@@ -213,7 +213,7 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
-      "tags": ["ammunition", "noDurabilityLine"],
+      "tags": ["ammunition"],
       "description": [
         {
           "text": "@numberOfItems"
@@ -230,6 +230,7 @@
           "levels": [1, 15]
         }
       ],
+      "tooltipLayout": "noDurabilityLine",
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -450,7 +451,7 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
-      "tags": ["ammunition", "noDurabilityLine"],
+      "tags": ["ammunition"],
       "description": [
         {
           "text": "@numberOfItems"
@@ -467,6 +468,7 @@
           "levels": [1, 15]
         }
       ],
+      "tooltipLayout": "noDurabilityLine",
       "width": 1,
       "height": 1,
       "slot": "mainHand",

@@ -169,7 +169,8 @@ picks it by, or `null` while it is not drawn: `click-ui` there talks to an NPC
 or targets a player the way a player's click does. A drop carries `pixel` too
 (`hover-ui` there shows its name and lights it, `click-ui` picks it up), and
 `label`, the name it shows on the ground: `text`, `color` and `background` as
-`#rrggbb`, and `bold`. The pixel is taken from the
+`#rrggbb` (a background that isn't opaque as `#rrggbbaa`, as the ground label
+file writes it), and `bold`. The pixel is taken from the
 last rendered frame, so it lags a moving object by a frame, and a window drawn
 over it catches the click instead.
 

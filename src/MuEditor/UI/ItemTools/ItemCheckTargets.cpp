@@ -21,7 +21,9 @@ constexpr std::string_view KeyEnds = ".[";
 
 constexpr std::string_view NameKey = "name";
 constexpr std::string_view TagsKey = "tags";
-constexpr std::string_view GroundLabelsKey = "groundLabels";
+// The keys of how the item is presented, Item Tooltip's: its ground label rules, the tooltip layout it uses and its own
+// changes to that layout.
+constexpr std::string_view TooltipKeys[] = {"groundLabels", "tooltipLayout", "tooltipLayoutChanges"};
 
 // The keys of a model entry in the model files.
 constexpr std::string_view ModelKeys[] = {"file",  "model", "textureFolders", "noneBlendMeshes", "inventory", "ground",
@@ -111,7 +113,7 @@ ItemTool GetToolForField(std::string_view field)
     {
         return ItemTool::Categories;
     }
-    if (key == GroundLabelsKey)
+    if (IsOneOf(key, TooltipKeys))
     {
         return ItemTool::Tooltip;
     }

@@ -4,6 +4,7 @@
 #include "ItemAttributeConversion.h"
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
+#include "ItemJsonFormat.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -74,7 +75,8 @@ struct TooltipLineOf
     std::string field;
 };
 
-// The item's description lines, then its name lines.
+// The lines ForEachItemTooltipLine walks (the description lines, the name lines, the added lines), each with its
+// field in the item file.
 std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
 {
     std::vector<TooltipLineOf> lines;
@@ -85,6 +87,15 @@ std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
     for (size_t index = 0; index < definition.nameLines.size(); ++index)
     {
         lines.push_back({&definition.nameLines[index], "nameLines[" + std::to_string(index) + "]"});
+    }
+    const std::vector<ItemTooltipLayoutAddition>& additions = definition.tooltipLayoutChanges.add;
+    for (size_t addition = 0; addition < additions.size(); ++addition)
+    {
+        for (size_t index = 0; index < additions[addition].lines.size(); ++index)
+        {
+            lines.push_back({&additions[addition].lines[index], "tooltipLayoutChanges.add[" + std::to_string(addition) +
+                                                                    "].lines[" + std::to_string(index) + "]"});
+        }
     }
     return lines;
 }
@@ -98,12 +109,6 @@ std::string TextField(const std::string& lineField, std::string_view locale)
         field += "." + std::string(locale);
     }
     return field;
-}
-
-// The field of a description line's text in one language.
-std::string DescriptionTextField(size_t line, std::string_view locale)
-{
-    return TextField("description[" + std::to_string(line) + "]", locale);
 }
 
 std::string ListPlaceholders(const std::set<std::string>& names)
@@ -316,30 +321,56 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// The highest level an item can need of a class: its third class.
+constexpr BYTE ThirdClassLevel = 3;
+
+// A class requirement above the third class: no character of that class can use the item, and its tooltip names no
+// class for it.
+void ValidateClassRequirements(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const std::span<const char* const> keys = GetClassKeys();
+    for (size_t index = 0; index < definition.classRequirements.size() && index < keys.size(); ++index)
+    {
+        const BYTE level = definition.classRequirements[index];
+        if (level > ThirdClassLevel)
+        {
+            const std::string field = std::string("classRequirements.") + keys[index];
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                     "is " + std::to_string(level) +
+                         ", above the third class (3): no character of the class can use the item, and its tooltip "
+                         "names no class for it",
+                     field.c_str());
+        }
+    }
+}
+
 // The kinds the original client named by these tags in its list of items without class lines
-// (IsRequireClassRenderItem); every item of them has the tag noClassLines.
+// (IsRequireClassRenderItem); every item of them uses a layout without the class lines.
 constexpr ItemTag KindsWithoutClassLines[] = {
     ItemTag::ElitePotion, ItemTag::BuffScroll, ItemTag::Elixir, ItemTag::GambleItem, ItemTag::BattleOrStrengthScroll,
     ItemTag::GuardianPet};
 
-// An item of one of those kinds without noClassLines shows class lines in its tooltip, unlike the others: an item
-// added later of a kind that used to get it from the list.
-void ValidateClassLines(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+// An item of one of those kinds whose layout has the class lines shows them in its tooltip, unlike the others: an
+// item added later of a kind that used to get it from the list. `layoutOf` gives a layout of the file as built; the
+// item's own changes can hide the class lines, but add no line with an id.
+template <typename TLayoutOf>
+void ValidateClassLines(const ItemDefinition& definition, TLayoutOf&& layoutOf, std::vector<ItemDataIssue>& issues)
 {
-    if (definition.tags.Has(ItemTag::NoClassLines))
+    const auto kind = std::find_if(std::begin(KindsWithoutClassLines), std::end(KindsWithoutClassLines),
+                                   [&](ItemTag tag) { return definition.tags.Has(tag); });
+    if (kind == std::end(KindsWithoutClassLines))
     {
         return;
     }
-    for (const ItemTag kind : KindsWithoutClassLines)
+    const std::vector<std::string>& hidden = definition.tooltipLayoutChanges.hide;
+    if (HasTooltipLine(layoutOf(GetItemTooltipLayoutName(definition)), ClassLinesId) &&
+        std::find(hidden.begin(), hidden.end(), ClassLinesId) == hidden.end())
     {
-        if (definition.tags.Has(kind))
-        {
-            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
-                     std::string("has the tag ") + FindEnumName(kind) +
-                         " but not noClassLines: its tooltip shows class lines, unlike the other items of its kind",
-                     "tags");
-            return;
-        }
+        AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                 std::string("has the tag ") + FindEnumName(*kind) +
+                     ", but its tooltip layout has the class lines (\"" + ClassLinesId +
+                     "\"), unlike the other items of its kind (the preset \"noClassLines\")",
+                 "tooltipLayout");
     }
 }
 } // namespace
@@ -371,7 +402,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
-        ValidateClassLines(definition, issues);
+        ValidateClassRequirements(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);
@@ -797,11 +828,30 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
         textNames.push_back(name);
     }
     std::set<std::string, std::less<>> used;
+    // The layouts the items name, each built once for the pass: they name one of a few.
+    std::map<std::string, std::vector<BuiltTooltipLine>, std::less<>> builtLayouts;
+    const auto layoutOf = [&](std::string_view name) -> std::span<const BuiltTooltipLine>
+    {
+        auto built = builtLayouts.find(name);
+        if (built == builtLayouts.end())
+        {
+            built = builtLayouts.emplace(std::string(name), std::vector<BuiltTooltipLine>()).first;
+            BuildTooltipLayout(tooltips, name, built->second);
+        }
+        return built->second;
+    };
     for (const TooltipLayout& layout : tooltips.layouts)
     {
         for (const TooltipLayoutLine& line : layout.lines)
         {
             used.insert(line.textName);
+        }
+        for (const TooltipLayoutAddition& addition : layout.add)
+        {
+            for (const TooltipLayoutLine& line : addition.lines)
+            {
+                used.insert(line.textName);
+            }
         }
     }
     for (const ItemDefinition& definition : items)
@@ -833,7 +883,17 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
             {
                 check(line->textName, field + ".text", false);
             }
+            if (const std::string warning = CheckClassOnlyValues(*line, tooltips); !warning.empty())
+            {
+                issues.push_back(
+                    {ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field, warning});
+            }
         }
+        for (const auto& [field, message] : CheckItemTooltipLayout(tooltips, definition))
+        {
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field, message});
+        }
+        ValidateClassLines(definition, layoutOf, issues);
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
             for (size_t level = 0; level < levelValues.values.size(); ++level)
@@ -969,13 +1029,9 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
                 }
             }
         };
-        for (size_t index = 0; index < definition.description.size(); ++index)
+        for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            warnAbout(definition.description[index].text, DescriptionTextField(index, LocalizedString::NeutralLocale));
-        }
-        for (size_t index = 0; index < definition.nameLines.size(); ++index)
-        {
-            warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
+            warnAbout(line->text, TextField(field, LocalizedString::NeutralLocale));
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {

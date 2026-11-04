@@ -1,5 +1,9 @@
 # The owned-random guard (test_game_random_is_owned.cmake) flags every compiled fixture that calls the CRT's rand() or
 # srand(), however its source spells the call, and none that only mentions them or has a rand() of its own.
+# A script run with -P sets no policies of its own: CMake 3 reads IN_LIST below as an operator only with this one (CMake 4
+# always does).
+cmake_policy(SET CMP0057 NEW)
+
 foreach(name MU_GUARD MU_SYMBOL_TOOL MU_USES MU_CLEAN MU_WORK)
     if(NOT DEFINED ${name})
         message(FATAL_ERROR "${name} is required")

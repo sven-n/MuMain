@@ -28,9 +28,9 @@ constexpr float LabelPaddingY = 2.0f;
 constexpr float ColorScale = 255.0f;
 constexpr char SwatchText[] = "A";
 
-ImU32 ToImColor(const GroundLabelColor& color)
+ImU32 ToImColor(const GroundLabelColor& color, BYTE alpha = 255)
 {
-    return IM_COL32(color[0], color[1], color[2], 255);
+    return IM_COL32(color[0], color[1], color[2], alpha);
 }
 
 bool ColorField(const char* label, GroundLabelColor& color)
@@ -51,17 +51,42 @@ bool ColorField(const char* label, GroundLabelColor& color)
     }
     return true;
 }
+
+// The background's color with its alpha (0: no box behind the text), shown over a checkerboard.
+bool BackgroundField(const char* label, GroundLabelColor& color, BYTE& alpha)
+{
+    float rgba[4];
+    for (size_t i = 0; i < color.size(); ++i)
+    {
+        rgba[i] = static_cast<float>(color[i]) / ColorScale;
+    }
+    rgba[3] = static_cast<float>(alpha) / ColorScale;
+    ImGui::SetNextItemWidth(ColorFieldWidth * g_MuEditorCore.GetUIScale());
+    if (!ImGui::ColorEdit4(label, rgba,
+                           ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_AlphaBar |
+                               ImGuiColorEditFlags_AlphaPreviewHalf))
+    {
+        return false;
+    }
+    for (size_t i = 0; i < color.size(); ++i)
+    {
+        color[i] = static_cast<BYTE>(std::lround(std::clamp(rgba[i], 0.0f, 1.0f) * ColorScale));
+    }
+    alpha = static_cast<BYTE>(std::lround(std::clamp(rgba[3], 0.0f, 1.0f) * ColorScale));
+    return true;
+}
 } // namespace
 
 bool RenderStyleFields(GroundLabelStyle& style)
 {
     bool changed = ColorField(I18N::Editor::TextColor, style.color);
-    changed |= ColorField(I18N::Editor::Background, style.background);
+    changed |= BackgroundField(I18N::Editor::Background, style.background, style.backgroundAlpha);
     changed |= ImGui::Checkbox(I18N::Editor::Bold, &style.bold);
     return changed;
 }
 
-void RenderLabel(const char* text, const GroundLabelColor& color, const GroundLabelColor& background, bool bold)
+void RenderLabel(const char* text, const GroundLabelColor& color, const GroundLabelColor& background, bool bold,
+                 BYTE backgroundAlpha)
 {
     const float uiScale = g_MuEditorCore.GetUIScale();
     const ImVec2 padding(LabelPaddingX * uiScale, LabelPaddingY * uiScale);
@@ -70,7 +95,7 @@ void RenderLabel(const char* text, const GroundLabelColor& color, const GroundLa
     const ImVec2 size(textSize.x + 2.0f * padding.x + boldOffset, textSize.y + 2.0f * padding.y);
     const ImVec2 at = ImGui::GetCursorScreenPos();
     ImDrawList* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(at, ImVec2(at.x + size.x, at.y + size.y), ToImColor(background));
+    draw->AddRectFilled(at, ImVec2(at.x + size.x, at.y + size.y), ToImColor(background, backgroundAlpha));
     const ImVec2 textAt(at.x + padding.x, at.y + padding.y);
     draw->AddText(textAt, ToImColor(color), text);
     if (bold)
@@ -85,7 +110,7 @@ void RenderSwatch(const GroundLabelStyle& style)
     const float side = ImGui::GetFrameHeight();
     const ImVec2 at = ImGui::GetCursorScreenPos();
     ImDrawList* draw = ImGui::GetWindowDrawList();
-    draw->AddRectFilled(at, ImVec2(at.x + side, at.y + side), ToImColor(style.background));
+    draw->AddRectFilled(at, ImVec2(at.x + side, at.y + side), ToImColor(style.background, style.backgroundAlpha));
     const ImVec2 textSize = ImGui::CalcTextSize(SwatchText);
     const ImVec2 textAt(at.x + (side - textSize.x) * 0.5f, at.y + (side - textSize.y) * 0.5f);
     draw->AddText(textAt, ToImColor(style.color), SwatchText);
@@ -133,6 +158,11 @@ GroundLabelColor FromGameColor(DWORD color)
 {
     return {static_cast<BYTE>(color & 0xFF), static_cast<BYTE>((color >> 8) & 0xFF),
             static_cast<BYTE>((color >> 16) & 0xFF)};
+}
+
+BYTE AlphaOfGameColor(DWORD color)
+{
+    return static_cast<BYTE>((color >> 24) & 0xFF);
 }
 } // namespace MuEditor::Colors::GroundLabelWidgets
 

@@ -74,6 +74,11 @@ TEST_CASE("The item checks send each field of an item to the tool that edits it 
         {"sellableWhenRentalExpired", ItemTool::Rules},
         {"tags", ItemTool::Categories},
         {"groundLabels[1]", ItemTool::Tooltip},
+        // The tooltip layout and the item's own changes to it (the class-line warning, a layout or line id the
+        // tooltip file doesn't have, an added line's text).
+        {"tooltipLayout", ItemTool::Tooltip},
+        {"tooltipLayoutChanges.hide[0]", ItemTool::Tooltip},
+        {"tooltipLayoutChanges.add[0].lines[1].text", ItemTool::Tooltip},
         {"name", ItemTool::Basics},
         {"name.en", ItemTool::Basics},
         {"name.de", ItemTool::Translations},

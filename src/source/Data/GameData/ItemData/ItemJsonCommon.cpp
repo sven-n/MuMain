@@ -162,6 +162,39 @@ bool IsName(std::string_view text)
            std::all_of(text.begin(), text.end(), [](unsigned char character) { return std::isalnum(character) != 0; });
 }
 
+bool ReadLineIds(const OrderedJson& json, std::vector<std::string>& ids)
+{
+    if (!json.is_array() || !std::all_of(json.begin(), json.end(), [](const OrderedJson& id)
+                                         { return id.is_string() && IsName(id.get_ref<const std::string&>()); }))
+    {
+        return false;
+    }
+    for (const OrderedJson& id : json)
+    {
+        ids.push_back(id.get<std::string>());
+    }
+    return true;
+}
+
+const OrderedJson* ReadLineAddition(const OrderedJson& entry, std::string& after)
+{
+    constexpr const char* AfterKey = "after";
+    constexpr const char* LinesKey = "lines";
+    if (!entry.is_object())
+    {
+        return nullptr;
+    }
+    const auto id = entry.find(AfterKey);
+    const auto lines = entry.find(LinesKey);
+    if (id == entry.end() || !id->is_string() || !IsName(id->get_ref<const std::string&>()) || lines == entry.end() ||
+        !lines->is_array())
+    {
+        return nullptr;
+    }
+    after = id->get<std::string>();
+    return &*lines;
+}
+
 void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
                   const std::string& message)
 {

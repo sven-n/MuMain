@@ -182,9 +182,28 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
     values.skillLuckOrOption = item.HasSkill || item.HasLuck || item.OptionLevel > 0;
     wchar_t setName[64]{};
     values.setItem = g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator);
+    // As the original client (RequireClass): an item that some class can use only from its second or third class
+    // keeps its class lines, which say so.
+    values.allClasses = std::all_of(std::begin(attribute->RequireClass), std::end(attribute->RequireClass),
+                                    [](BYTE level) { return level == 1; });
+    values.boots = type >= ITEM_BOOTS && type < ITEM_BOOTS + MAX_ITEM_INDEX;
+    values.gloves = type >= ITEM_GLOVES && type < ITEM_GLOVES + MAX_ITEM_INDEX;
+    values.expired = item.bPeriodItem && item.bExpiredPeriod;
     if (scope == TooltipValueScope::Basics)
     {
         return values;
+    }
+
+    // When a timed item ends, as the tooltip has always written it.
+    if (item.bPeriodItem && !item.bExpiredPeriod && item.lExpireTime != 0)
+    {
+        _tzset();
+        const time_t expireTime = item.lExpireTime;
+        if (const tm* expire = localtime(&expireTime))
+        {
+            mu_swprintf_s(values.expireDate.data(), values.expireDate.size(), L"%d-%02d-%02d  %02d:%02d",
+                          expire->tm_year + 1900, expire->tm_mon + 1, expire->tm_mday, expire->tm_hour, expire->tm_min);
+        }
     }
 
     // The stat lines' values (NeedsAllTooltipValues names them).
@@ -231,6 +250,7 @@ bool NeedsAllTooltipValues(Data::Items::TooltipValue value)
     case TooltipValue::AddOptionValue2:
     case TooltipValue::AddOptionDuration:
     case TooltipValue::BundleCount:
+    case TooltipValue::ExpireDate:
         return true;
     case TooltipValue::Level:
     case TooltipValue::MagicDefense:
@@ -250,6 +270,7 @@ bool NeedsAllTooltipValues(Data::Items::TooltipValue value)
     case TooltipValue::LevelPlusOne:
     case TooltipValue::Name:
     case TooltipValue::ExcellentFlags:
+    case TooltipValue::ClassName:
     case TooltipValue::Count:
         break;
     }
@@ -282,6 +303,11 @@ bool NeedsAllTooltipValues(Data::Items::TooltipState state)
     case TooltipState::UpperTierWings:
     case TooltipState::SkillLuckOrOption:
     case TooltipState::SetItem:
+    case TooltipState::AllClasses:
+    case TooltipState::ClassUsable:
+    case TooltipState::Boots:
+    case TooltipState::Gloves:
+    case TooltipState::Expired:
     case TooltipState::Count:
         break;
     }
@@ -372,6 +398,8 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::It
     case TooltipValue::Level:
     case TooltipValue::AddOptionDuration:
     case TooltipValue::Name:
+    case TooltipValue::ClassName:
+    case TooltipValue::ExpireDate:
     case TooltipValue::Count:
         break;
     }
@@ -383,6 +411,14 @@ const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::
     if (value == Data::Items::TooltipValue::Name)
     {
         return values.name != nullptr ? values.name : L"";
+    }
+    if (value == Data::Items::TooltipValue::ClassName)
+    {
+        return values.className != nullptr ? values.className : L"";
+    }
+    if (value == Data::Items::TooltipValue::ExpireDate)
+    {
+        return values.expireDate.data();
     }
     if (value == Data::Items::TooltipValue::AddOptionDuration)
     {
@@ -454,6 +490,16 @@ bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipSt
         return values.skillLuckOrOption;
     case TooltipState::SetItem:
         return values.setItem;
+    case TooltipState::AllClasses:
+        return values.allClasses;
+    case TooltipState::ClassUsable:
+        return values.classUsable;
+    case TooltipState::Boots:
+        return values.boots;
+    case TooltipState::Gloves:
+        return values.gloves;
+    case TooltipState::Expired:
+        return values.expired;
     case TooltipState::Count:
         break;
     }
@@ -471,6 +517,14 @@ std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, s
     if (name == "name")
     {
         return values.name != nullptr ? Core::Text::ToUtf8(values.name) : std::string();
+    }
+    if (name == "className")
+    {
+        return values.className != nullptr ? Core::Text::ToUtf8(values.className) : std::string();
+    }
+    if (name == "expireDate")
+    {
+        return Core::Text::ToUtf8(values.expireDate.data());
     }
     if (name == "addOptionDuration")
     {

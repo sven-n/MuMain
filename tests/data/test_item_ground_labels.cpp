@@ -185,6 +185,18 @@ TEST_CASE("The ground label file is checked [data][items]")
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[1]"));
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[2]"));
     }
+    SUBCASE("a rule's classUsable never holds: it is a tooltip class line's")
+    {
+        const LabelReadResult read = ReadStylesAndRules(
+            R"("ticket": {"color": "#ffffff"})",
+            R"({"when": ["excellent", "!classUsable"], "style": "ticket"}, {"when": ["level=0"], "style": "ticket"})");
+        CHECK_FALSE(HasFatal(read.issues));
+        const ItemDataIssue* warning = FindIssue(read.issues, "standard[0].when");
+        REQUIRE(warning != nullptr);
+        CHECK(warning->severity == ItemDataIssueSeverity::Warning);
+        CHECK(warning->message.find("never holds") != std::string::npos);
+        CHECK(FindIssue(read.issues, "standard[1].when") == nullptr);
+    }
     SUBCASE("rules after one without conditions are never used")
     {
         const LabelReadResult read = ReadStylesAndRules(R"("ticket": {"color": "#ffffff"})",
@@ -313,4 +325,61 @@ TEST_CASE("The styles the items and the standard rules name are in the ground la
         // A rule for every level after rules for all 16 levels still holds at Zen's amounts.
         CHECK(neverUsed({{"giftBoxPink", true, 0, 15}, {"white"}}).empty());
     }
+}
+
+// A style's background may have an alpha, "#rrggbbaa" (00 none, ff opaque); "#rrggbb" stays opaque, so the file keeps
+// its look. The text color has no alpha.
+TEST_CASE("A label style's background can have an alpha [data][items]")
+{
+    GroundLabelColor color{};
+    BYTE alpha = 0;
+    CHECK(ReadGroundLabelColor("#00000080", color, alpha));
+    CHECK(color == GroundLabelColor{0, 0, 0});
+    CHECK(alpha == 0x80);
+    CHECK(ReadGroundLabelColor("#3c3cc8", color, alpha));
+    CHECK(color == GroundLabelColor{0x3c, 0x3c, 0xc8});
+    CHECK(alpha == 255);
+    CHECK(WriteGroundLabelColor(color, 255) == "#3c3cc8");
+    CHECK(WriteGroundLabelColor(GroundLabelColor{0, 0, 0}, 0x80) == "#00000080");
+    for (const char* wrong : {"#0000008", "#000000800", "#0000008g", "00000080"})
+    {
+        CAPTURE(wrong);
+        CHECK_FALSE(ReadGroundLabelColor(wrong, color, alpha));
+    }
+    // A text color is "#rrggbb".
+    CHECK_FALSE(ReadGroundLabelColor("#00000080", color));
+
+    const std::string text = R"({
+  "formatVersion": 2,
+  "styles": {
+    "ticket": {"color": "#e58721"},
+    "seal": {"color": "#ffcc19", "background": "#00000080"},
+    "clear": {"color": "#ffffff", "background": "#00000000"}
+  },
+  "standard": [
+    {"style": "ticket"}
+  ]
+}
+)";
+    const LabelReadResult read = ReadLabels(text);
+    CHECK(read.issues.empty());
+    REQUIRE(read.file.styles.size() == 3);
+    CHECK(read.file.styles[0].backgroundAlpha == 255);
+    CHECK(read.file.styles[1].backgroundAlpha == 0x80);
+    CHECK(read.file.styles[2].background == GroundLabelColor{0, 0, 0});
+    CHECK(read.file.styles[2].backgroundAlpha == 0);
+    CHECK(WriteGroundLabelsJson(read.file) == text);
+    // Version 2 says so to a reader: a client from before reads up to 1, and a file without an alpha stays 1 for it.
+    LabelReadResult opaque = read;
+    opaque.file.styles[1].backgroundAlpha = 255;
+    opaque.file.styles[2].backgroundAlpha = 255;
+    CHECK(WriteGroundLabelsJson(opaque.file).find(R"("formatVersion": 1)") != std::string::npos);
+    std::string newer = text;
+    const std::string version = R"("formatVersion": 2)";
+    newer.replace(newer.find(version), version.size(), R"("formatVersion": 3)");
+    CHECK(HasIssue(ReadLabels(newer).issues, ItemDataIssueSeverity::Fatal, "formatVersion"));
+
+    const LabelReadResult seeThroughText =
+        ReadStylesAndRules(R"("ghost": {"color": "#ffffff99"})", R"({"style": "ghost"})");
+    CHECK(HasIssue(seeThroughText.issues, ItemDataIssueSeverity::Fatal, "styles.ghost.color"));
 }

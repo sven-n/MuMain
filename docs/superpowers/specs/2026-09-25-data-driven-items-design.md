@@ -59,10 +59,12 @@ share with items) is planned in the
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
-| D68 | Ground labels | The name above an item on the ground takes its colour, background and bold from a **label style**, a named look in `Data/Items/Tooltips/GroundLabels.json` (D26; every `*.json` of `Data/Items` is an item group file), with its colours as `"#rrggbb"`. An item picks its styles with `groundLabels` in its item file, next to `nameLines`: the first entry whose `levels` hold. It is a client-only field that the exchange leaves out (D22). Items without one use the file's **standard rules**, today's level ladder as data: the first rule whose `when` holds gives the style, with the tooltip's conditions. The first styles are named by role (`ticket`, `seal`, `jewel`, `giftBoxRed`, …) and keep today's looks. The text stays code: the name line, Zen's amount, the set name and " +Skill +Option +Luck". Italic waits until the fonts have it. |
+| D68 | Ground labels | The name above an item on the ground takes its colour, background and bold from a **label style**, a named look in `Data/Items/Tooltips/GroundLabels.json` (D26; every `*.json` of `Data/Items` is an item group file), with its colours as `"#rrggbb"` (a background may add its alpha, `"#rrggbbaa"`; without it, it is opaque as in the original client). An item picks its styles with `groundLabels` in its item file, next to `nameLines`: the first entry whose `levels` hold. It is a client-only field that the exchange leaves out (D22). Items without one use the file's **standard rules**, today's level ladder as data: the first rule whose `when` holds gives the style, with the tooltip's conditions. The first styles are named by role (`ticket`, `seal`, `jewel`, `giftBoxRed`, …) and keep today's looks. The text stays code: the name line, Zen's amount, the set name and " +Skill +Option +Luck". Italic waits until the fonts have it. |
 | D69 | Colors window | MuEditor has one **Colors** window for the named colours. Its left side is a tree: a root for each use (glow colours (D24), ground label styles (D68), the server list's own colours, and the tooltip colour groups when they come), the colours as leaves. A root has no colour of its own. Under a root the user makes **folders**, also inside folders, and orders folders and colours; a colour sits in at most one folder of its own root and never moves to another root, because the values differ: a glow tints a model, a label style is a text look, a server list colour has a shade per theme, and a tooltip colour group names one of the 14 theme colours the RmlUi themes draw. Each file keeps its folders next to its colours as `"colorFolders"`: a list of folders, each with a `name`, its `folders` and its `colors`; the game reads and checks the key but doesn't use it, and a colour in no folder sits under the root. One panel in code draws the picked colour of any root, with D26's "used by" and the list before a change. Each root's changes are steps of its own history (the item edits, the Server List window's). Windows ▸ Colors opens the window, and so do Items ▸ Glow Colors, Items ▸ Ground Label Styles and the Server List window's Edit colors, each on its own root. |
 | D70 | Conditions in the editor | Conditions are picked, not typed. Each one is a chip from a menu by kind (level, state, value, tag, class), with a description for each entry. The lists come from the loader's own, so the editor can't write a name the loader refuses. A **saved condition** is a combination under a name, in `Data/Items/Tooltips/Conditions.json`, used as `"@name"` in any `when`. It can't use another saved condition. New states, values and tags still need code. The same picker serves label rules and tooltip lines (#815 step 6). |
-| D71 | Item Tooltip | One item tool, **Item Tooltip**, shows how the selected item is presented: its ground label with D68's rules, and from #815 step 6a on its full tooltip. The preview has item controls (level, options, excellent, ancient, sockets, expired) and hero controls (class, level, stats). It draws the built lines in the editor, each with where it comes from (name line, description line, layout line, code). Next to them, the game's own tooltip box shows the previewed item in the legacy or modern theme. |
+| D71 | Item Tooltip | One item tool, **Item Tooltip**, shows how the selected item is presented: its ground label with D68's rules, and from #815 step 6a on its full tooltip. The preview has item controls (level, options, excellent, ancient, sockets, expired) and hero controls (class, level, stats). It draws the built lines in the editor, each with where it comes from (name line, description line, layout line, code). Next to them, the game's own tooltip box shows the previewed item: the real box on the game screen beside the window, while a checkbox is on, with a **Theme** combo that switches the game's theme for the session as the Options window does, so legacy, modern and classic are a click apart. The full preview comes after the code's lines (D72) and the option sections (phases 9 and 10) are data, so its sources show code only for the lines that need the game. |
+| D72 | Tooltip lines from code | The lines the tooltip code still writes that need neither the game's state nor the options move into the `default` layout, with output that stays the same: the **class lines** as one layout line repeated for each class the item names (`"forEachClass"`, its `{className}` the class at the level the item needs; states `allClasses` and `classUsable`), the **boots' and gloves' +5 lines** (states `boots` and `gloves`), the **expiry lines** (state `expired`, value `{expireDate}`), and the **four blank rows** the code writes (before the name, after it, before and after the options), with two new section markers: `itemCases` (lines before it come right after the name, lines after it after the item cases) and `afterOptions` (after the description's after-options lines). Lines that read the game stay code: shop prices, the reset fruits' points, saved places, socket seeds, the Sign of Dimensions' count, the Armor of Guardsman's table, the Lost Map and Symbol of Kundun, the Horn of Fenrir. The option lines become data with phase 9, the set option lines with phase 10. |
+| D73 | Layout presets | A layout line can have an `id`. A **preset** is a layout made from another: its `base` and its changes, `hide` (line ids) and `add` (lines after a line id), so a change to the `default` layout reaches every preset (D26). An item names a preset with `tooltipLayout` and can make its own changes with `tooltipLayoutChanges` (the same `hide` and `add`), on top of its preset or of `default`; both are client-only fields the exchange leaves out (D22). No item defines the blank rows or the class lines itself: they are in `default`, and an exception is a preset or an item's own change, without code. The editor always shows an item's layout as built: `default`, its preset, its own changes. The tags that only pick layout lines (`noClassLines`, `noDurabilityLine`, `noLevelRequirement`, `noBlankAfterOptions`) become presets and item changes; Item Checks' warning about an item of a kind without class lines (#893) then reads the item's layout. |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -642,7 +644,7 @@ in both repos (as separate PRs, one per repo).
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
-| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863). Left: the item cases and the class line list still in code, the ground label colours (D68–D71, six PRs), and the tooltip editor (#815 step 6); see the phase details. |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863), the item cases and the class line list too (#893). Left: the code's lines and layout presets (D72, D73), the rest of the ground label colours (D70, colour groups), and the tooltip editor (#815 step 6) after phases 9 and 10; see the phase details. |
 | 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
@@ -1281,18 +1283,20 @@ server with original clients (after phases 6 and B).
      placeholder and condition names when the data loads.
 
    `docs/item-data.md` describes the data (Tooltip layouts, Descriptions,
-   Name lines). Left:
-   - **Item cases still in code** whose lines the data can already hold:
-     the ribbon and chocolate boxes, the Pumpkin of Luck and the
-     Jack O'Lanterns (`{addOptionValue1}`), the Box of Luck's texts by level,
-     the jewel bundles' "… is combined" lines (`{bundleCount}`), and the
-     arrows' and bolts' damage line.
-   - **The class line list** (`IsRequireClassRenderItem`: the items whose
-     tooltip has no class lines), as an item tag.
+   Name lines). The item cases whose lines the data can hold (the ribbon and
+   chocolate boxes, the Pumpkin of Luck and the Jack O'Lanterns, the Box of
+   Luck, the jewel bundles, the arrows' and bolts' damage line) and the class
+   line list (the tag `noClassLines`) followed (#893). Left:
+   - **The code's lines and layout presets** (D72, D73), in one PR, next:
+     the class lines, the boots' and gloves' +5 lines, the expiry lines and
+     the four blank rows the code writes move into the `default` layout,
+     with the same output for every item (the snapshot test); layout lines
+     get ids, presets and an item's own changes, and those replace the tags
+     that only pick layout lines.
    - **Ground label colours** (`BuildGroundItemLabelDescriptor`): the names
      come from `nameLines` (#834), the colours are still chosen per item, from
-     four model lists and about 20 single-item rules. With D68–D71, in six
-     PRs:
+     four model lists and about 20 single-item rules. With D68–D71, in five
+     PRs (1–3 done: #916, #919, #934):
      1. **The data move**, with no visible change. `GroundLabels.json` holds
         the styles and the standard rules. `groundLabels` goes on the about
         200 items with a style of their own, with `levels` for the level
@@ -1314,32 +1318,40 @@ server with original clients (after phases 6 and B).
      3. **Ground labels in MuEditor**: the Ground labels tab, and Item Tooltip
         (D71) with the item controls, the label preview and an item's label
         rules.
-     4. **The full tooltip preview**, #815 step 6a (D71).
-     5. **The standard rules and the condition picker** (D70), with saved
+     4. **The standard rules and the condition picker** (D70), with saved
         conditions.
-     6. **Tooltip colour groups**: `"colorGroups"` in `Tooltip.json`, each a
+     5. **Tooltip colour groups**: `"colorGroups"` in `Tooltip.json`, each a
         name for one of the 14 theme colours, usable by any tooltip line;
         a root of the Colors window.
 
      Italic label styles follow once the fonts have italic: italic fonts on
      Windows, and a slant in the Linux and macOS text code.
    - **The tooltip editor** in MuEditor (#815 step 6, designed as four PRs).
-     Its read-only preview (6a) comes with the ground labels (D71), and its
+     Its read-only preview (6a) in Item Tooltip (D71) comes after the code's
+     lines (D72) and the option sections (phases 9 and 10) are data, so its
+     sources show code only for the lines that need the game; its
      conditions are picked (D70).
 
-   Lines that need the game stay code: the reset fruits' points, the saved
-   revive and portal places, the Sign of Dimensions' count, the socket
-   seeds, the Armor of Guardsman's Chaos Castle table, the Lost Map and
-   Symbol of Kundun, and the Horn of Fenrir. The option sections come with
-   phases 9 and 10.
+   Lines that need the game stay code: the shop prices, the reset fruits'
+   points, the saved revive and portal places, the Sign of Dimensions'
+   count, the socket seeds, the Armor of Guardsman's Chaos Castle table, the
+   Lost Map and Symbol of Kundun, and the Horn of Fenrir. The option
+   sections come with phases 9 and 10: the option lines go into the layout
+   between its `options` and `afterOptions` markers, and the set option
+   lines come from the item sets.
 9. **Item option definitions** (D14): the option groups items link to
    (Luck, additional option, excellent, wing, harmony, guardian, socket, …)
    get their own JSON files, matching OpenMU's `ItemOptionDefinition`, with
-   their own exchange file and editor.
+   their own exchange file and editor. The tooltip's option lines (luck,
+   skill, the additional option, excellent, the 380 options, Jewel of
+   Harmony, sockets) then read these definitions and become layout lines
+   between the `options` and `afterOptions` markers (D72).
 10. **Item sets** (D11): `ItemSetType.bmd` / `ItemSetOption_<lang>.bmd` into
     JSON, matching OpenMU's `ItemSetGroup`, with their own exchange file and
     editor. Moved earlier if items cannot be made fully data-driven without
-    them.
+    them. The tooltip's set lines ("Set Item option info" and the set's
+    options) come from these sets too, and the set item editor shows them
+    as the tooltip draws them.
 
     **Starting point:** branch
     [`Mosch0512/MuMain:item-set-editor`](https://github.com/Mosch0512/MuMain/tree/item-set-editor)

@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "texts": {
     "durability": {
       "en": "Durability: [{durability}/{maxDurability}]",
@@ -1216,13 +1216,81 @@
       "tl": "Karagdagang Dmg +1",
       "uk": "Додатковий Dmg +1",
       "zh-TW": "附加傷害+1"
+    },
+    "canBeEquippedBy": {
+      "en": "Can be equipped by {className}",
+      "de": "Kann von {className} ausgerüstet werden",
+      "es": "Puede ser equipado con {className}",
+      "id": "Dapat dilengkapi dengan {className}",
+      "ja": "{className}使用可能",
+      "pl": "Może być używany przez: {className}",
+      "pt": "Pode ser equipado por {className}",
+      "ru": "Может быть оснащен {className}.",
+      "tl": "Maaaring gamitan ng {className}",
+      "uk": "Може бути оснащений {className}",
+      "zh-TW": "可由{className}配備"
+    },
+    "increasesMovingSpeed": {
+      "en": "Increases moving speed",
+      "de": "Erhöht die Bewegungsgeschwindigkeit",
+      "es": "Aumenta la velocidad de movimiento",
+      "id": "Meningkatkan kecepatan bergerak",
+      "ja": "移動速度プラス",
+      "pl": "Zwiększa prędkość poruszania się",
+      "pt": "Aumenta a velocidade de movimento",
+      "ru": "Увеличивает скорость передвижения",
+      "tl": "Pinapataas ang bilis ng paggalaw",
+      "uk": "Збільшує швидкість пересування",
+      "zh-TW": "增加移動速度"
+    },
+    "swimmingSpeedIncrease": {
+      "en": "Swimming speed increase",
+      "de": "Erhöhung der Schwimmgeschwindigkeit",
+      "es": "Aumento de la velocidad de natación",
+      "id": "Kecepatan berenang meningkat",
+      "ja": "スキューバ速度プラス",
+      "pl": "Zwiększenie prędkości pływania",
+      "pt": "Aumento da velocidade de natação",
+      "ru": "Увеличение скорости плавания",
+      "tl": "Tumaas ang bilis ng paglangoy",
+      "uk": "Збільшення швидкості плавання",
+      "zh-TW": "游泳速度增加"
+    },
+    "expiredItem": {
+      "en": "Expired Item",
+      "de": "Abgelaufener Gegenstand",
+      "es": "Artículo caducado",
+      "id": "Barang Kedaluwarsa",
+      "ja": "満了アイテム",
+      "pl": "Przedmiot wygasły",
+      "pt": "Item expirado",
+      "ru": "Товар с истекшим сроком годности",
+      "tl": "Nag-expire na Item",
+      "uk": "Термін дії минув",
+      "zh-TW": "過期商品"
+    },
+    "expirationDay": {
+      "en": "Expiration Day",
+      "de": "Ablaufdatum",
+      "es": "Día de vencimiento",
+      "id": "Hari Kedaluwarsa",
+      "ja": "満了日",
+      "pl": "Dzień ważności",
+      "pt": "Dia de expiração",
+      "ru": "Срок годности",
+      "tl": "Araw ng Pag-expire",
+      "uk": "День придатності",
+      "zh-TW": "到期日"
     }
   },
   "layouts": [
     {
       "name": "default",
       "lines": [
+        {"id": "firstRow", "text": ""},
         {"section": "name"},
+        {"id": "blankAfterName", "text": ""},
+        {"section": "itemCases"},
         {"text": "@oneHandedDamage", "when": ["hasDamage", "!skillBook", "!twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
         {"text": "@twoHandedDamage", "when": ["hasDamage", "!skillBook", "twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
         {"text": "@wizardryDamage", "when": ["hasDamage", "skillBook"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
@@ -1232,7 +1300,7 @@
         {"text": "@attackSpeed", "when": ["attackSpeed"]},
         {"text": "@walkSpeed", "when": ["walkSpeed"]},
         {"section": "description"},
-        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
+        {"id": "durability", "text": "@durability", "when": ["hasDurability", "!timed"]},
         {"text": "@iceResistance", "when": ["iceResistance"]},
         {"text": "@poisonResistance", "when": ["poisonResistance"]},
         {"text": "@lightningResistance", "when": ["lightningResistance"]},
@@ -1240,8 +1308,8 @@
         {"text": "@earthResistance", "when": ["earthResistance"]},
         {"text": "@windResistance", "when": ["windResistance"]},
         {"text": "@waterResistance", "when": ["waterResistance"]},
-        {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
-        {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
+        {"id": "requiredLevel", "text": "@requiredLevel", "when": ["requiredLevel"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
+        {"id": "lackingLevel", "text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "missingLevel"], "color": "red"},
         {"text": "@requiredStrength", "when": ["strengthRequired", "!tag:luckyItem"], "colors": [{"when": ["missingStrength"], "color": "red"}, {"when": ["strengthReduced"], "color": "yellow"}]},
         {"text": "@lacking", "values": {"missing": "missingStrength"}, "when": ["requiredStrength", "!tag:luckyItem", "missingStrength"], "color": "red"},
         {"text": "@requiredDexterity", "when": ["dexterityRequired", "!tag:luckyItem"], "colors": [{"when": ["missingDexterity"], "color": "red"}, {"when": ["dexterityReduced"], "color": "yellow"}]},
@@ -1253,13 +1321,40 @@
         {"text": "@requiredLeadership", "when": ["requiredLeadership", "!tag:luckyItem"], "colors": [{"when": ["missingLeadership"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingLeadership"}, "when": ["requiredLeadership", "!tag:luckyItem", "missingLeadership"], "color": "red"},
         {"section": "classes"},
+        {"id": "classLinesBlank", "text": ""},
+        {"id": "classLines", "text": "@canBeEquippedBy", "forEachClass": true, "when": ["!allClasses"], "colors": [{"when": ["!classUsable"], "color": "darkRed"}]},
+        {"text": "", "when": ["boots", "level>=5"]},
+        {"text": "@increasesMovingSpeed", "when": ["boots", "level>=5"], "color": "blue", "bold": true},
+        {"text": "", "when": ["gloves", "level>=5"]},
+        {"text": "@swimmingSpeedIncrease", "when": ["gloves", "level>=5"], "color": "blue", "bold": true},
         {"text": "", "when": ["wizardryWeapon"]},
         {"text": "@wizardryDamageIncrease", "when": ["wizardryWeapon", "!tag:summonerBook"], "color": "blue", "bold": true},
         {"text": "@curseDamageIncrease", "when": ["wizardryWeapon", "tag:summonerBook"], "color": "blue", "bold": true},
         {"text": "", "when": ["tag:sceptre"]},
         {"text": "@petAttackIncrease", "when": ["tag:sceptre"], "color": "blue", "bold": true},
-        {"section": "options"}
+        {"id": "blankBeforeOptions", "text": "", "when": ["hasOptions", "!tag:gemJewelry"]},
+        {"section": "options"},
+        {"id": "blankAfterOptions", "text": ""},
+        {"section": "afterOptions"},
+        {"text": "@expiredItem", "when": ["timed", "expired"], "color": "red"},
+        {"text": "@expirationDay", "when": ["timed", "!expired"], "color": "orange"},
+        {"text": "{expireDate}", "when": ["timed", "!expired"], "color": "blue"}
       ]
+    },
+    {
+      "name": "noClassLines",
+      "base": "default",
+      "hide": ["classLinesBlank", "classLines"]
+    },
+    {
+      "name": "noDurabilityLine",
+      "base": "default",
+      "hide": ["durability"]
+    },
+    {
+      "name": "noClassOrDurabilityLines",
+      "base": "noClassLines",
+      "hide": ["durability"]
     }
   ]
 }

@@ -2192,7 +2192,7 @@
         "es": "Talismán de la Suerte",
         "pt": "Talismã da sorte"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": {
@@ -2228,6 +2228,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2244,7 +2245,7 @@
         "es": "Tarjeta de Caos",
         "pt": "Cartão do caos"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@specialItemsWithCombinations",
@@ -2252,6 +2253,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2304,7 +2306,7 @@
         "es": "Boleto de Ítem Raro1",
         "pt": "Bilhete de item raro1"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -2312,6 +2314,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2328,7 +2331,7 @@
         "es": "Boleto de Ítem Raro2",
         "pt": "Bilhete de item raro2"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -2336,6 +2339,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2352,7 +2356,7 @@
         "es": "Boleto de Ítem Raro3",
         "pt": "Bilhete de item raro3"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -2360,6 +2364,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2376,7 +2381,7 @@
         "es": "Boleto de Ítem Raro4",
         "pt": "Bilhete de item raro4"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -2384,6 +2389,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2400,7 +2406,7 @@
         "es": "Boleto de Ítem Raro5",
         "pt": "Bilhete de item raro5"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -2408,6 +2414,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2614,7 +2621,7 @@
         "es": "Pócima de Curación de Élite",
         "pt": "Poção de cura de elite"
       },
-      "tags": ["elitePotion", "cashShop", "noClassLines"],
+      "tags": ["elitePotion", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -2638,6 +2645,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2654,7 +2662,7 @@
         "es": "Pócima de Maná de Élite",
         "pt": "Poção de mana de elite"
       },
-      "tags": ["elitePotion", "cashShop", "noClassLines"],
+      "tags": ["elitePotion", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -2678,6 +2686,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2694,7 +2703,7 @@
         "es": "Rollo de Rapidez",
         "pt": "Pergaminho da rapidez"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2718,6 +2727,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2734,7 +2744,7 @@
         "es": "Rollo de Defensa",
         "pt": "Pergaminho da defesa"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2758,6 +2768,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2774,7 +2785,7 @@
         "es": "Rollo de Ira",
         "pt": "Pergaminho da ira"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2798,6 +2809,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2814,7 +2826,7 @@
         "es": "Rollo de Magia",
         "pt": "Pergaminho do poder de magia"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2838,6 +2850,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2854,7 +2867,7 @@
         "es": "Rollo de Salud",
         "pt": "Pergaminho de vida"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2878,6 +2891,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2894,7 +2908,7 @@
         "es": "Rollo de Maná",
         "pt": "Pergaminho de mana"
       },
-      "tags": ["buffScroll", "cashShop", "noClassLines"],
+      "tags": ["buffScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -2918,6 +2932,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2934,7 +2949,7 @@
         "es": "Elixir de Fuerza",
         "pt": "Elixir da força"
       },
-      "tags": ["elixir", "cashShop", "noClassLines"],
+      "tags": ["elixir", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -2975,6 +2990,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -2991,7 +3007,7 @@
         "es": "Elixir de Agilidad",
         "pt": "Elixir da agilidade"
       },
-      "tags": ["elixir", "cashShop", "noClassLines"],
+      "tags": ["elixir", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -3032,6 +3048,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3048,7 +3065,7 @@
         "es": "Elixir de Salud",
         "pt": "Elixir da vida"
       },
-      "tags": ["elixir", "cashShop", "noClassLines"],
+      "tags": ["elixir", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -3089,6 +3106,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3105,7 +3123,7 @@
         "es": "Elixir de Energía",
         "pt": "Elixir da energia"
       },
-      "tags": ["elixir", "cashShop", "noClassLines"],
+      "tags": ["elixir", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -3146,6 +3164,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3162,7 +3181,7 @@
         "es": "Elixir de Control",
         "pt": "Elixir do controle"
       },
-      "tags": ["elixir", "cashShop", "noClassLines"],
+      "tags": ["elixir", "cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -3218,6 +3237,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3452,8 +3472,9 @@
         "es": "Tarjeta Personaje Invocador",
         "pt": "Cartão do Pers. Invocador"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3470,7 +3491,7 @@
         "es": "Tarjeta de Caos Oro",
         "pt": "Cartão dourado do caos"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@specialItemsWithCombinations",
@@ -3478,6 +3499,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3494,7 +3516,7 @@
         "es": "Tarjeta de Caos Rara",
         "pt": "Cartão raro do caos"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@specialItemsWithCombinations",
@@ -3502,6 +3524,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3518,7 +3541,7 @@
         "es": "Pócima Curación Élite Media",
         "pt": "Poção média de cura de elite"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -3542,6 +3565,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3558,7 +3582,7 @@
         "es": "Tarjeta de Caos Mini",
         "pt": "Mini cartão do caos"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@specialItemsWithCombinations",
@@ -3566,6 +3590,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3582,7 +3607,7 @@
         "es": "Ensamble Talismán del Caos",
         "pt": "Talismã do Agrup. do Caos"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": {
@@ -3634,6 +3659,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3650,7 +3676,7 @@
         "es": "Rollo de Batalla",
         "pt": "Pergaminho da batalha"
       },
-      "tags": ["battleOrStrengthScroll", "cashShop", "noClassLines"],
+      "tags": ["battleOrStrengthScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -3674,6 +3700,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -3690,7 +3717,7 @@
         "es": "Rollo de Fuerza",
         "pt": "Pergaminho da força"
       },
-      "tags": ["battleOrStrengthScroll", "cashShop", "noClassLines"],
+      "tags": ["battleOrStrengthScroll", "cashShop"],
       "description": [
         {
           "text": {
@@ -3714,6 +3741,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -4636,7 +4664,7 @@
         "es": "Pócima de SD de Élite",
         "pt": "Poção de SD de elite"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@numberOfItems",
@@ -4659,6 +4687,7 @@
           "color": "blue"
         }
       ],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4944,7 +4973,7 @@
         "es": "Boleto de Ítem Raro 7",
         "pt": "Bilhete de item raro7"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -4952,6 +4981,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4968,7 +4998,7 @@
         "es": "Boleto de Ítem Raro 8",
         "pt": "Bilhete de item raro8"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -4976,6 +5006,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4992,7 +5023,7 @@
         "es": "Boleto de Ítem Raro 9",
         "pt": "Bilhete de item raro9"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -5000,6 +5031,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -5016,7 +5048,7 @@
         "es": "Boleto de Ítem Raro 10",
         "pt": "Bilhete de item raro10"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -5024,6 +5056,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -5040,7 +5073,7 @@
         "es": "Boleto de Ítem Raro 11",
         "pt": "Bilhete de item raro11"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -5048,6 +5081,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -5064,7 +5098,7 @@
         "es": "Boleto de Ítem Raro 12",
         "pt": "Bilhete de item raro12"
       },
-      "tags": ["cashShop", "noClassLines"],
+      "tags": ["cashShop"],
       "description": [
         {
           "text": "@contactCsTeam",
@@ -5072,6 +5106,7 @@
         }
       ],
       "groundLabels": [{"style": "cashShopItem"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "tradable": false,

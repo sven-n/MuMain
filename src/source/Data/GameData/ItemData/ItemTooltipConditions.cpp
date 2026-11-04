@@ -59,11 +59,32 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
     return false;
 }
 
-constexpr std::array<std::string_view, 20> States = {
-    "hasDamage",          "skillBook",           "twoHanded",      "excellent",         "ancient",
-    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",         "strengthReduced",   "dexterityReduced",
-    "strengthRequired",   "dexterityRequired",   "wizardryWeapon", "hasDurability",     "timed",
-    "hasOptions",         "socketItem",          "upperTierWings", "skillLuckOrOption", "setItem",
+constexpr std::array<std::string_view, 25> States = {
+    "hasDamage",
+    "skillBook",
+    "twoHanded",
+    "excellent",
+    "ancient",
+    "damageHarmonyBonus",
+    "defenseHarmonyBonus",
+    "armour",
+    "strengthReduced",
+    "dexterityReduced",
+    "strengthRequired",
+    "dexterityRequired",
+    "wizardryWeapon",
+    "hasDurability",
+    "timed",
+    "hasOptions",
+    "socketItem",
+    "upperTierWings",
+    "skillLuckOrOption",
+    "setItem",
+    "allClasses",
+    "classUsable",
+    "boots",
+    "gloves",
+    "expired",
 };
 static_assert(States.size() == static_cast<size_t>(TooltipState::Count), "a name for every TooltipState, in order");
 } // namespace
@@ -122,6 +143,14 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
     {
         name.remove_prefix(TagPrefix.size());
         condition.kind = TooltipCondition::Kind::Tag;
+        if (const RemovedTooltipTag* removed = FindRemovedTooltipTag(name))
+        {
+            // Unlike in an item's tags, nothing in a condition stands for it: what it said is the item's layout now.
+            error = "\"" + std::string(text) + "\" names a tag the tooltip layouts replaced: the items that had it " +
+                    "have " + DescribeRemovedTooltipTag(*removed) +
+                    ", so a line it left out for them needs no condition (docs/item-data.md, Presets)";
+            return false;
+        }
         if (!FindEnumValue(name, condition.tag))
         {
             error = "\"" + std::string(text) + "\" names no item tag (docs/item-data.md, \"Tags\")";
