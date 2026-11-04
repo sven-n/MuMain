@@ -497,6 +497,8 @@ static void UpdateActiveScene()
     case MAIN_SCENE:
         MoveMainScene();
         break;
+    default:
+        break;
     }
 }
 
@@ -1278,6 +1280,8 @@ void RenderScene(HDC hDC)
         case CHARACTER_SCENE:
         case MAIN_SCENE:
             MainScene(hDC);
+            break;
+        default:
             break;
         }
 

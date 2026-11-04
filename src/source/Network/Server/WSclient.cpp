@@ -4049,6 +4049,8 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_ALICE_BERSERKER_STR:
         UnRegisterBuff(eBuff_Berserker, o);
         break;
+    default:
+        break;
     }
 }
 
@@ -14943,6 +14945,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuffList(o, bufflist);
         }
         break;
+        default:
+            break;
         }
 
         return true;
@@ -15015,6 +15019,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuff(o, eBuff_CastleRegimentDefense);
     }
     break;
+    default:
+        break;
     }
     return true;
 }
@@ -15198,6 +15204,8 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             g_RegisterBuffTime(buff, bufftime);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15354,6 +15362,8 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             g_UnRegisterBuffTime(buff);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15573,6 +15583,8 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, o->Light, 2, o, -1, 0, 0, 0, 1.5f);
     }
     break;
+    default:
+        break;
     }
 }
 
@@ -15759,6 +15771,8 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         DeleteEffect(BITMAP_LIGHT_RED, o, 2);
     }
     break;
+    default:
+        break;
     }
 }
 

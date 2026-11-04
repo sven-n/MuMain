@@ -123,6 +123,8 @@ void CUIMapName::Update()
             m_fAlpha = 0.0f;
         }
         break;
+    default:
+        break;
     }
 
     m_dwOldTime = dwNowTime;

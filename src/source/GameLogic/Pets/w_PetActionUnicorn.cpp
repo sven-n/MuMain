@@ -237,6 +237,8 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
         obj->Velocity = m_speed;
     }
     break;
+    default:
+        break;
     }
 
     return TRUE;
@@ -292,6 +294,8 @@ bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, doubl
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    default:
         break;
     }
 

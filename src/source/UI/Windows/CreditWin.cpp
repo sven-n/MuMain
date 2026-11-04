@@ -241,7 +241,9 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 			m_byIllust = ++m_byIllust == CRW_ILLUST_MAX ? 0 : m_byIllust;
 		}
 		break;
-	}
+    default:
+        break;
+    }
 }
 
 void CCreditWin::LoadText()
@@ -356,7 +358,9 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 				SetTextIndex();
 		}
 		break;
-	}
+    default:
+        break;
+    }
 }
 
 void CCreditWin::SyncRmlModel()

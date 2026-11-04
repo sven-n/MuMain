@@ -363,6 +363,8 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                         case AT_SKILL_FIRE_SCREAM_STR:
                             bOk = true;
                             break;
+                        default:
+                            break;
                         }
                     }
 

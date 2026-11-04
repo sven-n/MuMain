@@ -1074,6 +1074,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
             }
             break;
+            default:
+                break;
             }
         }
     }

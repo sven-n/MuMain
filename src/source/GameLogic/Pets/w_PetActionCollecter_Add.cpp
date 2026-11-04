@@ -211,6 +211,8 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, d
         }
     }
     break;
+    default:
+        break;
     }
 
     return TRUE;
@@ -267,6 +269,8 @@ bool PetActionCollecterAdd::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, 
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    default:
         break;
     }
 
@@ -514,6 +518,8 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         }
     }
     break;
+    default:
+        break;
     }
 
     return TRUE;

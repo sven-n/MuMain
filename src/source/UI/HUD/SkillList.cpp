@@ -533,6 +533,8 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
         }
     }
     break;
+    default:
+        break;
     }
 
     if (bySkillType == AT_SKILL_TWISTING_SLASH || bySkillType == AT_SKILL_TWISTING_SLASH_STR ||

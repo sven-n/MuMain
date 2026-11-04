@@ -122,6 +122,8 @@ CLASS_TYPE CCharacterManager::GetBaseClass(CLASS_TYPE iClass)
         return CLASS_DARK_LORD;
     case CLASS_TEMPLENIGHT:
         return CLASS_RAGEFIGHTER;
+    default:
+        break;
     }
 
     return iClass;
@@ -136,6 +138,8 @@ bool CCharacterManager::IsSecondClass(const CLASS_TYPE byClass)
     case CLASS_MUSEELF:
     case CLASS_BLOODYSUMMONER:
         return true;
+    default:
+        break;
     }
 
     return false;
@@ -153,6 +157,8 @@ bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR:
     case CLASS_TEMPLENIGHT:
         return true;
+    default:
+        break;
     }
 
     return false;
@@ -188,6 +194,8 @@ CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR: return SKIN_CLASS_LORDEMPEROR;
     case CLASS_DIMENSIONMASTER: return SKIN_CLASS_DIMENSIONMASTER;
     case CLASS_TEMPLENIGHT: return SKIN_CLASS_TEMPLENIGHT;
+    default:
+        break;
     }
 
     return static_cast<CLASS_SKIN_INDEX>(byClass);

@@ -236,6 +236,8 @@ bool CSPetSystem::PlayAnimation(OBJECT* o)
     case PET_TYPE_DARK_SPIRIT:
         playSpeed = 0.4f;
         break;
+    default:
+        break;
     }
 
     b->CurrentAction = o->CurrentAction;

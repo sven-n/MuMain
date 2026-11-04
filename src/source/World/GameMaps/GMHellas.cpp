@@ -1041,6 +1041,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         wcscpy(c->ID, L"진짜쿤둔");
         o->LifeTime = 100;
         break;
+    default:
+        break;
     }
 
     return c;
@@ -1358,6 +1360,8 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
         }
         return true;
+    default:
+        break;
     }
     return false;
 }

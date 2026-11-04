@@ -244,6 +244,8 @@ void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
             }
         }
         break;
+    default:
+        break;
     }
 }
 

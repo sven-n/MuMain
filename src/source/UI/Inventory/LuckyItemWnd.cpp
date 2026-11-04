@@ -73,6 +73,8 @@ STORAGE_TYPE CLuckyItemWnd::GetMoveStorageType() const
         return STORAGE_TYPE::LUCKYITEM_TRADE;
     case eLuckyItemType_Refinery:
         return STORAGE_TYPE::LUCKYITEM_REFINERY;
+    default:
+        break;
     }
 
     return STORAGE_TYPE::UNDEFINED;
@@ -170,6 +172,8 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
 
         m_eEnd = eLuckyItem_End;
         SetFrame_Text(m_eEnd);
+        break;
+    default:
         break;
     }
 
@@ -291,6 +295,8 @@ void CLuckyItemWnd::OpeningProcess(void)
         AddText(&I18N::Game::MaterialUsedForCombiningWillDisappear, 0xFF0000FF);
         // Mix button tooltip text is now derived from m_eType directly in SyncRmlModel().
         break;
+    default:
+        break;
     }
 }
 
@@ -310,6 +316,8 @@ void CLuckyItemWnd::SetFrame_Text(eLUCKYITEM _eType)
         if (m_eType == eLuckyItemType_Trade)
             AddText(&I18N::Game::ExchangeHasBeenMade);
         else if (m_eType == eLuckyItemType_Refinery) {}
+        break;
+    default:
         break;
     }
 }
@@ -373,6 +381,8 @@ bool CLuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
         break;
     case eLuckyItemType_Refinery:
         if (Check_LuckyItem_Refinery(_pItem))	return true;
+        break;
+    default:
         break;
     }
 

@@ -1046,6 +1046,8 @@ mu::ui::window::CChatLogWindow::type_vector_msgs* mu::ui::window::CChatLogWindow
         return &m_vecGensMsgs;
     case TYPE_GM_MESSAGE:
         return &m_vecGMMsgs;
+    default:
+        break;
     }
 
     return nullptr;

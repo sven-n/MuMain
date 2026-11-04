@@ -213,6 +213,8 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
         }
     }
     break;
+    default:
+        break;
     }
 
     return TRUE;
@@ -256,6 +258,8 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
     case eAction_Return:
         CreateEffect(MODEL_NEWYEARSDAY_EVENT_MONEY, Position, obj->Angle, Light);
         break;
+    default:
+        break;
     }
 
     b->TransformPosition(BoneTransform[10], vRelativePos, Position, false);
@@ -285,6 +289,8 @@ bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, dou
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    default:
         break;
     }
 

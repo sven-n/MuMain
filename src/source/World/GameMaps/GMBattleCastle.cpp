@@ -1517,6 +1517,8 @@ namespace battleCastle
             }
             c->Object.HiddenMesh = -1;
             break;
+        default:
+            break;
         }
 
         return c;
@@ -1595,6 +1597,8 @@ namespace battleCastle
             }
         }
         return true;
+        default:
+            break;
         }
         return false;
     }
@@ -1700,6 +1704,8 @@ namespace battleCastle
                 g_fLifeStoneLocation[1] = o->Position[1];
             }
             break;
+        default:
+            break;
         }
         return false;
     }
@@ -1747,6 +1753,8 @@ namespace battleCastle
                 CreateEffect(BITMAP_JOINT_FORCE, o->Position, o->Angle, o->Light);
             }
             return true;
+        default:
+            break;
         }
         return false;
     }
