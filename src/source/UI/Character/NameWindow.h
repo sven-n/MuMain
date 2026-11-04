@@ -21,11 +21,10 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         void PrepareFrame() override;
         void Show(bool bShow) override;
 
@@ -35,7 +34,7 @@ namespace mu::ui::window
         // original drew them before them; the main scene then leaves them out.
         bool RecordsInterfaceOverlays() const;
 
-        float GetLayerDepth();		// 1.0f
+        float GetLayerDepth() override; // 1.0f
 
     private:
         // Everything this window draws; recorded into m_labelLayer (RmlUi) when it is available,

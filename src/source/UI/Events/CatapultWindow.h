@@ -36,13 +36,12 @@ public:
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override;
+    bool Update() override;
+    bool Render() override;
 
-    bool UpdateMouseEvent();
-    bool UpdateKeyEvent();
-    bool Update();
-    bool Render();
-
-    float GetLayerDepth(); //. 5.0f
+    float GetLayerDepth() override; //. 5.0f
 
     void OpenningProcess();
     void ClosingProcess();

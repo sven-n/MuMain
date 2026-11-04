@@ -74,11 +74,11 @@ namespace mu::ui::window
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Show(bool bShow) override;
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-        float GetLayerDepth();	//. 5.1f
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
+        float GetLayerDepth() override; //. 5.1f
         void OpenningProcess();
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.

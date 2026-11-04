@@ -66,12 +66,12 @@ namespace mu::ui::window
 
         void Show(bool bShow) override;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 3.3f
+        float GetLayerDepth() override; //. 3.3f
 
         void OpenningProcess();
         void ClosingProcess();
