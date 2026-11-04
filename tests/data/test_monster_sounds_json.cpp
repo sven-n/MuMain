@@ -2,10 +2,12 @@
 
 #include "doctest.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "Data/GameData/MonsterData/MonsterSoundValidation.h"
@@ -128,6 +130,21 @@ MonsterSoundEvent OnCue(const std::string& cue)
     return event;
 }
 } // namespace
+
+// A set loads a sound that has an id into that id's slot: the monster data
+// names the ids of the list, by the enum's names (Audio/SoundIds.h), and no
+// sound of the code's own that a set's file would replace.
+TEST_CASE("Monster sounds: the monster data names the ids of its list by the enum's names, and no other id "
+          "[data][monsters]")
+{
+    using Data::Monsters::FindMonsterSoundId;
+    CHECK(FindMonsterSoundId("SOUND_TRAP01") == static_cast<int>(SOUND_TRAP01));
+    CHECK(FindMonsterSoundId("SOUND_KARUTAN_NARCONDRA_ATTACK") == static_cast<int>(SOUND_KARUTAN_NARCONDRA_ATTACK));
+    CHECK(FindMonsterSoundId("SOUND_AIDA_BLUEGOLEM_DIE") == static_cast<int>(SOUND_AIDA_BLUEGOLEM_DIE));
+    CHECK_FALSE(FindMonsterSoundId("SOUND_CLICK01").has_value());
+    CHECK_FALSE(FindMonsterSoundId("SOUND_TRAP").has_value());
+    CHECK_FALSE(FindMonsterSoundId("").has_value());
+}
 
 TEST_CASE("Monster sounds: a written set reads back the same (Q-MN78) [data][monsters]")
 {
