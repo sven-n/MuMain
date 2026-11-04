@@ -55,7 +55,7 @@ std::array<bool, MAX_SPRITES> s_spriteDrawn{};
 
 std::vector<bool> SpritesDrawnThisFrame()
 {
-    return {s_spriteDrawn.begin(), s_spriteDrawn.end()};
+    return std::vector<bool>(s_spriteDrawn.begin(), s_spriteDrawn.end());
 }
 
 void SetSpritesDrawnThisFrame(const std::vector<bool>& drawn)
