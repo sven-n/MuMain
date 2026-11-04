@@ -292,6 +292,32 @@ TEST_CASE("Monster models: a slot must be a model slot of the monster area and b
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, "model MONSTER_MODEL_HOUND slot", "more than once"));
 }
 
+// Twintail's map code asks its model for the hair swing timer by name: a model
+// list where it is renamed or gone says so, while the game runs without it.
+TEST_CASE("Monster models: a model without the timer the game's code asks for is an error [data][monsters]")
+{
+    MonsterModelDefinition twinTail;
+    twinTail.slot = "MONSTER_MODEL_TWIN_TAIL";
+    twinTail.timers = {{std::string(Data::Monsters::TwinTailHairSwingTimer), MONSTER01_WALK, 500}};
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ValidateMonsterModelNames({&twinTail, 1}, "Models.json", issues);
+    CHECK(issues.empty());
+
+    twinTail.timers[0].name = "hair";
+    Data::Monsters::ValidateMonsterModelNames({&twinTail, 1}, "Models.json", issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "model MONSTER_MODEL_TWIN_TAIL timers");
+    CHECK(issues[0].message.find("\"hair swing\"") != std::string::npos);
+
+    // Another model asks for no timer.
+    issues.clear();
+    MonsterModelDefinition hound;
+    hound.slot = "MONSTER_MODEL_HOUND";
+    Data::Monsters::ValidateMonsterModelNames({&hound, 1}, "Models.json", issues);
+    CHECK(issues.empty());
+}
+
 TEST_CASE("Monster models: both weapons may hang on one bone [data][monsters]")
 {
     const ReadResult read = Read(ModelsFile(Model("MONSTER_MODEL_ORC_ARCHER", R"("linkBones": [39, 39])")));

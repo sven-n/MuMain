@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -45,6 +46,23 @@ struct MonsterModelTimer
 
     bool operator==(const MonsterModelTimer&) const = default;
 };
+
+// A timer that the game's code asks a model for by name, and what stops
+// without it. The model list's check (ValidateMonsterModelNames) finds a
+// model of the list that lacks it, as the sound events' check finds an
+// event's timer.
+struct CodeModelTimer
+{
+    std::string_view slot;
+    std::string_view name;
+    std::string_view use;
+};
+
+// Twintail's hair swing, which its map's code asks for (GM_Kanturu_2nd.cpp).
+inline constexpr std::string_view TwinTailHairSwingTimer = "hair swing";
+inline constexpr std::array<CodeModelTimer, 1> CodeModelTimers = {{
+    {"MONSTER_MODEL_TWIN_TAIL", TwinTailHairSwingTimer, "Twintail's hair does not swing and its walk sound stops"},
+}};
 
 // Texture folders that the model uses on some maps (server map numbers)
 // instead of its own.

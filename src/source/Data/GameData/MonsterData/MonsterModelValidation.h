@@ -9,10 +9,12 @@
 
 namespace Data::Monsters
 {
-// Checks the names in the models, which the reader takes as they are; each
-// problem is an error: a bitmap slot that is not one, a part slot that is not
-// an NPC slot, and a part effect that the effect catalogue does not have (it
-// must be loaded). `source` names the file in the problems.
+// Checks the names in the models, which the reader takes as they are: fatal,
+// a bitmap slot that is not one, a part slot that is not an NPC slot, and a
+// part effect that the effect catalogue does not have (it must be loaded); an
+// error, a model of CodeModelTimers without the timer the game's code asks
+// for (the game runs without what it does). `source` names the file in the
+// problems.
 void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, const std::string& source,
                                std::vector<Items::ItemDataIssue>& issues);
 

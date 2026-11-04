@@ -849,7 +849,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
         if (o->CurrentAction == MONSTER01_WALK)
         {
             // Its hair swings on its model's timer, with its walk sound (Q-MN91).
-            if (GameLogic::Monsters::ModelTimers::Ticked(*c, "hair swing"))
+            if (GameLogic::Monsters::ModelTimers::Ticked(*c, Data::Monsters::TwinTailHairSwingTimer))
             {
                 if (o->m_iAnimation % 2 == 1)
                 {
