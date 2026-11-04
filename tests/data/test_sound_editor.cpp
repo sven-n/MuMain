@@ -392,7 +392,7 @@ TEST_CASE("Sound Editor: a set's sound changes through the monster tools, the ev
 }
 
 TEST_CASE("Sound Editor: undo of a set's sound puts back only that sound and keeps what the Monster Sounds window "
-          "changed since; a sound changed there is not undone [sounds][editor]")
+          "changed since, and a sound changed there is not undone [sounds][editor]")
 {
     EditorScope scope;
     g_SoundFileDatabase.Build(std::vector<SoundFile>{});
@@ -442,7 +442,7 @@ TEST_CASE("Sound Editor: undo of a set's sound puts back only that sound and kee
 }
 
 TEST_CASE("Sound Editor: undo of a map object sound puts back only that entry and keeps what the Map Editor's Sounds "
-          "tab changed since; an entry changed there is not undone [sounds][editor]")
+          "tab changed since, and an entry changed there is not undone [sounds][editor]")
 {
     EditorScope scope;
     g_SoundFileDatabase.Build(std::vector<SoundFile>{});
@@ -479,7 +479,7 @@ TEST_CASE("Sound Editor: undo of a map object sound puts back only that entry an
     CHECK(g_MapObjectSoundDatabase.GetAll() == sounds);
 }
 
-TEST_CASE("Sound Editor: a code sound's stored type is set and cleared in its row and undone; other rows have "
+TEST_CASE("Sound Editor: a code sound's stored type is set and cleared in its row and undone, and other rows have "
           "none (Q-SE2) [sounds][editor]")
 {
     EditorScope scope;
@@ -552,7 +552,7 @@ TEST_CASE("Sound Editor: the window draws the selected sound's row, also when it
     MuEditor::SoundSelection::Set(-1);
 }
 
-TEST_CASE("Sound Editor: a map object sound's name, file and channels change its table, which the map follows; it "
+TEST_CASE("Sound Editor: a map object sound's name, file and channels change its table, which the map follows, and it "
           "has no 3D (Q-SE1) [sounds][editor]")
 {
     EditorScope scope;
@@ -578,7 +578,7 @@ TEST_CASE("Sound Editor: a map object sound's name, file and channels change its
     CHECK(g_MapObjectSoundDatabase.GetAll().front() == Waterfall());
 }
 
-TEST_CASE("Sound Editor: names are read and written in the sets' sounds and the map object sounds; without one the "
+TEST_CASE("Sound Editor: names are read and written in the sets' sounds and the map object sounds, and without one the "
           "line stays as it was (Q-SE1) [sounds][editor]")
 {
     std::vector<Data::Monsters::MonsterSoundSet> sets;
@@ -662,7 +662,7 @@ std::string FileText(const std::string& path)
 }
 } // namespace
 
-TEST_CASE("Sound Editor: the folders' file reads folders in folders with their sounds and writes them back; a name "
+TEST_CASE("Sound Editor: the folders' file reads folders in folders with their sounds and writes them back, and a name "
           "twice among siblings is fatal, a sound twice stays in its first folder (Q-SE4) [sounds][editor]")
 {
     const std::vector<SoundFolder> folders{
@@ -871,7 +871,7 @@ TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under it
 }
 
 TEST_CASE("Sound Editor: a folders' file that cannot be read keeps the folders as they are, so Save leaves the file "
-          "alone; Revert reads it again once it is fixed (Q-SE4) [sounds][editor]")
+          "alone, and Revert reads it again once it is fixed (Q-SE4) [sounds][editor]")
 {
     EditorScope scope;
     g_SoundFileDatabase.Build(std::vector<SoundFile>{});

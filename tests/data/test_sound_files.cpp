@@ -140,7 +140,7 @@ private:
 };
 } // namespace
 
-TEST_CASE("Sound files: an entry reads its id's number, its name, file, channels, 3D and type; the optional fields "
+TEST_CASE("Sound files: an entry reads its id's number, its name, file, channels, 3D and type, and the optional fields "
           "have defaults (Q-SE1) [data][sounds]")
 {
     const ReadResult result = Read(
@@ -249,7 +249,7 @@ TEST_CASE("Sound files: the shipped file names each sound the code loads once, r
     CHECK(fileOf("SOUND_BMS_MANA") == "Data/Sound/BattleCastle/sDSwellMana.wav");
 }
 
-TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with its channels and 3D; an id the "
+TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with its channels and 3D, and an id the "
           "data has not loads nothing (Q-SE1) [data][sounds]")
 {
     LoadScope scope;
@@ -274,7 +274,7 @@ TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with
     CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_RAIN01)) == nullptr);
 }
 
-TEST_CASE("Sound ids: a SOUND_ name finds its id and an id its name; types have their words (Q-SE1, Q-SE2) "
+TEST_CASE("Sound ids: a SOUND_ name finds its id and an id its name, and types have their words (Q-SE1, Q-SE2) "
           "[data][sounds]")
 {
     CHECK(Audio::SoundIds::Find("SOUND_CLICK01") == SOUND_CLICK01);

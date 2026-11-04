@@ -661,7 +661,7 @@ TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
 }
 
 TEST_CASE("the Sound Mixer's gain changes a sound's playing copies of its group and new copies at once, not a "
-          "preview's level nor another group's copy; the music's too [audio][volume][mixer]")
+          "preview's level nor another group's copy, and the music's too [audio][volume][mixer]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();
     ma_engine_config engineConfig = ma_engine_config_init();
@@ -760,7 +760,7 @@ TEST_CASE("the Sound Mixer's gain changes a sound's playing copies of its group 
     }
 }
 
-TEST_CASE("the backend counts the starts the Sound Mixer lists, not a call while it plays nor a preview; it says "
+TEST_CASE("the backend counts the starts the Sound Mixer lists, not a call while it plays nor a preview, and it says "
           "whether they play and how long the sound is [audio][mixer]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();

@@ -64,7 +64,7 @@ TEST_CASE("Click sounds: every theme gives the login, server list and character 
     }
 }
 
-TEST_CASE("Click sounds: a click's kind is its element's or the nearest parent's; none and a disabled button play "
+TEST_CASE("Click sounds: a click's kind is its element's or the nearest parent's, and none and a disabled button play "
           "nothing (Q-UI1) [ui][rml-click-sounds]")
 {
     UI::Tests::RmlLayoutFixture fixture;

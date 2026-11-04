@@ -255,7 +255,7 @@ TEST_CASE("Sound Mixer: a sound's type is its source's, a loop's map ambience, e
     CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 8)) == "Map object sounds: object 37");
 }
 
-TEST_CASE("Sound Mixer: the heard list keeps each sound where it was first heard and counts the backend's starts; "
+TEST_CASE("Sound Mixer: the heard list keeps each sound where it was first heard and counts the backend's starts, and "
           "Clear all also unmutes and drops the changed sounds [audio][mixer][editor]")
 {
     MixerScope scope;

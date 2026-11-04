@@ -68,7 +68,7 @@ private:
 } // namespace
 
 TEST_CASE("Sound events: a rule reads its worlds, tiles, safe zone, what is held and its sounds, and writes back "
-          "the same; wrong values are fatal and name the field (Q-SE1) [data][sounds]")
+          "the same, and wrong values are fatal and name the field (Q-SE1) [data][sounds]")
 {
     std::vector<ItemDataIssue> issues;
     const std::vector<SoundEvent> events =
@@ -116,7 +116,7 @@ TEST_CASE("Sound events: a rule reads its worlds, tiles, safe zone, what is held
     CHECK(HasFatal(twice, "events[1].event"));
 }
 
-TEST_CASE("Sound events: a rule's click kinds read, write back and match the clicked button's kind; a rule "
+TEST_CASE("Sound events: a rule's click kinds read, write back and match the clicked button's kind, and a rule "
           "without kinds plays for any (Q-UI1) [data][sounds]")
 {
     std::vector<ItemDataIssue> issues;
