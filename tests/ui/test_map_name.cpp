@@ -340,6 +340,7 @@ TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]" *
     REQUIRE(std::filesystem::create_directory(texture.directory));
     // A one-pixel OZT exercises the production cache without requiring localized game artwork.
     std::array<unsigned char, 26> pixels{};
+    pixels[6] = 2;
     pixels[16] = pixels[18] = 1;
     pixels[20] = 32;
     std::fill(pixels.begin() + 22, pixels.end(), 255);
