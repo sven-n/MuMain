@@ -22,6 +22,10 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_build_plan.py"
 )
 add_test(
+    NAME ci_warning_scripts
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_warning_scripts.py"
+)
+add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )

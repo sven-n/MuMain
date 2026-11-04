@@ -225,8 +225,11 @@ jobs:
           key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
           restore-keys: vcpkg-windows-x64-v2-
 
+      # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
+      # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -236,6 +239,7 @@ jobs:
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -284,7 +288,7 @@ jobs:
           }
 
       - name: Build
-        run: cmake --build out/build/windows-ci-x64-release --config Release
+        run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
 
       - name: Run tests
         run: >
@@ -589,20 +593,23 @@ jobs:
           key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
 
       - name: Build
         run: |
           ccache --zero-stats
-          cmake --build out/build/linux-ci --config Release
+          python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
 
       - name: Report compiler cache
         if: always()
@@ -722,11 +729,14 @@ jobs:
           key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
           -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
@@ -736,7 +746,7 @@ jobs:
       - name: Build
         run: |
           ccache --zero-stats
-          cmake --build out/build/macos-ci --config Release
+          python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
 
       - name: Report compiler cache
         if: always()
@@ -805,6 +815,11 @@ jobs:
     needs: [quality, build-windows, build-linux, build-macos]
     if: always()
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # Reading the other jobs' annotations.
+      actions: read
+      checks: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -813,6 +828,13 @@ jobs:
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}
         run: python3 scripts/ci_build_plan.py check
+
+      # GitHub's own warnings count too, e.g. that an action targets a deprecated Node.js version.
+      - name: Check job annotations
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_job_annotations.py
 
   release:
     name: Semantic Release

@@ -313,6 +313,15 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
 for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
                  "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
     check(required in required_job, f"Required CI check missing {required}")
+# No warning may come back in the player builds (docs/build/README.md).
+for required in ("checks: read", "actions: read", "python3 scripts/ci_job_annotations.py"):
+    check(required in required_job, f"Required CI check must fail on warning annotations: {required}")
+for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
+    platform_configure = step(platform_job, f"build-{platform}", "Configure CMake")
+    platform_build = step(platform_job, f"build-{platform}", "Build")
+    for required in ("scripts/ci_warnings.py run", "-DMU_WARNINGS_AS_ERRORS=ON"):
+        check(required in platform_configure, f"{platform} configure must fail on warnings: {required}")
+    check("scripts/ci_warnings.py run" in platform_build, f"{platform} build must fail on warnings")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
 check("bash scripts/check_format.sh" in quality_formatting, "Formatting gate must share the hook's script")

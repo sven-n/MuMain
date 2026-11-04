@@ -54,6 +54,10 @@ Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
 Release, all with the editor OFF, and upload one no-data runtime artifact per OS.
 Build every other supported row locally using the setup guides above.
 
+A macOS build runs on the macOS version of the Mac that built it and newer: the
+Homebrew libraries it links (OpenSSL, libjpeg-turbo, Crypto++) are built for that
+version. The CI artifact needs macOS 26, which every Apple silicon Mac can install.
+
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
 > 32-bit Linux client could compile but could never load the network library,
@@ -99,6 +103,7 @@ SDL_mixer nor a separate FreeType submodule is required.
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
 | `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
+| `MU_WARNINGS_AS_ERRORS` | `ON` / `OFF` | Turns compiler, linker and DXC shader warnings into errors in the game's own code and its tests; the third-party libraries keep their own settings. Default `OFF`; CI's player builds turn it `ON` (see [No warnings](#no-warnings)). |
 | `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) at build time instead of loading them at run time, and links the Vulkan loader into `Main` (SDL still loads that one at run time). A packaged runtime then finds all of them through `Main`'s recorded `RUNPATH`, without a global library path. Defaults to `OFF`. |
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
@@ -183,6 +188,31 @@ intentional native-build skips above. Require this aggregate check instead of
 individual platform jobs, which do not run on every event. Do not enable **Require
 branches to be up to date** just to reduce builds: it can force another build after
 each main merge. Update a PR when its integration state needs revalidation.
+
+### No warnings
+
+The three player builds (Windows, Linux and macOS, editor and control socket OFF)
+configure and build without a single warning, note or deprecation message, and CI
+fails as soon as one comes back:
+
+- The game's own code, its tests and the DXC shader compiles build with
+  `MU_WARNINGS_AS_ERRORS=ON`, so a compiler or linker warning stops the build where
+  it happens. Configure with `-DMU_WARNINGS_AS_ERRORS=ON` to get the same locally.
+- [`scripts/ci_warnings.py`](../../scripts/ci_warnings.py) runs the configure and
+  build commands and fails the step for any other such line in their output: CMake
+  and the libraries' CMake scripts, vcpkg's notes, glslang, wayland-scanner and the
+  .NET build. `python3 scripts/ci_warnings.py scan <job log>` lists them in a
+  downloaded log.
+- **CI Required** (and Fork CI's last job) fails when a job of the run ends with a
+  warning annotation, such as GitHub's notice that an action targets a deprecated
+  Node.js version. Notices, e.g. about runner queue times, are listed only.
+
+The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) build
+without warnings, and miniaudio and glm are system headers: their warnings are for
+their authors. A new compiler or CMake on a runner image can bring new warnings
+without any change here; fix them in a PR like any other failure. The Linux jobs
+name their image (`ubuntu-26.04`), because GitHub moves repositories to a new
+`ubuntu-latest` one by one.
 
 Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
 summary show hits and misses; compare the Build step duration on a warm run with

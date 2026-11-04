@@ -289,6 +289,11 @@ if(ENABLE_EDITOR)
   target_compile_features(imgui PUBLIC cxx_std_20)
 endif()
 
+# Every target from here on is the game's own: with MU_WARNINGS_AS_ERRORS, its compiler and linker warnings are
+# errors. The third-party libraries above keep their own settings.
+set(CMAKE_COMPILE_WARNING_AS_ERROR ${MU_WARNINGS_AS_ERRORS})
+set(CMAKE_LINK_WARNING_AS_ERROR ${MU_WARNINGS_AS_ERRORS})
+
 # Engine/game code as a static library. Compile- and link-time usage
 # requirements (C++20, include paths, definitions, third-party libraries) are
 # attached PUBLIC below so both the Main executable and any test binary that

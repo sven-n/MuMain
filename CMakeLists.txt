@@ -22,6 +22,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(BUILD_TESTING "Build unit tests" OFF)
 option(MU_ENABLE_SHADER_COMPILATION
     "Compile HLSL shaders via glslang, SPIRV-Cross, and DXC; OFF copies checked-in shader blobs" OFF)
+option(MU_WARNINGS_AS_ERRORS
+    "Treat warnings as errors in the game's own code, its tests and DXC's shader compiles (CI turns this on)" OFF)
 
 include(FetchContent)
 
@@ -125,7 +127,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
         )
         add_custom_command(
             OUTPUT "${dxil}"
-            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main
+            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main $<$<BOOL:${MU_WARNINGS_AS_ERRORS}>:-WX>
                 -D MU_D3D12_RAW_STORAGE_BUFFER=1 -Fo "${dxil}" "${src}"
             DEPENDS "${src}" ${MU_SHADER_INCLUDES} "${MU_SHADER_COMPILATION_STAMP}" "${DXC_EXE}"
             COMMENT "HLSL to DXIL: ${shader_name}.${stage}.hlsl"
@@ -286,5 +288,8 @@ endif()
 
 if(BUILD_TESTING)
     enable_testing()
+    # The tests are the game's own code too (src/CMakeLists.txt sets the same before its first own target).
+    set(CMAKE_COMPILE_WARNING_AS_ERROR ${MU_WARNINGS_AS_ERRORS})
+    set(CMAKE_LINK_WARNING_AS_ERROR ${MU_WARNINGS_AS_ERRORS})
     add_subdirectory(tests)
 endif()
