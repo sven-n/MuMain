@@ -1331,7 +1331,7 @@ TEST_CASE("Models drawn for items keep the look of the old drawing code [data][i
     // character skeleton with the look of the item.
     CHECK(GetInventoryModel(ITEM_SACRED_ARMOR) == MODEL_ARMORINVEN_60);
     CHECK(GetInventoryModel(ITEM_PHOENIX_SOUL_ARMOR) == MODEL_ARMORINVEN_74);
-    CHECK(GetInventoryModel(ITEM_KRIS) == MODEL_ITEM + ITEM_KRIS);
+    CHECK(GetInventoryModel(ITEM_KRIS) == ToModelSlot(ITEM_KRIS));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_ARMORINVEN_74));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_HELM));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_BOOTS + MAX_ITEM_INDEX - 1));
@@ -1509,7 +1509,7 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
     // the Rage Fighter gloves have the colors of their item; the inventory
     // models draw their own meshes.
     const Color copper{0.8f, 0.46f, 0.25f};
-    CHECK(GetColors(MODEL_ITEM + ITEM_SACRED_ARMOR).color == copper);
+    CHECK(GetColors(ToModelSlot(ITEM_SACRED_ARMOR)).color == copper);
     CHECK(GetColors(MODEL_ARMORINVEN_60).color == copper);
     CHECK(GetColors(MODEL_SWORD_32_LEFT).color == copper);
     CHECK(Get(MODEL_ARMORINVEN_60) == ItemGlow{});
@@ -1599,20 +1599,20 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
     // the one of the plate set only for the helper NPCs, whose object has the
     // PC room flag (the helm: the armor also puts a light on the bones of the
     // object).
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE | RENDER_EXTRA));
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_BATTLE_BOW), RENDER_TEXTURE | RENDER_EXTRA));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_BATTLE_BOW), RENDER_TEXTURE));
     object.m_bpcroom = TRUE;
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_PLATE_HELM), RENDER_TEXTURE));
     object.m_bpcroom = FALSE;
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_ARMOR, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_PLATE_HELM), RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_PLATE_ARMOR), RENDER_TEXTURE));
     // Items without a style, and models that are not items, are drawn by the
     // drawing code.
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_KRIS), RENDER_TEXTURE));
     CHECK_FALSE(drawsWithStyle(MODEL_PLAYER, RENDER_TEXTURE));
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_STORM_CROW_ARMOR, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_STORM_CROW_ARMOR), RENDER_TEXTURE));
     // A style that shares its recipe, with a texture of its own.
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_SEAL_OF_WEALTH, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_SEAL_OF_WEALTH), RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1626,7 +1626,7 @@ TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glo
         INFO("model " << modelType);
         CHECK(MODEL_ITEM + GetItemTypeOfModel(modelType) == g_CMonkSystem.EqualItemModelType(modelType));
     }
-    CHECK(GetItemTypeOfModel(MODEL_ITEM + ITEM_KRIS) == ITEM_KRIS);
+    CHECK(GetItemTypeOfModel(ToModelSlot(ITEM_KRIS)) == ITEM_KRIS);
     CHECK(GetItemTypeOfModel(MODEL_PLAYER) == -1);
 
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
@@ -1651,10 +1651,10 @@ TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [dat
     OBJECT object;
     DrawLook look;
     look.blendMesh = -1;
-    Glow::RenderGlow(&model, &object, look, MODEL_ITEM + ITEM_DEADLY_STAFF, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_DEADLY_STAFF), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(look.blendMesh == 1);
     look.blendMesh = -1;
-    Glow::RenderGlow(&model, &object, look, MODEL_ITEM + ITEM_KRIS, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_KRIS), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
     CHECK(look.blendMesh == -1);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
@@ -1888,13 +1888,13 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
     // The event models of level variants have theirs in the drawing code: they
     // only run when the item has no effect.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_ITEM + ITEM_KRIS, alpha, level, 0) == Result::Drawn);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, ToModelSlot(ITEM_KRIS), alpha, level, 0) == Result::Drawn);
     object.Type = MODEL_EVENT + 18;
     look.blendMesh = -1;
     CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_EVENT + 18, alpha, level, 0) == Result::Applied);
     CHECK(look.blendMesh == 1);
     // Neither.
-    object.Type = MODEL_ITEM + ITEM_KRIS;
+    object.Type = ToModelSlot(ITEM_KRIS);
     CHECK(ApplyPartObjectEffect(&model, &object, look, object.Type, alpha, level, 0) == Result::None);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});

@@ -331,8 +331,9 @@ TEST_CASE("Monster models: the slots of the monster and NPC ranges have names [d
     CHECK_FALSE(Data::Monsters::FindMonsterModelSlot("MODEL_PLAYER"));
     CHECK_FALSE(Data::Monsters::FindMonsterModelSlot("MODEL_HOUND"));
 
-    for (int slot = MODEL_MONSTER01; slot < MODEL_MONSTER01 + MONSTER_MODEL_COUNT; ++slot)
+    for (int type = 0; type < MONSTER_MODEL_COUNT; ++type)
     {
+        const int slot = MODEL_MONSTER01 + type;
         CHECK(Data::Monsters::FindMonsterModelSlot(Data::Monsters::GetMonsterModelSymbol(slot)) == slot);
     }
     for (int slot = MODEL_NPC_BEGIN + 1; slot < MODEL_NPC_END; ++slot)
