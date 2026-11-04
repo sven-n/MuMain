@@ -1,6 +1,7 @@
 # Extra checks that sven-n/MuMain does not run automatically, to save its
 # Actions minutes: ci.yml builds Windows only for nightly/manual releases and never
-# builds the editor. On every pull request of a fork, which uses its own
+# builds the full editor executable. Its editor drawer contracts are separate.
+# On every pull request of a fork, which uses its own
 # minutes, this workflow adds the game's Windows build:
 #
 #   Windows x64 Release   editor OFF  (Linux and macOS, editor OFF: ci.yml)

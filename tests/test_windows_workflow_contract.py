@@ -258,8 +258,8 @@ jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
     job_names
-    == ["quality", "build-windows", "build-linux", "build-macos", "required", "release"],
-    "CI jobs must be quality, build-windows, build-linux, build-macos, required, "
+    == ["quality", "build-windows", "build-linux", "build-macos", "drawer-contracts", "required", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, drawer-contracts, required, "
     f"release; found {job_names}",
 )
 check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
@@ -272,6 +272,11 @@ linux_job = job(ci, "build-linux")
 macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
 required_job = job(ci, "required")
+contracts_job = job(ci, "drawer-contracts")
+for required in ("needs: quality", "if: needs.quality.outputs.linux == 'true'", "-DENABLE_EDITOR=ON",
+                 "--target test_editor_drawer_contracts test_draw_parity", "--no-tests=error -R 'drawer-contract'",
+                 "--no-tests=error -R '(draw-parity|mesh_list)'"):
+    check(required in contracts_job, f"Editor drawer contracts missing {required}")
 
 quality_history = step(quality_job, "quality", "Fetch history")
 check(
@@ -310,7 +315,7 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
         f"{platform} must follow the tested build plan",
     )
     check("timeout-minutes: 90" in platform_job, f"{platform} must bound job duration")
-for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
+for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos, drawer-contracts]",
                  "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
     check(required in required_job, f"Required CI check missing {required}")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")

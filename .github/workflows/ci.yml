@@ -757,9 +757,73 @@ jobs:
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  drawer-contracts:
+    name: Editor drawer contracts (Linux, Release)
+    needs: quality
+    if: needs.quality.outputs.linux == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache-editor
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
+      CCACHE_MAXSIZE: 1G
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build gcc g++ ccache \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libasound2-dev libpulse-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
+            pkg-config
+
+      - name: Cache editor dependencies and compilation
+        uses: actions/cache@v4
+        with:
+          path: |
+            .ccache-editor
+            out/build/drawer-contracts/_deps/*-src
+            out/build/drawer-contracts/_deps/*-subbuild
+            .nuget
+          key: drawer-contracts-linux-${{ runner.os }}-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**') }}-${{ github.sha }}
+          restore-keys: drawer-contracts-linux-${{ runner.os }}-
+
+      - name: Configure editor contracts
+        run: >
+          cmake --preset linux-x64 -B out/build/drawer-contracts
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DENABLE_EDITOR=ON -DENABLE_CONTROL_SOCKET=OFF
+          -DMU_ENABLE_SHADER_COMPILATION=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF -DBUILD_TESTING=ON
+
+      - name: Build contracts and parity tests
+        run: >
+          cmake --build out/build/drawer-contracts --config Release
+          --parallel 2 --target test_editor_drawer_contracts test_draw_parity
+
+      - name: Require editor contracts and check replay parity
+        run: |
+          ctest --test-dir out/build/drawer-contracts -C Release --output-on-failure --no-tests=error -R 'drawer-contract'
+          ctest --test-dir out/build/drawer-contracts -C Release --output-on-failure --no-tests=error -R '(draw-parity|mesh_list)'
+
   required:
     name: CI Required
-    needs: [quality, build-windows, build-linux, build-macos]
+    needs: [quality, build-windows, build-linux, build-macos, drawer-contracts]
     if: always()
     runs-on: ubuntu-latest
     steps:

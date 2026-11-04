@@ -202,6 +202,12 @@ drawer, and the renderer applies the active look per draw.
   random sequences are unchanged (`RepeatedDraws::CheckChangesNothing`).
   Effects that moved are tested with sentinel shared bones and a non-zero
   position, so a stale or wrong-space read lands where a check fails.
+- **Drawer contracts:** every new drawer or decorator, including editor previews,
+  uses the shared immediate/deferred comparison in `tests/render/DrawerContract.h`.
+  Compare submitted geometry and render state, including the final state; verify
+  that a captured pose is still used after the shared model changes, and that
+  unrelated models, shadows and nested scopes keep their behavior. The editor
+  contracts run in an editor-enabled CI job required alongside the Linux build.
 - **Control socket (developer builds):**
   - `drawspawns` lists every spawn the draw made, with its callers.
   - `drawpurity` compares, before and after each draw pass, the fields of

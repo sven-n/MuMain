@@ -100,6 +100,11 @@ def check_results(needs):
         if actual != expected:
             raise ValueError(f"{platform}: expected {expected}, got {actual}")
 
+    expected = "success" if outputs["linux"] == "true" else "skipped"
+    actual = needs["drawer-contracts"]["result"]
+    if actual != expected:
+        raise ValueError(f"drawer-contracts: expected {expected}, got {actual}")
+
 
 def check_release_revision():
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
