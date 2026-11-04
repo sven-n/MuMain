@@ -333,7 +333,7 @@ for required in (
     check(required in native_job, f"Main Windows job missing {required}")
 
 activation = step(native_job, "build-windows", "Activate Visual Studio developer environment")
-check("arch: x64" in activation, "Main Windows build must activate the x64 compiler")
+check("vcvars64.bat" in activation, "Main Windows build must activate the x64 compiler")
 environment_assertion = step(
     native_job, "build-windows", "Assert MSVC developer environment"
 )
@@ -412,14 +412,14 @@ check(
     "Main Windows build must archive the runtime before artifact upload",
 )
 for required in (
-    "uses: actions/upload-artifact@v4",
+    "uses: actions/upload-artifact@v7",
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
     "path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
     "if-no-files-found: error",
 ):
     check(required in native_upload, f"Main Windows upload missing {required}")
 check(
-    native_job.count("uses: actions/upload-artifact@v4") == 1,
+    native_job.count("uses: actions/upload-artifact@v7") == 1,
     "Main Windows job must upload exactly one runtime artifact",
 )
 
@@ -472,14 +472,14 @@ for (
     platform_upload = step(platform_job, job_name, "Upload runtime artifact")
     for required in (
         "if: needs.quality.outputs.release == 'true'",
-        "uses: actions/upload-artifact@v4",
+        "uses: actions/upload-artifact@v7",
         f"name: {artifact_name}",
         f"path: {archive_name}",
         "if-no-files-found: error",
     ):
         check(required in platform_upload, f"{display_name} upload missing {required}")
     check(
-        platform_job.count("uses: actions/upload-artifact@v4") == 1,
+        platform_job.count("uses: actions/upload-artifact@v7") == 1,
         f"{display_name} must upload exactly one runtime artifact",
     )
 
@@ -530,14 +530,14 @@ if fork_ci:
             "vcpkg binary archives must remain available across runner image updates",
         )
 linux_cache = step(linux_job, "build-linux", "Cache Linux compilation")
-for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in linux_cache, f"Compiler cache missing {required}")
 linux_cache_save = step(linux_job, "build-linux", "Save Linux compilation cache")
-for required in ("uses: actions/cache/save@v4", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
+for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
                  "steps.ccache.outputs.cache-primary-key"):
     check(required in linux_cache_save, f"Compiler cache must save only validated main builds: {required}")
 check(
-    "uses: actions/cache@v4" not in linux_cache,
+    "uses: actions/cache@v6" not in linux_cache,
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
@@ -568,10 +568,10 @@ for required in (
 ):
     check(required in macos_configure, f"macOS configure missing {required}")
 macos_cache = step(macos_job, "build-macos", "Cache macOS compilation")
-for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in macos_cache, f"macOS compiler cache missing {required}")
 macos_cache_save = step(macos_job, "build-macos", "Save macOS compilation cache")
-for required in ("uses: actions/cache/save@v4", "needs.quality.outputs.release == 'true'",
+for required in ("uses: actions/cache/save@v6", "needs.quality.outputs.release == 'true'",
                  "steps.ccache.outputs.cache-primary-key"):
     check(required in macos_cache_save, f"macOS compiler cache must save only validated release builds: {required}")
 check("ccache --show-stats" in macos_job, "macOS compiler cache must report hit statistics")
