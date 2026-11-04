@@ -55,6 +55,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Network/Server/CSMapServer.h"
+#include "Network/Server/IllusionTempleClass.h"
 #include "Network/Server/TransformViewportEntry.h"
 #include "GameLogic/NPCs/npcGateSwitch.h"
 #include "GameLogic/Items/CComGem.h"
@@ -12214,9 +12215,10 @@ void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
         auto player = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
         wchar_t name[MAX_USERNAME_SIZE + 1]{};
         CMultiLanguage::ConvertFromUtf8(name, player->GameId, MAX_USERNAME_SIZE);
-        players.push_back({ name, player->byMapNumber, static_cast<SEASON3A::eCursedTempleTeam>(player->btTeam),
-                            gCharacterManager.ChangeServerClassTypeToClientClassType(player->btClass),
-                            player->nAddExp });
+        players.push_back({name, player->byMapNumber, static_cast<SEASON3A::eCursedTempleTeam>(player->btTeam),
+                           gCharacterManager.ChangeServerClassTypeToClientClassType(static_cast<SERVER_CLASS_TYPE>(
+                               Network::Packets::DecodeIllusionTempleClass(static_cast<BYTE>(player->btClass)))),
+                           player->nAddExp});
         Offset += sizeof(PMSG_CURSED_TEMPLE_USER_ADD_EXP);
     }
 
