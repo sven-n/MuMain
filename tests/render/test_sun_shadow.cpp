@@ -26,6 +26,15 @@ glm::vec3 Ndc(const glm::mat4& viewProjection, const glm::vec3& world)
 }
 } // namespace
 
+TEST_CASE("the flat shadow fades as the sun's shadow comes in, without a jump [render][sun]")
+{
+    using Render::Lighting::FlatShadowStrength;
+    CHECK(FlatShadowStrength(1.f, 0.f) == doctest::Approx(1.f));
+    CHECK(FlatShadowStrength(1.f, 0.05f) == doctest::Approx(0.95f));
+    CHECK(FlatShadowStrength(1.f, 1.f) == doctest::Approx(0.f));
+    CHECK(FlatShadowStrength(0.f, 0.f) == doctest::Approx(0.f));
+}
+
 TEST_CASE("the sun stands opposite where the shadows fall, as high as their length says [render][sun]")
 {
     // Shadows towards -x (Classic), half as long as the caster is tall.
