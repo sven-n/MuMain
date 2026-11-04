@@ -588,7 +588,7 @@ TEST_CASE("An item from the server with a guardian option shows its 380 lines [d
     TooltipDataScope data;
     TooltipHeroScope hero;
     MakeBladeMaster(hero.Hero());
-    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    TextMeasureScope measure(&FixedWidthMeasure);
 
     // Bone Blade (0/22) +9 as the server writes it: group and number, level, durability, the option flags, then the
     // additional option's byte (level 2) and the excellent options' byte.
@@ -622,8 +622,6 @@ TEST_CASE("An item from the server with a guardian option shows its 380 lines [d
         CHECK(HasLine(guardedLines, line, TEXT_COLOR_REDPURPLE));
         CHECK_FALSE(HasLine(plainLines, line));
     }
-
-    SetItemTooltipTextMeasure(nullptr);
 }
 
 // A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
