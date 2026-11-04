@@ -232,7 +232,7 @@ for the whole file.
 | `clouds.scale` | 3000 | 3000 | 500–10000 | the cloud pattern's size in world units |
 | `clouds.speed` | 40 | 40 | 0–300 | how fast the clouds drift along a fixed wind, in world units per second |
 | `clouds.cover` | 0.45 | 0.45 | 0–1 | the share of the sky the clouds cover |
-| `sky.fill` | 0.5 | 0 | 0–1 | how far shade (from shadows and clouds) turns towards the sky's blue while sunlit places keep the sun's colour; replaces the light mood's `shadeCool` while sun shadows are on. Only with sun shadows |
+| `sky.fill` | 0.5 | 0 | 0–1 | how far shade (from shadows and clouds) turns towards the sky's blue while sunlit places keep the sun's colour; the light mood's `shadeCool` keeps the share (1 - this value) on painted shade while sun shadows are on. Only with sun shadows |
 | `lighting.rim.sunFollow` | 1 | 0 | 0–1 | how much the characters' edge light comes from the sun: brighter and sun-coloured on its side, gone in its shadow; 0 the even Enhanced rim |
 | `sun.resolution` | 2048 | 2048 | 1024–4096 | the sun shadow map's size in texels (1024, 2048 or 4096): sharper shadows for more graphics memory and time |
 

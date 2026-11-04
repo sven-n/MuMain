@@ -62,13 +62,12 @@ void Recompute(int world)
     s_state.scales = s_state.enabled && IsWorldMap(world) ? Blend(s_state.data.ForWorld(world), s_state.strength,
                                                                   Look::Value(Data::Maps::LookValue::HighlightKnee))
                                                           : Scales{};
-    // Where the sky fill tints the shade (the lit shaders, under sun shadows the renderer can draw), no
-    // second blue here.
+    // Where the sky fill tints real shadows (under sun shadows the renderer can draw), painted shade keeps the
+    // share of its blue the fill leaves, so the two stay close.
     if (s_state.enabled && IsWorldMap(world) && SunlightActive() &&
-        Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f && mu::GetRenderer().SunShadowsAvailable() &&
-        Look::Value(Data::Maps::LookValue::SkyFill) > 0.0f)
+        Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f && mu::GetRenderer().SunShadowsAvailable())
     {
-        s_state.scales.shadeCool = 0.f;
+        s_state.scales.shadeCool *= 1.f - static_cast<float>(Look::Value(Data::Maps::LookValue::SkyFill));
     }
     if (!(s_state.scales == previous))
     {
