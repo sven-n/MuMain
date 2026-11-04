@@ -71,6 +71,7 @@ Made on 2026-11-04 while planning phases 9 and 10.
 | O17 | Option lines in the tooltip (Q-O13, 2026-11-04) | Layout lines, one per option type, as D72 planned: `{"options": "guardian", "color": "redPurple", "bold": true}` expands into the item's options of that type, each with its text from `OptionTexts.json` (O8). Order, colours, bold and blank rows use what layout lines already have (`when`, `colors`, empty lines with states such as `hasGuardianOptions` and `harmonyActive`). The `default` layout gets today's order at the `options` marker: guardian, harmony, ancient bonus, wing, the skill lines (no option, they stay code: `{"code": "skillLines"}`), luck, additional option, excellent; the Horn of Fenrir before `afterOptions` and the sockets after the expiry lines, where the code writes them today. The tooltip snapshot shows the output is the same, and its variants grow with each group (380, sockets, wing option types, ancient bonus levels, Fenrir and Dinorant). Layout variants can hide or move a type, and the tooltip editor (#815 step 6) edits these lines like the others |
 | O18 | The editor (Q-O14, 2026-11-04) | One window, **Item Options**, in the Items group (Windows > Items), built like Item Formulas: the definitions as a list with search, a type filter and how many items use each; the picked definition's name (D17), type, Server box (O16) and options with attribute, value and text, edited on a copy and taken with Apply after the save checks; value editors that fit the type (a level grid for harmony, one row per element for sockets) and **Fill levels** (O11); its users (D26: a used definition cannot be removed, a rename updates the links, Copy makes a variant). Tabs **Rules** (`OptionRules.json`, O15) and **Texts** (`OptionTexts.json` in the names grid `NamesGrid`, O8). Item Basics gets the item's option links with a picker, marking a list that differs from the rules. Item Tooltip's controls grow with each group (option level and type, harmony option and level, 380, sockets, ancient bonus level). Every change is one step of the undo history; Save Items writes the files |
 | O19 | The exchange (Q-O15, 2026-11-04) | A file of its own for the definitions (D11, D14): `formatVersion`, `source`, `gameVersion` and `definitions` in the shape of the client files (O5 to O7, O11, O16), from MuEditor's Export, Import and Update from server and OpenMU's `GET api/items/options/exchange` (phase C). The item exchange gets the field `options` (the item's links, O15), written by an OpenMU `ItemExchangeField`. Client-only and never exchanged: the `text` names, `OptionTexts.json` and `OptionRules.json`. Every import shows a diff per definition and field, as phase 7; `Sync/KnownDifferences.json` gets an `options` list (P5 to P7, O12). Links to a definition the client does not have are refused, so options are imported before items. Phase 10's item sets follow the same pattern |
+| O20 | Pull requests (Q-O16, 2026-11-04) | The finer split of "Pull requests": one concern per pull request, 9a in six (format and luck, additional option, excellent, ancient, editor, exchange) plus the luck fix, then phase 10, then 9b in seven (wings, harmony, guardian, sockets, pets and specials, the tooltip lines, the docs). Each move proves itself with the tooltip snapshot, its variants added per group, and the stat tests |
 
 ## Current state
 
@@ -212,35 +213,44 @@ only says what follows from D14 and O1:
 - The option exchange file is a file of its own (D11, D14), compared field
   by field like the item exchange (phase 7); OpenMU's side is phase C.
 
+## Pull requests
+
+From O20. Each move is compared with the old code before the old code goes:
+the tooltip snapshot (with variants added for each group) and the stat tests
+stay the same.
+
+| PR | Contents | Waits for |
+|---|---|---|
+| 0 | This design, for review | – |
+| 9a1 | The file format and loader: `Options/*.json`, `Tooltips/OptionTexts.json`, `Options/OptionRules.json`, the items' `options` links (bmd import, Item Add, kept matching, O15), the attribute names and their client effects (O6), Data Checks and the data test. First group: luck | 0 |
+| fix | Luck adds its critical damage rate of 5 % in the client (P8, O12) | 9a1 |
+| 9a2 | The additional option of the items that are no wings (weapons, shields, armour, the jewelry's regeneration, the Ring of Magic, the Pendant of Ability) | 9a1 |
+| 9a3 | Excellent options, defensive and offensive; the excellent byte read by the linked type (O9) | 9a1 |
+| 9a4 | Ancient option and ancient bonus definitions; `attackType` picks the bonus until phase 10 (O14) | 9a1 |
+| 9a5 | Item Options (O18), the links in Item Basics, Item Tooltip's controls for the groups so far | 9a1 to 9a4 |
+| 9a6 | The option exchange file and the item field `options` (O19); an OpenMU issue for P5 to P7 | 9a5 |
+| C | OpenMU: the endpoint and the import page (phase C, OpenMU repository) | 9a6 |
+| 10 | Item sets (a design of its own) | 9a4 |
+| 9b1 | Wings: the additional options per wing (O10), the second and third tier wing options | 9a3 |
+| 9b2 | Jewel of Harmony (`JewelOfHarmonyOption_<lang>.bmd`) | 9a1 |
+| 9b3 | Guardian (380), the 380 part of `ItemAddOption.bmd` (O13) | 9a1, sven-n/MuMain#966 |
+| 9b4 | Sockets (`socketitem_<lang>.bmd`: seed options, bonus options, set bonus; O13) | 9a1 |
+| 9b5 | Pets and specials: Horn of Fenrir, Dark Horse, Horn of Dinorant, the Wizard's rings | 9a3 |
+| 9b6 | The tooltip's option lines as layout lines per type (O17) | 9b1 to 9b5 |
+| 9b7 | What stays true into `docs/item-data.md`; the items design's D13 and phase 11 changed (O13); this document deleted | 9b6 |
+
 ## Open questions
 
-Answered one by one, each with the current state, every option with an
-example, and a recommendation. The recommendation is listed here so the
-questions can be read in one go.
-
-| Q | Question | Recommendation |
-|---|---|---|
-| Q-O1 | The key of a definition. | Answered (O5). |
-| Q-O2 | How an option's value is written. | Answered (O6). |
-| Q-O3 | Values that depend on the hero or the item: excellent level / 20, the Dark Horse, Gold Fenrir, socket values per level or per max HP (P12). | Answered (O7). |
-| Q-O4 | Where the option lines' texts live. Today they are `.resx` texts with the value inside the text (`IncreaseMaxHP4`). | Answered (O8). |
-| Q-O5 | How the excellent byte is read (P2). | Answered (O9). |
-| Q-O6 | Wing additional options: one definition per wing (OpenMU) or shared definitions with a selector table. | Answered (O10). |
-| Q-O7 | How levels are written (P3). | Answered (O11). |
-| Q-O8 | Client values that differ from OpenMU (P5, P6, P7, P8). | Answered (O12). |
-| Q-O9 | `ItemAddOption.bmd` and `socketitem_<lang>.bmd`: phase 9 or phase 11 (D13 names both under phase 11). | Answered (O13). |
-| Q-O10 | The ancient bonus (P9). | Answered (O14). |
-| Q-O11 | Which items can have which group. Today type ranges in code, some tags. | Answered (O15). |
-| Q-O12 | What of OpenMU's server-only values the client file keeps (`AddsRandomly`, `AddChance`, `MaximumOptionsPerItem`, `Weight`). | Answered (O16). |
-| Q-O13 | The order, colour and spacing of the option lines in the tooltip (380 red-purple bold, harmony yellow or gray bold, the rest blue, sockets after all markers). | Answered (O17). |
-| Q-O14 | The editor. | Answered (O18). |
-| Q-O15 | The exchange file. | Answered (O19). |
-| Q-O16 | The pull requests of 9a and 9b. | 9a: **9a1** format, loader, attribute names, item links, luck, additional option (not wings) and excellent, the game reading them; **9a2** ancient option and ancient bonus definitions; **9a3** Item Options editor; **9a4** exchange file. 9b: one pull request per group (wings, harmony, guardian, sockets, pets), then the tooltip lines. |
+Answered on 2026-11-04: Q-O1 (O5), Q-O2 (O6), Q-O3 (O7), Q-O4 (O8), Q-O5
+(O9), Q-O6 (O10), Q-O7 (O11), Q-O8 (O12), Q-O9 (O13), Q-O10 (O14), Q-O11
+(O15), Q-O12 (O16), Q-O13 (O17), Q-O14 (O18), Q-O15 (O19), Q-O16 (O20). All
+questions are answered. New questions from the pull requests are added here.
 
 ## Tasks
 
-1. [ ] Write this design: answer the open questions one by one (in progress).
-2. [ ] The pull requests from Q-O16 (filled in once it is answered).
-3. [ ] Move what stays true into `docs/item-data.md`, and point the items
+1. [x] Answer the open questions one by one (O5 to O20).
+2. [ ] Write the target design from O1 to O20.
+3. [ ] The pull requests of "Pull requests".
+4. [ ] Move what stays true into `docs/item-data.md`, and point the items
    design (phase 9) and the roadmap (row "Items") at those docs.
-4. [ ] Delete this document.
+5. [ ] Delete this document.
