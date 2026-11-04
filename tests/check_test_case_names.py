@@ -10,7 +10,8 @@ changes a name that has
   after it in its binary become one entry that runs none;
 - a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none;
 - a '\\' anywhere else: the discovery escapes only commas for doctest's filter, and the filter reads '\\\\' as one '\\'
-  and splits at '\\,', so the entry's filter may match no case.
+  and splits at '\\,', so the entry's filter may match no case;
+- nothing at all: CMake drops an empty element, so the case gets no entry and never runs.
 A comma is safe: the discovery escapes it for doctest's filter.
 
 Usage: check_test_case_names.py <tests dir>. Reads the name of every case a doctest macro registers (TEST_CASE,
@@ -76,6 +77,8 @@ def cases(text):
 def problem(name):
     if name is None:
         return "is not written as string literals, so this check cannot read it"
+    if not name:
+        return "is empty, which the discovery drops; the case gets no entry"
     if ";" in name:
         return "has a ';', which cuts it in two; neither half runs a case"
     if "\n" in name:
@@ -105,8 +108,8 @@ def main():
     for offence in found:
         print(offence)
     if found:
-        print("Write each name as string literals, without ';', a line break or '\\' (a comma is fine) and with "
-              "balanced brackets.")
+        print("Write each name as string literals, not empty, without ';', a line break or '\\' (a comma is fine) "
+              "and with balanced brackets.")
         return 1
     if checked == 0:
         print(f"No TEST_CASE found under {root}")

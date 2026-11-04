@@ -45,7 +45,8 @@ foreach(case IN ITEMS
         "backslash_inside|doctest's filter reads as an escape"
         "not_literal|is not written as string literals"
         "literal_and_macro|is not written as string literals"
-        "scenario|which cuts it in two")
+        "scenario|which cuts it in two"
+        "empty|is empty, which the discovery drops")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 fixture)
     list(GET case 1 offence)
