@@ -314,6 +314,7 @@ mu_add_test(
     NAME render_style_tests
     SOURCES
         test_look_files.cpp
+        test_look_drawing.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient

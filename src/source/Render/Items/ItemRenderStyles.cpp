@@ -3,8 +3,10 @@
 #include "Core/Utilities/Random.h"
 #include "ItemRenderStyles.h"
 #include "ItemModelTable.h"
+#include "LookDrawing.h"
 
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -53,8 +55,15 @@ struct RenderStyle
     {
     }
 
+    // A render style that is data (Data/Effects/RenderStyles.json); the look outlives the entry.
+    explicit RenderStyle(const Data::Looks::LookDefinition& look) : name(look.name.c_str()), data(&look) {}
     bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType) const
     {
+        if (data != nullptr)
+        {
+            Looks::DrawRenderStyle(*data, b, o, look, alpha, renderType);
+            return true;
+        }
         return texturedRender != nullptr ? texturedRender(b, o, look, modelType, alpha, renderType, texture)
                                          : render(b, o, look, modelType, alpha, renderType);
     }
@@ -65,6 +74,7 @@ struct RenderStyle
     int texture = 0;
     GlowFunction glow = nullptr;
     const ShineBelowPlus3* shine = nullptr;
+    const Data::Looks::LookDefinition* data = nullptr;
 };
 
 // ------------------------------------------------ the shine below +3
@@ -1917,22 +1927,45 @@ ItemModelTable<SpawnFunction> g_itemSpawns{[](const Data::Items::ItemModelDefini
                                                return SpawnFunction{};
                                            }};
 
+// The render styles that are data, one entry per look of g_LookStore; built again when the looks change.
+const std::vector<RenderStyle>& DataStyles()
+{
+    static std::vector<RenderStyle> styles;
+    static int version = -1;
+    if (version != Data::Looks::g_LookStore.GetVersion())
+    {
+        version = Data::Looks::g_LookStore.GetVersion();
+        styles.clear();
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetRenderStyles())
+        {
+            styles.emplace_back(look);
+        }
+    }
+    return styles;
+}
+
+// A style that is data first, then one still in code (design L14).
 const RenderStyle* FindStyle(std::string_view name)
 {
+    if (const Data::Looks::LookDefinition* look = Data::Looks::g_LookStore.FindRenderStyle(name))
+    {
+        return &DataStyles()[static_cast<size_t>(look - Data::Looks::g_LookStore.GetRenderStyles().data())];
+    }
     const auto found = std::find_if(std::begin(RenderStyles), std::end(RenderStyles),
                                     [name](const RenderStyle& style) { return style.name == name; });
     return found != std::end(RenderStyles) ? found : nullptr;
 }
 
 // The render style of every item type, taken from the item model database
-// after each build of it.
+// after each build of it and after each change of the looks that are data.
 ItemModelTable<const RenderStyle*> g_itemStyles{[](const Data::Items::ItemModelDefinition& model)
                                                 {
                                                     // Names that are not styles are drawn plainly; the model
                                                     // loader reports them.
                                                     return model.renderStyle.empty() ? nullptr
                                                                                      : FindStyle(model.renderStyle);
-                                                }};
+                                                },
+                                                [] { return Data::Looks::g_LookStore.GetVersion(); }};
 } // namespace
 
 bool Exists(std::string_view name)
@@ -1942,16 +1975,23 @@ bool Exists(std::string_view name)
 
 std::span<const std::string_view> GetNames()
 {
-    static const std::vector<std::string_view> names = []
+    static std::vector<std::string_view> names;
+    static int version = -1;
+    if (version != Data::Looks::g_LookStore.GetVersion())
     {
-        std::vector<std::string_view> sorted;
+        version = Data::Looks::g_LookStore.GetVersion();
+        names.clear();
         for (const RenderStyle& style : RenderStyles)
         {
-            sorted.emplace_back(style.name);
+            names.emplace_back(style.name);
         }
-        std::ranges::sort(sorted);
-        return sorted;
-    }();
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetRenderStyles())
+        {
+            names.emplace_back(look.name);
+        }
+        std::ranges::sort(names);
+        names.erase(std::unique(names.begin(), names.end()), names.end());
+    }
     return names;
 }
 

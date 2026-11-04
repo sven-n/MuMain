@@ -37,6 +37,7 @@
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
@@ -47,6 +48,7 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemEffects.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
@@ -556,8 +558,20 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
+// Loads the render styles that are data (Data/Effects/RenderStyles.json), before the item models are opened, which
+// check the names of their looks.
+static void OpenRenderStyleData()
+{
+    std::string errorMessage;
+    if (!Data::Looks::LoadRenderStyles(errorMessage))
+    {
+        StopOnDataError("Render style data error", errorMessage);
+    }
+}
+
 void OpenItems()
 {
+    OpenRenderStyleData();
     // Without model data the game stops; the item models are not opened.
     if (OpenItemModelData())
     {
@@ -2145,6 +2159,7 @@ void OpenBasicData(HDC hDC)
     TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();
+    Render::Items::Looks::PrepareTextures();
     TitleSceneUI::RenderSceneUI(hDC, 5, 11);
 
     OpenSkills();
