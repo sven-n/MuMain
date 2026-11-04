@@ -280,10 +280,10 @@ private:
     {
         return " | blend " + std::to_string(m_blend) + " depth " + std::to_string(m_depthTest) +
                std::to_string(m_depthMask) + " cull " + std::to_string(m_cullFace) + " alphaTest " +
-               std::to_string(m_alphaTest) + " alphaRef " + std::to_string(m_alphaRef) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
-               " mode " + std::to_string(m_textureMode) + " fog " + std::to_string(m_fog) + " bloomExcluded " +
-               std::to_string(m_bloomExclusions > 0) + " reorderable " + std::to_string(m_reorderable) + " matrix" +
-               m_matrices.back();
+               std::to_string(m_alphaTest) + " alphaRef " + std::to_string(m_alphaRef) + " texture " +
+               std::to_string(m_texture2D) + " " + std::to_string(m_bound) + " mode " + std::to_string(m_textureMode) +
+               " fog " + std::to_string(m_fog) + " bloomExcluded " + std::to_string(m_bloomExclusions > 0) +
+               " reorderable " + std::to_string(m_reorderable) + " matrix" + m_matrices.back();
     }
 
     void Note(const char* name, long long value, std::uint64_t contents = 0)
