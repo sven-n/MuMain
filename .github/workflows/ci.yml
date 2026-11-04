@@ -678,7 +678,15 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache
+        # Only what the image lacks: brew warns about each formula that is already installed.
+        run: |
+          missing=()
+          for formula in cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache; do
+            brew list --formula "$formula" >/dev/null 2>&1 || missing+=("$formula")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            brew install "${missing[@]}"
+          fi
 
       - name: Identify compiler cache
         id: compiler
