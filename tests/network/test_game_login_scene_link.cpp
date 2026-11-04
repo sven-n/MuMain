@@ -12,10 +12,14 @@
 
 #include "Network/Reconnect/GameLoginSceneLink.h"
 #include "Network/Server/WSclient.h" // CurrentProtocolState and its states
+#include "Character/CharMakeWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "UI/Windows/MsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "UI/Windows/SysMenuWin.h"
+
+#include <array>
 
 extern BOOL g_bGameServerConnected;
 
@@ -59,6 +63,70 @@ private:
 
 TEST_SUITE("Game login scene link")
 {
+    TEST_CASE("hidden and released login windows do not handle keys")
+    {
+        // Only change visibility flags: opening real dialogs also changes input and preview state.
+        struct Modals
+        {
+            std::array<mu::ui::window::CObject*, 4> windows{&g_CharMakeWin, &g_CreditWin, &g_MsgWin, &g_SysMenuWin};
+            std::array<bool, 4> visible{};
+
+            Modals()
+            {
+                for (std::size_t i = 0; i < windows.size(); ++i)
+                {
+                    visible[i] = windows[i]->IsVisible();
+                    windows[i]->mu::ui::window::CObject::Show(false);
+                }
+            }
+
+            ~Modals()
+            {
+                for (std::size_t i = 0; i < windows.size(); ++i)
+                    windows[i]->mu::ui::window::CObject::Show(visible[i]);
+            }
+        } modals;
+
+        class LoginWindow : public CLoginWin
+        {
+        public:
+            int keyUpdates = 0;
+
+        protected:
+            bool UpdateWhileActive() override
+            {
+                ++keyUpdates;
+                return true;
+            }
+        } window;
+
+        window.Show(false);
+        window.Update();
+        CHECK(window.keyUpdates == 0);
+
+        window.Show(true);
+        window.Update();
+        CHECK(window.keyUpdates == 1);
+
+        g_MsgWin.mu::ui::window::CObject::Show(true);
+        window.Update();
+        CHECK(window.keyUpdates == 1);
+
+        g_MsgWin.mu::ui::window::CObject::Show(false);
+        window.Update();
+        CHECK(window.keyUpdates == 2);
+
+        window.Show(false);
+        window.Update();
+        CHECK(window.keyUpdates == 2);
+
+        window.Show(true);
+        window.Release();
+        CHECK_FALSE(window.IsVisible());
+        window.Update();
+        CHECK(window.keyUpdates == 2);
+    }
+
     TEST_CASE("an empty screen waits for the server of the step it took")
     {
         LoginScreen screen;

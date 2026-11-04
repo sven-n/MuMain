@@ -214,7 +214,7 @@ void CLoginWin::Show(bool bShow)
 void CLoginWin::Release()
 {
     // Hide, not unload -- the document/model are created once and reused.
-    m_RmlView.Hide();
+    Show(false);
 }
 
 void CLoginWin::RmlClickOk() { SubmitLogin(); }
@@ -322,10 +322,10 @@ bool CLoginWin::UpdateWhileShown()
     // back IsVisible()==false. g_CharMakeWin.IsVisible() covers the same gap: this window keeps
     // ticking on the character-select scene too, so without it, Esc closing Character Create also
     // fires this window's own SubmitCancel() and logs out unexpectedly.
-    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()
-                || g_CharMakeWin.IsVisible()
-                || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame()
-                || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
+    SetActive(IsVisible() &&
+              !(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() ||
+                g_CharMakeWin.IsVisible() || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame() ||
+                UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
 
     // Polls the "Remember Password" dialog's own Enter/Esc while it's open.
     UI::Login::Tick();
