@@ -825,6 +825,10 @@ if (MSVC)
     urlmon
     turbojpeg-static
   )
+  # The checked-in turbojpeg-static.lib (x64 and x86) was built against the static CRT and asks for libcmt.lib,
+  # while the game and vcpkg's libraries use the DLL CRT. Without libcmt, its objects use the DLL CRT too, and the
+  # linker no longer warns about two runtimes (LNK4098).
+  target_link_options(MuClient PUBLIC /NODEFAULTLIB:libcmt.lib)
 endif()
 
 if (MSVC)
