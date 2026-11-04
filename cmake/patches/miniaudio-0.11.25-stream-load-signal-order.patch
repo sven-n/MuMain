@@ -1,0 +1,41 @@
+diff --git a/miniaudio.h b/miniaudio.h
+index c6d493e..a494dbd 100644
+--- a/miniaudio.h
++++ b/miniaudio.h
+@@ -3748,6 +3748,9 @@ extern "C" {
+ #define MA_VERSION_MAJOR    0
+ #define MA_VERSION_MINOR    11
+ #define MA_VERSION_REVISION 25
++
++/* MuMain: this copy carries cmake/patches/miniaudio-0.11.25-stream-load-signal-order.patch. */
++#define MU_MINIAUDIO_STREAM_LOAD_PATCHED 1
+ #define MA_VERSION_STRING   MA_XSTRINGIFY(MA_VERSION_MAJOR) "." MA_XSTRINGIFY(MA_VERSION_MINOR) "." MA_XSTRINGIFY(MA_VERSION_REVISION)
+ 
+ #if defined(_MSC_VER) && !defined(__clang__)
+@@ -73262,6 +73265,18 @@ done:
+     /* We can only change the status away from MA_BUSY. If it's set to anything else it means an error has occurred somewhere or the uninitialization process has started (most likely). */
+     ma_atomic_compare_and_swap_i32(&pDataStream->result, MA_BUSY, result);
+ 
++    /*
++    MuMain: advance the execution pointer before signalling. A failed synchronous init frees the
++    stream as soon as it is signalled, so touching it afterwards writes to freed memory, which can
++    be the next stream allocated at the same address. That stream's load job then looks out of
++    order and is reposted forever.
++
++    The data buffer load jobs signal before advancing too, but that only matters for asynchronous
++    loads, which MuMain does not use. With more than one job thread, a later job for this stream
++    could now run before the fence below is released; MuMain's engine has one job thread.
++    */
++    ma_atomic_fetch_add_32(&pDataStream->executionPointer, 1);
++
+     /* Only signal the other threads after the result has been set just for cleanliness sake. */
+     if (pJob->data.resourceManager.loadDataStream.pInitNotification != NULL) {
+         ma_async_notification_signal(pJob->data.resourceManager.loadDataStream.pInitNotification);
+@@ -73270,7 +73285,6 @@ done:
+         ma_fence_release(pJob->data.resourceManager.loadDataStream.pInitFence);
+     }
+ 
+-    ma_atomic_fetch_add_32(&pDataStream->executionPointer, 1);
+     return result;
+ }
+ 

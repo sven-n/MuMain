@@ -195,19 +195,43 @@ FetchContent_Declare(miniaudio
 )
 FetchContent_MakeAvailable(miniaudio)
 
+# Without this patch a failed music load can hang the next one. MuClient includes only the patched
+# copy: the fetched tree stays off the include path, because its extras include the unpatched header
+# by relative path. MiniAudioImpl.cpp also needs extras/stb_vorbis.c, which does not include
+# miniaudio.h, so it is copied next to the patched header. MiniAudioImpl.cpp stops the build if the
+# patch is missing.
+include("${CMAKE_SOURCE_DIR}/cmake/PatchedCopy.cmake")
+set(MU_MINIAUDIO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/miniaudio-patched")
+mu_patched_copy(
+    SOURCE "${miniaudio_SOURCE_DIR}/miniaudio.h"
+    PATCH "${CMAKE_SOURCE_DIR}/cmake/patches/miniaudio-0.11.25-stream-load-signal-order.patch"
+    OUTPUT_DIR "${MU_MINIAUDIO_INCLUDE_DIR}"
+    MARKER "MU_MINIAUDIO_STREAM_LOAD_PATCHED"
+)
+configure_file("${miniaudio_SOURCE_DIR}/extras/stb_vorbis.c" "${MU_MINIAUDIO_INCLUDE_DIR}/stb_vorbis.c" COPYONLY)
+# configure_file() does not rerun configure when its output is deleted; this does.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MU_MINIAUDIO_INCLUDE_DIR}/stb_vorbis.c")
+
 set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
 set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
+# ApplyGitPatch.cmake finds git on its own; pass a configured one so a git outside PATH works too.
+set(MU_APPLY_GIT_PATCH_GIT "")
+if(GIT_EXECUTABLE)
+    set(MU_APPLY_GIT_PATCH_GIT "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}")
+endif()
 FetchContent_Declare(SDL3_ttf
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
     GIT_TAG        a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b
     GIT_SHALLOW    FALSE
     PATCH_COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-batch-glyph-uploads.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"

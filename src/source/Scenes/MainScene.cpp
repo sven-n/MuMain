@@ -714,7 +714,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     {
         const bool drawsLater = Render::Drawing::DrawsWorldLater();
         // Each run starts from the sprites the frame drew so far, as the frame's own pass does.
-        const std::vector<bool> spritesDrawn = SpritesDrawnThisFrame();
+        const SpriteDrawFlags spritesDrawn = SpritesDrawnThisFrame();
         Render::Drawing::DrawCallLog atOnce;
         Render::Drawing::DrawCallLog later;
         for (Render::Drawing::DrawCallLog* log : {&atOnce, &later})
