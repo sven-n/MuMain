@@ -307,3 +307,17 @@ mu_add_test(
 target_compile_definitions(player_model_selector_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+
+# Render styles as data (docs/item-data.md, "Render styles and item effects"): the look file, the layers' drawing
+# and the comparison of each moved look with its old code, on the item models of the test data.
+mu_add_test(
+    NAME render_style_tests
+    SOURCES
+        test_look_files.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(render_style_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
