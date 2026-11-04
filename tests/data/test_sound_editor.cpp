@@ -1094,6 +1094,31 @@ TEST_CASE("Sound Editor: the Events tab writes numbers as ranges and reads them 
     CHECK(event.rules.size() == 1);
 }
 
+TEST_CASE("Sound Editor: the Events tab's worlds and tiles go up to the limits the file's reader takes "
+          "[sounds][editor]")
+{
+    using Data::Sounds::MaxEventTile;
+    using Data::Sounds::MaxEventWorld;
+    using MuEditor::SoundEditor::ParseNumbers;
+    CHECK(ParseNumbers(std::to_string(MaxEventWorld), MaxEventWorld) == std::vector<int>{MaxEventWorld});
+    CHECK_FALSE(ParseNumbers(std::to_string(MaxEventWorld + 1), MaxEventWorld).has_value());
+    CHECK_FALSE(ParseNumbers(std::to_string(MaxEventTile + 1), MaxEventTile).has_value());
+
+    const auto read = [](int world, int tile)
+    {
+        std::vector<Data::Sounds::SoundEvent> events;
+        std::vector<Data::Items::ItemDataIssue> issues;
+        Data::Sounds::ReadSoundEventsJson(R"({"formatVersion": 1, "events": [{"event": "e", "rules": [{"worlds": [)" +
+                                              std::to_string(world) + R"(], "tiles": [)" + std::to_string(tile) +
+                                              R"(], "plays": ["SOUND_MAGIC"]}]}]})",
+                                          "SoundEvents.json", events, issues);
+        return Data::Items::HasFatal(issues);
+    };
+    CHECK_FALSE(read(MaxEventWorld, MaxEventTile));
+    CHECK(read(MaxEventWorld + 1, 0));
+    CHECK(read(0, MaxEventTile + 1));
+}
+
 TEST_CASE("Sound Editor: the Events tab writes and reads click kinds and shows each event's own fields (Q-UI1) "
           "[sounds][editor]")
 {

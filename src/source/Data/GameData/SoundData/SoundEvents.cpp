@@ -43,10 +43,6 @@ constexpr std::array<std::pair<HeldWeapon, std::string_view>, 6> WeaponWords{{
     {HeldWeapon::Other, "other"},
 }};
 
-// The highest world and tile a rule can name.
-constexpr long long MaxWorld = 255;
-constexpr long long MaxTile = 255;
-
 class EventReader
 {
 public:
@@ -123,12 +119,12 @@ private:
             return Fail(key, "must be an object");
         }
         if (const auto worlds = json.find(Keys::Worlds);
-            worlds != json.end() && !ReadNumbers(*worlds, key + "." + Keys::Worlds, MaxWorld, rule.worlds))
+            worlds != json.end() && !ReadNumbers(*worlds, key + "." + Keys::Worlds, MaxEventWorld, rule.worlds))
         {
             return false;
         }
         if (const auto tiles = json.find(Keys::Tiles);
-            tiles != json.end() && !ReadNumbers(*tiles, key + "." + Keys::Tiles, MaxTile, rule.tiles))
+            tiles != json.end() && !ReadNumbers(*tiles, key + "." + Keys::Tiles, MaxEventTile, rule.tiles))
         {
             return false;
         }

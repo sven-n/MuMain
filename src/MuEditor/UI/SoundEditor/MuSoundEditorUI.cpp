@@ -252,7 +252,7 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
             if (fields.worlds)
             {
                 ImGui::TableNextColumn();
-                if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, 255))
+                if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, Data::Sounds::MaxEventWorld))
                 {
                     SoundEventRule after = rule;
                     after.worlds = *worlds;
@@ -263,7 +263,7 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
             if (fields.tiles)
             {
                 ImGui::TableNextColumn();
-                if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, 255))
+                if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, Data::Sounds::MaxEventTile))
                 {
                     SoundEventRule after = rule;
                     after.tiles = *tiles;

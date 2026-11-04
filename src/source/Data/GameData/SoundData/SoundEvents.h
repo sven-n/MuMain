@@ -24,6 +24,11 @@ namespace Data::Sounds
 {
 constexpr int SoundEventsFormatVersion = 1;
 
+// The highest world and tile a rule can name: the reader refuses more, and
+// the Sound Editor's Events tab takes no more.
+inline constexpr int MaxEventWorld = 255;
+inline constexpr int MaxEventTile = 255;
+
 // The events the code names.
 inline constexpr std::string_view HeroFootstepEvent = "heroFootstep";
 inline constexpr std::string_view PlayerAttackSwingEvent = "playerAttackSwing";
@@ -52,9 +57,9 @@ enum class HeldWeapon
 
 struct SoundEventRule
 {
-    // The worlds (WD_*) it plays on; empty: any.
+    // The worlds (WD_*) it plays on, at most MaxEventWorld; empty: any.
     std::vector<int> worlds;
-    // The hero's ground tiles (HeroTile); empty: any.
+    // The hero's ground tiles (HeroTile), at most MaxEventTile; empty: any.
     std::vector<int> tiles;
     // Only in or outside the safe zone; none: either.
     std::optional<bool> safeZone;
