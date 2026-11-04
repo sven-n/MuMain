@@ -40,7 +40,7 @@ private:
                            const std::function<void(const Data::Sounds::SoundEventRule&)>& change);
     void RenderFilterBar(const std::vector<MuEditor::SoundEditor::SoundRow>& rows, size_t shown);
     void RenderTable(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);
-    void RenderFolderBar();
+    void RenderFolderBar(const std::vector<MuEditor::SoundEditor::SoundRow>& rows);
     void RenderFolder(const Data::Sounds::SoundFolder& folder, const MuEditor::SoundEditor::FolderPath& path,
                       const std::unordered_map<std::string, const MuEditor::SoundEditor::SoundRow*>& shown);
     void RenderNotSorted(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);

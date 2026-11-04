@@ -253,6 +253,18 @@ size_t DropStaleSounds(std::vector<SoundFolder>& folders, const std::vector<std:
 {
     return DropStale(folders, std::set<std::string>(keys.begin(), keys.end()));
 }
+
+size_t CountStaleSounds(const std::vector<SoundFolder>& folders, const std::set<std::string>& keys)
+{
+    size_t stale = 0;
+    for (const SoundFolder& folder : folders)
+    {
+        stale += static_cast<size_t>(std::count_if(folder.sounds.begin(), folder.sounds.end(),
+                                                   [&keys](const std::string& key) { return !keys.contains(key); })) +
+                 CountStaleSounds(folder.folders, keys);
+    }
+    return stale;
+}
 } // namespace MuEditor::SoundEditor
 
 #endif // _EDITOR

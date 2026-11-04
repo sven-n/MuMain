@@ -236,7 +236,9 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   column.
   Search finds names, ids, sets and files; **Only problems** leaves the files
   that are not in the client folder, a file two code sounds load and the
-  sounds the game played that nothing loads.
+  sounds the game played that nothing loads. The editor lists `Data/Sound`
+  once, when it first needs it: **Read Data/Sound again** counts a file
+  copied in since, in the picker and in the problems.
 - **Names.** The `SOUND_` id stays a sound's identity, which C++ and the
   data point at; its name is only what the editor shows (the Sound Mixer,
   its overlay and log, the Monster Sounds event combo too), so a rename
@@ -250,7 +252,10 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   folder**, **Rename**, **Remove** (its folders and sounds move up), **Move
   up** and **Move down** act on the folder clicked; drag a sound by its id
   onto a folder. A filter opens the folders that hold what it shows, a
-  selection the ones that hold the sound.
+  selection the ones that hold the sound. An entry of a sound that is gone
+  (removed in another window, or by hand in the file) stays, so the sound
+  finds its folder when it comes back; the folder bar counts them, and
+  **Drop them** takes them out as a step that **Undo** puts back.
 - **The Events tab** (`Data/Audio/SoundEvents.json`) decides which sound the
   code plays when: for each event the first rule that matches plays one of
   its sounds (at random when it has more). Your footsteps (`heroFootstep`)

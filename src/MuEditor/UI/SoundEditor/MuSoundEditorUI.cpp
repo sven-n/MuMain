@@ -149,7 +149,7 @@ void MuSoundEditorUI::Render(bool* open)
                         shown.push_back(&row);
                     }
                 }
-                RenderFolderBar();
+                RenderFolderBar(rows);
                 RenderFilterBar(rows, shown.size());
                 RenderTable(shown);
                 ImGui::EndTabItem();
@@ -544,6 +544,12 @@ void MuSoundEditorUI::RenderFilterBar(const std::vector<SoundRow>& rows, size_t 
     ImGui::TextDisabled(
         "%s",
         I18N::Format(I18N::Editor::SoundEditorShown01, {std::to_string(shown), std::to_string(rows.size())}).c_str());
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::SoundEditorReadFilesAgain))
+    {
+        MuEditor::SoundEditor::RefreshClientSoundFiles();
+    }
+    Tooltip(I18N::Editor::SoundEditorReadFilesAgainTip);
 }
 
 void MuSoundEditorUI::RenderTable(const std::vector<const SoundRow*>& rows)
@@ -718,7 +724,7 @@ void MuSoundEditorUI::DropSoundOn(const MuEditor::SoundEditor::FolderPath& path)
     ImGui::EndDragDropTarget();
 }
 
-void MuSoundEditorUI::RenderFolderBar()
+void MuSoundEditorUI::RenderFolderBar(const std::vector<SoundRow>& rows)
 {
     using MuEditor::SoundEditor::FolderPath;
     const auto change = [](std::vector<Data::Sounds::SoundFolder> after)
@@ -780,6 +786,25 @@ void MuSoundEditorUI::RenderFolderBar()
     ImGui::EndDisabled();
     ImGui::EndDisabled();
     ImGui::TextDisabled("%s", I18N::Editor::SoundEditorDragTip);
+    // Entries of sounds that are gone stay until the user drops them: a sound
+    // that comes back (another window's undo) finds its folder.
+    std::set<std::string> keys;
+    for (const SoundRow& row : rows)
+    {
+        keys.insert(row.key);
+    }
+    if (const size_t gone = MuEditor::SoundEditor::CountStaleSounds(g_SoundEdits.Folders(), keys); gone > 0)
+    {
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEditorGoneSounds0, {std::to_string(gone)}).c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::SoundEditorDropGoneSounds))
+        {
+            std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+            MuEditor::SoundEditor::DropStaleSounds(after, std::vector<std::string>(keys.begin(), keys.end()));
+            change(std::move(after));
+        }
+        Tooltip(I18N::Editor::SoundEditorDropGoneSoundsTip);
+    }
     if (ImGui::BeginPopup("##RenameFolder"))
     {
         if (ImGui::IsWindowAppearing())

@@ -21,7 +21,9 @@
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "Data/GameData/SoundData/SoundFilesJson.h"
 #include "Data/GameData/SoundData/SoundFolders.h"
+#include "I18N/All.h"
 #include "TestImGuiContext.h"
+#include "UI/Common/MuEditorWindowIds.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundEditor/SoundEditorEdits.h"
@@ -1028,6 +1030,61 @@ TEST_CASE("Sound Editor: the window draws the folders as a tree, the sounds no f
     }
     CHECK(open >= 2);
     MuEditor::SoundSelection::Set(-1);
+}
+
+// The Sounds tab's buttons: Data/Sound read again for a file copied in, and the
+// folders' entries of sounds that are gone (removed in another window, or by
+// hand in the file) dropped as a step that Undo puts back.
+TEST_CASE("Sound Editor: the Sounds tab reads Data/Sound again on its button, and drops the folders' entries of "
+          "sounds that are gone as a step of the history [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/new.wav", "Click")});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    const std::string gone = "objects:Data/Sound/EditorTest/gone.wav";
+    const std::vector<SoundFolder> withGone{Folder("Game", {"SOUND_CLICK01", gone})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", withGone));
+    TestImGuiContext context;
+    const auto frame = []
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(1400.0f, 600.0f));
+        bool open = true;
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName(MuEditor::WindowIds::SoundEditor);
+    REQUIRE(window != nullptr);
+    const ImGuiID tabs = ImGui::GetIDWithSeed("##SoundEditorTabs", nullptr, window->ID);
+    const ImGuiID sounds = ImGui::GetIDWithSeed(I18N::Editor::SoundEditorTabSounds, nullptr, tabs);
+    const auto press = [&](const char* label)
+    {
+        ImGui::ActivateItemByID(ImGui::GetIDWithSeed(label, nullptr, sounds));
+        frame();
+        frame();
+    };
+
+    press(I18N::Editor::SoundEditorDropGoneSounds);
+    CHECK(g_SoundEdits.Folders() == std::vector<SoundFolder>{Folder("Game", {"SOUND_CLICK01"})});
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.Folders() == withGone);
+
+    const auto missing = []
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, "SOUND_CLICK01");
+        REQUIRE(row != nullptr);
+        return row->problem == RowProblem::MissingFile;
+    };
+    std::ofstream("Data/Sound/EditorTest/new.wav", std::ios::binary) << "RIFF";
+    CHECK(missing());
+    press(I18N::Editor::SoundEditorReadFilesAgain);
+    CHECK_FALSE(missing());
 }
 
 TEST_CASE("Sound Editor: a row plays when it has a file that is in the client folder [sounds][editor]")

@@ -3940,6 +3940,21 @@
   <data name="Sound editor folders unreadable {0}" xml:space="preserve">
     <value>The folders' file could not be read, so the folders cannot be changed and Save leaves the file alone. Fix it, then Revert reads it again. {0}</value>
   </data>
+  <data name="Sound editor read files again" xml:space="preserve">
+    <value>Read Data/Sound again</value>
+  </data>
+  <data name="Sound editor read files again tip" xml:space="preserve">
+    <value>Lists the sound files of Data/Sound again, for the file picker and the rows' missing files. The editor reads the folder once, when it first needs it, so a file copied in since counts after this.</value>
+  </data>
+  <data name="Sound editor gone sounds {0}" xml:space="preserve">
+    <value>{0} folder entries name sounds that are gone: removed in another window, or by hand in the file.</value>
+  </data>
+  <data name="Sound editor drop gone sounds" xml:space="preserve">
+    <value>Drop them</value>
+  </data>
+  <data name="Sound editor drop gone sounds tip" xml:space="preserve">
+    <value>Takes them out of the folders, as a step that Undo puts back.</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>All sounds as normal</value>
   </data>

@@ -5,6 +5,7 @@
 #include "Data/GameData/SoundData/SoundFolders.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -53,6 +54,10 @@ bool RenameSounds(std::vector<Data::Sounds::SoundFolder>& folders, const std::ma
 // The folders that hold a key no row has: the keys are dropped (a sound
 // that is gone), the count returned.
 size_t DropStaleSounds(std::vector<Data::Sounds::SoundFolder>& folders, const std::vector<std::string>& keys);
+
+// How many keys of the folders no row has (`keys`), which DropStaleSounds
+// would drop.
+size_t CountStaleSounds(const std::vector<Data::Sounds::SoundFolder>& folders, const std::set<std::string>& keys);
 } // namespace MuEditor::SoundEditor
 
 #endif // _EDITOR
