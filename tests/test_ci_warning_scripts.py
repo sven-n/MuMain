@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Tests for scripts/ci_warnings.py and scripts/ci_job_annotations.py, the CI rule that no warning comes back."""
 
+import email.message
 import importlib.util
+import io
 import os
 import subprocess
 import sys
 import unittest
+import urllib.error
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
@@ -134,6 +137,50 @@ class AnnotationTests(unittest.TestCase):
         name, annotation = ci_job_annotations.find_annotations(
             self.JOBS, self.ANNOTATIONS.__getitem__, "warning")[0]
         self.assertEqual(ci_job_annotations.describe(name, annotation), "Linux: warning: Node.js 20 is deprecated.")
+
+
+def http_error(code, **headers):
+    message = email.message.Message()
+    for name, value in headers.items():
+        message[name.replace("_", "-")] = value
+    return urllib.error.HTTPError("https://api.github.com/x", code, "failed", message, None)
+
+
+class RequestRetryTests(unittest.TestCase):
+    def fetch(self, *outcomes):
+        """fetch_json against answers given in order: an exception is raised, anything else is the JSON body."""
+        answers = list(outcomes)
+        self.sleeps = []
+
+        def open_url(request, timeout):
+            answer = answers.pop(0)
+            if isinstance(answer, Exception):
+                raise answer
+            return io.BytesIO(answer.encode())
+
+        return ci_job_annotations.fetch_json("request", open_url, self.sleeps.append)
+
+    def test_a_server_error_is_retried(self):
+        self.assertEqual(self.fetch(http_error(502), '{"jobs": []}'), {"jobs": []})
+        self.assertEqual(self.sleeps, [5])
+
+    def test_a_network_failure_is_retried(self):
+        self.assertEqual(self.fetch(urllib.error.URLError("reset"), TimeoutError(), "[]"), [])
+        self.assertEqual(self.sleeps, [5, 10])
+
+    def test_a_rate_limit_is_retried(self):
+        self.assertEqual(self.fetch(http_error(403, x_ratelimit_remaining="0"), http_error(429), "[]"), [])
+        self.assertEqual(self.sleeps, [5, 10])
+
+    def test_a_refused_request_fails_at_once(self):
+        with self.assertRaises(urllib.error.HTTPError):
+            self.fetch(http_error(403), "[]")
+        self.assertEqual(self.sleeps, [])
+
+    def test_gives_up_after_the_last_attempt(self):
+        with self.assertRaises(urllib.error.HTTPError):
+            self.fetch(*[http_error(503)] * ci_job_annotations.REQUEST_ATTEMPTS)
+        self.assertEqual(self.sleeps, [5, 10, 15])
 
 
 if __name__ == "__main__":

@@ -17,14 +17,44 @@ import json
 import os
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 
 FAILING_LEVEL = "warning"
 LISTED_LEVEL = "notice"
 PAGE_SIZE = 100
+# A request that GitHub fails or rate-limits is sent again after 5, 10 and 15 seconds before the check gives up.
+REQUEST_ATTEMPTS = 4
+RETRY_DELAY_SECONDS = 5
 # Warnings about the state of GitHub's services rather than this repository: actions/cache's
 # "Failed to restore: Cache service responded with 429" and "Failed to save: ..." when the service fails.
 SERVICE_WARNINGS = (re.compile(r"^Failed to (?:restore|save): "),)
+
+
+def is_worth_retrying(error):
+    """Whether a failed request may pass when sent again: GitHub's own failures and its rate limits."""
+    if isinstance(error, urllib.error.HTTPError):
+        rate_limited = error.code == 429 or (
+            error.code == 403
+            and (error.headers.get("retry-after") or error.headers.get("x-ratelimit-remaining") == "0"))
+        return error.code >= 500 or rate_limited
+    return isinstance(error, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
+def fetch_json(request, open_url=urllib.request.urlopen, sleep=time.sleep):
+    """The JSON body of a GitHub API request, sent up to REQUEST_ATTEMPTS times while GitHub fails."""
+    for attempt in range(1, REQUEST_ATTEMPTS + 1):
+        try:
+            with open_url(request, timeout=30) as response:
+                return json.load(response)
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
+            if attempt == REQUEST_ATTEMPTS or not is_worth_retrying(error):
+                raise
+            print(f"GitHub API request failed ({error}); attempt {attempt + 1} of {REQUEST_ATTEMPTS} follows.",
+                  flush=True)
+            sleep(RETRY_DELAY_SECONDS * attempt)
+    raise AssertionError("unreachable")
 
 
 def get_pages(url, token):
@@ -42,8 +72,7 @@ def get_pages(url, token):
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
-            body = json.load(response)
+        body = fetch_json(request)
         batch = body[key] if key else body
         items.extend(batch)
         if len(batch) < PAGE_SIZE:
