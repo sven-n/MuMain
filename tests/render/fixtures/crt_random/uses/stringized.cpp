@@ -1,3 +1,3 @@
 #include <cstdlib>
-#define TEXT(include) (#include + std::rand())
-const char* Pick() { return TEXT(abc); }
+#define TEXT(include) (std::rand() + static_cast<int>(sizeof(#include)))
+int Pick() { return TEXT(abc); }
