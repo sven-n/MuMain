@@ -56,6 +56,7 @@ namespace Core::Input
             case VK_F11:     return SDL_SCANCODE_F11;
             case VK_F12:     return SDL_SCANCODE_F12;
             case VK_SNAPSHOT: return SDL_SCANCODE_PRINTSCREEN;
+            case VK_SHIFT:   return SDL_SCANCODE_LSHIFT;
             case VK_MENU:    return SDL_SCANCODE_LALT;
             default:         return SDL_SCANCODE_UNKNOWN;
             }

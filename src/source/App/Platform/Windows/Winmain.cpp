@@ -1202,6 +1202,7 @@ void HandleFocusChange(bool active)
     }
     if (!active)
     {
+        Core::Input::Synthetic::CancelDelivery();
 #ifdef ACTIVE_FOCUS_OUT
         if (g_bUseWindowMode == FALSE)
 #endif

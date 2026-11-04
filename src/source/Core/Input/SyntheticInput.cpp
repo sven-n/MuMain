@@ -84,6 +84,8 @@ struct Injection
     int moveFrame = 0;
     bool legacyDown = false;
     bool uiDown = false;
+    bool shift = false;
+    bool shiftDown = false;
     SDL_Window* window = nullptr;
     SDL_WindowID windowId = 0;
     Core::Input::IUiInputConsumer* consumer = nullptr;
@@ -105,8 +107,7 @@ struct NamedKey
     int virtualKey;
 };
 
-// Every key the SDL key-state shim translates (`VkToScancode`), by the name
-// a caller types.
+// Standalone hotkeys. Shift is held only as part of a click.
 constexpr NamedKey NamedKeys[] = {
     {"esc", VK_ESCAPE},     {"escape", VK_ESCAPE}, {"enter", VK_RETURN},
     {"return", VK_RETURN},  {"tab", VK_TAB},       {"space", VK_SPACE},
@@ -332,7 +333,7 @@ bool PressKey(int virtualKey)
     return true;
 }
 
-bool Click(float windowX, float windowY, MouseButton button)
+bool Click(float windowX, float windowY, MouseButton button, bool shift)
 {
     if (!IsIdle())
     {
@@ -344,6 +345,7 @@ bool Click(float windowX, float windowY, MouseButton button)
     g_injection.windowX = windowX;
     g_injection.windowY = windowY;
     g_injection.button = button;
+    g_injection.shift = shift;
     g_injection.window = g_window;
     g_injection.windowId = g_window ? SDL_GetWindowID(g_window) : 0;
     g_injection.consumer = Core::Input::ActiveUiInputConsumer();
@@ -470,6 +472,8 @@ std::uint64_t CurrentGeneration()
 
 bool IsKeyHeld(int virtualKey)
 {
+    if (g_injection.kind == Kind::Click && virtualKey == VK_SHIFT && g_injection.shiftDown)
+        return true;
     const bool down =
         g_injection.legacyDown && (g_injection.stage == Stage::Pressed || g_injection.stage == Stage::Held);
     if (!down)
@@ -513,26 +517,37 @@ void AdvanceKey()
         g_injection = {};
 }
 
+void BeginClick()
+{
+    const unsigned char button = g_injection.button == MouseButton::Left ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
+    if ((SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(button)) != 0)
+    {
+        Fail(DeliveryFailure::PhysicalOverlap);
+        return;
+    }
+    if (!DeliverMotion())
+    {
+        Fail(DeliveryFailure::TargetLost);
+        return;
+    }
+    ApplyPointerPosition();
+    bool propagates = true;
+    if (g_injection.shift && !DeliverKey(true, VK_SHIFT, propagates))
+    {
+        Fail(DeliveryFailure::TargetLost);
+        return;
+    }
+    // An earlier scan must see Shift before the mouse press so IsRepeat is ready.
+    g_injection.shiftDown = g_injection.shift && propagates;
+    g_injection.stage = Stage::Hovering;
+    g_injection.hoverFramesLeft = ClickHoverFrames;
+}
+
 void AdvanceClick()
 {
     bool propagates = true;
     if (g_injection.stage == Stage::Idle)
-    {
-        const unsigned char button = g_injection.button == MouseButton::Left ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
-        if ((SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(button)) != 0)
-        {
-            Fail(DeliveryFailure::PhysicalOverlap);
-            return;
-        }
-        if (!DeliverMotion())
-        {
-            Fail(DeliveryFailure::TargetLost);
-            return;
-        }
-        ApplyPointerPosition();
-        g_injection.stage = Stage::Hovering;
-        g_injection.hoverFramesLeft = ClickHoverFrames;
-    }
+        BeginClick();
     else if (g_injection.stage == Stage::Hovering)
     {
         if (!DeliverMotion())
@@ -549,8 +564,11 @@ void AdvanceClick()
             return;
         }
         g_injection.uiDown = !propagates;
-        g_injection.legacyDown = propagates;
-        if (propagates)
+        // A consumed modifier must not turn the gesture into an unmodified world click.
+        g_injection.legacyDown = propagates && (!g_injection.shift || g_injection.shiftDown);
+        if (!g_injection.legacyDown)
+            g_injection.shiftDown = false;
+        if (g_injection.legacyDown)
         {
             ApplyPointerPosition();
             ApplyButtonDown();
@@ -600,7 +618,14 @@ void AdvanceClick()
         g_injection.stage = Stage::Released;
     }
     else
+    {
+        if (g_injection.shift && !DeliverKey(false, VK_SHIFT, propagates))
+        {
+            Fail(DeliveryFailure::TargetLost);
+            return;
+        }
         g_injection = {};
+    }
 }
 
 void AdvanceMove()
@@ -689,8 +714,8 @@ void Reset()
 {
     // A click that is dropped mid-sequence has already written the button
     // down; take that back, or the game keeps seeing a button held by a frame
-    // that will never come. A key needs nothing: `IsKeyHeld` reads the stage,
-    // which goes away with the injection.
+    // that will never come. Keys and modifiers need nothing: their held state
+    // goes away with the injection.
     const bool holdingButton = g_injection.kind == Kind::Click && g_injection.legacyDown;
     if (g_injection.uiDown)
         Core::Input::CancelSyntheticMousePress(
