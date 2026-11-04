@@ -15,6 +15,7 @@ namespace Render::Lighting
 namespace
 {
 bool s_dynamicLightsEnabled = false;
+bool s_sunlightEnabled = false;
 } // namespace
 
 void SetDynamicLightsEnabled(bool enabled)
@@ -31,6 +32,17 @@ void SetDynamicLightsEnabled(bool enabled)
 bool DynamicLightsActive()
 {
     return s_dynamicLightsEnabled && EnhancedLightingActive();
+}
+
+void SetSunlightEnabled(bool enabled)
+{
+    s_sunlightEnabled = enabled;
+    mu::log::Get("render")->info("Enhanced sunlight {}", enabled ? "on" : "off");
+}
+
+bool SunlightActive()
+{
+    return s_sunlightEnabled && DynamicLightsActive();
 }
 
 namespace
@@ -58,7 +70,7 @@ void UpdateFrameSun()
 {
     s_frameSun.reset();
     s_frameSunShadows = false;
-    if (!DynamicLightsActive())
+    if (!SunlightActive())
     {
         return;
     }

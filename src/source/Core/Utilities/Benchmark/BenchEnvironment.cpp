@@ -81,6 +81,7 @@ void CaptureGraphics(EnvironmentInfo& info)
         };
         add(EnhancedFeature::Lighting, "lighting");
         add(EnhancedFeature::DynamicLights, "dynlights");
+        add(EnhancedFeature::Sun, "sun");
         add(EnhancedFeature::LightMood, "mood");
         add(EnhancedFeature::PostProcessing, "post");
     }

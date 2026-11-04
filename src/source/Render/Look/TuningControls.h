@@ -26,6 +26,7 @@ enum class TuningGroup : std::uint8_t
     DynamicLights,
     LightMood,
     PostProcessing,
+    Sunlight,
     Count,
 };
 inline constexpr std::size_t TuningGroupCount = static_cast<std::size_t>(TuningGroup::Count);
@@ -179,6 +180,7 @@ struct LookFeatureAppliers
     // Rebuilds the map light, which reads the look values (the highlight knee).
     std::function<void(bool enabled, int strengthPercent)> lightMood;
     std::function<void(bool)> antialiasing;
+    std::function<void(bool)> sunlight;
 };
 
 // Applies `requested`: Enhanced lighting before dynamic lights, which only act while it is on; then

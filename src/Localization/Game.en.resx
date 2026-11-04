@@ -1063,6 +1063,12 @@
   <data name="Enhanced Lighting" xml:space="preserve">
     <value>Enhanced lighting</value>
   </data>
+  <data name="Sunlight" xml:space="preserve">
+    <value>Sunlight</value>
+  </data>
+  <data name="Tuning Locked Needs Dynamic Lights" xml:space="preserve">
+    <value>Sunlight needs Dynamic lights: its ground shadows are drawn in the same pass.</value>
+  </data>
   <data name="Dynamic Lights" xml:space="preserve">
     <value>Dynamic lights</value>
   </data>

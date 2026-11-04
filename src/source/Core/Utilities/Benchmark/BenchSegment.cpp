@@ -131,6 +131,14 @@ const std::vector<Segment>& Catalog()
              return c;
          }()},
 
+        {"look.sun.off", "The sun off: no sun shadows, clouds or sky-blue shade.", TagLook,
+         []
+         {
+             SceneConfig c;
+             c.lookSunlightOff = true;
+             return c;
+         }()},
+
         {"look.mood.off", "The light mood off: the map's baked light as Classic has it.", TagLook,
          []
          {

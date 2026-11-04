@@ -16,6 +16,10 @@ void SetDynamicLightsEnabled(bool enabled);
 // draws Enhanced lighting.
 [[nodiscard]] bool DynamicLightsActive();
 
+// The sun ([Render] Sunlight). Needs dynamic lights: its ground shadows draw in the per-pixel ground pass.
+void SetSunlightEnabled(bool enabled);
+[[nodiscard]] bool SunlightActive();
+
 // True when the sun's shadows come from the shadow map: in the game, with dynamic lights active,
 // sun.shadow above 0 and a renderer that can draw it, taken once per frame (UpdateFrameSun). Characters then cast no
 // flat sun shadow.

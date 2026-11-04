@@ -2629,7 +2629,7 @@ void ProjectOntoGround(float position[3], const void* context)
 // (dynamic.shadowAngle, where shadows fall; the shear axis points the other way).
 float BodyShadowAxisAngle()
 {
-    if (!Render::Lighting::DynamicLightsActive())
+    if (!Render::Lighting::SunlightActive())
     {
         return 0.f;
     }

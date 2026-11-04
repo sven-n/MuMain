@@ -80,26 +80,26 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      0.05, TuningUnit::None, 1.0, TuningZero::Plain},
     {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius,
      5.0, TuningUnit::None, 1.0, TuningZero::Plain},
-    {TuningControlId::SunShadowStrength, TuningGroup::DynamicLights, false, LookValue::SunShadowStrength, 0.05,
+    {TuningControlId::SunShadowStrength, TuningGroup::Sunlight, false, LookValue::SunShadowStrength, 0.05,
      TuningUnit::Percent, 100.0, TuningZero::Plain},
-    {TuningControlId::SunShadowSoftness, TuningGroup::DynamicLights, true, LookValue::SunShadowSoftness, 0.1,
+    {TuningControlId::SunShadowSoftness, TuningGroup::Sunlight, true, LookValue::SunShadowSoftness, 0.1,
      TuningUnit::None, 1.0, TuningZero::Plain},
-    {TuningControlId::SunShadowResolution, TuningGroup::DynamicLights, true, LookValue::SunShadowResolution, 1024.0,
+    {TuningControlId::SunShadowResolution, TuningGroup::Sunlight, true, LookValue::SunShadowResolution, 1024.0,
      TuningUnit::None, 1.0, TuningZero::Plain},
-    {TuningControlId::FlatSunShadow, TuningGroup::DynamicLights, true, LookValue::FlatSunShadow, 0.05,
-     TuningUnit::Percent, 100.0, TuningZero::Plain},
-    {TuningControlId::CloudStrength, TuningGroup::DynamicLights, false, LookValue::CloudStrength, 0.05,
-     TuningUnit::Percent, 100.0, TuningZero::Plain},
-    {TuningControlId::CloudScale, TuningGroup::DynamicLights, true, LookValue::CloudScale, 250.0, TuningUnit::None, 1.0,
-     TuningZero::Plain},
-    {TuningControlId::CloudSpeed, TuningGroup::DynamicLights, true, LookValue::CloudSpeed, 5.0, TuningUnit::None, 1.0,
-     TuningZero::Plain},
-    {TuningControlId::CloudCover, TuningGroup::DynamicLights, true, LookValue::CloudCover, 0.05, TuningUnit::Percent,
+    {TuningControlId::FlatSunShadow, TuningGroup::Sunlight, true, LookValue::FlatSunShadow, 0.05, TuningUnit::Percent,
      100.0, TuningZero::Plain},
-    {TuningControlId::SkyFill, TuningGroup::DynamicLights, false, LookValue::SkyFill, 0.05, TuningUnit::Percent, 100.0,
+    {TuningControlId::CloudStrength, TuningGroup::Sunlight, false, LookValue::CloudStrength, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
+    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 250.0, TuningUnit::None, 1.0,
      TuningZero::Plain},
-    {TuningControlId::RimSunFollow, TuningGroup::DynamicLights, true, LookValue::RimSunFollow, 0.05,
-     TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::CloudSpeed, TuningGroup::Sunlight, true, LookValue::CloudSpeed, 5.0, TuningUnit::None, 1.0,
+     TuningZero::Plain},
+    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0.05, TuningUnit::Percent, 100.0,
+     TuningZero::Plain},
+    {TuningControlId::SkyFill, TuningGroup::Sunlight, false, LookValue::SkyFill, 0.05, TuningUnit::Percent, 100.0,
+     TuningZero::Plain},
+    {TuningControlId::RimSunFollow, TuningGroup::Sunlight, true, LookValue::RimSunFollow, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
 }};
 
 constexpr bool SpecsFollowIdOrder()
@@ -335,6 +335,8 @@ TuningGroupSet TuningGroupsApplying(const LookFeatures& features)
     applying[static_cast<std::size_t>(TuningGroup::Lighting)] = features.enhancedLighting;
     applying[static_cast<std::size_t>(TuningGroup::DynamicLights)] =
         features.enhancedLighting && features.dynamicLights;
+    applying[static_cast<std::size_t>(TuningGroup::Sunlight)] =
+        features.enhancedLighting && features.dynamicLights && features.sunlight;
     applying[static_cast<std::size_t>(TuningGroup::LightMood)] = features.lightMood;
     applying[static_cast<std::size_t>(TuningGroup::PostProcessing)] = features.postProcessing;
     return applying;
@@ -359,6 +361,10 @@ void ApplyLookFeatures(const LookFeatures& requested, const LookFeatureAppliers&
     if (appliers.dynamicLights)
     {
         appliers.dynamicLights(requested.dynamicLights);
+    }
+    if (appliers.sunlight)
+    {
+        appliers.sunlight(requested.sunlight);
     }
     const bool postProcessing = appliers.postProcessing && appliers.postProcessing(requested.postProcessing);
     if (appliers.tuningGroups)

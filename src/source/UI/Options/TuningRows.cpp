@@ -117,15 +117,20 @@ std::string StateText(TuningRowState state)
 }
 } // namespace
 
-TuningLock TuningGroupLock(TuningGroup group, bool enhanced, bool lightingChosen, const TuningFeatureState& feature)
+TuningLock TuningGroupLock(TuningGroup group, bool enhanced, bool lightingChosen, bool dynamicLightsChosen,
+                           const TuningFeatureState& feature)
 {
     if (!enhanced)
     {
         return TuningLock::ClassicLook;
     }
-    if (group == TuningGroup::DynamicLights && !lightingChosen)
+    if ((group == TuningGroup::DynamicLights || group == TuningGroup::Sunlight) && !lightingChosen)
     {
         return TuningLock::NeedsLighting;
+    }
+    if (group == TuningGroup::Sunlight && !dynamicLightsChosen)
+    {
+        return TuningLock::NeedsDynamicLights;
     }
     if (!feature.chosen)
     {
@@ -156,6 +161,8 @@ std::string TuningLockReason(TuningLock lock)
         return Text(I18N::Game::TuningLockedOff);
     case TuningLock::NeedsLighting:
         return Text(I18N::Game::TuningLockedNeedsLighting);
+    case TuningLock::NeedsDynamicLights:
+        return Text(I18N::Game::TuningLockedNeedsDynamicLights);
     case TuningLock::Unavailable:
         return Text(I18N::Game::TuningLockedUnavailable);
     case TuningLock::SessionOff:
