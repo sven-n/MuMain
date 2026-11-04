@@ -1239,6 +1239,29 @@ TEST_CASE("Sound Mixer: a starting sound and every change give the backend the g
     CHECK(scope.audio.gains.back() == std::pair{12, 1.0f});
 }
 
+// A map object's sound is asked for each frame it is drawn: a play reads
+// whether a control is on solo from the last Apply (every change of a control
+// ends in one), instead of scanning the controls of the session.
+TEST_CASE("Sound Mixer: a play takes the solo from the last Apply, while GainFor reads the controls as they are "
+          "[audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    SoundControl(5).solo = true;
+    CHECK(GainFor(6, SoundKind::Other) == 0.0f);
+    CHECK(OnPlay(6, false) == 1.0f);
+    Apply();
+    CHECK(OnPlay(6, false) == 0.0f);
+    CHECK(OnPlay(5, false) == 1.0f);
+    // The window's Solo button applies, so the next play follows it.
+    MuEditor::SoundMixer::ToggleSolo(SoundControl(5));
+    CHECK(OnPlay(6, false) == 1.0f);
+    // Putting every control back applies too.
+    SoundControl(5).solo = true;
+    ResetAll();
+    CHECK(OnPlay(6, false) == 1.0f);
+}
+
 TEST_CASE("Sound Mixer: a sound two types play starts in each type's group with that type's gain, and a change "
           "gives each group its own, so a muted type leaves the other type's copies alone (Q-SM4) "
           "[audio][mixer][editor]")

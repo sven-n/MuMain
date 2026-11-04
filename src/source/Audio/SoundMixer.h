@@ -98,8 +98,8 @@ void OnMusicPlay(const std::string& music);
 // the object it plays at (`objectPlace`, or nullptr), else map ambience for a
 // loop, else everything else (Q-SM13); before the loop's rule, a code sound
 // takes the type Data/Audio/SoundFiles.json stores (Q-SE2). Lists it, gives
-// the backend its gain
-// before it starts and returns the gain.
+// the backend its gain before it starts and returns the gain. Whether a
+// control is on solo is what Apply found: a play scans no controls.
 float OnPlay(int number, bool looped, const SoundPlace* objectPlace = nullptr);
 
 // The play OnPlay announced is done: counts a start at `now` when the backend
@@ -154,7 +154,8 @@ Changes CountChanges();
 
 // Gives the backend the gains of every sound heard this session, listed or
 // cleared, for each type it was heard as (its copies of that type follow),
-// and of the music; after a control changes.
+// and of the music; after a control changes. Finds once whether a control
+// is on solo, for these gains and the plays until the next Apply.
 void Apply();
 
 // Puts every control back to normal, and applies it.

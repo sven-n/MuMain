@@ -130,6 +130,9 @@ struct State
     std::vector<std::string> musicTracks;
     // The row number of the track asked for last; -1 before any.
     int currentMusic = -1;
+    // Whether a control was on solo at the last Apply: OnPlay asks this, not
+    // every control of the session.
+    bool anySolo = false;
 };
 
 constexpr int FirstMusicNumber = -2;
@@ -226,6 +229,23 @@ void Count(const Control& control, Changes& changes)
         ++changes.solo;
     }
 }
+
+// The gain of a sound of the kind, given whether a control is on solo.
+float GainOf(const State& state, int number, SoundKind kind, bool anySolo)
+{
+    const Control& ofKind = state.kinds[IndexOf(kind)];
+    const auto found = state.sounds.find(number);
+    const Control ofSound = found != state.sounds.end() ? found->second : Control{};
+    if (ofKind.muted || ofSound.muted)
+    {
+        return 0.0f;
+    }
+    if (anySolo && !ofKind.solo && !ofSound.solo)
+    {
+        return 0.0f;
+    }
+    return Level(ofKind.volume) * Level(ofSound.volume);
+}
 } // namespace
 
 bool Control::IsChanged() const
@@ -246,18 +266,7 @@ Control& SoundControl(int number)
 float GainFor(int number, SoundKind kind)
 {
     const State& state = Mixer();
-    const Control& ofKind = state.kinds[IndexOf(kind)];
-    const auto found = state.sounds.find(number);
-    const Control ofSound = found != state.sounds.end() ? found->second : Control{};
-    if (ofKind.muted || ofSound.muted)
-    {
-        return 0.0f;
-    }
-    if (AnySolo(state) && !ofKind.solo && !ofSound.solo)
-    {
-        return 0.0f;
-    }
-    return Level(ofKind.volume) * Level(ofSound.volume);
+    return GainOf(state, number, kind, AnySolo(state));
 }
 
 float MusicGain()
@@ -320,7 +329,7 @@ float OnPlay(int number, bool looped, const SoundPlace* objectPlace)
     heard.sourceNumber = state.origin.sourceNumber;
     state.playing = number;
     state.startsBefore = StartsOf(number);
-    const float gain = GainFor(number, heard.kind);
+    const float gain = GainOf(state, number, heard.kind, state.anySolo);
     if (g_platformAudio != nullptr)
     {
         // The start is of its type's group: the other types' copies keep their gain.
@@ -477,17 +486,19 @@ Changes CountChanges()
 
 void Apply()
 {
+    State& state = Mixer();
+    state.anySolo = AnySolo(state);
     if (g_platformAudio == nullptr)
     {
         return;
     }
     // Each type a sound was heard as has its own copies.
-    for (const auto& [number, kinds] : Mixer().kindsHeard)
+    for (const auto& [number, kinds] : state.kindsHeard)
     {
         for (const SoundKind kind : kinds)
         {
             g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), static_cast<int>(IndexOf(kind)),
-                                             GainFor(number, kind));
+                                             GainOf(state, number, kind, state.anySolo));
         }
     }
     g_platformAudio->SetMusicMixGain(MusicGain());
