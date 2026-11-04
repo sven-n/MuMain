@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.25)
 
+# As in the root CMakeLists.txt: each static library once on a link line where the linker needs no repeats.
+foreach(policy IN ITEMS CMP0156 CMP0179)
+  if(POLICY ${policy})
+    cmake_policy(SET ${policy} NEW)
+  endif()
+endforeach()
+
 project(MuMain)
 
 # Repository root (parent of this src/ directory). Defined here so all
@@ -39,7 +46,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   endif()
 endif()
 
+# SDL's ELF note check passes backslashes through a macro and expects them unescaped, as they were before CMake's
+# policy CMP0219; a CMake that knows the policy warns while it is unset.
+set(CMAKE_POLICY_DEFAULT_CMP0219 OLD)
 add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
+unset(CMAKE_POLICY_DEFAULT_CMP0219)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
@@ -52,6 +63,33 @@ if(NOT TARGET SDL3_ttf::SDL3_ttf OR NOT TARGET Freetype::Freetype)
 endif()
 FetchContent_MakeAvailable(SDL3_image)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
+# SDL3_ttf, SDL3_image and the vendored FreeType and HarfBuzz warn under newer compilers (Clang's -Wnontrivial-memcall
+# in HarfBuzz, a redefined OS_CODE in FreeType, MSVC's C4312 in SDL3_ttf, unused parameters in SDL3_image's SVG
+# loader). Their warnings are for their authors, so they build without any. SDL3_ttf and SDL3_image set MSVC's /W2
+# themselves, which /w would override with a warning of its own (D9025), so their /W level goes first.
+foreach(third_party IN ITEMS SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image Freetype::Freetype harfbuzz)
+  if(NOT TARGET ${third_party})
+    continue()
+  endif()
+  get_target_property(third_party_target ${third_party} ALIASED_TARGET)
+  if(NOT third_party_target)
+    set(third_party_target ${third_party})
+  endif()
+  get_target_property(third_party_imported ${third_party_target} IMPORTED)
+  if(third_party_imported)
+    continue()
+  endif()
+  if(MSVC)
+    get_target_property(third_party_options ${third_party_target} COMPILE_OPTIONS)
+    if(third_party_options)
+      list(FILTER third_party_options EXCLUDE REGEX "^/W[0-4]$")
+      set_property(TARGET ${third_party_target} PROPERTY COMPILE_OPTIONS ${third_party_options})
+    endif()
+    target_compile_options(${third_party_target} PRIVATE /w)
+  else()
+    target_compile_options(${third_party_target} PRIVATE -w)
+  endif()
+endforeach()
 
 # FreeType -- RmlUi's default font engine (below) requires a Freetype::Freetype target.
 # Not vendored separately, and no alias needed here either: SDL3_ttf's own CMakeLists.txt
@@ -705,9 +743,6 @@ target_include_directories(MuClient PUBLIC
   # after the bootstrap files moved out of source/ (issue #346).
   "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
-  # Only the patched copy of miniaudio.h and stb_vorbis.c (see the root CMakeLists.txt). The fetched
-  # tree stays off the include path: its other extras include the unpatched header by relative path.
-  "${MU_MINIAUDIO_INCLUDE_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
@@ -717,6 +752,11 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
+# MiniAudioImpl.cpp compiles miniaudio and its stb_vorbis.c; found in a system include folder, they keep their
+# warnings to themselves (Clang's -Wtautological-compare in stb_vorbis). The folder holds only the patched copy of
+# miniaudio.h and stb_vorbis.c (see the root CMakeLists.txt). The fetched tree stays off the include path: its other
+# extras include the unpatched header by relative path.
+target_include_directories(MuClient SYSTEM PUBLIC "${MU_MINIAUDIO_INCLUDE_DIR}")
 
 set_source_files_properties(
   "${CMAKE_CURRENT_SOURCE_DIR}/source/Core/Platform/Audio/MiniAudioImpl.cpp"

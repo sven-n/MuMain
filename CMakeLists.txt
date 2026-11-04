@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 
+# Each static library once on a link line where the linker needs no repeats, e.g. Apple's ld, which warns about
+# duplicates (CMake 3.29+; src/CMakeLists.txt sets the same after its own cmake_minimum_required).
+foreach(policy IN ITEMS CMP0156 CMP0179)
+    if(POLICY ${policy})
+        cmake_policy(SET ${policy} NEW)
+    endif()
+endforeach()
+
 project(MuMain LANGUAGES CXX)
 
 if(MINGW)
@@ -169,13 +177,18 @@ if(MU_ENABLE_SHADER_COMPILATION)
     )
 endif()
 
+# glm is header-only. Its own CMakeLists.txt asks for CMake 3.6, which CMake 4 warns is deprecated, and only builds
+# an empty library around the headers, so the game takes the headers alone.
 FetchContent_Declare(glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG        1.0.1
     GIT_SHALLOW    TRUE
+    SOURCE_SUBDIR  _fetchcontent_only
 )
-set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
+add_library(glm INTERFACE)
+add_library(glm::glm ALIAS glm)
+target_include_directories(glm SYSTEM INTERFACE "${glm_SOURCE_DIR}")
 
 set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
@@ -251,6 +264,13 @@ set(SDLIMAGE_VENDORED ON CACHE BOOL "" FORCE)
 # disabling formats we'll never load avoids requiring build tools purely to satisfy an unused
 # code path's link-time dependencies.
 set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+# For the same reason: the vendored libtiff and libwebp ask for a CMake older than CMake 4 supports without a
+# deprecation warning, the SVG loader redefines strstr, and macOS's ImageIO loader uses deprecated UTType constants.
+# PNG and JPEG still load through stb_image.
+set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(SDL3_image
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
     GIT_TAG        release-3.2.4
