@@ -8,6 +8,7 @@
 #include "Core/Platform/PathResolve.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
+#include "Core/Text/Utf8.h"
 
 #include <algorithm>
 #include <cmath>
@@ -535,7 +536,7 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     const std::string filePath = MuResolvePath(identity.c_str());
 #endif
     std::error_code error;
-    if (!std::filesystem::is_regular_file(std::filesystem::u8path(filePath), error))
+    if (!std::filesystem::is_regular_file(Core::Text::PathFromUtf8(filePath), error))
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})",
             filePath, error ? error.message() : "not a regular file");
