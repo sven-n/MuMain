@@ -180,6 +180,11 @@ TEST_CASE("a sound on a free channel leaves its playing channels alone and start
     CHECK(cursor(0) == 0);
     // At its level of the effect volume (a map object's distance, D-MP7).
     CHECK(ma_sound_get_volume(&backend->m_sounds[soundIndex][0]) == doctest::Approx(0.5f));
+    // It keeps the level when the effect volume changes while it plays: the
+    // far copy goes down with the near ones, not to the full volume.
+    backend->SetSFXVolume(0.8f);
+    CHECK(ma_sound_get_volume(&backend->m_sounds[soundIndex][0]) == doctest::Approx(0.4f));
+    CHECK(ma_sound_get_volume(&backend->m_sounds[soundIndex][1]) == doctest::Approx(0.8f));
 
     backend->Shutdown();
     for (ma_audio_buffer& audioBuffer : audioBuffers)
@@ -221,6 +226,10 @@ TEST_CASE("a sound played at a level ignores the effect volume [audio][volume]")
 
     REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
     CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.6f));
+    // Also when the effect volume changes while it plays (not 0.5 of it).
+    backend->SetSFXVolume(0.5f);
+    CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.6f));
+    backend->SetSFXVolume(0.0f);
 
     // The game's sounds keep the effect volume.
     ma_sound_stop(&sound);

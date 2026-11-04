@@ -74,13 +74,13 @@ public:
     [[nodiscard]] float GetSFXVolume() const override;
 
 private:
-    // PlaySound at `volume`, times the sound's mix gain when `mixed` (the
-    // game's plays; a preview's level is its own).
-    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool mixed);
+    // PlaySound at `level`: of the effect volume and times the sound's mix
+    // gain when `mixed` (the game's plays), a preview's own level otherwise.
+    bool StartSound(ESound buffer, const void* pObject, bool looped, float level, bool mixed);
 
     // A channel that starts takes its sound's mix gain and group for the next
-    // start, then SetChannelVolume.
-    void StartChannelVolume(int buffer, int channel, float volume, bool mixed);
+    // start and keeps its level, then SetChannelVolume.
+    void StartChannelVolume(int buffer, int channel, float level, bool mixed);
     // Sets the channel to `volume`, times the mix gain it started with when
     // `mixed`, and keeps both for a later change of the gain.
     void SetChannelVolume(int buffer, int channel, float volume, bool mixed);
@@ -114,11 +114,14 @@ private:
     std::deque<int> m_loadedChannels = std::deque<int>(MAX_BUFFER);
     // The Sound Mixer's gain and group for a sound number's next start (1 and
     // 0 unless the editor sets them); each channel's volume without the gain,
-    // the gain and group it started with, and whether the gain applies to the
-    // channel (not to a preview's PlaySoundAtLevel).
+    // the level it started at (a mixed channel's share of the effect volume:
+    // 1, or a map object copy's distance level), the gain and group it started
+    // with, and whether the gain and the effect volume apply to the channel
+    // (not to a preview's PlaySoundAtLevel).
     std::deque<float> m_mixGain = std::deque<float>(MAX_BUFFER, 1.0f);
     std::deque<int> m_mixGroup = std::deque<int>(MAX_BUFFER);
     std::deque<std::array<float, MAX_CHANNEL>> m_channelVolume = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelLevel = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
     std::deque<std::array<float, MAX_CHANNEL>> m_channelGain = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
     std::deque<std::array<int, MAX_CHANNEL>> m_channelGroup = std::deque<std::array<int, MAX_CHANNEL>>(MAX_BUFFER);
     std::deque<std::array<bool, MAX_CHANNEL>> m_channelMixed = std::deque<std::array<bool, MAX_CHANNEL>>(MAX_BUFFER);
