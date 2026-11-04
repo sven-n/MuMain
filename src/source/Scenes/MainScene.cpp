@@ -630,7 +630,7 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 
     {
         FRAME_PROFILE(Characters);
-        mu::ScopedCharacterDraws characterDraws;
+        Render::Drawing::ScopedCharacterDraws characterDraws;
         RenderCharactersClient();
     }
 

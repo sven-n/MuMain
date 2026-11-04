@@ -1433,7 +1433,7 @@ static vec3_t* s_faceLight = PrimaryTerrainLight;
 
 extern int FrustrumBoundMinX, FrustrumBoundMinY, FrustrumBoundMaxX, FrustrumBoundMaxY;
 
-static void BuildGroundLight()
+void BuildGroundLight()
 {
     for (int yi = FrustrumBoundMinY; yi <= FrustrumBoundMaxY + 3; ++yi)
     {
@@ -3423,11 +3423,6 @@ void RenderTerrain(bool EditFlag)
     {
         SelectFlag = false;
         InitCollisionDetectLineToFace();
-    }
-
-    if (!EditFlag && Render::Lighting::FrameWorldDynamicLights().IsPinned() && !s_groundLightBuilt)
-    {
-        BuildGroundLight();
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;

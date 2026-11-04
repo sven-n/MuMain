@@ -206,6 +206,30 @@ public:
     {
         return m_bloomExclusions > 0;
     }
+    void BeginWorldLitGeometry() override
+    {
+        ++m_worldLit;
+    }
+    void EndWorldLitGeometry() override
+    {
+        --m_worldLit;
+    }
+    void BeginGroundShadow(mu::GroundShadowSource source) override
+    {
+        ++m_groundShadows[static_cast<std::size_t>(source)];
+    }
+    void EndGroundShadow(mu::GroundShadowSource source) override
+    {
+        --m_groundShadows[static_cast<std::size_t>(source)];
+    }
+    void BeginCharacterDraws() override
+    {
+        ++m_characterDraws;
+    }
+    void EndCharacterDraws() override
+    {
+        --m_characterDraws;
+    }
     [[nodiscard]] std::size_t BeginReorderableDraws() override
     {
         return m_reorderable++;
@@ -271,6 +295,9 @@ private:
     int m_bound = -1;
     int m_textureMode = 0;
     int m_bloomExclusions = 0;
+    int m_worldLit = 0;
+    int m_groundShadows[2] = {};
+    int m_characterDraws = 0;
     std::size_t m_reorderable = 0;
     // The scene's camera, which the sprite matrix replaces.
     std::vector<std::string> m_matrices{std::string(" camera")};
@@ -283,7 +310,10 @@ private:
                std::to_string(m_alphaTest) + " alphaRef " + std::to_string(m_alphaRef) + " texture " +
                std::to_string(m_texture2D) + " " + std::to_string(m_bound) + " mode " + std::to_string(m_textureMode) +
                " fog " + std::to_string(m_fog) + " bloomExcluded " + std::to_string(m_bloomExclusions > 0) +
-               " reorderable " + std::to_string(m_reorderable) + " matrix" + m_matrices.back();
+               " worldLit " + std::to_string(m_worldLit > 0) + " groundShadow " +
+               std::to_string(m_groundShadows[0] > 0) + std::to_string(m_groundShadows[1] > 0) + " characters " +
+               std::to_string(m_characterDraws > 0) + " reorderable " + std::to_string(m_reorderable) + " matrix" +
+               m_matrices.back();
     }
 
     void Note(const char* name, long long value, std::uint64_t contents = 0)

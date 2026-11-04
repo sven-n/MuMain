@@ -16,6 +16,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Lighting/SunShadow.h"
 #include "Render/Renderer/SceneLighting.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 
 #include <algorithm>
@@ -126,6 +127,7 @@ void PinWorldDynamicLights()
     float reference[3];
     SelectionReference(reference);
     Render::Lighting::FrameWorldDynamicLights().Pin(Render::Lighting::FrameDynamicLights(), reference);
+    BuildGroundLight();
 }
 
 void SubmitDynamicLights()

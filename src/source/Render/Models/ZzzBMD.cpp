@@ -14,6 +14,7 @@
 #include <climits>
 #include <map>
 #include <optional>
+#include <type_traits>
 #include <limits>
 #include <set>
 #include <span>
@@ -2554,7 +2555,7 @@ __forceinline void GetClothShadowPosition(vec3_t* target, const Render::ModelDra
     CalcShadowPosition(target, projection);
 }
 
-void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, 
+void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes,
                                     const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
@@ -2636,14 +2637,50 @@ float BodyShadowAxisAngle()
     return (Render::Look::Value(Data::Maps::LookValue::GroundShadowAngle) + 180.f) * RadiansPerDegree;
 }
 
-// Where CalcShadowPosition and skinned_shadow.vert put a body shadow.
-mu::ShadowProjection BodyShadowProjection(const vec3_t origin, const float sx, const float sy)
+// The frame's light on a shadow: its fall under the sun, how dark the flat shadow is, what the point lights cast.
+void TakeShadowLight(Render::ModelDrawing::ShadowDraw& draw)
 {
+    draw.shearX = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
+    draw.axisAngle = BodyShadowAxisAngle();
+    // The sun shadow map shadows the ground itself; only the flat shadow is drawn without it, as dark
+    // as the map lets it be (dynamic.flatSunShadow: none indoors), falling away from the sun.
+    const std::optional<Render::Lighting::FrameSunDirections> sun = Render::Lighting::FrameSun();
+    if (sun)
+    {
+        constexpr float MaxFlatShadowFall = 3.0f;
+        const Render::Lighting::FlatShadowCast cast = Render::Lighting::FlatShadowFromSun(sun->sun, MaxFlatShadowFall);
+        draw.axisAngle = cast.axisAngle;
+        draw.shearX = draw.shearHeight * cast.fallPerHeight;
+    }
+    const float flatSunShadow = sun ? Render::Look::Value(Data::Maps::LookValue::FlatSunShadow) : 1.f;
+    draw.flatStrength = Render::Lighting::SunShadowsActive() ? 0.f : flatSunShadow;
+    // The ground's strongest point lights cast one more shadow each, away from the light.
+    const Render::Lighting::WorldDynamicLights& worldLights = Render::Lighting::FrameWorldDynamicLights();
+    if (Render::Lighting::DynamicLightsActive() && worldLights.IsPinned())
+    {
+        static_assert(std::extent_v<decltype(draw.lightCasts)> == Render::Lighting::kMaxLightShadowCasters);
+        const auto maxCasters =
+            static_cast<std::size_t>(Render::Look::Value(Data::Maps::LookValue::GroundShadowLights));
+        const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(
+            worldLights.Selection().uniform, {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]}, maxCasters);
+        constexpr float HalfTurn = 3.14159265358979f;
+        for (std::size_t i = 0; i < casters.count; ++i)
+        {
+            draw.lightCasts[i] = {casters.casters[i].fallAngle + HalfTurn, casters.casters[i].strength};
+        }
+        draw.lightCastCount = static_cast<int>(casters.count);
+    }
+}
+
+// Where CalcShadowPosition and skinned_shadow.vert put a body shadow.
+mu::ShadowProjection BodyShadowProjection(const Render::ModelDrawing::ShadowDraw& draw)
+{
+    const float* origin = draw.bodyOrigin;
     return {
         .origin = {origin[0], origin[1], origin[2]},
-        .shearX = sx,
-        .shearHeight = sy,
-        .axisAngle = BodyShadowAxisAngle(),
+        .shearX = draw.shearX,
+        .shearHeight = draw.shearHeight,
+        .axisAngle = draw.axisAngle,
         .specialHeight = g_fSpecialHeight,
         .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
     };
@@ -2818,7 +2855,7 @@ const vec3_t* BMD::ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, 
 }
 
 void BMD::AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, const int blendMesh,
-                                 const int hiddenMesh, const int startMesh, const int endMesh, 
+                                 const int hiddenMesh, const int startMesh, const int endMesh,
                                  const mu::ShadowProjection& projection, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
@@ -3014,6 +3051,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
                                           .lod = ActiveLod,
                                           .skin = CurrentSkin()};
     VectorCopy(BodyOrigin, draw.bodyOrigin);
+    TakeShadowLight(draw);
     // The cloth's points as plain data: the draw reads no simulation, and a drawer that draws later copies them.
     static thread_local std::vector<Render::ModelDrawing::ClothShadow> clothes;
     static thread_local std::vector<std::array<float, 3>> clothPoints;
@@ -3093,8 +3131,7 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
 
     const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, draw.startMesh, draw.endMesh);
 
-    mu::ShadowProjection projection =
-        BodyShadowProjection(draw.bodyOrigin, gMapManager.InBattleCastle() ? 2500.f : 2000.f, 4000.f);
+    mu::ShadowProjection projection = BodyShadowProjection(draw);
     const auto drawShadow = [&](float shadowAlpha)
     {
         const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(shadowAlpha, 0.f, 1.f));
@@ -3111,36 +3148,18 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
             AddMeshShadowTriangles(draw, draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, projection, shadowColor);
         }
     };
-    // The sun shadow map shadows the ground itself; only the flat shadow is drawn without it, as dark
-    // as the map lets it be (dynamic.flatSunShadow: none indoors), falling away from the sun.
-    const std::optional<Render::Lighting::FrameSunDirections> sun = Render::Lighting::FrameSun();
-    if (sun)
-    {
-        constexpr float MaxFlatShadowFall = 3.0f;
-        const Render::Lighting::FlatShadowCast cast = Render::Lighting::FlatShadowFromSun(sun->sun, MaxFlatShadowFall);
-        projection.axisAngle = cast.axisAngle;
-        projection.shearX = projection.shearHeight * cast.fallPerHeight;
-    }
-    const float flatSunShadow = sun ? Render::Look::Value(Data::Maps::LookValue::FlatSunShadow) : 1.f;
-    if (!Render::Lighting::SunShadowsActive() && flatSunShadow > 0.f)
+    if (draw.flatStrength > 0.f)
     {
         const mu::ScopedGroundShadow groundShadow;
-        drawShadow(draw.alpha * flatSunShadow);
+        drawShadow(draw.alpha * draw.flatStrength);
     }
-    // The ground's strongest point lights cast one more shadow each, away from the light.
-    const Render::Lighting::WorldDynamicLights& worldLights = Render::Lighting::FrameWorldDynamicLights();
-    if (Render::Lighting::DynamicLightsActive() && worldLights.IsPinned())
+    if (draw.lightCastCount > 0)
     {
-        const auto maxCasters =
-            static_cast<std::size_t>(Render::Look::Value(Data::Maps::LookValue::GroundShadowLights));
-        const Render::Lighting::LightShadowCasters casters = Render::Lighting::SelectLightShadowCasters(
-            worldLights.Selection().uniform, {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]}, maxCasters);
         const mu::ScopedGroundShadow lightShadow(mu::GroundShadowSource::PointLight);
-        for (std::size_t i = 0; i < casters.count; ++i)
+        for (int i = 0; i < draw.lightCastCount; ++i)
         {
-            constexpr float HalfTurn = 3.14159265358979f;
-            projection.axisAngle = casters.casters[i].fallAngle + HalfTurn;
-            drawShadow(draw.alpha * casters.casters[i].strength);
+            projection.axisAngle = draw.lightCasts[i].axisAngle;
+            drawShadow(draw.alpha * draw.lightCasts[i].strength);
         }
     }
 

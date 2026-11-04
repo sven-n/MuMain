@@ -569,6 +569,34 @@ TEST_CASE("Draws asked for inside a bloom exclusion and drawn later are drawn in
     CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
 }
 
+TEST_CASE("Characters drawn later are drawn inside the character scope they were asked for in [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    static float secondBones[MAX_BONES][3][4];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, firstBones);
+    Place(second, 400.f, 5.5f, secondBones);
+    AnimateCharacterBones(&first);
+    AnimateCharacterBones(&second);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        {
+            const Render::Drawing::ScopedCharacterDraws characters;
+            RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                             RENDER_TEXTURE);
+        }
+        RenderPartObject(&second, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                         RENDER_TEXTURE);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
 TEST_CASE("A cloth's shadow drawn later falls where the cloth was when it was asked for [draw-parity]")
 {
     PlayerModels models;

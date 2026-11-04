@@ -56,11 +56,11 @@ enum class Pass : int
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
-    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
-    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx", "SunShadow",
-    "TerrainBake", "SceneDepth",
+    "Terrain",  "Objects",  "Chars",    "Items",     "Effects",     "Other",      "CharWait",
+    "MoveFx",   "MovePart", "Skinning", "UI",        "RenderBegin", "RenderEnd",  "Submit",
+    "UIUpdate", "RmlInput", "UILayout", "Flush",     "Sprites",     "Particles",  "Joints",
+    "Overlay",  "RmlUpd",   "RmlRend",  "EndOffscr", "EndStage",    "EndReplay",  "EndPostUI",
+    "ObjAnim",  "ObjDraw",  "UpdateFx", "SunShadow", "TerrainBake", "SceneDepth",
 };
 
 enum class Counter : int
