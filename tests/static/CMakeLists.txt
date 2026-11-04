@@ -37,6 +37,7 @@ add_test(NAME test_case_names_reach_ctest_whole
 # Each fixture with the offence the check must report for it (a crash would not match).
 foreach(case IN ITEMS
         "semicolon|which cuts it in two"
+        "comment_between_literals|which cuts it in two"
         "brackets|has unbalanced brackets"
         "backslash|joins it with the next name"
         "not_literal|is not written as string literals")

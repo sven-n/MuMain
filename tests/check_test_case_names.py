@@ -11,18 +11,21 @@ changes a name that has
 A comma is safe: the discovery escapes it for doctest's filter.
 
 Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
-and .h files under it (third_party and fixtures left out), prints each name CMake would change, and exits 1 when there
-is one, when a name is not written as string literals, or when it finds no test case at all.
+and .h files under it (third_party and fixtures left out) as the compiler reads them: comments and preprocessor lines
+left out, adjacent literals joined. Prints each name CMake would change, and exits 1 when there is one, when a name is
+not written as string literals, or when it finds no test case at all.
 """
 
 import re
 import sys
 from pathlib import Path
 
-CASE = re.compile(r"^[ \t]*(TEST_CASE|TEST_CASE_FIXTURE)\s*\(\s*", re.M)
-FIXTURE = re.compile(r"[\w:]+\s*,\s*")
+from cpp_text import code_only
+
+CASE = re.compile(r"^[ \t]*(TEST_CASE|TEST_CASE_FIXTURE)\s*\(", re.M)
+FIXTURE = re.compile(r"\s*[\w:]+\s*,")
 # The name: string literals the compiler joins into one.
-LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"\s*')
+LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
 SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
@@ -36,13 +39,16 @@ def name_at(text, at):
 
 
 def cases(text):
-    """The line and name of each test case in a source."""
-    for case in CASE.finditer(text):
+    """The line and name of each test case in a source. The cases are found in the code alone, and their literals read
+    with the comments between them left out."""
+    code = code_only(text)
+    source = code_only(text, keep_literals=True)
+    for case in CASE.finditer(code):
         at = case.end()
         if case.group(1) == "TEST_CASE_FIXTURE":
-            fixture = FIXTURE.match(text, at)
+            fixture = FIXTURE.match(source, at)
             at = fixture.end() if fixture else at
-        yield text.count("\n", 0, case.start()) + 1, name_at(text, at)
+        yield text.count("\n", 0, case.start()) + 1, name_at(source, at)
 
 
 def problem(name):
