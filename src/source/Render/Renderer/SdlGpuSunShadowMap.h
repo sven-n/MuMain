@@ -22,21 +22,36 @@ public:
     // This frame asks for a map of ResolutionFor(`requested`) (SetSceneLighting), or for none.
     void Request(Uint32 requested);
     void Cancel();
-    [[nodiscard]] Uint32 Resolution() const { return m_resolution; }
+    [[nodiscard]] Uint32 Resolution() const
+    {
+        return m_resolution;
+    }
 
     // The far 1x1 map while it still needs its one clear, then null.
     [[nodiscard]] SDL_GPUTexture* FallbackToClear() const;
-    void MarkFallbackCleared() { m_fallbackCleared = true; }
+    void MarkFallbackCleared()
+    {
+        m_fallbackCleared = true;
+    }
 
     // Starts the frame: the map to draw into at the requested size, or null without a request (the map
     // is then released).
     [[nodiscard]] SDL_GPUTexture* PrepareMap();
     // The map holds this frame's shadows.
-    void MarkReady() { m_ready = true; }
+    void MarkReady()
+    {
+        m_ready = true;
+    }
 
     // What the lit shaders sample: this frame's map once drawn, otherwise the far 1x1 one.
-    [[nodiscard]] SDL_GPUTexture* Bound() const { return m_ready ? m_map : m_fallback; }
-    [[nodiscard]] SDL_GPUSampler* Sampler() const { return m_sampler; }
+    [[nodiscard]] SDL_GPUTexture* Bound() const
+    {
+        return m_ready ? m_map : m_fallback;
+    }
+    [[nodiscard]] SDL_GPUSampler* Sampler() const
+    {
+        return m_sampler;
+    }
 
 private:
     [[nodiscard]] SDL_GPUTexture* CreateDepth(Uint32 size) const;

@@ -499,8 +499,8 @@ private:
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
-    void AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, const mu::ShadowProjection& projection,
-                                   std::uint32_t color) const;
+    void AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes,
+                                   const mu::ShadowProjection& projection, std::uint32_t color) const;
     // Whether VertexTransform[mesh] holds this model's vertices now: skinned on the CPU, or written by the cloth.
     [[nodiscard]] bool OwnsCpuVertices(int mesh) const;
     // Whether a shadow casts a mesh's own CPU vertices instead of skinning it on the GPU.
@@ -509,7 +509,8 @@ private:
     // mesh skinned from the draw's skin without writing the scratch (valid until the next call).
     [[nodiscard]] const vec3_t* ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
     void AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int blendMesh, int hiddenMesh,
-                                int startMesh, int endMesh, const mu::ShadowProjection& projection, std::uint32_t color) const;
+                                int startMesh, int endMesh, const mu::ShadowProjection& projection,
+                                std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
                                            const mu::ShadowProjection& projection, std::uint32_t color) const;

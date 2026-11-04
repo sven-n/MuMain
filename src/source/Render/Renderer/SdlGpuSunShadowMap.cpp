@@ -105,8 +105,7 @@ SDL_GPUTexture* SdlGpuSunShadowMap::CreateDepth(Uint32 size) const
     SDL_GPUTexture* const texture = SDL_CreateGPUTexture(m_device, &info);
     if (!texture)
     {
-        mu::log::Get("render")->error("SDL_gpu -- sun shadow map creation failed ({0}x{0}): {1}", size,
-                                      SDL_GetError());
+        mu::log::Get("render")->error("SDL_gpu -- sun shadow map creation failed ({0}x{0}): {1}", size, SDL_GetError());
     }
     return texture;
 }

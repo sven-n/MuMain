@@ -33,18 +33,16 @@ bool DynamicLightsActive()
     return s_dynamicLightsEnabled && EnhancedLightingActive();
 }
 
-bool SunShadowsActive()
-{
-    const std::optional<FrameSunDirections> sun = FrameSun();
-    return SceneFlag == MAIN_SCENE && DynamicLightsActive() && sun &&
-           Render::Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0 &&
-           mu::GetRenderer().SunShadowsAvailable();
-}
-
 namespace
 {
 std::optional<FrameSunDirections> s_frameSun;
+bool s_frameSunShadows = false;
 } // namespace
+
+bool SunShadowsActive()
+{
+    return s_frameSunShadows;
+}
 
 std::optional<FrameSunDirections> FrameSun()
 {
@@ -54,6 +52,7 @@ std::optional<FrameSunDirections> FrameSun()
 void UpdateFrameSun()
 {
     s_frameSun.reset();
+    s_frameSunShadows = false;
     if (!DynamicLightsActive())
     {
         return;
@@ -61,6 +60,9 @@ void UpdateFrameSun()
     const float fall = gMapManager.InBattleCastle() ? kSunShadowFallBattleCastle : kSunShadowFall;
     s_frameSun = FrameSunDirections{SunDirection(Render::Look::Value(Data::Maps::LookValue::GroundShadowAngle), fall),
                                     SunDirection(kBakedSunShadowAngle, fall)};
+    s_frameSunShadows = SceneFlag == MAIN_SCENE &&
+                        Render::Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0 &&
+                        mu::GetRenderer().SunShadowsAvailable();
 }
 
 glm::vec3 FollowFrameSun(const glm::vec3& baked)

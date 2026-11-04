@@ -1327,7 +1327,7 @@ static float s_sceneProjection[16]{};
 static SDL_GPUGraphicsPipeline* s_sunShadowPipelines[3]{}; // [ShadowPassLayout]
 // The same draws, unbiased, into the scene's single-sample depth (RenderSceneDepth).
 static SDL_GPUGraphicsPipeline* s_sceneDepthPipelines[3]{}; // [ShadowPassLayout]
-static SDL_GPUShader* s_fragShaderSunDepth = nullptr;      // sun_depth.frag
+static SDL_GPUShader* s_fragShaderSunDepth = nullptr;       // sun_depth.frag
 static mu::SdlGpuSunShadowMap s_sunShadowMap;
 
 // Depth buffer texture for correct 3D depth testing.
