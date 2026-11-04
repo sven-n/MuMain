@@ -97,6 +97,13 @@ if(MU_ENABLE_SHADER_COMPILATION)
     # Shared code the shaders #include; a change rebuilds every shader.
     file(GLOB MU_SHADER_INCLUDES CONFIGURE_DEPENDS "${MU_SHADER_SOURCE_DIR}/*.hlsli")
 
+    # A list, not a generator expression: an empty one adds no argument to DXC's command line, where an empty
+    # generator expression would pass "".
+    set(MU_DXC_WARNING_FLAGS)
+    if(MU_WARNINGS_AS_ERRORS)
+        set(MU_DXC_WARNING_FLAGS -WX)
+    endif()
+
     function(mu_add_shader shader_name stage)
         if(stage STREQUAL "vert")
             set(dxil_profile vs_6_0)
@@ -127,7 +134,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
         )
         add_custom_command(
             OUTPUT "${dxil}"
-            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main $<$<BOOL:${MU_WARNINGS_AS_ERRORS}>:-WX>
+            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main ${MU_DXC_WARNING_FLAGS}
                 -D MU_D3D12_RAW_STORAGE_BUFFER=1 -Fo "${dxil}" "${src}"
             DEPENDS "${src}" ${MU_SHADER_INCLUDES} "${MU_SHADER_COMPILATION_STAMP}" "${DXC_EXE}"
             COMMENT "HLSL to DXIL: ${shader_name}.${stage}.hlsl"
