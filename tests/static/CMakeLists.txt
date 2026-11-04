@@ -44,7 +44,8 @@ foreach(case IN ITEMS
         "backslash|joins it with the next name"
         "backslash_inside|doctest's filter reads as an escape"
         "not_literal|is not written as string literals"
-        "literal_and_macro|is not written as string literals")
+        "literal_and_macro|is not written as string literals"
+        "scenario|which cuts it in two")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 fixture)
     list(GET case 1 offence)
@@ -55,7 +56,7 @@ foreach(case IN ITEMS
 endforeach()
 add_test(NAME test_case_names_check_passes_clean
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TEST_CASE_NAMES_FIXTURES}/clean")
-set_tests_properties(test_case_names_check_passes_clean PROPERTIES PASS_REGULAR_EXPRESSION "^4 test case names reach")
+set_tests_properties(test_case_names_check_passes_clean PROPERTIES PASS_REGULAR_EXPRESSION "^7 test case names reach")
 
 add_test(
     NAME msvc_runtime_dll_staging_contract

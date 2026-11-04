@@ -13,7 +13,8 @@ changes a name that has
   and splits at '\\,', so the entry's filter may match no case.
 A comma is safe: the discovery escapes it for doctest's filter.
 
-Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
+Usage: check_test_case_names.py <tests dir>. Reads the name of every case a doctest macro registers (TEST_CASE,
+TEST_CASE_FIXTURE, TEST_CASE_CLASS, SCENARIO and their template forms, with or without the DOCTEST_ prefix) in the .cpp
 and .h files under it (third_party and fixtures left out) as the compiler reads them: comments and preprocessor lines
 left out, adjacent literals joined, escapes decoded. Prints each name CMake would change, and exits 1 when there is one, when a name is
 not written as string literals alone (a macro in it, say), or when it finds no test case at all.
@@ -25,11 +26,13 @@ from pathlib import Path
 
 from cpp_text import code_only
 
-CASE = re.compile(r"^[ \t]*(TEST_CASE|TEST_CASE_FIXTURE)\s*\(", re.M)
+# The macros that register a case; TEST_CASE_FIXTURE takes the fixture before the name, the others the name first.
+CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEFINE)?)?"
+                  r"|SCENARIO(?:_CLASS|_TEMPLATE(?:_DEFINE)?)?)\s*\(")
 FIXTURE = re.compile(r"\s*[\w:]+\s*,")
-# The name: string literals the compiler joins into one, then the end of the arguments or a decorator.
+# The name: string literals the compiler joins into one, then the end of the arguments, the next one or a decorator.
 LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
-NAME_END = re.compile(r"\s*[)*]")
+NAME_END = re.compile(r"\s*[),*]")
 # A C escape: a hexadecimal or octal code, a universal character name, or the one character after the '\'.
 ESCAPE = re.compile(r"\\(x[0-9A-Fa-f]+|[0-7]{1,3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|.)")
 SIMPLE_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
