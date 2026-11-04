@@ -12,7 +12,7 @@
 #include <cctype>
 #include <optional>
 
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"

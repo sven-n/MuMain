@@ -4,7 +4,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/FontEngineInterface.h>

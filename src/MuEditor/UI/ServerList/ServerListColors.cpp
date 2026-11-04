@@ -9,7 +9,7 @@
 #include "I18N/All.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <array>
 #include <charconv>

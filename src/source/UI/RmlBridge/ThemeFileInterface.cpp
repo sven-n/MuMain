@@ -4,7 +4,7 @@
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "Core/Platform/PathResolve.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cstdint>

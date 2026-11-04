@@ -7,7 +7,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Core.h>

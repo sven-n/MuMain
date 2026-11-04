@@ -6,7 +6,7 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <filesystem>

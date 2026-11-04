@@ -6,19 +6,11 @@
 // pull a platform shim in with it.
 #pragma once
 
-#include <filesystem>
 #include <string>
 #include <string_view>
 
 namespace Core::Text
 {
-// A path from UTF-8 text on every platform, as std::filesystem::u8path made
-// it before C++20 deprecated that function.
-[[nodiscard]] inline std::filesystem::path PathFromUtf8(std::string_view text)
-{
-    return std::filesystem::path(std::u8string(text.begin(), text.end()));
-}
-
 // A null, empty or unconvertible source yields an empty string.
 [[nodiscard]] std::string ToUtf8(const wchar_t* text);
 
