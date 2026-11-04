@@ -604,6 +604,31 @@ TEST_CASE("Crywolf's water spots are rolled in the update, once for the water th
     Hero = savedHero;
 }
 
+TEST_CASE("Sprite draw-state snapshots preserve every flag independently and restore them [effects][sprite_state]")
+{
+    BeginSpriteDraws();
+    const auto cleared = SpritesDrawnThisFrame();
+    REQUIRE(cleared.size() == MAX_SPRITES);
+    CHECK(std::none_of(cleared.begin(), cleared.end(), [](bool drawn) { return drawn; }));
+
+    std::vector<bool> marked(MAX_SPRITES, false);
+    marked.front() = true;
+    marked[marked.size() / 2] = true;
+    marked.back() = true;
+    SetSpritesDrawnThisFrame(marked);
+    const auto snapshot = SpritesDrawnThisFrame();
+    BeginSpriteDraws();
+
+    REQUIRE(snapshot.size() == marked.size());
+    CHECK(snapshot == marked);
+    CHECK(SpritesDrawnThisFrame() == cleared);
+
+    SetSpritesDrawnThisFrame(snapshot);
+    const auto restored = SpritesDrawnThisFrame();
+    BeginSpriteDraws();
+    CHECK(restored == marked);
+}
+
 TEST_CASE("A frame with no update since the last draws the sprites again; a pass in the same frame doesn't [effects]")
 {
     ViewScope view;
