@@ -117,6 +117,22 @@ TEST_CASE(
     ClearEffects();
 }
 
+// The draw parity check restores this snapshot after each run, so it must hold every sprite's flag.
+TEST_CASE("The snapshot of drawn sprites keeps the flag of every sprite [effects]")
+{
+    SpriteDrawFlags drawn{};
+    for (size_t sprite = 0; sprite < drawn.size(); ++sprite)
+    {
+        drawn[sprite] = sprite % 3 == 0;
+    }
+    SetSpritesDrawnThisFrame(drawn);
+    const SpriteDrawFlags snapshot = SpritesDrawnThisFrame();
+    BeginSpriteDraws();
+
+    CHECK(snapshot == drawn);
+    CHECK(SpritesDrawnThisFrame() == SpriteDrawFlags{});
+}
+
 TEST_CASE("Drawing the effect passes again and again changes nothing the next update reads [effects]")
 {
     ViewScope view;
