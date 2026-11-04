@@ -114,7 +114,7 @@ jobs:
             C:/vcpkg/installed
             C:/vcpkg/packages
             ~/AppData/Local/vcpkg/archives
-          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
           restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
@@ -124,6 +124,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DENABLE_EDITOR=${{ matrix.editor }}
