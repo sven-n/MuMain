@@ -5855,7 +5855,8 @@ void DeleteObjectTile(int x, int y)
             OBJECT* o = ob->Head;
             while (1)
             {
-                if (o != NULL && o != (OBJECT*)0xdddddddd)
+                // 0xdddddddd is the 32-bit MSVC debug heap's fill for freed memory.
+                if (o != NULL && o != reinterpret_cast<OBJECT*>(static_cast<std::uintptr_t>(0xdddddddd)))
                 {
                     if (o->Live && (int)(o->Position[0] / TERRAIN_SCALE) == x && (int)(o->Position[1] / TERRAIN_SCALE) == y)
                         DeleteObject(o, ob);

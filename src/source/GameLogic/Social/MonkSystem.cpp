@@ -65,7 +65,7 @@ void CMonkSystem::Init()
 {
     m_mapItemEqualType.clear();
     m_subItemModels.clear();
-    memset(&m_cItemEqualType, 0, sizeof(CItemEqualType));
+    m_cItemEqualType = CItemEqualType();
     m_listGloveformSword.clear();
 
     InitEffectOnce();
@@ -1000,7 +1000,6 @@ void CMonkSystem::DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, 
 void CMonkSystem::InitDummyCal()
 {
     m_tmDummyUnit.clear();
-    memset(&m_tmDummyUnit, 0, sizeof(CDummyUnit) * m_tmDummyUnit.size());
     m_nDummyIndex = 0;
 }
 

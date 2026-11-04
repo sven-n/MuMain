@@ -1278,10 +1278,10 @@ namespace battleCastle
                 b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
@@ -2088,10 +2088,10 @@ namespace battleCastle
                 b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }

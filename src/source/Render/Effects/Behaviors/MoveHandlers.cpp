@@ -10040,7 +10040,8 @@ namespace Render::Effects::Behaviors
             o->LifeTime = 0;
             return true;
         }
-        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 & rand_fps_check(1))
+        // A bitwise &, not &&: the random check draws whenever the frame is above 2.
+        if (o->Owner->AnimationFrame > 2 && ((o->Owner->AnimationFrame < 8) & rand_fps_check(1)))
         {
             BMD* pModel = &Models[o->Owner->Type];
             vec3_t _StartPos, _EndPos;

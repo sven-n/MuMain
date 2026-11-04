@@ -30,7 +30,7 @@ extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
 extern "C" void DevEditor_GetCameraFogRange(const char* cameraName, float viewFar, float* outStart, float* outEnd);
 #endif
 
-extern "C" CameraManager& CameraManager_Instance();
+CameraManager& CameraManager_Instance();
 
 int     OpenglWindowX = 0;
 int     OpenglWindowY = 0;
