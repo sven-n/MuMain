@@ -47,6 +47,14 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Keeps git quiet in actions/checkout, as in ci.yml.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
   windows:
     name: Windows x64 Release, editor ${{ matrix.editor }}

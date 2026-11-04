@@ -18,6 +18,16 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # actions/checkout runs git init and then checks out a detached commit; without these settings git prints a hint
+  # about the initial branch name and an advice block about detached HEADs in every job. Git reads them from the
+  # environment (GIT_CONFIG_COUNT), so they need no step.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
   quality:
     name: Quality Gates
@@ -678,14 +688,15 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        # Only what the image lacks: brew warns about each formula that is already installed.
+        # Only what the image lacks: brew warns about each formula that is already installed. --quiet leaves out the
+        # caveats (ccache's explains its compiler symlinks, which the build does not use); warnings still show.
         run: |
           missing=()
           for formula in cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache; do
             brew list --formula "$formula" >/dev/null 2>&1 || missing+=("$formula")
           done
           if [ "${#missing[@]}" -gt 0 ]; then
-            brew install "${missing[@]}"
+            brew install --quiet "${missing[@]}"
           fi
 
       - name: Identify compiler cache
