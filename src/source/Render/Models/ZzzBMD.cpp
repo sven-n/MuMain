@@ -2653,7 +2653,7 @@ void TakeShadowLight(Render::ModelDrawing::ShadowDraw& draw)
         draw.shearX = draw.shearHeight * cast.fallPerHeight;
     }
     const float flatSunShadow = sun ? Render::Look::Value(Data::Maps::LookValue::FlatSunShadow) : 1.f;
-    draw.flatStrength = Render::Lighting::SunShadowsActive() ? 0.f : flatSunShadow;
+    draw.flatStrength = Render::Lighting::FlatShadowStrength(flatSunShadow, Render::Lighting::SunShadowShare());
     // The ground's strongest point lights cast one more shadow each, away from the light.
     const Render::Lighting::WorldDynamicLights& worldLights = Render::Lighting::FrameWorldDynamicLights();
     if (Render::Lighting::DynamicLightsActive() && worldLights.IsPinned())

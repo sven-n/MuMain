@@ -23,6 +23,12 @@ inline constexpr float kSunShadowCasterHeight = 3000.0f;
 // azimuth 315°, so shadows fall towards 135°.
 inline constexpr float kBakedSunShadowAngle = 135.0f;
 
+// The flat shadow's strength: it gives way to the sun's shadow as `sunShadowShare` (SunShadowShare) grows.
+[[nodiscard]] constexpr float FlatShadowStrength(float flatSunShadow, float sunShadowShare)
+{
+    return flatSunShadow * (1.f - sunShadowShare);
+}
+
 // A baked light vector (the terrain's slope shading, the models' light) moved as far as the sun has
 // moved from `bakedSun`, the sun the bake implies: its azimuth and elevation each change by the
 // sun's, its length stays, and its elevation stays within ±89°. Exactly `baked` while the sun is

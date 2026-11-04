@@ -20,6 +20,8 @@ void SetDynamicLightsEnabled(bool enabled);
 // sun.shadow above 0 and a renderer that can draw it, taken once per frame (UpdateFrameSun). Characters then cast no
 // flat sun shadow.
 [[nodiscard]] bool SunShadowsActive();
+// sun.shadow where sun shadows are active, else 0: everything that comes with them fades by it.
+[[nodiscard]] float SunShadowShare();
 
 // This frame's sun (towards it): from dynamic.shadowAngle and the map's shadow length, and the sun the
 // map's baked light implies (kBakedSunShadowAngle). None without Enhanced dynamic lights (Classic).

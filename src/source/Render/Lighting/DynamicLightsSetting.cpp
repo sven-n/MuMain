@@ -44,6 +44,11 @@ bool SunShadowsActive()
     return s_frameSunShadows;
 }
 
+float SunShadowShare()
+{
+    return s_frameSunShadows ? static_cast<float>(Render::Look::Value(Data::Maps::LookValue::SunShadowStrength)) : 0.f;
+}
+
 std::optional<FrameSunDirections> FrameSun()
 {
     return s_frameSun;

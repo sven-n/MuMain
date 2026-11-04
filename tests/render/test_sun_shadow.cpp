@@ -26,6 +26,15 @@ glm::vec3 Ndc(const glm::mat4& viewProjection, const glm::vec3& world)
 }
 } // namespace
 
+TEST_CASE("the flat shadow fades as the sun's shadow comes in, without a jump [render][sun]")
+{
+    using Render::Lighting::FlatShadowStrength;
+    CHECK(FlatShadowStrength(1.f, 0.f) == doctest::Approx(1.f));
+    CHECK(FlatShadowStrength(1.f, 0.05f) == doctest::Approx(0.95f));
+    CHECK(FlatShadowStrength(1.f, 1.f) == doctest::Approx(0.f));
+    CHECK(FlatShadowStrength(0.f, 0.f) == doctest::Approx(0.f));
+}
+
 TEST_CASE("the sun stands opposite where the shadows fall, as high as their length says [render][sun]")
 {
     // Shadows towards -x (Classic), half as long as the caster is tall.
@@ -142,7 +151,8 @@ TEST_CASE("a flat shadow falls away from the sun, as long as its slant [render][
 {
     using Render::Lighting::FlatShadowFromSun;
     // The baked sun: shadows towards 135 degrees, half a unit per unit of height.
-    const Render::Lighting::FlatShadowCast baked = FlatShadowFromSun(Render::Lighting::SunDirection(135.0f, 0.5f), 3.0f);
+    const Render::Lighting::FlatShadowCast baked =
+        FlatShadowFromSun(Render::Lighting::SunDirection(135.0f, 0.5f), 3.0f);
     CHECK(baked.fallPerHeight == doctest::Approx(0.5f));
     CHECK(std::cos(baked.axisAngle) == doctest::Approx(std::cos(glm::radians(315.0f))).epsilon(1e-4));
     CHECK(std::sin(baked.axisAngle) == doctest::Approx(std::sin(glm::radians(315.0f))).epsilon(1e-4));

@@ -103,7 +103,8 @@ void SubmitSceneLighting()
     if (Render::Lighting::SunShadowsActive() && sun)
     {
         using Data::Maps::LookValue;
-        lighting.cloudStrength = Render::Look::Value(LookValue::CloudStrength);
+        const float share = Render::Lighting::SunShadowShare();
+        lighting.cloudStrength = Render::Look::Value(LookValue::CloudStrength) * share;
         lighting.cloudScale = Render::Look::Value(LookValue::CloudScale);
         lighting.cloudCover = Render::Look::Value(LookValue::CloudCover);
         const glm::vec2 drift = CloudDrift(Render::Look::Value(LookValue::CloudSpeed));
@@ -112,8 +113,8 @@ void SubmitSceneLighting()
         const glm::vec2 slant = glm::vec2(sun->sun.x, sun->sun.y) * (CloudHeight / std::max(sun->sun.z, 0.2f));
         lighting.cloudOffset[0] = drift.x + slant.x;
         lighting.cloudOffset[1] = drift.y + slant.y;
-        lighting.skyFill = Render::Look::Value(LookValue::SkyFill);
-        lighting.rimSunFollow = Render::Look::Value(LookValue::RimSunFollow);
+        lighting.skyFill = Render::Look::Value(LookValue::SkyFill) * share;
+        lighting.rimSunFollow = Render::Look::Value(LookValue::RimSunFollow) * share;
     }
     mu::GetRenderer().SetSceneLighting(lighting);
 }
