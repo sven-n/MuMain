@@ -7,7 +7,7 @@ TEST_CASE("one, two [tag][other]")
     CHECK(true);
 }
 
-TEST_CASE("a \"quoted\" word and a \\ inside")
+TEST_CASE("a \"quoted\" word")
 {
     CHECK(true);
 }

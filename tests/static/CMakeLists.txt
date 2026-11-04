@@ -40,6 +40,7 @@ foreach(case IN ITEMS
         "comment_between_literals|which cuts it in two"
         "brackets|has unbalanced brackets"
         "backslash|joins it with the next name"
+        "backslash_inside|doctest's filter reads as an escape"
         "not_literal|is not written as string literals"
         "literal_and_macro|is not written as string literals")
     string(REPLACE "|" ";" case "${case}")

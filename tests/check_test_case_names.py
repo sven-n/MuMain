@@ -7,7 +7,9 @@ changes a name that has
 - a ';': the list separator cuts the name in two, and neither half matches a case, so both entries pass running none;
 - more '[' than ']', or more ']' than '[': a ';' inside brackets separates nothing, so the name and every name listed
   after it in its binary become one entry that runs none;
-- a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none.
+- a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none;
+- a '\\' anywhere else: the discovery escapes only commas for doctest's filter, and the filter reads '\\\\' as one '\\'
+  and splits at '\\,', so the entry's filter may match no case.
 A comma is safe: the discovery escapes it for doctest's filter.
 
 Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
@@ -63,6 +65,9 @@ def problem(name):
         return "has unbalanced brackets, which join it with every name after it; that entry runs no case"
     if name.endswith("\\"):
         return "ends with a '\\', which joins it with the next name; that entry runs no case"
+    if "\\" in name:
+        return ("has a '\\', which doctest's filter reads as an escape before a '\\' or a ',' "
+                "(then the entry runs no case)")
     return None
 
 
@@ -81,8 +86,7 @@ def main():
     for offence in found:
         print(offence)
     if found:
-        print("Write each name as string literals, without ';' (a comma is fine), with balanced brackets and no '\\' "
-              "at its end.")
+        print("Write each name as string literals, without ';' or '\\' (a comma is fine) and with balanced brackets.")
         return 1
     if checked == 0:
         print(f"No TEST_CASE found under {root}")
