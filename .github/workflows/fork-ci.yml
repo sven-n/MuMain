@@ -64,7 +64,8 @@ jobs:
   windows:
     name: Windows x64 Release, editor ${{ matrix.editor }}
     if: github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft)
-    runs-on: windows-latest
+    # The images by name, as in ci.yml.
+    runs-on: windows-2025-vs2026
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -165,7 +166,7 @@ jobs:
   linux-editor:
     name: Linux x64 Release, editor ON
     if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
 
     steps:
@@ -221,7 +222,7 @@ jobs:
   macos-editor:
     name: macOS arm64 Release, editor ON
     if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 90
 
     steps:

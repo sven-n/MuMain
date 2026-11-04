@@ -142,7 +142,9 @@ jobs:
     name: Windows Native Build (x64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.windows == 'true'
-    runs-on: windows-latest
+    # By name, as Quality Gates: another image brings another MSVC, and GitHub warns in every job while it moves
+    # windows-latest to a new one.
+    runs-on: windows-2025-vs2026
     timeout-minutes: 90
 
     steps:
@@ -676,7 +678,9 @@ jobs:
     name: macOS Native Build (arm64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.macos == 'true'
-    runs-on: macos-latest
+    # By name: the build's minimum macOS is the image's (cmake/toolchains/macos-arm64.cmake), so it changes only
+    # with this line, not when GitHub moves macos-latest to a newer macOS.
+    runs-on: macos-26
     timeout-minutes: 90
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache

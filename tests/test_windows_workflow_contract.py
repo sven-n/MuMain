@@ -337,7 +337,7 @@ check("strategy:" not in native_job, "Main Windows asset job must not use a matr
 check("matrix." not in native_job, "Main Windows asset job must use fixed values")
 for required in (
     "name: Windows Native Build (x64, Release, editor OFF)",
-    "runs-on: windows-latest",
+    "runs-on: windows-2025-vs2026",
 ):
     check(required in native_job, f"Main Windows job missing {required}")
 
@@ -455,7 +455,7 @@ for (
         macos_job,
         "build-macos",
         "macOS Native Build (arm64, Release, editor OFF)",
-        "macos-latest",
+        "macos-26",
         "mu-client-macos-native-arm64-release-editor-off-no-data-main",
         "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz "

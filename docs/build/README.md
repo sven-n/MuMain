@@ -57,6 +57,8 @@ Build every other supported row locally using the setup guides above.
 A macOS build runs on the macOS version of the Mac that built it and newer: the
 Homebrew libraries it links (OpenSSL, libjpeg-turbo, Crypto++) are built for that
 version. The CI artifact needs macOS 26, which every Apple silicon Mac can install.
+CI builds it on the `macos-26` image by name, so that minimum changes only when the
+workflow names a newer image, not when GitHub moves `macos-latest`.
 
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
@@ -210,9 +212,10 @@ fails as soon as one comes back:
 The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) compile
 with their warnings turned off (`-w`, `/w`), and miniaudio and glm are included as
 system headers: their warnings are for their authors to fix. A new compiler or CMake on a runner image can bring new warnings
-without any change here; fix them in a PR like any other failure. The Linux jobs
-name their image (`ubuntu-26.04`), because GitHub moves repositories to a new
-`ubuntu-latest` one by one.
+without any change here; fix them in a PR like any other failure. The jobs name
+their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
+`-latest` label: GitHub moves repositories to a new latest image one by one and
+warns about the move in every job meanwhile.
 
 Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
 summary show hits and misses; compare the Build step duration on a warm run with
