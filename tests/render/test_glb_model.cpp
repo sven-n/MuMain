@@ -24,7 +24,10 @@
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ModelLod.h"
 #include "Render/Models/SkinnedVertexPacking.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Scenes/FixedTick.h"
+#include "Scenes/SceneCore.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
 
@@ -1651,6 +1654,63 @@ TEST_CASE("glb_model: a set crossfade runs over its ticks from the pose on scree
     CHECK(rule.priorAction == YetiAttack1);
     rule.Tick(*plain, YetiWalk);
     CHECK(rule.priorAction == YetiWalk);
+}
+
+TEST_CASE("glb_model: a draw between ticks keeps a set crossfade's source until the fade ends")
+{
+    namespace FixedTick = Scenes::FixedTick;
+    FPS_ANIMATION_FACTOR = 1.f;
+    constexpr float walkSpeed = 0.25f;
+    BMD* const savedModels = Models;
+    const EGameScene savedScene = SceneFlag;
+    SceneFlag = MAIN_SCENE;
+    // A tick that crosses key `key` a quarter of the way through, and ends the fade three quarters of the way.
+    for (const float key : {1.f, 2.f})
+    {
+        CAPTURE(key);
+        const float fadeEnd = key + walkSpeed * 0.5f;
+        auto glb = OpenYetiGlbWith(YetiGlb, {{YetiWalk, {"", fadeEnd / walkSpeed}}});
+        PrepareLikeTheGame(*glb);
+        glb->Actions[YetiWalk].PlaySpeed = walkSpeed;
+        Models = glb.get();
+        for (const auto& [alpha, fading] : {std::pair{0.5f, true}, std::pair{0.9f, false}})
+        {
+            CAPTURE(alpha);
+            OBJECT& o = Effects[0];
+            o.Live = true;
+            o.Type = 0;
+            o.CurrentAction = YetiWalk;
+            Playback playback{key - walkSpeed * 0.25f, 3.3f, YetiAttack1};
+            o.AnimationFrame = playback.frame;
+            o.PriorAnimationFrame = playback.priorFrame;
+            o.PriorAction = playback.priorAction;
+
+            FixedTick::SetOn(true);
+            FixedTick::BeginFrame(0.0);
+            FixedTick::BeginFrame(FixedTick::TickMs * (1.f + alpha));
+            FixedTick::CaptureTransforms();
+            playback.Tick(*glb, YetiWalk);
+            REQUIRE(playback.priorAction == YetiWalk);
+            o.AnimationFrame = playback.frame;
+            o.PriorAnimationFrame = playback.priorFrame;
+            o.PriorAction = playback.priorAction;
+            FixedTick::CaptureTickEnd();
+
+            FixedTick::ApplyInterpolation();
+            CHECK(o.AnimationFrame == doctest::Approx(key + walkSpeed * (alpha - 0.25f)));
+            CHECK(o.PriorAction == (fading ? YetiAttack1 : YetiWalk));
+            if (fading)
+                CHECK(o.PriorAnimationFrame == doctest::Approx(3.3f));
+            FixedTick::Restore();
+            CHECK(o.AnimationFrame == doctest::Approx(playback.frame));
+            CHECK(o.PriorAction == YetiWalk);
+
+            o.Live = false;
+            FixedTick::SetOn(false);
+        }
+    }
+    SceneFlag = savedScene;
+    Models = savedModels;
 }
 
 TEST_CASE("glb_model: a set crossfade of at least the action's length ends before the wrap, without a jump")

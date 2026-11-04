@@ -23,6 +23,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/Core/WindowSystem.h"
 #include "Core/Utilities/Random.h"
+#include "Scenes/FixedTick.h"
 
 #include <cmath>
 
@@ -492,6 +493,7 @@ bool MoveLeaves()
 
             Vector(1.f, 1.f, 1.f, o->Light);
             o->Live = true;
+            o->Birth = Scenes::FixedTick::NextBirth();
 
             if (CreateDevilSquareRain(o, i))continue;
             if (CreateChaosCastleRain(o, i))continue;

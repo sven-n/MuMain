@@ -332,6 +332,8 @@ public:
     // the first miss of a name per model logs one line.
     int FindBoneOrRoot(std::string_view name) const;
 
+    // Whether a crossfade of a set length into `action` still runs at `frame`.
+    [[nodiscard]] bool CrossfadeRunsAt(unsigned short action, float frame) const;
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);
     // BoneMatrixCapacity: element count of the caller's BoneTransform buffer. The DXP-24 stale-slot
     // fill writes identity into [NumBones, BoneMatrixCapacity) so UBO-uploaded full-size palettes

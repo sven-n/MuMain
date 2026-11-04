@@ -52,6 +52,8 @@ void UpdateCharacterEffects();
 void UpdatePreviewCharacter(CHARACTER* c);
 // What a character's draw used to set while drawing it, set before the draw: its light, a Doppelganger's look and
 // rise, a Blood Castle corpse held to the ground, the blend mesh lights it draws with.
+// The height a drawn character's body moves to; the update's, as what the draw changes in a position lasts only for it.
+void UpdateDrawnCharacterHeight(CHARACTER* c);
 void PrepareCharacterForDraw(CHARACTER* c);
 // PrepareCharacterForDraw for the client characters drawn this frame; also clears a target the siege cloak hides and
 // moves a hidden GM's pick box away. Part of CullWorld.

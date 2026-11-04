@@ -24,6 +24,7 @@
 #include "Engine/Object/ItemDropModel.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Audio/DSPlaySound.h"
@@ -6284,6 +6285,7 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
 
     OBJECT* o = &ip->Object;
     o->Live = true;
+    o->Birth = Scenes::FixedTick::NextBirth();
     o->Type = Engine::Items::Drops::DrawnModel(Type, n->Level);
     o->SubType = 1;
     ItemObjectAttribute(o);
@@ -6339,6 +6341,7 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop)
 
     OBJECT* o = &ip->Object;
     o->Live = true;
+    o->Birth = Scenes::FixedTick::NextBirth();
     o->Type = Data::Items::ToModelSlot(Type);
     o->SubType = 1;
     

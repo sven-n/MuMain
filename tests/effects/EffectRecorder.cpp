@@ -52,7 +52,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 
 // ---------------------------------------------------------------------------
 // The named fields of the pool elements. Keep in step with OBJECT
-// (w_ObjectInfo.h), PARTICLE and JOINT (_struct.h).
+// (w_ObjectInfo.h), PARTICLE and JOINT (_struct.h). Birth is left out: a running count, it depends on the run's order.
 // ---------------------------------------------------------------------------
 // clang-format off
 #define RECORDER_OBJECT_FIELDS(F)                                                                                    \
@@ -92,8 +92,8 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 // Windows build without iterator debugging (OBJECT holds a std::map and
 // std::vectors, whose size depends on it).
 #if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
-static_assert(sizeof(OBJECT) == 776, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
-static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
+static_assert(sizeof(OBJECT) == 784, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
+static_assert(sizeof(PARTICLE) == 144, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
 static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
 #endif
 

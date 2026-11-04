@@ -14,6 +14,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/WindowSystem.h"
+#include "Scenes/FixedTick.h"
 
 PARTICLE Points[MAX_POINTS];
 
@@ -32,6 +33,7 @@ void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMo
         if (!o->Live)
         {
             o->Live = true;
+            o->Birth = Scenes::FixedTick::NextBirth();
             o->Type = Value;
             VectorCopy(Position, o->Position);
             o->Position[2] += 140.f;

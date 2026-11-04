@@ -7,6 +7,7 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Scenes/SceneCore.h"
 
 #include <array>
@@ -49,6 +50,8 @@ struct Slot
 {
     Transform previous;
     Transform current;
+    vec3_t tickEnd{};
+    unsigned int birth = 0;
     int type = -1;
     bool captured = false;
     bool applied = false;
@@ -59,6 +62,7 @@ struct PointSlot
 {
     vec3_t previous{};
     vec3_t current{};
+    unsigned int birth = 0;
     int type = -1;
     bool captured = false;
     bool applied = false;
@@ -83,6 +87,7 @@ Clock s_clock;
 double s_lastMs = -1.0;
 int s_ticksThisFrame = 0;
 std::uint64_t s_ticksRun = 0;
+unsigned int s_births = 0;
 
 template <typename Visit> void ForEachMoved(Visit visit)
 {
@@ -173,6 +178,11 @@ float InterpolateFrame(float previous, float current, float alpha, bool sameActi
     return previous + (current - previous) * alpha;
 }
 
+unsigned int NextBirth()
+{
+    return ++s_births;
+}
+
 bool IsOn()
 {
     return s_on;
@@ -238,6 +248,7 @@ void CaptureTransforms()
         [](Slot& slot, const OBJECT& o)
         {
             slot.captured = o.Live;
+            slot.birth = o.Birth;
             slot.type = o.Type;
             Copy(o, slot.previous);
         });
@@ -245,9 +256,15 @@ void CaptureTransforms()
         [](PointSlot& slot, const PARTICLE& p)
         {
             slot.captured = p.Live;
+            slot.birth = p.Birth;
             slot.type = p.Type;
             VectorCopy(p.Position, slot.previous);
         });
+}
+
+void CaptureTickEnd()
+{
+    ForEachMoved([](Slot& slot, const OBJECT& o) { VectorCopy(o.Position, slot.tickEnd); });
 }
 
 void ApplyInterpolation()
@@ -256,7 +273,7 @@ void ApplyInterpolation()
     ForEachMoved(
         [alpha](Slot& slot, OBJECT& o)
         {
-            if (!slot.captured || !o.Live || slot.applied || slot.type != o.Type)
+            if (!slot.captured || !o.Live || slot.applied || slot.type != o.Type || slot.birth != o.Birth)
                 return;
             Copy(o, slot.current);
             Interpolate(slot.previous.position, slot.current.position, alpha, o.Position);
@@ -264,24 +281,27 @@ void ApplyInterpolation()
                 o.Angle[i] = InterpolateAngle(slot.previous.angle[i], slot.current.angle[i], alpha);
             o.AnimationFrame = InterpolateFrame(slot.previous.frame, slot.current.frame, alpha,
                                                 slot.previous.action == slot.current.action);
-            // Still on the previous tick's key: it blends from what that tick blended from.
-            if (static_cast<int>(o.AnimationFrame) == static_cast<int>(slot.previous.frame) &&
-                slot.previous.action == slot.current.action)
+            // Still on the previous tick's key, or in its fade: it blends from what that tick blended from.
+            const bool samePriorKey = static_cast<int>(o.AnimationFrame) == static_cast<int>(slot.previous.frame);
+            const bool fading = slot.previous.priorAction != slot.previous.action && Models != nullptr && o.Type >= 0 &&
+                                o.Type < MAX_MODELS &&
+                                Models[o.Type].CrossfadeRunsAt(o.CurrentAction, o.AnimationFrame);
+            if (slot.previous.action == slot.current.action && (samePriorKey || fading))
             {
                 o.PriorAnimationFrame = slot.previous.priorFrame;
                 o.PriorAction = slot.previous.priorAction;
             }
             slot.applied = true;
-            if (!VectorCompare(o.Position, slot.current.position))
+            if (!VectorCompare(o.Position, slot.tickEnd))
             {
-                s_offsets[&o] = {o.Position[0] - slot.current.position[0], o.Position[1] - slot.current.position[1],
-                                 o.Position[2] - slot.current.position[2]};
+                s_offsets[&o] = {o.Position[0] - slot.tickEnd[0], o.Position[1] - slot.tickEnd[1],
+                                 o.Position[2] - slot.tickEnd[2]};
             }
         });
     ForEachPoint(
         [alpha](PointSlot& slot, PARTICLE& p)
         {
-            if (!slot.captured || !p.Live || slot.applied || slot.type != p.Type)
+            if (!slot.captured || !p.Live || slot.applied || slot.type != p.Type || slot.birth != p.Birth)
                 return;
             VectorCopy(p.Position, slot.current);
             Interpolate(slot.previous, slot.current, alpha, p.Position);

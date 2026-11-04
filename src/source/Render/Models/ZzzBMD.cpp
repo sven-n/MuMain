@@ -248,6 +248,12 @@ static std::optional<float> GltfCrossfadeKeyTime(const BMD& model, unsigned shor
         {a.NumAnimationKeys, a.LockPositions, a.PlaySpeed, a.Loop}, *gltf->actionCrossfades[action]);
 }
 
+bool BMD::CrossfadeRunsAt(unsigned short action, float frame) const
+{
+    const auto fade = GltfCrossfadeKeyTime(*this, action);
+    return fade && Render::Models::AnimationSampling::CrossfadeContinues(frame, *fade);
+}
+
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     const vec3_t Angle, const vec3_t HeadAngle, bool Parent, bool Translate,
                     const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity)

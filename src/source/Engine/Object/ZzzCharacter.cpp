@@ -6406,6 +6406,7 @@ void MoveCharacterClient(CHARACTER* cc)
         MoveCharacterVisual(cc, co);
 
         battleCastle::MoveBattleCastleMonster(cc, co);
+        UpdateDrawnCharacterHeight(cc);
     }
 }
 
@@ -12176,11 +12177,11 @@ void UpdatePreviewCharacter(CHARACTER* c)
     PrepareCharacterForDraw(c);
 }
 
-void PrepareCharacterForDraw(CHARACTER* c)
+void UpdateDrawnCharacterHeight(CHARACTER* c)
 {
+    if (!IsCharacterDrawn(c))
+        return;
     OBJECT* o = &c->Object;
-
-    PrepareCarriedParts(c);
 
     // A dying Blood Castle monster's body is held to the ground.
     if (o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP && c->MonsterIndex != MONSTER_ICE_QUEEN &&
@@ -12194,6 +12195,17 @@ void PrepareCharacterForDraw(CHARACTER* c)
         if (height < o->Position[2])
             o->Position[2] = height;
     }
+
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM &&
+        g_isCharacterBuff(o, eBuff_Doppelganger_Ascension))
+        o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
+}
+
+void PrepareCharacterForDraw(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+
+    PrepareCarriedParts(c);
 
     vec3_t Light;
     if (SceneFlag == CHARACTER_SCENE)
@@ -12215,8 +12227,6 @@ void PrepareCharacterForDraw(CHARACTER* c)
         else if (o->CurrentAction != PLAYER_DIE1)
             o->Alpha = 1.0f;
         o->BlendMesh = -1;
-        if (g_isCharacterBuff(o, eBuff_Doppelganger_Ascension))
-            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
     }
 
     if (c->PK >= PVP_MURDERER2)
@@ -12544,6 +12554,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->Path.CurrentPath = 0;
     c->Movement = false;
     o->Live = true;
+    o->Birth = Scenes::FixedTick::NextBirth();
     o->Visible = false;
     o->AlphaEnable = true;
     o->LightEnable = true;

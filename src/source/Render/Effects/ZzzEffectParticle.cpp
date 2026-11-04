@@ -23,6 +23,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Effects/ParticleDrawOrder.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/MainScene.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
@@ -73,6 +74,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
         if (!o->Live)
         {
             o->Live = true;
+            o->Birth = Scenes::FixedTick::NextBirth();
             o->Type = Type;
             o->TexType = Type;
             o->SubType = SubType;

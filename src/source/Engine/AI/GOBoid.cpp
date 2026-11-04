@@ -85,6 +85,7 @@ bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int Sub
     {
         o->Type = Type;
         o->Live = true;
+        o->Birth = Scenes::FixedTick::NextBirth();
         o->Visible = false;
         o->LightEnable = true;
         o->ContrastEnable = false;
@@ -896,6 +897,7 @@ int CreateDragon(OBJECT* o, int index)
     if (index < 3)
     {
         o->Live = true;
+        o->Birth = Scenes::FixedTick::NextBirth();
         OpenMonsterModel(MONSTER_MODEL_DRAGON);
         o->Type = MODEL_DRAGON_;
         o->Scale = (float)(Random::Rand() % 3 + 6) * 0.05f;
@@ -1437,6 +1439,7 @@ void MoveBoids()
                 if (rand_fps_check(300))
                 {
                     o->Live = true;
+                    o->Birth = Scenes::FixedTick::NextBirth();
                     OpenMonsterModel(MONSTER_MODEL_DRAGON);
                     o->Type = MODEL_DRAGON_;
                     o->Scale = (float)(Random::Rand() % 3 + 6) * 0.1f;
@@ -1477,6 +1480,7 @@ void MoveBoids()
                 o->Initialize();
 
                 o->Live = true;
+                o->Birth = Scenes::FixedTick::NextBirth();
                 o->Velocity = 1.f;
                 o->LightEnable = true;
                 o->LifeTime = 0;
@@ -1823,6 +1827,7 @@ void MoveFishs()
                 )
             {
                 o->Live = true;
+                o->Birth = Scenes::FixedTick::NextBirth();
                 o->Alpha = 0.f;
                 o->AlphaTarget = 1.f;
                 o->BlendMesh = -1;

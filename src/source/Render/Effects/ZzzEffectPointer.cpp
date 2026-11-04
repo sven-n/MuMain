@@ -16,6 +16,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
+#include "Scenes/FixedTick.h"
 
 PARTICLE Pointers[MAX_POINTERS];
 
@@ -30,6 +31,7 @@ void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float S
         if (!o->Live)
         {
             o->Live = true;
+            o->Birth = Scenes::FixedTick::NextBirth();
             o->Type = Type;
             VectorCopy(Position, o->Position);
             VectorCopy(Light, o->Light);

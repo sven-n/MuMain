@@ -5,6 +5,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
@@ -153,6 +154,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
             if (!pBoid->Live)
             {
                 pBoid->Live = true;
+                pBoid->Birth = Scenes::FixedTick::NextBirth();
                 pBoid->Velocity = 0.f;
                 pBoid->LightEnable = true;
                 pBoid->LifeTime = 0;

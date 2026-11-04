@@ -385,6 +385,8 @@ static void RunWorldTicks()
         UpdateGameEntities();
         g_PhysicsManager.Move(0.025f);
     }
+    if (Scenes::FixedTick::TicksThisFrame() > 0)
+        Scenes::FixedTick::CaptureTickEnd();
 }
 
 /**

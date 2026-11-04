@@ -127,3 +127,4 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+target_compile_definitions(test_fixed_tick PRIVATE MU_TEST_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin")

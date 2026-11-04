@@ -26,6 +26,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/MainScene.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
@@ -352,6 +353,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
         if (!o->Live)
         {
             o->Live = true;
+            o->Birth = Scenes::FixedTick::NextBirth();
             // Not tested yet: a reused slot must not draw in a pass that trusts last frame's visibility.
             o->Visible = false;
             o->Type = Type;

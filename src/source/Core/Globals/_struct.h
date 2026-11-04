@@ -455,6 +455,7 @@ typedef struct
     int iNumBone;
     bool bRepeatedly;
     float fRepeatedlyHeight;
+    unsigned int Birth;
 } PARTICLE;
 
 typedef struct

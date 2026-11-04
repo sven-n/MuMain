@@ -55,13 +55,19 @@ private:
     int m_step;
 };
 
+// Names a new life of an object in a reused slot or list place: what's kept of the place's last object isn't its own.
+[[nodiscard]] unsigned int NextBirth();
+
 // Keeps the positions, angles and animation frames the coming tick moves from.
 void CaptureTransforms();
+// Keeps where the frame's last tick left objects: what that tick built, sprites and cloth, stays there while the hero's
+// input moves on between ticks.
+void CaptureTickEnd();
 // For the frame's camera and draws, moved objects stand and pose between ticks; the draws animate them into bones of
 // their own. Restore gives the update's values back before anything can change them.
 void ApplyInterpolation();
 void Restore();
-// How far the frame's draw moves the object from where the update left it; zero for an object not moved.
+// How far the frame's draw moves the object from where the last tick left it; zero for an object not moved.
 void DrawOffset(const OBJECT* o, vec3_t out);
 // The sprites created in its lifetime move with this object: an equipment effect's own owner is its item type's shared
 // object, not who wears it.

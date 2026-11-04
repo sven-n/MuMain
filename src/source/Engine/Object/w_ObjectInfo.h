@@ -119,6 +119,7 @@ public:
 
 public:
     bool          Live;
+    unsigned int Birth = 0;
     bool          bBillBoard;
     bool          m_bCollisionCheck;
     bool          m_bRenderShadow;

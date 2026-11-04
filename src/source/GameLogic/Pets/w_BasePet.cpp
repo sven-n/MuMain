@@ -8,6 +8,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Scenes/FixedTick.h"
 
 extern float EarthQuake;
 
@@ -62,6 +63,7 @@ bool PetObject::Create(int itemType, int modelType, vec3_t Position, CHARACTER* 
 
     m_obj->Type = modelType;
     m_obj->Live = TRUE;
+    m_obj->Birth = Scenes::FixedTick::NextBirth();
     m_obj->Visible = FALSE;
     m_obj->LightEnable = TRUE;
     m_obj->ContrastEnable = FALSE;
