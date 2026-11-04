@@ -461,7 +461,7 @@ TEST_CASE("A copy drawn in place of an object draws as that object while its sco
     BeginObjectDraws();
 }
 
-TEST_CASE("A sprite is visible from its creation; its draw sets nothing on it [effects]")
+TEST_CASE("A sprite is visible from its creation, its draw sets nothing on it [effects]")
 {
     for (int i = 0; i < MAX_SPRITES; ++i)
         Sprites[i].Live = false;
@@ -474,7 +474,7 @@ TEST_CASE("A sprite is visible from its creation; its draw sets nothing on it [e
     Sprites[0].Live = false;
 }
 
-TEST_CASE("An effect drawn as its owner's weapon draws a copy; the effect stays as the update left it [effects]")
+TEST_CASE("An effect drawn as its owner's weapon draws a copy, the effect stays as the update left it [effects]")
 {
     ClearEffects();
     const std::unique_ptr<BMD[]> models(new BMD[MAX_MODELS]);
@@ -620,7 +620,7 @@ TEST_CASE("Crywolf's water spots are rolled in the update, once for the water th
     Hero = savedHero;
 }
 
-TEST_CASE("A frame with no update since the last draws the sprites again; a pass in the same frame doesn't [effects]")
+TEST_CASE("A frame with no update since the last draws the sprites again, a pass in the same frame doesn't [effects]")
 {
     ViewScope view;
     ClearSprites();
