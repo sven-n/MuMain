@@ -201,10 +201,14 @@ void DisableTexture2D()
 }
 void EnableAlphaTestRaw()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaTestRaw, 0))
+        return;
     glEnable(GL_ALPHA_TEST);
 }
 void DisableAlphaTestRaw()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableAlphaTestRaw, 0))
+        return;
     glDisable(GL_ALPHA_TEST);
 }
 void EnableFog()

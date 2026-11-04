@@ -4,6 +4,8 @@
 
 #ifdef _EDITOR
 
+#include "../render/DrawerContract.h"
+
 #include "UI/ItemTools/ItemMeshFields.h"
 #include "UI/ItemTools/ItemMeshFocus.h"
 #include "UI/ItemTools/ItemMeshPicking.h"
@@ -23,6 +25,7 @@
 #include <cstring>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <vector>
 
 using namespace MuEditor::Items;
@@ -113,9 +116,13 @@ public:
         alphaTests.push_back(glIsEnabled(GL_ALPHA_TEST) != 0);
     }
 
-    void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+    void DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) override
+    {
+        shadows.push_back(draw);
+    }
 
     std::vector<MeshDraw> draws;
+    std::vector<Render::ModelDrawing::ShadowDraw> shadows;
     // Whether the alpha test was on for each draw.
     std::vector<bool> alphaTests;
 
@@ -174,6 +181,48 @@ MeshDraw DrawOf(const BMD& model, int mesh, int flags)
     }
     return draw;
 }
+
+// A valid CPU triangle for the real model drawer; storage stays alive until replay finishes.
+struct TriangleGeometry
+{
+    float positions[3][3] = {{0.f, 0.f, 0.f}, {10.f, 0.f, 0.f}, {0.f, 10.f, 0.f}};
+    std::array<Vertex_t, 3> vertices{};
+    std::array<TexCoord_t, 3> texCoords{};
+    Normal_t normal{};
+    Triangle_t triangle{};
+
+    TriangleGeometry()
+    {
+        triangle.Polygon = 3;
+        normal.Normal[2] = 1.f;
+        for (int i = 0; i < 3; ++i)
+        {
+            VectorCopy(positions[i], vertices[i].Position);
+            triangle.VertexIndex[i] = static_cast<short>(i);
+            triangle.TexCoordIndex[i] = static_cast<short>(i);
+        }
+    }
+
+    void Attach(TestModel& model, int index)
+    {
+        Mesh_t& mesh = model.Mesh(index);
+        mesh.NumVertices = 3;
+        mesh.NumNormals = 1;
+        mesh.NumTexCoords = 3;
+        mesh.NumTriangles = 1;
+        mesh.Vertices = vertices.data();
+        mesh.Normals = &normal;
+        mesh.TexCoords = texCoords.data();
+        mesh.Triangles = &triangle;
+    }
+
+    MeshDraw Draw(const BMD& model, int mesh) const
+    {
+        MeshDraw draw = DrawOf(model, mesh, RENDER_TEXTURE);
+        draw.cpu = {.vertices = positions, .vertexCount = 3};
+        return draw;
+    }
+};
 
 MeshPicking::Ray Downward(float x, float y, float z)
 {
@@ -499,6 +548,142 @@ TEST_CASE("Without a shown mesh the preview's drawer draws the item as it is [ed
     REQUIRE(recorder.draws.size() == 2);
     CHECK(recorder.draws[0].flags == RENDER_TEXTURE);
     CHECK(recorder.draws[1].flags == (RENDER_TEXTURE | RENDER_CHROME));
+}
+
+TEST_CASE("Preview highlighting preserves cutouts and render state through real replay [drawer-contract]")
+{
+    const TextureWithHoles holes;
+    TestModel item(2);
+    TriangleGeometry geometry;
+    for (int mesh = 0; mesh < 2; ++mesh)
+    {
+        geometry.Attach(item, mesh);
+        item.SetLoadedTexture(mesh, holes.index);
+    }
+    const auto scene = [&]
+    {
+        {
+            CItemMeshPreviewDrawer preview(&item.Model(), 1, std::nullopt);
+            Render::ModelDrawing::ActiveModelDrawer().DrawMesh(geometry.Draw(item.Model(), 0));
+            Render::ModelDrawing::ActiveModelDrawer().DrawMesh(geometry.Draw(item.Model(), 1));
+        }
+        // A following draw sees the same state too, including the alpha threshold and depth writes.
+        Render::ModelDrawing::ActiveModelDrawer().DrawMesh(geometry.Draw(item.Model(), 1));
+    };
+    DrawerContract::CheckDrawnLaterAsAtOnce(scene, "Triangles");
+    const auto calls = DrawerContract::CallsOf(scene, false, false);
+    REQUIRE(calls.size() >= 3);
+    CHECK(calls[0].find("alphaTest 1") != std::string::npos);
+    CHECK(calls[0].find("depth 10") != std::string::npos);
+}
+
+TEST_CASE("Preview picking consumes the described pose after the shared model changes [drawer-contract]")
+{
+    TestModel item(1);
+    TriangleGeometry geometry;
+    geometry.Attach(item, 0);
+    float captured[MAX_BONES][3][4]{};
+    float live[MAX_BONES][3][4]{};
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        captured[0][axis][axis] = live[0][axis][axis] = 1.f;
+    }
+    live[0][0][3] = 100.f;
+    MeshDraw draw = geometry.Draw(item.Model(), 0);
+    MeshPicking::Ray atCaptured = Downward(1.f, 1.f, 10.f);
+    SUBCASE("CPU vertices remain authoritative") {}
+    SUBCASE("skin, scale and body origin remain authoritative")
+    {
+        draw.cpu = {};
+        draw.skin.bones = captured;
+        draw.skin.translate = true;
+        draw.bodyScale = 2.f;
+        draw.bodyOrigin[0] = 20.f;
+        atCaptured = Downward(22.f, 2.f, 10.f);
+    }
+    BMD& model = item.Model();
+    model.BodyScale = 1.f;
+    Vector(0.f, 0.f, 0.f, model.BodyOrigin);
+    vec3_t min{}, max{};
+    OBB_t bounds{};
+    const auto savedBones = g_pActiveBoneTransform;
+    model.TransformCheap(live, min, max, &bounds, true);
+    SetActiveBoneTransform(savedBones);
+    const auto before = Render::Drawing::Hash(geometry.positions, sizeof(geometry.positions));
+    RecordingDrawer recorder;
+    const DrawerScope scope(recorder);
+    {
+        CItemMeshPreviewDrawer preview(&model, std::nullopt, atCaptured);
+        preview.DrawMesh(draw);
+        CHECK(preview.HitMesh() == 0);
+    }
+    {
+        CItemMeshPreviewDrawer preview(&model, std::nullopt, Downward(101.f, 1.f, 10.f));
+        preview.DrawMesh(draw);
+        CHECK_FALSE(preview.HitMesh());
+    }
+    CHECK(Render::Drawing::Hash(geometry.positions, sizeof(geometry.positions)) == before);
+    CHECK(captured[0][0][3] == 0.f);
+    CHECK(live[0][0][3] == 100.f);
+}
+
+TEST_CASE("Preview drawers forward other models and shadows without changing their descriptions [drawer-contract]")
+{
+    TestModel item(1), other(1);
+    RecordingDrawer recorder;
+    const DrawerScope scope(recorder);
+    MeshDraw mesh = DrawOf(other.Model(), 0, RENDER_TEXTURE | RENDER_DARK);
+    mesh.alpha = 0.4f;
+    mesh.bodyOrigin[0] = 123.f;
+    const Render::ModelDrawing::ShadowDraw shadow{.model = &item.Model(), .alpha = 0.6f};
+    {
+        CItemMeshPreviewDrawer preview(&item.Model(), 0, std::nullopt);
+        preview.DrawMesh(mesh);
+        preview.DrawShadow(shadow);
+    }
+    REQUIRE(recorder.draws.size() == 1);
+    CHECK(recorder.draws[0].model == mesh.model);
+    CHECK(recorder.draws[0].flags == mesh.flags);
+    CHECK(recorder.draws[0].alpha == mesh.alpha);
+    CHECK(recorder.draws[0].bodyOrigin[0] == mesh.bodyOrigin[0]);
+    REQUIRE(recorder.shadows.size() == 1);
+    CHECK(recorder.shadows[0].model == shadow.model);
+    CHECK(recorder.shadows[0].alpha == shadow.alpha);
+}
+
+TEST_CASE("Nested preview drawers restore their caller on normal and exceptional exits [drawer-contract]")
+{
+    TestModel item(1), other(1);
+    RecordingDrawer recorder;
+    const DrawerScope scope(recorder);
+    {
+        CItemMeshPreviewDrawer outer(&item.Model(), 0, std::nullopt);
+        CHECK_THROWS_AS(
+            [&]
+            {
+                CItemMeshPreviewDrawer inner(&other.Model(), 0, std::nullopt);
+                CHECK(&Render::ModelDrawing::ActiveModelDrawer() == &inner);
+                throw std::runtime_error("test scope exit");
+            }(),
+            std::runtime_error);
+        CHECK(&Render::ModelDrawing::ActiveModelDrawer() == &outer);
+    }
+    CHECK(&Render::ModelDrawing::ActiveModelDrawer() == &recorder);
+}
+
+TEST_CASE("Picking rejects descriptions without a complete pose [drawer-contract]")
+{
+    TestModel item(1);
+    TriangleGeometry geometry;
+    geometry.Attach(item, 0);
+    MeshDraw draw = geometry.Draw(item.Model(), 0);
+    const auto ray = Downward(1.f, 1.f, 10.f);
+    draw.cpu.vertexCount = 2;
+    CHECK_FALSE(MeshPicking::HitMesh(ray, draw));
+    draw.cpu = {};
+    CHECK_FALSE(MeshPicking::HitMesh(ray, draw));
+    draw.model = nullptr;
+    CHECK_FALSE(MeshPicking::HitMesh(ray, draw));
 }
 
 #endif // _EDITOR

@@ -5,10 +5,12 @@
 #include "ItemMeshPicking.h"
 
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewCamera.h"
+#include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <cmath>
 #include <numbers>
+#include <vector>
 
 namespace MuEditor::Items::MeshPicking
 {
@@ -93,7 +95,7 @@ std::optional<float> HitTriangle(const Ray& ray, const float* a, const float* b,
     return distance;
 }
 
-std::optional<float> HitMesh(const Ray& ray, const BMD& model, int mesh, float (*vertices)[3])
+std::optional<float> HitMesh(const Ray& ray, const BMD& model, int mesh, const float (*vertices)[3])
 {
     if (mesh < 0 || mesh >= model.NumMeshs || model.Meshs == nullptr)
     {
@@ -123,6 +125,31 @@ std::optional<float> HitMesh(const Ray& ray, const BMD& model, int mesh, float (
         }
     }
     return nearest;
+}
+
+std::optional<float> HitMesh(const Ray& ray, const Render::ModelDrawing::MeshDraw& draw)
+{
+    if (draw.model == nullptr || draw.model->Meshs == nullptr || draw.mesh < 0 || draw.mesh >= draw.model->NumMeshs)
+    {
+        return std::nullopt;
+    }
+    const BMD& model = *draw.model;
+    const Mesh_t& mesh = model.Meshs[draw.mesh];
+    if (draw.cpu.vertices != nullptr)
+    {
+        return draw.cpu.vertexCount >= mesh.NumVertices ? HitMesh(ray, model, draw.mesh, draw.cpu.vertices)
+                                                        : std::nullopt;
+    }
+    if (draw.skin.bones == nullptr || mesh.NumVertices <= 0)
+    {
+        return std::nullopt;
+    }
+    std::vector<Vector> vertices(static_cast<std::size_t>(mesh.NumVertices));
+    for (int vertex = 0; vertex < mesh.NumVertices; ++vertex)
+    {
+        model.SkinVertex(draw.mesh, vertex, draw.skin, draw.bodyScale, draw.bodyOrigin, vertices[vertex].data());
+    }
+    return HitMesh(ray, model, draw.mesh, reinterpret_cast<const float (*)[3]>(vertices.data()));
 }
 } // namespace MuEditor::Items::MeshPicking
 
