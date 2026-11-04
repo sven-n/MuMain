@@ -65,26 +65,22 @@ void OpenFilterFile(const wchar_t* FileName)
 
     int Size = 20;
     BYTE* Buffer = new BYTE[Size * MAX_FILTERS];
-    DWORD dwCheckSum;
-    const bool complete =
-        DataFileIO::ReadExact(fp, Buffer, Size * MAX_FILTERS) && DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
+    // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
+    // smaller table ends early, after that entry, and still loads.
+    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp);
     fclose(fp);
-    if (!complete)
-    {
-        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
-        delete[] Buffer;
-        return;
-    }
 
+    bool ended = false;
     {
         BYTE* pSeek = Buffer;
-        for (int i = 0; i < MAX_FILTERS; i++)
+        for (std::size_t i = 0; i < entries; i++)
         {
             BuxConvert(pSeek, Size);
             memcpy(AbuseFilter[i], pSeek, Size);
             if (AbuseFilter[i][0] == 0)
             {
-                AbuseFilterNumber = i;
+                AbuseFilterNumber = static_cast<int>(i);
+                ended = true;
                 break;
             }
             pSeek += Size;
@@ -92,6 +88,10 @@ void OpenFilterFile(const wchar_t* FileName)
     }
 
     delete[] Buffer;
+    if (!ended && entries < MAX_FILTERS)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+    }
 }
 
 void OpenNameFilterFile(const wchar_t* FileName)
@@ -152,7 +152,14 @@ void OpenGateScript(const wchar_t* FileName)
         BYTE* Buffer = new BYTE[Size];
         for (int i = 0; i < MAX_GATES; i++)
         {
-            if (!DataFileIO::ReadExact(fp, Buffer, Size))
+            // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
+            // ends inside a gate is corrupt.
+            const std::size_t read = fread(Buffer, 1, Size, fp);
+            if (read == 0 && feof(fp))
+            {
+                break;
+            }
+            if (read != static_cast<std::size_t>(Size))
             {
                 DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
                 break;
