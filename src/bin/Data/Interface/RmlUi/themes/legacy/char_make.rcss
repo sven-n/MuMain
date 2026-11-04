@@ -6,22 +6,15 @@
 {
 	src: "../../../cha_id.tga";
 	charmake-input-image: 0px 0px 346px 38px;
+	charmake-tab-left:  40px 17px 7px 18px;
+	charmake-tab-mid:   62px 17px 1px 18px;
+	charmake-tab-right: 63px 17px 6px 18px;
 }
 @spritesheet charmake-job-sheet
 {
 	src: "../../../cha_bt.tga";
 	charmake-job-unchecked: 0px 0px 108px 26px;
 	charmake-job-checked:   0px 78px 108px 26px;
-}
-@spritesheet charmake-ok-sheet
-{
-	src: "../../../message_ok_b_all.tga";
-	charmake-ok-idle: 0px 0px 54px 30px;
-}
-@spritesheet charmake-cancel-sheet
-{
-	src: "../../../loding_cancel_b_all.tga";
-	charmake-cancel-idle: 0px 0px 54px 30px;
 }
 
 /* Static RCSS instead of C++-pushed for width/height and most children (except #panel's own
@@ -141,10 +134,21 @@
 	pointer-events: none;
 }
 
-/* Real legacy screen has no separate label element -- cha_id.tga's own baked art already shows
-   one as part of the single wide sprite above. */
+/* Cover the painted "ID" tab with matching art, then draw the translated label over it. */
 .input-label {
-	display: none;
+	position: absolute;
+	left: 40px;
+	top: 334px;
+	height: 18px;
+	padding: 0 8px 0 6px;
+	line-height: 18px;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	font-weight: bold;
+	color: #ffe96c;
+	font-effect: outline(1px black);
+	decorator: tiled-horizontal(charmake-tab-left, charmake-tab-mid, charmake-tab-right);
 }
 
 /* modern-only decorative backdrops/kickers (char_make.rml's own comment) -- real legacy sprite art
@@ -153,16 +157,12 @@
 	display: none;
 }
 
-/* Name field: placement/size only -- appearance comes from base.rcss's shared .text-field, with the
-   fill/border dropped here because cha_id.tga's own baked art (#input_frame above) already provides
-   them. Box matches where the native CUITextInputBox sat: the old kInputTextOffsetX=78/
-   kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317) origin at its Init()'d 200x20 size.
-   Text colour matches the old Configure({textR 255, textG 230, textB 210}). */
+/* Start after the widest translated tab while staying inside the original identity row. */
 .char-make-name-field {
 	position: absolute;
-	left: 78px;
+	left: 120px;
 	top: 338px;
-	width: 200px;
+	width: 160px;
 	height: 20px;
 	padding: 0;
 	color: token(text-narrative);
@@ -179,16 +179,14 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it
-	   (color:transparent); line-height/text-align/vertical-align set explicitly rather than
-	   relying on inheritance from base.rcss's .btn. */
-	color: transparent;
+	color: #efba58;
+	font-weight: bold;
+	font-effect: outline(1px black);
 }
-.btn-ok {
-	decorator: image(charmake-ok-idle);
-}
-.btn-cancel {
-	decorator: image(charmake-cancel-idle);
+
+.btn-text {
+	display: block;
+	white-space: nowrap;
 }
 
 /* The stat rows' own places, so a theme can move them -- they were style attributes, which are
