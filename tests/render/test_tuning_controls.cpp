@@ -73,8 +73,6 @@ const SpecRow Spec[] = {
      TuningUnit::Seconds, TuningZero::Immediate},
     {TuningControlId::EffectRangeMax, TuningGroup::DynamicLights, true, LookValue::DynamicEffectRangeMax, 0, 16, 1,
      TuningUnit::Cells, TuningZero::NoCap},
-    {TuningControlId::ShadowAngle, TuningGroup::DynamicLights, true, LookValue::GroundShadowAngle, 0, 360, 5,
-     TuningUnit::Degrees, TuningZero::Plain},
     {TuningControlId::MoodStrength, TuningGroup::LightMood, false, std::nullopt, 0, 100, 1, TuningUnit::Percent,
      TuningZero::Plain},
     {TuningControlId::BloomStrength, TuningGroup::PostProcessing, false, LookValue::BloomStrength, 0, 2, 0.05,
@@ -122,9 +120,9 @@ Data::Maps::LookProfileData ShippedLikeProfile()
 }
 } // namespace
 
-TEST_CASE("the 34 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
+TEST_CASE("the 33 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
 {
-    REQUIRE(Render::Look::TuningControlCount == 34);
+    REQUIRE(Render::Look::TuningControlCount == 33);
     REQUIRE(std::size(Spec) == Render::Look::TuningControlCount);
     std::set<LookValue> covered;
     for (const SpecRow& row : Spec)
@@ -153,8 +151,9 @@ TEST_CASE("the 34 tuning controls have the specified bounds, steps, units and pl
         const double steps = (control.max - control.min) / control.step;
         CHECK(std::abs(steps - std::round(steps)) < 1e-9);
     }
-    // Every look value has exactly one control.
-    CHECK(covered.size() == Data::Maps::LookValueCount);
+    // Every look value has exactly one control, but the sun's direction: painted shadows cannot follow a player's.
+    CHECK(covered.size() == Data::Maps::LookValueCount - 1);
+    CHECK_FALSE(Render::Look::FindTuningControl(LookValue::GroundShadowAngle));
     // Colour grading may now be off entirely.
     CHECK(Data::Maps::Info(LookValue::GradingStrength).min == 0.0);
 }
