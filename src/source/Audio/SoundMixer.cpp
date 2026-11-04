@@ -111,9 +111,6 @@ struct State
     // The rows since the list was cleared.
     std::map<int, Listed> listed;
     int nextOrder = 0;
-    // The kind of every sound heard this session, for Apply: a cleared sound
-    // may still play.
-    std::map<int, SoundKind> kindOf;
     // The backend's starts of OnPlay's sound before its play, and where it
     // comes from.
     int playing = -1;
@@ -126,7 +123,7 @@ struct State
     // The latest starts without a place, newest first.
     std::deque<PlacelessStart> placeless;
     // Every type each sound was heard as this session (the Sound Editor's
-    // "heard as").
+    // "heard as"; Apply: a cleared sound may still play).
     std::map<int, std::set<SoundKind>> kindsHeard;
     // The music tracks heard this session: the row number of the one at
     // `index` is MusicNumberAt(index) (Q-SM17).
@@ -321,13 +318,13 @@ float OnPlay(int number, bool looped, const SoundPlace* objectPlace)
     state.kindsHeard[number].insert(heard.kind);
     heard.name = state.origin.name;
     heard.sourceNumber = state.origin.sourceNumber;
-    state.kindOf[number] = heard.kind;
     state.playing = number;
     state.startsBefore = StartsOf(number);
     const float gain = GainFor(number, heard.kind);
     if (g_platformAudio != nullptr)
     {
-        g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), gain);
+        // The start is of its type's group: the other types' copies keep their gain.
+        g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), static_cast<int>(IndexOf(heard.kind)), gain);
     }
     return gain;
 }
@@ -484,9 +481,14 @@ void Apply()
     {
         return;
     }
-    for (const auto& [number, kind] : Mixer().kindOf)
+    // Each type a sound was heard as has its own copies.
+    for (const auto& [number, kinds] : Mixer().kindsHeard)
     {
-        g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), GainFor(number, kind));
+        for (const SoundKind kind : kinds)
+        {
+            g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), static_cast<int>(IndexOf(kind)),
+                                             GainFor(number, kind));
+        }
     }
     g_platformAudio->SetMusicMixGain(MusicGain());
 }

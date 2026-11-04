@@ -77,9 +77,12 @@ sounds (`World/MapInfra/MapObjectSounds.cpp`) with the map and object type. In
 players' builds it is an empty class: the game's code does the same as before.
 
 **Gains in the backend.** `IPlatformAudio` gets a mix gain per sound number and
-one for music, 1 by default. `MiniAudioBackend` keeps each channel's volume
-without the gain and multiplies it in when a channel starts and when a gain
-changes, so playing copies follow at once. Players' builds never set a gain.
+group (the type of the play), and one for music, 1 by default. `MiniAudioBackend`
+keeps each channel's volume without the gain and the gain and group it started
+with, and multiplies the gain in when a channel starts and when its group's gain
+changes, so playing copies follow at once; a copy another type started (the hero's
+swing while another player's swing of the same sound starts) keeps its own.
+Players' builds never set a gain.
 
 **What the mixer does not touch.** The editor's own previews (Monster Sounds'
 and the Map Editor's Play buttons, Monster Preview, the effect preview) play

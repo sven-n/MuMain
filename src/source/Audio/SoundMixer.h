@@ -153,7 +153,8 @@ struct Changes
 Changes CountChanges();
 
 // Gives the backend the gains of every sound heard this session, listed or
-// cleared, and of the music; after a control changes.
+// cleared, for each type it was heard as (its copies of that type follow),
+// and of the music; after a control changes.
 void Apply();
 
 // Puts every control back to normal, and applies it.

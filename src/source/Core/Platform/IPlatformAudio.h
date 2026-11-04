@@ -64,12 +64,16 @@ public:
 
     // Volume controls — linear 0.0 (mute) to 1.0 (full). Story 5.4.1.
     // The editor's Sound Mixer (Audio/SoundMixer.h): a gain per sound number
-    // and one for the music, on top of the volumes; playing copies follow at
-    // once. 1 unless the editor sets them; a backend without them ignores
+    // and group (the mixer's number of a play's type), and one for the music,
+    // on top of the volumes. A start of the sound plays at the gain last set
+    // for it and is of that group; the group's playing copies follow at once,
+    // the copies of other groups keep theirs (a sound two types play). 1 and
+    // group 0 unless the editor sets them; a backend without them ignores
     // them.
-    virtual void SetSoundMixGain(ESound buffer, float gain)
+    virtual void SetSoundMixGain(ESound buffer, int group, float gain)
     {
         static_cast<void>(buffer);
+        static_cast<void>(group);
         static_cast<void>(gain);
     }
     virtual void SetMusicMixGain(float gain)

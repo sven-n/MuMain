@@ -660,8 +660,8 @@ TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
     CHECK(Audio::SoundNumbers::ForFile(L"data\\sound\\testnumbersone.wav") == first);
 }
 
-TEST_CASE("the Sound Mixer's gain changes a sound's playing and new copies at once, not a preview's level; the "
-          "music's too [audio][volume][mixer]")
+TEST_CASE("the Sound Mixer's gain changes a sound's playing copies of its group and new copies at once, not a "
+          "preview's level nor another group's copy; the music's too [audio][volume][mixer]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();
     ma_engine_config engineConfig = ma_engine_config_init();
@@ -697,10 +697,10 @@ TEST_CASE("the Sound Mixer's gain changes a sound's playing and new copies at on
     // A playing copy follows the gain at once, and keeps running muted.
     REQUIRE(backend->PlaySound(soundId, nullptr, false));
     CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.8f));
-    backend->SetSoundMixGain(soundId, 0.0f);
+    backend->SetSoundMixGain(soundId, 0, 0.0f);
     CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.0f));
     CHECK(ma_sound_is_playing(&first));
-    backend->SetSoundMixGain(soundId, 0.5f);
+    backend->SetSoundMixGain(soundId, 0, 0.5f);
     CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.4f));
     // A new copy starts at it.
     REQUIRE(backend->PlaySound(soundId, nullptr, false));
@@ -712,14 +712,34 @@ TEST_CASE("the Sound Mixer's gain changes a sound's playing and new copies at on
     // A preview's level is its own, also when the gain changes after.
     REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
     CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.6f));
-    backend->SetSoundMixGain(soundId, 0.0f);
+    backend->SetSoundMixGain(soundId, 0, 0.0f);
     CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.6f));
     CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.0f));
     // A copy on a free channel too.
     ma_sound_stop(&second);
     backend->m_activeChannel[soundIndex] = 1;
-    backend->SetSoundMixGain(soundId, 0.5f);
+    backend->SetSoundMixGain(soundId, 0, 0.5f);
     REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 0.5f));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.25f));
+
+    // A copy another group (type) started keeps its gain: the hero's swing
+    // while another player's swing of the same sound starts muted.
+    ma_sound_stop(&first);
+    ma_sound_stop(&second);
+    backend->m_activeChannel[soundIndex] = 0;
+    backend->SetSoundMixGain(soundId, 1, 1.0f);
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(1.0f));
+    backend->SetSoundMixGain(soundId, 2, 0.0f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(1.0f));
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.0f));
+    // Each group's change reaches its own copy.
+    backend->SetSoundMixGain(soundId, 1, 0.5f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.5f));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.0f));
+    backend->SetSoundMixGain(soundId, 2, 0.25f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.5f));
     CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.25f));
 
     // The music: its volume times its gain.

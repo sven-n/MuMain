@@ -112,9 +112,10 @@ public:
     {
         return 1.0f;
     }
-    void SetSoundMixGain(ESound buffer, float gain) override
+    void SetSoundMixGain(ESound buffer, int group, float gain) override
     {
         gains.emplace_back(static_cast<int>(buffer), gain);
+        gainGroups.push_back(group);
     }
     void SetMusicMixGain(float gain) override
     {
@@ -126,6 +127,8 @@ public:
     std::map<int, std::uint32_t> started;
     std::set<int> playing;
     std::vector<std::pair<int, float>> gains;
+    // The group of each of `gains`.
+    std::vector<int> gainGroups;
     std::vector<float> musicGains;
     std::string music;
     std::uint32_t musicStarts = 0;
@@ -1232,6 +1235,43 @@ TEST_CASE("Sound Mixer: a starting sound and every change give the backend the g
     CHECK(scope.audio.musicGains.back() == 1.0f);
     ResetAll();
     CHECK(scope.audio.gains.back() == std::pair{12, 1.0f});
+}
+
+TEST_CASE("Sound Mixer: a sound two types play starts in each type's group with that type's gain, and a change "
+          "gives each group its own, so a muted type leaves the other type's copies alone (Q-SM4) "
+          "[audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    KindControl(SoundKind::Player).muted = true;
+    {
+        const Audio::ScopedSoundSource hero(SoundKind::Hero, "Hero");
+        CHECK(OnPlay(12, false) == 1.0f);
+    }
+    {
+        const Audio::ScopedSoundSource player(SoundKind::Player, "Another player");
+        CHECK(OnPlay(12, false) == 0.0f);
+    }
+    REQUIRE(scope.audio.gains.size() == 2);
+    const int heroGroup = scope.audio.gainGroups[0];
+    const int playerGroup = scope.audio.gainGroups[1];
+    CHECK(heroGroup != playerGroup);
+    CHECK(scope.audio.gains[0] == std::pair{12, 1.0f});
+    CHECK(scope.audio.gains[1] == std::pair{12, 0.0f});
+    // Unmuting the players reaches their group; the hero's keeps its gain.
+    scope.audio.gains.clear();
+    scope.audio.gainGroups.clear();
+    MuEditor::SoundMixer::ToggleMute(KindControl(SoundKind::Player));
+    MuEditor::SoundMixer::ToggleMute(KindControl(SoundKind::Hero));
+    std::map<int, float> byGroup;
+    for (size_t index = 0; index < scope.audio.gains.size(); ++index)
+    {
+        CHECK(scope.audio.gains[index].first == 12);
+        byGroup[scope.audio.gainGroups[index]] = scope.audio.gains[index].second;
+    }
+    CHECK(byGroup.size() == 2);
+    CHECK(byGroup[heroGroup] == 0.0f);
+    CHECK(byGroup[playerGroup] == 1.0f);
 }
 
 TEST_CASE("Sound Mixer: PlayBuffer notes a loaded sound with its gain, and starts a muted one silently (Q-SM4) "

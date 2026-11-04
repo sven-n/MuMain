@@ -64,7 +64,7 @@ public:
     // Volume controls (Story 5.4.1)
     void SetBGMVolume(float level) override;
     void SetSFXVolume(float level) override;
-    void SetSoundMixGain(ESound buffer, float gain) override;
+    void SetSoundMixGain(ESound buffer, int group, float gain) override;
     void SetMusicMixGain(float gain) override;
     [[nodiscard]] std::uint32_t GetSoundStarts(ESound buffer) const override;
     [[nodiscard]] std::uint32_t GetMusicStarts() const override;
@@ -78,8 +78,11 @@ private:
     // game's plays; a preview's level is its own).
     bool StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool mixed);
 
-    // Sets the channel to `volume`, times its sound's mix gain when `mixed`,
-    // and keeps both for a later change of the gain.
+    // A channel that starts takes its sound's mix gain and group for the next
+    // start, then SetChannelVolume.
+    void StartChannelVolume(int buffer, int channel, float volume, bool mixed);
+    // Sets the channel to `volume`, times the mix gain it started with when
+    // `mixed`, and keeps both for a later change of the gain.
     void SetChannelVolume(int buffer, int channel, float volume, bool mixed);
 
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
@@ -109,11 +112,15 @@ private:
     // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
     // APIs on uninitialized ma_sound handles (UB).
     std::deque<int> m_loadedChannels = std::deque<int>(MAX_BUFFER);
-    // The Sound Mixer's gain per sound number (1 unless the editor sets it),
-    // each channel's volume without it, and whether it applies to the
+    // The Sound Mixer's gain and group for a sound number's next start (1 and
+    // 0 unless the editor sets them); each channel's volume without the gain,
+    // the gain and group it started with, and whether the gain applies to the
     // channel (not to a preview's PlaySoundAtLevel).
     std::deque<float> m_mixGain = std::deque<float>(MAX_BUFFER, 1.0f);
+    std::deque<int> m_mixGroup = std::deque<int>(MAX_BUFFER);
     std::deque<std::array<float, MAX_CHANNEL>> m_channelVolume = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelGain = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<int, MAX_CHANNEL>> m_channelGroup = std::deque<std::array<int, MAX_CHANNEL>>(MAX_BUFFER);
     std::deque<std::array<bool, MAX_CHANNEL>> m_channelMixed = std::deque<std::array<bool, MAX_CHANNEL>>(MAX_BUFFER);
     // How often each sound started on a mixed channel (GetSoundStarts).
     std::deque<std::uint32_t> m_starts = std::deque<std::uint32_t>(MAX_BUFFER);
