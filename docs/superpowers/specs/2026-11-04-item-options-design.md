@@ -7,6 +7,9 @@
 > sven-n/MuMain#966 (open) makes the client read the guardian (380) flag
 > that the server sends; where this design depends on it, it says so.
 >
+> **To implement:** read Goal, Decisions and Target design; section 14 of
+> the target design says where to start, "Pull requests" gives the order.
+>
 > This document is temporary. Its last task deletes it, after what stays true
 > has moved into `docs/item-data.md` and the code (see "Tasks").
 
@@ -65,7 +68,7 @@ Made on 2026-11-04 while planning phases 9 and 10.
 | O11 | Values per level (Q-O7, 2026-11-04) | The form of `ItemStats.json`'s level bonus tables: `values` is a number or a list, and `perLevel` adds that much for every level (`{"perLevel": 4}` for the additional option, `{"values": 50, "perLevel": 5}` for the second tier wings' max HP). A list starts at level 1, or at `firstLevel` (harmony: 0). The level is the option's own level (option, harmony, sphere or ancient bonus level) unless `"levelType": "itemLevel"` says it is the item's + level (OpenMU's `LevelType.ItemLevel`). `"requiresItemLevel": true` is the harmony rule: an option level is active only while the item level is at least that level (OpenMU's `RequiredItemLevel` on every level). A straight line has no upper end, as today's `level * 4`, so any level the server sends keeps its value; tables only were weighed and dropped for that reason. Rules per level range ("from 6, start 10, +2") are not stored: Item Options gets a **Fill levels** action that writes them into a list. The exchange expands a straight line into OpenMU's one value per level, and its import writes an evenly spaced list back as `perLevel` |
 | O12 | Differences from OpenMU (Q-O8, 2026-11-04) | Checked against Season 6 sources on the web, one by one. **P5:** the data keeps the client's five second tier wing options; Max AG +50 is in the [Murred FAQ](https://murred.com/FAQ-2-wings.html) ("not applicable to Cape of Lord") and the [InfinityMU wiki](https://wiki.infinitymu.net/index.php?title=Item_Options), attack speed +5 only in the latter. **P6:** the data keeps 200 for the pants' defensive skill and 700 for the boots' max SD, as in every guide found ([guiamuonline](https://www.guiamuonline.com/component/content/article/301-todo-sobre-las-opciones-38?showall=1), [InfinityMU forum](https://forum.infinitymu.net/threads/380-level-item-options.10/)). **P7:** summoner books keep the staff harmony options, as [MuCustoms' Season 6 guide](https://mucustoms.com/harmony-system) lists them ("Staff, Stick, Book Summoner"). **P8:** luck is critical damage rate +5 % in the data, as every source and OpenMU have it; until a client fix right after 9a1 the attribute is "shown, not applied" (O6), so the move changes nothing and the fix is a pull request of its own. P5 to P7 are known differences of the option exchange (Q-O15), and an OpenMU issue names them with these sources |
 | O13 | `ItemAddOption.bmd` and `socketitem_<lang>.bmd` (Q-O9, 2026-11-04) | Split by meaning. 9b moves the 380 part of `ItemAddOption.bmd` (guardian definitions, OpenMU's `GuardianOption`) and the whole of `socketitem_<lang>.bmd`: the seed options (`SocketOption`), the bonus options (`SocketBonusOption`) and the set bonus, which becomes a combination bonus next to the socket definitions (OpenMU's `ItemOptionCombinationBonus`). Phase 11 keeps only the buff values of `ItemAddOption.bmd` (scrolls, elixirs, seals, charms, potions; `{addOptionValue1}` and `{addOptionDuration}`), which are no options in OpenMU, and `SocketItem` leaves phase 11. The items design's D13 and phase 11 are changed to say so when this design moves into the docs |
-| O14 | Ancient bonus (Q-O10, 2026-11-04) | Per item of a set, as OpenMU (`ItemOfItemSet.BonusOption`). 9a2 adds four definitions of type `ancientBonus` (`ancientBonusStrength`, `…Agility`, `…Energy`, `…Vitality`; `{"perLevel": 5}`, so level 1 = +5, level 2 = +10). Until phase 10 the item's `attackType` (1 to 4) picks the definition, so 9a2 changes nothing. Phase 10 links a bonus definition to each item of a set and removes `attackType`, whose only reader is this code. Of OpenMU's 115 set items, 113 have the stat of the client's `attackType`; the Pendant of Ability (13,28) has none on both sides, and the Ring of Fire (13,21) has energy in one set and vitality in the other on the server, energy in the client: phase 10 follows the server there and its pull request names it |
+| O14 | Ancient bonus (Q-O10, 2026-11-04) | Per item of a set, as OpenMU (`ItemOfItemSet.BonusOption`). 9a4 adds four definitions of type `ancientBonus` (`ancientBonusStrength`, `…Agility`, `…Energy`, `…Vitality`; `{"perLevel": 5}`, so level 1 = +5, level 2 = +10). Until phase 10 the item's `attackType` (1 to 4) picks the definition, so 9a4 changes nothing. Phase 10 links a bonus definition to each item of a set and removes `attackType`, whose only reader is this code. Of OpenMU's 115 set items, 113 have the stat of the client's `attackType`; the Pendant of Ability (13,28) has none on both sides, and the Ring of Fire (13,21) has energy in one set and vitality in the other on the server, energy in the client: phase 10 follows the server there and its pull request names it |
 | O15 | Which items have which groups (Q-O11, 2026-11-04) | As `statProfile` and `profileRules` (phase 3c): each item writes the definitions it can have (`"options": ["luck", "physicalDamageOption", "excellentPhysical", "harmonyPhysical"]`), and the game reads only that list; the type ranges in `SetItemAttributes`, `CalcExcellentOptions`, `GetItemType` and `IsSocketItem` go. Rules in data (`Options/OptionRules.json`, the shape of `profileRules`: a list of definitions for the items whose `group`, `slot`, `weaponKind`, `wingTier` or `tags` match) give the list an item's data gives it; the bmd import, Item Add and the item editor keep an item's list matching them, and a list written in the file that differs (the Bone Blade with `guardianWeapon`, a wing with its own definition) stays as long as it differs. The first rules are today's code ranges, so a converted item gets what it has today |
 | O16 | Server values (Q-O12, 2026-11-04) | The client files keep OpenMU's server-only values, as D14 says ("values, chances, levels"), grouped under `"server"` so it is clear the game does not read them: on a definition `{"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2}` (`excellentPhysical`), on a harmony option `{"weight": 40}`. Item Options shows them in a Server box and a weight column, the exchange carries them both ways, and Update from server shows a change made on the server (Luck's chance 0.25 to 0.30) in its diff. A new option group made in MuEditor so reaches OpenMU complete. This differs on purpose from the item exchange, which leaves server-only item fields out (phase 7): an option group without its chances is not a whole definition |
 | O17 | Option lines in the tooltip (Q-O13, 2026-11-04) | Layout lines, one per option type, as D72 planned: `{"options": "guardian", "color": "redPurple", "bold": true}` expands into the item's options of that type, each with its text from `OptionTexts.json` (O8). Order, colours, bold and blank rows use what layout lines already have (`when`, `colors`, empty lines with states such as `hasGuardianOptions` and `harmonyActive`). The `default` layout gets today's order at the `options` marker: guardian, harmony, ancient bonus, wing, the skill lines (no option, they stay code: `{"code": "skillLines"}`), luck, additional option, excellent; the Horn of Fenrir before `afterOptions` and the sockets after the expiry lines, where the code writes them today. The tooltip snapshot shows the output is the same, and its variants grow with each group (380, sockets, wing option types, ancient bonus levels, Fenrir and Dinorant). Layout variants can hide or move a type, and the tooltip editor (#815 step 6) edits these lines like the others |
@@ -193,25 +196,698 @@ Item Requirements has an option level selector for
 | P11 | Most harmony effects (critical damage, SD, regeneration) are shown but never added to the client's stats | `UIJewelHarmony.cpp:145-273` | 9b (report) |
 | P12 | Values computed when the item is made go stale: excellent level / 20 from the hero's level at that time | `CalcExcellentOptions` | 9a |
 | P13 | The socket "no bonus" value arrives as 0xF, not 0xFF; it works because bonus 15 is empty | `ParseItemData` | 9b |
+| P14 | The defensive excellent Zen option is +30 % in the client's text, +40 % in OpenMU (`MoneyAmountRate` 1.4, `ExcellentOptions.cs`); Season 6 guides give +30 % ([muonlinefanz](https://muonlinefanz.com/guide/items/excellent)), +40 % appears in a later Webzen event | `ZzzInventory.cpp` (`AT_IMPROVE_GAIN_GOLD`), `ExcellentOptions.cs:67` | 9a3 (Q-O17) |
 
 ## Target design
 
-Written from the answers to the open questions. Until then this section
-only says what follows from D14 and O1:
+The finished design, put together from O1 to O20. It is written so that
+someone who did not take part in the decisions can implement it: every
+section names the files and functions it changes. Field names are this
+design's working names; the pull request that first reads a field fixes its
+name in `docs/item-data.md`. Points that are no decision of their own but
+follow from two of them say so. File and line references are those of
+`88cf9d208` (see the note at the top); look a function up by name if the
+lines moved.
 
-- The option definitions are JSON files in a subfolder of `Data/Items`
-  (every `*.json` directly in `Data/Items` is an item group file, D68),
-  with `formatVersion`, the phase 2 rules for writing and loading, and the
-  three problem levels in Data Checks.
-- A definition has a name of its own that items link to (D26), its
-  translated display name (D17), its options with their values and levels,
-  and what belongs to it on the server (chances, options per item, weights;
-  D14 says "values, chances, levels").
-- An item file links to the definitions the item can have. The bmd import
-  sets the links by today's code rules, so a converted item gets what it
-  has today.
-- The option exchange file is a file of its own (D11, D14), compared field
-  by field like the item exchange (phase 7); OpenMU's side is phase C.
+**How to read the examples.** JSON examples use the real values of the
+client (`Engine/Object/ZzzInfomation.cpp`) and of OpenMU's Season 6 data.
+Where the two differ, the client's value is written and the difference is
+listed (P5 to P8, P14).
+
+### 1. Files
+
+```
+src/bin/Data/Items/
+├── Group00_Sword.json …          item files: each item gets "options" (section 6)
+├── Options/                      NEW, the option definitions (sections 2-4)
+│   ├── Luck.json                 9a1
+│   ├── Option.json               9a2  the additional option ("+4 … +28")
+│   ├── Excellent.json            9a3
+│   ├── Ancient.json              9a4  the ancient bonus (the ancient set options come with phase 10)
+│   ├── Wings.json                9b1
+│   ├── Harmony.json              9b2
+│   ├── Guardian.json             9b3
+│   ├── Socket.json               9b4
+│   ├── Pets.json                 9b5  Horn of Fenrir, Dark Horse, Horn of Dinorant, the Wizard's rings
+│   └── OptionRules.json          9a1  which items get which definitions (section 6)
+├── Tooltips/
+│   ├── Tooltip.json              unchanged until 9b6 (section 9)
+│   └── OptionTexts.json          NEW 9a1, the option lines' texts (section 5)
+└── Sync/
+    └── KnownDifferences.json     gets "options" in 9a6 (section 12)
+```
+
+- `Options/` is a subfolder because every `*.json` directly in
+  `Data/Items` is read as an item group file (D68).
+- Every file follows the phase 2 rules of `docs/item-data.md` ("Loading and
+  errors", "Writing"): UTF-8, LF, `formatVersion` first, fields with their
+  default value left out, a fixed key order, saved through a temporary file,
+  only valid data saved, a newer `formatVersion` is an error, older ones are
+  upgraded in memory.
+- The file a definition is in is a convention: the loader reads every
+  `*.json` in `Options/` except `OptionRules.json`, and a definition's `type`
+  says what it is, not its file. A definition name used twice, also across
+  files, is fatal.
+- The loader goes next to the others in
+  `Data/DataHandler/ItemData/ItemJsonStorage.{h,cpp}`
+  (`GetItemOptionsDirectory`, `LoadItemOptionsDirectory`,
+  `GetOptionTextsFile`, `LoadOptionTextsFile`, `ValidateItemOptionsAsWritten`,
+  as `LoadItemStatsFile` and `ValidateItemStatsAsWritten` are built) and is
+  called from `CItemDataHandler::Load`
+  (`Data/DataHandler/ItemData/ItemDataHandler.cpp:217-270`) after the item
+  files and before `FillItemAttributes`, because the item links are resolved
+  against it.
+- The in-memory model is a new database in `Data/GameData/ItemData/`
+  (`ItemOptionDatabase.{h,cpp}`): definitions by name and by index, each
+  item's links resolved to indices when loading (D26: names are resolved
+  when loading, the game never looks up a name).
+
+### 2. A definition
+
+```json
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "excellentPhysical",
+      "type": "excellent",
+      "displayName": {"en": "Excellent Physical Attack Options", "de": "…"},
+      "server": {"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2},
+      "options": [
+        {"number": 1, "attribute": "manaAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "manaAfterKill"},
+        {"number": 2, "attribute": "healthAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "lifeAfterKill"},
+        {"number": 3, "attribute": "attackSpeedAny", "add": {"values": 7}, "text": "increaseAttackSpeed"},
+        {"number": 4, "attribute": "physicalBaseDmgIncrease", "percent": {"values": 2}, "text": "increaseDamagePercent"},
+        {"number": 5, "attribute": "physicalBaseDmg", "add": {"values": 0, "per": [{"attribute": "totalLevel", "divisor": 20}]}, "text": "increaseDamageLevel20"},
+        {"number": 6, "attribute": "excellentDamageChance", "percent": {"values": 10}, "text": "excellentDamageRate"}
+      ]
+    }
+  ]
+}
+```
+
+**Definition fields.**
+
+| Field | Required | Meaning |
+|---|---|---|
+| `name` | yes | The definition's name (O5): camelCase, unique across all option files, what items link to. |
+| `type` | yes | One of the types of section 3. |
+| `displayName` | yes | Translated name (D17: an object by language, `en` required and first). Shown in the editor and sent to OpenMU as `Name`. |
+| `server` | no | OpenMU's server-only values (O16): `addsRandomly` (bool), `addChance` (0 to 1), `maximumOptionsPerItem` (int). The game does not read them. |
+| `options` | yes | The options, at least one. |
+
+**Option fields.**
+
+| Field | Required | Meaning |
+|---|---|---|
+| `number` | yes, except types with one option | OpenMU's `ItemOption.Number`; what it means depends on the type (section 3). Unique within a definition, except for `guardian` (section 3). |
+| `subOptionType` | no | OpenMU's `SubOptionType`: the socket element (`fire`, `water`, `ice`, `wind`, `lightning`, `earth`). Only for `socket`. |
+| `attribute` | yes | The attribute it raises, OpenMU's `Stats` name in camelCase (O6, section 4). |
+| `add` / `addFinal` / `percent` | exactly one | The value and how it adds (section 4). |
+| `levelType` | no | `"itemLevel"`: the level of the value is the item's + level, not the option's own level (O11). |
+| `requiresItemLevel` | no | `true`: an option level counts only while the item level is at least that level (the harmony rule, O11). |
+| `text` | yes | The name of its line in `OptionTexts.json` (O8), or a list of names when the option shows several lines (luck: the Jewel of Soul line and the critical damage line, in that order). |
+| `server` | no | `{"weight": 40}`: OpenMU's `IncreasableItemOption.Weight` (O16). |
+
+### 3. Types
+
+The type says which byte of the server's item data holds the option and
+what `number` means (P1). The names are OpenMU's `ItemOptionTypes` in
+camelCase.
+
+| Type | OpenMU type (GUID in `ItemOptionTypes.cs`) | Read from (section 7) | `number` means | Phase |
+|---|---|---|---|---|
+| `luck` | Luck | flag 0x02 | – (one option) | 9a1 |
+| `option` | Option | flag 0x01 and the option byte | the option type the server sends in the high nibble (0 for most items; 0, 2 or 3 for wings, O10); the option level is the low nibble | 9a2, 9b1 |
+| `excellent` | Excellent | excellent byte | 1 to 6, bit `number - 1` | 9a3 |
+| `wing` | Wing | excellent byte | 1 to 5, bit `number - 1` (O9) | 9b1 |
+| `ancientOption` | AncientOption | ancient byte (with phase 10's sets) | 1 to n, in the order the set gives them | 10 |
+| `ancientBonus` | AncientBonus | ancient byte, high nibble = level | – (one option) | 9a4 |
+| `harmony` | HarmonyOption | harmony byte, high nibble = number, low nibble = level | 1 to 10 | 9b2 |
+| `guardian` | GuardianOption | flag 0x40 (no byte): all options of the item's guardian definition | the item group (OpenMU: 0xF0 for weapons, 7 to 11 for armour); both options of a definition have the same number | 9b3 |
+| `socket` | SocketOption | socket bytes: `(sphere level - 1) * 50 + element offset + number` | 0-based within its element | 9b4 |
+| `socketBonus` | SocketBonusOption | socket header, high nibble | 0 to 5, unique across the bonus definitions | 9b4 |
+| `blackFenrir`, `blueFenrir`, `goldFenrir` | BlackFenrir, BlueFenrir, GoldFenrir | excellent byte equal to 1, 2 or 4 | the colour value (1, 2, 4) | 9b5 |
+| `darkHorse` | DarkHorse | none (always on) | 1 to 2 | 9b5 |
+
+- Two definitions of an item whose types read the same byte (`excellent`
+  with `wing` or a Fenrir type) are a load error (O9).
+- The Horn of Dinorant's options are of type `option`, but its option level
+  is a set of bits, not a level (OpenMU's "fixed option": type `option`
+  without levels). Its definition has `"bits": true`; each option's `number`
+  is its bit value (1 absorb 5 %, 2 max AG +50, 4 speed +5), and the option
+  level selects the options whose bit is set (9b5).
+- The Wizard's rings have options that need no byte (fixed 10 % / 10 % /
+  speed 10, Lethal 15 / 15 / 10, at levels 0 and 3 only for the Wizard's
+  Ring; `CalcExcellentOptions` `ZzzInfomation.cpp:453-483`). They become a
+  definition of type `option` with `"always": true` and, for the Wizard's
+  Ring, `"itemLevels": [0, 3]` (9b5). OpenMU writes them as the ring's base
+  power-ups, not as options; the exchange leaves this type out and it is a
+  known difference.
+- Skill is no option (Scope): it stays the item's `skill` field.
+
+### 4. Values
+
+**How a value adds (O6).** `add` adds the value as it is, `addFinal` adds it
+after the other additions (OpenMU's `AddFinal`, the wings' damage), and
+`percent` adds the value in per cent (OpenMU's `Multiplicate` with the
+factor `1 + value / 100` for attributes that multiply, or `AddRaw` with
+`value / 100` for chances such as `excellentDamageChance`; the exchange
+knows which from the attribute, section 12).
+
+**Levels (O11).** The value object has the form of `ItemStats.json`'s level
+bonus tables:
+
+```json
+{"values": 7}                                   // a constant
+{"perLevel": 4}                                 // 4, 8, 12, … at levels 1, 2, 3, …, no upper end
+{"values": 50, "perLevel": 5}                   // 50 + 5 * level
+{"values": [7, 8, 9, 10, 11]}                   // levels 1 to 5
+{"firstLevel": 0, "values": [3, 4, 5, …, 25]}   // levels 0 to 13
+```
+
+A list's last value counts for higher levels; a level below `firstLevel`
+(or 1) gives 0, and the option then has no line. Which level: the option's
+own level (option level, harmony level, sphere level, ancient bonus level),
+or the item's + level with `"levelType": "itemLevel"`.
+
+**Terms on hero or item attributes (O7).** `per` adds terms to the value:
+
+```json
+{"values": 0, "per": [{"attribute": "totalLevel", "divisor": 20}]}                       // excellent level / 20
+{"values": 5, "per": [{"attribute": "totalDexterity", "divisor": 20}, {"attribute": "horseLevel", "times": 2}]}  // Dark Horse
+```
+
+A term is `attribute * times` or `attribute / divisor` (rounded down, as the
+client's integer code does today). The attributes a term can read are the
+hero's (`totalLevel`, `masterLevel`, `totalStrength`, `totalDexterity`,
+`totalVitality`, `totalEnergy`, `totalLeadership`, `maximumHealth`,
+`maximumMana`), the pet's (`horseLevel`, `ravenLevel`) and the item's
+(`itemLevel`). The value is computed when the tooltip is drawn and when the
+stats are summed, from the hero as it is then (P12).
+
+**Attribute names and the client's effects (O6).** The client keeps its
+option list `ITEM::Special[]` / `SpecialValue[]` (`Core/Globals/_struct.h`)
+as the result of the definitions, so the price (`ItemValue`), mixes
+(`MixMgr.cpp`), the item comparison and the stat code (`PlusSpecial*`,
+`ZzzInfomation.cpp:1666`) keep reading what they read today. This follows
+from the goal (nothing changes) and O6. The bridge is one table in code,
+`Data/GameData/ItemData/ItemOptionEffects.cpp`, from (type, attribute, how it
+adds) to the client's effect id (`AT_*`, `Core/Globals/_enum.h:288-317`).
+The rows for 9a:
+
+| Type | Attribute | Adds | Effect | `SpecialValue` |
+|---|---|---|---|---|
+| `luck` | `criticalDamageChance` | percent | `AT_LUCK` | 0 until the luck fix (P8), then the value |
+| `option` | `physicalBaseDmg` | add | `AT_IMPROVE_DAMAGE` | the value |
+| `option` | `wizardryBaseDmg` | add | `AT_IMPROVE_MAGIC` | 〃 |
+| `option` | `curseBaseDmg` | add | `AT_IMPROVE_CURSE` | 〃 |
+| `option` | `baseDamageBonus` | add | `AT_IMPROVE_DAMAGE` (the magic swords; their second line comes from the option's second text) | 〃 |
+| `option` | `defenseRatePvm` | add | `AT_IMPROVE_BLOCKING` | 〃 |
+| `option` | `defenseBase` | add | `AT_IMPROVE_DEFENSE` | 〃 |
+| `option` | `healthRecoveryMultiplier` | percent | `AT_LIFE_REGENERATION` | 〃 |
+| `option` | `maximumMana` | percent | `AT_IMPROVE_MAX_MANA` | 〃 |
+| `option` | `maximumAbility` | percent | `AT_IMPROVE_MAX_AG` | 〃 |
+| `excellent` | `maximumHealth` | percent | `AT_IMPROVE_LIFE` | not set (as today) |
+| `excellent` | `maximumMana` | percent | `AT_IMPROVE_MANA` | 〃 |
+| `excellent` | `armorDamageDecrease` | percent | `AT_DECREASE_DAMAGE` | 〃 |
+| `excellent` | `damageReflection` | percent | `AT_REFLECTION_DAMAGE` | 〃 |
+| `excellent` | `defenseRatePvm` | percent | `AT_IMPROVE_BLOCKING_PERCENT` | 〃 |
+| `excellent` | `moneyAmountRate` | percent | `AT_IMPROVE_GAIN_GOLD` | 〃 |
+| `excellent` | `excellentDamageChance` | percent | `AT_EXCELLENT_DAMAGE` | 〃 |
+| `excellent` | `physicalBaseDmg` / `wizardryBaseDmg` with a `totalLevel` term | add | `AT_IMPROVE_DAMAGE_LEVEL` / `AT_IMPROVE_MAGIC_LEVEL` | the value |
+| `excellent` | `physicalBaseDmgIncrease` / `wizardryBaseDmgIncrease` | percent | `AT_IMPROVE_DAMAGE_PERCENT` / `AT_IMPROVE_MAGIC_PERCENT` | 〃 (2) |
+| `excellent` | `attackSpeedAny` | add | `AT_IMPROVE_ATTACK_SPEED` | 〃 (7) |
+| `excellent` | `healthAfterMonsterKillMultiplier` | add | `AT_IMPROVE_GAIN_LIFE` | not set |
+| `excellent` | `manaAfterMonsterKillMultiplier` | add | `AT_IMPROVE_GAIN_MANA` | not set |
+| `ancientBonus` | `totalStrength` … `totalVitality` | add | none: read by `CSItemOption::GetDefaultOptionValue` (`CSItemOption.cpp:546-594`), which then asks the definition | – |
+
+"Not set (as today)" keeps today's `SpecialValue` of 0 where the stat code
+uses a fixed number (`PlusSpecialPercent(..., 2)` at `ZzzInfomation.cpp:2006`,
+the blocking 10 % at `:2529-2538`); these readers are not changed in 9a, so
+the snapshot and the stat tests stay the same. Each later pull request that
+makes such a reader use the value says so. The rows for 9b are added by
+their pull requests. An attribute with no row loads with a warning, and its
+line is shown but adds nothing (O6).
+
+### 5. Option texts
+
+`Tooltips/OptionTexts.json` (O8) has the shape of `Tooltip.json`'s `texts`:
+
+```json
+{
+  "formatVersion": 1,
+  "texts": {
+    "luckJewelOfSoul":      {"en": "Luck (success rate of Jewel of Soul +25%)", "de": "…"},
+    "luckCriticalDamage":   {"en": "Luck (critical damage rate +{value}%)", "de": "…"},
+    "additionalDamage":     {"en": "Additional Dmg +{value}", "de": "…"},
+    "increaseMaxHp":        {"en": "Increase Max HP +{value}%", "de": "…"},
+    "increaseDamageLevel20":{"en": "Increase Damage +level/20", "de": "…"}
+  }
+}
+```
+
+- `{value}` is the option's value at the item's level from the definition,
+  as an integer. It does not come from `SpecialValue`: luck shows 5 while its
+  `SpecialValue` stays 0 until the luck fix (section 4). A text
+  without `{value}` shows none (the level / 20 lines keep their wording).
+- The texts come from the `.resx` texts the code uses today
+  (`GetSpecialOptionText`, `Engine/Object/ZzzInventory.cpp:1074-1298`, and
+  the luck line at `:2148`), with all their translations (`src/Localization/
+  Game.<lang>.resx`); a value written into a text (`Increase Max HP +4%%`)
+  becomes `{value}`, and `%%` becomes `%`. A `.resx` text only these lines
+  use is removed in the same pull request; one that other code uses stays.
+- A text name an option names but the file lacks is an error (the line is
+  left out); a text no option names is a warning.
+
+### 6. Item links and rules
+
+**On the item (O15).** Each item file entry gets `options`, the names of
+the definitions the item can have, in the order of the tooltip today
+(section 8):
+
+```json
+{"number": 0, "name": {"en": "Kris"}, "options": ["luck", "physicalDamageOption", "excellentPhysical"], …}
+```
+
+The field goes into `ItemDefinition` (`Data/GameData/ItemData/ItemDefinition.h`,
+next to `statProfile`), `ItemJsonFormat.cpp` (read and write) and the field
+lists `ItemFieldDefs.h`. A link to a definition that does not exist is an
+error (the link is dropped). An empty or missing list means the item has no
+options.
+
+**Rules (O15).** `Options/OptionRules.json` has the shape of `profileRules`
+in `ItemStats.json` (`StatProfileRule.{h,cpp}`): each rule gives a list of
+definitions to the items it matches, by `group`, `slot`, `weaponKind`,
+`wingTier`, `tags` (with `!tag` for "without") and `numbers`; the first rule
+that matches wins.
+
+```json
+{
+  "formatVersion": 1,
+  "rules": [
+    {"options": ["excellentPhysical"], "tags": ["ammunition"]},
+    {"options": ["luck", "physicalAndWizardryDamageOption", "excellentPhysical"], "tags": ["magicSword"]},
+    {"options": ["luck", "physicalDamageOption", "excellentPhysical"], "group": [0, 1, 2, 3, 4]},
+    {"options": ["luck", "curseDamageOption", "excellentWizardry"], "group": [5], "tags": ["summonerBook"]},
+    {"options": ["luck", "wizardryDamageOption", "excellentWizardry"], "group": [5]},
+    {"options": ["luck", "defenseRateOption", "excellentDefense"], "group": [6]},
+    {"options": ["luck", "defenseOption", "excellentDefense"], "group": [7, 8, 9, 10, 11]},
+    {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
+    {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
+    {"options": ["luck"], "group": [13], "numbers": [30]},
+    {"options": ["jewelryHealthRecovery", "excellentDefense"], "group": [13], "numbers": [8, 9, 21, 22, 23]},
+    {"options": ["ringOfMagicMana", "excellentDefense"], "group": [13], "numbers": [24]},
+    {"options": ["jewelryHealthRecovery", "excellentWizardry"], "group": [13], "numbers": [12, 25, 27]},
+    {"options": ["jewelryHealthRecovery", "excellentPhysical"], "group": [13], "numbers": [13, 26]},
+    {"options": ["pendantOfAbilityAg", "excellentPhysical"], "group": [13], "numbers": [28]}
+  ]
+}
+```
+
+These are 9a's rules at its end (after 9a3); each 9a pull request adds the
+definitions of its group to them (9a1 writes them with `luck` only). They
+reproduce today's code ranges:
+
+- `luck`: groups 0 to 11 without `ammunition`, and the wings today's luck
+  code names (`ZzzInfomation.cpp:523-551`): `ITEM_WING` to
+  `ITEM_WINGS_OF_DARKNESS` (12/0 to 12/6), `ITEM_WING_OF_CURSE` and
+  `ITEM_WINGS_OF_DESPAIR` (12/41, 12/42), the Cape of Fighter (12/49), the
+  Cape of Lord (13/30) and every third tier wing. Small wings get none.
+- Excellent: defensive for groups 6 to 11 and the rings 13/8, 13/9, 13/21 to
+  13/24; offensive for groups 0 to 5 (also ammunition, as the code's range
+  includes it) and the pendants 13/12, 13/13, 13/25 to 13/28, wizardry for
+  group 5 and the pendants of Lightning (13/12), Ice (13/25) and Water
+  (13/27) (`CalcExcellentOptions`, `ZzzInfomation.cpp:375-450`).
+- The additional option: as the table in section 15. **Do not** use the slot
+  `ring`: it also holds the transformation rings, the seals, the Wizard's
+  rings and the gem rings, which have no options.
+- Today's code also gives the life regeneration option to every other item
+  from `ITEM_RING_OF_ICE` to the end of group 13 (transformation rings,
+  Loch's Feather, …) when the server sends an option level. OpenMU attaches
+  no option to them, so the server never does; the rules leave them out, and
+  the 9a2 pull request lists them as the one place the links differ from
+  the code.
+
+**Kept matching**, as `statProfile` (`DeriveStatProfile`,
+`ItemAttributeConversion.h:51`, and its callers in `ItemBmdImport.cpp` and
+the item editor): the bmd import, Item Add and every edit that changes what
+a rule reads (group, slot, weapon kind, wing tier, tags, number) set the
+list the rules give, unless the list written in the file differs from what
+the rules gave it before; then it stays (the Bone Blade with
+`guardianWeapon`, each wing with its own definition). Loading warns about an
+item whose list differs from its rules only when it has no list at all.
+
+### 7. Reading an item from the server
+
+`ParseItemData` (`UI/Inventory/ItemMng.cpp:11-66`) keeps reading the bytes
+into `ItemCreationParams` and `ITEM` as today (with #966's guardian flag).
+What changes is how `SetItemAttributes` (`ZzzInfomation.cpp:486-834`) turns
+them into options: instead of the type ranges, it walks the item's linked
+definitions in order and, for each, reads its byte as section 3 says:
+
+- `luck`: `ITEM::HasLuck`.
+- `option`: `ITEM::OptionLevel` (level) and `ITEM::OptionType` (number). The
+  option whose `number` equals `OptionType` counts at level `OptionLevel`;
+  level 0 means none.
+- `excellent`, `wing`: `ITEM::ExcellentFlags`, each option whose bit
+  `number - 1` is set.
+- Fenrir types: `ExcellentFlags == number`.
+- `ancientBonus`: `ITEM::AncientBonusOption` is the level (9a4: of the
+  definition the item's `attackType` picks; from phase 10 on, of its set's).
+- `harmony`, `guardian`, `socket`, `socketBonus`: from 9b2 to 9b4, from the
+  fields `ParseItemData` fills today.
+
+The result is written into `Special[]` / `SpecialValue[]` through the table
+of section 4, in the order of today's code (section 8).
+
+### 8. In the game
+
+**Order.** `SetItemAttributes` writes today: wing options, skill, luck,
+additional option, excellent options. The new code writes the options of the
+linked definitions in this order of types: `wing`, then the skill (as
+today, from the item's `skill`), `luck`, `option`, `excellent`. Within a
+definition, options are written in the order of today's bit tests (excellent
+from bit 5 down to bit 0; the tooltip shows them in this order). Phase 9b6
+moves the order into the layout (O17).
+
+**"Excellent" (O9).** One function, `GameLogic::Items::HasExcellentOptions(const ITEM&)`,
+answers "has an active option of type `excellent`" and replaces the
+`ExcellentFlags > 0` tests that mean excellent: the name prefix and colour
+(`StandardItemName`, `ZzzInventory.cpp:1611-1625`), the durability
+(`CalcMaxDurability`, `ZzzInventory.cpp:1056-1061`;
+`CalcDurabilityPercent`, `ZzzInfomation.cpp:1766`), the requirements and
+stats (`ComputeItemStats`, `GameLogic/Items/ItemStats.cpp:138-201`, which
+today passes `ExcellentFlags` and checks for wings itself), and the tooltip
+state `excellent` (`ItemTooltipValues.cpp:144-222`). The wing and Fenrir
+exceptions in these places go, because a wing's or Fenrir's definitions are
+not of type `excellent`. `grep -n "ExcellentFlags" src/source` lists every
+place; the 9a3 pull request goes through all of them and says for each why
+it changes or stays (the model and colour code that reads the Fenrir colour
+stays until 9b5).
+
+**What stays code.** The stat code, the price, mixes and the comparison
+read `Special[]` as today. The skill lines (mana per skill, the class notes)
+stay code. `SpecialValue` is computed per option from section 4 when the
+item is made; the values with `per` terms are recomputed when the tooltip
+is drawn and when the stats are summed (P12), which is the one behaviour
+change of 9a3 and is named in its pull request.
+
+### 9. Tooltip
+
+**In 9a.** The tooltip's option loop (`BuildItemTooltipText`,
+`ZzzInventory.cpp:2134-2172`) stays, but `GetSpecialOptionText` takes the
+text of an option that came from a definition from `OptionTexts.json`
+instead of the `.resx` text. The output is the same.
+
+**In 9b6 (O17).** The option lines become layout lines in `Tooltip.json`'s
+`default` layout, one per type. A line `{"options": "<type>", …}` expands
+into the item's active options of that type, each with its text; it takes
+the line fields layout lines already have (`color`, `colors`, `bold`,
+`when`). New states for `when`: `has<Type>Options` (e.g.
+`hasGuardianOptions`, `hasHarmonyOption`) and `harmonyActive`. The default
+layout then reads, at the `options` marker, as today's order:
+
+```json
+{"section": "options"},
+{"text": "", "when": ["hasGuardianOptions"]},
+{"options": "guardian", "color": "redPurple", "bold": true},
+{"text": "", "when": ["hasGuardianOptions"]},
+{"text": "", "when": ["hasHarmonyOption"]},
+{"options": "harmony", "bold": true, "color": "yellow", "colors": [{"when": ["!harmonyActive"], "color": "gray"}]},
+{"text": "", "when": ["hasHarmonyOption"]},
+{"options": "ancientBonus", "color": "blue"},
+{"options": "wing", "color": "blue"},
+{"code": "skillLines"},
+{"options": "luck", "color": "blue"},
+{"options": "option", "color": "blue"},
+{"options": "excellent", "color": "blue"},
+{"id": "blankAfterOptions", "text": ""},
+```
+
+The Horn of Fenrir's lines (`{"options": "blackFenrir"}` and the others)
+go before `{"section": "afterOptions"}` and the sockets after the expiry
+lines, where the code writes them today (`ZzzInventory.cpp:2178-2245`,
+`:2380`). `Tooltip.json` gets `formatVersion` 3, because a version 2 reader
+would not know these lines. The gem jewelry's stop (`ITEM_SAPPHIRE_RING` to
+`ITEM_SAPPHIRE_NECKLACE`, `:2137`) becomes `"when": ["!tag:gemJewelry"]` on
+the option lines, as the layout's blank line already has it.
+
+### 10. Loading and checks
+
+The three levels of `docs/item-data.md` ("Loading and errors") and
+`ItemDataIssue` (`Data/GameData/ItemData/ItemDataIssue.h`); all show in Data
+Checks (`MuEditor/UI/DataChecks/`, a new area as `CreateLookCheckArea`).
+
+- **Fatal:** invalid JSON; a missing or unsupported `formatVersion`; a
+  definition without `name`, `type` or `options`; an unknown `type`; a name
+  used twice; an option without `attribute`, or with none or more than one of
+  `add`, `addFinal`, `percent`; a value of the wrong kind; a `number` used
+  twice in a definition (except `guardian`); `OptionRules.json` naming a
+  definition that does not exist.
+- **Error:** an item linking a definition that does not exist (the link is
+  dropped); an item linking two definitions whose types read the same byte
+  (O9; the later one is dropped); an item linking two definitions of type
+  `option`, `luck` or `ancientBonus` (one byte or flag each; the later one is
+  dropped); an option naming a text `OptionTexts.json` lacks (the line is
+  left out); an option text without `en`.
+- **Warning:** an attribute the client has no effect for (section 4: shown,
+  not applied); a definition no item and no rule links (except
+  `ancientBonus` and `ancientOption`, which `attackType` and phase 10's sets
+  link); a text no option names; an item whose list differs from its rules while it has no list;
+  an unknown field (editor only, as today).
+
+The automated data test (`tests/data/test_item_database_files.cpp`, "Shipped
+item data loads without problems") loads `Options/` and `OptionTexts.json`
+with the items, so a pull request with broken option data fails its checks.
+
+### 11. Editor
+
+**Item Options (O18)**, a new tool in `src/MuEditor/UI/ItemTools/`
+(`MuItemOptionsUI.{h,cpp}`), registered as the other item tools are: a bool
+in `UI/Common/MuEditorToolWindows.h`, an id in `UI/Common/MuEditorWindowIds.h`,
+an entry in `ItemToolEntries` (`UI/Common/ToolGroups.cpp:38`, the array size
+grows by one), its title an `I18N::Editor` text. Built like Item Formulas
+(`MuItemFormulasUI.cpp`):
+
+```
+┌ Item Options ──────────────────────────────────────────────────────────────┐
+│ [Definitions] [Rules] [Texts]                                              │
+│ [search……]  Type: [all ▾]                                                  │
+│ ┌ Definitions ─────────┐ ┌ excellentPhysical ─────────────────────────────┐ │
+│ │ luck             412 │ │ Name [Excellent Physical Attack Options] (en ▾) │ │
+│ │ physicalDmgOpt.  188 │ │ Type excellent                                  │ │
+│ │▸excellentPhysical156 │ │ Server ☑ random  chance [0.001]  max/item [2]   │ │
+│ │ …                    │ │ # │ attribute            │ value     │ text     │ │
+│ │ [New] [Copy]         │ │ 3 │ attackSpeedAny       │ +7        │ incr…    │ │
+│ │ [Rename] [Remove]    │ │ 5 │ physicalBaseDmg      │ lvl / 20  │ incr…    │ │
+│ └──────────────────────┘ │ Used by: 156 items ▸ Kris, Short Sword, …       │ │
+│                          │ [Fill levels…]   [Apply] [Revert]               │ │
+│                          └─────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Definitions**: the list with search, type filter and how many items link
+  each; the picked definition edited on a copy and taken with **Apply** after
+  the save checks (as Item Formulas); a value editor that fits the value (a
+  number, a level grid for lists, `per` terms); **Fill levels** writes a
+  list from a start level, a start value and a step (O11); **Used by**
+  lists the items; D26: a definition that is used cannot be removed (the
+  list shows why), **Rename** updates the links and the rules, **Copy**
+  makes a variant.
+- **Rules**: `OptionRules.json` as a list, with how many items each rule
+  matches; a changed rule lists the items whose list it changes before it is
+  applied.
+- **Texts**: `OptionTexts.json` in the names grid (`UI/Common/NamesGrid`),
+  names × languages, missing translations counted.
+- **Item Basics** gets the item's `options` as a list with a picker of
+  definitions; a list that differs from its rules is marked, with "Use the
+  rules" to reset it.
+- **Item Tooltip** (`MuItemTooltipUI.cpp:153-161`): the Option checkbox
+  becomes an option level (0 to 7) and type (for wings); Excellent becomes
+  one checkbox per option of the item's excellent or wing definition; with
+  9a4 an ancient bonus level (0 to 2); 9b adds harmony option and level, 380,
+  sockets.
+- Every change is one step of the item undo history
+  (`ItemEditHistory.cpp`); Save Items writes the option files with the item
+  files.
+
+### 12. Exchange
+
+**The option exchange file (O19)**, MuEditor's Export, Import and Update
+from server, next to the item exchange (`Data/GameData/ItemData/ItemExchangeFile.{h,cpp}`,
+the Item Sync tool):
+
+```json
+{
+  "formatVersion": 1,
+  "source": "MuMain",
+  "gameVersion": "season6",
+  "definitions": [
+    {"name": "excellentPhysical", "type": "excellent",
+     "displayName": {"en": "Excellent Physical Attack Options", "de": "…"},
+     "server": {"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2},
+     "options": [{"number": 3, "attribute": "attackSpeedAny", "add": {"values": 7}}, …]}
+  ]
+}
+```
+
+- The definitions in the shape of the client files without `text`; the
+  texts and `OptionRules.json` are client-only. The types without an OpenMU
+  counterpart (the Wizard's rings' `always` options) are left out.
+- **The item field `options`**: the item exchange gets the field `options`
+  (the links), listed in its `fields` (format version 2), written on
+  OpenMU's side by an `ItemExchangeField` (`ItemExchangeField.cs`).
+  Importing items whose links name a definition the client does not have is
+  refused with a message, so the options file is imported first.
+- **Mapping to OpenMU** (phase C does OpenMU's side): a definition is
+  OpenMU's `ItemOptionDefinition`; its `name` is matched to OpenMU's
+  definition by the fixed GUID of `ItemOptionDefinitionNumbers` (a table in
+  the exchange code, e.g. `excellentPhysical` ↔ `00000083-0013-…`), else by
+  type and English name (O5, P4). An option is an `IncreasableItemOption`
+  with `Number`, `SubOptionType`, `OptionType` (the type's GUID), `Weight`
+  (`server.weight`) and `LevelType`; its value is a `PowerUpDefinition` on
+  the attribute: `add` → `AddRaw`, `addFinal` → `AddFinal`, `percent` →
+  `Multiplicate` with `1 + v/100`, or `AddRaw` with `v/100` for the
+  attributes OpenMU keeps as fractions (the exchange code keeps this list;
+  for 9a: `criticalDamageChance`, `excellentDamageChance`,
+  `damageReflection`, `armorDamageDecrease`, `healthRecoveryMultiplier`;
+  9b adds its own, e.g. `defenseIgnoreChance`). The two "after kill"
+  attributes are the exception of section 15: `add` 8 ↔ `AddRaw` 1/8; `per` terms →
+  `RelatedValues` with `Multiply`; a level list or `perLevel` → one
+  `ItemOptionOfLevel` per level (`RequiredItemLevel` = the level with
+  `requiresItemLevel`). OpenMU's level 1 in the base value (P3) is read and
+  written as level 1.
+- **Every import shows a diff** per definition, option and field, checked
+  by hand, as phase 7; Apply is one undo step.
+- **Known differences**: `Sync/KnownDifferences.json` gets
+  `"options": [{"definition": "secondTierWing", "fields": ["options.4", "options.5"]}, …]`
+  for P5 to P7 and P14 (O12); they are shown unchecked.
+
+### 13. Proof
+
+Each move pull request shows that the game is the same:
+
+- **Tooltip snapshot** (`tests/data/item_tooltip_snapshot.txt`,
+  `tests/data/test_item_tooltips.cpp`, variants in
+  `Engine/Object/ItemTooltipSnapshot.cpp:22-70`): unchanged hashes. Its
+  variants grow with the groups: every option level 1 to 7 and option type
+  for 9a2 and 9b1, every single excellent bit for 9a3, ancient bonus level 1
+  and 2 for 9a4, the wing bits for 9b1, harmony options per kind for 9b2, 380
+  for 9b3, sockets for 9b4, the Fenrir colours and Dinorant bits for 9b5. New
+  variants are recorded on `main` first (in the pull request's first commit,
+  with the old code), then the move must keep them.
+- **`Special[]` test**: for every item and every variant, the old code's
+  `Special[]` / `SpecialValue[]` equals the new one (a test that runs both
+  while the old code still exists, removed with it), except where a pull
+  request names a change (P12 in 9a3).
+- **Stat tests** (`tests/data/`, the item stat and requirement tests):
+  unchanged.
+- **Data test**: the shipped option files load without problems (section 10).
+
+### 14. Where to start (9a1)
+
+For whoever picks this up: 9a1 is the first pull request and the base of all
+others.
+
+1. Read `docs/item-data.md` ("Loading and errors", "Item stats by level"
+   for the `values` / `perLevel` form and `profileRules`), this design's
+   sections 1 to 6 and 10, and `docs/CODING_RULES.md`.
+2. Add `ItemOptionDatabase` (section 1), the loaders and validators in
+   `ItemJsonStorage`, and the call in `CItemDataHandler::Load`.
+3. Add `options` to `ItemDefinition` and the item JSON format; add
+   `OptionRules.json` with its rule reader (reuse `StatProfileRule`'s
+   matching); derive and keep the lists matching where `statProfile` is
+   (section 6).
+4. Write `Options/Luck.json` (one definition, `luck`, one option:
+   `criticalDamageChance`, `percent` 5, texts `luckJewelOfSoul` and
+   `luckCriticalDamage`), `Tooltips/OptionTexts.json` with these two texts
+   from the `.resx` (`Luck (success rate of Jewel of Soul +25%%)` and
+   `Luck (critical damage rate +5%%)`, `Game.en.resx:238` and `:256`, with
+   their translations), and the luck rules of section 6. Run the bmd import or a one-off conversion
+   so every item gets its list; the item files change only by their new
+   `options` field.
+5. In `SetItemAttributes`, replace the luck block by reading the item's
+   `luck` definition (section 7); keep `SpecialValue` 0 (P8).
+6. Add the effect table (section 4) with its `luck` row, the Data Checks
+   area and the checks of section 10.
+7. Prove it (section 13): snapshot unchanged, the `Special[]` test, the data
+   test. Document the new files in `docs/item-data.md`.
+
+9a2 to 9a4 then each add a definition file, rules, effect rows, texts and
+snapshot variants, and remove the code block they replace.
+
+### 15. The 9a data
+
+**`Options/Luck.json` (9a1)**: `luck` (type `luck`; server: random, chance
+0.25, 1 per item), one option `criticalDamageChance` `percent` 5, texts
+`luckJewelOfSoul`, `luckCriticalDamage`.
+
+**`Options/Option.json` (9a2)**, all of type `option`, `number` 0, server:
+random, chance 0.25, 1 per item (OpenMU's values):
+
+| Name | Attribute | Value | Text (today's `.resx`) | Items today (`ZzzInfomation.cpp:553-620`) | OpenMU |
+|---|---|---|---|---|---|
+| `physicalDamageOption` | `physicalBaseDmg` | `add` `{"perLevel": 4}` | `AdditionalDmgD` | groups 0-4 without `ammunition` | "Physical Base Damage (min and max) Option", 0x03 |
+| `physicalAndWizardryDamageOption` | `baseDamageBonus` | `add` `{"perLevel": 4}` | `AdditionalDmgD` and `AdditionalWizardryDmgD` (`:2166-2171`) | the `magicSword` items | "Base Damage Bonus (physical and wizardry …) Option", 0x07 |
+| `wizardryDamageOption` | `wizardryBaseDmg` | `add` `{"perLevel": 4}` | `AdditionalWizardryDmgD` | group 5 without `summonerBook` | 0x04 |
+| `curseDamageOption` | `curseBaseDmg` | `add` `{"perLevel": 4}` | `AdditionalCurseSpellD` | group 5 with `summonerBook` | 0x05 |
+| `defenseRateOption` | `defenseRatePvm` | `add` `{"perLevel": 5}` | `AdditionalDefenseRateD` | group 6 | 0x06 |
+| `defenseOption` | `defenseBase` | `add` `{"perLevel": 4}` | `AdditionalDefenseD` | groups 7-11 | 0x02 |
+| `jewelryHealthRecovery` | `healthRecoveryMultiplier` | `percent` `{"perLevel": 1}` | `AutomaticHPRecoveryD` | the rings 13/8, 13/9, 13/21 to 13/23 and the pendants 13/12, 13/13, 13/25 to 13/27 (today: `ITEM_RING_OF_ICE` to the end of group 13 without the Cape of Lord, section 6) | "JeweleryHealth", 0x10 |
+| `ringOfMagicMana` | `maximumMana` | `percent` `{"perLevel": 1}` | `MaxManaIncreasedByD` | Ring of Magic (13/24) | per item, GUID from the item id |
+| `pendantOfAbilityAg` | `maximumAbility` | `percent` `{"perLevel": 1}` | `MaxAGIncreasedByD` | Pendant of Ability (13/28) | per item |
+
+`AutomaticHPRecoveryD` is not shown for `ITEM_LOCHS_FEATHER` to
+`ITEM_INVISIBILITY_CLOAK` (13/14 to 13/18) today (`ZzzInventory.cpp`, case
+`AT_LIFE_REGENERATION`); they get no link (section 6), so that exception
+goes.
+
+**`Options/Excellent.json` (9a3)**, type `excellent`, server: random, chance
+0.001, 2 per item. Bit = `number - 1`, as OpenMU and as today's code.
+
+| Name | # | Attribute | Value | Text (today) |
+|---|---|---|---|---|
+| `excellentDefense` (shields to boots, rings) | 1 | `moneyAmountRate` | `percent` 30 (OpenMU 40, P14) | `IncreasesAcquisitionRateOfZenAfterHuntingMonsters30` |
+| | 2 | `defenseRatePvm` | `percent` 10 | `DefenseSuccessRate10` |
+| | 3 | `damageReflection` | `percent` 5 | `ReflectDamage5` |
+| | 4 | `armorDamageDecrease` | `percent` 4 | `DamageDecrease4` |
+| | 5 | `maximumMana` | `percent` 4 | `IncreaseMaxMana4` |
+| | 6 | `maximumHealth` | `percent` 4 | `IncreaseMaxHP4` |
+| `excellentPhysical` (groups 0-4, physical pendants) and `excellentWizardry` (group 5, the Lightning, Ice and Water pendants) | 1 | `manaAfterMonsterKillMultiplier` | `add` 8 (mana / 8) | `…ManaAfterHuntingMonstersMana8` |
+| | 2 | `healthAfterMonsterKillMultiplier` | `add` 8 | `…LifeAfterHuntingMonstersLife8` |
+| | 3 | `attackSpeedAny` | `add` 7 | `IncreaseAttackingWizardrySpeedD` |
+| | 4 | `physicalBaseDmgIncrease` / `wizardryBaseDmgIncrease` | `percent` 2 | `IncreaseDamageD` / `IncreaseWizardryDmgD` |
+| | 5 | `physicalBaseDmg` / `wizardryBaseDmg` | `add` 0 + `totalLevel / 20` | `IncreaseDamageLevel20` / `IncreaseWizardryDmgLevel20` |
+| | 6 | `excellentDamageChance` | `percent` 10 | `ExcellentDamageRate10` |
+
+OpenMU writes the "after kill" options as the factor 1/8; the client file
+writes the divisor 8 as `add` and the exchange converts (`8` ↔ `1/8` for
+these two attributes).
+
+**`Options/Ancient.json` (9a4)**, type `ancientBonus`, no `server` values
+(OpenMU links them through the sets, not randomly):
+`ancientBonusStrength` (`totalStrength`), `ancientBonusAgility`
+(`totalAgility`), `ancientBonusEnergy` (`totalEnergy`),
+`ancientBonusVitality` (`totalVitality`), each `add` `{"perLevel": 5}`, text
+`IncreaseStrengthD` and its siblings (`CSItemOption.cpp:572-590`). Until
+phase 10 the item's `attackType` (1 to 4) picks the definition, and items
+get no `options` link for them.
+
+### 16. The 9b groups in short
+
+| PR | Source today | Definitions | Notes |
+|---|---|---|---|
+| 9b1 | `CalcWingOptions` (`ZzzInfomation.cpp:291-373`), the wing chain (`:620-826`) | 20 per-wing `option` definitions (O10, `Wings.cs:74-107` for the numbers); `secondTierWing` (5 options, P5), `secondTierCape` (Cape of Fighter: 3), `capeOfLord` (HP, MP, ignore defense, command `{"values": 10, "perLevel": 5}`), `thirdTierWing` (4); HP / MP / command with `levelType: itemLevel` | Wing types read the excellent byte (O9) |
+| 9b2 | `JewelOfHarmonyOption_<lang>.bmd` (`UIJewelHarmony.cpp:15-88`) | `harmonyWeapon`, `harmonyStaff` (also books, P7), `harmonyDefense`; values `{"firstLevel": <Minlevel>, "values": [...]}` with `requiresItemLevel`; Zen costs per level stay with the definition as `"zen": [...]` (client-only); names into `OptionTexts.json`; OpenMU weights under `server` | `GetStrengthenCapability` reads the definitions; P11 is reported, not fixed |
+| 9b3 | `ItemAddOption.bmd`, its 380 records (`ItemAddOptioninfo.cpp`) | one `guardian` definition per item kind (weapon, helm, armor, pants, gloves, boots), values as the bmd (P6) | needs #966; the buff records stay in the bmd (O13) |
+| 9b4 | `socketitem_<lang>.bmd` (`SocketSystem.cpp:605`) | one `socket` definition per element, values per sphere level; `socketBonus` definitions; the set bonus as `"combinations"` in `Socket.json` (OpenMU's `ItemOptionCombinationBonus`); value kinds 3 to 5 as `per` terms (O7) | `IsSocketItem`'s list becomes the links; P13 |
+| 9b5 | Fenrir (`ZzzInventory.cpp:2178-2245`), Dark Horse (`GIPetManager.cpp:580-605`), Dinorant (`ZzzInfomation.cpp:557-574`), Wizard's rings (`:453-483`) | the Fenrir types, `darkHorse`, `hornOfDinorant` (`bits`), `wizardsRing` (`always`) | section 3 |
+| 9b6 | the option loop of `BuildItemTooltipText` | – | section 9 |
+
+`zen` on harmony options and `combinations` in `Socket.json` are named here
+so 9b2 and 9b4 do not have to invent them; their pull requests fix the
+details in `docs/item-data.md`.
 
 ## Pull requests
 
@@ -243,13 +919,17 @@ stay the same.
 
 Answered on 2026-11-04: Q-O1 (O5), Q-O2 (O6), Q-O3 (O7), Q-O4 (O8), Q-O5
 (O9), Q-O6 (O10), Q-O7 (O11), Q-O8 (O12), Q-O9 (O13), Q-O10 (O14), Q-O11
-(O15), Q-O12 (O16), Q-O13 (O17), Q-O14 (O18), Q-O15 (O19), Q-O16 (O20). All
-questions are answered. New questions from the pull requests are added here.
+(O15), Q-O12 (O16), Q-O13 (O17), Q-O14 (O18), Q-O15 (O19), Q-O16 (O20). New
+questions from the pull requests are added here.
+
+| Q | Question | Recommendation |
+|---|---|---|
+| Q-O17 | P14, found while writing the target design: the Zen option +30 % (client, Season 6 guides) or +40 % (OpenMU). | +30 %, as the other differences of O12: the client's value, a known difference, named in the OpenMU issue. Must be answered before 9a3. |
 
 ## Tasks
 
 1. [x] Answer the open questions one by one (O5 to O20).
-2. [ ] Write the target design from O1 to O20.
+2. [x] Write the target design from O1 to O20.
 3. [ ] The pull requests of "Pull requests".
 4. [ ] Move what stays true into `docs/item-data.md`, and point the items
    design (phase 9) and the roadmap (row "Items") at those docs.
