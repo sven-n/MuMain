@@ -38,7 +38,7 @@ endif()
 set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 
 # Helper for module CMakeLists. Usage:
-#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2)
+#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>])
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
 # failures point at the specific case in CI logs.
 set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
@@ -51,7 +51,7 @@ if(MSVC)
 endif()
 
 function(mu_add_test)
-    cmake_parse_arguments(MAT "" "NAME" "SOURCES;LINK_LIBS" ${ARGN})
+    cmake_parse_arguments(MAT "" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
     list(FIND MAT_SOURCES "${MU_TEST_WINMAIN}" winmain_index)
     if(NOT winmain_index EQUAL -1)
         list(REMOVE_AT MAT_SOURCES ${winmain_index})
@@ -66,8 +66,12 @@ function(mu_add_test)
     if(MSVC)
         target_compile_options(${MAT_NAME} PRIVATE /utf-8)
     endif()
-    # Cases of one binary share fixed temp paths, so `ctest --parallel` runs them one at a time; binaries overlap.
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_NAME})
+    # Cases of one binary share fixed temp paths, so `ctest --parallel` runs them one at a time; binaries overlap,
+    # except binaries that name the same RESOURCE_LOCK because they write the same file.
+    if(NOT MAT_RESOURCE_LOCK)
+        set(MAT_RESOURCE_LOCK ${MAT_NAME})
+    endif()
+    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
