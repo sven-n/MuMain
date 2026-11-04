@@ -23,7 +23,7 @@
 # The editor OFF build follows ci.yml's rule that no warning may come back (docs/build/README.md): the game's
 # own code builds with warnings as errors, scripts/ci_warnings.py fails the step for any other warning, note or
 # deprecation in the configure or build output, and the last job fails on a warning annotation of any job. The
-# editor ON builds only list their warnings.
+# editor ON builds are not held to it; the Windows one lists its warnings (ci_warnings.py report).
 #
 # Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
 # about 35), and each test case its own limit from tests/CMakeLists.txt. A
