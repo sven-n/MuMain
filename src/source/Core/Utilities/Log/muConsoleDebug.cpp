@@ -23,6 +23,7 @@
 #include "Core/Text/Utf8.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
@@ -133,6 +134,27 @@ bool CheckDeveloperLookCommand(const std::wstring& command)
         return true;
     }
     return false;
+}
+
+// "$fixedtick on|off": the same switch as the control socket's fixedtick.
+bool CheckFixedTickCommand(const std::wstring& command)
+{
+    if (!command.starts_with(L"$fixedtick"))
+    {
+        return false;
+    }
+    if (command != L"$fixedtick on" && command != L"$fixedtick off")
+    {
+        mu::log::Get("render")->warn("{}: not understood (on or off)", Core::Text::ToUtf8(command.c_str()));
+        return true;
+    }
+    const bool on = command == L"$fixedtick on";
+    if (on != Scenes::FixedTick::IsOn())
+    {
+        Scenes::FixedTick::SetOn(on);
+    }
+    g_pSystemLogBox->AddText(on ? L"Fixed tick on" : L"Fixed tick off", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    return true;
 }
 #endif
 } // namespace
@@ -341,7 +363,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
 
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
-    if (CheckDeveloperLookCommand(strCommand))
+    if (CheckDeveloperLookCommand(strCommand) || CheckFixedTickCommand(strCommand))
     {
         return true;
     }
