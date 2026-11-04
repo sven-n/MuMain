@@ -2,6 +2,7 @@ mu_add_test(
     NAME test_boid_steering
     SOURCES
         test_boid_steering.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
