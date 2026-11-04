@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 # Copies every DLL that EXE loads, directly or through another DLL (libcurl ->
 # zlib), from vcpkg's bin directory next to EXE.
 #
