@@ -45,6 +45,7 @@ const std::vector<CommandEntry>& CommandTable()
         {"drawspawns", SceneRequirement::World, &Commands::DrawSpawns},
         {"drawpurity", SceneRequirement::World, &Commands::DrawPurity},
         {"drawlater", SceneRequirement::World, &Commands::DrawLater},
+        {"fixedtick", SceneRequirement::World, &Commands::FixedTick},
         {"drawparity", SceneRequirement::World, &Commands::DrawParity},
         {"spawn-effect", SceneRequirement::World, &Commands::SpawnEffect},
         {"click-ui", SceneRequirement::Any, &Commands::ClickUi},

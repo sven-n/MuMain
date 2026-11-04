@@ -8,6 +8,7 @@
 #include "App/Control/DrawPurityCheck.h"
 #include "Render/Drawing/DeferredDraws.h"
 #include "Render/Drawing/DrawCallLog.h"
+#include "Scenes/FixedTick.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -525,6 +526,21 @@ std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
     Render::Drawing::SetDrawsWorldLater(on);
     json result;
     result["on"] = on;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string FixedTick(const Request& request, std::unique_ptr<Act>&)
+{
+    bool on = Scenes::FixedTick::IsOn();
+    if (request.Has("on") && !request.GetBool("on", on))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "on must be a boolean");
+    }
+    if (on != Scenes::FixedTick::IsOn())
+        Scenes::FixedTick::SetOn(on);
+    json result;
+    result["on"] = on;
+    result["ticks"] = Scenes::FixedTick::TicksRun();
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

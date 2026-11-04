@@ -233,6 +233,7 @@ const std::vector<std::string>& CommandNames()
         "drawspawns",
         "drawpurity",
         "drawlater",
+        "fixedtick",
         "drawparity",
         "spawn-effect",
         "tooltip",

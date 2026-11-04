@@ -15,6 +15,8 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "Scenes/FixedTick.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Input/Selection.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -207,7 +209,7 @@ static void InitializeMainScene()
  *
  * @note Called every frame during the main scene update loop.
  */
-static void InitializeSceneFrame()
+static void InitializeWorldUpdate()
 {
     ApplyCharacterEffectsEarthQuake();
     // Decays per reference frame, like DefaultCamera samples it.
@@ -216,7 +218,10 @@ static void InitializeSceneFrame()
         EarthQuake *= 0.2f;
     }
     InitTerrainLight();
+}
 
+static void InitializeFrameInput()
+{
     CheckInventory = NULL;
     CheckSkill = -1;
     MouseOnWindow = false;
@@ -304,7 +309,8 @@ static void UpdateGameEntities()
     UpdatePersonalShopTitleImp();
     {
         Render::Lighting::LightSourceScope characterLights(Render::Lighting::LightSource::Character);
-        MoveHero();
+        if (!Scenes::FixedTick::RunsWorld())
+            MoveHero();
         MoveCharactersClient();
     }
     MoveMounts();
@@ -344,6 +350,10 @@ static void UpdateGameEntities()
  */
 static void UpdateMainSceneView()
 {
+    const bool ticks = Scenes::FixedTick::RunsWorld();
+    if (ticks)
+        Scenes::FixedTick::ApplyInterpolation();
+
     MoveMainCamera();
 
     const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
@@ -352,8 +362,29 @@ static void UpdateMainSceneView()
                    static_cast<float>(viewport.height) / WindowHeight);
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
     CullWorld();
-    // The frame's lights, from every light the update added; the draw only shows them.
-    AddFrameHistoryLights();
+    // The frame's lights, from every light the update added; the draw only shows them. A frame with no tick keeps them.
+    if (!ticks || Scenes::FixedTick::TicksThisFrame() > 0)
+        AddFrameHistoryLights();
+}
+
+extern CPhysicsManager g_PhysicsManager;
+
+// The world update in whole ticks. The hero's input runs every frame: its clicks last one frame, and it steps no time.
+static void RunWorldTicks()
+{
+    {
+        Render::Lighting::LightSourceScope characterLights(Render::Lighting::LightSource::Character);
+        MoveHero();
+    }
+    for (int i = 0; i < Scenes::FixedTick::TicksThisFrame(); ++i)
+    {
+        const Scenes::FixedTick::TickScope tick;
+        ClearSprites();
+        InitializeWorldUpdate();
+        Scenes::FixedTick::CaptureTransforms();
+        UpdateGameEntities();
+        g_PhysicsManager.Move(0.025f);
+    }
 }
 
 /**
@@ -363,7 +394,7 @@ static void UpdateMainSceneView()
  * It orchestrates initialization, server connection waiting, and frame updates by calling:
  * 1. InitializeMainScene() - One-time setup (first call only)
  * 2. Server join synchronization - Waits for server response before enabling rendering
- * 3. InitializeSceneFrame() - Per-frame state reset
+ * 3. InitializeWorldUpdate(), InitializeFrameInput() - Per-frame state reset
  * 4. UpdateUIAndInput() - UI and input processing
  * 5. UpdateGameEntities() - Game world and entity updates
  * 6. UpdateMainSceneView() - Camera and the frame's view
@@ -389,7 +420,10 @@ void MoveMainScene()
 
     // Picks what the cursor is over in what the last frame drew, and highlights it.
     Input::Selection::SelectObjects();
-    InitializeSceneFrame();
+    const bool ticks = Scenes::FixedTick::RunsWorld();
+    if (!ticks)
+        InitializeWorldUpdate();
+    InitializeFrameInput();
 
     // While the reconnect dialog is up it's modal: block world clicks so they
     // don't move the hero and instead reach the dialog's Cancel button.
@@ -401,7 +435,10 @@ void MoveMainScene()
     if (ErrorMessage != 0)
         MouseOnWindow = true;
 
-    UpdateGameEntities();
+    if (ticks)
+        RunWorldTicks();
+    else
+        UpdateGameEntities();
 
     g_ConsoleDebug->UpdateMainScene();
 

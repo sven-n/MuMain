@@ -70,6 +70,7 @@ FrameTimingState g_frameTiming;
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/SceneLightingSetup.h"
 #include "Scenes/SceneNames.h"
 #include "Render/Lighting/LightMoodSetting.h"
@@ -483,7 +484,8 @@ static void HandleScreenshotCapture()
  */
 static void UpdateActiveScene()
 {
-    ClearSprites();
+    if (!Scenes::FixedTick::RunsWorld())
+        ClearSprites();
     switch (SceneFlag)
     {
     case LOG_IN_SCENE:
@@ -555,7 +557,8 @@ static void UpdateWaterAnimation()
  */
 static void UpdateCoreSystems()
 {
-    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
+    if (!Scenes::FixedTick::RunsWorld())
+        g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
     Bitmaps.Manage();
     Set3DSoundPosition();
 }
@@ -1253,6 +1256,7 @@ void MainScene(HDC hDC)
 void RenderScene(HDC hDC)
 {
     CalcFPS();
+    Scenes::FixedTick::BeginFrame(WorldTime);
     UpdateSceneState();
 
     // Drive auto-reconnect after the scene loops have advanced this frame. It
@@ -1292,6 +1296,8 @@ void RenderScene(HDC hDC)
         mbstowcs(errorMessage, e.what(), 255);
         g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", errorMessage);
     }
+
+    Scenes::FixedTick::Restore();
 
     // SDL may deliver button-down and button-up in one event batch. Keep these
     // one-shot flags alive until scene logic has consumed the rendered frame.
