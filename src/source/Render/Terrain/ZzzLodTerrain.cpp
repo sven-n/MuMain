@@ -54,6 +54,7 @@
 #include "Camera/ConvexHull2D.h"
 #include "Engine/Object/CullingConstants.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Drawing/LegacyCalls.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -1544,10 +1545,31 @@ void RenderFaceBlend(int Texture, int mx, int my)
     s_layerFaces.push_back({Texture, true, {v0, v1, v2, v3}});
 }
 
-void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
+namespace
+{
+// The Crywolf water faces the last terrain pass drew.
+std::vector<std::pair<float, float>> s_drawnCrywolfWater;
+} // namespace
+
+void UpdateTerrainWaterSpots()
 {
     vec3_t Light, Pos;
     Vector(0.30f, 0.40f, 0.20f, Light);
+    for (const auto& [xf, yf] : s_drawnCrywolfWater)
+    {
+        if (rand_fps_check(50))
+        {
+            float sx = xf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+            float sy = yf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+            Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
+            CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
+        }
+    }
+    s_drawnCrywolfWater.clear();
+}
+
+void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
+{
     BITMAP_t* b = &Bitmaps[BITMAP_MAPTILE + Texture];
     float Width, Height;
     if (Scale)
@@ -1576,15 +1598,7 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
         float Water3 = 0.f;
         float Water4 = 0.f;
         if (gMapManager.WorldActive == WD_34CRYWOLF_1ST && Texture == 5)
-        {
-            if (rand_fps_check(50))
-            {
-                float sx = xf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
-                float sy = yf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
-                Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
-                CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
-            }
-        }
+            s_drawnCrywolfWater.emplace_back(xf, yf);
 
         if (gMapManager.WorldActive == WD_30BATTLECASTLE && Texture == 5)
             suf -= WaterMove;
@@ -3270,6 +3284,14 @@ bool g_bMapEditorFullTerrain = false;
 
 void RenderTerrain(bool EditFlag)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::RenderTerrain, EditFlag))
+        return;
+    if (!EditFlag)
+    {
+        // The tiles noted are this pass's: a pass drawn again replaces them.
+        s_drawnCrywolfWater.clear();
+        ForgetDrawnTerrain();
+    }
     if (g_bMapEditorFullTerrain)
         ResetFrustrumBoundsFullTerrain();
 

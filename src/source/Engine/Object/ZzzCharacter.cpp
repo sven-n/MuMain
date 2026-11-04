@@ -192,6 +192,7 @@ namespace
 #include "GameLogic/Social/MonkSystem.h"
 #include "UI/Core/WindowSystem.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Effects/EffectDraw.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -6555,7 +6556,6 @@ void RenderGuild(const OBJECT* o, int Type, vec3_t vPos)
     EnableAlphaTest();
     EnableCullFace();
     BindTexture(BITMAP_GUILD);
-    mu::GetRenderer().PushMatrix();
 
     float Matrix[3][4];
     vec3_t Angle;
@@ -6583,10 +6583,10 @@ void RenderGuild(const OBJECT* o, int Type, vec3_t vPos)
     }
 
     R_ConcatTransforms(DrawnPose(o)[26], Matrix, ParentMatrix);
-    mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
-    RenderPlane3D(5.f, 7.f, ParentMatrix);
-
-    mu::GetRenderer().PopMatrix();
+    Render::EffectDrawing::PlaneDraw plane{
+        .position = {o->Position[0], o->Position[1], o->Position[2]}, .width = 5.f, .height = 7.f};
+    std::memcpy(plane.rotation, ParentMatrix, sizeof(plane.rotation));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawPlane(plane);
     DisableCullFace();
 }
 
@@ -9741,8 +9741,8 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
                 float Luminosity = sinf(WorldTime * 0.0015f) * 0.3f + 0.8f;
 
                 Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light);
-                RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light,
-                                         -o->Angle[2]);
+                Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                    BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light, -o->Angle[2]));
             }
         }
     }
@@ -10035,10 +10035,10 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
             const float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
             EnableAlphaBlend();
             Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
-            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight,
-                                     WorldTime * 0.01f);
-            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight,
-                                     -WorldTime * 0.01f);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight, WorldTime * 0.01f));
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight, -WorldTime * 0.01f));
             // RenderAurora ( BITMAP_GM_AURORA, RENDER_BRIGHT, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight );
 
             DisableAlphaBlend();

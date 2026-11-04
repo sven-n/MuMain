@@ -42,6 +42,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Render/Models/GpuSkinningPath.h"
 #include "Render/Models/SkinnedVertexPacking.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -1585,7 +1586,7 @@ void BMD::EndRenderCoinHeap(int coinCount)
         muVerts[static_cast<std::size_t>(i)] =
             {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color};
     }
-    mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = muVerts, .triangles = true});
 }
 
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)

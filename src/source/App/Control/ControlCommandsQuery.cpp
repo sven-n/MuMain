@@ -6,6 +6,8 @@
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "App/Control/DrawPurityCheck.h"
+#include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -510,6 +512,50 @@ std::string DrawPurity(const Request& request, std::unique_ptr<Act>&)
     json result;
     result["draws"] = draws;
     result["changes"] = changes;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
+{
+    bool on = Render::Drawing::DrawsWorldLater();
+    if (request.Has("on") && !request.GetBool("on", on))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "on must be a boolean");
+    }
+    Render::Drawing::SetDrawsWorldLater(on);
+    json result;
+    result["on"] = on;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawParity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    bool later = true;
+    if (request.Has("later") && !request.GetBool("later", later))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "later must be a boolean");
+    }
+    if (start)
+    {
+        Render::Drawing::RequestDrawParity(later);
+    }
+    const Render::Drawing::DrawParityReport& report = Render::Drawing::LastDrawParityReport();
+    json result;
+    result["done"] = report.done;
+    result["later"] = report.later;
+    result["at_once_calls"] = report.atOnceCalls;
+    result["later_calls"] = report.laterCalls;
+    result["first_difference"] = report.firstDifference;
+    result["first"] = {{"at_once", report.first.first}, {"later", report.first.second}};
+    result["only_at_once"] = report.onlyAtOnce;
+    result["only_later"] = report.onlyLater;
+    result["only_at_once_examples"] = report.onlyAtOnceExamples;
+    result["only_later_examples"] = report.onlyLaterExamples;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

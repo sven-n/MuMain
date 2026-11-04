@@ -5,7 +5,8 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
-#include "Render/Drawing/StateCalls.h"
+#include "Render/Drawing/LegacyCalls.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -14,6 +15,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Core/WindowSystem.h"
+#include <bit>
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
@@ -150,87 +152,6 @@ int  GrabScreen = 0;
 // opengl render util
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace
-{
-Render::Drawing::StateCallRecorder* s_stateCallRecorder = nullptr;
-
-// While a drawer that draws later records, a state call is recorded with its draws instead of made now.
-bool RecordsStateCall(Render::Drawing::StateCall call, int argument)
-{
-    if (s_stateCallRecorder == nullptr)
-        return false;
-    s_stateCallRecorder->RecordStateCall(call, argument);
-    return true;
-}
-} // namespace
-
-namespace Render::Drawing
-{
-void SetStateCallRecorder(StateCallRecorder* recorder)
-{
-    s_stateCallRecorder = recorder;
-}
-
-StateCallRecorder* ActiveStateCallRecorder()
-{
-    return s_stateCallRecorder;
-}
-
-void MakeStateCall(StateCall call, int argument)
-{
-    switch (call)
-    {
-    case StateCall::BindTexture:
-        BindTexture(argument);
-        break;
-    case StateCall::EnableDepthTest:
-        EnableDepthTest();
-        break;
-    case StateCall::DisableDepthTest:
-        DisableDepthTest();
-        break;
-    case StateCall::EnableDepthMask:
-        EnableDepthMask();
-        break;
-    case StateCall::DisableDepthMask:
-        DisableDepthMask();
-        break;
-    case StateCall::EnableCullFace:
-        EnableCullFace();
-        break;
-    case StateCall::DisableCullFace:
-        DisableCullFace();
-        break;
-    case StateCall::DisableTexture:
-        DisableTexture(argument != 0);
-        break;
-    case StateCall::DisableAlphaBlend:
-        DisableAlphaBlend();
-        break;
-    case StateCall::EnableAlphaTest:
-        EnableAlphaTest(argument != 0);
-        break;
-    case StateCall::EnableAlphaBlend:
-        EnableAlphaBlend();
-        break;
-    case StateCall::EnableAlphaBlendMinus:
-        EnableAlphaBlendMinus();
-        break;
-    case StateCall::EnableAlphaBlend2:
-        EnableAlphaBlend2();
-        break;
-    case StateCall::EnableAlphaBlend3:
-        EnableAlphaBlend3();
-        break;
-    case StateCall::EnableAlphaBlend4:
-        EnableAlphaBlend4();
-        break;
-    case StateCall::EnableLightMap:
-        EnableLightMap();
-        break;
-    }
-}
-} // namespace Render::Drawing
 
 int  CachTexture = -1;
 bool TextureEnable;
@@ -242,7 +163,7 @@ int  AlphaBlendType;
 
 void BindTexture(int tex)
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::BindTexture, tex))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::BindTexture, tex))
         return;
     // Always forward to the renderer. In the deferred SDL renderer this only
     // updates logical state, and caching can desync when callers bind directly.
@@ -265,7 +186,9 @@ void EndTextureStream()
 
 void SetAlphaFuncRef(float ref)
 {
-    glAlphaFunc(GL_GREATER, ref);
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::SetAlphaFuncRef, std::bit_cast<int>(ref)))
+        return;
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, ref);
 }
 
 void EnableTexture2D()
@@ -331,7 +254,7 @@ void FlushGL()
 
 void EnableDepthTest()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableDepthTest, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableDepthTest, 0))
         return;
     if (!DepthTestEnable)
     {
@@ -342,7 +265,7 @@ void EnableDepthTest()
 
 void DisableDepthTest()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::DisableDepthTest, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableDepthTest, 0))
         return;
     if (DepthTestEnable)
     {
@@ -353,7 +276,7 @@ void DisableDepthTest()
 
 void EnableDepthMask()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableDepthMask, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableDepthMask, 0))
         return;
     if (!DepthMaskEnable)
     {
@@ -364,7 +287,7 @@ void EnableDepthMask()
 
 void DisableDepthMask()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::DisableDepthMask, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableDepthMask, 0))
         return;
     if (DepthMaskEnable)
     {
@@ -375,7 +298,7 @@ void DisableDepthMask()
 
 void EnableCullFace()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableCullFace, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableCullFace, 0))
         return;
     if (!CullFaceEnable)
     {
@@ -386,7 +309,7 @@ void EnableCullFace()
 
 void DisableCullFace()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::DisableCullFace, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableCullFace, 0))
         return;
     if (CullFaceEnable)
     {
@@ -397,7 +320,7 @@ void DisableCullFace()
 
 void DisableTexture(bool AlphaTest)
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::DisableTexture, AlphaTest))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableTexture, AlphaTest))
         return;
     EnableDepthMask();
     if (AlphaTest == true)
@@ -425,7 +348,7 @@ void DisableTexture(bool AlphaTest)
 
 void DisableAlphaBlend()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::DisableAlphaBlend, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableAlphaBlend, 0))
         return;
     if (AlphaBlendType != 0)
     {
@@ -450,7 +373,7 @@ void DisableAlphaBlend()
 
 void EnableAlphaTest(bool DepthMask)
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaTest, DepthMask))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaTest, DepthMask))
         return;
     if (AlphaBlendType != 2)
     {
@@ -476,7 +399,7 @@ void EnableAlphaTest(bool DepthMask)
 
 void EnableAlphaBlend()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend, 0))
         return;
     if (AlphaBlendType != 3)
     {
@@ -501,7 +424,7 @@ void EnableAlphaBlend()
 
 void EnableAlphaBlendMinus()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlendMinus, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlendMinus, 0))
         return;
     if (AlphaBlendType != 4)
     {
@@ -526,7 +449,7 @@ void EnableAlphaBlendMinus()
 
 void EnableAlphaBlend2()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend2, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend2, 0))
         return;
     if (AlphaBlendType != 5)
     {
@@ -551,7 +474,7 @@ void EnableAlphaBlend2()
 
 void EnableAlphaBlend3()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend3, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend3, 0))
         return;
     if (AlphaBlendType != 6)
     {
@@ -576,7 +499,7 @@ void EnableAlphaBlend3()
 
 void EnableAlphaBlend4()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend4, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend4, 0))
         return;
     if (AlphaBlendType != 7)
     {
@@ -601,7 +524,7 @@ void EnableAlphaBlend4()
 
 void EnableLightMap()
 {
-    if (RecordsStateCall(Render::Drawing::StateCall::EnableLightMap, 0))
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableLightMap, 0))
         return;
     if (AlphaBlendType != 1)
     {
@@ -968,12 +891,16 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
 
 void BeginSprite()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::BeginSprite))
+        return;
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
 }
 
 void EndSprite()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EndSprite))
+        return;
     mu::GetRenderer().PopMatrix();
 }
 
@@ -1049,7 +976,8 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -1081,7 +1009,8 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
 void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha, float Scale)

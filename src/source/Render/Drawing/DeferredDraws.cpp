@@ -8,13 +8,28 @@
 
 namespace Render::Drawing
 {
+namespace
+{
+bool s_drawsWorldLater = false;
+} // namespace
+
+bool DrawsWorldLater()
+{
+    return s_drawsWorldLater;
+}
+
+void SetDrawsWorldLater(bool later)
+{
+    s_drawsWorldLater = later;
+}
+
 DeferredDraws::DeferredDraws()
     : m_models(&ModelDrawing::ActiveModelDrawer()), m_effects(&EffectDrawing::ActiveEffectDrawer()),
-      m_states(ActiveStateCallRecorder())
+      m_states(ActiveLegacyCallRecorder())
 {
     ModelDrawing::SetModelDrawer(this);
     EffectDrawing::SetEffectDrawer(this);
-    SetStateCallRecorder(this);
+    SetLegacyCallRecorder(this);
 }
 
 DeferredDraws::~DeferredDraws()
@@ -29,7 +44,7 @@ void DeferredDraws::Flush()
     m_flushed = true;
     ModelDrawing::SetModelDrawer(m_models);
     EffectDrawing::SetEffectDrawer(m_effects);
-    SetStateCallRecorder(m_states);
+    SetLegacyCallRecorder(m_states);
     for (const Recorded& record : m_draws)
     {
         std::optional<mu::ScopedBloomExclusion> exclusion;
@@ -49,7 +64,8 @@ void DeferredDraws::Flush()
                     m_effects->DrawSprite(recorded);
                 else if constexpr (std::is_same_v<Kind, Quads>)
                     m_effects->DrawQuads({.vertices = std::span(m_vertices).subspan(recorded.first, recorded.count),
-                                          .texture = recorded.texture});
+                                          .texture = recorded.texture,
+                                          .triangles = recorded.triangles});
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::DecalDraw>)
                     m_effects->DrawDecal(recorded);
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::CircleDraw>)
@@ -57,7 +73,7 @@ void DeferredDraws::Flush()
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::PlaneDraw>)
                     m_effects->DrawPlane(recorded);
                 else
-                    MakeStateCall(recorded.call, recorded.argument);
+                    MakeLegacyCall(recorded.call, recorded.argument);
             },
             record.draw);
     }
@@ -157,7 +173,10 @@ void DeferredDraws::DrawSprite(const EffectDrawing::SpriteDraw& draw)
 
 void DeferredDraws::DrawQuads(const EffectDrawing::QuadsDraw& draw)
 {
-    Record(Quads{.first = m_vertices.size(), .count = draw.vertices.size(), .texture = draw.texture});
+    Record(Quads{.first = m_vertices.size(),
+                 .count = draw.vertices.size(),
+                 .texture = draw.texture,
+                 .triangles = draw.triangles});
     m_vertices.insert(m_vertices.end(), draw.vertices.begin(), draw.vertices.end());
 }
 
@@ -176,7 +195,7 @@ void DeferredDraws::DrawPlane(const EffectDrawing::PlaneDraw& draw)
     Record(draw);
 }
 
-void DeferredDraws::RecordStateCall(StateCall call, int argument)
+void DeferredDraws::RecordLegacyCall(LegacyCall call, int argument)
 {
     Record(State{.call = call, .argument = argument});
 }

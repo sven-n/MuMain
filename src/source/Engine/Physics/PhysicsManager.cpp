@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Effects/EffectDraw.h"
 
 #define RENDER_CLOTH
 #define ADD_COLLISION
@@ -960,7 +961,7 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, u
         }
     }
 
-    mu::GetRenderer().RenderQuad3D(quadVerts, 0);
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quadVerts});
 }
 
 void CPhysicsCloth::RenderCollisions(void)

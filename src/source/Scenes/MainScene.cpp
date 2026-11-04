@@ -44,6 +44,11 @@
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
+#include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Render/Drawing/LegacyCalls.h"
+
+#include <optional>
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
 #include "Camera/CameraDebugLog.h"
@@ -322,7 +327,9 @@ static void UpdateGameEntities()
         UpdateMountEffects();
         UpdateEffectModelEffects();
         UpdateTerrainEffects();
+        UpdateTerrainWaterSpots();
     }
+    MoveWaterTerrain();
 
     g_Direction.CheckDirection();
 
@@ -546,7 +553,7 @@ bool IsWingExtraLayersDisabledDebug()
  * @param width Screen width for water terrain rendering
  * @param height Screen height for water terrain rendering
  */
-static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 {
 #ifdef _EDITOR
     // DevEditor render toggle checks
@@ -562,6 +569,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
+    // Described first and drawn at the end of the pass when the developer switch is on.
+    std::optional<Render::Drawing::DeferredDraws> later;
+    if (Render::Drawing::DrawsWorldLater())
+        later.emplace();
 
     if (IsWaterTerrain() == false && renderTerrain)
     {
@@ -577,7 +588,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
                 {
                     FRAME_PROFILE(Objects);
                     Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
-                    mu::ScopedReorderableDraws reorderable;
+                    Render::Drawing::ScopedReorderableDraws reorderable;
                     RenderObjects();
                 }
                 { FRAME_PROFILE(Terrain); RenderTerrain(false); }
@@ -588,7 +599,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     {
         FRAME_PROFILE(Objects);
         Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
-        mu::ScopedReorderableDraws reorderable;
+        Render::Drawing::ScopedReorderableDraws reorderable;
         RenderObjects();
     }
 
@@ -622,7 +633,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (renderStatic)
     {
         FRAME_PROFILE(Objects);
-        mu::ScopedReorderableDraws reorderable;
+        Render::Drawing::ScopedReorderableDraws reorderable;
         RenderObjects_AfterCharacter();
     }
 
@@ -652,6 +663,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     EndSprite();
 
     RenderAfterEffects();
+    if (later)
+        later->Flush();
 
     if (IsWaterTerrain() == true)
     {
@@ -659,6 +672,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
         EndOpengl();
         BeginOpenglPhysical(0, 0, width, height);
+        // The water pass changes the camera: a segment of its own.
+        std::optional<Render::Drawing::DeferredDraws> waterLater;
+        if (Render::Drawing::DrawsWorldLater())
+            waterLater.emplace();
         RenderWaterTerrain();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
@@ -672,6 +689,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderPoints(byWaterMap);
 
         EndSprite();
+        if (waterLater)
+            waterLater->Flush();
         EndOpengl();
 
         BeginOpenglPhysical(0, 0, width, height);
@@ -684,6 +703,38 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             battleCastle::EndFog();
         }
     }
+}
+
+// Draws the world pass, after drawing it at once and later into two logs when "drawparity" asked for it. The logs
+// stand in for the renderer, so the frame shows the pass once.
+static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+{
+    bool secondLater = true;
+    if (Render::Drawing::TakeDrawParityRequest(secondLater))
+    {
+        const bool drawsLater = Render::Drawing::DrawsWorldLater();
+        // Each run starts from the sprites the frame drew so far, as the frame's own pass does.
+        const std::vector<bool> spritesDrawn = SpritesDrawnThisFrame();
+        Render::Drawing::DrawCallLog atOnce;
+        Render::Drawing::DrawCallLog later;
+        for (Render::Drawing::DrawCallLog* log : {&atOnce, &later})
+        {
+            Render::Drawing::SetDrawsWorldLater(secondLater && log == &later);
+            mu::SetRendererOverride(log);
+            Render::Drawing::ResetLegacyState();
+            SetSpritesDrawnThisFrame(spritesDrawn);
+            BYTE waterMap = byWaterMap;
+            RenderGameWorldPass(waterMap, width, height);
+            log->NoteFinalState();
+            mu::SetRendererOverride(nullptr);
+        }
+        Render::Drawing::SetDrawsWorldLater(drawsLater);
+        // The legacy calls' caches followed the logs: tell the renderer again.
+        Render::Drawing::ResetLegacyState();
+        SetSpritesDrawnThisFrame(spritesDrawn);
+        Render::Drawing::ReportDrawParity(atOnce.calls, later.calls);
+    }
+    RenderGameWorldPass(byWaterMap, width, height);
 }
 
 /**

@@ -9,12 +9,15 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Render/Drawing/LegacyCalls.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include <array>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -33,294 +36,16 @@ namespace
 {
 const std::filesystem::path PlayerFolder = std::filesystem::path(MU_TEST_DATA_DIR) / "Player";
 
-std::uint64_t Hash(const void* data, std::size_t size, std::uint64_t hash = 1469598103934665603ull)
-{
-    const auto* bytes = static_cast<const unsigned char*>(data);
-    for (std::size_t i = 0; i < size; ++i)
-        hash = (hash ^ bytes[i]) * 1099511628211ull;
-    return hash;
-}
-
-template <typename T> std::uint64_t HashSpan(std::span<const T> values)
-{
-    return Hash(values.data(), values.size_bytes());
-}
-
-template <typename T> void HashInto(std::uint64_t& hash, const T& value)
-{
-    hash = Hash(&value, sizeof(value), hash);
-}
-
-// What a GPU-skinned draw is drawn with, field by field: the palette version and the bones' address are cache keys,
-// the matrices themselves are compared.
-std::uint64_t HashOf(const mu::SkinningParameters& p)
-{
-    std::uint64_t hash = HashSpan(p.boneMatrices);
-    HashInto(hash, p.bodyOrigin);
-    HashInto(hash, p.bodyScale);
-    HashInto(hash, p.boneScale);
-    HashInto(hash, p.restPoseScale);
-    HashInto(hash, p.lightDirection);
-    HashInto(hash, p.highlightKnee);
-    HashInto(hash, p.textureCoordinateOffset);
-    HashInto(hash, p.chromeWave);
-    HashInto(hash, p.chromeWave2);
-    HashInto(hash, p.chromeLight);
-    HashInto(hash, p.chromeTimeTerm);
-    HashInto(hash, p.textureCoordinates);
-    HashInto(hash, p.translate);
-    HashInto(hash, p.lightEnabled);
-    HashInto(hash, p.specularStrength);
-    HashInto(hash, p.normalTextureId);
-    HashInto(hash, p.normalMapScale);
-    return hash;
-}
-
-std::uint64_t HashOf(const mu::ShadowProjection& projection)
-{
-    std::uint64_t hash = Hash(projection.origin, sizeof(projection.origin));
-    HashInto(hash, projection.shearX);
-    HashInto(hash, projection.shearHeight);
-    HashInto(hash, projection.specialHeight);
-    HashInto(hash, projection.terrain);
-    return hash;
-}
-
-// Every draw that reaches the renderer, with a hash of what it draws (skinned draws' bones included) and the state
-// it is drawn with.
-class CallLog final : public mu::IMuRenderer
-{
-public:
-    std::vector<std::string> calls;
-    // The vertices of each RenderTriangles call.
-    std::vector<std::vector<mu::Vertex3D>> triangles;
-    // Casts body shadows on the GPU (RenderCachedSkinnedShadow); otherwise the models project them on the CPU.
-    bool gpuShadows = false;
-
-    // What the draws and state calls leave after the last draw, which the next draws in the frame inherit.
-    void NoteFinalState()
-    {
-        calls.push_back("final" + State());
-    }
-
-    void RenderQuad2D(std::span<const mu::Vertex2D> v, std::uint32_t texture) override
-    {
-        Note("Quad2D", texture, HashSpan(v));
-    }
-    void RenderTriangles(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
-    {
-        Note("Triangles", texture, HashSpan(v));
-        triangles.emplace_back(v.begin(), v.end());
-    }
-    void RenderQuad3D(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
-    {
-        Note("Quad3D", texture, HashSpan(v));
-    }
-    void RenderQuadStrip(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
-    {
-        Note("Strip", texture, HashSpan(v));
-    }
-    void RenderLines(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
-    {
-        Note("Lines", texture, HashSpan(v));
-    }
-    [[nodiscard]] bool RenderSkinnedTriangles(std::span<const mu::SkinnedVertex3D> v, std::uint32_t color,
-                                              std::uint32_t texture, const mu::SkinningParameters& p) override
-    {
-        return Skinned("Skinned", HashSpan(v), color, texture, p);
-    }
-    [[nodiscard]] bool RenderWeightedSkinnedTriangles(std::span<const mu::SkinnedWeightedVertex3D> v,
-                                                      std::uint32_t color, std::uint32_t texture,
-                                                      const mu::SkinningParameters& p) override
-    {
-        return Skinned("WeightedSkinned", HashSpan(v), color, texture, p);
-    }
-    [[nodiscard]] bool IsSkinnedMeshCached(const void* mesh) const override
-    {
-        return m_cached.contains(mesh);
-    }
-    [[nodiscard]] bool CacheSkinnedMesh(const void* mesh, std::span<const mu::SkinnedVertex3D> v) override
-    {
-        return Cache(mesh, HashSpan(v));
-    }
-    [[nodiscard]] bool CacheWeightedSkinnedMesh(const void* mesh,
-                                                std::span<const mu::SkinnedWeightedVertex3D> v) override
-    {
-        return Cache(mesh, HashSpan(v));
-    }
-    [[nodiscard]] bool RenderCachedSkinnedMesh(const void* mesh, std::uint32_t color, std::uint32_t texture,
-                                               const mu::SkinningParameters& p) override
-    {
-        const auto cached = m_cached.find(mesh);
-        return cached != m_cached.end() && Skinned("CachedSkinned", cached->second, color, texture, p);
-    }
-    [[nodiscard]] bool SetTerrainHeights(std::span<const float>, std::span<const std::uint16_t>, std::uint32_t) override
-    {
-        return gpuShadows;
-    }
-    [[nodiscard]] bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color, const mu::SkinningParameters& p,
-                                                 const mu::ShadowProjection& projection) override
-    {
-        const auto cached = m_cached.find(mesh);
-        if (!gpuShadows || cached == m_cached.end())
-            return false;
-        calls.push_back("CachedShadow " + std::to_string(color) + " " + std::to_string(cached->second) + " " +
-                        std::to_string(HashOf(p)) + " " + std::to_string(HashOf(projection)) + State());
-        return true;
-    }
-    // State calls set what the following draws are drawn with; a draw is logged with it, as the SDL_GPU renderer
-    // records it with each command.
-    void SetBlendMode(mu::BlendMode mode) override
-    {
-        m_blend = static_cast<int>(mode);
-    }
-    void DisableBlend() override
-    {
-        m_blend = -1;
-    }
-    void SetDepthTest(bool on) override
-    {
-        m_depthTest = on;
-    }
-    void SetDepthMask(bool on) override
-    {
-        m_depthMask = on;
-    }
-    void SetCullFace(bool on) override
-    {
-        m_cullFace = on;
-    }
-    void SetAlphaTest(bool on) override
-    {
-        m_alphaTest = on;
-    }
-    void SetTexture2D(bool on) override
-    {
-        m_texture2D = on;
-    }
-    void SetFogEnabled(bool on) override
-    {
-        m_fog = on;
-    }
-    void BindTexture(int texture) override
-    {
-        m_bound = texture;
-    }
-    void SetTexEnv(int, int, int mode) override
-    {
-        m_textureMode = mode;
-    }
-    void BeginBloomExclusion() override
-    {
-        ++m_bloomExclusions;
-    }
-    void EndBloomExclusion() override
-    {
-        --m_bloomExclusions;
-    }
-    [[nodiscard]] bool IsBloomExcluded() const override
-    {
-        return m_bloomExclusions > 0;
-    }
-    void PushMatrix() override
-    {
-        m_matrices.push_back(m_matrices.back());
-    }
-    void PopMatrix() override
-    {
-        m_matrices.pop_back();
-    }
-    void LoadIdentity() override
-    {
-        m_matrices.back().clear();
-    }
-    void Translate(float x, float y, float z) override
-    {
-        m_matrices.back() += " T" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
-    }
-    void Rotate(float angle, float x, float y, float z) override
-    {
-        m_matrices.back() +=
-            " R" + std::to_string(angle) + "," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
-    }
-    void Scale(float x, float y, float z) override
-    {
-        m_matrices.back() += " S" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
-    }
-    void MultMatrix(const float* m) override
-    {
-        m_matrices.back() += " M" + std::to_string(Hash(m, sizeof(float) * 16));
-    }
-    void LoadMatrix(const float* m) override
-    {
-        m_matrices.back() = " L" + std::to_string(Hash(m, sizeof(float) * 16));
-    }
-    void SetFog(const mu::FogParams&) override {}
-    void BeginScene(int, int, int, int) override {}
-    void EndScene() override {}
-    void Begin2DPass() override {}
-    void End2DPass() override {}
-    void ClearScreen() override {}
-
-private:
-    std::map<const void*, std::uint64_t> m_cached;
-    int m_blend = 0;
-    bool m_depthTest = true;
-    bool m_depthMask = true;
-    bool m_cullFace = true;
-    bool m_alphaTest = false;
-    bool m_texture2D = true;
-    bool m_fog = false;
-    int m_bound = -1;
-    int m_textureMode = 0;
-    int m_bloomExclusions = 0;
-    std::vector<std::string> m_matrices{std::string()};
-
-    // The state a draw is drawn with.
-    [[nodiscard]] std::string State() const
-    {
-        return " | blend " + std::to_string(m_blend) + " depth " + std::to_string(m_depthTest) +
-               std::to_string(m_depthMask) + " cull " + std::to_string(m_cullFace) + " alphaTest " +
-               std::to_string(m_alphaTest) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
-               " mode " + std::to_string(m_textureMode) + " fog " + std::to_string(m_fog) + " bloomExcluded " +
-               std::to_string(m_bloomExclusions > 0) + " matrix" + m_matrices.back();
-    }
-
-    void Note(const char* name, long long value, std::uint64_t contents = 0)
-    {
-        calls.push_back(std::string(name) + " " + std::to_string(value) + " " + std::to_string(contents) + State());
-    }
-
-    bool Cache(const void* mesh, std::uint64_t contents)
-    {
-        m_cached[mesh] = contents;
-        return true;
-    }
-
-    bool Skinned(const char* name, std::uint64_t vertices, std::uint32_t color, std::uint32_t texture,
-                 const mu::SkinningParameters& p)
-    {
-        calls.push_back(std::string(name) + " " + std::to_string(texture) + " " + std::to_string(color) + " " +
-                        std::to_string(vertices) + " " + std::to_string(HashOf(p)) + State());
-        return true;
-    }
-};
+using Render::Drawing::Hash;
+using Render::Drawing::HashSpan;
+using CallLog = Render::Drawing::DrawCallLog;
 
 // Draws a scene into `log`, at once or later.
 template <typename Scene> void Draw(CallLog& log, Scene scene, bool later)
 {
     mu::SetRendererOverride(&log);
-    // Both runs start from the same state, told to the log: the legacy state calls skip what they think is set
-    // already, so each is set the other way first.
-    EnableAlphaTest();
-    DisableTexture();
-    DisableDepthTest();
-    DisableDepthMask();
-    DisableCullFace();
-    EnableAlphaBlend();
-    DisableAlphaBlend();
-    EnableDepthTest();
-    BindTexture(0);
+    // Both runs start from the same state, told to the log.
+    Render::Drawing::ResetLegacyState();
     log.calls.clear();
     log.triangles.clear();
     if (later)
@@ -445,6 +170,12 @@ public:
     ~GridCloth() override
     {
         Destroy();
+    }
+
+    // How the cloth blends (PCT_MASK_BLIT, PCT_MASK_BLEND, ...), which it sets before drawing its faces.
+    void SetDrawType(DWORD type)
+    {
+        m_dwType = type;
     }
 
     void Place(float x)
@@ -857,4 +588,142 @@ TEST_CASE("A cloth's shadow drawn later falls where the cloth was when it was as
         cape.Place(400.f);
     };
     CheckDrawnLaterAsAtOnce(scene, "Triangles");
+}
+
+TEST_CASE("A cloth drawn later is drawn with the state it was asked for in [draw-parity]")
+{
+    GridCloth cape;
+    GridCloth otherCape;
+    cape.Place(100.f);
+    otherCape.Place(400.f);
+    // Blended, it glows; drawn when asked for instead of in its place, it would take the state before it.
+    otherCape.SetDrawType(PCT_MASK_BLEND);
+    const auto scene = [&]
+    {
+        EnableAlphaBlend();
+        cape.Render();
+        DisableAlphaBlend();
+        BindTexture(BITMAP_LIGHT);
+        otherCape.Render();
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+}
+
+TEST_CASE("Guild marks drawn later are drawn where their characters stand [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    static float secondBones[MAX_BONES][3][4];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, firstBones);
+    Place(second, 400.f, 5.5f, secondBones);
+    AnimateCharacterBones(&first);
+    AnimateCharacterBones(&second);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    const auto scene = [&]
+    {
+        RenderGuild(&first, MODEL_BODY_ARMOR);
+        RenderGuild(&second, MODEL_BODY_ARMOR);
+    };
+    CheckDrawnLaterAsAtOnce(scene);
+}
+
+TEST_CASE("Reorderable ranges and the sprite matrix drawn later hold the draws asked for in them [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    OBJECT first;
+    Place(first, 100.f, 2.5f, firstBones);
+    AnimateCharacterBones(&first);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        {
+            const Render::Drawing::ScopedReorderableDraws reorderable;
+            RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true);
+        }
+        // Sprites are drawn in view space.
+        BeginSprite();
+        const float position[3] = {10.f, 20.f, 30.f};
+        Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(
+            Render::EffectDrawing::Sprite(BITMAP_LIGHT, position, 2.f, 3.f, light));
+        EndSprite();
+        RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
+TEST_CASE("Damage numbers drawn later are drawn with the state and matrix they were asked for in [draw-parity]")
+{
+    // In front of a camera that looks down the view axis.
+    float savedCamera[3][4];
+    std::memcpy(savedCamera, g_Camera.Matrix, sizeof(savedCamera));
+    const float identity[3][4] = {{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}};
+    std::memcpy(g_Camera.Matrix, identity, sizeof(identity));
+    // As RenderPoints draws them: in view space, alpha tested, over everything.
+    const auto scene = []
+    {
+        BeginSprite();
+        EnableAlphaTest();
+        DisableDepthTest();
+        const vec3_t position = {10.f, 20.f, -300.f};
+        const vec3_t color = {1.f, 0.5f, 0.f};
+        RenderNumber(position, 1234, color, 1.f, 10.f);
+        RenderNumber(position, -2, color, 1.f, 10.f);
+        EnableDepthTest();
+        EndSprite();
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+    std::memcpy(g_Camera.Matrix, savedCamera, sizeof(savedCamera));
+}
+
+TEST_CASE("A zen pile drawn later keeps its place among the draws around it [draw-parity]")
+{
+    PlayerModels models;
+    BMD& model = Models[MODEL_BODY_ARMOR];
+    const std::array<mu::Vertex3D, 4> quad{};
+    const auto scene = [&]
+    {
+        EnableAlphaBlend();
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+        // As RenderZen draws it, with one coin's vertices.
+        model.BeginRenderCoinHeap();
+        model.EndRenderCoinHeap(1);
+        EnableAlphaBlend();
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Triangles");
+}
+
+TEST_CASE("A mesh's own alpha threshold drawn later applies to that mesh only [draw-parity]")
+{
+    const std::array<mu::Vertex3D, 4> quad{};
+    const auto scene = [&]
+    {
+        SetAlphaFuncRef(0.f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+        SetAlphaFuncRef(0.25f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+    const std::vector<std::string> later = CallsOf(scene, true, false);
+    REQUIRE(later.size() >= 2);
+    CHECK(later[0].find("alphaRef 0.000000") != std::string::npos);
+    CHECK(later[1].find("alphaRef 0.250000") != std::string::npos);
+}
+
+TEST_CASE("The log takes a pass that pops what the frame pushed before the log stood in, as the water pass does "
+          "[draw-parity]")
+{
+    CallLog log;
+    log.PopMatrix();
+    log.PopMatrix();
+    const std::array<mu::Vertex3D, 4> quad{};
+    log.RenderQuad3D(quad, 0u);
+    REQUIRE(log.calls.size() == 1);
+    CHECK(log.calls[0].find("matrix camera") != std::string::npos);
 }

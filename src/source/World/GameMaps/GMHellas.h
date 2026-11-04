@@ -11,6 +11,7 @@ bool    CreateWaterTerrain(int mapIndex);
 bool    IsWaterTerrain(void);
 void    AddWaterWave(int x, int y, int range, int height);
 float   GetWaterTerrain(float x, float y);
+// Steps the water's waves; the update calls it once a frame, and the draw shows that step.
 void    MoveWaterTerrain(void);
 bool    RenderWaterTerrain(void);
 void    DeleteWaterTerrain(void);

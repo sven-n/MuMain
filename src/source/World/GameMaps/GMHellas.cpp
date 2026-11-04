@@ -26,6 +26,7 @@
 #include "Camera/CameraProjection.h"
 #include "I18N/All.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Render/Drawing/LegacyCalls.h"
 
 extern  int  WaterTextureNumber;
 
@@ -89,9 +90,10 @@ void MoveWaterTerrain(void)
 
 bool RenderWaterTerrain(void)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::RenderWaterTerrain))
+        return g_pCSWaterTerrain != NULL;
     if (g_pCSWaterTerrain != NULL)
     {
-        g_pCSWaterTerrain->Update();
         g_pCSWaterTerrain->Render();
         return true;
     }

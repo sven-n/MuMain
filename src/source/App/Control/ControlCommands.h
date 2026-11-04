@@ -29,6 +29,8 @@ std::string Scene(const Request& request, std::unique_ptr<Act>& act);
 std::string Bones(const Request& request, std::unique_ptr<Act>& act);
 std::string DrawSpawns(const Request& request, std::unique_ptr<Act>& act);
 std::string DrawPurity(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawLater(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawParity(const Request& request, std::unique_ptr<Act>& act);
 std::string SpawnEffect(const Request& request, std::unique_ptr<Act>& act);
 std::string State(const Request& request, std::unique_ptr<Act>& act);
 std::string Nearby(const Request& request, std::unique_ptr<Act>& act);

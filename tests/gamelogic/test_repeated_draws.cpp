@@ -14,10 +14,15 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "World/GameMaps/GMHellas.h"
+#include "World/MapInfra/MapManager.h"
 
 #include "RepeatedDraws.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
 #include <string>
@@ -25,6 +30,10 @@
 
 extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
+extern double WorldTime;
+extern float FPS_ANIMATION_FACTOR;
+extern unsigned char TerrainMappingLayer1[];
+extern float TerrainMappingAlpha[];
 
 namespace
 {
@@ -497,4 +506,127 @@ TEST_CASE("A Skill Spear's blend mesh light is set where it is created, not by i
     REQUIRE(spear >= 0);
     CHECK(Effects[spear].BlendMeshLight == 1.f);
     ClearEffects();
+}
+
+TEST_CASE("Drawing Kalima's water again and again leaves its waves as the update stepped them [effects]")
+{
+    auto hero = std::make_unique<CHARACTER>();
+    hero->PositionX = 100;
+    hero->PositionY = 100;
+    CHARACTER* const savedHero = Hero;
+    Hero = hero.get();
+    const double savedTime = WorldTime;
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    WorldTime = 0.0;
+    FPS_ANIMATION_FACTOR = 1.f;
+    REQUIRE(CreateWaterTerrain(WD_24HELLAS));
+    AddWaterWave(100, 100, 8, 2000);
+    MoveWaterTerrain();
+
+    const auto heights = []
+    {
+        std::vector<float> h;
+        for (int y = 90; y <= 110; ++y)
+            for (int x = 90; x <= 110; ++x)
+                h.push_back(GetWaterTerrain(x * TERRAIN_SCALE, y * TERRAIN_SCALE));
+        return h;
+    };
+    const std::vector<float> stepped = heights();
+
+    Render::Drawing::DrawCallLog log;
+    mu::SetRendererOverride(&log);
+    RepeatedDraws::CheckChangesNothing([] { RenderWaterTerrain(); }, 3);
+    mu::SetRendererOverride(nullptr);
+    CHECK_FALSE(log.calls.empty());
+    CHECK(heights() == stepped);
+
+    MoveWaterTerrain();
+    CHECK(heights() != stepped);
+
+    DeleteWaterTerrain();
+    FPS_ANIMATION_FACTOR = savedFactor;
+    WorldTime = savedTime;
+    Hero = savedHero;
+}
+
+TEST_CASE("Crywolf's water spots are rolled in the update, once for the water the last terrain pass drew [effects]")
+{
+    ViewScope view;
+    auto hero = std::make_unique<CHARACTER>();
+    CHARACTER* const savedHero = Hero;
+    Hero = hero.get();
+    const int savedWorld = gMapManager.WorldActive;
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    gMapManager.WorldActive = WD_34CRYWOLF_1ST;
+    FPS_ANIMATION_FACTOR = 1.f;
+    constexpr int tiles = TERRAIN_SIZE * TERRAIN_SIZE;
+    const std::vector<unsigned char> savedLayer(TerrainMappingLayer1, TerrainMappingLayer1 + tiles);
+    const std::vector<float> savedAlpha(TerrainMappingAlpha, TerrainMappingAlpha + tiles);
+    // Water everywhere: a first layer of texture 5, half covered.
+    std::fill(TerrainMappingLayer1, TerrainMappingLayer1 + tiles, static_cast<unsigned char>(5));
+    std::fill(TerrainMappingAlpha, TerrainMappingAlpha + tiles, 0.5f);
+    const auto clearParticles = []
+    {
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+    };
+    clearParticles();
+
+    Render::Drawing::DrawCallLog log;
+    // The random state after `passes` terrain passes and the update after them.
+    const auto afterUpdate = [&log](int passes)
+    {
+        mu::SetRendererOverride(&log);
+        RepeatedDraws::CheckChangesNothing([] { RenderTerrain(false); }, passes);
+        mu::SetRendererOverride(nullptr);
+        Random::Seed(914);
+        UpdateTerrainWaterSpots();
+        return Random::Snapshot();
+    };
+    Random::Seed(914);
+    const std::mt19937 seeded = Random::Snapshot();
+    const std::mt19937 once = afterUpdate(1);
+    const std::mt19937 thrice = afterUpdate(3);
+    CHECK(once != seeded);
+    CHECK(thrice == once);
+    CHECK(std::any_of(Particles, Particles + MAX_PARTICLES, [](const PARTICLE& p) { return p.Live; }));
+
+    // The update took the notes: the next one rolls nothing.
+    Random::Seed(914);
+    UpdateTerrainWaterSpots();
+    CHECK(Random::Snapshot() == seeded);
+
+    clearParticles();
+    std::copy(savedLayer.begin(), savedLayer.end(), TerrainMappingLayer1);
+    std::copy(savedAlpha.begin(), savedAlpha.end(), TerrainMappingAlpha);
+    FPS_ANIMATION_FACTOR = savedFactor;
+    gMapManager.WorldActive = savedWorld;
+    Hero = savedHero;
+}
+
+TEST_CASE("A frame with no update since the last draws the sprites again; a pass in the same frame doesn't [effects]")
+{
+    ViewScope view;
+    ClearSprites();
+    vec3_t ahead;
+    view.Ahead(1000.f, ahead);
+    vec3_t light{1.f, 1.f, 1.f};
+    REQUIRE(CreateSprite(BITMAP_LIGHT, ahead, 1.f, light, nullptr) >= 0);
+
+    Render::Drawing::DrawCallLog log;
+    mu::SetRendererOverride(&log);
+    BeginSpriteDraws();
+    RenderSprites();
+    const std::size_t oneFrame = log.calls.size();
+    RenderSprites();
+    const std::size_t samePass = log.calls.size();
+    BeginSpriteDraws();
+    RenderSprites();
+    const std::size_t nextFrame = log.calls.size();
+    mu::SetRendererOverride(nullptr);
+
+    CHECK(oneFrame > 0);
+    CHECK(samePass == oneFrame);
+    CHECK(nextFrame - samePass == oneFrame);
+    ClearSprites();
 }

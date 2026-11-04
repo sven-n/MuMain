@@ -21,6 +21,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Data/DataHandler/LoadData.h"
 #include "UI/Core/WindowSystem.h"
+#include "Render/Effects/EffectDraw.h"
 
 CTrapCanon g_TrapCanon;
 
@@ -1228,10 +1229,12 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(const CHARACTER* c, const OB
             Light[2] = 0.0f;
 
             EnableAlphaBlend();
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle));
 
             Vector(0.5f, 0.5f, 0.1f, Light);
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle));
         }
         break;
     case MODEL_DREADFEAR:
@@ -1247,10 +1250,12 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(const CHARACTER* c, const OB
             Light[2] = 0.0f;
 
             EnableAlphaBlend();
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle));
 
             Vector(1.0f, 0.3f, 0.1f, Light);
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle));
         }
         break;
     }

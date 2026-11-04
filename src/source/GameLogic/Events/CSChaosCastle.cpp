@@ -595,6 +595,11 @@ void NoteDrawnTerrain(int xi, int yi)
     }
 }
 
+void ForgetDrawnTerrain()
+{
+    s_drawnLimitTiles.clear();
+}
+
 void UpdateTerrainEffects()
 {
     for (const auto& [xi, yi] : s_drawnLimitTiles)

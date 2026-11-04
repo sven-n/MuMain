@@ -97,6 +97,8 @@ drawer, and the renderer applies the active look per draw.
 - Dark Side steps once per reference frame for each part its draw shows; it
   stepped once per drawn part per frame, faster at a high frame rate.
 - Effect ground marks show the frame's visibility; they lagged a frame.
+- Crywolf's water spots start one frame later, on the water the last terrain
+  pass drew; Kalima's water steps in the update, before the draw that shows it.
 - Debug switches that hide a pass no longer stop what it used to spawn.
 - Draw flickers no longer move the random sequences, so the update's later
   random choices differ from what the same seed gave before.
