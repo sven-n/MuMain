@@ -197,17 +197,24 @@ FetchContent_MakeAvailable(miniaudio)
 
 set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
 set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
+# ApplyGitPatch.cmake finds git on its own; pass a configured one so a git outside PATH works too.
+set(MU_APPLY_GIT_PATCH_GIT "")
+if(GIT_EXECUTABLE)
+    set(MU_APPLY_GIT_PATCH_GIT "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}")
+endif()
 FetchContent_Declare(SDL3_ttf
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
     GIT_TAG        a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b
     GIT_SHALLOW    FALSE
     PATCH_COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-batch-glyph-uploads.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
