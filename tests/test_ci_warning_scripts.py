@@ -7,6 +7,7 @@ import io
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 import urllib.error
 from pathlib import Path
@@ -73,29 +74,51 @@ class WarningLineTests(unittest.TestCase):
 
 
 class RunTests(unittest.TestCase):
+    """Runs the script as CI does, in its own process. Without its own GITHUB_STEP_SUMMARY, the test's warnings
+    would land in the summary of the CI step that runs the tests, and its ::error lines in that step's log."""
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.summary = Path(directory.name) / "summary.md"
+
+    def run_script(self, *arguments, **environment):
+        env = {**os.environ, "GITHUB_STEP_SUMMARY": str(self.summary), **environment}
+        return subprocess.run([sys.executable, str(SCRIPTS / "ci_warnings.py"), *arguments],
+                              capture_output=True, env=env)
+
     def run_python(self, mode, code):
-        return ci_warnings.main([mode, sys.executable, "-c", code])
+        return self.run_script(mode, sys.executable, "-c", code)
 
     def test_clean_output_passes(self):
-        self.assertEqual(self.run_python("run", "print('[1/1] Linking CXX executable Main')"), 0)
+        result = self.run_python("run", "print('[1/1] Linking CXX executable Main')")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn(b"Linking CXX executable Main", result.stdout)
+        self.assertFalse(self.summary.exists())
 
     def test_a_warning_fails_the_step(self):
-        self.assertEqual(self.run_python("run", "print('a.cpp:1:2: warning: x [-Wfoo]')"), 1)
+        result = self.run_python("run", "print('a.cpp:1:2: warning: x [-Wfoo]')")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(b"::error title=diagnostic in ", result.stdout)
+        self.assertIn("a.cpp:1:2: warning: x [-Wfoo]", self.summary.read_text(encoding="utf-8"))
 
     def test_the_commands_own_failure_wins(self):
-        self.assertEqual(self.run_python("run", "import sys; print('a.cpp:1:2: warning: x'); sys.exit(3)"), 3)
+        result = self.run_python("run", "import sys; print('a.cpp:1:2: warning: x'); sys.exit(3)")
+        self.assertEqual(result.returncode, 3)
 
     def test_report_lists_without_failing(self):
-        self.assertEqual(self.run_python("report", "print('a.cpp:1:2: warning: x [-Wfoo]')"), 0)
+        result = self.run_python("report", "print('a.cpp:1:2: warning: x [-Wfoo]')")
+        self.assertEqual(result.returncode, 0)
+        self.assertNotIn(b"::error", result.stdout)
+        self.assertIn("a.cpp:1:2: warning: x [-Wfoo]", self.summary.read_text(encoding="utf-8"))
 
     def test_separator_is_optional(self):
-        self.assertEqual(ci_warnings.main(["run", "--", sys.executable, "-c", "print('ok')"]), 0)
+        self.assertEqual(self.run_script("run", "--", sys.executable, "-c", "print('ok')").returncode, 0)
 
     def test_text_outside_the_code_page_passes_through(self):
         # As in the Windows build: stdout is a pipe in a code page that cannot hold Korean.
         child = [sys.executable, "-c", "import sys; sys.stdout.buffer.write('\\ud55c\\uad6d\\n'.encode())"]
-        result = subprocess.run([sys.executable, str(SCRIPTS / "ci_warnings.py"), "run", *child],
-                                capture_output=True, env={**os.environ, "PYTHONIOENCODING": "cp1252"})
+        result = self.run_script("run", *child, PYTHONIOENCODING="cp1252")
         self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
 
 
