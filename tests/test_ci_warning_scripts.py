@@ -118,6 +118,18 @@ class AnnotationTests(unittest.TestCase):
         found = ci_job_annotations.find_annotations(self.JOBS, self.ANNOTATIONS.__getitem__, "notice")
         self.assertEqual([name for name, _ in found], ["macOS"])
 
+    def test_cache_service_warnings_are_listed_separately(self):
+        found = [
+            ("Linux", {"annotation_level": "warning", "message": "Failed to restore: Cache service responded with 429"}),
+            ("macOS", {"annotation_level": "warning", "message": "Failed to save: Unable to upload the cache"}),
+            ("Windows", {"annotation_level": "warning", "message": "Node.js 20 is deprecated."}),
+            ("Linux", {"annotation_level": "warning", "message": "The step Failed to restore: x"}),
+        ]
+        failing, service = ci_job_annotations.split_service_warnings(found)
+        self.assertEqual([name for name, _ in service], ["Linux", "macOS"])
+        self.assertEqual([a["message"] for _, a in failing],
+                         ["Node.js 20 is deprecated.", "The step Failed to restore: x"])
+
     def test_description_names_job_and_message(self):
         name, annotation = ci_job_annotations.find_annotations(
             self.JOBS, self.ANNOTATIONS.__getitem__, "warning")[0]

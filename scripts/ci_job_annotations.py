@@ -4,8 +4,9 @@
 GitHub annotates jobs itself, e.g. "Node.js 20 is deprecated" when an action targets a Node.js version its runners
 no longer ship, and steps add annotations with ::warning::. Notices are listed but pass: GitHub posts some about its
 own state ("Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times"),
-which no change here can remove. Run it from the last job of a workflow, with `actions: read` and `checks: read` and
-the token in GH_TOKEN:
+which no change here can remove. For the same reason, the warnings that actions/cache logs when GitHub's cache
+service fails to restore or save an entry (a rate limit, a timeout; the build goes on without it) are listed and
+pass. Run it from the last job of a workflow, with `actions: read` and `checks: read` and the token in GH_TOKEN:
 
     python3 scripts/ci_job_annotations.py
 
@@ -14,12 +15,16 @@ The job that runs it is still in progress and is not checked.
 
 import json
 import os
+import re
 import sys
 import urllib.request
 
 FAILING_LEVEL = "warning"
 LISTED_LEVEL = "notice"
 PAGE_SIZE = 100
+# Warnings about the state of GitHub's services rather than this repository: actions/cache's
+# "Failed to restore: Cache service responded with 429" and "Failed to save: ..." when the service fails.
+SERVICE_WARNINGS = (re.compile(r"^Failed to (?:restore|save): "),)
 
 
 def get_pages(url, token):
@@ -58,6 +63,17 @@ def find_annotations(jobs, annotations_of, level):
     return found
 
 
+def split_service_warnings(found):
+    """The (job name, annotation) pairs split into those that fail and those about GitHub's services."""
+    failing = []
+    service = []
+    for job_name, annotation in found:
+        message = annotation["message"]
+        (service if any(pattern.search(message) for pattern in SERVICE_WARNINGS) else failing).append(
+            (job_name, annotation))
+    return failing, service
+
+
 def describe(job_name, annotation):
     title = annotation.get("title") or annotation["annotation_level"]
     message = " ".join(annotation["message"].split())
@@ -84,9 +100,11 @@ def main():
             cache[job_id] = get_pages(f"{api}/repos/{repository}/check-runs/{job_id}/annotations", token)
         return cache[job_id]
 
-    warnings = find_annotations(jobs, annotations_of, FAILING_LEVEL)
+    warnings, service_warnings = split_service_warnings(find_annotations(jobs, annotations_of, FAILING_LEVEL))
     for job_name, annotation in find_annotations(jobs, annotations_of, LISTED_LEVEL):
         print(f"Notice, not checked: {describe(job_name, annotation)}")
+    for job_name, annotation in service_warnings:
+        print(f"Service warning, not checked: {describe(job_name, annotation)}")
     for job_name, annotation in warnings:
         print(f"::error title=Job annotation::{describe(job_name, annotation)}")
     finished = sum(job["status"] == "completed" for job in jobs)
