@@ -21,7 +21,8 @@
 //
 // A sound is named by its key (MuEditor::SoundEditor::SoundRow::key): the
 // SOUND_ id of a code sound, "set:<set>:<id, else file>" of a set's sound,
-// "objects:<file>" of a map object sound.
+// "objects:<file>" of a map object sound; "#2", "#3" after it for the second
+// and third sound with the same one.
 namespace Data::Sounds
 {
 constexpr int SoundFoldersFormatVersion = 1;

@@ -787,6 +787,46 @@ TEST_CASE("Sound Editor: a change of the folders is a step of the history, Save 
     CHECK_FALSE(g_SoundEdits.CanUndo());
 }
 
+TEST_CASE("Sound Editor: two rows with the same key, map object sounds of one file, get keys of their own, so a "
+          "folder holds each and the window tells them apart (Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    Data::Maps::MapObjectSound other = Waterfall();
+    other.maps = {{30}};
+    Data::Maps::MapObjectSound third = Waterfall();
+    third.maps = {{31}};
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall(), other, third});
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    REQUIRE(rows.size() == 3);
+    CHECK(rows[0].key == "objects:Data/Sound/EditorTest/ok.wav");
+    CHECK(rows[1].key == "objects:Data/Sound/EditorTest/ok.wav#2");
+    CHECK(rows[2].key == "objects:Data/Sound/EditorTest/ok.wav#3");
+    CHECK(rows[2].index == 2);
+
+    // The first one's file changes: the others' keys move up, and the
+    // folders follow every one.
+    const std::vector<SoundFolder> folders{Folder("Kalima", {rows[0].key}), Folder("Map 30", {rows[1].key}),
+                                           Folder("Map 31", {rows[2].key})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", folders));
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(rows[0]);
+    values.file = "Data/Sound/EditorTest/Other.wav";
+    REQUIRE(g_SoundEdits.Change(rows[0], values));
+    CHECK(g_SoundEdits.Folders() ==
+          std::vector<SoundFolder>{Folder("Kalima", {"objects:Data/Sound/EditorTest/Other.wav"}),
+                                   Folder("Map 30", {"objects:Data/Sound/EditorTest/ok.wav"}),
+                                   Folder("Map 31", {"objects:Data/Sound/EditorTest/ok.wav#2"})});
+
+    TestImGuiContext context;
+    ImGui::NewFrame();
+    ImGui::SetNextWindowSize(ImVec2(900.0f, 400.0f));
+    bool open = true;
+    g_MuSoundEditorUI.Render(&open);
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
 TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under its new key, in the same step "
           "(Q-SE4) [sounds][editor]")
 {

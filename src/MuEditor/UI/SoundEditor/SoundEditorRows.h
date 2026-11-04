@@ -44,7 +44,8 @@ struct SoundRow
     // Unique among the rows, and what a folder names the sound by (Q-SE4):
     // "SOUND_CLICK01", "set:Death Tree:Data/Sound/w34/dt_idle1.wav" (a set's
     // sound by its id, else its file),
-    // "objects:Data/Sound/aKalimaWaterFall.wav".
+    // "objects:Data/Sound/aKalimaWaterFall.wav"; a second row with the same
+    // one (two map object sounds of one file) gets "#2" after it, and so on.
     std::string key;
     // The SOUND_ id, or "" (a set's sound without one, a map object sound).
     std::string id;

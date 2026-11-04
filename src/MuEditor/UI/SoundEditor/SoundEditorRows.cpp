@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+#include <set>
+#include <string>
 #include <tuple>
 #include <unordered_map>
 
@@ -153,6 +155,35 @@ void AddNotLoadedRows(std::vector<SoundRow>& rows)
     }
 }
 
+// The rows' keys name one row each, as the folders and the window's ids need
+// them: the second row with a key gets "#2" after it, the third "#3" (a key
+// that is free).
+void MakeKeysUnique(std::vector<SoundRow>& rows)
+{
+    std::set<std::string> taken;
+    for (const SoundRow& row : rows)
+    {
+        taken.insert(row.key);
+    }
+    std::set<std::string> seen;
+    for (SoundRow& row : rows)
+    {
+        if (seen.insert(row.key).second)
+        {
+            continue;
+        }
+        const std::string base = row.key;
+        int count = 2;
+        while (taken.contains(base + "#" + std::to_string(count)))
+        {
+            ++count;
+        }
+        row.key = base + "#" + std::to_string(count);
+        taken.insert(row.key);
+        seen.insert(row.key);
+    }
+}
+
 void FindProblems(std::vector<SoundRow>& rows)
 {
     std::map<std::string, int> codeFiles;
@@ -188,6 +219,7 @@ std::vector<SoundRow> BuildRows()
     AddSetRows(rows);
     AddObjectRows(rows);
     AddNotLoadedRows(rows);
+    MakeKeysUnique(rows);
     FindProblems(rows);
     return rows;
 }
