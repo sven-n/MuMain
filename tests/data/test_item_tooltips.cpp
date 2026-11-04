@@ -612,9 +612,13 @@ TEST_CASE("An item from the server with a guardian option shows its 380 lines [d
     FillItemFromParameters(withGuardian, guarded);
     ITEM without;
     FillItemFromParameters(without, plain);
+    // The Bone Blade's row in ItemAddOption.bmd has both its 380 options. Checked on the row: GetItemAddOtioninfoText
+    // writes two lines even for a row that has none.
+    const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(withGuardian.Type);
+    REQUIRE(addOption.m_byOption1 != 0);
+    REQUIRE(addOption.m_byOption2 != 0);
     std::vector<std::wstring> lines380;
     g_pItemAddOptioninfo->GetItemAddOtioninfoText(lines380, withGuardian.Type);
-    REQUIRE_FALSE(lines380.empty());
     const std::vector<ItemTooltipLine> guardedLines = BuildItemTooltipLines(&withGuardian, false);
     const std::vector<ItemTooltipLine> plainLines = BuildItemTooltipLines(&without, false);
     for (const std::wstring& line : lines380)
