@@ -3,6 +3,7 @@
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -118,11 +119,9 @@ bool FulfillsClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass,
     return requirement != 0 && secondClass >= requirement - 1;
 }
 
-using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
-
-FilePtr OpenBinaryFile(const wchar_t* filename)
+Core::Utilities::FileHandle OpenBinaryFile(const wchar_t* filename)
 {
-    return FilePtr(_wfopen(filename, L"rb"), &std::fclose);
+    return Core::Utilities::FileHandle(_wfopen(filename, L"rb"));
 }
 
 void ReportFileIssue(const wchar_t* filename, const wchar_t* issue)

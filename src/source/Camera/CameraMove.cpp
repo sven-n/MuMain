@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
+#include "Core/Utilities/FileHandle.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -186,7 +187,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
 {
     UnLoadCameraWalkScript();
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"rb"), &fclose);
+    Core::Utilities::FileHandle fileHandle(_wfopen(filename.c_str(), L"rb"));
     if (!fileHandle)
     {
         return false;
@@ -234,7 +235,7 @@ bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
         return false;
     }
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"wb"), &fclose);
+    Core::Utilities::FileHandle fileHandle(_wfopen(filename.c_str(), L"wb"));
     if (!fileHandle)
     {
         return false;
