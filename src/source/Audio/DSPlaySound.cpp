@@ -184,9 +184,15 @@ HRESULT PlayBufferAtLevel(ESound bufferId, float level)
 
 HRESULT PlayBufferOnFreeChannel(ESound bufferId, float level)
 {
+    Diagnostics::DrawSpawnCheck::Note("sound");
 #ifdef _EDITOR
     if (Audio::EditorMute::IsMuted())
         return S_FALSE;
+    // A sound nothing loaded is silent: the Sound Editor lists it.
+    if (!LoadedSounds().contains(static_cast<int>(bufferId)))
+    {
+        Audio::SoundLoads::NotePlayedUnloaded(static_cast<int>(bufferId));
+    }
     NoteForMixer(bufferId, false);
 #endif
     HRESULT result = E_FAIL;

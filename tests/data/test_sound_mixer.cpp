@@ -9,6 +9,7 @@
 #ifdef _EDITOR
 #include "App/Platform/Windows/Winmain.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundLoads.h"
 #include "Audio/SoundMixer.h"
 #include "Audio/SoundOverlay.h"
 #include "Audio/SoundPlaces.h"
@@ -18,6 +19,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Camera/CameraState.h"
 #include "Core/Platform/IPlatformAudio.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "TestImGuiContext.h"
 #include "UI/Common/MuEditorToolWindows.h"
@@ -1272,6 +1274,26 @@ TEST_CASE("Sound Mixer: a sound two types play starts in each type's group with 
     CHECK(byGroup.size() == 2);
     CHECK(byGroup[heroGroup] == 0.0f);
     CHECK(byGroup[playerGroup] == 1.0f);
+}
+
+TEST_CASE("Sound Mixer: a sound on a free channel is a change of the game inside a draw, as PlayBuffer is, and "
+          "one nothing loaded is noted for the Sound Editor [audio][mixer][editor]")
+{
+    MixerScope scope;
+    ForgetLoadedSounds();
+    Audio::SoundLoads::Clear();
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    const auto unloaded = static_cast<ESound>(SOUND_CLICK01 + 1);
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        PlayBuffer(SOUND_CLICK01);
+        PlayBufferOnFreeChannel(unloaded, 0.5f);
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 2);
+    CHECK(Audio::SoundLoads::PlayedUnloaded() ==
+          std::set<int>{static_cast<int>(SOUND_CLICK01), static_cast<int>(unloaded)});
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    Audio::SoundLoads::Clear();
 }
 
 TEST_CASE("Sound Mixer: PlayBuffer notes a loaded sound with its gain, and starts a muted one silently (Q-SM4) "
