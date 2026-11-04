@@ -87,7 +87,8 @@ public:
     void Render(bool* open);
 
     // The overlay over the game, once a frame, also while the window is
-    // closed (Q-SM10): the sources of the rows the filters show.
+    // closed (Q-SM10): the sources of the rows the filters show. After Render
+    // in the frame: it marks the row the mouse is over in this frame.
     void RenderOverlay();
 
 private:
