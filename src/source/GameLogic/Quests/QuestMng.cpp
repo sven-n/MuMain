@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "QuestMng.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 
 
@@ -102,8 +103,8 @@ void CQuestMng::LoadQuestProgressScript()
 
 void CQuestMng::LoadQuestWordsScript()
 {
-    FILE* fp = ::_wfopen(QM_QUESTWORDS_FILE, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(::_wfopen(QM_QUESTWORDS_FILE, L"rb"));
+    if (!fp)
     {
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTWORDS_FILE);
@@ -126,15 +127,14 @@ void CQuestMng::LoadQuestWordsScript()
     char rawWords[1024] { };
     wchar_t szWords[1024] { };
 
-    while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
+    while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp.get()))
     {
         ::BuxConvert(reinterpret_cast<BYTE*>(&sQuestWordsHeader), nSize);
 
         const short wordsLength = sQuestWordsHeader.m_nWordsLen;
         if (wordsLength < 0 || static_cast<std::size_t>(wordsLength) > sizeof(rawWords) ||
-            !DataFileIO::ReadExact(fp, rawWords, static_cast<std::size_t>(wordsLength)))
+            !DataFileIO::ReadExact(fp.get(), rawWords, static_cast<std::size_t>(wordsLength)))
         {
-            ::fclose(fp);
             DataFileIO::ReportUnusableFile(QM_QUESTWORDS_FILE, L"File corrupted.");
             return;
         }
@@ -144,8 +144,6 @@ void CQuestMng::LoadQuestWordsScript()
         std::wstring strWords = szWords;
         m_mapQuestWords.insert(std::make_pair(sQuestWordsHeader.m_nIndex, strWords));
     }
-
-    ::fclose(fp);
 }
 
 void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)

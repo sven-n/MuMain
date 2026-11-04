@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <memory>
 #include <functional>
+#include <optional>
+#include <vector>
 
 /**
  * Generic file I/O operations for game data
@@ -90,6 +92,13 @@ namespace DataFileIO
      * @return false when the file ends or a read fails first
      */
     bool ReadExact(FILE* fp, void* buffer, std::size_t size);
+
+    /**
+     * Read a whole open file, from its start to its end
+     *
+     * @return std::nullopt when its size cannot be told or a read fails
+     */
+    std::optional<std::vector<BYTE>> ReadAll(FILE* fp);
 
     /**
      * Report a game data file that cannot be used, as the loaders report a missing one: the error log, a message box

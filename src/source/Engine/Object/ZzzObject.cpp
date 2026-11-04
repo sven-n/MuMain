@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Core/Utilities/Random.h"
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -5872,8 +5873,8 @@ void DeleteObjectTile(int x, int y)
 
 int OpenObjects(wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
@@ -5881,20 +5882,16 @@ int OpenObjects(wchar_t* FileName)
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
     }
-    fseek(fp, 0, SEEK_END);
-    int EncBytes = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    auto* EncData = new unsigned char[EncBytes];
-    const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
-    fclose(fp);
-    if (!complete)
+    std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());
+    file.reset();
+    if (!EncData || EncData->empty())
     {
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
-        delete[] EncData;
         return (-1);
     }
+    const int EncBytes = static_cast<int>(EncData->size());
 
-    unsigned char* Data = EncData;
+    const unsigned char* Data = EncData->data();
     int DataBytes = EncBytes;
 
     int DataPtr = 0;
@@ -5922,15 +5919,14 @@ int OpenObjects(wchar_t* FileName)
         DataPtr += sizeof(Scale);
         CreateObject(Type, Position, Angle, Scale);
     }
-    delete[] Data;
 
     return iMapNumber;
 }
 
 int OpenObjectsEnc(wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
@@ -5938,23 +5934,19 @@ int OpenObjectsEnc(wchar_t* FileName)
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
     }
-    fseek(fp, 0, SEEK_END);
-    int EncBytes = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    auto* EncData = new unsigned char[EncBytes];
-    const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
-    fclose(fp);
-    if (!complete)
+    std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());
+    file.reset();
+    if (!EncData || EncData->empty())
     {
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
-        delete[] EncData;
         return (-1);
     }
+    const int EncBytes = static_cast<int>(EncData->size());
 
-    int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
-    auto* Data = new unsigned char[DataBytes];
-    MapFileDecrypt(Data, EncData, EncBytes);
-    delete[] EncData;
+    int DataBytes = MapFileDecrypt(NULL, EncData->data(), EncBytes);
+    std::vector<unsigned char> Decrypted(static_cast<std::size_t>(DataBytes));
+    MapFileDecrypt(Decrypted.data(), EncData->data(), EncBytes);
+    const unsigned char* Data = Decrypted.data();
 
     int DataPtr = 0;
     DataPtr += 1;
@@ -5980,7 +5972,6 @@ int OpenObjectsEnc(wchar_t* FileName)
         DataPtr += sizeof(Scale);
         CreateObject(Type, Position, Angle, Scale);
     }
-    delete[] Data;
 
     return iMapNumber;
 }
@@ -6028,28 +6019,25 @@ bool SaveObjects(wchar_t* FileName, int iMapNumber)
     fclose(fp);
 
     {
-        fp = _wfopen(FileName, L"rb");
-        fseek(fp, 0, SEEK_END);
-        int EncBytes = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-        auto* EncData = new unsigned char[EncBytes];
-        const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
-        fclose(fp);
-        if (!complete)
+        Core::Utilities::FileHandle plain(_wfopen(FileName, L"rb"));
+        std::optional<std::vector<BYTE>> EncData = plain ? DataFileIO::ReadAll(plain.get()) : std::nullopt;
+        plain.reset();
+        if (!EncData)
         {
-            delete[] EncData;
             return false;
         }
+        const int EncBytes = static_cast<int>(EncData->size());
 
-        int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
-        auto* Data = new unsigned char[DataBytes];
-        MapFileEncrypt(Data, EncData, EncBytes);
-        delete[] EncData;
+        int DataBytes = MapFileEncrypt(NULL, EncData->data(), EncBytes);
+        std::vector<unsigned char> Data(static_cast<std::size_t>(DataBytes));
+        MapFileEncrypt(Data.data(), EncData->data(), EncBytes);
 
-        fp = _wfopen(FileName, L"wb");
-        fwrite(Data, DataBytes, 1, fp);
-        fclose(fp);
-        delete[] Data;
+        Core::Utilities::FileHandle encrypted(_wfopen(FileName, L"wb"));
+        if (!encrypted)
+        {
+            return false;
+        }
+        fwrite(Data.data(), DataBytes, 1, encrypted.get());
     }
     return true;
 }

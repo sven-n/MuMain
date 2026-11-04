@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -34,23 +35,21 @@ CMoveCommandData* CMoveCommandData::GetInstance()
 
 bool CMoveCommandData::Create(const std::wstring& filename)
 {
-    FILE* fp = _wfopen(filename.c_str(), L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(filename.c_str(), L"rb"));
+    if (!fp)
         return false;
 
     int count = 0;
-    if (!DataFileIO::ReadExact(fp, &count, sizeof(int)))
+    if (!DataFileIO::ReadExact(fp.get(), &count, sizeof(int)))
     {
-        fclose(fp);
         return false;
     }
 
     for (int i = 0; i < count; i++)
     {
         MOVEREQINFO_FILE moveReqInfo{};
-        if (!DataFileIO::ReadExact(fp, &moveReqInfo, sizeof moveReqInfo))
+        if (!DataFileIO::ReadExact(fp.get(), &moveReqInfo, sizeof moveReqInfo))
         {
-            fclose(fp);
             return false;
         }
         // Value-initialised: the flags stay false until the move window sets them.
@@ -70,7 +69,6 @@ bool CMoveCommandData::Create(const std::wstring& filename)
 
         m_listMoveInfoData.push_back(pMoveInfoData);
     }
-    fclose(fp);
 
     return true;
 }

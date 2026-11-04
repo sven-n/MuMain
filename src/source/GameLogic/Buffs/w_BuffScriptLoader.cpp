@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Core/Utilities/ReadScript.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -69,26 +70,26 @@ BuffScriptLoader::~BuffScriptLoader() {}
 
 bool BuffScriptLoader::Load(const std::wstring& pchFileName)
 {
-    FILE* fp = _wfopen(pchFileName.c_str(), L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(pchFileName.c_str(), L"rb"));
 
-    if (fp != NULL)
+    if (fp)
     {
         DWORD structsize = sizeof(_BUFFINFO);
 
         DWORD listsize;
-        if (!DataFileIO::ReadExact(fp, &listsize, sizeof(DWORD)))
+        if (!DataFileIO::ReadExact(fp.get(), &listsize, sizeof(DWORD)))
         {
-            fclose(fp);
             DataFileIO::ReportUnusableFile(pchFileName.c_str(), L"File corrupted.");
             return true;
         }
 
-        BYTE* Buffer = new BYTE[structsize * listsize];
+        std::vector<BYTE> content(static_cast<std::size_t>(structsize) * listsize);
+        BYTE* Buffer = content.data();
         DWORD dwCheckSum;
-        const bool complete = DataFileIO::ReadExact(fp, Buffer, structsize * listsize) &&
-                              DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
+        const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, structsize * listsize) &&
+                              DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
 
-        fclose(fp);
+        fp.reset();
         if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
         {
             mu::log::Get("gameplay")->warn("{} - File corrupted.", mu_wchar_to_utf8(pchFileName.c_str()));
@@ -125,7 +126,6 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
                 pSeek += structsize;
             }
         }
-        delete[] Buffer;
     }
     else
     {

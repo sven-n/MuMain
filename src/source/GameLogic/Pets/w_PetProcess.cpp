@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
@@ -172,8 +173,8 @@ bool PetProcess::LoadData()
     int _ver;
     int _array;
 
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
 
@@ -181,10 +182,10 @@ bool PetProcess::LoadData()
     }
 
     int _listSize = 0;
-    if (!DataFileIO::ReadExact(fp, &_ver, sizeof(int)) || !DataFileIO::ReadExact(fp, &_array, sizeof(int)) ||
-        !DataFileIO::ReadExact(fp, &_listSize, sizeof(DWORD)))
+    if (!DataFileIO::ReadExact(fp.get(), &_ver, sizeof(int)) ||
+        !DataFileIO::ReadExact(fp.get(), &_array, sizeof(int)) ||
+        !DataFileIO::ReadExact(fp.get(), &_listSize, sizeof(DWORD)))
     {
-        fclose(fp);
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
         return FALSE;
     }
@@ -193,22 +194,22 @@ bool PetProcess::LoadData()
     int _blendMesh;
     float _scale;
     int _count;
-    int* _action = new int[_array];
-    float* _speed = new float[_array];
+    std::vector<int> actions(static_cast<std::size_t>(_array));
+    std::vector<float> speeds(static_cast<std::size_t>(_array));
+    int* _action = actions.data();
+    float* _speed = speeds.data();
 
     int Size = sizeof(int) + sizeof(int) + sizeof(float) + sizeof(int) + ((sizeof(int) + sizeof(float)) * _array);
-    BYTE* Buffer = new BYTE[Size * _listSize];
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * _listSize);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    const bool complete =
-        DataFileIO::ReadExact(fp, Buffer, Size * _listSize) && DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * _listSize) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
 
     if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
     {
-        delete[] _action;
-        delete[] _speed;
-        delete[] Buffer;
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
 
         return FALSE;
@@ -262,9 +263,6 @@ bool PetProcess::LoadData()
             m_petsInfo.insert(make_pair(ITEM_HELPER + _type, petInfo));
         }
     }
-    delete[] _action;
-    delete[] _speed;
-    delete[] Buffer;
 
     return TRUE;
 }

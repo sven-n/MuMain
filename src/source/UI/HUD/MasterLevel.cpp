@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -187,9 +188,9 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
-    FILE* fp = _wfopen(path, L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
 
-    if (fp == nullptr)
+    if (!fp)
     {
         DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
@@ -197,18 +198,18 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 
     constexpr int Size = sizeof(_MASTER_SKILLTREE_DATA);
 
-    auto Buffer = new BYTE[Size * MAX_MASTER_SKILL_DATA];
+    std::vector<BYTE> content(Size * MAX_MASTER_SKILL_DATA);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    const bool complete = DataFileIO::ReadExact(fp, Buffer, Size * MAX_MASTER_SKILL_DATA) &&
-                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
 
-    fclose(fp);
+    fp.reset();
 
     if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
         DataFileIO::ReportUnusableFile(path, L"File corrupted.");
-        delete[] Buffer;
         return;
     }
 
@@ -227,31 +228,29 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
             break;
         }
     }
-
-    delete[] Buffer;
 }
 
 void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 
-    FILE* fp = _wfopen(path, L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
 
-    if (fp == nullptr)
+    if (!fp)
     {
         DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
     }
 
     constexpr int record_size = sizeof(_MASTER_SKILL_TOOLTIP_FILE);
-    auto file_buffer = new BYTE[record_size * MAX_MASTER_SKILL_DATA];
+    std::vector<BYTE> content(record_size * MAX_MASTER_SKILL_DATA);
+    BYTE* file_buffer = content.data();
     DWORD dwCheckSum;
-    const bool complete = DataFileIO::ReadExact(fp, file_buffer, record_size * MAX_MASTER_SKILL_DATA) &&
-                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), file_buffer, record_size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
     if (!complete)
     {
-        delete[] file_buffer;
         DataFileIO::ReportUnusableFile(path, L"File corrupted.");
         return;
     }
@@ -283,8 +282,6 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
             break;
         }
     }
-
-    delete[] file_buffer;
 }
 
 void mu::ui::window::CMasterLevel::InitMasterSkillPoint()
