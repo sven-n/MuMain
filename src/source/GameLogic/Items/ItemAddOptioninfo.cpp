@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Core/UIManager.h"
@@ -43,9 +44,13 @@ const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::wstring& file
     {
         int nSize = sizeof(ITEM_ADD_OPTION) * MAX_ITEM;
 
-        ::fread(m_ItemAddOption, nSize, 1, fp);
-        ::BuxConvert((BYTE*)m_ItemAddOption, nSize);
+        const bool complete = DataFileIO::ReadExact(fp, m_ItemAddOption, nSize);
         ::fclose(fp);
+        if (!complete)
+        {
+            return false;
+        }
+        ::BuxConvert(reinterpret_cast<BYTE*>(m_ItemAddOption), nSize);
 
         return true;
     }

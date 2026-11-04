@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "I18N/All.h"
 #include "Core/Text/WideFormat.h"
 
@@ -1224,7 +1225,12 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
 
     int iNumMixRecipes[MAX_MIX_TYPES];
     int iSize = sizeof(int) * MAX_MIX_TYPES;
-    fread(iNumMixRecipes, iSize, 1, fp);
+    if (!DataFileIO::ReadExact(fp, iNumMixRecipes, iSize))
+    {
+        fclose(fp);
+        DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+        exit(0);
+    }
     BuxConvert(reinterpret_cast<BYTE*>(iNumMixRecipes), iSize);
 
     iSize = sizeof(MIX_RECIPE);
@@ -1243,7 +1249,13 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
             auto* pMixRecipe = new MIX_RECIPE;
-            fread(pMixRecipe, iSize, 1, fp);
+            if (!DataFileIO::ReadExact(fp, pMixRecipe, iSize))
+            {
+                delete pMixRecipe;
+                fclose(fp);
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                exit(0);
+            }
             BuxConvert(reinterpret_cast<BYTE*>(pMixRecipe), iSize);
             m_MixRecipe[j].AddRecipe(pMixRecipe);
         }

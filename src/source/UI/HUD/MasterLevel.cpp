@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -203,20 +204,19 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 
     auto Buffer = new BYTE[Size * MAX_MASTER_SKILL_DATA];
 
-    fread(Buffer, Size * MAX_MASTER_SKILL_DATA, 1, fp);
-
     DWORD dwCheckSum;
-
-    fread(&dwCheckSum, sizeof(DWORD), 1u, fp);
+    const bool complete = DataFileIO::ReadExact(fp, Buffer, Size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
 
     fclose(fp);
 
-    if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
         mu_swprintf(Text, L"%ls - File corrupted.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        delete[] Buffer;
         return;
     }
 
@@ -257,10 +257,16 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 
     constexpr int record_size = sizeof(_MASTER_SKILL_TOOLTIP_FILE);
     auto file_buffer = new BYTE[record_size * MAX_MASTER_SKILL_DATA];
-    fread(file_buffer, record_size * MAX_MASTER_SKILL_DATA, 1, fp);
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1u, fp);
+    const bool complete = DataFileIO::ReadExact(fp, file_buffer, record_size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
     fclose(fp);
+    if (!complete)
+    {
+        delete[] file_buffer;
+        DataFileIO::ReportUnusableFile(path, L"File corrupted.");
+        return;
+    }
 
     BYTE* pSeek = file_buffer;
 

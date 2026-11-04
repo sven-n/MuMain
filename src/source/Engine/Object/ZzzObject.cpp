@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/Random.h"
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -5884,8 +5885,14 @@ int OpenObjects(wchar_t* FileName)
     int EncBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     auto* EncData = new unsigned char[EncBytes];
-    fread(EncData, 1, EncBytes, fp);
+    const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
     fclose(fp);
+    if (!complete)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        delete[] EncData;
+        return (-1);
+    }
 
     unsigned char* Data = EncData;
     int DataBytes = EncBytes;
@@ -5935,8 +5942,14 @@ int OpenObjectsEnc(wchar_t* FileName)
     int EncBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     auto* EncData = new unsigned char[EncBytes];
-    fread(EncData, 1, EncBytes, fp);
+    const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
     fclose(fp);
+    if (!complete)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        delete[] EncData;
+        return (-1);
+    }
 
     int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
     auto* Data = new unsigned char[DataBytes];
@@ -6020,8 +6033,13 @@ bool SaveObjects(wchar_t* FileName, int iMapNumber)
         int EncBytes = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         auto* EncData = new unsigned char[EncBytes];
-        fread(EncData, 1, EncBytes, fp);
+        const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
         fclose(fp);
+        if (!complete)
+        {
+            delete[] EncData;
+            return false;
+        }
 
         int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
         auto* Data = new unsigned char[DataBytes];

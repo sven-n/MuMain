@@ -5,6 +5,7 @@
 #include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Data/DataHandler/DataFileIO.h"
 
 #include <codecvt>
 #include <sstream>
@@ -64,10 +65,16 @@ void OpenFilterFile(const wchar_t* FileName)
 
     int Size = 20;
     BYTE* Buffer = new BYTE[Size * MAX_FILTERS];
-    fread(Buffer, Size * MAX_FILTERS, 1, fp);
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+    const bool complete =
+        DataFileIO::ReadExact(fp, Buffer, Size * MAX_FILTERS) && DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
     fclose(fp);
+    if (!complete)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        delete[] Buffer;
+        return;
+    }
 
     {
         BYTE* pSeek = Buffer;
@@ -102,12 +109,11 @@ void OpenNameFilterFile(const wchar_t* FileName)
     int Size = 20;
     BYTE* Buffer = new BYTE[Size * MAX_NAMEFILTERS];
 
-    fread(Buffer, Size * MAX_NAMEFILTERS, 1, fp);
-
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+    const bool complete = DataFileIO::ReadExact(fp, Buffer, Size * MAX_NAMEFILTERS) &&
+                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
     fclose(fp);
-    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File corrupted.", FileName);
@@ -146,7 +152,11 @@ void OpenGateScript(const wchar_t* FileName)
         BYTE* Buffer = new BYTE[Size];
         for (int i = 0; i < MAX_GATES; i++)
         {
-            fread(Buffer, Size, 1, fp);
+            if (!DataFileIO::ReadExact(fp, Buffer, Size))
+            {
+                DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+                break;
+            }
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
         }

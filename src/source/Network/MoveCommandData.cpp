@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "MoveCommandData.h"
+#include "Data/DataHandler/DataFileIO.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -38,14 +39,22 @@ bool CMoveCommandData::Create(const std::wstring& filename)
         return false;
 
     int count = 0;
-    fread(&count, sizeof(int), 1, fp);
+    if (!DataFileIO::ReadExact(fp, &count, sizeof(int)))
+    {
+        fclose(fp);
+        return false;
+    }
 
     for (int i = 0; i < count; i++)
     {
+        MOVEREQINFO_FILE moveReqInfo{};
+        if (!DataFileIO::ReadExact(fp, &moveReqInfo, sizeof moveReqInfo))
+        {
+            fclose(fp);
+            return false;
+        }
         // Value-initialised: the flags stay false until the move window sets them.
         auto* pMoveInfoData = new MOVEINFODATA{};
-        MOVEREQINFO_FILE moveReqInfo{};
-        fread(&moveReqInfo, sizeof moveReqInfo, 1, fp);
 
         // cppcheck-suppress dangerousTypeCast
         BuxConvert((BYTE*)&moveReqInfo, sizeof moveReqInfo);

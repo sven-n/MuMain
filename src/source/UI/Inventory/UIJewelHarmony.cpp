@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Core/UIManager.h"
@@ -45,9 +46,13 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
 
         std::vector<BYTE> tempBuffer(nSize);
 
-        ::fread(tempBuffer.data(), nSize, 1, fp);
-        ::BuxConvert((BYTE*)tempBuffer.data(), nSize);
+        const bool complete = DataFileIO::ReadExact(fp, tempBuffer.data(), nSize);
         ::fclose(fp);
+        if (!complete)
+        {
+            return false;
+        }
+        ::BuxConvert(tempBuffer.data(), nSize);
 
         // Copy to the new HarmonyJewelOption array that uses wchar_t[] for the Name
         for (int i = 0; i < nEntries; ++i)

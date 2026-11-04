@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -621,8 +622,13 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
         {
             SOCKET_OPTION_INFO_FILE current;
-            fread(&current, iSize, 1, fp);
-            BuxConvert((BYTE*)&current, iSize);
+            if (!DataFileIO::ReadExact(fp, &current, iSize))
+            {
+                fclose(fp);
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                return;
+            }
+            BuxConvert(reinterpret_cast<BYTE*>(&current), iSize);
 
             auto target = &m_SocketOptionInfo[j][i];
             target->m_iOptionCategory = current.m_iOptionCategory;

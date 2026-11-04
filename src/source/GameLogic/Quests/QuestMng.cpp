@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "QuestMng.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "I18N/All.h"
 
 
@@ -129,8 +130,15 @@ void CQuestMng::LoadQuestWordsScript()
     {
         ::BuxConvert(reinterpret_cast<BYTE*>(&sQuestWordsHeader), nSize);
 
-        ::fread(rawWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
-        ::BuxConvert(reinterpret_cast<BYTE*>(rawWords), sQuestWordsHeader.m_nWordsLen);
+        const short wordsLength = sQuestWordsHeader.m_nWordsLen;
+        if (wordsLength < 0 || static_cast<std::size_t>(wordsLength) > sizeof(rawWords) ||
+            !DataFileIO::ReadExact(fp, rawWords, static_cast<std::size_t>(wordsLength)))
+        {
+            ::fclose(fp);
+            DataFileIO::ReportUnusableFile(QM_QUESTWORDS_FILE, L"File corrupted.");
+            return;
+        }
+        ::BuxConvert(reinterpret_cast<BYTE*>(rawWords), wordsLength);
         CMultiLanguage::ConvertFromUtf8(szWords, rawWords, 1024);
 
         std::wstring strWords = szWords;

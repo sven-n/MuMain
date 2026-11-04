@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
@@ -183,8 +184,14 @@ bool PetProcess::LoadData()
         return FALSE;
     }
 
-    fread(&_ver, sizeof(int), 1, fp);
-    fread(&_array, sizeof(int), 1, fp);
+    int _listSize = 0;
+    if (!DataFileIO::ReadExact(fp, &_ver, sizeof(int)) || !DataFileIO::ReadExact(fp, &_array, sizeof(int)) ||
+        !DataFileIO::ReadExact(fp, &_listSize, sizeof(DWORD)))
+    {
+        fclose(fp);
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return FALSE;
+    }
 
     int _type;
     int _blendMesh;
@@ -193,19 +200,19 @@ bool PetProcess::LoadData()
     int* _action = new int[_array];
     float* _speed = new float[_array];
 
-    int _listSize = 0;
-    fread(&_listSize, sizeof(DWORD), 1, fp);
-
     int Size = sizeof(int) + sizeof(int) + sizeof(float) + sizeof(int) + ((sizeof(int) + sizeof(float)) * _array);
     BYTE* Buffer = new BYTE[Size * _listSize];
 
-    fread(Buffer, Size * _listSize, 1, fp);
-
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+    const bool complete =
+        DataFileIO::ReadExact(fp, Buffer, Size * _listSize) && DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
+    fclose(fp);
 
-    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
     {
+        delete[] _action;
+        delete[] _speed;
+        delete[] Buffer;
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File corrupted.", FileName);
         g_ErrorReport.Write(Text);

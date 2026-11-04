@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Drawing/LegacyCalls.h"
@@ -88,9 +89,7 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 
     if ((fp = _wfopen(L"dconfig.ini", L"rb")) != NULL)
     {
-        fread(&num, sizeof(WORD), 1, fp);
-
-        if (num > 100)
+        if (!DataFileIO::ReadExact(fp, &num, sizeof(WORD)) || num > 100)
         {
             num = 0;
         }
@@ -98,8 +97,16 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
         {
             for (int i = 0; i < num; ++i)
             {
-                fread(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
-                fread(&days[i].date, sizeof(WORD), 1, fp);
+                // A history cut short counts as none, as when the file is missing.
+                if (!DataFileIO::ReadExact(fp, days[i].ID, sizeof(char) * (MAX_USERNAME_SIZE + 1)) ||
+                    !DataFileIO::ReadExact(fp, &days[i].date, sizeof(WORD)))
+                {
+                    num = 0;
+                    count = 0;
+                    sameName = false;
+                    update = true;
+                    break;
+                }
 
                 if (!wcscmp(days[i].ID, Name))
                 {

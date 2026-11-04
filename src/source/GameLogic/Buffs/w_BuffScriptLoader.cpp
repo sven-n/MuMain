@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/ReadScript.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -75,16 +76,20 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
         DWORD structsize = sizeof(_BUFFINFO);
 
         DWORD listsize;
-        fread(&listsize, sizeof(DWORD), 1, fp);
+        if (!DataFileIO::ReadExact(fp, &listsize, sizeof(DWORD)))
+        {
+            fclose(fp);
+            DataFileIO::ReportUnusableFile(pchFileName.c_str(), L"File corrupted.");
+            return true;
+        }
 
         BYTE* Buffer = new BYTE[structsize * listsize];
-        fread(Buffer, structsize * listsize, 1, fp);
-
         DWORD dwCheckSum;
-        fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+        const bool complete = DataFileIO::ReadExact(fp, Buffer, structsize * listsize) &&
+                              DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
 
         fclose(fp);
-        if (dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
+        if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
         {
             mu::log::Get("gameplay")->warn("{} - File corrupted.", mu_wchar_to_utf8(pchFileName.c_str()));
             wchar_t Text[256];

@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Core/Utilities/Random.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #ifdef __APPLE__
@@ -165,7 +166,13 @@ int OpenTerrainAttribute(wchar_t* FileName)
     long file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     auto* file_data = new unsigned char[file_size];
-    fread(file_data, file_size, 1, fp);
+    if (!DataFileIO::ReadExact(fp, file_data, file_size))
+    {
+        fclose(fp);
+        delete[] file_data;
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return (-1);
+    }
 
     // Decrypt file data
     int iSize = MapFileDecrypt(NULL, file_data, file_size);
@@ -356,8 +363,13 @@ int OpenTerrainMapping(wchar_t* FileName) {
     fseek(fp, 0, SEEK_SET);
 
     auto* EncData = new unsigned char[EncBytes];
-    fread(EncData, 1, EncBytes, fp);
+    const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
     fclose(fp);
+    if (!complete)
+    {
+        delete[] EncData;
+        return -1;
+    }
 
     int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
     auto* Data = new unsigned char[DataBytes];
@@ -433,8 +445,13 @@ bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber)
         int EncBytes = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         auto* EncData = new unsigned char[EncBytes];
-        fread(EncData, 1, EncBytes, fp);
+        const bool complete = DataFileIO::ReadExact(fp, EncData, EncBytes);
         fclose(fp);
+        if (!complete)
+        {
+            delete[] EncData;
+            return false;
+        }
 
         int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
         auto* Data = new unsigned char[DataBytes];
@@ -906,8 +923,14 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     fseek(fp, 0, SEEK_SET);
 
     BYTE* pbyData = new BYTE[iBytes];
-    fread(pbyData, 1, iBytes, fp);
+    const bool complete = DataFileIO::ReadExact(fp, pbyData, iBytes);
     fclose(fp);
+    if (!complete)
+    {
+        delete[] pbyData;
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return false;
+    }
 
     DWORD dwCurPos = 0;
     dwCurPos += 4;

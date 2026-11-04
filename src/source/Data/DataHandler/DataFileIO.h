@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core/Platform/WinCompat.h"
+#include <cstddef>
+#include <cstdio>
 #include <memory>
 #include <functional>
 
@@ -81,4 +83,20 @@ namespace DataFileIO
      * @param message Error message to display
      */
     void ReportError(const wchar_t* message);
+
+    /**
+     * Read exactly `size` bytes; reading zero bytes always succeeds
+     *
+     * @return false when the file ends or a read fails first
+     */
+    bool ReadExact(FILE* fp, void* buffer, std::size_t size);
+
+    /**
+     * Report a game data file that cannot be used, as the loaders report a missing one: the error log, a message box
+     * and the game window closing
+     *
+     * @param fileName The file, as the loader opened it
+     * @param issue What is wrong with it, e.g. L"File corrupted."
+     */
+    void ReportUnusableFile(const wchar_t* fileName, const wchar_t* issue);
 }

@@ -59,6 +59,20 @@ namespace DataFileIO
         g_ErrorReport.Write(L"[DataFileIO] %ls\r\n", message);
     }
 
+    bool ReadExact(FILE* fp, void* buffer, std::size_t size)
+    {
+        return size == 0 || std::fread(buffer, size, 1, fp) == 1;
+    }
+
+    void ReportUnusableFile(const wchar_t* fileName, const wchar_t* issue)
+    {
+        wchar_t text[256]{};
+        mu_swprintf(text, L"%ls - %ls", fileName, issue);
+        g_ErrorReport.Write(L"%ls\r\n", text);
+        MessageBox(g_hWnd, text, nullptr, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    }
+
 #ifdef _EDITOR
     bool WriteBuffer(FILE* fp, BYTE* buffer, const IOConfig& config)
     {
