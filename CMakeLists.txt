@@ -250,6 +250,14 @@ FetchContent_Declare(SDL3_ttf
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
+    # The vendored HarfBuzz printed "WARNHarfBuzz has a Meson port ..." in every configure: a message(WARN) that asks
+    # its users to build with Meson. SDL_ttf builds it with CMake, so the message goes.
+    COMMAND
+        "${CMAKE_COMMAND}"
+        ${MU_APPLY_GIT_PATCH_GIT}
+        "-DSOURCE_DIR=<SOURCE_DIR>/external/harfbuzz"
+        "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/harfbuzz-8.5.0-no-meson-message.patch"
+        -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
 )
 
 # RmlUi port: RmlUi's own vendored SDL_GPU renderer backend (ThirdParty/RmlUi/Backends/
