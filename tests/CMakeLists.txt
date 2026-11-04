@@ -40,6 +40,11 @@ endif()
 # hangs holds its CI job until the runner gives up hours later.
 set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 
+# What doctest prints when an entry's filter matches no case: it runs nothing and still exits 0. Such an entry fails,
+# so a name the discovery cut or joined (see tests/check_test_case_names.py) cannot pass unseen. The '.' stands for
+# doctest's '|': on Windows the discovery's post-build command line would read a '|' as a pipe.
+set(MU_TEST_RAN_NO_CASE "test cases: +0 . +0 passed")
+
 # Helper for module CMakeLists. Usage:
 #   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>])
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
@@ -74,7 +79,10 @@ function(mu_add_test)
     if(NOT MAT_RESOURCE_LOCK)
         set(MAT_RESOURCE_LOCK ${MAT_NAME})
     endif()
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
+    doctest_discover_tests(${MAT_NAME} PROPERTIES
+        TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+        RESOURCE_LOCK ${MAT_RESOURCE_LOCK}
+        FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}")
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)

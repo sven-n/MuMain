@@ -47,9 +47,11 @@ source under `src/MuEditor/` was compiled into the non-editor client.
 - Give every `TEST_CASE` a name, without `;`, a line break or `\` (a comma is
   fine) and with as many `[` as `]`. CTest's discovery reads the names as a CMake
   list, so it would drop an empty name and cut or join the others, and doctest's
-  filter reads a `\` as an escape; the entries it registers pass without running
-  the case. The static check
-  `test_case_names_reach_ctest_whole` enforces this.
+  filter reads a `\` as an escape; then no entry runs the case. The static check
+  `test_case_names_reach_ctest_whole` finds such names before any build.
+- A CTest entry that runs no case fails (doctest reports `test cases: 0`), so a
+  name the discovery cut or joined fails in CI even where the static check cannot
+  read it.
 
 ## Static checks and the pre-push hook
 

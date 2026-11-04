@@ -2,23 +2,24 @@
 """Every test case reaches CTest whole.
 
 doctest_discover_tests (tests/third_party/doctest/doctestAddTests.cmake) reads the names a test binary lists as one
-CMake list, a name per element, and registers each as a CTest entry that runs `--test-case=<name>`. CMake's list syntax
-changes a name that has
+CMake list, a name per element, and registers each as a CTest entry that runs `--test-case=<name>`. A name loses its
+case when it has
 - a ';' or a line break: the list separator, or the line break the discovery turns into one, cuts the name in two,
-  and neither half matches a case, so both entries pass running none;
+  and neither half matches a case;
 - more '[' than ']', or more ']' than '[': a ';' inside brackets separates nothing, so the name and every name listed
-  after it in its binary become one entry that runs none;
-- a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none;
+  after it in its binary become one entry that matches none;
+- a '\\' at its end: it escapes the separator, so the name and the next one become one entry that matches none;
 - a '\\' anywhere else: the discovery escapes only commas for doctest's filter, and the filter reads '\\\\' as one '\\'
   and splits at '\\,', so the entry's filter may match no case;
 - nothing at all: CMake drops an empty element, so the case gets no entry and never runs.
-A comma is safe: the discovery escapes it for doctest's filter.
+A comma is safe: the discovery escapes it for doctest's filter. tests/CMakeLists.txt fails an entry that runs no case;
+this check finds such names before any build, the empty ones too, which get no entry that could fail.
 
 Usage: check_test_case_names.py <tests dir>. Reads the name of every case a doctest macro registers (TEST_CASE,
 TEST_CASE_FIXTURE, TEST_CASE_CLASS, SCENARIO and their template forms, with or without the DOCTEST_ prefix) in the .cpp
 and .h files under it (third_party and fixtures left out) as the compiler reads them: comments and preprocessor lines
-left out, adjacent literals joined, escapes decoded. Prints each name CMake would change, and exits 1 when there is one, when a name is
-not written as string literals alone (a macro in it, say), or when it finds no test case at all.
+left out, adjacent literals joined, escapes decoded. Prints each name CMake would change, and exits 1 when there is
+one, when a name is not written as string literals alone (a macro in it, say), or when it finds no test case at all.
 """
 
 import re
