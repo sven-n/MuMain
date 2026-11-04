@@ -42,6 +42,7 @@ foreach(case IN ITEMS
         "escaped_semicolon|has a '.', which cuts it in two"
         "line_break|has a line break"
         "brackets|has unbalanced brackets"
+        "close_bracket|has unbalanced brackets"
         "backslash|joins it with the next name"
         "backslash_inside|doctest's filter reads as an escape"
         "not_literal|is not written as string literals"
