@@ -13,7 +13,7 @@ A comma is safe: the discovery escapes it for doctest's filter.
 Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
 and .h files under it (third_party and fixtures left out) as the compiler reads them: comments and preprocessor lines
 left out, adjacent literals joined. Prints each name CMake would change, and exits 1 when there is one, when a name is
-not written as string literals, or when it finds no test case at all.
+not written as string literals alone (a macro in it, say), or when it finds no test case at all.
 """
 
 import re
@@ -24,18 +24,21 @@ from cpp_text import code_only
 
 CASE = re.compile(r"^[ \t]*(TEST_CASE|TEST_CASE_FIXTURE)\s*\(", re.M)
 FIXTURE = re.compile(r"\s*[\w:]+\s*,")
-# The name: string literals the compiler joins into one.
+# The name: string literals the compiler joins into one, then the end of the arguments or a decorator.
 LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
+NAME_END = re.compile(r"\s*[)*]")
 SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
 def name_at(text, at):
-    """The name whose literals start at `at`, or None if it is not written as string literals."""
+    """The name whose literals start at `at`, or None if it is not written as string literals alone."""
     parts = []
     while literal := LITERAL.match(text, at):
         parts.append(re.sub(r"\\(.)", r"\1", literal.group(1)))
         at = literal.end()
-    return "".join(parts) if parts else None
+    if not parts or not NAME_END.match(text, at):
+        return None
+    return "".join(parts)
 
 
 def cases(text):
