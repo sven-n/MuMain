@@ -2,7 +2,7 @@
 #define __ZZZ_EFFECT_H__
 #include "Core/Utilities/Random.h"
 
-#include <vector>
+#include <array>
 
 namespace Render::EffectDrawing
 {
@@ -43,8 +43,9 @@ void ClearSprites();
 void BeginSpriteDraws();
 void RenderSprites(BYTE byRenderOneMore = 0);
 // Which sprites this frame's passes already drew; a parity check gives it back to draw the world pass again.
-[[nodiscard]] std::vector<bool> SpritesDrawnThisFrame();
-void SetSpritesDrawnThisFrame(const std::vector<bool>& drawn);
+using SpriteDrawFlags = std::array<bool, MAX_SPRITES>;
+[[nodiscard]] SpriteDrawFlags SpritesDrawnThisFrame();
+void SetSpritesDrawnThisFrame(const SpriteDrawFlags& drawn);
 // The draw a live sprite asks for: its quad, its blend and whether bloom leaves it alone.
 Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
 
