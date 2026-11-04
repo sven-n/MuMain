@@ -46,7 +46,8 @@ foreach(case IN ITEMS
         "not_literal|is not written as string literals"
         "literal_and_macro|is not written as string literals"
         "scenario|which cuts it in two"
-        "empty|is empty, which the discovery drops")
+        "empty|is empty, which the discovery drops"
+        "non_ascii|which cuts it in two")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 fixture)
     list(GET case 1 offence)

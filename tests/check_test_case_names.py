@@ -94,6 +94,8 @@ def problem(name):
 
 
 def main():
+    # Piped output on Windows (CTest, the pre-push hook) uses the ANSI code page: escape what it cannot show.
+    sys.stdout.reconfigure(errors="backslashreplace")
     root = Path(sys.argv[1])
     sources = [path for path in sorted(root.rglob("*"))
                if path.suffix in (".cpp", ".h") and not SKIPPED_DIRS & set(path.relative_to(root).parts)]
