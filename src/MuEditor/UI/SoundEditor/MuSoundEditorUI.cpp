@@ -723,6 +723,17 @@ void MuSoundEditorUI::RenderFolderBar()
     using MuEditor::SoundEditor::FolderPath;
     const auto change = [](std::vector<Data::Sounds::SoundFolder> after)
     { g_SoundEdits.ChangeFolders(I18N::Editor::SoundEditorStepFolders, std::move(after)); };
+    // A file that was not read is left alone (ChangeFolders refuses).
+    const std::vector<Data::Items::ItemDataIssue>& problems = g_SoundEdits.FolderProblems();
+    if (!problems.empty())
+    {
+        const std::string text =
+            I18N::Format(I18N::Editor::SoundEditorFoldersUnreadable0, {problems.front().ToString()});
+        ImGui::PushTextWrapPos(0.0f);
+        ImGui::TextColored(ProblemColor, "%s", text.c_str());
+        ImGui::PopTextWrapPos();
+    }
+    ImGui::BeginDisabled(!problems.empty());
     if (ImGui::Button(I18N::Editor::SoundEditorNewFolder))
     {
         std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
@@ -766,6 +777,7 @@ void MuSoundEditorUI::RenderFolderBar()
         }
         ImGui::SameLine();
     }
+    ImGui::EndDisabled();
     ImGui::EndDisabled();
     ImGui::TextDisabled("%s", I18N::Editor::SoundEditorDragTip);
     if (ImGui::BeginPopup("##RenameFolder"))

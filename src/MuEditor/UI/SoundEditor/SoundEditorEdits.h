@@ -88,8 +88,12 @@ public:
     // The folders (Q-SE4), read from Data/Audio/SoundFolders.json the first
     // time.
     const std::vector<Data::Sounds::SoundFolder>& Folders();
+    // What kept the folders' file from being read (its fatal problems): the
+    // folders stay as they are, so Save never writes over the file, until
+    // Revert reads it again. Empty when it was read.
+    const std::vector<Data::Items::ItemDataIssue>& FolderProblems();
     // Replaces the folders as one step of the history; false when nothing
-    // differs.
+    // differs or the file was not read (FolderProblems).
     bool ChangeFolders(std::string label, std::vector<Data::Sounds::SoundFolder> after);
 
     // Replaces the sound events (the Events tab, Q-SE1) as one step of the
@@ -146,6 +150,7 @@ private:
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
+    std::vector<Data::Items::ItemDataIssue> m_folderProblems;
     std::optional<std::vector<Data::Sounds::SoundEvent>> m_savedEvents;
 };
 } // namespace MuEditor::SoundEditor

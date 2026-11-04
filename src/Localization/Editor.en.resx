@@ -3937,6 +3937,9 @@
   <data name="Sound editor step refused" xml:space="preserve">
     <value>This step's sound changed in another window since; it stays as it is.</value>
   </data>
+  <data name="Sound editor folders unreadable {0}" xml:space="preserve">
+    <value>The folders' file could not be read, so the folders cannot be changed and Save leaves the file alone. Fix it, then Revert reads it again. {0}</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>All sounds as normal</value>
   </data>

@@ -18,6 +18,7 @@
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <iterator>
 
 namespace MuEditor::SoundEditor
 {
@@ -228,10 +229,22 @@ const std::vector<Data::Sounds::SoundFolder>& SoundEdits::Folders()
 {
     if (!m_folders)
     {
-        m_folders = Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile()).folders;
+        Data::Sounds::SoundFoldersLoadResult read =
+            Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
+        m_folders = std::move(read.folders);
         m_savedFolders = m_folders;
+        m_folderProblems.clear();
+        std::copy_if(read.issues.begin(), read.issues.end(), std::back_inserter(m_folderProblems),
+                     [](const Data::Items::ItemDataIssue& issue)
+                     { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
     }
     return *m_folders;
+}
+
+const std::vector<Data::Items::ItemDataIssue>& SoundEdits::FolderProblems()
+{
+    Folders();
+    return m_folderProblems;
 }
 
 bool SoundEdits::ChangeFolders(std::string label, std::vector<Data::Sounds::SoundFolder> after)
@@ -240,7 +253,7 @@ bool SoundEdits::ChangeFolders(std::string label, std::vector<Data::Sounds::Soun
     {
         TakeSaved();
     }
-    if (after == Folders())
+    if (after == Folders() || !m_folderProblems.empty())
     {
         return false;
     }
@@ -490,6 +503,7 @@ void SoundEdits::Clear()
     m_savedObjects.reset();
     m_folders.reset();
     m_savedFolders.reset();
+    m_folderProblems.clear();
     m_savedEvents.reset();
 }
 } // namespace MuEditor::SoundEditor

@@ -3718,6 +3718,9 @@
   <data name="Sound editor step refused" xml:space="preserve">
     <value>Das Geräusch dieses Schritts wurde seitdem in einem anderen Fenster geändert; es bleibt, wie es ist.</value>
   </data>
+  <data name="Sound editor folders unreadable {0}" xml:space="preserve">
+    <value>Die Datei der Ordner konnte nicht gelesen werden, daher lassen sich die Ordner nicht ändern, und Speichern lässt die Datei unverändert. Nach dem Beheben liest Zurücksetzen sie neu. {0}</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>Alle Geräusche wie gewohnt</value>
   </data>

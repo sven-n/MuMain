@@ -787,6 +787,43 @@ TEST_CASE("Sound Editor: a change of the folders is a step of the history, Save 
     CHECK_FALSE(g_SoundEdits.CanUndo());
 }
 
+TEST_CASE("Sound Editor: a folders' file that cannot be read keeps the folders as they are, so Save leaves the file "
+          "alone; Revert reads it again once it is fixed (Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    std::filesystem::create_directories("Data/Audio");
+    const std::string broken = "{ \"formatVersion\": 1, \"folders\": [ { \"name\": \"Interface\", \"sounds\": [";
+    std::ofstream(Data::Sounds::GetSoundFoldersFile(), std::ios::binary) << broken;
+    CHECK(g_SoundEdits.Folders().empty());
+    CHECK_FALSE(g_SoundEdits.FolderProblems().empty());
+    CHECK_FALSE(g_SoundEdits.ChangeFolders("Sound folders", {Folder("Interface", {"SOUND_CLICK01"})}));
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    std::vector<Data::Items::ItemDataIssue> issues;
+    CHECK(g_SoundEdits.Save(issues));
+    std::stringstream text;
+    text << std::ifstream(Data::Sounds::GetSoundFoldersFile(), std::ios::binary).rdbuf();
+    CHECK(text.str() == broken);
+    // The window says so.
+    {
+        TestImGuiContext context;
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    }
+
+    const std::vector<SoundFolder> fixed{Folder("Interface", {"SOUND_CLICK01"})};
+    REQUIRE(Data::Sounds::SaveSoundFolders(Data::Sounds::GetSoundFoldersFile(), fixed, issues));
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(g_SoundEdits.FolderProblems().empty());
+    CHECK(g_SoundEdits.Folders() == fixed);
+    CHECK(g_SoundEdits.ChangeFolders("Sound folders", std::vector<SoundFolder>{}));
+}
+
 TEST_CASE("Sound Editor: the shipped folders hold every sound of the shipped files once, by their keys, and write "
           "back the same (Q-SE4) [sounds][editor]")
 {
