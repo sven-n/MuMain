@@ -34,27 +34,29 @@ add_test(
 set(MU_TEST_CASE_NAMES_FIXTURES "${MU_TESTS}/fixtures/test_case_names")
 add_test(NAME test_case_names_reach_ctest_whole
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TESTS}")
-# Each fixture with the offence the check must report for it (a crash would not match).
+# Each fixture with the offence the check must report for it (a crash would not match; "'.'" stands for "';'", which
+# this list would split at). PASS_REGULAR_EXPRESSION ignores the exit code, so a second run must fail.
 foreach(case IN ITEMS
-        "semicolon|which cuts it in two"
-        "comment_between_literals|which cuts it in two"
-        "escaped_semicolon|has a ';', which cuts it in two"
+        "semicolon|has a '.', which cuts it in two"
+        "comment_between_literals|has a '.', which cuts it in two"
+        "escaped_semicolon|has a '.', which cuts it in two"
         "line_break|has a line break"
         "brackets|has unbalanced brackets"
         "backslash|joins it with the next name"
         "backslash_inside|doctest's filter reads as an escape"
         "not_literal|is not written as string literals"
         "literal_and_macro|is not written as string literals"
-        "scenario|which cuts it in two"
+        "scenario|has a '.', which cuts it in two"
         "empty|is empty, which the discovery drops"
-        "non_ascii|which cuts it in two")
+        "non_ascii|has a '.', which cuts it in two")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 fixture)
     list(GET case 1 offence)
-    add_test(NAME test_case_names_check_catches_${fixture}
-        COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py"
-                "${MU_TEST_CASE_NAMES_FIXTURES}/${fixture}")
+    set(command "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TEST_CASE_NAMES_FIXTURES}/${fixture}")
+    add_test(NAME test_case_names_check_catches_${fixture} COMMAND ${command})
     set_tests_properties(test_case_names_check_catches_${fixture} PROPERTIES PASS_REGULAR_EXPRESSION "${offence}")
+    add_test(NAME test_case_names_check_fails_on_${fixture} COMMAND ${command})
+    set_tests_properties(test_case_names_check_fails_on_${fixture} PROPERTIES WILL_FAIL TRUE)
 endforeach()
 add_test(NAME test_case_names_check_passes_clean
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TEST_CASE_NAMES_FIXTURES}/clean")
