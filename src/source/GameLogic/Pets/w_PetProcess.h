@@ -107,6 +107,11 @@ public:
     // Marks the pets the frame's view shows; part of CullWorld.
     void CullPets();
     void RenderPets();
+    template <typename Visit> void ForEachObject(Visit visit)
+    {
+        for (auto& pet : m_petsList)
+            visit(*pet->GetObject());
+    }
     void SetCommandPet(CHARACTER* Owner, int targetKey, PetObject::ActionType cmdType);
 
 private:

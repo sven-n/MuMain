@@ -16,6 +16,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/WindowSystem.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/MainScene.h"
 #include "Render/Renderer/MuRenderer.h"
 
@@ -93,6 +94,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
             o->Owner = Owner;
             s_spriteBloomExcluded[i] = mu::GetRenderer().IsBloomExcluded();
             s_spriteDrawn[i] = false;
+            Scenes::FixedTick::NoteSpriteCreated(i);
             o->AnimationFrame = 1.f;
             o->Visible = true;
             o->Scale = Scale;

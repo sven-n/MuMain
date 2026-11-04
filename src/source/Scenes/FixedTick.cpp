@@ -4,10 +4,15 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "GameLogic/Pets/w_PetProcess.h"
+#include "GameLogic/Skills/SkillEffectMgr.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
 
 #include <array>
 #include <cmath>
+#include <unordered_map>
+#include <vector>
 
 extern float FPS_ANIMATION_FACTOR;
 extern int REFERENCE_FRAME_STEP;
@@ -44,11 +49,35 @@ struct Slot
 {
     Transform previous;
     Transform current;
+    int type = -1;
     bool captured = false;
     bool applied = false;
 };
 
-std::array<Slot, MAX_CHARACTERS_CLIENT + MAX_MOUNTS> s_slots{};
+// A particle only has a position to interpolate.
+struct PointSlot
+{
+    vec3_t previous{};
+    vec3_t current{};
+    int type = -1;
+    bool captured = false;
+    bool applied = false;
+};
+
+struct SpriteSlot
+{
+    int index = 0;
+    vec3_t current{};
+};
+
+std::vector<Slot> s_slots;
+std::vector<PointSlot> s_pointSlots;
+std::vector<SpriteSlot> s_movedSprites;
+std::unordered_map<const OBJECT*, std::array<float, 3>> s_offsets;
+const OBJECT* s_spriteCarrier = nullptr;
+std::array<const OBJECT*, MAX_SPRITES> s_spriteCarriers{};
+int s_liveSprites = 0;
+int s_spritesFollowing = 0;
 bool s_on = false;
 Clock s_clock;
 double s_lastMs = -1.0;
@@ -57,13 +86,50 @@ std::uint64_t s_ticksRun = 0;
 
 template <typename Visit> void ForEachMoved(Visit visit)
 {
+    std::size_t next = 0;
+    const auto each = [&](OBJECT& o)
+    {
+        if (next == s_slots.size())
+            s_slots.emplace_back();
+        visit(s_slots[next++], o);
+    };
     if (CharactersClient != nullptr)
     {
         for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
-            visit(s_slots[i], CharactersClient[i].Object);
+            each(CharactersClient[i].Object);
     }
     for (int i = 0; i < MAX_MOUNTS; ++i)
-        visit(s_slots[MAX_CHARACTERS_CLIENT + i], Mounts[i]);
+        each(Mounts[i]);
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+        each(Effects[i]);
+    for (int i = 0; i < g_SkillEffects.GetSize(); ++i)
+        each(*g_SkillEffects.GetEffect(i));
+    for (int i = 0; i < MAX_BOIDS; ++i)
+        each(Boids[i]);
+    for (int i = 0; i < MAX_FISHS; ++i)
+        each(Fishs[i]);
+    for (int i = 0; i < MAX_ITEMS; ++i)
+        each(Items[i].Object);
+    if (g_petProcess)
+        ThePetProcess().ForEachObject(each);
+}
+
+template <typename Visit> void ForEachPoint(Visit visit)
+{
+    std::size_t next = 0;
+    const auto pool = [&](PARTICLE* particles, int count)
+    {
+        for (int i = 0; i < count; ++i)
+        {
+            if (next == s_pointSlots.size())
+                s_pointSlots.emplace_back();
+            visit(s_pointSlots[next++], particles[i]);
+        }
+    };
+    pool(Particles, MAX_PARTICLES);
+    pool(Leaves, MAX_LEAVES);
+    pool(Points, MAX_POINTS);
+    pool(Pointers, MAX_POINTERS);
 }
 } // namespace
 
@@ -120,6 +186,8 @@ void SetOn(bool on)
     s_clock = Clock{};
     for (Slot& slot : s_slots)
         slot.captured = false;
+    for (PointSlot& slot : s_pointSlots)
+        slot.captured = false;
 }
 
 bool RunsWorld()
@@ -170,7 +238,15 @@ void CaptureTransforms()
         [](Slot& slot, const OBJECT& o)
         {
             slot.captured = o.Live;
+            slot.type = o.Type;
             Copy(o, slot.previous);
+        });
+    ForEachPoint(
+        [](PointSlot& slot, const PARTICLE& p)
+        {
+            slot.captured = p.Live;
+            slot.type = p.Type;
+            VectorCopy(p.Position, slot.previous);
         });
 }
 
@@ -180,7 +256,7 @@ void ApplyInterpolation()
     ForEachMoved(
         [alpha](Slot& slot, OBJECT& o)
         {
-            if (!slot.captured || !o.Live || slot.applied)
+            if (!slot.captured || !o.Live || slot.applied || slot.type != o.Type)
                 return;
             Copy(o, slot.current);
             Interpolate(slot.previous.position, slot.current.position, alpha, o.Position);
@@ -196,11 +272,47 @@ void ApplyInterpolation()
                 o.PriorAction = slot.previous.priorAction;
             }
             slot.applied = true;
+            if (!VectorCompare(o.Position, slot.current.position))
+            {
+                s_offsets[&o] = {o.Position[0] - slot.current.position[0], o.Position[1] - slot.current.position[1],
+                                 o.Position[2] - slot.current.position[2]};
+            }
         });
+    ForEachPoint(
+        [alpha](PointSlot& slot, PARTICLE& p)
+        {
+            if (!slot.captured || !p.Live || slot.applied || slot.type != p.Type)
+                return;
+            VectorCopy(p.Position, slot.current);
+            Interpolate(slot.previous, slot.current, alpha, p.Position);
+            slot.applied = true;
+        });
+    // A sprite lasts one tick, so it has no earlier position: it moves with its owner.
+    s_liveSprites = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        OBJECT& sprite = Sprites[i];
+        if (!sprite.Live)
+            continue;
+        ++s_liveSprites;
+        auto offset = s_offsets.find(s_spriteCarriers[i]);
+        if (offset == s_offsets.end())
+            offset = s_offsets.find(sprite.Owner);
+        if (offset == s_offsets.end())
+            continue;
+        SpriteSlot& slot = s_movedSprites.emplace_back();
+        slot.index = i;
+        VectorCopy(sprite.Position, slot.current);
+        for (int axis = 0; axis < 3; ++axis)
+            sprite.Position[axis] += offset->second[axis];
+    }
+    s_spritesFollowing = static_cast<int>(s_movedSprites.size());
 }
 
 void Restore()
 {
+    if (!s_on && s_slots.empty())
+        return;
     ForEachMoved(
         [](Slot& slot, OBJECT& o)
         {
@@ -213,5 +325,49 @@ void Restore()
             o.PriorAction = slot.current.priorAction;
             slot.applied = false;
         });
+    ForEachPoint(
+        [](PointSlot& slot, PARTICLE& p)
+        {
+            if (!slot.applied)
+                return;
+            VectorCopy(slot.current, p.Position);
+            slot.applied = false;
+        });
+    for (const SpriteSlot& slot : s_movedSprites)
+        VectorCopy(slot.current, Sprites[slot.index].Position);
+    s_movedSprites.clear();
+    s_offsets.clear();
+}
+
+SpriteCarrierScope::SpriteCarrierScope(const OBJECT* carrier) : m_previous(s_spriteCarrier)
+{
+    s_spriteCarrier = carrier;
+}
+
+SpriteCarrierScope::~SpriteCarrierScope()
+{
+    s_spriteCarrier = m_previous;
+}
+
+void NoteSpriteCreated(int sprite)
+{
+    s_spriteCarriers[sprite] = s_spriteCarrier;
+}
+
+void DrawOffset(const OBJECT* o, vec3_t out)
+{
+    const auto offset = s_offsets.find(o);
+    for (int axis = 0; axis < 3; ++axis)
+        out[axis] = offset != s_offsets.end() ? offset->second[axis] : 0.f;
+}
+
+int LiveSprites()
+{
+    return s_liveSprites;
+}
+
+int SpritesFollowing()
+{
+    return s_spritesFollowing;
 }
 } // namespace Scenes::FixedTick

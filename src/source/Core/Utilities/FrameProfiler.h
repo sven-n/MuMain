@@ -46,6 +46,8 @@ enum class Pass : int
     ObjectsDraw,
     // The update's effect spawns and poses for the drawn characters and map objects.
     UpdateEffects,
+    // A world pass drawn later: its replay at the end of the pass.
+    WorldReplay,
     Count_
 };
 
@@ -54,6 +56,7 @@ inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
     "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
     "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx",
+    "WorldRep",
 };
 
 enum class Counter : int

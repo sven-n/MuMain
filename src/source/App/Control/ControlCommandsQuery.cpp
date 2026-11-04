@@ -541,6 +541,8 @@ std::string FixedTick(const Request& request, std::unique_ptr<Act>&)
     json result;
     result["on"] = on;
     result["ticks"] = Scenes::FixedTick::TicksRun();
+    result["sprites"] = Scenes::FixedTick::LiveSprites();
+    result["sprites_following"] = Scenes::FixedTick::SpritesFollowing();
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

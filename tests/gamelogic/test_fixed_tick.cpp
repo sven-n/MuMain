@@ -3,6 +3,7 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Scenes/FixedTick.h"
 #include "Scenes/SceneCore.h"
 
@@ -125,6 +126,79 @@ TEST_CASE("Applying moves a character for the frame, and restoring gives the upd
 
     SetOn(false);
     CHECK_FALSE(RunsWorld());
+    SceneFlag = savedScene;
+    CharactersClient = saved;
+}
+
+TEST_CASE("Effects and particles draw between ticks; a sprite and an offset follow the moved owner [fixed-tick]")
+{
+    const auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    CHARACTER* const saved = CharactersClient;
+    const EGameScene savedScene = SceneFlag;
+    CharactersClient = characters.get();
+    SceneFlag = MAIN_SCENE;
+    OBJECT& owner = CharactersClient[0].Object;
+    owner.Live = true;
+    Vector(100.f, 100.f, 0.f, owner.Position);
+    OBJECT& effect = Effects[0];
+    effect.Live = true;
+    Vector(0.f, 0.f, 0.f, effect.Position);
+    PARTICLE& particle = Particles[0];
+    particle.Live = true;
+    Vector(10.f, 0.f, 0.f, particle.Position);
+    OBJECT& sprite = Sprites[0];
+
+    SetOn(true);
+    BeginFrame(0.0);
+    BeginFrame(60.0); // one tick, and half of the next
+    CaptureTransforms();
+    Vector(120.f, 100.f, 0.f, owner.Position);
+    Vector(40.f, 0.f, 0.f, effect.Position);
+    Vector(30.f, 0.f, 0.f, particle.Position);
+    sprite.Live = true;
+    sprite.Owner = &owner;
+    Vector(500.f, 0.f, 0.f, sprite.Position);
+    // An equipment effect's sprite: owned by its item type's shared object, carried by the character.
+    OBJECT itemType{};
+    vec3_t worn = {800.f, 0.f, 0.f};
+    vec3_t light = {1.f, 1.f, 1.f};
+    int wornSprite = -1;
+    {
+        const SpriteCarrierScope carrier(&owner);
+        wornSprite = CreateSprite(BITMAP_LIGHT, worn, 1.f, light, &itemType);
+    }
+    REQUIRE(wornSprite > 0);
+    // Born in this tick: nothing to draw it from.
+    OBJECT& born = Effects[1];
+    born.Live = true;
+    Vector(70.f, 0.f, 0.f, born.Position);
+
+    ApplyInterpolation();
+    CHECK(owner.Position[0] == doctest::Approx(110.f));
+    CHECK(effect.Position[0] == doctest::Approx(20.f));
+    CHECK(particle.Position[0] == doctest::Approx(20.f));
+    CHECK(sprite.Position[0] == doctest::Approx(490.f));
+    CHECK(Sprites[wornSprite].Position[0] == doctest::Approx(790.f));
+    CHECK(born.Position[0] == doctest::Approx(70.f));
+    vec3_t offset;
+    DrawOffset(&owner, offset);
+    CHECK(offset[0] == doctest::Approx(-10.f));
+    DrawOffset(&effect, offset);
+    CHECK(offset[0] == doctest::Approx(-20.f));
+    CHECK(SpritesFollowing() == 2);
+
+    Restore();
+    CHECK(owner.Position[0] == doctest::Approx(120.f));
+    CHECK(effect.Position[0] == doctest::Approx(40.f));
+    CHECK(particle.Position[0] == doctest::Approx(30.f));
+    CHECK(sprite.Position[0] == doctest::Approx(500.f));
+    CHECK(Sprites[wornSprite].Position[0] == doctest::Approx(800.f));
+    DrawOffset(&owner, offset);
+    CHECK(offset[0] == doctest::Approx(0.f));
+
+    effect.Live = born.Live = particle.Live = sprite.Live = Sprites[wornSprite].Live = false;
+    sprite.Owner = nullptr;
+    SetOn(false);
     SceneFlag = savedScene;
     CharactersClient = saved;
 }

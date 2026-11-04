@@ -9,6 +9,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Scenes/FixedTick.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Effects/EffectDraw.h"
 
@@ -691,6 +692,10 @@ void CPhysicsClothMesh::AddStateTo(Fnv1aHash& hash) const
 void CPhysicsCloth::GetPosition(int index, vec3_t* pPos) const
 {
     m_pVertices[index].GetPosition(pPos);
+    // The cloth hangs on an owner the frame draws between ticks.
+    vec3_t offset;
+    Scenes::FixedTick::DrawOffset(m_oOwner, offset);
+    VectorAdd(*pPos, offset, *pPos);
 }
 
 void CPhysicsCloth::InitForces(void)
@@ -860,7 +865,7 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
         {
             int iVertex = m_iNumHor * j + i;
             vec3_t* pvPos = &pvRenderPos[iVertex];
-            m_pVertices[iVertex].GetPosition(pvPos);
+            GetPosition(iVertex, pvPos);
         }
     }
 
@@ -1307,7 +1312,7 @@ void CPhysicsClothMesh::Render(vec3_t* pvColor, int iLevel)
     vec3_t vPos;
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
-        m_pVertices[iVertex].GetPosition(&vPos);
+        GetPosition(iVertex, &vPos);
         VectorCopy(vPos, VertexTransform[m_iMesh][iVertex]);
     }
 

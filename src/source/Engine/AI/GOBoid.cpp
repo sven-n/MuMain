@@ -24,6 +24,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
 #include "UI/Core/WindowSystem.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/MainScene.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -763,6 +764,7 @@ void UpdateMountEffects()
         OBJECT* o = &Mounts[i];
         if (!o->Live || o->DrawnFrame != s_mountCullFrame)
             continue;
+        const Scenes::FixedTick::SpriteCarrierScope carrier(o);
         UpdateDrawnMountEffects(o);
     }
 }

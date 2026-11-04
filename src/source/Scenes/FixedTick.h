@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+class OBJECT;
+
 // The developer switch "fixedtick": in the world, the update runs in whole steps at the reference rate (ADR 0001) and
 // each frame draws between the last two steps. Everything else in the frame still runs once per frame.
 namespace Scenes::FixedTick
@@ -59,4 +61,23 @@ void CaptureTransforms();
 // their own. Restore gives the update's values back before anything can change them.
 void ApplyInterpolation();
 void Restore();
+// How far the frame's draw moves the object from where the update left it; zero for an object not moved.
+void DrawOffset(const OBJECT* o, vec3_t out);
+// The sprites created in its lifetime move with this object: an equipment effect's own owner is its item type's shared
+// object, not who wears it.
+class SpriteCarrierScope
+{
+public:
+    explicit SpriteCarrierScope(const OBJECT* carrier);
+    ~SpriteCarrierScope();
+    SpriteCarrierScope(const SpriteCarrierScope&) = delete;
+    SpriteCarrierScope& operator=(const SpriteCarrierScope&) = delete;
+
+private:
+    const OBJECT* m_previous;
+};
+void NoteSpriteCreated(int sprite);
+// The live sprites, and those that follow an owner, in the last frame interpolated.
+[[nodiscard]] int LiveSprites();
+[[nodiscard]] int SpritesFollowing();
 } // namespace Scenes::FixedTick

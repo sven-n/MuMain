@@ -701,7 +701,10 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 
     RenderAfterEffects();
     if (later)
+    {
+        FRAME_PROFILE(WorldReplay);
         later->Flush();
+    }
 
     if (IsWaterTerrain() == true)
     {
@@ -727,7 +730,10 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 
         EndSprite();
         if (waterLater)
+        {
+            FRAME_PROFILE(WorldReplay);
             waterLater->Flush();
+        }
         EndOpengl();
 
         BeginOpenglPhysical(0, 0, width, height);

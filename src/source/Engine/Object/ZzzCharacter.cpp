@@ -35,6 +35,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/FixedTick.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
@@ -12083,6 +12084,7 @@ void UpdateDrawnCharacterEffects()
             continue;
 
         OBJECT* o = &c->Object;
+        const Scenes::FixedTick::SpriteCarrierScope carrier(o);
         BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
