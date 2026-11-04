@@ -4178,8 +4178,6 @@ void MoveParticles()
                     break;
 
                 case 2:
-                    o->Position[0]; // += (float)(Random::Rand()%30-15)*1.f*o->Scale;
-                    o->Position[1]; // += (float)(Random::Rand()%30-15)*1.f*o->Scale;
                     o->Position[2] += (float)(Random::Rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     break;
@@ -4191,8 +4189,6 @@ void MoveParticles()
                     o->Position[2] += (float)(Random::Rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     break;
                 case 4:
-                    o->Position[0]; // += (float)(Random::Rand()%30-15)*1.f*o->Scale;
-                    o->Position[1]; // += (float)(Random::Rand()%30-15)*1.f*o->Scale;
                     o->Position[2] += (float)(Random::Rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     if (o->Position[2] > 350)
