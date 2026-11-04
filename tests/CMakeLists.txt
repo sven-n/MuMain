@@ -66,8 +66,9 @@ function(mu_add_test)
     if(MSVC)
         target_compile_options(${MAT_NAME} PRIVATE /utf-8)
     endif()
-    # Cases of one binary share fixed temp paths, so `ctest --parallel` runs them one at a time; binaries overlap.
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_NAME})
+    # Binaries of one folder share the config.ini next to them, so `ctest --parallel` overlaps only different folders.
+    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+                           RESOURCE_LOCK "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
