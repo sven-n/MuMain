@@ -4,7 +4,8 @@
 doctest_discover_tests (tests/third_party/doctest/doctestAddTests.cmake) reads the names a test binary lists as one
 CMake list, a name per element, and registers each as a CTest entry that runs `--test-case=<name>`. CMake's list syntax
 changes a name that has
-- a ';': the list separator cuts the name in two, and neither half matches a case, so both entries pass running none;
+- a ';' or a line break: the list separator, or the line break the discovery turns into one, cuts the name in two,
+  and neither half matches a case, so both entries pass running none;
 - more '[' than ']', or more ']' than '[': a ';' inside brackets separates nothing, so the name and every name listed
   after it in its binary become one entry that runs none;
 - a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none;
@@ -14,7 +15,7 @@ A comma is safe: the discovery escapes it for doctest's filter.
 
 Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
 and .h files under it (third_party and fixtures left out) as the compiler reads them: comments and preprocessor lines
-left out, adjacent literals joined. Prints each name CMake would change, and exits 1 when there is one, when a name is
+left out, adjacent literals joined, escapes decoded. Prints each name CMake would change, and exits 1 when there is one, when a name is
 not written as string literals alone (a macro in it, say), or when it finds no test case at all.
 """
 
@@ -29,14 +30,27 @@ FIXTURE = re.compile(r"\s*[\w:]+\s*,")
 # The name: string literals the compiler joins into one, then the end of the arguments or a decorator.
 LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
 NAME_END = re.compile(r"\s*[)*]")
+# A C escape: a hexadecimal or octal code, a universal character name, or the one character after the '\'.
+ESCAPE = re.compile(r"\\(x[0-9A-Fa-f]+|[0-7]{1,3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|.)")
+SIMPLE_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
 SKIPPED_DIRS = {"third_party", "fixtures"}
+
+
+def unescaped(escape):
+    """The character a C escape stands for."""
+    code = escape.group(1)
+    if code[0] in "xuU":
+        return chr(int(code[1:], 16))
+    if code[0] in "01234567":
+        return chr(int(code, 8))
+    return SIMPLE_ESCAPES.get(code, code)
 
 
 def name_at(text, at):
     """The name whose literals start at `at`, or None if it is not written as string literals alone."""
     parts = []
     while literal := LITERAL.match(text, at):
-        parts.append(re.sub(r"\\(.)", r"\1", literal.group(1)))
+        parts.append(ESCAPE.sub(unescaped, literal.group(1)))
         at = literal.end()
     if not parts or not NAME_END.match(text, at):
         return None
@@ -61,6 +75,8 @@ def problem(name):
         return "is not written as string literals, so this check cannot read it"
     if ";" in name:
         return "has a ';', which cuts it in two; neither half runs a case"
+    if "\n" in name:
+        return "has a line break, which cuts it in two; neither half runs a case"
     if name.count("[") != name.count("]"):
         return "has unbalanced brackets, which join it with every name after it; that entry runs no case"
     if name.endswith("\\"):
@@ -81,12 +97,13 @@ def main():
         for line, name in cases(path.read_text(encoding="utf-8", errors="replace")):
             checked += 1
             if reason := problem(name):
-                shown = "the name" if name is None else f'"{name}"'
+                shown = "the name" if name is None else '"' + name.replace("\n", "\\n") + '"'
                 found.append(f"{path}:{line}: {shown} {reason}")
     for offence in found:
         print(offence)
     if found:
-        print("Write each name as string literals, without ';' or '\\' (a comma is fine) and with balanced brackets.")
+        print("Write each name as string literals, without ';', a line break or '\\' (a comma is fine) and with "
+              "balanced brackets.")
         return 1
     if checked == 0:
         print(f"No TEST_CASE found under {root}")

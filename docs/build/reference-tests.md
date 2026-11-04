@@ -44,8 +44,8 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   monotonic clock; microbenchmarks do not belong in the regression suite.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
-- Write a `TEST_CASE` name without `;` or `\` (a comma is fine) and with as many
-  `[` as `]`. CTest's discovery reads the names as a CMake list, so it would cut
+- Write a `TEST_CASE` name without `;`, a line break or `\` (a comma is fine) and
+  with as many `[` as `]`. CTest's discovery reads the names as a CMake list, so it would cut
   or join such a name, and doctest's filter reads a `\` as an escape; the entries
   it registers pass without running the case. The static check
   `test_case_names_reach_ctest_whole` enforces this.

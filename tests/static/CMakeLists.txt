@@ -38,6 +38,8 @@ add_test(NAME test_case_names_reach_ctest_whole
 foreach(case IN ITEMS
         "semicolon|which cuts it in two"
         "comment_between_literals|which cuts it in two"
+        "escaped_semicolon|has a ';', which cuts it in two"
+        "line_break|has a line break"
         "brackets|has unbalanced brackets"
         "backslash|joins it with the next name"
         "backslash_inside|doctest's filter reads as an escape"
