@@ -277,7 +277,7 @@ void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
-    const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT;
+    const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::masterLevelEnabled, "master_level_enabled",
               masterLevelEnabled);
 
@@ -325,7 +325,7 @@ void mu::ui::window::CCharacterInfoWindow::RmlClickPet()
 
 void mu::ui::window::CCharacterInfoWindow::RmlClickMasterLevel()
 {
-    if (gCharacterManager.IsMasterLevel(Hero->Class) && Hero->Class != CLASS_TEMPLENIGHT)
+    if (gCharacterManager.IsMasterLevel(Hero->Class))
         g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
 }
 

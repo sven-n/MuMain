@@ -236,8 +236,8 @@ bool mu::ui::window::CHotKey::UpdateKeyEvent()
     }
     else if (mu::ui::window::IsPress('A'))
     {
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true
-            && Hero->Class != CLASS_TEMPLENIGHT)
+        // The Fist Master (CLASS_TEMPLENIGHT) has its master tree too (the window and its data cover it).
+        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
             g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
         }
