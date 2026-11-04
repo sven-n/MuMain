@@ -50,17 +50,17 @@ namespace
 // character's Classic look alone.
 std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
 // Sprites a RenderSprites pass already drew this frame; a later pass in the same frame draws only newer ones.
-std::array<bool, MAX_SPRITES> s_spriteDrawn{};
+SpriteDrawFlags s_spriteDrawn{};
 } // namespace
 
-std::vector<bool> SpritesDrawnThisFrame()
+SpriteDrawFlags SpritesDrawnThisFrame()
 {
-    return {s_spriteDrawn.begin(), s_spriteDrawn.end()};
+    return s_spriteDrawn;
 }
 
-void SetSpritesDrawnThisFrame(const std::vector<bool>& drawn)
+void SetSpritesDrawnThisFrame(const SpriteDrawFlags& drawn)
 {
-    std::copy_n(drawn.begin(), std::min(drawn.size(), s_spriteDrawn.size()), s_spriteDrawn.begin());
+    s_spriteDrawn = drawn;
 }
 
 void ClearSprites()
