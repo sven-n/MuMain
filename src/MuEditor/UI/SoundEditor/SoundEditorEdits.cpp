@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "SoundEditorEdits.h"
+#include "SoundFolderTree.h"
 
 #include "../MuEditor/UI/MapEditor/MapSoundsTab.h"
 #include "../MuEditor/UI/MonsterTools/MonsterEdits.h"
@@ -19,6 +20,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <tuple>
 
 namespace MuEditor::SoundEditor
 {
@@ -104,6 +106,39 @@ std::optional<Data::Monsters::MonsterSoundSet> TurnSetSound(const Data::Monsters
         }
     }
     return turned;
+}
+
+// A row by what it is, whatever its key: a set's sound by its set and place,
+// a map object sound by its place, any other by its key.
+using RowIdentity = std::tuple<RowSource, std::string, size_t, std::string>;
+
+RowIdentity IdentityOf(const SoundRow& row)
+{
+    if (row.source == RowSource::MonsterSet || row.source == RowSource::MapObject)
+    {
+        return {row.source, row.set, row.index, {}};
+    }
+    return {row.source, {}, 0, row.key};
+}
+
+// The keys before and after of the rows whose key changed.
+std::map<std::string, std::string> ChangedKeys(const std::vector<SoundRow>& before, const std::vector<SoundRow>& after)
+{
+    std::map<RowIdentity, std::string> keys;
+    for (const SoundRow& row : before)
+    {
+        keys.emplace(IdentityOf(row), row.key);
+    }
+    std::map<std::string, std::string> changed;
+    for (const SoundRow& row : after)
+    {
+        const auto found = keys.find(IdentityOf(row));
+        if (found != keys.end() && found->second != row.key)
+        {
+            changed.emplace(found->second, row.key);
+        }
+    }
+    return changed;
 }
 } // namespace
 
@@ -212,6 +247,12 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     {
         return false;
     }
+    // A set's or a map object sound's key has its file in it (SoundRow::key).
+    std::optional<std::vector<SoundRow>> rowsBefore;
+    if (values.file != row.file && row.source != RowSource::Code)
+    {
+        rowsBefore = BuildRows();
+    }
     if (!Apply(edit, true))
     {
         return false;
@@ -220,9 +261,26 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     {
         m_savedSets.try_emplace(row.set, *savedSet);
     }
+    if (rowsBefore)
+    {
+        FollowKeys(edit, *rowsBefore);
+    }
     m_undo.push_back(std::move(edit));
     m_redo.clear();
     return true;
+}
+
+void SoundEdits::FollowKeys(SoundEdit& edit, const std::vector<SoundRow>& rowsBefore)
+{
+    const std::map<std::string, std::string> changed = ChangedKeys(rowsBefore, BuildRows());
+    std::vector<Data::Sounds::SoundFolder> folders = Folders();
+    if (changed.empty() || !m_folderProblems.empty() || !RenameSounds(folders, changed))
+    {
+        return;
+    }
+    edit.foldersBefore = Folders();
+    edit.foldersAfter = folders;
+    m_folders = std::move(folders);
 }
 
 const std::vector<Data::Sounds::SoundFolder>& SoundEdits::Folders()

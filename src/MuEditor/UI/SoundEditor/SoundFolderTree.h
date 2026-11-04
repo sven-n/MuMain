@@ -4,6 +4,7 @@
 
 #include "Data/GameData/SoundData/SoundFolders.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,11 @@ bool MoveFolder(std::vector<Data::Sounds::SoundFolder>& folders, const FolderPat
 // Puts the sound into the folder, out of the one it was in; {} takes it out
 // of every folder ("Not sorted"). False for no such folder or no change.
 bool MoveSound(std::vector<Data::Sounds::SoundFolder>& folders, const std::string& key, const FolderPath& to);
+
+// The sounds whose keys changed (their file did, `renamed`: before to after)
+// stay where they are under the new keys, all at once, so keys may trade
+// places. False when no folder held one.
+bool RenameSounds(std::vector<Data::Sounds::SoundFolder>& folders, const std::map<std::string, std::string>& renamed);
 
 // The folders that hold a key no row has: the keys are dropped (a sound
 // that is gone), the count returned.

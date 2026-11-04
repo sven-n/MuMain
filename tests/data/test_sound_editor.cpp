@@ -787,6 +787,49 @@ TEST_CASE("Sound Editor: a change of the folders is a step of the history, Save 
     CHECK_FALSE(g_SoundEdits.CanUndo());
 }
 
+TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under its new key, in the same step "
+          "(Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall()});
+    g_SoundEdits.TakeSaved();
+    const std::vector<SoundFolder> folders{Folder("Death Tree", {"set:Death Tree:Data/Sound/EditorTest/ok.wav"}),
+                                           Folder("Map objects", {"objects:Data/Sound/EditorTest/ok.wav"})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", folders));
+    for (const char* key : {"set:Death Tree:Data/Sound/EditorTest/ok.wav", "objects:Data/Sound/EditorTest/ok.wav"})
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, key);
+        REQUIRE(row != nullptr);
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+        values.file = "Data/Sound/EditorTest/Other.wav";
+        REQUIRE(g_SoundEdits.Change(*row, values));
+    }
+    const std::vector<SoundFolder> moved{Folder("Death Tree", {"set:Death Tree:Data/Sound/EditorTest/Other.wav"}),
+                                         Folder("Map objects", {"objects:Data/Sound/EditorTest/Other.wav"})};
+    CHECK(g_SoundEdits.Folders() == moved);
+    // A set's sound with an id keeps its key.
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    const SoundRow* attack = FindRow(rows, "set:Death Tree:SOUND_MONSTER_MAGICSKULL1");
+    REQUIRE(attack != nullptr);
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*attack);
+    values.file = "Data/Sound/EditorTest/Other.wav";
+    REQUIRE(g_SoundEdits.Change(*attack, values));
+    CHECK(g_SoundEdits.Folders() == moved);
+    REQUIRE(g_SoundEdits.Undo());
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.Folders() ==
+          std::vector<SoundFolder>{Folder("Death Tree", {"set:Death Tree:Data/Sound/EditorTest/Other.wav"}),
+                                   Folder("Map objects", {"objects:Data/Sound/EditorTest/ok.wav"})});
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.Folders() == folders);
+    REQUIRE(g_SoundEdits.Redo());
+    REQUIRE(g_SoundEdits.Redo());
+    CHECK(g_SoundEdits.Folders() == moved);
+}
+
 TEST_CASE("Sound Editor: a folders' file that cannot be read keeps the folders as they are, so Save leaves the file "
           "alone; Revert reads it again once it is fixed (Q-SE4) [sounds][editor]")
 {

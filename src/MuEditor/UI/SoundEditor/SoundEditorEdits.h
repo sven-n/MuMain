@@ -140,6 +140,9 @@ private:
     // False, with nothing changed, when the step's sound is not as the other
     // direction left it.
     bool Apply(const SoundEdit& edit, bool forward);
+    // A change of a file changes its row's key (SoundRow::key): the folders
+    // keep the sounds whose keys changed under their new ones, in the step.
+    void FollowKeys(SoundEdit& edit, const std::vector<SoundRow>& rowsBefore);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;

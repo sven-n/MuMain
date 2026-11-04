@@ -230,6 +230,25 @@ bool MoveSound(std::vector<SoundFolder>& folders, const std::string& key, const 
     return true;
 }
 
+bool RenameSounds(std::vector<SoundFolder>& folders, const std::map<std::string, std::string>& renamed)
+{
+    bool any = false;
+    for (SoundFolder& folder : folders)
+    {
+        for (std::string& sound : folder.sounds)
+        {
+            const auto found = renamed.find(sound);
+            if (found != renamed.end())
+            {
+                sound = found->second;
+                any = true;
+            }
+        }
+        any = RenameSounds(folder.folders, renamed) || any;
+    }
+    return any;
+}
+
 size_t DropStaleSounds(std::vector<SoundFolder>& folders, const std::vector<std::string>& keys)
 {
     return DropStale(folders, std::set<std::string>(keys.begin(), keys.end()));
