@@ -436,7 +436,7 @@ for (
         linux_job,
         "build-linux",
         "Linux Native Build (x64, Release, editor OFF)",
-        "ubuntu-latest",
+        "ubuntu-26.04",
         "mu-client-linux-native-x64-release-editor-off-no-data-main",
         "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz "

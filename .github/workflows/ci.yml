@@ -21,7 +21,9 @@ permissions:
 jobs:
   quality:
     name: Quality Gates
-    runs-on: ubuntu-latest
+    # The image by name, not ubuntu-latest: GitHub moves repositories to a new latest image one by one, and its
+    # cppcheck and GCC report different findings and warnings.
+    runs-on: ubuntu-26.04
     outputs:
       linux: ${{ steps.plan.outputs.linux }}
       macos: ${{ steps.plan.outputs.macos }}
@@ -521,7 +523,8 @@ jobs:
     name: Linux Native Build (x64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.linux == 'true'
-    runs-on: ubuntu-latest
+    # By name, as Quality Gates: another image's GCC warns differently.
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -781,7 +784,7 @@ jobs:
     name: CI Required
     needs: [quality, build-windows, build-linux, build-macos]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -795,7 +798,7 @@ jobs:
     name: Semantic Release
     needs: [quality, build-windows, build-linux, build-macos, required]
     if: needs.quality.outputs.release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
 
