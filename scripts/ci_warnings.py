@@ -31,6 +31,9 @@ PATTERNS = (
     ("validity error", re.compile(r"\bvalidity error\b")),
     ("Node.js deprecation", re.compile(r"\bDeprecationWarning\b")),
     ("Clang warning count", re.compile(r"\b\d+ warnings? generated\b")),
+    # A line that opens with an upper-case WARN: loggers ("WARN ", "[WARN]") and CMake's message() with a mode it
+    # does not know, which it prints as text ("message(WARN \"x\")" -> "WARNx").
+    ("warning line", re.compile(r"^\s*\[?WARN(?![a-z])")),
 )
 
 ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")

@@ -44,6 +44,8 @@ class WarningLineTests(unittest.TestCase):
             "MSBUILD : warning MSB4011: \"a.props\" cannot be imported again.",
             "C:\\x\\ClientLibrary.csproj : warning NU1603: Package A depends on B (>= 1.0)",
             "2026-11-04T01:26:43.0922614Z cc1plus: note: source object is likely at address",
+            "WARNHarfBuzz has a Meson port and tries to migrate all the other build systems to it",
+            "[WARN] cache miss",
         ):
             with self.subTest(line=line):
                 self.assertIsNotNone(ci_warnings.find_problem(line))
@@ -56,6 +58,7 @@ class WarningLineTests(unittest.TestCase):
             "-- Looking for strstr - found",
             "Start  995: what can't be used is left out with a warning",
             "Warnings: 0",
+            "Warnings are errors in the game's own code",
             "Installing 3/11 cryptopp:x64-windows@2026-03-02...",
             "-- Build files have been written to: D:/a/MuMain/MuMain/out/build/windows-ci-x64-release",
         ):
