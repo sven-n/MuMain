@@ -189,14 +189,9 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 
     FILE* fp = _wfopen(path, L"rb");
 
-    wchar_t Text[256];
-
     if (fp == nullptr)
     {
-        mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
     }
 
@@ -212,10 +207,7 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 
     if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
-        mu_swprintf(Text, L"%ls - File corrupted.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File corrupted.");
         delete[] Buffer;
         return;
     }
@@ -247,11 +239,7 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 
     if (fp == nullptr)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
     }
 

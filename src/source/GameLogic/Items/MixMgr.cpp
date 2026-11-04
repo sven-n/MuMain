@@ -1215,11 +1215,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     FILE* fp = _wfopen(szFileName, L"rb");
     if (fp == NULL)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", szFileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
         exit(0);
     }
 

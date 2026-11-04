@@ -230,11 +230,7 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
 
         if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
         {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls - File corrupted.", Fname);
-            g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+            DataFileIO::ReportUnusableFile(Fname, L"File corrupted.");
         }
         else
         {

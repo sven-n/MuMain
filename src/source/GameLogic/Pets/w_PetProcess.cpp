@@ -175,11 +175,7 @@ bool PetProcess::LoadData()
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
 
         return FALSE;
     }
@@ -213,11 +209,7 @@ bool PetProcess::LoadData()
         delete[] _action;
         delete[] _speed;
         delete[] Buffer;
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
 
         return FALSE;
     }
