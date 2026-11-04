@@ -79,14 +79,6 @@
     <value>需求智力：%d</value>
     <comment>legacy_id=77</comment>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>移动速度提高</value>
-    <comment>legacy_id=78</comment>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>游泳速度提高</value>
-    <comment>legacy_id=93</comment>
-  </data>
   <data name="I,V : Inventory" xml:space="preserve">
     <value>I、V：背包</value>
     <comment>legacy_id=127</comment>

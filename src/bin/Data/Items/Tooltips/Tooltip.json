@@ -1278,6 +1278,7 @@
       "ru": "Увеличивает скорость передвижения",
       "tl": "Pinapataas ang bilis ng paggalaw",
       "uk": "Збільшує швидкість пересування",
+      "zh-CN": "移动速度提高",
       "zh-TW": "增加移動速度"
     },
     "swimmingSpeedIncrease": {
@@ -1291,6 +1292,7 @@
       "ru": "Увеличение скорости плавания",
       "tl": "Tumaas ang bilis ng paglangoy",
       "uk": "Збільшення швидкості плавання",
+      "zh-CN": "游泳速度提高",
       "zh-TW": "游泳速度增加"
     },
     "expiredItem": {
