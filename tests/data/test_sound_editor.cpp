@@ -15,6 +15,7 @@
 #include "Data/GameData/MapData/MapObjectSoundsJson.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
+#include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/DataHandler/SoundData/SoundFolderStorage.h"
 #include "Data/GameData/MapData/MapObjectSoundsJson.h"
 #include "Data/GameData/SoundData/SoundEventDatabase.h"
@@ -474,6 +475,49 @@ TEST_CASE("Sound Editor: undo of a set's sound puts back only that sound and kee
     CHECK(g_SoundEdits.WasLastRefused());
     CHECK(g_SoundEdits.CanUndo());
     CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == changed);
+}
+
+TEST_CASE("Sound Editor: Revert puts a set it changed back as Data/Monsters/Sounds.json has it, also when the "
+          "Monster Sounds window changed it since, and takes out a set the file does not have [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    Data::Monsters::MonsterSoundSet added;
+    added.name = "Added";
+    added.sounds.resize(1);
+    added.sounds[0].file = "Data/Sound/EditorTest/Other.wav";
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree(), added});
+    // The file has Death Tree as it is, not the added set.
+    const std::vector<Data::Monsters::MonsterSoundSet> saved{DeathTree()};
+    std::filesystem::create_directories("Data/Monsters");
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary)
+        << Data::Monsters::WriteMonsterSoundsJson(saved);
+    g_SoundEdits.TakeSaved();
+
+    // The Monster Sounds window changes Death Tree without saving, then the
+    // Sound Editor names a sound of each set.
+    Data::Monsters::MonsterSoundSet edited = DeathTree();
+    edited.sounds[0].channels = 3;
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", edited, -1));
+    for (const char* key : {"set:Death Tree:Data/Sound/EditorTest/ok.wav", "set:Added:Data/Sound/EditorTest/Other.wav"})
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, key);
+        REQUIRE(row != nullptr);
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+        values.name = "Named";
+        REQUIRE(g_SoundEdits.Change(*row, values));
+    }
+
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Revert(issues));
+    INFO(issues.size());
+    const Data::Monsters::MonsterSoundSet* deathTree = g_MonsterSoundSetDatabase.Find("Death Tree");
+    REQUIRE(deathTree != nullptr);
+    CHECK(*deathTree == DeathTree());
+    CHECK(g_MonsterSoundSetDatabase.Find("Added") == nullptr);
+    CHECK_FALSE(g_SoundEdits.IsModified());
 }
 
 TEST_CASE("Sound Editor: undo of a map object sound puts back only that entry and keeps what the Map Editor's Sounds "

@@ -125,8 +125,9 @@ public:
     // ObjectSounds.json, SoundFolders.json and SoundEvents.json. False when
     // one was refused (the problems in `issues`); the others are written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
-    // Reads the files whose tables changed again (a monster set: as it was
-    // saved) and the folders; the history goes.
+    // Reads the files whose tables changed again (a monster set this window
+    // changed: as Data/Monsters/Sounds.json has it) and the folders; the
+    // history goes.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
     // The tables as they are now are what Save and Revert compare with.
     void TakeSaved();
@@ -148,7 +149,8 @@ private:
     std::vector<SoundEdit> m_redo;
     bool m_lastRefused = false;
     std::optional<std::vector<Data::Sounds::SoundFile>> m_savedCode;
-    // The sets changed since the last save, as they were then.
+    // The sets changed since the last save, as they were before the first
+    // change (IsModified, Save); Revert reads them from the file.
     std::map<std::string, Data::Monsters::MonsterSoundSet> m_savedSets;
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;

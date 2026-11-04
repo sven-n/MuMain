@@ -9,6 +9,7 @@
 #include "../MuEditor/UI/MonsterTools/MonsterEdits.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
 #include "Data/DataHandler/SoundData/SoundFolderStorage.h"
@@ -510,12 +511,38 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
             reverted = false;
         }
     }
-    for (const auto& [name, set] : m_savedSets)
+    if (SetsDiffer(m_savedSets))
     {
-        const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
-        if (now == nullptr || *now != set)
+        // The sets this window changed, as Data/Monsters/Sounds.json has them
+        // now: the Monster Sounds window's unsaved changes of them go too, and
+        // a set the file does not have goes.
+        const Data::Monsters::MonsterSoundsLoadResult file =
+            Data::Monsters::LoadMonsterSoundsFile(Data::Monsters::GetMonsterSoundsFile());
+        if (Data::Items::HasFatal(file.issues))
         {
-            g_MonsterEdits.SetSoundSet(I18N::Editor::Revert, set, -1);
+            issues.insert(issues.end(), file.issues.begin(), file.issues.end());
+            reverted = false;
+        }
+        else
+        {
+            for (const auto& entry : m_savedSets)
+            {
+                const std::string& name = entry.first;
+                const auto named = [&name](const Data::Monsters::MonsterSoundSet& set) { return set.name == name; };
+                const auto saved = std::find_if(file.sets.begin(), file.sets.end(), named);
+                const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
+                if (saved == file.sets.end())
+                {
+                    if (now != nullptr)
+                    {
+                        g_MonsterEdits.RemoveSoundSet(I18N::Editor::Revert, name, -1);
+                    }
+                }
+                else if (now == nullptr || *now != *saved)
+                {
+                    g_MonsterEdits.SetSoundSet(I18N::Editor::Revert, *saved, -1);
+                }
+            }
         }
     }
     if (m_savedObjects && *m_savedObjects != g_MapObjectSoundDatabase.GetAll())
