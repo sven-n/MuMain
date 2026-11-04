@@ -577,6 +577,55 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK_FALSE(duration->empty());
 }
 
+// The server marks an item's guardian (380) option with one bit of its option flags and no byte of its own; such an
+// item shows its 380 lines.
+TEST_CASE("An item from the server with a guardian option shows its 380 lines [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    // Bone Blade (0/22) +9 as the server writes it: group and number, level, durability, the option flags, then the
+    // additional option's byte (level 2) and the excellent options' byte.
+    const auto fromServer = [](ItemOptionFlags flags)
+    {
+        const std::array<BYTE, 7> itemData{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x01};
+        return ParseItemData(itemData);
+    };
+    const ItemOptionFlags optionAndExcellent = ItemOptionFlags::HasOption | ItemOptionFlags::HasExcellent;
+    const ItemCreationParams guarded = fromServer(optionAndExcellent | ItemOptionFlags::HasGuardian);
+    const ItemCreationParams plain = fromServer(optionAndExcellent);
+    CHECK(guarded.HasGuardianOption);
+    CHECK_FALSE(plain.HasGuardianOption);
+    // The flag takes no byte: the option bytes after it read the same either way.
+    CHECK(guarded.OptionLevel == 2);
+    CHECK(guarded.ExcellentFlags == 0x01);
+    CHECK(guarded.OptionLevel == plain.OptionLevel);
+    CHECK(guarded.ExcellentFlags == plain.ExcellentFlags);
+
+    ITEM withGuardian;
+    FillItemFromParameters(withGuardian, guarded);
+    ITEM without;
+    FillItemFromParameters(without, plain);
+    std::vector<std::wstring> lines380;
+    g_pItemAddOptioninfo->GetItemAddOtioninfoText(lines380, withGuardian.Type);
+    REQUIRE_FALSE(lines380.empty());
+    const std::vector<ItemTooltipLine> guardedLines = BuildItemTooltipLines(&withGuardian, false);
+    const std::vector<ItemTooltipLine> plainLines = BuildItemTooltipLines(&without, false);
+    for (const std::wstring& line : lines380)
+    {
+        CHECK(HasLine(guardedLines, line, TEXT_COLOR_REDPURPLE));
+        CHECK_FALSE(HasLine(plainLines, line));
+    }
+
+    SetItemTooltipTextMeasure(nullptr);
+}
+
 // A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
 TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
 {

@@ -53,6 +53,9 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
         offset++;
     }
 
+    // The guardian (380) option is only this flag: no byte of its own follows.
+    params.HasGuardianOption = flags & ItemOptionFlags::HasGuardian;
+
     if (flags & ItemOptionFlags::HasSockets)
     {
         params.SocketBonusOption = (itemData[5 + offset] >> 4) & 0xF;
@@ -97,8 +100,8 @@ ITEM* mu::ui::window::CItemMng::CreateItem(std::span<const BYTE> itemData)
 ///     HasSkill
 ///     HasExc
 ///     HasAnc
-///     HasGuardian
 ///     HasHarmony
+///     HasGuardian (no byte of its own)
 ///     HasSockets
 ///   Optional, depending on Flags:
 ///     Opt_Lvl 4 bit
