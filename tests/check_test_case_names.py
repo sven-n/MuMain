@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""Every test case reaches CTest whole.
+
+doctest_discover_tests (tests/third_party/doctest/doctestAddTests.cmake) reads the names a test binary lists as one
+CMake list, a name per element, and registers each as a CTest entry that runs `--test-case=<name>`. CMake's list syntax
+changes a name that has
+- a ';': the list separator cuts the name in two, and neither half matches a case, so both entries pass running none;
+- more '[' than ']', or more ']' than '[': a ';' inside brackets separates nothing, so the name and every name listed
+  after it in its binary become one entry that runs none;
+- a '\\' at its end: it escapes the separator, so the name and the next one become one entry that runs none.
+A comma is safe: the discovery escapes it for doctest's filter.
+
+Usage: check_test_case_names.py <tests dir>. Reads the names of the TEST_CASE and TEST_CASE_FIXTURE lines in the .cpp
+and .h files under it (third_party and fixtures left out), prints each name CMake would change, and exits 1 when there
+is one, when a name is not written as string literals, or when it finds no test case at all.
+"""
+
+import re
+import sys
+from pathlib import Path
+
+CASE = re.compile(r"^[ \t]*(TEST_CASE|TEST_CASE_FIXTURE)\s*\(\s*", re.M)
+FIXTURE = re.compile(r"[\w:]+\s*,\s*")
+# The name: string literals the compiler joins into one.
+LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"\s*')
+SKIPPED_DIRS = {"third_party", "fixtures"}
+
+
+def name_at(text, at):
+    """The name whose literals start at `at`, or None if it is not written as string literals."""
+    parts = []
+    while literal := LITERAL.match(text, at):
+        parts.append(re.sub(r"\\(.)", r"\1", literal.group(1)))
+        at = literal.end()
+    return "".join(parts) if parts else None
+
+
+def cases(text):
+    """The line and name of each test case in a source."""
+    for case in CASE.finditer(text):
+        at = case.end()
+        if case.group(1) == "TEST_CASE_FIXTURE":
+            fixture = FIXTURE.match(text, at)
+            at = fixture.end() if fixture else at
+        yield text.count("\n", 0, case.start()) + 1, name_at(text, at)
+
+
+def problem(name):
+    if name is None:
+        return "is not written as string literals, so this check cannot read it"
+    if ";" in name:
+        return "has a ';', which cuts it in two; neither half runs a case"
+    if name.count("[") != name.count("]"):
+        return "has unbalanced brackets, which join it with every name after it; that entry runs no case"
+    if name.endswith("\\"):
+        return "ends with a '\\', which joins it with the next name; that entry runs no case"
+    return None
+
+
+def main():
+    root = Path(sys.argv[1])
+    sources = [path for path in sorted(root.rglob("*"))
+               if path.suffix in (".cpp", ".h") and not SKIPPED_DIRS & set(path.relative_to(root).parts)]
+    checked = 0
+    found = []
+    for path in sources:
+        for line, name in cases(path.read_text(encoding="utf-8", errors="replace")):
+            checked += 1
+            if reason := problem(name):
+                shown = "the name" if name is None else f'"{name}"'
+                found.append(f"{path}:{line}: {shown} {reason}")
+    for offence in found:
+        print(offence)
+    if found:
+        print("Write each name as string literals, without ';' (a comma is fine), with balanced brackets and no '\\' "
+              "at its end.")
+        return 1
+    if checked == 0:
+        print(f"No TEST_CASE found under {root}")
+        return 1
+    print(f"{checked} test case names reach CTest whole")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

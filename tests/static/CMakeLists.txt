@@ -29,6 +29,29 @@ add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )
+
+# doctest_discover_tests reads case names as a CMake list: a name it cuts or joins registers entries that run no case.
+set(MU_TEST_CASE_NAMES_FIXTURES "${MU_TESTS}/fixtures/test_case_names")
+add_test(NAME test_case_names_reach_ctest_whole
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TESTS}")
+# Each fixture with the offence the check must report for it (a crash would not match).
+foreach(case IN ITEMS
+        "semicolon|which cuts it in two"
+        "brackets|has unbalanced brackets"
+        "backslash|joins it with the next name"
+        "not_literal|is not written as string literals")
+    string(REPLACE "|" ";" case "${case}")
+    list(GET case 0 fixture)
+    list(GET case 1 offence)
+    add_test(NAME test_case_names_check_catches_${fixture}
+        COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py"
+                "${MU_TEST_CASE_NAMES_FIXTURES}/${fixture}")
+    set_tests_properties(test_case_names_check_catches_${fixture} PROPERTIES PASS_REGULAR_EXPRESSION "${offence}")
+endforeach()
+add_test(NAME test_case_names_check_passes_clean
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TEST_CASE_NAMES_FIXTURES}/clean")
+set_tests_properties(test_case_names_check_passes_clean PROPERTIES PASS_REGULAR_EXPRESSION "^3 test case names reach")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"
