@@ -1409,7 +1409,8 @@ number that has a model but no item:
 - A preview of the model as the game has it opened, at an item level,
   excellent or ancient, standing as the inventory turns it or lying as on
   the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
-  wheel to zoom, double click to put it back).
+  wheel to zoom, double click to put it back). A click on a part of the
+  item finds its mesh in the mesh list and keeps it shown.
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's
   folder as its texture folder; a model whose only texture folder is its
@@ -1422,8 +1423,22 @@ number that has a model but no item:
   this item** gives the item a file entry of its own instead (a variant).
   A shared model that items use cannot be removed; the ones no item uses
   are listed with a button that removes them.
-- For a file of its own, the texture folders and none-blend meshes; then
-  the inventory display as sliders, each with a number field to type the
+- For a file of its own, the texture folders and none-blend meshes.
+- **Meshes**: a row for each mesh of the opened model, with its number, its
+  texture's name, its marks (*hidden*: a texture name starting with `hid`
+  or the `_H` script, never drawn; *glows*: `_R`; *scrolls*: `_S`; *no
+  chrome*: `_N` or a none-blend mesh, which the chrome-type passes and the
+  level glow skip; *holes*: its texture has pixels the alpha test drops,
+  alpha 0.25 or less) and the fields that name it (none-blend meshes, glow
+  and shine meshes, excellent mesh). The mouse on a row shows the texture's
+  file and size and the mesh's vertices and triangles. Pointing at a row,
+  or at a number in one of those mesh fields, draws that mesh in the preview
+  as it is and the others see-through; a click on a row keeps it so until
+  it is clicked again. At a level the preview draws with another model (the
+  Box of Luck's levels, for example), the list says so and the preview
+  shows none of its meshes. Which meshes a render style or item effect draws is
+  still drawing code and not listed.
+- The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of
   its size, drawn as
   the game's inventory draws it at the preview's item level (it turns while
@@ -1437,9 +1452,9 @@ number that has a model but no item:
   those models by level (the Box of Luck, the Wizard's Ring, ...); the
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
-- The render style and the item effect, picked from their lists with how
-  many models use each, and the items that use the picked one (a click
-  selects one). What a look is made of is drawing code.
+- **Style and effect**: the render style and the item effect, picked from
+  their lists with how many models use each, and the items that use the
+  picked one (a click selects one). What they are made of is drawing code.
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game

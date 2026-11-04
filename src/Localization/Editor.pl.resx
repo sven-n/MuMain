@@ -487,9 +487,6 @@
   <data name="Look Save" xml:space="preserve">
     <value>Zapisz</value>
   </data>
-  <data name="Looks" xml:space="preserve">
-    <value>Wygląd</value>
-  </data>
   <data name="Model file" xml:space="preserve">
     <value>Plik modelu</value>
   </data>

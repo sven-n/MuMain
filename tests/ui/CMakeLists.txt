@@ -184,6 +184,8 @@ mu_add_test(
         test_ui_scaling.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+    # Saves the config.ini beside the executable, as theme_file_interface_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
 )
 
 mu_add_test(
@@ -320,6 +322,8 @@ mu_add_test(
         test_theme_inheritance.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+    # Choosing a theme saves the config.ini beside the executable, as ui_scaling_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
 )
 target_compile_definitions(theme_file_interface_tests PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"

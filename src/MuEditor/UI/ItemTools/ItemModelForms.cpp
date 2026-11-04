@@ -7,6 +7,7 @@
 #include "ItemEdits.h"
 #include "ItemFieldWidgets.h"
 #include "ItemListFields.h"
+#include "ItemMeshFields.h"
 #include "ItemNumberList.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
@@ -79,7 +80,8 @@ void Sliders(ModelDraft& draft, const char* label, std::array<double, Count>& va
     ImGui::PopID();
 }
 
-// A number list as text ("1, 3"), stored when it was left and reads as numbers.
+// A list of mesh numbers as text ("1, 3"), stored when it was left and reads as numbers; the number under the
+// mouse shows in the preview.
 void Numbers(ModelDraft& draft, const char* label, std::vector<int>& numbers)
 {
     std::string text = NumberList::Format(numbers);
@@ -91,10 +93,12 @@ void Numbers(ModelDraft& draft, const char* label, std::vector<int>& numbers)
             numbers = *parsed;
         }
     }
+    MeshFields::PointAtNumber(text);
     draft.AfterField(label);
 }
 
-// A value that may be left out: a checkbox, and the value when it is there.
+// A mesh number that may be left out: a checkbox, and the number when it is there, shown in the preview while
+// the mouse is on it.
 void OptionalInt(ModelDraft& draft, const char* label, std::optional<int>& value)
 {
     ImGui::PushID(label);
@@ -108,6 +112,7 @@ void OptionalInt(ModelDraft& draft, const char* label, std::optional<int>& value
     if (value)
     {
         Fields::Int(draft, label, *value);
+        MeshFields::PointAtMesh(*value);
     }
     else
     {

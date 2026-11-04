@@ -487,8 +487,71 @@
   <data name="Look Save" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="Looks" xml:space="preserve">
-    <value>Looks</value>
+  <data name="Style and effect" xml:space="preserve">
+    <value>Style and effect</value>
+  </data>
+  <data name="Graphics look" xml:space="preserve">
+    <value>Graphics look</value>
+  </data>
+  <data name="Meshes" xml:space="preserve">
+    <value>Meshes</value>
+  </data>
+  <data name="Mesh list note" xml:space="preserve">
+    <value>Point at a row to see its mesh alone in the preview, the others see-through; a click keeps it, another click lets it go. A click on a part of the preview finds its row.</value>
+  </data>
+  <data name="Meshes not in preview note" xml:space="preserve">
+    <value>At this level the preview draws another model, so it can't show these meshes, and a click on it finds none of them.</value>
+  </data>
+  <data name="No meshes loaded" xml:space="preserve">
+    <value>The model is not loaded, so there are no meshes to list.</value>
+  </data>
+  <data name="Mesh texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Mesh marks" xml:space="preserve">
+    <value>Marks</value>
+  </data>
+  <data name="Mesh used by" xml:space="preserve">
+    <value>Used by</value>
+  </data>
+  <data name="Mesh hidden" xml:space="preserve">
+    <value>hidden</value>
+  </data>
+  <data name="Mesh glows" xml:space="preserve">
+    <value>glows</value>
+  </data>
+  <data name="Mesh scrolls" xml:space="preserve">
+    <value>scrolls</value>
+  </data>
+  <data name="Mesh no chrome" xml:space="preserve">
+    <value>no chrome</value>
+  </data>
+  <data name="Mesh holes" xml:space="preserve">
+    <value>holes</value>
+  </data>
+  <data name="Mesh all but this one" xml:space="preserve">
+    <value>all but this one</value>
+  </data>
+  <data name="Mesh texture file 0" xml:space="preserve">
+    <value>Loaded from {0}</value>
+  </data>
+  <data name="Mesh texture size 0 1" xml:space="preserve">
+    <value>{0} x {1}, as the game uses it</value>
+  </data>
+  <data name="Mesh texture not loaded" xml:space="preserve">
+    <value>The texture is not loaded.</value>
+  </data>
+  <data name="Mesh counts 0 1" xml:space="preserve">
+    <value>{0} vertices, {1} triangles</value>
+  </data>
+  <data name="Mesh never drawn" xml:space="preserve">
+    <value>Never drawn, so the preview can't show it alone.</value>
+  </data>
+  <data name="Mesh code looks note" xml:space="preserve">
+    <value>The render style and the item effect are drawing code: which meshes they draw shows here once they are data.</value>
+  </data>
+  <data name="Preview pick note" xml:space="preserve">
+    <value>Click a part to find its mesh in the mesh list.</value>
   </data>
   <data name="Model file" xml:space="preserve">
     <value>Model file</value>

@@ -106,13 +106,13 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 **Windows > Data Checks** lists the problems of all game data in one table:
 the items, the monsters and the monster models as their Save would write
 them now, and the glTF model file table, the server list, the effect
-catalogue and the looks (the look profile and the light moods) as the game
-reads their files at start.
+catalogue and the graphics look (the look profile and the light moods, area
+**Graphics look**) as the game reads their files at start.
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
-the looks start anyway, with the built-in look values and the Classic
-light),
+the graphics look starts anyway, with the built-in look values and the
+Classic light),
 **error** (something it names is missing, e.g. an item or a model file: the
 game runs without it, Save keeps it) and **warning** (it works, but is worth
 knowing). The worst come first. The boxes above the table show or hide each
@@ -122,7 +122,7 @@ since the last check.
 
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
-Server List, the Effect Browser, or the Dev Editor for the looks. An arrow
+Server List, the Effect Browser, or the Dev Editor for the graphics look. An arrow
 key onto a problem only selects it.
 
 ---

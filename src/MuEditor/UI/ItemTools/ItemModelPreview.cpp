@@ -4,15 +4,22 @@
 
 #include "ItemModelPreview.h"
 
+#include "ItemMeshFocus.h"
+#include "ItemMeshPreviewDrawer.h"
+
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewInput.h"
+#include "../MuEditor/UI/EffectBrowser/EffectPreviewItems.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewSubject.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Common/ScopedOffscreenCapture.h"
 #include "imgui.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 
 namespace MuEditor::Items
@@ -25,7 +32,58 @@ constexpr float MinViewHeight = 160.0f;
 constexpr float MaxViewHeight = 360.0f;
 constexpr int MaxItemLevel = 15;
 constexpr float LevelWidth = 120.0f;
+
+// After the view: a left click that did not turn it gives the ray through the clicked point. The second click of a
+// double click puts the view back (EffectPreviewInput) and gives none.
+std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPreviewCamera& camera, const ImVec2& min,
+                                           const ImVec2& max)
+{
+    if (!ImGui::IsItemDeactivated() || !ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    {
+        return std::nullopt;
+    }
+    const ImGuiIO& io = ImGui::GetIO();
+    if (io.MouseClickedLastCount[ImGuiMouseButton_Left] > 1)
+    {
+        return std::nullopt;
+    }
+    const float threshold = io.MouseDragThreshold;
+    if (io.MouseDragMaxDistanceSqr[ImGuiMouseButton_Left] > threshold * threshold)
+    {
+        return std::nullopt;
+    }
+    const float width = max.x - min.x;
+    const float height = max.y - min.y;
+    if (width <= 0.0f || height <= 0.0f)
+    {
+        return std::nullopt;
+    }
+    const float viewX = (io.MousePos.x - min.x) / width * 2.0f - 1.0f;
+    const float viewY = 1.0f - (io.MousePos.y - min.y) / height * 2.0f;
+    if (std::abs(viewX) > 1.0f || std::abs(viewY) > 1.0f)
+    {
+        return std::nullopt;
+    }
+    return MeshPicking::RayThroughView(camera, width / height, viewX, viewY);
+}
+
+// The item's own model, which the mesh list lists, when the preview draws it at `level`; nothing for a level drawn
+// with another model (the Box of Luck's levels, (14,12) at +0 and +2), which has none of the listed meshes.
+const BMD* ListedModelInView(int itemType, int level)
+{
+    const int listed = Data::Items::ToModelSlot(itemType);
+    if (MuEditor::Effects::GetPreviewItemModels(itemType, level).model != listed)
+    {
+        return nullptr;
+    }
+    return &Models[listed];
+}
 } // namespace
+
+bool CItemModelPreview::ShowsListedModel(int itemType) const
+{
+    return ListedModelInView(itemType, m_level) != nullptr;
+}
 
 void CItemModelPreview::Render(int itemType)
 {
@@ -86,8 +144,15 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
     const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
     MuEditor::Effects::PreviewInput::RenderView("##ModelView", width, height, m_camera);
+    TakeBackPickOnDoubleClick();
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
+    const std::optional<MeshPicking::Ray> pickRay = ClickedRay(m_camera, min, max);
+    if (ImGui::IsItemHovered() && !ImGui::IsItemActive())
+    {
+        // Over the effect browser's controls text, which RenderView set.
+        ImGui::SetTooltip("%s %s", I18N::Editor::PreviewControls, I18N::Editor::PreviewPickNote);
+    }
     const MuEditor::Effects::PreviewFraming framing = m_scene.Prepare(request);
     if (m_framedItemType != request.itemType)
     {
@@ -113,7 +178,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        m_scene.Draw(request, m_camera, width / height);
+        DrawScene(request, width / height, pickRay);
     }
     else
     {
@@ -123,6 +188,39 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
     {
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
+    }
+}
+
+void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
+                                  const std::optional<MeshPicking::Ray>& pickRay)
+{
+    const BMD* model = ListedModelInView(request.itemType, request.itemLevel);
+    std::optional<int> hitMesh;
+    {
+        // Without the listed model the drawer leaves every draw alone.
+        CItemMeshPreviewDrawer drawer(model, g_ItemMeshFocus.Shown(), pickRay);
+        m_scene.Draw(request, m_camera, aspect);
+        hitMesh = drawer.HitMesh();
+    }
+    // A click on another model finds none of the listed meshes, so it keeps the kept one.
+    if (pickRay && model != nullptr)
+    {
+        g_ItemMeshFocus.Pick(hitMesh);
+        m_pickTime = ImGui::GetTime();
+    }
+}
+
+// After the view, as EffectPreviewInput puts the view back on a double click: the mesh its first click picked is
+// taken back, so the double click leaves the kept mesh as it was.
+void CItemModelPreview::TakeBackPickOnDoubleClick() const
+{
+    if (!ImGui::IsItemHovered() || !ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+    {
+        return;
+    }
+    if (ImGui::GetTime() - m_pickTime <= ImGui::GetIO().MouseDoubleClickTime)
+    {
+        g_ItemMeshFocus.TakeBackPick();
     }
 }
 } // namespace MuEditor::Items
