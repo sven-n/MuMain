@@ -543,7 +543,9 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     }
 
     // Synchronous init keeps IsEndMusic() accurate while starting. Missing files never reach
-    // the resource-manager job queue; decoder failures are remembered by PlayMusic().
+    // the resource-manager job queue; decoder failures are remembered by PlayMusic(). The pinned
+    // miniaudio is patched so a failed stream load cannot stall the next one
+    // (cmake/patches/miniaudio-0.11.25-stream-load-signal-order.patch).
     ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM,
         nullptr, nullptr, &m_musicSound);
     if (result != MA_SUCCESS)
