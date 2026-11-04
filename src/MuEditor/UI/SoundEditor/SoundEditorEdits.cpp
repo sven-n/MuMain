@@ -60,6 +60,50 @@ bool SetsDiffer(const std::map<std::string, Data::Monsters::MonsterSoundSet>& sa
                            return now == nullptr || *now != entry.second;
                        });
 }
+
+// Where the entry a step left is now: at its index, or elsewhere when
+// entries before it came or went; none when it changed since.
+template <typename Entry>
+std::optional<size_t> FindAsLeft(const std::vector<Entry>& entries, size_t index, const Entry& left)
+{
+    if (index < entries.size() && entries[index] == left)
+    {
+        return index;
+    }
+    const auto found = std::find(entries.begin(), entries.end(), left);
+    if (found == entries.end())
+    {
+        return std::nullopt;
+    }
+    return static_cast<size_t>(found - entries.begin());
+}
+
+// The set with the step's sound turned from one side to the other, and the
+// events that named it renamed with it; none when the sound is not as `from`.
+std::optional<Data::Monsters::MonsterSoundSet> TurnSetSound(const Data::Monsters::MonsterSoundSet& set,
+                                                            const SetSoundStep& step, bool forward)
+{
+    const Data::Monsters::MonsterSound& from = forward ? step.before : step.after;
+    const Data::Monsters::MonsterSound& to = forward ? step.after : step.before;
+    const std::optional<size_t> at = FindAsLeft(set.sounds, step.index, from);
+    if (!at)
+    {
+        return std::nullopt;
+    }
+    Data::Monsters::MonsterSoundSet turned = set;
+    turned.sounds[*at] = to;
+    const std::string fromName = Data::Monsters::SoundNameOf(from);
+    const std::string toName = Data::Monsters::SoundNameOf(to);
+    for (const auto& [event, sound] : step.eventNames)
+    {
+        if (event < turned.soundEvents.size() && sound < turned.soundEvents[event].sounds.size() &&
+            turned.soundEvents[event].sounds[sound] == fromName)
+        {
+            turned.soundEvents[event].sounds[sound] = toName;
+        }
+    }
+    return turned;
+}
 } // namespace
 
 RowValues ValuesOf(const SoundRow& row)
@@ -81,6 +125,7 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     }
     SoundEdit edit;
     edit.label = StepLabel(row);
+    std::optional<Data::Monsters::MonsterSoundSet> savedSet;
     if (row.source == RowSource::Code)
     {
         std::vector<SoundFile> after = g_SoundFileDatabase.GetAll();
@@ -110,61 +155,70 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
         {
             return false;
         }
-        Data::Monsters::MonsterSoundSet after = *found;
-        Data::Monsters::MonsterSound& sound = after.sounds[row.index];
-        const std::string oldName = Data::Monsters::SoundNameOf(sound);
-        sound.name = values.name;
-        sound.file = values.file;
-        sound.channels = values.channels;
-        sound.spatial = values.spatial;
-        // The events name a sound without an id by its file: they follow.
-        const std::string newName = Data::Monsters::SoundNameOf(sound);
-        if (newName != oldName)
+        SetSoundStep step;
+        step.set = row.set;
+        step.index = row.index;
+        step.before = found->sounds[row.index];
+        step.after = step.before;
+        step.after.name = values.name;
+        step.after.file = values.file;
+        step.after.channels = values.channels;
+        step.after.spatial = values.spatial;
+        if (step.after == step.before)
         {
-            for (Data::Monsters::MonsterSoundEvent& event : after.soundEvents)
+            return false;
+        }
+        // The events name a sound without an id by its file: they follow.
+        const std::string oldName = Data::Monsters::SoundNameOf(step.before);
+        if (Data::Monsters::SoundNameOf(step.after) != oldName)
+        {
+            for (size_t event = 0; event < found->soundEvents.size(); ++event)
             {
-                std::replace(event.sounds.begin(), event.sounds.end(), oldName, newName);
+                const std::vector<std::string>& named = found->soundEvents[event].sounds;
+                for (size_t sound = 0; sound < named.size(); ++sound)
+                {
+                    if (named[sound] == oldName)
+                    {
+                        step.eventNames.emplace_back(event, sound);
+                    }
+                }
             }
         }
-        if (after == *found)
-        {
-            return false;
-        }
-        edit.setBefore = *found;
-        edit.setAfter = std::move(after);
-        if (!g_MonsterEdits.SetSoundSet(edit.label, *edit.setAfter, -1))
-        {
-            return false;
-        }
-        m_savedSets.try_emplace(row.set, *edit.setBefore);
-        m_undo.push_back(std::move(edit));
-        m_redo.clear();
-        return true;
+        savedSet = *found;
+        edit.setSound = std::move(step);
     }
     else if (row.source == RowSource::MapObject)
     {
-        std::vector<Data::Maps::MapObjectSound> after = g_MapObjectSoundDatabase.GetAll();
-        if (row.index >= after.size())
+        const std::vector<Data::Maps::MapObjectSound>& sounds = g_MapObjectSoundDatabase.GetAll();
+        if (row.index >= sounds.size())
         {
             return false;
         }
-        Data::Maps::MapObjectSound& sound = after[row.index];
-        const Data::Maps::MapObjectSound old = sound;
-        sound.name = values.name;
-        sound.file = values.file;
-        sound.channels = values.channels;
-        if (sound == old)
+        ObjectSoundStep step;
+        step.index = row.index;
+        step.before = sounds[row.index];
+        step.after = step.before;
+        step.after.name = values.name;
+        step.after.file = values.file;
+        step.after.channels = values.channels;
+        if (step.after == step.before)
         {
             return false;
         }
-        edit.objectsBefore = g_MapObjectSoundDatabase.GetAll();
-        edit.objectsAfter = std::move(after);
+        edit.objectSound = std::move(step);
     }
     else
     {
         return false;
     }
-    Apply(edit, true);
+    if (!Apply(edit, true))
+    {
+        return false;
+    }
+    if (savedSet)
+    {
+        m_savedSets.try_emplace(row.set, *savedSet);
+    }
     m_undo.push_back(std::move(edit));
     m_redo.clear();
     return true;
@@ -220,23 +274,38 @@ bool SoundEdits::ChangeEvents(std::string label, std::vector<Data::Sounds::Sound
     return true;
 }
 
-void SoundEdits::Apply(const SoundEdit& edit, bool forward)
+bool SoundEdits::Apply(const SoundEdit& edit, bool forward)
 {
+    // The set and the map object sounds are checked before anything changes.
+    if (edit.setSound)
+    {
+        const Data::Monsters::MonsterSoundSet* set = g_MonsterSoundSetDatabase.Find(edit.setSound->set);
+        const std::optional<Data::Monsters::MonsterSoundSet> turned =
+            set != nullptr ? TurnSetSound(*set, *edit.setSound, forward) : std::nullopt;
+        if (!turned || !g_MonsterEdits.SetSoundSet(edit.label, *turned, -1))
+        {
+            return false;
+        }
+    }
+    if (edit.objectSound)
+    {
+        std::vector<Data::Maps::MapObjectSound> sounds = g_MapObjectSoundDatabase.GetAll();
+        const ObjectSoundStep& step = *edit.objectSound;
+        const std::optional<size_t> at = FindAsLeft(sounds, step.index, forward ? step.before : step.after);
+        if (!at)
+        {
+            return false;
+        }
+        sounds[*at] = forward ? step.after : step.before;
+        // The map's object sounds follow the table's version (MapObjectSounds).
+        g_MapObjectSoundDatabase.Build(sounds);
+    }
     if (edit.codeBefore && edit.codeAfter)
     {
         const std::vector<SoundFile>& from = forward ? *edit.codeBefore : *edit.codeAfter;
         const std::vector<SoundFile>& to = forward ? *edit.codeAfter : *edit.codeBefore;
         g_SoundFileDatabase.Build(to);
         ReloadChanged(from, to);
-    }
-    if (edit.setBefore && edit.setAfter)
-    {
-        g_MonsterEdits.SetSoundSet(edit.label, forward ? *edit.setAfter : *edit.setBefore, -1);
-    }
-    if (edit.objectsBefore && edit.objectsAfter)
-    {
-        // The map's object sounds follow the table's version (MapObjectSounds).
-        g_MapObjectSoundDatabase.Build(forward ? *edit.objectsAfter : *edit.objectsBefore);
     }
     if (edit.foldersBefore && edit.foldersAfter)
     {
@@ -246,31 +315,40 @@ void SoundEdits::Apply(const SoundEdit& edit, bool forward)
     {
         g_SoundEventDatabase.Build(forward ? *edit.eventsAfter : *edit.eventsBefore);
     }
+    return true;
 }
 
 bool SoundEdits::Undo()
 {
+    m_lastRefused = false;
     if (m_undo.empty())
     {
         return false;
     }
-    SoundEdit edit = std::move(m_undo.back());
+    if (!Apply(m_undo.back(), false))
+    {
+        m_lastRefused = true;
+        return false;
+    }
+    m_redo.push_back(std::move(m_undo.back()));
     m_undo.pop_back();
-    Apply(edit, false);
-    m_redo.push_back(std::move(edit));
     return true;
 }
 
 bool SoundEdits::Redo()
 {
+    m_lastRefused = false;
     if (m_redo.empty())
     {
         return false;
     }
-    SoundEdit edit = std::move(m_redo.back());
+    if (!Apply(m_redo.back(), true))
+    {
+        m_lastRefused = true;
+        return false;
+    }
+    m_undo.push_back(std::move(m_redo.back()));
     m_redo.pop_back();
-    Apply(edit, true);
-    m_undo.push_back(std::move(edit));
     return true;
 }
 

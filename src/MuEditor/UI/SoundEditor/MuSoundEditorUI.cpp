@@ -495,6 +495,7 @@ void MuSoundEditorUI::RenderToolbar()
     if (ImGui::Button(I18N::Editor::Undo))
     {
         g_SoundEdits.Undo();
+        m_status = g_SoundEdits.WasLastRefused() ? I18N::Editor::SoundEditorStepRefused : "";
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
@@ -502,6 +503,7 @@ void MuSoundEditorUI::RenderToolbar()
     if (ImGui::Button(I18N::Editor::Redo))
     {
         g_SoundEdits.Redo();
+        m_status = g_SoundEdits.WasLastRefused() ? I18N::Editor::SoundEditorStepRefused : "";
     }
     ImGui::EndDisabled();
     if (g_SoundEdits.IsModified())

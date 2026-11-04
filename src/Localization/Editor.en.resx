@@ -3934,6 +3934,9 @@
   <data name="Sound editor reverted" xml:space="preserve">
     <value>Read again from the files.</value>
   </data>
+  <data name="Sound editor step refused" xml:space="preserve">
+    <value>This step's sound changed in another window since; it stays as it is.</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>All sounds as normal</value>
   </data>

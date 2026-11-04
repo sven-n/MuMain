@@ -14,6 +14,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // The Sound Editor's changes (sound editor design, Q-SE1): a row's name,
@@ -36,16 +37,37 @@ struct RowValues
 // The row's values as they are.
 RowValues ValuesOf(const SoundRow& row);
 
-// One step of the history: the table before and after, of one file.
+// A set's sound before and after, and where its set's events named it (they
+// follow its name).
+struct SetSoundStep
+{
+    std::string set;
+    size_t index = 0;
+    Data::Monsters::MonsterSound before;
+    Data::Monsters::MonsterSound after;
+    // Event, then sound in the event.
+    std::vector<std::pair<size_t, size_t>> eventNames;
+};
+
+// A map object sound before and after.
+struct ObjectSoundStep
+{
+    size_t index = 0;
+    Data::Maps::MapObjectSound before;
+    Data::Maps::MapObjectSound after;
+};
+
+// One step of the history: the table before and after, of one file. The
+// Monster Sounds window and the Map Editor's Sounds tab change the sets and
+// the map object sounds too, so a step there is only the one sound it
+// changed: an undo puts that back and keeps what they changed since.
 struct SoundEdit
 {
     std::string label;
     std::optional<std::vector<Data::Sounds::SoundFile>> codeBefore;
     std::optional<std::vector<Data::Sounds::SoundFile>> codeAfter;
-    std::optional<Data::Monsters::MonsterSoundSet> setBefore;
-    std::optional<Data::Monsters::MonsterSoundSet> setAfter;
-    std::optional<std::vector<Data::Maps::MapObjectSound>> objectsBefore;
-    std::optional<std::vector<Data::Maps::MapObjectSound>> objectsAfter;
+    std::optional<SetSoundStep> setSound;
+    std::optional<ObjectSoundStep> objectSound;
     std::optional<std::vector<Data::Sounds::SoundFolder>> foldersBefore;
     std::optional<std::vector<Data::Sounds::SoundFolder>> foldersAfter;
     std::optional<std::vector<Data::Sounds::SoundEvent>> eventsBefore;
@@ -82,8 +104,15 @@ public:
     {
         return !m_redo.empty();
     }
+    // False, with nothing changed, when there is nothing to do or the step's
+    // sound changed since (in another window): the step stays, and
+    // WasLastRefused says so.
     bool Undo();
     bool Redo();
+    bool WasLastRefused() const
+    {
+        return m_lastRefused;
+    }
 
     // Whether a file's table differs from what was last read or saved.
     bool IsModified() const;
@@ -104,10 +133,13 @@ public:
 private:
     SoundEdits() = default;
 
-    void Apply(const SoundEdit& edit, bool forward);
+    // False, with nothing changed, when the step's sound is not as the other
+    // direction left it.
+    bool Apply(const SoundEdit& edit, bool forward);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;
+    bool m_lastRefused = false;
     std::optional<std::vector<Data::Sounds::SoundFile>> m_savedCode;
     // The sets changed since the last save, as they were then.
     std::map<std::string, Data::Monsters::MonsterSoundSet> m_savedSets;

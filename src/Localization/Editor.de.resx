@@ -3715,6 +3715,9 @@
   <data name="Sound editor reverted" xml:space="preserve">
     <value>Neu aus den Dateien gelesen.</value>
   </data>
+  <data name="Sound editor step refused" xml:space="preserve">
+    <value>Das Geräusch dieses Schritts wurde seitdem in einem anderen Fenster geändert; es bleibt, wie es ist.</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>Alle Geräusche wie gewohnt</value>
   </data>

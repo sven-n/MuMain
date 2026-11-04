@@ -22,6 +22,7 @@
 #include "Data/GameData/SoundData/SoundFilesJson.h"
 #include "Data/GameData/SoundData/SoundFolders.h"
 #include "TestImGuiContext.h"
+#include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundEditor/SoundEditorRows.h"
@@ -388,6 +389,94 @@ TEST_CASE("Sound Editor: a set's sound changes through the monster tools, the ev
     REQUIRE(g_SoundEdits.Undo());
     CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == DeathTree());
     CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
+TEST_CASE("Sound Editor: undo of a set's sound puts back only that sound and keeps what the Monster Sounds window "
+          "changed since; a sound changed there is not undone [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    g_SoundEdits.TakeSaved();
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    REQUIRE(rows.size() == 2);
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(rows[0]);
+    values.file = "Data/Sound/EditorTest/Other.wav";
+    REQUIRE(g_SoundEdits.Change(rows[0], values));
+    // The Monster Sounds window: another sound and another event, and a new
+    // sound in front.
+    Data::Monsters::MonsterSoundSet other = *g_MonsterSoundSetDatabase.Find("Death Tree");
+    other.sounds[1].channels = 3;
+    Data::Monsters::MonsterSoundEvent attackEvent;
+    attackEvent.animations = {1};
+    attackEvent.sounds = {"SOUND_MONSTER_MAGICSKULL1"};
+    other.soundEvents.push_back(attackEvent);
+    Data::Monsters::MonsterSound added;
+    added.file = "Data/Sound/EditorTest/added.wav";
+    other.sounds.insert(other.sounds.begin(), added);
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", other, -1));
+
+    REQUIRE(g_SoundEdits.Undo());
+    const Data::Monsters::MonsterSoundSet* set = g_MonsterSoundSetDatabase.Find("Death Tree");
+    REQUIRE(set != nullptr);
+    REQUIRE(set->sounds.size() == 3);
+    CHECK(set->sounds[0] == added);
+    CHECK(set->sounds[1] == DeathTree().sounds[0]);
+    CHECK(set->sounds[2].channels == 3);
+    CHECK(set->soundEvents[0].sounds == std::vector<std::string>{"Data/Sound/EditorTest/ok.wav"});
+    CHECK(set->soundEvents.size() == 2);
+    REQUIRE(g_SoundEdits.Redo());
+    CHECK(g_MonsterSoundSetDatabase.Find("Death Tree")->sounds[1].file == "Data/Sound/EditorTest/Other.wav");
+    CHECK(g_MonsterSoundSetDatabase.Find("Death Tree")->soundEvents[0].sounds ==
+          std::vector<std::string>{"Data/Sound/EditorTest/Other.wav"});
+
+    // The Monster Sounds window changes the step's own sound: the step stays.
+    Data::Monsters::MonsterSoundSet changed = *g_MonsterSoundSetDatabase.Find("Death Tree");
+    changed.sounds[1].channels = 4;
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", changed, -1));
+    CHECK_FALSE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.WasLastRefused());
+    CHECK(g_SoundEdits.CanUndo());
+    CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == changed);
+}
+
+TEST_CASE("Sound Editor: undo of a map object sound puts back only that entry and keeps what the Map Editor's Sounds "
+          "tab changed since; an entry changed there is not undone [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    Data::Maps::MapObjectSound river = Waterfall();
+    river.objects = {40};
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall(), river});
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    const auto second = std::find_if(rows.begin(), rows.end(), [](const SoundRow& row) { return row.index == 1; });
+    REQUIRE(second != rows.end());
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*second);
+    values.channels = 1;
+    REQUIRE(g_SoundEdits.Change(*second, values));
+    // The Sounds tab: another entry changes, the first goes, one is added.
+    std::vector<Data::Maps::MapObjectSound> sounds = g_MapObjectSoundDatabase.GetAll();
+    sounds[0].channels = 2;
+    Data::Maps::MapObjectSound added = Waterfall();
+    added.objects = {50};
+    sounds.push_back(added);
+    sounds.erase(sounds.begin());
+    g_MapObjectSoundDatabase.Build(sounds);
+
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_MapObjectSoundDatabase.GetAll() == std::vector<Data::Maps::MapObjectSound>{river, added});
+    REQUIRE(g_SoundEdits.Redo());
+    CHECK(g_MapObjectSoundDatabase.GetAll()[0].channels == 1);
+
+    sounds = g_MapObjectSoundDatabase.GetAll();
+    sounds[0].file = "Data/Sound/EditorTest/ok.wav";
+    sounds[0].channels = 4;
+    g_MapObjectSoundDatabase.Build(sounds);
+    CHECK_FALSE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.WasLastRefused());
+    CHECK(g_MapObjectSoundDatabase.GetAll() == sounds);
 }
 
 TEST_CASE("Sound Editor: a code sound's stored type is set and cleared in its row and undone; other rows have "
