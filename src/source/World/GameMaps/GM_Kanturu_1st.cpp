@@ -312,10 +312,10 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(const OBJECT* pObject, DrawLook
         break;
     case 96:
         pModel->StreamMesh = 0;
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
+        SetAlphaFuncRef(0.f);
         pModel->RenderMesh(0, RENDER_TEXTURE, 1.0f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                            -(int)WorldTime % 20000 * 0.00005f);
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+        SetAlphaFuncRef(0.25f);
         pModel->StreamMesh = -1;
         break;
     }

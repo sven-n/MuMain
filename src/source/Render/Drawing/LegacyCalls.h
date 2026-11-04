@@ -29,6 +29,8 @@ enum class LegacyCall : std::uint8_t
     EnableAlphaBlend3,
     EnableAlphaBlend4,
     EnableLightMap,
+    // Argument: the threshold's bits.
+    SetAlphaFuncRef,
     BeginSprite,
     EndSprite,
     BeginReorderableDraws,

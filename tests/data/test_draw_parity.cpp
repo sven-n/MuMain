@@ -17,6 +17,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include <array>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -678,4 +679,39 @@ TEST_CASE("Damage numbers drawn later are drawn with the state and matrix they w
     };
     CheckDrawnLaterAsAtOnce(scene, "Quad3D");
     std::memcpy(g_Camera.Matrix, savedCamera, sizeof(savedCamera));
+}
+
+TEST_CASE("A zen pile drawn later keeps its place among the draws around it [draw-parity]")
+{
+    PlayerModels models;
+    BMD& model = Models[MODEL_BODY_ARMOR];
+    const std::array<mu::Vertex3D, 4> quad{};
+    const auto scene = [&]
+    {
+        EnableAlphaBlend();
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+        // As RenderZen draws it, with one coin's vertices.
+        model.BeginRenderCoinHeap();
+        model.EndRenderCoinHeap(1);
+        EnableAlphaBlend();
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Triangles");
+}
+
+TEST_CASE("A mesh's own alpha threshold drawn later applies to that mesh only [draw-parity]")
+{
+    const std::array<mu::Vertex3D, 4> quad{};
+    const auto scene = [&]
+    {
+        SetAlphaFuncRef(0.f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+        SetAlphaFuncRef(0.25f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+    const std::vector<std::string> later = CallsOf(scene, true, false);
+    REQUIRE(later.size() >= 2);
+    CHECK(later[0].find("alphaRef 0.000000") != std::string::npos);
+    CHECK(later[1].find("alphaRef 0.250000") != std::string::npos);
 }

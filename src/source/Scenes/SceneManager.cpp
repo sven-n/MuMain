@@ -1200,6 +1200,7 @@ void MainScene(HDC hDC)
     // Every update of the frame has run, previews included: the draws record into the next frame.
     Engine::Object::Attachments::BeginFrame();
     BeginObjectDraws();
+    BeginSpriteDraws();
     Random::NextDrawFrame();
 
     bool Success = false;

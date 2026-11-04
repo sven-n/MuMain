@@ -7,6 +7,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/GameMaps/GMHellas.h"
 
+#include <bit>
 #include <cstddef>
 #include <vector>
 
@@ -88,6 +89,9 @@ void MakeLegacyCall(LegacyCall call, int argument)
         break;
     case LegacyCall::EnableLightMap:
         EnableLightMap();
+        break;
+    case LegacyCall::SetAlphaFuncRef:
+        SetAlphaFuncRef(std::bit_cast<float>(argument));
         break;
     case LegacyCall::BeginSprite:
         BeginSprite();

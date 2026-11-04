@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Core/WindowSystem.h"
+#include <bit>
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
@@ -185,7 +186,9 @@ void EndTextureStream()
 
 void SetAlphaFuncRef(float ref)
 {
-    glAlphaFunc(GL_GREATER, ref);
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::SetAlphaFuncRef, std::bit_cast<int>(ref)))
+        return;
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, ref);
 }
 
 void EnableTexture2D()

@@ -80,7 +80,10 @@ public:
 
     void DrawQuads(const QuadsDraw& draw) override
     {
-        mu::GetRenderer().RenderQuad3D(draw.vertices, draw.texture);
+        if (draw.triangles)
+            mu::GetRenderer().RenderTriangles(draw.vertices, draw.texture);
+        else
+            mu::GetRenderer().RenderQuad3D(draw.vertices, draw.texture);
     }
 
     void DrawDecal(const DecalDraw& draw) override

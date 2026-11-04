@@ -70,6 +70,8 @@ struct QuadsDraw
     std::span<const mu::Vertex3D> vertices;
     // 0 draws with the bound texture.
     std::uint32_t texture = 0;
+    // The vertices are triangles rather than quads.
+    bool triangles = false;
 };
 
 // A texture laid on the terrain around a point.

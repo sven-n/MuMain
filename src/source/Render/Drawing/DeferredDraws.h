@@ -62,6 +62,7 @@ private:
         std::size_t first = 0;
         std::size_t count = 0;
         std::uint32_t texture = 0;
+        bool triangles = false;
     };
     struct State
     {

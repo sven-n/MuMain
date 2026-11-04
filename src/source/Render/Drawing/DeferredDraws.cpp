@@ -64,7 +64,8 @@ void DeferredDraws::Flush()
                     m_effects->DrawSprite(recorded);
                 else if constexpr (std::is_same_v<Kind, Quads>)
                     m_effects->DrawQuads({.vertices = std::span(m_vertices).subspan(recorded.first, recorded.count),
-                                          .texture = recorded.texture});
+                                          .texture = recorded.texture,
+                                          .triangles = recorded.triangles});
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::DecalDraw>)
                     m_effects->DrawDecal(recorded);
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::CircleDraw>)
@@ -172,7 +173,10 @@ void DeferredDraws::DrawSprite(const EffectDrawing::SpriteDraw& draw)
 
 void DeferredDraws::DrawQuads(const EffectDrawing::QuadsDraw& draw)
 {
-    Record(Quads{.first = m_vertices.size(), .count = draw.vertices.size(), .texture = draw.texture});
+    Record(Quads{.first = m_vertices.size(),
+                 .count = draw.vertices.size(),
+                 .texture = draw.texture,
+                 .triangles = draw.triangles});
     m_vertices.insert(m_vertices.end(), draw.vertices.begin(), draw.vertices.end());
 }
 

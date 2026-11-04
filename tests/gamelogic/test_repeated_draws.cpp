@@ -603,3 +603,30 @@ TEST_CASE("Crywolf's water spots are rolled in the update, once for the water th
     gMapManager.WorldActive = savedWorld;
     Hero = savedHero;
 }
+
+TEST_CASE("A frame with no update since the last draws the sprites again; a pass in the same frame doesn't [effects]")
+{
+    ViewScope view;
+    ClearSprites();
+    vec3_t ahead;
+    view.Ahead(1000.f, ahead);
+    vec3_t light{1.f, 1.f, 1.f};
+    REQUIRE(CreateSprite(BITMAP_LIGHT, ahead, 1.f, light, nullptr) >= 0);
+
+    Render::Drawing::DrawCallLog log;
+    mu::SetRendererOverride(&log);
+    BeginSpriteDraws();
+    RenderSprites();
+    const std::size_t oneFrame = log.calls.size();
+    RenderSprites();
+    const std::size_t samePass = log.calls.size();
+    BeginSpriteDraws();
+    RenderSprites();
+    const std::size_t nextFrame = log.calls.size();
+    mu::SetRendererOverride(nullptr);
+
+    CHECK(oneFrame > 0);
+    CHECK(samePass == oneFrame);
+    CHECK(nextFrame - samePass == oneFrame);
+    ClearSprites();
+}

@@ -28,6 +28,7 @@ void ResetLegacyState()
     DisableAlphaBlend();
     EnableDepthTest();
     BindTexture(0);
+    SetAlphaFuncRef(0.25f);
 }
 
 void RequestDrawParity(bool later)

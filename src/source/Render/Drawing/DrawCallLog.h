@@ -174,6 +174,10 @@ public:
     {
         m_alphaTest = on;
     }
+    void SetAlphaFunc(int /*func*/, float ref) override
+    {
+        m_alphaRef = ref;
+    }
     void SetTexture2D(bool on) override
     {
         m_texture2D = on;
@@ -257,6 +261,7 @@ private:
     bool m_depthMask = true;
     bool m_cullFace = true;
     bool m_alphaTest = false;
+    float m_alphaRef = 0.25f;
     bool m_texture2D = true;
     bool m_fog = false;
     int m_bound = -1;
@@ -271,7 +276,7 @@ private:
     {
         return " | blend " + std::to_string(m_blend) + " depth " + std::to_string(m_depthTest) +
                std::to_string(m_depthMask) + " cull " + std::to_string(m_cullFace) + " alphaTest " +
-               std::to_string(m_alphaTest) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
+               std::to_string(m_alphaTest) + " alphaRef " + std::to_string(m_alphaRef) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
                " mode " + std::to_string(m_textureMode) + " fog " + std::to_string(m_fog) + " bloomExcluded " +
                std::to_string(m_bloomExclusions > 0) + " reorderable " + std::to_string(m_reorderable) + " matrix" +
                m_matrices.back();

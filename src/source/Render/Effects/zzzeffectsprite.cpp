@@ -67,6 +67,10 @@ void ClearSprites()
 {
     for (OBJECT& sprite : Sprites)
         sprite.Live = false;
+}
+
+void BeginSpriteDraws()
+{
     s_spriteDrawn.fill(false);
 }
 
@@ -199,7 +203,7 @@ Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloo
 
 void RenderSprites(BYTE byRenderOneMore)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return;
     }
