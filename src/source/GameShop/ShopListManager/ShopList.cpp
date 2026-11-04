@@ -240,12 +240,14 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
         return FE_ANSI;
     }
 
-    if (buff[0] == 0xEF && buff[1] == 0xBB && buff[2] == 0xBF)
+    // char is signed on every platform the game builds for, so the bytes are compared unsigned.
+    const auto* bytes = reinterpret_cast<const unsigned char*>(buff);
+    if (bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
     {
         return FE_UTF8;
     }
 
-    if (buff[0] == 0xFF && buff[1] == 0xFE)
+    if (bytes[0] == 0xFF && bytes[1] == 0xFE)
     {
         return FE_UNICODE;
     }
