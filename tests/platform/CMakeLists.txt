@@ -19,6 +19,16 @@ mu_add_test(
         test_secure_crt.cpp
 )
 
+# The .ini profile functions: Windows' own, and the shim (WinIni.cpp) on the other platforms.
+mu_add_test(
+    NAME win_ini_tests
+    SOURCES
+        test_win_ini.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinIni.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinNls.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+)
+
 # Font sizing uses the real UI scaling layer. Supply its application-owned globals and
 # preferences through the same entry-point glue as ui_scaling_tests, including editor builds.
 mu_add_test(
