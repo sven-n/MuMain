@@ -72,7 +72,6 @@ enum class TuningControlId : std::uint8_t
     Wrap,
     MapSmoothing,
     EffectRangeMax,
-    ShadowAngle,
     MoodStrength,
     BloomStrength,
     BloomLevelFalloff,
