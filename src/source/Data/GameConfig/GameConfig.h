@@ -140,6 +140,14 @@ public:
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
     void SetDynamicLights(bool enabled) { m_dynamicLights = enabled; }
+    bool GetSunlight() const
+    {
+        return m_sunlight;
+    }
+    void SetSunlight(bool enabled)
+    {
+        m_sunlight = enabled;
+    }
     bool GetLightMood() const { return m_lightMood; }
     void SetLightMood(bool enabled) { m_lightMood = enabled; }
     bool GetPostProcessing() const { return m_postProcessing; }
@@ -230,6 +238,7 @@ private:
     int m_antialiasing;
     bool m_enhancedLighting;
     bool m_dynamicLights;
+    bool m_sunlight;
     bool m_lightMood;
     bool m_postProcessing;
     std::wstring m_renderBackend;

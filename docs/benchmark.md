@@ -81,6 +81,7 @@ it found when it ends or is stopped.
 | `look.texfilter.off` | Enhanced texture filtering: mipmaps and anisotropy on world textures. |
 | `look.lighting.off` | Enhanced per-pixel model lighting, and the dynamic lights that need it. |
 | `look.dynlights.off` | Dynamic model lights from candles, fires and spells. |
+| `look.sun.off` | The sun: its shadows, clouds and sky-blue shade. |
 | `look.mood.off` | The light mood: the map's baked light as Classic has it. |
 | `look.post.off` | Bloom and colour grading. |
 | `aa.off` | Multisample anti-aliasing. |

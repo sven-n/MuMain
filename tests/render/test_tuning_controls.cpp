@@ -85,25 +85,25 @@ const SpecRow Spec[] = {
      0, 2, 0.05, TuningUnit::None, TuningZero::Plain},
     {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius, 10,
      300, 5, TuningUnit::None, TuningZero::Plain},
-    {TuningControlId::SunShadowStrength, TuningGroup::DynamicLights, false, LookValue::SunShadowStrength, 0, 1, 0.05,
+    {TuningControlId::SunShadowStrength, TuningGroup::Sunlight, false, LookValue::SunShadowStrength, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
-    {TuningControlId::SunShadowSoftness, TuningGroup::DynamicLights, true, LookValue::SunShadowSoftness, 0, 2, 0.1,
+    {TuningControlId::SunShadowSoftness, TuningGroup::Sunlight, true, LookValue::SunShadowSoftness, 0, 2, 0.1,
      TuningUnit::None, TuningZero::Plain},
-    {TuningControlId::SunShadowResolution, TuningGroup::DynamicLights, true, LookValue::SunShadowResolution, 1024, 4096,
+    {TuningControlId::SunShadowResolution, TuningGroup::Sunlight, true, LookValue::SunShadowResolution, 1024, 4096,
      1024, TuningUnit::None, TuningZero::Plain},
-    {TuningControlId::FlatSunShadow, TuningGroup::DynamicLights, true, LookValue::FlatSunShadow, 0, 1, 0.05,
+    {TuningControlId::FlatSunShadow, TuningGroup::Sunlight, true, LookValue::FlatSunShadow, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
-    {TuningControlId::CloudStrength, TuningGroup::DynamicLights, false, LookValue::CloudStrength, 0, 1, 0.05,
+    {TuningControlId::CloudStrength, TuningGroup::Sunlight, false, LookValue::CloudStrength, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
-    {TuningControlId::CloudScale, TuningGroup::DynamicLights, true, LookValue::CloudScale, 500, 10000, 250,
+    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 500, 10000, 250,
      TuningUnit::None, TuningZero::Plain},
-    {TuningControlId::CloudSpeed, TuningGroup::DynamicLights, true, LookValue::CloudSpeed, 0, 300, 5, TuningUnit::None,
+    {TuningControlId::CloudSpeed, TuningGroup::Sunlight, true, LookValue::CloudSpeed, 0, 300, 5, TuningUnit::None,
      TuningZero::Plain},
-    {TuningControlId::CloudCover, TuningGroup::DynamicLights, true, LookValue::CloudCover, 0, 1, 0.05,
+    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
-    {TuningControlId::SkyFill, TuningGroup::DynamicLights, false, LookValue::SkyFill, 0, 1, 0.05, TuningUnit::Percent,
+    {TuningControlId::SkyFill, TuningGroup::Sunlight, false, LookValue::SkyFill, 0, 1, 0.05, TuningUnit::Percent,
      TuningZero::Plain},
-    {TuningControlId::RimSunFollow, TuningGroup::DynamicLights, true, LookValue::RimSunFollow, 0, 1, 0.05,
+    {TuningControlId::RimSunFollow, TuningGroup::Sunlight, true, LookValue::RimSunFollow, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
 };
 
@@ -291,13 +291,13 @@ TEST_CASE("a developer's edit covers only the scope it was made in [render][look
 TEST_CASE("player values apply only while their feature is in effect [render][look][tuning]")
 {
     Render::Look::LookFeatures enhanced = Render::Look::PresetFeatures(LookPreset::Enhanced);
-    CHECK(Render::Look::TuningGroupsApplying(enhanced) == Render::Look::TuningGroupSet{true, true, true, true});
+    CHECK(Render::Look::TuningGroupsApplying(enhanced) == Render::Look::TuningGroupSet{true, true, true, true, true});
     CHECK(Render::Look::TuningGroupsApplying(Render::Look::PresetFeatures(LookPreset::Classic)) ==
           Render::Look::TuningGroupSet{});
     // Dynamic lights act only with Enhanced lighting.
     Render::Look::LookFeatures noLighting = enhanced;
     noLighting.enhancedLighting = false;
-    CHECK(Render::Look::TuningGroupsApplying(noLighting) == Render::Look::TuningGroupSet{false, false, true, true});
+    CHECK(Render::Look::TuningGroupsApplying(noLighting) == Render::Look::TuningGroupSet{false, false, true, true, false});
 
     const Data::Maps::LookProfileData profile = ShippedLikeProfile();
     Data::Maps::LookOverrides personal;

@@ -21,7 +21,7 @@ namespace
 constexpr int Lorencia = 0;
 constexpr int Icarus = 10;
 
-const Render::Look::TuningGroupSet AllGroups{true, true, true, true};
+const Render::Look::TuningGroupSet AllGroups{true, true, true, true, true};
 
 const std::string LookText = R"({
   "formatVersion": 1,
@@ -346,7 +346,7 @@ TEST_CASE("a refused Enhanced lighting applies the map's knee to the mood until 
     CHECK(layers.Active(Lorencia)[LookValue::HighlightKnee] == 0.8);
     CHECK(layers.Active(Lorencia)[LookValue::BloomStrength] == 0.5);
     CHECK(layers.Personal()[LookValue::HighlightKnee] == 0.6);
-    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{false, false, true, true});
+    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{false, false, true, true, false});
 
     // The renderer recovers and the look is applied again: the rebuild reads the player's knee.
     rendererCanLight = true;
@@ -354,7 +354,7 @@ TEST_CASE("a refused Enhanced lighting applies the map's knee to the mood until 
     REQUIRE(kneeSeen.size() == 2);
     CHECK(kneeSeen.back() == 0.6);
     CHECK(layers.Active(Lorencia)[LookValue::HighlightKnee] == 0.6);
-    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{true, true, true, true});
+    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{true, true, true, true, true});
 }
 
 TEST_CASE("a refused post-processing keeps the player's bloom stored but unapplied [render][look][tuning]")
@@ -373,5 +373,5 @@ TEST_CASE("a refused post-processing keeps the player's bloom stored but unappli
     Render::Look::ApplyLookFeatures(Render::Look::PresetFeatures(LookPreset::Enhanced), appliers);
     CHECK(Bloom(layers, Lorencia) == 1.0);
     CHECK(layers.Personal()[LookValue::BloomStrength] == 0.5);
-    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{true, true, true, false});
+    CHECK(layers.ApplyingGroups() == Render::Look::TuningGroupSet{true, true, true, false, true});
 }

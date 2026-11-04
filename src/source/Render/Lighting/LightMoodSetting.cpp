@@ -64,7 +64,7 @@ void Recompute(int world)
                                                           : Scales{};
     // Where the sky fill tints the shade (the lit shaders, under sun shadows the renderer can draw), no
     // second blue here.
-    if (s_state.enabled && IsWorldMap(world) && DynamicLightsActive() &&
+    if (s_state.enabled && IsWorldMap(world) && SunlightActive() &&
         Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f && mu::GetRenderer().SunShadowsAvailable() &&
         Look::Value(Data::Maps::LookValue::SkyFill) > 0.0f)
     {

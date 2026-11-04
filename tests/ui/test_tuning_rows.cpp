@@ -138,23 +138,26 @@ TEST_CASE("a tuning group is locked with its reason and dynamic lights need Enha
 {
     using UI::Options::TuningGroupLock;
     const UI::Options::TuningFeatureState on;
-    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, on) == TuningLock::None);
-    CHECK(TuningGroupLock(TuningGroup::Lighting, false, true, on) == TuningLock::ClassicLook);
-    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, false, on) == TuningLock::NeedsLighting);
-    CHECK(TuningGroupLock(TuningGroup::LightMood, true, false, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, true, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, false, true, true, on) == TuningLock::ClassicLook);
+    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, false, true, on) == TuningLock::NeedsLighting);
+    CHECK(TuningGroupLock(TuningGroup::Sunlight, true, false, true, on) == TuningLock::NeedsLighting);
+    CHECK(TuningGroupLock(TuningGroup::Sunlight, true, true, false, on) == TuningLock::NeedsDynamicLights);
+    CHECK(TuningGroupLock(TuningGroup::DynamicLights, true, true, false, on) == TuningLock::None);
+    CHECK(TuningGroupLock(TuningGroup::LightMood, true, false, true, on) == TuningLock::None);
     UI::Options::TuningFeatureState off;
     off.chosen = false;
-    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, off) == TuningLock::FeatureOff);
+    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, true, off) == TuningLock::FeatureOff);
     UI::Options::TuningFeatureState unavailable;
     unavailable.active = false;
-    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, unavailable) == TuningLock::Unavailable);
+    CHECK(TuningGroupLock(TuningGroup::PostProcessing, true, true, true, unavailable) == TuningLock::Unavailable);
     UI::Options::TuningFeatureState session;
     session.sessionOff = true;
-    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, session) == TuningLock::SessionOff);
+    CHECK(TuningGroupLock(TuningGroup::Lighting, true, true, true, session) == TuningLock::SessionOff);
     UI::Options::TuningFeatureState sessionValue;
     sessionValue.sessionSet = true;
-    CHECK(TuningGroupLock(TuningGroup::LightMood, true, true, sessionValue) == TuningLock::SessionSet);
-    for (const TuningLock lock : {TuningLock::ClassicLook, TuningLock::FeatureOff, TuningLock::NeedsLighting,
+    CHECK(TuningGroupLock(TuningGroup::LightMood, true, true, true, sessionValue) == TuningLock::SessionSet);
+    for (const TuningLock lock : {TuningLock::ClassicLook, TuningLock::FeatureOff, TuningLock::NeedsLighting, TuningLock::NeedsDynamicLights,
                                   TuningLock::Unavailable, TuningLock::SessionOff, TuningLock::SessionSet})
     {
         CHECK_FALSE(UI::Options::TuningLockReason(lock).empty());
@@ -199,7 +202,7 @@ TEST_CASE("both option themes bind the same tuning groups, rows, sliders and res
         }
         // One slider template per row list: pointer, drag, keys and every way an interaction ends.
         const std::size_t lists = Count(markup, "data-for=\"row : tuning_");
-        CHECK(lists == 6);
+        CHECK(lists == 8);
         for (const char* binding :
              {"data-event-mousedown=\"option_tuning_pointer(row.control)\"",
               "data-event-drag=\"option_tuning_pointer(row.control)\"",

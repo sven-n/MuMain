@@ -20,9 +20,9 @@ options window, without editing those files (see "Tuning it yourself").
 ## Choosing the look
 
 - **Options window**: the "Enhanced graphics" checkbox on the Graphics tab. Under
-  it, Enhanced lighting, Dynamic lights, Darker map light (the light mood) and
+  it, Enhanced lighting, Dynamic lights, Sunlight, Darker map light (the light mood) and
   Bloom and colour grading switch those features of Enhanced off one by one;
-  dynamic lights need Enhanced lighting. Ticked
+  dynamic lights need Enhanced lighting, and Sunlight needs dynamic lights, because its ground shadows draw in their per-pixel ground pass. Ticked
   is Enhanced, unticked Classic; it applies at once and is saved.
 - **Chat box**: `$look enhanced` and `$look classic`, in every build; saved too.
 - **`config.ini`**, section `[Render]`:
@@ -32,7 +32,7 @@ options window, without editing those files (see "Tuning it yourself").
   | `Look` | `Enhanced` or `Classic` | `Classic` |
   | `Antialiasing` | samples of the Enhanced look: `0` (off), `2`, `4` or `8` | `4` |
   | `Anisotropy` | maximum anisotropic filtering, clamped to the GPU | `8` |
-  | `EnhancedLighting`, `DynamicLights`, `LightMood`, `PostProcessing` | `0` switches that feature of Enhanced off; Classic ignores them | `1` |
+  | `EnhancedLighting`, `DynamicLights`, `Sunlight`, `LightMood`, `PostProcessing` | `0` switches that feature of Enhanced off; Classic ignores them | `1` |
 
   A missing or unknown `Look` counts as Classic, so the classic look stays
   until a player ticks "Enhanced graphics". Classic renders without
@@ -50,10 +50,10 @@ except the light mood. The interface is the same in both looks.
 
 ## Tuning it yourself
 
-Under each of the four rows below "Enhanced graphics" (Enhanced lighting,
-Dynamic lights, Darker map light, Bloom and colour grading), the options
+Under each of the five rows below "Enhanced graphics" (Enhanced lighting,
+Dynamic lights, Sunlight, Darker map light, Bloom and colour grading), the options
 window has that feature's own sliders. Clicking a row's name or its arrow opens
-or closes them; only the checkbox switches the feature. All four start closed,
+or closes them; only the checkbox switches the feature. All five start closed,
 and the specialist sliders of a group wait under its own "More settings".
 
 Each slider shows its name, its current value with its unit, its smallest and
@@ -85,16 +85,16 @@ window.
 | Dynamic lights | Light wrap | `dynamic.wrap` | 0–0.5 | 0.05 | 0.3 | More settings |
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
 | Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
-| Dynamic lights | Sun shadows | `sun.shadow` | 0–100 % | 5 % | 100 % | common |
-| Dynamic lights | Sun shadow softness | `sun.softness` | 0–2 | 0.1 | 1 | More settings |
-| Dynamic lights | Sun shadow resolution | `sun.resolution` | 1024–4096 | 1024 | 2048 | More settings |
-| Dynamic lights | Flat sun shadow | `dynamic.flatSunShadow` | 0–100 % | 5 % | 100 % (0 indoors) | More settings |
-| Dynamic lights | Cloud shadows | `clouds.strength` | 0–100 % | 5 % | 35 % | common |
-| Dynamic lights | Cloud size | `clouds.scale` | 500–10000 | 250 | 3000 | More settings |
-| Dynamic lights | Cloud speed | `clouds.speed` | 0–300 | 5 | 40 | More settings |
-| Dynamic lights | Cloud cover | `clouds.cover` | 0–100 % | 5 % | 45 % | More settings |
-| Dynamic lights | Sky-blue shade | `sky.fill` | 0–100 % | 5 % | 50 % | common |
-| Dynamic lights | Rim light follows the sun | `lighting.rim.sunFollow` | 0–100 % | 5 % | 100 % | More settings |
+| Sunlight | Sun shadows | `sun.shadow` | 0–100 % | 5 % | 100 % | common |
+| Sunlight | Sun shadow softness | `sun.softness` | 0–2 | 0.1 | 1 | More settings |
+| Sunlight | Sun shadow resolution | `sun.resolution` | 1024–4096 | 1024 | 2048 | More settings |
+| Sunlight | Flat sun shadow | `dynamic.flatSunShadow` | 0–100 % | 5 % | 100 % (0 indoors) | More settings |
+| Sunlight | Cloud shadows | `clouds.strength` | 0–100 % | 5 % | 35 % | common |
+| Sunlight | Cloud size | `clouds.scale` | 500–10000 | 250 | 3000 | More settings |
+| Sunlight | Cloud speed | `clouds.speed` | 0–300 | 5 | 40 | More settings |
+| Sunlight | Cloud cover | `clouds.cover` | 0–100 % | 5 % | 45 % | More settings |
+| Sunlight | Sky-blue shade | `sky.fill` | 0–100 % | 5 % | 50 % | common |
+| Sunlight | Rim light follows the sun | `lighting.rim.sunFollow` | 0–100 % | 5 % | 100 % | More settings |
 | Darker map light | Mood strength | `mood.strengthPercent` | 0–100 % | 1 % | 100 % | common |
 | Bloom and colour grading | Bloom intensity | `bloom.strength` | 0–2 | 0.05 | 1 (Icarus 0.3) | common |
 | Bloom and colour grading | Bloom spread | `bloom.levelFalloff` | 0.25–1 | 0.05 | 0.6 | common |
@@ -125,7 +125,7 @@ per-map player settings. "Defaults" means the shipped settings apply; these
 can adapt automatically to a map (for example, untouched Bloom intensity is
 1 in Lorencia and 0.3 in Icarus). Moving that slider sets your chosen value on
 every map until Reset restores the shipped settings. Each group has "Reset these settings" for its
-sliders, and "Reset all tuning" below the four groups resets every slider,
+sliders, and "Reset all tuning" below the five groups resets every slider,
 Mood strength included. Resets never change which features are switched on,
 the look, Anti-aliasing or Anisotropic filtering. Opening and closing the window
 changes nothing: a map value between two slider steps stays as it is until you
@@ -290,7 +290,7 @@ restart clears them:
 
 | Command | Effect |
 |---|---|
-| `$texfilter on\|off`, `$lighting on\|off`, `$dynlights on\|off`, `$post on\|off` | one feature on or off |
+| `$texfilter on\|off`, `$lighting on\|off`, `$dynlights on\|off`, `$sun on\|off`, `$post on\|off` | one feature on or off |
 | `$lightmood on\|off\|<0-100>` | the light mood, or its strength in percent |
 
 Diagnostics: `$post view source|bloom|scene` (what feeds the bloom, the blurred
