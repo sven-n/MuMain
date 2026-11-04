@@ -56,6 +56,7 @@ Made on 2026-11-04 while planning phases 9 and 10.
 | O2 | Starting point | Written from scratch. No branch or pull request started phase 9 (sven-n/MuMain and Mosch0512/MuMain searched on 2026-11-04). |
 | O3 | Guardian flag | sven-n/MuMain#966 is merged before the guardian options move, so that the 380 lines the move compares are the ones a server item shows. |
 | O4 | This document | Deleted by its last task, after its lasting content has moved into the docs. |
+| O5 | Definition names (Q-O1, 2026-11-04) | A definition has a name of our own in camelCase (`luck`, `excellentPhysical`, `harmonyDefense`, `wingsOfSatan`), unique across all option files. Item files link to it by that name, and the exchange file carries it. OpenMU's import finds the definition by its fixed GUID where the Season 6 data gives one (`ItemOptionDefinitionNumbers`), else by its type and English name, because harmony and guardian definitions get random GUIDs (P4). The display name is a translated text of its own (D17). |
 
 ## Current state
 
@@ -205,7 +206,7 @@ questions can be read in one go.
 
 | Q | Question | Recommendation |
 |---|---|---|
-| Q-O1 | The key of a definition. OpenMU has only GUIDs, some random per installation (P4). | A name of our own (`luck`, `excellentDefense`, `wingsOfSatan`), the link target in the item files and the identity in the exchange file. OpenMU's import finds a definition by its fixed GUID where it has one, else by type and name. |
+| Q-O1 | The key of a definition. | Answered (O5). |
 | Q-O2 | How an option's value is written. OpenMU writes attribute, aggregate type and related values (`PowerUpDefinition`); the client has its own effect ids (`AT_*`, `_enum.h:288-317`). | Attribute names from OpenMU's `Stats` (`maximumHealth`, `defenseBase`), an aggregate (`add`, `percent`, `addFinal`) and a value; the loader maps each name to the client's effect id, and a name the client does not compute is a warning ("shown, not applied"). This keeps the exchange 1:1. |
 | Q-O3 | Values that depend on the hero or the item: excellent level / 20, the Dark Horse, Gold Fenrir, socket values per level or per max HP (P12). | A small fixed set of value kinds: a constant, a value per level (option, harmony, sphere or item level), and "per hero stat" with a divisor. Computed when shown and when stats are summed, not when the item is made. Anything else stays code with a named value kind. |
 | Q-O4 | Where the option lines' texts live. Today they are `.resx` texts with the value inside the text (`IncreaseMaxHP4`). | On the option, translated like `Tooltip.json`'s texts (`{"en": "Increase Max HP +{value}%"}`), with `{value}`. The `.resx` texts that only options use are removed when their option moves. |
