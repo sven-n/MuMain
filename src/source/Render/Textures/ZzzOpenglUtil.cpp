@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
-#include "Data/DataHandler/DataFileIO.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Drawing/LegacyCalls.h"
@@ -65,90 +64,9 @@ bool         MouseMButtonPush;
 int          MouseWheel;
 DWORD		 MouseRButtonPress = 0;
 
-//bool    showShoppingMall = false;
-
 void OpenExploper(wchar_t* Name, wchar_t* para)
 {
     ShellExecute(NULL, L"open", Name, para, L"", SW_SHOW);
-}
-
-bool CheckID_HistoryDay(wchar_t* Name, WORD day)
-{
-    typedef struct  __day_history__
-    {
-        wchar_t ID[MAX_USERNAME_SIZE + 1];
-        WORD date;
-    }dayHistory;
-
-    FILE* fp;
-    dayHistory days[100];
-    int   count = 0;
-    WORD  num = 0;
-    bool  sameName = false;
-    bool  update = true;
-
-    if ((fp = _wfopen(L"dconfig.ini", L"rb")) != NULL)
-    {
-        if (!DataFileIO::ReadExact(fp, &num, sizeof(WORD)) || num > 100)
-        {
-            num = 0;
-        }
-        else
-        {
-            for (int i = 0; i < num; ++i)
-            {
-                // A history cut short counts as none, as when the file is missing.
-                if (!DataFileIO::ReadExact(fp, days[i].ID, sizeof(char) * (MAX_USERNAME_SIZE + 1)) ||
-                    !DataFileIO::ReadExact(fp, &days[i].date, sizeof(WORD)))
-                {
-                    num = 0;
-                    count = 0;
-                    sameName = false;
-                    update = true;
-                    break;
-                }
-
-                if (!wcscmp(days[i].ID, Name))
-                {
-                    sameName = true;
-                    if (days[i].date == day)
-                    {
-                        update = false;
-                        break;
-                    }
-                    days[i].date = day;
-                }
-                count++;
-            }
-        }
-        fclose(fp);
-    }
-
-    if (update)
-    {
-        if (!sameName)
-        {
-            memcpy(days[num].ID, Name, (MAX_USERNAME_SIZE + 1) * sizeof(char));
-            days[num].date = day;
-
-            num++;
-        }
-
-        fp = _wfopen(L"dconfig.ini", L"wb");
-
-        fwrite(&num, sizeof(WORD), 1, fp);
-        for (int i = 0; i < num; ++i)
-        {
-            fwrite(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
-            fwrite(&days[i].date, sizeof(WORD), 1, fp);
-        }
-
-        fclose(fp);
-    }
-
-    //    showShoppingMall = update;
-
-    return  update;
 }
 
 bool GrabEnable = false;
