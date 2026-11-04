@@ -207,9 +207,9 @@ fails as soon as one comes back:
   warning annotation, such as GitHub's notice that an action targets a deprecated
   Node.js version. Notices, e.g. about runner queue times, are listed only.
 
-The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) build
-without warnings, and miniaudio and glm are system headers: their warnings are for
-their authors. A new compiler or CMake on a runner image can bring new warnings
+The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) compile
+with their warnings turned off (`-w`, `/w`), and miniaudio and glm are included as
+system headers: their warnings are for their authors to fix. A new compiler or CMake on a runner image can bring new warnings
 without any change here; fix them in a PR like any other failure. The Linux jobs
 name their image (`ubuntu-26.04`), because GitHub moves repositories to a new
 `ubuntu-latest` one by one.
