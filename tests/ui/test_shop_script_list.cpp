@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Core/Utilities/Log/MuLogger.h"
 #include "GameShop/ShopListManager/ShopListManager.h"
 
 namespace
@@ -26,6 +27,7 @@ public:
     explicit ScopedWorkingDirectory(const char* name)
         : m_previous(std::filesystem::current_path()), m_directory(std::filesystem::temp_directory_path() / name)
     {
+        mu::log::Init(m_previous);
         std::filesystem::remove_all(m_directory);
         std::filesystem::create_directories(m_directory);
         std::filesystem::current_path(m_directory);
