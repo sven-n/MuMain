@@ -40,7 +40,8 @@ The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
 ([monster-data.md](monster-data.md)), Colors ([item-data.md](item-data.md#colors)),
-Data Checks ([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
+Style Editor ([item-data.md](item-data.md#style-editor)), Data Checks
+([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
 the Sound Editor ([below](#sound-editor)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
@@ -52,7 +53,8 @@ between sessions (`imgui.ini` in the game folder).
 The editor window's bar has the **Windows** menu, **Undo** and **Redo**, the UI
 scale and the language. Undo and Redo act on the tool used last: after a click
 into the Server List window on its changes, after a click into a monster tool
-on monster edits, after a click into an item tool on item edits. While the
+on monster edits, after a click into the Style Editor on its looks, after a
+click into an item tool on item edits. While the
 tool used last is closed (for the monster tools: all of them), they act on
 item edits. A window of tool windows floating outside the editor window has the
 same bar once, on the tab shown at its top left when several are docked in it,
@@ -108,10 +110,11 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 **Windows > Data Checks** lists the problems of all game data in one table:
 the items, the monsters and the monster models as their Save would write
 them now, and the glTF model file table, the server list, the effect
-catalogue and the graphics look (the look profile and the light moods, area
-**Graphics look**) as the game reads their files at start, and the map
-object sounds as the Map Editor's Sounds tab has them
-([map-data.md](map-data.md)).
+catalogue, the render styles (area **Render styles**: their file, checked
+against the item models and the texture files) and the graphics look (the
+look profile and the light moods, area **Graphics look**) as the game reads
+their files at start, and the map object sounds as the Map Editor's Sounds tab
+has them ([map-data.md](map-data.md)).
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
@@ -126,9 +129,9 @@ since the last check.
 
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
-Server List, the Effect Browser, the Map Editor for the map sounds, or the
-Dev Editor for the graphics look. An arrow
-key onto a problem only selects it.
+Server List, the Effect Browser, the Map Editor for the map sounds, the Style
+Editor on the look (and the item a problem is about), or the Dev Editor for the
+graphics look. An arrow key onto a problem only selects it.
 
 ### Sound Mixer
 

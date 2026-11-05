@@ -1078,18 +1078,19 @@ for the inventory, ...
 { "number": 15, "file": "Data/Player/ArmorMale16.bmd", "textureFolders": ["Player"], "renderStyle": "stormCrow" }
 ```
 
-Each look is code, a render style with a name; the names are listed at
-the end of `src/source/Render/Items/ItemRenderStyles.cpp`. Items with the
-same look share a style (the Storm Crow set, the archangel staff and
-crossbow, …), and a few plain looks have names of their own: `textured`
-(drawn with its texture only, whatever the drawing asks for),
+A render style is a named look in `Data/Effects/RenderStyles.json` (see
+[Render styles and item effects](#render-styles-and-item-effects)), or one
+still in code, listed at the end of
+`src/source/Render/Items/ItemRenderStyles.cpp`; the looks move from the code
+into the file step by step, and the game looks a name up in the file first.
+Items with the same look share a style (the Storm Crow set, the archangel
+staff and crossbow, …), and a few plain looks have names of their own:
+`textured` (drawn with its texture only, whatever the drawing asks for),
 `texturedAllMeshes`, `chromeMesh0` and `chromeMesh1` (a chrome shine on
 one mesh), `onlyMesh0WithoutSkin`, `onlyMesh1WithoutSkin` and
 `onlyMesh2WithoutSkin` (in the inventory and on the ground only the armor
-mesh, without the character skin). Styles that only differ in a texture
-share their code, with the texture in the list of names (the package
-boxes, the tickets, the chaos cards, …). An item without `renderStyle` is
-drawn plainly; a new look needs a new style in code.
+mesh, without the character skin). An item without `renderStyle` is drawn
+plainly; a new look is made in the [Style Editor](#style-editor).
 
 Most styles fit any item. The ones that pick a mesh, a texture or a color
 for each of their items only know those items and draw other items
@@ -1204,6 +1205,83 @@ with `hid` are not drawn, so their texture is not loaded.
 
 On Linux the game itself hands out the copied text, so it may only be
 pastable while the game runs. The text is in `MuError.log` as well.
+
+### Render styles and item effects
+
+The render styles that are data are in `Data/Effects/RenderStyles.json`: a
+format version, the kind, the folders the [Style Editor](#style-editor) sorts
+them in, and the looks sorted by name.
+
+```json
+{
+  "formatVersion": 1,
+  "kind": "renderStyle",
+  "lookFolders": [{"name": "Scepters", "looks": ["masterScepter"]}],
+  "looks": [
+    {
+      "name": "masterScepter",
+      "layers": [
+        {"kind": "texture", "opacity": "drawing"},
+        {"kind": "texture", "meshes": [0], "opacity": "drawing", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}, "light": [0.1, 0.3, 1]},
+        {"kind": "texture", "meshes": [1], "texture": "Effect/Chrome01.jpg", "opacity": "drawing", "glowMesh": 1, "glowStrength": 1, "scrollV": {"shape": "scroll", "perSecond": 0.3}, "light": [0.6, 0.8, 1]}
+      ],
+      "itemValuesAfter": {"glowMesh": 1, "glowStrength": 1}
+    }
+  ]
+}
+```
+
+A look draws its layers in their order; each layer draws some of the model's
+meshes in one way. A field left out takes the item's value, the one the
+drawing hands the look.
+
+| Field | Values |
+|---|---|
+| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome) |
+| `motion` | How a reflection moves: `slowDrift` (left out), `fastSweep`, `followsLight`, `swirl`, `strongSwirl`, `stripes`, `verySlowDrift`, `oilSheen`, `stillShine` |
+| `blend` | `normal` (left out), `glow` (added to what is below), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
+| `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those |
+| `texture` | A texture file under `Data` (`Effect/Chrome01.jpg`) instead of the mesh's own: a `.jpg` or a `.tga`, which the game reads from its `.OZJ` or `.OZT` file |
+| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
+| `opacity` | A number, a shape, or `"drawing"`: the drawing's opacity |
+| `glowMesh` | The mesh drawn glowing: a mesh number, `"none"` or `"all"` |
+| `glowStrength`, `scrollU`, `scrollV` | A number or a shape |
+| `scrollingMesh` | The mesh whose texture scrolls while the layer draws, without the light of the scene; otherwise the model's own stays |
+
+A value that changes over time names a **shape**. Its numbers give the
+code's values exactly, so a look moved from code keeps them:
+`{"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}` is the
+code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
+
+| Shape | Fields | Value |
+|---|---|---|
+| `wave` | `from`, `to`, `seconds` | A sine between `from` and `to`, starting halfway and going up; `seconds` a cycle |
+| `bounce` | `from`, `to`, `seconds` | From `from` up to `to` and back (the absolute sine); `seconds` a bounce |
+| `scroll` | `perSecond` | `perSecond` more every second, without end |
+| `ramp` | `from`, `to`, `seconds` | From `from` towards `to` in `seconds`, then from `from` again |
+| `frames` | `count`, `step`, `secondsEach` | `count` steps of `step` from 0, `secondsEach` each, then again from 0 (a texture's frames) |
+| `random` | `from`, `to`, `step` | A value from `from` to `to` in steps of `step`, a new one each frame |
+
+`itemValuesAfter` holds what the look leaves for what is drawn after it in
+the same drawing, the +7 glow and the excellent glow: `opacity`,
+`glowStrength`, `scrollU` and `scrollV` (numbers or shapes), and `glowMesh`,
+`hiddenMesh` and `scrollingMesh` (a mesh number or `"none"`). The scrolling
+mesh stays on the model for its later drawings too.
+
+The checks run at start, in **Data Checks** (area Render styles) and in the
+Style Editor under the picked look. **Fatal**, the game stops at start with
+a message: a file that can't be read, a wrong format version or kind, a name
+that isn't letters and digits or is in the file twice, an unknown kind,
+motion, blend or shape, a shape's missing or wrong number (`seconds` 0 or
+less, `count` outside 1 to 1000, a `random` whose `to` is below `from`), a
+mesh number above 49, and an item effect's part (`itemValuesBefore`).
+**Error**, the game skips that layer: a texture that is no `.jpg` or `.tga`,
+or whose file is missing. **Warning**: unknown fields, a look without
+layers, a look no item uses, a mesh number an item's model doesn't have
+(about that item), and a folder naming a look the file doesn't have.
+
+The item effects are all still code (above); their file,
+`Data/Effects/ItemEffects.json`, comes when the first ones move.
 
 ### Shared models
 
@@ -1453,8 +1531,10 @@ number that has a model but no item:
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
 - **Style and effect**: the render style and the item effect, picked from
-  their lists with how many models use each, and the items that use the
-  picked one (a click selects one). What they are made of is drawing code.
+  their lists with how many models use each and "(code)" for one still in
+  code, and the items that use the picked one (a click selects one). **Open
+  in Style Editor** shows the render style in the
+  [Style Editor](#style-editor).
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game
@@ -1506,6 +1586,46 @@ digits no other style has, starting with the look of the picked style. A
 style no item names is removed (**Remove**, or **Remove them** for all of
 them); the styles of the standard rules stay. Renaming a style is left out.
 The editor has no bold font, so it draws a bold label twice, a pixel apart.
+
+### Style Editor
+
+**Windows > Style Editor** shows the looks of items as a tree, built like the
+[Colors](#colors) window and docked with the item tools: the roots **Render
+styles** and **Item effects**, each look with how many models use it, and
+"(code)" for a look that is still drawing code, which you see with its items
+but can't change. Folders sort the render styles of the file as in the Colors
+window (**New folder**, **Rename**, **Remove**, **Move up**, **Move down**,
+drag and drop); the file keeps them as `"lookFolders"`. A look in code stays
+under its root, and the looks there are sorted by name.
+
+**New look** adds a look to the picked folder that draws the item plainly
+(one texture layer), **Copy** copies the picked look under a new name, and
+**Rename** and **Remove** change a look no item uses. A name has letters and
+digits only, and no other render style has it, in the file or in code.
+
+The picked look shows:
+
+- **Apply** and **Revert**: the fields change a copy of the look; Apply makes
+  it the look, after listing the items it reaches when items use it. Apply is
+  off while the look has a fatal problem.
+- The **problems** of the look as the fields have it, with the file's checks.
+- The **layers** in drawing order, one line each written from its fields,
+  and **Item values after drawing** as the last line; **Add**, **Copy**,
+  **Move up**, **Move down** and **Remove** change the list. Below it are the
+  fields of the picked line: kind, motion, blend, meshes, texture, light,
+  opacity, glow mesh and strength, scroll and the scrolling mesh. A value is
+  the item's, the drawing's (opacity), a number or a shape; a shape's curve
+  over time is drawn below its fields.
+- The items that use the look; a click selects one.
+- A **preview** of the item picked in the item tools, drawn with the look as
+  the fields have it, before Apply: the Item Model window's preview, with
+  **Stop time** and a time slider, an eye per layer that leaves it out, and
+  **Draw as a doppelganger**.
+
+Each change of the looks or their folders is a step of the window's undo
+history and reaches the game at once. **Save** writes
+`Data/Effects/RenderStyles.json`, and **Revert** reads it again (unsaved
+changes are lost). After a read with a fatal problem Save is off.
 
 ### Item Tooltip
 

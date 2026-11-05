@@ -569,8 +569,8 @@ shown live in the Style Editor. The bone effects of held and worn items
 |---|---|---|
 | 0 | This design (L26); #954, merged 2026-11-03 | – |
 | 1 | The mesh list and showing a mesh (L21, L22), the names of L24; #970, merged 2026-11-04 | – |
-| 2 | Step 1 part 1: loader, the two look files, layer drawing with the shared mesh rules, the draw recorder, the checks, the Style Editor; L17's groups 1 and 2 without the six of L33 and `characterCard` (96 render styles: 36 of group 1, 60 of group 2; `characterCard` picks its texture per item, L12's values per item, so it moves with group 3) | – |
-| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `characterCard` and the six render styles of L33, `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle`, the shines below +3 and the Deadly Staff's glow pass as glow data (L30) | – (#915 merged on 2026-11-04) |
+| 2 | Step 1 part 1: loader, the render style file, layer drawing with the shared mesh rules, the draw recorder, the checks (Data Checks area Render styles), the Style Editor; L17's groups 1 and 2 without the six of L33 and `characterCard` (96 render styles: 36 of group 1, 60 of group 2; `characterCard` picks its texture per item, L12's values per item, so it moves with group 3). The item effect file `ItemEffects.json` and its Data Checks area come with the item effects in PR 3: they need the Only when of group 3 (follows from L17) | – |
+| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `ItemEffects.json` with its Data Checks area and its Style Editor root's folders, `characterCard` and the six render styles of L33, `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle`, the shines below +3 and the Deadly Staff's glow pass as glow data (L30) | – (#915 merged on 2026-11-04) |
 | 4 | Steps 2 and 3: FX1.7c, the 12 looks with things on bones | – |
 | 5 | The bone effects of held and worn items, after their survey; then task 8 (the docs, this document deleted) | PR 4 |
 
