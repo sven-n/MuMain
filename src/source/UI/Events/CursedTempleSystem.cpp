@@ -5,6 +5,7 @@
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Events/CursedTempleSystem.h"
+#include "Core/Input/SyntheticInput.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
@@ -723,7 +724,7 @@ void mu::ui::window::CCursedTempleSystem::UpdateTutorialStep()
 
 bool mu::ui::window::CCursedTempleSystem::Update()
 {
-    if (!MouseRButton || !g_bWndActive)
+    if (!MouseRButton || (!g_bWndActive && !Core::Input::Synthetic::IsKeyHeld(VK_RBUTTON)))
         m_CursedTempleGestureConsumed = false;
 
     UpdateScore();
@@ -1176,7 +1177,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
         }
         SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType,
                                                                      static_cast<uint16_t>(tc->Key), Distance);
-        if (MouseRButton && g_bWndActive)
+        if (MouseRButton && (g_bWndActive || Core::Input::Synthetic::IsKeyHeld(VK_RBUTTON)))
             m_CursedTempleGestureConsumed = true;
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;

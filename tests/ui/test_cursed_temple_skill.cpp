@@ -8,6 +8,7 @@
 #ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
 #include "Dotnet/Connection.h"
 #endif
+#include "Core/Input/SyntheticInput.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -331,6 +332,16 @@ public:
         m_window->ResolveSkill({static_cast<WORD>(skill), static_cast<WORD>(HeroId), static_cast<WORD>(HeroId), false});
     }
 
+    void ResolveSucceeded(int skill)
+    {
+        m_window->ResolveSkill({static_cast<WORD>(skill), static_cast<WORD>(HeroId), static_cast<WORD>(HeroId), true});
+    }
+
+    void UpdateTemple()
+    {
+        m_window->Update();
+    }
+
     void ReleaseRightButton()
     {
         MouseRButton = false;
@@ -487,6 +498,63 @@ TEST_CASE("Temple response before RMB release does not repeat a held gesture [ui
 
     fixture.ReleaseRightButton();
     fixture.BeginHeldCast(skill, MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+}
+#endif
+
+#if defined(MU_TEST_TEMPLE_AOT_TRANSPORT) && defined(MU_ENABLE_CONTROL_SOCKET)
+TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Temple response [ui][temple-skill]")
+{
+    using namespace Core::Input::Synthetic;
+    TempleSkillFixture fixture;
+    struct InjectorGuard
+    {
+        ~InjectorGuard()
+        {
+            Reset();
+            SetEventDelivery(nullptr, nullptr);
+        }
+    } guard;
+    Reset();
+    SetEventDelivery(
+        [](SDL_Event&, bool& propagates)
+        {
+            propagates = true;
+            return true;
+        },
+        nullptr);
+    g_bWndActive = false;
+    MouseRButton = false;
+    Hero->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
+
+    REQUIRE(Click(100, 200, MouseButton::Right, true));
+    for (int frame = 0; frame < 12 && !IsKeyHeld(VK_RBUTTON); ++frame)
+        BeginFrame();
+    REQUIRE(IsKeyHeld(VK_RBUTTON));
+    REQUIRE(MouseRButton);
+    fixture.RetryHeldCast(MissingSelection);
+    REQUIRE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+
+    fixture.ResolveSucceeded(AT_SKILL_CURSED_TEMPLE_PRODECTION);
+    REQUIRE_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    BeginFrame();
+    REQUIRE(IsKeyHeld(VK_RBUTTON));
+    fixture.UpdateTemple();
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+        BeginFrame();
+    REQUIRE(IsIdle());
+    fixture.UpdateTemple();
+    REQUIRE(Click(100, 200, MouseButton::Right, true));
+    for (int frame = 0; frame < 12 && !IsKeyHeld(VK_RBUTTON); ++frame)
+        BeginFrame();
+    REQUIRE(IsKeyHeld(VK_RBUTTON));
+    fixture.RetryHeldCast(MissingSelection);
     CHECK(Hero->m_CursedTempleCurSkillPacket);
     fixture.ExpectRequestCount(1);
 }
