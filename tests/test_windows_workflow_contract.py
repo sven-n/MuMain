@@ -606,6 +606,20 @@ check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit 
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.
 CACHE_SAVER = "github.event_name == 'push' && github.ref == 'refs/heads/main'"
+# Each compiler cache save holds the objects its build used, not every build's since the cache began: the step before
+# the save drops the older ones, in the runs that save.
+for job_name, job_body, system in (("build-windows", native_job, "Windows"), ("build-linux", linux_job, "Linux"),
+                                   ("build-macos", macos_job, "macOS")):
+    names = re.findall(r"(?m)^      - name: (.+)$", job_body)
+    save_name = f"Save {system} compilation cache"
+    check("Trim compiler cache" in names and save_name in names
+          and names.index("Trim compiler cache") + 1 == names.index(save_name),
+          f"{job_name} must trim its compiler cache right before saving it")
+    trim = step(job_body, job_name, "Trim compiler cache")
+    for required in (f"if: {CACHE_SAVER} && steps.ccache.outputs.cache-hit != 'true'", "ccache --evict-older-than",
+                     "BUILD_STARTED"):
+        check(required in trim, f"{job_name} compiler cache trim missing {required}")
+    check("BUILD_STARTED=" in step(job_body, job_name, "Build"), f"{job_name} Build must note when it starts")
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
     for job_step in re.split(r"(?m)^      - name: ", job_body)[1:]:

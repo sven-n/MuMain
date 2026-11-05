@@ -152,8 +152,8 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
-      # MSVC's objects carry their debug info (/Z7, see src/CMakeLists.txt), so they are larger than GCC's and Clang's.
-      CCACHE_MAXSIZE: 3G
+      # MSVC's objects carry their debug info (/Z7, see src/CMakeLists.txt): one build's take about 0.5 GB.
+      CCACHE_MAXSIZE: 1500M
 
     steps:
       - name: Checkout repository
@@ -356,7 +356,10 @@ jobs:
           key: ${{ steps.vcpkg_cache.outputs.cache-primary-key }}
 
       - name: Build
+        # Trim compiler cache keeps the objects used from here on.
         run: |
+          $started = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+          "BUILD_STARTED=$started" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           ccache --zero-stats
           python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
 
@@ -616,6 +619,17 @@ jobs:
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $age = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - [long]$env:BUILD_STARTED + 60
+          ccache --evict-older-than "${age}s"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ccache --show-stats
+
       - name: Save Windows compilation cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
@@ -714,7 +728,9 @@ jobs:
           -DBUILD_TESTING=ON
 
       - name: Build
+        # Trim compiler cache keeps the objects used from here on.
         run: |
+          echo "BUILD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
 
@@ -772,6 +788,14 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        run: |
+          ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"
+          ccache --show-stats
 
       - name: Save Linux compilation cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
@@ -871,7 +895,9 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
+        # Trim compiler cache keeps the objects used from here on.
         run: |
+          echo "BUILD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
 
@@ -927,6 +953,14 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        run: |
+          ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"
+          ccache --show-stats
 
       - name: Save macOS compilation cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
