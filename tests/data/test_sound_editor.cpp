@@ -906,8 +906,8 @@ TEST_CASE("Sound Editor: two rows with the same key, map object sounds of one fi
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
 }
 
-TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under its new key, in the same step "
-          "(Q-SE4) [sounds][editor]")
+TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under its new key, and undo and redo take "
+          "the key back and forth (Q-SE4) [sounds][editor]")
 {
     EditorScope scope;
     g_SoundFileDatabase.Build(std::vector<SoundFile>{});
@@ -947,6 +947,68 @@ TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under it
     REQUIRE(g_SoundEdits.Redo());
     REQUIRE(g_SoundEdits.Redo());
     CHECK(g_SoundEdits.Folders() == moved);
+}
+
+// The editor calls FollowKeyChanges each frame, after the other windows.
+TEST_CASE("Sound Editor: the folders keep the sounds whose keys another window changes, a set renamed in Monster "
+          "Sounds, an entry removed or given another file in the Map Editor's Sounds tab, also in the history and "
+          "after Revert (Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    Data::Maps::MapObjectSound other = Waterfall();
+    other.maps = {{30}};
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall(), other});
+    g_SoundEdits.TakeSaved();
+    const std::string idle = "set:Death Tree:Data/Sound/EditorTest/ok.wav";
+    const std::string attack = "set:Death Tree:SOUND_MONSTER_MAGICSKULL1";
+    const std::string first = "objects:Data/Sound/EditorTest/ok.wav";
+    const std::string picked = "objects:Data/Sound/EditorTest/Other.wav";
+    const std::vector<SoundFolder> folders{Folder("Death Tree", {idle, attack}), Folder("Kalima", {first}),
+                                           Folder("Map 30", {first + "#2"})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", folders));
+    std::filesystem::create_directories("Data/Audio");
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+
+    // Monster Sounds renames the set: its sounds keep their folder, which is
+    // not saved yet; Revert reads the file's folders and follows it too.
+    REQUIRE(g_MonsterEdits.RenameSoundSet("Rename the set", "Death Tree", "Tree of Death", -1));
+    g_SoundEdits.FollowKeyChanges();
+    const std::vector<SoundFolder> renamed{Folder("Death Tree", {"set:Tree of Death:Data/Sound/EditorTest/ok.wav",
+                                                                 "set:Tree of Death:SOUND_MONSTER_MAGICSKULL1"}),
+                                           Folder("Kalima", {first}), Folder("Map 30", {first + "#2"})};
+    CHECK(g_SoundEdits.Folders() == renamed);
+    CHECK(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(g_SoundEdits.Folders() == renamed);
+    // Its undo there takes the keys back.
+    REQUIRE(g_MonsterEdits.Undo());
+    g_SoundEdits.FollowKeyChanges();
+    CHECK(g_SoundEdits.Folders() == folders);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    // The Sounds tab removes the first entry: the second takes its key ("#2"
+    // moves), and the first's entry goes.
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{other});
+    g_SoundEdits.FollowKeyChanges();
+    CHECK(g_SoundEdits.Folders() ==
+          std::vector<SoundFolder>{Folder("Death Tree", {idle, attack}), Folder("Kalima"), Folder("Map 30", {first})});
+
+    // A file that a gone entry names (here in Kalima) is picked in the Sounds
+    // tab: the sound stays in its own folder only, also in the history.
+    std::vector<SoundFolder> withGone = g_SoundEdits.Folders();
+    withGone[1].sounds = {picked};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", withGone));
+    other.file = "Data/Sound/EditorTest/Other.wav";
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{other});
+    g_SoundEdits.FollowKeyChanges();
+    const std::vector<SoundFolder> followed{Folder("Death Tree", {idle, attack}), Folder("Kalima"),
+                                            Folder("Map 30", {picked})};
+    CHECK(g_SoundEdits.Folders() == followed);
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.Folders() == followed);
 }
 
 TEST_CASE("Sound Editor: a folders' file that cannot be read keeps the folders as they are, so Save leaves the file "

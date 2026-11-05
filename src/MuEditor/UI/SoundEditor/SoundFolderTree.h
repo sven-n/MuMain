@@ -46,9 +46,10 @@ bool MoveFolder(std::vector<Data::Sounds::SoundFolder>& folders, const FolderPat
 // of every folder ("Not sorted"). False for no such folder or no change.
 bool MoveSound(std::vector<Data::Sounds::SoundFolder>& folders, const std::string& key, const FolderPath& to);
 
-// The sounds whose keys changed (their file did, `renamed`: before to after)
+// The sounds whose keys changed (`renamed`: before to after, SoundKeyFollow)
 // stay where they are under the new keys, all at once, so keys may trade
-// places. False when no folder held one.
+// places; another entry of a new key (a sound that is gone) goes, so the
+// sound is in one folder. False when nothing changed.
 bool RenameSounds(std::vector<Data::Sounds::SoundFolder>& folders, const std::map<std::string, std::string>& renamed);
 
 // The folders that hold a key no row has: the keys are dropped (a sound

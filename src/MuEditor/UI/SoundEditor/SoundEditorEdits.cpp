@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <iterator>
-#include <tuple>
+#include <utility>
 
 namespace MuEditor::SoundEditor
 {
@@ -109,37 +109,10 @@ std::optional<Data::Monsters::MonsterSoundSet> TurnSetSound(const Data::Monsters
     return turned;
 }
 
-// A row by what it is, whatever its key: a set's sound by its set and place,
-// a map object sound by its place, any other by its key.
-using RowIdentity = std::tuple<RowSource, std::string, size_t, std::string>;
-
-RowIdentity IdentityOf(const SoundRow& row)
+// The versions of the tables the keys come from (SoundKeyFollow).
+std::pair<int, int> KeyedVersions()
 {
-    if (row.source == RowSource::MonsterSet || row.source == RowSource::MapObject)
-    {
-        return {row.source, row.set, row.index, {}};
-    }
-    return {row.source, {}, 0, row.key};
-}
-
-// The keys before and after of the rows whose key changed.
-std::map<std::string, std::string> ChangedKeys(const std::vector<SoundRow>& before, const std::vector<SoundRow>& after)
-{
-    std::map<RowIdentity, std::string> keys;
-    for (const SoundRow& row : before)
-    {
-        keys.emplace(IdentityOf(row), row.key);
-    }
-    std::map<std::string, std::string> changed;
-    for (const SoundRow& row : after)
-    {
-        const auto found = keys.find(IdentityOf(row));
-        if (found != keys.end() && found->second != row.key)
-        {
-            changed.emplace(found->second, row.key);
-        }
-    }
-    return changed;
+    return {g_MonsterSoundSetDatabase.GetVersion(), g_MapObjectSoundDatabase.GetVersion()};
 }
 } // namespace
 
@@ -160,6 +133,8 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     {
         TakeSaved();
     }
+    // What other windows changed first, apart from this change.
+    FollowKeyChanges();
     SoundEdit edit;
     edit.label = StepLabel(row);
     std::optional<Data::Monsters::MonsterSoundSet> savedSet;
@@ -248,12 +223,6 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     {
         return false;
     }
-    // A set's or a map object sound's key has its file in it (SoundRow::key).
-    std::optional<std::vector<SoundRow>> rowsBefore;
-    if (values.file != row.file && row.source != RowSource::Code)
-    {
-        rowsBefore = BuildRows();
-    }
     if (!Apply(edit, true))
     {
         return false;
@@ -262,42 +231,88 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     {
         m_savedSets.try_emplace(row.set, *savedSet);
     }
-    if (rowsBefore)
-    {
-        FollowKeys(edit, *rowsBefore);
-    }
     m_undo.push_back(std::move(edit));
     m_redo.clear();
+    // A set's or a map object sound's key has its file in it (SoundRow::key).
+    FollowKeyChanges();
     return true;
-}
-
-void SoundEdits::FollowKeys(SoundEdit& edit, const std::vector<SoundRow>& rowsBefore)
-{
-    const std::map<std::string, std::string> changed = ChangedKeys(rowsBefore, BuildRows());
-    std::vector<Data::Sounds::SoundFolder> folders = Folders();
-    if (changed.empty() || !m_folderProblems.empty() || !RenameSounds(folders, changed))
-    {
-        return;
-    }
-    edit.foldersBefore = Folders();
-    edit.foldersAfter = folders;
-    m_folders = std::move(folders);
 }
 
 const std::vector<Data::Sounds::SoundFolder>& SoundEdits::Folders()
 {
     if (!m_folders)
     {
-        Data::Sounds::SoundFoldersLoadResult read =
-            Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
-        m_folders = std::move(read.folders);
-        m_savedFolders = m_folders;
-        m_folderProblems.clear();
-        std::copy_if(read.issues.begin(), read.issues.end(), std::back_inserter(m_folderProblems),
-                     [](const Data::Items::ItemDataIssue& issue)
-                     { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+        ReadFolders();
     }
     return *m_folders;
+}
+
+void SoundEdits::ReadFolders()
+{
+    Data::Sounds::SoundFoldersLoadResult read = Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
+    m_folders = std::move(read.folders);
+    m_savedFolders = m_folders;
+    m_folderProblems.clear();
+    std::copy_if(read.issues.begin(), read.issues.end(), std::back_inserter(m_folderProblems),
+                 [](const Data::Items::ItemDataIssue& issue)
+                 { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+    KeyedTables now = CurrentKeyedTables();
+    if (!m_fileKeyed)
+    {
+        m_fileKeyed = now;
+    }
+    // The file names the sounds by the keys they had when it was written: the
+    // ones that changed since keep their folders (not saved yet).
+    if (m_folderProblems.empty())
+    {
+        RenameSounds(*m_folders, FollowedKeys(*m_fileKeyed, now));
+    }
+    m_keyed = std::move(now);
+    m_keyedVersions = KeyedVersions();
+}
+
+void SoundEdits::FollowKeyChanges()
+{
+    if (!m_fileKeyed)
+    {
+        // The folders' file goes with the tables as the editor found them.
+        m_fileKeyed = CurrentKeyedTables();
+    }
+    if (!m_folders || !m_keyed || KeyedVersions() == m_keyedVersions)
+    {
+        return;
+    }
+    KeyedTables now = CurrentKeyedTables();
+    // A file that could not be read is never written: its folders stay.
+    if (m_folderProblems.empty())
+    {
+        RenameInFolders(FollowedKeys(*m_keyed, now));
+    }
+    m_keyed = std::move(now);
+    m_keyedVersions = KeyedVersions();
+}
+
+void SoundEdits::RenameInFolders(const std::map<std::string, std::string>& renamed)
+{
+    if (renamed.empty())
+    {
+        return;
+    }
+    RenameSounds(*m_folders, renamed);
+    for (std::vector<SoundEdit>* steps : {&m_undo, &m_redo})
+    {
+        for (SoundEdit& step : *steps)
+        {
+            if (step.foldersBefore)
+            {
+                RenameSounds(*step.foldersBefore, renamed);
+            }
+            if (step.foldersAfter)
+            {
+                RenameSounds(*step.foldersAfter, renamed);
+            }
+        }
+    }
 }
 
 const std::vector<Data::Items::ItemDataIssue>& SoundEdits::FolderProblems()
@@ -397,6 +412,7 @@ bool SoundEdits::Undo()
     {
         return false;
     }
+    FollowKeyChanges();
     if (!Apply(m_undo.back(), false))
     {
         m_lastRefused = true;
@@ -404,6 +420,7 @@ bool SoundEdits::Undo()
     }
     m_redo.push_back(std::move(m_undo.back()));
     m_undo.pop_back();
+    FollowKeyChanges();
     return true;
 }
 
@@ -414,6 +431,7 @@ bool SoundEdits::Redo()
     {
         return false;
     }
+    FollowKeyChanges();
     if (!Apply(m_redo.back(), true))
     {
         m_lastRefused = true;
@@ -421,6 +439,7 @@ bool SoundEdits::Redo()
     }
     m_undo.push_back(std::move(m_redo.back()));
     m_redo.pop_back();
+    FollowKeyChanges();
     return true;
 }
 
@@ -435,6 +454,7 @@ bool SoundEdits::IsModified() const
 
 bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
 {
+    FollowKeyChanges();
     bool saved = true;
     if (m_savedCode && *m_savedCode != g_SoundFileDatabase.GetAll())
     {
@@ -475,6 +495,7 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
         if (Data::Sounds::SaveSoundFolders(Data::Sounds::GetSoundFoldersFile(), *m_folders, issues))
         {
             m_savedFolders = m_folders;
+            m_fileKeyed = m_keyed;
         }
         else
         {
@@ -575,7 +596,6 @@ void SoundEdits::TakeSaved()
     m_savedSets.clear();
     m_savedObjects = g_MapObjectSoundDatabase.GetAll();
     Folders();
-    m_savedFolders = m_folders;
     m_savedEvents = g_SoundEventDatabase.GetAll();
 }
 
@@ -589,6 +609,9 @@ void SoundEdits::Clear()
     m_folders.reset();
     m_savedFolders.reset();
     m_folderProblems.clear();
+    m_keyed.reset();
+    m_keyedVersions = {-1, -1};
+    m_fileKeyed.reset();
     m_savedEvents.reset();
 }
 } // namespace MuEditor::SoundEditor

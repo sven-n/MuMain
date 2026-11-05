@@ -3,6 +3,8 @@
 #ifdef _EDITOR
 
 #include "Audio/SoundSource.h"
+#include "Data/GameData/MapData/MapObjectSound.h"
+#include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <optional>
 #include <string>
@@ -73,6 +75,12 @@ struct SoundRow
 // Every row: the code's sounds in their file's order, then the sets' (by set
 // name), the map object sounds and the sounds played that nothing loads.
 std::vector<SoundRow> BuildRows();
+
+// The rows of these sets' sounds (in the sets' order) and map object sounds,
+// with only their source, set, index and key, keyed as BuildRows keys them:
+// what the folders name them by (SoundKeyFollow).
+std::vector<SoundRow> KeyRows(const std::vector<Data::Monsters::MonsterSoundSet>& sets,
+                              const std::vector<Data::Maps::MapObjectSound>& objects);
 
 // The text the editor shows for the row (Q-SE1): its name, else its id,
 // else "<set>: <file without folder>", else its file.

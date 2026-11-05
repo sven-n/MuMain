@@ -87,6 +87,17 @@ void AddCodeRows(std::vector<SoundRow>& rows)
     }
 }
 
+// The name the set's events give the sound: its id, else its file.
+std::string SetSoundKey(const std::string& set, const Data::Monsters::MonsterSound& sound)
+{
+    return "set:" + set + ":" + Data::Monsters::SoundNameOf(sound);
+}
+
+std::string ObjectSoundKey(const Data::Maps::MapObjectSound& sound)
+{
+    return "objects:" + sound.file;
+}
+
 void AddSetRows(std::vector<SoundRow>& rows)
 {
     for (const Data::Monsters::MonsterSoundSet* set : g_MonsterSoundSetDatabase.GetAll())
@@ -96,8 +107,7 @@ void AddSetRows(std::vector<SoundRow>& rows)
             const Data::Monsters::MonsterSound& sound = set->sounds[index];
             SoundRow row;
             row.source = RowSource::MonsterSet;
-            // The name the set's events give the sound: its id, else its file.
-            row.key = "set:" + set->name + ":" + Data::Monsters::SoundNameOf(sound);
+            row.key = SetSoundKey(set->name, sound);
             row.id = sound.id;
             row.set = set->name;
             row.index = index;
@@ -122,7 +132,7 @@ void AddObjectRows(std::vector<SoundRow>& rows)
         const Data::Maps::MapObjectSound& sound = sounds[index];
         SoundRow row;
         row.source = RowSource::MapObject;
-        row.key = "objects:" + sound.file;
+        row.key = ObjectSoundKey(sound);
         row.index = index;
         row.name = sound.name;
         row.file = sound.file;
@@ -221,6 +231,36 @@ std::vector<SoundRow> BuildRows()
     AddNotLoadedRows(rows);
     MakeKeysUnique(rows);
     FindProblems(rows);
+    return rows;
+}
+
+std::vector<SoundRow> KeyRows(const std::vector<Data::Monsters::MonsterSoundSet>& sets,
+                              const std::vector<Data::Maps::MapObjectSound>& objects)
+{
+    std::vector<SoundRow> rows;
+    for (const Data::Monsters::MonsterSoundSet& set : sets)
+    {
+        for (size_t index = 0; index < set.sounds.size(); ++index)
+        {
+            SoundRow row;
+            row.source = RowSource::MonsterSet;
+            row.set = set.name;
+            row.index = index;
+            row.key = SetSoundKey(set.name, set.sounds[index]);
+            rows.push_back(std::move(row));
+        }
+    }
+    for (size_t index = 0; index < objects.size(); ++index)
+    {
+        SoundRow row;
+        row.source = RowSource::MapObject;
+        row.index = index;
+        row.key = ObjectSoundKey(objects[index]);
+        rows.push_back(std::move(row));
+    }
+    // The other rows' keys never start with "set:" or "objects:", so these
+    // come out of MakeKeysUnique as in BuildRows.
+    MakeKeysUnique(rows);
     return rows;
 }
 

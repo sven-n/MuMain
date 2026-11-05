@@ -70,6 +70,38 @@ size_t DropStale(std::vector<SoundFolder>& folders, const std::set<std::string>&
     }
     return dropped;
 }
+
+// An entry of a key a renamed sound takes (`taken`) that was not renamed is
+// one of a sound that is gone: it goes, so the sound is in one folder.
+bool Rename(std::vector<SoundFolder>& folders, const std::map<std::string, std::string>& renamed,
+            const std::set<std::string>& taken)
+{
+    bool any = false;
+    for (SoundFolder& folder : folders)
+    {
+        for (auto sound = folder.sounds.begin(); sound != folder.sounds.end();)
+        {
+            const auto found = renamed.find(*sound);
+            if (found != renamed.end())
+            {
+                *sound = found->second;
+                ++sound;
+                any = true;
+            }
+            else if (taken.contains(*sound))
+            {
+                sound = folder.sounds.erase(sound);
+                any = true;
+            }
+            else
+            {
+                ++sound;
+            }
+        }
+        any = Rename(folder.folders, renamed, taken) || any;
+    }
+    return any;
+}
 } // namespace
 
 SoundFolder* FindFolder(std::vector<SoundFolder>& folders, const FolderPath& path)
@@ -232,21 +264,12 @@ bool MoveSound(std::vector<SoundFolder>& folders, const std::string& key, const 
 
 bool RenameSounds(std::vector<SoundFolder>& folders, const std::map<std::string, std::string>& renamed)
 {
-    bool any = false;
-    for (SoundFolder& folder : folders)
+    std::set<std::string> taken;
+    for (const auto& entry : renamed)
     {
-        for (std::string& sound : folder.sounds)
-        {
-            const auto found = renamed.find(sound);
-            if (found != renamed.end())
-            {
-                sound = found->second;
-                any = true;
-            }
-        }
-        any = RenameSounds(folder.folders, renamed) || any;
+        taken.insert(entry.second);
     }
-    return any;
+    return Rename(folders, renamed, taken);
 }
 
 size_t DropStaleSounds(std::vector<SoundFolder>& folders, const std::vector<std::string>& keys)

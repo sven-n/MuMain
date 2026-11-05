@@ -57,6 +57,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/SoundEditor/MuSoundEditorUI.h"
+#include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundMixer/MuSoundMixerUI.h"
 
 namespace mu
@@ -948,6 +949,10 @@ void CMuEditorCore::Render()
         {
             g_MuSoundMixerUI.Render(&m_windows.soundMixer);
         }
+        // Also while the Sound Editor is closed: its folders keep the sounds
+        // whose keys the windows above changed (a set renamed in Monster
+        // Sounds, a file picked in the Map Editor's Sounds tab).
+        g_SoundEdits.FollowKeyChanges();
         if (m_windows.soundEditor)
         {
             g_MuSoundEditorUI.Render(&m_windows.soundEditor);

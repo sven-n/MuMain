@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "SoundEditorRows.h"
+#include "SoundKeyFollow.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MapData/MapObjectSound.h"
@@ -86,8 +87,14 @@ public:
     bool Change(const SoundRow& row, const RowValues& values);
 
     // The folders (Q-SE4), read from Data/Audio/SoundFolders.json the first
-    // time.
+    // time: the sounds whose keys changed since the file was written keep
+    // their folders under the new keys.
     const std::vector<Data::Sounds::SoundFolder>& Folders();
+    // The folders, also the history's steps, keep the sounds whose keys
+    // changed since the last call in any window (FollowedKeys: a set renamed
+    // in Monster Sounds, a file picked in the Map Editor's Sounds tab); Save
+    // then writes the new keys. The editor calls it each frame.
+    void FollowKeyChanges();
     // What kept the folders' file from being read (its fatal problems): the
     // folders stay as they are, so Save never writes over the file, until
     // Revert reads it again. Empty when it was read.
@@ -129,7 +136,8 @@ public:
     // changed: as Data/Monsters/Sounds.json has it) and the folders; the
     // history goes.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
-    // The tables as they are now are what Save and Revert compare with.
+    // The tables as they are now, and the folders as their file has them, are
+    // what Save and Revert compare with.
     void TakeSaved();
 
     // Forgets the history and the saved state (tests).
@@ -141,9 +149,9 @@ private:
     // False, with nothing changed, when the step's sound is not as the other
     // direction left it.
     bool Apply(const SoundEdit& edit, bool forward);
-    // A change of a file changes its row's key (SoundRow::key): the folders
-    // keep the sounds whose keys changed under their new ones, in the step.
-    void FollowKeys(SoundEdit& edit, const std::vector<SoundRow>& rowsBefore);
+    void ReadFolders();
+    // In the folders and in the steps' folders.
+    void RenameInFolders(const std::map<std::string, std::string>& renamed);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;
@@ -156,6 +164,12 @@ private:
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
     std::vector<Data::Items::ItemDataIssue> m_folderProblems;
+    // The tables whose keys the folders and the steps' folders name, with
+    // their databases' versions, and the ones of the folders' file (when the
+    // editor found them, or the last Save of the folders).
+    std::optional<KeyedTables> m_keyed;
+    std::pair<int, int> m_keyedVersions{-1, -1};
+    std::optional<KeyedTables> m_fileKeyed;
     std::optional<std::vector<Data::Sounds::SoundEvent>> m_savedEvents;
 };
 } // namespace MuEditor::SoundEditor

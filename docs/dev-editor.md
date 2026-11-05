@@ -252,7 +252,11 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   folder**, **Rename**, **Remove** (its folders and sounds move up), **Move
   up** and **Move down** act on the folder clicked; drag a sound by its id
   onto a folder. A filter opens the folders that hold what it shows, a
-  selection the ones that hold the sound. An entry of a sound that is gone
+  selection the ones that hold the sound. A folder names a set's sound by
+  its set and its id or file, and a map object sound by its file: when one
+  of those changes, here or in another window (a set renamed in Monster
+  Sounds, a file picked in the Map Editor's Sounds tab), the sound keeps its
+  folder, and **Save** writes the new names. An entry of a sound that is gone
   (removed in another window, or by hand in the file) stays, so the sound
   finds its folder when it comes back; the folder bar counts them, and
   **Drop them** takes them out as a step that **Undo** puts back.
