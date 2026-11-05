@@ -322,6 +322,25 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
     for required in ("scripts/ci_warnings.py run", "-DMU_WARNINGS_AS_ERRORS=ON"):
         check(required in platform_configure, f"{platform} configure must fail on warnings: {required}")
     check("scripts/ci_warnings.py run" in platform_build, f"{platform} build must fail on warnings")
+# Every job names its runner image: a -latest label moves to a new image whenever GitHub decides, with new
+# warnings and, for macOS, a new minimum macOS (cmake/toolchains/macos-arm64.cmake).
+for workflow_name, workflow in (("ci.yml", ci), ("fork-ci.yml", read_optional(FORK_CI_WORKFLOW))):
+    for runner in re.findall(r"(?m)^\s*runs-on:\s*(\S+)", workflow):
+        check(not runner.endswith("-latest"), f"{workflow_name} must name its runner image, not {runner}")
+# Fork CI's Windows build is the only Windows build a pull request gets: its editor OFF row holds the same rule,
+# and its last job checks the annotations.
+fork_ci_workflow = read_optional(FORK_CI_WORKFLOW)
+if fork_ci_workflow:
+    fork_windows = job(fork_ci_workflow, "windows")
+    fork_wrapper = "python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}"
+    fork_configure = step(fork_windows, "windows", "Configure CMake")
+    for required in (fork_wrapper, "-DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}"):
+        check(required in fork_configure, f"Fork CI's editor OFF configure must fail on warnings: {required}")
+    check(fork_wrapper in step(fork_windows, "windows", "Build"), "Fork CI's editor OFF build must fail on warnings")
+    fork_annotations = job(fork_ci_workflow, "annotations")
+    for required in ("needs: [windows, linux-editor, macos-editor]", "if: always()", "actions: read",
+                     "checks: read", "python3 scripts/ci_job_annotations.py"):
+        check(required in fork_annotations, f"Fork CI must fail on warning annotations: {required}")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
 check("bash scripts/check_format.sh" in quality_formatting, "Formatting gate must share the hook's script")
