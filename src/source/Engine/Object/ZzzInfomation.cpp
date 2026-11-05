@@ -89,6 +89,12 @@ void OpenFilterFile(const wchar_t* FileName)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
     }
+    else if (entries < MAX_FILTERS)
+    {
+        // A file cut short after the list's end loads the same way; the error log says how much was there.
+        g_ErrorReport.Write(L"%ls - %d of %d filter entries; the list ends at entry %d.\r\n", FileName,
+                            static_cast<int>(entries), MAX_FILTERS, AbuseFilterNumber);
+    }
 }
 
 void OpenNameFilterFile(const wchar_t* FileName)
@@ -140,6 +146,8 @@ void OpenGateScript(const wchar_t* FileName)
         int Size = sizeof(GATE_ATTRIBUTE);
         std::vector<BYTE> record(static_cast<std::size_t>(Size));
         BYTE* Buffer = record.data();
+        int loaded = 0;
+        bool corrupted = false;
         for (int i = 0; i < MAX_GATES; i++)
         {
             // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
@@ -152,10 +160,17 @@ void OpenGateScript(const wchar_t* FileName)
             if (read != static_cast<std::size_t>(Size))
             {
                 DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+                corrupted = true;
                 break;
             }
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
+            ++loaded;
+        }
+        // A file cut short between two gates loads the same way; the error log says how many there were.
+        if (!corrupted && loaded < MAX_GATES)
+        {
+            g_ErrorReport.Write(L"%ls - %d of %d gates; the others stay empty.\r\n", FileName, loaded, MAX_GATES);
         }
     }
     else
