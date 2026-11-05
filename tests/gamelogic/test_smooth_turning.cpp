@@ -420,6 +420,23 @@ TEST_CASE("A turn toward the cursor tells the server its facing only when it arr
     }
 }
 
+TEST_CASE("The slope lean and a nod's bow tip the body, not the way it travels [gamelogic][turning]")
+{
+    const AnimationFactor factor(1.f);
+    for (const float lean : {0.f, 10.f, 25.f})
+    {
+        CAPTURE(lean);
+        CHARACTER& walker = WalkerOnPath(0.f);
+        walker.Motion.SlopePitch = lean;
+        walker.Motion.NodBowApplied = 5.f;
+        walker.Object.Angle[0] = lean + 5.f;
+        const float y = walker.Object.Position[1];
+        MoveCharacterPosition(&walker, walker.Object.Angle[2]);
+        // The whole step on the ground, as standing straight.
+        CHECK(walker.Object.Position[1] - y == doctest::Approx(10.f));
+    }
+}
+
 TEST_CASE("A position from the server keeps no flight pivot shift, through the next walks [gamelogic][flight]")
 {
     static CHARACTER flyer;

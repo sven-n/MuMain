@@ -6380,7 +6380,8 @@ void MoveCharacterPosition(CHARACTER* c, float heading)
 {
     OBJECT* o = &c->Object;
     float Matrix[3][4];
-    const vec3_t direction = {o->Angle[0], o->Angle[1], heading};
+    // The slope lean and the nod's bow tip the body, not the way it travels.
+    const vec3_t direction = {o->Angle[0] - c->Motion.SlopePitch - c->Motion.NodBowApplied, o->Angle[1], heading};
     AngleMatrix(direction, Matrix);
     vec3_t v, Velocity;
     Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
