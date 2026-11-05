@@ -320,7 +320,8 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
         "--label-exclude static" in step(platform_job, platform, "Run tests"),
         f"{platform} must not repeat the static checks Quality Gates already ran",
     )
-    # The runners have four cores; tests that share a file name a RESOURCE_LOCK (tests/CMakeLists.txt).
+    # Linux and Windows runners have four cores, macOS three; tests that share a file name a RESOURCE_LOCK
+    # (tests/CMakeLists.txt).
     check("--parallel 4" in step(platform_job, platform, "Run tests"), f"{platform} must run its tests in parallel")
     check(
         f"if: needs.quality.outputs.{platform} == 'true'" in platform_job,
