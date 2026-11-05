@@ -588,6 +588,7 @@ TEST_CASE("Characters drawn later are drawn inside the character scope they were
     {
         {
             const Render::Drawing::ScopedCharacterDraws characters;
+            const Render::Drawing::ScopedNoSunCasters noSunCasters;
             RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
                              RENDER_TEXTURE);
         }

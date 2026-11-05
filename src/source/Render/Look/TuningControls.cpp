@@ -323,10 +323,18 @@ bool DeveloperLookEdits::Covers(const Data::Maps::LookProfileData& profile, int 
     {
         return false;
     }
-    // An edited default shows only where no map entry overrides it.
+    // An edited default shows only where neither a map entry nor its environment overrides it.
     return std::none_of(profile.maps.begin(), profile.maps.end(),
-                        [world, value](const Data::Maps::MapLookOverrides& map)
-                        { return map.world == world && map.overrides[value].has_value(); });
+                        [&profile, world, value](const Data::Maps::MapLookOverrides& map)
+                        {
+                            if (map.world != world)
+                            {
+                                return false;
+                            }
+                            return map.overrides[value].has_value() ||
+                                   (map.environment && *map.environment < profile.environments.size() &&
+                                    profile.environments[*map.environment].overrides[value].has_value());
+                        });
 }
 
 TuningGroupSet TuningGroupsApplying(const LookFeatures& features)

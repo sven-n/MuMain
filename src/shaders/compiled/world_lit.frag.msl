@@ -52,6 +52,7 @@ struct FSInput
     float fogFactor;
     float eyeDepth;
     float3 worldPosition;
+    float3 darkening;
 };
 
 struct SceneLighting
@@ -109,6 +110,7 @@ struct main0_in
     float input_fogFactor [[user(locn2)]];
     float input_eyeDepth [[user(locn3)]];
     float3 input_worldPosition [[user(locn4)]];
+    float3 input_darkening [[user(locn5)]];
 };
 
 static inline __attribute__((always_inline))
@@ -213,7 +215,7 @@ float EnhancedFogAmount(thread const float& eyeDepth, constant SceneLighting& _5
 }
 
 static inline __attribute__((always_inline))
-float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<float> sunShadowMap, sampler sunShadowSampler, constant DynamicLights& _449, texture2d<float> tex, sampler s, texture2d<float> groundShadowMask, sampler groundShadowSampler, texture2d<float> terrainSunLight, sampler terrainSunSampler, constant FogUniforms& _678)
+float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<float> sunShadowMap, sampler sunShadowSampler, constant DynamicLights& _449, texture2d<float> tex, sampler s, texture2d<float> groundShadowMask, sampler groundShadowSampler, texture2d<float> terrainSunLight, sampler terrainSunSampler, constant FogUniforms& _682)
 {
     float4 texel = tex.sample(s, _input.uv);
     uint2 sizeQueryTemp = uint2(groundShadowMask.get_width(), groundShadowMask.get_height());
@@ -239,12 +241,12 @@ float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<
     }
     float3 skyShade = mix(float3(1.0), _56.skyFill.xyz, float3(_56.skyFill.w * (1.0 - (sunVisible * cloud))));
     float3 param_5 = _input.worldPosition;
-    float3 pointLight = WorldDynamicLighting(param_5, _449) * shadow.y;
+    float3 pointLight = fast::max((WorldDynamicLighting(param_5, _449) * shadow.y) + _input.darkening, float3(0.0));
     float3 light = fast::clamp((ground * skyShade) + pointLight, float3(0.0), float3(1.0));
     float4 color = float4(texel.xyz * light, texel.w * _input.color.w);
-    if (_678.alphaToCoverage != 0u)
+    if (_682.alphaToCoverage != 0u)
     {
-        float edge = fast::clamp(((color.w - _678.alphaThreshold) / fast::max(fwidth(color.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        float edge = fast::clamp(((color.w - _682.alphaThreshold) / fast::max(fwidth(color.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
         color.w *= edge;
         if (color.w <= 0.0)
         {
@@ -253,24 +255,24 @@ float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<
     }
     else
     {
-        if ((_678.alphaDiscardEnabled != 0u) && (color.w <= _678.alphaThreshold))
+        if ((_682.alphaDiscardEnabled != 0u) && (color.w <= _682.alphaThreshold))
         {
             discard_fragment();
         }
     }
-    if ((_678.fogEnabled != 0u) && (_56.sceneFogColor.w > 0.0))
+    if ((_682.fogEnabled != 0u) && (_56.sceneFogColor.w > 0.0))
     {
-        float4 _731 = color;
+        float4 _735 = color;
         float param_6 = _input.eyeDepth;
-        float3 _741 = mix(_731.xyz, _56.sceneFogColor.xyz, float3(EnhancedFogAmount(param_6, _56)));
-        color.x = _741.x;
-        color.y = _741.y;
-        color.z = _741.z;
+        float3 _745 = mix(_735.xyz, _56.sceneFogColor.xyz, float3(EnhancedFogAmount(param_6, _56)));
+        color.x = _745.x;
+        color.y = _745.y;
+        color.z = _745.z;
     }
     return color;
 }
 
-fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _678 [[buffer(0)]], constant SceneLighting& _56 [[buffer(1)]], constant DynamicLights& _449 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], depth2d<float> sunShadowMap [[texture(2)]], texture2d<float> terrainSunLight [[texture(3)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], sampler sunShadowSampler [[sampler(2)]], sampler terrainSunSampler [[sampler(3)]], float4 gl_FragCoord [[position]])
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _682 [[buffer(0)]], constant SceneLighting& _56 [[buffer(1)]], constant DynamicLights& _449 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], depth2d<float> sunShadowMap [[texture(2)]], texture2d<float> terrainSunLight [[texture(3)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], sampler sunShadowSampler [[sampler(2)]], sampler terrainSunSampler [[sampler(3)]], float4 gl_FragCoord [[position]])
 {
     main0_out out = {};
     FSInput _input;
@@ -280,9 +282,10 @@ fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _678 [[
     _input.fogFactor = in.input_fogFactor;
     _input.eyeDepth = in.input_eyeDepth;
     _input.worldPosition = in.input_worldPosition;
+    _input.darkening = in.input_darkening;
     FSInput param = _input;
-    float4 _778 = _main(param, _56, sunShadowMap, sunShadowSampler, _449, tex, s, groundShadowMask, groundShadowSampler, terrainSunLight, terrainSunSampler, _678);
-    out._entryPointOutput = _778;
+    float4 _785 = _main(param, _56, sunShadowMap, sunShadowSampler, _449, tex, s, groundShadowMask, groundShadowSampler, terrainSunLight, terrainSunSampler, _682);
+    out._entryPointOutput = _785;
     return out;
 }
 

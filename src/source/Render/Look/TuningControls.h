@@ -150,7 +150,7 @@ struct DeveloperLookEdits
     // A `$look reset <name>` on `world`: the default and that world's entry, as the reset restores.
     void Clear(Data::Maps::LookValue value, int world);
     // True when the developer's value is what `profile` gives `world`: the world's edited entry, or an
-    // edited default that no entry of the world overrides.
+    // edited default that neither an entry of the world nor its environment overrides.
     [[nodiscard]] bool Covers(const Data::Maps::LookProfileData& profile, int world, Data::Maps::LookValue value) const;
     bool operator==(const DeveloperLookEdits&) const = default;
 };

@@ -21,6 +21,8 @@ namespace Render::Terrain::LightGrid
 // Adds color * Falloff to every grid vertex within range cells of world (x, y), clamping each
 // vertex at 0 after the addition (Classic AddTerrainLight).
 void AddLight(float (*grid)[3], float x, float y, const float* color, int range);
+// AddLight without the clamp, for a grid that holds what is left once lights are taken out.
+void AddSignedLight(float (*grid)[3], float x, float y, const float* color, int range);
 
 // AddLight, and records the light in the frame's light list as a point light over terrain of the
 // given height. A light without range changes no vertex and is not recorded.

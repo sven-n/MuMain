@@ -222,6 +222,14 @@ public:
     {
         --m_groundShadows[static_cast<std::size_t>(source)];
     }
+    void BeginNoSunCasters() override
+    {
+        ++m_noSunCasters;
+    }
+    void EndNoSunCasters() override
+    {
+        --m_noSunCasters;
+    }
     void BeginCharacterDraws() override
     {
         ++m_characterDraws;
@@ -298,6 +306,7 @@ private:
     int m_worldLit = 0;
     int m_groundShadows[2] = {};
     int m_characterDraws = 0;
+    int m_noSunCasters = 0;
     std::size_t m_reorderable = 0;
     // The scene's camera, which the sprite matrix replaces.
     std::vector<std::string> m_matrices{std::string(" camera")};
@@ -312,8 +321,8 @@ private:
                " fog " + std::to_string(m_fog) + " bloomExcluded " + std::to_string(m_bloomExclusions > 0) +
                " worldLit " + std::to_string(m_worldLit > 0) + " groundShadow " +
                std::to_string(m_groundShadows[0] > 0) + std::to_string(m_groundShadows[1] > 0) + " characters " +
-               std::to_string(m_characterDraws > 0) + " reorderable " + std::to_string(m_reorderable) + " matrix" +
-               m_matrices.back();
+               std::to_string(m_characterDraws > 0) + " noSunCasters " + std::to_string(m_noSunCasters > 0) +
+               " reorderable " + std::to_string(m_reorderable) + " matrix" + m_matrices.back();
     }
 
     void Note(const char* name, long long value, std::uint64_t contents = 0)

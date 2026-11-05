@@ -5,6 +5,8 @@
 #include "Data/GameData/MapData/LookProfile.h"
 #include "Render/Look/TuningControls.h"
 
+#include <optional>
+
 #include <cmath>
 #include <limits>
 #include <set>
@@ -95,12 +97,12 @@ const SpecRow Spec[] = {
      TuningUnit::Percent, TuningZero::Plain},
     {TuningControlId::CloudStrength, TuningGroup::Sunlight, false, LookValue::CloudStrength, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
-    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 500, 10000, 250,
-     TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 500, 10000, 250, TuningUnit::None,
+     TuningZero::Plain},
     {TuningControlId::CloudSpeed, TuningGroup::Sunlight, true, LookValue::CloudSpeed, 0, 300, 5, TuningUnit::None,
      TuningZero::Plain},
-    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0, 1, 0.05,
-     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0, 1, 0.05, TuningUnit::Percent,
+     TuningZero::Plain},
     {TuningControlId::SkyFill, TuningGroup::Sunlight, false, LookValue::SkyFill, 0, 1, 0.05, TuningUnit::Percent,
      TuningZero::Plain},
     {TuningControlId::RimSunFollow, TuningGroup::Sunlight, true, LookValue::RimSunFollow, 0, 1, 0.05,
@@ -297,7 +299,8 @@ TEST_CASE("player values apply only while their feature is in effect [render][lo
     // Dynamic lights act only with Enhanced lighting.
     Render::Look::LookFeatures noLighting = enhanced;
     noLighting.enhancedLighting = false;
-    CHECK(Render::Look::TuningGroupsApplying(noLighting) == Render::Look::TuningGroupSet{false, false, true, true, false});
+    CHECK(Render::Look::TuningGroupsApplying(noLighting) ==
+          Render::Look::TuningGroupSet{false, false, true, true, false});
 
     const Data::Maps::LookProfileData profile = ShippedLikeProfile();
     Data::Maps::LookOverrides personal;
@@ -308,6 +311,29 @@ TEST_CASE("player values apply only while their feature is in effect [render][lo
     // The knee (Enhanced lighting) is the map's again; bloom (its feature still on) stays the player's.
     CHECK(off[LookValue::HighlightKnee] == profile.ForWorld(Lorencia)[LookValue::HighlightKnee]);
     CHECK(off[LookValue::BloomStrength] == 0.5);
+}
+
+TEST_CASE("an edited default does not show where an environment overrides it [render][look][tuning]")
+{
+    constexpr int Open = 0;
+    constexpr int Enclosed = 1;
+    Data::Maps::LookProfileData profile;
+    Data::Maps::EnvironmentLookOverrides environment;
+    environment.overrides[LookValue::BloomStrength] = 0.5;
+    profile.environments.push_back(environment);
+    Data::Maps::MapLookOverrides open;
+    open.world = Open;
+    Data::Maps::MapLookOverrides enclosed;
+    enclosed.world = Enclosed;
+    enclosed.environment = 0;
+    profile.maps = {open, enclosed};
+
+    Render::Look::DeveloperLookEdits developer;
+    developer.Mark(LookValue::BloomStrength, std::nullopt);
+    developer.Mark(LookValue::RimStrength, std::nullopt);
+    CHECK(developer.Covers(profile, Open, LookValue::BloomStrength));
+    CHECK_FALSE(developer.Covers(profile, Enclosed, LookValue::BloomStrength));
+    CHECK(developer.Covers(profile, Enclosed, LookValue::RimStrength));
 }
 
 TEST_CASE("a pointer sets the step it is on, also from an inherited value between steps [render][look][tuning]")

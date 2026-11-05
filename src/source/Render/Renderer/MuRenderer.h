@@ -467,6 +467,10 @@ public:
     // Draws between BeginCharacterDraws and EndCharacterDraws are the characters, apart from the world's
     // objects. Scopes nest; use Render::Drawing::ScopedCharacterDraws.
     virtual void BeginCharacterDraws() {}
+    // Draws between BeginNoSunCasters and EndNoSunCasters cast no sun shadow. Scopes nest; use
+    // Render::Drawing::ScopedNoSunCasters.
+    virtual void BeginNoSunCasters() {}
+    virtual void EndNoSunCasters() {}
     virtual void EndCharacterDraws() {}
     // Whether SetSceneLighting's sun shadow settings draw a shadow map.
     [[nodiscard]] virtual bool SunShadowsAvailable() const

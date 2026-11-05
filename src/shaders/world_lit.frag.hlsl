@@ -29,6 +29,7 @@ struct FSInput
     float fogFactor : TEXCOORD2;
     float eyeDepth : TEXCOORD3;
     float3 worldPosition : TEXCOORD4;
+    float3 darkening : TEXCOORD5;
 };
 
 // The frame's first point lights, which the ground's vertex colour leaves out.
@@ -72,7 +73,8 @@ float4 main(FSInput input) : SV_Target
     }
     // Shade, from shadows and clouds, turns towards the sky's blue.
     const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible * cloud));
-    const float3 pointLight = WorldDynamicLighting(input.worldPosition) * shadow.y;
+    // Darkening that outweighed the ground's own light takes from the point lights it was added after.
+    const float3 pointLight = max(WorldDynamicLighting(input.worldPosition) * shadow.y + input.darkening, 0.0);
     const float3 light = saturate(ground * skyShade + pointLight);
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);
     if (alphaToCoverage)

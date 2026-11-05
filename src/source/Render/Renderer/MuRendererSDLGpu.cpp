@@ -631,6 +631,8 @@ static int s_worldLitGeometryDepth = 0;
 static int s_groundShadowDepth = 0;
 // Draws recorded inside a ScopedCharacterDraws: the characters, apart from the world's objects.
 static int s_characterDrawDepth = 0;
+// Draws recorded inside a ScopedNoSunCasters cast no sun shadow.
+static int s_noSunCasterDepth = 0;
 static int s_lightShadowDepth = 0;
 // Ground shadows (BeginGroundShadow) are drawn into a coverage mask the world-lit ground samples, in
 // a frame that recorded world-lit draws; until the mask holds the frame's shadows they draw as before.
@@ -842,6 +844,7 @@ struct RenderCmd
     bool worldLit{};      // recorded inside BeginWorldLitGeometry: slot 1 is the ground shadow mask
     bool lightShadow{};   // a point light's (GroundShadowSource::PointLight)
     bool characterDraw{}; // recorded inside a ScopedCharacterDraws
+    bool noSunCaster{};   // recorded inside a ScopedNoSunCasters
     // Set once this command has been replayed into an offscreen capture (see
     // BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay pass then
     // skips it instead of drawing it a second time into the frame.
@@ -877,7 +880,8 @@ static Render::DrawCommandHistory s_previousDrawCommands;
     }
     if (previous.blendEnabled != command.blendEnabled || previous.blendMode != command.blendMode ||
         previous.bloomExcluded != command.bloomExcluded || previous.groundShadow != command.groundShadow ||
-        previous.lightShadow != command.lightShadow || previous.characterDraw != command.characterDraw)
+        previous.lightShadow != command.lightShadow || previous.characterDraw != command.characterDraw ||
+        previous.noSunCaster != command.noSunCaster)
     {
         return Counter::BatchBreakBlend;
     }
@@ -1143,9 +1147,16 @@ enum class SunCoverage : std::uint32_t
     Brightness,
 };
 
+// An alpha-tested or alpha-to-coverage draw writing depth: solid where its texels pass, though recorded as blended.
+[[nodiscard]] static bool IsCutout(const RenderCmd& command)
+{
+    return command.blendEnabled && command.blendMode == BlendMode::Alpha && command.depthMaskEnabled &&
+           (command.fogUniform.alphaDiscardEnabled != 0u || command.fogUniform.alphaToCoverage != 0u);
+}
+
 [[nodiscard]] static SunCoverage GetSunCoverage(const RenderCmd& command)
 {
-    if (!command.blendEnabled)
+    if (!command.blendEnabled || IsCutout(command))
         return SunCoverage::Solid;
     switch (command.blendMode)
     {
@@ -2339,6 +2350,7 @@ public:
         s_worldLitGeometryDepth = 0;
         s_groundShadowDepth = 0;
         s_characterDrawDepth = 0;
+        s_noSunCasterDepth = 0;
         s_lightShadowDepth = 0;
         s_frameHasWorldLit = false;
         s_groundShadowMaskReady = false;
@@ -2515,8 +2527,8 @@ public:
         return s_groundShadowMaskPipelines[command.lightShadow ? 1 : 0][ShadowPassLayout(command)];
     }
 
-    // A solid draw of the scene's world: depth-tested and depth-writing, not blended, not a ground shadow,
-    // not 2D; or a character's blended part (GetSunCoverage). Models drawn for the UI (their own view,
+    // A solid draw of the scene's world: depth-tested and depth-writing, not blended or a cutout, not a ground
+    // shadow, not 2D; or a character's blended part (GetSunCoverage). Models drawn for the UI (their own view,
     // Enhanced without the point lights) are left out.
     [[nodiscard]] static bool IsSunShadowCaster(const RenderCmd& command)
     {
@@ -2524,7 +2536,7 @@ public:
         {
             return false;
         }
-        if (command.blendEnabled || !command.depthMaskEnabled)
+        if ((command.blendEnabled && !IsCutout(command)) || !command.depthMaskEnabled)
         {
             const bool characterPart = command.characterDraw && command.type == RenderCmdType::DrawSkinnedTriangles &&
                                        command.blendEnabled && GetSunCoverage(command) != SunCoverage::None;
@@ -2550,12 +2562,14 @@ public:
         }
         if (selection == ReplaySelection::SceneDepth)
         {
-            const bool solid = IsSunShadowCaster(command) && !command.blendEnabled && command.depthMaskEnabled;
+            const bool solid =
+                IsSunShadowCaster(command) && (!command.blendEnabled || IsCutout(command)) && command.depthMaskEnabled;
             return solid ? s_sceneDepthPipelines[ShadowPassLayout(command)] : nullptr;
         }
         if (selection == ReplaySelection::SunShadowCasters)
         {
-            return IsSunShadowCaster(command) ? s_sunShadowPipelines[ShadowPassLayout(command)] : nullptr;
+            return IsSunShadowCaster(command) && !command.noSunCaster ? s_sunShadowPipelines[ShadowPassLayout(command)]
+                                                                      : nullptr;
         }
         if (command.lightShadow || (command.groundShadow && s_groundShadowMaskReady))
         {
@@ -4073,6 +4087,19 @@ public:
         if (s_worldLitGeometryDepth > 0)
         {
             --s_worldLitGeometryDepth;
+        }
+    }
+
+    void BeginNoSunCasters() override
+    {
+        ++s_noSunCasterDepth;
+    }
+
+    void EndNoSunCasters() override
+    {
+        if (s_noSunCasterDepth > 0)
+        {
+            --s_noSunCasterDepth;
         }
     }
 
@@ -5867,6 +5894,7 @@ private:
         command.groundShadow = s_groundShadowDepth > 0 || command.lightShadow;
         command.worldLit = s_worldLitGeometryDepth > 0;
         command.characterDraw = s_characterDrawDepth > 0;
+        command.noSunCaster = s_noSunCasterDepth > 0;
         if (command.worldLit)
         {
             s_frameHasWorldLit = true;
@@ -6552,6 +6580,16 @@ private:
 
             vtxBufDesc.pitch = sizeof(Vertex3D);
             numAttribs = 3;
+            if (description.vertexLayout == VertexLayout::ThreeDimensionalWorldLit)
+            {
+                // The lit ground's normal carries the darkening its vertex colour cannot (world_lit.vert).
+                vertexAttribs[3] = {};
+                vertexAttribs[3].location = 3;
+                vertexAttribs[3].buffer_slot = 0;
+                vertexAttribs[3].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+                vertexAttribs[3].offset = static_cast<Uint32>(offsetof(Vertex3D, nx));
+                numAttribs = 4;
+            }
         }
         else
         {

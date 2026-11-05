@@ -8,7 +8,9 @@
 #include "Render/Lighting/SunShadow.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "World/MapInfra/MapManager.h"
+#include "Scenes/MainScene.h"
 #include "Scenes/SceneCore.h"
+#include "UI/Core/WindowSystem.h"
 
 namespace Render::Lighting
 {
@@ -77,7 +79,10 @@ void UpdateFrameSun()
     const float fall = gMapManager.InBattleCastle() ? kSunShadowFallBattleCastle : kSunShadowFall;
     s_frameSun = FrameSunDirections{SunDirection(Render::Look::Value(Data::Maps::LookValue::GroundShadowAngle), fall),
                                     SunDirection(kBakedSunShadowAngle, fall)};
-    s_frameSunShadows = SceneFlag == MAIN_SCENE &&
+    // The switches that remove the body shadows remove the sun's too, and its pass with them.
+    const bool shadowsAllowed =
+        (g_pOption == nullptr || g_pOption->GetRenderAllEffects()) && !IsBodyShadowsDisabledDebug();
+    s_frameSunShadows = shadowsAllowed && SceneFlag == MAIN_SCENE &&
                         Render::Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0 &&
                         mu::GetRenderer().SunShadowsAvailable();
 }

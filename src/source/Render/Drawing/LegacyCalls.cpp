@@ -118,6 +118,14 @@ void MakeLegacyCall(LegacyCall call, int argument)
         if (!RecordsLegacyCall(call, argument))
             mu::GetRenderer().EndCharacterDraws();
         break;
+    case LegacyCall::BeginNoSunCasters:
+        if (!RecordsLegacyCall(call, argument))
+            mu::GetRenderer().BeginNoSunCasters();
+        break;
+    case LegacyCall::EndNoSunCasters:
+        if (!RecordsLegacyCall(call, argument))
+            mu::GetRenderer().EndNoSunCasters();
+        break;
     case LegacyCall::RenderTerrain:
         RenderTerrain(argument != 0);
         break;

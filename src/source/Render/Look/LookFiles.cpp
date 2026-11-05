@@ -192,6 +192,19 @@ LookValueSource SourceOf(const LookDocument& document, bool usable, const std::s
     {
         return LookValueSource::Map;
     }
+    if (const LookDocument* map = FindMapEntry(document, world))
+    {
+        const auto named = map->find("environment");
+        const auto environments = document.find("environments");
+        if (named != map->end() && named->is_string() && environments != document.end() && environments->is_object())
+        {
+            const auto environment = environments->find(named->get<std::string>());
+            if (environment != environments->end() && HasKey(&*environment, key))
+            {
+                return LookValueSource::Environment;
+            }
+        }
+    }
     const auto defaults = document.find(DefaultKey);
     if (defaults != document.end() && HasKey(&*defaults, key))
     {
@@ -391,6 +404,8 @@ const char* ToString(LookValueSource source)
     {
     case LookValueSource::Default:
         return "default";
+    case LookValueSource::Environment:
+        return "environment";
     case LookValueSource::Map:
         return "map";
     case LookValueSource::Personal:

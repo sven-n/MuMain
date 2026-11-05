@@ -116,6 +116,18 @@ TEST_CASE("terrain light grid adds lights exactly as Classic AddTerrainLight [re
     CHECK(classic == extracted);
 }
 
+TEST_CASE("taking a pinned light out keeps the darkening below zero [render][dynamic_lights]")
+{
+    // Base 0.1, a torch adding 0.5, then an ice effect taking 0.4: the frame's light is 0.2.
+    Grid grid = MakeGrid(0.2f);
+    const float torch[3] = {-0.5f, -0.5f, -0.5f};
+    LightGrid::AddSignedLight(Data(grid), 10.f * TERRAIN_SCALE, 20.f * TERRAIN_SCALE, torch, 1);
+    const float left = grid[20 * TERRAIN_SIZE + 10][0];
+    CHECK(left == doctest::Approx(-0.3f));
+    // The shader adds the torch back per pixel, which gives the frame's light again.
+    CHECK(left + 0.5f == doctest::Approx(0.2f));
+}
+
 TEST_CASE("dynamic terrain lights are recorded as point lights without changing the grid [render][dynamic_lights]")
 {
     Grid plain = MakeGrid(0.2f);

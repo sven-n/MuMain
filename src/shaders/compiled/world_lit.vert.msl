@@ -10,6 +10,7 @@ struct VSInput
     float3 pos;
     float2 uv;
     float4 color;
+    float3 normal;
 };
 
 struct VSOutput
@@ -20,6 +21,7 @@ struct VSOutput
     float fogFactor;
     float eyeDepth;
     float3 worldPosition;
+    float3 darkening;
     float clipDist;
 };
 
@@ -38,6 +40,7 @@ struct main0_out
     float _entryPointOutput_fogFactor [[user(locn2)]];
     float _entryPointOutput_eyeDepth [[user(locn3)]];
     float3 _entryPointOutput_worldPosition [[user(locn4)]];
+    float3 _entryPointOutput_darkening [[user(locn5)]];
     float4 gl_Position [[position]];
     float gl_ClipDistance [[clip_distance]] [1];
     float gl_ClipDistance_0 [[user(clip0)]];
@@ -48,6 +51,7 @@ struct main0_in
     float3 input_pos [[attribute(0)]];
     float2 input_uv [[attribute(1)]];
     float4 input_color [[attribute(2)]];
+    float3 input_normal [[attribute(3)]];
 };
 
 static inline __attribute__((always_inline))
@@ -63,6 +67,7 @@ VSOutput _main(thread const VSInput& _input, constant Transform& _32)
     o.fogFactor = (range > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - dist) / range, 0.0, 1.0) : 1.0;
     o.eyeDepth = dist;
     o.worldPosition = _input.pos;
+    o.darkening = _input.normal - float3(0.0, 0.0, 1.0);
     return o;
 }
 
@@ -73,6 +78,7 @@ vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffe
     _input.pos = in.input_pos;
     _input.uv = in.input_uv;
     _input.color = in.input_color;
+    _input.normal = in.input_normal;
     VSInput param = _input;
     VSOutput flattenTemp = _main(param, _32);
     out.gl_Position = flattenTemp.pos;
@@ -81,6 +87,7 @@ vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffe
     out._entryPointOutput_fogFactor = flattenTemp.fogFactor;
     out._entryPointOutput_eyeDepth = flattenTemp.eyeDepth;
     out._entryPointOutput_worldPosition = flattenTemp.worldPosition;
+    out._entryPointOutput_darkening = flattenTemp.darkening;
     out.gl_ClipDistance[0] = flattenTemp.clipDist;
     out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
     return out;
