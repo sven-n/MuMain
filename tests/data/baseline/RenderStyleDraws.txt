@@ -1,7 +1,7 @@
 # How the render styles moved from code into Data/Effects/RenderStyles.json draw: one line per item and
 # situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of
-# what the drawing left on the model (tests/data/LookRecorder.h). Written from each look's old code before the
-# code was deleted (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.
+# what the drawing left on the model (tests/data/LookRecorder.h). Written when each look moved, once its data
+# drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.
 accountServiceItem (14,114) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
 accountServiceItem (14,114) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
 accountServiceItem (14,114) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a

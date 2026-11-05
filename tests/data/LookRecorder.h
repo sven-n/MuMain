@@ -13,8 +13,8 @@
 // with its old code and with the data in the same build, and both records must be equal: the mesh draws first, then
 // the GPU calls.
 //
-// The world is pinned: WorldTime per situation, the draw frame of Random::DrawRand, and one OBJECT for every drawing,
-// set up by the game's ItemObjectAttribute.
+// The world is pinned: WorldTime per situation, the key of Random::DrawRand, the model's scrolling mesh, and one
+// OBJECT for every drawing, set up by the game's ItemObjectAttribute.
 namespace LookRecorder
 {
 // How an item is drawn.
@@ -83,8 +83,14 @@ Record RecordItem(int itemType, const Situation& situation);
 // g_LookStore while it draws.
 Record RecordItemWithCode(int itemType, const Situation& situation, std::string_view renderStyle);
 
+// How far a number of a mesh draw may be from the code's when every GPU call is the same (design L34): a pulse the
+// code wrote as (sin + 1.2) * 0.4 and the data draws as sin * 0.4 + 0.48 rounds in another order, a few float steps
+// (units in the last place) away.
+constexpr int AllowedFloatSteps = 8;
+
 // The first difference between a drawing with the old code and one with the data, in words ("draw 2 of 4, mesh 1:
-// blendMeshAlpha 0.812 (code) vs 0.79 (data)"); empty when they are equal.
+// blendMeshAlpha 0.812 (code) vs 0.79 (data)"); empty when they are equal: the same GPU calls, and the same mesh
+// draws and model after the drawing, their numbers at most AllowedFloatSteps apart.
 std::string FirstDifference(const Record& code, const Record& data);
 
 // A digest of the mesh draws and of what the drawing left on the model, with the numbers rounded to 6 digits, for the

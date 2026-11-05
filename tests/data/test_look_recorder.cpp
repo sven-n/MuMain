@@ -56,15 +56,16 @@ LookDefinition ChromeMesh0(Value reflectionOpacity = FromItem{})
 }
 
 // The baseline (tests/data/baseline/RenderStyleDraws.txt): one line per item and situation of each render style moved
-// into data, written from its old code before the code was deleted. MU_LOOK_RECORDER_WRITE=<names, comma-separated>
-// records those looks as they are drawn now (the code, while no data of the name is loaded) into the file.
+// into data, written when it moved, after the comparison test below found its data drawing as its code, before the
+// code was deleted. MU_LOOK_RECORDER_WRITE=<names, comma-separated> records those looks as they are drawn now (the data
+// look of the name, or its code while the data has none) into the file.
 const std::filesystem::path Baseline = MU_RENDER_STYLE_BASELINE;
 
 constexpr const char* BaselineHeader =
     "# How the render styles moved from code into Data/Effects/RenderStyles.json draw: one line per item and\n"
     "# situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of\n"
-    "# what the drawing left on the model (tests/data/LookRecorder.h). Written from each look's old code before the\n"
-    "# code was deleted (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.\n";
+    "# what the drawing left on the model (tests/data/LookRecorder.h). Written when each look moved, once its data\n"
+    "# drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.\n";
 
 std::map<std::string, std::string> ReadBaseline()
 {
@@ -181,6 +182,9 @@ TEST_CASE("Render styles moved into data draw as their old code did (the baselin
     std::map<std::string, std::string> baseline = ReadBaseline();
     if (const char* write = std::getenv("MU_LOOK_RECORDER_WRITE"))
     {
+        RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
+        REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+        const LookStoreScope looks(std::move(shipped.looks));
         for (const std::string& name : SplitNames(write))
         {
             std::erase_if(baseline, [&](const auto& line) { return line.first.rfind(name + " ", 0) == 0; });

@@ -4,6 +4,7 @@
 
 #include "TestModelSlots.h"
 
+#include "Core/Utilities/Random.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
@@ -19,11 +20,15 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/GpuUploadSkip.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iterator>
 #include <filesystem>
 #include <memory>
@@ -60,10 +65,9 @@ std::string Hex(unsigned value)
 std::vector<Field> FieldsOf(const MeshDraw& draw)
 {
     int flags = draw.flags;
-    if ((flags & ReflectionFlags) != 0)
-    {
-        flags &= ~RENDER_TEXTURE;
-    }
+    // BMD::DrawMesh reads the texture bit only for a pass without a reflection, and the light map bit only for one
+    // with a reflection.
+    flags &= (flags & ReflectionFlags) != 0 ? ~RENDER_TEXTURE : ~RENDER_LIGHTMAP;
     return {
         {"mesh", std::to_string(draw.mesh)},
         {"flags", Hex(static_cast<unsigned>(flags))},
@@ -76,7 +80,8 @@ std::vector<Field> FieldsOf(const MeshDraw& draw)
         {"bodyLight", Number(draw.bodyLight[0]) + " " + Number(draw.bodyLight[1]) + " " + Number(draw.bodyLight[2])},
         {"lightEnable", draw.lightEnable ? "1" : "0"},
         {"hideSkin", draw.hideSkin ? "1" : "0"},
-        {"streamMesh", std::to_string(draw.streamMesh)},
+        // The drawing reads the scrolling mesh only for the mesh it draws.
+        {"streamMesh", std::to_string(draw.streamMesh == draw.mesh ? draw.mesh : -1)},
     };
 }
 
@@ -102,11 +107,17 @@ const Data::Items::ItemModelDataLoadResult& ShippedModels()
     return result;
 }
 
-// The one object every drawing draws: Random::DrawRand keys on its address.
+// The one object every drawing draws.
 OBJECT& DrawnObject()
 {
     static OBJECT object;
     return object;
+}
+
+// The key Random::DrawRand takes for the drawn object: an address no object has, the same in every run.
+const void* FixedDrawKey()
+{
+    return reinterpret_cast<const void*>(static_cast<std::uintptr_t>(0x10000));
 }
 
 std::string Join(const std::vector<Field>& fields)
@@ -118,6 +129,47 @@ std::string Join(const std::vector<Field>& fields)
         text += std::string(name) + "=" + value;
     }
     return text;
+}
+
+// Float steps (units in the last place) between two floats, through their bits in the order of the numbers.
+long long FloatSteps(float a, float b)
+{
+    const auto ordered = [](float value)
+    {
+        std::int32_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
+        return bits >= 0 ? static_cast<long long>(bits) : -static_cast<long long>(bits & 0x7fffffff);
+    };
+    return std::llabs(ordered(a) - ordered(b));
+}
+
+// Two field values that are the same text, or the same count of numbers, each at most `steps` float steps apart.
+bool Close(const std::string& a, const std::string& b, int steps)
+{
+    if (a == b)
+    {
+        return true;
+    }
+    if (steps == 0)
+    {
+        return false;
+    }
+    const char* x = a.c_str();
+    const char* y = b.c_str();
+    while (*x != '\0' || *y != '\0')
+    {
+        char* xEnd = nullptr;
+        char* yEnd = nullptr;
+        const float first = std::strtof(x, &xEnd);
+        const float second = std::strtof(y, &yEnd);
+        if (xEnd == x || yEnd == y || FloatSteps(first, second) > steps)
+        {
+            return false;
+        }
+        x = xEnd;
+        y = yEnd;
+    }
+    return true;
 }
 
 // Every number of the text with 6 significant digits.
@@ -235,13 +287,58 @@ ShippedItems::~ShippedItems()
     delete m_state;
 }
 
+// The textures of OpenBasicData (ZzzOpenData.cpp) that looks name, at the indices the game loads them at before the
+// looks find theirs: a look in code names the index, the data look of its name the file, so a wrong index here shows
+// as a texture difference in the comparison.
+struct BasicTexture
+{
+    const wchar_t* file;
+    GLuint index;
+    GLuint wrap;
+};
+constexpr BasicTexture BasicTextures[] = {
+    {L"Effect\\Chrome01.jpg", BITMAP_CHROME, GL_REPEAT},
+    {L"Effect\\bab2.jpg", BITMAP_CHROME + 1, GL_REPEAT},
+    {L"Effect\\Lava.jpg", BITMAP_LAVA, GL_CLAMP_TO_EDGE},
+    {L"Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\expensiveitem03a_R.jpg", BITMAP_RAREITEM4_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\phoenixfeather_R.tga", BITMAP_ITEM_EFFECT_PFEATHER_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\Deye_R.jpg", BITMAP_ITEM_EFFECT_DEYE_R, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_7_body.jpg", BITMAP_RAREITEM7, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_8_body.jpg", BITMAP_RAREITEM8, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_9_body.jpg", BITMAP_RAREITEM9, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_10_body.jpg", BITMAP_RAREITEM10, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_11_body.jpg", BITMAP_RAREITEM11, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\rareitem_ticket_12_body.jpg", BITMAP_RAREITEM12, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\DoppelCard.jpg", BITMAP_DOPPLEGANGGER_FREETICKET, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\BarcaCard.jpg", BITMAP_BARCA_FREETICKET, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge8\\Barca7Card.jpg", BITMAP_BARCA7TH_FREETICKET, GL_CLAMP_TO_EDGE},
+};
+
 void ShippedItems::Open(std::span<const int> itemTypes)
 {
     Data::Items::ModelLoader::ReopenModels(itemTypes, {});
-    // As the game loads them after the item models: the item effect textures at their indices, which looks in code
-    // name, then the textures the looks in data name.
+    // As the game loads them before the looks find theirs: the textures of OpenBasicData and the item effect textures
+    // at their indices, which looks in code name; then the textures the looks in data name.
     static const bool effectTexturesLoaded = []
     {
+        for (const BasicTexture& texture : BasicTextures)
+        {
+            LoadBitmap(texture.file, texture.index, GL_LINEAR, texture.wrap);
+        }
         OpenItemEffectTextures();
         return true;
     }();
@@ -278,6 +375,12 @@ Record RecordItem(int itemType, const Situation& situation)
     ItemObjectAttribute(&object);
     object.Alpha = situation.alpha;
 
+    // Each drawing starts from the scrolling mesh the model loads with: a look that leaves one would otherwise draw the
+    // next drawing differently.
+    model.StreamMesh = -1;
+    // Random::DrawRand keys on the object's address, which changes from run to run: the object is keyed as a fixed
+    // address, so the baseline holds the same random values in every run (and no draw frame starts in these tests).
+    const Random::DrawnAs fixedKey(&object, FixedDrawKey());
     const double previousWorldTime = WorldTime;
     WorldTime = situation.worldTime;
     model.Animation(BoneTransform, 0.f, 0.f, 0, object.Angle, object.HeadAngle, false, false);
@@ -323,6 +426,24 @@ Record RecordItemWithCode(int itemType, const Situation& situation, std::string_
 
 std::string FirstDifference(const Record& code, const Record& data)
 {
+    std::string gpuDifference;
+    const size_t calls = std::min(code.gpuCalls.size(), data.gpuCalls.size());
+    for (size_t i = 0; i < calls && gpuDifference.empty(); ++i)
+    {
+        if (code.gpuCalls[i] != data.gpuCalls[i])
+        {
+            gpuDifference = "GPU call " + std::to_string(i + 1) + " of " + std::to_string(code.gpuCalls.size()) +
+                            ":\n  code: " + code.gpuCalls[i] + "\n  data: " + data.gpuCalls[i];
+        }
+    }
+    if (gpuDifference.empty() && code.gpuCalls.size() != data.gpuCalls.size())
+    {
+        gpuDifference = std::to_string(code.gpuCalls.size()) + " GPU calls (code) vs " +
+                        std::to_string(data.gpuCalls.size()) + " (data)";
+    }
+    // Numbers a few float steps apart only while nothing different reaches the renderer.
+    const int steps = gpuDifference.empty() ? AllowedFloatSteps : 0;
+
     const size_t draws = std::min(code.meshDraws.size(), data.meshDraws.size());
     for (size_t i = 0; i < draws; ++i)
     {
@@ -330,7 +451,7 @@ std::string FirstDifference(const Record& code, const Record& data)
         const std::vector<Field>& b = data.meshDraws[i];
         for (size_t f = 0; f < a.size(); ++f)
         {
-            if (a[f].second != b[f].second)
+            if (!Close(a[f].second, b[f].second, steps))
             {
                 return "draw " + std::to_string(i + 1) + " of " + std::to_string(code.meshDraws.size()) + ", mesh " +
                        a[0].second + ": " + a[f].first + " " + a[f].second + " (code) vs " + b[f].second + " (data)";
@@ -345,27 +466,13 @@ std::string FirstDifference(const Record& code, const Record& data)
     }
     for (size_t f = 0; f < code.modelAfter.size(); ++f)
     {
-        if (code.modelAfter[f].second != data.modelAfter[f].second)
+        if (!Close(code.modelAfter[f].second, data.modelAfter[f].second, steps))
         {
             return std::string("the model after the drawing: ") + code.modelAfter[f].first + " " +
                    code.modelAfter[f].second + " (code) vs " + data.modelAfter[f].second + " (data)";
         }
     }
-    const size_t calls = std::min(code.gpuCalls.size(), data.gpuCalls.size());
-    for (size_t i = 0; i < calls; ++i)
-    {
-        if (code.gpuCalls[i] != data.gpuCalls[i])
-        {
-            return "GPU call " + std::to_string(i + 1) + " of " + std::to_string(code.gpuCalls.size()) +
-                   ":\n  code: " + code.gpuCalls[i] + "\n  data: " + data.gpuCalls[i];
-        }
-    }
-    if (code.gpuCalls.size() != data.gpuCalls.size())
-    {
-        return std::to_string(code.gpuCalls.size()) + " GPU calls (code) vs " + std::to_string(data.gpuCalls.size()) +
-               " (data)";
-    }
-    return {};
+    return gpuDifference;
 }
 
 std::string Digest(const Record& record)
