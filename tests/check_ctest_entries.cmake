@@ -5,19 +5,27 @@ cmake_minimum_required(VERSION 3.25)
 # differ. An entry that runs no case fails by itself (MU_TEST_RAN_NO_CASE in tests/CMakeLists.txt), but a dropped name
 # leaves no entry that could fail; this check compares the counts instead.
 # Usage: cmake -DTEST_EXECUTABLE=<test binary> -DTEST_EXECUTOR=<emulator, may be empty>
-#              -DCTEST_FILE=<file doctest_discover_tests wrote> -P check_ctest_entries.cmake
+#              -DDISCOVERY_INCLUDE_FILE=<file doctest_discover_tests added to TEST_INCLUDE_FILES>
+#              -P check_ctest_entries.cmake
 
-foreach(variable TEST_EXECUTABLE CTEST_FILE)
+foreach(variable TEST_EXECUTABLE DISCOVERY_INCLUDE_FILE)
     if(NOT DEFINED ${variable})
         message(FATAL_ERROR "${variable} must be set")
     endif()
 endforeach()
-if(NOT EXISTS "${CTEST_FILE}")
-    message(FATAL_ERROR "${CTEST_FILE} does not exist: build the test binary, which writes it")
+
+# The include file includes the file the discovery wrote the entries to, once the test binary is built.
+file(READ "${DISCOVERY_INCLUDE_FILE}" include_script)
+if(NOT include_script MATCHES "include\\(\"([^\"]+)\"\\)")
+    message(FATAL_ERROR "${DISCOVERY_INCLUDE_FILE} includes no file of discovered entries")
+endif()
+set(ctest_file "${CMAKE_MATCH_1}")
+if(NOT EXISTS "${ctest_file}")
+    message(FATAL_ERROR "${ctest_file} does not exist: build the test binary, which writes it")
 endif()
 
 # The discovery writes one add_test( line per entry. Counting the matches keeps a name out of any CMake list.
-file(READ "${CTEST_FILE}" discovered)
+file(READ "${ctest_file}" discovered)
 string(REGEX MATCHALL "(^|\n)add_test\\(" entries "${discovered}")
 list(LENGTH entries entry_count)
 

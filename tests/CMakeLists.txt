@@ -86,16 +86,15 @@ function(mu_add_test)
         TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
         RESOURCE_LOCK ${MAT_RESOURCE_LOCK}
         FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}")
-    # The file doctest_discover_tests writes the entries to: doctest.cmake names it after a hash of the TEST_SPEC and
-    # EXTRA_ARGS, both empty here.
-    string(SHA1 discovery_hash " ")
-    string(SUBSTRING ${discovery_hash} 0 7 discovery_hash)
+    # doctest_discover_tests adds a file to the directory's TEST_INCLUDE_FILES that includes the entries it writes.
+    get_property(test_include_files DIRECTORY PROPERTY TEST_INCLUDE_FILES)
+    list(GET test_include_files -1 discovery_include_file)
     get_property(emulator TARGET ${MAT_NAME} PROPERTY CROSSCOMPILING_EMULATOR)
     add_test(NAME ${MAT_NAME}_has_one_ctest_entry_per_case
         COMMAND "${CMAKE_COMMAND}"
             "-DTEST_EXECUTABLE=$<TARGET_FILE:${MAT_NAME}>"
             "-DTEST_EXECUTOR=${emulator}"
-            "-DCTEST_FILE=${CMAKE_CURRENT_BINARY_DIR}/${MAT_NAME}_tests-${discovery_hash}.cmake"
+            "-DDISCOVERY_INCLUDE_FILE=${discovery_include_file}"
             -P "${MU_CHECK_CTEST_ENTRIES}")
     set_tests_properties(${MAT_NAME}_has_one_ctest_entry_per_case PROPERTIES
         TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
