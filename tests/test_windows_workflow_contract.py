@@ -299,6 +299,11 @@ check(
     "Quality detection must use the event's pinned diff base",
 )
 check("bash scripts/changed_cpp_files.sh" in quality_detection, "Quality detection must share the hook's file list")
+# A main push compares against the commit main's last successful run built, which the plan looks up.
+quality_plan = step(quality_job, "quality", "Select native builds")
+for required in ("GH_TOKEN: ${{ github.token }}", "python3 scripts/ci_build_plan.py"):
+    check(required in quality_plan, f"Quality Gates must look up main's last successful run: {required}")
+check("actions: read" in quality_job, "Quality Gates must be able to read main's runs")
 quality_static = step(quality_job, "quality", "Run static checks")
 for required in ("cmake -S tests/static -B out/static-checks", "ctest --test-dir out/static-checks"):
     check(required in quality_static, f"Static checks must run before native builds: {required}")

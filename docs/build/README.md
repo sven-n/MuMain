@@ -167,7 +167,10 @@ PRs then run Windows x64, Linux x64 and macOS arm64 Release builds and tests. Dr
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.
 Code merges to main run the same three builds, which save the caches the next PRs
-start from (see the CI caches below). A PR's newer revision cancels its older run.
+start from (see the CI caches below). A main push compares against the commit main's
+last successful run built, not the previous push: a push still waiting for its run
+is replaced by a newer one, and would otherwise never be built. Without such a run,
+everything builds. A PR's newer revision cancels its older run.
 Main pushes and releases finish the running revision and keep only the newest
 pending trigger, so a main push's caches get saved; a newer push or nightly/manual
 trigger can replace an older pending one.

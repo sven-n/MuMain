@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import io
 import json
 import os
 import shutil
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,7 +16,9 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_build_plan import build_plan, check_results, needs_native_build, scheduled_release_needed
+import ci_build_plan
+from ci_build_plan import (build_plan, check_results, last_successful_main_run, needs_native_build,
+                           scheduled_release_needed)
 
 
 class BuildPlanTests(unittest.TestCase):
@@ -144,11 +148,78 @@ class BuildPlanTests(unittest.TestCase):
                        cwd=repo, env=env, check=True, capture_output=True)
         return dict(line.split("=", 1) for line in output.read_text(encoding="utf-8").splitlines())
 
+    def run_main_push(self, repo, before, built):
+        """write_plan for a main push, with `built` as the commit main's last successful run built."""
+        event_path = repo / "event.json"
+        event_path.write_text(json.dumps({"before": before}), encoding="utf-8")
+        output = repo / "output.txt"
+        output.write_text("", encoding="utf-8")
+        env = dict(GITHUB_EVENT_PATH=str(event_path), GITHUB_EVENT_NAME="push", GITHUB_REF="refs/heads/main",
+                   GITHUB_REPOSITORY="sven-n/MuMain", GITHUB_OUTPUT=str(output))
+        current = os.getcwd()
+        os.chdir(repo)
+        try:
+            with patch.dict(os.environ, env), patch("ci_build_plan.last_successful_main_run", return_value=built), \
+                    redirect_stdout(io.StringIO()):
+                ci_build_plan.write_plan()
+        finally:
+            os.chdir(current)
+        return dict(line.split("=", 1) for line in output.read_text(encoding="utf-8").splitlines())
+
+    def commit(self, repo, path, text):
+        (repo / path).parent.mkdir(parents=True, exist_ok=True)
+        (repo / path).write_text(text, encoding="utf-8")
+        self.git(repo, "add", path)
+        self.git(repo, "commit", "-q", "-m", path)
+        return self.git(repo, "rev-parse", "HEAD")
+
     def test_git_diff_uses_both_sides_of_a_rename_and_keeps_deletions(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
             repo = Path(temporary)
             base = self.prepare_renamed_repository(repo)
-            self.assertEqual(self.run_plan(repo, "push", {"before": base})["linux"], "true")
+            self.assertEqual(self.run_main_push(repo, base, base)["linux"], "true")
+
+    def test_main_push_builds_what_a_replaced_push_brought(self):
+        # Code merge B waited while A's run built, and docs-only merge C replaced B's pending run.
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            self.git(repo, "init", "-q")
+            self.git(repo, "config", "user.email", "ci@example.invalid")
+            self.git(repo, "config", "user.name", "CI test")
+            a = self.commit(repo, "src/a.cpp", "int a;")
+            b = self.commit(repo, "src/b.cpp", "int b;")
+            self.commit(repo, "docs/c.md", "c")
+            plan = self.run_main_push(repo, before=b, built=a)
+            self.assertEqual((plan["linux"], plan["windows"], plan["diff_base"]), ("true", "true", a))
+            # With B built, C's documentation alone builds nothing.
+            self.assertEqual(self.run_main_push(repo, before=b, built=b)["linux"], "false")
+            # Without a successful run to compare with, or with one git does not know, everything builds.
+            for built in (None, "0" * 40):
+                with self.subTest(built=built):
+                    plan = self.run_main_push(repo, before=b, built=built)
+                    self.assertEqual((plan["linux"], plan["diff_base"]), ("true", b))
+
+    def test_last_successful_main_run_asks_github_for_this_workflow(self):
+        env = dict(GITHUB_WORKFLOW_REF="sven-n/MuMain/.github/workflows/ci.yml@refs/heads/main", GH_TOKEN="token",
+                   GITHUB_REPOSITORY="sven-n/MuMain", GITHUB_API_URL="https://api.example")
+        urls = []
+
+        def fetch(request, runs=({"head_sha": "abc"},)):
+            urls.append(request.full_url)
+            return {"workflow_runs": list(runs)}
+
+        with patch.dict(os.environ, env):
+            self.assertEqual(last_successful_main_run(fetch), "abc")
+            self.assertEqual(urls, ["https://api.example/repos/sven-n/MuMain/actions/workflows/ci.yml/runs"
+                                    "?branch=main&event=push&status=success&per_page=1"])
+            self.assertIsNone(last_successful_main_run(lambda request: {"workflow_runs": []}))
+
+            def failing(request):
+                raise OSError("unreachable")
+            with redirect_stderr(io.StringIO()):
+                self.assertIsNone(last_successful_main_run(failing))
+        with patch.dict(os.environ, {**env, "GH_TOKEN": ""}):
+            self.assertIsNone(last_successful_main_run(fetch))
 
     def test_pull_request_diffs_against_current_main_not_stale_base_sha(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as temporary:

@@ -36,6 +36,10 @@ jobs:
     # The image by name, not ubuntu-latest: GitHub moves repositories to a new latest image one by one, and its
     # cppcheck and GCC report different findings and warnings.
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # Select native builds looks up the commit main's last successful run built (scripts/ci_build_plan.py).
+      actions: read
     outputs:
       linux: ${{ steps.plan.outputs.linux }}
       macos: ${{ steps.plan.outputs.macos }}
@@ -68,6 +72,8 @@ jobs:
 
       - name: Select native builds
         id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 scripts/ci_build_plan.py
 
       # Architecture guards and contracts that only read the source; native jobs skip the `static` label.
