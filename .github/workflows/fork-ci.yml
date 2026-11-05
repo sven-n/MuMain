@@ -1,10 +1,8 @@
-# Builds that ci.yml does not run, started by hand ("Run workflow"). ci.yml builds
-# the game (editor OFF) on Windows, Linux and macOS for every pull request and main
-# push, so pull requests no longer start this workflow. With "editor" checked it
-# adds the editor builds: the game matters more than an always working editor, and
-# on every pull request they would double the Actions usage.
+# The editor builds, which ci.yml does not run, started by hand ("Run workflow"). ci.yml
+# builds the game (editor OFF) on Windows, Linux and macOS for every pull request and
+# main push; the game matters more than an always working editor, and on every pull
+# request the editor builds would double the Actions usage.
 #
-#   Windows x64 Release   editor OFF  (always, as in ci.yml)
 #   Windows x64 Release   editor ON
 #   Linux x64 Release     editor ON
 #   macOS arm64 Release   editor ON
@@ -14,10 +12,9 @@
 # uses GitHub's own actions only, so it runs under a repository setting that
 # allows no other actions.
 #
-# The editor OFF build follows ci.yml's rule that no warning may come back (docs/build/README.md): the game's
-# own code builds with warnings as errors, scripts/ci_warnings.py fails the step for any other warning, note or
-# deprecation in the configure or build output, and the last job fails on a warning annotation of any job. The
-# editor ON builds are not held to it; the Windows one lists its warnings (ci_warnings.py report).
+# The editor builds are not held to ci.yml's rule that no warning may come back (docs/build/README.md); the
+# Windows one lists its warnings (ci_warnings.py report). The last job still fails on a warning annotation of any job,
+# e.g. GitHub's own about a deprecated action.
 #
 # Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
 # about 35), and each test case its own limit from tests/CMakeLists.txt. A
@@ -27,11 +24,6 @@ name: Fork CI
 
 on:
   workflow_dispatch:
-    inputs:
-      editor:
-        description: 'Also build and test with the editor ON (Windows, Linux, macOS)'
-        type: boolean
-        default: false
 
 concurrency:
   group: fork-ci-${{ github.ref }}
@@ -49,16 +41,11 @@ env:
   GIT_CONFIG_VALUE_1: 'false'
 
 jobs:
-  windows:
-    name: Windows x64 Release, editor ${{ matrix.editor }}
+  windows-editor:
+    name: Windows x64 Release, editor ON
     # The images by name, as in ci.yml.
     runs-on: windows-2025-vs2026
     timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        # Without "editor" checked, only the editor OFF build runs.
-        editor: ${{ fromJSON(inputs.editor && '["OFF", "ON"]' || '["OFF"]') }}
 
     steps:
       - name: Checkout repository
@@ -96,7 +83,7 @@ jobs:
           }
 
       - name: Cache dependencies
-        # Named as in ci.yml, after what picks the files. The editor changes no library source, so both builds share it.
+        # Named as in ci.yml, after what picks the files.
         uses: actions/cache@v6
         with:
           path: |
@@ -124,7 +111,7 @@ jobs:
 
       - name: Configure CMake
         run: >
-          python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}
+          python scripts/ci_warnings.py report
           cmake --preset windows-x64
           -B out/build/fork-ci-windows
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -133,9 +120,9 @@ jobs:
           -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
-          -DENABLE_EDITOR=${{ matrix.editor }}
-          -DENABLE_CONTROL_SOCKET=${{ matrix.editor }}
-          -DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}
+          -DENABLE_EDITOR=ON
+          -DENABLE_CONTROL_SOCKET=ON
+          -DMU_WARNINGS_AS_ERRORS=OFF
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -145,7 +132,7 @@ jobs:
 
       - name: Build
         run: >
-          python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}
+          python scripts/ci_warnings.py report
           cmake --build out/build/fork-ci-windows --config Release
 
       - name: Run tests
@@ -156,7 +143,6 @@ jobs:
 
   linux-editor:
     name: Linux x64 Release, editor ON
-    if: github.event_name == 'workflow_dispatch' && inputs.editor
     runs-on: ubuntu-26.04
     timeout-minutes: 90
 
@@ -216,7 +202,6 @@ jobs:
 
   macos-editor:
     name: macOS arm64 Release, editor ON
-    if: github.event_name == 'workflow_dispatch' && inputs.editor
     runs-on: macos-26
     timeout-minutes: 90
 
@@ -266,7 +251,7 @@ jobs:
 
   annotations:
     name: Job annotations
-    needs: [windows, linux-editor, macos-editor]
+    needs: [windows-editor, linux-editor, macos-editor]
     if: always()
     runs-on: ubuntu-26.04
     timeout-minutes: 10

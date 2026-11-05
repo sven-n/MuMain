@@ -339,21 +339,21 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
 for workflow_name, workflow in (("ci.yml", ci), ("fork-ci.yml", read_optional(FORK_CI_WORKFLOW))):
     for runner in re.findall(r"(?m)^\s*runs-on:\s*(\S+)", workflow):
         check(not runner.endswith("-latest"), f"{workflow_name} must name its runner image, not {runner}")
-# Fork CI runs only by hand: ci.yml builds Windows for every pull request, so a pull request starting Fork CI too would
-# build it twice. Its editor OFF row holds the same rule as ci.yml's, and its last job checks the annotations.
+# Fork CI runs only by hand and builds only the editor: ci.yml builds the game on every system for every pull request,
+# so a pull request starting Fork CI, or Fork CI building the game, would build it twice. Its last job checks the
+# annotations.
 fork_ci_workflow = read_optional(FORK_CI_WORKFLOW)
 if fork_ci_workflow:
     fork_triggers = re.search(r"(?ms)^on:\n(.*?)^\S", fork_ci_workflow)
     check(fork_triggers is not None and re.findall(r"(?m)^  (\w+):", fork_triggers.group(1)) == ["workflow_dispatch"],
           "Fork CI must run only when started by hand")
-    fork_windows = job(fork_ci_workflow, "windows")
-    fork_wrapper = "python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}"
-    fork_configure = step(fork_windows, "windows", "Configure CMake")
-    for required in (fork_wrapper, "-DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}"):
-        check(required in fork_configure, f"Fork CI's editor OFF configure must fail on warnings: {required}")
-    check(fork_wrapper in step(fork_windows, "windows", "Build"), "Fork CI's editor OFF build must fail on warnings")
+    for fork_job in ("windows-editor", "linux-editor", "macos-editor"):
+        check("-DENABLE_EDITOR=ON" in step(job(fork_ci_workflow, fork_job), fork_job, "Configure CMake"),
+              f"Fork CI's {fork_job} must build the editor")
+    check("-DENABLE_EDITOR=OFF" not in fork_ci_workflow and "matrix." not in fork_ci_workflow,
+          "Fork CI must not build the game without the editor, which ci.yml builds")
     fork_annotations = job(fork_ci_workflow, "annotations")
-    for required in ("needs: [windows, linux-editor, macos-editor]", "if: always()", "actions: read",
+    for required in ("needs: [windows-editor, linux-editor, macos-editor]", "if: always()", "actions: read",
                      "checks: read", "python3 scripts/ci_job_annotations.py"):
         check(required in fork_annotations, f"Fork CI must fail on warning annotations: {required}")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
@@ -584,7 +584,7 @@ fork_ci = read_optional(FORK_CI_WORKFLOW)
 if fork_ci:
     linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
     for windows_job, vcpkg_step in ((native_job, "Restore vcpkg packages"),
-                                    (job(fork_ci, "windows"), "Cache vcpkg packages")):
+                                    (job(fork_ci, "windows-editor"), "Cache vcpkg packages")):
         cache_key = step(windows_job, "windows", "Identify vcpkg toolchain")
         check("scripts/ci_vcpkg_cache_key.ps1" in cache_key, "Windows must identify its actual toolchain")
         cache = step(windows_job, "windows", vcpkg_step)
