@@ -321,9 +321,15 @@ TEST_CASE("map-name live binding survives locale and theme changes as plain text
     }
 }
 
-TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]" *
-          doctest::skip(std::getenv("MU_RUN_GPU_UPLOAD_TESTS") == nullptr))
+TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]")
 {
+    // Not doctest::skip(): CTest's discovery reads the variable when the binary is built, and a run without it would
+    // leave the entry running no case, which fails.
+    if (std::getenv("MU_RUN_GPU_UPLOAD_TESTS") == nullptr)
+    {
+        MESSAGE("Set MU_RUN_GPU_UPLOAD_TESTS to run this case.");
+        return;
+    }
     MapNameFixture fixture;
     WarningTextureFixture texture;
     REQUIRE(SDL_InitSubSystem(SDL_INIT_VIDEO));

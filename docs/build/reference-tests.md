@@ -54,7 +54,10 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   build.
 - A CTest entry that runs no case fails (doctest reports `test cases: 0`), so a
   name the discovery cut or joined fails in CI even where the static check cannot
-  read it.
+  read it. Decide an opt-in case at run time (return early) rather than with
+  `doctest::skip(condition)`: the discovery evaluates the condition when the
+  binary is built, so a condition read from the environment can differ when the
+  tests run.
 
 ## Static checks and the pre-push hook
 
