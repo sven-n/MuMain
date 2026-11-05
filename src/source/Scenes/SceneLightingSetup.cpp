@@ -72,6 +72,9 @@ void SubmitSceneLighting()
     Render::Lighting::ApplyTuning(lighting);
     lighting.highlightKnee = Render::Lighting::LightMood::Active().highlightKnee;
     const std::optional<Render::Lighting::FrameSunDirections> sun = Render::Lighting::FrameSun();
+    // Also while the map is unusable: a size other than the one that failed brings it back.
+    lighting.sunShadowResolution =
+        static_cast<std::uint32_t>(Render::Look::Value(Data::Maps::LookValue::SunShadowResolution));
     if (Render::Lighting::SunShadowsActive() && Hero && sun)
     {
         using Data::Maps::LookValue;
@@ -84,7 +87,6 @@ void SubmitSceneLighting()
         lighting.sunShadowDarkness =
             Render::Look::Value(LookValue::SunShadowStrength) * Render::Look::Value(LookValue::GroundShadowOpacity);
         lighting.sunShadowSoftness = Render::Look::Value(LookValue::SunShadowSoftness);
-        lighting.sunShadowResolution = static_cast<std::uint32_t>(Render::Look::Value(LookValue::SunShadowResolution));
         // Around the hero: the ground the camera sees lies within these heights.
         constexpr float GroundReach = 400.0f;
         lighting.groundLow = Hero->Object.Position[2] - GroundReach;

@@ -22,6 +22,13 @@ public:
     // This frame asks for a map of ResolutionFor(`requested`) (SetSceneLighting), or for none.
     void Request(Uint32 requested);
     void Cancel();
+    // The size the look asks for, map or no map: choosing a size other than one that failed tries again.
+    void Want(Uint32 requested);
+    // The wanted size failed to allocate: the flat shadows stay until another size is wanted, or the device is rebuilt.
+    [[nodiscard]] bool WantedSizeFailed() const
+    {
+        return m_failedSize != 0u && m_failedSize == m_resolution;
+    }
     [[nodiscard]] Uint32 Resolution() const
     {
         return m_resolution;
@@ -63,6 +70,7 @@ private:
     bool m_fallbackCleared = false;
     SDL_GPUTexture* m_map = nullptr;
     Uint32 m_mapSize = 0u;
+    Uint32 m_failedSize = 0u;
     bool m_requested = false;
     Uint32 m_resolution = 0u;
     bool m_ready = false;

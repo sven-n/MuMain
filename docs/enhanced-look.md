@@ -254,6 +254,51 @@ own. The shipped ones:
 [enhanced-look-map-environments.md](enhanced-look-map-environments.md) lists
 every map with its world number and why it has its environment.
 
+## Shadows and their switches
+
+Characters and objects get their sun shadow from one of two places:
+
+- **The shadow map**, while `sun.shadow` is above 0 and the graphics device can draw it.
+- **The flat shadow**, otherwise. As `sun.shadow` rises from 0 to 100 %, the flat shadow fades out while the shadow
+  map, clouds, sky-blue shade and sun rim fade in, so low values have no sudden change.
+
+The older switches also apply to the shadow map:
+
+| Switch | Effect |
+|---|---|
+| Disable Shadows | models stop casting body shadows and leave the shadow map; the terrain keeps casting, and the sunlight, clouds and sky-blue shade stay |
+| Render full effects, off | the same as Disable Shadows |
+| Disable wing shadow | wings and capes stop casting, in both kinds of shadow; the rest of the character still casts |
+
+These switches change what casts, not what is drawn: ambient occlusion still sees every model.
+
+Alpha-tested and alpha-to-coverage cut-outs (foliage, fences, hair) cast shadows through the same holes they show.
+Fading objects are not cut-outs: a fading object casts no shadow, except that a fading character part casts a partial
+one, as blended wings and capes do.
+
+If an optional pass cannot be drawn, the game falls back without losing geometry:
+
+| Unavailable | Fallback |
+|---|---|
+| Sun shadow map or its pipelines | flat shadows return from the next frame; choosing another `sun.resolution` tries again |
+| Ground shadow mask | sun shadows draw as recorded, and point-light shadows are left out |
+| Scene depth or ambient occlusion | no ambient occlusion |
+| HDR scene | the scene renders in the frame's own format |
+| Post-processing targets | the frame renders directly, without bloom or ambient occlusion |
+
+## Limits
+
+These are accepted limits of the current look, with the phase of the [rollout plan](https://github.com/sven-n/MuMain/issues/990)
+that takes them up. They are not claims of full 3D local-light occlusion.
+
+- **Point-light shadows are terrain-projected.** A character's shadow from a nearby light is flattened onto the ground.
+  It does not fall on walls or other characters, and world objects cast none. Better projection is Phase 2, and
+  occlusion by world objects is Phase 9.
+- **Lighting clamps remain.** The ground clips at full brightness while models use a soft roll-off. Deciding where
+  brightness is compressed belongs to the colour and HDR conventions in Phase 3.
+- **Ambient occlusion is tied to the bloom switch.** Turning off "Bloom and colour grading" removes ambient occlusion
+  too, until Phase 4 separates them.
+
 ## Developer commands
 
 Builds with the control socket (`ENABLE_CONTROL_SOCKET=ON`, the `-mueditor`

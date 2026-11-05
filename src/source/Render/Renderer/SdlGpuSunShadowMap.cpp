@@ -40,12 +40,14 @@ bool SdlGpuSunShadowMap::CreateResources(SDL_GPUDevice* device)
 
 bool SdlGpuSunShadowMap::IsAvailable() const
 {
-    return m_sampler && m_fallback;
+    return m_sampler && m_fallback && !WantedSizeFailed();
 }
 
 void SdlGpuSunShadowMap::Release()
 {
     ReleaseMap();
+    m_ready = false;
+    m_failedSize = 0u;
     if (m_fallback)
     {
         SDL_ReleaseGPUTexture(m_device, m_fallback);
@@ -61,6 +63,11 @@ void SdlGpuSunShadowMap::Release()
 void SdlGpuSunShadowMap::Request(Uint32 requested)
 {
     m_requested = true;
+    Want(requested);
+}
+
+void SdlGpuSunShadowMap::Want(Uint32 requested)
+{
     m_resolution = ResolutionFor(requested);
 }
 
@@ -87,6 +94,7 @@ SDL_GPUTexture* SdlGpuSunShadowMap::PrepareMap()
         ReleaseMap();
         m_map = CreateDepth(m_resolution);
         m_mapSize = m_map ? m_resolution : 0u;
+        m_failedSize = m_map ? 0u : m_resolution;
     }
     return m_map;
 }

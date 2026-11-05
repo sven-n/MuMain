@@ -5454,6 +5454,10 @@ public:
         const glm::mat4 viewProjection = m_projMatrix * m_modelViewMatrix;
 
         s_sunShadowMap.Cancel();
+        if (lighting.sunShadowResolution > 0u)
+        {
+            s_sunShadowMap.Want(lighting.sunShadowResolution);
+        }
         if (lighting.sunShadowDarkness > 0.0f && SunShadowsAvailable())
         {
             s_sunShadowMap.Request(lighting.sunShadowResolution);

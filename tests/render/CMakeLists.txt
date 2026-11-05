@@ -81,6 +81,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sun_shadow_map_tests
+    SOURCES
+        test_sun_shadow_map.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME shadow_pass_selection_tests
     SOURCES
         test_shadow_pass_selection.cpp
