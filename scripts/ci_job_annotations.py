@@ -13,6 +13,7 @@ are listed and pass; its other warnings, e.g. a cache over the size limit, fail 
 The job that runs it is still in progress and is not checked.
 """
 
+import http.client
 import json
 import os
 import re
@@ -27,6 +28,12 @@ PAGE_SIZE = 100
 # A request that GitHub fails or rate-limits is sent again after 5, 10 and 15 seconds before the check gives up.
 REQUEST_ATTEMPTS = 4
 RETRY_DELAY_SECONDS = 5
+# A wait GitHub asks for (Retry-After, or until a rate limit resets) is kept up to this long; a longer one fails the
+# check at once instead of holding the job.
+MAX_WAIT_SECONDS = 60
+# What a request can fail with on its way: OSError covers urllib's errors, timeouts, resets and SSL failures,
+# HTTPException a body cut off while it is read, JSONDecodeError a body that ended early.
+REQUEST_ERRORS = (OSError, http.client.HTTPException, json.JSONDecodeError)
 # Warnings about the state of GitHub's services rather than this repository: actions/cache's "Failed to restore: ..."
 # and "Failed to save: ..." when the cache service is busy, down, unreachable or raced by another job. The same prefix
 # also opens failures the workflow causes ("Failed to save: Cache size of ~11000 MB is over the 10GB limit"), which
@@ -44,28 +51,44 @@ SERVICE_WARNINGS = (
 )
 
 
-def is_worth_retrying(error):
-    """Whether a failed request may pass when sent again: GitHub's own failures and its rate limits."""
-    if isinstance(error, urllib.error.HTTPError):
-        rate_limited = error.code == 429 or (
-            error.code == 403
-            and (error.headers.get("retry-after") or error.headers.get("x-ratelimit-remaining") == "0"))
-        return error.code >= 500 or rate_limited
-    return isinstance(error, (urllib.error.URLError, TimeoutError, ConnectionError))
+def retry_delay(error, attempt, now):
+    """Seconds to wait before a failed request goes out again, or None when sending it again cannot help."""
+    backoff = RETRY_DELAY_SECONDS * attempt
+    if not isinstance(error, urllib.error.HTTPError):
+        return backoff
+    if error.code >= 500:
+        return backoff
+    if error.code not in (403, 429):
+        return None
+    headers = error.headers or {}
+    retry_after = (headers.get("retry-after") or "").strip()
+    reset = (headers.get("x-ratelimit-reset") or "").strip()
+    if retry_after:
+        # Seconds, or an HTTP date, for which the backoff stands in.
+        wait = int(retry_after) if retry_after.isdigit() else backoff
+    elif headers.get("x-ratelimit-remaining") == "0":
+        # The hourly limit is used up; waiting helps only when it resets soon.
+        wait = max(1, int(reset) - int(now) + 1) if reset.isdigit() else MAX_WAIT_SECONDS + 1
+    elif error.code == 429:
+        wait = backoff
+    else:
+        return None  # a 403 that is no rate limit, e.g. a missing permission
+    return wait if wait <= MAX_WAIT_SECONDS else None
 
 
-def fetch_json(request, open_url=urllib.request.urlopen, sleep=time.sleep):
+def fetch_json(request, open_url=urllib.request.urlopen, sleep=time.sleep, clock=time.time):
     """The JSON body of a GitHub API request, sent up to REQUEST_ATTEMPTS times while GitHub fails."""
     for attempt in range(1, REQUEST_ATTEMPTS + 1):
         try:
             with open_url(request, timeout=30) as response:
                 return json.load(response)
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
-            if attempt == REQUEST_ATTEMPTS or not is_worth_retrying(error):
+        except REQUEST_ERRORS as error:
+            delay = retry_delay(error, attempt, clock()) if attempt < REQUEST_ATTEMPTS else None
+            if delay is None:
                 raise
-            print(f"GitHub API request failed ({error}); attempt {attempt + 1} of {REQUEST_ATTEMPTS} follows.",
-                  flush=True)
-            sleep(RETRY_DELAY_SECONDS * attempt)
+            print(f"GitHub API request failed ({error!r}); attempt {attempt + 1} of {REQUEST_ATTEMPTS} follows in "
+                  f"{delay} s.", flush=True)
+            sleep(delay)
     raise AssertionError("unreachable")
 
 

@@ -2,9 +2,11 @@
 """Tests for scripts/ci_warnings.py and scripts/ci_job_annotations.py, the CI rule that no warning comes back."""
 
 import email.message
+import http.client
 import importlib.util
 import io
 import os
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -184,8 +186,10 @@ def http_error(code, **headers):
 
 
 class RequestRetryTests(unittest.TestCase):
+    NOW = 1_000_000
+
     def fetch(self, *outcomes):
-        """fetch_json against answers given in order: an exception is raised, anything else is the JSON body."""
+        """fetch_json against answers given in order: an exception is raised, anything else is the body."""
         answers = list(outcomes)
         self.sleeps = []
 
@@ -195,23 +199,44 @@ class RequestRetryTests(unittest.TestCase):
                 raise answer
             return io.BytesIO(answer.encode())
 
-        return ci_job_annotations.fetch_json("request", open_url, self.sleeps.append)
+        return ci_job_annotations.fetch_json("request", open_url, self.sleeps.append, lambda: self.NOW)
 
     def test_a_server_error_is_retried(self):
         self.assertEqual(self.fetch(http_error(502), '{"jobs": []}'), {"jobs": []})
         self.assertEqual(self.sleeps, [5])
 
     def test_a_network_failure_is_retried(self):
-        self.assertEqual(self.fetch(urllib.error.URLError("reset"), TimeoutError(), "[]"), [])
-        self.assertEqual(self.sleeps, [5, 10])
+        self.assertEqual(self.fetch(urllib.error.URLError("reset"), TimeoutError(), ssl.SSLError("bad record"), "[]"),
+                         [])
+        self.assertEqual(self.sleeps, [5, 10, 15])
 
-    def test_a_rate_limit_is_retried(self):
-        self.assertEqual(self.fetch(http_error(403, x_ratelimit_remaining="0"), http_error(429), "[]"), [])
-        self.assertEqual(self.sleeps, [5, 10])
+    def test_a_body_cut_off_is_retried(self):
+        self.assertEqual(self.fetch(http.client.IncompleteRead(b"{"), "[]"), [])
+        self.assertEqual(self.fetch('{"jobs": [', "[]"), [])
+        self.assertEqual(self.sleeps, [5])
+
+    def test_a_rate_limit_waits_as_github_asks(self):
+        self.assertEqual(
+            self.fetch(http_error(403, retry_after="30"),
+                       http_error(403, x_ratelimit_remaining="0", x_ratelimit_reset=str(self.NOW + 20)),
+                       http_error(429), "[]"),
+            [])
+        self.assertEqual(self.sleeps, [30, 21, 15])
+
+    def test_a_long_wait_fails_at_once(self):
+        for error in (http_error(429, retry_after="3600"),
+                      http_error(403, x_ratelimit_remaining="0", x_ratelimit_reset=str(self.NOW + 3000)),
+                      http_error(403, x_ratelimit_remaining="0")):
+            with self.subTest(headers=dict(error.headers)):
+                with self.assertRaises(urllib.error.HTTPError):
+                    self.fetch(error, "[]")
+                self.assertEqual(self.sleeps, [])
 
     def test_a_refused_request_fails_at_once(self):
         with self.assertRaises(urllib.error.HTTPError):
             self.fetch(http_error(403), "[]")
+        with self.assertRaises(urllib.error.HTTPError):
+            self.fetch(http_error(404), "[]")
         self.assertEqual(self.sleeps, [])
 
     def test_gives_up_after_the_last_attempt(self):
