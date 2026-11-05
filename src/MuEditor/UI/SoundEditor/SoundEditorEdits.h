@@ -99,6 +99,12 @@ public:
     // time: the sounds whose keys changed since the file was written keep
     // their folders under the new keys.
     const std::vector<Data::Sounds::SoundFolder>& Folders();
+    // Goes up each time the folders change (a step, a read of the file, a
+    // key followed), for what the window counts of them.
+    int GetFoldersVersion() const
+    {
+        return m_foldersVersion;
+    }
     // The folders, also the history's steps, keep the sounds whose keys
     // changed since the last call in any window (FollowedKeys: a set renamed
     // in Monster Sounds, a file picked in the Map Editor's Sounds tab); Save
@@ -221,6 +227,7 @@ private:
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
     std::vector<Data::Sounds::SoundFolder> m_foldersFile;
+    int m_foldersVersion = 0;
     std::vector<Data::Items::ItemDataIssue> m_folderProblems;
     // The tables whose keys the folders and the steps' folders name, with
     // their databases' versions.

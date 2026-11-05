@@ -9,9 +9,11 @@
 #include "Data/GameData/SoundData/SoundEvents.h"
 
 #include <array>
+#include <cstddef>
 #include <functional>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -73,6 +75,12 @@ private:
     // The numbers field being typed in, and which one.
     std::string m_numbersEdit;
     std::string m_numbersEditKey;
+    // How many folder entries name sounds the rows lack, and what that was
+    // counted for: the tables' and the folders' versions, the rows and the
+    // sounds played unloaded (RenderFolderBar counts again when one moves).
+    using GoneCountKey = std::tuple<int, int, int, int, std::size_t, std::size_t>;
+    std::optional<GoneCountKey> m_goneCountKey;
+    std::size_t m_goneCount = 0;
 };
 
 extern MuSoundEditorUI g_MuSoundEditorUI;

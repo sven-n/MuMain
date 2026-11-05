@@ -365,6 +365,7 @@ void SoundEdits::ReadFolders()
     FollowKeyChanges();
     Data::Sounds::SoundFoldersLoadResult read = Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
     m_folders = std::move(read.folders);
+    ++m_foldersVersion;
     m_savedFolders = m_folders;
     m_foldersFile = *m_folders;
     m_folderProblems.clear();
@@ -555,6 +556,7 @@ void SoundEdits::RenameInFolders(const std::map<std::string, std::string>& renam
         return;
     }
     RenameSounds(*m_folders, renamed);
+    ++m_foldersVersion;
     // The folders' file names the same sounds still.
     if (m_savedFolders)
     {
@@ -658,6 +660,7 @@ bool SoundEdits::Apply(const SoundEdit& edit, bool forward)
     if (edit.foldersBefore && edit.foldersAfter)
     {
         m_folders = forward ? *edit.foldersAfter : *edit.foldersBefore;
+        ++m_foldersVersion;
     }
     if (edit.eventsBefore && edit.eventsAfter)
     {

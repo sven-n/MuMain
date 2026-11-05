@@ -15,8 +15,10 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "../MuEditor/UI/SoundMixer/MuSoundMixerUI.h"
+#include "Audio/SoundLoads.h"
 #include "Audio/SoundMixer.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/SoundData/SoundEventDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "I18N/All.h"
@@ -787,18 +789,36 @@ void MuSoundEditorUI::RenderFolderBar(const std::vector<SoundRow>& rows)
     ImGui::EndDisabled();
     ImGui::TextDisabled("%s", I18N::Editor::SoundEditorDragTip);
     // Entries of sounds that are gone stay until the user drops them: a sound
-    // that comes back (another window's undo) finds its folder.
-    std::set<std::string> keys;
-    for (const SoundRow& row : rows)
+    // that comes back (another window's undo) finds its folder. Counted
+    // again only when the rows or the folders change.
+    const auto keysOf = [&rows]
     {
-        keys.insert(row.key);
+        std::set<std::string> keys;
+        for (const SoundRow& row : rows)
+        {
+            keys.insert(row.key);
+        }
+        return keys;
+    };
+    const GoneCountKey counted{g_SoundFileDatabase.GetVersion(),
+                               g_MonsterSoundSetDatabase.GetVersion(),
+                               g_MapObjectSoundDatabase.GetVersion(),
+                               g_SoundEdits.GetFoldersVersion(),
+                               rows.size(),
+                               Audio::SoundLoads::PlayedUnloaded().size()};
+    if (m_goneCountKey != counted)
+    {
+        m_goneCountKey = counted;
+        m_goneCount = MuEditor::SoundEditor::CountStaleSounds(g_SoundEdits.Folders(), keysOf());
     }
-    if (const size_t gone = MuEditor::SoundEditor::CountStaleSounds(g_SoundEdits.Folders(), keys); gone > 0)
+    if (m_goneCount > 0)
     {
-        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEditorGoneSounds0, {std::to_string(gone)}).c_str());
+        ImGui::TextDisabled("%s",
+                            I18N::Format(I18N::Editor::SoundEditorGoneSounds0, {std::to_string(m_goneCount)}).c_str());
         ImGui::SameLine();
         if (ImGui::SmallButton(I18N::Editor::SoundEditorDropGoneSounds))
         {
+            const std::set<std::string> keys = keysOf();
             std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
             MuEditor::SoundEditor::DropStaleSounds(after, std::vector<std::string>(keys.begin(), keys.end()));
             change(std::move(after));

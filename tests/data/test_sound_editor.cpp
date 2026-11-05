@@ -1700,6 +1700,27 @@ TEST_CASE("Sound Editor: the Sounds tab reads Data/Sound again on its button, an
     CHECK(g_SoundEdits.Folders() == std::vector<SoundFolder>{Folder("Game", {"SOUND_CLICK01"})});
     REQUIRE(g_SoundEdits.Undo());
     CHECK(g_SoundEdits.Folders() == withGone);
+    // The count follows the folders' undo: the button is there again.
+    press(I18N::Editor::SoundEditorDropGoneSounds);
+    CHECK(g_SoundEdits.Folders() == std::vector<SoundFolder>{Folder("Game", {"SOUND_CLICK01"})});
+    REQUIRE(g_SoundEdits.Undo());
+    // And the rows: a sound of the gone entry's key comes, so none is gone.
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall()});
+    std::vector<Data::Maps::MapObjectSound> back = g_MapObjectSoundDatabase.GetAll();
+    back[0].file = "Data/Sound/EditorTest/gone.wav";
+    g_MapObjectSoundDatabase.Build(back);
+    frame();
+    press(I18N::Editor::SoundEditorDropGoneSounds);
+    CHECK(g_SoundEdits.Folders() == withGone);
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    // Counted with none gone, then an entry of a gone sound comes: the count
+    // follows the folders, and the button is there.
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", std::vector<SoundFolder>{Folder("Game", {"SOUND_CLICK01"})}));
+    frame();
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", withGone));
+    frame();
+    press(I18N::Editor::SoundEditorDropGoneSounds);
+    CHECK(g_SoundEdits.Folders() == std::vector<SoundFolder>{Folder("Game", {"SOUND_CLICK01"})});
 
     const auto missing = []
     {
