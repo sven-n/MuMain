@@ -6490,13 +6490,11 @@ void MoveCharacterClient(CHARACTER* cc)
         MoveMonsterClient(cc, co);
         FinishPendingTurn(cc);
         MoveCharacter(cc, co);
-        // The hero's comes after its move, in MoveHero.
-        if (cc != Hero)
-        {
-            Engine::Characters::UpdateFlightFeel(cc);
-            Engine::Characters::UpdateTurnLag(cc);
-            Engine::Characters::UpdateSlopeLean(cc);
-        }
+        // After the character's move (MoveHero's for the hero, which runs before this whatever state it's in), so the
+        // flight's drift is in the height drawn.
+        Engine::Characters::UpdateFlightFeel(cc);
+        Engine::Characters::UpdateTurnLag(cc);
+        Engine::Characters::UpdateSlopeLean(cc);
         Engine::Characters::UpdateSnapTurn(cc);
         MoveCharacterVisual(cc, co);
 
