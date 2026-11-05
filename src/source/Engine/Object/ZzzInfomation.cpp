@@ -6,6 +6,7 @@
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 
 #include <codecvt>
 #include <sstream>
@@ -52,19 +53,20 @@ int  AbuseNameFilterNumber = 0;
 
 void OpenFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
 
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_FILTERS];
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_FILTERS);
+    BYTE* Buffer = content.data();
     // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
     // smaller table ends early, after that entry, and still loads.
-    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp);
-    fclose(fp);
+    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp.get());
+    fp.reset();
 
     bool ended = false;
     {
@@ -83,7 +85,6 @@ void OpenFilterFile(const wchar_t* FileName)
         }
     }
 
-    delete[] Buffer;
     if (!ended && entries < MAX_FILTERS)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
@@ -92,19 +93,20 @@ void OpenFilterFile(const wchar_t* FileName)
 
 void OpenNameFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
         DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_NAMEFILTERS];
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_NAMEFILTERS);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    const bool complete = DataFileIO::ReadExact(fp, Buffer, Size * MAX_NAMEFILTERS) &&
-                          DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * MAX_NAMEFILTERS) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
     if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
         DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
@@ -124,7 +126,6 @@ void OpenNameFilterFile(const wchar_t* FileName)
             pSeek += Size;
         }
     }
-    delete[] Buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,17 +134,18 @@ void OpenNameFilterFile(const wchar_t* FileName)
 
 void OpenGateScript(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (fp)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
-        BYTE* Buffer = new BYTE[Size];
+        std::vector<BYTE> record(static_cast<std::size_t>(Size));
+        BYTE* Buffer = record.data();
         for (int i = 0; i < MAX_GATES; i++)
         {
             // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
             // ends inside a gate is corrupt.
-            const std::size_t read = fread(Buffer, 1, Size, fp);
-            if (read == 0 && feof(fp))
+            const std::size_t read = fread(Buffer, 1, Size, fp.get());
+            if (read == 0 && feof(fp.get()))
             {
                 break;
             }
@@ -155,8 +157,6 @@ void OpenGateScript(const wchar_t* FileName)
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
         }
-        delete[] Buffer;
-        fclose(fp);
     }
     else
     {
