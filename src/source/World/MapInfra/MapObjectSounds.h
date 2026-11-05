@@ -17,8 +17,9 @@ namespace World::MapObjectSounds
 void LoadForMap(int serverMap, int stage);
 
 // The last frame drew the object (UpdateObjectVisual): its type's sound, if
-// an entry of the map names the type, and the sounds of the map's entries
-// without objects (any object, Q-MP8) start a copy in PlayDrawnSounds.
+// an entry of the map names the type, starts a copy in PlayDrawnSounds, and
+// the sounds of the map's entries without objects (any object, Q-MP8) do so
+// for the first object drawn in the frame.
 void OnObjectDrawn(const OBJECT& object);
 
 // After the objects the last frame drew (UpdateObjectEffects): each start of

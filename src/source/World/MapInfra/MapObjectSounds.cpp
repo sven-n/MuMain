@@ -75,6 +75,14 @@ std::vector<std::pair<ESound, float>>& LoudestLevels()
     return levels;
 }
 
+// The map-wide sounds asked for a start in this frame already: by its first
+// drawn object, as more starts of a sound that plays could not start a copy.
+bool& MapWideNoted()
+{
+    static bool noted = false;
+    return noted;
+}
+
 void NoteStart(const OBJECT& object, ESound sound, float level)
 {
     DrawnStarts().push_back({sound, level, object.Type, {object.Position[0], object.Position[1], object.Position[2]}});
@@ -213,10 +221,15 @@ void OnObjectDrawn(const OBJECT& object)
 #endif
         NoteStart(object, *sound, DistanceLevel(DistanceFromHero(object)));
     }
-    // A map-wide sound: at full volume, as no one object is its place.
-    for (const ESound sound : Loaded().anyObject)
+    // A map-wide sound: at full volume, as no one object is its place, and
+    // once a frame, as its starts would all be the same.
+    if (!MapWideNoted())
     {
-        NoteStart(object, sound, 1.0f);
+        for (const ESound sound : Loaded().anyObject)
+        {
+            NoteStart(object, sound, 1.0f);
+        }
+        MapWideNoted() = true;
     }
 }
 
@@ -230,6 +243,7 @@ void PlayDrawnSounds()
         PlayBufferOnFreeChannel(start.sound, LoudestLevel(start.sound));
     }
     starts.clear();
+    MapWideNoted() = false;
 }
 
 float DistanceLevel(float distance)

@@ -41,8 +41,9 @@ quarter at 15 tiles (a test of how it feels; the original played at full
 volume at any distance).
 
 An entry without `objects` plays while any object of its maps is drawn, at
-full volume: the hum of a whole map, which Kanturu Ruins and Kanturu Relics
-played from every object they moved (maps design, Q-MP8):
+full volume and asked for once a frame: the hum of a whole map, which Kanturu
+Ruins and Kanturu Relics played from every object they moved (maps design,
+Q-MP8):
 
 ```json
 {"maps": [37], "sound": {"file": "Data/Sound/w37/kan_ruin_global.wav"}, "plays": "whileInView"}

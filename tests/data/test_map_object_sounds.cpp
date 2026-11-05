@@ -290,8 +290,14 @@ TEST_CASE("Map object sounds: an entry without objects plays for any object of i
     World::MapObjectSounds::OnObjectDrawn(wheelObject);
     World::MapObjectSounds::OnObjectDrawn(farObject);
     World::MapObjectSounds::PlayDrawnSounds();
-    CHECK(scope.audio.freePlays == std::vector<int>{wheelNumber, humNumber, humNumber});
-    CHECK(scope.audio.freeLevels == std::vector<float>{1.0f, 1.0f, 1.0f});
+    // The hum once a frame, however many objects are drawn.
+    CHECK(scope.audio.freePlays == std::vector<int>{wheelNumber, humNumber});
+    CHECK(scope.audio.freeLevels == std::vector<float>{1.0f, 1.0f});
+    scope.audio.freePlays.clear();
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::PlayDrawnSounds();
+    CHECK(scope.audio.freePlays == std::vector<int>{humNumber});
     // Not a type of its own.
     CHECK_FALSE(World::MapObjectSounds::FindSound(5));
 
