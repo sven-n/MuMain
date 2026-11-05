@@ -215,14 +215,16 @@ jobs:
           exit 0
 
       - name: Install compiler cache
-        # The runner image has no ccache. Its release for Windows, checked against the SHA-256 the release lists.
+        # The runner image has no ccache. Its release for Windows, checked against the SHA-256 the release lists; a
+        # download that fails is sent again, as a brief GitHub error would otherwise fail every Windows job meanwhile.
         shell: pwsh
         run: |
           $version = '4.14.2'
           $sha256 = '6993ce645e53192cec592ee23186200b574ac4c59097ecde8d9cfd681b47ae84'
           $name = "ccache-$version-windows-x86_64"
           $archive = Join-Path $env:RUNNER_TEMP "$name.zip"
-          Invoke-WebRequest -Uri "https://github.com/ccache/ccache/releases/download/v$version/$name.zip" -OutFile $archive
+          Invoke-WebRequest -Uri "https://github.com/ccache/ccache/releases/download/v$version/$name.zip" -OutFile $archive `
+            -MaximumRetryCount 3 -RetryIntervalSec 10
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $sha256) {
             throw "$name.zip does not match its SHA-256."
           }

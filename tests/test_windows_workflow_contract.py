@@ -402,7 +402,7 @@ for required in (
 ):
     check(required in native_configure, f"Main Windows configure missing {required}")
 windows_ccache_install = step(native_job, "build-windows", "Install compiler cache")
-for required in ("$version = '", "$sha256 = '", "Get-FileHash", "GITHUB_PATH"):
+for required in ("$version = '", "$sha256 = '", "Get-FileHash", "GITHUB_PATH", "-MaximumRetryCount"):
     check(required in windows_ccache_install, f"Windows must install a pinned, checked ccache: {required}")
 windows_cache = step(native_job, "build-windows", "Cache Windows compilation")
 for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
