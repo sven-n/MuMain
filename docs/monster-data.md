@@ -1,7 +1,9 @@
 # Monster data
 
 The monster list gives every monster and NPC number the client knows its
-names, its kind and the model it appears with. It lives in
+names, its kind and the model it appears with. A monster can have several
+numbers that share its values (the Kalima levels' copies, the Blood Castle
+knights); each number keeps what it has differently. It lives in
 `src/bin/Data/Monsters/Monsters.json` and is loaded once at startup into a
 table by number. It replaces the original client's name files
 (`Data/Local/<Language>/NpcName_<Language>.txt`), which the repository no
@@ -24,47 +26,71 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 
 | File | What |
 |---|---|
-| `Monsters.json` | The monsters and NPCs: number, names, kind, model, sound set and attacks |
+| `Monsters.json` | The monsters and NPCs: their numbers, names, kind, model, sound set and attacks |
 | `Models.json` | The monster and NPC models, see [Models](#models) |
 | `Sounds.json` | The sound sets the monsters play, see [Sounds](#sounds) |
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "monsters": [
     {
-      "number": 2,
       "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BUDGE_DRAGON",
-      "soundSet": "Budge Dragon"
+      "soundSet": "Budge Dragon",
+      "numbers": [
+        {"number": 2}
+      ]
     },
     {
-      "number": 251,
-      "name": {"en": "Hanzo the Blacksmith", "es": "Hanzo el Herrero", "pt": "Hanzo, o ferreiro"},
-      "kind": "npc",
-      "model": "MODEL_SMITH"
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster",
+      "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
+      "attacks": {
+        "skills": {"1": "attack2", "17": "attack2"},
+        "otherwise": "attack1",
+        "clearSkill": "never"
+      },
+      "numbers": [
+        {"number": 145},
+        {"number": 336, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+      ]
     }
   ]
 }
 ```
 
-- A monster is identified by its `number`, 0–1023: the number the server
-  sends when a monster or NPC appears (packet 0x13 has 10 bits for it). Each
-  number has at most one entry.
-- Every entry has `number`, `name` and `kind`; `model` may be left out (every
-  shipped entry has it), and so may `soundSet`, `attacks` and the variants.
-- Monsters are sorted by number and the fields always come in the same
-  order, so saving unchanged data gives the same file (a test checks that
-  the shipped file is written this way).
-- The file is UTF-8 with LF line endings. `formatVersion` is 1; a file with
-  a newer version stops the start.
+- A monster lists its `numbers`, 0–1023: the numbers the server sends when a
+  monster or NPC appears (packet 0x13 has 10 bits for them). A number is in
+  one monster, once; a monster has at least one.
+- The monster's fields are the values its numbers share. A number lists only
+  what it has differently, its own values, in the same fields: above, 336
+  (Death Centurion of Kalima 7) has no attack data of its own and plays the
+  generic pattern. Any field may be a number's own; an own value replaces the
+  whole field (an own `name` all languages, own `attacks` all of them). Where
+  the monster has a value and the number has none, the number says so with an
+  empty one: `"model": ""`, `"soundSet": ""`, `"attacks": null`,
+  `"mapVariants": []`, `"randomVariants": []`.
+- A monster with one number shares all its values with it, so that number
+  never has own values.
+- Every monster has `name`, `kind` and `numbers`; `model` may be left out
+  (every shipped monster has it), and so may `soundSet`, `attacks` and the
+  variants.
+- Monsters are sorted by their first number, their numbers by number, and the
+  fields always come in the same order, so saving unchanged data gives the
+  same file (a test checks that the shipped file is written this way).
+- The file is UTF-8 with LF line endings. `formatVersion` is 2; a file with a
+  newer version stops the start. A file of version 1, which listed each
+  number with its values (`"number"` next to `"name"`), is read as a monster
+  for each entry, and saving writes version 2.
 
 ### Fields
 
 | Field | Meaning |
 |---|---|
-| `number` | The monster number, 0–1023 |
+| `numbers` | The monster's numbers, 0–1023, each `{"number": …}` with its own values |
 | `name` | The names by language, see [Names and translations](#names-and-translations) |
 | `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
 | `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), or `mapObject <number>` (a map object, a trap). The code still chooses the model; the field says which one, for the tools |
@@ -527,9 +553,14 @@ to `MuError.log`. Fatal problems are:
 
 - a file that cannot be read, invalid JSON, a missing or unsupported
   `formatVersion`, no `monsters` list
-- an entry that is not an object, or whose `number` is missing or not a
-  whole number from 0 to 1023
-- a number that is in the list more than once
+- a monster that is not an object or has no `numbers` list of one or more
+  numbers; a number that is not an object, or whose `number` is missing or
+  not a whole number from 0 to 1023
+- a number that is in the list more than once, in one monster or in two
+- a number's own model that is one of the looks (`randomVariants`) it shares
+
+A problem in a monster's shared values leaves the monster out, one in a
+number's own values that number; both stop the start.
 - a missing `name`, a name that is not a text or an object of texts, or a
   translation that is not a text (e.g. `"pt": 5`)
 - a missing `kind`, or one that is not `monster`, `npc`, `trap` or `other`

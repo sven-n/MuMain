@@ -108,7 +108,7 @@ TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]
     const auto text = Data::ReadTextFile(file);
 
     REQUIRE(text.has_value());
-    CHECK(Data::Monsters::WriteMonstersJson(loaded.monsters) == *text);
+    CHECK(Data::Monsters::WriteMonstersJson(loaded.groups) == *text);
 }
 
 TEST_CASE("Shipped monster list: the names the old name file test asked for [data][monsters]")
@@ -238,12 +238,12 @@ TEST_CASE("Monster data: saving writes what loads back, and refuses errors [data
     std::vector<MonsterDefinition> monsters = {monster};
     std::vector<ItemDataIssue> issues;
 
-    CHECK(Data::Monsters::SaveMonstersFile(file, monsters, issues));
+    CHECK(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters == monsters);
 
     monsters[0].names.Set("en", "Budge||Dragon");
     issues.clear();
-    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, monsters, issues));
+    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), issues));
     CHECK(HasFatal(issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters[0].names.GetNeutral() == "Budge Dragon");
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));

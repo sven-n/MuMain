@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <chrono>
 #include <map>
 
@@ -132,6 +133,9 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
     }
 
     g_MonsterDatabase.Build(result.monsters, I18N::GetCurrentLocale());
+#ifdef _EDITOR
+    m_groups = std::move(result.groups);
+#endif
     RegisterLocaleObserver();
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monsters from {} in {:.1f} ms", result.monsters.size(),
@@ -288,9 +292,14 @@ void MonsterDataHandler::ValidateModels(std::vector<Items::ItemDataIssue>& issue
 
 bool MonsterDataHandler::Save(std::vector<Items::ItemDataIssue>& issues)
 {
-    const std::vector<MonsterDefinition> monsters = CollectMonsters();
-    ValidateLocales(monsters, issues);
-    return SaveMonstersFile(GetMonstersFile(), monsters, issues);
+    ValidateLocales(CollectMonsters(), issues);
+    std::vector<MonsterGroup> groups = CollectGroups();
+    if (!SaveMonstersFile(GetMonstersFile(), groups, issues))
+    {
+        return false;
+    }
+    m_groups = std::move(groups);
+    return true;
 }
 
 bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
@@ -302,17 +311,50 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
-    UseMonsters(result.monsters);
+    UseMonsters(result.groups);
     return true;
 }
 
-void MonsterDataHandler::UseMonsters(std::span<const MonsterDefinition> monsters)
+void MonsterDataHandler::UseMonsters(std::span<const MonsterGroup> monsters)
 {
     // The data changes, not the language the names are shown in.
     const std::string displayLocale = g_MonsterDatabase.GetDisplayLocale();
-    g_MonsterDatabase.Build(monsters, displayLocale);
+    g_MonsterDatabase.Build(CollectNumberEntries(monsters), displayLocale);
+    m_groups.assign(monsters.begin(), monsters.end());
     RegisterLocaleObserver();
     NotifyNamesChanged(AllNumbers);
+}
+
+std::vector<MonsterGroup> MonsterDataHandler::CollectGroups() const
+{
+    std::vector<MonsterGroup> groups;
+    std::bitset<MonsterNumberCount> grouped;
+    for (const MonsterGroup& loaded : m_groups)
+    {
+        MonsterGroup group{loaded.shared, {}};
+        for (const MonsterDefinition& entry : loaded.numbers)
+        {
+            const MonsterDefinition* now = g_MonsterDatabase.Find(entry.number);
+            if (now != nullptr && !grouped[static_cast<std::size_t>(entry.number)])
+            {
+                group.numbers.push_back(*now);
+                grouped.set(static_cast<std::size_t>(entry.number));
+            }
+        }
+        if (!group.numbers.empty())
+        {
+            groups.push_back(std::move(group));
+        }
+    }
+    for (int number = 0; number < MonsterNumberCount; ++number)
+    {
+        const MonsterDefinition* now = g_MonsterDatabase.Find(number);
+        if (now != nullptr && !grouped[static_cast<std::size_t>(number)])
+        {
+            groups.push_back({*now, {*now}});
+        }
+    }
+    return groups;
 }
 
 std::optional<MonsterModelDefinition> MonsterDataHandler::ReadModel(int slot) const
@@ -363,10 +405,10 @@ bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
 
 bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
 {
-    const std::vector<MonsterDefinition> monsters = CollectMonsters();
-    ValidateLocales(monsters, issues);
+    ValidateLocales(CollectMonsters(), issues);
+    std::vector<MonsterGroup> groups = CollectGroups();
     // All are checked, so that the problems of all are listed.
-    const std::optional<std::string> monstersText = MakeMonstersFileText(GetMonstersFile(), monsters, issues);
+    const std::optional<std::string> monstersText = MakeMonstersFileText(GetMonstersFile(), groups, issues);
     const std::optional<std::string> modelsText =
         MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
     const std::vector<MonsterSoundSet> sets = CollectSoundSets();
@@ -389,6 +431,7 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
+    m_groups = std::move(groups);
     ++m_filesVersion;
     return true;
 }
@@ -434,7 +477,7 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     {
         return false;
     }
-    UseMonsters(monsters.monsters);
+    UseMonsters(monsters.groups);
     UseModels(models.models);
     UseSoundSets(sounds.sets);
     ++m_filesVersion;

@@ -5,6 +5,7 @@
 #ifdef _EDITOR
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
@@ -203,7 +204,11 @@ private:
     void NotifyNamesChanged(int number) const;
     // The tables become what the files read: the monsters with their names
     // in the language shown, the models with the changed slots to reopen.
-    void UseMonsters(std::span<const MonsterDefinition> monsters);
+    void UseMonsters(std::span<const MonsterGroup> monsters);
+    // The monsters as the monster list file writes them: those last loaded,
+    // each number with its entry in the table as it is now. A number the
+    // table gained is a monster of its own; one it lost is gone.
+    std::vector<MonsterGroup> CollectGroups() const;
     void UseModels(std::span<const MonsterModelDefinition> models);
     void UseSoundSets(std::span<const MonsterSoundSet> sets);
 #endif
@@ -218,6 +223,8 @@ private:
     // sounds again.
     bool m_soundsToLoad = false;
     int m_filesVersion = 0;
+    // The monsters the file had when it was last loaded, saved or reverted.
+    std::vector<MonsterGroup> m_groups;
 #endif
 };
 } // namespace Data::Monsters
