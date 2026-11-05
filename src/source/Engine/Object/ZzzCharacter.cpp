@@ -6616,11 +6616,8 @@ void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused)
         ++g_PrepassBoneCheck.rebuilt;
         return;
     }
-    vec3_t angle, headAngle;
-    VectorCopy(o->Angle, angle);
-    VectorCopy(o->HeadAngle, headAngle);
-    model->Animation(PrepassBones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, headAngle, false,
-                     o->Pose.World, nullptr, o->CurrentAction);
+    // Built as every pose is, with what the movement features add (AnimateBones).
+    Engine::Characters::AnimateBones(o, *model, PrepassBones, o->AnimationFrame, o->Pose.World, o->CurrentAction);
     RecordPrepassBones(PrepassBones, o->BoneTransform, model->NumBones, o->Type == MODEL_PLAYER);
 }
 
