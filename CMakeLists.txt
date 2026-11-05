@@ -288,19 +288,18 @@ set(SDLIMAGE_VENDORED ON CACHE BOOL "" FORCE)
 set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
 # For the same reason: the vendored libtiff and libwebp ask for a CMake older than CMake 4 supports without a
 # deprecation warning, the SVG loader redefines strstr, and macOS's ImageIO loader uses deprecated UTType constants.
-# PNG and JPEG still load through stb_image.
 set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
-# SDL_image's own defaults, set here too because the archive below holds none of its vendored libraries: without
-# stb_image, PNG and JPEG would build from the vendored libpng, jpeg and zlib, and JXL from libjxl.
+# PNG and JPEG load through stb_image, not the vendored libpng, jpeg and zlib, and JXL, which would build libjxl,
+# stays off. Both are SDL_image's defaults, set here because nothing below fetches its vendored libraries.
 set(SDLIMAGE_BACKEND_STB ON CACHE BOOL "" FORCE)
 set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
-# With those formats off, no part of SDL_image builds from its vendored libraries (aom, dav1d, libavif, libjxl, libpng,
-# jpeg, libtiff, libwebp, zlib): stb_image covers PNG and JPEG without libpng, jpeg or zlib. So SDL_image comes as its
-# release archive, which leaves them out: 11 MB to download and 36 MB unpacked, where the tag's git clone took 84 MB
-# and, with its submodules, 1.1 GB. The hash pins the sources, which a tag does not.
+# With these settings no part of SDL_image builds from its vendored libraries (aom, dav1d, libavif, libjxl, libpng,
+# jpeg, libtiff, libwebp, zlib), so SDL_image comes as its release archive, which leaves them out: 11 MB to download
+# and 36 MB unpacked, where the tag's git clone took 84 MB and, with its submodules, 1.1 GB. The hash pins the
+# sources, which a tag does not.
 FetchContent_Declare(SDL3_image
     URL      https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
     URL_HASH SHA256=a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
