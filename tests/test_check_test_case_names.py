@@ -24,12 +24,13 @@ OFFENCES = {
     "not_literal": "is not written as string literals",
     "literal_and_macro": "is not written as string literals",
     "scenario": "has a ';', which cuts it in two",
+    "raw_semicolon": "has a ';', which cuts it in two",
     "empty": "is empty, which the discovery drops",
     "doctest_header": "reads like a line of doctest's list output, which the discovery skips",
     "non_ascii": "has a character outside ASCII",
 }
 CLEAN = "clean"
-CLEAN_NAMES = 9
+CLEAN_NAMES = 11
 
 
 def run_check(fixture):

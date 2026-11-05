@@ -27,6 +27,17 @@ TEST_CASE_FIXTURE(Holder<std::pair<int, float>, 2>, "a fixture with template arg
     CHECK(true);
 }
 
+TEST_CASE(R"(a raw name, whole)")
+{
+    CHECK(true);
+}
+
+TEST_CASE("a name the compiler joins across a line \
+splice")
+{
+    CHECK(true);
+}
+
 TEST_CASE("a decorated case [slow]" * doctest::timeout(5))
 {
     CHECK(true);

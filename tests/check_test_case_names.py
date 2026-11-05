@@ -39,7 +39,10 @@ CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEF
 OPENERS = "(<[{"
 CLOSERS = ")>]}"
 # The name: string literals the compiler joins into one, then the end of the arguments, the next one or a decorator.
-LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
+# A literal is raw, read as written, or plain, where a '\' before a line break joins the lines (a line splice).
+RAW_LITERAL = re.compile(r'\s*R"([^()\\\s]{0,16})\((.*?)\)\1"', re.DOTALL)
+LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.|\\\n)*)"')
+LINE_SPLICE = "\\\n"
 NAME_END = re.compile(r"\s*[),*]")
 # A C escape: a hexadecimal or octal code, a universal character name, or the one character after the '\'.
 ESCAPE = re.compile(r"\\(x[0-9A-Fa-f]+|[0-7]{1,3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|.)")
@@ -62,12 +65,21 @@ def unescaped(escape):
     return SIMPLE_ESCAPES.get(code, code)
 
 
+def literal_at(text, at):
+    """The text of the string literal at `at` as the compiler reads it and where the literal ends, or None."""
+    if raw := RAW_LITERAL.match(text, at):
+        return raw.group(2), raw.end()
+    if plain := LITERAL.match(text, at):
+        return ESCAPE.sub(unescaped, plain.group(1).replace(LINE_SPLICE, "")), plain.end()
+    return None
+
+
 def name_at(text, at):
     """The name whose literals start at `at`, or None if it is not written as string literals alone."""
     parts = []
-    while literal := LITERAL.match(text, at):
-        parts.append(ESCAPE.sub(unescaped, literal.group(1)))
-        at = literal.end()
+    while literal := literal_at(text, at):
+        part, at = literal
+        parts.append(part)
     if not parts or not NAME_END.match(text, at):
         return None
     return "".join(parts)
