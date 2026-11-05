@@ -16,10 +16,10 @@
 # Windows one lists its warnings (ci_warnings.py report). The last job still fails on a warning annotation of any job,
 # e.g. GitHub's own about a deprecated action.
 #
-# Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
-# about 35), and each test case its own limit from tests/CMakeLists.txt. A
-# step that hangs then fails in time instead of holding the job until GitHub
-# cancels it after six hours.
+# Each job gets 90 minutes (timeout-minutes; the slowest, Windows, has no compiler
+# cache and took 43-48 with its vcpkg packages cached, about 18 more without), and
+# each test case its own limit from tests/CMakeLists.txt. A step that hangs then
+# fails in time instead of holding the job until GitHub cancels it after six hours.
 name: Fork CI
 
 on:
