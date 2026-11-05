@@ -24,6 +24,11 @@ option(MU_ENABLE_SHADER_COMPILATION
     "Compile HLSL shaders via glslang, SPIRV-Cross, and DXC; OFF copies checked-in shader blobs" OFF)
 option(MU_WARNINGS_AS_ERRORS
     "Treat warnings as errors in the game's own code, its tests and DXC's shader compiles (CI turns this on)" OFF)
+# CMake turns linker warnings into errors (LINK_WARNING_AS_ERROR) from 4.0 on and ignores the setting before.
+if(MU_WARNINGS_AS_ERRORS AND CMAKE_VERSION VERSION_LESS 4.0)
+    message(WARNING "MU_WARNINGS_AS_ERRORS makes linker warnings errors only with CMake 4.0 or newer; "
+        "CMake ${CMAKE_VERSION} keeps them warnings, so a build can pass here and fail in CI.")
+endif()
 
 include(FetchContent)
 
