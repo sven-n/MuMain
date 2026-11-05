@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_cache_prune import KINDS, PER_COMPILER, delete_entry, prune
+from ci_cache_prune import KINDS, PER_COMPILER, SYSTEMS, delete_entry, prune, system
 
 NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
 
@@ -22,10 +22,10 @@ def entry(entry_id, key, created_at, size=100, last_accessed_at=None):
 
 
 class PruneTests(unittest.TestCase):
-    def run_prune(self, entries_by_kind, kinds=("deps-",)):
+    def run_prune(self, entries_by_kind, kinds=("deps-",), read_at=None):
         deleted = []
         with redirect_stdout(io.StringIO()):
-            freed = prune(kinds, lambda kind: entries_by_kind.get(kind, []), deleted.append, NOW)
+            freed = prune(kinds, lambda kind: entries_by_kind.get(kind, []), deleted.append, NOW, read_at)
         return [item["id"] for item in deleted], freed
 
     def test_keeps_the_newest_entry_of_each_kind(self):
@@ -59,6 +59,25 @@ class PruneTests(unittest.TestCase):
                              entry(2, "deps-b", "2026-11-04T10:00:00Z", last_accessed_at="2026-11-06T11:40:00Z"),
                              entry(3, "deps-c", "2026-11-05T10:00:00Z")]}
         self.assertEqual(self.run_prune(entries), ([2], 100))
+
+    def test_this_runs_own_read_does_not_keep_an_entry(self):
+        # The run read the entry its build started from, then saved a newer one.
+        restores_ended = datetime(2026, 11, 6, 11, 52, tzinfo=timezone.utc)
+        entries = {"linux-deps-": [entry(1, "linux-deps-a", "2026-11-05T10:00:00Z",
+                                         last_accessed_at="2026-11-06T11:51:30Z"),
+                                   entry(2, "linux-deps-b", "2026-11-06T11:58:00Z")]}
+        kinds = ("linux-deps-",)
+        self.assertEqual(self.run_prune(entries, kinds, {"linux": restores_ended}), ([1], 100))
+        # A read after this run's restores ended is another job's, which may still be downloading.
+        entries["linux-deps-"][0]["last_accessed_at"] = "2026-11-06T11:53:00Z"
+        self.assertEqual(self.run_prune(entries, kinds, {"linux": restores_ended}), ([], 0))
+        # Another system's restores say nothing about this kind's reads.
+        self.assertEqual(self.run_prune(entries, kinds, {"windows": NOW}), ([], 0))
+
+    def test_every_kind_names_its_system(self):
+        for kind in KINDS:
+            self.assertEqual(sum(name in kind for name in SYSTEMS), 1, kind)
+        self.assertEqual(system("vcpkg-windows-x64-v2-"), "windows")
 
     def test_only_keys_of_the_kind_count(self):
         # GitHub matches the key as a prefix, but an entry outside the kind must never be deleted for it.

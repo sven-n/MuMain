@@ -148,6 +148,8 @@ jobs:
     # windows-latest to a new one.
     runs-on: windows-2025-vs2026
     timeout-minutes: 90
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
@@ -277,6 +279,14 @@ jobs:
             ~/AppData/Local/vcpkg/archives
           key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
           restore-keys: vcpkg-windows-x64-v2-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        shell: pwsh
+        run: |
+          $at = [DateTime]::UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+          "at=$at" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
       # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
@@ -657,6 +667,8 @@ jobs:
     # By name, as Quality Gates: another image's GCC warns differently.
     runs-on: ubuntu-26.04
     timeout-minutes: 90
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
@@ -711,6 +723,11 @@ jobs:
             .nuget
           key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
       # (docs/build/README.md).
@@ -824,6 +841,8 @@ jobs:
     # with this line, not when GitHub moves macos-latest to a newer macOS.
     runs-on: macos-26
     timeout-minutes: 90
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
@@ -877,6 +896,11 @@ jobs:
             .nuget
           key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
       # (docs/build/README.md).
@@ -1005,6 +1029,10 @@ jobs:
       - name: Delete older cache entries
         env:
           GH_TOKEN: ${{ github.token }}
+          # When each build job's restores ended, empty for a job that did not run.
+          CACHES_READ_AT_LINUX: ${{ needs.build-linux.outputs.caches-read-at }}
+          CACHES_READ_AT_MACOS: ${{ needs.build-macos.outputs.caches-read-at }}
+          CACHES_READ_AT_WINDOWS: ${{ needs.build-windows.outputs.caches-read-at }}
         run: python3 scripts/ci_cache_prune.py
 
   required:

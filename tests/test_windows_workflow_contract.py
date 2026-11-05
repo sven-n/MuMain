@@ -660,6 +660,19 @@ for required in ("sparse-checkout: scripts", "persist-credentials: false"):
           f"caches job must check out only the scripts, without credentials: {required}")
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
+# The prune job leaves an entry that a job read in the last minutes, unless the last read was this run's own: each
+# build job notes when its restores ended, after the last of them, and passes that on.
+for job_name, job_body, system in (("build-windows", native_job, "WINDOWS"), ("build-linux", linux_job, "LINUX"),
+                                   ("build-macos", macos_job, "MACOS")):
+    names = re.findall(r"(?m)^      - name: (.+)$", job_body)
+    restores = [index for index, name in enumerate(names)
+                if "uses: actions/cache/restore@v6" in step(job_body, job_name, name)]
+    note = names.index("Note when the caches were read") if "Note when the caches were read" in names else -1
+    check(restores and note == max(restores) + 1, f"{job_name} must note when its caches were read, after every restore")
+    check("caches-read-at: ${{ steps.caches_read.outputs.at }}" in job_body,
+          f"{job_name} must pass on when its caches were read")
+    check(f"CACHES_READ_AT_{system}: ${{{{ needs.{job_name}.outputs.caches-read-at }}}}" in caches_job,
+          f"caches job must know when {job_name} read its caches")
 sys.path.insert(0, str(ROOT / "scripts"))
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_job + linux_job + macos_job):
