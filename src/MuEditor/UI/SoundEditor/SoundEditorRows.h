@@ -99,7 +99,6 @@ bool CanPlay(const SoundRow& row);
 bool Matches(const SoundRow& row, std::string_view text);
 
 // "Data/Sound/a.wav" as LoadWaveFile takes it: "Data\Sound\a.wav".
-std::wstring ToLoaderPath(const std::string& file);
 
 // The name the editor shows for a sound number: the name of the sound the
 // data gives it, else "" (the mixer and the overlay then show the file).

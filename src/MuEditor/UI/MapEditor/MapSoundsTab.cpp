@@ -40,8 +40,7 @@ std::string ObjectsText(const std::vector<int>& objects)
 // Plays the file as the map would, loaded under its number first.
 void PreviewSound(const MapObjectSound& sound)
 {
-    std::wstring file = Core::Text::FromUtf8(sound.file.c_str());
-    std::replace(file.begin(), file.end(), L'/', L'\\');
+    const std::wstring file = Data::Paths::ToLoaderPath(sound.file);
     const ESound number = Audio::SoundNumbers::ForFile(file);
     if (number == Audio::SoundNumbers::NoNumber)
     {

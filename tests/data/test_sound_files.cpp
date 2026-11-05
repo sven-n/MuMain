@@ -10,6 +10,7 @@
 #include "Audio/SoundIds.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "Data/GameData/SoundData/SoundFilesJson.h"
 
@@ -272,6 +273,15 @@ TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with
     CHECK(IsSoundLoaded(SOUND_CLICK01, L"Data\\Sound\\w35\\iButtonClick.wav", 3, true));
     CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_CLICK01)) != nullptr);
     CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_RAIN01)) == nullptr);
+}
+
+TEST_CASE("Data paths: a data file's path becomes the loaders' path with backslashes, its UTF-8 letters wide "
+          "[data][sounds]")
+{
+    CHECK(Data::Paths::ToLoaderPath("Data/Sound/w34/aida_ambi.wav") == L"Data\\Sound\\w34\\aida_ambi.wav");
+    CHECK(Data::Paths::ToLoaderPath("Data/Sound/caf\xc3\xa9.wav") == L"Data\\Sound\\café.wav");
+    CHECK(Data::Paths::ToLoaderPath("a.wav") == L"a.wav");
+    CHECK(Data::Paths::ToLoaderPath("").empty());
 }
 
 TEST_CASE("Sound ids: a SOUND_ name finds its id and an id its name, and types have their words (Q-SE1, Q-SE2) "

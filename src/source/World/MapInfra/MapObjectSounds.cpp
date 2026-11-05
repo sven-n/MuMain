@@ -3,7 +3,7 @@
 #include "MapObjectSounds.h"
 
 #include "Audio/SoundNumbers.h"
-#include "Core/Text/Utf8.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Audio/SoundOverlay.h"
 #include "Audio/SoundSource.h"
@@ -120,17 +120,9 @@ float LoudestLevel(ESound sound)
     return 1.0f;
 }
 
-// "Data/Sound/a.wav" -> "Data\Sound\a.wav", as LoadWaveFile takes it.
-std::wstring ToLoaderPath(const std::string& path)
-{
-    std::wstring loaderPath = Core::Text::FromUtf8(path.c_str());
-    std::replace(loaderPath.begin(), loaderPath.end(), L'/', L'\\');
-    return loaderPath;
-}
-
 ESound LoadSound(const MapObjectSound& sound)
 {
-    const std::wstring file = ToLoaderPath(sound.file);
+    const std::wstring file = Data::Paths::ToLoaderPath(sound.file);
     const ESound number = Audio::SoundNumbers::ForFile(file);
     if (number != Audio::SoundNumbers::NoNumber && !IsSoundLoaded(number, file.c_str(), sound.channels, false))
     {

@@ -7,6 +7,7 @@
 #include "SoundEditorRows.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Audio/SoundNumbers.h"
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
@@ -133,7 +134,7 @@ std::vector<std::string> FilterFiles(const std::vector<std::string>& files, std:
 
 void PreviewFile(const std::string& file, int channels, bool spatial)
 {
-    const std::wstring path = ToLoaderPath(file);
+    const std::wstring path = Data::Paths::ToLoaderPath(file);
     const ESound number = Audio::SoundNumbers::ForFile(path);
     if (number == Audio::SoundNumbers::NoNumber)
     {

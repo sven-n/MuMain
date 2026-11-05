@@ -17,8 +17,8 @@
 #include "DSPlaySound.h"
 #include "Audio/SoundIds.h"
 #include "Core/Platform/IPlatformAudio.h"
-#include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #ifdef _EDITOR
 #include "Audio/EditorSoundMute.h"
@@ -27,7 +27,6 @@
 #include "Audio/SoundPlaces.h"
 #endif
 
-#include <algorithm>
 #include <cwctype>
 #include <optional>
 #include <string>
@@ -86,8 +85,7 @@ void LoadGameSound(ESound bufferId)
         return;
     }
     // "Data/Sound/a.wav" -> "Data\Sound\a.wav", as the code named it.
-    std::wstring file = Core::Text::FromUtf8(sound->file.c_str());
-    std::replace(file.begin(), file.end(), L'/', L'\\');
+    const std::wstring file = Data::Paths::ToLoaderPath(sound->file);
     LoadWaveFile(bufferId, file.c_str(), sound->channels, sound->spatial);
 #ifdef _EDITOR
     Audio::SoundLoads::NoteLoad(static_cast<int>(bufferId));

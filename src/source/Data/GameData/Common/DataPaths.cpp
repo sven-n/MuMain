@@ -2,6 +2,8 @@
 
 #include "DataPaths.h"
 
+#include "Core/Text/Utf8.h"
+
 #include <algorithm>
 
 namespace Data::Paths
@@ -10,10 +12,18 @@ namespace
 {
 constexpr char FolderSeparator = '/';
 constexpr char WindowsFolderSeparator = '\\';
+constexpr wchar_t LoaderFolderSeparator = L'\\';
 
 constexpr std::string_view ParentFolder = "..";
 constexpr char DriveSeparator = ':';
 } // namespace
+
+std::wstring ToLoaderPath(const std::string& path)
+{
+    std::wstring loaderPath = Core::Text::FromUtf8(path);
+    std::replace(loaderPath.begin(), loaderPath.end(), static_cast<wchar_t>(FolderSeparator), LoaderFolderSeparator);
+    return loaderPath;
+}
 
 std::string FindPathProblem(std::string_view path)
 {

@@ -11,6 +11,7 @@
 #include "Audio/SoundLoads.h"
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
@@ -48,7 +49,7 @@ std::string FileName(const std::string& file)
 
 int NumberOfFile(const std::string& file)
 {
-    const ESound number = Audio::SoundNumbers::ForFile(ToLoaderPath(file));
+    const ESound number = Audio::SoundNumbers::ForFile(Data::Paths::ToLoaderPath(file));
     return number == Audio::SoundNumbers::NoNumber ? -1 : static_cast<int>(number);
 }
 
@@ -316,13 +317,6 @@ bool Matches(const SoundRow& row, std::string_view text)
         }
     }
     return false;
-}
-
-std::wstring ToLoaderPath(const std::string& file)
-{
-    std::wstring path = Core::Text::FromUtf8(file.c_str());
-    std::replace(path.begin(), path.end(), L'/', L'\\');
-    return path;
 }
 
 std::string NameOfNumber(int number)
