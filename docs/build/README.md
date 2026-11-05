@@ -249,9 +249,12 @@ least recently used entries, which are main's Windows ones, used once a night.
 A save under a new key leaves the older entries of that cache behind, such as a
 compiler cache for each main push. After the builds of a run on main, the
 **Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
-deletes all but the newest entry of each cache on main. It is the only job with a
-token that can delete caches. A new cache that is restored by a key prefix needs
-its prefix in the script's `KINDS`; the workflow contract test checks that.
+deletes all but the newest entry of each cache on main. The compiler caches keep
+the newest entry of each compiler: a job restores only entries of its own compiler,
+and while GitHub moves the runners to a new image, jobs land on both images. It is
+the only job with a token that can delete caches. A new cache that is restored by a
+key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that
+prefix names the compiler; the workflow contract test checks that.
 
 ### Download artifacts
 

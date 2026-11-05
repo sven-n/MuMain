@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Deletes the older entries of each cache kind on this run's branch, so that one of each is left.
+"""Deletes the older entries of each cache kind on this run's branch, so that one of each is left (of the compiler
+caches, one for each compiler).
 
 ci.yml names a cache after what it holds: the compiler caches after the commit, the library and vcpkg caches after the
 files that pick their content. A run that saves under a new name leaves the older entries behind. GitHub keeps them
@@ -29,6 +30,22 @@ KINDS = (
     "windows-x64-release-dep-sources-",
     "vcpkg-windows-x64-v2-",
 )
+# Kinds whose restore step only reads entries of its own compiler, the part of the key after the kind: while GitHub
+# moves the runners to a new image, jobs land on both images, and one with another compiler cannot use the newest
+# entry of the kind. These keep the newest entry of each compiler; GitHub drops a compiler's last entry 7 days after
+# its last use.
+PER_COMPILER = (
+    "ccache-linux-x64-",
+    "ccache-macos-arm64-",
+)
+
+
+def group(kind, key):
+    """What a restore step searches for the key by: its kind, and for PER_COMPILER kinds also its compiler."""
+    if kind not in PER_COMPILER:
+        return kind
+    compiler = key[len(kind):].partition("-")[0]
+    return f"{kind}{compiler}-"
 
 
 def newest(entries):
@@ -41,18 +58,21 @@ def describe(entry):
 
 
 def prune(kinds, list_kind, delete):
-    """Deletes all but the newest entry of each kind and returns the bytes that frees."""
+    """Deletes all but the newest entry of each group (see group()) and returns the bytes that frees."""
     freed = 0
     for kind in kinds:
-        entries = [entry for entry in list_kind(kind) if entry["key"].startswith(kind)]
-        kept = newest(entries)
-        for entry in entries:
-            if entry is kept:
-                continue
-            delete(entry)
-            print(f"Deleted {describe(entry)}.")
-            freed += entry["size_in_bytes"]
-        if kept is not None:
+        groups = {}
+        for entry in list_kind(kind):
+            if entry["key"].startswith(kind):
+                groups.setdefault(group(kind, entry["key"]), []).append(entry)
+        for entries in groups.values():
+            kept = newest(entries)
+            for entry in entries:
+                if entry is kept:
+                    continue
+                delete(entry)
+                print(f"Deleted {describe(entry)}.")
+                freed += entry["size_in_bytes"]
             print(f"Kept {describe(kept)}.")
     return freed
 

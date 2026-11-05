@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_cache_prune import KINDS, delete_entry, prune
+from ci_cache_prune import KINDS, PER_COMPILER, delete_entry, prune
 
 
 def entry(entry_id, key, created_at, size=100):
@@ -47,6 +47,19 @@ class PruneTests(unittest.TestCase):
         # GitHub matches the key as a prefix, but an entry outside the kind must never be deleted for it.
         entries = {"deps-": [entry(1, "deps-a", "2026-11-03T10:00:00Z"), entry(2, "other", "2026-11-04T10:00:00Z")]}
         self.assertEqual(self.run_prune(entries), ([], 0))
+
+    def test_compiler_caches_keep_the_newest_entry_of_each_compiler(self):
+        # A runner image with another compiler restores only entries of its own (ci.yml's restore-keys).
+        kind = "ccache-linux-x64-"
+        entries = {kind: [entry(1, f"{kind}aaaa-commit1", "2026-11-03T10:00:00Z"),
+                          entry(2, f"{kind}aaaa-commit2", "2026-11-04T10:00:00Z"),
+                          entry(3, f"{kind}bbbb-commit3", "2026-11-05T10:00:00Z")]}
+        deleted, _ = self.run_prune(entries, kinds=(kind,))
+        self.assertEqual(deleted, [1])
+
+    def test_per_compiler_kinds_are_kinds(self):
+        for kind in PER_COMPILER:
+            self.assertIn(kind, KINDS)
 
     def test_kinds_do_not_contain_each_other(self):
         for kind in KINDS:

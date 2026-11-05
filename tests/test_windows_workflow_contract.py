@@ -609,10 +609,15 @@ for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS  # noqa: E402
+from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_job + linux_job + macos_job):
     kind = restore_prefix.split("${{")[0]
     check(kind in PRUNED_CACHE_KINDS, f"scripts/ci_cache_prune.py must prune the cache kind {kind}")
+    # A restore prefix that goes on after the kind (the compiler) reads only entries of that part, so the prune has
+    # to keep the newest entry of each.
+    check(("${{" in restore_prefix) == (kind in PRUNED_PER_COMPILER),
+          f"scripts/ci_cache_prune.py must keep the newest {kind} entry of each compiler exactly when the restore "
+          f"prefix names the compiler: {restore_prefix}")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
