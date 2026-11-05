@@ -497,7 +497,10 @@ static void UpdateActiveScene()
     case MAIN_SCENE:
         MoveMainScene();
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case SERVER_LIST_SCENE:
+    case WEBZEN_SCENE:
+    case LOADING_SCENE:
         break;
     }
 }
@@ -1281,7 +1284,8 @@ void RenderScene(HDC hDC)
         case MAIN_SCENE:
             MainScene(hDC);
             break;
-        default:
+        // The other values, listed without a default: a value added later fails the build here.
+        case SERVER_LIST_SCENE:
             break;
         }
 

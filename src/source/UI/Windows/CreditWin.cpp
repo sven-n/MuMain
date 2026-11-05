@@ -242,7 +242,8 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 			m_byIllust = ++m_byIllust == CRW_ILLUST_MAX ? 0 : m_byIllust;
 		}
 		break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
         break;
     }
 }
@@ -359,7 +360,8 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 				SetTextIndex();
 		}
 		break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
         break;
     }
 }

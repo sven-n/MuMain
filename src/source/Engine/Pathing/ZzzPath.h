@@ -432,7 +432,8 @@ inline POINT MovePoint(EPathDirection direction, POINT position)
     case EPathDirection::NORTHEAST:  position.y++; break;
     case EPathDirection::NORTH:      position.x--; position.y++; break;
     case EPathDirection::NORTHWEST:  position.x--; break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case EPathDirection::UNDEFINED:
         break;
     }
     return position;

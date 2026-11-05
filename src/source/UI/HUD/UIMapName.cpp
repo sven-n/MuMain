@@ -123,7 +123,8 @@ void CUIMapName::Update()
             m_fAlpha = 0.0f;
         }
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
         break;
     }
 

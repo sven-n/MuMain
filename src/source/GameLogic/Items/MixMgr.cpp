@@ -1064,7 +1064,12 @@ float CMixRecipes::MixrateFactor()
     case MRCP_NONJEWELITEM:
         fValue = m_dwTotalNonJewelItemValue;
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case MRCP_ADD:
+    case MRCP_SUB:
+    case MRCP_MUL:
+    case MRCP_DIV:
+    case MRCP_RP:
         break;
     }
     ++m_iMixRateIter;

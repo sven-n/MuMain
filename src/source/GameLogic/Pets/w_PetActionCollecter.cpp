@@ -213,7 +213,8 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
         }
     }
     break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
         break;
     }
 
@@ -258,7 +259,9 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
     case eAction_Return:
         CreateEffect(MODEL_NEWYEARSDAY_EVENT_MONEY, Position, obj->Angle, Light);
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_Stand:
+    case eAction_End_NotUse:
         break;
     }
 
@@ -290,7 +293,11 @@ bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, dou
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_Stand:
+    case eAction_Move:
+    case eAction_Get:
+    case eAction_End_NotUse:
         break;
     }
 

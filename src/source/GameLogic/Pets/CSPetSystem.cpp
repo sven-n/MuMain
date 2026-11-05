@@ -236,7 +236,10 @@ bool CSPetSystem::PlayAnimation(OBJECT* o)
     case PET_TYPE_DARK_SPIRIT:
         playSpeed = 0.4f;
         break;
-    default:
+    // The other values, listed without a default: a value added later fails the build here.
+    case PET_TYPE_NONE:
+    case PET_TYPE_DARK_HORSE:
+    case PET_TYPE_END:
         break;
     }
 
