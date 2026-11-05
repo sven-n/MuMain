@@ -10,9 +10,9 @@
 namespace
 {
 constexpr float TornadoRange = 150.f;
-constexpr short TargetedPlayerKey = 7;
+constexpr int HeroIndex = 0;
 
-// The client's characters, the hero and its skills for the scope, put back afterwards.
+// The client's characters (the hero among them, as in game) and the hero's skills for the scope, put back afterwards.
 class TornadoScope
 {
 public:
@@ -21,8 +21,9 @@ public:
           m_previousHero(Hero), m_previousAttribute(CharacterAttribute)
     {
         CharactersClient = m_characters.get();
-        Hero = &m_hero;
+        Hero = &CharactersClient[HeroIndex];
         CharacterAttribute = &m_attribute;
+        Place(HeroIndex, KIND_PLAYER, 0.f);
     }
 
     ~TornadoScope()
@@ -46,8 +47,9 @@ public:
         CHARACTER& c = CharactersClient[index];
         c.StormTime = 0.f;
         c.Dead = 0;
-        c.Key = 0;
+        c.Key = static_cast<decltype(c.Key)>(index);
         c.MonsterIndex = static_cast<decltype(c.MonsterIndex)>(0);
+        c.NotRotateOnMagicHit = false;
         c.Object.Live = true;
         c.Object.Visible = true;
         c.Object.Kind = kind;
@@ -58,7 +60,6 @@ public:
 
 private:
     std::unique_ptr<CHARACTER[]> m_characters;
-    CHARACTER m_hero{};
     CHARACTER_ATTRIBUTE m_attribute{};
     CHARACTER* m_previousCharacters;
     CHARACTER* m_previousHero;
@@ -66,57 +67,61 @@ private:
 };
 } // namespace
 
-TEST_CASE("A tornado spins the monsters and the targeted player in its range, as the original client did [render]")
+TEST_CASE("A tornado spins every monster in its range and no one else [render]")
 {
     TornadoScope scope;
-    scope.Attribute().Skill[0] = AT_SKILL_STORM;
-    CHARACTER& inRange = scope.Place(0, KIND_MONSTER, 100.f);
-    CHARACTER& edge = scope.Place(1, KIND_MONSTER, TornadoRange);
-    CHARACTER& outOfRange = scope.Place(2, KIND_MONSTER, TornadoRange + 1.f);
-    CHARACTER& npc = scope.Place(3, KIND_NPC, 50.f);
-    CHARACTER& target = scope.Place(4, KIND_PLAYER, 50.f);
-    target.Key = TargetedPlayerKey;
-    CHARACTER& bystander = scope.Place(5, KIND_PLAYER, 50.f);
-    bystander.Key = TargetedPlayerKey + 1;
-    // Immobile monsters keep their orientation.
-    CHARACTER& gate = scope.Place(6, KIND_MONSTER, 50.f);
-    gate.MonsterIndex = MONSTER_CASTLE_GATE;
-    CHARACTER& dead = scope.Place(7, KIND_MONSTER, 50.f);
+    CHARACTER& inRange = scope.Place(1, KIND_MONSTER, 100.f);
+    CHARACTER& edge = scope.Place(2, KIND_MONSTER, TornadoRange);
+    CHARACTER& outOfRange = scope.Place(3, KIND_MONSTER, TornadoRange + 1.f);
+    CHARACTER& npc = scope.Place(4, KIND_NPC, 50.f);
+    // A player is never spun, not even the one under the cursor when the hero cast it (the cast's PKKey).
+    CHARACTER& player = scope.Place(5, KIND_PLAYER, 50.f);
+    Hero->Object.PKKey = player.Key;
+    CHARACTER& dead = scope.Place(6, KIND_MONSTER, 50.f);
     dead.Dead = 1;
-    CHARACTER& hidden = scope.Place(8, KIND_MONSTER, 50.f);
+    CHARACTER& hidden = scope.Place(7, KIND_MONSTER, 50.f);
     hidden.Object.Visible = false;
 
     vec3_t center = {0.f, 0.f, 0.f};
-    // It never sends a request: the server calculates the hits.
-    CHECK_FALSE(AttackCharacterRange(0, center, TornadoRange, 0, TargetedPlayerKey));
+    SpinMonstersInTornado(center, TornadoRange);
 
     CHECK(inRange.StormTime > 0.f);
     CHECK(edge.StormTime > 0.f);
-    CHECK(target.StormTime > 0.f);
     CHECK(outOfRange.StormTime == 0.f);
     CHECK(npc.StormTime == 0.f);
-    CHECK(bystander.StormTime == 0.f);
-    CHECK(gate.StormTime == 0.f);
+    CHECK(player.StormTime == 0.f);
+    CHECK(Hero->StormTime == 0.f);
     CHECK(dead.StormTime == 0.f);
     CHECK(hidden.StormTime == 0.f);
 }
 
-TEST_CASE("Only Twister and Evil Spirit spin what they reach [render]")
+TEST_CASE("Gates, statues and other immobile monsters don't spin in a tornado [render]")
 {
     TornadoScope scope;
-    CHARACTER& monster = scope.Place(0, KIND_MONSTER, 50.f);
+    // Their setup marks most of them, e.g. the Castle Siege gate and the Blood Castle gate.
+    CHARACTER& marked = scope.Place(1, KIND_MONSTER, 50.f);
+    marked.NotRotateOnMagicHit = true;
+    // The rest are known by number, e.g. Selupan.
+    CHARACTER& selupan = scope.Place(2, KIND_MONSTER, 50.f);
+    selupan.MonsterIndex = MONSTER_SELUPAN;
+
     vec3_t center = {0.f, 0.f, 0.f};
+    SpinMonstersInTornado(center, TornadoRange);
 
-    scope.Attribute().Skill[0] = AT_SKILL_EVIL_SPIRIT;
-    AttackCharacterRange(0, center, TornadoRange, 0);
-    CHECK(monster.StormTime > 0.f);
+    CHECK(marked.StormTime == 0.f);
+    CHECK(selupan.StormTime == 0.f);
+}
 
-    monster.StormTime = 0.f;
-    scope.Attribute().Skill[1] = AT_SKILL_TELEPORT;
-    AttackCharacterRange(1, center, TornadoRange, 0);
-    CHECK(monster.StormTime == 0.f);
-    // A skill index outside the hero's skills is nothing.
-    AttackCharacterRange(-1, center, TornadoRange, 0);
-    AttackCharacterRange(MAX_SKILLS, center, TornadoRange, 0);
+TEST_CASE("Other area skills spin nothing, even with a tornado skill selected [render]")
+{
+    TornadoScope scope;
+    CHARACTER& monster = scope.Place(1, KIND_MONSTER, 50.f);
+    // A Fire Scream passes the hero's current skill, here Twister, and its own position.
+    scope.Attribute().Skill[0] = AT_SKILL_STORM;
+    Hero->CurrentSkill = 0;
+
+    vec3_t center = {0.f, 0.f, 0.f};
+    // It never sends a request either: the server calculates the hits.
+    CHECK_FALSE(AttackCharacterRange(Hero->CurrentSkill, center, 100.f, 0, -1));
     CHECK(monster.StormTime == 0.f);
 }
