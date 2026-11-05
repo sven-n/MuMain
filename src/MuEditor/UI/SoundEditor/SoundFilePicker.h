@@ -22,7 +22,8 @@ void RefreshClientSoundFiles();
 bool IsClientSoundFile(const std::string& file);
 
 // The files below `folder` (as the game names them, "Data/Sound/..."),
-// sorted without case.
+// sorted without case. A disk that spells the folder in another case (Linux,
+// "data/sound") is read as the game reads it.
 std::vector<std::string> ListSoundFiles(const std::string& folder);
 
 // The files that contain `text`, whatever the case; all for "".

@@ -753,6 +753,28 @@ TEST_CASE("Sound Editor: the picker lists a folder's sound files sorted, finds t
     CHECK(scope.audio.loads.size() == 1);
 }
 
+// Linux: the game opens "Data/Sound/..." in a client folder spelled
+// "data/SOUND" (MuResolvePath); the list and the rows' check find it too.
+TEST_CASE("Sound Editor: the client folder's list reads Data/Sound spelled in another case, as the game does "
+          "[sounds][editor]")
+{
+    const std::filesystem::path previous = std::filesystem::current_path();
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu_sound_editor_case";
+    std::error_code error;
+    std::filesystem::remove_all(folder, error);
+    std::filesystem::create_directories(folder / "data" / "SOUND" / "Case");
+    std::ofstream(folder / "data" / "SOUND" / "Case" / "Wave.wav", std::ios::binary) << "RIFF";
+    std::filesystem::current_path(folder);
+    const std::vector<std::string> files = MuEditor::SoundEditor::ListSoundFiles("Data/Sound");
+    MuEditor::SoundEditor::RefreshClientSoundFiles();
+    const bool found = MuEditor::SoundEditor::IsClientSoundFile("Data/Sound/Case/Wave.wav");
+    std::filesystem::current_path(previous);
+    MuEditor::SoundEditor::RefreshClientSoundFiles();
+    std::filesystem::remove_all(folder, error);
+    CHECK(files == std::vector<std::string>{"Data/Sound/Case/Wave.wav"});
+    CHECK(found);
+}
+
 namespace
 {
 using Data::Sounds::SoundFolder;

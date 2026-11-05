@@ -8,6 +8,9 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundNumbers.h"
+#ifndef _WIN32
+#include "Core/Platform/PathResolve.h"
+#endif
 
 #include <algorithm>
 #include <cctype>
@@ -52,13 +55,24 @@ std::string LookupKey(std::string file)
     std::replace(file.begin(), file.end(), '\\', '/');
     return Lowered(std::move(file));
 }
+
+// The folder as the disk spells it: on a case-sensitive disk the game finds
+// "Data/Sound" in any case (MuResolvePath), so the list does too.
+std::filesystem::path OnDisk(const std::string& folder)
+{
+#ifdef _WIN32
+    return std::filesystem::u8path(folder);
+#else
+    return std::filesystem::u8path(MuResolvePath(folder.c_str()));
+#endif
+}
 } // namespace
 
 std::vector<std::string> ListSoundFiles(const std::string& folder)
 {
     std::vector<std::string> files;
     std::error_code error;
-    const std::filesystem::path root = std::filesystem::u8path(folder);
+    const std::filesystem::path root = OnDisk(folder);
     for (std::filesystem::recursive_directory_iterator entry(root, error), end; !error && entry != end;
          entry.increment(error))
     {
