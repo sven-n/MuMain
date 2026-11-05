@@ -17,8 +17,15 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 from ci_job_annotations import REQUEST_ATTEMPTS, REQUEST_ERRORS, api_headers, get_pages, retry_delay
+
+# A job that found an entry may still be downloading it, and deleting the entry then would fail that restore with a
+# warning, which fails CI Required. GitHub sets last_accessed_at when a restore finds the entry, and actions/cache gives
+# up on a download after 10 minutes (SEGMENT_DOWNLOAD_TIMEOUT_MINS); an entry read less than this long ago is left for
+# a later run to delete.
+IN_USE = timedelta(minutes=15)
 
 # The kinds of entry ci.yml saves, by the start of their key. Each keeps its newest entry; the workflow contract test
 # checks that every cache ci.yml's build jobs restore by a key prefix is one of them.
@@ -48,17 +55,23 @@ def group(kind, key):
     return f"{kind}{compiler}-"
 
 
+def timestamp(text):
+    """A time from the GitHub API. Its fraction of a second varies in length, so the text alone does not sort."""
+    return datetime.fromisoformat(text)
+
+
 def newest(entries):
     """The entry saved last, or None when there is none."""
-    return max(entries, key=lambda entry: (entry["created_at"], entry["id"]), default=None)
+    return max(entries, key=lambda entry: (timestamp(entry["created_at"]), entry["id"]), default=None)
 
 
 def describe(entry):
     return f"{entry['key']} ({entry['size_in_bytes'] / 1e6:.0f} MB, created {entry['created_at']})"
 
 
-def prune(kinds, list_kind, delete):
-    """Deletes all but the newest entry of each group (see group()) and returns the bytes that frees."""
+def prune(kinds, list_kind, delete, now):
+    """Deletes all but the newest entry of each group (see group()), except entries read within IN_USE before `now`,
+    and returns the bytes that frees."""
     freed = 0
     for kind in kinds:
         groups = {}
@@ -69,6 +82,9 @@ def prune(kinds, list_kind, delete):
             kept = newest(entries)
             for entry in entries:
                 if entry is kept:
+                    continue
+                if now - timestamp(entry["last_accessed_at"]) < IN_USE:
+                    print(f"Left {describe(entry)} for a later run: a job read it at {entry['last_accessed_at']}.")
                     continue
                 delete(entry)
                 print(f"Deleted {describe(entry)}.")
@@ -106,7 +122,8 @@ def main():
         query = urllib.parse.urlencode({"key": kind, "ref": ref})
         return get_pages(f"{caches}?{query}#actions_caches", token)
 
-    freed = prune(KINDS, list_kind, lambda entry: delete_entry(f"{caches}/{entry['id']}", token))
+    freed = prune(KINDS, list_kind, lambda entry: delete_entry(f"{caches}/{entry['id']}", token),
+                  datetime.now(timezone.utc))
     print(f"Freed {freed / 1e9:.2f} GB on {ref}.")
     return 0
 

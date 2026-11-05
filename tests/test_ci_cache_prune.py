@@ -5,6 +5,7 @@ import sys
 import unittest
 import urllib.error
 from contextlib import redirect_stdout
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -12,16 +13,19 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from ci_cache_prune import KINDS, PER_COMPILER, delete_entry, prune
 
+NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
 
-def entry(entry_id, key, created_at, size=100):
-    return {"id": entry_id, "key": key, "created_at": created_at, "size_in_bytes": size}
+
+def entry(entry_id, key, created_at, size=100, last_accessed_at=None):
+    return {"id": entry_id, "key": key, "created_at": created_at, "size_in_bytes": size,
+            "last_accessed_at": last_accessed_at or created_at}
 
 
 class PruneTests(unittest.TestCase):
     def run_prune(self, entries_by_kind, kinds=("deps-",)):
         deleted = []
         with redirect_stdout(io.StringIO()):
-            freed = prune(kinds, lambda kind: entries_by_kind.get(kind, []), deleted.append)
+            freed = prune(kinds, lambda kind: entries_by_kind.get(kind, []), deleted.append, NOW)
         return [item["id"] for item in deleted], freed
 
     def test_keeps_the_newest_entry_of_each_kind(self):
@@ -42,6 +46,19 @@ class PruneTests(unittest.TestCase):
         same_time = "2026-11-05T10:00:00Z"
         deleted, _ = self.run_prune({"deps-": [entry(8, "deps-a", same_time), entry(9, "deps-b", same_time)]})
         self.assertEqual(deleted, [8])
+
+    def test_times_compare_as_times(self):
+        # GitHub's fractions of a second vary in length; as text, "44.1Z" would sort after "44.123456Z".
+        deleted, _ = self.run_prune({"deps-": [entry(1, "deps-a", "2026-11-05T10:00:44.1Z"),
+                                               entry(2, "deps-b", "2026-11-05T10:00:44.123456Z")]})
+        self.assertEqual(deleted, [1])
+
+    def test_an_entry_read_lately_waits_for_a_later_run(self):
+        # A job that found it may still be downloading it.
+        entries = {"deps-": [entry(1, "deps-a", "2026-11-03T10:00:00Z", last_accessed_at="2026-11-06T11:50:00Z"),
+                             entry(2, "deps-b", "2026-11-04T10:00:00Z", last_accessed_at="2026-11-06T11:40:00Z"),
+                             entry(3, "deps-c", "2026-11-05T10:00:00Z")]}
+        self.assertEqual(self.run_prune(entries), ([2], 100))
 
     def test_only_keys_of_the_kind_count(self):
         # GitHub matches the key as a prefix, but an entry outside the kind must never be deleted for it.
