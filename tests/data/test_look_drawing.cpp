@@ -5,6 +5,7 @@
 #include "ItemModelDatabaseScope.h"
 
 #include "Core/Globals/_enum.h"
+#include "Core/Utilities/Random.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
@@ -17,8 +18,10 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Sprites/GpuUploadSkip.h"
 #include "Render/Sprites/TextureScript.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -326,4 +329,124 @@ TEST_CASE("A layer of every mesh, the item's hidden one too, draws the item's hi
     look.hiddenMesh = 1;
     // Mesh 3 stays hidden by its texture script.
     CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 1, 2});
+}
+
+namespace
+{
+// WorldTime for one test, as the clock the shapes read.
+struct WorldTimeScope
+{
+    explicit WorldTimeScope(double time) : m_previous(WorldTime)
+    {
+        WorldTime = time;
+    }
+    ~WorldTimeScope()
+    {
+        WorldTime = m_previous;
+    }
+    WorldTimeScope(const WorldTimeScope&) = delete;
+    WorldTimeScope& operator=(const WorldTimeScope&) = delete;
+
+private:
+    double m_previous;
+};
+
+constexpr double TestTime = 1234567.25;
+} // namespace
+
+TEST_CASE("Values that change over time take the clock, as the looks in code wrote them [looks]")
+{
+    const Shape wave{.kind = ShapeKind::Wave, .from = -0.2, .to = 1.0, .seconds = 6.283185};
+    const Shape bounce{.kind = ShapeKind::Bounce, .from = 0.1, .to = 0.4, .seconds = 3.1415925};
+    const Shape scroll{.kind = ShapeKind::Scroll, .perSecond = 0.5};
+    const Shape ramp{.kind = ShapeKind::Ramp, .from = 0.0, .to = -1.0, .seconds = 2.0};
+    const Shape frames{.kind = ShapeKind::Frames, .seconds = 0.08, .step = 0.25, .count = 4};
+    const LookStoreScope looks(
+        {{"testLook",
+          {Layer{.meshes = {{0}}, .opacity = wave, .glowStrength = bounce, .scrollU = scroll, .scrollV = ramp},
+           Layer{.meshes = {{1}}, .scrollV = frames}},
+          {.glowStrength = wave}}});
+    TestSword sword("testLook");
+    const WorldTimeScope clock(TestTime);
+    DrawLook look;
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 2);
+    // The numbers of the code each shape stands for.
+    const float pulse = sinf(static_cast<float>(TestTime * 0.001f)) * 0.6f + 0.4f;
+    CHECK(draws[0].alpha == pulse);
+    CHECK(draws[0].blendMeshAlpha == 0.1f + fabsf(sinf(static_cast<float>(TestTime * 0.001f))) * 0.3f);
+    CHECK(draws[0].blendMeshU == static_cast<float>(TestTime * 0.0005f));
+    CHECK(draws[0].blendMeshV == -static_cast<int>(TestTime) % 2000 * 0.0005f);
+    CHECK(draws[1].blendMeshV == ((static_cast<int>(TestTime * 0.05) % 16) / 4) * 0.25f);
+    CHECK(look.blendMeshLight == pulse);
+}
+
+TEST_CASE("A random value takes Random::DrawRand of the object, with the next salt for each one [looks]")
+{
+    const Shape random{.kind = ShapeKind::Random, .from = 0.0, .to = 0.9, .step = 0.1};
+    const LookStoreScope looks({{"testLook", {Layer{.meshes = {{0}}, .scrollU = random, .scrollV = random}}, {}}});
+    TestSword sword("testLook");
+    DrawLook look;
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    CHECK(draws[0].blendMeshU == static_cast<float>(Random::DrawRand(&sword.object, 1) % 10) * 0.1f);
+    CHECK(draws[0].blendMeshV == static_cast<float>(Random::DrawRand(&sword.object, 2) % 10) * 0.1f);
+}
+
+TEST_CASE("A layer's light stays for the layers after it, and a tint takes the model's light [looks]")
+{
+    const LookStoreScope looks(
+        {{"testLook",
+          {Layer{.meshes = {{0}}}, Layer{.meshes = {{1}}, .light = LayerLight{.color = {1.f, 0.f, 0.2f}}},
+           Layer{.meshes = {{0}}},
+           Layer{.meshes = {{1}}, .light = LayerLight{.tint = true, .color = {0.8f, 0.f, 0.8f}}}},
+          {}}});
+    TestSword sword("testLook");
+    Vector(0.5f, 0.5f, 0.5f, sword.model.BodyLight);
+    DrawLook look;
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 4);
+    const auto light = [](const MeshDraw& draw)
+    { return std::make_tuple(draw.bodyLight[0], draw.bodyLight[1], draw.bodyLight[2]); };
+    CHECK(light(draws[0]) == std::make_tuple(0.5f, 0.5f, 0.5f));
+    CHECK(light(draws[1]) == std::make_tuple(1.f, 0.f, 0.2f));
+    CHECK(light(draws[2]) == std::make_tuple(1.f, 0.f, 0.2f));
+    CHECK(light(draws[3]) == std::make_tuple(0.4f, 0.f, 0.4f));
+    // The model keeps the light of the last layer.
+    CHECK(sword.model.BodyLight[0] == 0.4f);
+}
+
+TEST_CASE("A layer's scrolling mesh is the model's while it draws, and the item values can leave one [looks]")
+{
+    const LookStoreScope looks(
+        {{"whileDrawn", {Layer{.meshes = {{1}}, .scrollingMesh = 1}, Layer{.meshes = {{0}}}}, {}},
+         {"left", {Layer{.meshes = {{0}}}}, {.scrollingMesh = 1}}});
+    {
+        TestSword sword("whileDrawn");
+        sword.model.StreamMesh = -1;
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 2);
+        CHECK(draws[0].streamMesh == 1);
+        CHECK(draws[1].streamMesh == -1);
+        CHECK(sword.model.StreamMesh == -1);
+    }
+    {
+        TestSword sword("left");
+        sword.model.StreamMesh = -1;
+        DrawLook look;
+        sword.Draw(look);
+        CHECK(sword.model.StreamMesh == 1);
+    }
+}
+
+TEST_CASE("A glow mesh of every mesh draws each mesh as a glowing one [looks]")
+{
+    const LookStoreScope looks({{"testLook", {Layer{.meshes = {{0}}, .glowMesh = AllGlowMeshes{}}}, {}}});
+    TestSword sword("testLook");
+    DrawLook look;
+    const std::vector<MeshDraw> draws = sword.Draw(look);
+    REQUIRE(draws.size() == 1);
+    // BMD::DrawMesh draws every mesh as the glowing one below -1.
+    CHECK(draws[0].blendMesh == -2);
 }

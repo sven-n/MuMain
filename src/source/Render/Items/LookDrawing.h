@@ -15,6 +15,8 @@ namespace Render::Items::Looks
 //
 // A layer of every mesh draws with RenderBody (the texture scripts, leaving out the item's hidden mesh); a layer of
 // every mesh but one draws with RenderBody leaving that one out; a layer of listed meshes draws each with RenderMesh.
+// A layer's light is put on the model and stays for the layers after it; its scrolling mesh is put on the model while
+// it draws, and the model keeps the one it had unless the item values set one.
 void DrawRenderStyle(const Data::Looks::LookDefinition& style, BMD* b, const OBJECT* o, DrawLook& look, float alpha,
                      int renderType);
 

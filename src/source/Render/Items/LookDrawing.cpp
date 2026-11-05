@@ -3,11 +3,15 @@
 #include "LookDrawing.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Core/Utilities/Random.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 
@@ -16,6 +20,8 @@ namespace Render::Items::Looks
 namespace
 {
 using namespace Data::Looks;
+
+constexpr double Pi = 3.14159265358979323846;
 
 // The texture index of each texture file a layer names; BITMAP_UNKNOWN for a file that is missing.
 std::unordered_map<std::string, GLuint> s_textures;
@@ -57,11 +63,86 @@ int LayerFlags(const Layer& layer, int renderType)
     return layer.blend == Blend::Glow ? flags | RENDER_BRIGHT : flags;
 }
 
-float ValueOf(const Value& value, float item, float drawing)
+// The object of one drawing, which random values are drawn for; each random value of a look takes the next salt.
+struct Moment
+{
+    const OBJECT* object = nullptr;
+    std::uint32_t salt = 0;
+};
+
+// The angle at this moment of a sine that turns `radiansPerCycle` in `seconds`, as the looks in code wrote it:
+// WorldTime times a float constant.
+float Angle(double radiansPerCycle, double seconds)
+{
+    const auto rate = static_cast<float>(radiansPerCycle / (seconds * 1000.0));
+    return static_cast<float>(WorldTime * static_cast<double>(rate));
+}
+
+// Milliseconds, rounded to the microsecond, so 0.08 seconds count 80 milliseconds.
+double Milliseconds(double seconds)
+{
+    return std::round(seconds * 1.0e6) / 1.0e3;
+}
+
+float ValueAt(const Shape& shape, Moment& moment)
+{
+    const double from = shape.from;
+    const double to = shape.to;
+    switch (shape.kind)
+    {
+    case ShapeKind::Wave:
+    {
+        const auto amplitude = static_cast<float>((to - from) / 2.0);
+        const auto middle = static_cast<float>((to + from) / 2.0);
+        return sinf(Angle(2.0 * Pi, shape.seconds)) * amplitude + middle;
+    }
+    case ShapeKind::Bounce:
+        return static_cast<float>(from) + fabsf(sinf(Angle(Pi, shape.seconds))) * static_cast<float>(to - from);
+    case ShapeKind::Scroll:
+    {
+        const auto rate = static_cast<float>(shape.perSecond / 1000.0);
+        return static_cast<float>(WorldTime * static_cast<double>(rate));
+    }
+    case ShapeKind::Ramp:
+    {
+        const int period = std::max(1, static_cast<int>(Milliseconds(shape.seconds)));
+        const auto rate = static_cast<float>((to - from) / period);
+        return static_cast<float>(from) + static_cast<float>(static_cast<int>(WorldTime) % period) * rate;
+    }
+    case ShapeKind::Frames:
+    {
+        const double each = std::max(1.0, Milliseconds(shape.seconds));
+        const int frame = static_cast<int>(std::floor(WorldTime / each)) % std::max(1, shape.count);
+        return static_cast<float>(frame) * static_cast<float>(shape.step);
+    }
+    case ShapeKind::Random:
+    {
+        const int count = std::max(1, static_cast<int>(std::lround((to - from) / shape.step)) + 1);
+        const std::int32_t number = Random::DrawRand(moment.object, ++moment.salt);
+        return static_cast<float>(from) + static_cast<float>(number % count) * static_cast<float>(shape.step);
+    }
+    }
+    return static_cast<float>(from);
+}
+
+float NumberAt(const Number& number, Moment& moment)
+{
+    if (const Shape* shape = std::get_if<Shape>(&number))
+    {
+        return ValueAt(*shape, moment);
+    }
+    return std::get<float>(number);
+}
+
+float ValueOf(const Value& value, float item, float drawing, Moment& moment)
 {
     if (const float* number = std::get_if<float>(&value))
     {
         return *number;
+    }
+    if (const Shape* shape = std::get_if<Shape>(&value))
+    {
+        return ValueAt(*shape, moment);
     }
     return std::holds_alternative<FromDrawing>(value) ? drawing : item;
 }
@@ -71,6 +152,11 @@ int GlowMeshOf(const GlowMesh& mesh, int item)
     if (const int* number = std::get_if<int>(&mesh))
     {
         return *number;
+    }
+    if (std::holds_alternative<AllGlowMeshes>(mesh))
+    {
+        // ResolveMaterial draws every mesh as a glowing one below -1.
+        return -2;
     }
     return std::holds_alternative<NoGlowMesh>(mesh) ? -1 : item;
 }
@@ -101,29 +187,19 @@ std::optional<int> TextureOf(const Layer& layer)
     return static_cast<int>(found->second);
 }
 
-void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, int renderType)
+void DrawMeshes(const Layer& layer, BMD* b, const DrawLook& look, int texture, int flags, float opacity, int glowMesh,
+                float glowStrength, float u, float v)
 {
-    const std::optional<int> texture = TextureOf(layer);
-    if (!texture)
-    {
-        return;
-    }
-    const int flags = LayerFlags(layer, renderType);
-    const float opacity = ValueOf(layer.opacity, look.alpha, alpha);
-    const int glowMesh = GlowMeshOf(layer.glowMesh, look.blendMesh);
-    const float glowStrength = ValueOf(layer.glowStrength, look.blendMeshLight, look.blendMeshLight);
-    const float u = ValueOf(layer.scrollU, look.blendMeshU, look.blendMeshU);
-    const float v = ValueOf(layer.scrollV, look.blendMeshV, look.blendMeshV);
     const std::vector<int>& meshes = layer.meshes.meshes;
     if (layer.meshes.IsAll())
     {
         b->RenderBody(flags, opacity, glowMesh, glowStrength, u, v, layer.meshes.evenHidden ? -1 : look.hiddenMesh,
-                      *texture);
+                      texture);
         return;
     }
     if (layer.meshes.allBut && meshes.size() == 1)
     {
-        b->RenderBody(flags, opacity, glowMesh, glowStrength, u, v, meshes.front(), *texture);
+        b->RenderBody(flags, opacity, glowMesh, glowStrength, u, v, meshes.front(), texture);
         return;
     }
     if (layer.meshes.allBut)
@@ -134,7 +210,7 @@ void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, in
         {
             if (std::ranges::find(meshes, mesh) == meshes.end() && !b->IsMeshHidden(mesh, -1))
             {
-                b->RenderScriptedMesh(mesh, flags, opacity, glowMesh, glowStrength, u, v, *texture);
+                b->RenderScriptedMesh(mesh, flags, opacity, glowMesh, glowStrength, u, v, texture);
             }
         }
         b->EndRender();
@@ -142,29 +218,78 @@ void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, in
     }
     for (const int mesh : meshes)
     {
-        b->RenderMesh(mesh, flags, opacity, glowMesh, glowStrength, u, v, *texture);
+        b->RenderMesh(mesh, flags, opacity, glowMesh, glowStrength, u, v, texture);
     }
 }
 
-void LeaveItemValues(const ItemValues& values, DrawLook& look)
+void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, int renderType, Moment& moment)
 {
-    look.alpha = values.opacity.value_or(look.alpha);
+    const std::optional<int> texture = TextureOf(layer);
+    if (!texture)
+    {
+        return;
+    }
+    const int flags = LayerFlags(layer, renderType);
+    const float opacity = ValueOf(layer.opacity, look.alpha, alpha, moment);
+    const int glowMesh = GlowMeshOf(layer.glowMesh, look.blendMesh);
+    const float glowStrength = ValueOf(layer.glowStrength, look.blendMeshLight, look.blendMeshLight, moment);
+    const float u = ValueOf(layer.scrollU, look.blendMeshU, look.blendMeshU, moment);
+    const float v = ValueOf(layer.scrollV, look.blendMeshV, look.blendMeshV, moment);
+    if (!layer.scrollingMesh)
+    {
+        DrawMeshes(layer, b, look, *texture, flags, opacity, glowMesh, glowStrength, u, v);
+        return;
+    }
+    const int scrolling = b->StreamMesh;
+    b->StreamMesh = *layer.scrollingMesh;
+    DrawMeshes(layer, b, look, *texture, flags, opacity, glowMesh, glowStrength, u, v);
+    b->StreamMesh = scrolling;
+}
+
+// Puts the layer's light on the model, from the light the drawing handed the look.
+void LightLayer(const LayerLight& light, const vec3_t modelLight, BMD* b, Moment& moment)
+{
+    for (int channel = 0; channel < 3; ++channel)
+    {
+        const float color = NumberAt(light.color[channel], moment);
+        b->BodyLight[channel] = light.tint ? color * modelLight[channel] : color;
+    }
+}
+
+void LeaveItemValues(const ItemValues& values, BMD* b, DrawLook& look, Moment& moment)
+{
+    const auto leave = [&moment](const std::optional<Number>& value, float& field)
+    {
+        if (value)
+        {
+            field = NumberAt(*value, moment);
+        }
+    };
+    leave(values.opacity, look.alpha);
     look.blendMesh = values.glowMesh.value_or(look.blendMesh);
-    look.blendMeshLight = values.glowStrength.value_or(look.blendMeshLight);
-    look.blendMeshU = values.scrollU.value_or(look.blendMeshU);
-    look.blendMeshV = values.scrollV.value_or(look.blendMeshV);
+    leave(values.glowStrength, look.blendMeshLight);
+    leave(values.scrollU, look.blendMeshU);
+    leave(values.scrollV, look.blendMeshV);
     look.hiddenMesh = values.hiddenMesh.value_or(look.hiddenMesh);
+    b->StreamMesh = values.scrollingMesh.value_or(b->StreamMesh);
 }
 } // namespace
 
-void DrawRenderStyle(const LookDefinition& style, BMD* b, const OBJECT* /*o*/, DrawLook& look, float alpha,
-                     int renderType)
+void DrawRenderStyle(const LookDefinition& style, BMD* b, const OBJECT* o, DrawLook& look, float alpha, int renderType)
 {
+    Moment moment{.object = o};
+    vec3_t modelLight;
+    VectorCopy(b->BodyLight, modelLight);
+    // A layer without a light of its own keeps the one on the model, as the looks in code drew.
     for (const Layer& layer : style.layers)
     {
-        DrawLayer(layer, b, look, alpha, renderType);
+        if (layer.light)
+        {
+            LightLayer(*layer.light, modelLight, b, moment);
+        }
+        DrawLayer(layer, b, look, alpha, renderType, moment);
     }
-    LeaveItemValues(style.itemValuesAfter, look);
+    LeaveItemValues(style.itemValuesAfter, b, look, moment);
 }
 
 void PrepareTextures()

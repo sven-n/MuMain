@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <limits>
 #include <set>
 
@@ -39,11 +40,23 @@ constexpr const char* GlowStrength = "glowStrength";
 constexpr const char* ScrollU = "scrollU";
 constexpr const char* ScrollV = "scrollV";
 constexpr const char* HiddenMesh = "hiddenMesh";
+constexpr const char* Light = "light";
+constexpr const char* Tint = "tint";
+constexpr const char* ScrollingMesh = "scrollingMesh";
+constexpr const char* Shape = "shape";
+constexpr const char* From = "from";
+constexpr const char* To = "to";
+constexpr const char* Seconds = "seconds";
+constexpr const char* PerSecond = "perSecond";
+constexpr const char* Step = "step";
+constexpr const char* Count = "count";
+constexpr const char* SecondsEach = "secondsEach";
 } // namespace Keys
 
 constexpr const char* RenderStyleKind = "renderStyle";
 constexpr const char* Drawing = "drawing";
 constexpr const char* None = "none";
+constexpr const char* All = "all";
 
 // A model has at most this many meshes (MAX_MESH).
 constexpr long long MeshCount = 50;
@@ -70,6 +83,56 @@ constexpr std::array<std::pair<Blend, const char*>, 3> BlendNames{{
     {Blend::Glow, "glow"},
     {Blend::AsDrawing, "asDrawing"},
 }};
+
+constexpr std::array<std::pair<ShapeKind, const char*>, 6> ShapeNames{{
+    {ShapeKind::Wave, "wave"},
+    {ShapeKind::Bounce, "bounce"},
+    {ShapeKind::Scroll, "scroll"},
+    {ShapeKind::Ramp, "ramp"},
+    {ShapeKind::Frames, "frames"},
+    {ShapeKind::Random, "random"},
+}};
+
+// The fields of each shape, in the order they are written.
+std::vector<const char*> ShapeFields(ShapeKind kind)
+{
+    switch (kind)
+    {
+    case ShapeKind::Wave:
+    case ShapeKind::Bounce:
+    case ShapeKind::Ramp:
+        return {Keys::From, Keys::To, Keys::Seconds};
+    case ShapeKind::Scroll:
+        return {Keys::PerSecond};
+    case ShapeKind::Frames:
+        return {Keys::Count, Keys::Step, Keys::SecondsEach};
+    case ShapeKind::Random:
+        return {Keys::From, Keys::To, Keys::Step};
+    }
+    return {};
+}
+
+// The number a shape keeps for a field of ShapeFields other than its count.
+double& ShapeField(Shape& shape, std::string_view key)
+{
+    if (key == Keys::From)
+    {
+        return shape.from;
+    }
+    if (key == Keys::To)
+    {
+        return shape.to;
+    }
+    if (key == Keys::PerSecond)
+    {
+        return shape.perSecond;
+    }
+    if (key == Keys::Step)
+    {
+        return shape.step;
+    }
+    return shape.seconds;
+}
 
 template <typename T, std::size_t N> const char* NameOf(const std::array<std::pair<T, const char*>, N>& names, T value)
 {
@@ -139,9 +202,13 @@ private:
     bool ReadMeshList(const OrderedJson& json, const std::string& field, std::vector<int>& meshes);
     bool ReadMesh(const OrderedJson& json, const std::string& field, int& mesh);
     void ReadValue(const OrderedJson& json, const char* key, const std::string& field, bool drawing, Value& value);
+    bool ReadNumber(const OrderedJson& json, const std::string& field, Number& number);
+    bool ReadShape(const OrderedJson& json, const std::string& field, Shape& shape);
     void ReadGlowMesh(const OrderedJson& json, const std::string& field, GlowMesh& mesh);
+    void ReadLight(const OrderedJson& json, const std::string& field, std::optional<LayerLight>& light);
     void ReadItemValues(const OrderedJson& json, const std::string& field, ItemValues& values);
-    void ReadNumber(const OrderedJson& json, const char* key, const std::string& field, std::optional<float>& value);
+    void ReadItemNumber(const OrderedJson& json, const char* key, const std::string& field,
+                        std::optional<Number>& value);
     void ReadMeshOrNone(const OrderedJson& json, const char* key, const std::string& field, std::optional<int>& mesh);
 
     template <typename T, std::size_t N>
@@ -267,9 +334,19 @@ void LookReader::ReadLayer(const OrderedJson& json, const std::string& field, La
     ReadValue(json, Keys::GlowStrength, field, false, layer.glowStrength);
     ReadValue(json, Keys::ScrollU, field, false, layer.scrollU);
     ReadValue(json, Keys::ScrollV, field, false, layer.scrollV);
+    ReadLight(json, field, layer.light);
+    if (const auto scrolling = json.find(Keys::ScrollingMesh); scrolling != json.end())
+    {
+        int mesh = 0;
+        if (ReadMesh(*scrolling, field + "." + Keys::ScrollingMesh, mesh))
+        {
+            layer.scrollingMesh = mesh;
+        }
+    }
     WarnAboutUnknownKeys(json,
                          {Keys::Kind, Keys::Motion, Keys::Blend, Keys::Meshes, Keys::Texture, Keys::Opacity,
-                          Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU, Keys::ScrollV},
+                          Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU, Keys::ScrollV, Keys::Light,
+                          Keys::ScrollingMesh},
                          field);
 }
 
@@ -338,17 +415,110 @@ void LookReader::ReadValue(const OrderedJson& json, const char* key, const std::
     {
         return;
     }
-    if (entry->is_number())
-    {
-        value = entry->get<float>();
-        return;
-    }
     if (drawing && entry->is_string() && entry->get_ref<const std::string&>() == Drawing)
     {
         value = FromDrawing{};
         return;
     }
-    AddFatal(field + "." + key, drawing ? "must be a number or \"drawing\"" : "must be a number");
+    if (entry->is_object())
+    {
+        Shape shape;
+        if (ReadShape(*entry, field + "." + key, shape))
+        {
+            value = shape;
+        }
+        return;
+    }
+    if (entry->is_number())
+    {
+        value = entry->get<float>();
+        return;
+    }
+    AddFatal(field + "." + key, drawing ? "must be a number, \"drawing\" or a shape" : "must be a number or a shape");
+}
+
+// A number, or a shape: {"shape": "wave", ...}.
+bool LookReader::ReadNumber(const OrderedJson& json, const std::string& field, Number& number)
+{
+    if (json.is_number())
+    {
+        number = json.get<float>();
+        return true;
+    }
+    if (json.is_object())
+    {
+        Shape shape;
+        if (ReadShape(json, field, shape))
+        {
+            number = shape;
+            return true;
+        }
+        return false;
+    }
+    AddFatal(field, "must be a number or a shape");
+    return false;
+}
+
+bool LookReader::ReadShape(const OrderedJson& json, const std::string& field, Shape& shape)
+{
+    if (json.find(Keys::Shape) == json.end())
+    {
+        AddFatal(field + "." + Keys::Shape, "is missing: " + ListOf(ShapeNames));
+        return false;
+    }
+    if (!ReadName(json, Keys::Shape, field, ShapeNames, shape.kind))
+    {
+        return false;
+    }
+    const std::string kind = NameOf(ShapeNames, shape.kind);
+    bool valid = true;
+    Items::Json::KeySet known{Keys::Shape};
+    for (const char* key : ShapeFields(shape.kind))
+    {
+        known.insert(key);
+        const auto entry = json.find(key);
+        if (entry == json.end() || !entry->is_number())
+        {
+            AddFatal(field + "." + key, "must be a number: a " + kind + " has " + key);
+            valid = false;
+            continue;
+        }
+        if (std::string_view(key) == Keys::Count)
+        {
+            long long count = 0;
+            if (!Items::Json::ReadWholeNumber(*entry, count) || count < 1 || count > 1000)
+            {
+                AddFatal(field + "." + key, "must be a whole number from 1 to 1000");
+                valid = false;
+            }
+            shape.count = static_cast<int>(count);
+            continue;
+        }
+        ShapeField(shape, key) = entry->get<double>();
+    }
+    WarnAboutUnknownKeys(json, known, field);
+    if (!valid)
+    {
+        return false;
+    }
+    const bool timed = shape.kind != ShapeKind::Scroll && shape.kind != ShapeKind::Random;
+    if (timed && !(shape.seconds > 0.0))
+    {
+        AddFatal(field + "." + (shape.kind == ShapeKind::Frames ? Keys::SecondsEach : Keys::Seconds),
+                 "must be more than 0");
+        return false;
+    }
+    if (shape.kind == ShapeKind::Random && !(shape.step > 0.0))
+    {
+        AddFatal(field + "." + Keys::Step, "must be more than 0");
+        return false;
+    }
+    if (shape.kind == ShapeKind::Random && shape.to < shape.from)
+    {
+        AddFatal(field + "." + Keys::To, "must not be below from");
+        return false;
+    }
+    return true;
 }
 
 void LookReader::ReadGlowMesh(const OrderedJson& json, const std::string& field, GlowMesh& mesh)
@@ -363,10 +533,55 @@ void LookReader::ReadGlowMesh(const OrderedJson& json, const std::string& field,
         mesh = NoGlowMesh{};
         return;
     }
+    if (entry->is_string() && entry->get_ref<const std::string&>() == All)
+    {
+        mesh = AllGlowMeshes{};
+        return;
+    }
     int number = 0;
     if (ReadMesh(*entry, field + "." + Keys::GlowMesh, number))
     {
         mesh = number;
+    }
+}
+
+// [red, green, blue], or {"tint": [red, green, blue]}; each a number or a shape.
+void LookReader::ReadLight(const OrderedJson& json, const std::string& field, std::optional<LayerLight>& light)
+{
+    const auto entry = json.find(Keys::Light);
+    if (entry == json.end())
+    {
+        return;
+    }
+    const std::string lightField = field + "." + Keys::Light;
+    LayerLight read;
+    const OrderedJson* color = &*entry;
+    std::string colorField = lightField;
+    if (entry->is_object())
+    {
+        const auto tint = entry->find(Keys::Tint);
+        if (tint == entry->end() || entry->size() != 1)
+        {
+            AddFatal(lightField, "must be [red, green, blue] or {\"tint\": [red, green, blue]}");
+            return;
+        }
+        read.tint = true;
+        color = &*tint;
+        colorField += std::string(".") + Keys::Tint;
+    }
+    if (!color->is_array() || color->size() != 3)
+    {
+        AddFatal(colorField, "must be [red, green, blue]: three numbers or shapes");
+        return;
+    }
+    bool valid = true;
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        valid = ReadNumber((*color)[i], colorField + "[" + std::to_string(i) + "]", read.color[i]) && valid;
+    }
+    if (valid)
+    {
+        light = read;
     }
 }
 
@@ -377,35 +592,36 @@ void LookReader::ReadItemValues(const OrderedJson& json, const std::string& fiel
         AddFatal(field, "must be an object of item values");
         return;
     }
-    ReadNumber(json, Keys::Opacity, field, values.opacity);
+    ReadItemNumber(json, Keys::Opacity, field, values.opacity);
     ReadMeshOrNone(json, Keys::GlowMesh, field, values.glowMesh);
-    ReadNumber(json, Keys::GlowStrength, field, values.glowStrength);
-    ReadNumber(json, Keys::ScrollU, field, values.scrollU);
-    ReadNumber(json, Keys::ScrollV, field, values.scrollV);
+    ReadItemNumber(json, Keys::GlowStrength, field, values.glowStrength);
+    ReadItemNumber(json, Keys::ScrollU, field, values.scrollU);
+    ReadItemNumber(json, Keys::ScrollV, field, values.scrollV);
     ReadMeshOrNone(json, Keys::HiddenMesh, field, values.hiddenMesh);
+    ReadMeshOrNone(json, Keys::ScrollingMesh, field, values.scrollingMesh);
     if (values.IsEmpty())
     {
         AddIssue(ItemDataIssueSeverity::Warning, field, "sets no item value");
     }
-    WarnAboutUnknownKeys(
-        json, {Keys::Opacity, Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU, Keys::ScrollV, Keys::HiddenMesh},
-        field);
+    WarnAboutUnknownKeys(json,
+                         {Keys::Opacity, Keys::GlowMesh, Keys::GlowStrength, Keys::ScrollU, Keys::ScrollV,
+                          Keys::HiddenMesh, Keys::ScrollingMesh},
+                         field);
 }
 
-void LookReader::ReadNumber(const OrderedJson& json, const char* key, const std::string& field,
-                            std::optional<float>& value)
+void LookReader::ReadItemNumber(const OrderedJson& json, const char* key, const std::string& field,
+                                std::optional<Number>& value)
 {
     const auto entry = json.find(key);
     if (entry == json.end())
     {
         return;
     }
-    if (!entry->is_number())
+    Number number;
+    if (ReadNumber(*entry, field + "." + key, number))
     {
-        AddFatal(field + "." + key, "must be a number");
-        return;
+        value = number;
     }
-    value = entry->get<float>();
 }
 
 // A mesh number, or "none" (-1, what the item starts with).
@@ -429,11 +645,46 @@ void LookReader::ReadMeshOrNone(const OrderedJson& json, const char* key, const 
     }
 }
 
+// A whole number without a fraction, as WriteFloat writes one.
+OrderedJson WriteDouble(double value)
+{
+    if (value == std::floor(value) && std::abs(value) < static_cast<double>(1LL << 53))
+    {
+        return static_cast<long long>(value);
+    }
+    return value;
+}
+
+OrderedJson WriteShape(Shape shape)
+{
+    OrderedJson json = OrderedJson::object();
+    json[Keys::Shape] = NameOf(ShapeNames, shape.kind);
+    for (const char* key : ShapeFields(shape.kind))
+    {
+        json[key] =
+            std::string_view(key) == Keys::Count ? OrderedJson(shape.count) : WriteDouble(ShapeField(shape, key));
+    }
+    return json;
+}
+
+OrderedJson WriteNumber(const Number& number)
+{
+    if (const Shape* shape = std::get_if<Shape>(&number))
+    {
+        return WriteShape(*shape);
+    }
+    return WriteFloat(std::get<float>(number));
+}
+
 OrderedJson WriteValue(const Value& value)
 {
     if (std::holds_alternative<FromDrawing>(value))
     {
         return Drawing;
+    }
+    if (const Shape* shape = std::get_if<Shape>(&value))
+    {
+        return WriteShape(*shape);
     }
     return WriteFloat(std::get<float>(value));
 }
@@ -484,6 +735,10 @@ OrderedJson WriteLayer(const Layer& layer)
     {
         json[Keys::GlowMesh] = None;
     }
+    else if (std::holds_alternative<AllGlowMeshes>(layer.glowMesh))
+    {
+        json[Keys::GlowMesh] = All;
+    }
     else if (const int* mesh = std::get_if<int>(&layer.glowMesh))
     {
         json[Keys::GlowMesh] = *mesh;
@@ -491,6 +746,26 @@ OrderedJson WriteLayer(const Layer& layer)
     PutValue(json, Keys::GlowStrength, layer.glowStrength);
     PutValue(json, Keys::ScrollU, layer.scrollU);
     PutValue(json, Keys::ScrollV, layer.scrollV);
+    if (layer.light)
+    {
+        OrderedJson color = OrderedJson::array();
+        for (const Number& channel : layer.light->color)
+        {
+            color.push_back(WriteNumber(channel));
+        }
+        if (layer.light->tint)
+        {
+            json[Keys::Light] = OrderedJson{{Keys::Tint, std::move(color)}};
+        }
+        else
+        {
+            json[Keys::Light] = std::move(color);
+        }
+    }
+    if (layer.scrollingMesh)
+    {
+        json[Keys::ScrollingMesh] = *layer.scrollingMesh;
+    }
     return json;
 }
 
@@ -499,7 +774,7 @@ OrderedJson WriteItemValues(const ItemValues& values)
     OrderedJson json = OrderedJson::object();
     if (values.opacity)
     {
-        json[Keys::Opacity] = WriteFloat(*values.opacity);
+        json[Keys::Opacity] = WriteNumber(*values.opacity);
     }
     if (values.glowMesh)
     {
@@ -507,19 +782,23 @@ OrderedJson WriteItemValues(const ItemValues& values)
     }
     if (values.glowStrength)
     {
-        json[Keys::GlowStrength] = WriteFloat(*values.glowStrength);
+        json[Keys::GlowStrength] = WriteNumber(*values.glowStrength);
     }
     if (values.scrollU)
     {
-        json[Keys::ScrollU] = WriteFloat(*values.scrollU);
+        json[Keys::ScrollU] = WriteNumber(*values.scrollU);
     }
     if (values.scrollV)
     {
-        json[Keys::ScrollV] = WriteFloat(*values.scrollV);
+        json[Keys::ScrollV] = WriteNumber(*values.scrollV);
     }
     if (values.hiddenMesh)
     {
         json[Keys::HiddenMesh] = WriteMeshOrNone(*values.hiddenMesh);
+    }
+    if (values.scrollingMesh)
+    {
+        json[Keys::ScrollingMesh] = WriteMeshOrNone(*values.scrollingMesh);
     }
     return json;
 }

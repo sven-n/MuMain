@@ -146,6 +146,36 @@ TEST_CASE("Problems that make a render style file unusable are fatal [looks][fil
         {R"([{"name": "a", "layers": [{"kind": "texture", "texture": ""}]}])", "looks[0].layers[0].texture"},
         {R"([{"name": "a", "layers": [], "itemValuesAfter": {"hiddenMesh": "all"}}])",
          "looks[0].itemValuesAfter.hiddenMesh"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "glowMesh": "every"}]}])", "looks[0].layers[0].glowMesh"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "opacity": {"from": 0}}]}])",
+         "looks[0].layers[0].opacity.shape"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "opacity": {"shape": "zigzag"}}]}])",
+         "looks[0].layers[0].opacity.shape"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "glowStrength": {"shape": "wave", "from": 0, "to": 1}}]}])",
+         "looks[0].layers[0].glowStrength.seconds"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "glowStrength": {"shape": "wave", "from": 0, "to": 1,
+            "seconds": 0}}]}])",
+         "looks[0].layers[0].glowStrength.seconds"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "scrollV": {"shape": "frames", "count": 0, "step": 0.25,
+            "secondsEach": 0.08}}]}])",
+         "looks[0].layers[0].scrollV.count"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "scrollU": {"shape": "random", "from": 0, "to": 1,
+            "step": 0}}]}])",
+         "looks[0].layers[0].scrollU.step"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "scrollU": {"shape": "random", "from": 1, "to": 0,
+            "step": 0.1}}]}])",
+         "looks[0].layers[0].scrollU.to"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "light": [1, 1]}]}])", "looks[0].layers[0].light"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "light": {"color": [1, 1, 1]}}]}])",
+         "looks[0].layers[0].light"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "light": {"tint": [1, 1]}}]}])",
+         "looks[0].layers[0].light.tint"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "light": [1, "white", 1]}]}])",
+         "looks[0].layers[0].light[1]"},
+        {R"([{"name": "a", "layers": [{"kind": "texture", "scrollingMesh": 50}]}])",
+         "looks[0].layers[0].scrollingMesh"},
+        {R"([{"name": "a", "layers": [], "itemValuesAfter": {"glowStrength": "drawing"}}])",
+         "looks[0].itemValuesAfter.glowStrength"},
     };
     for (const Case& c : cases)
     {
@@ -194,4 +224,52 @@ TEST_CASE("A layer of every mesh, the item's hidden one too, reads and writes as
     REQUIRE(result.looks.size() == 1);
     CHECK(result.looks[0].layers[0].meshes.evenHidden);
     CHECK(result.looks[0].layers[0].meshes.IsAll());
+}
+
+TEST_CASE("Shapes, a layer's light, its scrolling mesh and the glow of every mesh write back as they were read "
+          "[looks][files]")
+{
+    const Shape wave{.kind = ShapeKind::Wave, .from = -0.2, .to = 1.2, .seconds = 7.853982};
+    const Shape bounce{.kind = ShapeKind::Bounce, .from = 0.1, .to = 0.4, .seconds = 3.141593};
+    const Shape scroll{.kind = ShapeKind::Scroll, .perSecond = -0.1};
+    const Shape ramp{.kind = ShapeKind::Ramp, .from = 0.0, .to = -1.0, .seconds = 2.0};
+    const Shape frames{.kind = ShapeKind::Frames, .seconds = 0.08, .step = 0.25, .count = 4};
+    const Shape random{.kind = ShapeKind::Random, .from = 0.0, .to = 0.9, .step = 0.1};
+    const std::vector<LookDefinition> looks{
+        {"timed",
+         {Layer{.meshes = {{1}},
+                .opacity = wave,
+                .glowMesh = AllGlowMeshes{},
+                .glowStrength = bounce,
+                .scrollU = scroll,
+                .scrollV = ramp,
+                .light = LayerLight{.color = {bounce, bounce, 1.f}},
+                .scrollingMesh = 1},
+          Layer{.scrollU = random, .scrollV = frames, .light = LayerLight{.tint = true, .color = {0.8f, 0.f, 0.8f}}}},
+         {.glowStrength = wave, .scrollU = scroll, .scrollingMesh = -1}},
+    };
+    const std::string text = WriteRenderStylesJson(looks);
+    INFO(text);
+    // Each layer stays on one line, its shapes in it, with the numbers of the file.
+    CHECK(text.find(R"("opacity": {"shape": "wave", "from": -0.2, "to": 1.2, "seconds": 7.853982})") !=
+          std::string::npos);
+    CHECK(text.find(R"("glowMesh": "all")") != std::string::npos);
+    CHECK(text.find(R"("light": {"tint": [0.8, 0, 0.8]})") != std::string::npos);
+    CHECK(text.find(R"("scrollV": {"shape": "frames", "count": 4, "step": 0.25, "secondsEach": 0.08})") !=
+          std::string::npos);
+    CHECK(text.find(R"("scrollingMesh": "none")") != std::string::npos);
+    const ReadResult result = Read(text);
+    INFO(Describe(result.issues));
+    CHECK(result.issues.empty());
+    CHECK(result.looks == looks);
+    CHECK(WriteRenderStylesJson(result.looks) == text);
+}
+
+TEST_CASE("A field of another shape is a warning [looks][files]")
+{
+    const ReadResult result = Read(File(R"([{"name": "a", "layers": [{"kind": "texture",
+        "glowStrength": {"shape": "scroll", "perSecond": 0.5, "seconds": 2}}]}])"));
+    INFO(Describe(result.issues));
+    CHECK_FALSE(Data::Items::HasFatal(result.issues));
+    CHECK(Find(result.issues, ItemDataIssueSeverity::Warning, "looks[0].layers[0].glowStrength.seconds") != nullptr);
 }
