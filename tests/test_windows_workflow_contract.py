@@ -620,6 +620,10 @@ for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled
                  "github.event_name != 'pull_request'", "actions: write", "python3 scripts/ci_cache_prune.py",
                  "GH_TOKEN: ${{ github.token }}"):
     check(required in caches_job, f"caches job must prune after the builds of runs on main: {required}")
+# Its checkout needs only the scripts, not the game data, and must not keep the token that can delete caches.
+for required in ("sparse-checkout: scripts", "persist-credentials: false"):
+    check(required in step(caches_job, "caches", "Checkout repository"),
+          f"caches job must check out only the scripts, without credentials: {required}")
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
 sys.path.insert(0, str(ROOT / "scripts"))

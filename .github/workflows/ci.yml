@@ -890,8 +890,13 @@ jobs:
       contents: read
       actions: write
     steps:
+      # The script and what it imports, without the game data; and no token left in .git/config, as this one can
+      # delete caches.
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
 
       - name: Delete older cache entries
         env:
