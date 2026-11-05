@@ -136,7 +136,8 @@ public:
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
     // Reads the files whose tables changed again (a monster set this window
     // changed: as Data/Monsters/Sounds.json has it, under the name another
-    // window gave it since) and the folders; the history goes.
+    // window gave it since) and the folders; the history goes. A set that
+    // was not put back (the file cannot be read) stays not saved.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
     // The tables as they are now, and the folders as their file has them, are
     // what Save and Revert compare with.
@@ -160,8 +161,11 @@ private:
     // The sets this window changed, as Data/Monsters/Sounds.json has them now
     // (Revert): the Monster Sounds window's unsaved changes of them go too, a
     // set renamed there since keeps its new name, and a set the file does not
-    // have goes. False when the file could not be read.
-    bool RevertSets(std::vector<Data::Items::ItemDataIssue>& issues);
+    // have goes. False when the file could not be read or the monster tools
+    // refused a set (a problem in `issues`); the sets not put back are in
+    // `kept`, as m_savedSets has them.
+    bool RevertSets(std::vector<Data::Items::ItemDataIssue>& issues,
+                    std::map<std::string, Data::Monsters::MonsterSoundSet>& kept);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;

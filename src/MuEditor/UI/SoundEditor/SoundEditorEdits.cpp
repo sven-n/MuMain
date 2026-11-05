@@ -118,6 +118,26 @@ std::optional<Data::Monsters::MonsterSoundSet> TurnSetSound(const Data::Monsters
     return turned;
 }
 
+// The set `name` as the file has it (`fileSets`, by its name before this
+// window changed it, `before`), under its name now; one the file lacks goes.
+// False when the monster tools refused it.
+bool PutSetBack(const std::string& name, const Data::Monsters::MonsterSoundSet& before,
+                const std::vector<Data::Monsters::MonsterSoundSet>& fileSets)
+{
+    const auto saved =
+        std::find_if(fileSets.begin(), fileSets.end(),
+                     [&before](const Data::Monsters::MonsterSoundSet& set) { return set.name == before.name; });
+    const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
+    if (saved == fileSets.end())
+    {
+        return now == nullptr || g_MonsterEdits.RemoveSoundSet(I18N::Editor::Revert, name, -1);
+    }
+    // A set renamed in another window since keeps its new name.
+    Data::Monsters::MonsterSoundSet put = *saved;
+    put.name = name;
+    return (now != nullptr && *now == put) || g_MonsterEdits.SetSoundSet(I18N::Editor::Revert, put, -1);
+}
+
 // The versions of the tables the keys come from (SoundKeyFollow).
 std::pair<int, int> KeyedVersions()
 {
@@ -574,7 +594,8 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
             reverted = false;
         }
     }
-    if (SetsDiffer(m_savedSets) && !RevertSets(issues))
+    std::map<std::string, Data::Monsters::MonsterSoundSet> keptSets;
+    if (SetsDiffer(m_savedSets) && !RevertSets(issues, keptSets))
     {
         reverted = false;
     }
@@ -599,44 +620,37 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
     m_undo.clear();
     m_redo.clear();
     TakeSaved();
+    // The sets not put back still differ from the file: not saved yet.
+    m_savedSets = std::move(keptSets);
     return reverted;
 }
 
-bool SoundEdits::RevertSets(std::vector<Data::Items::ItemDataIssue>& issues)
+bool SoundEdits::RevertSets(std::vector<Data::Items::ItemDataIssue>& issues,
+                            std::map<std::string, Data::Monsters::MonsterSoundSet>& kept)
 {
     const Data::Monsters::MonsterSoundsLoadResult file =
         Data::Monsters::LoadMonsterSoundsFile(Data::Monsters::GetMonsterSoundsFile());
     if (Data::Items::HasFatal(file.issues))
     {
         issues.insert(issues.end(), file.issues.begin(), file.issues.end());
+        kept = m_savedSets;
         return false;
     }
+    bool all = true;
     for (const auto& entry : m_savedSets)
     {
-        const std::string& name = entry.first;
-        // The file names the set as it was before this window changed it.
-        const std::string& fileName = entry.second.name;
-        const auto saved = std::find_if(file.sets.begin(), file.sets.end(),
-                                        [&fileName](const Data::Monsters::MonsterSoundSet& set)
-                                        { return set.name == fileName; });
-        const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
-        if (saved == file.sets.end())
+        if (PutSetBack(entry.first, entry.second, file.sets))
         {
-            if (now != nullptr)
-            {
-                g_MonsterEdits.RemoveSoundSet(I18N::Editor::Revert, name, -1);
-            }
             continue;
         }
-        // A set renamed in another window since keeps its new name.
-        Data::Monsters::MonsterSoundSet put = *saved;
-        put.name = name;
-        if (now == nullptr || *now != put)
-        {
-            g_MonsterEdits.SetSoundSet(I18N::Editor::Revert, put, -1);
-        }
+        kept.insert(entry);
+        issues.push_back({Data::Items::ItemDataIssueSeverity::Fatal,
+                          Data::Monsters::GetMonsterSoundsFile().generic_string(), Data::Items::ItemDataIssue::NoItem,
+                          Data::Items::ItemDataIssue::NoItem, "",
+                          "the set \"" + entry.first + "\" could not be put back as the file has it"});
+        all = false;
     }
-    return true;
+    return all;
 }
 
 void SoundEdits::TakeSaved()

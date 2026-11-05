@@ -563,6 +563,38 @@ TEST_CASE("Sound Editor: a set renamed in Monster Sounds keeps this window's cha
     CHECK_FALSE(g_SoundEdits.IsModified());
 }
 
+TEST_CASE("Sound Editor: a Revert that cannot read Data/Monsters/Sounds.json says why and keeps the sets it changed "
+          "not saved, and a later one puts them back [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    std::filesystem::create_directories("Data/Monsters");
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary) << "{ \"formatVersion\": 1, \"sets\": [";
+    g_SoundEdits.TakeSaved();
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    const SoundRow* idle = FindRow(rows, "set:Death Tree:Data/Sound/EditorTest/ok.wav");
+    REQUIRE(idle != nullptr);
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*idle);
+    values.name = "Named";
+    REQUIRE(g_SoundEdits.Change(*idle, values));
+
+    std::vector<Data::Items::ItemDataIssue> issues;
+    CHECK_FALSE(g_SoundEdits.Revert(issues));
+    CHECK(Data::Items::HasFatal(issues));
+    CHECK(g_MonsterSoundSetDatabase.Find("Death Tree")->sounds[0].name == "Named");
+    CHECK(g_SoundEdits.IsModified());
+
+    // The file fixed: Revert puts the set back.
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary)
+        << Data::Monsters::WriteMonsterSoundsJson(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    issues.clear();
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == DeathTree());
+    CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
 TEST_CASE("Sound Editor: Save writes the sets it changed into Data/Monsters/Sounds.json alone, and the monster "
           "tools' other changes stay unsaved [sounds][editor]")
 {
