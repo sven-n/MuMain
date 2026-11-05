@@ -92,6 +92,14 @@ def fetch_json(request, open_url=urllib.request.urlopen, sleep=time.sleep, clock
     raise AssertionError("unreachable")
 
 
+def api_headers(token):
+    return {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+
 def get_pages(url, token):
     """Every item of a paginated GitHub REST list; `url` names the list's key after a '#'."""
     url, _, key = url.partition("#")
@@ -100,13 +108,7 @@ def get_pages(url, token):
     while True:
         separator = "&" if "?" in url else "?"
         request = urllib.request.Request(
-            f"{url}{separator}per_page={PAGE_SIZE}&page={page}",
-            headers={
-                "Accept": "application/vnd.github+json",
-                "Authorization": f"Bearer {token}",
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        )
+            f"{url}{separator}per_page={PAGE_SIZE}&page={page}", headers=api_headers(token))
         body = fetch_json(request)
         batch = body[key] if key else body
         items.extend(batch)

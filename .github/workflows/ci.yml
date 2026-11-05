@@ -152,6 +152,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup .NET 10
+        id: dotnet
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
@@ -203,22 +204,33 @@ jobs:
           }
           exit 0
 
-      - name: Cache FetchContent and NuGet dependencies
-        uses: actions/cache@v6
+      - name: Restore dependencies
+        id: deps
+        # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
+        # their sources, and the ClientLibrary projects and the .NET SDK pick the NuGet packages (the SDK's version
+        # picks those of its NativeAOT compiler). src/CMakeLists.txt is not part of it: it changes with every new
+        # source file of the game. Only the release runs, the runs on main that build Windows, save it (Save
+        # dependencies): a PR's own copy would serve that PR alone and push main's entries out of the 10 GB cache. One
+        # kind of run saves each cache, so its newest entry, the one the prune job keeps, is always the newest commit's.
+        uses: actions/cache/restore@v6
         with:
           path: |
-            out/build/windows-ci-x64-release/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/windows-ci-x64-release/_deps/*-src
+            out/build/windows-ci-x64-release/_deps/*-subbuild
             .nuget
-          key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: windows-x64-release-deps-
+          key: windows-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: windows-x64-release-dep-sources-
 
       - name: Identify vcpkg toolchain
         id: vcpkg
         shell: pwsh
         run: ./scripts/ci_vcpkg_cache_key.ps1
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@v6
+      - name: Restore vcpkg packages
+        id: vcpkg_cache
+        # Saved after the configure step, which builds what the archives lack, by the release runs only.
+        uses: actions/cache/restore@v6
         with:
           path: |
             C:/vcpkg/installed
@@ -289,8 +301,29 @@ jobs:
             throw "CMake selected a compiler outside the active MSVC environment."
           }
 
+      - name: Save vcpkg packages
+        if: needs.quality.outputs.release == 'true' && steps.vcpkg_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/vcpkg/packages
+            ~/AppData/Local/vcpkg/archives
+          key: ${{ steps.vcpkg_cache.outputs.cache-primary-key }}
+
       - name: Build
         run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+
+      - name: Save dependencies
+        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/windows-ci-x64-release/_deps/*-src
+            out/build/windows-ci-x64-release/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Run tests
         run: >
@@ -554,6 +587,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup .NET 10
+        id: dotnet
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
@@ -584,15 +618,17 @@ jobs:
           key: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
           restore-keys: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-
 
-      - name: Cache dependencies
-        uses: actions/cache@v6
+      - name: Restore dependencies
+        id: deps
+        # Named as on Windows; saved by main pushes, like the compiler cache (Save dependencies).
+        uses: actions/cache/restore@v6
         with:
           path: |
             # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
             out/build/linux-ci/_deps/*-src
             out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
       # As on Windows: no warning may come back (docs/build/README.md).
@@ -612,6 +648,19 @@ jobs:
         run: |
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
+
+      - name: Save dependencies
+        # Not by the nightly: it runs beside the pushes in another concurrency group, so an older commit's entry could
+        # be saved after a newer one and be the one the prune job keeps.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/linux-ci/_deps/*-src
+            out/build/linux-ci/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Report compiler cache
         if: always()
@@ -694,6 +743,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup .NET 10
+        id: dotnet
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
@@ -722,15 +772,17 @@ jobs:
           key: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
           restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
-      - name: Cache dependencies
-        uses: actions/cache@v6
+      - name: Restore dependencies
+        id: deps
+        # Named and saved as on Windows.
+        uses: actions/cache/restore@v6
         with:
           path: |
             # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
             out/build/macos-ci/_deps/*-src
             out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
       # As on Windows: no warning may come back (docs/build/README.md).
@@ -751,6 +803,17 @@ jobs:
         run: |
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
+
+      - name: Save dependencies
+        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/macos-ci/_deps/*-src
+            out/build/macos-ci/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Report compiler cache
         if: always()
@@ -814,9 +877,37 @@ jobs:
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  # A save under a new key leaves the older entries of that cache behind, e.g. a compiler cache for each main push.
+  # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
+  caches:
+    name: Prune caches
+    needs: [build-windows, build-linux, build-macos]
+    # PR runs save no cache.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      # The script and what it imports, without the game data; and no token left in .git/config, as this one can
+      # delete caches.
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - name: Delete older cache entries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_cache_prune.py
+
   required:
     name: CI Required
-    needs: [quality, build-windows, build-linux, build-macos]
+    # The prune job too: its failures and warning annotations count like a build's. Without it running, the caches
+    # fill up again and push main's entries out.
+    needs: [quality, build-windows, build-linux, build-macos, caches]
     if: always()
     runs-on: ubuntu-26.04
     permissions:

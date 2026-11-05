@@ -155,6 +155,12 @@ def step(job_body, job_name, step_name):
     return match.group(1) if match else ""
 
 
+def cache_paths(step_body):
+    """The lines of an actions/cache step's multi-line path input."""
+    match = re.search(r"(?ms)^          path: \|\n(.*?)(?=^          \w)", step_body)
+    return match.group(1) if match else ""
+
+
 def manifest(block, assignment):
     match = re.search(
         rf"(?ms)^\s*{re.escape(assignment)}\s*=\s*@?\((.*?)^\s*\)", block
@@ -258,8 +264,8 @@ jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
     job_names
-    == ["quality", "build-windows", "build-linux", "build-macos", "required", "release"],
-    "CI jobs must be quality, build-windows, build-linux, build-macos, required, "
+    == ["quality", "build-windows", "build-linux", "build-macos", "caches", "required", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, caches, required, "
     f"release; found {job_names}",
 )
 check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
@@ -310,7 +316,8 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
         f"{platform} must follow the tested build plan",
     )
     check("timeout-minutes: 90" in platform_job, f"{platform} must bound job duration")
-for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
+for required in ("name: CI Required", "if: always()",
+                 "needs: [quality, build-windows, build-linux, build-macos, caches]",
                  "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
     check(required in required_job, f"Required CI check missing {required}")
 # No warning may come back in the player builds (docs/build/README.md).
@@ -547,10 +554,11 @@ linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
 fork_ci = read_optional(FORK_CI_WORKFLOW)
 if fork_ci:
     linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
-    for windows_job in (native_job, job(fork_ci, "windows")):
+    for windows_job, vcpkg_step in ((native_job, "Restore vcpkg packages"),
+                                    (job(fork_ci, "windows"), "Cache vcpkg packages")):
         cache_key = step(windows_job, "windows", "Identify vcpkg toolchain")
         check("scripts/ci_vcpkg_cache_key.ps1" in cache_key, "Windows must identify its actual toolchain")
-        cache = step(windows_job, "windows", "Cache vcpkg packages")
+        cache = step(windows_job, "windows", vcpkg_step)
         for required in ("steps.vcpkg.outputs.identity", "toolchain-x64.cmake", "~/AppData/Local/vcpkg/archives"):
             check(required in cache, f"vcpkg cache missing {required}")
         check(
@@ -569,6 +577,65 @@ check(
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
+# PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
+# entries out of the repository's 10 GB. Each job's caches are saved by one kind of run on main: main pushes and the
+# nightly run side by side, so with both saving, an older commit's entry could be saved last and be the one the prune
+# job keeps.
+CACHE_SAVERS = {
+    "build-windows": "needs.quality.outputs.release == 'true'",
+    "build-linux": "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+    "build-macos": "needs.quality.outputs.release == 'true'",
+}
+for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
+    check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
+    for job_step in re.split(r"(?m)^      - name: ", job_body)[1:]:
+        if "uses: actions/cache/save@v6" in job_step:
+            check(f"if: {CACHE_SAVERS[job_name]} && steps." in job_step,
+                  f"{job_name} {job_step.splitlines()[0]} must save only in {CACHE_SAVERS[job_name]}")
+    cache_steps = [("Restore dependencies", "Save dependencies")]
+    if job_name == "build-windows":
+        cache_steps.append(("Restore vcpkg packages", "Save vcpkg packages"))
+    for restore_name, save_name in cache_steps:
+        restore = step(job_body, job_name, restore_name)
+        save = step(job_body, job_name, save_name)
+        restore_id = re.search(r"(?m)^        id: (\w+)$", restore)
+        check(restore_id is not None and "uses: actions/cache/restore@v6" in restore,
+              f"{job_name} {restore_name} must be a restore step with an id")
+        if restore_id is None:
+            continue
+        restore_id = restore_id.group(1)
+        for required in ("uses: actions/cache/save@v6", f"steps.{restore_id}.outputs.cache-hit != 'true'",
+                         f"key: ${{{{ steps.{restore_id}.outputs.cache-primary-key }}}}"):
+            check(required in save, f"{job_name} {save_name} must save on a miss, under the restored key: {required}")
+        check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
+              f"{job_name} {save_name} must save the paths {restore_name} restores")
+    # .nuget holds the NativeAOT compiler packages of the .NET SDK in use; a new SDK needs a new entry.
+    check("id: dotnet" in step(job_body, job_name, "Setup .NET 10")
+          and "steps.dotnet.outputs.dotnet-version" in step(job_body, job_name, "Restore dependencies"),
+          f"{job_name} must name the library cache after the .NET SDK version")
+# A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each
+# cache the build jobs restore by a key prefix.
+caches_job = job(ci, "caches")
+for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled()",
+                 "github.event_name != 'pull_request'", "actions: write", "python3 scripts/ci_cache_prune.py",
+                 "GH_TOKEN: ${{ github.token }}"):
+    check(required in caches_job, f"caches job must prune after the builds of runs on main: {required}")
+# Its checkout needs only the scripts, not the game data, and must not keep the token that can delete caches.
+for required in ("sparse-checkout: scripts", "persist-credentials: false"):
+    check(required in step(caches_job, "caches", "Checkout repository"),
+          f"caches job must check out only the scripts, without credentials: {required}")
+for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
+    check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
+sys.path.insert(0, str(ROOT / "scripts"))
+from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
+for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_job + linux_job + macos_job):
+    kind = restore_prefix.split("${{")[0]
+    check(kind in PRUNED_CACHE_KINDS, f"scripts/ci_cache_prune.py must prune the cache kind {kind}")
+    # A restore prefix that goes on after the kind (the compiler) reads only entries of that part, so the prune has
+    # to keep the newest entry of each.
+    check(("${{" in restore_prefix) == (kind in PRUNED_PER_COMPILER),
+          f"scripts/ci_cache_prune.py must keep the newest {kind} entry of each compiler exactly when the restore "
+          f"prefix names the compiler: {restore_prefix}")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))

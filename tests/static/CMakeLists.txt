@@ -26,6 +26,10 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_warning_scripts.py"
 )
 add_test(
+    NAME ci_cache_prune
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_cache_prune.py"
+)
+add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )

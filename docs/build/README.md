@@ -231,6 +231,38 @@ keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
 
+The library caches keep the downloaded library sources (`_deps/*-src`,
+`_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
+recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
+(which declares the libraries), `cmake/patches` and the ClientLibrary projects, and
+name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
+so a new entry is stored only when one of those changes, not with every new source
+file in `src/CMakeLists.txt`.
+
+PR runs only read the library and vcpkg caches, as they do the compiler caches:
+**Restore dependencies** and **Restore vcpkg packages** read them, and
+**Save dependencies** (after the build) and **Save vcpkg packages** (after the
+configure step) store them only in runs on main, when the exact key was missing. A
+PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
+past that, GitHub deletes the least recently used entries, which are main's Windows
+ones, used once a night. Each job's caches have one kind of run that saves them:
+main pushes for Linux, the nightly and manual release builds for macOS and Windows.
+Pushes and the nightly run side by side, so with both saving, an older commit's
+entry could be saved last and be the one the prune job keeps.
+
+A save under a new key leaves the older entries of that cache behind, such as a
+compiler cache for each main push. After the builds of a run on main, the
+**Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
+deletes all but the newest entry of each cache on main. The compiler caches keep
+the newest entry of each compiler: a job restores only entries of its own compiler,
+and while GitHub moves the runners to a new image, jobs land on both images. An
+entry a job read in the last 15 minutes is left for a later run, as that job may
+still be downloading it. It is the only job with a token that can delete caches.
+CI Required waits for it: a prune that fails or warns fails the run like a build,
+since without it the caches fill up again. A new cache that is restored by a
+key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that
+prefix names the compiler; the workflow contract test checks that.
+
 ### Download artifacts
 
 Actions expose builds through CI artifacts and two coordinated release streams:
