@@ -50,6 +50,15 @@ struct SetSoundStep
     std::vector<std::pair<size_t, size_t>> eventNames;
 };
 
+// A sound of a set that this window changed since the set was last saved or
+// read: as it was then and as this window left it, at its index then.
+struct SetSoundTurn
+{
+    size_t index = 0;
+    Data::Monsters::MonsterSound from;
+    Data::Monsters::MonsterSound to;
+};
+
 // A map object sound before and after.
 struct ObjectSoundStep
 {
@@ -160,9 +169,9 @@ private:
     void FollowTables();
     // In the folders and in the steps' folders.
     void RenameInFolders(const std::map<std::string, std::string>& renamed);
-    // Sets renamed in another window since (RenamedSets): the saved sets and
-    // the steps name them by their new names, and m_fileNames keeps their
-    // names in the file.
+    // Sets renamed in another window since (RenamedSets): the turns and the
+    // steps name them by their new names, and m_fileNames keeps their names
+    // in the file.
     void FollowRenamedSets(const std::map<std::string, std::string>& renamed);
     // The name in Data/Monsters/Sounds.json of the set that has `name` now.
     std::string FileNameOf(const std::string& name) const;
@@ -172,23 +181,30 @@ private:
     // Whether the folders' file names its sounds as the files of
     // m_savedTables do (m_foldersFileStale).
     void CheckFoldersFile();
+    // This window turned the set's sound at `index` from `from` into `to`
+    // (a change, an undo or a redo): the turn that left it as `from` goes on,
+    // or a new one starts; one back where it started goes.
+    void Turn(const std::string& set, size_t index, const Data::Monsters::MonsterSound& from,
+              const Data::Monsters::MonsterSound& to);
     // The sets this window changed, as Data/Monsters/Sounds.json has them now
     // (Revert): the Monster Sounds window's unsaved changes of them go too, a
     // set renamed there keeps its new name, and a set the file does not have
     // goes. False when the file could not be read or the monster tools
-    // refused a set (a problem in `issues`); the sets not put back are in
-    // `kept`, as m_savedSets has them.
+    // refused a set (a problem in `issues`); the turns of the sets not put
+    // back are in `kept`.
     bool RevertSets(std::vector<Data::Items::ItemDataIssue>& issues,
-                    std::map<std::string, Data::Monsters::MonsterSoundSet>& kept);
+                    std::map<std::string, std::vector<SetSoundTurn>>& kept);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;
     bool m_lastRefused = false;
     std::optional<std::vector<Data::Sounds::SoundFile>> m_savedCode;
-    // The sets changed since the last save, by their names now (a rename in
-    // another window follows), each as it was before the first change
-    // (IsModified, Save); Revert reads them from the file.
-    std::map<std::string, Data::Monsters::MonsterSoundSet> m_savedSets;
+    // The sounds this window changed in sets since the last save, by the
+    // sets' names now (a rename in another window follows): IsModified, and
+    // what Save writes into the file's sets, so the Monster Sounds window's
+    // unsaved changes of the same sets stay its own; Revert reads those sets
+    // from the file.
+    std::map<std::string, std::vector<SetSoundTurn>> m_setTurns;
     // The sets renamed in another window since the monster tools last wrote
     // or read their files as a whole (MonsterDataHandler::GetFilesVersion,
     // m_filesVersion): name now to the name in Data/Monsters/Sounds.json,

@@ -778,6 +778,80 @@ TEST_CASE("Sound Editor: Save writes the sets it changed into Data/Monsters/Soun
     CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 }
 
+TEST_CASE("Sound Editor: Save writes only the sounds it changed into a set, not the Monster Sounds window's unsaved "
+          "changes of the same set, and leaves a sound changed there too to that window [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    std::filesystem::create_directories("Data/Monsters");
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary)
+        << Data::Monsters::WriteMonsterSoundsJson(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    g_SoundEdits.TakeSaved();
+    const auto change = [](const char* key, const char* file)
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, key);
+        REQUIRE(row != nullptr);
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+        values.file = file;
+        REQUIRE(g_SoundEdits.Change(*row, values));
+    };
+    const auto fileSet = []
+    {
+        const std::vector<Data::Monsters::MonsterSoundSet> sets =
+            Data::Monsters::LoadMonsterSoundsFile(Data::Monsters::GetMonsterSoundsFile()).sets;
+        REQUIRE(sets.size() == 1);
+        return sets[0];
+    };
+
+    // Monster Sounds changes the event and the attack's channels, then this
+    // window gives the idle sound another file.
+    Data::Monsters::MonsterSoundSet edited = DeathTree();
+    edited.soundEvents[0].chance = Data::Monsters::MonsterSoundChance{4};
+    edited.sounds[1].channels = 3;
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", edited, -1));
+    change("set:Death Tree:Data/Sound/EditorTest/ok.wav", "Data/Sound/EditorTest/Other.wav");
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+    Data::Monsters::MonsterSoundSet expected = DeathTree();
+    expected.sounds[0].file = "Data/Sound/EditorTest/Other.wav";
+    expected.soundEvents[0].sounds = {"Data/Sound/EditorTest/Other.wav"};
+    CHECK(fileSet() == expected);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+
+    // The attack, which Monster Sounds changed and has not saved: Save leaves
+    // it to that window and says so; the window still says Not saved yet.
+    change("set:Death Tree:SOUND_MONSTER_MAGICSKULL1", "Data/Sound/EditorTest/ok.wav");
+    issues.clear();
+    CHECK_FALSE(g_SoundEdits.Save(issues));
+    CHECK(Data::Items::HasFatal(issues));
+    CHECK(fileSet() == expected);
+    CHECK(g_SoundEdits.IsModified());
+
+    // The monster tools save: the attack is in the file with this window's
+    // file, and nothing is left to save here.
+    issues.clear();
+    REQUIRE(g_MonsterEdits.Save(issues));
+    g_SoundEdits.FollowKeyChanges();
+    CHECK(fileSet().sounds[1].file == "Data/Sound/EditorTest/ok.wav");
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    // Monster Sounds changes a sound this window changed since: that window's
+    // to save, so this window writes nothing of it.
+    change("set:Death Tree:Data/Sound/EditorTest/Other.wav", "Data/Sound/EditorTest/ok.wav");
+    Data::Monsters::MonsterSoundSet over = *g_MonsterSoundSetDatabase.Find("Death Tree");
+    over.sounds[0].channels = 1;
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", over, -1));
+    const Data::Monsters::MonsterSoundSet before = fileSet();
+    issues.clear();
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK(fileSet() == before);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
 TEST_CASE("Sound Editor: undo of a map object sound puts back only that entry and keeps what the Map Editor's Sounds "
           "tab changed since, and an entry changed there is not undone [sounds][editor]")
 {
