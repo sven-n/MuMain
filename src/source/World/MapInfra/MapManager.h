@@ -69,6 +69,10 @@ enum ENUM_WORLD
     NUM_WD
 };
 
+// Devil Square 5-7: a map number the server sends that is no world of its
+// own; the client loads it as Devil Square (WD_9DEVILSQUARE).
+constexpr int SecondDevilSquareMapId = 32;
+
 class CMapManager
 {
 public:
@@ -83,17 +87,48 @@ public:
     bool InHellas(int iMap = -1);
     bool InHiddenHellas(int iMap = -1);
     bool IsPKField();
-    bool IsCursedTemple();
+    bool IsCursedTemple(int iMap = -1);
     bool IsEmpireGuardian1();
     bool IsEmpireGuardian2();
     bool IsEmpireGuardian3();
     bool IsEmpireGuardian4();
     bool IsEmpireGuardian();
     bool InBattleCastle(int iMap = -1);
+    const wchar_t* FindMapName(int iMap);
     const wchar_t* GetMapName(int iMap);
+
+    // The hero's map as the server names it (monsters design, D67): WorldActive
+    // becomes the world the client loads for it, Devil Square (9) for Devil
+    // Square 5-7 (32). LoadWorld calls it.
+    void SetServerMap(int serverMap);
+    // The server's number of the hero's map, which data that names maps uses:
+    // WorldActive, but 32 in Devil Square 5-7. Where WorldActive was set alone
+    // (the tests, the photo viewer), WorldActive.
+    int GetServerMap() const;
+    // Whether the hero is on this server map already: a packet that moves the
+    // hero loads the world only when not. Not WorldActive == serverMap: Devil
+    // Square 5-7 (32) is loaded as world 9, the world of Devil Square 1-4.
+    bool IsServerMapLoaded(int serverMap) const;
+    // The stage the server sent with the map (OpenMU's discriminator, monsters
+    // design, D67): the stage of Devil Square, 1 to 7; 0 when it sent none.
+    // Where WorldActive was set alone, 0.
+    void SetServerStage(int stage);
+    int GetServerStage() const;
+    // The world the client loads for a server map.
+    static int GetLoadedWorld(int serverMap);
+    // The number n of the Data/World<n> and Data/Object<n> folders a server map
+    // loads: one for all rounds of Blood Castle, Chaos Castle, Kalima, Illusion
+    // Temple and Devil Square.
+    int GetFilesFolder(int serverMap);
 
 public:
     int WorldActive;
+
+private:
+    int m_serverMap = -1;
+    int m_serverStage = 0;
+    // WorldActive when SetServerMap ran.
+    int m_serverMapWorld = -1;
 };
 
 extern CMapManager gMapManager;

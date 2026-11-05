@@ -2,8 +2,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "GameLogic/Social/MonkSystem.h"
+#include "Core/Utilities/Fnv1aHash.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -63,7 +65,7 @@ void CMonkSystem::Init()
 {
     m_mapItemEqualType.clear();
     m_subItemModels.clear();
-    memset(&m_cItemEqualType, 0, sizeof(CItemEqualType));
+    m_cItemEqualType = CItemEqualType();
     m_listGloveformSword.clear();
 
     InitEffectOnce();
@@ -247,16 +249,85 @@ bool CMonkSystem::IsSwordformGloves(int _Type)
     return false;
 }
 
-void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
+std::uint64_t CDummyUnit::StateHash() const
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
-    w->LinkBone = _Hand ? 37 : 28;
-    RenderLinkObject(_Hand ? 100.f : 80.f, 10.0, -75.0, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1);
+    Fnv1aHash hash;
+    for (const vec_t* vector : {m_vPosition, m_vStartPosition, m_vTargetPosition, m_vDirection})
+    {
+        for (int k = 0; k < 3; ++k)
+            hash.Add(vector[k]);
+    }
+    for (const float value : {m_fDisFrame, m_fAniFrame, m_fAlpha, m_fAniFrameSpeed})
+        hash.Add(value);
+    return hash.Value();
 }
 
-void CMonkSystem::RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)
+std::uint64_t CMonkSystem::DarksideStateHash() const
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
+    Fnv1aHash hash;
+    hash.Add(m_nRepeatedlyCnt);
+    for (const DamageInfo& damage : m_arrRepeatedly)
+    {
+        hash.Add(damage.m_Damage);
+        hash.Add(damage.m_DamageType);
+        hash.Add(damage.m_Double);
+    }
+    hash.Add(m_nDarksideCnt);
+    for (const WORD index : m_DarksideIndex)
+        hash.Add(index);
+    for (const int target : m_DarkTargetIndex)
+        hash.Add(target);
+    for (const float value :
+         {m_fFirstFrame, m_fSecondFrame, m_fDistanceFrame, m_fOtherAniFrame, m_fDistanceNextFrame, m_fDummyAniFrame})
+        hash.Add(value);
+    hash.Add(m_btAttState);
+    hash.Add(m_nDarksideEffectTotal);
+    hash.Add(m_nDarksideEffectAttCnt);
+    hash.Add(m_bDarkSideEffOnce);
+    hash.Add(m_bDarkSideEffOnce2);
+    hash.Add(m_nDummyIndex);
+    hash.Add(m_CDummyUnit.StateHash());
+    hash.Add(m_tmDummyUnit.size());
+    for (const auto& [key, dummy] : m_tmDummyUnit)
+    {
+        hash.Add(key);
+        hash.Add(dummy.StateHash());
+    }
+    hash.Add(m_bUseEffectOnce);
+    hash.Add(m_nLowerEffCnt);
+    for (const auto& [character, parts] : m_DarksideParts)
+    {
+        hash.Add(character);
+        for (const auto& [part, placements] : parts)
+        {
+            hash.Add(part);
+            for (const DarksidePlacement& placement : placements)
+            {
+                for (int k = 0; k < 3; ++k)
+                {
+                    hash.Add(placement.position[k]);
+                    hash.Add(placement.startPosition[k]);
+                    hash.Add(placement.angle[k]);
+                }
+                hash.Add(placement.alpha);
+                hash.Add(placement.animationFrame);
+            }
+        }
+    }
+    return hash.Value();
+}
+
+void CMonkSystem::RenderPhoenixGloves(const CHARACTER* _pCha, BYTE _Hand)
+{
+    const PART_t* w = &_pCha->Weapon[_Hand];
+    const LinkOffset at = PhoenixGloveOffset(_Hand);
+    RenderLinkObject(at.x, at.y, at.z, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1, PhoenixGloveBone(_Hand));
+}
+
+void CMonkSystem::RenderSwordformGloves(const CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha,
+                                        bool _Translate, int _Select)
+{
+    const PART_t* w = &_pCha->Weapon[_Hand];
     RenderPartObject(&_pCha->Object, ModifyTypeSwordformGloves(_ModelType, _Hand), w, _pCha->Light, _Alpha, w->Level, w->ExcellentFlags, w->AncientDiscriminator, false, false, _Translate, _Select);
 }
 
@@ -494,7 +565,7 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
     return false;
 }
 
-bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
+bool CMonkSystem::RageFighterEffect(const OBJECT* _pObj, int _Type)
 {
     BMD* b = &Models[_Type];
     if (_pObj->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)
@@ -504,7 +575,6 @@ bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
         int _nAniKey = Models[_pObj->Type].Actions[PLAYER_SKILL_DARKSIDE_READY].NumAnimationKeys;
         float _nRoop = (float)(180.0f / _nAniKey) * _pObj->AnimationFrame + 180.0f;
         fAlpha = sinf(_nRoop * Q_PI / 180) * 0.7f + 1.0f;
-        _pObj->Angle[2] = 45.0f;
         b->RenderBody(RENDER_TEXTURE, fAlpha, _pObj->BlendMesh, _pObj->BlendMeshLight, _pObj->BlendMeshTexCoordU, _pObj->BlendMeshTexCoordV);
         return true;
     }
@@ -703,11 +773,22 @@ bool CMonkSystem::CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAn
     return false;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select)
+// One Dark Side step, as each of its draws took one: it moves the dash and the afterimages, spawns their effects and
+// keeps where it placed the character.
+void CMonkSystem::StepDarkside(CHARACTER* pCha, std::vector<DarksidePlacement>& placed)
 {
     OBJECT* pObj = &pCha->Object;
     float fAnimationFrame = pObj->AnimationFrame;
-    int Type = pPart->Type;
+    const auto placement = [pObj]
+    {
+        DarksidePlacement at{};
+        VectorCopy(pObj->Position, at.position);
+        VectorCopy(pObj->StartPosition, at.startPosition);
+        VectorCopy(pObj->Angle, at.angle);
+        at.alpha = pObj->Alpha;
+        at.animationFrame = pObj->AnimationFrame;
+        return at;
+    };
 
     vec3_t vPos, vStartPos, vOrgPos, vOrgAngle;
     unsigned short OrgCurrentAction;
@@ -767,8 +848,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
         pObj->AnimationFrame = m_fOtherAniFrame;
         pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-        Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+        placed.push_back(placement());
     }
 
     if (m_nDarksideCnt > 0)
@@ -836,8 +916,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
                 pObj->AnimationFrame = m_fDummyAniFrame;
                 pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-                Calc_ObjectAnimation(pObj, Translate, Select);
-                RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+                placed.push_back(placement());
             }
         }
     }
@@ -848,14 +927,79 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
     VectorCopy(vOrgPos, pObj->Position);
     VectorCopy(vStartPos, pObj->StartPosition);
     VectorCopy(vOrgAngle, pObj->Angle);
-    Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+}
+void CMonkSystem::UpdateDarkside(CHARACTER* pCha, const std::vector<PART_t*>& parts)
+{
+    if (parts.empty())
+    {
+        m_DarksideParts.erase(pCha);
+        return;
+    }
+
+    DarksideParts& drawn = m_DarksideParts[pCha];
+    if (REFERENCE_FRAME_STEP > 0)
+        drawn.clear();
+    for (int step = 0; step < REFERENCE_FRAME_STEP; ++step)
+    {
+        for (PART_t* part : parts)
+        {
+            std::vector<DarksidePlacement> placed;
+            StepDarkside(pCha, placed);
+            if (step == REFERENCE_FRAME_STEP - 1)
+                drawn.emplace_back(part, std::move(placed));
+        }
+    }
+}
+
+const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacementsOf(const CHARACTER* pCha,
+                                                                                     const PART_t* pPart) const
+{
+    const auto character = m_DarksideParts.find(pCha);
+    if (character == m_DarksideParts.end())
+        return nullptr;
+    for (const auto& [part, placements] : character->second)
+    {
+        if (part == pPart)
+            return &placements;
+    }
+    return nullptr;
+}
+
+void CMonkSystem::DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate,
+                                    int Select, const PART_t* key)
+{
+    const OBJECT* pObj = &pCha->Object;
+    const int Type = pPart->Type;
+    const auto render = [&]
+    {
+        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+                         pPart->AncientDiscriminator, false, false, Translate, Select);
+    };
+
+    if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, key != nullptr ? key : pPart))
+    {
+        // Each placement is drawn from a copy of the character, posed for it; the character stays as it stands.
+        OBJECT ghost = *pObj;
+        const Random::DrawnAs drawnAs(&ghost, pObj);
+        for (const DarksidePlacement& at : *placements)
+        {
+            VectorCopy(at.position, ghost.Position);
+            VectorCopy(at.startPosition, ghost.StartPosition);
+            VectorCopy(at.angle, ghost.Angle);
+            ghost.Alpha = at.alpha;
+            ghost.AnimationFrame = at.animationFrame;
+            ghost.CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
+            Calc_ObjectAnimation(&ghost, Translate, Select);
+            RenderPartObject(&ghost, Type, pPart, light, ghost.Alpha, pPart->Level, pPart->ExcellentFlags,
+                             pPart->AncientDiscriminator, false, false, Translate, Select);
+        }
+    }
+    render();
 }
 
 void CMonkSystem::InitDummyCal()
 {
     m_tmDummyUnit.clear();
-    memset(&m_tmDummyUnit, 0, sizeof(CDummyUnit) * m_tmDummyUnit.size());
     m_nDummyIndex = 0;
 }
 
@@ -935,7 +1079,7 @@ bool CMonkSystem::IsConsecutiveAtt(float _fAttFrame)
     return false;
 }
 
-void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
+void CMonkSystem::CreateRepeatedDamagePoints(int _Key, OBJECT* pObj)
 {
     vec3_t Position, Light, Light2;
     VectorCopy(pObj->Position, Position);
@@ -1003,7 +1147,7 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
         }
 
         Position[1] += (_index % 2 == 0) ? -40.0f : 40.0f;
-        Position[2] -= (rand() % 10 + 15.0f);
+        Position[2] -= (Random::Rand() % 10 + 15.0f);
     }
     m_nRepeatedlyCnt = 0;
 }

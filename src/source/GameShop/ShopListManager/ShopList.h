@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <iosfwd>
+#include <string>
+
 #include "ShopPackage.h"
 #include "ShopProduct.h"
 
@@ -48,5 +51,7 @@ private:
     CShopProductList* m_ProductListPtr;
 
     FILE_ENCODE IsFileEncodingUtf8(const wchar_t* szFilePath);
+    // The next line of a script in the encoding, without its line break and byte order mark; false at the end.
+    bool ReadLine(std::istream& stream, FILE_ENCODE encode, std::wstring& line);
     std::wstring GetDecodedString(const char* buffer, FILE_ENCODE encode);
 };

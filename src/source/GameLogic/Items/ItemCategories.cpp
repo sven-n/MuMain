@@ -122,11 +122,6 @@ namespace GameLogic::Items
         return HasTag(pItem, ItemTag::GuardianPet);
     }
 
-    bool IsDemonOrSpiritOfGuardianType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::GuardianPet);
-    }
-
     bool IsDemonOrSpiritOfGuardianModel(int modelType)
     {
         return HasTag(Data::Items::ToItemType(modelType), ItemTag::GuardianPet);
@@ -252,19 +247,9 @@ namespace GameLogic::Items
         return HasTag(pItem, ItemTag::BuffScroll);
     }
 
-    bool IsBuffScrollType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::BuffScroll);
-    }
-
     bool IsBattleOrStrengthScroll(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::BattleOrStrengthScroll);
-    }
-
-    bool IsBattleOrStrengthScrollType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::BattleOrStrengthScroll);
     }
 
     bool IsAmmunition(const ITEM* pItem)
@@ -305,11 +290,6 @@ namespace GameLogic::Items
     bool IsGambleItem(const ITEM* pItem)
     {
         return HasTag(pItem, ItemTag::GambleItem);
-    }
-
-    bool IsGambleItemType(int itemType)
-    {
-        return HasTag(itemType, ItemTag::GambleItem);
     }
 
     bool IsGambleItemModel(int modelType)

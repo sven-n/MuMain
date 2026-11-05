@@ -1,0 +1,30 @@
+/* Classic rows of the Golden Archer's Rena window, after the current client's Rena page: the
+   title in its box, the explanation from y 50, "Collected" and "Registered" each on a Level_box
+   (75x21, the second mirrored) at y 115 with their counts under them (the registered one in
+   (204, 153, 0)), Register at y 165 and the closing notice from y 215. */
+
+.entry-text:nth-child(1) { left: 35px; top: 12px; width: 120px; color: #e6e6e6; font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 50px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(3) { left: 0px; top: 65px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(4) { left: 0px; top: 80px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(5) { left: 13px; top: 115px; width: 75px; height: 21px; decorator: image(gb-classic-box); color: rgb(255, 230, 210); }
+.entry-text:nth-child(6) { left: 13px; top: 140px; width: 75px; color: #ffffff; }
+.entry-text:nth-child(7) { left: 102px; top: 115px; width: 75px; height: 21px; decorator: image(gb-classic-box flip-horizontal); color: rgb(255, 230, 210); }
+.entry-text:nth-child(8) { left: 102px; top: 140px; width: 75px; color: rgb(204, 153, 0); }
+.entry-text:nth-child(9) { left: 0px; top: 215px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(10) { left: 0px; top: 230px; color: rgb(255, 230, 210); }
+
+.entry-btn:nth-child(1) { top: 165px; }
+
+/* The captions are the current client's (texts 884 / 885, centred on the box). MuMain's own
+   captions ("Number of Rena you have", ...) are far wider than the 75-unit boxes and run into
+   each other, so they are hidden and the short ones drawn on the plates instead. */
+.entry-text:nth-child(5) .sharp-text, .entry-text:nth-child(7) .sharp-text { visibility: hidden; }
+.entry-text:nth-child(5) { font-size: 8px; decorator: text("Collected Renas" #ffe6d2 center center), image(gb-classic-box); }
+.entry-text:nth-child(7) { font-size: 8px; decorator: text("Registered Renas" #ffe6d2 center center), image(gb-classic-box flip-horizontal); }
+
+/* Where C++ draws the live 3D Rena (legacy's .entry-item-box, which this copy predated): 20x20,
+   just left of each count's "X". */
+.entry-item-box { position: absolute; width: 20px; height: 20px; pointer-events: none; }
+#entry_item_box_1 { left: 22px; top: 136px; }
+#entry_item_box_2 { left: 111px; top: 136px; }

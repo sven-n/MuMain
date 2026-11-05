@@ -98,7 +98,7 @@ constexpr const char* LightMoodFile = "Data/Maps/LightMood.json";
 
 // Reads the moods of the file into `data`. One invalid value makes the whole
 // file unusable: `data` is then left Classic (every value 1) and `issues`
-// has errors (Items::HasErrors).
+// has fatal problems (Items::HasFatal).
 void ReadLightMoodJson(std::string_view text, const std::string& source, LightMoodData& data,
                        std::vector<Items::ItemDataIssue>& issues);
 

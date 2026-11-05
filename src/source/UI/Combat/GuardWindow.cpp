@@ -244,6 +244,17 @@ void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
             }
         }
         break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case CASTLESIEGE_STATE_NONE:
+    case CASTLESIEGE_STATE_IDLE_1:
+    case CASTLESIEGE_STATE_IDLE_2:
+    case CASTLESIEGE_STATE_IDLE_3:
+    case CASTLESIEGE_STATE_NOTIFY:
+    case CASTLESIEGE_STATE_READYSIEGE:
+    case CASTLESIEGE_STATE_STARTSIEGE:
+    case CASTLESIEGE_STATE_ENDSIEGE:
+    case CASTLESIEGE_STATE_ENDCYCLE:
+        break;
     }
 }
 

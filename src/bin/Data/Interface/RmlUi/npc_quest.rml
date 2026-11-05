@@ -25,7 +25,8 @@
 		</div>
 		<!-- The live 3D quest-condition items, drawn by C++ beside their rows over the frame. -->
 		<img id="nq_item" class="nq-item"/>
-		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{npc_name}}</span>
+		<!-- .with-quest-title lets a theme place the name by whether the quest title shows under it. -->
+		<span class="sharp-text" id="title" data-class-with-quest-title="show_quest_title" data-style-font-size="text_px + 'px'">{{npc_name}}</span>
 		<div class="sharp-text nq-quest-title" data-class-hidden="!show_quest_title" data-style-font-size="text_px + 'px'">{{quest_title}}</div>
 
 		<div class="nq-divider" data-class-hidden="!show_conditions"></div>

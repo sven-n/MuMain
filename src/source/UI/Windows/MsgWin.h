@@ -103,6 +103,7 @@ private:
         bool modeOkOnly = false;
         bool modeBoth = false;
         bool modeInput = false;
+        bool ownCaptions = false; // the buttons say more than OK/Cancel; themes draw them as text
         Rml::String okLabel, cancelLabel;
 
         // MWT_STR_INPUT's resident-password entry, two-way bound to #msgwin_input. RmlUi owns the

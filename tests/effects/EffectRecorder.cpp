@@ -58,6 +58,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 #define RECORDER_OBJECT_FIELDS(F)                                                                                    \
     F(Live) F(bBillBoard) F(m_bCollisionCheck) F(m_bRenderShadow) F(EnableShadow) F(LightEnable) F(m_bActionStart)   \
     F(m_bRenderAfterCharacter) F(Visible) F(AlphaEnable) F(EnableBoneMatrix) F(ContrastEnable) F(ChromeEnable)       \
+    F(OwnsBoneTransform)                                                                                             \
     F(AI) F(CurrentAction) F(PriorAction) F(ExtState) F(Teleport) F(Kind) F(Skill) F(m_byNumCloth)                   \
     F(m_byHurtByDeathstab) F(WeaponLevel) F(DamageTime) F(m_byBuildTime) F(m_bySkillCount) F(m_bySkillSerialNum)     \
     F(Block) F(m_pCloth) F(ScreenX) F(ScreenY) F(Weapon) F(Type) F(SubType) F(m_iAnimation) F(HiddenMesh)            \
@@ -66,8 +67,11 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
     F(CollisionRange) F(ShadowScale) F(Gravity) F(Distance) F(AnimationFrame) F(PriorAnimationFrame)                 \
     F(AlphaTarget) F(Alpha) F(LastHorseWaveEffect) F(PKKey) F(Light) F(Direction) F(m_vPosSword) F(StartPosition)    \
     F(BoundingBoxMin) F(BoundingBoxMax) F(m_vDownAngle) F(m_vDeadPosition) F(Position) F(Angle) F(HeadAngle)         \
-    F(HeadTargetAngle) F(EyeLeft) F(EyeRight) F(EyeLeft2) F(EyeRight2) F(EyeLeft3) F(EyeRight3) F(Matrix)            \
-    F(BoneTransform) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior) F(Next) F(m_BuffMap)   \
+    F(HeadTargetAngle) F(EyeLeft) F(EyeRight) F(EyeLeft2) F(EyeRight2) F(EyeLeft3) F(EyeRight3) F(SetTrailLeft) F(SetTrailRight) F(Matrix)            \
+    F(BoneTransform) F(Pose.Type) F(Pose.CurrentAction) F(Pose.PriorAction) F(Pose.AnimationFrame)                   \
+    F(Pose.PriorAnimationFrame) F(Pose.Angle) F(Pose.HeadAngle) F(Pose.World) F(Pose.Origin) F(Pose.Scale)           \
+    F(Pose.Height) F(DrawnFrame) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior)            \
+    F(Next) F(m_BuffMap)                                                                                             \
     F(m_sTargetIndex) F(m_bpcroom) F(m_v3PrePos1) F(m_v3PrePos2) F(m_Interpolates)
 
 #define RECORDER_PARTICLE_FIELDS(F)                                                                                  \
@@ -88,7 +92,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 // Windows build without iterator debugging (OBJECT holds a std::map and
 // std::vectors, whose size depends on it).
 #if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
-static_assert(sizeof(OBJECT) == 680, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
+static_assert(sizeof(OBJECT) == 776, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
 static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
 static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
 #endif
@@ -931,9 +935,9 @@ void CompareArray(Record& record, const char* name, const vec3_t after, const st
 // How many values a generator gave since it was seeded: the next two values
 // after the call are searched for in the seeded sequence; "more than N" when
 // the call drew more than the limit. The same draws give the same count on
-// every platform, but rand() and the distributions give other values per
-// standard library, so a case whose number of draws depends on a drawn value
-// can count differently elsewhere.
+// every platform. Random::Rand() gives the same values everywhere, but the
+// distributions give other values per standard library, so a case whose number
+// of draws depends on a value they drew can count differently elsewhere.
 constexpr int DrawLimit = 100000;
 
 template <typename Reseed, typename Draw> std::string CountDraws(Reseed reseed, Draw draw)
@@ -954,7 +958,7 @@ template <typename Reseed, typename Draw> std::string CountDraws(Reseed reseed, 
 
 std::string CountRandDraws()
 {
-    return CountDraws([] { std::srand(RecordSeed); }, [] { return std::rand(); });
+    return CountDraws([] { Random::SeedRand(RecordSeed); }, [] { return Random::Rand(); });
 }
 
 // RangeInt over 2^31 values takes exactly one value of the 32-bit engine on
@@ -1042,7 +1046,7 @@ Record RecordCall(const EffectCall& call, const Conditions& conditions)
     vec3_t position{call.position[0], call.position[1], call.position[2]};
     vec3_t angle{call.angle[0], call.angle[1], call.angle[2]};
     vec3_t light{call.light[0], call.light[1], call.light[2]};
-    std::srand(RecordSeed);
+    Random::SeedRand(RecordSeed);
     Random::Seed(RecordSeed);
     CreateEffect(call.type, position, angle, light, call.subType, OwnerObject(call.owner), call.pkKey, call.skillIndex,
                  call.skill, call.skillSerialNum, call.scale, call.targetIndex);

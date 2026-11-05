@@ -34,18 +34,19 @@ namespace
 {
 constexpr float NameWidth = 260.0f;
 
+// An item, or an entry without a name: its English name makes it an item.
 std::optional<ItemDefinition> LoadItem(int itemType)
 {
-    const ItemDefinition* item = g_ItemDatabase.Find(itemType);
-    return item != nullptr ? std::optional<ItemDefinition>(*item) : std::nullopt;
+    const ItemDefinition* entry = g_ItemDatabase.FindEntry(itemType);
+    return entry != nullptr ? std::optional<ItemDefinition>(*entry) : std::nullopt;
 }
 
 // What refuses the English name the draft changed: empty, or with the
 // separator the save refuses. An item without an English name (from a bmd
-// import) can still be edited.
+// import) and an entry without a name can still be edited.
 const char* RefuseEnglishName(const ItemDefinition& item)
 {
-    const ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(item.group, item.number));
+    const ItemDefinition* stored = g_ItemDatabase.FindEntry(item.group, item.number);
     const std::string& english = item.names.GetNeutral();
     if (stored != nullptr && stored->names.GetNeutral() == english)
     {
@@ -205,13 +206,13 @@ void CMuItemBasicsUI::RenderStats(ItemDefinition& item)
     Fields::Byte(m_draft, I18N::Metadata::Durability, item.durability);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::MagicDurability, item.magicDurability);
-    Fields::Byte(m_draft, I18N::Metadata::MinDamage, item.damageMin);
+    Fields::Word(m_draft, I18N::Metadata::MinDamage, item.damageMin);
     ImGui::SameLine();
-    Fields::Byte(m_draft, I18N::Metadata::MaxDamage, item.damageMax);
+    Fields::Word(m_draft, I18N::Metadata::MaxDamage, item.damageMax);
     Fields::Byte(m_draft, I18N::Metadata::AttackSpeed, item.attackSpeed);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::MoveSpeed, item.walkSpeed);
-    Fields::Byte(m_draft, I18N::Metadata::MagicPower, item.magicPower);
+    Fields::Word(m_draft, I18N::Metadata::MagicPower, item.magicPower);
     ImGui::SameLine();
     Fields::Byte(m_draft, I18N::Metadata::AttackType, item.attackType);
     Fields::Byte(m_draft, I18N::Metadata::Defense, item.defense);

@@ -34,9 +34,6 @@
 #include "Render/Text/CUIRenderText.h"
 
 extern  bool    SkillEnable;
-extern	wchar_t TextList[50][100];
-extern	int     TextListColor[50];
-extern	int     TextBold[50];
 extern  int     CheckX;
 extern  int     CheckY;
 extern  int     CheckSkill;
@@ -48,6 +45,26 @@ namespace
     constexpr std::size_t kTooltipBufferCapacity = 100;
     constexpr int kPetCommandCount = AT_PET_COMMAND_END - AT_PET_COMMAND_DEFAULT;
     constexpr int kTooltipLineLimit = 50;
+
+    // The pet command names, in PET_COMMAND order.
+    const wchar_t* const* const kPetCommandNames[] = {
+        &I18N::Game::BasicAction,
+        &I18N::Game::RandomAutomaticAttack,
+        &I18N::Game::AttackWithOwner,
+        &I18N::Game::AttackTarget,
+    };
+    static_assert(std::size(kPetCommandNames) == PET_CMD_END, "one name per pet command");
+
+    // The name of pet command `command` (a PET_COMMAND); empty for any other number.
+    const wchar_t* GetPetCommandName(int command)
+    {
+        if (command < PET_CMD_DEFAULT || command >= PET_CMD_END)
+        {
+            return L"";
+        }
+
+        return *kPetCommandNames[command];
+    }
 
     std::wstring SanitizeWideStringFormat(const wchar_t* format)
     {
@@ -151,7 +168,7 @@ namespace
         return CInput::Instance().IsKeyDown(virtualKey);
     }
 
-    CSPetSystem* ResolvePetSystem(CHARACTER* character)
+    CSPetSystem* ResolvePetSystem(const CHARACTER* character)
     {
         return HasActivePet(character) ? static_cast<CSPetSystem*>(character->m_pPet) : nullptr;
     }
@@ -208,22 +225,32 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
-    void RenderPet(CHARACTER* c)
+    void CullPet(CHARACTER* c)
+    {
+        if (auto* petSystem = ResolvePetSystem(c))
+            petSystem->CullPet();
+    }
+
+    void RenderPet(const CHARACTER* c)
+    {
+        const OBJECT* o = &c->Object;
+        if (auto* petSystem = ResolvePetSystem(c))
+        {
+            petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking) ? 10 : 0);
+        }
+    }
+
+    void UpdatePetEffects(CHARACTER* c)
     {
         OBJECT* o = &c->Object;
         if (auto* petSystem = ResolvePetSystem(c))
         {
-            if (g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                petSystem->RenderPet(10);
-            }
-            else
+            if (!g_isCharacterBuff(o, eBuff_Cloaking))
             {
                 ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-                PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
-                petSystem->SetPetInfo(pPetInfo);
-                petSystem->RenderPet();
+                petSystem->SetPetInfo(giPetManager::GetPetInfo(pEquipmentItemSlot));
             }
+            petSystem->UpdatePetEffects();
         }
     }
 
@@ -369,7 +396,7 @@ static std::uint8_t g_tabBar = 0;
             ++outModel.skipCount;
         };
 
-        pushLine(I18N::Game::Lookup(1219 + cmdType), LineColor::Blue, true, false);
+        pushLine(GetPetCommandName(cmdType), LineColor::Blue, true, false);
         pushLine(L"\n", LineColor::White, false, true);
         pushLine(L"\n", LineColor::White, false, true);
 
@@ -510,7 +537,7 @@ static std::uint8_t g_tabBar = 0;
         std::memcpy(&gs_PetInfo, pPetinfo, sizeof(PET_INFO));
     }
 
-    PET_INFO* GetPetInfo(ITEM* pItem)
+    PET_INFO* GetPetInfo(const ITEM* pItem)
     {
         if (pItem == &CharacterMachine->Equipment[EQUIPMENT_HELPER])
         {
@@ -601,7 +628,7 @@ static std::uint8_t g_tabBar = 0;
         return gold;
     }
 
-    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* pItem, int iInvenType)
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* pItem, int iInvenType)
     {
         PET_INFO* pPetInfo = GetPetInfo(pItem);
 
@@ -754,10 +781,12 @@ static std::uint8_t g_tabBar = 0;
         const int ownershipColor = (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD) ? TEXT_COLOR_WHITE : TEXT_COLOR_DARKRED;
         appendLine(ownershipColor, false, true, ownershipFormat.c_str(), I18N::Game::DarkLord);
 
-        for (int i = 0; i < pItem->SpecialNum; ++i)
+        // The defense option a Dark Horse gives is shown from a copy; the tooltip leaves the item as it is.
+        ITEM shown = *pItem;
+        SetPetItemConvert(&shown, &gs_PetInfo);
+        for (int i = 0; i < shown.SpecialNum; ++i)
         {
-            SetPetItemConvert(pItem, &gs_PetInfo);
-            GetSpecialOptionText(pItem->Type, TextList[TextNum], pItem->Special[i], pItem->SpecialValue[i], 0);
+            GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             ++TextNum;

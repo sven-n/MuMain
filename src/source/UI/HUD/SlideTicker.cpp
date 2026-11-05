@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/HUD/SlideTicker.h"
+#include "Data/DataHandler/DataFileIO.h"
 
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Text/CUIRenderText.h"
@@ -505,9 +507,14 @@ void SlideTicker::OpenSlideTextFile(const wchar_t* szFileName)
     }
 
     SLIDEHELP SlideHelp;
-    fread(&SlideHelp, sizeof(SLIDEHELP), 1, fp);
-    BuxConvert((BYTE*)&SlideHelp, sizeof(SLIDEHELP));
+    const bool complete = DataFileIO::ReadExact(fp, &SlideHelp, sizeof(SLIDEHELP));
     fclose(fp);
+    if (!complete)
+    {
+        DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+        return;
+    }
+    BuxConvert(reinterpret_cast<BYTE*>(&SlideHelp), sizeof(SLIDEHELP));
 
     SetCreateDelay(SlideHelp.iCreateDelay);
     m_fHelpSlideSpeed = SlideHelp.fSpeed;
@@ -559,7 +566,7 @@ const wchar_t* SlideTicker::GetSlideText(int iLevel)
     if (iHelpType == -1) return nullptr;
     if (m_iTextNumber[iHelpType] == 0) return nullptr;
 
-    int iRandom = rand() % m_iTextNumber[iHelpType];
+    int iRandom = Random::Rand() % m_iTextNumber[iHelpType];
 
     if ((unsigned int)iRandom >= m_SlideTextList[iHelpType].size()) return nullptr;
 

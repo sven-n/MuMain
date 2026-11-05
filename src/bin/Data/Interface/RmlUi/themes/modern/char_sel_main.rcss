@@ -25,18 +25,22 @@
 .btn-icon {
 	bottom: 25dp;
 }
+
+.btn-icon-item { font-size: 9dp; }
+.btn-icon-caption { width: 54dp; font-size: 1em; }
+
 #btn_create { left: 22dp; }
 #btn_menu   { left: 77dp; }
 #btn_connect { right: 77dp; }
 #btn_delete  { right: 22dp; }
 
-/* Each caption's left/right is its button's value minus 9dp ((72-54)/2) -- centers the wider
-   caption on the button above it. #btn_x_item is used only as a CSS scope (unstyled,
-   position:static), not a positioning context. */
-#btn_create_item .btn-icon-caption  { left: 13dp; bottom: 11dp; }
-#btn_menu_item .btn-icon-caption    { left: 68dp; bottom: 11dp; }
-#btn_connect_item .btn-icon-caption { right: 68dp; bottom: 11dp; }
-#btn_delete_item .btn-icon-caption  { right: 13dp; bottom: 11dp; }
+/* Captions match their buttons' 54dp width and position, so neighbouring translated labels never
+   share horizontal space. #btn_x_item is used only as a CSS scope (unstyled, position:static), not
+   a positioning context. */
+#btn_create_item .btn-icon-caption  { left: 22dp; bottom: 11dp; }
+#btn_menu_item .btn-icon-caption    { left: 77dp; bottom: 11dp; }
+#btn_connect_item .btn-icon-caption { right: 77dp; bottom: 11dp; }
+#btn_delete_item .btn-icon-caption  { right: 22dp; bottom: 11dp; }
 
 /* font-family/size redeclared directly here (not inherited from #panel) -- this document's
    data-model bindings make inheritance silently fail for this text in this RmlUi build. */

@@ -100,6 +100,7 @@ void CItemAddDialog::OpenAdd(int templateItemType)
     m_width = 1;
     m_height = 1;
     m_slot = Data::Items::ItemSlot::None;
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -118,6 +119,7 @@ void CItemAddDialog::OpenDuplicate(int sourceItemType)
     m_number = GetNextFreeItemNumber(m_group, Data::Items::GetItemNumber(sourceItemType));
     m_name = source->names.GetNeutral();
     m_shareModel = true;
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -176,9 +178,11 @@ void CItemAddDialog::RenderNumber()
     {
         m_number = GetNextFreeItemNumber(m_group, m_number + 1);
     }
-    if (!Data::Items::IsFreeItemType(Data::Items::MakeItemType(m_group, m_number)))
+    const int itemType = Data::Items::MakeItemType(m_group, m_number);
+    if (!Data::Items::IsFreeItemType(itemType))
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
+        m_numberHolder.Render(itemType);
     }
 }
 

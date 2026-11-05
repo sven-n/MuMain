@@ -6,7 +6,7 @@
 
 namespace MuEditor::Items
 {
-// The rows of the item browser: number, name in the UI language and model
+// The rows of the item browser: number, name as the game shows it and model
 // file of each listed item, the selected one highlighted.
 class CItemBrowserList
 {

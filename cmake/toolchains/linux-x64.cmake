@@ -15,6 +15,16 @@ set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
 
+# Build for the x86-64 baseline, which every 64-bit x86 CPU runs (Windows
+# builds the same way). Without -march, GCC uses its own default, and that
+# differs: GitHub's ubuntu-26.04 runners install Ubuntu's amd64v3 packages,
+# whose GCC defaults to x86-64-v3 (AVX2 and FMA). Main would then need an AVX2
+# CPU, and GCC would fuse multiplies and adds wherever it chooses, so the same
+# float arithmetic in two places can round differently (the bit-for-bit
+# animation test fails).
+set(CMAKE_C_FLAGS_INIT "-march=x86-64")
+set(CMAKE_CXX_FLAGS_INIT "-march=x86-64")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

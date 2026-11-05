@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "doctest.h"
 
@@ -55,7 +56,7 @@ void Skill(OBJECT* o, vec3_t Position)
     CreateEffect(MODEL_FENRIR_THUNDER, Position, o->Angle, Light, 2, o);
     CreateJoint(BITMAP_JOINT_THUNDER, Position, Target, Angle, 3, NULL, 50.f, 7, 12);
     CreateParticleFpsChecked(BITMAP_FIRE, Position, Angle, o->Light);
-    CreateEffect(MODEL_STONE1 + rand() % 2, Position, Angle, Light, 13, o);
+    CreateEffect(MODEL_STONE1 + Random::Rand() % 2, Position, Angle, Light, 13, o);
     Vector(1.f, 0.5f, .25f, Light);
     CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o, 0.f);
     VectorCopy(o->Light, Light);

@@ -1,0 +1,151 @@
+/* Classic theme for a letter being read: the Season 1 client's window (CUILetterReadWindow, the code
+   this client's own native window ran before its RmlUi port; same frame and palette as
+   friend_shell.rcss, which says where they come from). 0.97 has no letters. Inside the frame:
+   - a black band 14 high with "Sender: name date time" at (3, 3), closed by a 106,97,88 line;
+   - the letter's text below it, the sender's portrait in a 119-wide column at the right from y 15
+     down to the bottom;
+   - a 106,97,88 line 20 above the bottom and a black foot 19 high left of the portrait, with
+     Reply / Delete (50x14 at x 2, 53), Previous / Next (40x14 at 104, 145) and Close (50x14 at 186),
+     16 above the bottom.
+   Season 1: 370x182 with the portrait; 420 here, the buttons wider, for longer captions.
+   1dp is one of the window's units. font-size 1rem, never dp: the theme sizes text natively. */
+
+@spritesheet lr-titlebar-sheet { src: "../../../win_titlebar.jpg"; lr-titlebar: 0px 0px 4px 15px; }
+@spritesheet lr-size-sheet { src: "../../../win_size.jpg"; lr-minimize: 0px 0px 9px 9px; lr-close: 0px 9px 9px 9px; }
+@spritesheet lr-button-sheet { src: "../../../win_button.tga"; lr-button: 0px 0px 49px 16px; }
+@spritesheet lr-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	lr-scroll-thumb: 0px 1px 11px 1px;
+	lr-scroll-up: 0px 3px 13px 13px;
+	lr-scroll-down: 0px 16px 13px 13px;
+}
+
+#panel { transform: none; }
+#panel { width: 420dp; height: 182dp; min-width: 400dp; min-height: 182dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); }
+
+/* Season 1's frame (friend_shell.rcss): body black at 179, the 5-unit outline drawn in
+   CUIBaseWindow::DrawOutLine()'s order (the inner lines crossing into the corners), a dot in all
+   four corners (the window doesn't resize, so the bottom-right one is drawn too; the footer
+   anchor, unused here, carries the bottom two), and the title bar. */
+.window-shell-sprite-back {
+	left: 0;
+	right: 0;
+	top: 5dp;
+	bottom: 5dp;
+	background-color: rgba(0, 0, 0, 179);
+	decorator: linear-gradient(to right, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp),
+	           linear-gradient(to left, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp);
+}
+.window-shell-sprite-top {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	height: auto;
+	decorator: linear-gradient(to bottom, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to top, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-middle {
+	left: 0;
+	right: 0;
+	top: 1dp;
+	bottom: 1dp;
+	decorator: linear-gradient(to right, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to left, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-bottom {
+	left: 2dp;
+	right: 2dp;
+	top: 2dp;
+	bottom: auto;
+	height: 1dp;
+	decorator: linear-gradient(to right, rgb(173, 167, 150) 1dp, transparent 1dp),
+	           linear-gradient(to left, rgb(173, 167, 150) 1dp, transparent 1dp);
+}
+#window_shell_footer {
+	left: 2dp;
+	right: 2dp;
+	top: auto;
+	bottom: 2dp;
+	height: 1dp;
+	decorator: linear-gradient(to right, rgb(173, 167, 150) 1dp, transparent 1dp),
+	           linear-gradient(to left, rgb(173, 167, 150) 1dp, transparent 1dp);
+}
+.window-shell-header-rail {
+	left: 5dp;
+	right: 5dp;
+	top: 5dp;
+	height: 16dp;
+	box-sizing: border-box;
+	border-left: 1dp rgb(136, 138, 147);
+	border-right: 1dp rgb(0, 0, 8);
+	border-bottom: 1dp rgb(106, 97, 88);
+	decorator: image(lr-titlebar fill);
+}
+.window-shell-header-title { left: 9dp; right: 40dp; top: 8dp; text-align: left; white-space: nowrap; overflow: hidden; color: rgb(230, 220, 200); }
+/* This frame needs no extra fill. Only the title bar drags: the strip reaches back out of the
+   client area over it. */
+#frame_fill { display: none; }
+#drag_strip { position: absolute; left: -5dp; right: -5dp; top: -21dp; height: 21dp; pointer-events: auto; }
+
+/* The client area: 5 units in from the sides and the bottom, 21 down. Each interactive part opts
+   back into pointer events. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 5dp;
+	right: 5dp;
+	top: 21dp;
+	bottom: 5dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); cursor: pointer; pointer-events: auto; }
+
+/* Minimize and close at w-27 and w-16, y 8 (no maximize). */
+#window_controls { position: absolute; right: 2dp; top: -13dp; z-index: 10; pointer-events: auto; white-space: nowrap; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 2dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(lr-minimize); }
+#btn_close_x { decorator: image(lr-close); }
+
+/* win_button stretched whole, pressed one unit in. */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 14dp; padding: 0 2dp; line-height: 14dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: image(lr-button fill); }
+/* base.rcss's .btn:hover / :active swap in legacy's button art; these keep win_button. */
+.btn:hover, .btn:active { decorator: image(lr-button fill); }
+.btn:active { padding-top: 1dp; padding-left: 3dp; }
+
+/* The sender's well, which #photo_image fills: the right column, 119 wide. */
+#photo_image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+#photo_slot.webzen #photo_image { left: 50%; top: 50%; width: 80dp; height: 62dp; margin-left: -40dp; margin-top: -31dp; }
+/* The "?" in the well's bottom-left corner, a pixel smaller and inset while its help is open. */
+@spritesheet photo-help-sheet { src: "../../../win_question.tga"; photo-help: 0px 0px 16px 16px; photo-help-pressed: 0px 0px 15px 15px; }
+#photo_help { position: absolute; left: 1dp; bottom: 1dp; width: 16dp; height: 16dp; pointer-events: auto; cursor: pointer; decorator: image(photo-help); }
+#photo_help.active { left: 2dp; width: 15dp; height: 15dp; decorator: image(photo-help-pressed); }
+#photo_slot.webzen #photo_help { display: none; }
+
+.text-field { background-color: transparent; border-width: 0; color: rgb(230, 220, 200); }
+
+#header { position: absolute; left: 0; right: 0; top: 0; height: 15dp; line-height: 14dp; padding: 0 3dp; box-sizing: border-box; white-space: nowrap; overflow: hidden; pointer-events: auto; border-bottom: 1dp rgb(106, 97, 88); background-color: rgb(0, 0, 0); }
+
+#body_pane { position: absolute; left: 0; right: 120dp; top: 15dp; bottom: 20dp; overflow: hidden scroll; background-color: transparent; pointer-events: auto; }
+.line { padding: 0 4dp; min-height: 13dp; line-height: 13dp; }
+
+#photo_slot { position: absolute; right: 0; width: 119dp; top: 15dp; bottom: 0; background-color: transparent; pointer-events: auto; cursor: move; }
+
+#footer { position: absolute; left: 0; right: 120dp; bottom: 0; height: 20dp; padding: 3dp 0 0 2dp; box-sizing: border-box; white-space: nowrap; border-top: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); background-color: rgb(0, 0, 0); }
+#footer .btn { width: 60dp; margin-right: 1dp; }
+#footer .btn.narrow { width: 50dp; }
+
+/* win_scrollbar, as the friend window's lists. */
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(lr-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(lr-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(lr-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }

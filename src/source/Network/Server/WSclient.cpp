@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
@@ -18,6 +19,7 @@
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
+#include <vector>
 #include "Guild/GuildCache.h"
 #include "Guild/GuildTypes.h"
 #include "Render/Models/ZzzBMD.h"
@@ -37,6 +39,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "I18N/All.h"
@@ -44,6 +47,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "GameLogic/Events/MatchEvent.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -95,6 +99,7 @@ using namespace mu::ui::window;
 #include "GameLogic/Combat/DuelMgr.h"
 
 #include "GameLogic/Social/GambleSystem.h"
+#include "GameLogic/Quests/DialogStructure.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Scenes/SceneCommon.h"
 #ifdef PBG_ADD_SECRETBUFF
@@ -109,6 +114,7 @@ using namespace mu::ui::window;
 
 #include "MUHelper/MuHelper.h"
 #include "Network/Server/ServerListManager.h"
+#include "Network/Server/ServerMessageTexts.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
@@ -371,13 +377,18 @@ static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, in
     return current + add;
 }
 
+bool IsGameServerPort(unsigned short Port)
+{
+    // todo: generally, it's a bad idea to assume a specific port number (range).
+    return Port > 0xADFF || Port < 0xAD00;
+}
+
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
-    // todo: generally, it's a bad idea to assume a specific port number (range).
-    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
+    const bool isEncrypted = IsGameServerPort(Port);
     SocketClient = new Connection(MU_C16(IpAddr), Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
@@ -391,7 +402,8 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
         // While auto-reconnecting we probe the server repeatedly; the reconnect
         // dialog already shows the status, so don't stack "server lost" popups.
-        if (!ReconnectManager::Instance().IsActive())
+        // On the login screen LoginSceneReconnect says it with its Reconnect / Exit message.
+        if (!ReconnectManager::Instance().IsActive() && SceneFlag != LOG_IN_SCENE)
         {
             static bool connectErrorDisplayed = false;
             if (!connectErrorDisplayed)
@@ -420,17 +432,34 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
 void DeleteSocket()
 {
-    if (SocketClient)
-    {
-        SocketClient->Close();
-        SocketClient = nullptr;
-    }
+    // Deleting an open connection closes it, and takes it out of the connection map first,
+    // so the client library's threads reach it no more.
+    delete SocketClient;
+    SocketClient = nullptr;
 }
 
 int LogIn = 0;
 wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
     0,
 };
+
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
+{
+    DeleteSocket();
+    LogIn = 0;
+    CurrentProtocolState = REQUEST_JOIN_SERVER;
+
+    // Game server packets (CheckHack's ping, the logout on quit) go out only while a
+    // game server is connected; the connect server doesn't know them.
+    g_bGameServerConnected = FALSE;
+    if (!CreateSocket(IpAddr, Port))
+    {
+        return FALSE;
+    }
+
+    g_bGameServerConnected = IsGameServerPort(Port) ? TRUE : FALSE;
+    return TRUE;
+}
 
 bool First = false;
 int FirstTime = 0;
@@ -526,6 +555,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
     }
 
     UI::LoginScene::ServerListReceived();
+    LoginSceneReconnect::Instance().OnGreeting(LoginServer::Connect);
 
     g_ErrorReport.Write(L"Success Receive Server List.\r\n");
 
@@ -538,15 +568,16 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
 
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
-    if (SocketClient != nullptr)
+    DeleteSocket();
+
+    if (!CreateSocket(IP, Data->Port))
     {
-        SocketClient->Close();
+        // The connect server still lists a game server that is down.
+        LoginSceneReconnect::Instance().OnServerUnreachable(LoginServer::Game);
+        return;
     }
 
-    if (CreateSocket(IP, Data->Port))
-    {
-        g_bGameServerConnected = TRUE;
-    }
+    g_bGameServerConnected = TRUE;
 
     wchar_t Text[100];
     mu_swprintf(Text, I18N::Game::YouAreConnectedToTheServer, IP, Data->Port);
@@ -556,13 +587,16 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList(); // counts toward the connection's list requests
 }
 
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
     mu::log::Get("network")->info("NET: Login response result=0x{:02X}", Data2->Result);
+
+    // A login may follow: the server let the client in, and the client is new enough.
+    bool readyForLogin = false;
 
     if (LogIn != 0)
     {
@@ -607,9 +641,19 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             UI::LoginScene::ShowMessage(MESSAGE_VERSION);
             g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
+
+        readyForLogin = Data2->Result == 0x01 && actual >= received;
     }
 
     g_GuildCache.Reset();
+
+    // Last, once the join is handled: a login the login screen's reconnect waits to
+    // send goes out only to a server that let the client in, and not while the
+    // client shows that it needs a new version.
+    if (LogIn == 0)
+    {
+        LoginSceneReconnect::Instance().OnGreeting(LoginServer::Game, readyForLogin);
+    }
 
     // #if defined _DEBUG || defined FOR_WORK
     //     if (Data2->Result == 0x01)
@@ -978,6 +1022,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
         UI::Inventory::RestorePickedItem();
 
+        MUHelper::g_MuHelper.EndSession();
         ReleaseMainData();
         CryWolfMVPInit();
 
@@ -996,6 +1041,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             StopMusic();
             AllStopSound();
             UI::Inventory::RestorePickedItem();
+            MUHelper::g_MuHelper.EndSession();
             ReleaseMainData();
         }
 
@@ -1041,6 +1087,7 @@ void ResetClientToLoginScene()
     StopMusic();
     AllStopSound();
     UI::Inventory::RestorePickedItem();
+    MUHelper::g_MuHelper.EndSession();
     ReleaseMainData();
 
     g_GuildCache.Reset();
@@ -1085,10 +1132,20 @@ void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std:
                           static_cast<unsigned>(expected));
 }
 
+// C3 F3 03 CharacterInformationExtended: OpenMU appends the discriminator at
+// 92, so the packet is 93 bytes.
+static_assert(sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED) == 92);
+
+int GetJoinMapServerStage(std::span<const BYTE> packet)
+{
+    constexpr std::size_t StageIndex = sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED);
+    return packet.size() > StageIndex ? packet[StageIndex] : 0;
+}
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
-    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
+    HeroIndex = Random::Rand() % MAX_CHARACTERS_CLIENT;
     CHARACTER* c = &CharactersClient[HeroIndex];
 
     CharacterAttribute->Ability = 0;
@@ -1130,6 +1187,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
     CharacterMachine->Gold = Data->Gold;
 
+    // Before LoadWorld, which loads the stage's map parts.
+    gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
@@ -1375,7 +1434,9 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         }
     }
 
-    if (gMapManager.WorldActive != Data->Map)
+    // A revival names no stage of the map.
+    gMapManager.SetServerStage(0);
+    if (!gMapManager.IsServerMapLoaded(Data->Map))
     {
         int OldWorld = gMapManager.WorldActive;
 
@@ -1547,7 +1608,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
-void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
+void Receive_Master_SetSkillList(const PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
 {
     memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
 
@@ -1555,8 +1616,9 @@ void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
     skills.reserve(lpMsg->count);
     for (DWORD n = 0; n < lpMsg->count; n++)
     {
-        auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
-                                                (sizeof(PMSG_MASTER_SKILL_LIST) * n));
+        const auto* lpInfo = reinterpret_cast<const PMSG_MASTER_SKILL_LIST*>(reinterpret_cast<const BYTE*>(lpMsg) +
+                                                                             sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
+                                                                             (sizeof(PMSG_MASTER_SKILL_LIST) * n));
         skills.push_back({ lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue });
     }
     UI::Hud::ReplaceMasterSkills(Hero->Class, skills);
@@ -1998,7 +2060,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
-        if (Data->Notice != nullptr && Data->Notice[0] != '\0')
+        if (Data->Notice[0] != '\0')
         {
             UI::Hud::AddSlideNotice(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f,
                                     Data->Color);
@@ -2125,11 +2187,22 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
 
 extern int EnableEvent;
 
+// C3 1C 0F MapChanged: the map number's low byte at 6. MapChangedExtended
+// appends the discriminator at 15, so the packet is 16 bytes.
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, Map) == 6);
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) == 15);
+
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet)
+{
+    return packet.Header.Size > offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) ? packet.MapDiscriminator : 0;
+}
+
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     UI::Inventory::RestorePickedItem();
 
     auto Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
+    gMapManager.SetServerStage(GetTeleportStage(*Data));
     Hero->PositionX = Data->PositionX;
     Hero->PositionY = Data->PositionY;
 
@@ -2172,10 +2245,13 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         // Before the view is emptied, not after: the events name the objects
         // that are about to disappear, and their slots are reused.
         App::Control::Events::RecordViewCleared("the character teleported");
+        // The helper's targets, drops and starting position belong to the view being emptied; the stop
+        // requested below may never be confirmed by the server.
+        MUHelper::g_MuHelper.EndSession();
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();
-        if (gMapManager.WorldActive != Data->Map)
+        if (!gMapManager.IsServerMapLoaded(Data->Map))
         {
             int OldWorld = gMapManager.WorldActive;
 
@@ -2464,11 +2540,10 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         break;
     case 8:
+        DeleteCharacterCompanions(c);
         if (Data->ItemGroup == 0xFF)
         {
             c->Helper.Type = -1;
-            DeleteMount(o);
-            ThePetProcess().DeletePet(c, c->Helper.Type, true);
         }
         else
         {
@@ -2769,6 +2844,8 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             o->Kind = KIND_PLAYER;
             c->Change = true;
 
+            ReadEquipmentExtended(Key, Data2->Flags, Data2->Equipment, c);
+
             for (int j = 0; j < Data2->s_BuffCount; ++j)
             {
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -2797,9 +2874,9 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
                 c->Movement = true;
             }
 
+            memset(c->ID, 0, sizeof c->ID);
             CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_USERNAME_SIZE);
 
-            ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
         }
 
         Offset += *EntryLength;
@@ -2856,10 +2933,10 @@ void AppearMonster(CHARACTER* c)
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -3282,7 +3359,7 @@ void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, cons
         }
         else
         {
-            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (rand() % 2 == 0))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (Random::Rand() % 2 == 0))
             {
                 SetPlayerShock(c, damage);
             }
@@ -3364,7 +3441,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
         }
         else
         {
-            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (rand() % 2 == 0))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (Random::Rand() % 2 == 0))
             {
                 SetPlayerShock(c, damage);
             }
@@ -3432,7 +3509,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             g_CMonkSystem.SetRepeatedly(damage, damageType, bDoubleEnable, bEndRepeatedly);
             if (bEndRepeatedly)
             {
-                g_CMonkSystem.RenderRepeatedly(key, o);
+                g_CMonkSystem.CreateRepeatedDamagePoints(key, o);
             }
         }
         else if (damage == 0 && !SuppressOptionalPresentation)
@@ -3502,9 +3579,10 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     auto ShieldDamage = Data->ShieldDamage;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    // The key is the monster receiving damage, not its attacker.
     if (IsMonster(c))
     {
-        MUHelper::g_MuHelper.AddTarget(Key, true);
+        MUHelper::g_MuHelper.AddTarget(Key, false);
     }
 
     if (Data->HealthStatus == 0xFF)
@@ -3589,7 +3667,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->TargetCharacter = HeroIndex;
         if (IsMonster(c))
         {
-            MUHelper::g_MuHelper.AddTarget(Key, true);
+            MUHelper::g_MuHelper.AddTarget(Key, iTargetKey == HeroKey);
         }
 
         AttackPlayer = Index;
@@ -3971,6 +4049,8 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_ALICE_BERSERKER_STR:
         UnRegisterBuff(eBuff_Berserker, o);
         break;
+    default:
+        break;
     }
 }
 
@@ -4104,6 +4184,8 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     if (SkillNumber > ATMON_SKILL_BIGIN && SkillNumber < ATMON_SKILL_END)
     {
         sc->Object.Angle[2] = CreateAngle2D(so->Position, to->Position);
+        // The skill's own attack.
+        const GameLogic::Monsters::Attacks::SkillAttackScope skillAttack(*sc);
         SetPlayerAttack(sc);
         so->AnimationFrame = 0;
         sc->AttackTime = 1;
@@ -4211,7 +4293,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         for (int i = 0; i < 2; ++i)
         {
             int iNumBones = Models[o->Type].NumBones;
-            Models[o->Type].TransformByObjectBone(vFirePosition, o, rand() % iNumBones);
+            Models[o->Type].TransformByObjectBone(vFirePosition, o, Random::Rand() % iNumBones);
             CreateEffect(BITMAP_FLARE, vFirePosition, o->Angle, Light, 3);
         }
     }
@@ -4858,8 +4940,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         float addx, addz;
         for (int iaa = 0; iaa < 3; iaa++)
         {
-            addx = rand() % 160;
-            addz = rand() % 160;
+            addx = Random::Rand() % 160;
+            addz = Random::Rand() % 160;
             Vector(to->Position[0] + addx, to->Position[1] + addz, to->Position[2], Pos);
 
             CreateBomb(Pos, true);
@@ -4997,8 +5079,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         for (int i = 0; i < 8; i++)
         {
-            Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-            Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+            Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+            Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
             CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0,
                         o->m_bySkillSerialNum);
         }
@@ -5350,8 +5432,8 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
                 for (int i = 0; i < 8; i++)
                 {
-                    Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-                    Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+                    Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+                    Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
                     CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0,
                                 o->m_bySkillSerialNum);
                 }
@@ -5446,7 +5528,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 for (int i = 0; i < 2; ++i)
                 {
                     int iNumBones = Models[o->Type].NumBones;
-                    Models[o->Type].TransformByObjectBone(vFirePosition, o, rand() % iNumBones);
+                    Models[o->Type].TransformByObjectBone(vFirePosition, o, Random::Rand() % iNumBones);
                     CreateEffect(BITMAP_FLARE, vFirePosition, o->Angle, Light, 3);
                 }
                 PlayBuffer(SOUND_SKILL_RECOVER);
@@ -5638,7 +5720,7 @@ void ReceiveMagicPosition(const BYTE* ReceiveBuffer, int Size)
         int TargetKey = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
         CHARACTER* tc = &CharactersClient[FindCharacterIndex(TargetKey)];
         OBJECT* to = &tc->Object;
-        if (rand() % 2 == 0)
+        if (Random::Rand() % 2 == 0)
             SetPlayerShock(tc, tc->Hit);
         if (tc->Hit > 0)
         {
@@ -5862,8 +5944,8 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
     {
         c->StormTime = 0;
         o->m_bActionStart = true;
-        o->Gravity = rand() % 10 + 10.f;
-        o->Velocity -= rand() % 3 + 3.f;
+        o->Gravity = Random::Rand() % 10 + 10.f;
+        o->Velocity -= Random::Rand() % 3 + 3.f;
 
         Vector(0.f, 0.f, 1.f, o->Direction);
         VectorCopy(o->Position, o->m_vDeadPosition);
@@ -5874,9 +5956,9 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
     {
         c->StormTime = 0;
         o->m_bActionStart = true;
-        o->Gravity = rand() % 10 + 10.f;
-        o->Velocity = rand() % 20 + 20.f;
-        float angle = rand() % 10 + 85.f;
+        o->Gravity = Random::Rand() % 10 + 10.f;
+        o->Velocity = Random::Rand() % 20 + 20.f;
+        float angle = Random::Rand() % 10 + 85.f;
 
         if ((TerrainWall[WallIndex + 1] & TW_NOGROUND) == TW_NOGROUND)
         {
@@ -5888,7 +5970,7 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
         }
 
         o->Angle[2] = o->m_vDownAngle[2];
-        Vector(rand() % 6 + 8.f, -rand() % 2 + 13.f, 5.f, o->Direction);
+        Vector(Random::Rand() % 6 + 8.f, -Random::Rand() % 2 + 13.f, 5.f, o->Direction);
         VectorCopy(o->Position, o->m_vDeadPosition);
     }
 
@@ -5940,10 +6022,10 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
         case AT_SKILL_COMBO:
             o->m_bActionStart = true;
             c->StormTime = 0;
-            o->Velocity = (rand() % 5 + 10.f) * 0.1f;
+            o->Velocity = (Random::Rand() % 5 + 10.f) * 0.1f;
             o->m_bySkillCount = 0;
 
-            Vector(0.f, rand() % 15 + 40.f, 0.f, o->Direction);
+            Vector(0.f, Random::Rand() % 15 + 40.f, 0.f, o->Direction);
             VectorCopy(o->Position, o->m_vDeadPosition);
             break;
         }
@@ -8293,27 +8375,20 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     }
     break;
     case 1:
-        if (Data->Cmd2 >= 20)
-        {
-            mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(830 + Data->Cmd2 - 20));
-        }
-        else
-        {
-            mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(650 + Data->Cmd2));
-        }
+        mu::ui::window::CreateOkMessageBox(Network::ServerMessages::GetEventNpcLine(Data->Cmd2));
         break;
 
     case 3:
-        mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(710 + Data->Cmd2));
+        mu::ui::window::CreateOkMessageBox(Network::ServerMessages::GetGoldenArcherLine(Data->Cmd2));
         break;
     case 4:
-        mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(725 + Data->Cmd2));
+        mu::ui::window::CreateOkMessageBox(Network::ServerMessages::GetRenaLine(Data->Cmd2));
         break;
     case 5:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.acceptLabel = I18N::Game::ConversationIsOver;
-        cfg.lines = { { I18N::Dialog::Lookup(Data->Cmd2), false } };
+        cfg.lines = {{GameLogic::Quests::Dialog::GetText(Data->Cmd2), false}};
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
@@ -8423,9 +8498,13 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     }
     case 47:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::ThankYouFinallyYouGotItBack);
+        break;
     case 48:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreBackSafely);
+        break;
     case 49:
-        mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(1823 + Data->Cmd1 - 47));
+        mu::ui::window::CreateOkMessageBox(I18N::Game::ThankYouForYourHelp);
         break;
     case 55:
     {
@@ -9207,9 +9286,9 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     UI::Dialogs::ConfirmRequest cfg;
     cfg.duelCaption = I18N::Game::DuelFinished;
     cfg.lines = {
-        { strLine1, false },
-        { strLine2, false },
-        { I18N::Game::Lookup(2697), false },
+        {strLine1, false},
+        {strLine2, false},
+        {L"", false},
     };
     UI::Dialogs::ShowConfirm(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
@@ -9236,7 +9315,8 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPPSHOPTITLE_HEADERINFO)ReceiveBuffer;
 
-    auto* pShopTitle = (PSHOPTITLE_DATAINFO*)(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
+    const auto* pShopTitle =
+        reinterpret_cast<const PSHOPTITLE_DATAINFO*>(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
     for (int i = 0; i < Header->byCount; i++, pShopTitle++)
     {
         int key = MAKEWORD(pShopTitle->byIndexL, pShopTitle->byIndexH);
@@ -10163,11 +10243,19 @@ void ReceiveScratchResult(const BYTE* ReceiveBuffer)
     switch (Data->m_byIsRegistered)
     {
     case 0:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouHaveSuccessfullyRegistered);
+        break;
     case 1:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::ThisSerialNumberHasAlreadyBeenRegistered);
+        break;
     case 2:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouHaveExceededTheMaxRegistrationNumber);
+        break;
     case 3:
+        mu::ui::window::CreateOkMessageBox(I18N::Game::WrongSerialNumber);
+        break;
     case 4:
-        mu::ui::window::CreateOkMessageBox(I18N::Game::Lookup(886 + Data->m_byIsRegistered));
+        mu::ui::window::CreateOkMessageBox(I18N::Game::UnknownError);
         break;
 
     case 5:
@@ -10420,13 +10508,14 @@ void ReceiveQuestByItemUseEP(const BYTE* ReceiveBuffer)
 void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    g_QuestMng.SetQuestIndexByEtcList((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
+    g_QuestMng.SetQuestIndexByEtcList(reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
+                                      pData->m_wQuestCount);
 }
 
 void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    auto questIndices = (const std::uint32_t*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
+    auto questIndices = reinterpret_cast<const std::uint32_t*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
     UI::Npc::ShowQuestList({ questIndices, pData->m_wQuestCount });
 }
 
@@ -10486,8 +10575,9 @@ void ReceiveQuestGiveUp(const BYTE* ReceiveBuffer)
 void ReceiveProgressQuestList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
-    g_QuestMng.SetCurQuestIndexList((DWORD*)(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
-                                    int(pData->m_byQuestCount));
+    g_QuestMng.SetCurQuestIndexList(
+        reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
+        int(pData->m_byQuestCount));
 }
 
 void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
@@ -10609,11 +10699,11 @@ void ReceiveReward(const BYTE* ReceiveBuffer)
 
 namespace
 {
-// The stat a fruit changes and the text id which names it.
+// The stat a fruit changes and the text which names it.
 struct FruitStat
 {
     WORD* Value;
-    int TextIndex;
+    const wchar_t* const* Name;
 };
 
 FruitStat GetFruitStat(BYTE fruit)
@@ -10621,24 +10711,24 @@ FruitStat GetFruitStat(BYTE fruit)
     switch (fruit)
     {
     case 0:
-        return {&CharacterAttribute->Energy, 168};
+        return {&CharacterAttribute->Energy, &I18N::Game::ENG};
     case 1:
-        return {&CharacterAttribute->Vitality, 169};
+        return {&CharacterAttribute->Vitality, &I18N::Game::STA};
     case 2:
-        return {&CharacterAttribute->Dexterity, 167};
+        return {&CharacterAttribute->Dexterity, &I18N::Game::AGI};
     case 3:
-        return {&CharacterAttribute->Strength, 166};
+        return {&CharacterAttribute->Strength, &I18N::Game::STR};
     case 4:
-        return {&CharacterAttribute->Charisma, 1900};
+        return {&CharacterAttribute->Charisma, &I18N::Game::Command};
     default:
-        return {nullptr, 0};
+        return {nullptr, nullptr};
     }
 }
 
 void ShowFruitStatMessage(const wchar_t* format, const FruitStat& stat, WORD point)
 {
     wchar_t text[MAX_GLOBAL_TEXT_STRING];
-    mu_swprintf(text, format, I18N::Game::Lookup(stat.TextIndex), point);
+    mu_swprintf(text, format, *stat.Name, point);
     mu::ui::window::CreateOkMessageBox(text);
 }
 } // namespace
@@ -11365,8 +11455,6 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
 
     if (CrownSwitch == nullptr)
         return;
-    if (CrownSwitch->ID == nullptr)
-        return;
 
     switch (static_cast<CrownSwitchState>(pData->m_byState))
     {
@@ -11389,9 +11477,7 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         int otherKey = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
         int otherIndex = FindCharacterIndex(otherKey);
         CHARACTER* other = &CharactersClient[otherIndex];
-        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther,
-                                    other != nullptr && other->ID != nullptr ? other->ID : L"",
-                                    CrownSwitch->ID);
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther, other->ID, CrownSwitch->ID);
         break;
     }
     }
@@ -11732,7 +11818,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
             c->PositionY = pData2->m_byPosY;
             c->TargetX = pData2->m_byPosX;
             c->TargetY = pData2->m_byPosY;
-            c->Object.Angle[2] = rand() % 360;
+            c->Object.Angle[2] = Random::Rand() % 360;
 
             c->m_iDeleteTime = 150;
 
@@ -11761,7 +11847,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
             c->PositionY = pData2->m_byPosY;
             c->TargetX = pData2->m_byPosX;
             c->TargetY = pData2->m_byPosY;
-            c->Object.Angle[2] = rand() % 360;
+            c->Object.Angle[2] = Random::Rand() % 360;
 
             c->m_iDeleteTime = 150;
 
@@ -12640,6 +12726,12 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 // (0xD2)(0x01)
+// D2 01 CashShopPointInfo: the view type at 4, then five doubles. The exact sizes of the
+// D2 packets are generated from OpenMU's XML (wire_sizes.generated.h); the handlers cast the
+// buffer, so a field at the wrong offset would be read without any message.
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalCash) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalMileage) == 37);
+
 bool ReceiveIGS_CashPoint(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_CASHPOINT_ANS)pReceiveBuffer;
@@ -12671,6 +12763,10 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
 
     return true;
 }
+
+// D2 03 CashShopItemBuyResult: the result at 4, the left count at 5.
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, byResultCode) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, lItemLeftCount) == 5);
 
 // (0xD2)(0x03)
 bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
@@ -12758,6 +12854,10 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
+// D2 04 CashShopItemGiftResult: the result at 4, the left count at 5, the limited cash at 9.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, lItemLeftCount) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, dLimitedCash) == 9);
+
 bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_GIFTSEND_ANS)pReceiveBuffer;
@@ -12856,6 +12956,13 @@ bool ReceiveIGS_StorageItemListCount(const BYTE* pReceiveBuffer)
     return true;
 }
 
+// D2 0D CashShopStorageItem: five 32-bit sequences from 4, the cash points at 24 and the item
+// type at 32. AddStorageItem() drops an item whose type isn't 'C' or 'P' without a message.
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lStorageIndex) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lPriceSeq) == 20);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, chItemType) == 32);
+
 // (0xD2)(0x0D)
 bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
 {
@@ -12871,6 +12978,13 @@ bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
                                        (char)Data->chItemType });
     return true;
 }
+
+// D2 0E CashShopGiftStorageItem: the storage item's fields, then the sender at 33 and the
+// message at 44.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chItemType) == 32);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chSendUserName) == 33);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chMessage) == 44);
 
 // (0xD2)(0x0E)
 bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
@@ -13031,7 +13145,7 @@ bool ReceiveIGS_EventItemlistCnt(const BYTE* pReceiveBuffer)
 bool ReceiveIGS_EventItemlist(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_EVENTITEM_LIST)pReceiveBuffer;
-    g_InGameShopSystem->InsertEventPackage((int*)Data->lPackageSeq);
+    g_InGameShopSystem->InsertEventPackage(Data->lPackageSeq);
     return true;
 }
 
@@ -13116,6 +13230,11 @@ bool ReceivePeriodItemListCount(const BYTE* pReceiveBuffer)
     auto Data = (LPPMSG_PERIODITEMEX_ITEMCOUNT)pReceiveBuffer;
     return true;
 }
+
+// D2 12 period item list: not in OpenMU's XML, so its size is guarded here. The struct isn't
+// packed; the expire date is at 8.
+static_assert(sizeof(PMSG_PERIODITEMEX_ITEMLIST) == 12);
+static_assert(offsetof(PMSG_PERIODITEMEX_ITEMLIST, lExpireDate) == 8);
 
 bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 {
@@ -13459,7 +13578,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             Receive_Master_LevelGetSkill(ReceiveBuffer);
             break;
         case 0x53:
-            Receive_Master_SetSkillList((PMSG_MASTER_SKILL_LIST_SEND*)ReceiveBuffer);
+            Receive_Master_SetSkillList(reinterpret_cast<const PMSG_MASTER_SKILL_LIST_SEND*>(ReceiveBuffer));
             break;
         }
         break;
@@ -14741,7 +14860,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 
 void ProcessPacketCallback(const PacketInfo* Packet)
 {
-    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetHandle())
+    // By the id, not the live handle: what a server sent right before it closed the
+    // connection (e.g. why it closed it) still counts.
+    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetId())
     {
         return;
     }
@@ -14820,6 +14941,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuffList(o, bufflist);
         }
         break;
+        default:
+            break;
         }
 
         return true;
@@ -14892,6 +15015,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuff(o, eBuff_CastleRegimentDefense);
     }
     break;
+    default:
+        break;
     }
     return true;
 }
@@ -15075,6 +15200,8 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             g_RegisterBuffTime(buff, bufftime);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15231,6 +15358,8 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             g_UnRegisterBuffTime(buff);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15450,6 +15579,8 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, o->Light, 2, o, -1, 0, 0, 0, 1.5f);
     }
     break;
+    default:
+        break;
     }
 }
 
@@ -15636,6 +15767,8 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         DeleteEffect(BITMAP_LIGHT_RED, o, 2);
     }
     break;
+    default:
+        break;
     }
 }
 

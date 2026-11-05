@@ -46,18 +46,18 @@ namespace mu::ui::window
 
         void Show(bool bShow) override;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
         // While a tuning slider holds the keys, only this window gets them, so Escape still closes it.
         bool TakesTypingFrom(const Rml::ElementDocument* document) const override
         {
             return document == m_RmlView.Document();
         }
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 10.5f
-        float GetKeyEventOrder();	// 10.f;
+        float GetLayerDepth() override;    //. 10.5f
+        float GetKeyEventOrder() override; // 10.f;
 
         void OpenningProcess();
         void ClosingProcess();
@@ -164,6 +164,8 @@ namespace mu::ui::window
         void RmlGaugeEvent(Rml::Event& event, int gauge);
         void RmlResolutionChanged(int index);
         void RmlLanguageChanged(int index);
+        // The checkbox under the language: item names in the UI language, or English.
+        void RmlToggleTranslateItemNames();
         void RmlFontChanged(int index);
         // Graphics tab -- DXP-23's per-system effect-cost toggles (MainScene.h), promoted from
         // console-only ($effects ...) diagnostics to a persisted, in-game-options setting.
@@ -299,6 +301,8 @@ namespace mu::ui::window
             int languageIndex = 0;
             Rml::String languageRowLabel;
             Rml::String languageValueLabel;
+            bool translateItemNames = true;
+            Rml::String translateItemNamesLabel;
             std::vector<Rml::String> fontLabels;
             int fontIndex = 0;
             Rml::String fontRowLabel;
@@ -401,6 +405,8 @@ namespace mu::ui::window
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
+        // The model's copy of a UI text, marked dirty when the text changed.
+        void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
@@ -428,6 +434,7 @@ namespace mu::ui::window
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;
+        bool m_bTranslateItemNames;
         int m_iFontIndex;
 
         std::vector<UI::Options::DisplayResolution> m_resolutions;

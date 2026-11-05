@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Core/UIManager.h"
@@ -16,18 +17,19 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 {
     const std::wstring filename =
         L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd";
-    if (OpenJewelHarmonyInfoFile(filename))
+    const wchar_t* problem = OpenJewelHarmonyInfoFile(filename);
+    if (problem == nullptr)
         return;
 
-    mu::log::Get("ui")->error("{} file not found.", StringUtils::WideToNarrow(filename.c_str()));
-    const std::wstring message = filename + L" file not found.\r\n";
+    mu::log::Get("ui")->error("{} {}", StringUtils::WideToNarrow(filename.c_str()), StringUtils::WideToNarrow(problem));
+    const std::wstring message = filename + L" " + problem + L"\r\n";
     ::MessageBox(g_hWnd, message.c_str(), NULL, MB_OK);
     ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
 }
 
 JewelHarmonyInfo::~JewelHarmonyInfo() {}
 
-const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
+const wchar_t* JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
 {
     constexpr size_t NAME_SIZE = 60;
     constexpr size_t LEVEL_COUNT = 14;
@@ -45,9 +47,13 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
 
         std::vector<BYTE> tempBuffer(nSize);
 
-        ::fread(tempBuffer.data(), nSize, 1, fp);
-        ::BuxConvert((BYTE*)tempBuffer.data(), nSize);
+        const bool complete = DataFileIO::ReadExact(fp, tempBuffer.data(), nSize);
         ::fclose(fp);
+        if (!complete)
+        {
+            return L"file corrupted.";
+        }
+        ::BuxConvert(tempBuffer.data(), nSize);
 
         // Copy to the new HarmonyJewelOption array that uses wchar_t[] for the Name
         for (int i = 0; i < nEntries; ++i)
@@ -78,9 +84,9 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
                    LEVEL_COUNT * sizeof(int));
         }
 
-        return true;
+        return nullptr;
     }
-    return false;
+    return L"file not found.";
 }
 
 const StrengthenItem JewelHarmonyInfo::GetItemType(int type)

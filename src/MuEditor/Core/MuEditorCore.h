@@ -90,6 +90,7 @@ private:
     void ToggleFullscreenOnF11();
     void ReopenChangedItemModels();
     void RenderItemTools();
+    void RenderMonsterTools();
     bool IsEditorWindow(SDL_Window* window) const;
     bool FindMouseInEditorWindow() const;
 

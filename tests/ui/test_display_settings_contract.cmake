@@ -145,6 +145,19 @@ foreach(required_text IN ITEMS
     require_text(config_source "${required_text}" "GameConfig.cpp must persist VSync through")
 endforeach()
 
+# Translated item names ([UI] TranslateItemNames, on by default): saved with the other [UI] keys
+# and given to the item data handler at start-up.
+require_text(config_constants "CfgDefaultTranslateItemNames = true;"
+    "GameConfigConstants.h must turn translated item names on by default")
+foreach(required_text IN ITEMS
+        "m_translateItemNames = ReadBool(CfgSectionUI, CfgKeyTranslateItemNames, CfgDefaultTranslateItemNames);"
+        "WriteBool(CfgSectionUI, CfgKeyTranslateItemNames, m_translateItemNames);")
+    require_text(config_source "${required_text}" "GameConfig.cpp must persist translated item names through")
+endforeach()
+require_text(winmain_source
+    "g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());"
+    "Winmain.cpp must apply translated item names at startup")
+
 # A missing or invalid Look counts as CfgDefaultLook, which is Classic: Enhanced is opt-in.
 require_text(config_constants "CfgDefaultLook[] = L\"Classic\""
     "GameConfigConstants.h must default the look preset to Classic")

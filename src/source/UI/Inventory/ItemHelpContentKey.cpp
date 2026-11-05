@@ -8,6 +8,10 @@
 
 mu::ui::window::ItemHelpContentKey mu::ui::window::GetItemHelpContentKey(int itemType)
 {
-    return {itemType, g_ItemDatabase.GetVersion(), I18N::LocaleIndex(I18N::GetCurrentLocale()), Hero->Class,
+    return {itemType,
+            g_ItemDatabase.GetVersion(),
+            I18N::LocaleIndex(I18N::GetCurrentLocale()),
+            g_ItemDatabase.GetNameVersion(),
+            Hero->Class,
             GetItemInfoHeroStats()};
 }

@@ -132,18 +132,18 @@ namespace mu::ui::window
         bool IsBlockWhisper();
         void SetBlockWhisper(bool bBlockWhisper);
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
         // Enter, Escape and the history keys while the player types a line.
         bool TakesTypingFrom(const Rml::ElementDocument* document) const override
         {
             return document == m_RmlView.Document();
         }
-        bool Render();
+        bool Render() override;
 
-        float GetLayerDepth();
-        float GetKeyEventOrder();
+        float GetLayerDepth() override;
+        float GetKeyEventOrder() override;
 
         void OpenningProcess();
         void ClosingProcess();

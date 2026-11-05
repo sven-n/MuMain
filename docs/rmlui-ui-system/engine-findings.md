@@ -64,6 +64,13 @@ implementation findings, not general policy; recheck them when updating the engi
   explicit `width`** — left to shrink-to-fit, the width computation undersizes to the longest
   *word*, not the longest *line*.
 
+- **A shrink-to-fit width leaves out the vertical scrollbar.** `LayoutDetails::GetShrinkToFitWidth()`
+  and a flex container's max-content size measure the content alone; when the box then scrolls,
+  its scrollbar takes its width out of that content and squeezes it. Give the scrollbar a negative
+  `margin-left` as wide as itself (`ElementScroll::EnableScrollbar()` counts its margins in the
+  width it takes) and the box a right padding as wide: the scrollbar then sits in the padding
+  (`server_select.rcss`'s `#server_col`).
+
 - **The default `display` is `inline`, not `block`, for every element including `<div>`**
   (`StyleSheetSpecification.cpp`; there is no user-agent stylesheet). Absolute positioning makes a
   block box anyway, which hides it; in-flow stacked content (e.g. `data-for` lines) runs together
@@ -89,8 +96,10 @@ implementation findings, not general policy; recheck them when updating the engi
   backdrop blur costs a blur pass every frame it is visible.
 
 - **`decorator: image(...)` does not stretch a sprite rect to a box of a different size;
-  `ninepatch(...)` with a declared inner rect does.** `server_select.rcss`'s `.server-row`/
-  `.group-btn` use `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)`. Legacy's plain `.gmd-btn`
+  `ninepatch(...)` with a declared inner rect does, and so does `tiled-box(...)` with a sprite per
+  corner and edge**, which can take an edge from another part of the art: legacy `base.rcss`'s
+  server rows (`.server-option-btn`) take their bottom edge from beside the art's gauge track.
+  Legacy's plain `.gmd-btn`
   (128 dp / 64 dp over a 108×30 sprite) has the same width mismatch and has not been visually
   checked; `.gmd-btn.cols-2` uses the ninepatch fix.
 
@@ -103,6 +112,20 @@ implementation findings, not general policy; recheck them when updating the engi
   with geometry regression coverage. Repetition adds geometry per tile for atlas sprites;
   `ninepatch(...)` remains the appropriate choice for stretchable frames. Visual GPU filtering
   and seams still need in-game verification.
+
+- **Images stay half a texel inside their sprite; only tiling axes repeat.** At a quad's outer
+  pixels linear filtering reaches half a texel past the edge texel. With the repeating sampler
+  the SDL_GPU backend used for everything, a sprite whose own edge is transparent pulled in the
+  texture's opposite edge (a faint dark line around the MU Helper bar, the character window's
+  frame pieces and stat boxes), and a sprite inside a sheet mixed in the next sprite whatever the
+  sampler (the line under the cash shop's unselected zone tabs and under stacked button states).
+  Now the decorators (`image()`, `tiled-*`, `ninepatch()`, repeated sprites) and `<img>` hold
+  their texture coordinates half a texel inside their sprite, or the whole image, on every side:
+  a band along each edge samples the edge texel's centre, the rest is mapped as before, so no
+  pixel moves at any scale and the geometry no longer depends on the sampler (`TexCoordClamp.h`).
+  An axis whose coordinates run past the sprite tiles it and is left alone, and the backend
+  repeats only along the axes a mesh tiles: `image(file repeat-x)` wraps across and clamps its
+  top and bottom. A sprite spanning its whole texture repeats by wrapping, so it shows no seams.
 
 - **Fractional `letter-spacing` accumulates before rounding.** The default font backend formerly
   truncated each character's spacing to an integer, making subpixel values ineffective. This
@@ -382,6 +405,10 @@ The context currently receives SDL window-coordinate dimensions rather than fram
 size. At pixel density above 1, these spaces may differ. `ContentScaleFromMetrics()` derives the
 scale correction from display scale divided by pixel density; this does not by itself prove
 correct rendering and input on every high-density display.
+
+The SDL window does not request `SDL_WINDOW_HIGH_PIXEL_DENSITY`, so the pixel density stays 1 and
+both spaces agree. Without it macOS runs at 1x on a Retina display; a density above 1 can still
+reach the window on Wayland, where the compositor owns the scale.
 
 Previous OS-scale validation is not evidence of validation with `SDL_GetWindowPixelDensity() > 1`.
 Check layout, pointer alignment, render targets and fonts on such hardware when changing this

@@ -172,19 +172,19 @@ namespace mu::ui::window
         BOOL IsInvenItem(const short sType);
 #endif
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Render3D();
 
-        bool IsVisible() const;
+        bool IsVisible() const override;
 
         void OpenningProcess();
         void ClosingProcess();
 
-        float GetLayerDepth();
+        float GetLayerDepth() override;
 
         CInventoryCtrl* GetInventoryCtrl() const;
 

@@ -139,6 +139,7 @@ TEST_CASE("Synthetic input names the keys the shim translates [core][synthetic-i
     CHECK(VirtualKeyFromName("f1") == VK_F1);
     CHECK(VirtualKeyFromName("F12") == VK_F12);
     CHECK(VirtualKeyFromName("printscreen") == VK_SNAPSHOT);
+    CHECK(VirtualKeyFromName("alt") == VK_MENU);
     CHECK(VirtualKeyFromName("i") == 'I');
     CHECK(VirtualKeyFromName("I") == 'I');
     CHECK(VirtualKeyFromName("7") == '7');
@@ -177,13 +178,32 @@ TEST_CASE("A hotkey is down for exactly one frame [core][synthetic-input]")
     CHECK(IsIdle());
 }
 
+// Alt is a modifier the key-state shim reads from SDL's modifier state; a scripted press still counts as down, so
+// the name window's toggle of every drop's name sees it.
+TEST_CASE("A scripted Alt is down for its frame [core][synthetic-input]")
+{
+    ResetInjector guard;
+    CHECK(PressKey(VK_MENU));
+    BeginFrame();
+    CHECK(Core::Input::IsKeyDown(VK_MENU));
+    BeginFrame();
+    CHECK_FALSE(IsKeyHeld(VK_MENU));
+}
+
 TEST_CASE("Synthetic navigation keys carry SDL keycodes for RmlSDL [core][synthetic-input]")
 {
     ResetInjector guard;
-    const struct { int virtualKey; SDL_Scancode scancode; SDL_Keycode keycode; } cases[] = {
+    struct KeyCase
+    {
+        int virtualKey;
+        SDL_Scancode scancode;
+        SDL_Keycode keycode;
+    };
+    const KeyCase cases[] = {
         {VK_TAB, SDL_SCANCODE_TAB, SDLK_TAB},
         {VK_DOWN, SDL_SCANCODE_DOWN, SDLK_DOWN},
         {VK_SPACE, SDL_SCANCODE_SPACE, SDLK_SPACE},
+        {VK_MENU, SDL_SCANCODE_LALT, SDLK_LALT},
     };
     for (const auto& key : cases)
     {

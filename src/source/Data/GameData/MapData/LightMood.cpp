@@ -48,7 +48,7 @@ class IssueList
 public:
     IssueList(const std::string& source, std::vector<ItemDataIssue>& issues) : m_source(source), m_issues(issues) {}
 
-    void Error(const std::string& field, const std::string& message)
+    void Fatal(const std::string& field, const std::string& message)
     {
         Items::Json::AddFileIssue(m_issues, m_source, ItemDataIssue::NoItem, field, message);
     }
@@ -88,14 +88,14 @@ bool ReadMoodValues(const OrderedJson& json, const std::string& object, bool nee
         {
             if (needsAll && value.required)
             {
-                issues.Error(Field(object, value.key), "missing");
+                issues.Fatal(Field(object, value.key), "missing");
                 valid = false;
             }
             continue;
         }
         if (!field->is_number() || !std::isfinite(field->get<double>()))
         {
-            issues.Error(Field(object, value.key), "must be a number");
+            issues.Fatal(Field(object, value.key), "must be a number");
             valid = false;
             continue;
         }
@@ -110,7 +110,7 @@ bool CheckRange(double value, double min, double max, const std::string& field, 
     {
         return true;
     }
-    issues.Error(field,
+    issues.Fatal(field,
                  "is " + FormatNumber(value) + ", must be from " + FormatNumber(min) + " to " + FormatNumber(max));
     return false;
 }
@@ -130,7 +130,7 @@ bool CheckRanges(const LightMood& mood, const std::string& object, IssueList& is
     // Figures are never darker than the base: the rule names both values.
     if (!(mood.figures >= mood.base && mood.figures <= MaxScale))
     {
-        issues.Error(Field(object, "figures"), "is " + FormatNumber(mood.figures) + ", must be from " +
+        issues.Fatal(Field(object, "figures"), "is " + FormatNumber(mood.figures) + ", must be from " +
                                                    FormatNumber(mood.base) + " to " + FormatNumber(MaxScale) +
                                                    " (not below base " + FormatNumber(mood.base) + ")");
         valid = false;
@@ -164,7 +164,7 @@ bool ReadDefault(const OrderedJson& root, LightMood& mood, IssueList& issues)
     const auto json = root.find(DefaultKey);
     if (json == root.end() || !json->is_object())
     {
-        issues.Error(DefaultKey, "missing or not an object of base, figures, dynamicGain, background and sun");
+        issues.Fatal(DefaultKey, "missing or not an object of base, figures, dynamicGain, background and sun");
         return false;
     }
     WarnUnknownKeys(*json, DefaultKey, true, {}, issues);
@@ -178,7 +178,7 @@ bool ReadWorld(const OrderedJson& json, const std::string& object, int& world, I
     if (field == json.end() || !field->is_number_integer() || !Items::Json::ReadWholeNumber(*field, number) ||
         number < 0 || number > MaxLightMoodWorld)
     {
-        issues.Error(Field(object, WorldKey),
+        issues.Fatal(Field(object, WorldKey),
                      "missing or not a whole number from 0 to " + std::to_string(MaxLightMoodWorld));
         return false;
     }
@@ -192,7 +192,7 @@ bool ReadMap(const OrderedJson& json, size_t index, const LightMood& defaultMood
     const std::string entry = std::string(MapsKey) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        issues.Error(entry, "must be an object with a world and its values");
+        issues.Fatal(entry, "must be an object with a world and its values");
         return false;
     }
     MapLightMood map{0, defaultMood};
@@ -203,7 +203,7 @@ bool ReadMap(const OrderedJson& json, size_t index, const LightMood& defaultMood
     const std::string object = std::string(MapsKey) + "[world " + std::to_string(map.world) + "]";
     if (!worlds.insert(map.world).second)
     {
-        issues.Error(object, "is in the list more than once");
+        issues.Fatal(object, "is in the list more than once");
         return false;
     }
     WarnUnknownKeys(json, object, true, {WorldKey, NameKey}, issues);
@@ -224,7 +224,7 @@ bool ReadMaps(const OrderedJson& root, LightMoodData& data, IssueList& issues)
     }
     if (!list->is_array())
     {
-        issues.Error(MapsKey, "must be a list of map entries");
+        issues.Fatal(MapsKey, "must be a list of map entries");
         return false;
     }
     bool valid = true;
@@ -283,7 +283,7 @@ LightMoodLoadResult LoadLightMoodFile(const std::filesystem::path& file)
     const std::optional<std::string> text = Items::Json::ReadTextFile(file);
     if (!text)
     {
-        IssueList(source, result.issues).Error("", "could not be read");
+        IssueList(source, result.issues).Fatal("", "could not be read");
         return result;
     }
     ReadLightMoodJson(*text, source, result.data, result.issues);

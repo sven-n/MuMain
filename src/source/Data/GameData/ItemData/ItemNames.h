@@ -19,6 +19,10 @@ const std::string& GetOwnName(const ItemDefinition& definition, std::string_view
 // Whether the item has a name of its own in the language (GetOwnName).
 bool HasNameIn(const ItemDefinition& definition, std::string_view locale);
 
+// The language the game shows item names in: the UI language, or English when
+// the player turned translated item names off in the options window.
+std::string_view GetItemNameLocale(std::string_view uiLocale, bool translateItemNames);
+
 struct ItemNameCount
 {
     std::string locale;

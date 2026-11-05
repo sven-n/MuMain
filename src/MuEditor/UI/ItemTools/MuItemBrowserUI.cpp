@@ -12,6 +12,7 @@
 #include "ItemToolWindow.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
@@ -208,6 +209,8 @@ void CMuItemBrowserUI::RenderMissingFilter()
 void CMuItemBrowserUI::RenderItemActions(int selectedItemType)
 {
     const bool hasItem = g_ItemDatabase.Find(selectedItemType) != nullptr;
+    // An entry without a name moves and goes as an item does; there is nothing to duplicate.
+    const bool hasEntry = g_ItemDatabase.FindEntry(selectedItemType) != nullptr;
     if (ImGui::Button(I18N::Editor::AddItem))
     {
         m_addDialog.OpenAdd(selectedItemType);
@@ -218,7 +221,9 @@ void CMuItemBrowserUI::RenderItemActions(int selectedItemType)
     {
         m_addDialog.OpenDuplicate(selectedItemType);
     }
+    ImGui::EndDisabled();
     ImGui::SameLine();
+    ImGui::BeginDisabled(!hasEntry);
     if (ImGui::Button(I18N::Editor::MoveItem))
     {
         m_moveDialog.Open(selectedItemType);
@@ -238,10 +243,9 @@ bool CMuItemBrowserUI::RevealSelection(int selectedItemType)
         return false;
     }
     m_shownSerial = g_ItemSelection.GetSerial();
-    // A number with neither an item nor a model entry (an undone Add) is in no
+    // A number with neither an entry nor a model entry (an undone Add) is in no
     // list: the filters stay.
-    if (!Data::Items::IsValidItemType(selectedItemType) ||
-        (g_ItemDatabase.Find(selectedItemType) == nullptr && g_ItemModelDatabase.Find(selectedItemType) == nullptr))
+    if (!Data::Items::IsValidItemType(selectedItemType) || Data::Items::IsFreeItemType(selectedItemType))
     {
         return false;
     }
@@ -249,10 +253,9 @@ bool CMuItemBrowserUI::RevealSelection(int selectedItemType)
     const std::vector<int>& listed = m_list.GetItemTypes(m_filter);
     if (std::ranges::find(listed, selectedItemType) == listed.end())
     {
-        // A number without an item is only in the list of models without one.
+        // All items lists it: an item, an entry without a name or a model without an entry.
         m_filter = {};
         m_search.clear();
-        m_filter.modelsWithoutItem = g_ItemDatabase.Find(selectedItemType) == nullptr;
     }
     return true;
 }

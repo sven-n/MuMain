@@ -64,8 +64,6 @@ const char* Stage(RenderStage stage)
 {
     switch (stage)
     {
-    case RenderStage::Handler:
-        return I18N::Editor::StageHandler;
     case RenderStage::Switch:
         return I18N::Editor::StageSwitch;
     case RenderStage::DrawnAsModel:

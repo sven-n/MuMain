@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Core/Platform/WinCompat.h"
+#include <cstddef>
+#include <cstdio>
 #include <memory>
 #include <functional>
+#include <optional>
+#include <vector>
 
 /**
  * Generic file I/O operations for game data
@@ -81,4 +85,51 @@ namespace DataFileIO
      * @param message Error message to display
      */
     void ReportError(const wchar_t* message);
+
+    // ReadExact and ReadAll are inline: a loader that only reads must not link DataFileIO.cpp, whose error log
+    // (g_ErrorReport) brings the crash reporter, and with it the renderer and the audio, into every binary that
+    // links the loader. The unit tests that link the game library without Winmain.cpp would then miss its globals.
+
+    /**
+     * Read exactly `size` bytes; reading zero bytes always succeeds
+     *
+     * @return false when the file ends or a read fails first
+     */
+    inline bool ReadExact(FILE* fp, void* buffer, std::size_t size)
+    {
+        return size == 0 || std::fread(buffer, size, 1, fp) == 1;
+    }
+
+    /**
+     * Read a whole open file, from its start to its end
+     *
+     * @return std::nullopt when its size cannot be told or a read fails
+     */
+    inline std::optional<std::vector<BYTE>> ReadAll(FILE* fp)
+    {
+        if (std::fseek(fp, 0, SEEK_END) != 0)
+        {
+            return std::nullopt;
+        }
+        const long size = std::ftell(fp);
+        if (size < 0 || std::fseek(fp, 0, SEEK_SET) != 0)
+        {
+            return std::nullopt;
+        }
+        std::vector<BYTE> content(static_cast<std::size_t>(size));
+        if (!ReadExact(fp, content.data(), content.size()))
+        {
+            return std::nullopt;
+        }
+        return content;
+    }
+
+    /**
+     * Report a game data file that cannot be used, as the loaders report a missing one: the error log, a message box
+     * and the game window closing
+     *
+     * @param fileName The file, as the loader opened it
+     * @param issue What is wrong with it, e.g. L"File corrupted."
+     */
+    void ReportUnusableFile(const wchar_t* fileName, const wchar_t* issue);
 }

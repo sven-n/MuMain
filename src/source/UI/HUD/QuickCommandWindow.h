@@ -26,14 +26,14 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
-        float GetLayerDepth();	//. 2.0f
-        float GetKeyEventOrder();	// 10.f;
+        float GetLayerDepth() override;    //. 2.0f
+        float GetKeyEventOrder() override; // 10.f;
 
         void OpenningProcess();
         void ClosingProcess();

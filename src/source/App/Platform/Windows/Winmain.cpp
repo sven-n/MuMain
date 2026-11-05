@@ -1,12 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
@@ -26,6 +29,9 @@
 #include <utility>
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterNames.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -103,7 +109,6 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
-#include "Camera/CameraProjection.h"
 #include "I18N/All.h"
 
 #ifdef _EDITOR
@@ -124,7 +129,7 @@ CUIMapName* g_pUIMapName = nullptr; // rozy
 
 float Time_Effect = 0;
 bool ashies = false;
-int weather = rand() % 3;
+int weather = Random::Rand() % 3;
 
 HWND g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
@@ -186,7 +191,7 @@ void CheckHack()
     }
 
     const int dwTick = GetTickCount();
-    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed);
+    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed, magicSpeed);
 
     if (!First)
     {
@@ -1472,6 +1477,10 @@ MSG MainLoop()
         SDL_Event event;
         int messageProcessed = 0;
 
+        // Wait for the GPU before reading input, not after: with VSync the frame then uses input as fresh as
+        // the CPU work allows, and the wait isn't counted as the renderer's CPU time.
+        mu::GetRenderer().WaitForSwapchain();
+
         // Per-frame mouse-state reset (was done per-message in WndProc): clear a
         // stale double-click and a pop whose position the cursor has moved off.
         MouseLButtonDBClick = false;
@@ -1875,13 +1884,6 @@ void UpdateCursorClip()
 // Update camera state when window resolution changes
 void UpdateResolutionDependentSystems()
 {
-    // Force camera state update with new viewport dimensions
-    // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
-    extern CameraState g_Camera;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
-                                       g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.
@@ -2253,7 +2255,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     mu::GetRenderer().SetOffscreenRenderCallback([]
     {
         FRAME_PROFILE(UI);
+        // A draw pass like the scene's: what the previews draw was updated by their owners.
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        Diagnostics::DrawPurityCheck::BeforeDraw();
         UI::RmlBridge::RenderTarget::RenderAll();
+        Diagnostics::DrawPurityCheck::AfterDraw();
     });
 
     mu::GetRenderer().SetPostRmlUiCallback(
@@ -2296,6 +2302,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
+    g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
+    g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.
@@ -2393,18 +2401,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     timers.SetRepeating(MUHELPER_TIMER, 250 /* ms */,
                         [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
 
-    srand((unsigned)time(nullptr));
+    Random::SeedRand((unsigned)time(nullptr));
 
     for (int& i : RandomTable)
-        i = rand() % 360;
+        i = Random::Rand() % 360;
 
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
+    RendomMemoryDump = new BYTE[Random::Rand() % 100 + 1];
     GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
     SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
     ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    ItemAttribute = ItemAttRibuteMemoryDump + rand() % 1024;
+    ItemAttribute = ItemAttRibuteMemoryDump + Random::Rand() % 1024;
     CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    CharactersClient = CharacterMemoryDump + rand() % 128;
+    CharactersClient = CharacterMemoryDump + Random::Rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));

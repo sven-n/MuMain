@@ -7,18 +7,18 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     //. 오브젝트
     bool CreateCryWolf1stObject(OBJECT* o);
     bool MoveCryWolf1stObject(OBJECT* o);
-    bool RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b);
-    bool RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
+    bool UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b);
+    bool RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon);
 
     //. 몬스터
     CHARACTER* CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key);
 
     bool MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     void MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    bool RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
-    bool RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon);
+    bool UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderCryWolf1stMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
     bool AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* b);
-    bool SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o);
     bool CreateMist(PARTICLE* pParticleObj);
     void RenderBaseSmoke(void);
 
@@ -38,7 +38,6 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     void DoTankerFireFixStartPosition(int SourceX, int SourceY, int PositionX, int PositionY);
 
     void Check_AltarState(int Num, int State);
-    void Set_Message_Box(int Str, int Num, int Key, int ObjNum = -1);
     void Set_Val_Hp(int State);
     void Set_BossMonster(int Val_Hp, int Dl_Num);
     void SetTime(BYTE byHour, BYTE byMinute);

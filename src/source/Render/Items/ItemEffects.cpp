@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "ItemEffects.h"
 #include "ItemModelTable.h"
@@ -13,130 +14,144 @@
 #include <string_view>
 #include <vector>
 
+namespace Render
+{
+DrawLook DrawLook::Of(const OBJECT& o)
+{
+    return {o.Alpha, o.BlendMesh, o.BlendMeshLight, o.BlendMeshTexCoordU, o.BlendMeshTexCoordV, o.HiddenMesh};
+}
+} // namespace Render
+
 namespace Render::Items::ItemEffects
 {
 namespace
 {
 // An effect runs before the model is drawn, and may change the level the
-// model glows like. Drawn: it drew the model itself, nothing more is drawn.
-using EffectFunction = Result (*)(BMD* b, OBJECT* o, int Type, float Alpha, int& Level);
+// model glows like and the alpha it is drawn with. Drawn: it drew the model
+// itself, nothing more is drawn.
+using EffectFunction = Result (*)(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level);
+// Spawns the effect's sprites, particles and lightning from the model's pose, in the update.
+using SpawnFunction = void (*)(BMD* b, OBJECT* o, vec34_t* bones);
 
 struct ItemEffect
 {
     const char* name;
     EffectFunction apply;
+    SpawnFunction spawn = nullptr;
 };
 
 // ------------------------------------------------ the effects
 
-Result ApplyBillOfBalrog(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+// For effects that only spawn: the model is drawn as usual.
+Result ApplyNothing(BMD*, const OBJECT*, DrawLook&, int, float&, int&)
+{
+    return Result::Applied;
+}
+
+Result ApplyBillOfBalrog(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     Vector(0.5f, 0.5f, 1.5f, b->BodyLight);
     b->StreamMesh = 0;
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                  look.hiddenMesh, BITMAP_CHROME);
     b->StreamMesh = -1;
     return Result::Applied;
 }
 
-Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyMeshesPerLevel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     Vector(1.f, 1.f, 1.f, b->BodyLight);
     b->StreamMesh = 0;
-    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     switch (Level)
     {
     case 2:
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         break;
     case 3:
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         Vector(0.75f, 0.65f, 0.5f, b->BodyLight);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
-        b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
+        b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         break;
     }
     b->StreamMesh = -1;
     return Result::Drawn;
 }
 
-Result ApplyFirecracker(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyFirecracker(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     b->StreamMesh = 0;
-    o->BlendMeshLight = 1.f;
+    look.blendMeshLight = 1.f;
     Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV);
+    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     Vector(1.f, 0.f, 0.f, b->BodyLight);
     b->LightEnable = true;
-    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV);
+    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
+    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                  look.blendMeshV);
     b->StreamMesh = -1;
     return Result::Drawn;
 }
 
-Result ApplyGmGift(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyGmGift(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+    b->RenderBody(RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     b->LightEnable = true;
     Vector(0.1f, 0.6f, 0.4f, b->BodyLight);
-    o->Alpha = 0.5f;
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV);
+    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     return Result::Drawn;
 }
 
-Result ApplyDarkLordScroll(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDarkLordScroll(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    b->BeginRender(o->Alpha);
-    o->BlendMeshLight = 1.f;
-    b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                  o->HiddenMesh);
-    o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    b->RenderMesh(2, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 2, 1 - o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
+    b->BeginRender(look.alpha);
+    look.blendMeshLight = 1.f;
+    b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
+    b->RenderMesh(1, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                  look.hiddenMesh);
+    b->RenderMesh(2, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 2, 1 - look.blendMeshLight, look.blendMeshU,
+                  look.blendMeshV, look.hiddenMesh);
     b->EndRender();
     return Result::Drawn;
 }
 
-Result ApplySpirit(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplySpirit(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                  o->HiddenMesh);
+    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                  look.hiddenMesh);
     switch (Level)
     {
     case 0:
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         break;
 
     case 1:
         Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         break;
     }
     return Result::Drawn;
 }
 
-Result ApplyPotion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyPotion(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     if (Level > 0)
         Level = 7;
     return Result::Applied;
 }
 
-Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyFruits(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     switch (Level)
     {
@@ -153,28 +168,32 @@ Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
         Vector(0.6f, 0.8f, 0.4f, b->BodyLight);
         break;
     }
-    b->RenderBody(RENDER_METAL, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                  o->HiddenMesh, BITMAP_CHROME + 1);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
+    b->RenderBody(RENDER_METAL, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                  look.hiddenMesh, BITMAP_CHROME + 1);
+    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                  look.blendMeshV, look.hiddenMesh, BITMAP_CHROME + 1);
     return Result::Drawn;
 }
 
-Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDevilsEye(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     float sine = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
 
-    o->BlendMesh = 1;
-    o->BlendMeshLight = sine;
-    o->BlendMeshTexCoordV = (int)WorldTime % 2000 * 0.0005f;
-    o->Alpha = 2.0f;
+    look.blendMesh = 1;
+    look.blendMeshLight = sine;
+    look.blendMeshV = (int)WorldTime % 2000 * 0.0005f;
+    Alpha = 2.0f;
+    return Result::Applied;
+}
 
-    float Luminosity = sine;
+// The eye's pulse, which the ground item's next draw adds to its light.
+void SpawnDevilsEye(BMD* b, OBJECT* o, vec34_t* bones)
+{
+    float Luminosity = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
     Vector(Luminosity / 5.0f, Luminosity / 5.0f, Luminosity / 5.0f, o->Light);
-    return Result::Applied;
 }
 
-Result ApplyDevilsKey(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnDevilsKey(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
     vec3_t p, Position, EffLight;
@@ -183,17 +202,16 @@ Result ApplyDevilsKey(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     float Scale = Luminosity * 0.8f;
     Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
 
-    b->TransformPosition(BoneTransform[1], p, Position);
+    b->TransformPosition(bones[1], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 
-    b->TransformPosition(BoneTransform[2], p, Position);
+    b->TransformPosition(bones[2], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    return Result::Applied;
 }
 
-Result ApplyDevilsInvitation(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnDevilsInvitation(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
     vec3_t p, Position, EffLight;
@@ -202,77 +220,75 @@ Result ApplyDevilsInvitation(BMD* b, OBJECT* o, int Type, float Alpha, int& Leve
     float Scale = Luminosity * 0.8f;
     Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
 
-    b->TransformPosition(BoneTransform[9], p, Position);
+    b->TransformPosition(bones[9], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 
-    b->TransformPosition(BoneTransform[10], p, Position);
+    b->TransformPosition(bones[10], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    return Result::Applied;
 }
 
-Result ApplyRena(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnRena(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.25f + 0.75f;
     vec3_t EffLight;
 
     Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.f, EffLight);
     CreateSprite(BITMAP_SPARK + 1, o->Position, 2.5f, EffLight, o);
-    return Result::Applied;
 }
 
-Result ApplyWingsOfDragon(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyWingsOfDragon(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->BlendMeshLight = (float)(sinf(WorldTime * 0.001f) + 1.f) / 4.f;
+    look.blendMeshLight = (float)(sinf(WorldTime * 0.001f) + 1.f) / 4.f;
     return Result::Applied;
 }
 
-Result ApplyWingsOfSoul(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyWingsOfSoul(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->BlendMeshLight = (float)sinf(WorldTime * 0.001f) + 1.1f;
+    look.blendMeshLight = (float)sinf(WorldTime * 0.001f) + 1.1f;
     return Result::Applied;
 }
 
-Result ApplyRedSpirit(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyRedSpirit(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
+    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
     return Result::Applied;
 }
 
-Result ApplyStaffOfKundun(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyStaffOfKundun(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
+    look.blendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
     return Result::Applied;
 }
 
-Result ApplyDivineSet(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDivineSet(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->BlendMeshLight = 1.f;
+    look.blendMeshLight = 1.f;
     return Result::Applied;
 }
 
-Result ApplyHiddenMeshByLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyHiddenMeshByLevel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
     switch (Level)
     {
     case 0:
-        o->HiddenMesh = 1;
+        look.hiddenMesh = 1;
         break;
     case 1:
-        o->HiddenMesh = 0;
+        look.hiddenMesh = 0;
         break;
     }
     return Result::Applied;
 }
 
-Result ApplyHideMesh1(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyHideMesh1(BMD* b, const OBJECT* o, DrawLook& look, int Type, float& Alpha, int& Level)
 {
-    o->HiddenMesh = 1;
+    look.hiddenMesh = 1;
     return Result::Applied;
 }
 
-Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingsOfDarkness(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t posCenter, p, Position, Light;
     float Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.3f;
@@ -285,8 +301,8 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 5; ++i)
     {
-        b->TransformPosition(BoneTransform[22 - i], p, posCenter, true);
-        b->TransformPosition(BoneTransform[30 - i], p, Position, true);
+        b->TransformPosition(bones[22 - i], p, posCenter, true);
+        b->TransformPosition(bones[30 - i], p, Position, true);
         if (rand_fps_check(1))
         {
             CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
@@ -298,8 +314,8 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 5; ++i)
     {
-        b->TransformPosition(BoneTransform[7 - i], p, posCenter, true);
-        b->TransformPosition(BoneTransform[11 + i], p, Position, true);
+        b->TransformPosition(bones[7 - i], p, posCenter, true);
+        b->TransformPosition(bones[11 + i], p, Position, true);
         if (rand_fps_check(1))
         {
             CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
@@ -308,10 +324,9 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
         CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t vRelativePos, vPos, vLight;
     Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -325,8 +340,8 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 25; ++i)
     {
-        b->TransformPosition(BoneTransform[iBone[i]], vRelativePos, vPos, true);
-        fScale = 0.5f; // (rand()%10) * 0.05f + 0.3f;
+        b->TransformPosition(bones[iBone[i]], vRelativePos, vPos, true);
+        fScale = 0.5f; // (Random::Rand()%10) * 0.05f + 0.3f;
         CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime * 0.01f, 1);
     }
 
@@ -335,8 +350,8 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     {
         for (int i = 0; i < 6; ++i)
         {
-            b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-            if (rand() % 20 == 0)
+            b->TransformPosition(bones[iBoneThunder[i]], vRelativePos, vPos, true);
+            if (Random::Rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
                 CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
@@ -350,7 +365,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 22; ++i)
     {
-        b->TransformPosition(BoneTransform[iBoneLight[i]], vRelativePos, vPos, true);
+        b->TransformPosition(bones[iBoneLight[i]], vRelativePos, vPos, true);
         if (iBoneLight[i] == 12 || iBoneLight[i] == 64 || iBoneLight[i] == 98 || iBoneLight[i] == 52)
         {
             Vector(0.9f, 0.0f, 0.0f, vLight);
@@ -362,10 +377,9 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
             CreateSprite(BITMAP_LIGHT, vPos, fScale + 0.3f, vLight, o);
         }
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfEternal(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -377,7 +391,7 @@ Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {24, 31, 15, 8, 53, 35};
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.3f, Light, o);
     }
 
@@ -387,20 +401,19 @@ Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 18; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
     }
     int iGreenFlarePos2[] = {56, 38, 51, 45};
 
     for (int i = 0; i < 4; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos2[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos2[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 0.5f, Light, o);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfIllusion(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -411,7 +424,7 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {5, 6, 7, 8, 18, 19, 23, 24, 25, 27, 37, 38};
     for (int i = 0; i < 12; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 0.6f, Light, o);
     }
 
@@ -420,7 +433,7 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 8; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
     }
 
@@ -430,15 +443,14 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o, 0.5f);
     if (rand_fps_check(2))
     {
-        b->TransformPosition(BoneTransform[13], p, Position, true);
+        b->TransformPosition(bones[13], p, Position, true);
         CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
-        b->TransformPosition(BoneTransform[31], p, Position, true);
+        b->TransformPosition(bones[31], p, Position, true);
         CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfRuin(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -449,7 +461,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {6, 15, 24, 56, 47, 38};
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
     }
 
@@ -460,7 +472,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.1f);
@@ -468,7 +480,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 6; i < 18; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.3f);
@@ -476,7 +488,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 18; i < 30; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.5f);
@@ -484,15 +496,14 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 30; i < 38; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.7f);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfDimension(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -505,13 +516,13 @@ Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
     int icnt;
     for (icnt = 0; icnt < 2; ++icnt)
     {
-        b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
+        b->TransformPosition(bones[iFlarePos0[icnt]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
     }
     Vector((1.0f + Luminosity) / 4.f, (0.7f + Luminosity) / 4.f, (0.2f + Luminosity) / 4.f, Light);
     for (; icnt < 6; ++icnt)
     {
-        b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
+        b->TransformPosition(bones[iFlarePos0[icnt]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 0.5f, Light, o);
     }
 
@@ -520,10 +531,9 @@ Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
     }
-    return Result::Applied;
 }
 
 // ------------------------------------------------ the names
@@ -537,10 +547,10 @@ const ItemEffect ItemEffects[] = {
     {"spirit", ApplySpirit},
     {"potion", ApplyPotion},
     {"fruits", ApplyFruits},
-    {"devilsEye", ApplyDevilsEye},
-    {"devilsKey", ApplyDevilsKey},
-    {"devilsInvitation", ApplyDevilsInvitation},
-    {"rena", ApplyRena},
+    {"devilsEye", ApplyDevilsEye, SpawnDevilsEye},
+    {"devilsKey", ApplyNothing, SpawnDevilsKey},
+    {"devilsInvitation", ApplyNothing, SpawnDevilsInvitation},
+    {"rena", ApplyNothing, SpawnRena},
     {"wingsOfDragon", ApplyWingsOfDragon},
     {"wingsOfSoul", ApplyWingsOfSoul},
     {"redSpirit", ApplyRedSpirit},
@@ -548,12 +558,12 @@ const ItemEffect ItemEffects[] = {
     {"divineSet", ApplyDivineSet},
     {"hiddenMeshByLevel", ApplyHiddenMeshByLevel},
     {"hideMesh1", ApplyHideMesh1},
-    {"wingsOfDarkness", ApplyWingsOfDarkness},
-    {"wingOfStorm", ApplyWingOfStorm},
-    {"wingOfEternal", ApplyWingOfEternal},
-    {"wingOfIllusion", ApplyWingOfIllusion},
-    {"wingOfRuin", ApplyWingOfRuin},
-    {"wingOfDimension", ApplyWingOfDimension},
+    {"wingsOfDarkness", ApplyNothing, SpawnWingsOfDarkness},
+    {"wingOfStorm", ApplyNothing, SpawnWingOfStorm},
+    {"wingOfEternal", ApplyNothing, SpawnWingOfEternal},
+    {"wingOfIllusion", ApplyNothing, SpawnWingOfIllusion},
+    {"wingOfRuin", ApplyNothing, SpawnWingOfRuin},
+    {"wingOfDimension", ApplyNothing, SpawnWingOfDimension},
 };
 
 const ItemEffect* FindEffect(std::string_view name)
@@ -594,9 +604,22 @@ std::span<const std::string_view> GetNames()
     return names;
 }
 
-Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)
+Result Apply(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float& alpha, int& level)
 {
     const ItemEffect* effect = g_itemEffects.Find(modelType);
-    return effect != nullptr ? effect->apply(b, o, modelType, alpha, level) : Result::None;
+    return effect != nullptr ? effect->apply(b, o, look, modelType, alpha, level) : Result::None;
+}
+
+bool Spawns(int modelType)
+{
+    const ItemEffect* effect = g_itemEffects.Find(modelType);
+    return effect != nullptr && effect->spawn != nullptr;
+}
+
+void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
+{
+    const ItemEffect* effect = g_itemEffects.Find(modelType);
+    if (effect != nullptr && effect->spawn != nullptr)
+        effect->spawn(b, o, bones);
 }
 } // namespace Render::Items::ItemEffects

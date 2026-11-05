@@ -3,8 +3,10 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <bitset>
@@ -65,9 +67,34 @@ std::filesystem::path GetItemStatsFile();
 
 ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file);
 
+struct ItemTooltipLoadResult
+{
+    ItemTooltipFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/Tooltip.json, relative to the client folder: the shared texts and the layouts of the item
+// tooltips, see ItemTooltipLayouts.h. In a folder of its own like the stat file.
+std::filesystem::path GetItemTooltipFile();
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
+
+struct GroundLabelsLoadResult
+{
+    GroundLabelFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/GroundLabels.json, relative to the client folder: the looks of the item names on the ground, see
+// ItemGroundLabels.h. Next to the tooltip file.
+std::filesystem::path GetGroundLabelsFile();
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
+
 struct GlowColorsLoadResult
 {
     std::vector<Effects::GlowColor> colors;
+    std::vector<Colors::ColorFolder> folders;
     std::vector<ItemDataIssue> issues;
 };
 
@@ -89,13 +116,18 @@ enum class ItemDataSaveResult
 // Item groups by number, e.g. the groups whose model files a save writes.
 using ItemGroupSet = std::bitset<MAX_ITEM_TYPE>;
 
-// Validates the items and, when there are no errors, writes one file per
+// Validates the items and, when there are no fatal problems, writes one file per
 // group. Each changed file is written to a temporary file first; only when
 // all of them could be written do they replace the old files, so a full disk
 // or a folder that cannot be written leaves every file as it was. Files
 // whose content did not change are not touched.
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues);
+
+// Writes `text` to `file` as the saves do: by a temporary file that replaces it, so a failed
+// write leaves the old file. An unchanged file is not touched.
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues);
 
 // The item models a save writes with the items.
 struct ItemModelSave
@@ -111,12 +143,17 @@ struct ItemModelSave
     // Written to glowColorsFile (GetGlowColorsFile) when glowColorsChanged.
     std::filesystem::path glowColorsFile;
     std::span<const Effects::GlowColor> glowColors;
+    std::span<const Colors::ColorFolder> glowColorFolders;
     bool glowColorsChanged = false;
 #ifdef _EDITOR
     // Written to statsFile (GetItemStatsFile) when statsChanged.
     std::filesystem::path statsFile;
     const ItemStatFile* stats = nullptr;
     bool statsChanged = false;
+    // Written to groundLabelsFile (GetGroundLabelsFile) when groundLabelsChanged.
+    std::filesystem::path groundLabelsFile;
+    const GroundLabelFile* groundLabels = nullptr;
+    bool groundLabelsChanged = false;
 #endif
 };
 
@@ -155,6 +192,9 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
 // The same for the item stat file (the changes of Item Formulas), read back
 // from ItemStats.json as the save would write it.
 void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues);
+// The same for the ground label file (the styles the Colors window changed),
+// read back from GroundLabels.json as the save would write it.
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues);
 #endif
 
 // A model file that is not in the client folder (relative to the working

@@ -2,7 +2,9 @@
 
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipConditions.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/StatProfileRule.h"
 
@@ -116,6 +118,105 @@ TEST_CASE("Item attribute conversion keeps every field [data][items]")
     }
 }
 
+// The editor rebuilds an item from its bmd attribute, which has no tooltip data: the fields the attribute lacks come
+// from the item as it was, its description lines, level values and name lines whole.
+TEST_CASE("Converting from the item attribute keeps the client-only fields [data][items]")
+{
+    ItemDefinition source = MakeItem(SwordGroup, 0, "Kris");
+    ItemDescriptionLine written;
+    written.text.Set("en", "Increase {percent}% of Damage");
+    written.text.Set("de", "Erhöht den Schaden um {percent}%");
+    written.values = {{"percent", "wingDamageIncrease1st"}};
+    TooltipCondition condition;
+    std::string error;
+    REQUIRE(ReadTooltipCondition("level>=3", condition, error));
+    written.when = {condition};
+    written.color = ItemTextColor::Blue;
+    written.minLevel = 3;
+    written.maxLevel = 9;
+    ItemDescriptionLine shared;
+    shared.textName = "cannotRepair";
+    shared.color = ItemTextColor::Red;
+    source.description = {written, ItemDescriptionLine{}, shared};
+    ItemLevelValue stat;
+    stat.text.Set("en", "ENG");
+    ItemLevelValue sharedStat;
+    sharedStat.textName = "stamina";
+    source.levelValues = {{"stat", {stat, sharedStat}}};
+    ItemNameLine olive;
+    olive.text.Set("en", "Olive of love");
+    olive.hasText = true;
+    olive.color = ItemTextColor::Yellow;
+    olive.hasColor = true;
+    olive.minLevel = 4;
+    olive.maxLevel = 4;
+    source.nameLines = {olive};
+    source.statProfile = "weapon";
+
+    // As the bmd import makes it: the attribute's fields, nothing of the tooltip.
+    ItemDefinition target = MakeItem(SwordGroup, 0, "Kris of the bmd");
+    target.damageMin = 99;
+    CopyFieldsNotInItemAttribute(source, target);
+
+    CHECK(target.description == source.description);
+    CHECK(target.levelValues == source.levelValues);
+    CHECK(target.nameLines == source.nameLines);
+    CHECK(target.statProfile == "weapon");
+    // The attribute's own fields stay the imported ones.
+    CHECK(target.names.GetNeutral() == "Kris of the bmd");
+    CHECK(target.damageMin == 99);
+}
+
+TEST_CASE("Damage and magic power past 255 are kept, but do not fit the bmd item file [data][items]")
+{
+    ItemDefinition definition = MakeItem(SwordGroup, 51, "Later Sword");
+    definition.damageMin = 345;
+    definition.damageMax = 380;
+    definition.magicPower = 276;
+
+    ITEM_ATTRIBUTE attribute{};
+    ToItemAttribute(definition, attribute);
+    CHECK(attribute.DamageMin == 345);
+    CHECK(attribute.DamageMax == 380);
+    CHECK(attribute.MagicPower == 276);
+    CHECK(ToItemDefinition(attribute, MakeItemType(SwordGroup, 51)).damageMax == 380);
+
+    // Each value past 255 is named, with its item and the file's limit.
+    std::vector<ITEM_ATTRIBUTE> items(3);
+    items[1] = attribute;
+    const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(items.data(), static_cast<int>(items.size()));
+    REQUIRE(misfits.size() == 3);
+    CHECK(misfits[0].itemType == 1);
+    CHECK(std::string(misfits[0].field) == "DamageMin");
+    CHECK(misfits[0].value == 345);
+    CHECK(misfits[0].limit == 255);
+    CHECK(std::string(misfits[1].field) == "DamageMax");
+    CHECK(std::string(misfits[2].field) == "MagicPower");
+    CHECK(DescribeItemFileMisfits({misfits[0]}) == "Item (0,1) DamageMin is 345; a .bmd item file holds up to 255\n");
+
+    // Each field on its own.
+    for (WORD ITEM_ATTRIBUTE::* field :
+         {&ITEM_ATTRIBUTE::DamageMin, &ITEM_ATTRIBUTE::DamageMax, &ITEM_ATTRIBUTE::MagicPower})
+    {
+        ITEM_ATTRIBUTE one{};
+        one.*field = 256;
+        const std::vector<ItemFileMisfit> alone = FindItemFileMisfits(&one, 1);
+        REQUIRE(alone.size() == 1);
+        CHECK(alone[0].value == 256);
+        one.*field = 255;
+        CHECK(FindItemFileMisfits(&one, 1).empty());
+    }
+
+    attribute.DamageMin = 255;
+    attribute.DamageMax = 255;
+    attribute.MagicPower = 255;
+    CHECK(FindItemFileMisfits(&attribute, 1).empty());
+    ITEM_ATTRIBUTE_FILE file{};
+    CopyItemAttributeToDestination(file, attribute);
+    CHECK(file.DamageMax == 255);
+    CHECK(sizeof(file.DamageMax) == 1);
+}
+
 TEST_CASE("A weapon's group gives its weapon kind [data][items]")
 {
     const auto groupWeaponKind = [](int group, ItemSlot slot, bool twoHanded)
@@ -217,6 +318,34 @@ TEST_CASE("Item database finds existing items only [data][items]")
     CHECK(database.Find(MAX_ITEM_TYPE, 0) == nullptr);
 }
 
+TEST_CASE("The game does not know an item file entry without a name [data][items]")
+{
+    ItemDefinition entry;
+    entry.group = SwordGroup;
+    entry.number = 1;
+    entry.entryWithoutName = true;
+    const std::vector<ItemDefinition> items = {MakeItem(SwordGroup, 0, "Kris"), entry};
+
+    ItemDatabase database;
+    database.Build(items);
+
+    const int itemType = MakeItemType(SwordGroup, 1);
+    CHECK(database.GetExistingItemCount() == 1);
+    CHECK(database.Find(itemType) == nullptr);
+    CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Trade));
+    const ItemDefinition& slot = database.GetAllSlots()[itemType];
+    CHECK(slot.HasEntry());
+    CHECK_FALSE(slot.Exists());
+
+    // A name makes the entry an item.
+    ItemDefinition named = slot;
+    named.names = Data::LocalizedString::Parse("Short Sword");
+    database.Set(named);
+    REQUIRE(database.Find(itemType) != nullptr);
+    CHECK_FALSE(database.Find(itemType)->entryWithoutName);
+    CHECK(database.GetExistingItemCount() == 2);
+}
+
 TEST_CASE("Item names follow the display locale with English fallback [data][items]")
 {
     const std::vector<ItemDefinition> items = {
@@ -234,6 +363,25 @@ TEST_CASE("Item names follow the display locale with English fallback [data][ite
 
     database.SetDisplayLocale("de");
     CHECK(potion->name == L"Large Healing Potion");
+}
+
+TEST_CASE("Another language of the item names raises the name version but not the item version [data][items]")
+{
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{MakeItem(SwordGroup, 0, "Kris||pt=Cris")});
+    const int version = database.GetVersion();
+    const int nameVersion = database.GetNameVersion();
+
+    database.SetDisplayLocale("en");
+    CHECK(database.GetNameVersion() == nameVersion);
+
+    database.SetDisplayLocale("pt");
+    CHECK(database.GetNameVersion() != nameVersion);
+    CHECK(database.GetVersion() == version);
+
+    const int ptNameVersion = database.GetNameVersion();
+    database.Set(*database.Find(SwordGroup, 0));
+    CHECK(database.GetNameVersion() != ptNameVersion);
 }
 
 TEST_CASE("Item log names use English names and the item id [data][items]")

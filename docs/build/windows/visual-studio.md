@@ -18,12 +18,16 @@ See [the build guide](../README.md) for shared concepts.
    reads `CMakePresets.json` automatically.
 2. Pick a configure preset from the toolbar:
 
-   | Preset | Arch | Editor |
-   |--------|------|--------|
-   | `windows-x64` | 64-bit | off |
-   | `windows-x64-mueditor` | 64-bit | on |
-   | `windows-x86` | 32-bit | off |
-   | `windows-x86-mueditor` | 32-bit | on |
+   | Preset | Arch | Editor | In-game tests |
+   |--------|------|--------|---------------|
+   | `windows-x64` | 64-bit | off | off |
+   | `windows-x64-mueditor` | 64-bit | on | on |
+   | `windows-x64-in-game-tests` | 64-bit | off | on |
+   | `windows-x86` | 32-bit | off | off |
+   | `windows-x86-mueditor` | 32-bit | on | on |
+
+   The in-game tests come with the control socket they drive the client
+   through; see [in-game tests](../../in-game-tests.md).
 
 3. Build (`Build > Build All`). The output lands in
    `out/build/<preset>/src/<config>/`.

@@ -214,6 +214,23 @@
         "pt": "Dardo"
       },
       "tags": ["ammunition"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": "@additionalDamagePlusOne",
+          "color": "blue",
+          "levels": [1, 15]
+        }
+      ],
+      "tooltipLayout": "noDurabilityLine",
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -435,6 +452,23 @@
         "pt": "Flecha"
       },
       "tags": ["ammunition"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": "@additionalDamagePlusOne",
+          "color": "blue",
+          "levels": [1, 15]
+        }
+      ],
+      "tooltipLayout": "noDurabilityLine",
       "width": 1,
       "height": 1,
       "slot": "mainHand",
@@ -511,6 +545,21 @@
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "mainHand",

@@ -20,6 +20,19 @@ namespace
 constexpr float kExitWidth = 36.f;
 constexpr float kExitHeight = 29.f;
 
+// The event notes above the counts, top to bottom.
+const wchar_t* const* const kIntroNotes[] = {
+    &I18N::Game::October28November112010,
+    &I18N::Game::RegisterTheSignInGame,
+    &I18N::Game::VisitOurHomepage,
+};
+
+// The closing notes below the counts, top to bottom.
+const wchar_t* const* const kClosingNotes[] = {
+    &I18N::Game::ToBeAbleToJoin,
+    &I18N::Game::TheEvent,
+};
+
 // The original printed its notes through mu_swprintf() as formats.
 std::wstring Formatted(const wchar_t* format)
 {
@@ -141,8 +154,8 @@ void CGoldBowmanLena::SyncView()
         const float width = INVENTORY_WIDTH;
         std::vector<EventItemEntryView::Text> texts;
         texts.push_back({getMonsterName(236), width});
-        for (int i = 0; i < 3; ++i)
-            texts.push_back({Formatted(I18N::Game::Lookup(700 + i)), width});
+        for (const wchar_t* const* note : kIntroNotes)
+            texts.push_back({Formatted(*note), width});
 
         wchar_t count[100] = {};
         const int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_RENA, 0);
@@ -152,8 +165,8 @@ void CGoldBowmanLena::SyncView()
         texts.push_back({I18N::Game::NumberOfRegisteredRena, width});
         mu_swprintf(count, L"    X    %d", g_shEventChipCount);
         texts.push_back({count, width});
-        for (int j = 0; j < 2; ++j)
-            texts.push_back({Formatted(I18N::Game::Lookup(703 + j)), width});
+        for (const wchar_t* const* note : kClosingNotes)
+            texts.push_back({Formatted(*note), width});
         m_View.SetTexts(std::move(texts));
 
         m_View.SetButtons({{.label = I18N::Game::RegisteringRena,

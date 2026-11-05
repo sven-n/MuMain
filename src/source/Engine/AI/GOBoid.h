@@ -10,15 +10,23 @@ bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int Sub
 void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType = 0, int LinkBone = 0);
 bool MoveMount(OBJECT* o, bool bForceRender = false);
 void MoveMounts(void);
-bool RenderMount(OBJECT* o, bool bForceRender = false);
+// Marks the mounts the frame's view shows and sets their drawn scale; part of CullWorld.
+void CullMounts();
+bool RenderMount(const OBJECT* o, bool bForceRender = false);
 void RenderMount(void);
-void RenderDarkHorseSkill(OBJECT* o, BMD* b);
-void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
+// Spawns the effects of the mounts the last RenderMount drew; call once per update, after the mounts moved.
+void UpdateMountEffects();
+// The effects of one mount its last draw drew.
+void UpdateDrawnMountEffects(OBJECT* o);
+void UpdateDarkHorseSkill(OBJECT* o, BMD* b);
+void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
 void DeleteMount(OBJECT* Owner);
 // �������� �� �������ΰ�?
 bool IsMount(ITEM* pItem);
 
 void MoveBoids(void);
+// Marks the boids and fish the frame's view shows; part of CullWorld.
+void CullBoids();
 void RenderBoids(bool bAfterCharacter = false);
 void DeleteBoids(void);
 

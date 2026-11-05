@@ -27,7 +27,7 @@ void AddWarning(std::vector<ItemDataIssue>& issues, const std::string& source, c
         {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
 {
     Data::Items::Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, "", message);
 }
@@ -39,12 +39,12 @@ std::string FormatNumber(double value)
     return text.str();
 }
 
-std::string Errors(const std::vector<ItemDataIssue>& issues)
+std::string FatalMessages(const std::vector<ItemDataIssue>& issues)
 {
     std::string text;
     for (const ItemDataIssue& issue : issues)
     {
-        if (issue.severity == ItemDataIssueSeverity::Error)
+        if (issue.severity == ItemDataIssueSeverity::Fatal)
         {
             text += (text.empty() ? "" : "; ") + issue.ToString();
         }
@@ -56,7 +56,7 @@ bool ReadLook(const std::string& text, const std::string& source, LookFiles& fil
 {
     std::vector<ItemDataIssue> read;
     Data::Maps::ReadLookProfileJson(text, source, files.lookData, read);
-    const bool valid = !Data::Items::HasErrors(read);
+    const bool valid = !Data::Items::HasFatal(read);
     issues.insert(issues.end(), read.begin(), read.end());
     files.lookUsable = valid;
     files.look = valid ? LookDocument::parse(text) : LookDocument{};
@@ -67,7 +67,7 @@ bool ReadMood(const std::string& text, const std::string& source, LookFiles& fil
 {
     std::vector<ItemDataIssue> read;
     Data::Maps::ReadLightMoodJson(text, source, files.moodData, read);
-    const bool valid = !Data::Items::HasErrors(read);
+    const bool valid = !Data::Items::HasFatal(read);
     issues.insert(issues.end(), read.begin(), read.end());
     files.moodUsable = valid;
     files.mood = valid ? LookDocument::parse(text) : LookDocument{};
@@ -88,7 +88,7 @@ void LoadShippedMood(LookFileSystem& fileSystem, const std::filesystem::path& mo
     const std::optional<std::string> text = fileSystem.Read(moodFile);
     if (!text)
     {
-        AddError(issues, source, "could not be read");
+        AddFatal(issues, source, "could not be read");
         files.moodUsable = false;
         files.mood = LookDocument{};
         files.moodData = {};
@@ -225,7 +225,7 @@ std::string Revalidate(LookFiles& files, bool lookEdited, bool moodEdited)
         Data::Maps::ReadLightMoodJson(files.mood.dump(), "LightMood.json", files.moodData, read);
         issues.insert(issues.end(), read.begin(), read.end());
     }
-    return Errors(issues);
+    return FatalMessages(issues);
 }
 
 std::string UnusableError(const ResolvedName& name)
@@ -338,7 +338,7 @@ LookFilesLoad LoadLookFiles(LookFileSystem& fileSystem, const std::filesystem::p
     }
     else
     {
-        AddError(result.issues, lookSource, "could not be read");
+        AddFatal(result.issues, lookSource, "could not be read");
         result.files.lookUsable = false;
     }
     LoadShippedMood(fileSystem, moodFile, result.files, result.issues);
@@ -355,7 +355,7 @@ std::optional<LookFiles> LoadCandidateFiles(LookFileSystem& fileSystem, const st
     const std::optional<std::string> lookText = fileSystem.Exists(lookFile) ? fileSystem.Read(lookFile) : std::nullopt;
     if (!lookText)
     {
-        AddError(issues, lookSource, "not found or could not be read");
+        AddFatal(issues, lookSource, "not found or could not be read");
         return std::nullopt;
     }
     bool valid = ReadLook(*lookText, lookSource, files, issues);
@@ -365,7 +365,7 @@ std::optional<LookFiles> LoadCandidateFiles(LookFileSystem& fileSystem, const st
         const std::optional<std::string> moodText = fileSystem.Read(candidateMoodFile);
         if (!moodText)
         {
-            AddError(issues, moodSource, "could not be read");
+            AddFatal(issues, moodSource, "could not be read");
             valid = false;
         }
         else

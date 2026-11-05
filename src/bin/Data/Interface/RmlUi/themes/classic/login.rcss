@@ -1,0 +1,160 @@
+/* Classic (0.97) login box. Positions, sizes and colours from the 0.97 client:
+   - 0Account_new (250x216) centred horizontally, resting at y=266 of 480 with its bottom 2 px
+     below the screen, sliding up when it appears;
+   - the Connect and Exit plates are part of the background art; the button art only lights up
+     under the mouse (0On_Botton / 0On_Botton2);
+   - text colour (255, 230, 210).
+   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. The text
+   does not stretch with it: 0.97 drew its font at screen pixels, so the labels, fields and buttons
+   are "native-text" (login.rml), the native text size (RmlNativeText.h). */
+
+@spritesheet classic-login-sheet
+{
+	src: ../../../../Logo/Classic/0account_new.tga;
+	classic-login-back: 0px 0px 250px 216px;
+}
+
+@spritesheet classic-login-ok-sheet
+{
+	src: ../../../../Logo/Classic/0on_botton.jpg;
+	classic-login-ok-hover: 0px 0px 70px 19px;
+}
+
+@spritesheet classic-login-exit-sheet
+{
+	src: ../../../../Logo/Classic/0on_botton2.jpg;
+	classic-login-exit-hover: 0px 0px 70px 20px;
+}
+
+@keyframes classic-login-rise
+{
+	from { transform: translateY(100%); }
+	to   { transform: translateY(0%); }
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+	--px: calc(100vh / 480);
+}
+
+/* LoginWin.cpp still moves this one; the classic box is placed by the stylesheet instead. */
+#panel {
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+
+#classic_box {
+	position: absolute;
+	left: 50%;
+	bottom: calc(-2 * var(--px));
+	width: calc(250 * var(--px));
+	height: calc(216 * var(--px));
+	margin-left: calc(-125 * var(--px));
+	font-family: "token(font-body)";
+	color: #ffe6d2;
+	decorator: image(classic-login-back);
+	pointer-events: auto;
+	animation: 0.45s cubic-out 1 classic-login-rise;
+}
+
+.label {
+	position: absolute;
+	left: calc(32 * var(--px));
+	white-space: nowrap;
+}
+.label-account  { top: calc(50 * var(--px)); }
+.label-password { top: calc(72 * var(--px)); }
+
+.login-field {
+	position: absolute;
+	left: calc(100 * var(--px));
+	width: calc(119 * var(--px));
+	height: calc(16 * var(--px));
+	padding: 0;
+	color: #ffe6d2;
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
+}
+.login-field-account  { top: calc(48 * var(--px)); }
+.login-field-password { top: calc(70 * var(--px)); }
+
+.btn {
+	position: absolute;
+	width: calc(70 * var(--px));
+	text-align: center;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: none;
+}
+.btn-text {
+	color: #ffffff;
+}
+.btn-ok {
+	left: calc(128 * var(--px));
+	top: calc(95 * var(--px));
+	height: calc(19 * var(--px));
+	line-height: calc(19 * var(--px));
+}
+.btn-ok:hover {
+	decorator: image(classic-login-ok-hover);
+}
+.btn-cancel {
+	left: calc(90 * var(--px));
+	top: calc(180 * var(--px));
+	height: calc(20 * var(--px));
+	line-height: calc(20 * var(--px));
+}
+.btn-cancel:hover {
+	decorator: image(classic-login-exit-hover);
+}
+
+/* The "remember me" / "save password" options, which neither 0.97 nor Season 1 (the same box) has:
+   on the two blank plates of the box's second row (x 52 and 129, y 118, 69x19), each with the
+   classic social windows' check box (a 7x7 box, win_check's mark). */
+@spritesheet classic-login-check-sheet { src: ../../../win_check.tga; classic-login-check: 0px 0px 5px 5px; }
+
+#classic_box .checkbox-row {
+	position: absolute;
+	top: calc(118 * var(--px));
+	width: calc(69 * var(--px));
+	height: calc(19 * var(--px));
+	line-height: calc(19 * var(--px));
+	text-align: center;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#classic_box .checkbox-remember-me   { left: calc(52 * var(--px)); }
+#classic_box .checkbox-save-password { left: calc(129 * var(--px)); }
+#classic_box .checkbox-box {
+	display: inline-block;
+	width: calc(7 * var(--px));
+	height: calc(7 * var(--px));
+	margin-right: calc(3 * var(--px));
+	vertical-align: middle;
+	box-sizing: border-box;
+	background-color: rgb(106, 97, 88);
+	border: 1px rgb(146, 134, 121);
+	decorator: none;
+}
+#classic_box .checkbox-box.checked { decorator: image(classic-login-check); }
+/* The labels are sized with the box, not at the native text size, which would run past the plate
+   at most sizes (the plate shrinks with the screen faster than the native text does). They break
+   into two lines at their space ("Remember / Password", German's "Benutzernamen / merken", the
+   longest word), beside the check box. */
+#classic_box .checkbox-label {
+	position: static;
+	display: inline-block;
+	max-width: calc(54 * var(--px));
+	vertical-align: middle;
+	white-space: normal;
+	text-align: left;
+	font-size: calc(6.5 * var(--px));
+	line-height: calc(7.5 * var(--px));
+}

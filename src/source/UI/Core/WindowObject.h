@@ -131,7 +131,10 @@ namespace mu::ui::window
         virtual bool UpdateWhileShown() { return true; }
         virtual bool UpdateWhileActive() { return true; }
 
-        virtual float GetKeyEventOrder() { return 3.0f; }		//. Default
+        float GetKeyEventOrder() override
+        {
+            return 3.0f;
+        }
 
         // Called every frame for each visible object, under its layout transform, before any
         // window renders: a document filled here shows this frame's state (CNameWindow's world

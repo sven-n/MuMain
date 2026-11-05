@@ -35,7 +35,7 @@ private:
     // item; returns whether the list scrolls to it.
     bool RevealSelection(int selectedItemType);
 
-    CItemListModel m_list;
+    CItemListModel m_list{CItemListModel::NumbersWithoutItem::InAllItems};
     CItemListModel::Filter m_filter;
     std::string m_search;
     MuEditor::Items::CItemBrowserList m_rows;

@@ -82,14 +82,32 @@
 	pointer-events: none;
 }
 .level-text { top: 58px; color: #e6e600; font-weight: bold; }
-.levelup-point-text { top: 58px; left: 110px; color: #ff8a00; font-weight: bold; }
+/* The points to spend sit under the summary box, right-aligned, in the gap above the STR row: the
+   original's place beside the level (x 110) collides with "Level: N | Resets: N". Every attribute
+   row sits --points-room lower than the original's to make that gap. The points' middle sits on the
+   gap's middle, between the box's bottom line (y 113) and the STR bar (y 121 + room), at any text
+   size. */
+#panel { --points-room: 8px; }
+.levelup-point-text {
+	left: auto;
+	right: 18px;
+	top: calc(117px + var(--points-room) / 2);
+	/* base.rcss's .sharp-text.sharp-middle centring around .counter-scaled's scale, written out: RmlUi
+	   has no separate translate property, and a shared class in the markup would move classic's
+	   points too. The character window test checks that it scales like the other texts. */
+	transform-origin: right center;
+	transform: translateY(-50%) scale(calc(1 / var(--root-scale, 1)));
+	color: #ff8a00;
+	font-weight: bold;
+}
 .exp-text { top: 75px; color: token(text-primary); }
 .point-probability-text { top: 88px; color: #4cc5fe; }
 .point-text { top: 101px; color: #4cc5fe; }
 
 /* Attribute rows: textbox background (170x21) + centered label/value halves + a variable-length
    block of extra derived-stat lines below. HEIGHT_STRENGTH/DEXTERITY/VITALITY/ENERGY/CHARISMA
-   (CharacterInfoWindow.h) are 120/175/240/295/350. */
+   (CharacterInfoWindow.h) are 120/175/240/295/350; every row and its lines sit --points-room lower
+   here, which makes the gap above STR tall enough for the points to spend (.levelup-point-text). */
 .attr-textbox {
 	position: absolute;
 	left: 11px;
@@ -98,11 +116,11 @@
 	decorator: image(chainfo-textbox);
 	pointer-events: none;
 }
-.attr-textbox-str { top: 120px; }
-.attr-textbox-agi { top: 175px; }
-.attr-textbox-vit { top: 240px; }
-.attr-textbox-ene { top: 295px; }
-.attr-textbox-cmd { top: 350px; }
+.attr-textbox-str { top: calc(120px + var(--points-room)); }
+.attr-textbox-agi { top: calc(175px + var(--points-room)); }
+.attr-textbox-vit { top: calc(240px + var(--points-room)); }
+.attr-textbox-ene { top: calc(295px + var(--points-room)); }
+.attr-textbox-cmd { top: calc(350px + var(--points-room)); }
 
 /* Label and value share the value's color, as RenderAttribute() set one color for both. */
 .attr-label, .attr-value {
@@ -115,11 +133,11 @@
 }
 .attr-label { left: 12px; width: 74px; color: rgb(230, 230, 0); }
 .attr-value { left: 86px; right: 18px; color: rgb(230, 230, 0); }
-.attr-label-str, .attr-value-str { top: 126px; }
-.attr-label-agi, .attr-value-agi { top: 181px; }
-.attr-label-vit, .attr-value-vit { top: 246px; }
-.attr-label-ene, .attr-value-ene { top: 301px; }
-.attr-label-cmd, .attr-value-cmd { top: 356px; }
+.attr-label-str, .attr-value-str { top: calc(126px + var(--points-room)); }
+.attr-label-agi, .attr-value-agi { top: calc(181px + var(--points-room)); }
+.attr-label-vit, .attr-value-vit { top: calc(246px + var(--points-room)); }
+.attr-label-ene, .attr-value-ene { top: calc(301px + var(--points-room)); }
+.attr-label-cmd, .attr-value-cmd { top: calc(356px + var(--points-room)); }
 
 /* Extra derived-stat lines: normal block flow, one span per line with a fixed 13 reference px row
    height (bound in the RML, since the block is counter-scaled) -- reproduces RenderAttribute()'s
@@ -129,10 +147,10 @@
    own RenderText() call sites. */
 .attr-lines { position: absolute; transform-origin: left top; pointer-events: none; }
 .attr-lines span { display: block; white-space: nowrap; }
-.attr-lines-str { left: 20px; top: 145px; }
-.attr-lines-agi { left: 20px; top: 199px; }
-.attr-lines-vit { left: 20px; top: 264px; }
-.attr-lines-ene { left: 18px; top: 319px; }
+.attr-lines-str { left: 20px; top: calc(145px + var(--points-room)); }
+.attr-lines-agi { left: 20px; top: calc(199px + var(--points-room)); }
+.attr-lines-vit { left: 20px; top: calc(264px + var(--points-room)); }
+.attr-lines-ene { left: 18px; top: calc(319px + var(--points-room)); }
 
 .stat-btn {
 	position: absolute;
@@ -144,11 +162,11 @@
 	pointer-events: auto;
 }
 .stat-btn:hover { filter: brightness(1.25); }
-.stat-btn-str { top: 122px; }
-.stat-btn-agi { top: 177px; }
-.stat-btn-vit { top: 242px; }
-.stat-btn-ene { top: 297px; }
-.stat-btn-cmd { top: 352px; }
+.stat-btn-str { top: calc(122px + var(--points-room)); }
+.stat-btn-agi { top: calc(177px + var(--points-room)); }
+.stat-btn-vit { top: calc(242px + var(--points-room)); }
+.stat-btn-ene { top: calc(297px + var(--points-room)); }
+.stat-btn-cmd { top: calc(352px + var(--points-room)); }
 
 /* Exit is fully shared now (docked_panel_frame.rcss's #btn_exit) -- only Quest/Pet/MasterLevel
    (this window's own extra shortcuts, not part of the shared frame) stay local. */

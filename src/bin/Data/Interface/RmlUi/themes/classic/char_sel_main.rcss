@@ -1,0 +1,187 @@
+/* Classic (0.97) character select frame and plates. From the 0.97 client. The 0.97 client stretches this 2D layer
+   with the window (x by width/640, y by height/480); so does this sheet, in percentages of the
+   640x480 layout: the frame reaches the screen edges in 16:9, as in the current client. */
+
+@spritesheet classic-charsel-frame-sheet-top
+{
+	src: ../../../../Logo/Classic/Interface01.tga;
+	classic-frame-top: 0px 0px 256px 86px;
+}
+@spritesheet classic-charsel-frame-sheet-upper
+{
+	src: ../../../../Logo/Classic/Interface02.tga;
+	classic-frame-column-upper: 0px 0px 64px 256px;
+}
+@spritesheet classic-charsel-frame-sheet-lower
+{
+	src: ../../../../Logo/Classic/Interface03.tga;
+	classic-frame-column-lower: 0px 0px 64px 224px;
+}
+@spritesheet classic-charsel-frame-sheet-base
+{
+	src: ../../../../Logo/Classic/Interface04.tga;
+	classic-frame-base: 0px 0px 256px 32px;
+}
+@spritesheet classic-charsel-create-sheet
+{
+	src: ../../../../Logo/Classic/New_character201.tga;
+	classic-plate-create: 0px 0px 199px 109px;
+}
+@spritesheet classic-charsel-create-hover-sheet
+{
+	src: ../../../../Logo/Classic/New_character202.jpg;
+	classic-plate-create-hover: 0px 0px 70px 25px;
+}
+@spritesheet classic-charsel-delete-sheet
+{
+	src: ../../../../Logo/Classic/Delete01.tga;
+	classic-plate-delete: 0px 0px 205px 88px;
+}
+@spritesheet classic-charsel-delete-hover-sheet
+{
+	src: ../../../../Logo/Classic/Delete02.jpg;
+	classic-plate-delete-hover: 0px 0px 70px 19px;
+}
+@spritesheet classic-charsel-ok-sheet
+{
+	src: ../../../../Logo/Classic/Ok01.tga;
+	classic-plate-ok: 0px 0px 205px 88px;
+}
+@spritesheet classic-charsel-ok-hover-sheet
+{
+	src: ../../../../Logo/Classic/Ok02.jpg;
+	classic-plate-ok-hover: 0px 0px 70px 19px;
+}
+
+/* The NEW CHARACTER plate drops in from above the frame when the screen opens (-100 -> 4 of 480). */
+@keyframes classic-plate-drop
+{
+	from { transform: translateY(-95%); }
+	to   { transform: translateY(0%); }
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* ---- Frame: left halves are the right ones mirrored. ---- */
+#classic_frame {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+.frame { position: absolute; }
+.frame-top   { top: 0;        height: 17.9167%; width: 40%; }
+.frame-base  { top: 93.3333%; height: 6.6667%;  width: 40%; }
+.frame-top.frame-left,  .frame-base.frame-left  { left: 10%; }
+.frame-top.frame-right, .frame-base.frame-right { left: 50%; }
+.frame-column-upper { top: 0;        height: 53.3333%; width: 10%; }
+.frame-column-lower { top: 53.3333%; height: 46.6667%; width: 10%; }
+.frame-column-upper.frame-left,  .frame-column-lower.frame-left  { left: 0; }
+.frame-column-upper.frame-right, .frame-column-lower.frame-right { left: 90%; }
+
+.frame-top.frame-right             { decorator: image(classic-frame-top); }
+.frame-top.frame-left              { decorator: image(classic-frame-top flip-horizontal); }
+.frame-column-upper.frame-right    { decorator: image(classic-frame-column-upper); }
+.frame-column-upper.frame-left     { decorator: image(classic-frame-column-upper flip-horizontal); }
+.frame-column-lower.frame-right    { decorator: image(classic-frame-column-lower); }
+.frame-column-lower.frame-left     { decorator: image(classic-frame-column-lower flip-horizontal); }
+.frame-base.frame-right            { decorator: image(classic-frame-base); }
+.frame-base.frame-left             { decorator: image(classic-frame-base flip-horizontal); }
+
+/* ---- Plates ---- */
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+.plate {
+	position: absolute;
+	pointer-events: none;
+}
+.plate.hidden {
+	display: none;
+}
+.hotspot {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.hotspot.disabled {
+	pointer-events: none;
+}
+
+/* NEW CHARACTER: 199x109 at (221, 4); the word at (286, 79), 70x25. Dimmed when the account is
+   full. */
+.plate-create {
+	left: 34.5313%;
+	top: 0.8333%;
+	width: 31.0938%;
+	height: 22.7083%;
+	decorator: image(classic-plate-create);
+	animation: 0.45s cubic-out 1 classic-plate-drop;
+}
+.plate-create.disabled {
+	filter: brightness(0.5);
+}
+.plate-create .hotspot {
+	left: 32.6633%;
+	top: 68.8073%;
+	width: 35.1759%;
+	height: 22.9358%;
+}
+.plate-create .hotspot:hover {
+	decorator: image(classic-plate-create-hover);
+}
+
+/* DELETE (left) and OK (right): 205x88 at (-2, 116) and (436, 116); the words at (126, 148) and
+   (443, 148), 70x19. */
+.plate-delete, .plate-connect {
+	top: 24.1667%;
+	width: 32.0313%;
+	height: 18.3333%;
+}
+.plate-delete {
+	left: -0.3125%;
+	decorator: image(classic-plate-delete);
+}
+.plate-connect {
+	left: 68.125%;
+	decorator: image(classic-plate-ok);
+}
+.plate-delete .hotspot, .plate-connect .hotspot {
+	top: 36.3636%;
+	width: 34.1463%;
+	height: 21.5909%;
+}
+.plate-delete .hotspot  { left: 62.439%; }
+.plate-connect .hotspot { left: 3.4146%; }
+.plate-delete .hotspot:hover  { decorator: image(classic-plate-delete-hover); }
+.plate-connect .hotspot:hover { decorator: image(classic-plate-ok-hover); }
+
+/* Account with item-blocked characters: two lines centred at x = 320, y = 330 and 348 of 480,
+   black on half-transparent cyan. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 68.75%;
+	width: 100%;
+	text-align: center;
+	pointer-events: none;
+}
+#account_block_message.hidden {
+	display: none;
+}
+.line {
+	color: #000000;
+	background-color: rgba(0, 255, 255, 128);
+}

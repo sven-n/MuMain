@@ -61,12 +61,12 @@ const std::string& ItemNamesakes::GetQualifier(int itemType)
 
 void ItemNamesakes::Update()
 {
-    if (m_version == g_ItemDatabase.GetVersion() && m_locale == g_ItemDatabase.GetDisplayLocale())
+    if (m_version == g_ItemDatabase.GetVersion() && m_nameVersion == g_ItemDatabase.GetNameVersion())
     {
         return;
     }
     m_version = g_ItemDatabase.GetVersion();
-    m_locale = g_ItemDatabase.GetDisplayLocale();
+    m_nameVersion = g_ItemDatabase.GetNameVersion();
     const auto slots = g_ItemDatabase.GetAllSlots();
     m_qualifiers.assign(slots.size(), std::string());
 

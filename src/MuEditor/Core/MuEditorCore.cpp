@@ -17,14 +17,16 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
-#include "../MuEditor/UI/ItemTools/MuItemChecksUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
-#include "../MuEditor/UI/ItemTools/MuItemGlowColorsUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemTooltipUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRulesUI.h"
@@ -33,11 +35,21 @@
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterSoundsUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
+#include "../MuEditor/UI/ServerList/MuServerListUI.h"
+#include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterModelChanges.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Utilities/WorldClearing.h"
@@ -459,6 +471,9 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Winmain before we got here; do not touch I18N::SetLocale from editor
     // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
+    // The Server List window's preview of the offline servers, as it was left.
+    g_ServerListManager->SetOfflinePreview(g_MuEditorConfig.GetShowOfflineServers(),
+                                           g_MuEditorConfig.GetOfflineServerLoad());
     // The item checks know the looks; they are drawing code.
     g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
     g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());
@@ -481,6 +496,9 @@ void CMuEditorCore::ConnectGameHooks()
     // the item tools change an opened item model, and the game makes it again;
     // the Grand Soul pants' mesh is made their cloth grid again after.
     g_ItemDataHandler.SetOpenedModelHooks({&MuEditor::Items::DropWornCloth, &MuEditor::Items::PrepareClothMeshes});
+    // Characters of a monster model the monster tools opened again stay
+    // inside its animations.
+    g_MonsterDataHandler.SetModelsReopenedCallback(&GameLogic::Monsters::ModelChanges::ClampAnimations);
 }
 
 void CMuEditorCore::Shutdown()
@@ -536,8 +554,11 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
-        // Between frames too: item models the item tools changed are opened again.
+        g_MuMonsterPreviewUI.BeforeFrame();
+        // Between frames too: item models the item tools changed are opened
+        // again, and so are the monster models the monster tools changed.
         ReopenChangedItemModels();
+        g_MonsterDataHandler.ReopenChangedModels();
 
         SelectWindowMode();
         UpdateKeyboardNavigation();
@@ -592,17 +613,52 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemModelUI.Render(&m_windows.itemModel);
     }
-    if (m_windows.itemGlowColors)
+    // The named colors: a root per use, all of them item edits for now.
+    if (m_windows.colors)
     {
-        g_MuItemGlowColorsUI.Render(&m_windows.itemGlowColors);
+        g_MuColorsUI.Render(&m_windows.colors);
+    }
+    if (m_windows.itemTooltip)
+    {
+        g_MuItemTooltipUI.Render(&m_windows.itemTooltip);
     }
     if (m_windows.itemFormulas)
     {
         g_MuItemFormulasUI.Render(&m_windows.itemFormulas);
     }
-    if (m_windows.itemChecks)
+    if (m_windows.itemSync)
     {
-        g_MuItemChecksUI.Render(&m_windows.itemChecks);
+        g_MuItemSyncUI.Render(&m_windows.itemSync);
+    }
+}
+
+// The monster browser and the monster tools beside it; they show the monster
+// it selects.
+void CMuEditorCore::RenderMonsterTools()
+{
+    if (m_windows.monsterBrowser)
+    {
+        g_MuMonsterBrowserUI.Render(&m_windows.monsterBrowser);
+    }
+    if (m_windows.monsterModel)
+    {
+        g_MuMonsterModelUI.Render(&m_windows.monsterModel);
+    }
+    if (m_windows.monsterPreview)
+    {
+        g_MuMonsterPreviewUI.Render(&m_windows.monsterPreview);
+    }
+    if (m_windows.monsterAttacks)
+    {
+        g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
+    }
+    if (m_windows.monsterSounds)
+    {
+        g_MuMonsterSoundsUI.Render(&m_windows.monsterSounds);
+    }
+    if (m_windows.monsterTranslations)
+    {
+        g_MuMonsterTranslationsUI.Render(&m_windows.monsterTranslations);
     }
 }
 
@@ -876,7 +932,16 @@ void CMuEditorCore::Render()
         {
             g_MuItemTranslationsUI.Render(&m_windows.itemTranslations);
         }
+        if (m_windows.serverList)
+        {
+            g_MuServerListUI.Render(&m_windows.serverList);
+        }
         RenderItemTools();
+        RenderMonsterTools();
+        if (m_windows.dataChecks)
+        {
+            g_MuDataChecksUI.Render(&m_windows.dataChecks);
+        }
 
         // Render console (if enabled)
         if (m_windows.console)

@@ -1,0 +1,95 @@
+/* Classic theme for Doorkeeper Titus's duel channels (CDuelWatchWindow). 0.97 and Season 1 have
+   no duel arena; the window takes the classic entry windows' parts: the 0.97 frame, 0.97's divider
+   (Trading_line, 190 x 10, centred on the S6 separator's row) and the Watch button on a 0.97 text
+   plate (Message_box, 120 x 22 at (35, 100)) tinted (0.9, 0.8, 0.7), lit white under the mouse,
+   darkened (0.4, 0.4, 0.5) with a grey label while locked, as the classic market's Warp. Legacy's
+   rules first, then the classic ones. */
+
+/* Legacy theme for CDuelWatchWindow, reproducing its RenderFrame()/Render(): the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), "Doorkeeper Titus" bold
+   (220, 220, 220) centred on 160 units from x 15 at y 13, the prompt bold at y 50 centred on 190
+   (left aligned when it overflows, like the original), three newui_myquest_Line separators
+   (188 x 21) at y 130 + 90 k, and per colosseum (90 units apart from y 50): the heading bold
+   (255, 255, 128) at + 20, "VS" red (255, 50, 50) centred at + 35 with the players centred in
+   70-unit boxes at x 20 and 100, or "No duel on." white, and the 53 x 23 Watch button at
+   (68, 100): newui_btn_empty_very_small up / over / down, tinted (100, 100, 100) with a grey
+   label while locked. Coordinates are reference px inside #panel. */
+
+@spritesheet dw-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	dw-btn-up: 0px 0px 53px 23px;
+	dw-btn-over: 0px 23px 53px 23px;
+	dw-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet dw-line-sheet { src: "../../../newui_myquest_Line.tga"; dw-line: 0px 0px 188px 21px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+
+#title { left: 15px; top: 13px; font-weight: bold; color: #dcdcdc; }
+#subtitle { left: 0; top: 50px; font-weight: bold; color: #dcdcdc; }
+
+.line { position: absolute; left: 1px; width: 188px; height: 21px; decorator: image(dw-line); }
+
+.room { display: block; position: absolute; left: 0; width: 190px; height: 90px; }
+.room-heading { left: 0; top: 70px; font-weight: bold; color: #ffff80; }
+.room-vs { left: 0; top: 85px; color: #ff3232; }
+.room-player { top: 85px; color: #ffffff; }
+.room-player-1 { left: 20px; }
+.room-player-2 { left: 100px; }
+.room-empty { left: 0; top: 85px; color: #ffffff; }
+
+.watch-btn {
+	display: block;
+	position: absolute;
+	left: 68px;
+	top: 100px;
+	width: 53px;
+	height: 23px;
+	decorator: image(dw-btn-up);
+	image-color: #646464;
+	pointer-events: auto;
+}
+.watch-btn.enabled { image-color: #ffffff; }
+.watch-btn.enabled:hover { decorator: image(dw-btn-over); }
+.watch-btn.enabled:active { decorator: image(dw-btn-down); }
+.watch-label { left: 0; color: #646464; }
+.watch-btn.enabled .watch-label { color: #ffffff; }
+
+/* The three separators and the four colosseum blocks, 90 units apart as the original drew them. */
+.lines, .rooms { position: static; }
+.lines .line:nth-child(1) { top: 130px; }
+.lines .line:nth-child(2) { top: 220px; }
+.lines .line:nth-child(3) { top: 310px; }
+.room:nth-child(1) { top: 0; }
+.room:nth-child(2) { top: 90px; }
+.room:nth-child(3) { top: 180px; }
+.room:nth-child(4) { top: 270px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+#subtitle { width: calc(190px * var(--root-scale)); }
+.room-heading { width: calc(190px * var(--root-scale)); }
+.room-vs { width: calc(190px * var(--root-scale)); }
+.room-player.room-player-1 { width: calc(70px * var(--root-scale)); }
+.room-player.room-player-2 { width: calc(70px * var(--root-scale)); }
+.room-empty { width: calc(190px * var(--root-scale)); }
+.watch-label { width: calc(53px * var(--root-scale)); }
+
+/* --- Classic ---------------------------------------------------------------------------------- */
+@spritesheet dw-classic-line-sheet  { src: ../../../Classic/Trading_line.jpg; dw-classic-line: 0px 0px 190px 10px; }
+@spritesheet dw-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; dw-classic-plate: 0px 0px 213px 64px; }
+.line { left: 0; width: 190px; height: 10px; margin-top: 5px; decorator: image(dw-classic-line); }
+.watch-btn { left: 35px; width: 120px; height: 22px; decorator: image(dw-classic-plate fill); image-color: #66667f; }
+.watch-btn.enabled { image-color: #e6ccb3; }
+.watch-btn.enabled:hover, .watch-btn.enabled:active { decorator: image(dw-classic-plate fill); image-color: #ffffff; }
+.watch-label { color: #808080; font-weight: bold; }
+.watch-btn.enabled .watch-label { color: #ffffff; }
+.watch-label { width: calc(120px * var(--root-scale)); }
+/* The window's only close is the corner one, which the classic frame hides: shown as the 0.97
+   Close at (25, 395), the docked windows' place. */
+#frame_corner_close { display: block; position: absolute; left: 25px; top: 395px; width: 24px; height: 24px; cursor: pointer; pointer-events: auto; decorator: image(docked-exit-btn); }
+#frame_corner_close:active { decorator: image(docked-exit-btn-pressed); }

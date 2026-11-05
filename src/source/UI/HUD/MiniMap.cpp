@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "I18N/All.h"
 
@@ -222,19 +223,14 @@ void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
     {
         int Size = sizeof(MINI_MAP_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_MINI_MAP_DATA + 45];
-        fread(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 1, fp);
-
         DWORD dwCheckSum;
-        fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+        const bool complete = DataFileIO::ReadExact(fp, Buffer, (Size * MAX_MINI_MAP_DATA) + 45) &&
+                              DataFileIO::ReadExact(fp, &dwCheckSum, sizeof(DWORD));
         fclose(fp);
 
-        if (dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
+        if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
         {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls - File corrupted.", Fname);
-            g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+            DataFileIO::ReportUnusableFile(Fname, L"File corrupted.");
         }
         else
         {

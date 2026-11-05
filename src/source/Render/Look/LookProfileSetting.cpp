@@ -30,6 +30,8 @@ struct State
     // rebuilds the static map light.
     LookLayers layers{[](const Data::Maps::LightMoodData& mood) { Lighting::LightMood::SetMoodData(mood); }};
     std::string source = "shipped";
+    // The saves SaveLive made (SaveCount).
+    int saves = 0;
 };
 
 State s_state;
@@ -246,8 +248,14 @@ bool SaveLive()
     }
     // What was saved is now what a reset goes back to.
     s_state.layers.MarkSaved();
+    ++s_state.saves;
     mu::log::Get("render")->info("$look save: {}", result.message);
     return true;
+}
+
+int SaveCount()
+{
+    return s_state.saves;
 }
 
 bool HandleDeveloperCommand(std::wstring_view command)

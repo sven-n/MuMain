@@ -5,6 +5,7 @@
 #ifdef _EDITOR
 
 #include "ClientDataScope.h"
+#include "LevelBasisScrollProfile.h"
 
 #include "UI/ItemTools/ItemRequirementTable.h"
 
@@ -151,8 +152,16 @@ TEST_CASE("Typing a +0 requirement takes its weight, lists several or offers the
     CHECK(pick.weights == WeightRange{45, 49});
     CHECK(pick.weight == 45);
 
-    // A scroll's energy takes the level requirement: 20 + weight * 50 * 4 / 100.
-    const ItemDefinition& parchment = Shipped(IncreaseBlockParchmentType);
+    // A scroll keeps its energy as stored: it has no weight.
+    CHECK_FALSE(HasWeight(Shipped(IncreaseBlockParchmentType), ItemRequirement::Energy));
+    CHECK(ComputeZeroValue(Shipped(IncreaseBlockParchmentType), ItemRequirement::Energy) == 80);
+
+    // The "levelRequirement" basis, which no shipped profile uses any more: 20 + weight * 50 * 4
+    // / 100 for the parchment's level requirement of 50.
+    const LevelBasisScrollProfile levelBasis(ClientDirectory);
+    ItemDefinition parchment = Shipped(IncreaseBlockParchmentType);
+    parchment.requirements.energy = 30;
+    REQUIRE(HasWeight(parchment, ItemRequirement::Energy));
     CHECK(ComputeZeroValue(parchment, ItemRequirement::Energy) == 80);
     const WeightChoice take = ChooseWeight(parchment, ItemRequirement::Energy, 82, 30);
     CHECK(take.kind == Kind::Take);

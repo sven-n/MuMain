@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef PJH_ADD_PANDA_PET
 
@@ -210,6 +211,9 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, d
         }
     }
     break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
+        break;
     }
 
     return TRUE;
@@ -266,6 +270,12 @@ bool PetActionCollecterAdd::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, 
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_Stand:
+    case eAction_Move:
+    case eAction_Get:
+    case eAction_End_NotUse:
         break;
     }
 
@@ -513,6 +523,9 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         }
     }
     break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
+        break;
     }
 
     return TRUE;
@@ -578,7 +591,7 @@ bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targe
             if (i == 1 && rand_fps_check(2))
                 continue;
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPosition, vAngle, vLight, 4, obj->Scale, obj);

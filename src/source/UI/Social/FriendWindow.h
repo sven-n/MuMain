@@ -21,13 +21,13 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
         bool TakesTypingFrom(const Rml::ElementDocument* document) const override;
-        bool Render();
+        bool Render() override;
 
-        float GetLayerDepth();		// 6.f
+        float GetLayerDepth() override; // 6.f
 
         void Reset();
         UI::Social::FriendDialogs& Dialogs() { return m_Dialogs; }

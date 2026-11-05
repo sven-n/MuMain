@@ -21,10 +21,10 @@ namespace
 // clang-format off
 constexpr EffectLegacyCases LegacyCases[] = {
     {MODEL_KALIMA_FALLING_STONE, CreateCase | MoveCase | RenderCase},
-    {BATTLE_CASTLE_WALL1, RenderCase},
-    {BATTLE_CASTLE_WALL2, RenderCase},
-    {BATTLE_CASTLE_WALL3, RenderCase},
-    {BATTLE_CASTLE_WALL4, RenderCase},
+    {BATTLE_CASTLE_WALL1, MoveCase | RenderCase},
+    {BATTLE_CASTLE_WALL2, MoveCase | RenderCase},
+    {BATTLE_CASTLE_WALL3, MoveCase | RenderCase},
+    {BATTLE_CASTLE_WALL4, MoveCase | RenderCase},
     {MODEL_BUTTERFLY01, CreateCase | RenderCase},
     {MODEL_GHOST, CreateCase | RenderCase},
     {MODEL_DRAGON, RenderCase},

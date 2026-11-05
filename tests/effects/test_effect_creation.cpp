@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "doctest.h"
 
@@ -147,19 +148,19 @@ TEST_CASE("The slot pattern shows in the record, the frame factor does not [effe
     CHECK_FALSE(Compare(a, b).empty());
 }
 
-TEST_CASE("The effect recorder counts the values rand() and Random:: give [effects][recorder]")
+TEST_CASE("The effect recorder counts the values Random::Rand() and Random:: give [effects][recorder]")
 {
     BuildShippedRegistry();
     Record record = RecordCall(CallOf(MODEL_KENTAUROS_ARROW), {});
     CHECK(Find(record, "draws.rand") == "0");
     CHECK(Find(record, "draws.Random") == "0");
 
-    // Three rand() in its case.
+    // Three Random::Rand() in its case.
     record = RecordCall(CallOf(MODEL_WARP), {});
     CHECK(Find(record, "draws.rand") == "3");
     CHECK(Find(record, "draws.Random") == "0");
 
-    // A rand() pick of its variant, then nine rand().
+    // A Random::Rand() pick of its variant, then nine Random::Rand().
     record = RecordCall(CallOf(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN), {});
     CHECK(Find(record, "draws.rand") == "10");
     CHECK(Find(record, "draws.Random") == "0");

@@ -1,4 +1,6 @@
 ﻿#include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -26,6 +28,13 @@
 #include "UI/Tooltip/LegacyTextListTooltip.h"
 #include <RmlUi/Core/ElementDocument.h>
 
+// The class name and, per category column, the format of the points spent in that column.
+struct MasterTreeHeaderTexts
+{
+    const wchar_t* const* className;
+    const wchar_t* const* categoryPoints[MAX_MASTER_SKILL_CATEGORY];
+};
+
 namespace
 {
     _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
@@ -44,6 +53,57 @@ namespace
     // From the experience area's top left: the original's (466, 26) against its (458, 11).
     constexpr float kExperienceHintX = 8.0f;
     constexpr float kExperienceHintY = 15.0f;
+
+    // Per class family: the master class's name and the category columns' point formats, left to right.
+    const MasterTreeHeaderTexts kWizardHeaderTexts = {
+        &I18N::Game::GrandMaster, {&I18N::Game::PeaceD, &I18N::Game::WisdomD, &I18N::Game::OvercomeD}};
+    const MasterTreeHeaderTexts kKnightHeaderTexts = {
+        &I18N::Game::BladeMaster, {&I18N::Game::ProtectionD, &I18N::Game::BraveryD, &I18N::Game::AngerD}};
+    const MasterTreeHeaderTexts kElfHeaderTexts = {
+        &I18N::Game::HighElf, {&I18N::Game::BlessingD, &I18N::Game::SalvationD, &I18N::Game::StormD}};
+    const MasterTreeHeaderTexts kDarkHeaderTexts = {
+        &I18N::Game::DualMaster, {&I18N::Game::SolidityD, &I18N::Game::FightingSpiritD, &I18N::Game::UltimatumD}};
+    const MasterTreeHeaderTexts kDarkLordHeaderTexts = {
+        &I18N::Game::LordEmperor, {&I18N::Game::DeterminationD, &I18N::Game::JusticeD, &I18N::Game::ConquerD}};
+    const MasterTreeHeaderTexts kSummonerHeaderTexts = {
+        &I18N::Game::DimensionMaster, {&I18N::Game::GuardianD, &I18N::Game::ChaosD, &I18N::Game::HonorD}};
+    const MasterTreeHeaderTexts kRageFighterHeaderTexts = {
+        &I18N::Game::FistMaster, {&I18N::Game::WillpowerD, &I18N::Game::DeterminationD, &I18N::Game::DestructionD}};
+
+    // Null for a class without a master skill tree.
+    const MasterTreeHeaderTexts* GetHeaderTexts(CLASS_TYPE Class)
+    {
+        switch (Class)
+        {
+        case CLASS_WIZARD:
+        case CLASS_SOULMASTER:
+        case CLASS_GRANDMASTER:
+            return &kWizardHeaderTexts;
+        case CLASS_KNIGHT:
+        case CLASS_BLADEKNIGHT:
+        case CLASS_BLADEMASTER:
+            return &kKnightHeaderTexts;
+        case CLASS_ELF:
+        case CLASS_MUSEELF:
+        case CLASS_HIGHELF:
+            return &kElfHeaderTexts;
+        case CLASS_DARK:
+        case CLASS_DUELMASTER:
+            return &kDarkHeaderTexts;
+        case CLASS_DARK_LORD:
+        case CLASS_LORDEMPEROR:
+            return &kDarkLordHeaderTexts;
+        case CLASS_SUMMONER:
+        case CLASS_BLOODYSUMMONER:
+        case CLASS_DIMENSIONMASTER:
+            return &kSummonerHeaderTexts;
+        case CLASS_RAGEFIGHTER:
+        case CLASS_TEMPLENIGHT:
+            return &kRageFighterHeaderTexts;
+        default:
+            return nullptr;
+        }
+    }
 
     template <typename Model>
     void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
@@ -73,8 +133,7 @@ mu::ui::window::CMasterLevel::CMasterLevel()
     this->ConsumePoint = 0;
     this->CurSkillID = 0;
     this->classCode = MASTER_SKILL_TREE_CLASS_NONE;
-    this->CategoryTextIndex = 0;
-    this->ClassNameTextIndex = 0;
+    this->HeaderTexts = nullptr;
     this->InitMasterSkillPoint();
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
@@ -129,37 +188,28 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
-    FILE* fp = _wfopen(path, L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
 
-    wchar_t Text[256];
-
-    if (fp == nullptr)
+    if (!fp)
     {
-        mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
     }
 
     constexpr int Size = sizeof(_MASTER_SKILLTREE_DATA);
 
-    auto Buffer = new BYTE[Size * MAX_MASTER_SKILL_DATA];
-
-    fread(Buffer, Size * MAX_MASTER_SKILL_DATA, 1, fp);
+    std::vector<BYTE> content(Size * MAX_MASTER_SKILL_DATA);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
 
-    fread(&dwCheckSum, sizeof(DWORD), 1u, fp);
+    fp.reset();
 
-    fclose(fp);
-
-    if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
-        mu_swprintf(Text, L"%ls - File corrupted.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File corrupted.");
         return;
     }
 
@@ -178,32 +228,32 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
             break;
         }
     }
-
-    delete[] Buffer;
 }
 
 void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 
-    FILE* fp = _wfopen(path, L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(path, L"rb"));
 
-    if (fp == nullptr)
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, nullptr, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(path, L"File not exist.");
         return;
     }
 
     constexpr int record_size = sizeof(_MASTER_SKILL_TOOLTIP_FILE);
-    auto file_buffer = new BYTE[record_size * MAX_MASTER_SKILL_DATA];
-    fread(file_buffer, record_size * MAX_MASTER_SKILL_DATA, 1, fp);
+    std::vector<BYTE> content(record_size * MAX_MASTER_SKILL_DATA);
+    BYTE* file_buffer = content.data();
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1u, fp);
-    fclose(fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), file_buffer, record_size * MAX_MASTER_SKILL_DATA) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
+    if (!complete)
+    {
+        DataFileIO::ReportUnusableFile(path, L"File corrupted.");
+        return;
+    }
 
     BYTE* pSeek = file_buffer;
 
@@ -232,8 +282,6 @@ void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
             break;
         }
     }
-
-    delete[] file_buffer;
 }
 
 void mu::ui::window::CMasterLevel::InitMasterSkillPoint()
@@ -281,50 +329,12 @@ void mu::ui::window::CMasterLevel::SetMasterType(CLASS_TYPE Class)
 
     this->SetMasterSkillToolTipData();
 
-    switch (Class)
-    {
-    case CLASS_WIZARD:
-    case CLASS_SOULMASTER:
-    case CLASS_GRANDMASTER:
-        this->CategoryTextIndex = 1751;
-        this->ClassNameTextIndex = 1669;
-        break;
-    case CLASS_KNIGHT:
-    case CLASS_BLADEKNIGHT:
-    case CLASS_BLADEMASTER:
-        this->CategoryTextIndex = 1755;
-        this->ClassNameTextIndex = 1668;
-        break;
-    case CLASS_ELF:
-    case CLASS_MUSEELF:
-    case CLASS_HIGHELF:
-        this->CategoryTextIndex = 1759;
-        this->ClassNameTextIndex = 1670;
-        break;
-    case CLASS_DARK:
-    case CLASS_DUELMASTER:
-        this->CategoryTextIndex = 1763;
-        this->ClassNameTextIndex = 1671;
-        break;
-    case CLASS_DARK_LORD:
-    case CLASS_LORDEMPEROR:
-        this->CategoryTextIndex = 1767;
-        this->ClassNameTextIndex = 1672;
-        break;
-    case CLASS_SUMMONER:
-    case CLASS_BLOODYSUMMONER:
-    case CLASS_DIMENSIONMASTER:
-        this->CategoryTextIndex = 3136;
-        this->ClassNameTextIndex = 1689;
-        break;
-    case CLASS_RAGEFIGHTER:
-    case CLASS_TEMPLENIGHT:
-        this->CategoryTextIndex = 3330;
-        this->ClassNameTextIndex = 3151;
-        break;
-    default:
+    // A class without a master skill tree keeps the current texts.
+    const MasterTreeHeaderTexts* headerTexts = GetHeaderTexts(Class);
+    if (headerTexts == nullptr)
         return;
-    }
+
+    this->HeaderTexts = headerTexts;
 }
 
 void mu::ui::window::CMasterLevel::SetMasterSkillTreeData()
@@ -602,8 +612,9 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
 {
     wchar_t buffer[256] = {};
 
+    const wchar_t* className = this->HeaderTexts != nullptr ? *this->HeaderTexts->className : L"";
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::classNameText, "class_name_text",
-               StringUtils::WideToNarrow(I18N::Game::Lookup(this->ClassNameTextIndex)));
+               StringUtils::WideToNarrow(className));
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::closeHint, "close_hint",
                StringUtils::WideToNarrow(I18N::Game::Close388));
 
@@ -631,7 +642,8 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
     const char* const columnNames[MAX_MASTER_SKILL_CATEGORY] = {"column_text_0", "column_text_1", "column_text_2"};
     for (int column = 0; column < MAX_MASTER_SKILL_CATEGORY; ++column)
     {
-        mu_swprintf(buffer, I18N::Game::Lookup(this->CategoryTextIndex + column), this->CategoryPoint[column]);
+        const wchar_t* pointsFormat = this->HeaderTexts != nullptr ? *this->HeaderTexts->categoryPoints[column] : L"";
+        mu_swprintf(buffer, pointsFormat, this->CategoryPoint[column]);
         SyncString(m_RmlView.Binder(), columnFields[column], columnNames[column], StringUtils::WideToNarrow(buffer));
     }
 }

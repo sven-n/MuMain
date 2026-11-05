@@ -346,16 +346,17 @@ void CEffectPreviewView::RenderItemList()
 }
 
 // The names come from the items as the game has them now; the list is made
-// again when the item tools change the items or their models, or the language
-// changes. The item models are all opened on the loading screen and stay, so
-// the list does not change with the map; the models of the chosen level are
-// checked when drawn.
+// again when the item tools change the items or their models, or the item
+// names change (another UI language, translated item names turned on or off).
+// The item models are all opened on the loading screen and stay, so the list
+// does not change with the map; the models of the chosen level are checked
+// when drawn.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
     const int modelVersion = g_ItemModelDatabase.GetVersion();
-    const char* locale = I18N::GetCurrentLocale();
-    if (m_itemsVersion == version && m_itemModelsVersion == modelVersion && m_itemsLocale == locale)
+    const int namesVersion = g_ItemDatabase.GetNameVersion();
+    if (m_itemsVersion == version && m_itemModelsVersion == modelVersion && m_itemNamesVersion == namesVersion)
         return;
     // Whether an item can be drawn is known once its changed model is opened
     // again, before the next frame: until then the list is built again each
@@ -363,7 +364,7 @@ void CEffectPreviewView::RefreshItems()
     const bool modelsOpened = !g_ItemDataHandler.HasModelsToReopen();
     m_itemsVersion = modelsOpened ? version : -1;
     m_itemModelsVersion = modelVersion;
-    m_itemsLocale = locale;
+    m_itemNamesVersion = namesVersion;
     m_items.Build(
         MAX_ITEM, [](int itemType) { return Core::Text::ToUtf8(ItemAttribute[itemType].Name); }, IsItemDrawable);
     m_itemMatchesValid = false;

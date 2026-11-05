@@ -7,6 +7,7 @@
 #include "Camera/CameraState.h"
 
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -28,6 +29,8 @@
 #include "json.hpp"
 
 #include <cmath>
+#include <cstdio>
+#include <optional>
 #include <utility>
 
 // The quest dialog's page, text and answers (Scenes/SceneCore.cpp).
@@ -135,23 +138,6 @@ json TradeState()
     trade["my_confirm_wait"] = g_pTrade->GetMyTradeWait();
     trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
     return trade;
-}
-
-std::string_view ObjectKindName(int objectKind)
-{
-    switch (objectKind)
-    {
-    case KIND_PLAYER:
-        return "player";
-    case KIND_MONSTER:
-        return "monster";
-    case KIND_NPC:
-        return "npc";
-    case KIND_PET:
-        return "pet";
-    default:
-        return "unknown";
-    }
 }
 
 json EquipmentArray()
@@ -476,6 +462,27 @@ json ObjectPixel(const OBJECT& object)
     pixel["y"] = std::round(y);
     return pixel;
 }
+
+// A color the render text takes (red in the low byte, then green, blue, alpha) as the ground label file writes it:
+// `#rrggbb`, with its alpha after it (`#rrggbbaa`) when it is not opaque, as a see-through label background.
+std::string LabelColor(DWORD color)
+{
+    constexpr int ByteBits = 8;
+    const auto channel = [color](int index) { return static_cast<BYTE>((color >> (index * ByteBits)) & 0xFF); };
+    return Data::Items::WriteGroundLabelColor({channel(0), channel(1), channel(2)}, channel(3));
+}
+
+// The name a drop shows on the ground, while Alt shows every drop's name or the pointer is over it.
+json GroundLabel(ITEM_t& drop)
+{
+    const GroundItemLabel label = DescribeGroundItemLabel(&drop.Object, &drop.Item);
+    json described;
+    described["text"] = Core::Text::ToUtf8(label.text.c_str());
+    described["color"] = LabelColor(label.textColor);
+    described["background"] = LabelColor(label.backgroundColor);
+    described["bold"] = label.bold;
+    return described;
+}
 } // namespace
 
 namespace App::Control
@@ -563,6 +570,8 @@ json NearbyArray()
         json described;
         described["id"] = character.Key;
         described["kind"] = ObjectKindName(character.Object.Kind);
+        const std::optional<int> monster = MonsterNumberOf(character);
+        described["monster"] = monster ? json(*monster) : json(nullptr);
         described["name"] = Core::Text::ToUtf8(character.ID);
         described["position"] = json::array({character.PositionX, character.PositionY});
         described["alive"] = character.Dead <= 0;
@@ -597,6 +606,8 @@ json NearbyArray()
         described["name"] = ItemName(drop.Item);
         const std::pair<int, int> tile = App::Control::DropTile(index);
         described["position"] = json::array({tile.first, tile.second});
+        described["label"] = GroundLabel(Items[index]);
+        described["pixel"] = ObjectPixel(drop.Object);
         nearby.push_back(std::move(described));
     }
 
