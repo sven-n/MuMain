@@ -9180,86 +9180,14 @@
   <data name="Use skills closely" xml:space="preserve">
     <value>Używaj umiejętności z bliska</value>
   </data>
-  <data name="¼ºÁÖÀÇ Ç¥½Ä µî·Ï ÇöÈ²" xml:space="preserve">
-    <value>Stan rejestracji Sign of Lord</value>
-  </data>
-  <data name="¼ºÁÖÀÇ Ç¥½Ä µî·Ï ¼øÀ§" xml:space="preserve">
-    <value>Ranking rejestracji Sign of Lord</value>
-  </data>
-  <data name="µî·Ï °³¼ö" xml:space="preserve">
-    <value>Zarejestrowano</value>
-  </data>
-  <data name="¿ì¸® ±æµå ÇöÈ²" xml:space="preserve">
-    <value>Stan naszej gildii</value>
-  </data>
-  <data name="µÚ·Î°¡±â" xml:space="preserve">
-    <value>Wstecz</value>
-  </data>
-  <data name="µî·Ï °¡´É" xml:space="preserve">
-    <value>Rejestracja możliwa</value>
-  </data>
-  <data name="µî·Ï ºÒ°¡" xml:space="preserve">
-    <value>Rejestracja niemożliwa</value>
-  </data>
-  <data name="µî·ÏÇÒ ¼ºÁÖÀÇ Ç¥½Ä °³¼ö : %d°³" xml:space="preserve">
-    <value>Sign of Lord do zarejestrowania: %d szt.</value>
-  </data>
-  <data name="µî·ÏÇÒ ¼ºÁÖÀÇ Ç¥½ÄÀ» Á¶ÇÕÃ¢¿¡ ¿Ã·ÁÁÖ¼¼¿ä." xml:space="preserve">
-    <value>Umieść w oknie łączenia Sign of Lord do zarejestrowania.</value>
-  </data>
   <data name="¼ºÁÖÀÇ Ç¥½ÄÀº ÇÑ¹ø¿¡ ÃÖ´ë 225°³±îÁö µî·ÏÇÒ ¼ö ÀÖ½À´Ï´Ù." xml:space="preserve">
     <value>Jednorazowo można zarejestrować maksymalnie 225 Sign of Lord.</value>
-  </data>
-  <data name="µî·ÏµÈ ¼ºÁÖÀÇ Ç¥½Ä °³¼ö: %d°³" xml:space="preserve">
-    <value>Zarejestrowane Sign of Lord: %d szt.</value>
-  </data>
-  <data name="¼ºÁÖÀÇ Ç¥½Ä µî·Ï" xml:space="preserve">
-    <value>Rejestracja Sign of Lord</value>
-  </data>
-  <data name="¼ºÁÖÀÇ Ç¥½ÄÀ» µî·ÏÇÏ½Ã°Ú½À´Ï±î?" xml:space="preserve">
-    <value>Czy chcesz zarejestrować Sign of Lord?</value>
-  </data>
-  <data name="¼ºÁÖÀÇ Ç¥½Ä µî·ÏÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù." xml:space="preserve">
-    <value>Rejestracja Sign of Lord zakończona.</value>
-  </data>
-  <data name="¼ºÁÖÀÇ Ç¥½Ä µî·ÏÀÌ ½ÇÆÐÇÏ¿´½À´Ï´Ù." xml:space="preserve">
-    <value>Rejestracja Sign of Lord nie powiodła się.</value>
-  </data>
-  <data name="ｼﾓｼｺ" xml:space="preserve">
-    <value>Żywioł</value>
-  </data>
-  <data name="ﾆﾇﾅｸｱﾗｷ･ ﾁ､ｺｸ" xml:space="preserve">
-    <value>Informacje o Pentagramie</value>
-  </data>
-  <data name="ﾀ盂ﾝ" xml:space="preserve">
-    <value>Zablokuj</value>
-  </data>
-  <data name="ﾇﾘﾁｦ" xml:space="preserve">
-    <value>Odblokuj</value>
-  </data>
-  <data name="Àû´ë±æµå¸¦ ÇØÁ¦ÇÒ ±æµå¸íÀ» ¼±ÅÃÇØ ÁÖ¼¼¿ä" xml:space="preserve">
-    <value>Wybierz gildię, z którą chcesz zakończyć wrogość</value>
-  </data>
-  <data name="±æµå¸¦ Àû´ë±æµå¿¡¼­ ÇØÁ¦ÇÏ½Ã°Ú½À´Ï±î?" xml:space="preserve">
-    <value>Czy chcesz usunąć tę gildię z listy wrogich gildii?</value>
-  </data>
-  <data name="¼­¹ö" xml:space="preserve">
-    <value>Serwer</value>
   </data>
   <data name="ESC" xml:space="preserve">
     <value>ESC</value>
   </data>
   <data name="20¾ïÁ¨ ÀÌ»ó Ãâ±Ý ºÒ°¡" xml:space="preserve">
     <value>Nie można wypłacić więcej niż 2 000 000 000 zen</value>
-  </data>
-  <data name="ÀüÃ¼¼ö¸®ºñ¿ë" xml:space="preserve">
-    <value>Koszt naprawy wszystkiego</value>
-  </data>
-  <data name="ÇØ´ç ±æµå°¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù" xml:space="preserve">
-    <value>Taka gildia nie istnieje</value>
-  </data>
-  <data name="°Å·¡ ½ÂÀÎ ´ë±âÁß" xml:space="preserve">
-    <value>Oczekiwanie na akceptację wymiany</value>
   </data>
   <data name="You can purchase it after a while." xml:space="preserve">
     <value>Po pewnym czasie możesz go kupić.</value>

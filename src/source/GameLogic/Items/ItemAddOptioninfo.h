@@ -64,7 +64,8 @@ public: // inline
     const ITEM_ADD_OPTION& GetItemAddOtioninfo(int type);
 
 private:
-    const bool OpenItemAddOptionInfoFile(const std::wstring& filename);
+    // What is wrong with the file, e.g. L"file not found."; nullptr when it loaded.
+    const wchar_t* OpenItemAddOptionInfoFile(const std::wstring& filename);
     ItemAddOptioninfo();
 
 private:

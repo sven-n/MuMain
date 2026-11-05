@@ -51,16 +51,16 @@ namespace mu::ui::window
 
         void Show(bool bShow) override;
 
-        bool UpdateMouseEvent();
+        bool UpdateMouseEvent() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         const char* PlacedRootId() const override { return "content_root"; }
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
 
-        bool IsVisible() const;
+        bool IsVisible() const override;
 
-        float GetLayerDepth();	//. 3.1f
+        float GetLayerDepth() override; //. 3.1f
 
         void ProcessOpening();
         bool ProcessClosing();

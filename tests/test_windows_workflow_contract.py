@@ -313,6 +313,34 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
 for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
                  "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
     check(required in required_job, f"Required CI check missing {required}")
+# No warning may come back in the player builds (docs/build/README.md).
+for required in ("checks: read", "actions: read", "python3 scripts/ci_job_annotations.py"):
+    check(required in required_job, f"Required CI check must fail on warning annotations: {required}")
+for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
+    platform_configure = step(platform_job, f"build-{platform}", "Configure CMake")
+    platform_build = step(platform_job, f"build-{platform}", "Build")
+    for required in ("scripts/ci_warnings.py run", "-DMU_WARNINGS_AS_ERRORS=ON"):
+        check(required in platform_configure, f"{platform} configure must fail on warnings: {required}")
+    check("scripts/ci_warnings.py run" in platform_build, f"{platform} build must fail on warnings")
+# Every job names its runner image: a -latest label moves to a new image whenever GitHub decides, with new
+# warnings and, for macOS, a new minimum macOS (cmake/toolchains/macos-arm64.cmake).
+for workflow_name, workflow in (("ci.yml", ci), ("fork-ci.yml", read_optional(FORK_CI_WORKFLOW))):
+    for runner in re.findall(r"(?m)^\s*runs-on:\s*(\S+)", workflow):
+        check(not runner.endswith("-latest"), f"{workflow_name} must name its runner image, not {runner}")
+# Fork CI's Windows build is the only Windows build a pull request gets: its editor OFF row holds the same rule,
+# and its last job checks the annotations.
+fork_ci_workflow = read_optional(FORK_CI_WORKFLOW)
+if fork_ci_workflow:
+    fork_windows = job(fork_ci_workflow, "windows")
+    fork_wrapper = "python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}"
+    fork_configure = step(fork_windows, "windows", "Configure CMake")
+    for required in (fork_wrapper, "-DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}"):
+        check(required in fork_configure, f"Fork CI's editor OFF configure must fail on warnings: {required}")
+    check(fork_wrapper in step(fork_windows, "windows", "Build"), "Fork CI's editor OFF build must fail on warnings")
+    fork_annotations = job(fork_ci_workflow, "annotations")
+    for required in ("needs: [windows, linux-editor, macos-editor]", "if: always()", "actions: read",
+                     "checks: read", "python3 scripts/ci_job_annotations.py"):
+        check(required in fork_annotations, f"Fork CI must fail on warning annotations: {required}")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
 check("bash scripts/check_format.sh" in quality_formatting, "Formatting gate must share the hook's script")
@@ -328,12 +356,12 @@ check("strategy:" not in native_job, "Main Windows asset job must not use a matr
 check("matrix." not in native_job, "Main Windows asset job must use fixed values")
 for required in (
     "name: Windows Native Build (x64, Release, editor OFF)",
-    "runs-on: windows-latest",
+    "runs-on: windows-2025-vs2026",
 ):
     check(required in native_job, f"Main Windows job missing {required}")
 
 activation = step(native_job, "build-windows", "Activate Visual Studio developer environment")
-check("arch: x64" in activation, "Main Windows build must activate the x64 compiler")
+check("vcvars64.bat" in activation, "Main Windows build must activate the x64 compiler")
 environment_assertion = step(
     native_job, "build-windows", "Assert MSVC developer environment"
 )
@@ -412,14 +440,14 @@ check(
     "Main Windows build must archive the runtime before artifact upload",
 )
 for required in (
-    "uses: actions/upload-artifact@v4",
+    "uses: actions/upload-artifact@v7",
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
     "path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
     "if-no-files-found: error",
 ):
     check(required in native_upload, f"Main Windows upload missing {required}")
 check(
-    native_job.count("uses: actions/upload-artifact@v4") == 1,
+    native_job.count("uses: actions/upload-artifact@v7") == 1,
     "Main Windows job must upload exactly one runtime artifact",
 )
 
@@ -436,7 +464,7 @@ for (
         linux_job,
         "build-linux",
         "Linux Native Build (x64, Release, editor OFF)",
-        "ubuntu-latest",
+        "ubuntu-26.04",
         "mu-client-linux-native-x64-release-editor-off-no-data-main",
         "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz "
@@ -446,7 +474,7 @@ for (
         macos_job,
         "build-macos",
         "macOS Native Build (arm64, Release, editor OFF)",
-        "macos-latest",
+        "macos-26",
         "mu-client-macos-native-arm64-release-editor-off-no-data-main",
         "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz "
@@ -472,14 +500,14 @@ for (
     platform_upload = step(platform_job, job_name, "Upload runtime artifact")
     for required in (
         "if: needs.quality.outputs.release == 'true'",
-        "uses: actions/upload-artifact@v4",
+        "uses: actions/upload-artifact@v7",
         f"name: {artifact_name}",
         f"path: {archive_name}",
         "if-no-files-found: error",
     ):
         check(required in platform_upload, f"{display_name} upload missing {required}")
     check(
-        platform_job.count("uses: actions/upload-artifact@v4") == 1,
+        platform_job.count("uses: actions/upload-artifact@v7") == 1,
         f"{display_name} must upload exactly one runtime artifact",
     )
 
@@ -530,14 +558,14 @@ if fork_ci:
             "vcpkg binary archives must remain available across runner image updates",
         )
 linux_cache = step(linux_job, "build-linux", "Cache Linux compilation")
-for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in linux_cache, f"Compiler cache missing {required}")
 linux_cache_save = step(linux_job, "build-linux", "Save Linux compilation cache")
-for required in ("uses: actions/cache/save@v4", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
+for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
                  "steps.ccache.outputs.cache-primary-key"):
     check(required in linux_cache_save, f"Compiler cache must save only validated main builds: {required}")
 check(
-    "uses: actions/cache@v4" not in linux_cache,
+    "uses: actions/cache@v6" not in linux_cache,
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
@@ -568,10 +596,10 @@ for required in (
 ):
     check(required in macos_configure, f"macOS configure missing {required}")
 macos_cache = step(macos_job, "build-macos", "Cache macOS compilation")
-for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in macos_cache, f"macOS compiler cache missing {required}")
 macos_cache_save = step(macos_job, "build-macos", "Save macOS compilation cache")
-for required in ("uses: actions/cache/save@v4", "needs.quality.outputs.release == 'true'",
+for required in ("uses: actions/cache/save@v6", "needs.quality.outputs.release == 'true'",
                  "steps.ccache.outputs.cache-primary-key"):
     check(required in macos_cache_save, f"macOS compiler cache must save only validated release builds: {required}")
 check("ccache --show-stats" in macos_job, "macOS compiler cache must report hit statistics")

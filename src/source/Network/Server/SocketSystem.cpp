@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -604,8 +606,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
 {
-    FILE* fp = _wfopen(szFileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    if (!fp)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
@@ -621,8 +623,12 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
         {
             SOCKET_OPTION_INFO_FILE current;
-            fread(&current, iSize, 1, fp);
-            BuxConvert((BYTE*)&current, iSize);
+            if (!DataFileIO::ReadExact(fp.get(), &current, iSize))
+            {
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                return;
+            }
+            BuxConvert(reinterpret_cast<BYTE*>(&current), iSize);
 
             auto target = &m_SocketOptionInfo[j][i];
             target->m_iOptionCategory = current.m_iOptionCategory;
@@ -644,7 +650,7 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         }
     }
 
-    fclose(fp);
+    fp.reset();
 
     for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
     {

@@ -12,8 +12,21 @@ set(CMAKE_SYSTEM_NAME Darwin)
 set(CMAKE_SYSTEM_PROCESSOR arm64)
 set(CMAKE_OSX_ARCHITECTURES arm64)
 
-# Target macOS 12 Monterey as minimum deployment target
-set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0")
+# The oldest macOS the build runs on: the one of this Mac, as major.0. The Homebrew libraries the game links
+# (OpenSSL, libjpeg-turbo, Crypto++) are built for it, and Apple's ld warns about each one when the target is older.
+# Every Apple Silicon Mac can install the macOS that GitHub's macOS runners use.
+if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    execute_process(
+        COMMAND sw_vers -productVersion
+        OUTPUT_VARIABLE _host_macos_version
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _sw_vers_result
+    )
+    if(NOT _sw_vers_result EQUAL 0 OR NOT _host_macos_version MATCHES "^([0-9]+)")
+        message(FATAL_ERROR "sw_vers -productVersion failed (exit ${_sw_vers_result}): cannot tell this Mac's macOS version")
+    endif()
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "${CMAKE_MATCH_1}.0")
+endif()
 
 # Prefer Homebrew LLVM for macOS builds — Homebrew Clang supports warnings like
 # -Wnontrivial-memcall that Apple Clang 17 (Xcode CLI tools) does not.

@@ -4,6 +4,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/FontEngineInterface.h>
@@ -210,7 +211,7 @@ void LoadThemeFonts(const ThemeInheritance& theme)
         const auto expanded = ExpandEnvironment(setting.value);
         if (!expanded)
             continue;
-        auto path = std::filesystem::u8path(*expanded);
+        auto path = Core::Text::PathFromUtf8(*expanded);
         if (!path.is_absolute())
             path = setting.directory / path;
         const std::string name = ThemePathUtf8(std::filesystem::absolute(path).lexically_normal());

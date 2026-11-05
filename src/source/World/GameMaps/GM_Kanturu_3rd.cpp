@@ -1557,6 +1557,8 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     return true;
     case MONSTER_MAYA:
         return true;
+    default:
+        break;
     }
 
     return false;

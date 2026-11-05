@@ -123,6 +123,9 @@ void CUIMapName::Update()
             m_fAlpha = 0.0f;
         }
         break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
+        break;
     }
 
     m_dwOldTime = dwNowTime;

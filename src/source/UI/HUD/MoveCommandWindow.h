@@ -53,16 +53,16 @@ namespace mu::ui::window
         void SetFillPlacementSize(float width, float height) override;
         bool GetFillMinimumSize(float& width, float& height) const override;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
 
         virtual void OpenningProcess();
         void ClosingProcess();
-        float GetLayerDepth();
+        float GetLayerDepth() override;
 
         bool IsLuckySealBuff();
         bool IsMapMove(const std::wstring& src);

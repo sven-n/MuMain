@@ -23,6 +23,9 @@ endif()
 add_library(mu_test_main STATIC main.cpp)
 target_include_directories(mu_test_main PUBLIC third_party/doctest)
 target_compile_features(mu_test_main PUBLIC cxx_std_20)
+# doctest declares std::tuple and other standard templates itself unless told to include their headers, and MSVC
+# warns that a program may not declare them (C5285).
+target_compile_definitions(mu_test_main PUBLIC DOCTEST_CONFIG_USE_STD_HEADERS)
 # Test sources contain non-ASCII wide string literals. MSVC defaults to the
 # system codepage when reading sources, which mangles UTF-8 characters into
 # wrong codepoints and breaks every non-Latin language test. /utf-8 forces

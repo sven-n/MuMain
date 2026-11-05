@@ -10499,6 +10499,8 @@ void UpdateMonsterBodyEffects(CHARACTER* c, OBJECT* o, BMD* b)
                 }
             }
             break;
+        default:
+            break;
         }
     }
 }
@@ -12792,6 +12794,20 @@ void SetCharacterScale(CHARACTER* c)
             case CLASS_DARK_LORD: c->Object.Scale = 0.92f; break;
             case CLASS_SUMMONER:	c->Object.Scale = 0.90f; break;
             case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.03f; break;
+            // The other values, listed without a default: a value added later fails the build here.
+            case CLASS_SOULMASTER:
+            case CLASS_BLADEKNIGHT:
+            case CLASS_MUSEELF:
+            case CLASS_BLOODYSUMMONER:
+            case CLASS_GRANDMASTER:
+            case CLASS_BLADEMASTER:
+            case CLASS_HIGHELF:
+            case CLASS_DUELMASTER:
+            case CLASS_LORDEMPEROR:
+            case CLASS_DIMENSIONMASTER:
+            case CLASS_TEMPLENIGHT:
+            case CLASS_UNDEFINED:
+                break;
             }
         }
         else
@@ -12805,6 +12821,20 @@ void SetCharacterScale(CHARACTER* c)
             case CLASS_DARK_LORD: c->Object.Scale = 0.92f; break;
             case CLASS_SUMMONER:	c->Object.Scale = 0.90f; break;
             case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.03f; break;
+            // The other values, listed without a default: a value added later fails the build here.
+            case CLASS_SOULMASTER:
+            case CLASS_BLADEKNIGHT:
+            case CLASS_MUSEELF:
+            case CLASS_BLOODYSUMMONER:
+            case CLASS_GRANDMASTER:
+            case CLASS_BLADEMASTER:
+            case CLASS_HIGHELF:
+            case CLASS_DUELMASTER:
+            case CLASS_LORDEMPEROR:
+            case CLASS_DIMENSIONMASTER:
+            case CLASS_TEMPLENIGHT:
+            case CLASS_UNDEFINED:
+                break;
             }
         }
     }

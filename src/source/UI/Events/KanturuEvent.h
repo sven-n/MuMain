@@ -48,12 +48,12 @@ public:
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-    bool UpdateMouseEvent();
-    bool UpdateKeyEvent();
-    bool Update();
-    bool Render();
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override;
+    bool Update() override;
+    bool Render() override;
 
-    float GetLayerDepth(); //. 10.1f
+    float GetLayerDepth() override; //. 10.1f
 
     void SetNpcObject(OBJECT* pObj);
     bool IsNpcAnimation();
@@ -137,14 +137,14 @@ public:
     bool Create(CManager* pNewUIMng);
     void Release();
 
-    bool UpdateMouseEvent();
+    bool UpdateMouseEvent() override;
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-    bool UpdateKeyEvent();
-    bool Update();
-    bool Render();
+    bool UpdateKeyEvent() override;
+    bool Update() override;
+    bool Render() override;
 
-    float GetLayerDepth();    //. 1.92f
-    float GetKeyEventOrder(); //. 9.1f
+    float GetLayerDepth() override;    //. 1.92f
+    float GetKeyEventOrder() override; //. 9.1f
 
     void SetTime(int iTimeLimit);
 

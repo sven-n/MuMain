@@ -33,6 +33,12 @@ using mu::PackABGR;
 extern float g_fBoneSave[10][3][4];
 extern int EditFlag;
 
+namespace
+{
+// A joint that lives until something removes it; 999999999 in the original client, which a float holds as 1e9.
+constexpr float EndlessLifeTime = 1.0e9f;
+} // namespace
+
 void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType, OBJECT* Target, float Scale, short PKKey,
     WORD SkillIndex, WORD SkillSerialNum, int iChaIndex, const float* vPriorColor, short int sTargetindex)
 {
@@ -334,7 +340,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 case 32:
                 case 33:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     if (o->SubType == 5) o->MaxTails = 10;
                     else if (o->SubType == 10 || o->SubType == 11) o->MaxTails = 5;
                     else if (o->SubType == 14 || o->SubType == 15) o->MaxTails = 15;
@@ -387,32 +393,32 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     break;
                 case 22:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 10;
                     UpdateJointTargetPosition(o, o->Target->EyeLeft);
                     break;
                 case 23:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 10;
                     UpdateJointTargetPosition(o, o->Target->EyeRight);
                     break;
                 case 24:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 10;
                     UpdateJointTargetPosition(o, o->Target->EyeLeft);
                     break;
                 case 25:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 10;
                     VectorCopy(o->Target->EyeRight, o->Position);
                     break;
                 case 40:
                 case 41:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     if (o->SubType == 5) o->MaxTails = 10;
                     VectorCopy(TargetPosition, o->Position);
                     break;
@@ -437,13 +443,13 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 case 51:
                 case 52:
                 case 53:
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 3;
                     Vector(0.5f, 0.5f, 0.9f, o->Light);
                     break;
                 case 54:
                     o->Velocity = 0.f;
-                    o->LifeTime = 999999999;
+                    o->LifeTime = EndlessLifeTime;
                     o->MaxTails = 30;
                     o->TexType = BITMAP_SPARK + 1;
                     switch (o->PKKey)

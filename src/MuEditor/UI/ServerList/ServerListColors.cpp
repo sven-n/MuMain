@@ -9,6 +9,7 @@
 #include "I18N/All.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <array>
 #include <charconv>
@@ -49,7 +50,7 @@ const UI::RmlBridge::ThemeInheritance& GetTheme(std::string_view theme)
     if (found == themes.end())
     {
         auto inheritance = std::make_unique<UI::RmlBridge::ThemeInheritance>(
-            std::filesystem::u8path(ThemesFolder) / std::filesystem::u8path(std::string(theme)));
+            Core::Text::PathFromUtf8(ThemesFolder) / Core::Text::PathFromUtf8(theme));
         found = themes.emplace(std::string(theme), std::move(inheritance)).first;
     }
     return *found->second;
@@ -167,7 +168,7 @@ std::optional<std::string> FindThemeTokenSource(std::string_view theme, const ch
 bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value)
 {
     const std::filesystem::path folder =
-        std::filesystem::u8path(ThemesFolder) / std::filesystem::u8path(std::string(theme));
+        Core::Text::PathFromUtf8(ThemesFolder) / Core::Text::PathFromUtf8(theme);
     std::error_code fileError;
     if (!std::filesystem::is_directory(folder, fileError))
     {

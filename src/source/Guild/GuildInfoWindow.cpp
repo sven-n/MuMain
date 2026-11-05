@@ -96,7 +96,7 @@ int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(const wchar_t* szName)
 {
     for (int i = 0; i < g_nGuildMemberCount; ++i)
     {
-        if (GuildList[i].Name && !wcscmp(GuildList[i].Name, szName))
+        if (!wcscmp(GuildList[i].Name, szName))
             return i;
     }
 

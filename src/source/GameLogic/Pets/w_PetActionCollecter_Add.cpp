@@ -211,6 +211,9 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, d
         }
     }
     break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
+        break;
     }
 
     return TRUE;
@@ -267,6 +270,12 @@ bool PetActionCollecterAdd::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, 
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_Stand:
+    case eAction_Move:
+    case eAction_Get:
+    case eAction_End_NotUse:
         break;
     }
 
@@ -514,6 +523,9 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         }
     }
     break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
+        break;
     }
 
     return TRUE;

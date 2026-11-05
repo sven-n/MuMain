@@ -1486,6 +1486,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
         }
         break;
+        default:
+            break;
         }
     }
     break;

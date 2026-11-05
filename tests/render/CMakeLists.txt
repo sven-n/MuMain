@@ -302,6 +302,9 @@ add_library(crt_random_clean OBJECT ${MU_CRT_RANDOM_CLEAN})
 foreach(fixtures IN ITEMS crt_random_uses crt_random_clean)
     target_compile_features(${fixtures} PRIVATE cxx_std_20)
 endforeach()
+# A // comment that a backslash continues onto the rand() line is what this fixture checks, and what MSVC warns about.
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random/clean/continued_comment.cpp"
+    PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:MSVC>:/wd4010>")
 file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/game_random_objects_$<CONFIG>.txt"
      CONTENT "$<JOIN:$<TARGET_OBJECTS:MuClient>;$<TARGET_OBJECTS:Main>,\n>\n")
 file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/crt_random_uses_$<CONFIG>.txt"

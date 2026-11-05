@@ -104,13 +104,13 @@ protected:
     float m_fRadius;
 
 public:
-    virtual int GetType(void)
+    int GetType(void) override
     {
         return (CLT_SPHERE);
     }
 
     void Init(float fXPos, float fYPos, float fZPos, float fRadius, int iBone);
-    virtual void ProcessCollision(CPhysicsVertex* pVertex);
+    void ProcessCollision(CPhysicsVertex* pVertex) override;
     void AddStateTo(Fnv1aHash& hash) const override;
     float GetRadius(void)
     {
@@ -293,12 +293,12 @@ public:
 protected:
     int FindMatchVertex(Mesh_t* pMesh, int iV1, int iV2, int iV3);
     BOOL FindInLink(int iCount, int iV1, int iV2);
-    virtual void SetFixedVertices(float Matrix[3][4]);
-    virtual void NotifyVertexPos(int iVertex, vec3_t vPos);
-    virtual void InitForces(void);
+    void SetFixedVertices(float Matrix[3][4]) override;
+    void NotifyVertexPos(int iVertex, vec3_t vPos) override;
+    void InitForces(void) override;
 
 public:
-    virtual void Render(vec3_t* pvColor = NULL, int iLevel = 0);
+    void Render(vec3_t* pvColor = NULL, int iLevel = 0) override;
 };
 
 class CPhysicsManager

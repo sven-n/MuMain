@@ -6,6 +6,7 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -64,7 +65,7 @@ void ValidateParts(const MonsterModelDefinition& model, ModelProblems& problems)
 bool IsInClientFolder(const std::string& path, bool folder)
 {
 #ifdef _WIN32
-    const std::filesystem::path resolved = std::filesystem::u8path(path);
+    const std::filesystem::path resolved = Core::Text::PathFromUtf8(path);
 #else
     // The data spells files as they are on disk, but checks the way the game finds them.
     const std::filesystem::path resolved = MuResolvePath(path.c_str());

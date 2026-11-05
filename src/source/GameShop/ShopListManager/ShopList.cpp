@@ -17,6 +17,18 @@
 #include <fstream>
 #include <vector>
 
+namespace
+{
+constexpr wchar_t ByteOrderMark = 0xFEFF;
+
+// A UTF-16 script is read as bytes: a text-mode stream splits lines at any 0x0A byte, which is half of a UTF-16
+// line break, and Windows' text mode also changes the bytes of some characters.
+std::ios::openmode ScriptOpenMode(FILE_ENCODE encode)
+{
+    return encode == FE_UNICODE ? std::ifstream::in | std::ifstream::binary : std::ifstream::in;
+}
+} // namespace
+
 CShopList::CShopList() // OK
 {
     this->m_CategoryListPtr = new CShopCategoryList;
@@ -40,18 +52,16 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
     std::ifstream ifs;
 
     const auto narrowPath = mu_resolved_narrow_path(szFilePath);
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath, ScriptOpenMode(enc));
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath, ScriptOpenMode(enc));
         LastError = GetLastError();
     }
-
-    char buff[1024] = { 0 };
 
     if (ifs.is_open())
     {
@@ -60,18 +70,12 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
         int linesRead = 0;
         int rowsParsed = 0;
 
-        while (true)
+        std::wstring data;
+        while (this->ReadLine(ifs, enc, data))
         {
-            memset(buff, 0, sizeof(buff));
-
-            if (!ifs.getline(buff, sizeof(buff)))
-                break;
-
             ++linesRead;
 
             CShopCategory cat;
-
-            const std::wstring data = this->GetDecodedString(buff, enc);
 
             if (cat.SetCategory(data))
             {
@@ -107,31 +111,27 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
     std::ifstream ifs;
 
     const auto narrowPath = mu_resolved_narrow_path(szFilePath);
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath, ScriptOpenMode(enc));
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath, ScriptOpenMode(enc));
         LastError = GetLastError();
     }
-
-    char buff[1024] = { 0 };
 
     if (ifs.is_open())
     {
         this->GetPackageListPtr()->Clear();
 
-        while (true)
+        std::wstring data;
+        while (this->ReadLine(ifs, enc, data))
         {
-            if (!ifs.getline(buff, sizeof(buff)))
-                break;
-
             CShopPackage pack;
 
-            if (pack.SetPackage(this->GetDecodedString(buff, enc)))
+            if (pack.SetPackage(data))
             {
                 this->GetPackageListPtr()->Append(pack);
                 this->GetCategoryListPtr()->InsertPackage(pack.ProductDisplaySeq, pack.PackageProductSeq);
@@ -159,33 +159,25 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
     std::ifstream ifs;
 
     const auto narrowPath = mu_resolved_narrow_path(szFilePath);
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath, ScriptOpenMode(enc));
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath, ScriptOpenMode(enc));
         LastError = GetLastError();
     }
-
-    char buff[1024] = { 0 };
 
     if (ifs.is_open())
     {
         this->GetProductListPtr()->Clear();
 
-        while (true)
+        std::wstring data;
+        while (this->ReadLine(ifs, enc, data))
         {
-            memset(buff, 0, sizeof(buff));
-
-            if (!ifs.getline(buff, sizeof(buff)))
-                break;
-
             CShopProduct product;
-
-            std::wstring data = this->GetDecodedString(buff, enc);
 
             if (product.SetProduct(data))
             {
@@ -220,37 +212,68 @@ void CShopList::SetProductListPtr(CShopProductList* ProductListPtr) // OK
 
 FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
-    std::ifstream ifs;
-
-    ifs.open(mu_resolved_narrow_path(szFilePath), std::ifstream::in);
-
+    // The byte order mark is read as bytes, before any text-mode translation.
+    std::ifstream ifs(mu_resolved_narrow_path(szFilePath), std::ifstream::in | std::ifstream::binary);
     if (!ifs.is_open())
     {
         return FE_ANSI;
     }
 
-    char buff[16] = { 0 };
+    unsigned char bytes[3] = {};
+    ifs.read(reinterpret_cast<char*>(bytes), sizeof(bytes));
+    const std::streamsize count = ifs.gcount();
 
-    ifs.getline(buff, sizeof(buff));
-
-    ifs.close();
-
-    if (strlen(buff) < 3)
-    {
-        return FE_ANSI;
-    }
-
-    if (buff[0] == 0xEF && buff[1] == 0xBB && buff[2] == 0xBF)
+    if (count >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
     {
         return FE_UTF8;
     }
 
-    if (buff[0] == 0xFF && buff[1] == 0xFE)
+    if (count >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE)
     {
         return FE_UNICODE;
     }
 
     return FE_ANSI;
+}
+
+bool CShopList::ReadLine(std::istream& stream, FILE_ENCODE encode, std::wstring& line)
+{
+    if (encode == FE_UNICODE)
+    {
+        // UTF-16LE: two bytes per code unit, the line ends at the code unit 0x000A.
+        std::string bytes;
+        char unit[2] = {};
+        while (stream.read(unit, sizeof(unit)) && !(unit[0] == '\n' && unit[1] == '\0'))
+        {
+            bytes.append(unit, sizeof(unit));
+        }
+        if (bytes.empty() && !stream)
+        {
+            return false;
+        }
+        if (bytes.size() >= 2 && bytes[bytes.size() - 2] == '\r' && bytes.back() == '\0')
+        {
+            bytes.resize(bytes.size() - 2);
+        }
+        bytes.append(2, '\0');
+        line = this->GetDecodedString(bytes.data(), encode);
+    }
+    else
+    {
+        char buff[1024] = {0};
+        if (!stream.getline(buff, sizeof(buff)))
+        {
+            return false;
+        }
+        line = this->GetDecodedString(buff, encode);
+    }
+
+    // The byte order mark opens the first line; it is no part of the row.
+    if (!line.empty() && line.front() == ByteOrderMark)
+    {
+        line.erase(0, 1);
+    }
+    return true;
 }
 
 std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode) // OK

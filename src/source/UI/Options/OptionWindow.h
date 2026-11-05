@@ -46,18 +46,18 @@ namespace mu::ui::window
 
         void Show(bool bShow) override;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
         // While a tuning slider holds the keys, only this window gets them, so Escape still closes it.
         bool TakesTypingFrom(const Rml::ElementDocument* document) const override
         {
             return document == m_RmlView.Document();
         }
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 10.5f
-        float GetKeyEventOrder();	// 10.f;
+        float GetLayerDepth() override;    //. 10.5f
+        float GetKeyEventOrder() override; // 10.f;
 
         void OpenningProcess();
         void ClosingProcess();

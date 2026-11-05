@@ -1353,6 +1353,8 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             m_bCurrentIsRage_Jerint = true;
         return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
+    default:
+        break;
     }
     return false;
 }

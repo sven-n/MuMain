@@ -245,6 +245,8 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
     break;
+    default:
+        break;
     }
 
     return pCharacter;
@@ -284,6 +286,8 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
+    default:
+        break;
     }
 
     return false;
