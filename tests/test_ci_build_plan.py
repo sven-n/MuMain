@@ -70,6 +70,7 @@ class BuildPlanTests(unittest.TestCase):
         }}}
         for platform in ("linux", "macos", "windows"):
             needs[f"build-{platform}"] = {"result": "success" if plan[platform] else "skipped"}
+        needs["drawer-contracts"] = {"result": "success" if plan["linux"] else "skipped"}
         return needs
 
     def test_required_check_accepts_only_planned_skips(self):
@@ -84,6 +85,17 @@ class BuildPlanTests(unittest.TestCase):
         needs = self.results(self.plan(paths=("README.md",)))
         needs["build-macos"]["result"] = "success"
         with self.assertRaises(ValueError):
+            check_results(needs)
+
+    def test_required_check_requires_editor_contracts_with_linux(self):
+        for result in ("failure", "cancelled", "skipped"):
+            needs = self.results(self.plan())
+            needs["drawer-contracts"]["result"] = result
+            with self.subTest(result=result), self.assertRaisesRegex(ValueError, "drawer-contracts"):
+                check_results(needs)
+        needs = self.results(self.plan(paths=("README.md",)))
+        needs["drawer-contracts"]["result"] = "success"
+        with self.assertRaisesRegex(ValueError, "drawer-contracts"):
             check_results(needs)
 
     def test_required_check_rejects_failed_quality_and_missing_plan(self):

@@ -128,7 +128,6 @@ mu_add_test(
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_exchange_file.cpp
-        test_item_mesh_list.cpp
         test_item_model_files.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
@@ -155,6 +154,18 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
+
+# These editor drawer contracts must be built in an editor-enabled job, rather than compiling to no tests.
+if(ENABLE_EDITOR)
+    mu_add_test(
+        NAME test_editor_drawer_contracts
+        SOURCES
+            test_item_mesh_list.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
 
 # Animates the shipped player model the way the character pre-pass does.
 mu_add_test(

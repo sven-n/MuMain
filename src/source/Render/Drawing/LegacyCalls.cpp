@@ -72,6 +72,12 @@ void MakeLegacyCall(LegacyCall call, int argument)
     case LegacyCall::EnableAlphaTest:
         EnableAlphaTest(argument != 0);
         break;
+    case LegacyCall::EnableAlphaTestRaw:
+        EnableAlphaTestRaw();
+        break;
+    case LegacyCall::DisableAlphaTestRaw:
+        DisableAlphaTestRaw();
+        break;
     case LegacyCall::EnableAlphaBlend:
         EnableAlphaBlend();
         break;

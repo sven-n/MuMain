@@ -23,6 +23,8 @@ enum class LegacyCall : std::uint8_t
     DisableAlphaBlend,
     // Argument: the depth mask.
     EnableAlphaTest,
+    EnableAlphaTestRaw,
+    DisableAlphaTestRaw,
     EnableAlphaBlend,
     EnableAlphaBlendMinus,
     EnableAlphaBlend2,

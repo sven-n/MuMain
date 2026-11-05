@@ -61,11 +61,11 @@ void CItemMeshPreviewDrawer::DrawMesh(const MeshDraw& draw)
 
 // Added light fills the holes the alpha test cuts into a texture, and EnableAlphaBlend turns the test off, so a
 // texture with holes keeps the test on for its draw: the draw's EnableAlphaBlend turns it off only when it knows it
-// on, and it is put in that state first. A drawer that draws later makes the state calls later.
+// on, and it is put in that state first. All three state calls are recorded with a deferred draw.
 void CItemMeshPreviewDrawer::DrawSeeThrough(const MeshDraw& draw)
 {
     const MeshDraw seeThrough = SeeThrough(draw);
-    if (m_next.DrawsLater() || !HasHoles(draw))
+    if (!HasHoles(draw))
     {
         m_next.DrawMesh(seeThrough);
         return;
@@ -95,8 +95,7 @@ MeshDraw CItemMeshPreviewDrawer::SeeThrough(const MeshDraw& draw)
     return seeThrough;
 }
 
-// The mesh's vertices as this draw poses them (the model's current skin), tested once per mesh. VertexTransform has
-// MAX_MESH meshes; EnsureCpuVertices skins none past them.
+// Each mesh is tested once, from the draw's captured vertices or skin rather than the shared model's last pose.
 void CItemMeshPreviewDrawer::Pick(const MeshDraw& draw)
 {
     if (draw.mesh < 0 || draw.mesh >= MAX_MESH || m_tested.test(draw.mesh))
@@ -110,9 +109,7 @@ void CItemMeshPreviewDrawer::Pick(const MeshDraw& draw)
     {
         return;
     }
-    draw.model->EnsureCpuVertices(draw.mesh);
-    const std::optional<float> hit =
-        MeshPicking::HitMesh(*m_pickRay, *draw.model, draw.mesh, VertexTransform[draw.mesh]);
+    const std::optional<float> hit = MeshPicking::HitMesh(*m_pickRay, draw);
     if (hit && (!m_hitMesh || *hit < m_hitDistance))
     {
         m_hitMesh = draw.mesh;

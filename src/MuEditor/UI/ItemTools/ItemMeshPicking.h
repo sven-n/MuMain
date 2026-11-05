@@ -7,6 +7,11 @@
 
 class BMD;
 
+namespace Render::ModelDrawing
+{
+struct MeshDraw;
+}
+
 namespace MuEditor::Effects
 {
 class EffectPreviewCamera;
@@ -34,7 +39,10 @@ struct Ray
 [[nodiscard]] std::optional<float> HitTriangle(const Ray& ray, const float* a, const float* b, const float* c);
 
 // The nearest hit of one of the model's meshes, its vertices posed in `vertices` (a quad is two triangles).
-[[nodiscard]] std::optional<float> HitMesh(const Ray& ray, const BMD& model, int mesh, float (*vertices)[3]);
+[[nodiscard]] std::optional<float> HitMesh(const Ray& ray, const BMD& model, int mesh, const float (*vertices)[3]);
+
+// Uses the draw's captured CPU vertices, or skins from its captured pose into local storage.
+[[nodiscard]] std::optional<float> HitMesh(const Ray& ray, const Render::ModelDrawing::MeshDraw& draw);
 } // namespace MuEditor::Items::MeshPicking
 
 #endif // _EDITOR
