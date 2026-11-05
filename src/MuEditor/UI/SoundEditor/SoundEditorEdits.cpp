@@ -118,15 +118,15 @@ std::optional<Data::Monsters::MonsterSoundSet> TurnSetSound(const Data::Monsters
     return turned;
 }
 
-// The set `name` as the file has it (`fileSets`, by its name before this
-// window changed it, `before`), under its name now; one the file lacks goes.
-// False when the monster tools refused it.
-bool PutSetBack(const std::string& name, const Data::Monsters::MonsterSoundSet& before,
+// The set `name` as the file has it (`fileSets`, under `fileName`), under
+// its name now; one the file lacks goes. False when the monster tools refused
+// it.
+bool PutSetBack(const std::string& name, const std::string& fileName,
                 const std::vector<Data::Monsters::MonsterSoundSet>& fileSets)
 {
     const auto saved =
         std::find_if(fileSets.begin(), fileSets.end(),
-                     [&before](const Data::Monsters::MonsterSoundSet& set) { return set.name == before.name; });
+                     [&fileName](const Data::Monsters::MonsterSoundSet& set) { return set.name == fileName; });
     const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
     if (saved == fileSets.end())
     {
@@ -297,10 +297,21 @@ void SoundEdits::ReadFolders()
 
 void SoundEdits::FollowKeyChanges()
 {
-    if (m_keyed && KeyedVersions() == m_keyedVersions)
+    if (!m_keyed || KeyedVersions() != m_keyedVersions)
     {
-        return;
+        FollowTables();
     }
+    // After the renames of a revert: the monster tools wrote or read their
+    // files as a whole, so the sets' names are the file's.
+    if (g_MonsterDataHandler.GetFilesVersion() != m_filesVersion)
+    {
+        m_filesVersion = g_MonsterDataHandler.GetFilesVersion();
+        m_fileNames.clear();
+    }
+}
+
+void SoundEdits::FollowTables()
+{
     KeyedTables now = CurrentKeyedTables();
     if (!m_fileKeyed)
     {
@@ -326,6 +337,27 @@ void SoundEdits::FollowRenamedSets(const std::map<std::string, std::string>& ren
     {
         return;
     }
+    // All at once: a name one set gives up another may take.
+    std::map<std::string, std::string> fileNames;
+    for (const auto& [from, to] : renamed)
+    {
+        fileNames.emplace(to, FileNameOf(from));
+    }
+    for (const auto& entry : renamed)
+    {
+        m_fileNames.erase(entry.first);
+    }
+    for (auto& [to, file] : fileNames)
+    {
+        if (file != to)
+        {
+            m_fileNames[to] = std::move(file);
+        }
+        else
+        {
+            m_fileNames.erase(to);
+        }
+    }
     std::map<std::string, Data::Monsters::MonsterSoundSet> followed;
     for (auto& [name, set] : m_savedSets)
     {
@@ -344,6 +376,12 @@ void SoundEdits::FollowRenamedSets(const std::map<std::string, std::string>& ren
             }
         }
     }
+}
+
+std::string SoundEdits::FileNameOf(const std::string& name) const
+{
+    const auto found = m_fileNames.find(name);
+    return found != m_fileNames.end() ? found->second : name;
 }
 
 void SoundEdits::RenameInFolders(const std::map<std::string, std::string>& renamed)
@@ -523,13 +561,26 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
     }
     if (SetsDiffer(m_savedSets))
     {
-        std::vector<std::string> names;
-        for (const auto& entry : m_savedSets)
+        // Only the sets, under their names in the file: not the monster
+        // tools' other unsaved changes, a rename among them.
+        const auto change = [this](std::vector<Data::Monsters::MonsterSoundSet>& fileSets)
         {
-            names.push_back(entry.first);
-        }
-        // Only the sets: not the monster tools' other unsaved changes.
-        if (g_MonsterDataHandler.SaveSoundSets(names, issues))
+            for (const auto& entry : m_savedSets)
+            {
+                const Data::Monsters::MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(entry.first);
+                const std::string fileName = FileNameOf(entry.first);
+                const auto saved =
+                    std::find_if(fileSets.begin(), fileSets.end(), [&fileName](const Data::Monsters::MonsterSoundSet& set)
+                                 { return set.name == fileName; });
+                if (now != nullptr && saved != fileSets.end())
+                {
+                    *saved = *now;
+                    saved->name = fileName;
+                }
+            }
+            return true;
+        };
+        if (g_MonsterDataHandler.SaveSoundSets(change, issues))
         {
             m_savedSets.clear();
         }
@@ -639,7 +690,7 @@ bool SoundEdits::RevertSets(std::vector<Data::Items::ItemDataIssue>& issues,
     bool all = true;
     for (const auto& entry : m_savedSets)
     {
-        if (PutSetBack(entry.first, entry.second, file.sets))
+        if (PutSetBack(entry.first, FileNameOf(entry.first), file.sets))
         {
             continue;
         }
@@ -675,6 +726,8 @@ void SoundEdits::Clear()
     m_keyed.reset();
     m_keyedVersions = {-1, -1};
     m_fileKeyed.reset();
+    m_fileNames.clear();
+    m_filesVersion = -1;
     m_savedEvents.reset();
 }
 } // namespace MuEditor::SoundEditor

@@ -389,10 +389,12 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
+    ++m_filesVersion;
     return true;
 }
 
-bool MonsterDataHandler::SaveSoundSets(std::span<const std::string> names, std::vector<Items::ItemDataIssue>& issues)
+bool MonsterDataHandler::SaveSoundSets(const std::function<bool(std::vector<MonsterSoundSet>& sets)>& change,
+                                       std::vector<Items::ItemDataIssue>& issues)
 {
     MonsterSoundsLoadResult file = LoadMonsterSoundsFile(GetMonsterSoundsFile());
     if (Items::HasFatal(file.issues))
@@ -400,15 +402,9 @@ bool MonsterDataHandler::SaveSoundSets(std::span<const std::string> names, std::
         issues.insert(issues.end(), file.issues.begin(), file.issues.end());
         return false;
     }
-    for (const std::string& name : names)
+    if (!change(file.sets))
     {
-        const MonsterSoundSet* now = g_MonsterSoundSetDatabase.Find(name);
-        const auto saved = std::find_if(file.sets.begin(), file.sets.end(),
-                                        [&name](const MonsterSoundSet& set) { return set.name == name; });
-        if (now != nullptr && saved != file.sets.end())
-        {
-            *saved = *now;
-        }
+        return false;
     }
     const std::optional<std::string> text = MakeMonsterSoundsFileText(GetMonsterSoundsFile(), file.sets, issues);
     if (!text)
@@ -441,6 +437,7 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     UseMonsters(monsters.monsters);
     UseModels(models.models);
     UseSoundSets(sounds.sets);
+    ++m_filesVersion;
     return true;
 }
 
