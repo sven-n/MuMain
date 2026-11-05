@@ -438,10 +438,14 @@ void MuSoundEditorUI::RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule
     for (size_t index = 0; index < rule.plays.size(); ++index)
     {
         ImGui::PushID(static_cast<int>(index));
-        Data::Sounds::SoundEventRule after = rule;
-        if (ImGui::SmallButton("x") && MuEditor::SoundEditor::RemovePlay(after, index))
+        if (ImGui::SmallButton("x"))
         {
-            change(after);
+            // A copy only for the click.
+            Data::Sounds::SoundEventRule after = rule;
+            if (MuEditor::SoundEditor::RemovePlay(after, index))
+            {
+                change(after);
+            }
         }
         ImGui::SameLine();
         const std::string name =
@@ -456,21 +460,29 @@ void MuSoundEditorUI::RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule
                           ImVec2(PickerWidth * g_MuEditorCore.GetUIScale(), PickerHeight * g_MuEditorCore.GetUIScale()),
                           ImGuiChildFlags_Borders))
     {
+        const bool filtered = m_pickerText[0] != '\0';
         for (const Data::Sounds::SoundFile& sound : g_SoundFileDatabase.GetAll())
         {
-            const std::string shown = sound.name.empty() ? sound.id : sound.name + " (" + sound.id + ")";
-            MuEditor::SoundEditor::SoundRow probe;
-            probe.id = sound.id;
-            probe.name = sound.name;
-            probe.file = sound.file;
-            if (!MuEditor::SoundEditor::Matches(probe, m_pickerText.data()))
+            if (filtered)
             {
-                continue;
+                MuEditor::SoundEditor::SoundRow probe;
+                probe.id = sound.id;
+                probe.name = sound.name;
+                probe.file = sound.file;
+                if (!MuEditor::SoundEditor::Matches(probe, m_pickerText.data()))
+                {
+                    continue;
+                }
             }
-            Data::Sounds::SoundEventRule after = rule;
-            if (ImGui::Selectable(shown.c_str()) && MuEditor::SoundEditor::AddPlay(after, sound.id))
+            const std::string shown = sound.name.empty() ? sound.id : sound.name + " (" + sound.id + ")";
+            if (ImGui::Selectable(shown.c_str()))
             {
-                change(after);
+                // A copy only for the click.
+                Data::Sounds::SoundEventRule after = rule;
+                if (MuEditor::SoundEditor::AddPlay(after, sound.id))
+                {
+                    change(after);
+                }
             }
         }
     }
