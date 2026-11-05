@@ -1,7 +1,13 @@
 #include "stdafx.h"
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+#include <winsock2.h>
+#endif
 #include <doctest.h>
 
 #include "RmlLayoutFixture.h"
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+#include "Dotnet/Connection.h"
+#endif
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -18,7 +24,9 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <array>
+#include <chrono>
 #include <memory>
+#include <vector>
 
 #ifndef _WIN32
 #include <sys/mman.h>
@@ -43,6 +51,76 @@ constexpr int TestTile = 40;
 constexpr int TestCharacterLevel = 400;
 constexpr int TempleSkillCount = AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1;
 constexpr DWORD MissingSelection = static_cast<DWORD>(-1);
+
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+class SkillPacketPeer
+{
+public:
+    SkillPacketPeer()
+    {
+        WSADATA data{};
+        REQUIRE(WSAStartup(MAKEWORD(2, 2), &data) == 0);
+        m_listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        REQUIRE(m_listener != INVALID_SOCKET);
+        sockaddr_in address{};
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        REQUIRE(bind(m_listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == 0);
+        REQUIRE(listen(m_listener, 1) == 0);
+        int size = sizeof(address);
+        REQUIRE(getsockname(m_listener, reinterpret_cast<sockaddr*>(&address), &size) == 0);
+        port = ntohs(address.sin_port);
+    }
+
+    ~SkillPacketPeer()
+    {
+        if (m_peer != INVALID_SOCKET)
+            closesocket(m_peer);
+        if (m_listener != INVALID_SOCKET)
+            closesocket(m_listener);
+        WSACleanup();
+    }
+
+    void Accept()
+    {
+        fd_set readable;
+        FD_ZERO(&readable);
+        FD_SET(m_listener, &readable);
+        timeval wait{2, 0};
+        REQUIRE(select(0, &readable, nullptr, nullptr, &wait) == 1);
+        m_peer = accept(m_listener, nullptr, nullptr);
+        REQUIRE(m_peer != INVALID_SOCKET);
+    }
+
+    std::vector<BYTE> Collect()
+    {
+        std::vector<BYTE> bytes;
+        const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(300);
+        while (std::chrono::steady_clock::now() < until)
+        {
+            fd_set readable;
+            FD_ZERO(&readable);
+            FD_SET(m_peer, &readable);
+            timeval wait{0, 10000};
+            const int ready = select(0, &readable, nullptr, nullptr, &wait);
+            REQUIRE(ready != SOCKET_ERROR);
+            if (ready == 0)
+                continue;
+            char buffer[256];
+            const int count = recv(m_peer, buffer, sizeof(buffer), 0);
+            REQUIRE(count > 0);
+            bytes.insert(bytes.end(), buffer, buffer + count);
+        }
+        return bytes;
+    }
+
+    int port = 0;
+
+private:
+    SOCKET m_listener = INVALID_SOCKET;
+    SOCKET m_peer = INVALID_SOCKET;
+};
+#endif
 
 // End the real character table at an inaccessible page so one-past-end reads always fault.
 class GuardedCharacters
@@ -109,8 +187,9 @@ public:
           m_previousMachine(CharacterMachine), m_previousAttribute(CharacterAttribute),
           m_previousSkills(SkillAttribute), m_previousSocket(SocketClient), m_previousScene(SceneFlag),
           m_previousWorld(gMapManager.WorldActive), m_previousSelection(SelectedCharacter), m_previousTargetX(TargetX),
-          m_previousTargetY(TargetY), m_previousMousePush(MouseRButtonPush), m_previousActive(g_bWndActive),
-          m_previousLanguage(g_strSelectedML), m_previousDirectory(std::filesystem::current_path()),
+          m_previousTargetY(TargetY), m_previousMouse(MouseRButton), m_previousMousePush(MouseRButtonPush),
+          m_previousActive(g_bWndActive), m_previousLanguage(g_strSelectedML),
+          m_previousDirectory(std::filesystem::current_path()),
           m_previousTextureCollector(Render::Textures::GetTextureErrorCollector())
     {
     }
@@ -147,6 +226,7 @@ public:
         SelectedCharacter = m_previousSelection;
         TargetX = m_previousTargetX;
         TargetY = m_previousTargetY;
+        MouseRButton = m_previousMouse;
         MouseRButtonPush = m_previousMousePush;
         g_bWndActive = m_previousActive;
         g_strSelectedML = m_previousLanguage;
@@ -167,6 +247,7 @@ private:
     int m_previousSelection;
     int m_previousTargetX;
     int m_previousTargetY;
+    bool m_previousMouse;
     bool m_previousMousePush;
     bool m_previousActive;
     std::wstring m_previousLanguage;
@@ -208,6 +289,12 @@ public:
         SetUpTemple();
         // Rejected targets must return before any transport access.
         SocketClient = nullptr;
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+        m_connection = std::make_unique<Connection>(u"127.0.0.1", peer.port, false, nullptr);
+        REQUIRE(m_connection->IsConnected());
+        peer.Accept();
+        SocketClient = m_connection.get();
+#endif
     }
 
     ~TempleSkillFixture()
@@ -223,6 +310,70 @@ public:
         MouseRButtonPush = true;
         m_window->SetCursedTempleSkill(Hero, &Hero->Object, selection);
     }
+
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+    void BeginHeldCast(int skill, DWORD selection)
+    {
+        Hero->m_CursedTempleCurSkill = skill;
+        Hero->m_CursedTempleCurSkillPacket = false;
+        MouseRButton = true;
+        MouseRButtonPush = true;
+        m_window->SetCursedTempleSkill(Hero, &Hero->Object, selection);
+    }
+
+    void RetryHeldCast(DWORD selection)
+    {
+        m_window->SetCursedTempleSkill(Hero, &Hero->Object, selection);
+    }
+
+    void ResolveRejected(int skill)
+    {
+        m_window->ResolveSkill({static_cast<WORD>(skill), static_cast<WORD>(HeroId), static_cast<WORD>(HeroId), false});
+    }
+
+    void ReleaseRightButton()
+    {
+        MouseRButton = false;
+        m_window->Update();
+    }
+
+    void ExpectRequestCount(std::size_t expectedCount)
+    {
+        const std::vector<BYTE> bytes = peer.Collect();
+        std::size_t offset = 0;
+        std::size_t requestCount = 0;
+        while (offset < bytes.size())
+        {
+            const std::size_t remaining = bytes.size() - offset;
+            REQUIRE(remaining >= 2);
+            std::size_t packetLength = 0;
+            std::size_t headerLength = 0;
+            if (bytes[offset] == 0xC1)
+            {
+                headerLength = 2;
+                packetLength = bytes[offset + 1];
+            }
+            else if (bytes[offset] == 0xC2)
+            {
+                REQUIRE(remaining >= 3);
+                headerLength = 3;
+                packetLength = (static_cast<std::size_t>(bytes[offset + 1]) << 8) | bytes[offset + 2];
+            }
+            else
+            {
+                FAIL("Unexpected MU packet header");
+            }
+
+            REQUIRE(packetLength >= headerLength + 2);
+            REQUIRE(packetLength <= remaining);
+            CHECK(bytes[offset + headerLength] == 0xBF);
+            CHECK(bytes[offset + headerLength + 1] == 0x02);
+            ++requestCount;
+            offset += packetLength;
+        }
+        CHECK(requestCount == expectedCount);
+    }
+#endif
 
     void ExpectRejected(int skill, DWORD selection)
     {
@@ -271,6 +422,13 @@ private:
     std::unique_ptr<BMD[]> m_models;
     std::unique_ptr<SKILL_ATTRIBUTE[]> m_skills;
     std::unique_ptr<mu::ui::window::CCursedTempleSystem> m_window;
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+public:
+    SkillPacketPeer peer;
+
+private:
+    std::unique_ptr<Connection> m_connection;
+#endif
 };
 } // namespace
 
@@ -310,6 +468,29 @@ TEST_CASE("Temple hostile skills reject absent target keys and teammates [ui][te
         fixture.ExpectRejected(skill, EnemySlot);
     }
 }
+
+#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+TEST_CASE("Temple response before RMB release does not repeat a held gesture [ui][temple-skill]")
+{
+    TempleSkillFixture fixture;
+    const int skill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
+
+    fixture.BeginHeldCast(skill, MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+
+    fixture.ResolveRejected(skill);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    fixture.ReleaseRightButton();
+    fixture.BeginHeldCast(skill, MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+}
+#endif
 
 namespace
 {
