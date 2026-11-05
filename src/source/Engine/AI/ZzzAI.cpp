@@ -31,6 +31,7 @@
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FrameTime.h"
 #include "Engine/Object/Movement/LookAt.h"
+#include "Engine/Object/Movement/MovementTuning.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 
@@ -698,7 +699,7 @@ bool MovePath(CHARACTER* c, bool Turn)
         }
         if (Turn && Engine::Characters::EnhancedMovementEnabled())
         {
-            if (!Success && FarAngle(o->Angle[2], c->MoveHeading) >= SharpTurnDegrees)
+            if (!Success && FarAngle(o->Angle[2], c->MoveHeading) >= Engine::Characters::SharpTurnDegrees)
             {
                 o->Angle[2] = c->MoveHeading;
                 c->TurnSpeed = 0.f;

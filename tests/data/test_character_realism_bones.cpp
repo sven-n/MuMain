@@ -8,8 +8,11 @@
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FootPlacement.h"
 #include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/Momentum.h"
+#include "Engine/Object/Movement/Stride.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <chrono>
@@ -496,6 +499,58 @@ TEST_CASE("Emotes play through with Enhanced Movement on and go back to standing
         CHECK_FALSE(c.TurnPending);
         CHECK(o.Angle[2] == 90.f);
     }
+
+    FPS_ANIMATION_FACTOR = savedFactor;
+    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
+}
+
+TEST_CASE("A walker's steps play at the eased pace it moves at while setting off [data][animation][momentum]")
+{
+    PlayerModel player;
+    BMD& model = player.model;
+    model.BoneFoot[0] = 6;
+    model.BoneFoot[1] = 13;
+    for (int walk = PLAYER_WALK_MALE; walk <= PLAYER_RUN_RIDE_WEAPON; ++walk)
+    {
+        model.Actions[walk].PlaySpeed = 0.3f;
+    }
+    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
+    Engine::Characters::SetEnhancedMovementEnabled(true);
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    // 100 frames a second: a start takes several frames.
+    FPS_ANIMATION_FACTOR = static_cast<float>(REFERENCE_FPS / 100.0);
+
+    // How far the walk's keys go in one frame, for a walker moving at `pace` of its speed now.
+    const auto keysInAFrame = [&](float pace)
+    {
+        CHARACTER& c = StandingPlayer();
+        OBJECT& o = c.Object;
+        // Not a player of the server's: its speed is its own MoveSpeed.
+        o.Kind = KIND_NPC;
+        c.MoveSpeed = 12;
+        c.Movement = true;
+        o.CurrentAction = PLAYER_WALK_MALE;
+        o.PriorAction = PLAYER_WALK_MALE;
+        o.AnimationFrame = 1.f;
+        o.PriorAnimationFrame = 1.f;
+        c.Motion.MomentumSpeed = pace;
+        model.CurrentAction = PLAYER_WALK_MALE;
+        CharacterAnimation(&c, &o);
+        return o.AnimationFrame - 1.f;
+    };
+    REQUIRE(Engine::Characters::StepPerKey(PLAYER_WALK_MALE) > 0.f);
+    const float full = keysInAFrame(1.f);
+    REQUIRE(full > 0.f);
+
+    // Setting off: the first frame's pace, eased, is what the body moves at (MoveCharacterPosition) and the steps play
+    // at, so the feet keep to the ground.
+    CHARACTER& walker = StandingPlayer();
+    ++RENDERED_FRAME;
+    const float pace = Engine::Characters::StepMomentum(&walker);
+    REQUIRE(pace > 0.f);
+    REQUIRE(pace < 1.f);
+    CHECK(walker.Motion.MomentumSpeed == pace);
+    CHECK(keysInAFrame(pace) == doctest::Approx(full * pace));
 
     FPS_ANIMATION_FACTOR = savedFactor;
     Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);

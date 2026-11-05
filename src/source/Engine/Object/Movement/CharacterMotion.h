@@ -3,7 +3,7 @@
 #include <cmath>
 
 // A character's state for the movement features (Enhanced Movement) that work after it moved: how it's drawn
-// flying, trailing a turn, looking, greeting and fading between actions. CHARACTER::Motion.
+// flying, trailing a turn, looking, greeting, setting off and fading between actions. CHARACTER::Motion.
 struct CharacterMotion
 {
     // A flying character's feel (UpdateFlightFeel): the roll it banks by into a turn, how far the gentle up-and-down
@@ -18,6 +18,11 @@ struct CharacterMotion
     float TurnLag = 0.f;
     float TurnLagSpeed = 0.f;
     float TurnLagFacing = NAN;
+    // A walker setting off from rest (StepMomentum): how far through its start it is (0 to 1), the share of its speed
+    // it moves at (eased), and the rendered frame it last walked in (0: not yet).
+    float MomentumStart = 1.f;
+    float MomentumSpeed = 1.f;
+    unsigned int MomentumFrame = 0;
     // The pitch a slope gives the character now (UpdateSlopeLean), in degrees, as last added to Object.Angle[0].
     float SlopePitch = 0.f;
     // A nod (UpdateNod): how far through it the head is (seconds left, 0: none), the pitch it last added to

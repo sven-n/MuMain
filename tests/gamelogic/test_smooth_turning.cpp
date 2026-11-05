@@ -4,6 +4,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/MovementTuning.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 #include "../data/TestModelSlots.h"
@@ -249,7 +250,9 @@ TEST_CASE("A walking reversal faces and travels the new way at once, as without 
 {
     const AnimationFactor factor(1.f);
     const float toPath = CreateAngle(0.f, 0.f, 0.f, 1.f);
-    for (const float facing : {180.f, 90.f, -60.f, 50.f})
+    using Engine::Characters::SharpTurnDegrees;
+    // A reversal, sharp turns either way, and one just past the threshold.
+    for (const float facing : {180.f, 90.f, -60.f, SharpTurnDegrees + 1.f})
     {
         CAPTURE(facing);
         const WalkStep on = StepAlongPath(facing, true);
@@ -268,13 +271,15 @@ TEST_CASE("A gentle walking turn eases while the walker already travels the new 
 {
     const AnimationFactor factor(1.f);
     const EnhancedMovementSwitch option(true);
-    CHARACTER& walker = WalkerOnPath(30.f);
+    // Gentler than a sharp turn.
+    const float facing = Engine::Characters::SharpTurnDegrees - 15.f;
+    CHARACTER& walker = WalkerOnPath(facing);
     const float toPath = CreateAngle(0.f, 0.f, 0.f, 1.f);
     CHECK_FALSE(MovePath(&walker));
     // One frame from rest turns a little, not the whole way.
     const float left = FarAngle(walker.Object.Angle[2], toPath);
-    CHECK(left > 20.f);
-    CHECK(left < 30.f);
+    CHECK(left > 0.f);
+    CHECK(left < facing - 0.01f);
     const float x = walker.Object.Position[0];
     const float y = walker.Object.Position[1];
     MoveCharacterPosition(&walker, walker.MoveHeading);

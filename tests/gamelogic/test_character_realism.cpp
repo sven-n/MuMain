@@ -6,12 +6,15 @@
 #include "Engine/Object/Movement/FlightFeel.h"
 #include "Engine/Object/Movement/Greetings.h"
 #include "Engine/Object/Movement/LookAt.h"
+#include "Engine/Object/Movement/Momentum.h"
+#include "Engine/Object/Movement/MovementTuning.h"
 #include "Engine/Object/Movement/SlopeLean.h"
 #include "Engine/Object/Movement/SnapTurn.h"
 #include "Engine/Object/Movement/TurnLag.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "../data/TestModelSlots.h"
 
 #include <algorithm>
@@ -1023,4 +1026,73 @@ TEST_CASE("The hero nods back only while it stands on foot [gamelogic][nod]")
         // Its head turns to the nodder either way.
         CHECK(heroAttended);
     }
+}
+
+TEST_CASE("A walker setting off from rest reaches its full speed within MomentumStartSeconds, at any frame rate "
+          "[gamelogic][momentum]")
+{
+    for (const double fps : std::array{25.0, 60.0, 240.0})
+    {
+        CAPTURE(fps);
+        const Clock clock(fps);
+        CHARACTER& walker = FreshPlayer();
+        float fullAt = -1.f;
+        float previous = 0.f;
+        for (int frame = 1; frame <= clock.Frames(1.f); ++frame)
+        {
+            clock.Tick();
+            ++RENDERED_FRAME;
+            const float pace = StepMomentum(&walker);
+            CHECK(pace >= previous);
+            previous = pace;
+            if (frame == 1)
+            {
+                // One frame's share of the start, eased.
+                const float start = std::min(1.f, clock.Seconds() / MomentumStartSeconds);
+                CHECK(pace == doctest::Approx(start * start * (3.f - 2.f * start)));
+            }
+            if (pace == 1.f)
+            {
+                fullAt = static_cast<float>(frame) * clock.Seconds();
+                break;
+            }
+        }
+        CHECK(fullAt > 0.f);
+        // Within the start's time, rounded up to whole frames.
+        CHECK(fullAt <= MomentumStartSeconds + clock.Seconds() - 0.0001f);
+    }
+}
+
+TEST_CASE("Below 10 frames a second a walker keeps its speed, and only standing still starts it over "
+          "[gamelogic][momentum]")
+{
+    // 6 frames a second: each frame is longer than any gap a walk could have in real time. The game's frame step stops
+    // at the reference rate's (CalcFPS clamps FPS_ANIMATION_FACTOR to 1), so the world clock runs ahead of it.
+    const Clock clock(REFERENCE_FPS);
+    constexpr double SlowFrameMilliseconds = 1000.0 / 6.0;
+    CHARACTER& walker = FreshPlayer();
+    for (int frame = 0; frame < 20; ++frame)
+    {
+        WorldTime += SlowFrameMilliseconds;
+        ++RENDERED_FRAME;
+        StepMomentum(&walker);
+    }
+    CHECK(walker.Motion.MomentumSpeed == 1.f);
+
+    // A pause up to the rest gap keeps the speed.
+    RENDERED_FRAME += MomentumRestFrames;
+    CHECK(StepMomentum(&walker) == 1.f);
+    // Standing still longer, then walking again: from rest.
+    RENDERED_FRAME += MomentumRestFrames + 1;
+    CHECK(StepMomentum(&walker) < 1.f);
+}
+
+TEST_CASE("Without Enhanced Movement a walker moves at full speed from the first frame [gamelogic][momentum][option]")
+{
+    const Clock clock(60.0);
+    const EnhancedMovementOff off;
+    CHARACTER& walker = FreshPlayer();
+    ++RENDERED_FRAME;
+    CHECK(StepMomentum(&walker) == 1.f);
+    CHECK(walker.Motion.MomentumSpeed == 1.f);
 }

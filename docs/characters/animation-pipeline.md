@@ -62,7 +62,7 @@ the seconds of a frame are `FPS_ANIMATION_FACTOR / REFERENCE_FPS`. Below 25 FPS 
 
 1. Objects, items, boids.
 2. **`MoveHero`** (`Engine/Object/ZzzInterface.cpp`): the hero's head (`UpdateHeroLook`: who nodded at it, what it
-   looks at, idle glances; else the cursor), walking (`MovePath`, `MoveCharacterPosition`) or turning
+   looks at, idle glances; else the cursor), walking (`MovePath`, `StepMomentum`, `MoveCharacterPosition`) or turning
    on the spot (toward the cursor), then its flight feel, turn lag and slope lean.
 3. **`MoveCharactersClient`** (`ZzzCharacter.cpp`): for every slot `MoveCharacterClient`:
    `MoveMonsterClient` (paths and walking; returns at once for the hero), `FinishPendingTurn`, **`MoveCharacter`**
@@ -174,6 +174,7 @@ is `CHARACTER::Motion`.
 | `FootPlacement` | a player's feet on the ground under them, in the bones (`PlaceFeet`) |
 | `Stride` | how far each action steps per key (`StepPerKey`), so walking plays as fast as the character moves |
 | `PoseFade` | fades between actions (`UpdatePoseFade`, `CharacterPoseFade`), by a table of where the action goes |
+| `Momentum` | a walker setting off from rest reaches full speed over `MomentumStartSeconds` (`StepMomentum`); turns keep its speed; the tunables are in `MovementTuning.h` |
 | `MovementBones` | the one bone builder (`AnimateBones`, above) |
 | `FrameTime` | `FrameSeconds`, `EaseStep`: everything is timed in seconds, the same at any frame rate |
 

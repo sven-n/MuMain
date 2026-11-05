@@ -194,8 +194,8 @@ public:
     // Whether the last standing turn ended by arriving (FinishPendingTurn), rather than cut short by another action, a
     // walk or another facing, which tell the server themselves.
     bool TurnArrived = false;
-    // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, slope lean, the
-    // drawn sudden turn, pose fades).
+    // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, setting off, slope
+    // lean, the drawn sudden turn, pose fades).
     CharacterMotion Motion;
     char		CollisionTime; // unused?
 
