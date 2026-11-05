@@ -502,6 +502,7 @@ void StartStandingTurn(CHARACTER* c, float angle)
         return;
     }
     c->TurnLeftAt = c->Object.Angle[2];
+    c->TurnStance = c->Object.CurrentAction;
     c->TurnPending = FarAngle(c->Object.Angle[2], angle) > TurnArrivedDegrees;
 }
 
@@ -528,10 +529,13 @@ void FinishPendingTurn(CHARACTER* c)
         c->TurnSpeed = 0.f;
         return;
     }
-    // Something else turned the character or gave it another action since (walking, an attack, a skill, the
-    // server's direction): that wins, and the turn ends where it is.
+    // Something else turned the character or gave it another action since (walking, an attack, a skill, a sit, an
+    // emote, death, the server's direction): that wins, and the turn ends where it is. Before its first step the
+    // character still stands in the stance the turn started from; after, it plays the turn's steps.
     const bool stepping = c->TurnAction != -1;
-    if (c->Movement || o->Angle[2] != c->TurnLeftAt || (stepping && o->CurrentAction != c->TurnAction))
+    const bool sameAction =
+        stepping ? o->CurrentAction == c->TurnAction : c->Dead == 0 && o->CurrentAction == c->TurnStance;
+    if (c->Movement || o->Angle[2] != c->TurnLeftAt || !sameAction)
     {
         c->TurnPending = false;
         c->TurnAction = -1;

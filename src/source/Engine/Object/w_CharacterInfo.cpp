@@ -77,6 +77,7 @@ void CHARACTER::Initialize()
     TurnLeftAt = 0.f;
     TurnAction = -1;
     TurnSpeed = 0.f;
+    TurnStance = -1;
     Motion.Reset();
     MovementType = 0;
     CollisionTime = 0;

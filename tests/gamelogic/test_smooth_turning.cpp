@@ -306,3 +306,47 @@ TEST_CASE("A standing turn starts only for a real change and gives way to anythi
     CHECK_FALSE(standing.TurnPending);
     standing.Movement = false;
 }
+
+namespace
+{
+// A character standing in `stance`, about to turn from 90 to 270 degrees (StartStandingTurn, as the server's direction
+// or the cursor starts one). Not a player and in a safe zone, so its steps are the plain walk.
+CHARACTER& StandingTurner(int stance)
+{
+    static CHARACTER turner;
+    turner.Initialize();
+    turner.SafeZone = true;
+    turner.Object.CurrentAction = static_cast<unsigned short>(stance);
+    turner.Object.Angle[2] = 90.f;
+    StartStandingTurn(&turner, 270.f);
+    REQUIRE(turner.TurnPending);
+    return turner;
+}
+} // namespace
+
+TEST_CASE("A standing turn doesn't replace an action set before its first step: a sit, an emote, death "
+          "[gamelogic][turning]")
+{
+    const EnhancedMovementSwitch option(true);
+    struct InBetween
+    {
+        const char* what;
+        int action;
+        BYTE dead;
+    };
+    for (const InBetween& between : {InBetween{"sit", PLAYER_SIT1, 0}, InBetween{"emote", PLAYER_GREETING1, 0},
+                                     InBetween{"death", PLAYER_DIE1, 1}})
+    {
+        CAPTURE(between.what);
+        CHARACTER& turner = StandingTurner(PLAYER_STOP_MALE);
+        turner.Object.CurrentAction = static_cast<unsigned short>(between.action);
+        turner.Dead = between.dead;
+        FinishPendingTurn(&turner);
+        // The action stays, and the turn ends where it is, without stepping or standing it up.
+        CHECK(turner.Object.CurrentAction == between.action);
+        CHECK_FALSE(turner.TurnPending);
+        CHECK(turner.TurnAction == -1);
+        CHECK(turner.Object.Angle[2] == 90.f);
+        turner.Dead = 0;
+    }
+}

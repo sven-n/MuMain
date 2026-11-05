@@ -187,6 +187,10 @@ public:
     // How fast the facing turns toward MoveHeading now, in degrees per second (signed): a turn speeds up and slows
     // down (TurnTowardsMoveHeading) instead of starting and stopping at full speed.
     float TurnSpeed = 0.f;
+    // The stance a standing turn starts from: the action the character stood in when StartStandingTurn started it, or
+    // the one SetPlayerStop gave it when a walk ended. Another action set before the turn's first step (a sit, an
+    // emote, death) ends the turn where it is instead of being replaced by its steps.
+    int TurnStance = -1;
     // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, slope lean, the
     // drawn sudden turn, pose fades).
     CharacterMotion Motion;

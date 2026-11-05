@@ -483,6 +483,9 @@ void SetPlayerStop(CHARACTER* c)
             SetAction(&c->Object, MONSTER01_STOP1);
     }
 
+    // A walk that just ended may leave a standing turn; it starts from this stance.
+    c->TurnStance = o->CurrentAction;
+
     // Every character whose monster names a set, also a player-shaped one;
     // players have none.
     PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Stand);
