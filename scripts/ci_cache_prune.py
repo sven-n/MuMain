@@ -5,8 +5,8 @@ caches, one for each compiler).
 ci.yml names a cache after what it holds: the compiler caches after the commit, the library and vcpkg caches after the
 files that pick their content. A run that saves under a new name leaves the older entries behind. GitHub keeps them
 until they go unused for 7 days, or until the repository's caches pass 10 GB; then it deletes the least recently used
-entries first, which can be the newest entry of a cache that only the nightly run reads. Run it after the jobs that
-save caches, with `actions: write` and the token in GH_TOKEN:
+entries first, and those can be the newest entries that the next PRs and main pushes would start from. Run it after
+the jobs that save caches, with `actions: write` and the token in GH_TOKEN:
 
     python3 scripts/ci_cache_prune.py
 """
