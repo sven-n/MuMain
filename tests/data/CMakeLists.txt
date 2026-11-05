@@ -135,7 +135,6 @@ mu_add_test(
         test_monster_data_users.cpp
         test_monster_database.cpp
         test_monster_edit_history.cpp
-        test_monster_grouping_once.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
@@ -156,8 +155,6 @@ mu_add_test(
 )
 target_compile_definitions(monster_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
-    # The flat monster list before PR 3a grouped it, for its one-time comparison.
-    MU_TEST_MONSTERS_BEFORE_GROUPING="${CMAKE_CURRENT_SOURCE_DIR}/monsters_before_grouping.json"
 )
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
