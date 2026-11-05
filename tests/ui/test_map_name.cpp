@@ -324,10 +324,11 @@ TEST_CASE("map-name live binding survives locale and theme changes as plain text
 TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]")
 {
     // Not doctest::skip(): CTest's discovery reads the variable when the binary is built, and a run without it would
-    // leave the entry running no case, which fails.
+    // leave the entry running no case, which fails. The marker makes CTest report the entry as skipped
+    // (MU_TEST_SKIPPED in tests/CMakeLists.txt).
     if (std::getenv("MU_RUN_GPU_UPLOAD_TESTS") == nullptr)
     {
-        MESSAGE("Set MU_RUN_GPU_UPLOAD_TESTS to run this case.");
+        MESSAGE("MU_TEST_SKIPPED: set MU_RUN_GPU_UPLOAD_TESTS to run this case");
         return;
     }
     MapNameFixture fixture;

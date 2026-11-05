@@ -56,10 +56,11 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
   entries and its cases differ in number. So a name the discovery cut, joined or
   dropped fails in CI even where the static check cannot read it. Decide an
-  opt-in case at run time (return early) rather than with
-  `doctest::skip(condition)`: the discovery evaluates the condition when the
-  binary is built, so a condition read from the environment can differ when the
-  tests run.
+  opt-in case at run time rather than with `doctest::skip(condition)`: the
+  discovery evaluates the condition when the binary is built, so a condition
+  read from the environment can differ when the tests run. Print
+  `MESSAGE("MU_TEST_SKIPPED: <why>")` and return at once; CTest then reports the
+  entry as skipped (a skip wins over a failure, so check nothing after it).
 
 ## Static checks and the pre-push hook
 

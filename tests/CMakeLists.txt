@@ -44,6 +44,10 @@ set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 # so a name the discovery cut or joined (see tests/check_test_case_names.py) cannot pass unseen. The '.' stands for
 # doctest's '|': on Windows the discovery's post-build command line would read a '|' as a pipe.
 set(MU_TEST_RAN_NO_CASE "test cases: +0 . +0 passed")
+# What a case prints, with MESSAGE, before it returns because it should not run here (an opt-in case whose variable is
+# unset): CTest then reports its entry as skipped, as SKIP_RETURN_CODE does for a whole test program. A skip wins over
+# a failure, so the case must return right after printing it.
+set(MU_TEST_SKIPPED "MU_TEST_SKIPPED:")
 # A dropped name leaves no entry that could fail: every test binary also gets an entry that compares its CTest
 # entries with its test cases.
 set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake")
@@ -85,7 +89,8 @@ function(mu_add_test)
     doctest_discover_tests(${MAT_NAME} PROPERTIES
         TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
         RESOURCE_LOCK ${MAT_RESOURCE_LOCK}
-        FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}")
+        FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
+        SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
     # doctest_discover_tests adds a file to the directory's TEST_INCLUDE_FILES that includes the entries it writes.
     get_property(test_include_files DIRECTORY PROPERTY TEST_INCLUDE_FILES)
     list(GET test_include_files -1 discovery_include_file)
