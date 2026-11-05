@@ -155,6 +155,12 @@ def step(job_body, job_name, step_name):
     return match.group(1) if match else ""
 
 
+def cache_paths(step_body):
+    """The lines of an actions/cache step's multi-line path input."""
+    match = re.search(r"(?ms)^          path: \|\n(.*?)(?=^          \w)", step_body)
+    return match.group(1) if match else ""
+
+
 def manifest(block, assignment):
     match = re.search(
         rf"(?ms)^\s*{re.escape(assignment)}\s*=\s*@?\((.*?)^\s*\)", block
@@ -547,10 +553,11 @@ linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
 fork_ci = read_optional(FORK_CI_WORKFLOW)
 if fork_ci:
     linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
-    for windows_job in (native_job, job(fork_ci, "windows")):
+    for windows_job, vcpkg_step in ((native_job, "Restore vcpkg packages"),
+                                    (job(fork_ci, "windows"), "Cache vcpkg packages")):
         cache_key = step(windows_job, "windows", "Identify vcpkg toolchain")
         check("scripts/ci_vcpkg_cache_key.ps1" in cache_key, "Windows must identify its actual toolchain")
-        cache = step(windows_job, "windows", "Cache vcpkg packages")
+        cache = step(windows_job, "windows", vcpkg_step)
         for required in ("steps.vcpkg.outputs.identity", "toolchain-x64.cmake", "~/AppData/Local/vcpkg/archives"):
             check(required in cache, f"vcpkg cache missing {required}")
         check(
@@ -569,6 +576,29 @@ check(
     "PR compilation must restore without creating isolated cache entries",
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
+# PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
+# entries out of the repository's 10 GB.
+for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
+    check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
+    cache_steps = [("Restore dependencies", "Save dependencies")]
+    if job_name == "build-windows":
+        cache_steps.append(("Restore vcpkg packages", "Save vcpkg packages"))
+    for restore_name, save_name in cache_steps:
+        restore = step(job_body, job_name, restore_name)
+        save = step(job_body, job_name, save_name)
+        restore_id = re.search(r"(?m)^        id: (\w+)$", restore)
+        check(restore_id is not None and "uses: actions/cache/restore@v6" in restore,
+              f"{job_name} {restore_name} must be a restore step with an id")
+        if restore_id is None:
+            continue
+        restore_id = restore_id.group(1)
+        for required in ("uses: actions/cache/save@v6", "github.event_name != 'pull_request'",
+                         f"steps.{restore_id}.outputs.cache-hit != 'true'",
+                         f"key: ${{{{ steps.{restore_id}.outputs.cache-primary-key }}}}"):
+            check(required in save, f"{job_name} {save_name} must save only outside PRs, under the restored key: "
+                                    f"{required}")
+        check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
+              f"{job_name} {save_name} must save the paths {restore_name} restores")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))

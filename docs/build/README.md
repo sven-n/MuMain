@@ -231,12 +231,20 @@ keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
 
-The **Cache dependencies** steps keep the downloaded library sources (`_deps/*-src`,
+The library caches keep the downloaded library sources (`_deps/*-src`,
 `_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
 recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
 (which declares the libraries), `cmake/patches` and the ClientLibrary projects, so
 a new entry is stored only when one of those changes, not with every new source
 file in `src/CMakeLists.txt`.
+
+PR runs only read the library and vcpkg caches, as they do the compiler caches:
+**Restore dependencies** and **Restore vcpkg packages** read them, and
+**Save dependencies** (after the build) and **Save vcpkg packages** (after the
+configure step) store them only in runs on main (pushes, the nightly and manual
+release builds), when the exact key was missing. A PR's own entry would serve that
+PR alone, and the repository's caches share 10 GB: past that, GitHub deletes the
+least recently used entries, which are main's Windows ones, used once a night.
 
 ### Download artifacts
 
