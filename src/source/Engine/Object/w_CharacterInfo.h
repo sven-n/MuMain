@@ -191,6 +191,9 @@ public:
     // the one SetPlayerStop gave it when a walk ended. Another action set before the turn's first step (a sit, an
     // emote, death) ends the turn where it is instead of being replaced by its steps.
     int TurnStance = -1;
+    // Whether the last standing turn ended by arriving (FinishPendingTurn), rather than cut short by another action, a
+    // walk or another facing, which tell the server themselves.
+    bool TurnArrived = false;
     // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, slope lean, the
     // drawn sudden turn, pose fades).
     CharacterMotion Motion;

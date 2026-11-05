@@ -503,6 +503,7 @@ void StartStandingTurn(CHARACTER* c, float angle)
     }
     c->TurnLeftAt = c->Object.Angle[2];
     c->TurnStance = c->Object.CurrentAction;
+    c->TurnArrived = false;
     c->TurnPending = FarAngle(c->Object.Angle[2], angle) > TurnArrivedDegrees;
 }
 
@@ -519,6 +520,7 @@ void FinishPendingTurn(CHARACTER* c)
         if (!c->Movement && o->Angle[2] == c->TurnLeftAt)
         {
             o->Angle[2] = c->MoveHeading;
+            c->TurnArrived = true;
         }
         if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
         {
@@ -557,8 +559,27 @@ void FinishPendingTurn(CHARACTER* c)
     if (!c->TurnPending)
     {
         c->TurnAction = -1;
+        c->TurnArrived = true;
         SetPlayerStop(c);
     }
+}
+
+bool FollowCursorTurn(CHARACTER* c, bool mayTurn, float cursorAngle, bool& turning)
+{
+    if (!turning)
+    {
+        return false;
+    }
+    if (c->TurnPending)
+    {
+        if (mayTurn)
+        {
+            c->MoveHeading = cursorAngle;
+        }
+        return false;
+    }
+    turning = false;
+    return c->TurnArrived;
 }
 
 namespace
@@ -586,6 +607,7 @@ bool MovePath(CHARACTER* c, bool Turn)
     PATH_t* p = &c->Path;
     // Walking again: the turn the last walk left is this walk's now.
     c->TurnPending = false;
+    c->TurnArrived = false;
     // The path is followed from the character's own position: without the sideways shift a flying bank adds for its
     // pivot (UpdateFlightFeel puts it back), which would otherwise turn the heading and so the bank, rocking it.
     c->Object.Position[0] -= c->Motion.FlightPivotShift[0];

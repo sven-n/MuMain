@@ -59,6 +59,12 @@ void StartStandingTurn(CHARACTER* c, float angle);
 // One frame of a standing character's turn (CHARACTER::TurnPending: one a walk ended before, or StartStandingTurn's):
 // called each frame for every character. The feet step with the walk animation until the facing arrives.
 void FinishPendingTurn(CHARACTER* c);
+// One frame of the hero's turn toward the cursor while `turning` (TurnToCursor; FinishPendingTurn moves it on): the
+// turn heads for `cursorAngle` while the cursor may turn the hero (`mayTurn`: not over a window, not attacking);
+// otherwise it finishes where it was going. Once the turn is over `turning` goes false, and the result is true when it
+// arrived: then the server is to hear the new facing (an attack, a sit or a walk that cut it short tell the server
+// themselves).
+bool FollowCursorTurn(CHARACTER* c, bool mayTurn, float cursorAngle, bool& turning);
 
 // One frame along the character's path: sets its MoveHeading toward the next point (and, with Turn, turns its
 // facing toward it); true when the path's end is reached.

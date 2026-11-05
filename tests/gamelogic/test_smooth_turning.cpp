@@ -5,6 +5,7 @@
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
+#include "../data/TestModelSlots.h"
 
 #include <array>
 #include <cmath>
@@ -345,8 +346,75 @@ TEST_CASE("A standing turn doesn't replace an action set before its first step: 
         // The action stays, and the turn ends where it is, without stepping or standing it up.
         CHECK(turner.Object.CurrentAction == between.action);
         CHECK_FALSE(turner.TurnPending);
+        CHECK_FALSE(turner.TurnArrived);
         CHECK(turner.TurnAction == -1);
         CHECK(turner.Object.Angle[2] == 90.f);
         turner.Dead = 0;
+    }
+}
+
+TEST_CASE("A turn toward the cursor tells the server its facing only when it arrives [gamelogic][turning]")
+{
+    const EnhancedMovementSwitch option(true);
+    const AnimationFactor factor(1.f);
+    // Empty model slots: the turn's steps and its end set actions on the character's model.
+    const TestModelSlots models;
+    constexpr int MaxFrames = 600;
+
+    SUBCASE("Arrived: the facing is sent once, at the end")
+    {
+        CHARACTER& hero = StandingTurner(MONSTER01_STOP1);
+        bool turning = true;
+        int sent = 0;
+        int frames = 0;
+        for (; frames < MaxFrames && turning; ++frames)
+        {
+            FinishPendingTurn(&hero);
+            sent += FollowCursorTurn(&hero, true, 270.f, turning) ? 1 : 0;
+        }
+        CHECK_FALSE(turning);
+        CHECK(sent == 1);
+        CHECK(hero.Object.Angle[2] == doctest::Approx(270.f).epsilon(0.01));
+    }
+
+    SUBCASE("Cut short by an attack or a sit: nothing is sent, the action tells the server itself")
+    {
+        for (const int action : {PLAYER_ATTACK_FIST, PLAYER_SIT1})
+        {
+            CAPTURE(action);
+            CHARACTER& hero = StandingTurner(MONSTER01_STOP1);
+            bool turning = true;
+            FinishPendingTurn(&hero);
+            CHECK_FALSE(FollowCursorTurn(&hero, true, 270.f, turning));
+            REQUIRE(hero.TurnPending);
+            hero.Object.CurrentAction = static_cast<unsigned short>(action);
+            int sent = 0;
+            for (int frame = 0; frame < MaxFrames && turning; ++frame)
+            {
+                FinishPendingTurn(&hero);
+                sent += FollowCursorTurn(&hero, true, 270.f, turning) ? 1 : 0;
+            }
+            CHECK_FALSE(turning);
+            CHECK(sent == 0);
+            CHECK(hero.Object.CurrentAction == action);
+        }
+    }
+
+    SUBCASE("The cursor goes onto a window meanwhile: the turn finishes where it was going, and that is sent")
+    {
+        CHARACTER& hero = StandingTurner(MONSTER01_STOP1);
+        bool turning = true;
+        FinishPendingTurn(&hero);
+        CHECK_FALSE(FollowCursorTurn(&hero, true, 270.f, turning));
+        int sent = 0;
+        for (int frame = 0; frame < MaxFrames && turning; ++frame)
+        {
+            FinishPendingTurn(&hero);
+            // The cursor over a window points elsewhere; it may not turn the hero now.
+            sent += FollowCursorTurn(&hero, false, 0.f, turning) ? 1 : 0;
+        }
+        CHECK_FALSE(turning);
+        CHECK(sent == 1);
+        CHECK(hero.Object.Angle[2] == doctest::Approx(270.f).epsilon(0.01));
     }
 }

@@ -2961,18 +2961,10 @@ void TurnToCursor(CHARACTER* c, int heroX, int heroY, bool lookAtMouse)
     }
     if (s_turningToCursor)
     {
-        if (c->TurnPending && mayTurn)
+        // Arrived: the others see where he faces now.
+        if (FollowCursorTurn(c, mayTurn, cursorAngle, s_turningToCursor))
         {
-            c->MoveHeading = cursorAngle;
-        }
-        else
-        {
-            // Done (or cut short by an attack, a sit, a window): the others see where he faces now.
-            s_turningToCursor = false;
-            if (!c->TurnPending)
-            {
-                SendRequestAction(Hero->Object, AT_STAND1);
-            }
+            SendRequestAction(Hero->Object, AT_STAND1);
         }
     }
     else if (mayTurn && FarAngle(o->Angle[2], cursorAngle) > CursorTurnDegrees)
