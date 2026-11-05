@@ -107,14 +107,17 @@ jobs:
             throw "vcvars64.bat failed."
           }
 
-      - name: Cache FetchContent and NuGet dependencies
+      - name: Cache dependencies
+        # Named as in ci.yml, after what picks the files. The editor changes no library source, so both builds share it.
         uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-windows/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-windows/_deps/*-src
+            out/build/fork-ci-windows/_deps/*-subbuild
             .nuget
-          key: fork-windows-x64-editor-${{ matrix.editor }}-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-windows-x64-editor-${{ matrix.editor }}-deps-
+          key: fork-windows-x64-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-windows-x64-dep-sources-
 
       - name: Identify vcpkg toolchain
         id: vcpkg
@@ -193,13 +196,16 @@ jobs:
             pkg-config
 
       - name: Cache dependencies
+        # Named as in ci.yml.
         uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-linux-editor/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-linux-editor/_deps/*-src
+            out/build/fork-ci-linux-editor/_deps/*-subbuild
             .nuget
-          key: fork-linux-x64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-linux-x64-editor-ON-deps-
+          key: fork-linux-x64-editor-ON-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-linux-x64-editor-ON-dep-sources-
 
       - name: Configure CMake
         run: >
@@ -238,13 +244,16 @@ jobs:
         run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
 
       - name: Cache dependencies
+        # Named as in ci.yml.
         uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-macos-editor/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-macos-editor/_deps/*-src
+            out/build/fork-ci-macos-editor/_deps/*-subbuild
             .nuget
-          key: fork-macos-arm64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-macos-arm64-editor-ON-deps-
+          key: fork-macos-arm64-editor-ON-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-macos-arm64-editor-ON-dep-sources-
 
       - name: Configure CMake
         run: >

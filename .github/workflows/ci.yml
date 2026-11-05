@@ -203,14 +203,19 @@ jobs:
           }
           exit 0
 
-      - name: Cache FetchContent and NuGet dependencies
+      - name: Cache dependencies
+        # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
+        # their sources, and the ClientLibrary projects pick the NuGet packages. src/CMakeLists.txt is not part of it:
+        # it changes with every new source file of the game.
         uses: actions/cache@v6
         with:
           path: |
-            out/build/windows-ci-x64-release/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/windows-ci-x64-release/_deps/*-src
+            out/build/windows-ci-x64-release/_deps/*-subbuild
             .nuget
-          key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: windows-x64-release-deps-
+          key: windows-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: windows-x64-release-dep-sources-
 
       - name: Identify vcpkg toolchain
         id: vcpkg
@@ -585,6 +590,7 @@ jobs:
           restore-keys: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
+        # Named as on Windows.
         uses: actions/cache@v6
         with:
           path: |
@@ -592,7 +598,7 @@ jobs:
             out/build/linux-ci/_deps/*-src
             out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
       # As on Windows: no warning may come back (docs/build/README.md).
@@ -723,6 +729,7 @@ jobs:
           restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
+        # Named as on Windows.
         uses: actions/cache@v6
         with:
           path: |
@@ -730,7 +737,7 @@ jobs:
             out/build/macos-ci/_deps/*-src
             out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
       # As on Windows: no warning may come back (docs/build/README.md).

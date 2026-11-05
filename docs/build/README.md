@@ -231,6 +231,13 @@ keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
 
+The **Cache dependencies** steps keep the downloaded library sources (`_deps/*-src`,
+`_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
+recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
+(which declares the libraries), `cmake/patches` and the ClientLibrary projects, so
+a new entry is stored only when one of those changes, not with every new source
+file in `src/CMakeLists.txt`.
+
 ### Download artifacts
 
 Actions expose builds through CI artifacts and two coordinated release streams:
