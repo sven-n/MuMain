@@ -8,6 +8,7 @@
 
 #include "../MuEditor/UI/Common/MapPicker.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "../MuEditor/UI/SoundEditor/SoundEditorEdits.h"
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
@@ -381,6 +382,7 @@ void CMapSoundsTab::Save()
     if (Data::Maps::SaveMapObjectSounds(issues))
     {
         m_saved = g_MapObjectSoundDatabase.GetAll();
+        g_SoundEdits.TakeSavedObjects();
         m_status = I18N::Format(I18N::Editor::SavedTo0, {Data::Maps::GetMapObjectSoundsFile().generic_string()});
         return;
     }
@@ -398,6 +400,7 @@ void CMapSoundsTab::Revert()
     if (Data::Maps::RevertMapObjectSounds(issues))
     {
         m_saved = g_MapObjectSoundDatabase.GetAll();
+        g_SoundEdits.TakeSavedObjects();
         m_status.clear();
         return;
     }

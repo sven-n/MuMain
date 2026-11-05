@@ -154,6 +154,9 @@ public:
     // The tables as they are now, and the folders as their file has them, are
     // what Save and Revert compare with.
     void TakeSaved();
+    // The Map Editor's Sounds tab wrote Data/Maps/ObjectSounds.json or read it
+    // again: the map object sounds as they are now are the file's, here too.
+    void TakeSavedObjects();
 
     // Forgets the history and the saved state (tests).
     void Clear();

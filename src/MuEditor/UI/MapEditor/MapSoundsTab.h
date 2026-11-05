@@ -36,6 +36,11 @@ public:
     void Add(int serverMap, int stage);
     // The table as the file has it now: what Save and Revert compare with.
     void TakeSaved();
+    // The tab's Save and Revert: write the file, or read it again over the
+    // table. The Sound Editor, which changes the same table, then takes it as
+    // saved too.
+    void Save();
+    void Revert();
 
     // Whether the table differs from the file as it was last read or saved.
     bool IsModified() const;
@@ -50,8 +55,6 @@ private:
     void RenderFile(Data::Maps::MapObjectSound& sound, size_t index, bool& changed);
     // The table with `sound` at `index`, or without it for nullopt.
     void Store(size_t index, const std::optional<Data::Maps::MapObjectSound>& sound);
-    void Save();
-    void Revert();
 
     // The table as the file had it when it was last read or saved.
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_saved;

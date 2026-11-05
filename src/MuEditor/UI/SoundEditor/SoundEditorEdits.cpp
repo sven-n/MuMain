@@ -918,6 +918,18 @@ void SoundEdits::TakeSaved()
     m_savedEvents = g_SoundEventDatabase.GetAll();
 }
 
+void SoundEdits::TakeSavedObjects()
+{
+    FollowKeyChanges();
+    if (m_savedObjects)
+    {
+        m_savedObjects = g_MapObjectSoundDatabase.GetAll();
+    }
+    // A file picked there has another key in the file now.
+    m_savedTables->objects = m_keyed->objects;
+    CheckFoldersFile();
+}
+
 void SoundEdits::Clear()
 {
     m_undo.clear();

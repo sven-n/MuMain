@@ -27,6 +27,7 @@
 #include "I18N/All.h"
 #include "TestImGuiContext.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/MapEditor/MapSoundsTab.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundEditor/SoundEditorEdits.h"
@@ -1465,6 +1466,69 @@ TEST_CASE("Sound Editor: Save writes the folders with the keys the saved files g
     CHECK(folderFile() ==
           std::vector<SoundFolder>{Folder("Death Tree", {"set:Tree of Death:Data/Sound/EditorTest/Other.wav",
                                                          "set:Tree of Death:SOUND_MONSTER_MAGICSKULL1"})});
+    CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
+TEST_CASE("Sound Editor: a Save or Revert in the Map Editor's Sounds tab takes the map object sounds as saved here "
+          "too, and a file saved there with a sound's new key makes the folders' file not saved (Q-SE4) "
+          "[sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{Waterfall()});
+    std::filesystem::create_directories("Data/Maps");
+    std::filesystem::create_directories("Data/Audio");
+    g_SoundEdits.TakeSaved();
+    g_MapSoundsTab.TakeSaved();
+    const std::string first = "objects:Data/Sound/EditorTest/ok.wav";
+    const auto rename = [&first](const char* name)
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, first);
+        REQUIRE(row != nullptr);
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+        values.name = name;
+        REQUIRE(g_SoundEdits.Change(*row, values));
+    };
+
+    rename("Kalima waterfall");
+    CHECK(g_SoundEdits.IsModified());
+    CHECK(g_MapSoundsTab.IsModified());
+    g_MapSoundsTab.Save();
+    CHECK_FALSE(g_MapSoundsTab.IsModified());
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    rename("Other");
+    g_MapSoundsTab.Revert();
+    CHECK(g_MapObjectSoundDatabase.GetAll()[0].name == "Kalima waterfall");
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    // The file changed by hand: the tab's Revert reads it, and the Sound
+    // Editor takes it as saved too.
+    std::vector<Data::Maps::MapObjectSound> byHand = g_MapObjectSoundDatabase.GetAll();
+    byHand[0].name = "By hand";
+    std::ofstream("Data/Maps/ObjectSounds.json", std::ios::binary) << Data::Maps::WriteMapObjectSoundsJson(byHand);
+    g_MapSoundsTab.Revert();
+    CHECK(g_MapObjectSoundDatabase.GetAll()[0].name == "By hand");
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    // A folder holds the entry; the tab gives it another file and saves.
+    const std::vector<SoundFolder> folders{Folder("Kalima", {first})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", folders));
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+    std::vector<Data::Maps::MapObjectSound> picked = g_MapObjectSoundDatabase.GetAll();
+    picked[0].file = "Data/Sound/EditorTest/Other.wav";
+    g_MapObjectSoundDatabase.Build(picked);
+    g_SoundEdits.FollowKeyChanges();
+    // The table differs from its file, here too; once the tab saved it, the
+    // folders' file still has the entry's old key.
+    CHECK(g_SoundEdits.IsModified());
+    g_MapSoundsTab.Save();
+    CHECK(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK(Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile()).folders ==
+          std::vector<SoundFolder>{Folder("Kalima", {"objects:Data/Sound/EditorTest/Other.wav"})});
     CHECK_FALSE(g_SoundEdits.IsModified());
 }
 
