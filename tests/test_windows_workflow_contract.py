@@ -338,10 +338,13 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
 for workflow_name, workflow in (("ci.yml", ci), ("fork-ci.yml", read_optional(FORK_CI_WORKFLOW))):
     for runner in re.findall(r"(?m)^\s*runs-on:\s*(\S+)", workflow):
         check(not runner.endswith("-latest"), f"{workflow_name} must name its runner image, not {runner}")
-# Fork CI's Windows build is the only Windows build a pull request gets: its editor OFF row holds the same rule,
-# and its last job checks the annotations.
+# Fork CI runs only by hand: ci.yml builds Windows for every pull request, so a pull request starting Fork CI too would
+# build it twice. Its editor OFF row holds the same rule as ci.yml's, and its last job checks the annotations.
 fork_ci_workflow = read_optional(FORK_CI_WORKFLOW)
 if fork_ci_workflow:
+    fork_triggers = re.search(r"(?ms)^on:\n(.*?)^\S", fork_ci_workflow)
+    check(fork_triggers is not None and re.findall(r"(?m)^  (\w+):", fork_triggers.group(1)) == ["workflow_dispatch"],
+          "Fork CI must run only when started by hand")
     fork_windows = job(fork_ci_workflow, "windows")
     fork_wrapper = "python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}"
     fork_configure = step(fork_windows, "windows", "Configure CMake")

@@ -1,19 +1,13 @@
-# Extra checks that sven-n/MuMain does not run automatically, to save its
-# Actions minutes: ci.yml builds Windows only for nightly/manual releases and never
-# builds the editor. On every pull request of a fork, which uses its own
-# minutes, this workflow adds the game's Windows build:
+# Builds that ci.yml does not run, started by hand ("Run workflow"). ci.yml builds
+# the game (editor OFF) on Windows, Linux and macOS for every pull request and main
+# push, so pull requests no longer start this workflow. With "editor" checked it
+# adds the editor builds: the game matters more than an always working editor, and
+# on every pull request they would double the Actions usage.
 #
-#   Windows x64 Release   editor OFF  (Linux and macOS, editor OFF: ci.yml)
-#
-# The editor builds run only when started by hand ("Run workflow" with
-# "editor" checked): the game matters more than an always working editor,
-# and on every pull request they would double the fork's Actions usage.
-#
+#   Windows x64 Release   editor OFF  (always, as in ci.yml)
 #   Windows x64 Release   editor ON
 #   Linux x64 Release     editor ON
 #   macOS arm64 Release   editor ON
-#
-# On sven-n/MuMain the whole workflow only runs when started by hand.
 #
 # Editor ON also enables the control socket, like the *-mueditor presets.
 # The jobs only build and run the tests; they upload nothing. The workflow
@@ -32,12 +26,6 @@
 name: Fork CI
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
   workflow_dispatch:
     inputs:
       editor:
@@ -63,14 +51,13 @@ env:
 jobs:
   windows:
     name: Windows x64 Release, editor ${{ matrix.editor }}
-    if: github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft)
     # The images by name, as in ci.yml.
     runs-on: windows-2025-vs2026
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        # Without "Run workflow" there are no inputs, so a pull request builds OFF only.
+        # Without "editor" checked, only the editor OFF build runs.
         editor: ${{ fromJSON(inputs.editor && '["OFF", "ON"]' || '["OFF"]') }}
 
     steps:
@@ -280,7 +267,7 @@ jobs:
   annotations:
     name: Job annotations
     needs: [windows, linux-editor, macos-editor]
-    if: always() && (github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft))
+    if: always()
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
