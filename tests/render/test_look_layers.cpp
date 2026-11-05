@@ -220,6 +220,45 @@ TEST_CASE("a map-scoped developer edit leaves the player's values on other maps 
     CHECK(Bloom(layers, Lorencia) == 0.5);
 }
 
+TEST_CASE("a default edit hidden by an environment leaves the player's value there [render][look][tuning]")
+{
+    MemoryFileSystem fileSystem;
+    fileSystem.files["Look.json"] = R"({
+  "formatVersion": 1,
+  "default": { "bloom.strength": 1.0 },
+  "environments": { "enclosed": { "bloom.strength": 0.3 } },
+  "maps": [ { "world": 1, "name": "Dungeon", "environment": "enclosed" } ]
+})";
+    Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, "Look.json", "LightMood.json");
+    REQUIRE(loaded.issues.empty());
+    constexpr int Enclosed = 1;
+
+    LookLayers layers;
+    layers.UseFiles(loaded.files);
+    layers.SetApplyingGroups(AllGroups);
+    layers.SetPersonal(PersonalBloom(0.5));
+
+    const LookEdit edit{"bloom.strength", 0.2};
+    REQUIRE(layers.Set({&edit, 1}, std::nullopt).applied);
+    // In the open the edit is what the files give, so it shows over the player's.
+    CHECK(Bloom(layers, Lorencia) == 0.2);
+    // The environment hides it: the player's value stays, and says so.
+    CHECK(Bloom(layers, Enclosed) == 0.5);
+    std::vector<Render::Look::LookValueState> states = layers.Describe(Enclosed, "bloom.strength");
+    REQUIRE(states.size() == 1);
+    CHECK(states[0].source == LookValueSource::Personal);
+    CHECK(states[0].value == 0.5);
+
+    // Without a player's value, the environment shows, named as the source.
+    layers.SetPersonal({});
+    CHECK(Bloom(layers, Enclosed) == 0.3);
+    states = layers.Describe(Enclosed, "bloom.strength");
+    REQUIRE(states.size() == 1);
+    CHECK(states[0].source == LookValueSource::Environment);
+    CHECK(states[0].value == 0.3);
+    CHECK(std::string(Render::Look::ToString(LookValueSource::Environment)) == "environment");
+}
+
 TEST_CASE("a saved developer edit is the files' value, under the player's [render][look][tuning]")
 {
     LookLayers layers;
