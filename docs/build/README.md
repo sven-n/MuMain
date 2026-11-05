@@ -233,9 +233,12 @@ their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
 `-latest` label: GitHub moves repositories to a new latest image one by one and
 warns about the move in every job meanwhile.
 
-Linux and macOS use a compiler cache (ccache). The job logs and the **Linux
-compiler cache** and **macOS compiler cache** step summaries show hits and misses;
-compare the Build step duration on a warm run with the first run. All builds
+All three builds use a compiler cache (ccache). The job logs and the **Windows
+compiler cache**, **Linux compiler cache** and **macOS compiler cache** step
+summaries show hits and misses; compare the Build step duration on a warm run with
+the first run. Windows downloads a pinned ccache release and checks it against its
+SHA-256 (**Install compiler cache**); its cache may grow to 3 GB, as MSVC's objects
+carry their debug info (`/Z7`). All builds
 restore the compiler cache; only successful main pushes save it, so PR-only entries
 do not displace shared caches, and a PR starts from the latest main. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.

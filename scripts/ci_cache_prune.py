@@ -32,6 +32,7 @@ IN_USE = timedelta(minutes=15)
 KINDS = (
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
+    "ccache-windows-x64-",
     "linux-x64-release-dep-sources-",
     "macos-arm64-release-dep-sources-",
     "windows-x64-release-dep-sources-",
@@ -44,6 +45,7 @@ KINDS = (
 PER_COMPILER = (
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
+    "ccache-windows-x64-",
 )
 
 

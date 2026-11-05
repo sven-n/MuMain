@@ -148,6 +148,12 @@ jobs:
     # windows-latest to a new one.
     runs-on: windows-2025-vs2026
     timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
+      # MSVC's objects carry their debug info (/Z7, see src/CMakeLists.txt), so they are larger than GCC's and Clang's.
+      CCACHE_MAXSIZE: 3G
 
     steps:
       - name: Checkout repository
@@ -206,6 +212,37 @@ jobs:
           }
           exit 0
 
+      - name: Install compiler cache
+        # The runner image has no ccache. Its release for Windows, checked against the SHA-256 the release lists.
+        shell: pwsh
+        run: |
+          $version = '4.14.2'
+          $sha256 = '6993ce645e53192cec592ee23186200b574ac4c59097ecde8d9cfd681b47ae84'
+          $name = "ccache-$version-windows-x86_64"
+          $archive = Join-Path $env:RUNNER_TEMP "$name.zip"
+          Invoke-WebRequest -Uri "https://github.com/ccache/ccache/releases/download/v$version/$name.zip" -OutFile $archive
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $sha256) {
+            throw "$name.zip does not match its SHA-256."
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP
+          Join-Path $env:RUNNER_TEMP $name | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Identify compiler cache
+        id: compiler
+        shell: pwsh
+        run: |
+          $compiler = (Get-Command cl.exe -ErrorAction Stop).Source
+          $identity = (Get-FileHash -LiteralPath $compiler -Algorithm SHA256).Hash.Substring(0, 16).ToLowerInvariant()
+          "identity=$identity" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Cache Windows compilation
+        id: ccache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-windows-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-windows-x64-${{ steps.compiler.outputs.identity }}-
+
       - name: Restore dependencies
         id: deps
         # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
@@ -262,6 +299,8 @@ jobs:
           -DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Assert configured MSVC compiler
         shell: pwsh
@@ -314,7 +353,20 @@ jobs:
           key: ${{ steps.vcpkg_cache.outputs.cache-primary-key }}
 
       - name: Build
-        run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+        run: |
+          ccache --zero-stats
+          python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+
+      - name: Report compiler cache
+        if: always()
+        shell: pwsh
+        run: |
+          if (Get-Command ccache -ErrorAction SilentlyContinue) {
+            $stats = ccache --show-stats | Out-String
+            Write-Host $stats
+            "### Windows compiler cache", '```text', $stats.TrimEnd(), '```' |
+              Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
 
       - name: Save dependencies
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
@@ -560,6 +612,13 @@ jobs:
           }
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
+
+      - name: Save Windows compilation cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
 
       # Only the release runs hand their builds on, as on Linux and macOS.
       - name: Archive runtime

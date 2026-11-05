@@ -393,8 +393,21 @@ for required in (
     "-DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe",
     "-DMU_COPY_RUNTIME_ASSETS=OFF",
     "-DBUILD_TESTING=ON",
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
 ):
     check(required in native_configure, f"Main Windows configure missing {required}")
+windows_ccache_install = step(native_job, "build-windows", "Install compiler cache")
+for required in ("$version = '", "$sha256 = '", "Get-FileHash", "GITHUB_PATH"):
+    check(required in windows_ccache_install, f"Windows must install a pinned, checked ccache: {required}")
+windows_cache = step(native_job, "build-windows", "Cache Windows compilation")
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+    check(required in windows_cache, f"Windows compiler cache missing {required}")
+windows_cache_save = step(native_job, "build-windows", "Save Windows compilation cache")
+for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
+                 "steps.ccache.outputs.cache-primary-key"):
+    check(required in windows_cache_save, f"Windows compiler cache must save only validated main builds: {required}")
+check("ccache --show-stats" in native_job, "Windows compiler cache must report hit statistics")
 
 native_build = step(native_job, "build-windows", "Build")
 check(
