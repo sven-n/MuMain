@@ -18,6 +18,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Colors/MuColorsUI.h"
+#include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
@@ -557,6 +558,7 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
+        g_MuStyleEditorUI.BeforeFrame();
         g_MuMonsterPreviewUI.BeforeFrame();
         // Between frames too: item models the item tools changed are opened
         // again, and so are the monster models the monster tools changed.
@@ -620,6 +622,11 @@ void CMuEditorCore::RenderItemTools()
     if (m_windows.colors)
     {
         g_MuColorsUI.Render(&m_windows.colors);
+    }
+    // After the Item Model window, as its preview.
+    if (m_windows.styleEditor)
+    {
+        g_MuStyleEditorUI.Render(&m_windows.styleEditor);
     }
     if (m_windows.itemTooltip)
     {

@@ -37,6 +37,11 @@ public:
     {
         return m_ancient;
     }
+    // Draws the item as a doppelganger's (the Style Editor's "Draw as: doppelganger").
+    void SetDrawAsDoppelganger(bool doppelganger)
+    {
+        m_asDoppelganger = doppelganger;
+    }
     // Whether the preview draws the item's own model at the chosen level, the one whose meshes the mesh list lists.
     [[nodiscard]] bool ShowsListedModel(int itemType) const;
 
@@ -61,6 +66,7 @@ private:
     bool m_excellent = false;
     bool m_ancient = false;
     bool m_turn = true;
+    bool m_asDoppelganger = false;
     MuEditor::Effects::PreviewItemPose m_pose = MuEditor::Effects::PreviewItemPose::Inventory;
     // ImGui::GetTime() of the last click that picked a mesh; long ago before the first one.
     double m_pickTime = std::numeric_limits<double>::lowest();

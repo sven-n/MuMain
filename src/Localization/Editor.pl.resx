@@ -1345,9 +1345,6 @@
   <data name="Excellent mesh without skin" xml:space="preserve">
     <value>Siatka doskonała bez skóry</value>
   </data>
-  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
-    <value>Wygląd to kod rysowania; tu wybierasz, którego używa przedmiot.</value>
-  </data>
   <data name="Remove the model entry" xml:space="preserve">
     <value>Usuń wpis modelu</value>
   </data>

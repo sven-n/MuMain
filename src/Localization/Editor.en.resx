@@ -571,6 +571,264 @@
   <data name="Render styles" xml:space="preserve">
     <value>Render styles</value>
   </data>
+  <data name="Item effects" xml:space="preserve">
+    <value>Item effects</value>
+  </data>
+  <data name="Style Editor" xml:space="preserve">
+    <value>Style Editor</value>
+  </data>
+  <data name="Open in Style Editor" xml:space="preserve">
+    <value>Open in Style Editor</value>
+  </data>
+  <data name="Code mark" xml:space="preserve">
+    <value>(code)</value>
+  </data>
+  <data name="Item looks note" xml:space="preserve">
+    <value>Render styles are in Data/Effects/RenderStyles.json or still drawing code, marked (code); Open in Style Editor shows the look. This picks which one the item uses.</value>
+  </data>
+  <data name="Style Editor tree note" xml:space="preserve">
+    <value>Render styles draw an item in layers; item effects act before it is drawn. Folders only sort the looks: drag a look or a folder onto a folder or onto its root. A look marked (code) is still drawing code: you see it and its items, but can't change it.</value>
+  </data>
+  <data name="New look" xml:space="preserve">
+    <value>New look</value>
+  </data>
+  <data name="Copy a look" xml:space="preserve">
+    <value>Copy a look</value>
+  </data>
+  <data name="Rename a look" xml:space="preserve">
+    <value>Rename a look</value>
+  </data>
+  <data name="Remove a look" xml:space="preserve">
+    <value>Remove a look</value>
+  </data>
+  <data name="Change a look" xml:space="preserve">
+    <value>Change a look</value>
+  </data>
+  <data name="Move a look" xml:space="preserve">
+    <value>Move a look</value>
+  </data>
+  <data name="New look folder" xml:space="preserve">
+    <value>New look folder</value>
+  </data>
+  <data name="Rename a look folder" xml:space="preserve">
+    <value>Rename a look folder</value>
+  </data>
+  <data name="Remove a look folder" xml:space="preserve">
+    <value>Remove a look folder</value>
+  </data>
+  <data name="Move a look folder" xml:space="preserve">
+    <value>Move a look folder</value>
+  </data>
+  <data name="It holds {0} looks and {1} folders." xml:space="preserve">
+    <value>It holds {0} looks and {1} folders.</value>
+  </data>
+  <data name="Look name" xml:space="preserve">
+    <value>Look name</value>
+  </data>
+  <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
+    <value>A name of letters and digits that no other render style has, in the file or in code.</value>
+  </data>
+  <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
+    <value>Only a look no item uses can be renamed or removed.</value>
+  </data>
+  <data name="Code look note" xml:space="preserve">
+    <value>Still drawing code (Render/Items/ItemRenderStyles.cpp): you see the look and its items here, but can't change it. It moves into the look file in a later step.</value>
+  </data>
+  <data name="Item effects root note" xml:space="preserve">
+    <value>Item effects act before an item is drawn. They are all still drawing code (Render/Items/ItemEffects.cpp): you see each one and its items here, but can't change them.</value>
+  </data>
+  <data name="Render styles root note" xml:space="preserve">
+    <value>The render styles of {0}, and those still drawing code, marked (code).</value>
+  </data>
+  <data name="The look file has a fatal problem" xml:space="preserve">
+    <value>The look file had a fatal problem when it was read (see Render styles): Save is off until it is fixed and Revert reads it again.</value>
+  </data>
+  <data name="Apply is off while a fatal problem is left." xml:space="preserve">
+    <value>Apply is off while a fatal problem is left.</value>
+  </data>
+  <data name="Problems of this look" xml:space="preserve">
+    <value>Problems of this look</value>
+  </data>
+  <data name="Layers" xml:space="preserve">
+    <value>Layers</value>
+  </data>
+  <data name="Show this layer in the preview" xml:space="preserve">
+    <value>Show this layer in the preview</value>
+  </data>
+  <data name="Item values after drawing" xml:space="preserve">
+    <value>Item values after drawing</value>
+  </data>
+  <data name="Leaves it" xml:space="preserve">
+    <value>The look leaves this value for what is drawn after it, such as the level glow.</value>
+  </data>
+  <data name="Stop time" xml:space="preserve">
+    <value>Stop time</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Draw as a doppelganger" xml:space="preserve">
+    <value>Draw as a doppelganger</value>
+  </data>
+  <data name="Pick an item to see the look on it" xml:space="preserve">
+    <value>Pick an item in the item tools, or one of the items above, to see the look on it.</value>
+  </data>
+  <data name="The preview draws {0}" xml:space="preserve">
+    <value>The preview draws {0} with the look as its fields have it now.</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Texture hint" xml:space="preserve">
+    <value>Empty: the mesh's own</value>
+  </data>
+  <data name="Reflection" xml:space="preserve">
+    <value>Reflection</value>
+  </data>
+  <data name="Motion" xml:space="preserve">
+    <value>Motion</value>
+  </data>
+  <data name="Slow drift" xml:space="preserve">
+    <value>Slow drift</value>
+  </data>
+  <data name="Fast sweep" xml:space="preserve">
+    <value>Fast sweep</value>
+  </data>
+  <data name="Follows the light" xml:space="preserve">
+    <value>Follows the light</value>
+  </data>
+  <data name="Swirl" xml:space="preserve">
+    <value>Swirl</value>
+  </data>
+  <data name="Strong swirl" xml:space="preserve">
+    <value>Strong swirl</value>
+  </data>
+  <data name="Stripes" xml:space="preserve">
+    <value>Stripes</value>
+  </data>
+  <data name="Very slow drift" xml:space="preserve">
+    <value>Very slow drift</value>
+  </data>
+  <data name="Oil sheen" xml:space="preserve">
+    <value>Oil sheen</value>
+  </data>
+  <data name="Still shine" xml:space="preserve">
+    <value>Still shine</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="As the drawing asks" xml:space="preserve">
+    <value>As the drawing asks</value>
+  </data>
+  <data name="Every mesh" xml:space="preserve">
+    <value>Every mesh</value>
+  </data>
+  <data name="These meshes" xml:space="preserve">
+    <value>These meshes</value>
+  </data>
+  <data name="Every mesh but" xml:space="preserve">
+    <value>Every mesh but</value>
+  </data>
+  <data name="Also the hidden mesh" xml:space="preserve">
+    <value>Also the item's hidden mesh</value>
+  </data>
+  <data name="Mesh numbers hint" xml:space="preserve">
+    <value>Mesh numbers, e.g. 0, 2</value>
+  </data>
+  <data name="A mesh" xml:space="preserve">
+    <value>A mesh</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="The light before" xml:space="preserve">
+    <value>As the layer before</value>
+  </data>
+  <data name="A color" xml:space="preserve">
+    <value>A color</value>
+  </data>
+  <data name="Tint of the item light" xml:space="preserve">
+    <value>A tint of the item's light</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="Glow mesh" xml:space="preserve">
+    <value>Glow mesh</value>
+  </data>
+  <data name="Glow strength" xml:space="preserve">
+    <value>Glow strength</value>
+  </data>
+  <data name="Scroll U" xml:space="preserve">
+    <value>Scroll U</value>
+  </data>
+  <data name="Scroll V" xml:space="preserve">
+    <value>Scroll V</value>
+  </data>
+  <data name="Scrolling mesh" xml:space="preserve">
+    <value>Scrolling mesh</value>
+  </data>
+  <data name="Hidden mesh" xml:space="preserve">
+    <value>Hidden mesh</value>
+  </data>
+  <data name="Kept from the model" xml:space="preserve">
+    <value>The model's</value>
+  </data>
+  <data name="From the item" xml:space="preserve">
+    <value>The item's</value>
+  </data>
+  <data name="From the drawing" xml:space="preserve">
+    <value>The drawing's</value>
+  </data>
+  <data name="A number" xml:space="preserve">
+    <value>A number</value>
+  </data>
+  <data name="Wave" xml:space="preserve">
+    <value>Wave</value>
+  </data>
+  <data name="Bounce" xml:space="preserve">
+    <value>Bounce</value>
+  </data>
+  <data name="Scroll" xml:space="preserve">
+    <value>Scroll</value>
+  </data>
+  <data name="Ramp" xml:space="preserve">
+    <value>Ramp</value>
+  </data>
+  <data name="Frames" xml:space="preserve">
+    <value>Frames</value>
+  </data>
+  <data name="Random value" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="A new value each frame" xml:space="preserve">
+    <value>A new value each frame</value>
+  </data>
+  <data name="Seconds" xml:space="preserve">
+    <value>Seconds</value>
+  </data>
+  <data name="Per second" xml:space="preserve">
+    <value>Per second</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="Seconds each" xml:space="preserve">
+    <value>Seconds each</value>
+  </data>
   <data name="Used by" xml:space="preserve">
     <value>used by</value>
   </data>
@@ -1347,9 +1605,6 @@
   </data>
   <data name="Excellent mesh without skin" xml:space="preserve">
     <value>Excellent mesh without skin</value>
-  </data>
-  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
-    <value>The looks are drawing code; this picks which one the item uses.</value>
   </data>
   <data name="Remove the model entry" xml:space="preserve">
     <value>Remove the model entry</value>

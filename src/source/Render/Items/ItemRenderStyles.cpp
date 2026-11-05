@@ -1200,8 +1200,39 @@ void SpawnHelperNpcPlateLights(OBJECT* o)
     CreateSprite(BITMAP_LIGHT, EndPos, 2.0f, o->Light, o);
 }
 
+namespace
+{
+// PreviewLook's model and look; nullptr while there is none.
+struct Preview
+{
+    int modelType = -1;
+    const Data::Looks::LookDefinition* look = nullptr;
+};
+Preview s_preview;
+
+bool IsPreviewed(int modelType)
+{
+    return s_preview.look != nullptr && s_preview.modelType == modelType;
+}
+} // namespace
+
+PreviewLook::PreviewLook(int modelType, const Data::Looks::LookDefinition& look)
+{
+    s_preview = {modelType, &look};
+}
+
+PreviewLook::~PreviewLook()
+{
+    s_preview = {};
+}
+
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType)
 {
+    if (IsPreviewed(modelType))
+    {
+        Looks::DrawRenderStyle(*s_preview.look, b, o, look, alpha, renderType);
+        return true;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, look, modelType, alpha, renderType);
 }
@@ -1219,12 +1250,20 @@ void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
 
 const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
 {
+    if (IsPreviewed(modelType))
+    {
+        return nullptr;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr ? style->shine : nullptr;
 }
 
 bool RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
+    if (IsPreviewed(modelType))
+    {
+        return false;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     if (style == nullptr || style->glow == nullptr)
     {

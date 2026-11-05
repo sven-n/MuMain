@@ -4,8 +4,10 @@
 
 #include "RenderStyleCheckArea.h"
 
+#include "MuStyleEditorUI.h"
+
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/ItemTools/ItemCheckTargets.h"
+#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/DataHandler/LookData/LookDataHandler.h"
@@ -14,7 +16,6 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
-#include "Data/GameData/LookData/LookChecks.h"
 #include "Data/GameData/LookData/LookJson.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -105,18 +106,21 @@ public:
 
     void Open(const ItemDataIssue& issue, bool clicked) override
     {
-        if (!IsAboutAnItem(issue))
+        if (IsAboutAnItem(issue))
         {
-            return;
+            g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
         }
-        g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
         if (!clicked)
         {
             return;
         }
-        const Items::ItemToolWindowRef tool = Items::GetToolWindow(Items::ItemTool::Model);
-        g_MuEditorCore.GetToolWindows().*tool.open = true;
-        ImGui::SetWindowFocus(tool.windowId);
+        if (const std::string look = LookOf(issue); !look.empty())
+        {
+            g_MuStyleEditorUI.ShowRenderStyle(look);
+            return;
+        }
+        g_MuEditorCore.GetToolWindows().styleEditor = true;
+        ImGui::SetWindowFocus(WindowIds::StyleEditor);
     }
 
 private:
@@ -143,6 +147,11 @@ private:
     std::vector<std::string> m_lookNames;
 };
 } // namespace
+
+Data::Looks::RenderStyleCheckInput MakeEditorCheckInput()
+{
+    return {.models = g_ItemModelDatabase.GetAllSlots(), .textureExists = TextureFileExists, .meshCount = MeshCount};
+}
 
 std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea()
 {

@@ -101,6 +101,7 @@ void CItemModelPreview::Render(int itemType)
     request.turn = m_turn;
     request.itemPose = m_pose;
     request.itemGroundPlane = true;
+    request.itemAsDoppelganger = m_asDoppelganger;
     RenderView(request);
 }
 

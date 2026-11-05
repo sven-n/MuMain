@@ -217,7 +217,8 @@ bool NamedTree::CanMovePicked() const
     {
         return true;
     }
-    return !m_pick.entry.empty() && (!m_pick.folder.empty() || GetPickedRoot().CanReorder());
+    const NamedTreeRoot& root = GetPickedRoot();
+    return !m_pick.entry.empty() && root.CanMoveEntry(m_pick.entry) && (!m_pick.folder.empty() || root.CanReorder());
 }
 
 void NamedTree::MovePicked(const NamedTreeTexts& texts, int delta)
@@ -421,7 +422,8 @@ void NamedTree::RunAction()
 
 void NamedTree::BeginDrag(std::size_t root, const ColorFolderPath& folder, const std::string& entry, const char* label)
 {
-    if (!m_roots[root]->HasFolders() || !ImGui::BeginDragDropSource())
+    const NamedTreeRoot& source = *m_roots[root];
+    if (!source.HasFolders() || (!entry.empty() && !source.CanMoveEntry(entry)) || !ImGui::BeginDragDropSource())
     {
         return;
     }

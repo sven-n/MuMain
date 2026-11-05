@@ -23,4 +23,7 @@ void DrawRenderStyle(const Data::Looks::LookDefinition& style, BMD* b, const OBJ
 // Finds the texture each layer names, loading the ones no code loaded; done after the item textures are loaded, and
 // again when the looks change. A layer whose texture is missing is skipped, and that is logged as an error.
 void PrepareTextures();
+// The same for one look, such as one the Style Editor shows before it is applied; a missing texture is not logged
+// again.
+void PrepareTextures(const Data::Looks::LookDefinition& style);
 } // namespace Render::Items::Looks

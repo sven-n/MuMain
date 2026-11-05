@@ -273,6 +273,20 @@ void LeaveItemValues(const ItemValues& values, BMD* b, DrawLook& look, Moment& m
     look.hiddenMesh = values.hiddenMesh.value_or(look.hiddenMesh);
     b->StreamMesh = values.scrollingMesh.value_or(b->StreamMesh);
 }
+// Finds the texture's index, loading it when no code loaded it; a missing one is logged.
+void PrepareTexture(const std::string& look, const std::string& texture)
+{
+    // A texture the game loaded already (an item effect texture) keeps its index.
+    const std::wstring file = BitmapFileName(texture);
+    const BITMAP_t* loaded = Bitmaps.FindTexture(file);
+    const GLuint index = loaded != nullptr ? loaded->BitmapIndex : Bitmaps.LoadImage(file, GL_LINEAR, GL_REPEAT);
+    if (index == BITMAP_UNKNOWN)
+    {
+        MU_LOG_ERROR(mu::log::Get("data"),
+                     "Render style data error: {}: texture \"{}\" is not found; the layer is skipped", look, texture);
+    }
+    s_textures[texture] = index;
+}
 } // namespace
 
 void DrawRenderStyle(const LookDefinition& style, BMD* b, const OBJECT* o, DrawLook& look, float alpha, int renderType)
@@ -298,22 +312,21 @@ void PrepareTextures()
     {
         for (const Layer& layer : style.layers)
         {
-            if (layer.texture.empty())
+            if (!layer.texture.empty())
             {
-                continue;
+                PrepareTexture(style.name, layer.texture);
             }
-            // A texture the game loaded already (an item effect texture) keeps its index.
-            const std::wstring file = BitmapFileName(layer.texture);
-            const BITMAP_t* loaded = Bitmaps.FindTexture(file);
-            const GLuint texture =
-                loaded != nullptr ? loaded->BitmapIndex : Bitmaps.LoadImage(file, GL_LINEAR, GL_REPEAT);
-            if (texture == BITMAP_UNKNOWN)
-            {
-                MU_LOG_ERROR(mu::log::Get("data"),
-                             "Render style data error: {}: texture \"{}\" is not found; the layer is skipped",
-                             style.name, layer.texture);
-            }
-            s_textures[layer.texture] = texture;
+        }
+    }
+}
+
+void PrepareTextures(const LookDefinition& style)
+{
+    for (const Layer& layer : style.layers)
+    {
+        if (!layer.texture.empty() && !s_textures.contains(layer.texture))
+        {
+            PrepareTexture(style.name, layer.texture);
         }
     }
 }

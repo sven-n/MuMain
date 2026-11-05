@@ -10,6 +10,11 @@
 class BMD;
 class OBJECT;
 
+namespace Data::Looks
+{
+struct LookDefinition;
+}
+
 // The looks of item models that are more than a plain textured model: chrome
 // layers, glowing meshes, animated textures, ... Each look is code, a render
 // style with a name; the model entry of an item names its style
@@ -31,6 +36,18 @@ std::span<const std::string_view> GetNames();
 // has no style, or its style is not for this drawing (e.g. a doppelganger);
 // the drawing code then draws the model itself.
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType);
+
+// While it lives, the model `modelType` is drawn with `look` instead of its own render style, without the glow pass or
+// the shine below +3 of a style in code: the Style Editor's preview of a look before it is applied. The look must
+// outlive it; one at a time.
+class PreviewLook
+{
+public:
+    PreviewLook(int modelType, const Data::Looks::LookDefinition& look);
+    ~PreviewLook();
+    PreviewLook(const PreviewLook&) = delete;
+    PreviewLook& operator=(const PreviewLook&) = delete;
+};
 
 // Whether the item's style spawns lights or animates where it is drawn.
 bool Spawns(int modelType);

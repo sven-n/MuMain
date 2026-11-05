@@ -53,6 +53,12 @@ public:
     }
     // The entries in this order (the same names, another order), as one undo step named `step`.
     virtual void SetOrder(const char* step, std::span<const std::string> names) = 0;
+    // Whether the entry can go into a folder and move; one that can't stays under the root.
+    virtual bool CanMoveEntry(const std::string& name) const
+    {
+        static_cast<void>(name);
+        return true;
+    }
 };
 
 // The entries' names in the file's order.
