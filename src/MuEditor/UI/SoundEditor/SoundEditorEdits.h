@@ -131,8 +131,11 @@ public:
     // Writes the files whose tables changed: SoundFiles.json, the sets this
     // window changed into Data/Monsters/Sounds.json (SaveSoundSets: the
     // monster tools' own unsaved changes stay unsaved),
-    // ObjectSounds.json, SoundFolders.json and SoundEvents.json. False when
-    // one was refused (the problems in `issues`); the others are written.
+    // ObjectSounds.json, SoundFolders.json and SoundEvents.json. The folders'
+    // file names the sounds by the keys the files written give them, so a
+    // set another window renamed and has not saved keeps its old keys there.
+    // False when one was refused (the problems in `issues`); the others are
+    // written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
     // Reads the files whose tables changed again (a monster set this window
     // changed: as Data/Monsters/Sounds.json has it, under the name another
@@ -163,6 +166,12 @@ private:
     void FollowRenamedSets(const std::map<std::string, std::string>& renamed);
     // The name in Data/Monsters/Sounds.json of the set that has `name` now.
     std::string FileNameOf(const std::string& name) const;
+    // The tables as Data/Monsters/Sounds.json and Data/Maps/ObjectSounds.json
+    // have them; m_savedTables' part for a file that cannot be read.
+    KeyedTables ReadKeyedTables() const;
+    // Whether the folders' file names its sounds as the files of
+    // m_savedTables do (m_foldersFileStale).
+    void CheckFoldersFile();
     // The sets this window changed, as Data/Monsters/Sounds.json has them now
     // (Revert): the Monster Sounds window's unsaved changes of them go too, a
     // set renamed there keeps its new name, and a set the file does not have
@@ -188,15 +197,27 @@ private:
     std::map<std::string, std::string> m_fileNames;
     int m_filesVersion = -1;
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
+    // The folders, and the folders as their file has them, both under the
+    // keys of now; and the file's text, under its own keys.
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
+    std::vector<Data::Sounds::SoundFolder> m_foldersFile;
     std::vector<Data::Items::ItemDataIssue> m_folderProblems;
     // The tables whose keys the folders and the steps' folders name, with
-    // their databases' versions, and the ones of the folders' file (when the
-    // editor found them, or the last Save of the folders).
+    // their databases' versions.
     std::optional<KeyedTables> m_keyed;
     std::pair<int, int> m_keyedVersions{-1, -1};
-    std::optional<KeyedTables> m_fileKeyed;
+    // The tables as their files have them (Data/Monsters/Sounds.json,
+    // Data/Maps/ObjectSounds.json), whose keys Save writes into the folders'
+    // file; the tables whose keys the folders' file has (when the editor
+    // found them, or the files' at the last Save of the folders), with the
+    // sets renamed since (name now to the name there); and whether a sound
+    // the folders' file holds has another key in the files (its file was
+    // saved since): then the folders' file is not saved.
+    std::optional<KeyedTables> m_savedTables;
+    std::optional<KeyedTables> m_foldersFileTables;
+    std::map<std::string, std::string> m_folderNames;
+    bool m_foldersFileStale = false;
     std::optional<std::vector<Data::Sounds::SoundEvent>> m_savedEvents;
 };
 } // namespace MuEditor::SoundEditor

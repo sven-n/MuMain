@@ -143,6 +143,61 @@ std::pair<int, int> KeyedVersions()
 {
     return {g_MonsterSoundSetDatabase.GetVersion(), g_MapObjectSoundDatabase.GetVersion()};
 }
+
+// `names` (a set's name now to its name elsewhere) after the sets of
+// `renamed` (old name to new) took their new names, all at once: a name one
+// set gives up another may take.
+void FollowNames(std::map<std::string, std::string>& names, const std::map<std::string, std::string>& renamed)
+{
+    std::map<std::string, std::string> moved;
+    for (const auto& [from, to] : renamed)
+    {
+        const auto found = names.find(from);
+        moved.emplace(to, found != names.end() ? found->second : from);
+    }
+    for (const auto& entry : renamed)
+    {
+        names.erase(entry.first);
+    }
+    for (auto& [to, elsewhere] : moved)
+    {
+        if (elsewhere != to)
+        {
+            names[to] = std::move(elsewhere);
+        }
+        else
+        {
+            names.erase(to);
+        }
+    }
+}
+
+std::string NameIn(const std::map<std::string, std::string>& names, const std::string& name)
+{
+    const auto found = names.find(name);
+    return found != names.end() ? found->second : name;
+}
+
+// The names in `to` of the sets that `from` names otherwise, by their names
+// in `from`; both map a set's name now to its name there.
+std::map<std::string, std::string> NamesBetween(const std::map<std::string, std::string>& from,
+                                                const std::map<std::string, std::string>& to)
+{
+    std::map<std::string, std::string> names;
+    for (const std::map<std::string, std::string>* side : {&from, &to})
+    {
+        for (const auto& entry : *side)
+        {
+            const std::string there = NameIn(from, entry.first);
+            const std::string here = NameIn(to, entry.first);
+            if (there != here)
+            {
+                names[there] = here;
+            }
+        }
+    }
+    return names;
+}
 } // namespace
 
 RowValues ValuesOf(const SoundRow& row)
@@ -283,16 +338,21 @@ void SoundEdits::ReadFolders()
     Data::Sounds::SoundFoldersLoadResult read = Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
     m_folders = std::move(read.folders);
     m_savedFolders = m_folders;
+    m_foldersFile = *m_folders;
     m_folderProblems.clear();
     std::copy_if(read.issues.begin(), read.issues.end(), std::back_inserter(m_folderProblems),
                  [](const Data::Items::ItemDataIssue& issue)
                  { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
-    // The file names the sounds by the keys they had when it was written: the
-    // ones that changed since keep their folders (not saved yet).
+    // The file names the sounds by the keys of its tables, the window by the
+    // keys of now: the ones that changed since keep their folders.
     if (m_folderProblems.empty())
     {
-        RenameSounds(*m_folders, FollowedKeys(*m_fileKeyed, *m_keyed));
+        const std::map<std::string, std::string> renamed =
+            FollowedKeys(*m_foldersFileTables, *m_keyed, NamesBetween(m_folderNames, {}));
+        RenameSounds(*m_folders, renamed);
+        RenameSounds(*m_savedFolders, renamed);
     }
+    CheckFoldersFile();
 }
 
 void SoundEdits::FollowKeyChanges()
@@ -307,16 +367,23 @@ void SoundEdits::FollowKeyChanges()
     {
         m_filesVersion = g_MonsterDataHandler.GetFilesVersion();
         m_fileNames.clear();
+        // The sets' file has the table's sets now.
+        m_savedTables->sets = m_keyed->sets;
+        CheckFoldersFile();
     }
 }
 
 void SoundEdits::FollowTables()
 {
     KeyedTables now = CurrentKeyedTables();
-    if (!m_fileKeyed)
+    if (!m_foldersFileTables)
     {
-        // The folders' file goes with the tables as the editor found them.
-        m_fileKeyed = now;
+        // The files, and the folders' file with them, go with the tables as
+        // the editor found them.
+        m_savedTables = now;
+        m_foldersFileTables = now;
+        m_folderNames.clear();
+        m_foldersFileStale = false;
     }
     if (m_keyed)
     {
@@ -337,27 +404,8 @@ void SoundEdits::FollowRenamedSets(const std::map<std::string, std::string>& ren
     {
         return;
     }
-    // All at once: a name one set gives up another may take.
-    std::map<std::string, std::string> fileNames;
-    for (const auto& [from, to] : renamed)
-    {
-        fileNames.emplace(to, FileNameOf(from));
-    }
-    for (const auto& entry : renamed)
-    {
-        m_fileNames.erase(entry.first);
-    }
-    for (auto& [to, file] : fileNames)
-    {
-        if (file != to)
-        {
-            m_fileNames[to] = std::move(file);
-        }
-        else
-        {
-            m_fileNames.erase(to);
-        }
-    }
+    FollowNames(m_fileNames, renamed);
+    FollowNames(m_folderNames, renamed);
     std::map<std::string, Data::Monsters::MonsterSoundSet> followed;
     for (auto& [name, set] : m_savedSets)
     {
@@ -380,8 +428,32 @@ void SoundEdits::FollowRenamedSets(const std::map<std::string, std::string>& ren
 
 std::string SoundEdits::FileNameOf(const std::string& name) const
 {
-    const auto found = m_fileNames.find(name);
-    return found != m_fileNames.end() ? found->second : name;
+    return NameIn(m_fileNames, name);
+}
+
+KeyedTables SoundEdits::ReadKeyedTables() const
+{
+    KeyedTables tables = *m_savedTables;
+    const Data::Monsters::MonsterSoundsLoadResult sets =
+        Data::Monsters::LoadMonsterSoundsFile(Data::Monsters::GetMonsterSoundsFile());
+    if (!Data::Items::HasFatal(sets.issues))
+    {
+        tables.sets = sets.sets;
+    }
+    const Data::Maps::MapObjectSoundsLoadResult objects =
+        Data::Maps::LoadMapObjectSoundsFile(Data::Maps::GetMapObjectSoundsFile());
+    if (!Data::Items::HasFatal(objects.issues))
+    {
+        tables.objects = objects.sounds;
+    }
+    return tables;
+}
+
+void SoundEdits::CheckFoldersFile()
+{
+    std::vector<Data::Sounds::SoundFolder> moved = m_foldersFile;
+    m_foldersFileStale = RenameSounds(
+        moved, FollowedKeys(*m_foldersFileTables, *m_savedTables, NamesBetween(m_folderNames, m_fileNames)));
 }
 
 void SoundEdits::RenameInFolders(const std::map<std::string, std::string>& renamed)
@@ -391,6 +463,11 @@ void SoundEdits::RenameInFolders(const std::map<std::string, std::string>& renam
         return;
     }
     RenameSounds(*m_folders, renamed);
+    // The folders' file names the same sounds still.
+    if (m_savedFolders)
+    {
+        RenameSounds(*m_savedFolders, renamed);
+    }
     for (std::vector<SoundEdit>* steps : {&m_undo, &m_redo})
     {
         for (SoundEdit& step : *steps)
@@ -539,7 +616,7 @@ bool SoundEdits::IsModified() const
 {
     const bool code = m_savedCode && *m_savedCode != g_SoundFileDatabase.GetAll();
     const bool objects = m_savedObjects && *m_savedObjects != g_MapObjectSoundDatabase.GetAll();
-    const bool folders = m_folders && m_savedFolders && *m_folders != *m_savedFolders;
+    const bool folders = m_folders && m_savedFolders && (m_foldersFileStale || *m_folders != *m_savedFolders);
     const bool events = m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll();
     return code || objects || folders || events || SetsDiffer(m_savedSets);
 }
@@ -601,12 +678,26 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
             saved = false;
         }
     }
-    if (m_folders && m_savedFolders && *m_folders != *m_savedFolders)
+    // The keys the files give the sounds now: a sound whose file was saved
+    // has another key there, so the folders' file is written too.
+    if (m_folders)
     {
-        if (Data::Sounds::SaveSoundFolders(Data::Sounds::GetSoundFoldersFile(), *m_folders, issues))
+        m_savedTables = ReadKeyedTables();
+        CheckFoldersFile();
+    }
+    if (m_folders && m_savedFolders && (m_foldersFileStale || *m_folders != *m_savedFolders))
+    {
+        // Under those keys: a set another window renamed or changed and has
+        // not saved keeps its old keys there, as in the sets' file.
+        std::vector<Data::Sounds::SoundFolder> written = *m_folders;
+        RenameSounds(written, FollowedKeys(*m_keyed, *m_savedTables, m_fileNames));
+        if (Data::Sounds::SaveSoundFolders(Data::Sounds::GetSoundFoldersFile(), written, issues))
         {
             m_savedFolders = m_folders;
-            m_fileKeyed = m_keyed;
+            m_foldersFile = std::move(written);
+            m_foldersFileTables = m_savedTables;
+            m_folderNames = m_fileNames;
+            m_foldersFileStale = false;
         }
         else
         {
@@ -732,10 +823,14 @@ void SoundEdits::Clear()
     m_savedObjects.reset();
     m_folders.reset();
     m_savedFolders.reset();
+    m_foldersFile.clear();
     m_folderProblems.clear();
     m_keyed.reset();
     m_keyedVersions = {-1, -1};
-    m_fileKeyed.reset();
+    m_savedTables.reset();
+    m_foldersFileTables.reset();
+    m_folderNames.clear();
+    m_foldersFileStale = false;
     m_fileNames.clear();
     m_filesVersion = -1;
     m_savedEvents.reset();

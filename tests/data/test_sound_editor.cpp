@@ -1252,15 +1252,16 @@ TEST_CASE("Sound Editor: the folders keep the sounds whose keys another window c
     std::vector<Data::Items::ItemDataIssue> issues;
     REQUIRE(g_SoundEdits.Save(issues));
 
-    // Monster Sounds renames the set: its sounds keep their folder, which is
-    // not saved yet; Revert reads the file's folders and follows it too.
+    // Monster Sounds renames the set: its sounds keep their folder; the
+    // folders' file names them as the sets' file does, so nothing is to be
+    // saved. Revert reads the file's folders and follows it too.
     REQUIRE(g_MonsterEdits.RenameSoundSet("Rename the set", "Death Tree", "Tree of Death", -1));
     g_SoundEdits.FollowKeyChanges();
     const std::vector<SoundFolder> renamed{Folder("Death Tree", {"set:Tree of Death:Data/Sound/EditorTest/ok.wav",
                                                                  "set:Tree of Death:SOUND_MONSTER_MAGICSKULL1"}),
                                            Folder("Kalima", {first}), Folder("Map 30", {first + "#2"})};
     CHECK(g_SoundEdits.Folders() == renamed);
-    CHECK(g_SoundEdits.IsModified());
+    CHECK_FALSE(g_SoundEdits.IsModified());
     REQUIRE(g_SoundEdits.Revert(issues));
     CHECK(g_SoundEdits.Folders() == renamed);
     // Its undo there takes the keys back.
@@ -1289,6 +1290,82 @@ TEST_CASE("Sound Editor: the folders keep the sounds whose keys another window c
     CHECK(g_SoundEdits.Folders() == followed);
     REQUIRE(g_SoundEdits.Undo());
     CHECK(g_SoundEdits.Folders() == followed);
+}
+
+TEST_CASE("Sound Editor: Save writes the folders with the keys the saved files give the sounds, so a set renamed in "
+          "Monster Sounds keeps its folders in the files until that window saves it (Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    std::filesystem::create_directories("Data/Monsters");
+    std::filesystem::create_directories("Data/Audio");
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary)
+        << Data::Monsters::WriteMonsterSoundsJson(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    g_SoundEdits.TakeSaved();
+    g_SoundEdits.FollowKeyChanges();
+    const std::string idle = "set:Death Tree:Data/Sound/EditorTest/ok.wav";
+    const std::string attack = "set:Death Tree:SOUND_MONSTER_MAGICSKULL1";
+    const std::vector<SoundFolder> saved{Folder("Death Tree", {idle, attack})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", saved));
+    const auto folderFile = []
+    { return Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile()).folders; };
+
+    // Monster Sounds renames the set and changes it, and saves neither.
+    REQUIRE(g_MonsterEdits.RenameSoundSet("Rename the set", "Death Tree", "Tree of Death", -1));
+    g_SoundEdits.FollowKeyChanges();
+    Data::Monsters::MonsterSoundSet edited = *g_MonsterSoundSetDatabase.Find("Tree of Death");
+    edited.sounds[0].channels = 4;
+    REQUIRE(g_MonsterEdits.SetSoundSet("Monster Sounds", edited, -1));
+    g_SoundEdits.FollowKeyChanges();
+    const std::vector<SoundFolder> renamed{Folder("Death Tree", {"set:Tree of Death:Data/Sound/EditorTest/ok.wav",
+                                                                 "set:Tree of Death:SOUND_MONSTER_MAGICSKULL1"})};
+    CHECK(g_SoundEdits.Folders() == renamed);
+
+    // The folders' file names the sounds as Sounds.json does, which the
+    // editor reads when it starts again; the window keeps the names of now,
+    // also after Revert.
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK(folderFile() == saved);
+    std::vector<std::string> fileKeys;
+    for (const SoundRow& row : MuEditor::SoundEditor::KeyRows(
+             Data::Monsters::LoadMonsterSoundsFile(Data::Monsters::GetMonsterSoundsFile()).sets, {}))
+    {
+        fileKeys.push_back(row.key);
+    }
+    CHECK(fileKeys == std::vector<std::string>{idle, attack});
+    CHECK(g_SoundEdits.Folders() == renamed);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(g_SoundEdits.Folders() == renamed);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    // The monster tools save the set under its new name: the folders' file is
+    // not saved until it has the new keys too.
+    issues.clear();
+    REQUIRE(g_MonsterEdits.Save(issues));
+    g_SoundEdits.FollowKeyChanges();
+    CHECK(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK(folderFile() == renamed);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+
+    // This window gives a sound another file: Save writes the sets' file and
+    // the folders' file with the sound's new key.
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    const SoundRow* row = FindRow(rows, "set:Tree of Death:Data/Sound/EditorTest/ok.wav");
+    REQUIRE(row != nullptr);
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+    values.file = "Data/Sound/EditorTest/Other.wav";
+    REQUIRE(g_SoundEdits.Change(*row, values));
+    issues.clear();
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK(folderFile() ==
+          std::vector<SoundFolder>{Folder("Death Tree", {"set:Tree of Death:Data/Sound/EditorTest/Other.wav",
+                                                         "set:Tree of Death:SOUND_MONSTER_MAGICSKULL1"})});
+    CHECK_FALSE(g_SoundEdits.IsModified());
 }
 
 TEST_CASE("Sound Editor: a folders' file that cannot be read keeps the folders as they are, so Save leaves the file "

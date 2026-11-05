@@ -259,10 +259,13 @@ yet** until their own **Save**.
   its set and its id or file, and a map object sound by its file: when one
   of those changes, here or in another window (a set renamed in Monster
   Sounds, a file picked in the Map Editor's Sounds tab), the sound keeps its
-  folder, and **Save** writes the new names. An entry of a sound that is gone
-  (removed in another window, or by hand in the file) stays, so the sound
-  finds its folder when it comes back; the folder bar counts them, and
-  **Drop them** takes them out as a step that **Undo** puts back.
+  folder. `SoundFolders.json` names the sounds as the saved files do: a
+  rename another window has not saved stays out of it, and once a file is
+  saved with new names (here, or that window's **Save**) the Sound Editor
+  says **Not saved yet** until its **Save** writes them. An entry of a sound
+  that is gone (removed in another window, or by hand in the file) stays, so
+  the sound finds its folder when it comes back; the folder bar counts them,
+  and **Drop them** takes them out as a step that **Undo** puts back.
 - **The Events tab** (`Data/Audio/SoundEvents.json`) decides which sound the
   code plays when: for each event the first rule that matches plays one of
   its sounds (at random when it has more). Your footsteps (`heroFootstep`)

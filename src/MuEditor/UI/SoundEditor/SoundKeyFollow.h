@@ -30,7 +30,10 @@ KeyedTables CurrentKeyedTables();
 // a sound or an entry changed in its place, and a "#2" that moved when a sound
 // of the same key came or went. Where sounds came, went and changed between
 // the same neighbours, which one became which is not known: none of those.
-std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const KeyedTables& after);
+// `names`: the sets known to have another name in `after` (before's name to
+// after's), found so also when they changed otherwise.
+std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const KeyedTables& after,
+                                                const std::map<std::string, std::string>& names = {});
 
 // The sets of `before` that `after` has under another name (renamed, alike
 // otherwise, as FollowedKeys finds them), old name to new.
