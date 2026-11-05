@@ -59,30 +59,6 @@ namespace DataFileIO
         g_ErrorReport.Write(L"[DataFileIO] %ls\r\n", message);
     }
 
-    bool ReadExact(FILE* fp, void* buffer, std::size_t size)
-    {
-        return size == 0 || std::fread(buffer, size, 1, fp) == 1;
-    }
-
-    std::optional<std::vector<BYTE>> ReadAll(FILE* fp)
-    {
-        if (std::fseek(fp, 0, SEEK_END) != 0)
-        {
-            return std::nullopt;
-        }
-        const long size = std::ftell(fp);
-        if (size < 0 || std::fseek(fp, 0, SEEK_SET) != 0)
-        {
-            return std::nullopt;
-        }
-        std::vector<BYTE> content(static_cast<std::size_t>(size));
-        if (!ReadExact(fp, content.data(), content.size()))
-        {
-            return std::nullopt;
-        }
-        return content;
-    }
-
     void ReportUnusableFile(const wchar_t* fileName, const wchar_t* issue)
     {
         wchar_t text[256]{};
