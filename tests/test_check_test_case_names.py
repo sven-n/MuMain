@@ -25,10 +25,11 @@ OFFENCES = {
     "literal_and_macro": "is not written as string literals",
     "scenario": "has a ';', which cuts it in two",
     "empty": "is empty, which the discovery drops",
+    "doctest_header": "reads like a line of doctest's list output, which the discovery skips",
     "non_ascii": "has a character outside ASCII",
 }
 CLEAN = "clean"
-CLEAN_NAMES = 7
+CLEAN_NAMES = 8
 
 
 def run_check(fixture):

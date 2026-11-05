@@ -45,11 +45,13 @@ source under `src/MuEditor/` was compiled into the non-editor client.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
 - Give every `TEST_CASE` an ASCII name, without `;`, a line break or `\` (a
-  comma is fine) and with as many `[` as `]`. CTest's discovery reads the names
-  as a CMake list, so it would drop an empty name and cut or join the others;
-  doctest's filter reads a `\` as an escape, and on Windows the test binary reads
-  its filter in the ANSI code page. Then no entry runs the case. The static check
-  `test_case_names_reach_ctest_whole` finds such names before any build.
+  comma is fine), with as many `[` as `]` and not starting with `[doctest] `.
+  CTest's discovery reads the names as a CMake list, so it would drop an empty
+  name and cut or join the others, and it skips lines that look like doctest's
+  own output; doctest's filter reads a `\` as an escape, and on Windows the test
+  binary reads its filter in the ANSI code page. Then no entry runs the case. The
+  static check `test_case_names_reach_ctest_whole` finds such names before any
+  build.
 - A CTest entry that runs no case fails (doctest reports `test cases: 0`), so a
   name the discovery cut or joined fails in CI even where the static check cannot
   read it.

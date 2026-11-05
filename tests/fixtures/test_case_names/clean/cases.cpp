@@ -37,4 +37,10 @@ SCENARIO("a scenario, whole")
     CHECK(true);
 }
 
+// doctest lists it as "  Scenario: [doctest] ...", which the discovery keeps.
+SCENARIO("[doctest] a scenario keeps its prefix")
+{
+    CHECK(true);
+}
+
 TEST_SUITE("a suite") { DOCTEST_TEST_CASE("a case after code on its line, with the prefix") {} }

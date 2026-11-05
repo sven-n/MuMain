@@ -12,6 +12,8 @@ case when it has
 - a '\\' anywhere else: the discovery escapes only commas for doctest's filter, and the filter reads '\\\\' as one '\\'
   and splits at '\\,', so the entry's filter may match no case;
 - nothing at all: CMake drops an empty element, so the case gets no entry and never runs;
+- the shape of a line of doctest's list output ("[doctest] " at its start, or the row of '='): the discovery skips
+  those lines, so the case gets no entry either;
 - a character outside ASCII: on Windows the test binary reads its `--test-case=` argument in the ANSI code page, not as
   the UTF-8 the name is compiled to, so the filter matches no case there.
 A comma is safe: the discovery escapes it for doctest's filter. tests/CMakeLists.txt fails an entry that runs no case;
@@ -41,6 +43,11 @@ NAME_END = re.compile(r"\s*[),*]")
 # A C escape: a hexadecimal or octal code, a universal character name, or the one character after the '\'.
 ESCAPE = re.compile(r"\\(x[0-9A-Fa-f]+|[0-7]{1,3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|.)")
 SIMPLE_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
+# doctest's SCENARIO macros put this before the name they list.
+SCENARIO_PREFIX = "  Scenario: "
+# The lines of doctest's list output around the names, which the discovery skips.
+LIST_HEADER = "[doctest] "
+LIST_SEPARATOR = "=" * 79
 SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
@@ -66,8 +73,8 @@ def name_at(text, at):
 
 
 def cases(text):
-    """The line and name of each test case in a source. The cases are found in the code alone, and their literals read
-    with the comments between them left out."""
+    """The line and listed name of each test case in a source. The cases are found in the code alone, and their
+    literals read with the comments between them left out."""
     code = code_only(text)
     source = code_only(text, keep_literals=True)
     for case in CASE.finditer(code):
@@ -75,7 +82,10 @@ def cases(text):
         if case.group(1) == "TEST_CASE_FIXTURE":
             fixture = FIXTURE.match(source, at)
             at = fixture.end() if fixture else at
-        yield text.count("\n", 0, case.start()) + 1, name_at(source, at)
+        name = name_at(source, at)
+        if name is not None and case.group(1).startswith("SCENARIO"):
+            name = SCENARIO_PREFIX + name
+        yield text.count("\n", 0, case.start()) + 1, name
 
 
 def problem(name):
@@ -83,6 +93,8 @@ def problem(name):
         return "is not written as string literals, so this check cannot read it"
     if not name:
         return "is empty, which the discovery drops; the case gets no entry"
+    if name.startswith(LIST_HEADER) or name == LIST_SEPARATOR:
+        return "reads like a line of doctest's list output, which the discovery skips; the case gets no entry"
     if ";" in name:
         return "has a ';', which cuts it in two; neither half runs a case"
     if "\n" in name:
@@ -116,8 +128,8 @@ def main():
     for offence in found:
         print(offence)
     if found:
-        print("Write each name in ASCII as string literals, not empty, without ';', a line break or '\\' (a comma is "
-              "fine) and with balanced brackets.")
+        print("Write each name in ASCII as string literals, not empty or starting with '[doctest] ', without ';', a "
+              "line break or '\\' (a comma is fine) and with balanced brackets.")
         return 1
     if checked == 0:
         print(f"No TEST_CASE found under {root}")
