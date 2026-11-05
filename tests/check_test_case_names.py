@@ -26,6 +26,7 @@ left out, adjacent literals joined, escapes decoded. Prints each name CMake woul
 one, when a name is not written as string literals alone (a macro in it, say), or when it finds no test case at all.
 """
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -52,6 +53,7 @@ SCENARIO_PREFIX = "  Scenario: "
 # The lines of doctest's list output around the names, which the discovery skips.
 LIST_HEADER = "[doctest] "
 LIST_SEPARATOR = "=" * 79
+SOURCE_SUFFIXES = (".cpp", ".h")
 SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
@@ -139,15 +141,22 @@ def problem(name):
     return None
 
 
+def sources(root):
+    """The .cpp and .h files under root in order, without entering third_party or fixtures directories."""
+    found = []
+    for directory, subdirectories, files in os.walk(root):
+        subdirectories[:] = sorted(name for name in subdirectories if name not in SKIPPED_DIRS)
+        found += [Path(directory, name) for name in sorted(files) if Path(name).suffix in SOURCE_SUFFIXES]
+    return found
+
+
 def main():
     # Piped output on Windows (CTest, the pre-push hook) uses the ANSI code page: escape what it cannot show.
     sys.stdout.reconfigure(errors="backslashreplace")
     root = Path(sys.argv[1])
-    sources = [path for path in sorted(root.rglob("*"))
-               if path.suffix in (".cpp", ".h") and not SKIPPED_DIRS & set(path.relative_to(root).parts)]
     checked = 0
     found = []
-    for path in sources:
+    for path in sources(root):
         for line, name in cases(path.read_text(encoding="utf-8-sig", errors="replace")):
             checked += 1
             if reason := problem(name):
