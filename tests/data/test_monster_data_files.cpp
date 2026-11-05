@@ -99,6 +99,7 @@ TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty 
     CHECK(loaded.issues[0].severity == ItemDataIssueSeverity::Warning);
     CHECK(loaded.issues[0].number == 252);
     CHECK(loaded.monsters.size() == 547);
+    CHECK(loaded.groups.size() == 423);
 }
 
 TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]")

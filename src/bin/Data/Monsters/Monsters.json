@@ -115,7 +115,8 @@
       "model": "MONSTER_MODEL_LARVA",
       "soundSet": "Larva",
       "numbers": [
-        {"number": 12}
+        {"number": 12},
+        {"number": 532}
       ]
     },
     {
@@ -756,7 +757,14 @@
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
       "numbers": [
-        {"number": 84}
+        {"number": 84},
+        {"number": 90},
+        {"number": 96},
+        {"number": 113},
+        {"number": 119},
+        {"number": 125},
+        {"number": 138},
+        {"number": 428}
       ]
     },
     {
@@ -765,7 +773,14 @@
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
       "numbers": [
-        {"number": 85}
+        {"number": 85},
+        {"number": 91},
+        {"number": 97},
+        {"number": 114},
+        {"number": 120},
+        {"number": 126},
+        {"number": 139},
+        {"number": 429}
       ]
     },
     {
@@ -774,7 +789,14 @@
       "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
       "soundSet": "Dark Skull Soldier",
       "numbers": [
-        {"number": 86}
+        {"number": 86},
+        {"number": 92},
+        {"number": 98},
+        {"number": 115},
+        {"number": 121},
+        {"number": 127},
+        {"number": 140},
+        {"number": 430}
       ]
     },
     {
@@ -783,7 +805,14 @@
       "model": "MONSTER_MODEL_GIANT_OGRE",
       "soundSet": "Giant Ogre",
       "numbers": [
-        {"number": 87}
+        {"number": 87},
+        {"number": 93},
+        {"number": 99},
+        {"number": 116},
+        {"number": 122},
+        {"number": 128},
+        {"number": 141},
+        {"number": 431}
       ]
     },
     {
@@ -792,7 +821,14 @@
       "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
       "soundSet": "Red Skeleton Knight",
       "numbers": [
-        {"number": 88}
+        {"number": 88},
+        {"number": 94},
+        {"number": 111},
+        {"number": 117},
+        {"number": 123},
+        {"number": 129},
+        {"number": 142},
+        {"number": 432}
       ]
     },
     {
@@ -801,97 +837,14 @@
       "model": "MONSTER_MODEL_MAGIC_SKELETON",
       "soundSet": "Magic Skeleton",
       "numbers": [
-        {"number": 89}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 90}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 91}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 92}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 93}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 94}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 95}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 96}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 97}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 98}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 99}
+        {"number": 89},
+        {"number": 95},
+        {"number": 112},
+        {"number": 118},
+        {"number": 124},
+        {"number": 130},
+        {"number": 143},
+        {"number": 433}
       ]
     },
     {
@@ -973,186 +926,6 @@
       ]
     },
     {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 111}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 112}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 113}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 114}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 115}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 116}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 117}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 118}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 119}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 120}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 121}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 122}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 123}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 124}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 125}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 126}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 127}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 128}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 129}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 130}
-      ]
-    },
-    {
       "name": {"en": "Castle Gate", "es": "Puerta del Castillo", "pt": "Portão do castelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_CASTLE_GATE",
@@ -1165,22 +938,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_STATUE_OF_SAINT",
       "numbers": [
-        {"number": 132}
-      ]
-    },
-    {
-      "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_STATUE_OF_SAINT",
-      "numbers": [
-        {"number": 133}
-      ]
-    },
-    {
-      "name": {"en": "Statue of Saint", "es": "Estatua de Santo", "pt": "Estátua do Santo"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_STATUE_OF_SAINT",
-      "numbers": [
+        {"number": 132},
+        {"number": 133},
         {"number": 134}
       ]
     },
@@ -1212,66 +971,18 @@
       ]
     },
     {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 138}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 139}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 140}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 141}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 142}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 143}
-      ]
-    },
-    {
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_ANGEL",
       "soundSet": "Death Angel",
       "numbers": [
-        {"number": 144}
+        {"number": 144},
+        {"number": 174},
+        {"number": 182},
+        {"number": 190},
+        {"number": 260},
+        {"number": 268},
+        {"number": 334}
       ]
     },
     {
@@ -1285,7 +996,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 145}
+        {"number": 145},
+        {"number": 175},
+        {"number": 183},
+        {"number": 191},
+        {"number": 261},
+        {"number": 269},
+        {"number": 336, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1294,7 +1011,13 @@
       "model": "MONSTER_MODEL_BLOOD_SOLDIER",
       "soundSet": "Blood Soldier",
       "numbers": [
-        {"number": 146}
+        {"number": 146},
+        {"number": 176},
+        {"number": 184},
+        {"number": 192},
+        {"number": 262},
+        {"number": 270},
+        {"number": 333}
       ]
     },
     {
@@ -1308,7 +1031,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 147}
+        {"number": 147},
+        {"number": 177},
+        {"number": 185},
+        {"number": 193},
+        {"number": 263},
+        {"number": 271},
+        {"number": 331, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1322,7 +1051,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 148}
+        {"number": 148},
+        {"number": 178},
+        {"number": 186},
+        {"number": 194},
+        {"number": 264},
+        {"number": 272},
+        {"number": 332, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1336,7 +1071,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 149}
+        {"number": 149},
+        {"number": 179},
+        {"number": 187},
+        {"number": 195},
+        {"number": 265},
+        {"number": 273},
+        {"number": 335, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1427,7 +1168,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 160}
+        {"number": 160},
+        {"number": 180},
+        {"number": 188},
+        {"number": 196},
+        {"number": 266},
+        {"number": 274},
+        {"number": 337, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1440,7 +1187,12 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 161}
+        {"number": 161},
+        {"number": 181},
+        {"number": 189},
+        {"number": 197},
+        {"number": 267},
+        {"number": 338, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1567,306 +1319,6 @@
       ],
       "numbers": [
         {"number": 173}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 174}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 175}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 176}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 177}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 178}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
-        "otherwise": "none",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 179}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 180}
-      ]
-    },
-    {
-      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Illusion of Kundun",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 181}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 182}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 183}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 184}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 185}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 186}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
-        "otherwise": "none",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 187}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 188}
-      ]
-    },
-    {
-      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Illusion of Kundun",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 189}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 190}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 191}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 192}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 193}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 194}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
-        "otherwise": "none",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 195}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 196}
-      ]
-    },
-    {
-      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Illusion of Kundun",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 197}
       ]
     },
     {
@@ -2170,7 +1622,8 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 247}
+        {"number": 247},
+        {"number": 249}
       ]
     },
     {
@@ -2179,14 +1632,6 @@
       "model": "MODEL_MERCHANT_MAN",
       "numbers": [
         {"number": 248}
-      ]
-    },
-    {
-      "name": {"en": "Guard", "es": "Guardia", "pt": "Guarda"},
-      "kind": "npc",
-      "model": "player",
-      "numbers": [
-        {"number": 249}
       ]
     },
     {
@@ -2269,193 +1714,6 @@
       "model": "MODEL_KALIMA_SHOP",
       "numbers": [
         {"number": 259}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 260}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 261}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 262}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 263}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 264}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
-        "otherwise": "none",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 265}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 266}
-      ]
-    },
-    {
-      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Illusion of Kundun",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 267}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 268}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 269}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 270}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 271}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "attacks": {
-        "skills": {"17": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 272}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "attacks": {
-        "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
-        "otherwise": "none",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 273}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "attacks": {
-        "otherwiseRandom": "rand",
-        "clearSkill": "never"
-      },
-      "numbers": [
-        {"number": 274}
       ]
     },
     {
@@ -2771,7 +2029,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BALRAM",
       "numbers": [
-        {"number": 316}
+        {"number": 316},
+        {"number": 344, "attacks": {"monsterSkills": {"9": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2779,7 +2038,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SORAM",
       "numbers": [
-        {"number": 317}
+        {"number": 317},
+        {"number": 341, "attacks": {"monsterSkills": {"11": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2788,78 +2048,6 @@
       "model": "MONSTER_MODEL_SCOUT",
       "numbers": [
         {"number": 318}
-      ]
-    },
-    {
-      "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS",
-      "soundSet": "Aegis",
-      "numbers": [
-        {"number": 331}
-      ]
-    },
-    {
-      "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Rogue Centurion",
-      "numbers": [
-        {"number": 332}
-      ]
-    },
-    {
-      "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
-      "soundSet": "Blood Soldier",
-      "numbers": [
-        {"number": 333}
-      ]
-    },
-    {
-      "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL",
-      "soundSet": "Death Angel",
-      "numbers": [
-        {"number": 334}
-      ]
-    },
-    {
-      "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON",
-      "soundSet": "Necron",
-      "numbers": [
-        {"number": 335}
-      ]
-    },
-    {
-      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION",
-      "soundSet": "Death Centurion",
-      "numbers": [
-        {"number": 336}
-      ]
-    },
-    {
-      "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Schriker",
-      "numbers": [
-        {"number": 337}
-      ]
-    },
-    {
-      "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER",
-      "soundSet": "Illusion of Kundun",
-      "numbers": [
-        {"number": 338}
       ]
     },
     {
@@ -2872,33 +2060,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 340}
-      ]
-    },
-    {
-      "name": {"en": "Soram", "es": "Soram", "pt": "Soram"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SORAM",
-      "attacks": {
-        "monsterSkills": {"11": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 341}
-      ]
-    },
-    {
-      "name": {"en": "Balram", "es": "Balram", "pt": "Balram"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BALRAM",
-      "attacks": {
-        "monsterSkills": {"9": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 344}
+        {"number": 340},
+        {"number": 440, "attacks": {"monsterSkills": {"8": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2945,7 +2108,8 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 350}
+        {"number": 350},
+        {"number": 435, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3016,7 +2180,8 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 356}
+        {"number": 356},
+        {"number": 434, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3043,7 +2208,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 358}
+        {"number": 358},
+        {"number": 438, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3071,7 +2237,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 360}
+        {"number": 360},
+        {"number": 439, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3291,151 +2458,11 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
       "numbers": [
-        {"number": 386}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
-      "numbers": [
-        {"number": 387}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
-      "attacks": {
-        "monsterSkills": {"27": "attack2", "28": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 388}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
-      "numbers": [
-        {"number": 389}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
-      "numbers": [
-        {"number": 390}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
-      "attacks": {
-        "monsterSkills": {"27": "attack2", "28": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 391}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
-      "numbers": [
-        {"number": 392}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
-      "numbers": [
-        {"number": 393}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
-      "attacks": {
-        "monsterSkills": {"27": "attack2", "28": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 394}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
-      "numbers": [
-        {"number": 395}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
-      "numbers": [
-        {"number": 396}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
-      "attacks": {
-        "monsterSkills": {"27": "attack2", "28": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 397}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
-      "numbers": [
-        {"number": 398}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
-      "numbers": [
-        {"number": 399}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
-      "attacks": {
-        "monsterSkills": {"27": "attack2", "28": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 400}
-      ]
-    },
-    {
-      "name": {"en": "Illusion Sorcerer Spirit", "es": "Espíritu Hechicero de Ilusión", "pt": "Espírito do Feitic. da Ilusão"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
-      "numbers": [
+        {"number": 386},
+        {"number": 389},
+        {"number": 392},
+        {"number": 395},
+        {"number": 398},
         {"number": 401}
       ]
     },
@@ -3444,6 +2471,11 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
       "numbers": [
+        {"number": 387},
+        {"number": 390},
+        {"number": 393},
+        {"number": 396},
+        {"number": 399},
         {"number": 402}
       ]
     },
@@ -3457,6 +2489,11 @@
         "clearSkill": "always"
       },
       "numbers": [
+        {"number": 388},
+        {"number": 391},
+        {"number": 394},
+        {"number": 397},
+        {"number": 400},
         {"number": 403}
       ]
     },
@@ -3509,7 +2546,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 409}
+        {"number": 409},
+        {"number": 436, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3533,7 +2571,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 411}
+        {"number": 411},
+        {"number": 437, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -3683,125 +2722,6 @@
       ]
     },
     {
-      "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC",
-      "soundSet": "Elite Ogre",
-      "numbers": [
-        {"number": 428}
-      ]
-    },
-    {
-      "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER",
-      "soundSet": "Ogre archer",
-      "numbers": [
-        {"number": 429}
-      ]
-    },
-    {
-      "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
-      "soundSet": "Dark Skull Soldier",
-      "numbers": [
-        {"number": 430}
-      ]
-    },
-    {
-      "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE",
-      "soundSet": "Giant Ogre",
-      "numbers": [
-        {"number": 431}
-      ]
-    },
-    {
-      "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
-      "soundSet": "Red Skeleton Knight",
-      "numbers": [
-        {"number": 432}
-      ]
-    },
-    {
-      "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON",
-      "soundSet": "Magic Skeleton",
-      "numbers": [
-        {"number": 433}
-      ]
-    },
-    {
-      "name": {"en": "Gigantis", "es": "Gigantis", "pt": "Gigantis"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GIGANTIS",
-      "soundSet": "Gigantis",
-      "numbers": [
-        {"number": 434}
-      ]
-    },
-    {
-      "name": {"en": "Berserker", "es": "Energúmeno", "pt": "Berserker"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BERSERK",
-      "soundSet": "Berserker",
-      "numbers": [
-        {"number": 435}
-      ]
-    },
-    {
-      "name": {"en": "Balram (Trainee Soldier)", "es": "Balram (Soldado Recluta)", "pt": "Balram (Trein.)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_BALRAM",
-      "numbers": [
-        {"number": 436}
-      ]
-    },
-    {
-      "name": {"en": "Soram (Trainee Soldier)", "es": "Soram (Soldado Recluta)", "pt": "Soram (Trein.)"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SORAM",
-      "numbers": [
-        {"number": 437}
-      ]
-    },
-    {
-      "name": {"en": "Persona", "es": "Imagen", "pt": "Persona"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_PERSONA",
-      "soundSet": "Persona",
-      "numbers": [
-        {"number": 438}
-      ]
-    },
-    {
-      "name": {"en": "Dreadfear", "es": "Pavor Terrorífico", "pt": "Terror"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DREADFEAR",
-      "soundSet": "Dreadfear",
-      "numbers": [
-        {"number": 439}
-      ]
-    },
-    {
-      "name": {"en": "Dark Elf", "es": "Elfo Oscuro", "pt": "Elfo negro"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_ELF_1",
-      "attacks": {
-        "monsterSkills": {"8": "attack1"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 440}
-      ]
-    },
-    {
       "name": {"en": "Sapi-Unus", "es": "Sapi-Unus", "pt": "Sapi-Unus"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPIUNUS",
@@ -3925,7 +2845,8 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 454}
+        {"number": 454},
+        {"number": 531, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -4168,15 +3089,7 @@
       "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
       "soundSet": "Zombie Fighter",
       "numbers": [
-        {"number": 480}
-      ]
-    },
-    {
-      "name": {"en": "Zombie Fighter", "es": "Luchador Zombie", "pt": "Lutador zumbi"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
-      "soundSet": "Zombie Fighter",
-      "numbers": [
+        {"number": 480},
         {"number": 481}
       ]
     },
@@ -4186,15 +3099,7 @@
       "model": "MONSTER_MODEL_GLADIATOR",
       "soundSet": "Resurrected Gladiator",
       "numbers": [
-        {"number": 482}
-      ]
-    },
-    {
-      "name": {"en": "Resurrected Gladiator", "es": "Gladiador Resucitado", "pt": "Gladiador ressuscitado"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_GLADIATOR",
-      "soundSet": "Resurrected Gladiator",
-      "numbers": [
+        {"number": 482},
         {"number": 483}
       ]
     },
@@ -4204,15 +3109,7 @@
       "model": "MONSTER_MODEL_SLAUGTHERER",
       "soundSet": "Ash Slaughterer",
       "numbers": [
-        {"number": 484}
-      ]
-    },
-    {
-      "name": {"en": "Ash Slaughterer", "es": "Descuartizador Ceniza", "pt": "Matador das cinzas"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SLAUGTHERER",
-      "soundSet": "Ash Slaughterer",
-      "numbers": [
+        {"number": 484},
         {"number": 485}
       ]
     },
@@ -4231,15 +3128,7 @@
       "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
       "soundSet": "Cruel Blood Assassin",
       "numbers": [
-        {"number": 487}
-      ]
-    },
-    {
-      "name": {"en": "Cruel Blood Assassin", "es": "Asesino Sangriento Cruel", "pt": "Assassino sanguinário cruel"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
-      "soundSet": "Cruel Blood Assassin",
-      "numbers": [
+        {"number": 487},
         {"number": 488}
       ]
     },
@@ -4258,15 +3147,7 @@
       "model": "MONSTER_MODEL_LAVA_GIANT",
       "soundSet": "Ruthless Lava Giant",
       "numbers": [
-        {"number": 490}
-      ]
-    },
-    {
-      "name": {"en": "Ruthless Lava Giant", "es": "Gigante de Lava Despiadado", "pt": "Gigante de lava cruel"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_LAVA_GIANT",
-      "soundSet": "Ruthless Lava Giant",
-      "numbers": [
+        {"number": 490},
         {"number": 491}
       ]
     },
@@ -4697,24 +3578,6 @@
       ]
     },
     {
-      "name": {"en": "Ice Walker", "es": "Caminante del Hielo", "pt": "Caminhante do gelo"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_ICE_WALKER",
-      "soundSet": "Ice Walker",
-      "numbers": [
-        {"number": 531}
-      ]
-    },
-    {
-      "name": {"en": "Larva", "es": "Larva", "pt": "Larva"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_LARVA",
-      "soundSet": "Larva",
-      "numbers": [
-        {"number": 532}
-      ]
-    },
-    {
       "name": {"en": "Doppelganger", "es": "Doppelganger", "pt": "Doppelganger"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DOPPELGANGER",
@@ -4966,7 +3829,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 557}
+        {"number": 557},
+        {"number": 560}
       ]
     },
     {
@@ -4995,20 +3859,6 @@
       },
       "numbers": [
         {"number": 559}
-      ]
-    },
-    {
-      "name": {"en": "Sapi Queen", "es": "Reina Sapi", "pt": "Rainha Sapi"},
-      "kind": "monster",
-      "model": "MONSTER_MODEL_SAPI_QUEEN",
-      "soundSet": "Sapi Queen",
-      "attacks": {
-        "monsterSkills": {"72": "attack2"},
-        "otherwise": "attack1",
-        "clearSkill": "always"
-      },
-      "numbers": [
-        {"number": 560}
       ]
     },
     {

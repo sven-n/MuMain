@@ -75,6 +75,13 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
   `"mapVariants": []`, `"randomVariants": []`.
 - A monster with one number shares all its values with it, so that number
   never has own values.
+- The shipped list has 423 monsters for its 547 numbers: the numbers with the
+  same English name, kind and model are one monster, so 36 monsters have
+  several (160 numbers in all, e.g. a Kalima monster's seven levels). Inside
+  them only attacks differ: the copies without attack data of Kalima 7,
+  Devil Square 7 and the second Ice Walker (531) play the generic pattern
+  as their own `attacks` (P26 of the design), and Dark Elf 440, Balram 344
+  and Soram 341 have attacks of their own.
 - Every monster has `name`, `kind` and `numbers`; `model` may be left out
   (every shipped monster has it), and so may `soundSet`, `attacks` and the
   variants.
