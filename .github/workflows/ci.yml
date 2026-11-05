@@ -405,6 +405,7 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
+          --parallel 4
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
