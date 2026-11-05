@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cpp_text import code_only  # noqa: E402
+from cpp_text import code_and_source  # noqa: E402
 
 # The macros that register a case; TEST_CASE_FIXTURE takes the fixture before the name, the others the name first.
 CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEFINE)?)?"
@@ -105,8 +105,7 @@ def after_first_argument(code, at):
 def cases(text):
     """The line and listed name of each test case in a source. The cases are found in the code alone, and their
     literals read with the comments between them left out."""
-    code = code_only(text)
-    source = code_only(text, keep_literals=True)
+    code, source = code_and_source(text)
     for case in CASE.finditer(code):
         at = case.end()
         if case.group(1) == "TEST_CASE_FIXTURE":

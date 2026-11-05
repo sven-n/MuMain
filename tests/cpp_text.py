@@ -20,10 +20,10 @@ def line_end(text, at):
     return at
 
 
-def code_only(text, keep_literals=False):
-    """The text as the compiler reads it, with comments, preprocessor lines and (unless keep_literals) string and
-    character literals turned into spaces; every character keeps its place, so positions and lines stay."""
-    out = []
+def skipped_spans(text):
+    """The comments, preprocessor lines and string and character literals in the text, in order, as
+    (start, stop, is_literal)."""
+    spans = []
     at, end = 0, len(text)
     line_start = True
     while at < end:
@@ -53,14 +53,35 @@ def code_only(text, keep_literals=False):
                 stop += 2 if text[stop] == "\\" else 1
             stop = min(stop + 1, end)
         if stop is None:
-            out.append(c)
             if c == "\n":
                 line_start = True
             elif not c.isspace():
                 line_start = False
             at += 1
             continue
-        is_literal = c in "\"'"
-        out.append(text[at:stop] if keep_literals and is_literal else blank(text, at, stop))
+        spans.append((at, stop, c in "\"'"))
         at = stop
+    return spans
+
+
+def with_spans_blanked(text, spans, keep_literals):
+    out = []
+    at = 0
+    for start, stop, is_literal in spans:
+        out.append(text[at:start])
+        out.append(text[start:stop] if keep_literals and is_literal else blank(text, start, stop))
+        at = stop
+    out.append(text[at:])
     return "".join(out)
+
+
+def code_only(text):
+    """The text as the compiler reads it, with comments, preprocessor lines and string and character literals turned
+    into spaces; every character keeps its place, so positions and lines stay."""
+    return with_spans_blanked(text, skipped_spans(text), keep_literals=False)
+
+
+def code_and_source(text):
+    """code_only(text), and the same text with its string and character literals kept, from one pass."""
+    spans = skipped_spans(text)
+    return with_spans_blanked(text, spans, keep_literals=False), with_spans_blanked(text, spans, keep_literals=True)
