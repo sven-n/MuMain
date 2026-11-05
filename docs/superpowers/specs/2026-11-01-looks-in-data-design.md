@@ -80,6 +80,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L30 | A render style's own glow and shine (Q-L15, 2026-11-03) | **Into the item's glow data.** Two extras of the level glow hang on render style entries today (`ItemRenderStyles.cpp:33-68`): the shine below +3 of 10 items (`ZzzObject.cpp:7703-7725`: at +0 to +2 the look is drawn with the item's light times a factor, then a fast sweep at opacity 1.5 and a swirl, both glowing, in the item's shine color on its shine meshes), named `HarmonyShine` (Jewel of Harmony, Moonstone Pendant, Illusion Sorcerer Covenant), `SealShine` (the six Seals and Master Seals, light times 0.9) and `CursedCastleWaterShine` (the model's light, a texture glow at 0.5, then a swirl); and the Deadly Staff's own +7 glow pass (`ItemGlow.cpp:151`: the whole staff glows, then mesh 1 again in white). The Glow section of a model entry gets a **shine below +3**, which names one of these shines from a small shared list of named shines in `Data/Effects/` (a light factor and two passes each; the file is pull request 3's), and the Deadly Staff gets **glow again in white on mesh 1**. The style `harmonyShine`, which draws plainly and only carried the shine, goes away. The 11 model entries change in pull request 3, compared by the draw recorder at every level. Layers of the render style with level conditions (three new blocks for 11 items, and looks split by level), and leaving both as code for later, were weighed. |
 | L31 | The Style Editor's list (Q-L16, 2026-11-03) | **One tree like the Colors window.** Glow Colors, whose flat list L18 copied, became the Glow root of the Colors window in #926 (`MuColorsUI.cpp`): a fixed root per use, your own nested folders, drag and drop within a root, New folder, New color, Rename, Remove, Move up and Move down, and the folders saved next to the colors as `"colorFolders"`. The Style Editor works the same way: the roots Render styles and Item effects take the place of L18's tabs, folders sort the looks (a set's styles, the wings, the tickets), the toolbar is New folder, New look, Copy, Rename, Remove, Move up and Move down, and each look file keeps its folders as `"lookFolders"`, which the game skips. A look stays in its root, looks still in code can be in folders, and folder names follow the Colors window's rules (unique among siblings; stale names warned and dropped on save). The rest of L18 to L20 stays. Tabs with a flat list (L18 as first written), and tabs with folders, were weighed. |
 | L32 | What the draw recorder compares (Q-L17, 2026-11-04) | **Both, stacked.** The recording drawer of L25 writes each mesh draw's fields (mesh, flags, opacity, glow mesh and strength, scrolling, texture, the model's light) and hands the draw on to the normal drawing, which draws into the draw-call log of #964 (`Render/Drawing/DrawCallLog.h`) standing in for the renderer, as `tests/data/test_draw_parity.cpp` does with real models. The mesh draws are compared first, so a difference names its drawing, draw, mesh and field ("lordScepter, (0,13) +7 worn at 1.25 s: draw 2 of 4, mesh 1: blendMeshAlpha 0.812 (code) vs 0.790 (data)"); then the logs, which also hold what the fields don't show (the bound texture, the vertices, the state). The item values the look leaves and the `Random::DrawRand` values stay part of the record (L25). The test data's 530 item models (`src/bin/Data/Item`) let CI draw real items. The GPU log alone (least code, but a difference shows only as a differing hash) and the mesh draws alone (L25 as written, complete only while looks set no GPU state outside `RenderMesh`) were weighed. |
+| L33 | Looks with a glow pass or a shine of their own (Q-L18, 2026-11-05) | **They move in pull request 3, with L30.** Six of the 103 render styles of L17's groups 1 and 2 carry more than their drawing: `deadlyStaff` its own glow pass for +7 and up, `harmonyShine` and `illusionSorcererCovenant` the shine below +3 `HarmonyShine`, and `sealOfAscension`, `sealOfSustenance` and `sealOfWealth` the shine `SealShine` (`ItemRenderStyles.cpp:72-75`). L30 puts these parts into the item's glow data, which comes with pull request 3, so the six move there in one piece with their glow data: pull request 2 moves 97 render styles (36 of group 1, 61 of group 2), and no look is half data and half code, with its name in both (L14). `harmonyShine`, which exists for its shine only, is not moved into data just to be removed again. The user checked the six items in game and in the Item Model preview first (Deadly Staff (5,30); Moonstone Pendant (13,38) and Jewel of Harmony (14,42); Illusion Sorcerer Covenant (13,50); the seals (13,43), (13,44), (13,45), (13,93), (13,94), (13,116)). Moving their drawing in pull request 2 and keeping the glow and shine in code under the same names until pull request 3, and bringing L30 into pull request 2, were weighed. |
 
 ## Current state
 
@@ -567,8 +568,8 @@ shown live in the Style Editor. The bone effects of held and worn items
 |---|---|---|
 | 0 | This design (L26); #954, merged 2026-11-03 | – |
 | 1 | The mesh list and showing a mesh (L21, L22), the names of L24; #970, merged 2026-11-04 | – |
-| 2 | Step 1 part 1: loader, the two look files, layer drawing with the shared mesh rules, the draw recorder, the checks, the Style Editor; L17's groups 1 and 2 (103 render styles) | – |
-| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle`, the shines below +3 and the Deadly Staff's glow pass as glow data (L30) | – (#915 merged on 2026-11-04) |
+| 2 | Step 1 part 1: loader, the two look files, layer drawing with the shared mesh rules, the draw recorder, the checks, the Style Editor; L17's groups 1 and 2 without the six of L33 (97 render styles) | – |
+| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks) and the six render styles of L33, `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle`, the shines below +3 and the Deadly Staff's glow pass as glow data (L30) | – (#915 merged on 2026-11-04) |
 | 4 | Steps 2 and 3: FX1.7c, the 12 looks with things on bones | – |
 | 5 | The bone effects of held and worn items, after their survey; then task 8 (the docs, this document deleted) | PR 4 |
 
@@ -592,7 +593,7 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29), Q-L15 (L30) and Q-L16 (L31) on 2026-11-03; Q-L17 (L32) on 2026-11-04. All questions are answered.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29), Q-L15 (L30) and Q-L16 (L31) on 2026-11-03; Q-L17 (L32) on 2026-11-04; Q-L18 (L33) on 2026-11-05. All questions are answered.
 
 ## Tasks
 
@@ -604,11 +605,12 @@ The design, then the pull requests of L26 and L27:
 2. [x] Pull request 0, the design: this document, for review (#954).
 3. [x] Pull request 1, the mesh list (L21, L22) and the names of L24 (#970).
 4. [ ] Pull request 2, step 1 part 1: the machinery, the Style Editor, L17's
-   groups 1 and 2.
+   groups 1 and 2 without the six render styles of L33.
 5. [ ] Pull request 3, step 1 part 2: L17's groups 3 to 5 (#915 is
    merged), with `ItemObjectAttribute`'s glow values (L27), and the part
    models with the 3 looks of `RenderModelWithoutStyle` (L28), and the
-   shines below +3 and the Deadly Staff's glow pass as glow data (L30).
+   shines below +3 and the Deadly Staff's glow pass as glow data (L30),
+   with the six render styles that carry them (L33).
 6. [ ] Pull request 4, steps 2 and 3: FX1.7c, the 12 looks with things on
    bones.
 7. [ ] Pull request 5: the bone effects of held and worn items (L27), after a
