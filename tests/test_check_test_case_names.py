@@ -2,6 +2,7 @@
 """Runs tests/check_test_case_names.py on each fixture in tests/fixtures/test_case_names: the check must report the
 fixture's offence and exit 1, and pass the clean fixture with every name it holds."""
 
+import os
 import subprocess
 import sys
 import unittest
@@ -31,7 +32,10 @@ CLEAN_NAMES = 7
 
 
 def run_check(fixture):
-    return subprocess.run([sys.executable, str(CHECK), str(FIXTURES / fixture)], capture_output=True, text=True)
+    # PYTHONSAFEPATH (Python 3.11+) keeps the script's directory off sys.path; the check must still find cpp_text.
+    environment = dict(os.environ, PYTHONSAFEPATH="1")
+    return subprocess.run([sys.executable, str(CHECK), str(FIXTURES / fixture)], capture_output=True, text=True,
+                          env=environment)
 
 
 class CheckTestCaseNamesTests(unittest.TestCase):

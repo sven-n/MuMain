@@ -26,7 +26,8 @@ import re
 import sys
 from pathlib import Path
 
-from cpp_text import code_only
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cpp_text import code_only  # noqa: E402
 
 # The macros that register a case; TEST_CASE_FIXTURE takes the fixture before the name, the others the name first.
 CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEFINE)?)?"
