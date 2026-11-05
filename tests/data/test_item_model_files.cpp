@@ -10,6 +10,7 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -19,6 +20,7 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -65,6 +67,24 @@ const ItemModelDefinition* FindModel(const std::vector<ItemModelDefinition>& mod
     });
     return found != models.end() ? &*found : nullptr;
 }
+
+// The render styles of Data/Effects/RenderStyles.json in g_LookStore while it lives, as the game loads them before
+// the item models; the moved looks are no longer in code.
+struct ShippedRenderStylesScope
+{
+    ShippedRenderStylesScope()
+    {
+        Data::Looks::RenderStylesLoadResult result = Data::Looks::LoadRenderStyleFile(DataDirectory / "Effects");
+        REQUIRE_FALSE(HasFatal(result.issues));
+        Data::Looks::g_LookStore.SetRenderStyles(std::move(result.looks));
+    }
+    ~ShippedRenderStylesScope()
+    {
+        Data::Looks::g_LookStore.SetRenderStyles({});
+    }
+    ShippedRenderStylesScope(const ShippedRenderStylesScope&) = delete;
+    ShippedRenderStylesScope& operator=(const ShippedRenderStylesScope&) = delete;
+};
 
 const ItemModelDataLoadResult& ShippedModels()
 {
@@ -1444,6 +1464,7 @@ TEST_CASE("The glow of shipped item models is on meshes the models have [data][i
 // model loader accepts.
 TEST_CASE("The render style and item effect lists name every look once, sorted [data][items]")
 {
+    const ShippedRenderStylesScope renderStyles;
     for (const std::span<const std::string_view> names :
          {Render::Items::Styles::GetNames(), Render::Items::ItemEffects::GetNames()})
     {
@@ -1527,6 +1548,7 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
 
 TEST_CASE("The render styles of shipped item models exist [data][items]")
 {
+    const ShippedRenderStylesScope renderStyles;
     for (const ItemModelDefinition& model : ShippedModels().models)
     {
         if (!model.renderStyle.empty())

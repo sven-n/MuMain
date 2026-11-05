@@ -183,3 +183,15 @@ TEST_CASE("The Style Editor's folders are the editor's: the file reads without a
     INFO(Describe(result.issues));
     CHECK(result.issues.empty());
 }
+
+TEST_CASE("A layer of every mesh, the item's hidden one too, reads and writes as allEvenHidden [looks][files]")
+{
+    const std::string text = WriteRenderStylesJson({{"texturedAllMeshes", {Layer{.meshes = {{}, false, true}}}, {}}});
+    CHECK(text.find(R"("meshes": "allEvenHidden")") != std::string::npos);
+    const ReadResult result = Read(text);
+    INFO(Describe(result.issues));
+    CHECK(result.issues.empty());
+    REQUIRE(result.looks.size() == 1);
+    CHECK(result.looks[0].layers[0].meshes.evenHidden);
+    CHECK(result.looks[0].layers[0].meshes.IsAll());
+}

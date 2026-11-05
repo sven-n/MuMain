@@ -61,7 +61,8 @@ public:
     ShippedItems(const ShippedItems&) = delete;
     ShippedItems& operator=(const ShippedItems&) = delete;
 
-    // Opens the models of these items.
+    // Opens the models of these items, then, as the game does after the item models, loads the item effect textures
+    // and finds the textures the looks in data name; open them after the looks are in g_LookStore.
     void Open(std::span<const int> itemTypes);
 
 private:

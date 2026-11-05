@@ -117,7 +117,8 @@ void DrawLayer(const Layer& layer, BMD* b, const DrawLook& look, float alpha, in
     const std::vector<int>& meshes = layer.meshes.meshes;
     if (layer.meshes.IsAll())
     {
-        b->RenderBody(flags, opacity, glowMesh, glowStrength, u, v, look.hiddenMesh, *texture);
+        b->RenderBody(flags, opacity, glowMesh, glowStrength, u, v, layer.meshes.evenHidden ? -1 : look.hiddenMesh,
+                      *texture);
         return;
     }
     if (layer.meshes.allBut && meshes.size() == 1)
@@ -172,11 +173,15 @@ void PrepareTextures()
     {
         for (const Layer& layer : style.layers)
         {
-            if (layer.texture.empty() || s_textures.contains(layer.texture))
+            if (layer.texture.empty())
             {
                 continue;
             }
-            const GLuint texture = Bitmaps.LoadImage(BitmapFileName(layer.texture), GL_LINEAR, GL_REPEAT);
+            // A texture the game loaded already (an item effect texture) keeps its index.
+            const std::wstring file = BitmapFileName(layer.texture);
+            const BITMAP_t* loaded = Bitmaps.FindTexture(file);
+            const GLuint texture =
+                loaded != nullptr ? loaded->BitmapIndex : Bitmaps.LoadImage(file, GL_LINEAR, GL_REPEAT);
             if (texture == BITMAP_UNKNOWN)
             {
                 MU_LOG_ERROR(mu::log::Get("data"),

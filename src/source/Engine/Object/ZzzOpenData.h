@@ -16,6 +16,8 @@ void ReleaseCharacterSceneData();
 
 void OpenPlayerTextures();
 void OpenItemTextures();
+// The textures of the item effects and the looks in code, at their BITMAP_ indices (OpenItemTextures loads them).
+void OpenItemEffectTextures();
 // Makes mesh 2 of the Grand Soul pants' model the grid their cloth moves
 // (OpenItems once the item models are open; the item editor again after their
 // slot took other data).

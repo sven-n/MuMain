@@ -55,9 +55,11 @@ enum class Blend
 struct MeshSet
 {
     // Empty `meshes` and not `allBut`: every mesh, with the model's texture scripts, leaving out the item's hidden
-    // mesh. A list: those meshes, one after the other. allBut: every mesh but those, with the texture scripts.
+    // mesh (`evenHidden`: drawing it too). A list: those meshes, one after the other. allBut: every mesh but those,
+    // with the texture scripts.
     std::vector<int> meshes;
     bool allBut = false;
+    bool evenHidden = false;
 
     [[nodiscard]] bool IsAll() const
     {

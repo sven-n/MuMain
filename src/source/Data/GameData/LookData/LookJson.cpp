@@ -31,6 +31,7 @@ constexpr const char* Motion = "motion";
 constexpr const char* Blend = "blend";
 constexpr const char* Meshes = "meshes";
 constexpr const char* AllBut = "allBut";
+constexpr const char* AllEvenHidden = "allEvenHidden";
 constexpr const char* Texture = "texture";
 constexpr const char* Opacity = "opacity";
 constexpr const char* GlowMesh = "glowMesh";
@@ -280,12 +281,17 @@ void LookReader::ReadMeshes(const OrderedJson& json, const std::string& field, M
         return;
     }
     const std::string meshesField = field + "." + Keys::Meshes;
+    if (entry->is_string() && entry->get_ref<const std::string&>() == Keys::AllEvenHidden)
+    {
+        meshes.evenHidden = true;
+        return;
+    }
     if (entry->is_object())
     {
         const auto allBut = entry->find(Keys::AllBut);
         if (allBut == entry->end() || entry->size() != 1)
         {
-            AddFatal(meshesField, "must be a list of meshes, or {\"allBut\": [meshes]}");
+            AddFatal(meshesField, "must be a list of meshes, {\"allBut\": [meshes]} or \"allEvenHidden\"");
             return;
         }
         meshes.allBut = ReadMeshList(*allBut, meshesField + "." + Keys::AllBut, meshes.meshes);
@@ -457,7 +463,11 @@ OrderedJson WriteLayer(const Layer& layer)
     {
         json[Keys::Blend] = NameOf(BlendNames, layer.blend);
     }
-    if (layer.meshes.allBut)
+    if (layer.meshes.evenHidden)
+    {
+        json[Keys::Meshes] = Keys::AllEvenHidden;
+    }
+    else if (layer.meshes.allBut)
     {
         json[Keys::Meshes] = OrderedJson{{Keys::AllBut, layer.meshes.meshes}};
     }

@@ -12,6 +12,8 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ZzzOpenData.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Drawing/DrawCallLog.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
@@ -236,6 +238,15 @@ ShippedItems::~ShippedItems()
 void ShippedItems::Open(std::span<const int> itemTypes)
 {
     Data::Items::ModelLoader::ReopenModels(itemTypes, {});
+    // As the game loads them after the item models: the item effect textures at their indices, which looks in code
+    // name, then the textures the looks in data name.
+    static const bool effectTexturesLoaded = []
+    {
+        OpenItemEffectTextures();
+        return true;
+    }();
+    (void)effectTexturesLoaded;
+    Render::Items::Looks::PrepareTextures();
 }
 
 std::vector<int> ItemsUsing(std::string_view renderStyle)

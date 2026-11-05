@@ -19,6 +19,9 @@ namespace Render::Items::Styles
 // Whether there is a render style of this name. The model loader checks the
 // names of the model entries with it.
 bool Exists(std::string_view name);
+// Whether a render style of this name is still in code (ItemRenderStyles.cpp), whether or not the data has one; a name
+// moved into data (Data/Effects/RenderStyles.json) is deleted from the code (design L14).
+bool ExistsInCode(std::string_view name);
 
 // The names of all render styles, sorted, for the item editor's lists.
 std::span<const std::string_view> GetNames();

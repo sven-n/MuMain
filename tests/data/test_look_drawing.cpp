@@ -266,29 +266,22 @@ TEST_CASE("A render style leaves its item values for what is drawn after it [loo
 
 TEST_CASE("A name in the data is found before the same name in code, which it then replaces [looks]")
 {
-    // chromeMesh0 in code: the model, then a glowing chrome pass on mesh 0.
-    std::vector<MeshDraw> code;
+    // Any look still in code; the data look of its name draws mesh 2 alone.
+    const auto all = Render::Items::Styles::GetNames();
+    const auto inCode = std::ranges::find_if(all, &Render::Items::Styles::ExistsInCode);
+    if (inCode == all.end())
     {
-        TestSword sword("chromeMesh0");
-        DrawLook look;
-        code = sword.Draw(look);
+        MESSAGE("No render style is in code any more.");
+        return;
     }
-    const LookStoreScope looks(
-        {{"chromeMesh0",
-          {Layer{}, Layer{.kind = LayerKind::Reflection, .blend = Blend::Glow, .meshes = {{0}}, .glowMesh = 0}},
-          {}}});
-    CHECK(Render::Items::Styles::Exists("chromeMesh0"));
+    const std::string name(*inCode);
+    const LookStoreScope looks({{name, {Layer{.meshes = {{2}}}}, {}}});
+    CHECK(Render::Items::Styles::Exists(name));
     const auto names = Render::Items::Styles::GetNames();
-    CHECK(std::count(names.begin(), names.end(), "chromeMesh0") == 1);
-    TestSword sword("chromeMesh0");
+    CHECK(std::count(names.begin(), names.end(), name) == 1);
+    TestSword sword(name.c_str());
     DrawLook look;
-    const std::vector<MeshDraw> data = sword.Draw(look);
-    REQUIRE(data.size() == code.size());
-    for (size_t i = 0; i < data.size(); ++i)
-    {
-        CAPTURE(i);
-        CHECK(Fields(data[i]) == Fields(code[i]));
-    }
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{2});
 }
 
 TEST_CASE("A name only in the data is a render style too [looks]")
@@ -323,4 +316,14 @@ TEST_CASE("A layer draws with the texture file it names, and is skipped when the
     }
     Bitmaps.UnloadImage(texture, true);
     Render::Sprites::SetGpuUploadsSkipped(false);
+}
+
+TEST_CASE("A layer of every mesh, the item's hidden one too, draws the item's hidden mesh [looks]")
+{
+    const LookStoreScope looks({{"testLook", {Layer{.meshes = {{}, false, true}}}, {}}});
+    TestSword sword("testLook");
+    DrawLook look;
+    look.hiddenMesh = 1;
+    // Mesh 3 stays hidden by its texture script.
+    CHECK(Meshes(sword.Draw(look)) == std::vector<int>{0, 1, 2});
 }

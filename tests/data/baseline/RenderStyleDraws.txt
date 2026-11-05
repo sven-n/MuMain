@@ -2,3 +2,1487 @@
 # situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of
 # what the drawing left on the model (tests/data/LookRecorder.h). Written from each look's old code before the
 # code was deleted (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.
+accountServiceItem (14,114) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,114) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,114) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,114) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,114) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,114) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,114) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,114) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,114) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,114) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,114) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,114) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,114) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,114) +9 at 1235.817 s	3 e63af99dd7fc43c5
+accountServiceItem (14,115) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,115) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,115) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,115) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,115) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,115) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,115) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,115) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,115) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,115) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,115) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,115) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,115) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,115) +9 at 1235.817 s	3 e63af99dd7fc43c5
+accountServiceItem (14,116) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,116) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,116) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,116) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,116) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,116) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,116) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,116) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,116) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,116) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,116) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,116) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,116) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,116) +9 at 1235.817 s	3 e63af99dd7fc43c5
+accountServiceItem (14,117) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,117) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,117) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,117) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,117) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,117) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,117) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,117) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,117) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,117) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,117) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,117) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,117) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,117) +9 at 1235.817 s	3 e63af99dd7fc43c5
+accountServiceItem (14,118) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,118) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,118) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,118) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,118) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,118) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,118) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,118) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,118) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,118) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,118) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,118) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,118) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,118) +9 at 1235.817 s	3 e63af99dd7fc43c5
+accountServiceItem (14,119) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,119) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
+accountServiceItem (14,119) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
+accountServiceItem (14,119) +0 at 1234.567 s, fading 0.5	1 40697dc1b923d5bb
+accountServiceItem (14,119) +0 at 1234.567 s, in a monster's hands	1 ddb3fb0b0beac3c9
+accountServiceItem (14,119) +0 at 1234.567 s, without the skin	1 3b770198dda5d746
+accountServiceItem (14,119) +0 at 1235.817 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,119) +0 at 1238.267 s	1 ddb3fb0b0beac3c9
+accountServiceItem (14,119) +11 at 1234.567 s	4 6fda1f82f2389010
+accountServiceItem (14,119) +13 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,119) +15 at 1234.567 s	4 eb0e49523cffebff
+accountServiceItem (14,119) +7 at 1234.567 s	2 feb68d6b41f5367f
+accountServiceItem (14,119) +9 at 1234.567 s	3 e63af99dd7fc43c5
+accountServiceItem (14,119) +9 at 1235.817 s	3 e63af99dd7fc43c5
+albatrossBow (4,22) +0 at 1234.567 s	5 98baba540ec74b3e
+albatrossBow (4,22) +0 at 1234.567 s, doppelganger	5 98baba540ec74b3e
+albatrossBow (4,22) +0 at 1234.567 s, excellent	8 9cecc14a4c9ab48c
+albatrossBow (4,22) +0 at 1234.567 s, fading 0.5	5 bba19f8cad191846
+albatrossBow (4,22) +0 at 1234.567 s, in a monster's hands	5 98baba540ec74b3e
+albatrossBow (4,22) +0 at 1234.567 s, without the skin	5 4d0bf2297bd8f3e7
+albatrossBow (4,22) +0 at 1235.817 s	5 98baba540ec74b3e
+albatrossBow (4,22) +0 at 1238.267 s	5 98baba540ec74b3e
+albatrossBow (4,22) +11 at 1234.567 s	14 600a5fd7f19ff3d5
+albatrossBow (4,22) +13 at 1234.567 s	14 59d8ab4f62cd7cb6
+albatrossBow (4,22) +15 at 1234.567 s	14 59d8ab4f62cd7cb6
+albatrossBow (4,22) +7 at 1234.567 s	8 7eccf055ec4062ef
+albatrossBow (4,22) +9 at 1234.567 s	11 88070361d6b643ef
+albatrossBow (4,22) +9 at 1235.817 s	11 88070361d6b643ef
+boostAura (13,104) +0 at 1234.567 s	3 5a4e03b757ba9359
+boostAura (13,104) +0 at 1234.567 s, doppelganger	3 5a4e03b757ba9359
+boostAura (13,104) +0 at 1234.567 s, excellent	5 3c08d93e7d8a42cf
+boostAura (13,104) +0 at 1234.567 s, fading 0.5	3 2fb699184d1208ed
+boostAura (13,104) +0 at 1234.567 s, in a monster's hands	3 5a4e03b757ba9359
+boostAura (13,104) +0 at 1234.567 s, without the skin	3 25836b6bdd45ea30
+boostAura (13,104) +0 at 1235.817 s	3 5a4e03b757ba9359
+boostAura (13,104) +0 at 1238.267 s	3 5a4e03b757ba9359
+boostAura (13,104) +11 at 1234.567 s	9 b2504fc2ace9afc5
+boostAura (13,104) +13 at 1234.567 s	9 c1e31526b6a315cb
+boostAura (13,104) +15 at 1234.567 s	9 c1e31526b6a315cb
+boostAura (13,104) +7 at 1234.567 s	5 ea623434a4662d9d
+boostAura (13,104) +9 at 1234.567 s	7 116bcf0e8650f8b8
+boostAura (13,104) +9 at 1235.817 s	7 116bcf0e8650f8b8
+boostAura (13,105) +0 at 1234.567 s	3 5a4e03b757ba9359
+boostAura (13,105) +0 at 1234.567 s, doppelganger	3 5a4e03b757ba9359
+boostAura (13,105) +0 at 1234.567 s, excellent	5 3c08d93e7d8a42cf
+boostAura (13,105) +0 at 1234.567 s, fading 0.5	3 2fb699184d1208ed
+boostAura (13,105) +0 at 1234.567 s, in a monster's hands	3 5a4e03b757ba9359
+boostAura (13,105) +0 at 1234.567 s, without the skin	3 25836b6bdd45ea30
+boostAura (13,105) +0 at 1235.817 s	3 5a4e03b757ba9359
+boostAura (13,105) +0 at 1238.267 s	3 5a4e03b757ba9359
+boostAura (13,105) +11 at 1234.567 s	9 b2504fc2ace9afc5
+boostAura (13,105) +13 at 1234.567 s	9 c1e31526b6a315cb
+boostAura (13,105) +15 at 1234.567 s	9 c1e31526b6a315cb
+boostAura (13,105) +7 at 1234.567 s	5 ea623434a4662d9d
+boostAura (13,105) +9 at 1234.567 s	7 116bcf0e8650f8b8
+boostAura (13,105) +9 at 1235.817 s	7 116bcf0e8650f8b8
+brova (3,11) +0 at 1234.567 s	6 00eeb0feeeeb96ce
+brova (3,11) +0 at 1234.567 s, doppelganger	6 00eeb0feeeeb96ce
+brova (3,11) +0 at 1234.567 s, excellent	9 447654b3f98c6512
+brova (3,11) +0 at 1234.567 s, fading 0.5	6 0233b7ed03bb829a
+brova (3,11) +0 at 1234.567 s, in a monster's hands	6 00eeb0feeeeb96ce
+brova (3,11) +0 at 1234.567 s, without the skin	6 104bf87e08258538
+brova (3,11) +0 at 1235.817 s	6 00eeb0feeeeb96ce
+brova (3,11) +0 at 1238.267 s	6 00eeb0feeeeb96ce
+brova (3,11) +11 at 1234.567 s	13 889b02a0a2a26994
+brova (3,11) +13 at 1234.567 s	13 bebc04e87847fdd7
+brova (3,11) +15 at 1234.567 s	13 bebc04e87847fdd7
+brova (3,11) +7 at 1234.567 s	8 138408d8ae79af45
+brova (3,11) +9 at 1234.567 s	10 96c10c7a9879ab92
+brova (3,11) +9 at 1235.817 s	10 96c10c7a9879ab92
+chromeMesh0 (14,112) +0 at 1234.567 s	2 634fe3ea4508f20e
+chromeMesh0 (14,112) +0 at 1234.567 s, doppelganger	2 634fe3ea4508f20e
+chromeMesh0 (14,112) +0 at 1234.567 s, excellent	3 212dc4bcbb7e47b9
+chromeMesh0 (14,112) +0 at 1234.567 s, fading 0.5	2 410dcc2fdc8ad092
+chromeMesh0 (14,112) +0 at 1234.567 s, in a monster's hands	2 634fe3ea4508f20e
+chromeMesh0 (14,112) +0 at 1234.567 s, without the skin	2 becbd3cfd4bee8ec
+chromeMesh0 (14,112) +0 at 1235.817 s	2 634fe3ea4508f20e
+chromeMesh0 (14,112) +0 at 1238.267 s	2 634fe3ea4508f20e
+chromeMesh0 (14,112) +11 at 1234.567 s	5 9efd9d03da32ff7f
+chromeMesh0 (14,112) +13 at 1234.567 s	5 1b5a0e352f116faa
+chromeMesh0 (14,112) +15 at 1234.567 s	5 1b5a0e352f116faa
+chromeMesh0 (14,112) +7 at 1234.567 s	3 1ede0948c67abcd1
+chromeMesh0 (14,112) +9 at 1234.567 s	4 10d047d819569838
+chromeMesh0 (14,112) +9 at 1235.817 s	4 10d047d819569838
+chromeMesh0 (14,113) +0 at 1234.567 s	2 634fe3ea4508f20e
+chromeMesh0 (14,113) +0 at 1234.567 s, doppelganger	2 634fe3ea4508f20e
+chromeMesh0 (14,113) +0 at 1234.567 s, excellent	3 212dc4bcbb7e47b9
+chromeMesh0 (14,113) +0 at 1234.567 s, fading 0.5	2 410dcc2fdc8ad092
+chromeMesh0 (14,113) +0 at 1234.567 s, in a monster's hands	2 634fe3ea4508f20e
+chromeMesh0 (14,113) +0 at 1234.567 s, without the skin	2 becbd3cfd4bee8ec
+chromeMesh0 (14,113) +0 at 1235.817 s	2 634fe3ea4508f20e
+chromeMesh0 (14,113) +0 at 1238.267 s	2 634fe3ea4508f20e
+chromeMesh0 (14,113) +11 at 1234.567 s	5 9efd9d03da32ff7f
+chromeMesh0 (14,113) +13 at 1234.567 s	5 1b5a0e352f116faa
+chromeMesh0 (14,113) +15 at 1234.567 s	5 1b5a0e352f116faa
+chromeMesh0 (14,113) +7 at 1234.567 s	3 1ede0948c67abcd1
+chromeMesh0 (14,113) +9 at 1234.567 s	4 10d047d819569838
+chromeMesh0 (14,113) +9 at 1235.817 s	4 10d047d819569838
+chromeMesh0 (14,120) +0 at 1234.567 s	3 b1026538f5bcff06
+chromeMesh0 (14,120) +0 at 1234.567 s, doppelganger	3 b1026538f5bcff06
+chromeMesh0 (14,120) +0 at 1234.567 s, excellent	5 34c650889101900f
+chromeMesh0 (14,120) +0 at 1234.567 s, fading 0.5	3 c17c8b2f9c6d7568
+chromeMesh0 (14,120) +0 at 1234.567 s, in a monster's hands	3 b1026538f5bcff06
+chromeMesh0 (14,120) +0 at 1234.567 s, without the skin	3 bfaf4b8d0acbd22f
+chromeMesh0 (14,120) +0 at 1235.817 s	3 b1026538f5bcff06
+chromeMesh0 (14,120) +0 at 1238.267 s	3 b1026538f5bcff06
+chromeMesh0 (14,120) +11 at 1234.567 s	9 8467a93db3e4e9c0
+chromeMesh0 (14,120) +13 at 1234.567 s	9 c501891f735b3dc8
+chromeMesh0 (14,120) +15 at 1234.567 s	9 c501891f735b3dc8
+chromeMesh0 (14,120) +7 at 1234.567 s	5 4893f03771fbd543
+chromeMesh0 (14,120) +9 at 1234.567 s	7 d2b5245a6b653b11
+chromeMesh0 (14,120) +9 at 1235.817 s	7 d2b5245a6b653b11
+chromeMesh1 (13,107) +0 at 1234.567 s	3 e9444f827029a131
+chromeMesh1 (13,107) +0 at 1234.567 s, doppelganger	3 e9444f827029a131
+chromeMesh1 (13,107) +0 at 1234.567 s, excellent	5 180cbc4741c3a432
+chromeMesh1 (13,107) +0 at 1234.567 s, fading 0.5	3 33411e494771fcff
+chromeMesh1 (13,107) +0 at 1234.567 s, in a monster's hands	3 e9444f827029a131
+chromeMesh1 (13,107) +0 at 1234.567 s, without the skin	3 5a84585383f7abbc
+chromeMesh1 (13,107) +0 at 1235.817 s	3 e9444f827029a131
+chromeMesh1 (13,107) +0 at 1238.267 s	3 e9444f827029a131
+chromeMesh1 (13,107) +11 at 1234.567 s	9 143ea544e1d45ecb
+chromeMesh1 (13,107) +13 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,107) +15 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,107) +7 at 1234.567 s	5 01b0f950965a5bac
+chromeMesh1 (13,107) +9 at 1234.567 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,107) +9 at 1235.817 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,109) +0 at 1234.567 s	3 e9444f827029a131
+chromeMesh1 (13,109) +0 at 1234.567 s, doppelganger	3 e9444f827029a131
+chromeMesh1 (13,109) +0 at 1234.567 s, excellent	5 180cbc4741c3a432
+chromeMesh1 (13,109) +0 at 1234.567 s, fading 0.5	3 33411e494771fcff
+chromeMesh1 (13,109) +0 at 1234.567 s, in a monster's hands	3 e9444f827029a131
+chromeMesh1 (13,109) +0 at 1234.567 s, without the skin	3 5a84585383f7abbc
+chromeMesh1 (13,109) +0 at 1235.817 s	3 e9444f827029a131
+chromeMesh1 (13,109) +0 at 1238.267 s	3 e9444f827029a131
+chromeMesh1 (13,109) +11 at 1234.567 s	9 143ea544e1d45ecb
+chromeMesh1 (13,109) +13 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,109) +15 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,109) +7 at 1234.567 s	5 01b0f950965a5bac
+chromeMesh1 (13,109) +9 at 1234.567 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,109) +9 at 1235.817 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,110) +0 at 1234.567 s	3 e9444f827029a131
+chromeMesh1 (13,110) +0 at 1234.567 s, doppelganger	3 e9444f827029a131
+chromeMesh1 (13,110) +0 at 1234.567 s, excellent	5 180cbc4741c3a432
+chromeMesh1 (13,110) +0 at 1234.567 s, fading 0.5	3 33411e494771fcff
+chromeMesh1 (13,110) +0 at 1234.567 s, in a monster's hands	3 e9444f827029a131
+chromeMesh1 (13,110) +0 at 1234.567 s, without the skin	3 5a84585383f7abbc
+chromeMesh1 (13,110) +0 at 1235.817 s	3 e9444f827029a131
+chromeMesh1 (13,110) +0 at 1238.267 s	3 e9444f827029a131
+chromeMesh1 (13,110) +11 at 1234.567 s	9 143ea544e1d45ecb
+chromeMesh1 (13,110) +13 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,110) +15 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,110) +7 at 1234.567 s	5 01b0f950965a5bac
+chromeMesh1 (13,110) +9 at 1234.567 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,110) +9 at 1235.817 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,111) +0 at 1234.567 s	3 e9444f827029a131
+chromeMesh1 (13,111) +0 at 1234.567 s, doppelganger	3 e9444f827029a131
+chromeMesh1 (13,111) +0 at 1234.567 s, excellent	5 180cbc4741c3a432
+chromeMesh1 (13,111) +0 at 1234.567 s, fading 0.5	3 33411e494771fcff
+chromeMesh1 (13,111) +0 at 1234.567 s, in a monster's hands	3 e9444f827029a131
+chromeMesh1 (13,111) +0 at 1234.567 s, without the skin	3 5a84585383f7abbc
+chromeMesh1 (13,111) +0 at 1235.817 s	3 e9444f827029a131
+chromeMesh1 (13,111) +0 at 1238.267 s	3 e9444f827029a131
+chromeMesh1 (13,111) +11 at 1234.567 s	9 143ea544e1d45ecb
+chromeMesh1 (13,111) +13 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,111) +15 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,111) +7 at 1234.567 s	5 01b0f950965a5bac
+chromeMesh1 (13,111) +9 at 1234.567 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,111) +9 at 1235.817 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,112) +0 at 1234.567 s	3 e9444f827029a131
+chromeMesh1 (13,112) +0 at 1234.567 s, doppelganger	3 e9444f827029a131
+chromeMesh1 (13,112) +0 at 1234.567 s, excellent	5 180cbc4741c3a432
+chromeMesh1 (13,112) +0 at 1234.567 s, fading 0.5	3 33411e494771fcff
+chromeMesh1 (13,112) +0 at 1234.567 s, in a monster's hands	3 e9444f827029a131
+chromeMesh1 (13,112) +0 at 1234.567 s, without the skin	3 5a84585383f7abbc
+chromeMesh1 (13,112) +0 at 1235.817 s	3 e9444f827029a131
+chromeMesh1 (13,112) +0 at 1238.267 s	3 e9444f827029a131
+chromeMesh1 (13,112) +11 at 1234.567 s	9 143ea544e1d45ecb
+chromeMesh1 (13,112) +13 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,112) +15 at 1234.567 s	9 0643fe4db611a19b
+chromeMesh1 (13,112) +7 at 1234.567 s	5 01b0f950965a5bac
+chromeMesh1 (13,112) +9 at 1234.567 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,112) +9 at 1235.817 s	7 1b9abea8cfde8bba
+chromeMesh1 (13,113) +0 at 1234.567 s	3 a6101fce9f34119c
+chromeMesh1 (13,113) +0 at 1234.567 s, doppelganger	3 a6101fce9f34119c
+chromeMesh1 (13,113) +0 at 1234.567 s, excellent	5 861f480d2f17564e
+chromeMesh1 (13,113) +0 at 1234.567 s, fading 0.5	3 9441c870f8a0b48a
+chromeMesh1 (13,113) +0 at 1234.567 s, in a monster's hands	3 a6101fce9f34119c
+chromeMesh1 (13,113) +0 at 1234.567 s, without the skin	3 deb434a9690e962f
+chromeMesh1 (13,113) +0 at 1235.817 s	3 a6101fce9f34119c
+chromeMesh1 (13,113) +0 at 1238.267 s	3 a6101fce9f34119c
+chromeMesh1 (13,113) +11 at 1234.567 s	9 a409e3b25e5e0221
+chromeMesh1 (13,113) +13 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,113) +15 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,113) +7 at 1234.567 s	5 3873798905e75490
+chromeMesh1 (13,113) +9 at 1234.567 s	7 2bb16cf6cc085fbb
+chromeMesh1 (13,113) +9 at 1235.817 s	7 2bb16cf6cc085fbb
+chromeMesh1 (13,114) +0 at 1234.567 s	3 a6101fce9f34119c
+chromeMesh1 (13,114) +0 at 1234.567 s, doppelganger	3 a6101fce9f34119c
+chromeMesh1 (13,114) +0 at 1234.567 s, excellent	5 861f480d2f17564e
+chromeMesh1 (13,114) +0 at 1234.567 s, fading 0.5	3 9441c870f8a0b48a
+chromeMesh1 (13,114) +0 at 1234.567 s, in a monster's hands	3 a6101fce9f34119c
+chromeMesh1 (13,114) +0 at 1234.567 s, without the skin	3 deb434a9690e962f
+chromeMesh1 (13,114) +0 at 1235.817 s	3 a6101fce9f34119c
+chromeMesh1 (13,114) +0 at 1238.267 s	3 a6101fce9f34119c
+chromeMesh1 (13,114) +11 at 1234.567 s	9 a409e3b25e5e0221
+chromeMesh1 (13,114) +13 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,114) +15 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,114) +7 at 1234.567 s	5 3873798905e75490
+chromeMesh1 (13,114) +9 at 1234.567 s	7 2bb16cf6cc085fbb
+chromeMesh1 (13,114) +9 at 1235.817 s	7 2bb16cf6cc085fbb
+chromeMesh1 (13,115) +0 at 1234.567 s	3 a6101fce9f34119c
+chromeMesh1 (13,115) +0 at 1234.567 s, doppelganger	3 a6101fce9f34119c
+chromeMesh1 (13,115) +0 at 1234.567 s, excellent	5 861f480d2f17564e
+chromeMesh1 (13,115) +0 at 1234.567 s, fading 0.5	3 9441c870f8a0b48a
+chromeMesh1 (13,115) +0 at 1234.567 s, in a monster's hands	3 a6101fce9f34119c
+chromeMesh1 (13,115) +0 at 1234.567 s, without the skin	3 deb434a9690e962f
+chromeMesh1 (13,115) +0 at 1235.817 s	3 a6101fce9f34119c
+chromeMesh1 (13,115) +0 at 1238.267 s	3 a6101fce9f34119c
+chromeMesh1 (13,115) +11 at 1234.567 s	9 a409e3b25e5e0221
+chromeMesh1 (13,115) +13 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,115) +15 at 1234.567 s	9 c57c1c6b071b4109
+chromeMesh1 (13,115) +7 at 1234.567 s	5 3873798905e75490
+chromeMesh1 (13,115) +9 at 1234.567 s	7 2bb16cf6cc085fbb
+chromeMesh1 (13,115) +9 at 1235.817 s	7 2bb16cf6cc085fbb
+condorFeather (13,53) +0 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +0 at 1234.567 s, doppelganger	1 505c3fa95a978f53
+condorFeather (13,53) +0 at 1234.567 s, excellent	2 aa8bd1fa0664a708
+condorFeather (13,53) +0 at 1234.567 s, fading 0.5	1 505c3fa95a978f53
+condorFeather (13,53) +0 at 1234.567 s, in a monster's hands	1 505c3fa95a978f53
+condorFeather (13,53) +0 at 1234.567 s, without the skin	1 2905ac9d08fc45f8
+condorFeather (13,53) +0 at 1235.817 s	1 505c3fa95a978f53
+condorFeather (13,53) +0 at 1238.267 s	1 505c3fa95a978f53
+condorFeather (13,53) +11 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +13 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +15 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +7 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +9 at 1234.567 s	1 505c3fa95a978f53
+condorFeather (13,53) +9 at 1235.817 s	1 505c3fa95a978f53
+condorFlame (13,52) +0 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +0 at 1234.567 s, doppelganger	2 84b80094ce4d3540
+condorFlame (13,52) +0 at 1234.567 s, excellent	3 08db036abcbe5d1f
+condorFlame (13,52) +0 at 1234.567 s, fading 0.5	2 7555264c9d0fbd0e
+condorFlame (13,52) +0 at 1234.567 s, in a monster's hands	2 84b80094ce4d3540
+condorFlame (13,52) +0 at 1234.567 s, without the skin	2 1dc083444e7be54c
+condorFlame (13,52) +0 at 1235.817 s	2 84b80094ce4d3540
+condorFlame (13,52) +0 at 1238.267 s	2 84b80094ce4d3540
+condorFlame (13,52) +11 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +13 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +15 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +7 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +9 at 1234.567 s	2 84b80094ce4d3540
+condorFlame (13,52) +9 at 1235.817 s	2 84b80094ce4d3540
+crimsonGlory (6,17) +0 at 1234.567 s	5 bd1d9d1fd7a8a41d
+crimsonGlory (6,17) +0 at 1234.567 s, doppelganger	5 bd1d9d1fd7a8a41d
+crimsonGlory (6,17) +0 at 1234.567 s, excellent	8 bc547b4dbc23df7d
+crimsonGlory (6,17) +0 at 1234.567 s, fading 0.5	5 2a0efeac7c77f357
+crimsonGlory (6,17) +0 at 1234.567 s, in a monster's hands	5 bd1d9d1fd7a8a41d
+crimsonGlory (6,17) +0 at 1234.567 s, without the skin	5 0390a0e9a39a518c
+crimsonGlory (6,17) +0 at 1235.817 s	5 bd1d9d1fd7a8a41d
+crimsonGlory (6,17) +0 at 1238.267 s	5 bd1d9d1fd7a8a41d
+crimsonGlory (6,17) +11 at 1234.567 s	14 b59fa7255ae87c39
+crimsonGlory (6,17) +13 at 1234.567 s	14 11e07b927382bafc
+crimsonGlory (6,17) +15 at 1234.567 s	14 11e07b927382bafc
+crimsonGlory (6,17) +7 at 1234.567 s	8 3c5e917a74cc2426
+crimsonGlory (6,17) +9 at 1234.567 s	11 170d737d0f5be5f9
+crimsonGlory (6,17) +9 at 1235.817 s	11 170d737d0f5be5f9
+dayPass (14,126) +0 at 1234.567 s	1 3567d99ca10d386a
+dayPass (14,126) +0 at 1234.567 s, doppelganger	1 3567d99ca10d386a
+dayPass (14,126) +0 at 1234.567 s, excellent	2 375e43259b3b695d
+dayPass (14,126) +0 at 1234.567 s, fading 0.5	1 c710d9ea8ad4c718
+dayPass (14,126) +0 at 1234.567 s, in a monster's hands	1 3567d99ca10d386a
+dayPass (14,126) +0 at 1234.567 s, without the skin	1 791e12d8e6fba78d
+dayPass (14,126) +0 at 1235.817 s	1 3567d99ca10d386a
+dayPass (14,126) +0 at 1238.267 s	1 3567d99ca10d386a
+dayPass (14,126) +11 at 1234.567 s	4 98c35cc2aaf334a9
+dayPass (14,126) +13 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,126) +15 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,126) +7 at 1234.567 s	2 fcca741933471ac0
+dayPass (14,126) +9 at 1234.567 s	3 1cd796ef745a3656
+dayPass (14,126) +9 at 1235.817 s	3 1cd796ef745a3656
+dayPass (14,127) +0 at 1234.567 s	1 3567d99ca10d386a
+dayPass (14,127) +0 at 1234.567 s, doppelganger	1 3567d99ca10d386a
+dayPass (14,127) +0 at 1234.567 s, excellent	2 375e43259b3b695d
+dayPass (14,127) +0 at 1234.567 s, fading 0.5	1 c710d9ea8ad4c718
+dayPass (14,127) +0 at 1234.567 s, in a monster's hands	1 3567d99ca10d386a
+dayPass (14,127) +0 at 1234.567 s, without the skin	1 791e12d8e6fba78d
+dayPass (14,127) +0 at 1235.817 s	1 3567d99ca10d386a
+dayPass (14,127) +0 at 1238.267 s	1 3567d99ca10d386a
+dayPass (14,127) +11 at 1234.567 s	4 98c35cc2aaf334a9
+dayPass (14,127) +13 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,127) +15 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,127) +7 at 1234.567 s	2 fcca741933471ac0
+dayPass (14,127) +9 at 1234.567 s	3 1cd796ef745a3656
+dayPass (14,127) +9 at 1235.817 s	3 1cd796ef745a3656
+dayPass (14,128) +0 at 1234.567 s	1 3567d99ca10d386a
+dayPass (14,128) +0 at 1234.567 s, doppelganger	1 3567d99ca10d386a
+dayPass (14,128) +0 at 1234.567 s, excellent	2 375e43259b3b695d
+dayPass (14,128) +0 at 1234.567 s, fading 0.5	1 c710d9ea8ad4c718
+dayPass (14,128) +0 at 1234.567 s, in a monster's hands	1 3567d99ca10d386a
+dayPass (14,128) +0 at 1234.567 s, without the skin	1 791e12d8e6fba78d
+dayPass (14,128) +0 at 1235.817 s	1 3567d99ca10d386a
+dayPass (14,128) +0 at 1238.267 s	1 3567d99ca10d386a
+dayPass (14,128) +11 at 1234.567 s	4 98c35cc2aaf334a9
+dayPass (14,128) +13 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,128) +15 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,128) +7 at 1234.567 s	2 fcca741933471ac0
+dayPass (14,128) +9 at 1234.567 s	3 1cd796ef745a3656
+dayPass (14,128) +9 at 1235.817 s	3 1cd796ef745a3656
+dayPass (14,129) +0 at 1234.567 s	1 3567d99ca10d386a
+dayPass (14,129) +0 at 1234.567 s, doppelganger	1 3567d99ca10d386a
+dayPass (14,129) +0 at 1234.567 s, excellent	2 375e43259b3b695d
+dayPass (14,129) +0 at 1234.567 s, fading 0.5	1 c710d9ea8ad4c718
+dayPass (14,129) +0 at 1234.567 s, in a monster's hands	1 3567d99ca10d386a
+dayPass (14,129) +0 at 1234.567 s, without the skin	1 791e12d8e6fba78d
+dayPass (14,129) +0 at 1235.817 s	1 3567d99ca10d386a
+dayPass (14,129) +0 at 1238.267 s	1 3567d99ca10d386a
+dayPass (14,129) +11 at 1234.567 s	4 98c35cc2aaf334a9
+dayPass (14,129) +13 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,129) +15 at 1234.567 s	4 182e80f836d5ce7c
+dayPass (14,129) +7 at 1234.567 s	2 fcca741933471ac0
+dayPass (14,129) +9 at 1234.567 s	3 1cd796ef745a3656
+dayPass (14,129) +9 at 1235.817 s	3 1cd796ef745a3656
+demonicStick (5,18) +0 at 1234.567 s	3 5592a6b804f24b06
+demonicStick (5,18) +0 at 1234.567 s, doppelganger	3 5bd75c75d271b832
+demonicStick (5,18) +0 at 1234.567 s, excellent	5 abe76263a2b9540f
+demonicStick (5,18) +0 at 1234.567 s, fading 0.5	3 0678107bd2ec33b4
+demonicStick (5,18) +0 at 1234.567 s, in a monster's hands	3 0f273160d90cfe34
+demonicStick (5,18) +0 at 1234.567 s, without the skin	3 456a46ccfd7e30d3
+demonicStick (5,18) +0 at 1235.817 s	3 5592a6b804f24b06
+demonicStick (5,18) +0 at 1238.267 s	3 5592a6b804f24b06
+demonicStick (5,18) +11 at 1234.567 s	9 8cc641e7a690a965
+demonicStick (5,18) +13 at 1234.567 s	9 8d003378cdfb6eed
+demonicStick (5,18) +15 at 1234.567 s	9 8d003378cdfb6eed
+demonicStick (5,18) +7 at 1234.567 s	5 860dd750a4dae16a
+demonicStick (5,18) +9 at 1234.567 s	7 fd5f1791a20d0704
+demonicStick (5,18) +9 at 1235.817 s	7 fd5f1791a20d0704
+elitePotion (14,70) +0 at 1234.567 s	3 b3a5f04bb7d0148c
+elitePotion (14,70) +0 at 1234.567 s, doppelganger	3 b3a5f04bb7d0148c
+elitePotion (14,70) +0 at 1234.567 s, excellent	5 c380c0333c5969fe
+elitePotion (14,70) +0 at 1234.567 s, fading 0.5	3 4d9b546dc396c45e
+elitePotion (14,70) +0 at 1234.567 s, in a monster's hands	3 b3a5f04bb7d0148c
+elitePotion (14,70) +0 at 1234.567 s, without the skin	3 93c068f2c17ac77f
+elitePotion (14,70) +0 at 1235.817 s	3 b3a5f04bb7d0148c
+elitePotion (14,70) +0 at 1238.267 s	3 b3a5f04bb7d0148c
+elitePotion (14,70) +11 at 1234.567 s	9 423147f9aa0441f1
+elitePotion (14,70) +13 at 1234.567 s	9 67e1dc20d0e691d9
+elitePotion (14,70) +15 at 1234.567 s	9 67e1dc20d0e691d9
+elitePotion (14,70) +7 at 1234.567 s	5 45c5dc3a668a2040
+elitePotion (14,70) +9 at 1234.567 s	7 b8e06684bc87abab
+elitePotion (14,70) +9 at 1235.817 s	7 b8e06684bc87abab
+elitePotion (14,71) +0 at 1234.567 s	3 b3a5f04bb7d0148c
+elitePotion (14,71) +0 at 1234.567 s, doppelganger	3 b3a5f04bb7d0148c
+elitePotion (14,71) +0 at 1234.567 s, excellent	5 c380c0333c5969fe
+elitePotion (14,71) +0 at 1234.567 s, fading 0.5	3 4d9b546dc396c45e
+elitePotion (14,71) +0 at 1234.567 s, in a monster's hands	3 b3a5f04bb7d0148c
+elitePotion (14,71) +0 at 1234.567 s, without the skin	3 93c068f2c17ac77f
+elitePotion (14,71) +0 at 1235.817 s	3 b3a5f04bb7d0148c
+elitePotion (14,71) +0 at 1238.267 s	3 b3a5f04bb7d0148c
+elitePotion (14,71) +11 at 1234.567 s	9 423147f9aa0441f1
+elitePotion (14,71) +13 at 1234.567 s	9 67e1dc20d0e691d9
+elitePotion (14,71) +15 at 1234.567 s	9 67e1dc20d0e691d9
+elitePotion (14,71) +7 at 1234.567 s	5 45c5dc3a668a2040
+elitePotion (14,71) +9 at 1234.567 s	7 b8e06684bc87abab
+elitePotion (14,71) +9 at 1235.817 s	7 b8e06684bc87abab
+frostMace (2,16) +0 at 1234.567 s	5 d26ab48a53543aa9
+frostMace (2,16) +0 at 1234.567 s, doppelganger	5 05e7207a61e84b63
+frostMace (2,16) +0 at 1234.567 s, excellent	8 ca507daabfc85541
+frostMace (2,16) +0 at 1234.567 s, fading 0.5	5 4b84a44a6f37af03
+frostMace (2,16) +0 at 1234.567 s, in a monster's hands	5 bf2ce0c9b92928c7
+frostMace (2,16) +0 at 1234.567 s, without the skin	5 4784b054b068685c
+frostMace (2,16) +0 at 1235.817 s	5 d26ab48a53543aa9
+frostMace (2,16) +0 at 1238.267 s	5 d26ab48a53543aa9
+frostMace (2,16) +11 at 1234.567 s	14 81d83bad13d786bd
+frostMace (2,16) +13 at 1234.567 s	14 45378981b52e8fb0
+frostMace (2,16) +15 at 1234.567 s	14 45378981b52e8fb0
+frostMace (2,16) +7 at 1234.567 s	8 2073b769e5beee2a
+frostMace (2,16) +9 at 1234.567 s	11 e29aa86a043da94d
+frostMace (2,16) +9 at 1235.817 s	11 e29aa86a043da94d
+goldenOrSilverBox (14,123) +0 at 1234.567 s	3 7380051158db6654
+goldenOrSilverBox (14,123) +0 at 1234.567 s, doppelganger	3 7380051158db6654
+goldenOrSilverBox (14,123) +0 at 1234.567 s, excellent	7 9b93d8ee5235778e
+goldenOrSilverBox (14,123) +0 at 1234.567 s, fading 0.5	3 ff0169abe9792ed4
+goldenOrSilverBox (14,123) +0 at 1234.567 s, in a monster's hands	3 7380051158db6654
+goldenOrSilverBox (14,123) +0 at 1234.567 s, without the skin	3 8bb308fdf1f50b7d
+goldenOrSilverBox (14,123) +0 at 1235.817 s	3 7380051158db6654
+goldenOrSilverBox (14,123) +0 at 1238.267 s	3 7380051158db6654
+goldenOrSilverBox (14,123) +11 at 1234.567 s	15 e3d411017c023673
+goldenOrSilverBox (14,123) +13 at 1234.567 s	15 20ef6e8b3d019077
+goldenOrSilverBox (14,123) +15 at 1234.567 s	15 20ef6e8b3d019077
+goldenOrSilverBox (14,123) +7 at 1234.567 s	7 856b641d5ba4197c
+goldenOrSilverBox (14,123) +9 at 1234.567 s	11 914d815fde75106f
+goldenOrSilverBox (14,123) +9 at 1235.817 s	11 914d815fde75106f
+goldenOrSilverBox (14,124) +0 at 1234.567 s	3 7380051158db6654
+goldenOrSilverBox (14,124) +0 at 1234.567 s, doppelganger	3 7380051158db6654
+goldenOrSilverBox (14,124) +0 at 1234.567 s, excellent	7 9b93d8ee5235778e
+goldenOrSilverBox (14,124) +0 at 1234.567 s, fading 0.5	3 ff0169abe9792ed4
+goldenOrSilverBox (14,124) +0 at 1234.567 s, in a monster's hands	3 7380051158db6654
+goldenOrSilverBox (14,124) +0 at 1234.567 s, without the skin	3 8bb308fdf1f50b7d
+goldenOrSilverBox (14,124) +0 at 1235.817 s	3 7380051158db6654
+goldenOrSilverBox (14,124) +0 at 1238.267 s	3 7380051158db6654
+goldenOrSilverBox (14,124) +11 at 1234.567 s	15 e3d411017c023673
+goldenOrSilverBox (14,124) +13 at 1234.567 s	15 20ef6e8b3d019077
+goldenOrSilverBox (14,124) +15 at 1234.567 s	15 20ef6e8b3d019077
+goldenOrSilverBox (14,124) +7 at 1234.567 s	7 856b641d5ba4197c
+goldenOrSilverBox (14,124) +9 at 1234.567 s	11 914d815fde75106f
+goldenOrSilverBox (14,124) +9 at 1235.817 s	11 914d815fde75106f
+greatLordScepter (2,12) +0 at 1234.567 s	6 7208ef8ce76d9dc6
+greatLordScepter (2,12) +0 at 1234.567 s, doppelganger	6 ce19732633568136
+greatLordScepter (2,12) +0 at 1234.567 s, excellent	10 0a4b989a86b9edc8
+greatLordScepter (2,12) +0 at 1234.567 s, fading 0.5	6 3ff4d634bf017012
+greatLordScepter (2,12) +0 at 1234.567 s, in a monster's hands	6 c007bf54154eb1ae
+greatLordScepter (2,12) +0 at 1234.567 s, without the skin	6 2171980091c3f9f8
+greatLordScepter (2,12) +0 at 1235.817 s	6 7208ef8ce76d9dc6
+greatLordScepter (2,12) +0 at 1238.267 s	6 7208ef8ce76d9dc6
+greatLordScepter (2,12) +11 at 1234.567 s	18 ba94106a87808040
+greatLordScepter (2,12) +13 at 1234.567 s	18 72322f833b82d6a4
+greatLordScepter (2,12) +15 at 1234.567 s	18 72322f833b82d6a4
+greatLordScepter (2,12) +7 at 1234.567 s	10 e7000affc2a9c8de
+greatLordScepter (2,12) +9 at 1234.567 s	14 c8edadbfb712036c
+greatLordScepter (2,12) +9 at 1235.817 s	14 c8edadbfb712036c
+guardianShield (6,20) +0 at 1234.567 s	3 e8e620a10e464619
+guardianShield (6,20) +0 at 1234.567 s, doppelganger	3 e8e620a10e464619
+guardianShield (6,20) +0 at 1234.567 s, excellent	5 b5ea1bd31bf8cfda
+guardianShield (6,20) +0 at 1234.567 s, fading 0.5	3 7552a82f1644fd13
+guardianShield (6,20) +0 at 1234.567 s, in a monster's hands	3 e8e620a10e464619
+guardianShield (6,20) +0 at 1234.567 s, without the skin	3 19b7982f44b5f9ec
+guardianShield (6,20) +0 at 1235.817 s	3 e8e620a10e464619
+guardianShield (6,20) +0 at 1238.267 s	3 e8e620a10e464619
+guardianShield (6,20) +11 at 1234.567 s	7 c9b3158d6878b6dd
+guardianShield (6,20) +13 at 1234.567 s	7 2ae397e1ffb1d12d
+guardianShield (6,20) +15 at 1234.567 s	7 2ae397e1ffb1d12d
+guardianShield (6,20) +7 at 1234.567 s	4 a25a382e2efcd9c3
+guardianShield (6,20) +9 at 1234.567 s	5 fb0e9aed254e0b44
+guardianShield (6,20) +9 at 1235.817 s	5 fb0e9aed254e0b44
+hourPass (14,130) +0 at 1234.567 s	1 62d34ba71977fb7b
+hourPass (14,130) +0 at 1234.567 s, doppelganger	1 62d34ba71977fb7b
+hourPass (14,130) +0 at 1234.567 s, excellent	2 56af7dfd0845b370
+hourPass (14,130) +0 at 1234.567 s, fading 0.5	1 878b95a8f891d109
+hourPass (14,130) +0 at 1234.567 s, in a monster's hands	1 62d34ba71977fb7b
+hourPass (14,130) +0 at 1234.567 s, without the skin	1 7c5131edd6372760
+hourPass (14,130) +0 at 1235.817 s	1 62d34ba71977fb7b
+hourPass (14,130) +0 at 1238.267 s	1 62d34ba71977fb7b
+hourPass (14,130) +11 at 1234.567 s	4 3627035dd2d57e9a
+hourPass (14,130) +13 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,130) +15 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,130) +7 at 1234.567 s	2 3525d68994daa945
+hourPass (14,130) +9 at 1234.567 s	3 5c2ab8d5acba15cb
+hourPass (14,130) +9 at 1235.817 s	3 5c2ab8d5acba15cb
+hourPass (14,131) +0 at 1234.567 s	1 62d34ba71977fb7b
+hourPass (14,131) +0 at 1234.567 s, doppelganger	1 62d34ba71977fb7b
+hourPass (14,131) +0 at 1234.567 s, excellent	2 56af7dfd0845b370
+hourPass (14,131) +0 at 1234.567 s, fading 0.5	1 878b95a8f891d109
+hourPass (14,131) +0 at 1234.567 s, in a monster's hands	1 62d34ba71977fb7b
+hourPass (14,131) +0 at 1234.567 s, without the skin	1 7c5131edd6372760
+hourPass (14,131) +0 at 1235.817 s	1 62d34ba71977fb7b
+hourPass (14,131) +0 at 1238.267 s	1 62d34ba71977fb7b
+hourPass (14,131) +11 at 1234.567 s	4 3627035dd2d57e9a
+hourPass (14,131) +13 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,131) +15 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,131) +7 at 1234.567 s	2 3525d68994daa945
+hourPass (14,131) +9 at 1234.567 s	3 5c2ab8d5acba15cb
+hourPass (14,131) +9 at 1235.817 s	3 5c2ab8d5acba15cb
+hourPass (14,132) +0 at 1234.567 s	1 62d34ba71977fb7b
+hourPass (14,132) +0 at 1234.567 s, doppelganger	1 62d34ba71977fb7b
+hourPass (14,132) +0 at 1234.567 s, excellent	2 56af7dfd0845b370
+hourPass (14,132) +0 at 1234.567 s, fading 0.5	1 878b95a8f891d109
+hourPass (14,132) +0 at 1234.567 s, in a monster's hands	1 62d34ba71977fb7b
+hourPass (14,132) +0 at 1234.567 s, without the skin	1 7c5131edd6372760
+hourPass (14,132) +0 at 1235.817 s	1 62d34ba71977fb7b
+hourPass (14,132) +0 at 1238.267 s	1 62d34ba71977fb7b
+hourPass (14,132) +11 at 1234.567 s	4 3627035dd2d57e9a
+hourPass (14,132) +13 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,132) +15 at 1234.567 s	4 86be2d1ca82af959
+hourPass (14,132) +7 at 1234.567 s	2 3525d68994daa945
+hourPass (14,132) +9 at 1234.567 s	3 5c2ab8d5acba15cb
+hourPass (14,132) +9 at 1235.817 s	3 5c2ab8d5acba15cb
+jewelryCase (14,141) +0 at 1234.567 s	3 ea6816993306bdb0
+jewelryCase (14,141) +0 at 1234.567 s, doppelganger	3 ea6816993306bdb0
+jewelryCase (14,141) +0 at 1234.567 s, excellent	5 34b67f4f0a36e231
+jewelryCase (14,141) +0 at 1234.567 s, fading 0.5	3 c5ce55d1d444d14c
+jewelryCase (14,141) +0 at 1234.567 s, in a monster's hands	3 ea6816993306bdb0
+jewelryCase (14,141) +0 at 1234.567 s, without the skin	3 2f48b2f45c8c0b85
+jewelryCase (14,141) +0 at 1235.817 s	3 ea6816993306bdb0
+jewelryCase (14,141) +0 at 1238.267 s	3 ea6816993306bdb0
+jewelryCase (14,141) +11 at 1234.567 s	9 88abbf9aaf56c2ba
+jewelryCase (14,141) +13 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,141) +15 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,141) +7 at 1234.567 s	5 61b5b16ae0c1b615
+jewelryCase (14,141) +9 at 1234.567 s	7 d772ffc20ed11b83
+jewelryCase (14,141) +9 at 1235.817 s	7 d772ffc20ed11b83
+jewelryCase (14,142) +0 at 1234.567 s	3 ea6816993306bdb0
+jewelryCase (14,142) +0 at 1234.567 s, doppelganger	3 ea6816993306bdb0
+jewelryCase (14,142) +0 at 1234.567 s, excellent	5 34b67f4f0a36e231
+jewelryCase (14,142) +0 at 1234.567 s, fading 0.5	3 c5ce55d1d444d14c
+jewelryCase (14,142) +0 at 1234.567 s, in a monster's hands	3 ea6816993306bdb0
+jewelryCase (14,142) +0 at 1234.567 s, without the skin	3 2f48b2f45c8c0b85
+jewelryCase (14,142) +0 at 1235.817 s	3 ea6816993306bdb0
+jewelryCase (14,142) +0 at 1238.267 s	3 ea6816993306bdb0
+jewelryCase (14,142) +11 at 1234.567 s	9 88abbf9aaf56c2ba
+jewelryCase (14,142) +13 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,142) +15 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,142) +7 at 1234.567 s	5 61b5b16ae0c1b615
+jewelryCase (14,142) +9 at 1234.567 s	7 d772ffc20ed11b83
+jewelryCase (14,142) +9 at 1235.817 s	7 d772ffc20ed11b83
+jewelryCase (14,143) +0 at 1234.567 s	3 ea6816993306bdb0
+jewelryCase (14,143) +0 at 1234.567 s, doppelganger	3 ea6816993306bdb0
+jewelryCase (14,143) +0 at 1234.567 s, excellent	5 34b67f4f0a36e231
+jewelryCase (14,143) +0 at 1234.567 s, fading 0.5	3 c5ce55d1d444d14c
+jewelryCase (14,143) +0 at 1234.567 s, in a monster's hands	3 ea6816993306bdb0
+jewelryCase (14,143) +0 at 1234.567 s, without the skin	3 2f48b2f45c8c0b85
+jewelryCase (14,143) +0 at 1235.817 s	3 ea6816993306bdb0
+jewelryCase (14,143) +0 at 1238.267 s	3 ea6816993306bdb0
+jewelryCase (14,143) +11 at 1234.567 s	9 88abbf9aaf56c2ba
+jewelryCase (14,143) +13 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,143) +15 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,143) +7 at 1234.567 s	5 61b5b16ae0c1b615
+jewelryCase (14,143) +9 at 1234.567 s	7 d772ffc20ed11b83
+jewelryCase (14,143) +9 at 1235.817 s	7 d772ffc20ed11b83
+jewelryCase (14,144) +0 at 1234.567 s	3 ea6816993306bdb0
+jewelryCase (14,144) +0 at 1234.567 s, doppelganger	3 ea6816993306bdb0
+jewelryCase (14,144) +0 at 1234.567 s, excellent	5 34b67f4f0a36e231
+jewelryCase (14,144) +0 at 1234.567 s, fading 0.5	3 c5ce55d1d444d14c
+jewelryCase (14,144) +0 at 1234.567 s, in a monster's hands	3 ea6816993306bdb0
+jewelryCase (14,144) +0 at 1234.567 s, without the skin	3 2f48b2f45c8c0b85
+jewelryCase (14,144) +0 at 1235.817 s	3 ea6816993306bdb0
+jewelryCase (14,144) +0 at 1238.267 s	3 ea6816993306bdb0
+jewelryCase (14,144) +11 at 1234.567 s	9 88abbf9aaf56c2ba
+jewelryCase (14,144) +13 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,144) +15 at 1234.567 s	9 6c97054c6a516e62
+jewelryCase (14,144) +7 at 1234.567 s	5 61b5b16ae0c1b615
+jewelryCase (14,144) +9 at 1234.567 s	7 d772ffc20ed11b83
+jewelryCase (14,144) +9 at 1235.817 s	7 d772ffc20ed11b83
+luckyCoin (14,100) +0 at 1234.567 s	1 3544bacb4bd0b039
+luckyCoin (14,100) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+luckyCoin (14,100) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+luckyCoin (14,100) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+luckyCoin (14,100) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+luckyCoin (14,100) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+luckyCoin (14,100) +0 at 1235.817 s	1 3544bacb4bd0b039
+luckyCoin (14,100) +0 at 1238.267 s	1 3544bacb4bd0b039
+luckyCoin (14,100) +11 at 1234.567 s	4 90ac4f7fb3106a20
+luckyCoin (14,100) +13 at 1234.567 s	4 71de38ed7971794f
+luckyCoin (14,100) +15 at 1234.567 s	4 71de38ed7971794f
+luckyCoin (14,100) +7 at 1234.567 s	2 ae652853bc2f200f
+luckyCoin (14,100) +9 at 1234.567 s	3 233dff6b9cec2d75
+luckyCoin (14,100) +9 at 1235.817 s	3 233dff6b9cec2d75
+packageBoxA (14,134) +0 at 1234.567 s	1 d93bd622b1a6257c
+packageBoxA (14,134) +0 at 1234.567 s, doppelganger	1 d93bd622b1a6257c
+packageBoxA (14,134) +0 at 1234.567 s, excellent	2 cb428258d452a1c3
+packageBoxA (14,134) +0 at 1234.567 s, fading 0.5	1 0790e533f702d17a
+packageBoxA (14,134) +0 at 1234.567 s, in a monster's hands	1 d93bd622b1a6257c
+packageBoxA (14,134) +0 at 1234.567 s, without the skin	1 518765259ea96207
+packageBoxA (14,134) +0 at 1235.817 s	1 d93bd622b1a6257c
+packageBoxA (14,134) +0 at 1238.267 s	1 d93bd622b1a6257c
+packageBoxA (14,134) +11 at 1234.567 s	4 6364f48ffef61c03
+packageBoxA (14,134) +13 at 1234.567 s	4 2ea461cc8e86379e
+packageBoxA (14,134) +15 at 1234.567 s	4 2ea461cc8e86379e
+packageBoxA (14,134) +7 at 1234.567 s	2 4607806988caecfe
+packageBoxA (14,134) +9 at 1234.567 s	3 a1e1bbc5ed687eac
+packageBoxA (14,134) +9 at 1235.817 s	3 a1e1bbc5ed687eac
+packageBoxB (14,135) +0 at 1234.567 s	1 2e410e085169f368
+packageBoxB (14,135) +0 at 1234.567 s, doppelganger	1 2e410e085169f368
+packageBoxB (14,135) +0 at 1234.567 s, excellent	2 0e2814f3c2408767
+packageBoxB (14,135) +0 at 1234.567 s, fading 0.5	1 9f48c5a34ed3ee8e
+packageBoxB (14,135) +0 at 1234.567 s, in a monster's hands	1 2e410e085169f368
+packageBoxB (14,135) +0 at 1234.567 s, without the skin	1 f81f601bd66b4403
+packageBoxB (14,135) +0 at 1235.817 s	1 2e410e085169f368
+packageBoxB (14,135) +0 at 1238.267 s	1 2e410e085169f368
+packageBoxB (14,135) +11 at 1234.567 s	4 191b60123d7c8a17
+packageBoxB (14,135) +13 at 1234.567 s	4 2bf66cfb279b0772
+packageBoxB (14,135) +15 at 1234.567 s	4 2bf66cfb279b0772
+packageBoxB (14,135) +7 at 1234.567 s	2 61b7cff95ff4e7a2
+packageBoxB (14,135) +9 at 1234.567 s	3 1377970f1d4793a0
+packageBoxB (14,135) +9 at 1235.817 s	3 1377970f1d4793a0
+packageBoxC (14,136) +0 at 1234.567 s	1 642ad837425ab38b
+packageBoxC (14,136) +0 at 1234.567 s, doppelganger	1 642ad837425ab38b
+packageBoxC (14,136) +0 at 1234.567 s, excellent	2 29cc5ade0488edc0
+packageBoxC (14,136) +0 at 1234.567 s, fading 0.5	1 3c8f9497648e417d
+packageBoxC (14,136) +0 at 1234.567 s, in a monster's hands	1 642ad837425ab38b
+packageBoxC (14,136) +0 at 1234.567 s, without the skin	1 3a077a91e875c1b0
+packageBoxC (14,136) +0 at 1235.817 s	1 642ad837425ab38b
+packageBoxC (14,136) +0 at 1238.267 s	1 642ad837425ab38b
+packageBoxC (14,136) +11 at 1234.567 s	4 1172984364668b0a
+packageBoxC (14,136) +13 at 1234.567 s	4 7f6d7d0509465049
+packageBoxC (14,136) +15 at 1234.567 s	4 7f6d7d0509465049
+packageBoxC (14,136) +7 at 1234.567 s	2 353c961e0acc8135
+packageBoxC (14,136) +9 at 1234.567 s	3 4e6b40974cc4069b
+packageBoxC (14,136) +9 at 1235.817 s	3 4e6b40974cc4069b
+packageBoxD (14,137) +0 at 1234.567 s	1 6f051e04aafe297a
+packageBoxD (14,137) +0 at 1234.567 s, doppelganger	1 6f051e04aafe297a
+packageBoxD (14,137) +0 at 1234.567 s, excellent	2 122d2a2ed1166ead
+packageBoxD (14,137) +0 at 1234.567 s, fading 0.5	1 71c79d51fdaacd7c
+packageBoxD (14,137) +0 at 1234.567 s, in a monster's hands	1 6f051e04aafe297a
+packageBoxD (14,137) +0 at 1234.567 s, without the skin	1 2434a7895dc3cb5d
+packageBoxD (14,137) +0 at 1235.817 s	1 6f051e04aafe297a
+packageBoxD (14,137) +0 at 1238.267 s	1 6f051e04aafe297a
+packageBoxD (14,137) +11 at 1234.567 s	4 34b89f8571b44ed9
+packageBoxD (14,137) +13 at 1234.567 s	4 23655f96c318bbec
+packageBoxD (14,137) +15 at 1234.567 s	4 23655f96c318bbec
+packageBoxD (14,137) +7 at 1234.567 s	2 791a1bcb91dcfdb0
+packageBoxD (14,137) +9 at 1234.567 s	3 b9500e75dc0cdb66
+packageBoxD (14,137) +9 at 1235.817 s	3 b9500e75dc0cdb66
+packageBoxE (14,138) +0 at 1234.567 s	1 a403cd681889997d
+packageBoxE (14,138) +0 at 1234.567 s, doppelganger	1 a403cd681889997d
+packageBoxE (14,138) +0 at 1234.567 s, excellent	2 e986db564e69d256
+packageBoxE (14,138) +0 at 1234.567 s, fading 0.5	1 fcb69f668e5f5b8b
+packageBoxE (14,138) +0 at 1234.567 s, in a monster's hands	1 a403cd681889997d
+packageBoxE (14,138) +0 at 1234.567 s, without the skin	1 779ea43218f5c49a
+packageBoxE (14,138) +0 at 1235.817 s	1 a403cd681889997d
+packageBoxE (14,138) +0 at 1238.267 s	1 a403cd681889997d
+packageBoxE (14,138) +11 at 1234.567 s	4 d46235a513b45dec
+packageBoxE (14,138) +13 at 1234.567 s	4 da14df4d8e2cb92b
+packageBoxE (14,138) +15 at 1234.567 s	4 da14df4d8e2cb92b
+packageBoxE (14,138) +7 at 1234.567 s	2 3bd5a8f221e4b3fb
+packageBoxE (14,138) +9 at 1234.567 s	3 9ca19e12c536adf1
+packageBoxE (14,138) +9 at 1235.817 s	3 9ca19e12c536adf1
+packageBoxF (14,139) +0 at 1234.567 s	1 9f6a5c2ba09e7ed8
+packageBoxF (14,139) +0 at 1234.567 s, doppelganger	1 9f6a5c2ba09e7ed8
+packageBoxF (14,139) +0 at 1234.567 s, excellent	2 d59970897804fa97
+packageBoxF (14,139) +0 at 1234.567 s, fading 0.5	1 9d85765281b584aa
+packageBoxF (14,139) +0 at 1234.567 s, in a monster's hands	1 9f6a5c2ba09e7ed8
+packageBoxF (14,139) +0 at 1234.567 s, without the skin	1 bcf78d729d73b433
+packageBoxF (14,139) +0 at 1235.817 s	1 9f6a5c2ba09e7ed8
+packageBoxF (14,139) +0 at 1238.267 s	1 9f6a5c2ba09e7ed8
+packageBoxF (14,139) +11 at 1234.567 s	4 625df590da47ffa7
+packageBoxF (14,139) +13 at 1234.567 s	4 a633291e5929ca42
+packageBoxF (14,139) +15 at 1234.567 s	4 a633291e5929ca42
+packageBoxF (14,139) +7 at 1234.567 s	2 9450223a79a4da72
+packageBoxF (14,139) +9 at 1234.567 s	3 c1ecbeafaac0b410
+packageBoxF (14,139) +9 at 1235.817 s	3 c1ecbeafaac0b410
+salamanderShield (6,18) +0 at 1234.567 s	2 0fbffe965f1bb351
+salamanderShield (6,18) +0 at 1234.567 s, doppelganger	2 0fbffe965f1bb351
+salamanderShield (6,18) +0 at 1234.567 s, excellent	4 1c5b0dc5684de352
+salamanderShield (6,18) +0 at 1234.567 s, fading 0.5	2 be637fd3d995635d
+salamanderShield (6,18) +0 at 1234.567 s, in a monster's hands	2 0fbffe965f1bb351
+salamanderShield (6,18) +0 at 1234.567 s, without the skin	2 202bd2c24d45fe71
+salamanderShield (6,18) +0 at 1235.817 s	2 0fbffe965f1bb351
+salamanderShield (6,18) +0 at 1238.267 s	2 0fbffe965f1bb351
+salamanderShield (6,18) +11 at 1234.567 s	8 0278aa579afb7749
+salamanderShield (6,18) +13 at 1234.567 s	8 fe1e008fee70e931
+salamanderShield (6,18) +15 at 1234.567 s	8 fe1e008fee70e931
+salamanderShield (6,18) +7 at 1234.567 s	4 adfbbb60aa605b65
+salamanderShield (6,18) +9 at 1234.567 s	6 2ce1c326b37a5d68
+salamanderShield (6,18) +9 at 1235.817 s	6 2ce1c326b37a5d68
+sealedBox (14,121) +0 at 1234.567 s	5 7236ce1529a1e853
+sealedBox (14,121) +0 at 1234.567 s, doppelganger	5 7236ce1529a1e853
+sealedBox (14,121) +0 at 1234.567 s, excellent	9 7626ff063252178f
+sealedBox (14,121) +0 at 1234.567 s, fading 0.5	5 5f4416b850d4c1d1
+sealedBox (14,121) +0 at 1234.567 s, in a monster's hands	5 7236ce1529a1e853
+sealedBox (14,121) +0 at 1234.567 s, without the skin	5 a69cdf13e7ed606c
+sealedBox (14,121) +0 at 1235.817 s	5 7236ce1529a1e853
+sealedBox (14,121) +0 at 1238.267 s	5 7236ce1529a1e853
+sealedBox (14,121) +11 at 1234.567 s	17 0a03904e8ed48894
+sealedBox (14,121) +13 at 1234.567 s	17 f3cbada689dc927c
+sealedBox (14,121) +15 at 1234.567 s	17 f3cbada689dc927c
+sealedBox (14,121) +7 at 1234.567 s	9 bcf7dd1588ecd0e5
+sealedBox (14,121) +9 at 1234.567 s	13 cba58e7f75380064
+sealedBox (14,121) +9 at 1235.817 s	13 cba58e7f75380064
+sealedBox (14,122) +0 at 1234.567 s	5 7236ce1529a1e853
+sealedBox (14,122) +0 at 1234.567 s, doppelganger	5 7236ce1529a1e853
+sealedBox (14,122) +0 at 1234.567 s, excellent	9 7626ff063252178f
+sealedBox (14,122) +0 at 1234.567 s, fading 0.5	5 5f4416b850d4c1d1
+sealedBox (14,122) +0 at 1234.567 s, in a monster's hands	5 7236ce1529a1e853
+sealedBox (14,122) +0 at 1234.567 s, without the skin	5 a69cdf13e7ed606c
+sealedBox (14,122) +0 at 1235.817 s	5 7236ce1529a1e853
+sealedBox (14,122) +0 at 1238.267 s	5 7236ce1529a1e853
+sealedBox (14,122) +11 at 1234.567 s	17 0a03904e8ed48894
+sealedBox (14,122) +13 at 1234.567 s	17 f3cbada689dc927c
+sealedBox (14,122) +15 at 1234.567 s	17 f3cbada689dc927c
+sealedBox (14,122) +7 at 1234.567 s	9 bcf7dd1588ecd0e5
+sealedBox (14,122) +9 at 1234.567 s	13 cba58e7f75380064
+sealedBox (14,122) +9 at 1235.817 s	13 cba58e7f75380064
+skeletonTransformationRing (13,122) +0 at 1234.567 s	2 59439a8e694d21f4
+skeletonTransformationRing (13,122) +0 at 1234.567 s, doppelganger	2 59439a8e694d21f4
+skeletonTransformationRing (13,122) +0 at 1234.567 s, excellent	3 630212d722fc801d
+skeletonTransformationRing (13,122) +0 at 1234.567 s, fading 0.5	2 410dcc2fdc8ad092
+skeletonTransformationRing (13,122) +0 at 1234.567 s, in a monster's hands	2 59439a8e694d21f4
+skeletonTransformationRing (13,122) +0 at 1234.567 s, without the skin	2 d683ad15456c4a76
+skeletonTransformationRing (13,122) +0 at 1235.817 s	2 59439a8e694d21f4
+skeletonTransformationRing (13,122) +0 at 1238.267 s	2 59439a8e694d21f4
+skeletonTransformationRing (13,122) +11 at 1234.567 s	5 a130a1e0b64272b7
+skeletonTransformationRing (13,122) +13 at 1234.567 s	5 9bd134dd3437c300
+skeletonTransformationRing (13,122) +15 at 1234.567 s	5 9bd134dd3437c300
+skeletonTransformationRing (13,122) +7 at 1234.567 s	3 33374e4aaacb66e3
+skeletonTransformationRing (13,122) +9 at 1234.567 s	4 6cce104c6c3db4a2
+skeletonTransformationRing (13,122) +9 at 1235.817 s	4 6cce104c6c3db4a2
+staff32 (5,32) +0 at 1234.567 s	8 35a859c14bf8bee4
+staff32 (5,32) +0 at 1234.567 s, doppelganger	8 35a859c14bf8bee4
+staff32 (5,32) +0 at 1234.567 s, excellent	12 2cf46adb185890fe
+staff32 (5,32) +0 at 1234.567 s, fading 0.5	8 26c5b3b4b7c2202a
+staff32 (5,32) +0 at 1234.567 s, in a monster's hands	8 35a859c14bf8bee4
+staff32 (5,32) +0 at 1234.567 s, without the skin	8 bab7748b5c88e6cc
+staff32 (5,32) +0 at 1235.817 s	8 35a859c14bf8bee4
+staff32 (5,32) +0 at 1238.267 s	8 35a859c14bf8bee4
+staff32 (5,32) +11 at 1234.567 s	14 8c75f14f8e89f266
+staff32 (5,32) +13 at 1234.567 s	14 b19a2c4a2809455a
+staff32 (5,32) +15 at 1234.567 s	14 b19a2c4a2809455a
+staff32 (5,32) +7 at 1234.567 s	9 1329701ffcd12218
+staff32 (5,32) +9 at 1234.567 s	10 7bdd20d12306edae
+staff32 (5,32) +9 at 1235.817 s	10 7bdd20d12306edae
+strikerScepter (2,18) +0 at 1234.567 s	7 a8b7ea697a536c2f
+strikerScepter (2,18) +0 at 1234.567 s, doppelganger	7 a8b7ea697a536c2f
+strikerScepter (2,18) +0 at 1234.567 s, excellent	9 490684fbc9f8d328
+strikerScepter (2,18) +0 at 1234.567 s, fading 0.5	7 79e449994b864609
+strikerScepter (2,18) +0 at 1234.567 s, in a monster's hands	7 a8b7ea697a536c2f
+strikerScepter (2,18) +0 at 1234.567 s, without the skin	7 533f83690b0c380e
+strikerScepter (2,18) +0 at 1235.817 s	7 a8b7ea697a536c2f
+strikerScepter (2,18) +0 at 1238.267 s	7 a8b7ea697a536c2f
+strikerScepter (2,18) +11 at 1234.567 s	11 95996ad2799a4007
+strikerScepter (2,18) +13 at 1234.567 s	11 79bc89aaf189c74f
+strikerScepter (2,18) +15 at 1234.567 s	11 79bc89aaf189c74f
+strikerScepter (2,18) +7 at 1234.567 s	8 9411efb77d2d6435
+strikerScepter (2,18) +9 at 1234.567 s	9 33aa3319c2d0916e
+strikerScepter (2,18) +9 at 1235.817 s	9 33aa3319c2d0916e
+swordBreaker (0,27) +0 at 1234.567 s	3 a8b83917f6d43443
+swordBreaker (0,27) +0 at 1234.567 s, doppelganger	3 a6406d5300ddc8a7
+swordBreaker (0,27) +0 at 1234.567 s, excellent	5 472a3a82d61a5984
+swordBreaker (0,27) +0 at 1234.567 s, fading 0.5	3 a91c3801a925b0fd
+swordBreaker (0,27) +0 at 1234.567 s, in a monster's hands	3 eca31f9bf8847de9
+swordBreaker (0,27) +0 at 1234.567 s, without the skin	3 6e2ca067f9d648b2
+swordBreaker (0,27) +0 at 1235.817 s	3 a8b83917f6d43443
+swordBreaker (0,27) +0 at 1238.267 s	3 a8b83917f6d43443
+swordBreaker (0,27) +11 at 1234.567 s	7 80771793ee2a5d72
+swordBreaker (0,27) +13 at 1234.567 s	7 33a8cb1d14de50aa
+swordBreaker (0,27) +15 at 1234.567 s	7 33a8cb1d14de50aa
+swordBreaker (0,27) +7 at 1234.567 s	4 d0096f7348dfc97b
+swordBreaker (0,27) +9 at 1234.567 s	5 6239608ef1c4f847
+swordBreaker (0,27) +9 at 1235.817 s	5 6239608ef1c4f847
+talismanOfGuardian (13,81) +0 at 1234.567 s	5 d6618859981fb84b
+talismanOfGuardian (13,81) +0 at 1234.567 s, doppelganger	5 d6618859981fb84b
+talismanOfGuardian (13,81) +0 at 1234.567 s, excellent	8 e9ed2a8ec773d0a3
+talismanOfGuardian (13,81) +0 at 1234.567 s, fading 0.5	5 1bea08c0c82207cf
+talismanOfGuardian (13,81) +0 at 1234.567 s, in a monster's hands	5 d6618859981fb84b
+talismanOfGuardian (13,81) +0 at 1234.567 s, without the skin	5 7a02624492a66f72
+talismanOfGuardian (13,81) +0 at 1235.817 s	5 d6618859981fb84b
+talismanOfGuardian (13,81) +0 at 1238.267 s	5 d6618859981fb84b
+talismanOfGuardian (13,81) +11 at 1234.567 s	14 8e32f6bab07516a7
+talismanOfGuardian (13,81) +13 at 1234.567 s	14 06b489c6f86d7cfa
+talismanOfGuardian (13,81) +15 at 1234.567 s	14 06b489c6f86d7cfa
+talismanOfGuardian (13,81) +7 at 1234.567 s	8 525887d74ac57718
+talismanOfGuardian (13,81) +9 at 1234.567 s	11 e8f7bab90e29839f
+talismanOfGuardian (13,81) +9 at 1235.817 s	11 e8f7bab90e29839f
+talismanOfItemProtection (13,82) +0 at 1234.567 s	3 35ba587760a37a19
+talismanOfItemProtection (13,82) +0 at 1234.567 s, doppelganger	3 35ba587760a37a19
+talismanOfItemProtection (13,82) +0 at 1234.567 s, excellent	5 850414d1095c8bda
+talismanOfItemProtection (13,82) +0 at 1234.567 s, fading 0.5	3 a54ad57d773d9113
+talismanOfItemProtection (13,82) +0 at 1234.567 s, in a monster's hands	3 35ba587760a37a19
+talismanOfItemProtection (13,82) +0 at 1234.567 s, without the skin	3 668bd00597132dec
+talismanOfItemProtection (13,82) +0 at 1235.817 s	3 35ba587760a37a19
+talismanOfItemProtection (13,82) +0 at 1238.267 s	3 35ba587760a37a19
+talismanOfItemProtection (13,82) +11 at 1234.567 s	9 e46b88ce86d48aeb
+talismanOfItemProtection (13,82) +13 at 1234.567 s	9 cd48f59ca9475d3b
+talismanOfItemProtection (13,82) +15 at 1234.567 s	9 cd48f59ca9475d3b
+talismanOfItemProtection (13,82) +7 at 1234.567 s	5 4b8e55518b4d56cc
+talismanOfItemProtection (13,82) +9 at 1234.567 s	7 0a84c6bf090bbada
+talismanOfItemProtection (13,82) +9 at 1235.817 s	7 0a84c6bf090bbada
+talismanOfMobility (13,70) +0 at 1234.567 s	3 a8b83917f6d43443
+talismanOfMobility (13,70) +0 at 1234.567 s, doppelganger	3 a8b83917f6d43443
+talismanOfMobility (13,70) +0 at 1234.567 s, excellent	5 472a3a82d61a5984
+talismanOfMobility (13,70) +0 at 1234.567 s, fading 0.5	3 a91c3801a925b0fd
+talismanOfMobility (13,70) +0 at 1234.567 s, in a monster's hands	3 a8b83917f6d43443
+talismanOfMobility (13,70) +0 at 1234.567 s, without the skin	3 6e2ca067f9d648b2
+talismanOfMobility (13,70) +0 at 1235.817 s	3 a8b83917f6d43443
+talismanOfMobility (13,70) +0 at 1238.267 s	3 a8b83917f6d43443
+talismanOfMobility (13,70) +11 at 1234.567 s	9 446e4057d771e8a5
+talismanOfMobility (13,70) +13 at 1234.567 s	9 b5378706edf2a8ad
+talismanOfMobility (13,70) +15 at 1234.567 s	9 b5378706edf2a8ad
+talismanOfMobility (13,70) +7 at 1234.567 s	5 789547453429556a
+talismanOfMobility (13,70) +9 at 1234.567 s	7 343d943d7a62a684
+talismanOfMobility (13,70) +9 at 1235.817 s	7 343d943d7a62a684
+textured (0,32) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (0,32) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (0,32) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (0,32) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (0,32) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (0,32) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (0,32) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (0,32) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (0,32) +11 at 1234.567 s	8 2ee92bea9148329e
+textured (0,32) +13 at 1234.567 s	8 332392d768a3d556
+textured (0,32) +15 at 1234.567 s	8 332392d768a3d556
+textured (0,32) +7 at 1234.567 s	4 4d3f0a5498716b30
+textured (0,32) +9 at 1234.567 s	6 e0949233d4a24fa7
+textured (0,32) +9 at 1235.817 s	6 e0949233d4a24fa7
+textured (0,33) +0 at 1234.567 s	3 fe5d4d0953cef770
+textured (0,33) +0 at 1234.567 s, doppelganger	3 fe5d4d0953cef770
+textured (0,33) +0 at 1234.567 s, excellent	6 f5ab30b20a3822c4
+textured (0,33) +0 at 1234.567 s, fading 0.5	3 468263e53642b20a
+textured (0,33) +0 at 1234.567 s, in a monster's hands	3 fe5d4d0953cef770
+textured (0,33) +0 at 1234.567 s, without the skin	3 77d82c401674bf65
+textured (0,33) +0 at 1235.817 s	3 fe5d4d0953cef770
+textured (0,33) +0 at 1238.267 s	3 fe5d4d0953cef770
+textured (0,33) +11 at 1234.567 s	12 2a01264554303938
+textured (0,33) +13 at 1234.567 s	12 561ccca5628d06bb
+textured (0,33) +15 at 1234.567 s	12 561ccca5628d06bb
+textured (0,33) +7 at 1234.567 s	6 95e6b516440c20f7
+textured (0,33) +9 at 1234.567 s	9 03362d6d91e1a8c2
+textured (0,33) +9 at 1235.817 s	9 03362d6d91e1a8c2
+textured (0,34) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (0,34) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (0,34) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (0,34) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (0,34) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (0,34) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (0,34) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (0,34) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (0,34) +11 at 1234.567 s	4 f0251d59bf19dbca
+textured (0,34) +13 at 1234.567 s	4 22952eec090096d9
+textured (0,34) +15 at 1234.567 s	4 22952eec090096d9
+textured (0,34) +7 at 1234.567 s	2 5506d3201a6bdbb3
+textured (0,34) +9 at 1234.567 s	3 ac0ce9a271e9a103
+textured (0,34) +9 at 1235.817 s	3 ac0ce9a271e9a103
+textured (13,54) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,54) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,54) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,54) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,54) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,54) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,54) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,54) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,54) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,54) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,54) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,54) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,54) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,54) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,55) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,55) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,55) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,55) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,55) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,55) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,55) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,55) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,55) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,55) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,55) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,55) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,55) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,55) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,56) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,56) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,56) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,56) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,56) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,56) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,56) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,56) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,56) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,56) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,56) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,56) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,56) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,56) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,57) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,57) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,57) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,57) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,57) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,57) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,57) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,57) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,57) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,57) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,57) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,57) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,57) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,57) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,58) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,58) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,58) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,58) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,58) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,58) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,58) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,58) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,58) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,58) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,58) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,58) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,58) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,58) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,59) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,59) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,59) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,59) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,59) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,59) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,59) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,59) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,59) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,59) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,59) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,59) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,59) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,59) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,60) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (13,60) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (13,60) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (13,60) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (13,60) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (13,60) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (13,60) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (13,60) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (13,60) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (13,60) +13 at 1234.567 s	4 71de38ed7971794f
+textured (13,60) +15 at 1234.567 s	4 71de38ed7971794f
+textured (13,60) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (13,60) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (13,60) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (13,62) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,62) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,62) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,62) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,62) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,62) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,62) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,62) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,62) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,62) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,62) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,62) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,62) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,62) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,63) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,63) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,63) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,63) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,63) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,63) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,63) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,63) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,63) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,63) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,63) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,63) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,63) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,63) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,64) +0 at 1234.567 s	3 fe5d4d0953cef770
+textured (13,64) +0 at 1234.567 s, doppelganger	3 fe5d4d0953cef770
+textured (13,64) +0 at 1234.567 s, excellent	6 f5ab30b20a3822c4
+textured (13,64) +0 at 1234.567 s, fading 0.5	3 468263e53642b20a
+textured (13,64) +0 at 1234.567 s, in a monster's hands	3 fe5d4d0953cef770
+textured (13,64) +0 at 1234.567 s, without the skin	3 77d82c401674bf65
+textured (13,64) +0 at 1235.817 s	3 fe5d4d0953cef770
+textured (13,64) +0 at 1238.267 s	3 fe5d4d0953cef770
+textured (13,64) +11 at 1234.567 s	12 78ef8c88dfa1bb3a
+textured (13,64) +13 at 1234.567 s	12 0ec01fb2cfcefc59
+textured (13,64) +15 at 1234.567 s	12 0ec01fb2cfcefc59
+textured (13,64) +7 at 1234.567 s	6 4cc66f903914d823
+textured (13,64) +9 at 1234.567 s	9 f6a83bb0864a7894
+textured (13,64) +9 at 1235.817 s	9 f6a83bb0864a7894
+textured (13,65) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,65) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,65) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,65) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,65) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,65) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,65) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,65) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,65) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,65) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,65) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,65) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,65) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,65) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,83) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,83) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,83) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,83) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,83) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,83) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,83) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,83) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,83) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,83) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,83) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,83) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,83) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,83) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,84) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,84) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,84) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,84) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,84) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,84) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,84) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,84) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,84) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,84) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,84) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,84) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,84) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,84) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,85) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (13,85) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (13,85) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (13,85) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (13,85) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (13,85) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (13,85) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (13,85) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (13,85) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (13,85) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (13,85) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (13,85) +7 at 1234.567 s	4 091a24c652df9c87
+textured (13,85) +9 at 1234.567 s	6 16e388092e199b3b
+textured (13,85) +9 at 1235.817 s	6 16e388092e199b3b
+textured (13,86) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,86) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,86) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,86) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,86) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,86) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,86) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,86) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,86) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,86) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,86) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,86) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,86) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,86) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,87) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,87) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,87) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,87) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,87) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,87) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,87) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,87) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,87) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,87) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,87) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,87) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,87) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,87) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,88) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,88) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,88) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,88) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,88) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,88) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,88) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,88) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,88) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,88) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,88) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,88) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,88) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,88) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,89) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,89) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,89) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,89) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,89) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,89) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,89) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,89) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,89) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,89) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,89) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,89) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,89) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,89) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (13,90) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (13,90) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (13,90) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (13,90) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (13,90) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (13,90) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (13,90) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (13,90) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (13,90) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (13,90) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (13,90) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (13,90) +7 at 1234.567 s	4 091a24c652df9c87
+textured (13,90) +9 at 1234.567 s	6 16e388092e199b3b
+textured (13,90) +9 at 1235.817 s	6 16e388092e199b3b
+textured (13,91) +0 at 1234.567 s	3 fe5d4d0953cef770
+textured (13,91) +0 at 1234.567 s, doppelganger	3 fe5d4d0953cef770
+textured (13,91) +0 at 1234.567 s, excellent	6 f5ab30b20a3822c4
+textured (13,91) +0 at 1234.567 s, fading 0.5	3 468263e53642b20a
+textured (13,91) +0 at 1234.567 s, in a monster's hands	3 fe5d4d0953cef770
+textured (13,91) +0 at 1234.567 s, without the skin	3 77d82c401674bf65
+textured (13,91) +0 at 1235.817 s	3 fe5d4d0953cef770
+textured (13,91) +0 at 1238.267 s	3 fe5d4d0953cef770
+textured (13,91) +11 at 1234.567 s	12 78ef8c88dfa1bb3a
+textured (13,91) +13 at 1234.567 s	12 0ec01fb2cfcefc59
+textured (13,91) +15 at 1234.567 s	12 0ec01fb2cfcefc59
+textured (13,91) +7 at 1234.567 s	6 4cc66f903914d823
+textured (13,91) +9 at 1234.567 s	9 f6a83bb0864a7894
+textured (13,91) +9 at 1235.817 s	9 f6a83bb0864a7894
+textured (13,92) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (13,92) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (13,92) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (13,92) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (13,92) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (13,92) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (13,92) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (13,92) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (13,92) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (13,92) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,92) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (13,92) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (13,92) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (13,92) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,72) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,72) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,72) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,72) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,72) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,72) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,72) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,72) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,72) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,72) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,72) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,72) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,72) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,72) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,73) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,73) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,73) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,73) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,73) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,73) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,73) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,73) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,73) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,73) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,73) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,73) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,73) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,73) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,74) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,74) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,74) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,74) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,74) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,74) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,74) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,74) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,74) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,74) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,74) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,74) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,74) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,74) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,75) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,75) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,75) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,75) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,75) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,75) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,75) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,75) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,75) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,75) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,75) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,75) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,75) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,75) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,76) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,76) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,76) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,76) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,76) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,76) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,76) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,76) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,76) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,76) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,76) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,76) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,76) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,76) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,77) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,77) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,77) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,77) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,77) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,77) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,77) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,77) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,77) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,77) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,77) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,77) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,77) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,77) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,78) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (14,78) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (14,78) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (14,78) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (14,78) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (14,78) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (14,78) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (14,78) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (14,78) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (14,78) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,78) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,78) +7 at 1234.567 s	4 091a24c652df9c87
+textured (14,78) +9 at 1234.567 s	6 16e388092e199b3b
+textured (14,78) +9 at 1235.817 s	6 16e388092e199b3b
+textured (14,79) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (14,79) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (14,79) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (14,79) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (14,79) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (14,79) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (14,79) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (14,79) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (14,79) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (14,79) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,79) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,79) +7 at 1234.567 s	4 091a24c652df9c87
+textured (14,79) +9 at 1234.567 s	6 16e388092e199b3b
+textured (14,79) +9 at 1235.817 s	6 16e388092e199b3b
+textured (14,80) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (14,80) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (14,80) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (14,80) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (14,80) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (14,80) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (14,80) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (14,80) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (14,80) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (14,80) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,80) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,80) +7 at 1234.567 s	4 091a24c652df9c87
+textured (14,80) +9 at 1234.567 s	6 16e388092e199b3b
+textured (14,80) +9 at 1235.817 s	6 16e388092e199b3b
+textured (14,81) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (14,81) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (14,81) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (14,81) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (14,81) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (14,81) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (14,81) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (14,81) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (14,81) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (14,81) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,81) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,81) +7 at 1234.567 s	4 091a24c652df9c87
+textured (14,81) +9 at 1234.567 s	6 16e388092e199b3b
+textured (14,81) +9 at 1235.817 s	6 16e388092e199b3b
+textured (14,82) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+textured (14,82) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+textured (14,82) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+textured (14,82) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+textured (14,82) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+textured (14,82) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+textured (14,82) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+textured (14,82) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+textured (14,82) +11 at 1234.567 s	8 a2ba192af40ffca1
+textured (14,82) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,82) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+textured (14,82) +7 at 1234.567 s	4 091a24c652df9c87
+textured (14,82) +9 at 1234.567 s	6 16e388092e199b3b
+textured (14,82) +9 at 1235.817 s	6 16e388092e199b3b
+textured (14,96) +0 at 1234.567 s	1 3544bacb4bd0b039
+textured (14,96) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+textured (14,96) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+textured (14,96) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+textured (14,96) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+textured (14,96) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+textured (14,96) +0 at 1235.817 s	1 3544bacb4bd0b039
+textured (14,96) +0 at 1238.267 s	1 3544bacb4bd0b039
+textured (14,96) +11 at 1234.567 s	4 90ac4f7fb3106a20
+textured (14,96) +13 at 1234.567 s	4 71de38ed7971794f
+textured (14,96) +15 at 1234.567 s	4 71de38ed7971794f
+textured (14,96) +7 at 1234.567 s	2 ae652853bc2f200f
+textured (14,96) +9 at 1234.567 s	3 233dff6b9cec2d75
+textured (14,96) +9 at 1235.817 s	3 233dff6b9cec2d75
+textured (14,97) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,97) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,97) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,97) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,97) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,97) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,97) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,97) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,97) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,97) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,97) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,97) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,97) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,97) +9 at 1235.817 s	6 39bf0226d16551b8
+textured (14,98) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+textured (14,98) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+textured (14,98) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+textured (14,98) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+textured (14,98) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+textured (14,98) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+textured (14,98) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+textured (14,98) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+textured (14,98) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+textured (14,98) +13 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,98) +15 at 1234.567 s	8 d8a4935afb09b7c1
+textured (14,98) +7 at 1234.567 s	4 ee489678f8a9361f
+textured (14,98) +9 at 1234.567 s	6 39bf0226d16551b8
+textured (14,98) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,84) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,84) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,84) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+texturedAllMeshes (14,84) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+texturedAllMeshes (14,84) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,84) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+texturedAllMeshes (14,84) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,84) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,84) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+texturedAllMeshes (14,84) +13 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,84) +15 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,84) +7 at 1234.567 s	4 ee489678f8a9361f
+texturedAllMeshes (14,84) +9 at 1234.567 s	6 39bf0226d16551b8
+texturedAllMeshes (14,84) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,85) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,85) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,85) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+texturedAllMeshes (14,85) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+texturedAllMeshes (14,85) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,85) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+texturedAllMeshes (14,85) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,85) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,85) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+texturedAllMeshes (14,85) +13 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,85) +15 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,85) +7 at 1234.567 s	4 ee489678f8a9361f
+texturedAllMeshes (14,85) +9 at 1234.567 s	6 39bf0226d16551b8
+texturedAllMeshes (14,85) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,86) +0 at 1234.567 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,86) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+texturedAllMeshes (14,86) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+texturedAllMeshes (14,86) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+texturedAllMeshes (14,86) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+texturedAllMeshes (14,86) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+texturedAllMeshes (14,86) +0 at 1235.817 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,86) +0 at 1238.267 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,86) +11 at 1234.567 s	4 90ac4f7fb3106a20
+texturedAllMeshes (14,86) +13 at 1234.567 s	4 71de38ed7971794f
+texturedAllMeshes (14,86) +15 at 1234.567 s	4 71de38ed7971794f
+texturedAllMeshes (14,86) +7 at 1234.567 s	2 ae652853bc2f200f
+texturedAllMeshes (14,86) +9 at 1234.567 s	3 233dff6b9cec2d75
+texturedAllMeshes (14,86) +9 at 1235.817 s	3 233dff6b9cec2d75
+texturedAllMeshes (14,87) +0 at 1234.567 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,87) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
+texturedAllMeshes (14,87) +0 at 1234.567 s, excellent	2 7f1c37174212362a
+texturedAllMeshes (14,87) +0 at 1234.567 s, fading 0.5	1 152da26ac83ac72f
+texturedAllMeshes (14,87) +0 at 1234.567 s, in a monster's hands	1 3544bacb4bd0b039
+texturedAllMeshes (14,87) +0 at 1234.567 s, without the skin	1 b50a73d1548aa4f6
+texturedAllMeshes (14,87) +0 at 1235.817 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,87) +0 at 1238.267 s	1 3544bacb4bd0b039
+texturedAllMeshes (14,87) +11 at 1234.567 s	4 90ac4f7fb3106a20
+texturedAllMeshes (14,87) +13 at 1234.567 s	4 71de38ed7971794f
+texturedAllMeshes (14,87) +15 at 1234.567 s	4 71de38ed7971794f
+texturedAllMeshes (14,87) +7 at 1234.567 s	2 ae652853bc2f200f
+texturedAllMeshes (14,87) +9 at 1234.567 s	3 233dff6b9cec2d75
+texturedAllMeshes (14,87) +9 at 1235.817 s	3 233dff6b9cec2d75
+texturedAllMeshes (14,88) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,88) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,88) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+texturedAllMeshes (14,88) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+texturedAllMeshes (14,88) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,88) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+texturedAllMeshes (14,88) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,88) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,88) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+texturedAllMeshes (14,88) +13 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,88) +15 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,88) +7 at 1234.567 s	4 ee489678f8a9361f
+texturedAllMeshes (14,88) +9 at 1234.567 s	6 39bf0226d16551b8
+texturedAllMeshes (14,88) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,89) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,89) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,89) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+texturedAllMeshes (14,89) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+texturedAllMeshes (14,89) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,89) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+texturedAllMeshes (14,89) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,89) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,89) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+texturedAllMeshes (14,89) +13 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,89) +15 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,89) +7 at 1234.567 s	4 ee489678f8a9361f
+texturedAllMeshes (14,89) +9 at 1234.567 s	6 39bf0226d16551b8
+texturedAllMeshes (14,89) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,90) +0 at 1234.567 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,90) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,90) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
+texturedAllMeshes (14,90) +0 at 1234.567 s, fading 0.5	2 9f96422ebbe85c0d
+texturedAllMeshes (14,90) +0 at 1234.567 s, in a monster's hands	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,90) +0 at 1234.567 s, without the skin	2 aa96a81529f5b623
+texturedAllMeshes (14,90) +0 at 1235.817 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,90) +0 at 1238.267 s	2 b17d7cb70c9c18c1
+texturedAllMeshes (14,90) +11 at 1234.567 s	8 b1d5114f4f48f3d9
+texturedAllMeshes (14,90) +13 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,90) +15 at 1234.567 s	8 d8a4935afb09b7c1
+texturedAllMeshes (14,90) +7 at 1234.567 s	4 ee489678f8a9361f
+texturedAllMeshes (14,90) +9 at 1234.567 s	6 39bf0226d16551b8
+texturedAllMeshes (14,90) +9 at 1235.817 s	6 39bf0226d16551b8
+texturedAllMeshes (14,94) +0 at 1234.567 s	2 dd32cbd6b7bbea2e
+texturedAllMeshes (14,94) +0 at 1234.567 s, doppelganger	2 dd32cbd6b7bbea2e
+texturedAllMeshes (14,94) +0 at 1234.567 s, excellent	4 53bdf62e2d81a30c
+texturedAllMeshes (14,94) +0 at 1234.567 s, fading 0.5	2 0e2b7b16abefa09a
+texturedAllMeshes (14,94) +0 at 1234.567 s, in a monster's hands	2 dd32cbd6b7bbea2e
+texturedAllMeshes (14,94) +0 at 1234.567 s, without the skin	2 eb5ca56b524647e6
+texturedAllMeshes (14,94) +0 at 1235.817 s	2 dd32cbd6b7bbea2e
+texturedAllMeshes (14,94) +0 at 1238.267 s	2 dd32cbd6b7bbea2e
+texturedAllMeshes (14,94) +11 at 1234.567 s	8 a2ba192af40ffca1
+texturedAllMeshes (14,94) +13 at 1234.567 s	8 135ec4dbc6bbdf89
+texturedAllMeshes (14,94) +15 at 1234.567 s	8 135ec4dbc6bbdf89
+texturedAllMeshes (14,94) +7 at 1234.567 s	4 091a24c652df9c87
+texturedAllMeshes (14,94) +9 at 1234.567 s	6 16e388092e199b3b
+texturedAllMeshes (14,94) +9 at 1235.817 s	6 16e388092e199b3b

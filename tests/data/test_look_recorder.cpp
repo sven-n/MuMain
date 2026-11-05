@@ -7,6 +7,7 @@
 #include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Render/Items/ItemRenderStyles.h"
 
 #include <cstdlib>
 #include <filesystem>
@@ -135,6 +136,7 @@ TEST_CASE("The draw recorder draws a real item the same way twice, and the draws
 {
     const std::vector<int> items = LookRecorder::ItemsUsing("chromeMesh0");
     REQUIRE_FALSE(items.empty());
+    const LookStoreScope looks({ChromeMesh0()});
     LookRecorder::ShippedItems shipped;
     shipped.Open(items);
     for (const Situation& situation : LookRecorder::Situations())
@@ -142,46 +144,36 @@ TEST_CASE("The draw recorder draws a real item the same way twice, and the draws
         CAPTURE(situation.Describe());
         const Record first = LookRecorder::RecordItem(items.front(), situation);
         const Record second = LookRecorder::RecordItem(items.front(), situation);
-        CHECK_FALSE(first.meshDraws.empty());
+        CHECK(first.meshDraws.size() > 1);
         CHECK(first.gpuCalls.size() > 1);
         CHECK(LookRecorder::FirstDifference(first, second).empty());
         CHECK(LookRecorder::Digest(first) == LookRecorder::Digest(second));
     }
 }
 
-TEST_CASE("chromeMesh0 in the data draws as its code on every item that uses it, in every situation "
-          "[looks][recorder]")
+TEST_CASE("The draw recorder names the first difference between two drawings [looks][recorder]")
 {
     const std::vector<int> items = LookRecorder::ItemsUsing("chromeMesh0");
-    const LookStoreScope looks({ChromeMesh0()});
-    LookRecorder::ShippedItems shipped;
-    shipped.Open(items);
-    for (const int item : items)
-    {
-        for (const Situation& situation : LookRecorder::Situations())
-        {
-            CAPTURE(LookRecorder::DescribeItem(item) + " " + situation.Describe());
-            const Record code = LookRecorder::RecordItemWithCode(item, situation, "chromeMesh0");
-            const Record data = LookRecorder::RecordItem(item, situation);
-            CHECK(LookRecorder::FirstDifference(code, data) == "");
-        }
-    }
-}
-
-TEST_CASE("The draw recorder names the first difference between the code and the data [looks][recorder]")
-{
-    const std::vector<int> items = LookRecorder::ItemsUsing("chromeMesh0");
-    const LookStoreScope looks({ChromeMesh0(0.5f)});
-    LookRecorder::ShippedItems shipped;
-    shipped.Open(items);
     const Situation plain = LookRecorder::Situations().front();
-    const Record code = LookRecorder::RecordItemWithCode(items.front(), plain, "chromeMesh0");
-    const Record data = LookRecorder::RecordItem(items.front(), plain);
-    const std::string difference = LookRecorder::FirstDifference(code, data);
+    Record before;
+    Record after;
+    {
+        const LookStoreScope looks({ChromeMesh0()});
+        LookRecorder::ShippedItems shipped;
+        shipped.Open(items);
+        before = LookRecorder::RecordItem(items.front(), plain);
+    }
+    {
+        const LookStoreScope looks({ChromeMesh0(0.5f)});
+        LookRecorder::ShippedItems shipped;
+        shipped.Open(items);
+        after = LookRecorder::RecordItem(items.front(), plain);
+    }
+    const std::string difference = LookRecorder::FirstDifference(before, after);
     INFO(difference);
     CHECK(difference.find("alpha 1 (code) vs 0.5 (data)") != std::string::npos);
     CHECK(difference.find(", mesh 0:") != std::string::npos);
-    CHECK(LookRecorder::Digest(code) != LookRecorder::Digest(data));
+    CHECK(LookRecorder::Digest(before) != LookRecorder::Digest(after));
 }
 
 TEST_CASE("Render styles moved into data draw as their old code did (the baseline) [looks][recorder]")
@@ -228,5 +220,48 @@ TEST_CASE("Render styles moved into data draw as their old code did (the baselin
             REQUIRE(line != baseline.end());
             CHECK(digest == line->second);
         }
+    }
+}
+
+TEST_CASE("Each render style in the data draws as its code while the code still has it [looks][recorder]")
+{
+    // A look being moved: added to the data and compared with its code here, field by field, before the code is
+    // deleted (then the baseline keeps what the code drew).
+    RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
+    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+    std::vector<std::string> moving;
+    for (const LookDefinition& look : shipped.looks)
+    {
+        if (Render::Items::Styles::ExistsInCode(look.name))
+        {
+            moving.push_back(look.name);
+        }
+    }
+    const LookStoreScope looks(std::move(shipped.looks));
+    for (const std::string& name : moving)
+    {
+        const std::vector<int> items = LookRecorder::ItemsUsing(name);
+        LookRecorder::ShippedItems shippedItems;
+        shippedItems.Open(items);
+        for (const int item : items)
+        {
+            for (const Situation& situation : LookRecorder::Situations())
+            {
+                CAPTURE(name + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
+                const Record code = LookRecorder::RecordItemWithCode(item, situation, name);
+                const Record data = LookRecorder::RecordItem(item, situation);
+                CHECK(LookRecorder::FirstDifference(code, data) == "");
+            }
+        }
+    }
+}
+
+TEST_CASE("No render style is both in the data and in the code (design L14) [looks]")
+{
+    const RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
+    for (const LookDefinition& look : shipped.looks)
+    {
+        CAPTURE(look.name);
+        CHECK_FALSE(Render::Items::Styles::ExistsInCode(look.name));
     }
 }

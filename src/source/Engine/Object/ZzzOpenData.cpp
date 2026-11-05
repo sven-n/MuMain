@@ -624,7 +624,7 @@ static void OpenItemEffectModelTextures()
 }
 
 // Textures that the effect code of items draws with.
-static void OpenItemEffectTextures()
+void OpenItemEffectTextures()
 {
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
