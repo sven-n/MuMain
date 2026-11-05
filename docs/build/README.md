@@ -75,6 +75,10 @@ These apply to every setup; the per-setup guides only cover what differs.
 Use CMake 3.25 or newer, the .NET 10 SDK, and the compiler and system packages listed
 in your platform guide. Windows presets also require vcpkg with `VCPKG_ROOT` set.
 Initial configuration needs network access unless dependency sources are already cached.
+When a change in `CMakeLists.txt` changes how a library is downloaded (its version, URL
+or archive), the next configure downloads it again, in an existing build folder too.
+Offline, configure with `-DFETCHCONTENT_FULLY_DISCONNECTED=ON` to keep using the copy
+that is already there.
 
 CMake initializes missing Git submodules under `src/ThirdParty/`: SDL3 and RmlUi for
 all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
