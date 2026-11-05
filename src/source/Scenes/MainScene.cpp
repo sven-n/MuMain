@@ -528,6 +528,10 @@ bool IsBodyShadowsDisabledDebug()
 {
     return g_bDisableBodyShadowsDebug;
 }
+bool ModelShadowsEnabled()
+{
+    return (g_pOption == nullptr || g_pOption->GetRenderAllEffects()) && !IsBodyShadowsDisabledDebug();
+}
 
 static bool g_bDisableJointsDebug = false;
 void SetDisableJoints(bool disabled)
@@ -605,6 +609,9 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
                     FRAME_PROFILE(Objects);
                     Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
                     Render::Drawing::ScopedReorderableDraws reorderable;
+                    std::optional<Render::Drawing::ScopedNoSunCasters> objectsCastNone;
+                    if (!ModelShadowsEnabled())
+                        objectsCastNone.emplace();
                     RenderObjects();
                 }
                 {
@@ -613,6 +620,11 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
                 }
             }
     }
+
+    // Past the terrain, which keeps casting: what the switches take the shadows of casts none in the sun's map either.
+    std::optional<Render::Drawing::ScopedNoSunCasters> modelsCastNone;
+    if (!ModelShadowsEnabled())
+        modelsCastNone.emplace();
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
     {
@@ -686,6 +698,7 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
     EndSprite();
 
     RenderAfterEffects();
+    modelsCastNone.reset();
     if (later)
         later->Flush();
 
@@ -700,6 +713,8 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         if (Render::Drawing::DrawsWorldLater())
             waterLater.emplace();
         RenderWaterTerrain();
+        if (!ModelShadowsEnabled())
+            modelsCastNone.emplace();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
         BeginSprite();
@@ -712,6 +727,7 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         RenderPoints(byWaterMap);
 
         EndSprite();
+        modelsCastNone.reset();
         if (waterLater)
             waterLater->Flush();
         EndOpengl();

@@ -3113,7 +3113,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
 void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
 {
-    if ((g_pOption != nullptr && !g_pOption->GetRenderAllEffects()) || IsBodyShadowsDisabledDebug())
+    if (!ModelShadowsEnabled())
     {
         return;
     }
