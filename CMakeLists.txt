@@ -293,6 +293,10 @@ set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
+# SDL_image's own defaults, set here too because the submodules below are not fetched: without stb_image, PNG and
+# JPEG would build from the vendored libpng, jpeg and zlib, and JXL from libjxl.
+set(SDLIMAGE_BACKEND_STB ON CACHE BOOL "" FORCE)
+set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
 # With those formats off, no part of SDL_image builds from its git submodules (aom, dav1d, libavif, libjxl, libpng,
 # jpeg, libtiff, libwebp, zlib): stb_image covers PNG and JPEG without libpng, jpeg or zlib. Cloned with their whole
 # history, they were about 1 GB of each build folder's 1.1 GB of SDL_image, so they are not fetched.
