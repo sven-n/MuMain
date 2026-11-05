@@ -24,7 +24,6 @@
 #include "Engine/Object/Movement/FlightFeel.h"
 #include "Engine/Object/Movement/Greetings.h"
 #include "Engine/Object/Movement/LookAt.h"
-#include "Engine/Object/Movement/Momentum.h"
 #include "Engine/Object/Movement/MovementBones.h"
 #include "Engine/Object/Movement/PoseFade.h"
 #include "Engine/Object/Movement/SlopeLean.h"
@@ -2479,8 +2478,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             const float step = Engine::Characters::StepPerKey(o->CurrentAction);
             if (step > 0.f)
             {
-                // (Slowing to a stop or speeding up, at the share of its speed it has: StepMomentum.)
-                PlaySpeed = CharacterMoveSpeed(c) * c->Motion.MomentumPace / (step * o->Scale);
+                PlaySpeed = CharacterMoveSpeed(c) / (step * o->Scale);
             }
         }
         // Hovering in place, the body's breathing keeps the wings' beat: one of its cycles per wing beat (at their
@@ -6375,14 +6373,14 @@ void MoveCharacterPosition(CHARACTER* c)
     MoveCharacterPosition(c, c->Object.Angle[2]);
 }
 
-void MoveCharacterPosition(CHARACTER* c, float heading, float pace)
+void MoveCharacterPosition(CHARACTER* c, float heading)
 {
     OBJECT* o = &c->Object;
     float Matrix[3][4];
     const vec3_t direction = {o->Angle[0], o->Angle[1], heading};
     AngleMatrix(direction, Matrix);
     vec3_t v, Velocity;
-    Vector(0.f, -CharacterMoveSpeed(c) * pace, 0.f, v);
+    Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
     VectorRotate(v, Matrix, Velocity);
     VectorAddScaled(o->Position, Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
@@ -6467,9 +6465,7 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
                 SetPlayerStop(c);
             }
 
-            float heading = Engine::Characters::EnhancedMovementEnabled() ? c->MoveHeading : o->Angle[2];
-            const float pace = Engine::Characters::StepMomentum(c, heading);
-            MoveCharacterPosition(c, heading, pace);
+            MoveCharacterPosition(c, Engine::Characters::EnhancedMovementEnabled() ? c->MoveHeading : o->Angle[2]);
         }
     }
     else

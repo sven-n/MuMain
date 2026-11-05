@@ -2,6 +2,7 @@
 #include "doctest.h"
 
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 
@@ -162,16 +163,15 @@ TEST_CASE("A part turned about an upright keeps its height and circles the pivot
     CHECK(matrix[2][2] == 1.f);
 }
 
-TEST_CASE("A walking character travels toward its path while its facing turns gradually [gamelogic][turning]")
+namespace
+{
+// A walker on a straight path north along x = 10 from tile (10, 10), facing `facing` degrees off the path, with a
+// walking speed of its own (a monster's, not the player's equipment-based one).
+CHARACTER& WalkerOnPath(float facing)
 {
     static CHARACTER walker;
     walker.Initialize();
-    // A walking speed of its own (a monster's, not the player's equipment-based one).
     walker.MoveSpeed = 10;
-    const float savedFactor = FPS_ANIMATION_FACTOR;
-    FPS_ANIMATION_FACTOR = 1.f;
-
-    // A straight path north along x = 10, the character facing the other way.
     PATH_t& path = walker.Path;
     path.PathNum = 4;
     for (int i = 0; i < 4; ++i)
@@ -183,25 +183,101 @@ TEST_CASE("A walking character travels toward its path while its facing turns gr
     path.CurrentPathFloat = 0;
     walker.Object.Position[0] = 10.5f * TERRAIN_SCALE;
     walker.Object.Position[1] = 10.5f * TERRAIN_SCALE;
-    const float toPath = CreateAngle(0.f, 0.f, 0.f, 1.f);
-    walker.Object.Angle[2] = toPath + 180.f;
+    walker.Object.Angle[2] = std::fmod(CreateAngle(0.f, 0.f, 0.f, 1.f) + facing + 360.f, 360.f);
+    return walker;
+}
 
+// FPS_ANIMATION_FACTOR set for a test and put back after it.
+class AnimationFactor
+{
+public:
+    explicit AnimationFactor(float factor) : m_saved(FPS_ANIMATION_FACTOR)
+    {
+        FPS_ANIMATION_FACTOR = factor;
+    }
+    ~AnimationFactor()
+    {
+        FPS_ANIMATION_FACTOR = m_saved;
+    }
+    AnimationFactor(const AnimationFactor&) = delete;
+    AnimationFactor& operator=(const AnimationFactor&) = delete;
+
+private:
+    float m_saved;
+};
+
+// Enhanced Movement switched for a test and put back after it.
+class EnhancedMovementSwitch
+{
+public:
+    explicit EnhancedMovementSwitch(bool enabled) : m_saved(Engine::Characters::EnhancedMovementEnabled())
+    {
+        Engine::Characters::SetEnhancedMovementEnabled(enabled);
+    }
+    ~EnhancedMovementSwitch()
+    {
+        Engine::Characters::SetEnhancedMovementEnabled(m_saved);
+    }
+    EnhancedMovementSwitch(const EnhancedMovementSwitch&) = delete;
+    EnhancedMovementSwitch& operator=(const EnhancedMovementSwitch&) = delete;
+
+private:
+    bool m_saved;
+};
+
+// Where a walker facing `facing` off its path is after one frame along it, with Enhanced Movement on or off.
+struct WalkStep
+{
+    float facing = 0.f;
+    float x = 0.f;
+    float y = 0.f;
+};
+
+WalkStep StepAlongPath(float facing, bool enhanced)
+{
+    const EnhancedMovementSwitch option(enhanced);
+    CHARACTER& walker = WalkerOnPath(facing);
     CHECK_FALSE(MovePath(&walker));
-    CHECK(walker.MoveHeading == doctest::Approx(toPath).epsilon(0.001));
-    // One frame from rest turns a little, not the whole way (it used to snap on a turn of 45 degrees or more).
-    const float turned = FarAngle(toPath + 180.f, walker.Object.Angle[2]);
-    CHECK(turned > 0.f);
-    CHECK(turned < 10.f);
+    MoveCharacterPosition(&walker, enhanced ? walker.MoveHeading : walker.Object.Angle[2]);
+    return {walker.Object.Angle[2], walker.Object.Position[0], walker.Object.Position[1]};
+}
+} // namespace
 
-    // It moves along its heading, not its facing: toward the path, though it still faces mostly away.
+TEST_CASE("A walking reversal faces and travels the new way at once, as without Enhanced Movement [gamelogic][turning]")
+{
+    const AnimationFactor factor(1.f);
+    const float toPath = CreateAngle(0.f, 0.f, 0.f, 1.f);
+    for (const float facing : {180.f, 90.f, -60.f, 50.f})
+    {
+        CAPTURE(facing);
+        const WalkStep on = StepAlongPath(facing, true);
+        const WalkStep off = StepAlongPath(facing, false);
+        // It faces the path at once (UpdateSnapTurn draws the body catching up), as it did before the option.
+        CHECK(FarAngle(on.facing, toPath) == doctest::Approx(0.f).epsilon(0.001));
+        CHECK(FarAngle(on.facing, off.facing) == doctest::Approx(0.f).epsilon(0.001));
+        // And it goes the new way at full speed from the first frame: where it would have gone without the option.
+        CHECK(on.x == doctest::Approx(off.x));
+        CHECK(on.y == doctest::Approx(off.y));
+        CHECK(on.y - 10.5f * TERRAIN_SCALE == doctest::Approx(10.f));
+    }
+}
+
+TEST_CASE("A gentle walking turn eases while the walker already travels the new way [gamelogic][turning]")
+{
+    const AnimationFactor factor(1.f);
+    const EnhancedMovementSwitch option(true);
+    CHARACTER& walker = WalkerOnPath(30.f);
+    const float toPath = CreateAngle(0.f, 0.f, 0.f, 1.f);
+    CHECK_FALSE(MovePath(&walker));
+    // One frame from rest turns a little, not the whole way.
+    const float left = FarAngle(walker.Object.Angle[2], toPath);
+    CHECK(left > 20.f);
+    CHECK(left < 30.f);
     const float x = walker.Object.Position[0];
     const float y = walker.Object.Position[1];
     MoveCharacterPosition(&walker, walker.MoveHeading);
-    REQUIRE((walker.Object.Position[0] != x || walker.Object.Position[1] != y));
-    CHECK(walker.Object.Position[1] > y);
+    CHECK(walker.Object.Position[1] - y == doctest::Approx(10.f));
     CHECK(walker.Object.Position[0] == doctest::Approx(x).epsilon(0.001));
-
-    FPS_ANIMATION_FACTOR = savedFactor;
 }
 
 TEST_CASE("A standing turn starts only for a real change and gives way to anything else that turns the character [gamelogic][turning]")

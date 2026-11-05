@@ -71,7 +71,6 @@
 #include "Engine/Object/Movement/FrameTime.h"
 #include "Engine/Object/Movement/FlightFeel.h"
 #include "Engine/Object/Movement/HeroLook.h"
-#include "Engine/Object/Movement/Momentum.h"
 #include "Engine/Object/Movement/SlopeLean.h"
 #include "Engine/Object/Movement/TurnLag.h"
 
@@ -3169,9 +3168,7 @@ void MoveHero()
             else
             {
                 g_CharacterUnRegisterBuff((&Hero->Object), eBuff_CrywolfHeroContracted);
-                float heading = enhancedMovement ? c->MoveHeading : o->Angle[2];
-                const float pace = Engine::Characters::StepMomentum(c, heading);
-                MoveCharacterPosition(c, heading, pace);
+                MoveCharacterPosition(c, enhancedMovement ? c->MoveHeading : o->Angle[2]);
             }
         }
     }

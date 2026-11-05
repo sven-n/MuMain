@@ -48,6 +48,9 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
 // that speed and slows down again before it arrives.
 constexpr float WalkTurnDegreesPerSecond = 540.f;
 constexpr float WalkTurnAcceleration = 1440.f;
+// A walking turn this sharp or sharper (a reversal) faces the new way at once, as without Enhanced Movement, so a quick
+// change of direction stays as quick (UpdateSnapTurn draws the body catching up); a gentler one eases.
+constexpr float SharpTurnDegrees = 45.f;
 // One frame of a character's facing turning toward its MoveHeading (StepEasedTurn, with the walk turn's speeds).
 void TurnTowardsMoveHeading(CHARACTER* c);
 // Starts a standing character turning toward `angle` (a direction from the server), stepping around instead of

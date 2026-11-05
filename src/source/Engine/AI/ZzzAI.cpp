@@ -664,15 +664,23 @@ bool MovePath(CHARACTER* c, bool Turn)
             c->MoveHeading = o->Angle[2];
             c->TurnSpeed = 0.f;
         }
-        // The character travels straight toward the point (MoveCharacterPosition along MoveHeading), so its path
-        // is as before; only its facing turns smoothly, where it used to snap on a turn of 45 degrees or more.
+        // The character travels straight toward the point (MoveCharacterPosition along MoveHeading) at full speed, so
+        // its path is as before; only its facing turns smoothly on a gentle turn (a sharp one still faces at once).
         else if (!Success)
         {
             c->MoveHeading = CreateAngle(o->Position[0], o->Position[1], cx, cy);
         }
         if (Turn && Engine::Characters::EnhancedMovementEnabled())
         {
-            TurnTowardsMoveHeading(c);
+            if (!Success && FarAngle(o->Angle[2], c->MoveHeading) >= SharpTurnDegrees)
+            {
+                o->Angle[2] = c->MoveHeading;
+                c->TurnSpeed = 0.f;
+            }
+            else
+            {
+                TurnTowardsMoveHeading(c);
+            }
             if (Success)
             {
                 c->TurnPending = FarAngle(o->Angle[2], c->MoveHeading) > TurnArrivedDegrees;

@@ -6,7 +6,6 @@
 #include "Engine/Object/Movement/FlightFeel.h"
 #include "Engine/Object/Movement/Greetings.h"
 #include "Engine/Object/Movement/LookAt.h"
-#include "Engine/Object/Movement/Momentum.h"
 #include "Engine/Object/Movement/SlopeLean.h"
 #include "Engine/Object/Movement/SnapTurn.h"
 #include "Engine/Object/Movement/TurnLag.h"
@@ -370,98 +369,6 @@ TEST_CASE("A turn of less than 30 degrees in a frame is not a sudden turn [gamel
     walker.Object.Angle[2] = 350.f;
     UpdateSnapTurn(&walker);
     CHECK(walker.Motion.SnapTurnOffset > 0.f);
-}
-
-TEST_CASE("A walker speeds up from rest over about 0.15 seconds [gamelogic][momentum]")
-{
-    for (const double fps : std::array{25.0, 60.0, 240.0})
-    {
-        CAPTURE(fps);
-        const Clock clock(fps);
-        CHARACTER& walker = FreshPlayer();
-        float fullAt = -1.f;
-        float previous = 0.f;
-        for (int frame = 1; frame <= clock.Frames(1.f); ++frame)
-        {
-            clock.Tick();
-            float heading = 45.f;
-            const float pace = StepMomentum(&walker, heading);
-            CHECK(heading == 45.f);
-            CHECK(pace >= previous);
-            previous = pace;
-            if (frame == 1)
-            {
-                CHECK(pace < 0.5f);
-            }
-            if (pace == 1.f)
-            {
-                fullAt = static_cast<float>(frame) * clock.Seconds();
-                break;
-            }
-        }
-        CHECK(fullAt >= 0.14f);
-        CHECK(fullAt <= 0.2f);
-    }
-}
-
-TEST_CASE("A walker turning back slows to a stop the old way before it takes the new one [gamelogic][momentum]")
-{
-    for (const double fps : std::array{25.0, 60.0, 240.0})
-    {
-        CAPTURE(fps);
-        const Clock clock(fps);
-        CHARACTER& walker = FreshPlayer();
-        for (int frame = 0; frame < clock.Frames(0.5f); ++frame)
-        {
-            clock.Tick();
-            float heading = 0.f;
-            StepMomentum(&walker, heading);
-        }
-        REQUIRE(walker.Motion.MomentumPace == 1.f);
-
-        float turnedAt = -1.f;
-        float previous = 1.f;
-        for (int frame = 1; frame <= clock.Frames(1.f); ++frame)
-        {
-            clock.Tick();
-            float heading = 180.f;
-            const float pace = StepMomentum(&walker, heading);
-            if (heading == 180.f)
-            {
-                turnedAt = static_cast<float>(frame) * clock.Seconds();
-                break;
-            }
-            CHECK(heading == 0.f);
-            CHECK(pace <= previous);
-            previous = pace;
-        }
-        CHECK(previous == 0.f);
-        CHECK(turnedAt >= 0.11f);
-        CHECK(turnedAt <= 0.21f);
-    }
-}
-
-TEST_CASE("A walker follows a gentler turn at once, and starts over after standing still [gamelogic][momentum]")
-{
-    const Clock clock(60.0);
-    CHARACTER& walker = FreshPlayer();
-    for (int frame = 0; frame < 30; ++frame)
-    {
-        clock.Tick();
-        float heading = 0.f;
-        StepMomentum(&walker, heading);
-    }
-
-    clock.Tick();
-    float heading = 80.f;
-    CHECK(StepMomentum(&walker, heading) == 1.f);
-    CHECK(heading == 80.f);
-
-    // Stood still for a moment: from rest again, the new way at once.
-    WorldTime += 200.0;
-    heading = 260.f;
-    CHECK(StepMomentum(&walker, heading) < 0.5f);
-    CHECK(heading == 260.f);
 }
 
 TEST_CASE("The back takes the spine's share of a head turn [gamelogic][turning]")
@@ -900,21 +807,6 @@ TEST_CASE("Switching Enhanced Movement off mid-flight eases the bank and the dri
     CHECK(o.Position[2] == doctest::Approx(100.f));
 }
 
-TEST_CASE(
-    "Without Enhanced Movement a walker keeps its full pace and the way it's headed [gamelogic][momentum][option]")
-{
-    const Clock clock(60.0);
-    const EnhancedMovementOff off;
-    CHARACTER& walker = FreshPlayer();
-    for (const float wanted : {0.f, 0.f, 180.f, 90.f})
-    {
-        clock.Tick();
-        float heading = wanted;
-        CHECK(StepMomentum(&walker, heading) == 1.f);
-        CHECK(heading == wanted);
-    }
-}
-
 TEST_CASE("Without Enhanced Movement a sudden turn is drawn at once, and the wings don't trail "
           "[gamelogic][snapturn][turnlag][option]")
 {
@@ -960,13 +852,6 @@ TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelo
                                                    c.Object.Angle[2] = static_cast<float>((i * 7) % 360);
                                                    UpdateSnapTurn(&c);
                                                });
-    const double momentum = NanosecondsPerCall(Calls,
-                                               [&](int i)
-                                               {
-                                                   clock.Tick();
-                                                   float heading = static_cast<float>((i / 50) % 2 * 180);
-                                                   StepMomentum(&c, heading);
-                                               });
     double slopeLean = 0.;
     {
         const Slope slope(10.f);
@@ -993,7 +878,7 @@ TEST_CASE("The realism steps' per-frame cost for a character (benchmark) [gamelo
         CHECK(looker.Motion.LookTarget >= 0);
     }
     MESSAGE("per frame, ns per character: flight " << flight << ", turn lag " << turnLag << ", sudden turn " << snapTurn
-                                                   << ", momentum " << momentum << ", slope lean " << slopeLean
+                                                   << ", slope lean " << slopeLean
                                                    << "; a look around in a 400-character scene " << lookAround
                                                    << " (each player does one every 0.25 s or so)");
     CHECK(flight >= 0.);

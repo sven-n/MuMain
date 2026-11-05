@@ -187,8 +187,8 @@ public:
     // How fast the facing turns toward MoveHeading now, in degrees per second (signed): a turn speeds up and slows
     // down (TurnTowardsMoveHeading) instead of starting and stopping at full speed.
     float TurnSpeed = 0.f;
-    // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, momentum, slope
-    // lean, the drawn sudden turn, pose fades).
+    // The movement features' state (Enhanced Movement: flight feel, turn lag, look-at, greetings, slope lean, the
+    // drawn sudden turn, pose fades).
     CharacterMotion Motion;
     char		CollisionTime; // unused?
 

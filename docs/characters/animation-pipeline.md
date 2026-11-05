@@ -62,7 +62,7 @@ the seconds of a frame are `FPS_ANIMATION_FACTOR / REFERENCE_FPS`. Below 25 FPS 
 
 1. Objects, items, boids.
 2. **`MoveHero`** (`Engine/Object/ZzzInterface.cpp`): the hero's head (`UpdateHeroLook`: who nodded at it, what it
-   looks at, idle glances; else the cursor), walking (`MovePath`, `StepMomentum`, `MoveCharacterPosition`) or turning
+   looks at, idle glances; else the cursor), walking (`MovePath`, `MoveCharacterPosition`) or turning
    on the spot (toward the cursor), then its flight feel, turn lag and slope lean.
 3. **`MoveCharactersClient`** (`ZzzCharacter.cpp`): for every slot `MoveCharacterClient`:
    `MoveMonsterClient` (paths and walking; returns at once for the hero), `FinishPendingTurn`, **`MoveCharacter`**
@@ -170,7 +170,6 @@ is `CHARACTER::Motion`.
 | `LookAt` | who a head looks at (`UpdateLookAt`, `LookTowards`); the view and head limits (`LookViewDegrees`, `HeroLookDegrees`) |
 | `HeroLook` | the hero's own head before the cursor (`UpdateHeroLook`) and its idle glances (`HeroIsGlancing`) |
 | `Greetings` | nods and greetings, from the hero's point of view (`RemoveNod`, `UpdateNod`, `HeroNodAttention`) |
-| `Momentum` | walking slows to a stop on a turn back and speeds up from rest (`StepMomentum`) |
 | `SlopeLean` | a walker leans into a climb, a mount follows the slope |
 | `FootPlacement` | a player's feet on the ground under them, in the bones (`PlaceFeet`) |
 | `Stride` | how far each action steps per key (`StepPerKey`), so walking plays as fast as the character moves |
@@ -219,7 +218,8 @@ Dummies: 9, 16, 21, 24, 32, 41, 56-59.
 ## Monsters and NPCs each frame
 
 - **Walking:** `MoveMonsterClient` paths toward the server's target tile and walks it like a player (`MovePath`:
-  `MoveHeading` along a spline through the path, the facing eased toward it).
+  `MoveHeading` along a spline through the path, the facing eased toward it, or at once on a turn of 45 degrees or
+  more).
 - **Head:** `MoveCharacterVisual`: someone to look at (`UpdateLookAt`: a monster its target, an NPC the hero passing,
   a player an enemy, an NPC or another player in sight) comes first; otherwise the old idle glances (`MoveHead` for
   non-players, plus a random glance for everyone but the hero). Skipped while stunned, asleep or hardened.
