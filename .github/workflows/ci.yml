@@ -147,7 +147,8 @@ jobs:
     # By name, as Quality Gates: another image brings another MSVC, and GitHub warns in every job while it moves
     # windows-latest to a new one.
     runs-on: windows-2025-vs2026
-    timeout-minutes: 90
+    # A cold build, e.g. after a runner image brings a new cl.exe, took 64 minutes: vcpkg 18, the build 41.
+    timeout-minutes: 120
     outputs:
       caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:

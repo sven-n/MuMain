@@ -319,7 +319,8 @@ for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("
         f"if: needs.quality.outputs.{platform} == 'true'" in platform_job,
         f"{platform} must follow the tested build plan",
     )
-    check("timeout-minutes: 90" in platform_job, f"{platform} must bound job duration")
+    timeout = "timeout-minutes: 120" if platform == "windows" else "timeout-minutes: 90"
+    check(timeout in platform_job, f"{platform} must bound job duration: {timeout}")
 for required in ("name: CI Required", "if: always()",
                  "needs: [quality, build-windows, build-linux, build-macos, caches]",
                  "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
