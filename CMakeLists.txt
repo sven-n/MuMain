@@ -299,7 +299,8 @@ set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
 # With these settings no part of SDL_image builds from its vendored libraries (aom, dav1d, libavif, libjxl, libpng,
 # jpeg, libtiff, libwebp, zlib), so SDL_image comes as its release archive, which leaves them out: 11 MB to download
 # and 36 MB unpacked, where the tag's git clone took 84 MB and, with its submodules, 1.1 GB. The hash pins the
-# sources, which a tag does not.
+# sources, which a tag does not. To build a format that needs a vendored library, fetch SDL_image with it first (e.g.
+# the tag's git clone with that submodule); tests/test_sdl_image_archive.cmake checks these settings.
 FetchContent_Declare(SDL3_image
     URL      https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
     URL_HASH SHA256=a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
