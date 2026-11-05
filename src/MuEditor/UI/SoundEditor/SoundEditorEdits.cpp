@@ -631,39 +631,36 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
 {
     // The sets renamed in other windows since are found by their new names.
     FollowKeyChanges();
-    bool reverted = true;
+    // What each file that is not read again stays not saved against.
+    const auto savedCode = m_savedCode;
+    const auto savedObjects = m_savedObjects;
+    const auto savedEvents = m_savedEvents;
+    bool codeKept = false;
+    bool objectsKept = false;
+    bool eventsKept = false;
     // Only the files whose tables changed are read again.
     const std::vector<SoundFile> before = g_SoundFileDatabase.GetAll();
     if (m_savedCode && *m_savedCode != before)
     {
-        if (Data::Sounds::RevertSoundFiles(issues))
+        codeKept = !Data::Sounds::RevertSoundFiles(issues);
+        if (!codeKept)
         {
             ReloadChanged(before, g_SoundFileDatabase.GetAll());
         }
-        else
-        {
-            reverted = false;
-        }
     }
     std::map<std::string, Data::Monsters::MonsterSoundSet> keptSets;
-    if (SetsDiffer(m_savedSets) && !RevertSets(issues, keptSets))
-    {
-        reverted = false;
-    }
+    const bool setsKept = SetsDiffer(m_savedSets) && !RevertSets(issues, keptSets);
     if (m_savedObjects && *m_savedObjects != g_MapObjectSoundDatabase.GetAll())
     {
-        if (Data::Maps::RevertMapObjectSounds(issues))
+        objectsKept = !Data::Maps::RevertMapObjectSounds(issues);
+        if (!objectsKept)
         {
             g_MapSoundsTab.TakeSaved();
         }
-        else
-        {
-            reverted = false;
-        }
     }
-    if (m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll() && !Data::Sounds::RevertSoundEvents(issues))
+    if (m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll())
     {
-        reverted = false;
+        eventsKept = !Data::Sounds::RevertSoundEvents(issues);
     }
     // The folders as the file has them.
     m_folders.reset();
@@ -671,9 +668,22 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
     m_undo.clear();
     m_redo.clear();
     TakeSaved();
-    // The sets not put back still differ from the file: not saved yet.
+    // A file that was not read again still differs from its table: not saved
+    // yet, so Save writes it and a later Revert reads it.
+    if (codeKept)
+    {
+        m_savedCode = savedCode;
+    }
     m_savedSets = std::move(keptSets);
-    return reverted;
+    if (objectsKept)
+    {
+        m_savedObjects = savedObjects;
+    }
+    if (eventsKept)
+    {
+        m_savedEvents = savedEvents;
+    }
+    return !codeKept && !setsKept && !objectsKept && !eventsKept;
 }
 
 bool SoundEdits::RevertSets(std::vector<Data::Items::ItemDataIssue>& issues,

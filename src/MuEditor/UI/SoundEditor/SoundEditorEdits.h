@@ -136,8 +136,8 @@ public:
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
     // Reads the files whose tables changed again (a monster set this window
     // changed: as Data/Monsters/Sounds.json has it, under the name another
-    // window gave it since) and the folders; the history goes. A set that
-    // was not put back (the file cannot be read) stays not saved.
+    // window gave it since) and the folders; the history goes. A table whose
+    // file cannot be read, and a set that was not put back, stay not saved.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
     // The tables as they are now, and the folders as their file has them, are
     // what Save and Revert compare with.

@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <set>
 #include <sstream>
 #include <string>
@@ -657,6 +658,79 @@ TEST_CASE("Sound Editor: a Revert that cannot read Data/Monsters/Sounds.json say
     REQUIRE(g_SoundEdits.Revert(issues));
     CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == DeathTree());
     CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
+TEST_CASE("Sound Editor: a Revert that cannot read the code sounds', the map object sounds' or the sound events' file "
+          "keeps that table's changes not saved, and a later one reads it [sounds][editor]")
+{
+    EditorScope scope;
+    const std::vector<Data::Sounds::SoundEvent> previousEvents = g_SoundEventDatabase.GetAll();
+    const std::vector<SoundFile> code{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/ok.wav")};
+    const std::vector<Data::Maps::MapObjectSound> objects{Waterfall()};
+    Data::Sounds::SoundEvent click;
+    click.event = "characterSelected";
+    Data::Sounds::SoundEventRule rule;
+    MuEditor::SoundEditor::AddPlay(rule, "SOUND_CLICK01");
+    click.rules = {rule};
+    const std::vector<Data::Sounds::SoundEvent> events{click};
+    g_SoundFileDatabase.Build(code);
+    g_MapObjectSoundDatabase.Build(objects);
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_SoundEventDatabase.Build(events);
+    std::filesystem::create_directories("Data/Audio");
+    std::filesystem::create_directories("Data/Maps");
+    g_SoundEdits.TakeSaved();
+    const auto changeRow = [](const char* key, const char* name)
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, key);
+        REQUIRE(row != nullptr);
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*row);
+        values.name = name;
+        REQUIRE(g_SoundEdits.Change(*row, values));
+    };
+
+    struct Case
+    {
+        const char* file;
+        std::string text;
+        std::function<void()> change;
+        std::function<bool()> changed;
+    };
+    const std::vector<Case> cases{
+        {"Data/Audio/SoundFiles.json", Data::Sounds::WriteSoundFilesJson(code),
+         [&] { changeRow("SOUND_CLICK01", "Click"); }, [] { return g_SoundFileDatabase.GetAll()[0].name == "Click"; }},
+        {"Data/Maps/ObjectSounds.json", Data::Maps::WriteMapObjectSoundsJson(objects),
+         [&] { changeRow("objects:Data/Sound/EditorTest/ok.wav", "Kalima waterfall"); },
+         [] { return g_MapObjectSoundDatabase.GetAll()[0].name == "Kalima waterfall"; }},
+        {"Data/Audio/SoundEvents.json", Data::Sounds::WriteSoundEventsJson(events),
+         [&]
+         {
+             Data::Sounds::SoundEvent after = click;
+             REQUIRE(MuEditor::SoundEditor::AddPlay(after.rules[0], "SOUND_INTERFACE01"));
+             REQUIRE(g_SoundEdits.ChangeEvents("Sound event", std::vector<Data::Sounds::SoundEvent>{after}));
+         },
+         [] { return g_SoundEventDatabase.GetAll()[0].rules[0].plays.size() == 2; }},
+    };
+    for (const Case& entry : cases)
+    {
+        CAPTURE(entry.file);
+        entry.change();
+        std::ofstream(entry.file, std::ios::binary) << "{ \"formatVersion\": 1, \"broken\": [";
+        std::vector<Data::Items::ItemDataIssue> issues;
+        CHECK_FALSE(g_SoundEdits.Revert(issues));
+        CHECK(Data::Items::HasFatal(issues));
+        CHECK(entry.changed());
+        CHECK(g_SoundEdits.IsModified());
+
+        // The file fixed: Revert reads it.
+        std::ofstream(entry.file, std::ios::binary) << entry.text;
+        issues.clear();
+        REQUIRE(g_SoundEdits.Revert(issues));
+        CHECK_FALSE(entry.changed());
+        CHECK_FALSE(g_SoundEdits.IsModified());
+    }
+    g_SoundEventDatabase.Build(previousEvents);
 }
 
 TEST_CASE("Sound Editor: Save writes the sets it changed into Data/Monsters/Sounds.json alone, and the monster "
