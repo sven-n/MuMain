@@ -4,6 +4,7 @@
 
 #include "TestModelSlots.h"
 
+#include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FootPlacement.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -380,4 +381,51 @@ TEST_CASE("The realism steps' cost in a player's bone build (benchmark) [data][a
                                                 << ", plus the ponytail's lag " << ponytail << "; feet on flat ground +"
                                                 << feetFlat << ", on a slope +" << feetSlope);
     CHECK(sink == sink);
+}
+
+TEST_CASE("A pose fade with the head turned fades the neck and the spine too, turned the same way "
+          "[data][animation][fade]")
+{
+    PlayerModel player;
+    BMD& model = player.model;
+    REQUIRE(model.HeadTurnBones[0] == model.BoneHead);
+    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
+    Engine::Characters::SetEnhancedMovementEnabled(true);
+
+    vec3_t angle = {0.f, 0.f, 0.f};
+    // Looking to a side, as the hero's head follows the cursor.
+    vec3_t head = {40.f, 0.f, 0.f};
+    // Running, head turned: where a fade from the run starts.
+    static float running[MAX_BONES][3][4];
+    model.Animation(running, 0.f, 0.f, PLAYER_RUN, angle, head, false, false, nullptr, PLAYER_RUN);
+    // Just stopped: standing, with all of the run still faded in.
+    static float fading[MAX_BONES][3][4];
+    PoseBlend blend;
+    blend.Action = PLAYER_RUN;
+    blend.Frame = 0.f;
+    blend.Weight = 1.f;
+    model.Animation(fading, 0.f, 0.f, PLAYER_STOP_MALE, angle, head, false, false, nullptr, PLAYER_STOP_MALE, MAX_BONES,
+                    0.f, 0.f, 0.f, &blend);
+    // And standing without it, for what the fade would have snapped to.
+    static float standing[MAX_BONES][3][4];
+    model.Animation(standing, 0.f, 0.f, PLAYER_STOP_MALE, angle, head, false, false, nullptr, PLAYER_STOP_MALE);
+
+    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
+
+    for (const short bone : model.HeadTurnBones)
+    {
+        REQUIRE(bone >= 0);
+        CAPTURE(model.Bones[bone].Name);
+        // The turned bones still show the run (its forward lean, turned with the head), not the standing pose.
+        float toRun[3][3];
+        RotationBetween(running[bone], fading[bone], toRun);
+        CHECK(toRun[0][0] == doctest::Approx(1.f).epsilon(0.001));
+        CHECK(toRun[1][1] == doctest::Approx(1.f).epsilon(0.001));
+        CHECK(toRun[2][2] == doctest::Approx(1.f).epsilon(0.001));
+        CHECK(Distance(running[bone], fading[bone]) == doctest::Approx(0.f).epsilon(0.01));
+    }
+    // The run and the stand differ there, so the check above means something.
+    float toStanding[3][3];
+    RotationBetween(running[model.HeadTurnBones[3]], standing[model.HeadTurnBones[3]], toStanding);
+    CHECK(toStanding[0][0] + toStanding[1][1] + toStanding[2][2] < 2.999f);
 }

@@ -347,12 +347,12 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // Head on Neck, Spine1 and Spine) with Enhanced Movement, the neck and spine take a share of the turn to the side
     // (HeadTurn.h), so the shoulders follow the head while the feet stay put; their share comes off the head's, which
     // ends up turned as far as before. The nod (up and down) is the head's alone. Each bone turns about its own X
-    // axis, which runs along a Biped spine.
+    // axis, which runs along a Biped spine. The pose faded out of is turned the same way, so a turned bone fades too.
     struct TurnedBone
     {
         int bone = -1;
         float share = 0.f; // radians
-        vec4_t q1, q2;
+        vec4_t q1, q2, blend;
     };
     TurnedBone turned[4];
     int turnedCount = 0;
@@ -415,6 +415,10 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         {
             turnedSample(turned[t], pose.from, turned[t].q1);
             turnedSample(turned[t], pose.to, turned[t].q2);
+            if (blending)
+            {
+                turnedSample(turned[t], blendSample, turned[t].blend);
+            }
         }
     }
 
@@ -487,7 +491,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const float* Position2;
         // A locked root keeps x and y of the current action's key 0.
         vec3_t lockedRoot;
-        // This bone's rotation in the pose faded out of, while one fades (a bone the head turned keeps its turn).
+        // This bone's rotation in the pose faded out of (turned with the head where the bone is), while one fades.
         const float* blendRotation = nullptr;
         vec4_t blendScratch;
 
@@ -537,9 +541,9 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
                 q1 = sampleRotation(b, pose.from, rotationScratch1);
                 q2 = sampleRotation(b, pose.to, rotationScratch2);
             }
-            if (blending && (turn == nullptr || (HeadAngle[0] == 0.f && HeadAngle[1] == 0.f)))
+            if (blending)
             {
-                blendRotation = sampleRotation(b, blendSample, blendScratch);
+                blendRotation = turn != nullptr ? turn->blend : sampleRotation(b, blendSample, blendScratch);
             }
             Position1 = samplePosition(b, pose.from, positionScratch1);
             Position2 = samplePosition(b, pose.to, positionScratch2);
