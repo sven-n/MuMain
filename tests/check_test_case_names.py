@@ -149,7 +149,7 @@ def main():
     checked = 0
     found = []
     for path in sources:
-        for line, name in cases(path.read_text(encoding="utf-8", errors="replace")):
+        for line, name in cases(path.read_text(encoding="utf-8-sig", errors="replace")):
             checked += 1
             if reason := problem(name):
                 shown = "the name" if name is None else '"' + name.replace("\n", "\\n") + '"'

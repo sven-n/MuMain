@@ -342,9 +342,9 @@ def offences(path, text, kinds):
 def main():
     root = Path(sys.argv[1])
     paths = [p for p in sorted(root.rglob("*")) if p.suffix in (".cpp", ".h") and "ThirdParty" not in p.parts]
-    texts = {p: code_only(p.read_text(encoding="utf-8", errors="replace")) for p in paths}
+    texts = {p: code_only(p.read_text(encoding="utf-8-sig", errors="replace")) for p in paths}
     game = Path(__file__).resolve().parents[2] / "src" / "source"
-    headers = [code_only(p.read_text(encoding="utf-8", errors="replace"))
+    headers = [code_only(p.read_text(encoding="utf-8-sig", errors="replace"))
                for p in sorted(game.rglob("*.h")) if "ThirdParty" not in p.parts]
     kinds = Kinds([text for path, text in texts.items() if path.suffix == ".h"] + headers)
     found = []
