@@ -81,6 +81,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME shadow_pass_selection_tests
+    SOURCES
+        test_shadow_pass_selection.cpp
+)
+
+mu_add_test(
     NAME antialiasing_tests
     SOURCES
         test_antialiasing.cpp

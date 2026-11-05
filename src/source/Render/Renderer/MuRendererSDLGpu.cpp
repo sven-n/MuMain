@@ -39,6 +39,7 @@
 #include "RangeAllocator.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuAmbientOcclusion.h"
+#include "ShadowPassSelection.h"
 #include "SdlGpuSunShadowMap.h"
 #include "SdlGpuPostProcessing.h"
 #include "SdlGpuReplayState.h"
@@ -845,6 +846,7 @@ struct RenderCmd
     bool lightShadow{};   // a point light's (GroundShadowSource::PointLight)
     bool characterDraw{}; // recorded inside a ScopedCharacterDraws
     bool noSunCaster{};   // recorded inside a ScopedNoSunCasters
+    bool translucentVertices{}; // below full alpha before the texture
     // Set once this command has been replayed into an offscreen capture (see
     // BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay pass then
     // skips it instead of drawing it a second time into the frame.
@@ -881,7 +883,7 @@ static Render::DrawCommandHistory s_previousDrawCommands;
     if (previous.blendEnabled != command.blendEnabled || previous.blendMode != command.blendMode ||
         previous.bloomExcluded != command.bloomExcluded || previous.groundShadow != command.groundShadow ||
         previous.lightShadow != command.lightShadow || previous.characterDraw != command.characterDraw ||
-        previous.noSunCaster != command.noSunCaster)
+        previous.noSunCaster != command.noSunCaster || previous.translucentVertices != command.translucentVertices)
     {
         return Counter::BatchBreakBlend;
     }
@@ -1136,40 +1138,26 @@ static bool s_sunShadowPass = false;
 static bool s_sceneDepthPass = false;
 static glm::mat4 s_sunFromScene{1.0f};
 
-// How a draw covers the sun shadow map (sun_depth.frag's coverageMode): solid with its alpha test,
-// or a blended character part (wings, capes, auras) dithered by its alpha or, glowing, by its
-// brightness, so the shadow's blur turns it into a partial shadow. Darkening blends cast none.
-enum class SunCoverage : std::uint32_t
+// What the sun shadow and scene depth passes read of a recorded draw.
+[[nodiscard]] static Render::ShadowPass::DrawTraits ShadowPassTraits(const RenderCmd& command)
 {
-    None,
-    Solid,
-    Alpha,
-    Brightness,
-};
-
-// An alpha-tested or alpha-to-coverage draw writing depth: solid where its texels pass, though recorded as blended.
-[[nodiscard]] static bool IsCutout(const RenderCmd& command)
-{
-    return command.blendEnabled && command.blendMode == BlendMode::Alpha && command.depthMaskEnabled &&
-           (command.fogUniform.alphaDiscardEnabled != 0u || command.fogUniform.alphaToCoverage != 0u);
-}
-
-[[nodiscard]] static SunCoverage GetSunCoverage(const RenderCmd& command)
-{
-    if (!command.blendEnabled || IsCutout(command))
-        return SunCoverage::Solid;
-    switch (command.blendMode)
-    {
-    case BlendMode::Alpha:
-    case BlendMode::Mixed:
-        return SunCoverage::Alpha;
-    case BlendMode::Additive:
-    case BlendMode::Glow:
-    case BlendMode::Luminance:
-        return SunCoverage::Brightness;
-    default:
-        return SunCoverage::None;
-    }
+    const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
+    Render::ShadowPass::DrawTraits traits;
+    // Models drawn for the UI (their own view, Enhanced without the point lights) are left out.
+    traits.worldGeometry =
+        skinned ? s_skinningUniforms[command.skinningIndex].palette[3] != k_SkinningLightingEnhanced
+                : command.type != RenderCmdType::DrawTriangles2D && command.vtxStride == sizeof(Vertex3D);
+    traits.groundShadow = command.groundShadow;
+    traits.depthTest = command.depthTestEnabled;
+    traits.depthWrite = command.depthMaskEnabled;
+    traits.blended = command.blendEnabled;
+    traits.blendMode = command.blendMode;
+    traits.alphaTest = command.fogUniform.alphaDiscardEnabled != 0u;
+    traits.alphaToCoverage = command.fogUniform.alphaToCoverage != 0u;
+    traits.translucentVertices = command.translucentVertices;
+    traits.characterPart = command.characterDraw && skinned;
+    traits.noSunCaster = command.noSunCaster;
+    return traits;
 }
 
 // A draw's vertex uniforms in the sun shadow pass: its own, with the sun's matrix.
@@ -1263,7 +1251,8 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     {
         // sun_depth.frag reads fogEnabled's slot as its coverage mode.
         FogUniform coverage = command.fogUniform;
-        coverage.fogEnabled = static_cast<std::uint32_t>(GetSunCoverage(command)) - 1u;
+        coverage.fogEnabled =
+            static_cast<std::uint32_t>(Render::ShadowPass::CoverageOf(ShadowPassTraits(command))) - 1u;
         PushReplayFragmentUniforms(coverage, state);
     }
     else
@@ -2527,31 +2516,6 @@ public:
         return s_groundShadowMaskPipelines[command.lightShadow ? 1 : 0][ShadowPassLayout(command)];
     }
 
-    // A solid draw of the scene's world: depth-tested and depth-writing, not blended or a cutout, not a ground
-    // shadow, not 2D; or a character's blended part (GetSunCoverage). Models drawn for the UI (their own view,
-    // Enhanced without the point lights) are left out.
-    [[nodiscard]] static bool IsSunShadowCaster(const RenderCmd& command)
-    {
-        if (command.groundShadow || !command.depthTestEnabled)
-        {
-            return false;
-        }
-        if ((command.blendEnabled && !IsCutout(command)) || !command.depthMaskEnabled)
-        {
-            const bool characterPart = command.characterDraw && command.type == RenderCmdType::DrawSkinnedTriangles &&
-                                       command.blendEnabled && GetSunCoverage(command) != SunCoverage::None;
-            if (!characterPart)
-            {
-                return false;
-            }
-        }
-        if (command.type == RenderCmdType::DrawSkinnedTriangles)
-        {
-            return s_skinningUniforms[command.skinningIndex].palette[3] != k_SkinningLightingEnhanced;
-        }
-        return command.type != RenderCmdType::DrawTriangles2D && command.vtxStride == sizeof(Vertex3D);
-    }
-
     // The pipeline `command` replays with in a pass of `selection`, or null when it is not drawn there.
     // Once the mask holds the ground shadows, the other passes leave them out.
     [[nodiscard]] static SDL_GPUGraphicsPipeline* GetReplayPipeline(const RenderCmd& command, ReplaySelection selection)
@@ -2562,14 +2526,15 @@ public:
         }
         if (selection == ReplaySelection::SceneDepth)
         {
-            const bool solid =
-                IsSunShadowCaster(command) && (!command.blendEnabled || IsCutout(command)) && command.depthMaskEnabled;
-            return solid ? s_sceneDepthPipelines[ShadowPassLayout(command)] : nullptr;
+            return Render::ShadowPass::WritesSceneDepth(ShadowPassTraits(command))
+                       ? s_sceneDepthPipelines[ShadowPassLayout(command)]
+                       : nullptr;
         }
         if (selection == ReplaySelection::SunShadowCasters)
         {
-            return IsSunShadowCaster(command) && !command.noSunCaster ? s_sunShadowPipelines[ShadowPassLayout(command)]
-                                                                      : nullptr;
+            return Render::ShadowPass::CastsSunShadow(ShadowPassTraits(command))
+                       ? s_sunShadowPipelines[ShadowPassLayout(command)]
+                       : nullptr;
         }
         if (command.lightShadow || (command.groundShadow && s_groundShadowMaskReady))
         {
@@ -4902,7 +4867,8 @@ public:
             }
             return;
         }
-        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(pipeline, resolvedTexId, GetVertexAlpha(vertices));
+        const VertexAlpha vertexAlpha = GetVertexAlpha(vertices);
+        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(pipeline, resolvedTexId, vertexAlpha);
         pipeline = coverage.pipeline;
 
         void* pSampler = LookupWorldSampler(resolvedTexId);
@@ -4921,6 +4887,7 @@ public:
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
@@ -5023,6 +4990,7 @@ public:
         cmd.vu.fogStart = m_fogUniform.fogStart;
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
+        cmd.translucentVertices = GetVertexAlpha(vertices) == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
         std::size_t& previousCommand =
@@ -5299,8 +5267,8 @@ public:
         const Uint32 numIndices = numQuads * 6;
 
         // RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
-        const AlphaCoverageChoice coverage =
-            ChooseAlphaCoverage(GetActive3DPipeline(), resolvedTexId, GetVertexAlpha(vertices));
+        const VertexAlpha vertexAlpha = GetVertexAlpha(vertices);
+        const AlphaCoverageChoice coverage = ChooseAlphaCoverage(GetActive3DPipeline(), resolvedTexId, vertexAlpha);
         SDL_GPUGraphicsPipeline* pipeline = coverage.pipeline;
         if (!pipeline)
         {
@@ -5345,6 +5313,7 @@ public:
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
 
@@ -5692,10 +5661,9 @@ private:
         SDL_GPUGraphicsPipeline* pipeline =
             set.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled, cullFaceEnabled);
         // One colour for the whole draw: its alpha is the vertices' alpha.
+        const VertexAlpha vertexAlpha = (color >> 24u) == 0xFFu ? VertexAlpha::Opaque : VertexAlpha::Translucent;
         const AlphaCoverageChoice coverage =
-            shadow ? AlphaCoverageChoice{pipeline, false}
-                   : ChooseAlphaCoverage(pipeline, resolvedTexId,
-                                         (color >> 24u) == 0xFFu ? VertexAlpha::Opaque : VertexAlpha::Translucent);
+            shadow ? AlphaCoverageChoice{pipeline, false} : ChooseAlphaCoverage(pipeline, resolvedTexId, vertexAlpha);
         pipeline = coverage.pipeline;
         if (shadow)
         {
@@ -5804,6 +5772,7 @@ private:
         }
         cmd.fogUniform = m_fogUniform;
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
+        cmd.translucentVertices = vertexAlpha == VertexAlpha::Translucent;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
 
