@@ -568,6 +568,9 @@
   <data name="Item effect" xml:space="preserve">
     <value>Item effect</value>
   </data>
+  <data name="Render styles" xml:space="preserve">
+    <value>Render styles</value>
+  </data>
   <data name="Used by" xml:space="preserve">
     <value>used by</value>
   </data>

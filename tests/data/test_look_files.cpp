@@ -176,6 +176,7 @@ TEST_CASE("Problems that make a render style file unusable are fatal [looks][fil
          "looks[0].layers[0].scrollingMesh"},
         {R"([{"name": "a", "layers": [], "itemValuesAfter": {"glowStrength": "drawing"}}])",
          "looks[0].itemValuesAfter.glowStrength"},
+        {R"([{"name": "a", "layers": [], "itemValuesBefore": [{"hiddenMesh": 1}]}])", "looks[0].itemValuesBefore"},
     };
     for (const Case& c : cases)
     {

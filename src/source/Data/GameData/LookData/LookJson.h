@@ -28,6 +28,10 @@ std::string_view GetRenderStylesFileName();
 void ReadRenderStylesJson(std::string_view text, const std::string& source, std::vector<LookDefinition>& looks,
                           std::vector<Items::ItemDataIssue>& issues);
 
+// The name of each look of a render style file in file order, "" for one without a readable name: what a problem in
+// "looks[3]" is about. Empty when the text is no JSON object.
+std::vector<std::string> ReadLookNames(std::string_view text);
+
 // The text of a render style file: looks sorted by name, fields in a fixed order, values that are the item's left
 // out.
 std::string WriteRenderStylesJson(std::vector<LookDefinition> looks);

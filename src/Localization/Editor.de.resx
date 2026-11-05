@@ -547,6 +547,9 @@
   <data name="Item effect" xml:space="preserve">
     <value>Gegenstandseffekt</value>
   </data>
+  <data name="Render styles" xml:space="preserve">
+    <value>Darstellungsstile</value>
+  </data>
   <data name="Used by" xml:space="preserve">
     <value>verwendet von</value>
   </data>

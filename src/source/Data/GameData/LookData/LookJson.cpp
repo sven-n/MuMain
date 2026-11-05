@@ -28,6 +28,7 @@ constexpr const char* LookFolders = "lookFolders";
 constexpr const char* Name = "name";
 constexpr const char* Layers = "layers";
 constexpr const char* ItemValuesAfter = "itemValuesAfter";
+constexpr const char* ItemValuesBefore = "itemValuesBefore";
 constexpr const char* Motion = "motion";
 constexpr const char* Blend = "blend";
 constexpr const char* Meshes = "meshes";
@@ -296,7 +297,12 @@ bool LookReader::ReadLook(const OrderedJson& json, const std::string& field, Loo
     {
         ReadItemValues(*after, field + "." + Keys::ItemValuesAfter, look.itemValuesAfter);
     }
-    WarnAboutUnknownKeys(json, {Keys::Name, Keys::Layers, Keys::ItemValuesAfter}, field);
+    if (json.contains(Keys::ItemValuesBefore))
+    {
+        AddFatal(field + "." + Keys::ItemValuesBefore,
+                 "is a part of item effects; a render style leaves its item values after drawing (itemValuesAfter)");
+    }
+    WarnAboutUnknownKeys(json, {Keys::Name, Keys::Layers, Keys::ItemValuesAfter, Keys::ItemValuesBefore}, field);
     return true;
 }
 
@@ -833,6 +839,27 @@ void ReadRenderStylesJson(std::string_view text, const std::string& source, std:
             issues.push_back(
                 {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
         });
+}
+
+std::vector<std::string> ReadLookNames(std::string_view text)
+{
+    std::vector<std::string> names;
+    const OrderedJson root = OrderedJson::parse(text, nullptr, false);
+    if (!root.is_object())
+    {
+        return names;
+    }
+    const auto list = root.find(Keys::Looks);
+    if (list == root.end() || !list->is_array())
+    {
+        return names;
+    }
+    for (const OrderedJson& look : *list)
+    {
+        const auto name = look.is_object() ? look.find(Keys::Name) : look.end();
+        names.push_back(name != look.end() && name->is_string() ? name->get<std::string>() : "");
+    }
+    return names;
 }
 
 std::string WriteRenderStylesJson(std::vector<LookDefinition> looks)
