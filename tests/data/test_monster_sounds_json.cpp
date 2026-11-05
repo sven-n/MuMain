@@ -349,7 +349,7 @@ TEST_CASE("Monster sounds: wrong values are errors that name the set and the fie
     }
 }
 
-TEST_CASE("Monster sounds: a set needs a name, once; unknown fields are warnings [data][monsters]")
+TEST_CASE("Monster sounds: a set needs a name, once, and unknown fields are warnings [data][monsters]")
 {
     ReadResult read = Read(SoundsFile(R"({ "sounds": [] })"));
     CHECK(read.sets.empty());

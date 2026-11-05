@@ -141,7 +141,7 @@ std::vector<std::string> TexturesNotInFolders(const std::string& file, const std
 }
 } // namespace
 
-TEST_CASE("Monster models: the shipped model list loads; its only warning is Molt's missing file [data][monsters]")
+TEST_CASE("Monster models: the shipped model list loads, its only warning is Molt's missing file [data][monsters]")
 {
     const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
     INFO(Messages(result.issues));

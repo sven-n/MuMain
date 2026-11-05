@@ -113,7 +113,9 @@ void OpenPlayers()
 {
     ModelsDump = new BMD[MAX_MODELS + 1024];
     Models = ModelsDump + (Random::Rand() % 1024);
-    ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
+    // Zeroes the constructed models as the original client did, which also sets the constructor's
+    // iBillType (-1) and m_LastBoneScale (1) to 0; the cast says BMD is not a plain struct.
+    ZeroMemory(static_cast<void*>(Models), MAX_MODELS * sizeof(BMD));
 
     gLoadData.AccessModel(MODEL_PLAYER, L"Data\\Player\\", L"Player");
 

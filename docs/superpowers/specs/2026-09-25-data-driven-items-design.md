@@ -645,8 +645,8 @@ in both repos (as separate PRs, one per repo).
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
 | 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863), the item cases and the class line list too (#893). Left: the code's lines and layout presets (D72, D73), the rest of the ground label colours (D70, colour groups), and the tooltip editor (#815 step 6) after phases 9 and 10; see the phase details. |
-| 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
-| 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
+| 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. Design: [item options design](2026-11-04-item-options-design.md) (draft); in two parts, 9a (format, luck, additional option, excellent, ancient bonus, editor, exchange) before phase 10 and 9b (wings, harmony, guardian, sockets, pets, the tooltip lines) after it. |
+| 10 | Item sets | Both | MuMain + C | 2, 9a | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
 | 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
 | 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, 4d, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
@@ -1345,7 +1345,10 @@ server with original clients (after phases 6 and B).
    their own exchange file and editor. The tooltip's option lines (luck,
    skill, the additional option, excellent, the 380 options, Jewel of
    Harmony, sockets) then read these definitions and become layout lines
-   between the `options` and `afterOptions` markers (D72).
+   between the `options` and `afterOptions` markers (D72). Designed in the
+   [item options design](2026-11-04-item-options-design.md) (draft,
+   2026-11-04), which also moves the 380 part of `ItemAddOption.bmd` and
+   `SocketItem_<lang>.bmd` here from phase 11 (its O13).
 10. **Item sets** (D11): `ItemSetType.bmd` / `ItemSetOption_<lang>.bmd` into
     JSON, matching OpenMU's `ItemSetGroup`, with their own exchange file and
     editor. Moved earlier if items cannot be made fully data-driven without

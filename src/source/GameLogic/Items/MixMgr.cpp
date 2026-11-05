@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 #include "Core/Text/WideFormat.h"
 
@@ -1062,6 +1064,13 @@ float CMixRecipes::MixrateFactor()
     case MRCP_NONJEWELITEM:
         fValue = m_dwTotalNonJewelItemValue;
         break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case MRCP_ADD:
+    case MRCP_SUB:
+    case MRCP_MUL:
+    case MRCP_DIV:
+    case MRCP_RP:
+        break;
     }
     ++m_iMixRateIter;
     return fValue;
@@ -1209,44 +1218,46 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
         m_MixRecipe[j].Reset();
     }
 
-    FILE* fp = _wfopen(szFileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", szFileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
         exit(0);
     }
 
     int iNumMixRecipes[MAX_MIX_TYPES];
     int iSize = sizeof(int) * MAX_MIX_TYPES;
-    fread(iNumMixRecipes, iSize, 1, fp);
-    BuxConvert((BYTE*)iNumMixRecipes, iSize);
+    if (!DataFileIO::ReadExact(fp.get(), iNumMixRecipes, iSize))
+    {
+        DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+        exit(0);
+    }
+    BuxConvert(reinterpret_cast<BYTE*>(iNumMixRecipes), iSize);
 
     iSize = sizeof(MIX_RECIPE);
     for (j = 0; j < MAX_MIX_TYPES; ++j)
     {
-        if (feof(fp) || iNumMixRecipes[j] > 1000)
+        if (feof(fp.get()) || iNumMixRecipes[j] > 1000)
         {
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-            fclose(fp);
             exit(0);
         }
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
-            auto* pMixRecipe = new MIX_RECIPE;
-            fread(pMixRecipe, iSize, 1, fp);
-            BuxConvert((BYTE*)pMixRecipe, iSize);
-            m_MixRecipe[j].AddRecipe(pMixRecipe);
+            auto pMixRecipe = std::make_unique<MIX_RECIPE>();
+            if (!DataFileIO::ReadExact(fp.get(), pMixRecipe.get(), iSize))
+            {
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                exit(0);
+            }
+            BuxConvert(reinterpret_cast<BYTE*>(pMixRecipe.get()), iSize);
+            m_MixRecipe[j].AddRecipe(pMixRecipe.release());
         }
     }
-    fclose(fp);
 }
 
 int CMixRecipeMgr::GetMixInventoryType()

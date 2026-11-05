@@ -33,13 +33,13 @@ namespace mu::ui::window
         virtual ~CSiegeWarCommander();
 
     private:
-        virtual bool OnCreate();
-        virtual bool OnUpdate();
-        virtual void OnRelease();
+        bool OnCreate() override;
+        bool OnUpdate() override;
+        void OnRelease() override;
 
-        virtual bool OnUpdateMouseEvent();
-        virtual bool OnUpdateKeyEvent();
-        virtual bool OnBtnProcess();
+        bool OnUpdateMouseEvent() override;
+        bool OnUpdateKeyEvent() override;
+        bool OnBtnProcess() override;
         void OnTeamClick(int team) override;
         void OnOrderClick(int order) override;
         void OnFillRmlModel(SiegeWarfareRmlModel& model) override;

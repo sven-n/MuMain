@@ -694,10 +694,11 @@ void MuGetSystemInfo(ER_SystemInfo* si)
     struct utsname un {};
     if (::uname(&un) == 0)
     {
-        char kernel[MAX_LENGTH_OSINFO] = { 0 };
+        // Room for both names, so only the OS line below cuts the text to MAX_LENGTH_OSINFO.
+        char kernel[sizeof(un.sysname) + sizeof(un.release)] = {0};
         std::snprintf(kernel, sizeof(kernel), "%s %s", un.sysname, un.release);
-        wchar_t kernelW[MAX_LENGTH_OSINFO] = { 0 };
-        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, MAX_LENGTH_OSINFO);
+        wchar_t kernelW[sizeof(kernel)] = {0};
+        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, static_cast<int>(std::size(kernelW)));
 
         const std::wstring distro = Core::Platform::GetOSDistroName();
         const std::wstring osLine = distro.empty()

@@ -116,12 +116,12 @@ namespace mu::ui::window
         void	Release(void);
         void	OpeningProcess(void);
         bool	ClosingProcess(void);
-        bool	UpdateMouseEvent();
-        bool	UpdateKeyEvent();
-        bool	Update();
-        bool	Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-        float	GetLayerDepth();	//. 3.4f
+        float GetLayerDepth() override; //. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }
         __inline void	SetPos(int _nX, int _nY) { m_ptPos.x = _nX, m_ptPos.y = _nY; }

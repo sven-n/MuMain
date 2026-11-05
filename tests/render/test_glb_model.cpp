@@ -2504,7 +2504,7 @@ TEST_CASE("glb_model: a normal map without TANGENT is refused")
     RequireRefused(file.Path(), "lacks TANGENT");
 }
 
-TEST_CASE("glb_model: tangents pack as snorm16 with the handedness in w; BMD vertices carry none")
+TEST_CASE("glb_model: tangents pack as snorm16 with the handedness in w, BMD vertices carry none")
 {
     using Render::Models::PackTangent;
     CHECK(PackTangent({1.f, 0.f, 0.f, 1.f}) == std::array<std::int16_t, 4>{32767, 0, 0, 32767});

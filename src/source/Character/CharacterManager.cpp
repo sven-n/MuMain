@@ -122,6 +122,16 @@ CLASS_TYPE CCharacterManager::GetBaseClass(CLASS_TYPE iClass)
         return CLASS_DARK_LORD;
     case CLASS_TEMPLENIGHT:
         return CLASS_RAGEFIGHTER;
+    // Every class is listed, without a default: a new class makes the compiler ask for its base class.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return iClass;
@@ -136,6 +146,23 @@ bool CCharacterManager::IsSecondClass(const CLASS_TYPE byClass)
     case CLASS_MUSEELF:
     case CLASS_BLOODYSUMMONER:
         return true;
+    // Every class is listed, without a default: a new class makes the compiler ask which step it is.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_GRANDMASTER:
+    case CLASS_BLADEMASTER:
+    case CLASS_HIGHELF:
+    case CLASS_DUELMASTER:
+    case CLASS_LORDEMPEROR:
+    case CLASS_DIMENSIONMASTER:
+    case CLASS_TEMPLENIGHT:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return false;
@@ -153,6 +180,20 @@ bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR:
     case CLASS_TEMPLENIGHT:
         return true;
+    // Every class is listed, without a default: a new class makes the compiler ask which step it is.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_BLOODYSUMMONER:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return false;
@@ -188,6 +229,20 @@ CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR: return SKIN_CLASS_LORDEMPEROR;
     case CLASS_DIMENSIONMASTER: return SKIN_CLASS_DIMENSIONMASTER;
     case CLASS_TEMPLENIGHT: return SKIN_CLASS_TEMPLENIGHT;
+    // Every class is listed, without a default: a new class makes the compiler ask for its skin. These classes
+    // use the skin with their own number.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return static_cast<CLASS_SKIN_INDEX>(byClass);

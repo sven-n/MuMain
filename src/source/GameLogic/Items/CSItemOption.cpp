@@ -3,6 +3,8 @@
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/FileHandle.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -118,20 +120,9 @@ bool FulfillsClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass,
     return requirement != 0 && secondClass >= requirement - 1;
 }
 
-using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
-
-FilePtr OpenBinaryFile(const wchar_t* filename)
+Core::Utilities::FileHandle OpenBinaryFile(const wchar_t* filename)
 {
-    return FilePtr(_wfopen(filename, L"rb"), &std::fclose);
-}
-
-void ReportFileIssue(const wchar_t* filename, const wchar_t* issue)
-{
-    wchar_t text[256]{};
-    std::swprintf(text, std::size(text), L"%ls - %ls.", filename, issue);
-    g_ErrorReport.Write(text);
-    MessageBox(g_hWnd, text, nullptr, MB_OK);
-    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    return Core::Utilities::FileHandle(_wfopen(filename, L"rb"));
 }
 }
 
@@ -169,7 +160,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     auto file = OpenBinaryFile(filename);
     if (!file)
     {
-        ReportFileIssue(filename, L"File does not exist.");
+        DataFileIO::ReportUnusableFile(filename, L"File does not exist.");
         return false;
     }
 
@@ -177,20 +168,20 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     std::vector<std::uint8_t> buffer(entrySize * MAX_ITEM);
     if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read content.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
     if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read checksum.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;
     }
 
     if (checksum != GenerateCheckSum2(buffer.data(), static_cast<int>(buffer.size()), 0xE5F1))
     {
-        ReportFileIssue(filename, L"File corrupted.");
+        DataFileIO::ReportUnusableFile(filename, L"File corrupted.");
         return false;
     }
 
@@ -210,7 +201,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     auto file = OpenBinaryFile(filename);
     if (!file)
     {
-        ReportFileIssue(filename, L"File does not exist.");
+        DataFileIO::ReportUnusableFile(filename, L"File does not exist.");
         return false;
     }
 
@@ -218,20 +209,20 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     std::vector<std::uint8_t> buffer(entrySize * MAX_SET_OPTION);
     if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read content.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
     if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read checksum.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;
     }
 
     if (checksum != GenerateCheckSum2(buffer.data(), static_cast<int>(buffer.size()), 0xA2F1))
     {
-        ReportFileIssue(filename, L"File corrupted.");
+        DataFileIO::ReportUnusableFile(filename, L"File corrupted.");
         return false;
     }
 

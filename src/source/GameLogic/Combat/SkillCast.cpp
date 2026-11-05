@@ -166,6 +166,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 return false;
             }
             break;
+        default:
+            break;
         }
         int iMana, iSkillMana;
         gSkillManager.GetSkillInformation(Skill, 1, NULL, &iMana, NULL, &iSkillMana);
@@ -243,6 +245,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
             case AT_SKILL_RIDER:
                 if (CheckAttack())
                     Success = CastWarriorSkill(c, o, p, Skill);
+                break;
+            default:
                 break;
             }
         }
@@ -477,6 +481,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEATHSTAB:
     case AT_SKILL_DEATHSTAB_STR:
         return;
+    default:
+        break;
     }
 
     if (Skill == AT_SKILL_DEATH_CANNON)
@@ -531,6 +537,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     SetPlayerMagic(c);
     LetHeroStop();
     break;
+    default:
+        break;
     }
 
     c->SkillSuccess = true;

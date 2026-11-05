@@ -45,7 +45,7 @@ internal static class ResxLoader
         {
             if (!TrySplitName(path, out var group, out var locale))
             {
-                Console.Error.WriteLine($"Skipping {path}: filename must be <Group>.<locale>.resx");
+                Console.Error.WriteLine($"Warning: skipping {path}: filename must be <Group>.<locale>.resx");
                 continue;
             }
 
@@ -123,7 +123,7 @@ internal static class ResxLoader
                 // text in the source bmd). Skip the entry so it doesn't
                 // produce non-ASCII identifiers that MSVC refuses to compile.
                 Console.Error.WriteLine(
-                    $"Skipping {groupName} entry with no ASCII identifier: '{key.Substring(0, Math.Min(40, key.Length))}'");
+                    $"Warning: skipping {groupName} entry with no ASCII identifier: '{key.Substring(0, Math.Min(40, key.Length))}'");
                 continue;
             }
             EnsureNoIdentifierCollision(groupName, idToKey, identifier, key);

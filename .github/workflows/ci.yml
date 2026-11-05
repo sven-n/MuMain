@@ -18,10 +18,22 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # actions/checkout runs git init and then checks out a detached commit; without these settings git prints a hint
+  # about the initial branch name and an advice block about detached HEADs in every job. Git reads them from the
+  # environment (GIT_CONFIG_COUNT), so they need no step.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
   quality:
     name: Quality Gates
-    runs-on: ubuntu-latest
+    # The image by name, not ubuntu-latest: GitHub moves repositories to a new latest image one by one, and its
+    # cppcheck and GCC report different findings and warnings.
+    runs-on: ubuntu-26.04
     outputs:
       linux: ${{ steps.plan.outputs.linux }}
       macos: ${{ steps.plan.outputs.macos }}
@@ -32,7 +44,7 @@ jobs:
       # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
       # tests use; downloading it took 30 s to 3 min depending on GitHub.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # A pull request diffs against the merge commit's first parent, so it needs only one commit of history.
           fetch-depth: 2
@@ -68,7 +80,7 @@ jobs:
           test -f src/bin/fonts/DejaVuSans.ttf
 
       - name: Cache quality tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cache/pip
@@ -130,22 +142,45 @@ jobs:
     name: Windows Native Build (x64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.windows == 'true'
-    runs-on: windows-latest
+    # By name, as Quality Gates: another image brings another MSVC, and GitHub warns in every job while it moves
+    # windows-latest to a new one.
+    runs-on: windows-2025-vs2026
     timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
+      # Loads vcvars64.bat and passes every variable it changes on to the following steps, as Fork CI does
+      # (ilammy/msvc-dev-cmd, used before, still runs on the deprecated Node.js 20).
       - name: Activate Visual Studio developer environment
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
-        with:
-          arch: x64
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installation = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $installation) {
+            throw "No Visual Studio installation with the x64 C++ tools found."
+          }
+          $vcvars = Join-Path $installation "VC\Auxiliary\Build\vcvars64.bat"
+          # vcvars64.bat looks for vswhere.exe on PATH itself.
+          $env:PATH = "$(Split-Path $vswhere);$env:PATH"
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "`"$vcvars`" >nul && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$' -and $before[$Matches[1]] -ne $Matches[2]) {
+              "$($Matches[1])=$($Matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            }
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "vcvars64.bat failed."
+          }
 
       - name: Assert MSVC developer environment
         shell: pwsh
@@ -169,40 +204,56 @@ jobs:
           }
           exit 0
 
-      - name: Cache FetchContent and NuGet dependencies
-        uses: actions/cache@v4
+      - name: Restore dependencies
+        id: deps
+        # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
+        # their sources, and the ClientLibrary projects and the .NET SDK pick the NuGet packages (the SDK's version
+        # picks those of its NativeAOT compiler). src/CMakeLists.txt is not part of it: it changes with every new
+        # source file of the game. Only the release runs, the runs on main that build Windows, save it (Save
+        # dependencies): a PR's own copy would serve that PR alone and push main's entries out of the 10 GB cache. One
+        # kind of run saves each cache, so its newest entry, the one the prune job keeps, is always the newest commit's.
+        uses: actions/cache/restore@v6
         with:
           path: |
-            out/build/windows-ci-x64-release/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/windows-ci-x64-release/_deps/*-src
+            out/build/windows-ci-x64-release/_deps/*-subbuild
             .nuget
-          key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: windows-x64-release-deps-
+          key: windows-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: windows-x64-release-dep-sources-
 
       - name: Identify vcpkg toolchain
         id: vcpkg
         shell: pwsh
         run: ./scripts/ci_vcpkg_cache_key.ps1
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@v4
+      - name: Restore vcpkg packages
+        id: vcpkg_cache
+        # Saved after the configure step, which builds what the archives lack, by the release runs only.
+        uses: actions/cache/restore@v6
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
             ~/AppData/Local/vcpkg/archives
-          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
           restore-keys: vcpkg-windows-x64-v2-
 
+      # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
+      # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -250,8 +301,29 @@ jobs:
             throw "CMake selected a compiler outside the active MSVC environment."
           }
 
+      - name: Save vcpkg packages
+        if: needs.quality.outputs.release == 'true' && steps.vcpkg_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/vcpkg/packages
+            ~/AppData/Local/vcpkg/archives
+          key: ${{ steps.vcpkg_cache.outputs.cache-primary-key }}
+
       - name: Build
-        run: cmake --build out/build/windows-ci-x64-release --config Release
+        run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+
+      - name: Save dependencies
+        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/windows-ci-x64-release/_deps/*-src
+            out/build/windows-ci-x64-release/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Run tests
         run: >
@@ -491,7 +563,7 @@ jobs:
         run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
 
       - name: Upload runtime artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
           path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz
@@ -501,7 +573,8 @@ jobs:
     name: Linux Native Build (x64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.linux == 'true'
-    runs-on: ubuntu-latest
+    # By name, as Quality Gates: another image's GCC warns differently.
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -511,10 +584,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -538,37 +612,55 @@ jobs:
 
       - name: Cache Linux compilation
         id: ccache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
           restore-keys: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Restore dependencies
+        id: deps
+        # Named as on Windows; saved by main pushes, like the compiler cache (Save dependencies).
+        uses: actions/cache/restore@v6
         with:
           path: |
             # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
             out/build/linux-ci/_deps/*-src
             out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
 
       - name: Build
         run: |
           ccache --zero-stats
-          cmake --build out/build/linux-ci --config Release
+          python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
+
+      - name: Save dependencies
+        # Not by the nightly: it runs beside the pushes in another concurrency group, so an older commit's entry could
+        # be saved after a newer one and be the one the prune job keeps.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/linux-ci/_deps/*-src
+            out/build/linux-ci/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Report compiler cache
         if: always()
@@ -614,7 +706,7 @@ jobs:
 
       - name: Save Linux compilation cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ steps.ccache.outputs.cache-primary-key }}
@@ -625,7 +717,7 @@ jobs:
 
       - name: Upload runtime artifact
         if: needs.quality.outputs.release == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-linux-native-x64-release-editor-off-no-data-main
           path: MuMain-linux-native-x64-release-editor-off-no-data.tar.gz
@@ -635,7 +727,9 @@ jobs:
     name: macOS Native Build (arm64, Release, editor OFF)
     needs: quality
     if: needs.quality.outputs.macos == 'true'
-    runs-on: macos-latest
+    # By name: the build's minimum macOS is the image's (cmake/toolchains/macos-arm64.cmake), so it changes only
+    # with this line, not when GitHub moves macos-latest to a newer macOS.
+    runs-on: macos-26
     timeout-minutes: 90
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -646,15 +740,25 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache
+        # Only what the image lacks: brew warns about each formula that is already installed. --quiet leaves out the
+        # caveats (ccache's explains its compiler symlinks, which the build does not use); warnings still show.
+        run: |
+          missing=()
+          for formula in cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache; do
+            brew list --formula "$formula" >/dev/null 2>&1 || missing+=("$formula")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            brew install --quiet "${missing[@]}"
+          fi
 
       - name: Identify compiler cache
         id: compiler
@@ -662,28 +766,33 @@ jobs:
 
       - name: Cache macOS compilation
         id: ccache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
           restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Restore dependencies
+        id: deps
+        # Named and saved as on Windows.
+        uses: actions/cache/restore@v6
         with:
           path: |
             # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
             out/build/macos-ci/_deps/*-src
             out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
           -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
@@ -693,7 +802,18 @@ jobs:
       - name: Build
         run: |
           ccache --zero-stats
-          cmake --build out/build/macos-ci --config Release
+          python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
+
+      - name: Save dependencies
+        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/macos-ci/_deps/*-src
+            out/build/macos-ci/_deps/*-subbuild
+            .nuget
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Report compiler cache
         if: always()
@@ -740,7 +860,7 @@ jobs:
       # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
       - name: Save macOS compilation cache
         if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ steps.ccache.outputs.cache-primary-key }}
@@ -751,37 +871,77 @@ jobs:
 
       - name: Upload runtime artifact
         if: needs.quality.outputs.release == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-macos-native-arm64-release-editor-off-no-data-main
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  # A save under a new key leaves the older entries of that cache behind, e.g. a compiler cache for each main push.
+  # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
+  caches:
+    name: Prune caches
+    needs: [build-windows, build-linux, build-macos]
+    # PR runs save no cache.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      # The script and what it imports, without the game data; and no token left in .git/config, as this one can
+      # delete caches.
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - name: Delete older cache entries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_cache_prune.py
+
   required:
     name: CI Required
-    needs: [quality, build-windows, build-linux, build-macos]
+    # The prune job too: its failures and warning annotations count like a build's. Without it running, the caches
+    # fill up again and push main's entries out.
+    needs: [quality, build-windows, build-linux, build-macos, caches]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # Reading the other jobs' annotations.
+      actions: read
+      checks: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Verify applicable checks
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}
         run: python3 scripts/ci_build_plan.py check
 
+      # GitHub's own warnings count too, e.g. that an action targets a deprecated Node.js version.
+      - name: Check job annotations
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_job_annotations.py
+
   release:
     name: Semantic Release
     needs: [quality, build-windows, build-linux, build-macos, required]
     if: needs.quality.outputs.release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false

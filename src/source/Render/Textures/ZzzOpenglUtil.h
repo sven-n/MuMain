@@ -42,7 +42,6 @@ extern wchar_t         GrabFileName[];
 extern bool         GrabEnable;
 
 //  etc
-bool CheckID_HistoryDay(wchar_t* Name, WORD day);
 void SetRenderViewport(int x, int y, int Width, int Height);
 void BeginSprite();
 void EndSprite();

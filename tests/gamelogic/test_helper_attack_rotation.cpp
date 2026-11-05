@@ -32,6 +32,13 @@ constexpr ActionSkillType ExtraOne = static_cast<ActionSkillType>(42);
 constexpr ActionSkillType ExtraTwo = static_cast<ActionSkillType>(43);
 using GameLogic::Automation::SkillResult;
 
+// A skill condition as the helper's settings hold it: when the skill is cast, what is near and how many.
+uint32_t SkillCondition(MUHelper::ESkillActivationBase when, MUHelper::ESkillActivationPreCon what,
+                        MUHelper::ESkillActivationSubCon count)
+{
+    return static_cast<uint32_t>(when) | static_cast<uint32_t>(what) | static_cast<uint32_t>(count);
+}
+
 struct SkillFixture
 {
     CHARACTER hero;
@@ -303,11 +310,11 @@ TEST_CASE("Timers and monster conditions keep priority and OR semantics [helper_
     CHECK(fixture.Select(15) == ExtraTwo);
     fixture.rotation.Complete(SkillResult::Cast);
     fixture.config.aiSkillCondition[1] |=
-        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+        SkillCondition(MUHelper::ON_CONDITION, MUHelper::ON_MOBS_NEARBY, MUHelper::ON_MORE_THAN_TWO_MOBS);
     CHECK(fixture.Select(1, 2) == ExtraOne);
     CHECK(fixture.Select(16, 0) == ExtraOne);
     fixture.config.aiSkillCondition[1] =
-        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_ATTACKING | MUHelper::ON_MORE_THAN_THREE_MOBS;
+        SkillCondition(MUHelper::ON_CONDITION, MUHelper::ON_MOBS_ATTACKING, MUHelper::ON_MORE_THAN_THREE_MOBS);
     CHECK(fixture.Select(1, 5, 2) == Primary);
     CHECK(fixture.Select(1, 0, 3) == ExtraOne);
     fixture.config.aiSkillCondition[2] = MUHelper::ON_TIMER;
@@ -321,7 +328,7 @@ TEST_CASE("Triggered skills that cannot be cast leave the rotation to usable one
 {
     SkillFixture fixture;
     fixture.config.aiSkillCondition[1] =
-        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+        SkillCondition(MUHelper::ON_CONDITION, MUHelper::ON_MOBS_NEARBY, MUHelper::ON_MORE_THAN_TWO_MOBS);
     CharacterAttribute->Skill[1] = AT_SKILL_UNDEFINED;
     for (int tick = 0; tick < 3; ++tick)
     {
@@ -351,10 +358,10 @@ TEST_CASE("Rotation is transient and preserves saved skill combo and pickup sett
     fixture.config.bPickAllItems = true;
     fixture.config.bPickSelectItems = true;
     fixture.config.aiSkillCondition[1] =
-        MUHelper::ON_TIMER | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+        SkillCondition(MUHelper::ON_TIMER, MUHelper::ON_MOBS_NEARBY, MUHelper::ON_MORE_THAN_TWO_MOBS);
     fixture.config.aiSkillInterval[1] = 5;
     fixture.config.aiSkillCondition[2] =
-        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+        SkillCondition(MUHelper::ON_CONDITION, MUHelper::ON_MOBS_NEARBY, MUHelper::ON_MORE_THAN_TWO_MOBS);
     PRECEIVE_MUHELPER_DATA before{};
     MUHelper::ConfigDataSerDe::Serialize(fixture.config, before);
     fixture.Select(5);
@@ -595,7 +602,7 @@ TEST_CASE("A refused conditional skill yields to the rotation for a helper secon
 {
     SkillFixture fixture;
     fixture.config.aiSkillCondition[1] =
-        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+        SkillCondition(MUHelper::ON_CONDITION, MUHelper::ON_MOBS_NEARBY, MUHelper::ON_MORE_THAN_TWO_MOBS);
     REQUIRE(fixture.Select(3, 5) == ExtraOne);
     fixture.rotation.Complete(SkillResult::Refused);
     CHECK(fixture.Select(3, 5) != ExtraOne);

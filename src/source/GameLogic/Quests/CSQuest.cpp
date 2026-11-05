@@ -284,13 +284,9 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 
 void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
-    if (Class != -1)
-    {
-        m_bOnce = true;
-        bCheckNPC = false;
-
-        m_byClass = gCharacterManager.GetBaseClass(Class);
-    }
+    m_bOnce = true;
+    bCheckNPC = false;
+    m_byClass = gCharacterManager.GetBaseClass(Class);
 
     m_byQuestList.fill(0);
     if (byList != nullptr)
@@ -522,13 +518,10 @@ std::uint8_t CSQuest::getQuestState2(int questIndex)
 
 std::uint8_t CSQuest::CheckQuestState(std::uint8_t state)
 {
-    if (Hero->Class != -1)
+    if (m_bOnce)
     {
-        if (m_bOnce)
-        {
-            m_bOnce = false;
-            m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
-        }
+        m_bOnce = false;
+        m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
     }
 
     QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];

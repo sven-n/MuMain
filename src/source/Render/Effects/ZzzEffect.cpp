@@ -6248,12 +6248,14 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->BlendMeshTexCoordU = -(float)(int)o->LifeTime * 0.01f;
 
         if (o->Owner != NULL)
+        {
             if (o->Owner->Type == MODEL_WEREWOLF_HERO)
             {
                 Vector(Luminosity * 0.0f, Luminosity * 0.0f, Luminosity * 1.0f, Light);
             }
             else
                 Vector(Luminosity * 1.0f, Luminosity * 0.0f, Luminosity * 0.0f, Light);
+        }
         AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
         break;
     case MODEL_SKILL_FURY_STRIKE + 4:

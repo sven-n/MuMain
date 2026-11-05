@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "Core/Platform/PathResolve.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cctype>
@@ -204,7 +205,7 @@ std::optional<std::filesystem::path> ThemeDirectoryForResource(const std::string
 {
     std::string normalized = path;
     std::replace(normalized.begin(), normalized.end(), '\\', '/');
-    normalized = ThemePathUtf8(std::filesystem::u8path(normalized).lexically_normal());
+    normalized = ThemePathUtf8(Core::Text::PathFromUtf8(normalized).lexically_normal());
     const std::string lower = Lower(normalized);
     constexpr std::string_view root = "data/interface/rmlui/themes/";
     const auto start = lower.find(root);
@@ -214,7 +215,7 @@ std::optional<std::filesystem::path> ThemeDirectoryForResource(const std::string
     const auto end = lower.find('/', themeStart);
     if (end == std::string::npos || !ThemeInheritance::IsValidName(lower.substr(themeStart, end - themeStart)))
         return std::nullopt;
-    return std::filesystem::u8path(normalized.substr(0, end));
+    return Core::Text::PathFromUtf8(normalized.substr(0, end));
 }
 
 std::string ResolveThemeResource(const std::string& path, bool texture)
@@ -224,7 +225,7 @@ std::string ResolveThemeResource(const std::string& path, bool texture)
         return path;
     std::string normalized = path;
     std::replace(normalized.begin(), normalized.end(), '\\', '/');
-    const auto relative = std::filesystem::u8path(normalized).lexically_normal().lexically_relative(*directory);
+    const auto relative = Core::Text::PathFromUtf8(normalized).lexically_normal().lexically_relative(*directory);
     const ThemeInheritance theme(*directory);
     if (!theme.IsValid())
     {

@@ -22,9 +22,25 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_build_plan.py"
 )
 add_test(
+    NAME ci_warning_scripts
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_warning_scripts.py"
+)
+add_test(
+    NAME ci_cache_prune
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_cache_prune.py"
+)
+add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )
+
+# doctest_discover_tests reads case names as a CMake list: a name it cuts or joins registers entries that run no case.
+add_test(NAME test_case_names_reach_ctest_whole
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TESTS}")
+# The check on its fixtures: it reports each offence and exits 1, and passes the clean names.
+add_test(NAME test_case_names_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_test_case_names.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"
@@ -60,6 +76,11 @@ add_test(
 add_test(
     NAME copy_runtime_assets
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
+)
+add_test(
+    NAME sdl_image_archive_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_sdl_image_archive.cmake"
 )
 
 # Render and effects contracts.

@@ -48,12 +48,12 @@ namespace mu::ui::window
 
         void Show(bool bShow) override;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-        bool IsVisible() const;
-        float GetLayerDepth();	//. 3.1f
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
+        bool IsVisible() const override;
+        float GetLayerDepth() override; //. 3.1f
         void ProcessOpening();
         bool ProcessClosing();
         void SetContents(DWORD dwQuestIndex);

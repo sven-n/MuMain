@@ -2060,7 +2060,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
-        if (Data->Notice != nullptr && Data->Notice[0] != '\0')
+        if (Data->Notice[0] != '\0')
         {
             UI::Hud::AddSlideNotice(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f,
                                     Data->Color);
@@ -4048,6 +4048,8 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_ALICE_BERSERKER:
     case AT_SKILL_ALICE_BERSERKER_STR:
         UnRegisterBuff(eBuff_Berserker, o);
+        break;
+    default:
         break;
     }
 }
@@ -11453,8 +11455,6 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
 
     if (CrownSwitch == nullptr)
         return;
-    if (CrownSwitch->ID == nullptr)
-        return;
 
     switch (static_cast<CrownSwitchState>(pData->m_byState))
     {
@@ -11477,9 +11477,7 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         int otherKey = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
         int otherIndex = FindCharacterIndex(otherKey);
         CHARACTER* other = &CharactersClient[otherIndex];
-        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther,
-                                    other != nullptr && other->ID != nullptr ? other->ID : L"",
-                                    CrownSwitch->ID);
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther, other->ID, CrownSwitch->ID);
         break;
     }
     }
@@ -14943,6 +14941,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuffList(o, bufflist);
         }
         break;
+        default:
+            break;
         }
 
         return true;
@@ -15015,6 +15015,8 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             g_CharacterUnRegisterBuff(o, eBuff_CastleRegimentDefense);
     }
     break;
+    default:
+        break;
     }
     return true;
 }
@@ -15198,6 +15200,8 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             g_RegisterBuffTime(buff, bufftime);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15354,6 +15358,8 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             g_UnRegisterBuffTime(buff);
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -15573,6 +15579,8 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, o->Light, 2, o, -1, 0, 0, 0, 1.5f);
     }
     break;
+    default:
+        break;
     }
 }
 
@@ -15759,6 +15767,8 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         DeleteEffect(BITMAP_LIGHT_RED, o, 2);
     }
     break;
+    default:
+        break;
     }
 }
 

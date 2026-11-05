@@ -12,6 +12,8 @@
 #include <cctype>
 #include <optional>
 
+#include "Core/Text/Utf8Path.h"
+
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
 #endif
@@ -432,7 +434,7 @@ void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, st
             continue;
         }
 #ifdef _WIN32
-        const std::filesystem::path path = std::filesystem::u8path(model.file);
+        const std::filesystem::path path = Core::Text::PathFromUtf8(model.file);
 #else
         // The data does not always spell the files in the case they have on disk.
         const std::filesystem::path path = MuResolvePath(model.file.c_str());

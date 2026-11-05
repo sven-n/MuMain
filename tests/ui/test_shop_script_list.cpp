@@ -1,5 +1,6 @@
 // doctest unit tests for loading the in-game shop's script from the client folder: the shipped
-// script loads without a download, and a load never deletes it.
+// script loads without a download, a load never deletes it, and a byte order mark picks the
+// script's encoding.
 
 #include "App/stdafx.h"
 
@@ -9,6 +10,8 @@
 #include <fstream>
 #include <initializer_list>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include "GameShop/ShopListManager/ShopListManager.h"
@@ -66,6 +69,36 @@ std::vector<std::string> WorkingDirectoryEntries()
     return names;
 }
 
+void WriteBytes(const std::filesystem::path& file, const std::string& bytes)
+{
+    std::ofstream(file, std::ios::binary) << bytes;
+}
+
+// UTF-16LE bytes of the text, with a byte order mark in front.
+std::string Utf16LittleEndianWithMark(std::u16string_view text)
+{
+    std::string bytes = "\xFF\xFE";
+    for (const char16_t unit : text)
+    {
+        bytes.push_back(static_cast<char>(unit & 0xFF));
+        bytes.push_back(static_cast<char>(unit >> 8));
+    }
+    return bytes;
+}
+
+// The number and name of each category the shop list holds, in the script's order.
+std::vector<std::pair<int, std::wstring>> LoadedCategories(CShopListManager& manager)
+{
+    std::vector<std::pair<int, std::wstring>> categories;
+    CShopCategoryList* list = manager.GetListPtr()->GetCategoryListPtr();
+    CShopCategory category;
+    for (int index = 0; list->GetValueByIndex(index, category); ++index)
+    {
+        categories.emplace_back(category.ProductDisplaySeq, category.CategroyName);
+    }
+    return categories;
+}
+
 WZResult LoadShippedScript(CShopListManager& manager)
 {
     CListVersionInfo version{};
@@ -109,4 +142,37 @@ TEST_CASE("the shop loads a script whose folder and files are spelled differentl
     // The folder isn't created a second time in the requested spelling. Listed instead of asking
     // for "Data", which a case-insensitive file system (Windows, macOS) reports for "data" too.
     CHECK(WorkingDirectoryEntries() == std::vector<std::string>{"data"});
+}
+
+TEST_CASE("the shop reads a script in each encoding its byte order mark names [ui][ingameshop]")
+{
+    const ScopedWorkingDirectory directory("mu_shop_script_encodings");
+    const std::filesystem::path folder = "Data/InGameShopScript/512.2012.084";
+    WriteFiles(folder, {"IBSCategory.txt", "IBSPackage.txt", "IBSProduct.txt"});
+    const std::vector<std::pair<int, std::wstring>> expected{{10, L"First"}, {20, L"Second"}};
+
+    SUBCASE("no byte order mark")
+    {
+        WriteBytes(folder / "IBSCategory.txt", "10@First@0@1@0@1@1\r\n20@Second@0@1@0@2@1\r\n");
+        CShopListManager manager;
+        REQUIRE(LoadShippedScript(manager).IsSuccess());
+        CHECK(LoadedCategories(manager) == expected);
+    }
+    SUBCASE("UTF-8: the mark is no part of the first row's number")
+    {
+        WriteBytes(folder / "IBSCategory.txt", "\xEF\xBB\xBF" "10@First@0@1@0@1@1\r\n20@Second@0@1@0@2@1\r\n");
+        CShopListManager manager;
+        REQUIRE(LoadShippedScript(manager).IsSuccess());
+        CHECK(LoadedCategories(manager) == expected);
+    }
+    SUBCASE("UTF-16: every row, also after one with a character that holds a 0x0A byte")
+    {
+        // U+010A is the bytes 0A 01, which a text-mode line reader took for a line break.
+        WriteBytes(folder / "IBSCategory.txt",
+                   Utf16LittleEndianWithMark(u"10@First\x010A@0@1@0@1@1\r\n20@Second@0@1@0@2@1\r\n"));
+        CShopListManager manager;
+        REQUIRE(LoadShippedScript(manager).IsSuccess());
+        CHECK(LoadedCategories(manager) ==
+              std::vector<std::pair<int, std::wstring>>{{10, L"First\x010A"}, {20, L"Second"}});
+    }
 }

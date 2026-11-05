@@ -114,12 +114,12 @@ namespace mu::ui::window
         const MemberEntry* SelectedMember() const;
         const UnionEntry* SelectedUnion() const;
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 4.5f
+        float GetLayerDepth() override; //. 4.5f
 
         CGuildInfoWindow* GetGuildInfo() const;
 

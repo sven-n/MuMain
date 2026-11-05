@@ -136,17 +136,15 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         // The pointer over the drawn panel.
         bool IsPointerOverPanel();
 
-        float GetLayerDepth();	//. 2.1f
-
+        float GetLayerDepth() override; //. 2.1f
 
         // Returns the other player's (grid-based) trade inventory control.
         CInventoryCtrl* GetYourInvenCtrl() const

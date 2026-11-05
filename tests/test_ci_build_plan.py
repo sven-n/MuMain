@@ -64,38 +64,51 @@ class BuildPlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "main only"):
             self.plan("workflow_dispatch", ref="refs/heads/feature")
 
-    def results(self, plan):
+    def results(self, plan, event_name="pull_request"):
         needs = {"quality": {"result": "success", "outputs": {
             key: str(value).lower() for key, value in plan.items()
         }}}
         for platform in ("linux", "macos", "windows"):
             needs[f"build-{platform}"] = {"result": "success" if plan[platform] else "skipped"}
+        needs["caches"] = {"result": "skipped" if event_name == "pull_request" else "success"}
         return needs
 
     def test_required_check_accepts_only_planned_skips(self):
-        check_results(self.results(self.plan()))
-        check_results(self.results(self.plan(paths=("README.md",))))
-        check_results(self.results(self.plan("schedule")))
+        check_results(self.results(self.plan()), "pull_request")
+        check_results(self.results(self.plan(paths=("README.md",))), "pull_request")
+        check_results(self.results(self.plan("schedule"), "schedule"), "schedule")
         for result in ("failure", "cancelled", "skipped"):
             needs = self.results(self.plan())
             needs["build-linux"]["result"] = result
             with self.subTest(result=result), self.assertRaises(ValueError):
-                check_results(needs)
+                check_results(needs, "pull_request")
         needs = self.results(self.plan(paths=("README.md",)))
         needs["build-macos"]["result"] = "success"
         with self.assertRaises(ValueError):
-            check_results(needs)
+            check_results(needs, "pull_request")
+
+    def test_required_check_needs_the_cache_prune_outside_prs(self):
+        for event_name in ("push", "schedule"):
+            for result in ("failure", "cancelled", "skipped"):
+                needs = self.results(self.plan(event_name), event_name)
+                needs["caches"]["result"] = result
+                with self.subTest(event_name=event_name, result=result), self.assertRaises(ValueError):
+                    check_results(needs, event_name)
+        needs = self.results(self.plan())
+        needs["caches"]["result"] = "success"
+        with self.assertRaises(ValueError):
+            check_results(needs, "pull_request")
 
     def test_required_check_rejects_failed_quality_and_missing_plan(self):
         for result in ("failure", "cancelled", "skipped"):
             needs = self.results(self.plan())
             needs["quality"]["result"] = result
             with self.subTest(result=result), self.assertRaises(ValueError):
-                check_results(needs)
+                check_results(needs, "pull_request")
         needs = self.results(self.plan())
         needs["quality"]["outputs"]["linux"] = ""
         with self.assertRaises(ValueError):
-            check_results(needs)
+            check_results(needs, "pull_request")
 
     def prepare_renamed_repository(self, repo):
         def git(*args):

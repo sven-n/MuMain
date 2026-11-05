@@ -597,7 +597,7 @@ bool RenderIllusionSorcererCovenant(BMD* b, const OBJECT* o, DrawLook& look, int
 {
     float sine = float(sinf(WorldTime * 0.00004f) * 0.15f) + 0.5f;
     b->RenderBody(RenderType, 1.f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 0);
-    b->RenderBody(RenderType, 1.f, 0.5f, sine, look.blendMeshU, look.blendMeshV, 1);
+    b->RenderBody(RenderType, 1.f, 0, sine, look.blendMeshU, look.blendMeshV, 1);
     return true;
 }
 

@@ -969,6 +969,8 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
     case MONSTER_AXE_HERO:
     case MONSTER_AXE_WARRIOR:
         break;
+    default:
+        break;
     }
     return false;
 }

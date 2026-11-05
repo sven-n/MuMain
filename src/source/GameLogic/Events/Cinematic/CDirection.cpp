@@ -207,6 +207,8 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
     case 361:
         Index = MODEL_DARK_SKULL_SOLDIER_5;
         break;
+    default:
+        break;
     }
 
     BMD* b = &Models[Index];

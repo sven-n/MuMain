@@ -11,7 +11,7 @@ namespace
 {
 // The monster range and the NPC range follow each other without a gap.
 constexpr int FirstSlot = MODEL_MONSTER01;
-constexpr int SlotCount = MODEL_NPC_END - MODEL_MONSTER01;
+constexpr int SlotCount = MODEL_NPC_END - FirstSlot;
 } // namespace
 
 MonsterModelDatabase& MonsterModelDatabase::GetInstance()

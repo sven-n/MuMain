@@ -1599,6 +1599,8 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
         }
     }
         return true;
+    default:
+        break;
     }
     return false;
 }

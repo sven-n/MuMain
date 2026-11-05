@@ -74,10 +74,7 @@ public:
         const long size = std::ftell(m_capture);
         std::rewind(m_capture);
         std::string output(static_cast<std::size_t>(size), '\0');
-        if (!output.empty())
-        {
-            std::fread(output.data(), 1, output.size(), m_capture);
-        }
+        output.resize(std::fread(output.data(), 1, output.size(), m_capture));
         return output;
     }
 

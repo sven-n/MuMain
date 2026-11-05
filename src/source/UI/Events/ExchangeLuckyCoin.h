@@ -40,15 +40,13 @@ public:
     bool Create(CManager* pNewUIMng);
     void Release();
 
-
-    bool UpdateMouseEvent();
+    bool UpdateMouseEvent() override;
     Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
-    bool UpdateKeyEvent();
-    bool Update();
-    bool Render();
+    bool UpdateKeyEvent() override;
+    bool Update() override;
+    bool Render() override;
 
-
-    float GetLayerDepth(); //. 4.2f
+    float GetLayerDepth() override; //. 4.2f
 
     void OpenningProcess();
     void ClosingProcess();

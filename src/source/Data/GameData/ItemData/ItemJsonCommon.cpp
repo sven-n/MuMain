@@ -350,7 +350,8 @@ std::vector<std::string> FindRepeatedKeys(std::string_view text, std::string_vie
         }
         return true;
     };
-    static_cast<void>(OrderedJson::parse(text, callback, false));
+    // Only what the callback found matters; nlohmann marks parse() so its result must be taken.
+    [[maybe_unused]] const OrderedJson document = OrderedJson::parse(text, callback, false);
     return repeated;
 }
 } // namespace Data::Items::Json

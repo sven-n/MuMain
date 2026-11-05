@@ -2512,6 +2512,8 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             m_bCurrentIsRage_Gallia = true;
         return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
+    default:
+        break;
     }
     return false;
 }

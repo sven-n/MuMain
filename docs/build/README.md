@@ -54,6 +54,12 @@ Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
 Release, all with the editor OFF, and upload one no-data runtime artifact per OS.
 Build every other supported row locally using the setup guides above.
 
+A macOS build runs on the macOS version of the Mac that built it and newer: the
+Homebrew libraries it links (OpenSSL, libjpeg-turbo, Crypto++) are built for that
+version. The CI artifact needs macOS 26, which every Apple silicon Mac can install.
+CI builds it on the `macos-26` image by name, so that minimum changes only when the
+workflow names a newer image, not when GitHub moves `macos-latest`.
+
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
 > 32-bit Linux client could compile but could never load the network library,
@@ -69,6 +75,10 @@ These apply to every setup; the per-setup guides only cover what differs.
 Use CMake 3.25 or newer, the .NET 10 SDK, and the compiler and system packages listed
 in your platform guide. Windows presets also require vcpkg with `VCPKG_ROOT` set.
 Initial configuration needs network access unless dependency sources are already cached.
+When a change in `CMakeLists.txt` changes how a library is downloaded (its version, URL
+or archive), the next configure downloads it again, in an existing build folder too.
+Offline, configure with `-DFETCHCONTENT_FULLY_DISCONNECTED=ON` to keep using the copy
+that is already there.
 
 CMake initializes missing Git submodules under `src/ThirdParty/`: SDL3 and RmlUi for
 all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
@@ -88,6 +98,13 @@ CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchCo
 Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
 SDL_mixer nor a separate FreeType submodule is required.
 
+SDL3_image comes as its release archive, without the libraries it can vendor (libpng,
+libjpeg, zlib, libtiff, libwebp, libjxl, libavif): PNG and JPEG load through
+stb_image, and the formats that would need one of them are off. Turning such a format
+on also means fetching SDL_image with that library; the comment above
+`FetchContent_Declare(SDL3_image)` in `CMakeLists.txt` says how, and the
+`sdl_image_archive_contract` static check names what is missing.
+
 ### Build options
 
 | CMake option | Values | Meaning |
@@ -99,6 +116,7 @@ SDL_mixer nor a separate FreeType submodule is required.
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
 | `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
+| `MU_WARNINGS_AS_ERRORS` | `ON` / `OFF` | Turns compiler, linker and DXC shader warnings into errors in the game's own code and its tests; the third-party libraries keep their own settings. Linker warnings need CMake 4.0 or newer (an older CMake says so and keeps them warnings). Default `OFF`; CI's player builds turn it `ON` (see [No warnings](#no-warnings)). |
 | `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) at build time instead of loading them at run time, and links the Vulkan loader into `Main` (SDL still loads that one at run time). A packaged runtime then finds all of them through `Main`'s recorded `RUNPATH`, without a global library path. Defaults to `OFF`. |
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
@@ -184,6 +202,36 @@ individual platform jobs, which do not run on every event. Do not enable **Requi
 branches to be up to date** just to reduce builds: it can force another build after
 each main merge. Update a PR when its integration state needs revalidation.
 
+### No warnings
+
+The three player builds (Windows, Linux and macOS, editor and control socket OFF)
+configure and build without a single warning, note or deprecation message, and CI
+fails as soon as one comes back:
+
+- The game's own code, its tests and the DXC shader compiles build with
+  `MU_WARNINGS_AS_ERRORS=ON`, so a compiler or linker warning stops the build where
+  it happens. Configure with `-DMU_WARNINGS_AS_ERRORS=ON` to get the same locally.
+- [`scripts/ci_warnings.py`](../../scripts/ci_warnings.py) runs the configure and
+  build commands and fails the step for any other such line in their output: CMake
+  and the libraries' CMake scripts, vcpkg's notes, glslang, wayland-scanner and the
+  .NET build. `python3 scripts/ci_warnings.py scan <job log>` lists them in a
+  downloaded log.
+- **CI Required** (and Fork CI's last job) fails when a job of the run ends with a
+  warning annotation, such as GitHub's notice that an action targets a deprecated
+  Node.js version. Notices, e.g. about runner queue times, are listed only, and so
+  are the warnings actions/cache logs when GitHub's cache service is busy, down or
+  unreachable ("Failed to restore: Cache service responded with 503", timeouts): the
+  build goes on without the cache. Its other warnings, such as a cache over the size
+  limit, fail the check.
+
+The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) compile
+with their warnings turned off (`-w`, `/w`), and miniaudio and glm are included as
+system headers: their warnings are for their authors to fix. A new compiler or CMake on a runner image can bring new warnings
+without any change here; fix them in a PR like any other failure. The jobs name
+their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
+`-latest` label: GitHub moves repositories to a new latest image one by one and
+warns about the move in every job meanwhile.
+
 Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
 summary show hits and misses; compare the Build step duration on a warm run with
 the first run. All builds restore the compiler cache; only successful main pushes
@@ -193,6 +241,38 @@ successful nightly/manual release builds save it instead. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
+
+The library caches keep the downloaded library sources (`_deps/*-src`,
+`_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
+recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
+(which declares the libraries), `cmake/patches` and the ClientLibrary projects, and
+name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
+so a new entry is stored only when one of those changes, not with every new source
+file in `src/CMakeLists.txt`.
+
+PR runs only read the library and vcpkg caches, as they do the compiler caches:
+**Restore dependencies** and **Restore vcpkg packages** read them, and
+**Save dependencies** (after the build) and **Save vcpkg packages** (after the
+configure step) store them only in runs on main, when the exact key was missing. A
+PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
+past that, GitHub deletes the least recently used entries, which are main's Windows
+ones, used once a night. Each job's caches have one kind of run that saves them:
+main pushes for Linux, the nightly and manual release builds for macOS and Windows.
+Pushes and the nightly run side by side, so with both saving, an older commit's
+entry could be saved last and be the one the prune job keeps.
+
+A save under a new key leaves the older entries of that cache behind, such as a
+compiler cache for each main push. After the builds of a run on main, the
+**Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
+deletes all but the newest entry of each cache on main. The compiler caches keep
+the newest entry of each compiler: a job restores only entries of its own compiler,
+and while GitHub moves the runners to a new image, jobs land on both images. An
+entry a job read in the last 15 minutes is left for a later run, as that job may
+still be downloading it. It is the only job with a token that can delete caches.
+CI Required waits for it: a prune that fails or warns fails the run like a build,
+since without it the caches fill up again. A new cache that is restored by a
+key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that
+prefix names the compiler; the workflow contract test checks that.
 
 ### Download artifacts
 

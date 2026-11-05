@@ -379,7 +379,7 @@ TEST_CASE("Monster sounds: a monster without a sound set plays no sound event [m
     CHECK(scope.Take().empty());
 }
 
-TEST_CASE("Monster sounds: only the monster's own models play its set; a player has no monster number (Q-MN78) "
+TEST_CASE("Monster sounds: only the monster's own models play its set, a player has no monster number (Q-MN78) "
           "[monsters][sounds]")
 {
     SoundScope scope(WD_0LORENCIA);

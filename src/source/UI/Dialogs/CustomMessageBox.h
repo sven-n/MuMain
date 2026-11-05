@@ -18,10 +18,10 @@ public:
     virtual ~CGemIntegrationDisjointMsgBox();
 
     bool Create(float fPriority = 3.f);
-    void Release();
+    void Release() override;
 
-    bool Update();
-    bool Render();
+    bool Update() override;
+    bool Render() override;
     Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
     static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -61,10 +61,10 @@ private:
         virtual ~CBloodCastleResultMsgBox();
 
         bool Create(float fPriority = 3.f);
-        void Release();
+        void Release() override;
 
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -84,10 +84,10 @@ private:
         virtual ~CDevilSquareRankMsgBox();
 
         bool Create(float fPriority = 3.f);
-        void Release();
+        void Release() override;
 
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -106,10 +106,10 @@ private:
         virtual ~CChaosCastleResultMsgBox();
 
         bool Create(float fPriority = 3.f);
-        void Release();
+        void Release() override;
 
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -133,13 +133,13 @@ private:
         ~CProgressMsgBox();
 
         bool Create(DWORD dwElapseTime = 3000, float fPriority = 3.f);
-        void Release();
+        void Release() override;
 
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
         void SetElapseTime(DWORD dwElapseTime);
 
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -166,12 +166,12 @@ private:
         ~CCursedTempleProgressMsgBox();
 
         bool Create(DWORD dwElapseTime = 3000, float fPriority = 3.f);
-        void Release();
+        void Release() override;
 
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
 
-        bool Update();
-        bool Render();
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         void SetNpcIndex(DWORD dwIndex);
@@ -226,9 +226,9 @@ private:
         ~CGuild_ToPerson_Position();
 
         bool Create(float fPriority = 3.f);
-        void Release();
-        bool Update();
-        bool Render();
+        void Release() override;
+        bool Update() override;
+        bool Render() override;
         Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);

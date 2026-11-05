@@ -1046,6 +1046,10 @@ mu::ui::window::CChatLogWindow::type_vector_msgs* mu::ui::window::CChatLogWindow
         return &m_vecGensMsgs;
     case TYPE_GM_MESSAGE:
         return &m_vecGMMsgs;
+    // The other values, listed without a default: a value added later fails the build here.
+    case NUMBER_OF_TYPES:
+    case TYPE_UNKNOWN:
+        break;
     }
 
     return nullptr;

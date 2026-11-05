@@ -68,14 +68,14 @@ public:
     CSPetDarkSpirit(CHARACTER* c);
     virtual ~CSPetDarkSpirit(void);
 
-    virtual void MovePet(void);
-    virtual void CalcPetInformation(const PET_INFO& Petinfo);
+    void MovePet(void) override;
+    void CalcPetInformation(const PET_INFO& Petinfo) override;
     void CullPet() override;
-    virtual void RenderPet(int PetState = 0) const;
-    virtual void UpdatePetEffects();
+    void RenderPet(int PetState = 0) const override;
+    void UpdatePetEffects() override;
 
-    virtual void Eff_LevelUp(void);
-    virtual void Eff_LevelDown(void);
+    void Eff_LevelUp(void) override;
+    void Eff_LevelDown(void) override;
 
     void AttackEffect(CHARACTER* c, OBJECT* o);
 };

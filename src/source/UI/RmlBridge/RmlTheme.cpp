@@ -7,6 +7,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Core.h>
@@ -247,9 +248,9 @@ namespace UI::RmlBridge
     {
     std::optional<std::string> ReadThemedMarkup(const std::string& sourceUrl, const char* documentPath)
     {
-        std::ifstream file(std::filesystem::u8path(ResolveThemeResource(sourceUrl)), std::ios::binary);
+        std::ifstream file(Core::Text::PathFromUtf8(ResolveThemeResource(sourceUrl)), std::ios::binary);
         if (!file)
-            file.open(std::filesystem::u8path(documentPath), std::ios::binary);
+            file.open(Core::Text::PathFromUtf8(documentPath), std::ios::binary);
         if (!file)
         {
             g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);

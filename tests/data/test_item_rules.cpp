@@ -5,6 +5,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Items/EquipmentRestrictions.h"
@@ -279,12 +280,12 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
     CHECK_FALSE(IsSecondTierCape(&capeOfEmperor));
     CHECK_FALSE(IsSecondTierCape(&smallCapeOfLord));
 
-    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HELPER));
-    CHECK(IsPetSlotModel(MODEL_ITEM + ITEM_HORN_OF_FENRIR));
-    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + KrisType));
+    CHECK(IsPetSlotModel(ToModelSlot(ITEM_HELPER)));
+    CHECK(IsPetSlotModel(ToModelSlot(ITEM_HORN_OF_FENRIR)));
+    CHECK_FALSE(IsPetSlotModel(ToModelSlot(KrisType)));
     CHECK(IsRideableMount(&uniria));
-    CHECK(IsHornMountModel(MODEL_ITEM + ITEM_HORN_OF_UNIRIA));
-    CHECK_FALSE(IsHornMountModel(MODEL_ITEM + ITEM_DARK_HORSE_ITEM));
+    CHECK(IsHornMountModel(ToModelSlot(ITEM_HORN_OF_UNIRIA)));
+    CHECK_FALSE(IsHornMountModel(ToModelSlot(ITEM_DARK_HORSE_ITEM)));
     CHECK_FALSE(IsFlyingMount(&uniria));
     CHECK(IsFlyingMount(&fenrir));
     CHECK(HasFlightEquipment(&durableFenrir, &kris));
@@ -294,9 +295,9 @@ TEST_CASE("Item categories come from the item data [data][items][rules]")
 
     // Model ids outside the item range are no items.
     CHECK_FALSE(IsRideableMountModel(-1));
-    CHECK_FALSE(IsRideableMountModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsRideableMountModel(ToModelSlot(MAX_ITEM)));
     CHECK_FALSE(IsPetSlotModel(-1));
-    CHECK_FALSE(IsPetSlotModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsPetSlotModel(ToModelSlot(MAX_ITEM)));
 }
 
 TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
@@ -322,11 +323,11 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
     CHECK(IsCrossbowType(ITEM_DIVINE_CB_OF_ARCHANGEL));
     CHECK_FALSE(IsCrossbowType(ITEM_BOW));
     CHECK_FALSE(IsCrossbowType(ITEM_ARROWS));
-    CHECK(IsBowModel(MODEL_ITEM + ITEM_BOW));
-    CHECK(IsCrossbowModel(MODEL_ITEM + ITEM_CROSSBOW));
+    CHECK(IsBowModel(ToModelSlot(ITEM_BOW)));
+    CHECK(IsCrossbowModel(ToModelSlot(ITEM_CROSSBOW)));
 
     CHECK(IsSpearType(ITEM_SPEAR));
-    CHECK(IsSpearModel(MODEL_ITEM + ITEM_SPEAR));
+    CHECK(IsSpearModel(ToModelSlot(ITEM_SPEAR)));
     CHECK_FALSE(IsSpearType(KrisType));
 
     CHECK(IsShieldType(ITEM_SHIELD));
@@ -342,7 +343,7 @@ TEST_CASE("Weapon kinds come from the item data [data][items][rules]")
 
     // Model ids outside the item range are no weapons.
     CHECK_FALSE(IsSpearModel(-1));
-    CHECK_FALSE(IsBowModel(MODEL_ITEM + MAX_ITEM));
+    CHECK_FALSE(IsBowModel(ToModelSlot(MAX_ITEM)));
 }
 
 TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from the item data [data][items][rules]")
@@ -358,9 +359,9 @@ TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from th
     const ITEM smallShield = MakeItem(ITEM_SHIELD);
     const ITEM apple = MakeItem(ITEM_APPLE);
 
-    CHECK(IsSwordOrGloveModel(MODEL_ITEM + KrisType));
-    CHECK(IsSwordOrGloveModel(MODEL_ITEM + ITEM_SACRED_GLOVE));
-    CHECK_FALSE(IsSwordOrGloveModel(MODEL_ITEM + ITEM_AXE));
+    CHECK(IsSwordOrGloveModel(ToModelSlot(KrisType)));
+    CHECK(IsSwordOrGloveModel(ToModelSlot(ITEM_SACRED_GLOVE)));
+    CHECK_FALSE(IsSwordOrGloveModel(ToModelSlot(ITEM_AXE)));
 
     CHECK(IsSwordAxeMaceOrGloveType(KrisType));
     CHECK(IsSwordAxeMaceOrGloveType(ITEM_AXE));
@@ -373,7 +374,7 @@ TEST_CASE("Swords, gloves, staffs, books, sceptres and magic swords come from th
     CHECK(IsStaffOrBookType(ITEM_BOOK_OF_SAHAMUTT));
     CHECK_FALSE(IsStaffOrBookType(noBook));
     CHECK_FALSE(IsStaffOrBookType(KrisType));
-    CHECK(IsStaffOrBookModel(MODEL_ITEM + ITEM_STAFF));
+    CHECK(IsStaffOrBookModel(ToModelSlot(ITEM_STAFF)));
 
     CHECK(IsWeaponOrAmmunition(&kris));
     CHECK(IsWeaponOrAmmunition(&bolt));

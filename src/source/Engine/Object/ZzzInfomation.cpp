@@ -5,6 +5,8 @@
 #include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 
 #include <codecvt>
 #include <sstream>
@@ -51,69 +53,69 @@ int  AbuseNameFilterNumber = 0;
 
 void OpenFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
 
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_FILTERS];
-    fread(Buffer, Size * MAX_FILTERS, 1, fp);
-    DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-    fclose(fp);
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_FILTERS);
+    BYTE* Buffer = content.data();
+    // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
+    // smaller table ends early, after that entry, and still loads.
+    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp.get());
+    fp.reset();
 
+    bool ended = false;
     {
         BYTE* pSeek = Buffer;
-        for (int i = 0; i < MAX_FILTERS; i++)
+        for (std::size_t i = 0; i < entries; i++)
         {
             BuxConvert(pSeek, Size);
             memcpy(AbuseFilter[i], pSeek, Size);
             if (AbuseFilter[i][0] == 0)
             {
-                AbuseFilterNumber = i;
+                AbuseFilterNumber = static_cast<int>(i);
+                ended = true;
                 break;
             }
             pSeek += Size;
         }
     }
 
-    delete[] Buffer;
+    if (!ended && entries < MAX_FILTERS)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+    }
+    else if (entries < MAX_FILTERS)
+    {
+        // A file cut short after the list's end loads the same way; the error log says how much was there.
+        g_ErrorReport.Write(L"%ls - %d of %d filter entries; the list ends at entry %d.\r\n", FileName,
+                            static_cast<int>(entries), MAX_FILTERS, AbuseFilterNumber);
+    }
 }
 
 void OpenNameFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_NAMEFILTERS];
-
-    fread(Buffer, Size * MAX_NAMEFILTERS, 1, fp);
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_NAMEFILTERS);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-    fclose(fp);
-    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * MAX_NAMEFILTERS) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
     }
     else
     {
@@ -130,7 +132,6 @@ void OpenNameFilterFile(const wchar_t* FileName)
             pSeek += Size;
         }
     }
-    delete[] Buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,27 +140,42 @@ void OpenNameFilterFile(const wchar_t* FileName)
 
 void OpenGateScript(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (fp)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
-        BYTE* Buffer = new BYTE[Size];
+        std::vector<BYTE> record(static_cast<std::size_t>(Size));
+        BYTE* Buffer = record.data();
+        int loaded = 0;
+        bool corrupted = false;
         for (int i = 0; i < MAX_GATES; i++)
         {
-            fread(Buffer, Size, 1, fp);
+            // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
+            // ends inside a gate is corrupt.
+            const std::size_t read = fread(Buffer, 1, Size, fp.get());
+            if (read == 0 && feof(fp.get()))
+            {
+                break;
+            }
+            if (read != static_cast<std::size_t>(Size))
+            {
+                DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+                corrupted = true;
+                break;
+            }
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
+            ++loaded;
         }
-        delete[] Buffer;
-        fclose(fp);
+        // A file cut short between two gates loads the same way; the error log says how many there were.
+        if (!corrupted && loaded < MAX_GATES)
+        {
+            g_ErrorReport.Write(L"%ls - %d of %d gates; the others stay empty.\r\n", FileName, loaded, MAX_GATES);
+        }
     }
     else
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
     }
 }
 
