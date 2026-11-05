@@ -675,6 +675,30 @@ std::vector<HeardRow> FilterRows(const std::vector<HeardRow>& rows, const HeardF
     return shown;
 }
 
+namespace
+{
+// By the Sound or Source column's text without case: each row's text lowered
+// once, not twice per comparison. Rows alike keep their order.
+void SortByText(std::vector<HeardRow>& rows, HeardColumn column, bool descending)
+{
+    std::vector<std::pair<std::string, size_t>> texts;
+    texts.reserve(rows.size());
+    for (size_t index = 0; index < rows.size(); ++index)
+    {
+        texts.emplace_back(Lowered(column == HeardColumn::Sound ? CellText(rows[index]) : rows[index].source), index);
+    }
+    std::stable_sort(texts.begin(), texts.end(), [descending](const auto& left, const auto& right)
+                     { return descending ? right.first < left.first : left.first < right.first; });
+    std::vector<HeardRow> sorted;
+    sorted.reserve(rows.size());
+    for (const auto& text : texts)
+    {
+        sorted.push_back(std::move(rows[text.second]));
+    }
+    rows = std::move(sorted);
+}
+} // namespace
+
 void SortRows(std::vector<HeardRow>& rows, const HeardSort& sort, double now)
 {
     if (!sort.column)
@@ -682,14 +706,18 @@ void SortRows(std::vector<HeardRow>& rows, const HeardSort& sort, double now)
         return;
     }
     const HeardColumn column = *sort.column;
+    if (column == HeardColumn::Sound || column == HeardColumn::Source)
+    {
+        SortByText(rows, column, sort.descending);
+        return;
+    }
     const auto before = [column, now](const HeardRow& left, const HeardRow& right)
     {
         switch (column)
         {
         case HeardColumn::Sound:
-            return Lowered(CellText(left)) < Lowered(CellText(right));
         case HeardColumn::Source:
-            return Lowered(left.source) < Lowered(right.source);
+            break;
         case HeardColumn::Plays:
             return left.sound.plays < right.sound.plays;
         case HeardColumn::Length:

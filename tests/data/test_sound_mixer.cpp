@@ -437,6 +437,17 @@ TEST_CASE("Sound Mixer: a header sorts by its column, again reverses, none keeps
     CHECK(sorted(HeardColumn::Sound, false) == std::vector<int>{2, 1, 3, 4});
     CHECK(sorted(HeardColumn::Sound, true) == std::vector<int>{4, 3, 1, 2});
     CHECK(sorted(HeardColumn::Source, false) == std::vector<int>{2, 4, 3, 1});
+    // Texts alike but their case keep their order, both ways.
+    std::vector<HeardRow> alike{Row(5, "e.wav", "Monster sounds", 0), Row(6, "E.wav", "monster sounds", 0)};
+    for (const bool descending : {false, true})
+    {
+        for (const HeardColumn column : {HeardColumn::Sound, HeardColumn::Source})
+        {
+            std::vector<HeardRow> copy = alike;
+            SortRows(copy, HeardSort{column, descending}, 10.0);
+            CHECK(NumbersOf(copy) == std::vector<int>{5, 6});
+        }
+    }
     // Equal rows keep their order.
     CHECK(sorted(HeardColumn::Plays, false) == std::vector<int>{3, 1, 2, 4});
     CHECK(sorted(HeardColumn::Plays, true) == std::vector<int>{4, 1, 2, 3});
