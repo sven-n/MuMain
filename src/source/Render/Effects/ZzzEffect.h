@@ -112,6 +112,9 @@ void CreateMagicShiny(CHARACTER* c, int Hand = 0);
 
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1,
                           WORD SkillSerialNum = 0);
+// The hero's Twister or Evil Spirit: the monsters it touches spin for a moment. Visual only, the server calculates
+// the hits.
+void SpinMonstersInTornado(const vec3_t position, float range);
 
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey);
 void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex = 0, WORD Skill = 1, WORD SKKey = 0);

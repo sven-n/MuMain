@@ -3820,7 +3820,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 if ((int)o->LifeTime % 15 == 0)
                 {
                     if (o->Target == &Hero->Object)
-                        AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey, o->m_bySkillSerialNum);
+                        SpinMonstersInTornado(o->Position, 150.f);
                 }
 #endif // CSK_EVIL_SKILL
             }
