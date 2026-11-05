@@ -2,6 +2,20 @@
 # situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of
 # what the drawing left on the model (tests/data/LookRecorder.h). Written when each look moved, once its data
 # drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.
+abyssalEye (14,68) +0 at 1234.567 s	4 0c295738edd3800a
+abyssalEye (14,68) +0 at 1234.567 s, doppelganger	4 0c295738edd3800a
+abyssalEye (14,68) +0 at 1234.567 s, excellent	6 9d1e6674df155252
+abyssalEye (14,68) +0 at 1234.567 s, fading 0.5	4 f9a559b95fdb2368
+abyssalEye (14,68) +0 at 1234.567 s, in a monster's hands	4 0c295738edd3800a
+abyssalEye (14,68) +0 at 1234.567 s, without the skin	4 5c14d2f935d5e7d8
+abyssalEye (14,68) +0 at 1235.817 s	4 96146754c6f3a378
+abyssalEye (14,68) +0 at 1238.267 s	4 24d6a5c009de2bc5
+abyssalEye (14,68) +11 at 1234.567 s	10 37b06374710a4d26
+abyssalEye (14,68) +13 at 1234.567 s	10 dd415be19fa61f34
+abyssalEye (14,68) +15 at 1234.567 s	10 dd415be19fa61f34
+abyssalEye (14,68) +7 at 1234.567 s	6 7b73eb37ed46ad61
+abyssalEye (14,68) +9 at 1234.567 s	8 97505f41adcbdf7b
+abyssalEye (14,68) +9 at 1235.817 s	8 274fc25785dae2b9
 accountServiceItem (14,114) +0 at 1234.567 s	1 ddb3fb0b0beac3c9
 accountServiceItem (14,114) +0 at 1234.567 s, doppelganger	1 ddb3fb0b0beac3c9
 accountServiceItem (14,114) +0 at 1234.567 s, excellent	2 ffcb26c024d6003a
@@ -100,6 +114,62 @@ albatrossBow (4,22) +15 at 1234.567 s	14 59d8ab4f62cd7cb6
 albatrossBow (4,22) +7 at 1234.567 s	8 7eccf055ec4062ef
 albatrossBow (4,22) +9 at 1234.567 s	11 88070361d6b643ef
 albatrossBow (4,22) +9 at 1235.817 s	11 88070361d6b643ef
+archangelStaff (4,18) +0 at 1234.567 s	3 828b507076ca54f0
+archangelStaff (4,18) +0 at 1234.567 s, doppelganger	3 828b507076ca54f0
+archangelStaff (4,18) +0 at 1234.567 s, excellent	5 501a217f204da337
+archangelStaff (4,18) +0 at 1234.567 s, fading 0.5	3 de59cb31a1caf178
+archangelStaff (4,18) +0 at 1234.567 s, in a monster's hands	3 828b507076ca54f0
+archangelStaff (4,18) +0 at 1234.567 s, without the skin	3 9cb0da9bd1d1cc7b
+archangelStaff (4,18) +0 at 1235.817 s	3 86685f9736662bc5
+archangelStaff (4,18) +0 at 1238.267 s	3 e599f3b55fbe6bf3
+archangelStaff (4,18) +11 at 1234.567 s	9 32898f95d686a196
+archangelStaff (4,18) +13 at 1234.567 s	9 e79c0a640283875c
+archangelStaff (4,18) +15 at 1234.567 s	9 e79c0a640283875c
+archangelStaff (4,18) +7 at 1234.567 s	5 e6960037ee1f9865
+archangelStaff (4,18) +9 at 1234.567 s	7 6217111739320fa9
+archangelStaff (4,18) +9 at 1235.817 s	7 dfabfeb37eefb52c
+archangelStaff (5,10) +0 at 1234.567 s	3 828b507076ca54f0
+archangelStaff (5,10) +0 at 1234.567 s, doppelganger	3 828b507076ca54f0
+archangelStaff (5,10) +0 at 1234.567 s, excellent	5 501a217f204da337
+archangelStaff (5,10) +0 at 1234.567 s, fading 0.5	3 de59cb31a1caf178
+archangelStaff (5,10) +0 at 1234.567 s, in a monster's hands	3 828b507076ca54f0
+archangelStaff (5,10) +0 at 1234.567 s, without the skin	3 9cb0da9bd1d1cc7b
+archangelStaff (5,10) +0 at 1235.817 s	3 86685f9736662bc5
+archangelStaff (5,10) +0 at 1238.267 s	3 e599f3b55fbe6bf3
+archangelStaff (5,10) +11 at 1234.567 s	9 098947871843edc4
+archangelStaff (5,10) +13 at 1234.567 s	9 1d574c711d8133da
+archangelStaff (5,10) +15 at 1234.567 s	9 1d574c711d8133da
+archangelStaff (5,10) +7 at 1234.567 s	5 62308dc1f047fd9b
+archangelStaff (5,10) +9 at 1234.567 s	7 39fc5e901b5c4beb
+archangelStaff (5,10) +9 at 1235.817 s	7 037b4ee9057601b2
+arrowViperBow (4,20) +0 at 1234.567 s	7 887150904dcdf6c9
+arrowViperBow (4,20) +0 at 1234.567 s, doppelganger	7 887150904dcdf6c9
+arrowViperBow (4,20) +0 at 1234.567 s, excellent	14 db2e2a691c3ad9c4
+arrowViperBow (4,20) +0 at 1234.567 s, fading 0.5	7 887150904dcdf6c9
+arrowViperBow (4,20) +0 at 1234.567 s, in a monster's hands	7 887150904dcdf6c9
+arrowViperBow (4,20) +0 at 1234.567 s, without the skin	7 898902414b426c44
+arrowViperBow (4,20) +0 at 1235.817 s	7 6ae97a6a9b49fd03
+arrowViperBow (4,20) +0 at 1238.267 s	7 18386076c276a081
+arrowViperBow (4,20) +11 at 1234.567 s	28 e0f2720cb9734ab1
+arrowViperBow (4,20) +13 at 1234.567 s	28 76502bd78bf2a880
+arrowViperBow (4,20) +15 at 1234.567 s	28 76502bd78bf2a880
+arrowViperBow (4,20) +7 at 1234.567 s	14 033e9ed50ea91a0f
+arrowViperBow (4,20) +9 at 1234.567 s	21 45dd311f23d7e618
+arrowViperBow (4,20) +9 at 1235.817 s	21 e754ec7ca43d90ce
+battleScepter (2,8) +0 at 1234.567 s	3 66b372fb8d8a916a
+battleScepter (2,8) +0 at 1234.567 s, doppelganger	3 66b372fb8d8a916a
+battleScepter (2,8) +0 at 1234.567 s, excellent	5 7c73a4da15e65353
+battleScepter (2,8) +0 at 1234.567 s, fading 0.5	3 7708d98c9950b668
+battleScepter (2,8) +0 at 1234.567 s, in a monster's hands	3 66b372fb8d8a916a
+battleScepter (2,8) +0 at 1234.567 s, without the skin	3 2c9b47b3711e190d
+battleScepter (2,8) +0 at 1235.817 s	3 c8b631d495cabe64
+battleScepter (2,8) +0 at 1238.267 s	3 8e87d433c15dfee4
+battleScepter (2,8) +11 at 1234.567 s	9 fe91d3e0e3e0d99e
+battleScepter (2,8) +13 at 1234.567 s	9 eaf585b6e710ff38
+battleScepter (2,8) +15 at 1234.567 s	9 eaf585b6e710ff38
+battleScepter (2,8) +7 at 1234.567 s	5 5e8e2331844f438f
+battleScepter (2,8) +9 at 1234.567 s	7 d163de9d845da5a7
+battleScepter (2,8) +9 at 1235.817 s	7 f07ad1e6a2b98407
 boostAura (13,104) +0 at 1234.567 s	3 5a4e03b757ba9359
 boostAura (13,104) +0 at 1234.567 s, doppelganger	3 5a4e03b757ba9359
 boostAura (13,104) +0 at 1234.567 s, excellent	5 3c08d93e7d8a42cf
@@ -142,6 +212,62 @@ brova (3,11) +15 at 1234.567 s	13 bebc04e87847fdd7
 brova (3,11) +7 at 1234.567 s	8 138408d8ae79af45
 brova (3,11) +9 at 1234.567 s	10 96c10c7a9879ab92
 brova (3,11) +9 at 1235.817 s	10 96c10c7a9879ab92
+chaosCard (14,54) +0 at 1234.567 s	3 b4be7fb75192810b
+chaosCard (14,54) +0 at 1234.567 s, doppelganger	3 b4be7fb75192810b
+chaosCard (14,54) +0 at 1234.567 s, excellent	4 838d88a6cfa12340
+chaosCard (14,54) +0 at 1234.567 s, fading 0.5	3 39fe1534ed6613af
+chaosCard (14,54) +0 at 1234.567 s, in a monster's hands	3 b4be7fb75192810b
+chaosCard (14,54) +0 at 1234.567 s, without the skin	3 4cfdb2fc3eee7876
+chaosCard (14,54) +0 at 1235.817 s	3 0f29ea1e9c1ee00a
+chaosCard (14,54) +0 at 1238.267 s	3 e8a2bc02c8fe7e91
+chaosCard (14,54) +11 at 1234.567 s	6 38a2a935d59cce2e
+chaosCard (14,54) +13 at 1234.567 s	6 f50953cdd24a9b8d
+chaosCard (14,54) +15 at 1234.567 s	6 f50953cdd24a9b8d
+chaosCard (14,54) +7 at 1234.567 s	4 1879217ee00b92c7
+chaosCard (14,54) +9 at 1234.567 s	5 a5bf111b6cd236ef
+chaosCard (14,54) +9 at 1235.817 s	5 8bbc92987e79c6a2
+chaosCardGold (14,92) +0 at 1234.567 s	3 04c5fe90855f92c3
+chaosCardGold (14,92) +0 at 1234.567 s, doppelganger	3 04c5fe90855f92c3
+chaosCardGold (14,92) +0 at 1234.567 s, excellent	4 ad7dae5d980636f8
+chaosCardGold (14,92) +0 at 1234.567 s, fading 0.5	3 d40c79dfff69b4b7
+chaosCardGold (14,92) +0 at 1234.567 s, in a monster's hands	3 04c5fe90855f92c3
+chaosCardGold (14,92) +0 at 1234.567 s, without the skin	3 5c4d34790646deee
+chaosCardGold (14,92) +0 at 1235.817 s	3 7428a697569b2ffa
+chaosCardGold (14,92) +0 at 1238.267 s	3 e3c6a5bcbd1c32a9
+chaosCardGold (14,92) +11 at 1234.567 s	6 98b6279180913e66
+chaosCardGold (14,92) +13 at 1234.567 s	6 944dd98d8c3daf55
+chaosCardGold (14,92) +15 at 1234.567 s	6 944dd98d8c3daf55
+chaosCardGold (14,92) +7 at 1234.567 s	4 07c023e2cc1b08ef
+chaosCardGold (14,92) +9 at 1234.567 s	5 3211b423087b5237
+chaosCardGold (14,92) +9 at 1235.817 s	5 4cf23b60c22af1f2
+chaosCardMini (14,95) +0 at 1234.567 s	3 f347ba72b1301b91
+chaosCardMini (14,95) +0 at 1234.567 s, doppelganger	3 f347ba72b1301b91
+chaosCardMini (14,95) +0 at 1234.567 s, excellent	4 a4963aa19f4e75c2
+chaosCardMini (14,95) +0 at 1234.567 s, fading 0.5	3 20b16f52215ff055
+chaosCardMini (14,95) +0 at 1234.567 s, in a monster's hands	3 f347ba72b1301b91
+chaosCardMini (14,95) +0 at 1234.567 s, without the skin	3 94280424be0fc388
+chaosCardMini (14,95) +0 at 1235.817 s	3 3364969afd06f9e8
+chaosCardMini (14,95) +0 at 1238.267 s	3 e504829e68414f5b
+chaosCardMini (14,95) +11 at 1234.567 s	6 11a32578dca5537c
+chaosCardMini (14,95) +13 at 1234.567 s	6 1a79d662d5adddbb
+chaosCardMini (14,95) +15 at 1234.567 s	6 1a79d662d5adddbb
+chaosCardMini (14,95) +7 at 1234.567 s	4 be787e5ddb905d75
+chaosCardMini (14,95) +9 at 1234.567 s	5 21fd5856dc423961
+chaosCardMini (14,95) +9 at 1235.817 s	5 2fb4e4102f06b0cc
+chaosCardRare (14,93) +0 at 1234.567 s	3 537a0d45626077b2
+chaosCardRare (14,93) +0 at 1234.567 s, doppelganger	3 537a0d45626077b2
+chaosCardRare (14,93) +0 at 1234.567 s, excellent	4 8104a3682a729565
+chaosCardRare (14,93) +0 at 1234.567 s, fading 0.5	3 fbbc1067694c7f46
+chaosCardRare (14,93) +0 at 1234.567 s, in a monster's hands	3 537a0d45626077b2
+chaosCardRare (14,93) +0 at 1234.567 s, without the skin	3 99083a45a369d95b
+chaosCardRare (14,93) +0 at 1235.817 s	3 694e60c9edf7ba0b
+chaosCardRare (14,93) +0 at 1238.267 s	3 93ee3aed1c153638
+chaosCardRare (14,93) +11 at 1234.567 s	6 20f73b1fda815e05
+chaosCardRare (14,93) +13 at 1234.567 s	6 69aeacb1152f8e08
+chaosCardRare (14,93) +15 at 1234.567 s	6 69aeacb1152f8e08
+chaosCardRare (14,93) +7 at 1234.567 s	4 5ad7575a85be37e2
+chaosCardRare (14,93) +9 at 1234.567 s	5 a74c58a6022ac3c2
+chaosCardRare (14,93) +9 at 1235.817 s	5 6eabd85f87421be7
 chromeMesh0 (14,112) +0 at 1234.567 s	2 634fe3ea4508f20e
 chromeMesh0 (14,112) +0 at 1234.567 s, doppelganger	2 634fe3ea4508f20e
 chromeMesh0 (14,112) +0 at 1234.567 s, excellent	3 212dc4bcbb7e47b9
@@ -338,6 +464,76 @@ crimsonGlory (6,17) +15 at 1234.567 s	14 11e07b927382bafc
 crimsonGlory (6,17) +7 at 1234.567 s	8 3c5e917a74cc2426
 crimsonGlory (6,17) +9 at 1234.567 s	11 170d737d0f5be5f9
 crimsonGlory (6,17) +9 at 1235.817 s	11 170d737d0f5be5f9
+crossShield (6,21) +0 at 1234.567 s	3 9e87e7af7a9e9167
+crossShield (6,21) +0 at 1234.567 s, doppelganger	3 9e87e7af7a9e9167
+crossShield (6,21) +0 at 1234.567 s, excellent	6 056775801ae0abfc
+crossShield (6,21) +0 at 1234.567 s, fading 0.5	3 e963b0f8ea01fe7f
+crossShield (6,21) +0 at 1234.567 s, in a monster's hands	3 9e87e7af7a9e9167
+crossShield (6,21) +0 at 1234.567 s, without the skin	3 be17fbc288658c2a
+crossShield (6,21) +0 at 1235.817 s	3 32491b5e496da8a7
+crossShield (6,21) +0 at 1238.267 s	3 49e3d58b1f97775d
+crossShield (6,21) +11 at 1234.567 s	8 c11d3df5e68ff1f3
+crossShield (6,21) +13 at 1234.567 s	8 4ce04c6274c45e50
+crossShield (6,21) +15 at 1234.567 s	8 4ce04c6274c45e50
+crossShield (6,21) +7 at 1234.567 s	4 ee1c7365f54aa503
+crossShield (6,21) +9 at 1234.567 s	5 997cbc220aa2c09c
+crossShield (6,21) +9 at 1235.817 s	5 6823acd3e21a341c
+darkHorse (13,4) +0 at 1234.567 s	4 dee2198b2e6c9996
+darkHorse (13,4) +0 at 1234.567 s, doppelganger	4 599384deaf9a8b3a
+darkHorse (13,4) +0 at 1234.567 s, excellent	6 000291d0e65ec4fd
+darkHorse (13,4) +0 at 1234.567 s, fading 0.5	4 89e123457d0a0684
+darkHorse (13,4) +0 at 1234.567 s, in a monster's hands	4 8337a579d31c9de8
+darkHorse (13,4) +0 at 1234.567 s, without the skin	4 626bd22b9e42a174
+darkHorse (13,4) +0 at 1235.817 s	4 dee2198b2e6c9996
+darkHorse (13,4) +0 at 1238.267 s	4 dee2198b2e6c9996
+darkHorse (13,4) +11 at 1234.567 s	10 3fc7b20246b3ed10
+darkHorse (13,4) +13 at 1234.567 s	10 43d007e7565a1348
+darkHorse (13,4) +15 at 1234.567 s	10 43d007e7565a1348
+darkHorse (13,4) +7 at 1234.567 s	6 5d583ee33bcc4b86
+darkHorse (13,4) +9 at 1234.567 s	8 18aaa35de3ae9269
+darkHorse (13,4) +9 at 1235.817 s	8 18aaa35de3ae9269
+darkPhoenixFeather (14,67) +0 at 1234.567 s	2 c8fce6d7961a1eb8
+darkPhoenixFeather (14,67) +0 at 1234.567 s, doppelganger	2 c8fce6d7961a1eb8
+darkPhoenixFeather (14,67) +0 at 1234.567 s, excellent	3 e6b401897c6bed77
+darkPhoenixFeather (14,67) +0 at 1234.567 s, fading 0.5	2 9c076e36bed6b00c
+darkPhoenixFeather (14,67) +0 at 1234.567 s, in a monster's hands	2 c8fce6d7961a1eb8
+darkPhoenixFeather (14,67) +0 at 1234.567 s, without the skin	2 45622360b8758c1a
+darkPhoenixFeather (14,67) +0 at 1235.817 s	2 b00b3635076e591a
+darkPhoenixFeather (14,67) +0 at 1238.267 s	2 640602e3a4424583
+darkPhoenixFeather (14,67) +11 at 1234.567 s	5 5a0325c26e1bcaf1
+darkPhoenixFeather (14,67) +13 at 1234.567 s	5 82421760f31759d4
+darkPhoenixFeather (14,67) +15 at 1234.567 s	5 82421760f31759d4
+darkPhoenixFeather (14,67) +7 at 1234.567 s	3 d383eb00d11c42e3
+darkPhoenixFeather (14,67) +9 at 1234.567 s	4 cba7d6999462d74e
+darkPhoenixFeather (14,67) +9 at 1235.817 s	4 b8f82f11b5d68454
+darkRaven (13,5) +0 at 1234.567 s	3 246e2cfac022b2d8
+darkRaven (13,5) +0 at 1234.567 s, doppelganger	3 77ee027993c6184c
+darkRaven (13,5) +0 at 1234.567 s, excellent	5 9b1d2c08c1285366
+darkRaven (13,5) +0 at 1234.567 s, fading 0.5	3 27dc903ea3de75aa
+darkRaven (13,5) +0 at 1234.567 s, in a monster's hands	3 89f5d2ffd155b156
+darkRaven (13,5) +0 at 1234.567 s, without the skin	3 d73c720b18a20e35
+darkRaven (13,5) +0 at 1235.817 s	3 246e2cfac022b2d8
+darkRaven (13,5) +0 at 1238.267 s	3 246e2cfac022b2d8
+darkRaven (13,5) +11 at 1234.567 s	9 94fe38b4d0f56307
+darkRaven (13,5) +13 at 1234.567 s	9 77b0022770f048dd
+darkRaven (13,5) +15 at 1234.567 s	9 77b0022770f048dd
+darkRaven (13,5) +7 at 1234.567 s	5 e53666739e742de7
+darkRaven (13,5) +9 at 1234.567 s	7 0986411737721324
+darkRaven (13,5) +9 at 1235.817 s	7 0986411737721324
+darkReignBlade (0,21) +0 at 1234.567 s	5 dfc6cbc862938c2b
+darkReignBlade (0,21) +0 at 1234.567 s, doppelganger	5 dfc6cbc862938c2b
+darkReignBlade (0,21) +0 at 1234.567 s, excellent	8 35b9fd6a194eb4a8
+darkReignBlade (0,21) +0 at 1234.567 s, fading 0.5	5 7c375b30bb44ab09
+darkReignBlade (0,21) +0 at 1234.567 s, in a monster's hands	5 dfc6cbc862938c2b
+darkReignBlade (0,21) +0 at 1234.567 s, without the skin	5 de3c19dcc937bca6
+darkReignBlade (0,21) +0 at 1235.817 s	5 298f022fd0659679
+darkReignBlade (0,21) +0 at 1238.267 s	5 aac2a2f5ad93b37b
+darkReignBlade (0,21) +11 at 1234.567 s	11 db2fc3fad5518b87
+darkReignBlade (0,21) +13 at 1234.567 s	11 8b02c112508dc419
+darkReignBlade (0,21) +15 at 1234.567 s	11 8b02c112508dc419
+darkReignBlade (0,21) +7 at 1234.567 s	7 012d3861f7328c54
+darkReignBlade (0,21) +9 at 1234.567 s	9 ed4008c62d410fb7
+darkReignBlade (0,21) +9 at 1235.817 s	9 78041813099752e9
 dayPass (14,126) +0 at 1234.567 s	1 3567d99ca10d386a
 dayPass (14,126) +0 at 1234.567 s, doppelganger	1 3567d99ca10d386a
 dayPass (14,126) +0 at 1234.567 s, excellent	2 375e43259b3b695d
@@ -394,6 +590,20 @@ dayPass (14,129) +15 at 1234.567 s	4 182e80f836d5ce7c
 dayPass (14,129) +7 at 1234.567 s	2 fcca741933471ac0
 dayPass (14,129) +9 at 1234.567 s	3 1cd796ef745a3656
 dayPass (14,129) +9 at 1235.817 s	3 1cd796ef745a3656
+deathBeamKnightFlame (14,65) +0 at 1234.567 s	2 3a9dabd9d73e79c6
+deathBeamKnightFlame (14,65) +0 at 1234.567 s, doppelganger	2 3a9dabd9d73e79c6
+deathBeamKnightFlame (14,65) +0 at 1234.567 s, excellent	3 66c23478c07decb1
+deathBeamKnightFlame (14,65) +0 at 1234.567 s, fading 0.5	2 8763a6b8e0e11bc2
+deathBeamKnightFlame (14,65) +0 at 1234.567 s, in a monster's hands	2 3a9dabd9d73e79c6
+deathBeamKnightFlame (14,65) +0 at 1234.567 s, without the skin	2 dfc5b2f9c642f968
+deathBeamKnightFlame (14,65) +0 at 1235.817 s	2 51869efa89922524
+deathBeamKnightFlame (14,65) +0 at 1238.267 s	2 2c294a6d11075c7d
+deathBeamKnightFlame (14,65) +11 at 1234.567 s	5 5b6bd7d85dfbf1d3
+deathBeamKnightFlame (14,65) +13 at 1234.567 s	5 68bb81a083d819ee
+deathBeamKnightFlame (14,65) +15 at 1234.567 s	5 68bb81a083d819ee
+deathBeamKnightFlame (14,65) +7 at 1234.567 s	3 ef765711586defe5
+deathBeamKnightFlame (14,65) +9 at 1234.567 s	4 7cee2c239a28d0dc
+deathBeamKnightFlame (14,65) +9 at 1235.817 s	4 1e4fb3386314c5e6
 demonicStick (5,18) +0 at 1234.567 s	3 5592a6b804f24b06
 demonicStick (5,18) +0 at 1234.567 s, doppelganger	3 5bd75c75d271b832
 demonicStick (5,18) +0 at 1234.567 s, excellent	5 abe76263a2b9540f
@@ -408,6 +618,62 @@ demonicStick (5,18) +15 at 1234.567 s	9 8d003378cdfb6eed
 demonicStick (5,18) +7 at 1234.567 s	5 860dd750a4dae16a
 demonicStick (5,18) +9 at 1234.567 s	7 fd5f1791a20d0704
 demonicStick (5,18) +9 at 1235.817 s	7 fd5f1791a20d0704
+divineScepterOfArchangel (2,13) +0 at 1234.567 s	2 016f0bf61228aa3a
+divineScepterOfArchangel (2,13) +0 at 1234.567 s, doppelganger	2 016f0bf61228aa3a
+divineScepterOfArchangel (2,13) +0 at 1234.567 s, excellent	3 985e9e802c0de96d
+divineScepterOfArchangel (2,13) +0 at 1234.567 s, fading 0.5	2 683568f01b1bfc0a
+divineScepterOfArchangel (2,13) +0 at 1234.567 s, in a monster's hands	2 016f0bf61228aa3a
+divineScepterOfArchangel (2,13) +0 at 1234.567 s, without the skin	2 3995767bca23e56a
+divineScepterOfArchangel (2,13) +0 at 1235.817 s	2 689af55f4e16d429
+divineScepterOfArchangel (2,13) +0 at 1238.267 s	2 45da943e01353813
+divineScepterOfArchangel (2,13) +11 at 1234.567 s	5 ea48eefa3c39f2e3
+divineScepterOfArchangel (2,13) +13 at 1234.567 s	5 07b07b7bca381b7e
+divineScepterOfArchangel (2,13) +15 at 1234.567 s	5 07b07b7bca381b7e
+divineScepterOfArchangel (2,13) +7 at 1234.567 s	3 945da211041957c3
+divineScepterOfArchangel (2,13) +9 at 1234.567 s	4 07390dd9b37e128c
+divineScepterOfArchangel (2,13) +9 at 1235.817 s	4 f986769acff3a2e3
+divineSwordOfArchangel (0,19) +0 at 1234.567 s	3 a6ba2a9f0c576a0b
+divineSwordOfArchangel (0,19) +0 at 1234.567 s, doppelganger	3 a6ba2a9f0c576a0b
+divineSwordOfArchangel (0,19) +0 at 1234.567 s, excellent	5 3cf9e8766b4dc654
+divineSwordOfArchangel (0,19) +0 at 1234.567 s, fading 0.5	3 da90614a4c975b0d
+divineSwordOfArchangel (0,19) +0 at 1234.567 s, in a monster's hands	3 a6ba2a9f0c576a0b
+divineSwordOfArchangel (0,19) +0 at 1234.567 s, without the skin	3 00f9f948ea72eb7e
+divineSwordOfArchangel (0,19) +0 at 1235.817 s	3 930a5ae014bf7268
+divineSwordOfArchangel (0,19) +0 at 1238.267 s	3 ae72679b41191a52
+divineSwordOfArchangel (0,19) +11 at 1234.567 s	9 e762f67e303b3005
+divineSwordOfArchangel (0,19) +13 at 1234.567 s	9 fd456b2d1c432f9b
+divineSwordOfArchangel (0,19) +15 at 1234.567 s	9 fd456b2d1c432f9b
+divineSwordOfArchangel (0,19) +7 at 1234.567 s	5 d0297288fb6e472c
+divineSwordOfArchangel (0,19) +9 at 1234.567 s	7 282527384a8ca2dc
+divineSwordOfArchangel (0,19) +9 at 1235.817 s	7 14bb4bf7bfc1a9af
+dragonSpear (3,10) +0 at 1234.567 s	3 556f100a2c81d073
+dragonSpear (3,10) +0 at 1234.567 s, doppelganger	3 1ea257fbd4e370d9
+dragonSpear (3,10) +0 at 1234.567 s, excellent	6 ddbbc5dc37002614
+dragonSpear (3,10) +0 at 1234.567 s, fading 0.5	3 7928ca46973d3cdb
+dragonSpear (3,10) +0 at 1234.567 s, in a monster's hands	3 a99bf92d21236e95
+dragonSpear (3,10) +0 at 1234.567 s, without the skin	3 4e85b4bf92a2925e
+dragonSpear (3,10) +0 at 1235.817 s	3 2978009d914c6066
+dragonSpear (3,10) +0 at 1238.267 s	3 9f040c8de7863ece
+dragonSpear (3,10) +11 at 1234.567 s	10 272e1cf2893a805f
+dragonSpear (3,10) +13 at 1234.567 s	10 8fec98f920521644
+dragonSpear (3,10) +15 at 1234.567 s	10 8fec98f920521644
+dragonSpear (3,10) +7 at 1234.567 s	5 02dc3adeaa310f6d
+dragonSpear (3,10) +9 at 1234.567 s	7 d6e8e6ddc7f0c254
+dragonSpear (3,10) +9 at 1235.817 s	7 9ad7450bc1f7b4d1
+elementalShield (6,16) +0 at 1234.567 s	5 2b5e0b13029fe4d2
+elementalShield (6,16) +0 at 1234.567 s, doppelganger	5 2b5e0b13029fe4d2
+elementalShield (6,16) +0 at 1234.567 s, excellent	9 bde9367631cf9363
+elementalShield (6,16) +0 at 1234.567 s, fading 0.5	5 2b5e0b13029fe4d2
+elementalShield (6,16) +0 at 1234.567 s, in a monster's hands	5 2b5e0b13029fe4d2
+elementalShield (6,16) +0 at 1234.567 s, without the skin	5 aff46425cefbfac3
+elementalShield (6,16) +0 at 1235.817 s	5 8a203dbd27f3d510
+elementalShield (6,16) +0 at 1238.267 s	5 86be2637a07eeaae
+elementalShield (6,16) +11 at 1234.567 s	15 629db860f336a46f
+elementalShield (6,16) +13 at 1234.567 s	15 51d283a82ee33457
+elementalShield (6,16) +15 at 1234.567 s	15 51d283a82ee33457
+elementalShield (6,16) +7 at 1234.567 s	8 09c8f835af6cf28b
+elementalShield (6,16) +9 at 1234.567 s	11 85d44b2d3770e4aa
+elementalShield (6,16) +9 at 1235.817 s	11 e8fe64d9a6a8ae78
 elitePotion (14,70) +0 at 1234.567 s	3 b3a5f04bb7d0148c
 elitePotion (14,70) +0 at 1234.567 s, doppelganger	3 b3a5f04bb7d0148c
 elitePotion (14,70) +0 at 1234.567 s, excellent	5 c380c0333c5969fe
@@ -436,6 +702,118 @@ elitePotion (14,71) +15 at 1234.567 s	9 67e1dc20d0e691d9
 elitePotion (14,71) +7 at 1234.567 s	5 45c5dc3a668a2040
 elitePotion (14,71) +9 at 1234.567 s	7 b8e06684bc87abab
 elitePotion (14,71) +9 at 1235.817 s	7 b8e06684bc87abab
+eventTicket (13,121) +0 at 1234.567 s	3 3bfdec2a6378b8d8
+eventTicket (13,121) +0 at 1234.567 s, doppelganger	3 3bfdec2a6378b8d8
+eventTicket (13,121) +0 at 1234.567 s, excellent	5 66c573870b0b89b9
+eventTicket (13,121) +0 at 1234.567 s, fading 0.5	3 d55e4c48dc42c0de
+eventTicket (13,121) +0 at 1234.567 s, in a monster's hands	3 3bfdec2a6378b8d8
+eventTicket (13,121) +0 at 1234.567 s, without the skin	3 d0051055cee7a49d
+eventTicket (13,121) +0 at 1235.817 s	3 3f023821fdffdf9d
+eventTicket (13,121) +0 at 1238.267 s	3 63cb986832bc1ea7
+eventTicket (13,121) +11 at 1234.567 s	9 d2afa3b7104b5c9a
+eventTicket (13,121) +13 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,121) +15 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,121) +7 at 1234.567 s	5 fcc1af6a0e0c0fd9
+eventTicket (13,121) +9 at 1234.567 s	7 fa9acb6f18129363
+eventTicket (13,121) +9 at 1235.817 s	7 d99c9fd9cb8dc096
+eventTicket (13,46) +0 at 1234.567 s	3 3bfdec2a6378b8d8
+eventTicket (13,46) +0 at 1234.567 s, doppelganger	3 3bfdec2a6378b8d8
+eventTicket (13,46) +0 at 1234.567 s, excellent	5 66c573870b0b89b9
+eventTicket (13,46) +0 at 1234.567 s, fading 0.5	3 d55e4c48dc42c0de
+eventTicket (13,46) +0 at 1234.567 s, in a monster's hands	3 3bfdec2a6378b8d8
+eventTicket (13,46) +0 at 1234.567 s, without the skin	3 d0051055cee7a49d
+eventTicket (13,46) +0 at 1235.817 s	3 3f023821fdffdf9d
+eventTicket (13,46) +0 at 1238.267 s	3 63cb986832bc1ea7
+eventTicket (13,46) +11 at 1234.567 s	9 d2afa3b7104b5c9a
+eventTicket (13,46) +13 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,46) +15 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,46) +7 at 1234.567 s	5 fcc1af6a0e0c0fd9
+eventTicket (13,46) +9 at 1234.567 s	7 fa9acb6f18129363
+eventTicket (13,46) +9 at 1235.817 s	7 d99c9fd9cb8dc096
+eventTicket (13,47) +0 at 1234.567 s	3 3bfdec2a6378b8d8
+eventTicket (13,47) +0 at 1234.567 s, doppelganger	3 3bfdec2a6378b8d8
+eventTicket (13,47) +0 at 1234.567 s, excellent	5 66c573870b0b89b9
+eventTicket (13,47) +0 at 1234.567 s, fading 0.5	3 d55e4c48dc42c0de
+eventTicket (13,47) +0 at 1234.567 s, in a monster's hands	3 3bfdec2a6378b8d8
+eventTicket (13,47) +0 at 1234.567 s, without the skin	3 d0051055cee7a49d
+eventTicket (13,47) +0 at 1235.817 s	3 3f023821fdffdf9d
+eventTicket (13,47) +0 at 1238.267 s	3 63cb986832bc1ea7
+eventTicket (13,47) +11 at 1234.567 s	9 d2afa3b7104b5c9a
+eventTicket (13,47) +13 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,47) +15 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,47) +7 at 1234.567 s	5 fcc1af6a0e0c0fd9
+eventTicket (13,47) +9 at 1234.567 s	7 fa9acb6f18129363
+eventTicket (13,47) +9 at 1235.817 s	7 d99c9fd9cb8dc096
+eventTicket (13,48) +0 at 1234.567 s	3 3bfdec2a6378b8d8
+eventTicket (13,48) +0 at 1234.567 s, doppelganger	3 3bfdec2a6378b8d8
+eventTicket (13,48) +0 at 1234.567 s, excellent	5 66c573870b0b89b9
+eventTicket (13,48) +0 at 1234.567 s, fading 0.5	3 d55e4c48dc42c0de
+eventTicket (13,48) +0 at 1234.567 s, in a monster's hands	3 3bfdec2a6378b8d8
+eventTicket (13,48) +0 at 1234.567 s, without the skin	3 d0051055cee7a49d
+eventTicket (13,48) +0 at 1235.817 s	3 3f023821fdffdf9d
+eventTicket (13,48) +0 at 1238.267 s	3 63cb986832bc1ea7
+eventTicket (13,48) +11 at 1234.567 s	9 d2afa3b7104b5c9a
+eventTicket (13,48) +13 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,48) +15 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,48) +7 at 1234.567 s	5 fcc1af6a0e0c0fd9
+eventTicket (13,48) +9 at 1234.567 s	7 fa9acb6f18129363
+eventTicket (13,48) +9 at 1235.817 s	7 d99c9fd9cb8dc096
+eventTicket (13,61) +0 at 1234.567 s	3 3bfdec2a6378b8d8
+eventTicket (13,61) +0 at 1234.567 s, doppelganger	3 3bfdec2a6378b8d8
+eventTicket (13,61) +0 at 1234.567 s, excellent	5 66c573870b0b89b9
+eventTicket (13,61) +0 at 1234.567 s, fading 0.5	3 d55e4c48dc42c0de
+eventTicket (13,61) +0 at 1234.567 s, in a monster's hands	3 3bfdec2a6378b8d8
+eventTicket (13,61) +0 at 1234.567 s, without the skin	3 d0051055cee7a49d
+eventTicket (13,61) +0 at 1235.817 s	3 3f023821fdffdf9d
+eventTicket (13,61) +0 at 1238.267 s	3 63cb986832bc1ea7
+eventTicket (13,61) +11 at 1234.567 s	9 d2afa3b7104b5c9a
+eventTicket (13,61) +13 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,61) +15 at 1234.567 s	9 b0a9d4ce9dc531c2
+eventTicket (13,61) +7 at 1234.567 s	5 fcc1af6a0e0c0fd9
+eventTicket (13,61) +9 at 1234.567 s	7 fa9acb6f18129363
+eventTicket (13,61) +9 at 1235.817 s	7 d99c9fd9cb8dc096
+explosionBlade (0,23) +0 at 1234.567 s	6 fd307bc8453a35e4
+explosionBlade (0,23) +0 at 1234.567 s, doppelganger	6 fd307bc8453a35e4
+explosionBlade (0,23) +0 at 1234.567 s, excellent	9 fc561f54d1a4ab09
+explosionBlade (0,23) +0 at 1234.567 s, fading 0.5	6 a4b890cc6156dc8a
+explosionBlade (0,23) +0 at 1234.567 s, in a monster's hands	6 fd307bc8453a35e4
+explosionBlade (0,23) +0 at 1234.567 s, without the skin	6 8c17763c3f66a764
+explosionBlade (0,23) +0 at 1235.817 s	6 660abf802b12bf53
+explosionBlade (0,23) +0 at 1238.267 s	6 f36c38824965c92b
+explosionBlade (0,23) +11 at 1234.567 s	15 c48214cd02324e4b
+explosionBlade (0,23) +13 at 1234.567 s	15 a4504695f6f6b642
+explosionBlade (0,23) +15 at 1234.567 s	15 a4504695f6f6b642
+explosionBlade (0,23) +7 at 1234.567 s	9 5918e1cfa362dc65
+explosionBlade (0,23) +9 at 1234.567 s	12 04b3d0674563833c
+explosionBlade (0,23) +9 at 1235.817 s	12 b397f29c4a73b2d5
+flamberge (0,26) +0 at 1234.567 s	7 1eceb21b0bc5d30c
+flamberge (0,26) +0 at 1234.567 s, doppelganger	7 1eceb21b0bc5d30c
+flamberge (0,26) +0 at 1234.567 s, excellent	13 ddc2d75909ca90f5
+flamberge (0,26) +0 at 1234.567 s, fading 0.5	7 0ba43da80fb741b0
+flamberge (0,26) +0 at 1234.567 s, in a monster's hands	7 1eceb21b0bc5d30c
+flamberge (0,26) +0 at 1234.567 s, without the skin	7 a26f3776465b7505
+flamberge (0,26) +0 at 1235.817 s	7 d46ad273cd09242e
+flamberge (0,26) +0 at 1238.267 s	7 63c003a30c2b19f5
+flamberge (0,26) +11 at 1234.567 s	22 156e1cb63ec5ad6e
+flamberge (0,26) +13 at 1234.567 s	22 7ed8f7677b0b5099
+flamberge (0,26) +15 at 1234.567 s	22 7ed8f7677b0b5099
+flamberge (0,26) +7 at 1234.567 s	12 dd947fca15dae0b8
+flamberge (0,26) +9 at 1234.567 s	17 9cce7ffc1f2f4b1e
+flamberge (0,26) +9 at 1235.817 s	17 9d0d679ccd076028
+frostBarrier (6,19) +0 at 1234.567 s	3 0d9a8b25b923f39c
+frostBarrier (6,19) +0 at 1234.567 s, doppelganger	3 0d9a8b25b923f39c
+frostBarrier (6,19) +0 at 1234.567 s, excellent	6 89d5cabe61fe36da
+frostBarrier (6,19) +0 at 1234.567 s, fading 0.5	3 844d91a9da47a8a6
+frostBarrier (6,19) +0 at 1234.567 s, in a monster's hands	3 0d9a8b25b923f39c
+frostBarrier (6,19) +0 at 1234.567 s, without the skin	3 73f7c5f6c0871947
+frostBarrier (6,19) +0 at 1235.817 s	3 d238e1ed6596c924
+frostBarrier (6,19) +0 at 1238.267 s	3 aad2e0def99cbf23
+frostBarrier (6,19) +11 at 1234.567 s	6 edfb40f6401e3a09
+frostBarrier (6,19) +13 at 1234.567 s	6 3e92cad0b3a64c7a
+frostBarrier (6,19) +15 at 1234.567 s	6 3e92cad0b3a64c7a
+frostBarrier (6,19) +7 at 1234.567 s	4 feca79f0d32ca194
+frostBarrier (6,19) +9 at 1234.567 s	5 8cd53301c9f1acac
+frostBarrier (6,19) +9 at 1235.817 s	5 55317ec397e9ee6e
 frostMace (2,16) +0 at 1234.567 s	5 d26ab48a53543aa9
 frostMace (2,16) +0 at 1234.567 s, doppelganger	5 05e7207a61e84b63
 frostMace (2,16) +0 at 1234.567 s, excellent	8 ca507daabfc85541
@@ -492,6 +870,20 @@ greatLordScepter (2,12) +15 at 1234.567 s	18 72322f833b82d6a4
 greatLordScepter (2,12) +7 at 1234.567 s	10 e7000affc2a9c8de
 greatLordScepter (2,12) +9 at 1234.567 s	14 c8edadbfb712036c
 greatLordScepter (2,12) +9 at 1235.817 s	14 c8edadbfb712036c
+greatReignCrossbow (4,19) +0 at 1234.567 s	3 a40d31a0cf6075cf
+greatReignCrossbow (4,19) +0 at 1234.567 s, doppelganger	3 a40d31a0cf6075cf
+greatReignCrossbow (4,19) +0 at 1234.567 s, excellent	4 13a2d8cfcc614dac
+greatReignCrossbow (4,19) +0 at 1234.567 s, fading 0.5	3 fc67b270b483cf01
+greatReignCrossbow (4,19) +0 at 1234.567 s, in a monster's hands	3 a40d31a0cf6075cf
+greatReignCrossbow (4,19) +0 at 1234.567 s, without the skin	3 80beff451b4c3438
+greatReignCrossbow (4,19) +0 at 1235.817 s	3 c84411e52615a9bb
+greatReignCrossbow (4,19) +0 at 1238.267 s	3 6bfe027718e6bf51
+greatReignCrossbow (4,19) +11 at 1234.567 s	6 0b355aff98e78dfa
+greatReignCrossbow (4,19) +13 at 1234.567 s	6 96b1848bb327beb9
+greatReignCrossbow (4,19) +15 at 1234.567 s	6 96b1848bb327beb9
+greatReignCrossbow (4,19) +7 at 1234.567 s	4 cf20d3cabde9ed5c
+greatReignCrossbow (4,19) +9 at 1234.567 s	5 5de2e1749b8c9913
+greatReignCrossbow (4,19) +9 at 1235.817 s	5 6c4e70451bacef67
 guardianShield (6,20) +0 at 1234.567 s	3 e8e620a10e464619
 guardianShield (6,20) +0 at 1234.567 s, doppelganger	3 e8e620a10e464619
 guardianShield (6,20) +0 at 1234.567 s, excellent	5 b5ea1bd31bf8cfda
@@ -506,6 +898,20 @@ guardianShield (6,20) +15 at 1234.567 s	7 2ae397e1ffb1d12d
 guardianShield (6,20) +7 at 1234.567 s	4 a25a382e2efcd9c3
 guardianShield (6,20) +9 at 1234.567 s	5 fb0e9aed254e0b44
 guardianShield (6,20) +9 at 1235.817 s	5 fb0e9aed254e0b44
+hellMinerHorn (14,66) +0 at 1234.567 s	2 18d551a737211b29
+hellMinerHorn (14,66) +0 at 1234.567 s, doppelganger	2 18d551a737211b29
+hellMinerHorn (14,66) +0 at 1234.567 s, excellent	3 070f2b3eeb8c411a
+hellMinerHorn (14,66) +0 at 1234.567 s, fading 0.5	2 702e5acc915cf78d
+hellMinerHorn (14,66) +0 at 1234.567 s, in a monster's hands	2 18d551a737211b29
+hellMinerHorn (14,66) +0 at 1234.567 s, without the skin	2 1f4ae4543e292987
+hellMinerHorn (14,66) +0 at 1235.817 s	2 152f51315ed8bcab
+hellMinerHorn (14,66) +0 at 1238.267 s	2 8a62159cc765f972
+hellMinerHorn (14,66) +11 at 1234.567 s	5 013f774b65a27482
+hellMinerHorn (14,66) +13 at 1234.567 s	5 966d1fa2e548d291
+hellMinerHorn (14,66) +15 at 1234.567 s	5 966d1fa2e548d291
+hellMinerHorn (14,66) +7 at 1234.567 s	3 2ad2ec6a15b82546
+hellMinerHorn (14,66) +9 at 1234.567 s	4 5c661b26deb262c3
+hellMinerHorn (14,66) +9 at 1235.817 s	4 2a9e3a89ef62c559
 hourPass (14,130) +0 at 1234.567 s	1 62d34ba71977fb7b
 hourPass (14,130) +0 at 1234.567 s, doppelganger	1 62d34ba71977fb7b
 hourPass (14,130) +0 at 1234.567 s, excellent	2 56af7dfd0845b370
@@ -548,6 +954,34 @@ hourPass (14,132) +15 at 1234.567 s	4 86be2d1ca82af959
 hourPass (14,132) +7 at 1234.567 s	2 3525d68994daa945
 hourPass (14,132) +9 at 1234.567 s	3 5c2ab8d5acba15cb
 hourPass (14,132) +9 at 1235.817 s	3 5c2ab8d5acba15cb
+imperialStaff (5,31) +0 at 1234.567 s	6 a3799bdf42233eee
+imperialStaff (5,31) +0 at 1234.567 s, doppelganger	6 a3799bdf42233eee
+imperialStaff (5,31) +0 at 1234.567 s, excellent	8 decb4957cae8ba07
+imperialStaff (5,31) +0 at 1234.567 s, fading 0.5	6 2d6125bbfa1bf58a
+imperialStaff (5,31) +0 at 1234.567 s, in a monster's hands	6 a3799bdf42233eee
+imperialStaff (5,31) +0 at 1234.567 s, without the skin	6 0b683c740b78c08c
+imperialStaff (5,31) +0 at 1235.817 s	6 3c2760c9d677f8bf
+imperialStaff (5,31) +0 at 1238.267 s	6 eb55dfa24d5909a2
+imperialStaff (5,31) +11 at 1234.567 s	12 a1955240f55cdc83
+imperialStaff (5,31) +13 at 1234.567 s	12 b474bb7c0a28d44f
+imperialStaff (5,31) +15 at 1234.567 s	12 b474bb7c0a28d44f
+imperialStaff (5,31) +7 at 1234.567 s	8 61f305adf3aeb3ed
+imperialStaff (5,31) +9 at 1234.567 s	10 b2c8794113612e2a
+imperialStaff (5,31) +9 at 1235.817 s	10 e2d3fe5bbb9fee2d
+invitationToSantaVillage (13,66) +0 at 1234.567 s	3 9b677c4c9acc274d
+invitationToSantaVillage (13,66) +0 at 1234.567 s, doppelganger	3 9b677c4c9acc274d
+invitationToSantaVillage (13,66) +0 at 1234.567 s, excellent	5 a18151e194128b66
+invitationToSantaVillage (13,66) +0 at 1234.567 s, fading 0.5	3 1d75b299a31231f9
+invitationToSantaVillage (13,66) +0 at 1234.567 s, in a monster's hands	3 9b677c4c9acc274d
+invitationToSantaVillage (13,66) +0 at 1234.567 s, without the skin	3 5fefca5edcbcc2c0
+invitationToSantaVillage (13,66) +0 at 1235.817 s	3 812e03e59a833aa8
+invitationToSantaVillage (13,66) +0 at 1238.267 s	3 10a6b0d36354c7ae
+invitationToSantaVillage (13,66) +11 at 1234.567 s	9 12bb74c29887f42b
+invitationToSantaVillage (13,66) +13 at 1234.567 s	9 89e539b0dc18977b
+invitationToSantaVillage (13,66) +15 at 1234.567 s	9 89e539b0dc18977b
+invitationToSantaVillage (13,66) +7 at 1234.567 s	5 265aa6a0241035fc
+invitationToSantaVillage (13,66) +9 at 1234.567 s	7 8eec9f74042f9c1a
+invitationToSantaVillage (13,66) +9 at 1235.817 s	7 9bb8222852690697
 jewelryCase (14,141) +0 at 1234.567 s	3 ea6816993306bdb0
 jewelryCase (14,141) +0 at 1234.567 s, doppelganger	3 ea6816993306bdb0
 jewelryCase (14,141) +0 at 1234.567 s, excellent	5 34b67f4f0a36e231
@@ -604,6 +1038,62 @@ jewelryCase (14,144) +15 at 1234.567 s	9 6c97054c6a516e62
 jewelryCase (14,144) +7 at 1234.567 s	5 61b5b16ae0c1b615
 jewelryCase (14,144) +9 at 1234.567 s	7 d772ffc20ed11b83
 jewelryCase (14,144) +9 at 1235.817 s	7 d772ffc20ed11b83
+knightBlade (0,20) +0 at 1234.567 s	7 590decc554207647
+knightBlade (0,20) +0 at 1234.567 s, doppelganger	7 590decc554207647
+knightBlade (0,20) +0 at 1234.567 s, excellent	11 aa3d19028383415b
+knightBlade (0,20) +0 at 1234.567 s, fading 0.5	7 2cc51b2a97722511
+knightBlade (0,20) +0 at 1234.567 s, in a monster's hands	7 590decc554207647
+knightBlade (0,20) +0 at 1234.567 s, without the skin	7 4fa7d74cd35e2588
+knightBlade (0,20) +0 at 1235.817 s	7 53fb779a5aca0a1c
+knightBlade (0,20) +0 at 1238.267 s	7 d6ee83bad6d8920c
+knightBlade (0,20) +11 at 1234.567 s	16 2d89974d8a8e35cd
+knightBlade (0,20) +13 at 1234.567 s	16 331c6c31e8ef9c96
+knightBlade (0,20) +15 at 1234.567 s	16 331c6c31e8ef9c96
+knightBlade (0,20) +7 at 1234.567 s	10 39f64500f0f12e40
+knightBlade (0,20) +9 at 1234.567 s	13 4302efdb51f74cbd
+knightBlade (0,20) +9 at 1235.817 s	13 ba2b539bc264cb76
+lifeStone (13,11) +0 at 1234.567 s	2 e956514d1afe9dc5
+lifeStone (13,11) +0 at 1234.567 s, doppelganger	2 e956514d1afe9dc5
+lifeStone (13,11) +0 at 1234.567 s, excellent	4 dac7aad488fb01d1
+lifeStone (13,11) +0 at 1234.567 s, fading 0.5	2 e956514d1afe9dc5
+lifeStone (13,11) +0 at 1234.567 s, in a monster's hands	2 e956514d1afe9dc5
+lifeStone (13,11) +0 at 1234.567 s, without the skin	2 c490e2931b67ab31
+lifeStone (13,11) +0 at 1235.817 s	2 e956514d1afe9dc5
+lifeStone (13,11) +0 at 1238.267 s	2 e956514d1afe9dc5
+lifeStone (13,11) +11 at 1234.567 s	8 9da5d9d23ffd109a
+lifeStone (13,11) +13 at 1234.567 s	8 18979a9aa8254420
+lifeStone (13,11) +15 at 1234.567 s	8 18979a9aa8254420
+lifeStone (13,11) +7 at 1234.567 s	4 1eb88674ef917ffc
+lifeStone (13,11) +9 at 1234.567 s	6 a4719908c044b8c9
+lifeStone (13,11) +9 at 1235.817 s	6 a4719908c044b8c9
+lordScepter (2,11) +0 at 1234.567 s	4 b5722e106e57bfe7
+lordScepter (2,11) +0 at 1234.567 s, doppelganger	4 b5722e106e57bfe7
+lordScepter (2,11) +0 at 1234.567 s, excellent	7 6c069f2ba611d64c
+lordScepter (2,11) +0 at 1234.567 s, fading 0.5	4 85e04e03f1be8b9b
+lordScepter (2,11) +0 at 1234.567 s, in a monster's hands	4 b5722e106e57bfe7
+lordScepter (2,11) +0 at 1234.567 s, without the skin	4 595dcf5d003b6b5d
+lordScepter (2,11) +0 at 1235.817 s	4 0a56cda72270546c
+lordScepter (2,11) +0 at 1238.267 s	4 139404130cb52b2f
+lordScepter (2,11) +11 at 1234.567 s	13 bb034a3b7acd3c50
+lordScepter (2,11) +13 at 1234.567 s	13 a7418536fb739999
+lordScepter (2,11) +15 at 1234.567 s	13 a7418536fb739999
+lordScepter (2,11) +7 at 1234.567 s	7 81684605452b7038
+lordScepter (2,11) +9 at 1234.567 s	10 e1e9f3c874fe6a3f
+lordScepter (2,11) +9 at 1235.817 s	10 14a0151d0e2f49e8
+lostMap (14,28) +0 at 1234.567 s	2 9b79e9d848cf7d38
+lostMap (14,28) +0 at 1234.567 s, doppelganger	2 9b79e9d848cf7d38
+lostMap (14,28) +0 at 1234.567 s, excellent	4 21abe4c2a644f419
+lostMap (14,28) +0 at 1234.567 s, fading 0.5	2 9b79e9d848cf7d38
+lostMap (14,28) +0 at 1234.567 s, in a monster's hands	2 9b79e9d848cf7d38
+lostMap (14,28) +0 at 1234.567 s, without the skin	2 80db5e975fc73874
+lostMap (14,28) +0 at 1235.817 s	2 3a058b19fc899736
+lostMap (14,28) +0 at 1238.267 s	2 2268798da8597a5c
+lostMap (14,28) +11 at 1234.567 s	8 4dbf742333d5bab8
+lostMap (14,28) +13 at 1234.567 s	8 3ee8eedc500fe7e0
+lostMap (14,28) +15 at 1234.567 s	8 3ee8eedc500fe7e0
+lostMap (14,28) +7 at 1234.567 s	4 e51fd5ec31e778f4
+lostMap (14,28) +9 at 1234.567 s	6 d359684691fc5609
+lostMap (14,28) +9 at 1235.817 s	6 4a358baf3d8ed9f3
 luckyCoin (14,100) +0 at 1234.567 s	1 3544bacb4bd0b039
 luckyCoin (14,100) +0 at 1234.567 s, doppelganger	1 3544bacb4bd0b039
 luckyCoin (14,100) +0 at 1234.567 s, excellent	2 7f1c37174212362a
@@ -618,6 +1108,76 @@ luckyCoin (14,100) +15 at 1234.567 s	4 71de38ed7971794f
 luckyCoin (14,100) +7 at 1234.567 s	2 ae652853bc2f200f
 luckyCoin (14,100) +9 at 1234.567 s	3 233dff6b9cec2d75
 luckyCoin (14,100) +9 at 1235.817 s	3 233dff6b9cec2d75
+masterScepter (2,9) +0 at 1234.567 s	4 8d657c35e0ef8824
+masterScepter (2,9) +0 at 1234.567 s, doppelganger	4 8d657c35e0ef8824
+masterScepter (2,9) +0 at 1234.567 s, excellent	6 3fd5e0600dc6aaa3
+masterScepter (2,9) +0 at 1234.567 s, fading 0.5	4 d9aca31d334ceb24
+masterScepter (2,9) +0 at 1234.567 s, in a monster's hands	4 8d657c35e0ef8824
+masterScepter (2,9) +0 at 1234.567 s, without the skin	4 c64ad7493c3fe296
+masterScepter (2,9) +0 at 1235.817 s	4 2d5f3c94bd4fe620
+masterScepter (2,9) +0 at 1238.267 s	4 d1cc5c63aedf8317
+masterScepter (2,9) +11 at 1234.567 s	10 0f415db57fcbdf22
+masterScepter (2,9) +13 at 1234.567 s	10 0b57231d2f901f0a
+masterScepter (2,9) +15 at 1234.567 s	10 0b57231d2f901f0a
+masterScepter (2,9) +7 at 1234.567 s	6 e9ba1b00c0e7c40a
+masterScepter (2,9) +9 at 1234.567 s	8 fd929b4c34a4a1b3
+masterScepter (2,9) +9 at 1235.817 s	8 775d490e5e5ed32f
+oldScroll (13,49) +0 at 1234.567 s	2 40ce790b078dd0a8
+oldScroll (13,49) +0 at 1234.567 s, doppelganger	2 fa0d7e2567f7f533
+oldScroll (13,49) +0 at 1234.567 s, excellent	4 478a4a984b7a1372
+oldScroll (13,49) +0 at 1234.567 s, fading 0.5	2 40ce790b078dd0a8
+oldScroll (13,49) +0 at 1234.567 s, in a monster's hands	2 a9c49379c7445389
+oldScroll (13,49) +0 at 1234.567 s, without the skin	2 d26c707ded8a2f30
+oldScroll (13,49) +0 at 1235.817 s	2 b01eeafdfb7c9c43
+oldScroll (13,49) +0 at 1238.267 s	2 55c1daf7d52bce70
+oldScroll (13,49) +11 at 1234.567 s	8 d9f68d1a3697f4d3
+oldScroll (13,49) +13 at 1234.567 s	8 87c3b654fbac423b
+oldScroll (13,49) +15 at 1234.567 s	8 87c3b654fbac423b
+oldScroll (13,49) +7 at 1234.567 s	4 a6bf8dd868e7ef75
+oldScroll (13,49) +9 at 1234.567 s	6 55ff32f652f0ad19
+oldScroll (13,49) +9 at 1235.817 s	6 28952851aaa920b6
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s	2 14bcfec9795896aa
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s, doppelganger	2 14bcfec9795896aa
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s, excellent	3 bb5a827685a2619d
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s, fading 0.5	2 69ae389a6ad03ad6
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s, in a monster's hands	2 14bcfec9795896aa
+openAccessTicketToDoppelganger (13,125) +0 at 1234.567 s, without the skin	2 b776bc4fe1aed94a
+openAccessTicketToDoppelganger (13,125) +0 at 1235.817 s	2 e3108e40cdccf00f
+openAccessTicketToDoppelganger (13,125) +0 at 1238.267 s	2 629d1c9cd4364751
+openAccessTicketToDoppelganger (13,125) +11 at 1234.567 s	5 189fe600274afd6f
+openAccessTicketToDoppelganger (13,125) +13 at 1234.567 s	5 0fa395daf73c439a
+openAccessTicketToDoppelganger (13,125) +15 at 1234.567 s	5 0fa395daf73c439a
+openAccessTicketToDoppelganger (13,125) +7 at 1234.567 s	3 7a9f499635e0a4c3
+openAccessTicketToDoppelganger (13,125) +9 at 1234.567 s	4 263bf5f868b3a988
+openAccessTicketToDoppelganger (13,125) +9 at 1235.817 s	4 67ea560c913786fd
+openAccessTicketToVarka (13,126) +0 at 1234.567 s	2 7b58b56e03ebcd35
+openAccessTicketToVarka (13,126) +0 at 1234.567 s, doppelganger	2 7b58b56e03ebcd35
+openAccessTicketToVarka (13,126) +0 at 1234.567 s, excellent	3 6a62e2249ecd250e
+openAccessTicketToVarka (13,126) +0 at 1234.567 s, fading 0.5	2 c4076ed8396651b9
+openAccessTicketToVarka (13,126) +0 at 1234.567 s, in a monster's hands	2 7b58b56e03ebcd35
+openAccessTicketToVarka (13,126) +0 at 1234.567 s, without the skin	2 c6f3cc0ea73b3185
+openAccessTicketToVarka (13,126) +0 at 1235.817 s	2 0afb3f23b8902990
+openAccessTicketToVarka (13,126) +0 at 1238.267 s	2 21a80131410dae8e
+openAccessTicketToVarka (13,126) +11 at 1234.567 s	5 e615eed4e6cdb186
+openAccessTicketToVarka (13,126) +13 at 1234.567 s	5 c70cf810745c0675
+openAccessTicketToVarka (13,126) +15 at 1234.567 s	5 c70cf810745c0675
+openAccessTicketToVarka (13,126) +7 at 1234.567 s	3 de6e871d12d18640
+openAccessTicketToVarka (13,126) +9 at 1234.567 s	4 e0e7733c7f6f0857
+openAccessTicketToVarka (13,126) +9 at 1235.817 s	4 5743565fd58deb62
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s	2 c9348b562c8edbf4
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s, doppelganger	2 c9348b562c8edbf4
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s, excellent	3 b60d767120189c7b
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s, fading 0.5	2 b9810747f8530848
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s, in a monster's hands	2 c9348b562c8edbf4
+openAccessTicketToVarka7 (13,127) +0 at 1234.567 s, without the skin	2 991885cb7d809f98
+openAccessTicketToVarka7 (13,127) +0 at 1235.817 s	2 f3e5e5866f8e6c81
+openAccessTicketToVarka7 (13,127) +0 at 1238.267 s	2 4ac4bbe9af9c3fdf
+openAccessTicketToVarka7 (13,127) +11 at 1234.567 s	5 94e1b0e0be8bc125
+openAccessTicketToVarka7 (13,127) +13 at 1234.567 s	5 610aa2101c2871a8
+openAccessTicketToVarka7 (13,127) +15 at 1234.567 s	5 610aa2101c2871a8
+openAccessTicketToVarka7 (13,127) +7 at 1234.567 s	3 16c9e98d746514c5
+openAccessTicketToVarka7 (13,127) +9 at 1234.567 s	4 91de201be0659962
+openAccessTicketToVarka7 (13,127) +9 at 1235.817 s	4 a64ca98074975a57
 packageBoxA (14,134) +0 at 1234.567 s	1 d93bd622b1a6257c
 packageBoxA (14,134) +0 at 1234.567 s, doppelganger	1 d93bd622b1a6257c
 packageBoxA (14,134) +0 at 1234.567 s, excellent	2 cb428258d452a1c3
@@ -702,6 +1262,202 @@ packageBoxF (14,139) +15 at 1234.567 s	4 a633291e5929ca42
 packageBoxF (14,139) +7 at 1234.567 s	2 9450223a79a4da72
 packageBoxF (14,139) +9 at 1234.567 s	3 c1ecbeafaac0b410
 packageBoxF (14,139) +9 at 1235.817 s	3 c1ecbeafaac0b410
+platinaStaff (5,13) +0 at 1234.567 s	2 1e165479f30cd6d2
+platinaStaff (5,13) +0 at 1234.567 s, doppelganger	2 1e165479f30cd6d2
+platinaStaff (5,13) +0 at 1234.567 s, excellent	4 119b7228a88a4983
+platinaStaff (5,13) +0 at 1234.567 s, fading 0.5	2 1de9245ad682b060
+platinaStaff (5,13) +0 at 1234.567 s, in a monster's hands	2 1e165479f30cd6d2
+platinaStaff (5,13) +0 at 1234.567 s, without the skin	2 4027804adeb3b2a8
+platinaStaff (5,13) +0 at 1235.817 s	2 6b975127f1162c00
+platinaStaff (5,13) +0 at 1238.267 s	2 fc13ed9fd08b6f40
+platinaStaff (5,13) +11 at 1234.567 s	8 54986556a2eff204
+platinaStaff (5,13) +13 at 1234.567 s	8 2e63818f243e502c
+platinaStaff (5,13) +15 at 1234.567 s	8 2e63818f243e502c
+platinaStaff (5,13) +7 at 1234.567 s	4 73680dc3ceaa7606
+platinaStaff (5,13) +9 at 1234.567 s	6 30af47061674edb9
+platinaStaff (5,13) +9 at 1235.817 s	6 47a968338e7fc7a3
+rareItemTicket (14,62) +0 at 1234.567 s	3 826bc8fad5dc3d01
+rareItemTicket (14,62) +0 at 1234.567 s, doppelganger	3 826bc8fad5dc3d01
+rareItemTicket (14,62) +0 at 1234.567 s, excellent	5 ca5dd50d5e1adbe2
+rareItemTicket (14,62) +0 at 1234.567 s, fading 0.5	3 bad76c77c21ae01f
+rareItemTicket (14,62) +0 at 1234.567 s, in a monster's hands	3 826bc8fad5dc3d01
+rareItemTicket (14,62) +0 at 1234.567 s, without the skin	3 9263b54772aeca68
+rareItemTicket (14,62) +0 at 1235.817 s	3 7b46286ea2ccbeae
+rareItemTicket (14,62) +0 at 1238.267 s	3 067f7a023d7c7060
+rareItemTicket (14,62) +11 at 1234.567 s	9 529fd480c5815d9b
+rareItemTicket (14,62) +13 at 1234.567 s	9 444cbeee3322286b
+rareItemTicket (14,62) +15 at 1234.567 s	9 444cbeee3322286b
+rareItemTicket (14,62) +7 at 1234.567 s	5 bea5af2d5ae73310
+rareItemTicket (14,62) +9 at 1234.567 s	7 43edfa0c745bf6ca
+rareItemTicket (14,62) +9 at 1235.817 s	7 71b5bd1c22e40071
+rareItemTicket (14,83) +0 at 1234.567 s	3 826bc8fad5dc3d01
+rareItemTicket (14,83) +0 at 1234.567 s, doppelganger	3 826bc8fad5dc3d01
+rareItemTicket (14,83) +0 at 1234.567 s, excellent	5 ca5dd50d5e1adbe2
+rareItemTicket (14,83) +0 at 1234.567 s, fading 0.5	3 bad76c77c21ae01f
+rareItemTicket (14,83) +0 at 1234.567 s, in a monster's hands	3 826bc8fad5dc3d01
+rareItemTicket (14,83) +0 at 1234.567 s, without the skin	3 9263b54772aeca68
+rareItemTicket (14,83) +0 at 1235.817 s	3 7b46286ea2ccbeae
+rareItemTicket (14,83) +0 at 1238.267 s	3 067f7a023d7c7060
+rareItemTicket (14,83) +11 at 1234.567 s	9 529fd480c5815d9b
+rareItemTicket (14,83) +13 at 1234.567 s	9 444cbeee3322286b
+rareItemTicket (14,83) +15 at 1234.567 s	9 444cbeee3322286b
+rareItemTicket (14,83) +7 at 1234.567 s	5 bea5af2d5ae73310
+rareItemTicket (14,83) +9 at 1234.567 s	7 43edfa0c745bf6ca
+rareItemTicket (14,83) +9 at 1235.817 s	7 71b5bd1c22e40071
+rareItemTicket1 (14,58) +0 at 1234.567 s	4 2af9a774c2327eb5
+rareItemTicket1 (14,58) +0 at 1234.567 s, doppelganger	4 2af9a774c2327eb5
+rareItemTicket1 (14,58) +0 at 1234.567 s, excellent	6 1652abec32847a6e
+rareItemTicket1 (14,58) +0 at 1234.567 s, fading 0.5	4 e10b71e1aa443bb1
+rareItemTicket1 (14,58) +0 at 1234.567 s, in a monster's hands	4 2af9a774c2327eb5
+rareItemTicket1 (14,58) +0 at 1234.567 s, without the skin	4 4471d26cd6bbb533
+rareItemTicket1 (14,58) +0 at 1235.817 s	4 2a6bf06b414f815a
+rareItemTicket1 (14,58) +0 at 1238.267 s	4 59bb245d318513a0
+rareItemTicket1 (14,58) +11 at 1234.567 s	10 6ca82d30a412f069
+rareItemTicket1 (14,58) +13 at 1234.567 s	10 28bf5b67aa2bde51
+rareItemTicket1 (14,58) +15 at 1234.567 s	10 28bf5b67aa2bde51
+rareItemTicket1 (14,58) +7 at 1234.567 s	6 2d282af7666c159b
+rareItemTicket1 (14,58) +9 at 1234.567 s	8 d1c13edb276f1b08
+rareItemTicket1 (14,58) +9 at 1235.817 s	8 e45ec7244a87a69f
+rareItemTicket10 (14,148) +0 at 1234.567 s	3 71f37bd478d337fe
+rareItemTicket10 (14,148) +0 at 1234.567 s, doppelganger	3 71f37bd478d337fe
+rareItemTicket10 (14,148) +0 at 1234.567 s, excellent	5 d84ea61ffda87047
+rareItemTicket10 (14,148) +0 at 1234.567 s, fading 0.5	3 b50587489431427c
+rareItemTicket10 (14,148) +0 at 1234.567 s, in a monster's hands	3 71f37bd478d337fe
+rareItemTicket10 (14,148) +0 at 1234.567 s, without the skin	3 ceebcb03ea20bb9b
+rareItemTicket10 (14,148) +0 at 1235.817 s	3 4922e6e200bb775d
+rareItemTicket10 (14,148) +0 at 1238.267 s	3 9396cdd43aa4e94f
+rareItemTicket10 (14,148) +11 at 1234.567 s	9 aace8e11be91f878
+rareItemTicket10 (14,148) +13 at 1234.567 s	9 66a8bc528b179ba0
+rareItemTicket10 (14,148) +15 at 1234.567 s	9 66a8bc528b179ba0
+rareItemTicket10 (14,148) +7 at 1234.567 s	5 f6e8fe9e5980bab7
+rareItemTicket10 (14,148) +9 at 1234.567 s	7 e5449f512907d2c9
+rareItemTicket10 (14,148) +9 at 1235.817 s	7 edb3a842f7bc0046
+rareItemTicket11 (14,149) +0 at 1234.567 s	3 7e9f896cde822b0f
+rareItemTicket11 (14,149) +0 at 1234.567 s, doppelganger	3 7e9f896cde822b0f
+rareItemTicket11 (14,149) +0 at 1234.567 s, excellent	5 060c60026fdc5408
+rareItemTicket11 (14,149) +0 at 1234.567 s, fading 0.5	3 7fcd7e8dfb14b67d
+rareItemTicket11 (14,149) +0 at 1234.567 s, in a monster's hands	3 7e9f896cde822b0f
+rareItemTicket11 (14,149) +0 at 1234.567 s, without the skin	3 0f385d35431edf2e
+rareItemTicket11 (14,149) +0 at 1235.817 s	3 30308b97811be3dc
+rareItemTicket11 (14,149) +0 at 1238.267 s	3 0aef4f9793850f3e
+rareItemTicket11 (14,149) +11 at 1234.567 s	9 b55d1ed93810c139
+rareItemTicket11 (14,149) +13 at 1234.567 s	9 177e248318bed221
+rareItemTicket11 (14,149) +15 at 1234.567 s	9 177e248318bed221
+rareItemTicket11 (14,149) +7 at 1234.567 s	5 d6d71f8e1727820e
+rareItemTicket11 (14,149) +9 at 1234.567 s	7 6f537484c691c798
+rareItemTicket11 (14,149) +9 at 1235.817 s	7 06335cad7901a4bf
+rareItemTicket12 (14,150) +0 at 1234.567 s	3 5be475d3ada4d92c
+rareItemTicket12 (14,150) +0 at 1234.567 s, doppelganger	3 5be475d3ada4d92c
+rareItemTicket12 (14,150) +0 at 1234.567 s, excellent	5 d3ccdea2b6f46635
+rareItemTicket12 (14,150) +0 at 1234.567 s, fading 0.5	3 e286af99e55a638e
+rareItemTicket12 (14,150) +0 at 1234.567 s, in a monster's hands	3 5be475d3ada4d92c
+rareItemTicket12 (14,150) +0 at 1234.567 s, without the skin	3 0cda4bf04397b9f5
+rareItemTicket12 (14,150) +0 at 1235.817 s	3 83618fcc2eb7b43f
+rareItemTicket12 (14,150) +0 at 1238.267 s	3 2120edfa6399b66d
+rareItemTicket12 (14,150) +11 at 1234.567 s	9 02495052eecc06ee
+rareItemTicket12 (14,150) +13 at 1234.567 s	9 184c52ba24e6c416
+rareItemTicket12 (14,150) +15 at 1234.567 s	9 184c52ba24e6c416
+rareItemTicket12 (14,150) +7 at 1234.567 s	5 955acac422e1bf71
+rareItemTicket12 (14,150) +9 at 1234.567 s	7 0f8bf4444384e427
+rareItemTicket12 (14,150) +9 at 1235.817 s	7 a5f9c6b5322de970
+rareItemTicket2 (14,59) +0 at 1234.567 s	4 bd520c35fc88b89e
+rareItemTicket2 (14,59) +0 at 1234.567 s, doppelganger	4 bd520c35fc88b89e
+rareItemTicket2 (14,59) +0 at 1234.567 s, excellent	6 c02985c30bdd7ee7
+rareItemTicket2 (14,59) +0 at 1234.567 s, fading 0.5	4 56c436ec27349fba
+rareItemTicket2 (14,59) +0 at 1234.567 s, in a monster's hands	4 bd520c35fc88b89e
+rareItemTicket2 (14,59) +0 at 1234.567 s, without the skin	4 1bf2b3d4fc3cb640
+rareItemTicket2 (14,59) +0 at 1235.817 s	4 745f7a5673aa8e91
+rareItemTicket2 (14,59) +0 at 1238.267 s	4 a00108a9b58b26f3
+rareItemTicket2 (14,59) +11 at 1234.567 s	10 bb34e4f5c614bd72
+rareItemTicket2 (14,59) +13 at 1234.567 s	10 c26cff7bd519353a
+rareItemTicket2 (14,59) +15 at 1234.567 s	10 c26cff7bd519353a
+rareItemTicket2 (14,59) +7 at 1234.567 s	6 f9e385ce5897e270
+rareItemTicket2 (14,59) +9 at 1234.567 s	8 33900778cbfee93b
+rareItemTicket2 (14,59) +9 at 1235.817 s	8 72f02752dd1874dc
+rareItemTicket3 (14,60) +0 at 1234.567 s	4 a0f24fc2bee880a3
+rareItemTicket3 (14,60) +0 at 1234.567 s, doppelganger	4 a0f24fc2bee880a3
+rareItemTicket3 (14,60) +0 at 1234.567 s, excellent	6 91d6b1aa05b82b64
+rareItemTicket3 (14,60) +0 at 1234.567 s, fading 0.5	4 6d4e3d751a6ce277
+rareItemTicket3 (14,60) +0 at 1234.567 s, in a monster's hands	4 a0f24fc2bee880a3
+rareItemTicket3 (14,60) +0 at 1234.567 s, without the skin	4 31e7a16db0b0b625
+rareItemTicket3 (14,60) +0 at 1235.817 s	4 c7aed0b26aaa2d9c
+rareItemTicket3 (14,60) +0 at 1238.267 s	4 ba66e2477484abae
+rareItemTicket3 (14,60) +11 at 1234.567 s	10 0f329d994361245b
+rareItemTicket3 (14,60) +13 at 1234.567 s	10 be218c19b1b7642b
+rareItemTicket3 (14,60) +15 at 1234.567 s	10 be218c19b1b7642b
+rareItemTicket3 (14,60) +7 at 1234.567 s	6 25971862d9babf71
+rareItemTicket3 (14,60) +9 at 1234.567 s	8 9dceba0f1fbd9d8a
+rareItemTicket3 (14,60) +9 at 1235.817 s	8 ae8b456e549b5cf5
+rareItemTicket4 (14,61) +0 at 1234.567 s	3 998122981eddfa10
+rareItemTicket4 (14,61) +0 at 1234.567 s, doppelganger	3 998122981eddfa10
+rareItemTicket4 (14,61) +0 at 1234.567 s, excellent	5 71c476e21405ad91
+rareItemTicket4 (14,61) +0 at 1234.567 s, fading 0.5	3 e1aeacd76c6ac7ce
+rareItemTicket4 (14,61) +0 at 1234.567 s, in a monster's hands	3 998122981eddfa10
+rareItemTicket4 (14,61) +0 at 1234.567 s, without the skin	3 0744199325106215
+rareItemTicket4 (14,61) +0 at 1235.817 s	3 2ae510ae9f8e89ff
+rareItemTicket4 (14,61) +0 at 1238.267 s	3 aed6cf7ee976bd91
+rareItemTicket4 (14,61) +11 at 1234.567 s	9 dca1fb56aeb6ae6a
+rareItemTicket4 (14,61) +13 at 1234.567 s	9 6016070adb6d4452
+rareItemTicket4 (14,61) +15 at 1234.567 s	9 6016070adb6d4452
+rareItemTicket4 (14,61) +7 at 1234.567 s	5 c658d54d7d628501
+rareItemTicket4 (14,61) +9 at 1234.567 s	7 10c52005eec95bb3
+rareItemTicket4 (14,61) +9 at 1235.817 s	7 ee749ad07adbe6c0
+rareItemTicket7 (14,145) +0 at 1234.567 s	3 8d6936fb350bbd84
+rareItemTicket7 (14,145) +0 at 1234.567 s, doppelganger	3 8d6936fb350bbd84
+rareItemTicket7 (14,145) +0 at 1234.567 s, excellent	5 fa9554393618404d
+rareItemTicket7 (14,145) +0 at 1234.567 s, fading 0.5	3 5090e7200636321a
+rareItemTicket7 (14,145) +0 at 1234.567 s, in a monster's hands	3 8d6936fb350bbd84
+rareItemTicket7 (14,145) +0 at 1234.567 s, without the skin	3 06e0e1d241e46039
+rareItemTicket7 (14,145) +0 at 1235.817 s	3 cda3cf784deb479b
+rareItemTicket7 (14,145) +0 at 1238.267 s	3 a0587676cd18e69d
+rareItemTicket7 (14,145) +11 at 1234.567 s	9 eed62a974095b87e
+rareItemTicket7 (14,145) +13 at 1234.567 s	9 b4b6d3a0b19b44e6
+rareItemTicket7 (14,145) +15 at 1234.567 s	9 b4b6d3a0b19b44e6
+rareItemTicket7 (14,145) +7 at 1234.567 s	5 6b964a75a0bed8bd
+rareItemTicket7 (14,145) +9 at 1234.567 s	7 f6a027844e0f2237
+rareItemTicket7 (14,145) +9 at 1235.817 s	7 538b04a9436f2c8c
+rareItemTicket8 (14,146) +0 at 1234.567 s	3 a95d49ad30665083
+rareItemTicket8 (14,146) +0 at 1234.567 s, doppelganger	3 a95d49ad30665083
+rareItemTicket8 (14,146) +0 at 1234.567 s, excellent	5 66431d7031468f44
+rareItemTicket8 (14,146) +0 at 1234.567 s, fading 0.5	3 806eae766bb0101d
+rareItemTicket8 (14,146) +0 at 1234.567 s, in a monster's hands	3 a95d49ad30665083
+rareItemTicket8 (14,146) +0 at 1234.567 s, without the skin	3 c979dcb1234d8b4e
+rareItemTicket8 (14,146) +0 at 1235.817 s	3 329cb2b842caedcc
+rareItemTicket8 (14,146) +0 at 1238.267 s	3 707aaf20679f089a
+rareItemTicket8 (14,146) +11 at 1234.567 s	9 9b1bc29ed27264c5
+rareItemTicket8 (14,146) +13 at 1234.567 s	9 35180efd0bfebf4d
+rareItemTicket8 (14,146) +15 at 1234.567 s	9 35180efd0bfebf4d
+rareItemTicket8 (14,146) +7 at 1234.567 s	5 947c78f0b3f2a29e
+rareItemTicket8 (14,146) +9 at 1234.567 s	7 5f2e8301d4a10aa4
+rareItemTicket8 (14,146) +9 at 1235.817 s	7 0339e371eeb2176f
+rareItemTicket9 (14,147) +0 at 1234.567 s	3 cfb95c66538a0472
+rareItemTicket9 (14,147) +0 at 1234.567 s, doppelganger	3 cfb95c66538a0472
+rareItemTicket9 (14,147) +0 at 1234.567 s, excellent	5 a81233b179037da3
+rareItemTicket9 (14,147) +0 at 1234.567 s, fading 0.5	3 929c7a104ed7ee9c
+rareItemTicket9 (14,147) +0 at 1234.567 s, in a monster's hands	3 cfb95c66538a0472
+rareItemTicket9 (14,147) +0 at 1234.567 s, without the skin	3 64f410cc50e4dcbb
+rareItemTicket9 (14,147) +0 at 1235.817 s	3 2fa341cbd475874d
+rareItemTicket9 (14,147) +0 at 1238.267 s	3 d59eca1cbf096c2b
+rareItemTicket9 (14,147) +11 at 1234.567 s	9 d0512791bb86dd34
+rareItemTicket9 (14,147) +13 at 1234.567 s	9 597249a50298942c
+rareItemTicket9 (14,147) +15 at 1234.567 s	9 597249a50298942c
+rareItemTicket9 (14,147) +7 at 1234.567 s	5 622a9d519a5f4707
+rareItemTicket9 (14,147) +9 at 1234.567 s	7 38caefdfc0a79a05
+rareItemTicket9 (14,147) +9 at 1235.817 s	7 0f817d6ad29c7136
+runeBastardSword (0,28) +0 at 1234.567 s	5 f03980e84f9a90a0
+runeBastardSword (0,28) +0 at 1234.567 s, doppelganger	5 9b80921a76aa14b9
+runeBastardSword (0,28) +0 at 1234.567 s, excellent	8 1d1de822352e127d
+runeBastardSword (0,28) +0 at 1234.567 s, fading 0.5	5 0d02e2cb113841f6
+runeBastardSword (0,28) +0 at 1234.567 s, in a monster's hands	5 3f51e4ce60b204f7
+runeBastardSword (0,28) +0 at 1234.567 s, without the skin	5 c20f19656be72e95
+runeBastardSword (0,28) +0 at 1235.817 s	5 409aa76620b8b552
+runeBastardSword (0,28) +0 at 1238.267 s	5 8507a78fe3415c06
+runeBastardSword (0,28) +11 at 1234.567 s	10 04509cc2d3c1ebde
+runeBastardSword (0,28) +13 at 1234.567 s	10 1e70aa796882184f
+runeBastardSword (0,28) +15 at 1234.567 s	10 1e70aa796882184f
+runeBastardSword (0,28) +7 at 1234.567 s	6 8db17dbc22e97c3b
+runeBastardSword (0,28) +9 at 1234.567 s	7 06e5fe74ee7f76f5
+runeBastardSword (0,28) +9 at 1235.817 s	7 5c973eae4c0bfad1
 salamanderShield (6,18) +0 at 1234.567 s	2 0fbffe965f1bb351
 salamanderShield (6,18) +0 at 1234.567 s, doppelganger	2 0fbffe965f1bb351
 salamanderShield (6,18) +0 at 1234.567 s, excellent	4 1c5b0dc5684de352
@@ -716,6 +1472,20 @@ salamanderShield (6,18) +15 at 1234.567 s	8 fe1e008fee70e931
 salamanderShield (6,18) +7 at 1234.567 s	4 adfbbb60aa605b65
 salamanderShield (6,18) +9 at 1234.567 s	6 2ce1c326b37a5d68
 salamanderShield (6,18) +9 at 1235.817 s	6 2ce1c326b37a5d68
+scrollOfBlood (13,51) +0 at 1234.567 s	2 f7819e54c6b4cf19
+scrollOfBlood (13,51) +0 at 1234.567 s, doppelganger	2 c9abbbbd39b5a2a0
+scrollOfBlood (13,51) +0 at 1234.567 s, excellent	4 c169114a9003587e
+scrollOfBlood (13,51) +0 at 1234.567 s, fading 0.5	2 f7819e54c6b4cf19
+scrollOfBlood (13,51) +0 at 1234.567 s, in a monster's hands	2 1043e5ef9ed7ceac
+scrollOfBlood (13,51) +0 at 1234.567 s, without the skin	2 e897b38c8471b2fd
+scrollOfBlood (13,51) +0 at 1235.817 s	2 6d4f7136e925db1a
+scrollOfBlood (13,51) +0 at 1238.267 s	2 8eed5add00e6b839
+scrollOfBlood (13,51) +11 at 1234.567 s	8 b7f78e92179ca06d
+scrollOfBlood (13,51) +13 at 1234.567 s	8 8dee8fca97492a83
+scrollOfBlood (13,51) +15 at 1234.567 s	8 8dee8fca97492a83
+scrollOfBlood (13,51) +7 at 1234.567 s	4 2e95ebaa08c65e35
+scrollOfBlood (13,51) +9 at 1234.567 s	6 5e9cdb4242183064
+scrollOfBlood (13,51) +9 at 1235.817 s	6 a93dc05c567dc73f
 sealedBox (14,121) +0 at 1234.567 s	5 7236ce1529a1e853
 sealedBox (14,121) +0 at 1234.567 s, doppelganger	5 7236ce1529a1e853
 sealedBox (14,121) +0 at 1234.567 s, excellent	9 7626ff063252178f
@@ -758,6 +1528,230 @@ skeletonTransformationRing (13,122) +15 at 1234.567 s	5 9bd134dd3437c300
 skeletonTransformationRing (13,122) +7 at 1234.567 s	3 33374e4aaacb66e3
 skeletonTransformationRing (13,122) +9 at 1234.567 s	4 6cce104c6c3db4a2
 skeletonTransformationRing (13,122) +9 at 1235.817 s	4 6cce104c6c3db4a2
+skillParchment (15,19) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,19) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,19) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,19) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,19) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,19) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,19) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,19) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,19) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,19) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,19) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,19) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,19) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,19) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,20) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,20) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,20) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,20) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,20) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,20) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,20) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,20) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,20) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,20) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,20) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,20) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,20) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,20) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,21) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,21) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,21) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,21) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,21) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,21) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,21) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,21) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,21) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,21) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,21) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,21) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,21) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,21) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,22) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,22) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,22) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,22) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,22) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,22) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,22) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,22) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,22) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,22) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,22) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,22) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,22) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,22) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,23) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,23) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,23) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,23) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,23) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,23) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,23) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,23) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,23) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,23) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,23) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,23) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,23) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,23) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,24) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,24) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,24) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,24) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,24) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,24) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,24) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,24) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,24) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,24) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,24) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,24) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,24) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,24) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,25) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,25) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,25) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,25) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,25) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,25) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,25) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,25) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,25) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,25) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,25) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,25) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,25) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,25) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,26) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,26) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,26) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,26) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,26) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,26) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,26) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,26) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,26) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,26) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,26) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,26) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,26) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,26) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,27) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,27) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,27) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,27) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,27) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,27) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,27) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,27) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,27) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,27) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,27) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,27) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,27) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,27) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,30) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,30) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,30) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,30) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,30) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,30) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,30) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,30) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,30) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,30) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,30) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,30) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,30) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,30) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,31) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,31) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,31) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,31) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,31) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,31) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,31) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,31) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,31) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,31) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,31) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,31) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,31) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,31) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,32) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,32) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,32) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,32) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,32) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,32) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,32) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,32) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,32) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,32) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,32) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,32) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,32) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,32) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,33) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,33) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,33) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,33) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,33) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,33) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,33) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,33) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,33) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,33) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,33) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,33) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,33) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,33) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,34) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,34) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,34) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,34) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,34) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,34) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,34) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,34) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,34) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,34) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,34) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,34) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,34) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,34) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,35) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,35) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,35) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,35) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,35) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,35) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,35) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,35) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,35) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,35) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,35) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,35) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,35) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,35) +9 at 1235.817 s	4 bda357e6ab1c7ce0
+skillParchment (15,36) +0 at 1234.567 s	2 57dd7824e453d559
+skillParchment (15,36) +0 at 1234.567 s, doppelganger	2 57dd7824e453d559
+skillParchment (15,36) +0 at 1234.567 s, excellent	3 9052012f3f2346ca
+skillParchment (15,36) +0 at 1234.567 s, fading 0.5	2 34fb324ebf7338d5
+skillParchment (15,36) +0 at 1234.567 s, in a monster's hands	2 57dd7824e453d559
+skillParchment (15,36) +0 at 1234.567 s, without the skin	2 9d505bf2a9e22f37
+skillParchment (15,36) +0 at 1235.817 s	2 25d203fc45efb412
+skillParchment (15,36) +0 at 1238.267 s	2 0c0108403df14bbc
+skillParchment (15,36) +11 at 1234.567 s	5 a86daf1de45b5a3e
+skillParchment (15,36) +13 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,36) +15 at 1234.567 s	5 8d1af2683fc3fc9d
+skillParchment (15,36) +7 at 1234.567 s	3 74d76a5e8c244736
+skillParchment (15,36) +9 at 1234.567 s	4 c9d9dceb9c1bbf5f
+skillParchment (15,36) +9 at 1235.817 s	4 bda357e6ab1c7ce0
 staff32 (5,32) +0 at 1234.567 s	8 35a859c14bf8bee4
 staff32 (5,32) +0 at 1234.567 s, doppelganger	8 35a859c14bf8bee4
 staff32 (5,32) +0 at 1234.567 s, excellent	12 2cf46adb185890fe
@@ -772,6 +1766,34 @@ staff32 (5,32) +15 at 1234.567 s	14 b19a2c4a2809455a
 staff32 (5,32) +7 at 1234.567 s	9 1329701ffcd12218
 staff32 (5,32) +9 at 1234.567 s	10 7bdd20d12306edae
 staff32 (5,32) +9 at 1235.817 s	10 7bdd20d12306edae
+staffOfKundun (5,11) +0 at 1234.567 s	6 79ef0c307a3abd77
+staffOfKundun (5,11) +0 at 1234.567 s, doppelganger	6 80465fcfd5825576
+staffOfKundun (5,11) +0 at 1234.567 s, excellent	9 870f127f6adac39b
+staffOfKundun (5,11) +0 at 1234.567 s, fading 0.5	6 291354675745c4d5
+staffOfKundun (5,11) +0 at 1234.567 s, in a monster's hands	6 2d7cbabadf588224
+staffOfKundun (5,11) +0 at 1234.567 s, without the skin	6 bb43c873485d60a3
+staffOfKundun (5,11) +0 at 1235.817 s	6 5e0fabf531a3fb73
+staffOfKundun (5,11) +0 at 1238.267 s	6 54b4399b4438844f
+staffOfKundun (5,11) +11 at 1234.567 s	15 f625445039676370
+staffOfKundun (5,11) +13 at 1234.567 s	15 9ddef8638a0066f1
+staffOfKundun (5,11) +15 at 1234.567 s	15 9ddef8638a0066f1
+staffOfKundun (5,11) +7 at 1234.567 s	9 02a917450ee958e7
+staffOfKundun (5,11) +9 at 1234.567 s	12 df7f9c1cca481d64
+staffOfKundun (5,11) +9 at 1235.817 s	12 4ed8358cb816a8d0
+stormBlitzStick (5,19) +0 at 1234.567 s	3 82f8be40ebd84f39
+stormBlitzStick (5,19) +0 at 1234.567 s, doppelganger	3 19870add8eeaea0d
+stormBlitzStick (5,19) +0 at 1234.567 s, excellent	5 fc966ef369357e7a
+stormBlitzStick (5,19) +0 at 1234.567 s, fading 0.5	3 d09821cf98fae417
+stormBlitzStick (5,19) +0 at 1234.567 s, in a monster's hands	3 e7123adc24a51f97
+stormBlitzStick (5,19) +0 at 1234.567 s, without the skin	3 fe7e8f4217086518
+stormBlitzStick (5,19) +0 at 1235.817 s	3 ae261f0c9ddb6ec2
+stormBlitzStick (5,19) +0 at 1238.267 s	3 f583bdf5bf0c0e5b
+stormBlitzStick (5,19) +11 at 1234.567 s	9 b6cf69521de23789
+stormBlitzStick (5,19) +13 at 1234.567 s	9 dfe17bf0ce6cfe59
+stormBlitzStick (5,19) +15 at 1234.567 s	9 dfe17bf0ce6cfe59
+stormBlitzStick (5,19) +7 at 1234.567 s	5 029edefca8930646
+stormBlitzStick (5,19) +9 at 1234.567 s	7 135c7c78f25384e0
+stormBlitzStick (5,19) +9 at 1235.817 s	7 dce5b17e47856c97
 strikerScepter (2,18) +0 at 1234.567 s	7 a8b7ea697a536c2f
 strikerScepter (2,18) +0 at 1234.567 s, doppelganger	7 a8b7ea697a536c2f
 strikerScepter (2,18) +0 at 1234.567 s, excellent	9 490684fbc9f8d328
@@ -786,6 +1808,20 @@ strikerScepter (2,18) +15 at 1234.567 s	11 79bc89aaf189c74f
 strikerScepter (2,18) +7 at 1234.567 s	8 9411efb77d2d6435
 strikerScepter (2,18) +9 at 1234.567 s	9 33aa3319c2d0916e
 strikerScepter (2,18) +9 at 1235.817 s	9 33aa3319c2d0916e
+summonerCharacterCard (14,91) +0 at 1234.567 s	3 e9981ccf3553cbd7
+summonerCharacterCard (14,91) +0 at 1234.567 s, doppelganger	3 e9981ccf3553cbd7
+summonerCharacterCard (14,91) +0 at 1234.567 s, excellent	4 eb722ff646342a74
+summonerCharacterCard (14,91) +0 at 1234.567 s, fading 0.5	3 a93f912c1b0fcddb
+summonerCharacterCard (14,91) +0 at 1234.567 s, in a monster's hands	3 e9981ccf3553cbd7
+summonerCharacterCard (14,91) +0 at 1234.567 s, without the skin	3 5f7510785ea89f0e
+summonerCharacterCard (14,91) +0 at 1235.817 s	3 531ca6f7c80a9f5e
+summonerCharacterCard (14,91) +0 at 1238.267 s	3 23a2a41b32f0f449
+summonerCharacterCard (14,91) +11 at 1234.567 s	6 917560e88c5217c2
+summonerCharacterCard (14,91) +13 at 1234.567 s	6 087b9bf070def951
+summonerCharacterCard (14,91) +15 at 1234.567 s	6 087b9bf070def951
+summonerCharacterCard (14,91) +7 at 1234.567 s	4 344d3713d752e88f
+summonerCharacterCard (14,91) +9 at 1234.567 s	5 90039a789cde4e83
+summonerCharacterCard (14,91) +9 at 1235.817 s	5 2f6e51a90ad081be
 swordBreaker (0,27) +0 at 1234.567 s	3 a8b83917f6d43443
 swordBreaker (0,27) +0 at 1234.567 s, doppelganger	3 a6406d5300ddc8a7
 swordBreaker (0,27) +0 at 1234.567 s, excellent	5 472a3a82d61a5984
@@ -800,6 +1836,20 @@ swordBreaker (0,27) +15 at 1234.567 s	7 33a8cb1d14de50aa
 swordBreaker (0,27) +7 at 1234.567 s	4 d0096f7348dfc97b
 swordBreaker (0,27) +9 at 1234.567 s	5 6239608ef1c4f847
 swordBreaker (0,27) +9 at 1235.817 s	5 6239608ef1c4f847
+swordDancer (0,25) +0 at 1234.567 s	3 eac68b6a39585f48
+swordDancer (0,25) +0 at 1234.567 s, doppelganger	3 eac68b6a39585f48
+swordDancer (0,25) +0 at 1234.567 s, excellent	5 b941da5152b92d49
+swordDancer (0,25) +0 at 1234.567 s, fading 0.5	3 d30a0f04dd6f122a
+swordDancer (0,25) +0 at 1234.567 s, in a monster's hands	3 eac68b6a39585f48
+swordDancer (0,25) +0 at 1234.567 s, without the skin	3 c9c13b05c1bbd0e5
+swordDancer (0,25) +0 at 1235.817 s	3 786bff895ccdf983
+swordDancer (0,25) +0 at 1238.267 s	3 f41cd4f3c7ff39f3
+swordDancer (0,25) +11 at 1234.567 s	9 51a0cd638c91aece
+swordDancer (0,25) +13 at 1234.567 s	9 4ef06ad038f57816
+swordDancer (0,25) +15 at 1234.567 s	9 4ef06ad038f57816
+swordDancer (0,25) +7 at 1234.567 s	5 3e2e3ef6b1876cf1
+swordDancer (0,25) +9 at 1234.567 s	7 283ee7983f092ef7
+swordDancer (0,25) +9 at 1235.817 s	7 d2d7b2b2e8598f08
 talismanOfGuardian (13,81) +0 at 1234.567 s	5 d6618859981fb84b
 talismanOfGuardian (13,81) +0 at 1234.567 s, doppelganger	5 d6618859981fb84b
 talismanOfGuardian (13,81) +0 at 1234.567 s, excellent	8 e9ed2a8ec773d0a3
@@ -828,6 +1878,20 @@ talismanOfItemProtection (13,82) +15 at 1234.567 s	9 cd48f59ca9475d3b
 talismanOfItemProtection (13,82) +7 at 1234.567 s	5 4b8e55518b4d56cc
 talismanOfItemProtection (13,82) +9 at 1234.567 s	7 0a84c6bf090bbada
 talismanOfItemProtection (13,82) +9 at 1235.817 s	7 0a84c6bf090bbada
+talismanOfLuck (14,53) +0 at 1234.567 s	2 8f3260ad0948cc3f
+talismanOfLuck (14,53) +0 at 1234.567 s, doppelganger	2 8f3260ad0948cc3f
+talismanOfLuck (14,53) +0 at 1234.567 s, excellent	3 0e76e35f50d5ad1c
+talismanOfLuck (14,53) +0 at 1234.567 s, fading 0.5	2 f653e01c9843dcf3
+talismanOfLuck (14,53) +0 at 1234.567 s, in a monster's hands	2 8f3260ad0948cc3f
+talismanOfLuck (14,53) +0 at 1234.567 s, without the skin	2 fbb6f7a741c25681
+talismanOfLuck (14,53) +0 at 1235.817 s	2 28f379f248463958
+talismanOfLuck (14,53) +0 at 1238.267 s	2 463a1628a2aa23d6
+talismanOfLuck (14,53) +11 at 1234.567 s	5 479405232e66cc34
+talismanOfLuck (14,53) +13 at 1234.567 s	5 96b973a07a50f823
+talismanOfLuck (14,53) +15 at 1234.567 s	5 96b973a07a50f823
+talismanOfLuck (14,53) +7 at 1234.567 s	3 ac18aff0cd005f44
+talismanOfLuck (14,53) +9 at 1234.567 s	4 f6654def850ecae9
+talismanOfLuck (14,53) +9 at 1235.817 s	4 30f23b32bc11e66e
 talismanOfMobility (13,70) +0 at 1234.567 s	3 a8b83917f6d43443
 talismanOfMobility (13,70) +0 at 1234.567 s, doppelganger	3 a8b83917f6d43443
 talismanOfMobility (13,70) +0 at 1234.567 s, excellent	5 472a3a82d61a5984
@@ -842,6 +1906,20 @@ talismanOfMobility (13,70) +15 at 1234.567 s	9 b5378706edf2a8ad
 talismanOfMobility (13,70) +7 at 1234.567 s	5 789547453429556a
 talismanOfMobility (13,70) +9 at 1234.567 s	7 343d943d7a62a684
 talismanOfMobility (13,70) +9 at 1235.817 s	7 343d943d7a62a684
+talismanOfResurrection (13,69) +0 at 1234.567 s	2 9694d665c76dadc8
+talismanOfResurrection (13,69) +0 at 1234.567 s, doppelganger	2 9694d665c76dadc8
+talismanOfResurrection (13,69) +0 at 1234.567 s, excellent	4 9c05361cb27cdcc9
+talismanOfResurrection (13,69) +0 at 1234.567 s, fading 0.5	2 36d1706155c7bdd4
+talismanOfResurrection (13,69) +0 at 1234.567 s, in a monster's hands	2 9694d665c76dadc8
+talismanOfResurrection (13,69) +0 at 1234.567 s, without the skin	2 0da3f8784c3cab58
+talismanOfResurrection (13,69) +0 at 1235.817 s	2 a656a75b7651e86a
+talismanOfResurrection (13,69) +0 at 1238.267 s	2 b2888645eb2f785e
+talismanOfResurrection (13,69) +11 at 1234.567 s	8 505fd21ab247be28
+talismanOfResurrection (13,69) +13 at 1234.567 s	8 33ed5f95dd594dd0
+talismanOfResurrection (13,69) +15 at 1234.567 s	8 33ed5f95dd594dd0
+talismanOfResurrection (13,69) +7 at 1234.567 s	4 5da958979f7d548c
+talismanOfResurrection (13,69) +9 at 1234.567 s	6 8fecf9c173446ab9
+talismanOfResurrection (13,69) +9 at 1235.817 s	6 b320d1832df9ab83
 textured (0,32) +0 at 1234.567 s	2 b17d7cb70c9c18c1
 textured (0,32) +0 at 1234.567 s, doppelganger	2 b17d7cb70c9c18c1
 textured (0,32) +0 at 1234.567 s, excellent	4 3acac4ecaec2c422
@@ -1486,3 +2564,59 @@ texturedAllMeshes (14,94) +15 at 1234.567 s	8 135ec4dbc6bbdf89
 texturedAllMeshes (14,94) +7 at 1234.567 s	4 091a24c652df9c87
 texturedAllMeshes (14,94) +9 at 1234.567 s	6 16e388092e199b3b
 texturedAllMeshes (14,94) +9 at 1235.817 s	6 16e388092e199b3b
+wingOfDimension (12,43) +0 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +0 at 1234.567 s, doppelganger	4 d5d943732101050a
+wingOfDimension (12,43) +0 at 1234.567 s, excellent	4 d5d943732101050a
+wingOfDimension (12,43) +0 at 1234.567 s, fading 0.5	4 87b80260e9e9f782
+wingOfDimension (12,43) +0 at 1234.567 s, in a monster's hands	4 d5d943732101050a
+wingOfDimension (12,43) +0 at 1234.567 s, without the skin	4 a35de48bbaf736fc
+wingOfDimension (12,43) +0 at 1235.817 s	4 d5d943732101050a
+wingOfDimension (12,43) +0 at 1238.267 s	4 d5d943732101050a
+wingOfDimension (12,43) +11 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +13 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +15 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +7 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +9 at 1234.567 s	4 d5d943732101050a
+wingOfDimension (12,43) +9 at 1235.817 s	4 d5d943732101050a
+wingOfRuin (12,39) +0 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +0 at 1234.567 s, doppelganger	3 f10197667ea273ec
+wingOfRuin (12,39) +0 at 1234.567 s, excellent	3 f10197667ea273ec
+wingOfRuin (12,39) +0 at 1234.567 s, fading 0.5	3 e5ddb0bad7fd1be2
+wingOfRuin (12,39) +0 at 1234.567 s, in a monster's hands	3 f10197667ea273ec
+wingOfRuin (12,39) +0 at 1234.567 s, without the skin	3 2744d1ca6cf99553
+wingOfRuin (12,39) +0 at 1235.817 s	3 b97d9a3305ae77d3
+wingOfRuin (12,39) +0 at 1238.267 s	3 15d335d5a2678a62
+wingOfRuin (12,39) +11 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +13 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +15 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +7 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +9 at 1234.567 s	3 f10197667ea273ec
+wingOfRuin (12,39) +9 at 1235.817 s	3 b97d9a3305ae77d3
+wingsOfDarkness (12,6) +0 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +0 at 1234.567 s, doppelganger	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +0 at 1234.567 s, excellent	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +0 at 1234.567 s, fading 0.5	2 6f67eff4c60e7b03
+wingsOfDarkness (12,6) +0 at 1234.567 s, in a monster's hands	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +0 at 1234.567 s, without the skin	2 a9858ec1f9b35878
+wingsOfDarkness (12,6) +0 at 1235.817 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +0 at 1238.267 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +11 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +13 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +15 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +7 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +9 at 1234.567 s	2 c78a92d716f5c226
+wingsOfDarkness (12,6) +9 at 1235.817 s	2 c78a92d716f5c226
+wingsOfDespair (12,42) +0 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +0 at 1234.567 s, doppelganger	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +0 at 1234.567 s, excellent	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +0 at 1234.567 s, fading 0.5	3 f68f8f4b54e5e914
+wingsOfDespair (12,42) +0 at 1234.567 s, in a monster's hands	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +0 at 1234.567 s, without the skin	3 b6bd81d172bed42b
+wingsOfDespair (12,42) +0 at 1235.817 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +0 at 1238.267 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +11 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +13 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +15 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +7 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +9 at 1234.567 s	3 d430d0a8ce00dbf6
+wingsOfDespair (12,42) +9 at 1235.817 s	3 d430d0a8ce00dbf6
