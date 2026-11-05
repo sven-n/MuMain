@@ -264,8 +264,8 @@ jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
     job_names
-    == ["quality", "build-windows", "build-linux", "build-macos", "required", "release"],
-    "CI jobs must be quality, build-windows, build-linux, build-macos, required, "
+    == ["quality", "build-windows", "build-linux", "build-macos", "caches", "required", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, caches, required, "
     f"release; found {job_names}",
 )
 check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
@@ -599,6 +599,20 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
                                     f"{required}")
         check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
               f"{job_name} {save_name} must save the paths {restore_name} restores")
+# A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each
+# cache the build jobs restore by a key prefix.
+caches_job = job(ci, "caches")
+for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled()",
+                 "github.event_name != 'pull_request'", "actions: write", "python3 scripts/ci_cache_prune.py",
+                 "GH_TOKEN: ${{ github.token }}"):
+    check(required in caches_job, f"caches job must prune after the builds of runs on main: {required}")
+for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
+    check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
+sys.path.insert(0, str(ROOT / "scripts"))
+from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS  # noqa: E402
+for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_job + linux_job + macos_job):
+    kind = restore_prefix.split("${{")[0]
+    check(kind in PRUNED_CACHE_KINDS, f"scripts/ci_cache_prune.py must prune the cache kind {kind}")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))

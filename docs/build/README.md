@@ -246,6 +246,13 @@ release builds), when the exact key was missing. A PR's own entry would serve th
 PR alone, and the repository's caches share 10 GB: past that, GitHub deletes the
 least recently used entries, which are main's Windows ones, used once a night.
 
+A save under a new key leaves the older entries of that cache behind, such as a
+compiler cache for each main push. After the builds of a run on main, the
+**Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
+deletes all but the newest entry of each cache on main. It is the only job with a
+token that can delete caches. A new cache that is restored by a key prefix needs
+its prefix in the script's `KINDS`; the workflow contract test checks that.
+
 ### Download artifacts
 
 Actions expose builds through CI artifacts and two coordinated release streams:

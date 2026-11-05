@@ -870,6 +870,27 @@ jobs:
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  # A save under a new key leaves the older entries of that cache behind, e.g. a compiler cache for each main push.
+  # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
+  caches:
+    name: Prune caches
+    needs: [build-windows, build-linux, build-macos]
+    # PR runs save no cache.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Delete older cache entries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_cache_prune.py
+
   required:
     name: CI Required
     needs: [quality, build-windows, build-linux, build-macos]
