@@ -11,9 +11,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Coalesce releases: finish the running revision and keep only the newest pending trigger.
+  # A PR's newer push cancels its older run. Main pushes and releases finish the running revision and keep only the
+  # newest pending trigger: a main push saves the caches PRs start from, and its Windows and macOS builds take long
+  # enough that a day of merges would otherwise cancel most of them before they save anything.
   group: ci-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'release' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

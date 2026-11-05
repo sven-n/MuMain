@@ -167,9 +167,10 @@ PRs then run Windows x64, Linux x64 and macOS arm64 Release builds and tests. Dr
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.
 Code merges to main run the same three builds, which save the caches the next PRs
-start from (see the CI caches below). Newer revisions cancel older
-PR/integration runs. Releases finish the running revision and keep only the newest
-pending trigger; another nightly/manual trigger can replace an older pending one.
+start from (see the CI caches below). A PR's newer revision cancels its older run.
+Main pushes and releases finish the running revision and keep only the newest
+pending trigger, so a main push's caches get saved; a newer push or nightly/manual
+trigger can replace an older pending one.
 This deliberately coalesces work rather than guaranteeing a run for every request.
 
 Full Windows/Linux/macOS release builds run daily at approximately **02:17 UTC+8**

@@ -271,6 +271,10 @@ check(
 check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
 for required in ("branches: [main]", "ready_for_review", "schedule:", "workflow_dispatch:"):
     check(required in ci, f"CI trigger missing {required}")
+check(
+    "cancel-in-progress: ${{ github.event_name == 'pull_request' }}" in ci,
+    "Only a PR's newer run may cancel its older one: main pushes save the caches PRs start from",
+)
 
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
