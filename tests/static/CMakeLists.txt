@@ -33,6 +33,14 @@ add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )
+
+# doctest_discover_tests reads case names as a CMake list: a name it cuts or joins registers entries that run no case.
+add_test(NAME test_case_names_reach_ctest_whole
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TESTS}")
+# The check on its fixtures: it reports each offence and exits 1, and passes the clean names.
+add_test(NAME test_case_names_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_test_case_names.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"

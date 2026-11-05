@@ -44,6 +44,24 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   monotonic clock; microbenchmarks do not belong in the regression suite.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
+- Give every `TEST_CASE` an ASCII name, without `;`, a line break or `\` (a
+  comma is fine), with as many `[` as `]` and not starting with `[doctest] `.
+  CTest's discovery reads the names as a CMake list, so it would drop an empty
+  name and cut or join the others, and it skips lines that look like doctest's
+  own output; doctest's filter reads a `\` as an escape, and on Windows the test
+  binary reads its filter in the ANSI code page. Then no entry runs the case. The
+  static check `test_case_names_reach_ctest_whole` finds such names before any
+  build.
+- A CTest entry that runs no case fails (doctest reports `test cases: 0`), and
+  each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
+  entries and its cases differ in number. So a name the discovery cut, joined or
+  dropped fails in CI even where the static check cannot read it. The canary
+  binaries in `tests/fixtures/ctest_guards/` check that both guards still fail. Decide an
+  opt-in case at run time rather than with `doctest::skip(condition)`: the
+  discovery evaluates the condition when the binary is built, so a condition
+  read from the environment can differ when the tests run. Print
+  `MESSAGE("MU_TEST_SKIPPED: <why>")` and return at once; CTest then reports the
+  entry as skipped (a skip wins over a failure, so check nothing after it).
 
 ## Static checks and the pre-push hook
 

@@ -97,7 +97,7 @@ bool HasMessage(const std::vector<ItemDataIssue>& issues, int number, const std:
 }
 } // namespace
 
-TEST_CASE("Monster attack checks: the attacks of a player-shaped monster; any other plays them on every map "
+TEST_CASE("Monster attack checks: the attacks of a player-shaped monster, any other plays them on every map "
           "(Q-MN64) [editor][monsters]")
 {
     const std::array monsters = {
