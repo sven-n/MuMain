@@ -29,7 +29,7 @@ OFFENCES = {
     "non_ascii": "has a character outside ASCII",
 }
 CLEAN = "clean"
-CLEAN_NAMES = 8
+CLEAN_NAMES = 9
 
 
 def run_check(fixture):

@@ -22,6 +22,11 @@ TEST_CASE_FIXTURE(Scope, "a fixture's case, " // a comment between the literals
     CHECK(true);
 }
 
+TEST_CASE_FIXTURE(Holder<std::pair<int, float>, 2>, "a fixture with template arguments")
+{
+    CHECK(true);
+}
+
 TEST_CASE("a decorated case [slow]" * doctest::timeout(5))
 {
     CHECK(true);

@@ -36,7 +36,8 @@ from cpp_text import code_only  # noqa: E402
 # The macros that register a case; TEST_CASE_FIXTURE takes the fixture before the name, the others the name first.
 CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEFINE)?)?"
                   r"|SCENARIO(?:_CLASS|_TEMPLATE(?:_DEFINE)?)?)\s*\(")
-FIXTURE = re.compile(r"\s*[\w:]+\s*,")
+OPENERS = "(<[{"
+CLOSERS = ")>]}"
 # The name: string literals the compiler joins into one, then the end of the arguments, the next one or a decorator.
 LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.)*)"')
 NAME_END = re.compile(r"\s*[),*]")
@@ -72,6 +73,23 @@ def name_at(text, at):
     return "".join(parts)
 
 
+def after_first_argument(code, at):
+    """Where the second argument starts, after the first comma outside brackets: a fixture with template arguments
+    (Fixture<int, 2>) is skipped whole. Returns `at` if the arguments end first."""
+    depth = 0
+    for position in range(at, len(code)):
+        character = code[position]
+        if character in OPENERS:
+            depth += 1
+        elif character in CLOSERS:
+            if depth == 0:
+                return at
+            depth -= 1
+        elif character == "," and depth == 0:
+            return position + 1
+    return at
+
+
 def cases(text):
     """The line and listed name of each test case in a source. The cases are found in the code alone, and their
     literals read with the comments between them left out."""
@@ -80,8 +98,7 @@ def cases(text):
     for case in CASE.finditer(code):
         at = case.end()
         if case.group(1) == "TEST_CASE_FIXTURE":
-            fixture = FIXTURE.match(source, at)
-            at = fixture.end() if fixture else at
+            at = after_first_argument(code, at)
         name = name_at(source, at)
         if name is not None and case.group(1).startswith("SCENARIO"):
             name = SCENARIO_PREFIX + name
