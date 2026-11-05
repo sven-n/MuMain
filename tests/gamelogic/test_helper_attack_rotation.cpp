@@ -5,6 +5,9 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Automation/AttackSkillRotation.h"
+#include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/SkillCast.h"
+#include "GameLogic/Combat/SkillExecution.h"
 #include "MUHelper/MuHelperData.h"
 #include "MUHelper/MuHelper.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -24,12 +27,14 @@
 extern MovementSkill g_MovementSkill;
 extern int TargetX;
 extern int TargetY;
+extern int Attacking;
 
 namespace
 {
 constexpr ActionSkillType Primary = static_cast<ActionSkillType>(41);
 constexpr ActionSkillType ExtraOne = static_cast<ActionSkillType>(42);
 constexpr ActionSkillType ExtraTwo = static_cast<ActionSkillType>(43);
+constexpr int KnightSkillDelay = 500;
 using GameLogic::Automation::SkillResult;
 
 struct SkillFixture
@@ -42,6 +47,11 @@ struct SkillFixture
     CHARACTER_ATTRIBUTE* previousCharacter = CharacterAttribute;
     SKILL_ATTRIBUTE* previousAttributes = SkillAttribute;
     EGameScene previousScene = SceneFlag;
+    MovementSkill previousMovementSkill = g_MovementSkill;
+    int previousSelectedCharacter = SelectedCharacter;
+    int previousTargetX = TargetX;
+    int previousTargetY = TargetY;
+    int previousAttacking = Attacking;
     MUHelper::ConfigData config;
     GameLogic::Automation::AttackSkillRotation rotation;
 
@@ -71,7 +81,28 @@ struct SkillFixture
         CharacterAttribute = previousCharacter;
         SkillAttribute = previousAttributes;
         SceneFlag = previousScene;
+        g_MovementSkill = previousMovementSkill;
+        SelectedCharacter = previousSelectedCharacter;
+        TargetX = previousTargetX;
+        TargetY = previousTargetY;
+        Attacking = previousAttacking;
         gSkillManager.InvalidateSkillAttributeRequirementsCache();
+    }
+
+    void PrepareKnightCast(ActionSkillType skill)
+    {
+        hero.Object.Type = MODEL_PLAYER;
+        hero.Object.CurrentAction = PLAYER_STOP_MALE;
+        hero.Movement = false;
+        hero.SkillSuccess = true;
+        hero.CurrentSkill = 0;
+        machine.Character.Skill[0] = skill;
+        attributes[skill].Delay = KnightSkillDelay;
+        for (auto& item : machine.Equipment)
+            item.Type = -1;
+        SelectedCharacter = -1;
+        g_MovementSkill.m_iSkill = hero.CurrentSkill;
+        g_MovementSkill.m_iTarget = -1;
     }
 
     ActionSkillType Select(int seconds = 0, std::size_t nearby = 0, std::size_t attacking = 0)
@@ -223,6 +254,107 @@ TEST_CASE("Automatic selection reads real cooldowns without consuming them [help
     CharacterAttribute->SkillDelay[2] = 0;
     CHECK(GameLogic::Automation::IsAttackSkillAvailable(AT_SKILL_NOVA_BEGIN));
     CHECK(CharacterAttribute->SkillDelay[2] == 0);
+}
+
+TEST_CASE("Knight cooldown refusal cannot complete a cast [helper_execution]")
+{
+    constexpr int ConfiguredDelay = 500;
+    constexpr int RemainingDelay = 50;
+    constexpr float SkillDistance = 2.f;
+    for (const auto skill : {AT_SKILL_CYCLONE, AT_SKILL_TWISTING_SLASH, AT_SKILL_RAGEFUL_BLOW})
+    {
+        for (const bool previousCast : {false, true})
+        {
+            CAPTURE(skill);
+            CAPTURE(previousCast);
+            SkillFixture fixture;
+            Hero->Object.Type = MODEL_PLAYER;
+            Hero->Object.CurrentAction = PLAYER_STOP_MALE;
+            Hero->Movement = false;
+            Hero->SkillSuccess = previousCast;
+            Hero->CurrentSkill = 0;
+            CharacterAttribute->Skill[0] = skill;
+            SkillAttribute[skill].Delay = ConfiguredDelay;
+            CharacterAttribute->SkillDelay[0] = RemainingDelay;
+            for (auto& item : fixture.machine.Equipment)
+                item.Type = -1;
+            auto& weapon = fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT];
+            weapon.Type = ITEM_SHORT_SWORD;
+            weapon.SpecialNum = 1;
+            weapon.Special[0] = AT_SKILL_CYCLONE;
+            SelectedCharacter = -1;
+            g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+
+            // A cooldown refusal in weapon dispatch falls through to AttackKnight.
+            if (skill == AT_SKILL_CYCLONE)
+                CHECK_FALSE(GameLogic::Combat::SkillWarrior(Hero, &weapon));
+            GameLogic::Combat::AttackKnight(Hero, skill, SkillDistance);
+
+            CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
+            CHECK_FALSE(Hero->SkillSuccess);
+            CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
+            CHECK_FALSE(Hero->Movement);
+            CHECK(CharacterAttribute->SkillDelay[0] == RemainingDelay);
+        }
+    }
+}
+
+TEST_CASE("Knight range refusal cannot complete a cast [helper_execution]")
+{
+    SkillFixture fixture;
+    fixture.PrepareKnightCast(AT_SKILL_RAGEFUL_BLOW);
+    fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT].Type = ITEM_SHORT_SWORD;
+    constexpr float SkillDistance = 2.f;
+    constexpr int TargetOffset = 3;
+    Hero->PositionX = Hero->PositionY = MovementStartTile;
+    Hero->Object.Position[0] = Hero->Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+    TargetX = MovementStartTile + TargetOffset;
+    TargetY = MovementStartTile;
+    Hero->TargetPosition[0] = (TargetX + 0.5f) * TERRAIN_SCALE;
+    Hero->TargetPosition[1] = (TargetY + 0.5f) * TERRAIN_SCALE;
+    REQUIRE_FALSE(CheckTile(Hero, &Hero->Object, SkillDistance));
+
+    GameLogic::Combat::AttackKnight(Hero, AT_SKILL_RAGEFUL_BLOW, SkillDistance);
+
+    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
+    CHECK_FALSE(Hero->SkillSuccess);
+    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
+    CHECK_FALSE(Hero->Movement);
+    CHECK(CharacterAttribute->SkillDelay[0] == KnightSkillDelay);
+}
+
+TEST_CASE("Knight weapon refusal cannot complete a cast [helper_execution]")
+{
+    SkillFixture fixture;
+    fixture.PrepareKnightCast(AT_SKILL_RAGEFUL_BLOW);
+    constexpr float SkillDistance = 2.f;
+
+    GameLogic::Combat::AttackKnight(Hero, AT_SKILL_RAGEFUL_BLOW, SkillDistance);
+
+    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
+    CHECK_FALSE(Hero->SkillSuccess);
+    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
+    CHECK_FALSE(Hero->Movement);
+    CHECK(CharacterAttribute->SkillDelay[0] == 0);
+}
+
+TEST_CASE("Unsupported Knight dispatch cannot complete a cast [helper_execution]")
+{
+    SkillFixture fixture;
+    fixture.PrepareKnightCast(AT_SKILL_CYCLONE);
+    auto& weapon = fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT];
+    weapon.Type = ITEM_SHORT_SWORD;
+    weapon.SpecialNum = 1;
+    weapon.Special[0] = AT_SKILL_CYCLONE;
+    constexpr float SkillDistance = 2.f;
+
+    GameLogic::Combat::AttackKnight(Hero, AT_SKILL_CYCLONE, SkillDistance);
+
+    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
+    CHECK_FALSE(Hero->SkillSuccess);
+    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
+    CHECK_FALSE(Hero->Movement);
+    CHECK(CharacterAttribute->SkillDelay[0] == KnightSkillDelay);
 }
 
 TEST_CASE("Resource shortages reach execution while unlearned skills are skipped [helper_rotation]")
