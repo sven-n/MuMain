@@ -4,8 +4,10 @@
 
 #include "TestModelSlots.h"
 
+#include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/Movement/FootPlacement.h"
+#include "Engine/Object/Movement/Greetings.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
@@ -18,6 +20,8 @@
 #include <vector>
 
 extern EGameScene SceneFlag;
+// What MoveCharacter does when a player's action has played to its end.
+void PlayerStopAnimationSetting(CHARACTER* c, OBJECT* o);
 
 namespace
 {
@@ -428,4 +432,71 @@ TEST_CASE("A pose fade with the head turned fades the neck and the spine too, tu
     float toStanding[3][3];
     RotationBetween(running[model.HeadTurnBones[3]], standing[model.HeadTurnBones[3]], toStanding);
     CHECK(toStanding[0][0] + toStanding[1][1] + toStanding[2][2] < 2.999f);
+}
+
+TEST_CASE("Emotes play through with Enhanced Movement on and go back to standing [data][animation][emote]")
+{
+    PlayerModel player;
+    BMD& model = player.model;
+    const bool wasEnabled = Engine::Characters::EnhancedMovementEnabled();
+    Engine::Characters::SetEnhancedMovementEnabled(true);
+    const float savedFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f;
+    // The emotes' speeds, as the game sets them when it opens the player model (OpenPlayers).
+    for (int emote = PLAYER_GREETING1; emote <= PLAYER_SALUTE1 && emote < model.NumActions; ++emote)
+    {
+        model.Actions[emote].PlaySpeed = emote == PLAYER_SEE1 || emote == PLAYER_SEE_FEMALE1 ? 0.28f : 0.4f;
+    }
+
+    for (int emote = PLAYER_GREETING1; emote <= PLAYER_SALUTE1; ++emote)
+    {
+        if (emote >= model.NumActions || model.Actions[emote].NumAnimationKeys <= 1 || model.Actions[emote].Loop)
+        {
+            continue;
+        }
+        CAPTURE(emote);
+        CHARACTER& c = StandingPlayer();
+        OBJECT& o = c.Object;
+        c.Wing.Type = -1;
+        c.Weapon[0].Type = -1;
+        c.Weapon[1].Type = -1;
+        SetPlayerStop(&c);
+        const int stance = o.CurrentAction;
+        REQUIRE(stance == PLAYER_STOP_MALE);
+        // A standing turn under way (the server's direction, or the cursor) when the emote starts.
+        o.Angle[2] = 90.f;
+        StartStandingTurn(&c, 270.f);
+        REQUIRE(c.TurnPending);
+        SetAction(&o, emote);
+        REQUIRE(o.CurrentAction == emote);
+
+        bool cutShort = false;
+        int frames = 0;
+        for (; frames < 2000 && o.CurrentAction == emote; ++frames)
+        {
+            FinishPendingTurn(&c);
+            Engine::Characters::RemoveNod(&c);
+            Engine::Characters::UpdateNod(&c);
+            model.CurrentAction = o.CurrentAction;
+            if (!CharacterAnimation(&c, &o))
+            {
+                // What MoveCharacter does at an action's end.
+                PlayerStopAnimationSetting(&c, &o);
+                break;
+            }
+            cutShort = cutShort || o.CurrentAction != emote;
+        }
+        CHECK_FALSE(cutShort);
+        // It played to its end (its keys, at its speed), then stood.
+        const Action_t& action = model.Actions[emote];
+        CHECK(static_cast<float>(frames) >=
+              (static_cast<float>(action.NumAnimationKeys) - 2.f) / std::max(action.PlaySpeed, 0.0001f));
+        CHECK(o.CurrentAction == stance);
+        // The turn gave way to it, where it was.
+        CHECK_FALSE(c.TurnPending);
+        CHECK(o.Angle[2] == 90.f);
+    }
+
+    FPS_ANIMATION_FACTOR = savedFactor;
+    Engine::Characters::SetEnhancedMovementEnabled(wasEnabled);
 }
