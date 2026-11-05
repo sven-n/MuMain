@@ -148,16 +148,27 @@ class AnnotationTests(unittest.TestCase):
         self.assertEqual([name for name, _ in found], ["macOS"])
 
     def test_cache_service_warnings_are_listed_separately(self):
-        found = [
-            ("Linux", {"annotation_level": "warning", "message": "Failed to restore: Cache service responded with 429"}),
-            ("macOS", {"annotation_level": "warning", "message": "Failed to save: Unable to upload the cache"}),
-            ("Windows", {"annotation_level": "warning", "message": "Node.js 20 is deprecated."}),
-            ("Linux", {"annotation_level": "warning", "message": "The step Failed to restore: x"}),
+        service_messages = [
+            "Failed to restore: Cache service responded with 429",
+            "Failed to restore: Cache service responded with 503",
+            "Failed to save: Failed to CreateCacheEntry: Received non-retryable error: Failed request: (502) Bad Gateway",
+            "Failed to save: Unable to reserve cache with key x, another job may be creating this cache.",
+            "Failed to save: cache entry with the same key, version, and scope already exists",
+            "Failed to restore: Request timeout: /twirp/github.actions.results.api.v1.CacheService/GetCacheEntryDownloadURL",
+            "Failed to restore: getaddrinfo EAI_AGAIN results-receiver.actions.githubusercontent.com",
+            "Failed to save: socket hang up",
         ]
+        failing_messages = [
+            "Failed to save: Cache size of ~11000 MB (11534336000 B) is over the 10GB limit, not saving cache.",
+            "Failed to restore: Cache service responded with 400",
+            "Node.js 20 is deprecated.",
+            "The step Failed to restore: Cache service responded with 503",
+        ]
+        found = [("Linux", {"annotation_level": "warning", "message": message})
+                 for message in service_messages + failing_messages]
         failing, service = ci_job_annotations.split_service_warnings(found)
-        self.assertEqual([name for name, _ in service], ["Linux", "macOS"])
-        self.assertEqual([a["message"] for _, a in failing],
-                         ["Node.js 20 is deprecated.", "The step Failed to restore: x"])
+        self.assertEqual([a["message"] for _, a in service], service_messages)
+        self.assertEqual([a["message"] for _, a in failing], failing_messages)
 
     def test_description_names_job_and_message(self):
         name, annotation = ci_job_annotations.find_annotations(

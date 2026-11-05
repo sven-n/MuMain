@@ -208,8 +208,10 @@ fails as soon as one comes back:
 - **CI Required** (and Fork CI's last job) fails when a job of the run ends with a
   warning annotation, such as GitHub's notice that an action targets a deprecated
   Node.js version. Notices, e.g. about runner queue times, are listed only, and so
-  are the warnings actions/cache logs when GitHub's cache service fails ("Failed to
-  restore: ...", "Failed to save: ..."): the build goes on without the cache.
+  are the warnings actions/cache logs when GitHub's cache service is busy, down or
+  unreachable ("Failed to restore: Cache service responded with 503", timeouts): the
+  build goes on without the cache. Its other warnings, such as a cache over the size
+  limit, fail the check.
 
 The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) compile
 with their warnings turned off (`-w`, `/w`), and miniaudio and glm are included as

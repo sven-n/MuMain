@@ -5,8 +5,8 @@ GitHub annotates jobs itself, e.g. "Node.js 20 is deprecated" when an action tar
 no longer ship, and steps add annotations with ::warning::. Notices are listed but pass: GitHub posts some about its
 own state ("Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times"),
 which no change here can remove. For the same reason, the warnings that actions/cache logs when GitHub's cache
-service fails to restore or save an entry (a rate limit, a timeout; the build goes on without it) are listed and
-pass. Run it from the last job of a workflow, with `actions: read` and `checks: read` and the token in GH_TOKEN:
+service fails to restore or save an entry (a rate limit, a server error, a timeout; the build goes on without it)
+are listed and pass; its other warnings, e.g. a cache over the size limit, fail like any other. Run it from the last job of a workflow, with `actions: read` and `checks: read` and the token in GH_TOKEN:
 
     python3 scripts/ci_job_annotations.py
 
@@ -27,9 +27,21 @@ PAGE_SIZE = 100
 # A request that GitHub fails or rate-limits is sent again after 5, 10 and 15 seconds before the check gives up.
 REQUEST_ATTEMPTS = 4
 RETRY_DELAY_SECONDS = 5
-# Warnings about the state of GitHub's services rather than this repository: actions/cache's
-# "Failed to restore: Cache service responded with 429" and "Failed to save: ..." when the service fails.
-SERVICE_WARNINGS = (re.compile(r"^Failed to (?:restore|save): "),)
+# Warnings about the state of GitHub's services rather than this repository: actions/cache's "Failed to restore: ..."
+# and "Failed to save: ..." when the cache service is busy, down, unreachable or raced by another job. The same prefix
+# also opens failures the workflow causes ("Failed to save: Cache size of ~11000 MB is over the 10GB limit"), which
+# still fail the check.
+SERVICE_WARNINGS = (
+    re.compile(
+        r"^Failed to (?:restore|save): .*(?:"
+        r"Cache service responded with (?:429|5\d\d)\b"  # rate limit or server error
+        r"|\((?:429|5\d\d)\)"  # the same from the cache service's newer client: "Failed request: (503) ..."
+        r"|Unable to reserve cache|already exists"  # another job saves the same key at the same time
+        r"|timed? ?out|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|socket hang up"  # the network
+        r")",
+        re.IGNORECASE,
+    ),
+)
 
 
 def is_worth_retrying(error):
