@@ -42,9 +42,9 @@ public:
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
 public:
-    bool UpdateMouseEvent();
-    bool UpdateKeyEvent();
-    bool Update();
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override;
+    bool Update() override;
 
 public:
     bool CheckEnterLevel(int& enterlevel);
@@ -52,7 +52,7 @@ public:
     bool CheckInventory(BYTE& itempos, int enterlevel);
 
 public:
-    bool Render();
+    bool Render() override;
 
 private:
     void BuildRmlUi();
@@ -62,7 +62,7 @@ private:
 public:
 
 public:
-    float GetLayerDepth(); //. 5.0f
+    float GetLayerDepth() override; //. 5.0f
 
 public:
     void SetEntryOffer(std::uint8_t remainingTime, std::uint8_t entryCount);

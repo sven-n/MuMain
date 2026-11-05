@@ -104,7 +104,8 @@ ItemDefinition UnflattenItem(int group, int number, const Fields& fields, std::v
         }
     }
     ItemDefinition item;
-    Data::Items::ReadItemJson(json, "", group, item, issues);
+    // The client's entry without a name has none until the file gives it one.
+    Data::Items::ReadItemJson(json, "", group, item, issues, false);
     return Data::Items::ToExchangeItem(item);
 }
 
@@ -136,6 +137,24 @@ bool TakesPart(const std::string& path, bool incomingHasIt, const SyncOptions& o
     return std::ranges::find(options.uiLocales, locale) != options.uiLocales.end();
 }
 
+// Whether both sides carry the field of `path` ("requirements.strength" belongs to
+// "requirements"): a file with a "fields" list carries only those, the client's data all.
+bool BothCarry(const std::string& path, const ItemExchangeFile& current, const ItemExchangeFile& incoming)
+{
+    const std::string_view key = std::string_view(path).substr(0, path.find('.'));
+    return Data::Items::CarriesField(current, key) && Data::Items::CarriesField(incoming, key);
+}
+
+// The English name of an item for its row: the file's, unless it does not carry the names.
+std::string RowName(const ItemDefinition* current, const ItemDefinition* incoming)
+{
+    if (incoming != nullptr && !incoming->names.GetNeutral().empty())
+    {
+        return incoming->names.GetNeutral();
+    }
+    return current != nullptr ? current->names.GetNeutral() : std::string();
+}
+
 bool IsHeld(const SyncOptions& options, const ItemKey& key)
 {
     return options.isHeld && options.isHeld(Data::Items::MakeItemType(key.first, key.second));
@@ -163,12 +182,13 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
 }
 
 SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const ItemDefinition* incoming,
-                     const ItemExchangeFile& incomingFile, const SyncOptions& options)
+                     const ItemExchangeFile& currentFile, const ItemExchangeFile& incomingFile,
+                     const SyncOptions& options)
 {
     SyncItem row;
     row.group = key.first;
     row.number = key.second;
-    row.name = (incoming != nullptr ? incoming : current)->names.GetNeutral();
+    row.name = RowName(current, incoming);
     row.known = options.known != nullptr && options.known->Contains(key.first, key.second, "");
     const Fields currentFields = current != nullptr ? FlattenItem(*current) : Fields{};
     const Fields incomingFields = incoming != nullptr ? FlattenItem(*incoming) : Fields{};
@@ -178,7 +198,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
         row.change = SyncChange::New;
         for (const auto& [path, value] : incomingFields)
         {
-            if (TakesPart(path, true, options))
+            if (TakesPart(path, true, options) && BothCarry(path, currentFile, incomingFile))
             {
                 row.fields.push_back({path, std::nullopt, ToText(value)});
             }
@@ -188,6 +208,11 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
         if (IsHeld(options, key))
         {
             row.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotAdded;
+        }
+        // The fields a file does not carry would get their defaults.
+        else if (!options.comparingFiles && !Data::Items::CarriesEveryField(incomingFile))
+        {
+            row.locked = I18N::Editor::TheFileDoesNotCarryAllFieldsOfAnItemItIsNotAdded;
         }
         row.checked = !row.known && row.locked.empty();
         return row;
@@ -224,7 +249,8 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     {
         const std::optional<std::string> was = TextOf(currentFields, path);
         const std::optional<std::string> becomes = TextOf(incomingFields, path);
-        if (was == becomes || !TakesPart(path, becomes.has_value(), options))
+        if (was == becomes || !TakesPart(path, becomes.has_value(), options) ||
+            !BothCarry(path, currentFile, incomingFile))
         {
             continue;
         }
@@ -349,7 +375,7 @@ std::optional<Data::Items::ItemStatFile> UnflattenFormulas(const Fields& fields,
     std::vector<ItemDataIssue> readIssues;
     Data::Items::ItemStatFile file;
     Data::Items::ReadItemStatFormulasJson(json, "formulas", file, readIssues);
-    const bool valid = !Data::Items::HasErrors(readIssues);
+    const bool valid = !Data::Items::HasFatal(readIssues);
     issues.insert(issues.end(), readIssues.begin(), readIssues.end());
     return valid ? std::optional(std::move(file)) : std::nullopt;
 }
@@ -492,6 +518,47 @@ void ApplyFormulas(const ItemExchangeFile& source, ItemExchangeFile& target, con
         target.formulas = std::move(*formulas);
     }
 }
+
+// The columns of WriteSyncRowsMarkdown's table; the change column's head is the caller's.
+constexpr const char* MarkdownItemColumns = "Group | Number | Item";
+constexpr const char* MarkdownFieldsColumn = "Fields";
+constexpr const char* MarkdownCellSeparator = " | ";
+constexpr const char* MarkdownSeparatorCell = "---|";
+constexpr int MarkdownItemColumnCount = 3;
+// The change and the field count.
+constexpr int MarkdownChangeColumnCount = 2;
+
+// A Markdown table cell: a | would end it early, a line break the row.
+std::string MarkdownCell(std::string_view text)
+{
+    std::string cell;
+    for (const char c : text)
+    {
+        if (c == '|')
+        {
+            cell += "\\|";
+        }
+        else
+        {
+            cell += c == '\n' || c == '\r' ? ' ' : c;
+        }
+    }
+    return cell;
+}
+
+// What the row does in the client, in the English of the Markdown table.
+const char* MarkdownChange(SyncChange change)
+{
+    switch (change)
+    {
+    case SyncChange::New:
+        return "Added";
+    case SyncChange::Removed:
+        return "Removed";
+    default:
+        return "Changed";
+    }
+}
 } // namespace
 
 ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file, const SyncOptions& options)
@@ -530,14 +597,8 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
             row.group = key.first;
             row.number = key.second;
             row.change = !inCurrent ? SyncChange::New : !inIncoming ? SyncChange::Removed : SyncChange::Changed;
-            if (becomes != incomingItems.end())
-            {
-                row.name = becomes->second->names.GetNeutral();
-            }
-            else if (was != currentItems.end())
-            {
-                row.name = was->second->names.GetNeutral();
-            }
+            row.name = RowName(was != currentItems.end() ? was->second : nullptr,
+                               becomes != incomingItems.end() ? becomes->second : nullptr);
             if (!options.comparingFiles)
             {
                 row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;
@@ -550,8 +611,9 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
             diff.items.push_back(std::move(row));
             continue;
         }
-        SyncItem row = CompareItem(key, was != currentItems.end() ? was->second : nullptr,
-                                   becomes != incomingItems.end() ? becomes->second : nullptr, incoming, options);
+        SyncItem row =
+            CompareItem(key, was != currentItems.end() ? was->second : nullptr,
+                        becomes != incomingItems.end() ? becomes->second : nullptr, current, incoming, options);
         if (row.change != SyncChange::Changed || !row.fields.empty())
         {
             diff.items.push_back(std::move(row));
@@ -566,6 +628,77 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
         CompareFormulas(*current.formulas, *incoming.formulas, options, diff);
     }
     return diff;
+}
+
+bool IsOnlyInClient(const SyncItem& row)
+{
+    return row.change == SyncChange::Removed;
+}
+
+void SetRowChecked(SyncItem& row, bool checked)
+{
+    if (row.change != SyncChange::Changed)
+    {
+        row.checked = checked && row.locked.empty();
+        return;
+    }
+    for (SyncField& field : row.fields)
+    {
+        field.checked = checked && field.locked.empty();
+    }
+}
+
+void SetAllRowsChecked(ItemSyncDiff& diff, bool checked)
+{
+    for (SyncItem& row : diff.items)
+    {
+        SetRowChecked(row, checked);
+    }
+    for (SyncFormula& row : diff.formulas)
+    {
+        row.checked = checked;
+    }
+}
+
+std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
+                                  std::string_view changeColumn)
+{
+    const bool withChange = !changeColumn.empty();
+    std::string text(title);
+    text += "\n\n| ";
+    if (withChange)
+    {
+        text += MarkdownCell(changeColumn) + MarkdownCellSeparator;
+    }
+    text += MarkdownItemColumns;
+    if (withChange)
+    {
+        text += std::string(MarkdownCellSeparator) + MarkdownFieldsColumn;
+    }
+    text += " |\n|";
+    const int columns = MarkdownItemColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
+    for (int column = 0; column < columns; ++column)
+    {
+        text += MarkdownSeparatorCell;
+    }
+    text += "\n";
+    for (const SyncItem* row : rows)
+    {
+        text += "| ";
+        if (withChange)
+        {
+            text += MarkdownChange(row->change);
+            text += MarkdownCellSeparator;
+        }
+        text += std::to_string(row->group) + MarkdownCellSeparator + std::to_string(row->number) +
+                MarkdownCellSeparator + MarkdownCell(row->name);
+        if (withChange)
+        {
+            text += MarkdownCellSeparator + std::to_string(row->fields.size());
+        }
+        text += " |\n";
+    }
+    return text;
 }
 
 int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming)

@@ -40,7 +40,11 @@ void InstallRuntimeHooks()
         LoadActiveThemeFonts();
         UI::Diagnostics::Initialize();
     };
-    hooks.beforeDestroy = [] { UI::Diagnostics::Release(); ClearThemeFontCache(); };
+    hooks.beforeDestroy = []
+    {
+        UI::Diagnostics::Release();
+        ClearThemeFontCache();
+    };
     hooks.beforeUpdate = []
     {
         SuspendMainSceneDocumentsOutsideMainScene();

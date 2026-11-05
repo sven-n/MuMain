@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Automation/Pickup.h"
+#include "GameLogic/Automation/Movement.h"
 
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -45,6 +46,9 @@ PickupResult PickUpItem(int itemIndex, int maximumDistance)
         // pickup must not redirect a walk that is already under way.
         return PickupResult::TooFar;
     }
+
+    if (IsWalkInProgress())
+        return PickupResult::Approaching;
 
     TargetX = dropX;
     TargetY = dropY;

@@ -7,12 +7,15 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/MonsterData/MonsterDataValidation.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelValidation.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundValidation.h"
 #include "I18N/All.h"
 
 #include <algorithm>
@@ -28,6 +31,25 @@ constexpr std::string_view MonsterDataLabel = "Monster data";
 constexpr std::string_view MonsterDataName = "monster data";
 constexpr std::string_view MonsterModelsLabel = "Monster models";
 constexpr std::string_view MonsterModelsName = "monster model list";
+constexpr std::string_view MonsterSoundsLabel = "Monster sounds";
+constexpr std::string_view MonsterSoundsName = "monster sound sets";
+
+// What the monster table, the model table and these sound sets name of each
+// other: the game loads them one after the other. The tables' entries are
+// read in place.
+void ValidateLinks(std::span<const MonsterSoundSet> sets, std::vector<Items::ItemDataIssue>& issues)
+{
+    std::vector<const MonsterDefinition*> monsters;
+    for (int number = 0; number < MonsterNumberCount; ++number)
+    {
+        if (const MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+        {
+            monsters.push_back(monster);
+        }
+    }
+    ValidateMonsterSoundLinks(monsters, g_MonsterModelDatabase.GetAll(), sets, GetMonstersFile().generic_string(),
+                              GetMonsterSoundsFile().generic_string(), issues);
+}
 
 #ifdef _EDITOR
 // The entries of the table, sorted by number.
@@ -42,6 +64,17 @@ std::vector<MonsterDefinition> CollectMonsters()
         }
     }
     return monsters;
+}
+
+// The sets of the set table, sorted by name.
+std::vector<MonsterSoundSet> CollectSoundSets()
+{
+    std::vector<MonsterSoundSet> sets;
+    for (const MonsterSoundSet* set : g_MonsterSoundSetDatabase.GetAll())
+    {
+        sets.push_back(*set);
+    }
+    return sets;
 }
 
 // The entries of the model table, sorted by slot.
@@ -92,9 +125,9 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
     ValidateLocales(result.monsters, result.issues);
     LogDataIssues(MonsterDataLabel, result.issues);
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
-        errorMessage = DescribeDataErrors(MonsterDataName, GetMonstersFile(), result.issues);
+        errorMessage = DescribeFatalIssues(MonsterDataName, GetMonstersFile(), result.issues);
         return false;
     }
 
@@ -111,9 +144,9 @@ bool MonsterDataHandler::LoadModels(std::string& errorMessage)
     const auto loadStart = std::chrono::steady_clock::now();
     const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
     LogDataIssues(MonsterModelsLabel, result.issues);
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
-        errorMessage = DescribeDataErrors(MonsterModelsName, GetMonsterModelsFile(), result.issues);
+        errorMessage = DescribeFatalIssues(MonsterModelsName, GetMonsterModelsFile(), result.issues);
         return false;
     }
 
@@ -121,6 +154,28 @@ bool MonsterDataHandler::LoadModels(std::string& errorMessage)
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monster models from {} in {:.1f} ms", result.models.size(),
                 GetMonsterModelsFile().generic_string(), elapsed.count());
+    return true;
+}
+
+bool MonsterDataHandler::LoadSounds(std::string& errorMessage)
+{
+    const auto loadStart = std::chrono::steady_clock::now();
+    MonsterSoundsLoadResult result = LoadMonsterSoundsFile(GetMonsterSoundsFile());
+    if (!Items::HasFatal(result.issues))
+    {
+        ValidateLinks(result.sets, result.issues);
+    }
+    LogDataIssues(MonsterSoundsLabel, result.issues);
+    if (Items::HasFatal(result.issues))
+    {
+        errorMessage = DescribeFatalIssues(MonsterSoundsName, GetMonsterSoundsFile(), result.issues);
+        return false;
+    }
+
+    g_MonsterSoundSetDatabase.Build(result.sets);
+    const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
+    MU_LOG_INFO(mu::log::Get("data"), "Loaded {} monster sound sets from {} in {:.1f} ms", result.sets.size(),
+                GetMonsterSoundsFile().generic_string(), elapsed.count());
     return true;
 }
 
@@ -178,7 +233,40 @@ void MonsterDataHandler::RestoreMonsters(std::span<const MonsterSnapshot> snapsh
     if (changed)
     {
         NotifyNamesChanged(*changed);
+        // The monster may name another sound set.
+        m_soundsToLoad = true;
     }
+}
+
+std::optional<MonsterSoundSet> MonsterDataHandler::ReadSoundSet(const std::string& name) const
+{
+    const MonsterSoundSet* set = g_MonsterSoundSetDatabase.Find(name);
+    return set != nullptr ? std::optional<MonsterSoundSet>(*set) : std::nullopt;
+}
+
+void MonsterDataHandler::RestoreSoundSets(std::span<const MonsterSoundSetSnapshot> snapshots)
+{
+    for (const MonsterSoundSetSnapshot& snapshot : snapshots)
+    {
+        if (snapshot.set)
+        {
+            MonsterSoundSet set = *snapshot.set;
+            set.name = snapshot.name;
+            g_MonsterSoundSetDatabase.Set(set);
+        }
+        else
+        {
+            g_MonsterSoundSetDatabase.Remove(snapshot.name);
+        }
+    }
+    m_soundsToLoad = true;
+}
+
+void MonsterDataHandler::ValidateSounds(std::vector<Items::ItemDataIssue>& issues) const
+{
+    const std::vector<MonsterSoundSet> sets = CollectSoundSets();
+    ValidateMonsterSoundSetNames(sets, GetMonsterSoundsFile().generic_string(), issues);
+    ValidateLinks(sets, issues);
 }
 
 void MonsterDataHandler::Validate(std::vector<Items::ItemDataIssue>& issues) const
@@ -210,7 +298,7 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
     ValidateLocales(result.monsters, result.issues);
     issues.insert(issues.end(), result.issues.begin(), result.issues.end());
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
         return false;
     }
@@ -265,7 +353,7 @@ bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
 {
     const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
     issues.insert(issues.end(), result.issues.begin(), result.issues.end());
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
         return false;
     }
@@ -277,23 +365,27 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
 {
     const std::vector<MonsterDefinition> monsters = CollectMonsters();
     ValidateLocales(monsters, issues);
-    // Both are checked, so that the problems of both are listed.
+    // All are checked, so that the problems of all are listed.
     const std::optional<std::string> monstersText = MakeMonstersFileText(GetMonstersFile(), monsters, issues);
     const std::optional<std::string> modelsText =
         MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
-    if (!monstersText || !modelsText)
+    const std::vector<MonsterSoundSet> sets = CollectSoundSets();
+    const std::optional<std::string> soundsText = MakeMonsterSoundsFileText(GetMonsterSoundsFile(), sets, issues);
+    ValidateLinks(sets, issues);
+    if (!monstersText || !modelsText || !soundsText)
     {
         return false;
     }
-    // Both files or neither: the new monster list next to the old model list
-    // may name a model that list lacks.
-    const std::array<TextFileToWrite, 2> files{
-        {{GetMonstersFile(), *monstersText}, {GetMonsterModelsFile(), *modelsText}}};
+    // All files or none: the new monster list next to the old model list or
+    // sound sets may name a model or a set they lack.
+    const std::array<TextFileToWrite, 3> files{{{GetMonstersFile(), *monstersText},
+                                                {GetMonsterModelsFile(), *modelsText},
+                                                {GetMonsterSoundsFile(), *soundsText}}};
     std::filesystem::path failed;
     std::string error;
     if (!WriteTextFiles(files, failed, error))
     {
-        issues.push_back({Items::ItemDataIssueSeverity::Error, failed.generic_string(), Items::ItemDataIssue::NoItem,
+        issues.push_back({Items::ItemDataIssueSeverity::Fatal, failed.generic_string(), Items::ItemDataIssue::NoItem,
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
@@ -305,15 +397,24 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     MonsterDataLoadResult monsters = LoadMonstersFile(GetMonstersFile());
     ValidateLocales(monsters.monsters, monsters.issues);
     const MonsterModelsLoadResult models = LoadMonsterModelsFile(GetMonsterModelsFile());
+    const MonsterSoundsLoadResult sounds = LoadMonsterSoundsFile(GetMonsterSoundsFile());
     issues.insert(issues.end(), monsters.issues.begin(), monsters.issues.end());
     issues.insert(issues.end(), models.issues.begin(), models.issues.end());
-    if (Items::HasErrors(monsters.issues) || Items::HasErrors(models.issues))
+    issues.insert(issues.end(), sounds.issues.begin(), sounds.issues.end());
+    if (Items::HasFatal(monsters.issues) || Items::HasFatal(models.issues) || Items::HasFatal(sounds.issues))
     {
         return false;
     }
     UseMonsters(monsters.monsters);
     UseModels(models.models);
+    UseSoundSets(sounds.sets);
     return true;
+}
+
+void MonsterDataHandler::UseSoundSets(std::span<const MonsterSoundSet> sets)
+{
+    g_MonsterSoundSetDatabase.Build(sets);
+    m_soundsToLoad = true;
 }
 
 void MonsterDataHandler::UseModels(std::span<const MonsterModelDefinition> models)
@@ -354,6 +455,12 @@ void MonsterDataHandler::ReopenChangedModels()
     if (!reopened.empty() && m_modelsReopened != nullptr)
     {
         m_modelsReopened(reopened);
+    }
+
+    if (m_soundsToLoad)
+    {
+        m_soundsToLoad = false;
+        ModelLoader::LoadSoundsOfOpenModels();
     }
 
     std::vector<int> toOpen;

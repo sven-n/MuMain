@@ -2,40 +2,90 @@ name: CI
 
 on:
   push:
-    branches: ['*']
-    paths-ignore:
-      - 'src/bin/Data/**'
-      - 'src/bin/fonts/**'
+    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: '17 18 * * *' # 02:17 UTC+8
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Coalesce releases: finish the running revision and keep only the newest pending trigger.
+  group: ci-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
 
+env:
+  # actions/checkout runs git init and then checks out a detached commit; without these settings git prints a hint
+  # about the initial branch name and an advice block about detached HEADs in every job. Git reads them from the
+  # environment (GIT_CONFIG_COUNT), so they need no step.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
   quality:
     name: Quality Gates
-    runs-on: ubuntu-latest
+    # The image by name, not ubuntu-latest: GitHub moves repositories to a new latest image one by one, and its
+    # cppcheck and GCC report different findings and warnings.
+    runs-on: ubuntu-26.04
+    outputs:
+      linux: ${{ steps.plan.outputs.linux }}
+      macos: ${{ steps.plan.outputs.macos }}
+      windows: ${{ steps.plan.outputs.windows }}
+      release: ${{ steps.plan.outputs.release }}
 
     steps:
+      # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
+      # tests use; downloading it took 30 s to 3 min depending on GitHub.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          # A pull request diffs against the merge commit's first parent, so it needs only one commit of history.
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/src/bin/*
+            /src/bin/fonts/
+            /src/bin/Data/
+            !/src/bin/Data/*
+            /src/bin/Data/Interface/
+            /src/bin/Data/Dec2.dat
+
+      # Commits, tags and file lists for the diffs and release check, without every past asset version; git fetches
+      # the few old file versions a diff needs on demand.
+      - name: Fetch history
+        if: github.event_name != 'pull_request'
+        run: git fetch --quiet --filter=blob:none --unshallow --tags origin
+
+      - name: Select native builds
+        id: plan
+        run: python3 scripts/ci_build_plan.py
+
+      # Architecture guards and contracts that only read the source; native jobs skip the `static` label.
+      - name: Run static checks
+        run: |
+          cmake -S tests/static -B out/static-checks
+          ctest --test-dir out/static-checks -C Release --parallel 4 --output-on-failure --no-tests=error
+
+      - name: Validate game data inputs
+        run: |
+          test -f src/bin/Data/Dec2.dat
+          test -f src/bin/fonts/DejaVuSans.ttf
 
       - name: Cache quality tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cache/pip
-            /usr/bin/cppcheck
-            /usr/share/cppcheck
-          key: quality-tools-cppcheck-${{ runner.os }}-v2
-          restore-keys: quality-tools-cppcheck-${{ runner.os }}-
+          key: quality-tools-pip-${{ runner.os }}-v1
+          restore-keys: quality-tools-pip-${{ runner.os }}-
 
       - name: Install quality tools
         run: |
@@ -44,16 +94,10 @@ jobs:
 
       - name: Detect changed C++ files
         id: changed
+        env:
+          DIFF_BASE: ${{ steps.plan.outputs.diff_base }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            # On main push, diff against the previous commit
-            DIFF_BASE=HEAD~1
-          else
-            DIFF_BASE=origin/main
-          fi
-          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
-            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
-            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          CHANGED=$(bash scripts/changed_cpp_files.sh "$DIFF_BASE")
           echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
           if [ -z "$CHANGED" ]; then
             echo "count=0" >> "$GITHUB_OUTPUT"
@@ -69,29 +113,7 @@ jobs:
         if: steps.changed.outputs.count != '0'
         run: |
           echo "Checking ${{ steps.changed.outputs.count }} files..."
-          base="${{ steps.changed.outputs.diff_base }}"
-          while IFS= read -r file; do
-            format_args=()
-            while read -r start count; do
-              if [ -z "$start" ]; then
-                continue
-              fi
-              if [ -z "$count" ]; then
-                count=1
-              fi
-              if [ "$count" -eq 0 ]; then
-                continue
-              fi
-              end=$((start + count - 1))
-              format_args+=(--lines="${start}:${end}")
-            done < <(
-              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
-                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
-            )
-            if [ "${#format_args[@]}" -ne 0 ]; then
-              clang-format --dry-run --Werror "${format_args[@]}" "$file"
-            fi
-          done < /tmp/changed-cpp-files.txt
+          bash scripts/check_format.sh "${{ steps.changed.outputs.diff_base }}" < /tmp/changed-cpp-files.txt
 
       - name: Static analysis
         if: steps.changed.outputs.count != '0'
@@ -118,22 +140,46 @@ jobs:
 
   build-windows:
     name: Windows Native Build (x64, Release, editor OFF)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: windows-latest
+    needs: quality
+    if: needs.quality.outputs.windows == 'true'
+    # By name, as Quality Gates: another image brings another MSVC, and GitHub warns in every job while it moves
+    # windows-latest to a new one.
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
+      # Loads vcvars64.bat and passes every variable it changes on to the following steps, as Fork CI does
+      # (ilammy/msvc-dev-cmd, used before, still runs on the deprecated Node.js 20).
       - name: Activate Visual Studio developer environment
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
-        with:
-          arch: x64
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installation = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $installation) {
+            throw "No Visual Studio installation with the x64 C++ tools found."
+          }
+          $vcvars = Join-Path $installation "VC\Auxiliary\Build\vcvars64.bat"
+          # vcvars64.bat looks for vswhere.exe on PATH itself.
+          $env:PATH = "$(Split-Path $vswhere);$env:PATH"
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "`"$vcvars`" >nul && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$' -and $before[$Matches[1]] -ne $Matches[2]) {
+              "$($Matches[1])=$($Matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            }
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "vcvars64.bat failed."
+          }
 
       - name: Assert MSVC developer environment
         shell: pwsh
@@ -158,7 +204,7 @@ jobs:
           exit 0
 
       - name: Cache FetchContent and NuGet dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             out/build/windows-ci-x64-release/_deps
@@ -166,25 +212,36 @@ jobs:
           key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: windows-x64-release-deps-
 
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
+
       - name: Cache vcpkg packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-x64-
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
+          restore-keys: vcpkg-windows-x64-v2-
 
+      # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
+      # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -233,13 +290,14 @@ jobs:
           }
 
       - name: Build
-        run: cmake --build out/build/windows-ci-x64-release --config Release
+        run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
 
       - name: Run tests
         run: >
           ctest --test-dir out/build/windows-ci-x64-release --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -472,7 +530,7 @@ jobs:
         run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
 
       - name: Upload runtime artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
           path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz
@@ -480,15 +538,23 @@ jobs:
 
   build-linux:
     name: Linux Native Build (x64, Release, editor OFF)
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    needs: quality
+    if: needs.quality.outputs.linux == 'true'
+    # By name, as Quality Gates: another image's GCC warns differently.
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -496,41 +562,77 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            cmake ninja-build gcc g++ \
+            cmake ninja-build gcc g++ ccache \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
             libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
             glslang-tools spirv-cross \
             pkg-config
 
+      - name: Identify compiler cache
+        id: compiler
+        run: echo "identity=$(sha256sum /usr/bin/gcc /usr/bin/g++ | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Linux compilation
+        id: ccache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-
+
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
-            out/build/linux-ci/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/linux-ci/_deps/*-src
+            out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: linux-x64-release-deps-
+          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: linux-x64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build out/build/linux-ci --config Release
+        run: |
+          ccache --zero-stats
+          python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
+
+      - name: Report compiler cache
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### Linux compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Run tests
         run: >
           ctest --test-dir out/build/linux-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
+          --parallel 4
 
       - name: Validate runtime
         run: |
@@ -553,13 +655,20 @@ jobs:
             fi
           done
 
+      - name: Save Linux compilation cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
+
       - name: Archive runtime
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz -C out/build/linux-ci/src/Release .
 
       - name: Upload runtime artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        if: needs.quality.outputs.release == 'true'
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-linux-native-x64-release-editor-off-no-data-main
           path: MuMain-linux-native-x64-release-editor-off-no-data.tar.gz
@@ -567,47 +676,102 @@ jobs:
 
   build-macos:
     name: macOS Native Build (arm64, Release, editor OFF)
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    runs-on: macos-latest
+    needs: quality
+    if: needs.quality.outputs.macos == 'true'
+    # By name: the build's minimum macOS is the image's (cmake/toolchains/macos-arm64.cmake), so it changes only
+    # with this line, not when GitHub moves macos-latest to a newer macOS.
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      # /usr/bin/clang++ is an xcrun shim, so hashing its content would miss Xcode updates.
+      CCACHE_COMPILERCHECK: '%compiler% -v'
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
+        # Only what the image lacks: brew warns about each formula that is already installed. --quiet leaves out the
+        # caveats (ccache's explains its compiler symlinks, which the build does not use); warnings still show.
+        run: |
+          missing=()
+          for formula in cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache; do
+            brew list --formula "$formula" >/dev/null 2>&1 || missing+=("$formula")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            brew install --quiet "${missing[@]}"
+          fi
+
+      - name: Identify compiler cache
+        id: compiler
+        run: echo "identity=$(shasum -a 256 "$(xcrun -f clang)" "$(xcrun -f clang++)" | shasum -a 256 | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache macOS compilation
+        id: ccache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
-            out/build/macos-ci/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/macos-ci/_deps/*-src
+            out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: macos-arm64-release-deps-
+          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: macos-arm64-release-dep-sources-
 
+      # As on Windows: no warning may come back (docs/build/README.md).
       - name: Configure CMake
         run: >
+          python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
           -DENABLE_EDITOR=OFF
+          -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
           -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
-        run: cmake --build out/build/macos-ci --config Release
+        run: |
+          ccache --zero-stats
+          python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
+
+      - name: Report compiler cache
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### macOS compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Run tests
         run: >
           ctest --test-dir out/build/macos-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
+          --parallel 4
 
       - name: Validate runtime
         run: |
@@ -630,29 +794,63 @@ jobs:
             fi
           done
 
+      # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
+      - name: Save macOS compilation cache
+        if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
+
       - name: Archive runtime
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C out/build/macos-ci/src/Release Main.app
 
       - name: Upload runtime artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        if: needs.quality.outputs.release == 'true'
+        uses: actions/upload-artifact@v7
         with:
           name: mu-client-macos-native-arm64-release-editor-off-no-data-main
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  required:
+    name: CI Required
+    needs: [quality, build-windows, build-linux, build-macos]
+    if: always()
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # Reading the other jobs' annotations.
+      actions: read
+      checks: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Verify applicable checks
+        env:
+          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+        run: python3 scripts/ci_build_plan.py check
+
+      # GitHub's own warnings count too, e.g. that an action targets a deprecated Node.js version.
+      - name: Check job annotations
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_job_annotations.py
+
   release:
     name: Semantic Release
-    needs: [quality, build-windows, build-linux, build-macos]
-    if: github.repository == 'sven-n/MuMain' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    needs: [quality, build-windows, build-linux, build-macos, required]
+    if: needs.quality.outputs.release == 'true'
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -704,6 +902,10 @@ jobs:
             conventional-changelog-conventionalcommits@8.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check unpublished release revision
+        if: steps.semantic.outputs.new_release_published != 'true'
+        run: python3 scripts/ci_build_plan.py check-release
 
       - name: Link compatible data release
         if: steps.semantic.outputs.new_release_published == 'true'

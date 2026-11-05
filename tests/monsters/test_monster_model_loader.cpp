@@ -12,6 +12,7 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Engine/Object/ZzzOpenData.h"
 #ifdef _EDITOR
 #include "UI/MonsterTools/MonsterShownModel.h"
@@ -126,11 +127,11 @@ TEST_CASE("Monster models: the monster tools load a sound they play as its model
           "[monsters][models][sounds][editor]")
 {
     LoadScope scope(0);
-    // A Play button of a model that is not open loads the sound first.
-    const MonsterModelDefinition* grizzly = g_MonsterModelDatabase.Find(MODEL_GRIZZLY);
+    // A Play button of a set whose model is not open loads the sound first.
+    const Data::Monsters::MonsterSoundSet* grizzly = g_MonsterSoundSetDatabase.Find("Grizzly");
     REQUIRE(grizzly != nullptr);
     REQUIRE_FALSE(grizzly->sounds.empty());
-    const Data::Monsters::MonsterModelSound sound = grizzly->sounds.front();
+    const Data::Monsters::MonsterSound sound = grizzly->sounds.front();
     const int number = Data::Monsters::ModelLoader::SoundNumber(sound);
     const LoadChanges played = scope.Run(
         [&sound]

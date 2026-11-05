@@ -10,8 +10,14 @@
 
 namespace Engine::Items::TooltipSnapshot
 {
-// An item as the server would send it: the fields not set are 0, the durability is full.
+// An item as the server would send it: the fields not set are 0, the durability is the item data's base durability
+// (the snapshot is recorded with it; FullDurability gives the full one).
 ItemCreationParams FullItemParameters(int group, int number);
+
+// The full durability of the item made from `parameters`, as CalcMaxDurability gives it (it grows with the level, an
+// excellent or ancient option raises it, and a staff, stick or book starts from its magic durability), at most 255:
+// what the item's durability byte holds.
+BYTE FullDurability(const ItemCreationParams& parameters);
 
 // The information tooltip lines of such an item, for the hero as he is (BuildItemTooltipLines).
 std::vector<ItemTooltipLine> TooltipOfParameters(const ItemCreationParams& parameters);

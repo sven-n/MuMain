@@ -55,11 +55,6 @@ bool IsWingMixCharmModel(int modelType)
     return IsWingMixCharmType(Data::Items::ToItemType(modelType));
 }
 
-bool IsSealType(int itemType)
-{
-    return itemType == ITEM_SEAL_OF_ASCENSION || itemType == ITEM_SEAL_OF_WEALTH || itemType == ITEM_SEAL_OF_SUSTENANCE;
-}
-
 bool IsDevilSquareItemType(int itemType)
 {
     return itemType == ITEM_DEVILS_EYE || itemType == ITEM_DEVILS_KEY || itemType == ITEM_DEVILS_INVITATION;
@@ -80,52 +75,10 @@ bool IsResetFruit(const ITEM* pItem)
     return IsResetFruitType(pItem->Type);
 }
 
-bool IsHealingOrDivinitySealType(int itemType)
-{
-    return itemType == ITEM_SEAL_OF_HEALING || itemType == ITEM_SEAL_OF_DIVINITY;
-}
-
-bool IsEventTicketType(int itemType)
-{
-    return itemType == ITEM_DEVIL_SQUARE_TICKET || itemType == ITEM_BLOOD_CASTLE_TICKET ||
-           itemType == ITEM_KALIMA_TICKET;
-}
-
-bool IsEventTicket(const ITEM* pItem)
-{
-    return IsEventTicketType(pItem->Type);
-}
-
-bool IsDoppelgangerOrVarkaTicketType(int itemType)
-{
-    return itemType == ITEM_OPEN_ACCESS_TICKET_TO_DOPPELGANGER || itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA ||
-           itemType == ITEM_OPEN_ACCESS_TICKET_TO_VARKA_7;
-}
-
-bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem)
-{
-    return IsDoppelgangerOrVarkaTicketType(pItem->Type);
-}
-
 bool IsChocolateBoxType(int itemType)
 {
     return itemType == ITEM_PINK_CHOCOLATE_BOX || itemType == ITEM_RED_CHOCOLATE_BOX ||
            itemType == ITEM_BLUE_CHOCOLATE_BOX;
-}
-
-bool IsChocolateBox(const ITEM* pItem)
-{
-    return IsChocolateBoxType(pItem->Type);
-}
-
-bool IsRibbonBoxType(int itemType)
-{
-    return itemType == ITEM_RED_RIBBON_BOX || itemType == ITEM_GREEN_RIBBON_BOX || itemType == ITEM_BLUE_RIBBON_BOX;
-}
-
-bool IsRibbonBox(const ITEM* pItem)
-{
-    return IsRibbonBoxType(pItem->Type);
 }
 
 bool IsSecromiconQuestItem(const ITEM* pItem)

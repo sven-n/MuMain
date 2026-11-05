@@ -357,7 +357,7 @@ TEST_CASE("NpcName txt: a file that cannot be backed up is not written, the othe
     const auto& english = Of(exported, "en");
     CHECK_FALSE(english.written);
     REQUIRE(english.issues.size() == 1);
-    CHECK(english.issues.front().severity == Data::Items::ItemDataIssueSeverity::Error);
+    CHECK(english.issues.front().severity == Data::Items::ItemDataIssueSeverity::Fatal);
     CHECK(english.issues.front().message.find("backed up") != std::string::npos);
     CHECK(CountBackups(englishFile.parent_path()) == 0);
     CHECK(ReadNameFile(folder, "en") == oldText);

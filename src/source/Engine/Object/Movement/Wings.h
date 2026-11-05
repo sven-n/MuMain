@@ -4,8 +4,8 @@
 // them only by that bone's small share; they turn with the back too and trail behind a turn (UpdateTurnLag).
 namespace Engine::Characters
 {
-// Puts a player's wings on its back, in `parentMatrix` (their link bone's transform, as RenderLinkObject placed them):
-// turned with the back's share of the head's turn and the turn lag, about the upright through Spine1, and on a Uniria
-// or a Dinorant sitting on the spine as they do standing.
-void PlaceWingsOnBack(const CHARACTER* c, int linkBone, float parentMatrix[3][4]);
+// Puts a player's wings on its back, in `parentMatrix` (their link bone's transform in the pose `bones`, as
+// PlaceLinkedPart placed them): turned with the back's share of the head's turn and the turn lag, about the upright
+// through Spine1, and on a Uniria or a Dinorant sitting on the spine as they do standing.
+void PlaceWingsOnBack(const CHARACTER* c, int linkBone, const vec34_t* bones, float parentMatrix[3][4]);
 } // namespace Engine::Characters

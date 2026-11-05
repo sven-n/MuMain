@@ -5,6 +5,7 @@
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -78,6 +79,14 @@ ItemCreationParams FullItemParameters(int group, int number)
     params.Number = number;
     params.Durability = static_cast<BYTE>(ItemAttribute[group * MAX_ITEM_INDEX + number].Durability);
     return params;
+}
+
+BYTE FullDurability(const ItemCreationParams& parameters)
+{
+    ITEM item;
+    FillItemFromParameters(item, parameters);
+    const int maxDurability = CalcMaxDurability(&item, &ItemAttribute[item.Type], item.Level);
+    return static_cast<BYTE>(std::min(maxDurability, 255));
 }
 
 std::vector<ItemTooltipLine> TooltipOfParameters(const ItemCreationParams& parameters)

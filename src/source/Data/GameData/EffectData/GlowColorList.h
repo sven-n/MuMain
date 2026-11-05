@@ -30,7 +30,15 @@ public:
     // Adds the color after the others, or gives the one of its name its
     // value. For the item editor; Find's pointers do not stay valid.
     void Set(const GlowColor& color);
+    // Also takes the color out of its folder.
     void Remove(std::string_view name);
+    // The folders MuEditor sorts the colors in. Build keeps them; a name in them that isn't a color (any more) is
+    // neither shown nor written.
+    const std::vector<Colors::ColorFolder>& GetFolders() const
+    {
+        return m_folders;
+    }
+    void SetFolders(std::vector<Colors::ColorFolder> folders);
     // Counts the builds and changes, for what is shown from the list.
     int GetVersion() const
     {
@@ -41,6 +49,7 @@ public:
 private:
     std::vector<GlowColor> m_colors;
 #ifdef _EDITOR
+    std::vector<Colors::ColorFolder> m_folders;
     int m_version = 0;
 #endif
 };

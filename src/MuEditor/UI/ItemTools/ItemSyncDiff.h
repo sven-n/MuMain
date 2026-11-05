@@ -111,6 +111,22 @@ struct SyncOptions
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
                                const SyncOptions& options);
 
+// Whether the row is an item only the client has. Import and Update from server list these
+// rows in a section of their own: the file does not change them, and each one is removed only
+// when it is checked (its own box or Check all).
+bool IsOnlyInClient(const SyncItem& row);
+// Checks or unchecks a row's box: a New or Removed item as a whole, the fields of a Changed one.
+// Locked items and fields stay unchecked.
+void SetRowChecked(SyncItem& row, bool checked);
+// Check all and Check none: every row and formula entry, also the items only the client has
+// (the confirmation of the import says how many it removes; Undo brings them back).
+void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
+// The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
+// editor's language: `title`, an empty line, then a table of each item's group, number and name.
+// With a `changeColumn` (its head, e.g. "In the client"), the table also has each row's change
+// first and its number of differing fields last.
+std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
+                                  std::string_view changeColumn);
 // How many formula entries differ between two item stat files: the formula rows a diff lists.
 int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming);
 

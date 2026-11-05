@@ -6,6 +6,7 @@
 
 #include "MuEditorToolWindows.h"
 #include "MuEditorWindowIds.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "I18N/All.h"
 
 #include <array>
@@ -14,16 +15,39 @@ namespace MuEditor
 {
 namespace
 {
-const std::array<ToolWindowEntry, 10> ItemToolEntries = {{
+void ShowGlowColors()
+{
+    g_MuColorsUI.Show(Colors::ColorsRoot::Glow);
+}
+
+bool IsGlowColorsShown()
+{
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::Glow;
+}
+
+void ShowGroundLabelStyles()
+{
+    g_MuColorsUI.Show(Colors::ColorsRoot::GroundLabels);
+}
+
+bool IsGroundLabelStylesShown()
+{
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::GroundLabels;
+}
+
+const std::array<ToolWindowEntry, 11> ItemToolEntries = {{
     {WindowIds::ItemBasics, &I18N::Editor::ItemBasics, &ToolWindows::itemBasics},
     {WindowIds::ItemRequirements, &I18N::Editor::ItemRequirements, &ToolWindows::itemRequirements},
     {WindowIds::ItemRules, &I18N::Editor::ItemRules, &ToolWindows::itemRules},
     {WindowIds::ItemCategories, &I18N::Editor::ItemCategories, &ToolWindows::itemCategories},
     {WindowIds::ItemModel, &I18N::Editor::ItemModel, &ToolWindows::itemModel},
-    {WindowIds::ItemGlowColors, &I18N::Editor::GlowColors, &ToolWindows::itemGlowColors},
+    // Tabs of the Colors window, which docks with the item tools.
+    {WindowIds::Colors, &I18N::Editor::GlowColors, &ToolWindows::colors, &ShowGlowColors, &IsGlowColorsShown},
+    {WindowIds::Colors, &I18N::Editor::GroundLabelStyles, &ToolWindows::colors, &ShowGroundLabelStyles,
+     &IsGroundLabelStylesShown},
+    {WindowIds::ItemTooltip, &I18N::Editor::ItemTooltip, &ToolWindows::itemTooltip},
     {WindowIds::ItemFormulas, &I18N::Editor::ItemFormulas, &ToolWindows::itemFormulas},
     {WindowIds::ItemSync, &I18N::Editor::ItemSync, &ToolWindows::itemSync},
-    {WindowIds::ItemChecks, &I18N::Editor::ItemChecks, &ToolWindows::itemChecks},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},
 }};
 
@@ -31,8 +55,8 @@ const std::array<ToolWindowEntry, 5> MonsterToolEntries = {{
     {WindowIds::MonsterModel, &I18N::Editor::MonsterModel, &ToolWindows::monsterModel},
     {WindowIds::MonsterPreview, &I18N::Editor::MonsterPreview, &ToolWindows::monsterPreview},
     {WindowIds::MonsterAttacks, &I18N::Editor::MonsterAttacks, &ToolWindows::monsterAttacks},
+    {WindowIds::MonsterSounds, &I18N::Editor::MonsterSounds, &ToolWindows::monsterSounds},
     {WindowIds::MonsterTranslations, &I18N::Editor::MonsterTranslations, &ToolWindows::monsterTranslations},
-    {WindowIds::MonsterChecks, &I18N::Editor::MonsterChecks, &ToolWindows::monsterChecks},
 }};
 } // namespace
 

@@ -237,6 +237,9 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
         obj->Velocity = m_speed;
     }
     break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_End_NotUse:
+        break;
     }
 
     return TRUE;
@@ -292,6 +295,12 @@ bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, doubl
     {
     case eAction_Return:
         PlayBuffer(SOUND_DROP_GOLD01);
+        break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case eAction_Stand:
+    case eAction_Move:
+    case eAction_Get:
+    case eAction_End_NotUse:
         break;
     }
 

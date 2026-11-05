@@ -9,7 +9,7 @@ Translates one RML document and its theme's RCSS into plain HTML/CSS:
   given window size as UI::Scaling computes them;
 - data bindings (data-for, data-if, data-visible, data-class-*, data-style-*, data-attr-*,
   data-value, data-checked, data-rml, {{...}}) are evaluated against a JSON model;
-- @spritesheet sprites and image()/ninepatch() decorators are drawn from the game's own
+- @spritesheet sprites and image()/ninepatch()/tiled-box() decorators are drawn from the game's own
   textures (.OZT/.OZJ), gradients become CSS gradients, and the bundled fonts are used.
 
 Optionally screenshots the result with a Chromium-based browser (Chrome, Edge, Chromium).
@@ -401,6 +401,8 @@ class StylesheetConverter:
                 layers.extend(self.image_layer(kind, arguments, directory))
             elif kind == "ninepatch":
                 layers.extend(self.ninepatch_layers(arguments, directory))
+            elif kind == "tiled-box":
+                layers.extend(self.tiled_box_layers(arguments, directory))
             else:
                 warn(f"unsupported decorator: {kind}")
         if not layers:
@@ -469,6 +471,43 @@ class StylesheetConverter:
                 url = self.textures.crop(sheet, (cx, ry, cw, rh))
                 if url:
                     layers.append((f"url({url})", f"{csize} {rsize}", f"{cpos} {rpos}", "no-repeat"))
+        return layers
+
+
+    def tiled_box_layers(self, arguments, directory):
+        """tiled-box(top-left, top, top-right, left, center, right, bottom-left, bottom, bottom-right): the
+        corners at their natural size, each edge stretched along its side, the center filling the rest.
+        A tile's options after its sprite name (repeat modes, flips) are not drawn."""
+        names = [tile.split()[0] for tile in split_top_level(arguments) if tile.split()]
+        if len(names) != 9 or any(name not in self.sprites for name in names):
+            warn(f"unsupported tiled-box: {arguments}")
+            return []
+        sizes = []
+        for name in names:
+            _, rect, scale = self.sprites[name]
+            sizes.append((rect[2] * self.ratio * scale, rect[3] * self.ratio * scale))
+        (tlw, tlh), (_, th), (trw, trh), (lw, _), _, (rw, _), (blw, blh), (_, bh), (brw, brh) = sizes
+
+        def across(start, end):
+            return f"calc(100% - {start + end:.3f}px)"
+
+        tiles = [
+            (f"{tlw:.3f}px", f"{tlh:.3f}px", "left 0 top 0"),
+            (across(tlw, trw), f"{th:.3f}px", f"left {tlw:.3f}px top 0"),
+            (f"{trw:.3f}px", f"{trh:.3f}px", "right 0 top 0"),
+            (f"{lw:.3f}px", across(tlh, blh), f"left 0 top {tlh:.3f}px"),
+            (across(lw, rw), across(th, bh), f"left {lw:.3f}px top {th:.3f}px"),
+            (f"{rw:.3f}px", across(trh, brh), f"right 0 top {trh:.3f}px"),
+            (f"{blw:.3f}px", f"{blh:.3f}px", "left 0 bottom 0"),
+            (across(blw, brw), f"{bh:.3f}px", f"left {blw:.3f}px bottom 0"),
+            (f"{brw:.3f}px", f"{brh:.3f}px", "right 0 bottom 0"),
+        ]
+        layers = []
+        for name, (width, height, position) in zip(names, tiles):
+            sheet, rect, _ = self.sprites[name]
+            url = self.textures.crop(sheet, rect)
+            if url:
+                layers.append((f"url({url})", f"{width} {height}", position, "no-repeat"))
         return layers
 
 

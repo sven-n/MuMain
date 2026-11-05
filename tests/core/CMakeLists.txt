@@ -58,7 +58,7 @@ mu_add_test(
     NAME test_audio_playback
     SOURCES
         test_audio_playback.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
@@ -107,7 +107,7 @@ if(ENABLE_CONTROL_SOCKET)
         NAME test_synthetic_input
         SOURCES
             test_synthetic_input.cpp
-            $<TARGET_OBJECTS:mu_test_winmain>
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
     )
@@ -117,6 +117,16 @@ if(ENABLE_CONTROL_SOCKET)
         NAME test_control_tooltip_commands
         SOURCES
             test_control_tooltip_commands.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
+    # The item commands' argument checks, which return before they need item data.
+    mu_add_test(
+        NAME test_control_item_commands
+        SOURCES
+            test_control_item_commands.cpp
             ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
@@ -133,13 +143,6 @@ mu_add_test(
     NAME test_cpu_usage_math
     SOURCES
         test_cpu_usage_math.cpp
-)
-
-add_test(
-    NAME msvc_runtime_dll_staging_contract
-    COMMAND "${CMAKE_COMMAND}"
-        "-DMU_CMAKE_SOURCE=${CMAKE_SOURCE_DIR}/src/CMakeLists.txt"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_msvc_runtime_dll_staging.cmake"
 )
 
 mu_add_test(

@@ -7,6 +7,7 @@
 #include "ItemEdits.h"
 #include "ItemNamesakes.h"
 #include "ItemSelection.h"
+#include "ItemUsage.h"
 
 #include "../MuEditor/UI/Common/ToolGroups.h"
 #include "../MuEditor/UI/Common/ToolWindowFrame.h"
@@ -124,7 +125,7 @@ bool RenderSelectedItem(int itemType)
     if (item == nullptr)
     {
         ImGui::TextDisabled("(%d,%d) %s", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType),
-                            I18N::Editor::NoItemAtThisNumber);
+                            GetNumberWithoutItemLabel(itemType));
         return false;
     }
     // In the item name language, as the item browser shows it and its

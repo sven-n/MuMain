@@ -29,7 +29,6 @@ namespace GameLogic::Items
     bool IsDarkLordPet(const ITEM* pItem);
     bool IsDarkLordPetType(int itemType);
     bool IsDemonOrSpiritOfGuardian(const ITEM* pItem);
-    bool IsDemonOrSpiritOfGuardianType(int itemType);
     bool IsDemonOrSpiritOfGuardianModel(int modelType);
     bool IsPandaOrSkeletonItem(const ITEM* pItem);
     bool IsPandaOrSkeletonType(int itemType);
@@ -59,9 +58,7 @@ namespace GameLogic::Items
     bool IsElixir(const ITEM* pItem);
     bool IsElixirType(int itemType);
     bool IsBuffScroll(const ITEM* pItem);
-    bool IsBuffScrollType(int itemType);
     bool IsBattleOrStrengthScroll(const ITEM* pItem);
-    bool IsBattleOrStrengthScrollType(int itemType);
     bool IsAmmunition(const ITEM* pItem);
     bool IsAmmunitionType(int itemType);
     bool IsAmmunitionModel(int modelType);
@@ -73,7 +70,6 @@ namespace GameLogic::Items
     bool IsLuckyItemType(int itemType);
     bool IsGemJewelry(const ITEM* pItem);
     bool IsGambleItem(const ITEM* pItem);
-    bool IsGambleItemType(int itemType);
     bool IsGambleItemModel(int modelType);
 
     // Event and quest items
@@ -128,18 +124,9 @@ namespace GameLogic::Items
     bool IsWingMixCharmModel(int modelType);
     bool IsResetFruit(const ITEM* pItem);
     bool IsResetFruitType(int itemType);
-    bool IsSealType(int itemType);
-    bool IsHealingOrDivinitySealType(int itemType);
-    bool IsEventTicket(const ITEM* pItem);
-    bool IsEventTicketType(int itemType);
-    bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem);
-    bool IsDoppelgangerOrVarkaTicketType(int itemType);
     bool IsDevilSquareItem(const ITEM* pItem);
     bool IsDevilSquareItemType(int itemType);
-    bool IsChocolateBox(const ITEM* pItem);
     bool IsChocolateBoxType(int itemType);
-    bool IsRibbonBox(const ITEM* pItem);
-    bool IsRibbonBoxType(int itemType);
     bool IsSecromiconQuestItem(const ITEM* pItem);
     bool IsSummonerStickModel(int modelType);
 }

@@ -146,16 +146,15 @@ namespace mu::ui::window
 
         int GetPointedItemIndex();
 
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         // The pointer over the drawn panel.
         bool IsPointerOverPanel();
 
-        float GetLayerDepth();	//. 3.4f
+        float GetLayerDepth() override; //. 3.4f
 
         CInventoryCtrl* GetInventoryCtrl() const;
 

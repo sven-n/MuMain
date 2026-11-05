@@ -98,16 +98,15 @@ public:
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-
-    bool UpdateMouseEvent();
-    bool UpdateKeyEvent();
-    bool Update();
-    bool Render();
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override;
+    bool Update() override;
+    bool Render() override;
 
     void OpeningProcess();
     void ClosingProcess();
 
-    float GetLayerDepth(); //. 5.0f
+    float GetLayerDepth() override; //. 5.0f
 
     int GetCurrMsgBoxRequest()
     {

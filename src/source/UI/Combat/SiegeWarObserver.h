@@ -15,13 +15,13 @@ public:
     virtual ~CSiegeWarObserver();
 
 private:
-    virtual bool OnCreate();
-    virtual bool OnUpdate();
-    virtual void OnRelease();
+    bool OnCreate() override;
+    bool OnUpdate() override;
+    void OnRelease() override;
 
-    virtual bool OnUpdateMouseEvent();
-    virtual bool OnUpdateKeyEvent();
-    virtual bool OnBtnProcess();
+    bool OnUpdateMouseEvent() override;
+    bool OnUpdateKeyEvent() override;
+    bool OnBtnProcess() override;
 
     void OnFillRmlModel(SiegeWarfareRmlModel& model) override;
 };

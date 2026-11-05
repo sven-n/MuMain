@@ -8,6 +8,7 @@
 #include "Core/Platform/PathResolve.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cmath>
@@ -535,7 +536,7 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     const std::string filePath = MuResolvePath(identity.c_str());
 #endif
     std::error_code error;
-    if (!std::filesystem::is_regular_file(std::filesystem::u8path(filePath), error))
+    if (!std::filesystem::is_regular_file(Core::Text::PathFromUtf8(filePath), error))
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})",
             filePath, error ? error.message() : "not a regular file");
@@ -543,7 +544,9 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     }
 
     // Synchronous init keeps IsEndMusic() accurate while starting. Missing files never reach
-    // the resource-manager job queue; decoder failures are remembered by PlayMusic().
+    // the resource-manager job queue; decoder failures are remembered by PlayMusic(). The pinned
+    // miniaudio is patched so a failed stream load cannot stall the next one
+    // (cmake/patches/miniaudio-0.11.25-stream-load-signal-order.patch).
     ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM,
         nullptr, nullptr, &m_musicSound);
     if (result != MA_SUCCESS)
@@ -631,14 +634,10 @@ bool MiniAudioBackend::IsEndMusic()
 // Mirrors wzAudioGetStreamOffsetRange() return value from MuMain.cpp.
 // Returns 0 when not initialized or no music loaded.
 //
-// Music is loaded with
-// MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC. For streaming sounds,
-// ma_sound_get_length_in_pcm_frames() returns MA_RESULT indicating the length
-// is unavailable while the stream is still opening — totalFrames stays 0.
-// Fix: use ma_sound_get_cursor_in_seconds() for the cursor and
-// ma_sound_get_length_in_seconds() for the total length. The seconds API uses
-// the data-source length which streams can report even while decoding.
-// If length is still unavailable (streaming not yet started), fall back to 0.
+// Music is streamed with MA_SOUND_FLAG_STREAM and loaded synchronously, so the
+// stream's length is known once PlayMusic() has started it. Cursor and length
+// are read in seconds. A length of 0 (an empty file or a format that cannot
+// report one) gives 0.
 // ---------------------------------------------------------------------------
 int MiniAudioBackend::GetMusicPosition()
 {
@@ -651,15 +650,14 @@ int MiniAudioBackend::GetMusicPosition()
     float cursorSeconds = 0.0f;
     ma_sound_get_cursor_in_seconds(&m_musicSound, &cursorSeconds);
 
-    // Get total track length in seconds — works for streaming sounds unlike
-    // ma_sound_get_length_in_pcm_frames() which returns 0 until fully decoded.
+    // Get total track length in seconds
     float totalSeconds = 0.0f;
     ma_sound_get_length_in_seconds(&m_musicSound, &totalSeconds);
 
     if (totalSeconds <= 0.0f)
     {
-        // Length not yet available (stream still opening) — return 0.
-        // Callers checking for "IsEndMusic()" should use IsEndMusic() instead.
+        // No length to divide by. Callers checking for the end of the track
+        // should use IsEndMusic() instead.
         return 0;
     }
 

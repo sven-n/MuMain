@@ -38,6 +38,33 @@ mu_add_test(
         MuClient
 )
 
+mu_add_test(
+    NAME test_reachability_probe
+    SOURCES
+        test_reachability_probe.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_login_scene_reconnect
+    SOURCES
+        test_login_scene_reconnect.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# The game's side of that reconnect reads the login scene's windows, which need
+# the client globals of Winmain.cpp.
+mu_add_test(
+    NAME test_game_login_scene_link
+    SOURCES
+        test_game_login_scene_link.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # Control socket tests only exist in builds that enable it. Without it, the
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).
@@ -94,13 +121,6 @@ mu_add_test(
 )
 
 if(DOTNET_EXECUTABLE)
-    add_test(
-        NAME login_diagnostics_contract
-        COMMAND "${CMAKE_COMMAND}"
-            "-DMU_LOGIN_SOURCE=${CMAKE_SOURCE_DIR}/ClientLibrary/ConnectionManager.ClientToServer.Custom.cs"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/test_login_diagnostics.cmake"
-    )
-
     add_test(
         NAME dotnet_binding_generator
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform

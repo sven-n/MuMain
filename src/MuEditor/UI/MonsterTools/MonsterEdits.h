@@ -48,6 +48,19 @@ public:
     // not one).
     bool SetModel(std::string label, const Data::Monsters::MonsterModelDefinition& model, int monster);
 
+    // Stores the sound set under its name, a new one or over the set of that
+    // name, for the monster the tool shows it for (-1 for none). False, with
+    // nothing changed, when the name is empty or the sound sets' save would
+    // refuse it (a SOUND_ id that is not one, an event's sound that names no
+    // sound of the set).
+    bool SetSoundSet(std::string label, const Data::Monsters::MonsterSoundSet& set, int monster);
+    // Removes the set of the name; false when there is none.
+    bool RemoveSoundSet(std::string label, const std::string& name, int monster);
+    // Gives the set another name, and the monsters that name it the new one,
+    // in one undo step. False, with nothing changed, when there is no set
+    // `from` or `to` is empty or the name of another set.
+    bool RenameSoundSet(std::string label, const std::string& from, const std::string& to, int monster);
+
     // The changes until EndGroup are one undo step under `label` (an import of
     // names): a number changed twice keeps its first "before" and its last
     // "after".
@@ -85,6 +98,9 @@ private:
     // The same for a model slot.
     void ChangeModel(std::string label, int slot, const std::optional<Data::Monsters::MonsterModelDefinition>& after,
                      int monster);
+    // The same for a sound set.
+    void ChangeSoundSet(std::string label, const std::string& name,
+                        const std::optional<Data::Monsters::MonsterSoundSet>& after, int monster);
     // Into the history, or into the open group.
     void Record(MonsterEditEntry entry);
 

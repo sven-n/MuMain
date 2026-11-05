@@ -570,7 +570,7 @@ void CMuItemFormulasUI::RenderApplyButtons()
     {
         m_edit = stored;
         m_loaded = stored;
-        m_errors.clear();
+        m_fatalIssues.clear();
     }
     ImGui::EndDisabled();
     if (changed)
@@ -578,7 +578,7 @@ void CMuItemFormulasUI::RenderApplyButtons()
         ImGui::SameLine();
         ImGui::TextColored(WarningColor, "%s", I18N::Editor::NotApplied);
     }
-    for (const Data::Items::ItemDataIssue& issue : m_errors)
+    for (const Data::Items::ItemDataIssue& issue : m_fatalIssues)
     {
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextColored(ErrorColor, "%s", issue.ToString().c_str());
@@ -901,9 +901,9 @@ void CMuItemFormulasUI::RenderRuleConditions(StatProfileRule& rule)
 void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo,
                               bool renamedTable)
 {
-    m_errors.clear();
-    Data::Items::ValidateItemStatsAsWritten(file, m_errors);
-    if (!m_errors.empty())
+    m_fatalIssues.clear();
+    Data::Items::ValidateItemStatsAsWritten(file, m_fatalIssues);
+    if (!m_fatalIssues.empty())
     {
         return;
     }
@@ -1120,7 +1120,7 @@ void CMuItemFormulasUI::UpdateEdit()
         m_edit = Stored();
         m_loaded = m_edit;
         m_editOf = m_picked;
-        m_errors.clear();
+        m_fatalIssues.clear();
     }
     m_editVersion = version;
 }

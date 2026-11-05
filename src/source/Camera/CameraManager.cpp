@@ -238,8 +238,8 @@ void CameraManager::TransitionToCamera(ICamera* pNewCamera)
     m_pActiveCamera = pNewCamera;
 }
 
-// External C accessor for editor
-extern "C" CameraManager& CameraManager_Instance()
+// Accessor for the editor and the renderer
+CameraManager& CameraManager_Instance()
 {
     return CameraManager::Instance();
 }

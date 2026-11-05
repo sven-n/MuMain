@@ -68,7 +68,7 @@ std::uint64_t MaxWithdrawNow()
                 g_pGenericConfirmDialog->KeepOpen();
                 return;
             }
-            SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()));
+            SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()), u"");
         };
         cfg.onCancel = []
         {
@@ -504,7 +504,7 @@ void CStorageInventory::SyncRmlModel()
 
     // "Storage (open/close)" title text, red when locked.
     wchar_t titleBuf[128];
-    mu_swprintf(titleBuf, L"%ls (%ls)", I18N::Game::Storage, I18N::Game::Lookup(m_bLock ? 241 : 240));
+    mu_swprintf(titleBuf, L"%ls (%ls)", I18N::Game::Storage, m_bLock ? I18N::Game::Close : I18N::Game::Open);
     syncWide(&StorageRmlModel::title, "title", titleBuf);
     syncBool(&StorageRmlModel::titleLocked, "title_locked", m_bLock);
 

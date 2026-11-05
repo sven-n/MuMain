@@ -10,6 +10,7 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
+#include "UI/Windows/MsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
 
 #include <cstdlib>
@@ -19,6 +20,13 @@ namespace UI::LoginScene
 {
 void ServerListReceived()
 {
+#ifdef _EDITOR
+    // MuEditor's preview adds the channels the connect server didn't send.
+    if (g_ServerListManager->IsShowingOfflineServers())
+    {
+        g_ServerListManager->RebuildServerGroups();
+    }
+#endif
     if (std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr)
     {
         mu::log::Get("input")->info(
@@ -45,6 +53,18 @@ void HideLoginWindow()
     g_LoginWin.Show(false);
 }
 
+bool IsWaitingForServer()
+{
+    const bool offersNextStep =
+        g_ServerSelWin.IsVisible() || g_CreditWin.IsVisible() || g_LoginWin.IsVisible() || g_MsgWin.IsVisible();
+    return !offersNextStep;
+}
+
+bool IsServerListShown()
+{
+    return g_ServerSelWin.IsVisible();
+}
+
 void ShowMessage(int messageCode)
 {
     CSceneUICoordinator::Instance().PopUpMsgWin(messageCode);
@@ -53,6 +73,11 @@ void ShowMessage(int messageCode)
 void CloseMessage()
 {
     CSceneUICoordinator::Instance().CloseMsgWin();
+}
+
+bool IsShowingMessage(int messageCode)
+{
+    return g_MsgWin.PendingMessageCode() == messageCode;
 }
 
 void AddServerMessage(std::wstring_view text)

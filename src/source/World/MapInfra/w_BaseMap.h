@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -30,15 +32,20 @@ public: // Object
     {
         return false;
     }
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b)
+    // A map object's effects, sounds and state changes, for the objects the last draw drew. True when handled.
+    virtual bool UpdateObjectEffects(OBJECT* o, BMD* b)
     {
         return false;
     }
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0)
+    virtual bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
     {
         return false;
     }
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0) {}
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0)
+    {
+        return false;
+    }
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0) {}
 
     virtual void RenderFrontSideVisual() {}
 
@@ -52,7 +59,13 @@ public: // Character
         return false;
     }
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b) {}
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+    // A drawn monster's effects, sounds and state changes, after every Move* this frame: its bones are final and
+    // what it spawns is drawn this frame. True when handled.
+    virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+    {
+        return false;
+    }
+    virtual bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
     {
         return false;
     }

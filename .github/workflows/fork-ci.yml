@@ -1,5 +1,5 @@
 # Extra checks that sven-n/MuMain does not run automatically, to save its
-# Actions minutes: ci.yml builds Windows only on pushes to main and never
+# Actions minutes: ci.yml builds Windows only for nightly/manual releases and never
 # builds the editor. On every pull request of a fork, which uses its own
 # minutes, this workflow adds the game's Windows build:
 #
@@ -20,6 +20,11 @@
 # uses GitHub's own actions only, so it runs under a repository setting that
 # allows no other actions.
 #
+# The editor OFF build follows ci.yml's rule that no warning may come back (docs/build/README.md): the game's
+# own code builds with warnings as errors, scripts/ci_warnings.py fails the step for any other warning, note or
+# deprecation in the configure or build output, and the last job fails on a warning annotation of any job. The
+# editor ON builds are not held to it; the Windows one lists its warnings (ci_warnings.py report).
+#
 # Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
 # about 35), and each test case its own limit from tests/CMakeLists.txt. A
 # step that hangs then fails in time instead of holding the job until GitHub
@@ -29,6 +34,10 @@ name: Fork CI
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
   workflow_dispatch:
     inputs:
       editor:
@@ -43,11 +52,20 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Keeps git quiet in actions/checkout, as in ci.yml.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
   windows:
     name: Windows x64 Release, editor ${{ matrix.editor }}
-    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
-    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft)
+    # The images by name, as in ci.yml.
+    runs-on: windows-2025-vs2026
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -57,10 +75,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -90,7 +108,7 @@ jobs:
           }
 
       - name: Cache FetchContent and NuGet dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             out/build/fork-ci-windows/_deps
@@ -98,26 +116,35 @@ jobs:
           key: fork-windows-x64-editor-${{ matrix.editor }}-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: fork-windows-x64-editor-${{ matrix.editor }}-deps-
 
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
+
       - name: Cache vcpkg packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-x64-
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
+          python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}
           cmake --preset windows-x64
           -B out/build/fork-ci-windows
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DENABLE_EDITOR=${{ matrix.editor }}
           -DENABLE_CONTROL_SOCKET=${{ matrix.editor }}
+          -DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -126,7 +153,9 @@ jobs:
           -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build out/build/fork-ci-windows --config Release
+        run: >
+          python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}
+          cmake --build out/build/fork-ci-windows --config Release
 
       - name: Run tests
         run: >
@@ -137,15 +166,15 @@ jobs:
   linux-editor:
     name: Linux x64 Release, editor ON
     if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -155,8 +184,8 @@ jobs:
           sudo apt-get install -y \
             cmake ninja-build gcc g++ \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
             libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
@@ -164,7 +193,7 @@ jobs:
             pkg-config
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             out/build/fork-ci-linux-editor/_deps
@@ -193,15 +222,15 @@ jobs:
   macos-editor:
     name: macOS arm64 Release, editor ON
     if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -209,7 +238,7 @@ jobs:
         run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             out/build/fork-ci-macos-editor/_deps
@@ -235,3 +264,26 @@ jobs:
           ctest --test-dir out/build/fork-ci-macos-editor --build-config Release
           --output-on-failure
           --no-tests=error
+
+  annotations:
+    name: Job annotations
+    needs: [windows, linux-editor, macos-editor]
+    if: always() && (github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft))
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+
+      # GitHub's own warnings count too, e.g. that an action targets a deprecated Node.js version.
+      - name: Check job annotations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_job_annotations.py

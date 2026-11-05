@@ -96,6 +96,12 @@ struct TooltipColorRule
     bool operator==(const TooltipColorRule& other) const = default;
 };
 
+// The longest a description line's and a name line's text is shown, in UTF-16 characters with its placeholders filled
+// (a description line before it wraps): the tooltip writes them into rows of these sizes and cuts a longer text there.
+// Reading an item warns about a text written longer.
+constexpr size_t MaxDescriptionLineLength = 511;
+constexpr size_t MaxNameLineLength = 255;
+
 // One line of an item's description in its tooltip: a text with its translations or a shared text of the tooltip file
 // (neither: a blank line), the conditions it shows on (all of them; ItemTooltipConditions.h), its color, and the item
 // levels it is shown at (both included; every level unless set).
@@ -157,6 +163,51 @@ struct ItemLevelValues
     std::vector<ItemLevelValue> values;
 
     bool operator==(const ItemLevelValues& other) const = default;
+};
+
+// Lines put into a tooltip layout after the line of `after`'s id ("add": [{"after": "classLines", "lines": [...]}],
+// D73): a preset's, which are layout lines (TooltipLayoutAddition), or an item's own.
+template <typename TLine> struct TooltipLineAddition
+{
+    std::string after;
+    std::vector<TLine> lines;
+
+    bool operator==(const TooltipLineAddition& other) const = default;
+};
+// Lines an item adds to its tooltip layout, written as its description lines are, without "after": "options".
+using ItemTooltipLayoutAddition = TooltipLineAddition<ItemDescriptionLine>;
+
+// An item's own changes to the tooltip layout it uses ("tooltipLayoutChanges", D73): the ids of the layout lines it
+// leaves out, and the lines it adds.
+struct ItemTooltipLayoutChanges
+{
+    std::vector<std::string> hide;
+    std::vector<ItemTooltipLayoutAddition> add;
+
+    bool IsEmpty() const
+    {
+        return hide.empty() && add.empty();
+    }
+
+    bool operator==(const ItemTooltipLayoutChanges& other) const = default;
+};
+
+// One of an item's ground label rules ("groundLabels"): the style of Data/Items/Tooltips/GroundLabels.json its name
+// on the ground takes at these item levels, both included; without levels at every level, also above +15 (Zen's
+// amount is its level).
+struct ItemGroundLabel
+{
+    std::string style;
+    bool hasLevels = false;
+    int minLevel = 0;
+    int maxLevel = ItemLevelCount - 1;
+
+    bool HoldsAt(int level) const
+    {
+        return !hasLevels || (level >= minLevel && level <= maxLevel);
+    }
+
+    bool operator==(const ItemGroundLabel& other) const = default;
 };
 
 // What a player may do with an item. See the rule flags in ItemDefinition.
@@ -256,6 +307,9 @@ struct ItemDefinition
 {
     int group = 0;
     int number = 0;
+    // An entry of the item file without a name: the client uses the number (it has a model,
+    // code names it), but the game does not know an item there (Exists). Never set with a name.
+    bool entryWithoutName = false;
 
     // All names of the item, English first. Logs always use the English
     // name (names.GetNeutral()), never a translation.
@@ -274,6 +328,13 @@ struct ItemDefinition
     std::vector<ItemNameLine> nameLines;
     // The values of the description's own placeholders by item level ("levelValues").
     std::vector<ItemLevelValues> levelValues;
+    // The styles of its name on the ground, by level: the first rule that holds at the item's level gives the style;
+    // at a level none holds at (or with none), the standard rules of the ground label file do.
+    std::vector<ItemGroundLabel> groundLabels;
+    // The tooltip layout of Data/Items/Tooltips/Tooltip.json it uses (empty: the default one), and its own changes to
+    // it (D73).
+    std::string tooltipLayout;
+    ItemTooltipLayoutChanges tooltipLayoutChanges;
 
     const ItemLevelValues* FindLevelValues(std::string_view name) const
     {
@@ -344,9 +405,16 @@ struct ItemDefinition
     // Sellable to an NPC once the rental time ran out, even when sellable is false.
     bool sellableWhenRentalExpired = false;
 
+    // An item the game knows: it has a name.
     bool Exists() const
     {
         return !names.IsEmpty();
+    }
+
+    // The item file has the number: an item, or an entry without a name.
+    bool HasEntry() const
+    {
+        return entryWithoutName || Exists();
     }
 
     bool IsAllowed(ItemAction action) const
@@ -379,4 +447,25 @@ struct ItemDefinition
     // All fields; the item editor's undo compares definitions with it.
     bool operator==(const ItemDefinition& other) const = default;
 };
+
+// Calls `visit` with each line of the item's own that its tooltip writes: its description lines, its name lines and
+// the lines it adds to its tooltip layout. `definition` may be const or not, and so is each line then.
+template <typename TDefinition, typename TVisit> void ForEachItemTooltipLine(TDefinition& definition, TVisit&& visit)
+{
+    for (auto& line : definition.description)
+    {
+        visit(line);
+    }
+    for (auto& line : definition.nameLines)
+    {
+        visit(line);
+    }
+    for (auto& addition : definition.tooltipLayoutChanges.add)
+    {
+        for (auto& line : addition.lines)
+        {
+            visit(line);
+        }
+    }
+}
 } // namespace Data::Items

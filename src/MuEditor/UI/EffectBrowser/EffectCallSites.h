@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "EffectPreviewCamera.h"
+#include "Core/Utilities/Random.h"
 #include "Data/GameData/EffectData/EffectKind.h"
 
 #include <cstddef>
@@ -25,7 +26,7 @@ struct EffectCallSite
 {
     Data::Effects::EffectKind kind = Data::Effects::EffectKind::Effect;
     int type = 0;
-    // The call picks its type at random among this many (NAME + rand() % N).
+    // The call picks its type at random among this many (NAME + Random::Rand() % N).
     int randomTypes = 1;
     // The file relative to the source folder, with '/', and its line.
     std::string file;

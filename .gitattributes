@@ -49,3 +49,10 @@ tests/effects/baseline/*.txt text eol=lf
 *.[Ww][Aa][Vv]   binary
 *.[Oo][Gg][Gg]   binary
 *.[Mm][Pp]3      binary
+*.[Gg][Ll][Bb]   binary
+# Shell scripts and git hooks run under bash on every platform; CRLF breaks them.
+*.sh text eol=lf
+.githooks/* text eol=lf
+# The miniaudio patch must keep LF: it applies to a downloaded archive, which is LF on every
+# platform. The SDL_ttf patches stay native, like the SDL_ttf clone they apply to.
+cmake/patches/miniaudio-*.patch text eol=lf

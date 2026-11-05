@@ -460,8 +460,8 @@
   <data name="Failed to export items as bmd" xml:space="preserve">
     <value>Failed to export the items as bmd files.</value>
   </data>
-  <data name="Item data has errors" xml:space="preserve">
-    <value>The item data has errors and was not saved. See the console.</value>
+  <data name="Item data has fatal problems" xml:space="preserve">
+    <value>The item data has fatal problems and was not saved. See the console.</value>
   </data>
   <data name="Item data could not be written" xml:space="preserve">
     <value>The item data files could not be written. See the console.</value>
@@ -487,8 +487,71 @@
   <data name="Look Save" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="Looks" xml:space="preserve">
-    <value>Looks</value>
+  <data name="Style and effect" xml:space="preserve">
+    <value>Style and effect</value>
+  </data>
+  <data name="Graphics look" xml:space="preserve">
+    <value>Graphics look</value>
+  </data>
+  <data name="Meshes" xml:space="preserve">
+    <value>Meshes</value>
+  </data>
+  <data name="Mesh list note" xml:space="preserve">
+    <value>Point at a row to see its mesh alone in the preview, the others see-through; a click keeps it, another click lets it go. A click on a part of the preview finds its row.</value>
+  </data>
+  <data name="Meshes not in preview note" xml:space="preserve">
+    <value>At this level the preview draws another model, so it can't show these meshes, and a click on it finds none of them.</value>
+  </data>
+  <data name="No meshes loaded" xml:space="preserve">
+    <value>The model is not loaded, so there are no meshes to list.</value>
+  </data>
+  <data name="Mesh texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Mesh marks" xml:space="preserve">
+    <value>Marks</value>
+  </data>
+  <data name="Mesh used by" xml:space="preserve">
+    <value>Used by</value>
+  </data>
+  <data name="Mesh hidden" xml:space="preserve">
+    <value>hidden</value>
+  </data>
+  <data name="Mesh glows" xml:space="preserve">
+    <value>glows</value>
+  </data>
+  <data name="Mesh scrolls" xml:space="preserve">
+    <value>scrolls</value>
+  </data>
+  <data name="Mesh no chrome" xml:space="preserve">
+    <value>no chrome</value>
+  </data>
+  <data name="Mesh holes" xml:space="preserve">
+    <value>holes</value>
+  </data>
+  <data name="Mesh all but this one" xml:space="preserve">
+    <value>all but this one</value>
+  </data>
+  <data name="Mesh texture file 0" xml:space="preserve">
+    <value>Loaded from {0}</value>
+  </data>
+  <data name="Mesh texture size 0 1" xml:space="preserve">
+    <value>{0} x {1}, as the game uses it</value>
+  </data>
+  <data name="Mesh texture not loaded" xml:space="preserve">
+    <value>The texture is not loaded.</value>
+  </data>
+  <data name="Mesh counts 0 1" xml:space="preserve">
+    <value>{0} vertices, {1} triangles</value>
+  </data>
+  <data name="Mesh never drawn" xml:space="preserve">
+    <value>Never drawn, so the preview can't show it alone.</value>
+  </data>
+  <data name="Mesh code looks note" xml:space="preserve">
+    <value>The render style and the item effect are drawing code: which meshes they draw shows here once they are data.</value>
+  </data>
+  <data name="Preview pick note" xml:space="preserve">
+    <value>Click a part to find its mesh in the mesh list.</value>
   </data>
   <data name="Model file" xml:space="preserve">
     <value>Model file</value>
@@ -1288,20 +1351,53 @@
   <data name="Remove the model entry" xml:space="preserve">
     <value>Remove the model entry</value>
   </data>
-  <data name="Item Checks" xml:space="preserve">
-    <value>Item Checks</value>
-  </data>
-  <data name="Check" xml:space="preserve">
-    <value>Check</value>
-  </data>
   <data name="Errors: {0}" xml:space="preserve">
     <value>Errors: {0}</value>
+  </data>
+  <data name="Fatal: {0}" xml:space="preserve">
+    <value>Fatal: {0}</value>
   </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Warnings: {0}</value>
   </data>
+  <data name="Data Checks" xml:space="preserve">
+    <value>Data Checks</value>
+  </data>
+  <data name="Check all data" xml:space="preserve">
+    <value>Check all</value>
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value>Areas:</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="What" xml:space="preserve">
+    <value>What</value>
+  </data>
+  <data name="Monster models" xml:space="preserve">
+    <value>Monster models</value>
+  </data>
+  <data name="Model files" xml:space="preserve">
+    <value>Model files</value>
+  </data>
+  <data name="Data checks what note" xml:space="preserve">
+    <value>Items and monsters are checked as their Save would write them; the glTF model file table, the server list, effects and looks as the game reads their files at start.</value>
+  </data>
+  <data name="Data checks save note" xml:space="preserve">
+    <value>Each Save refuses data with fatal problems and saves data with errors and warnings.</value>
+  </data>
+  <data name="Data checks click note" xml:space="preserve">
+    <value>Click a problem to select what it is about and open its tool.</value>
+  </data>
+  <data name="The data changed since the last check; check again." xml:space="preserve">
+    <value>The data changed since the last check; check again.</value>
+  </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
+  </data>
+  <data name="Fatal" xml:space="preserve">
+    <value>Fatal</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
@@ -1312,17 +1408,8 @@
   <data name="Message" xml:space="preserve">
     <value>Message</value>
   </data>
-  <data name="No errors or warnings" xml:space="preserve">
-    <value>No errors or warnings</value>
-  </data>
-  <data name="The items changed since the last check; check again." xml:space="preserve">
-    <value>The items changed since the last check; check again.</value>
-  </data>
-  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Save Items refuses data with errors and saves data with warnings.</value>
-  </data>
-  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
-    <value>Click a problem of an item to select the item and open the tool of its field.</value>
+  <data name="No fatal problems, errors or warnings" xml:space="preserve">
+    <value>No fatal problems, errors or warnings</value>
   </data>
   <data name="Item Rules" xml:space="preserve">
     <value>Item Rules</value>
@@ -1450,14 +1537,137 @@
   <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
     <value>A name of letters and digits that no other glow color has</value>
   </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="Ground labels" xml:space="preserve">
+    <value>Ground labels</value>
+  </data>
+  <data name="Ground Label Styles" xml:space="preserve">
+    <value>Ground Label Styles</value>
+  </data>
+  <data name="Item Tooltip" xml:space="preserve">
+    <value>Item Tooltip</value>
+  </data>
+  <data name="New label style" xml:space="preserve">
+    <value>New label style</value>
+  </data>
+  <data name="Items name these styles in their ground label rules" xml:space="preserve">
+    <value>Items name these styles in their own ground label rules (Item Tooltip); the standard rules name the others.</value>
+  </data>
+  <data name="Apply to the style" xml:space="preserve">
+    <value>Apply to the style</value>
+  </data>
+  <data name="Change a label style" xml:space="preserve">
+    <value>Change a label style</value>
+  </data>
+  <data name="Remove a label style" xml:space="preserve">
+    <value>Remove a label style</value>
+  </data>
+  <data name="Remove unused label styles" xml:space="preserve">
+    <value>Remove unused label styles</value>
+  </data>
+  <data name="No item uses these label styles: {0}" xml:space="preserve">
+    <value>No item uses these label styles: {0}</value>
+  </data>
+  <data name="A style of the standard rules" xml:space="preserve">
+    <value>A style of the standard rules: an item without a rule of its own for a level takes it there.</value>
+  </data>
+  <data name="A name of letters and digits that no other label style has" xml:space="preserve">
+    <value>A name of letters and digits that no other label style has</value>
+  </data>
+  <data name="Text color" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Skill</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="Option" xml:space="preserve">
+    <value>Option</value>
+  </data>
+  <data name="No set" xml:space="preserve">
+    <value>No set</value>
+  </data>
+  <data name="Set {0}: {1}" xml:space="preserve">
+    <value>Set {0}: {1}</value>
+  </data>
+  <data name="Ground label" xml:space="preserve">
+    <value>Ground label</value>
+  </data>
+  <data name="All levels" xml:space="preserve">
+    <value>All levels</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Add rule</value>
+  </data>
+  <data name="Change the ground label rules" xml:space="preserve">
+    <value>Change the ground label rules</value>
+  </data>
+  <data name="The first rule whose levels hold gives the style" xml:space="preserve">
+    <value>The first rule whose levels hold gives the style; at the other levels the standard rules do.</value>
+  </data>
+  <data name="No rules of its own" xml:space="preserve">
+    <value>No rules of its own: the standard rules give the style.</value>
+  </data>
+  <data name="Its own rule {0}" xml:space="preserve">
+    <value>Its own rule {0}</value>
+  </data>
+  <data name="The standard rules" xml:space="preserve">
+    <value>The standard rules</value>
+  </data>
+  <data name="Tooltip layout" xml:space="preserve">
+    <value>Tooltip layout</value>
+  </data>
+  <data name="Tooltip layout note" xml:space="preserve">
+    <value>Which lines the tooltip shows besides the item's own: the default layout, or a preset that leaves some of them out (the class lines, the durability line).</value>
+  </data>
+  <data name="Change the tooltip layout" xml:space="preserve">
+    <value>Change the tooltip layout</value>
+  </data>
+  <data name="Its own changes hide {0}" xml:space="preserve">
+    <value>Its own changes hide: {0}</value>
+  </data>
+  <data name="Its own changes do not fit this layout {0}" xml:space="preserve">
+    <value>Its own changes don't fit this layout: {0}</value>
+  </data>
+  <data name="It adds after the line {0}" xml:space="preserve">
+    <value>It adds after the line {0}:</value>
+  </data>
+  <data name="A blank line" xml:space="preserve">
+    <value>(a blank line)</value>
+  </data>
+  <data name="At levels {0} to {1}" xml:space="preserve">
+    <value>(+{0} to +{1})</value>
+  </data>
+  <data name="In the tooltip" xml:space="preserve">
+    <value>In the tooltip</value>
+  </data>
+  <data name="Name line {0}" xml:space="preserve">
+    <value>Name line {0}</value>
+  </data>
+  <data name="Standard name" xml:space="preserve">
+    <value>Standard name</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Glow Colors</value>
   </data>
   <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
     <value>The item models name these colors; the model tool picks an item's colors.</value>
-  </data>
-  <data name="Pick a color in the list." xml:space="preserve">
-    <value>Pick a color in the list.</value>
   </data>
   <data name="Apply to the glow color" xml:space="preserve">
     <value>Apply to the glow color</value>
@@ -1927,26 +2137,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Channel</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>On the login screen</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normal</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Non-PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Sent, {0}% load</value>
@@ -1963,8 +2158,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>The order of the list is the order of the buttons on the login screen, which shows each change right away. Save writes {0}.</value>
   </data>
-  <data name="Save off after read errors" xml:space="preserve">
-    <value>The file had errors when it was read, so the list has only the groups that could be read. Save is off until the file is fixed and Revert reads it again; it would remove the other groups from the file.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>The file had problems that left something out when it was read (see the problems below): a group, VIP type or color with a fatal problem, or a rule, shade, channel VIP type or color the list could not use. Save is off until the file is fixed and Revert reads it again; it would remove or replace those in the file.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>Add {0}</value>
@@ -1990,14 +2185,212 @@
   <data name="Step channel" xml:space="preserve">
     <value>{0}: channel {1}</value>
   </data>
+  <data name="Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Channel names" xml:space="preserve">
+    <value>Channel names</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP</value>
+  </data>
+  <data name="VIP types" xml:space="preserve">
+    <value>VIP types</value>
+  </data>
+  <data name="New VIP type" xml:space="preserve">
+    <value>New VIP type</value>
+  </data>
+  <data name="Pick a VIP type in the list." xml:space="preserve">
+    <value>Pick a VIP type in the list.</value>
+  </data>
+  <data name="VIP type ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="VIP type ID note" xml:space="preserve">
+    <value>What channels name the type by: letters and digits, starting with a lowercase letter. A new ID is given to the channels with the type too.</value>
+  </data>
+  <data name="Not a VIP type ID" xml:space="preserve">
+    <value>Not a VIP type ID: letters and digits, starting with a lowercase letter.</value>
+  </data>
+  <data name="Another VIP type has the ID {0}." xml:space="preserve">
+    <value>Another VIP type has the ID {0}.</value>
+  </data>
+  <data name="A VIP type needs a name." xml:space="preserve">
+    <value>A VIP type needs a name.</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>Gray</value>
+  </data>
+  <data name="Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="Silver" xml:space="preserve">
+    <value>Silver</value>
+  </data>
+  <data name="Remove VIP type {0}?" xml:space="preserve">
+    <value>Remove VIP type {0}?</value>
+  </data>
+  <data name="VIP type used note" xml:space="preserve">
+    <value>{0} channels have this VIP type; they then have none:</value>
+  </data>
+  <data name="VIP type rules note" xml:space="preserve">
+    <value>{0} button color rules are for this VIP type; they go too.</value>
+  </data>
+  <data name="Texts" xml:space="preserve">
+    <value>Texts</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="PvP text" xml:space="preserve">
+    <value>PvP text</value>
+  </data>
+  <data name="Non-PvP text" xml:space="preserve">
+    <value>Non-PvP text</value>
+  </data>
+  <data name="Server list button" xml:space="preserve">
+    <value>Server list button</value>
+  </data>
+  <data name="Login window" xml:space="preserve">
+    <value>Login window</value>
+  </data>
+  <data name="Character info" xml:space="preserve">
+    <value>Character info</value>
+  </data>
+  <data name="Screenshot message" xml:space="preserve">
+    <value>Screenshot message</value>
+  </data>
+  <data name="Texts note" xml:space="preserve">
+    <value>A field left empty uses the English text, shown greyed. Each template can use {name}, {channel}, {vip} and {pvp}; the server list button also {load}, the screenshot message also {character}. An empty one goes with one space next to it, and brackets left empty go too.</value>
+  </data>
+  <data name="Not a placeholder of this template: {0}" xml:space="preserve">
+    <value>Not a placeholder of this template: {0}</value>
+  </data>
+  <data name="Preview note" xml:space="preserve">
+    <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above. The button's {load} is empty, as for a server that can be joined.</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="Load note" xml:space="preserve">
+    <value>How the button of a full server (load 100 % and more) or an overloaded one (128 and more) looks: its {load} text, and the load bar's ten segments of 10 % each, from the base color toward the full color. Default is the theme's own color; for a load text, the button's color.</value>
+  </data>
+  <data name="Load bar" xml:space="preserve">
+    <value>Load bar</value>
+  </data>
+  <data name="Base color" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Full color" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="Unlit color" xml:space="preserve">
+    <value>Unlit</value>
+  </data>
+  <data name="Full server" xml:space="preserve">
+    <value>Full server</value>
+  </data>
+  <data name="Overloaded server" xml:space="preserve">
+    <value>Overloaded server</value>
+  </data>
+  <data name="Full text" xml:space="preserve">
+    <value>Full text</value>
+  </data>
+  <data name="Overloaded text" xml:space="preserve">
+    <value>Overloaded text</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="Load preview note" xml:space="preserve">
+    <value>The button at 35 % load, full and overloaded, with its bar in each theme and the load text on the bar. Bold and italic show only in game.</value>
+  </data>
+  <data name="Load {0}%" xml:space="preserve">
+    <value>{0} % load</value>
+  </data>
+  <data name="Step load" xml:space="preserve">
+    <value>Load: {0}</value>
+  </data>
+  <data name="Step add VIP type" xml:space="preserve">
+    <value>Add VIP type {0}</value>
+  </data>
+  <data name="Step remove VIP type" xml:space="preserve">
+    <value>Remove VIP type {0}</value>
+  </data>
+  <data name="Step move VIP type" xml:space="preserve">
+    <value>Move VIP type {0}</value>
+  </data>
+  <data name="Step text" xml:space="preserve">
+    <value>Text: {0}</value>
+  </data>
+  <data name="Button colors" xml:space="preserve">
+    <value>Button colors</value>
+  </data>
+  <data name="Button colors note" xml:space="preserve">
+    <value>Of the rules that fit a channel, the most specific one colors its button: one with a VIP type beats one for any VIP type or none, which beats one without, and one with PvP beats one without. The order of the rules does not matter.</value>
+  </data>
+  <data name="Any VIP type" xml:space="preserve">
+    <value>Any VIP type</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Add rule</value>
+  </data>
+  <data name="Another rule fits the same channels." xml:space="preserve">
+    <value>Another rule fits the same channels.</value>
+  </data>
+  <data name="Every VIP type and PvP setting has a rule." xml:space="preserve">
+    <value>Every VIP type and PvP setting has a rule.</value>
+  </data>
+  <data name="Colors note" xml:space="preserve">
+    <value>The list's own colors are the Server list root of the Colors window.</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>New color</value>
+  </data>
+  <data name="Color ID note" xml:space="preserve">
+    <value>What the rules name the color by: letters and digits, starting with a lowercase letter, none of the theme colors' names (default, gray, orange, silver). A new ID is given to the rules with the color too.</value>
+  </data>
+  <data name="Not a free color ID" xml:space="preserve">
+    <value>Not a free color ID: letters and digits, starting with a lowercase letter, not a theme color's name or another color's.</value>
+  </data>
+  <data name="Step add color" xml:space="preserve">
+    <value>Add color {0}</value>
+  </data>
+  <data name="Step remove color" xml:space="preserve">
+    <value>Remove color {0}</value>
+  </data>
+  <data name="Step shade" xml:space="preserve">
+    <value>{0}: shade</value>
+  </data>
+  <data name="Step add button color rule" xml:space="preserve">
+    <value>Add button color rule</value>
+  </data>
+  <data name="Step remove button color rule" xml:space="preserve">
+    <value>Remove button color rule</value>
+  </data>
+  <data name="Step button color rule" xml:space="preserve">
+    <value>Button color rule {0}</value>
+  </data>
   <data name="Monster Browser" xml:space="preserve">
     <value>Monster Browser</value>
   </data>
   <data name="Monster Translations" xml:space="preserve">
     <value>Monster Translations</value>
-  </data>
-  <data name="Monster Checks" xml:space="preserve">
-    <value>Monster Checks</value>
   </data>
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>The monsters changed since this step; it is not undone.</value>
@@ -2107,18 +2500,6 @@
   <data name="Monster names not exported" xml:space="preserve">
     <value>Not every file was written. See the console.</value>
   </data>
-  <data name="Monster" xml:space="preserve">
-    <value>Monster</value>
-  </data>
-  <data name="The monsters changed since the last check; check again." xml:space="preserve">
-    <value>The monsters changed since the last check; check again.</value>
-  </data>
-  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Save Monsters refuses data with errors and saves data with warnings.</value>
-  </data>
-  <data name="Monster checks click note" xml:space="preserve">
-    <value>Click a problem of a monster to select the monster and open the tool of its field.</value>
-  </data>
   <data name="Item Sync" xml:space="preserve">
     <value>Item Sync</value>
   </data>
@@ -2144,7 +2525,7 @@
     <value>From OpenMU, server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} added, {1} changed, {2} removed items; {3} formula entries</value>
+    <value>{0} added, {1} changed items; {2} formula entries</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Check all</value>
@@ -2371,20 +2752,11 @@
   <data name="As the file has it" xml:space="preserve">
     <value>as the file has it</value>
   </data>
-  <data name="Attack sound 1" xml:space="preserve">
-    <value>Attack sound 1</value>
-  </data>
-  <data name="Attack sound 2" xml:space="preserve">
-    <value>Attack sound 2</value>
-  </data>
   <data name="Bounding box max" xml:space="preserve">
     <value>Bounding box max</value>
   </data>
   <data name="Bounding box min" xml:space="preserve">
     <value>Bounding box min</value>
-  </data>
-  <data name="Die sound" xml:space="preserve">
-    <value>Die sound</value>
   </data>
   <data name="Fixed bitmaps" xml:space="preserve">
     <value>Bitmaps in fixed slots</value>
@@ -2409,12 +2781,6 @@
   </data>
   <data name="Holds last frame" xml:space="preserve">
     <value>Holds last frame</value>
-  </data>
-  <data name="Idle sound 1" xml:space="preserve">
-    <value>Idle sound 1</value>
-  </data>
-  <data name="Idle sound 2" xml:space="preserve">
-    <value>Idle sound 2</value>
   </data>
   <data name="In game" xml:space="preserve">
     <value>In game</value>
@@ -2449,9 +2815,6 @@
   <data name="No monster is selected" xml:space="preserve">
     <value>No monster is selected</value>
   </data>
-  <data name="No sound" xml:space="preserve">
-    <value>(no sound)</value>
-  </data>
   <data name="Not in the client folder" xml:space="preserve">
     <value>not in the client folder</value>
   </data>
@@ -2469,6 +2832,21 @@
   </data>
   <data name="Play animation" xml:space="preserve">
     <value>Play</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Play next attack" xml:space="preserve">
+    <value>Play next attack</value>
+  </data>
+  <data name="Play next attack note" xml:space="preserve">
+    <value>The animation of the next attack that no skill entry plays, counted as the game counts for one monster from its creation.</value>
+  </data>
+  <data name="Played {0}" xml:space="preserve">
+    <value>Played {0}</value>
+  </data>
+  <data name="Plays it once in the Monster Preview, with the attack sounds." xml:space="preserve">
+    <value>Plays it once in the Monster Preview, with the attack sounds.</value>
   </data>
   <data name="Play this sound" xml:space="preserve">
     <value>Play</value>
@@ -2490,9 +2868,6 @@
   </data>
   <data name="Sound id" xml:space="preserve">
     <value>Id</value>
-  </data>
-  <data name="Sound slots note" xml:space="preserve">
-    <value>The sounds the game plays when the model stands, walks, attacks, is hit and dies; of a pair it picks one at random.</value>
   </data>
   <data name="Sounds" xml:space="preserve">
     <value>Sounds</value>
@@ -2521,9 +2896,6 @@
   <data name="Step what hold of {0}" xml:space="preserve">
     <value>holds the last frame of {0}</value>
   </data>
-  <data name="Step what sound slots" xml:space="preserve">
-    <value>sound slots</value>
-  </data>
   <data name="Step what speed of {0}" xml:space="preserve">
     <value>speed of {0}</value>
   </data>
@@ -2544,9 +2916,6 @@
   </data>
   <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
     <value>The file is not in the client folder; the model has no body.</value>
-  </data>
-  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
-    <value>The model has a second sound set, which monsters with SubType 9 play (five numbers further); it is edited in the file.</value>
   </data>
   <data name="The model is not open; it shows when it is." xml:space="preserve">
     <value>The model is not open (its file may be missing); it shows once the game opens it.</value>
@@ -2602,59 +2971,32 @@
   <data name="Clear skill after attack" xml:space="preserve">
     <value>after its own attack: when it ends, or another attack or a hit stops it (afterAttack)</value>
   </data>
-  <data name="Reader Hellas" xml:space="preserve">
-    <value>the Hellas handler, on any map</value>
-  </data>
   <data name="Reader Battle Castle guards" xml:space="preserve">
-    <value>the Battle Castle handler, by the guards' models, on any map</value>
-  </data>
-  <data name="Reader Hunting Ground" xml:space="preserve">
-    <value>the Hunting Ground handler, on its map</value>
-  </data>
-  <data name="Reader Aida" xml:space="preserve">
-    <value>the Aida handler, on Aida</value>
-  </data>
-  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
-    <value>the Crywolf handler, on Crywolf and in Devil Square</value>
-  </data>
-  <data name="Reader Kanturu 1st" xml:space="preserve">
-    <value>the Kanturu 1st handler, on Kanturu 1st</value>
-  </data>
-  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
-    <value>the Kanturu 2nd handler, on Kanturu 2nd and 3rd</value>
+    <value>the Battle Castle guards' attack state (AI), by their models, on any map</value>
   </data>
   <data name="Reader Kanturu 3rd" xml:space="preserve">
-    <value>the Kanturu 3rd handler, on Kanturu 3rd</value>
-  </data>
-  <data name="Reader Balgass barracks" xml:space="preserve">
-    <value>the Balgass barracks handler, in the barracks and the refuge</value>
-  </data>
-  <data name="Reader Illusion Temple" xml:space="preserve">
-    <value>the Illusion Temple handler, in Illusion Temple</value>
-  </data>
-  <data name="Reader Swamp of Quiet" xml:space="preserve">
-    <value>the Swamp of Quiet handler, by the models, on its map</value>
+    <value>Maya's scene, on Kanturu 3rd</value>
   </data>
   <data name="Reader Raklion" xml:space="preserve">
-    <value>the Raklion handler, on Raklion and its boss map</value>
+    <value>Selupan's height, sounds and effects, on Raklion and its boss map</value>
   </data>
   <data name="Reader Empire Guardian" xml:space="preserve">
-    <value>the Empire Guardian handler, on the four Empire Guardian maps</value>
+    <value>the bosses' rage (the Berserker skill starts it, appear plays in it), on the four Empire Guardian maps</value>
   </data>
   <data name="Reader Empire Guardian 2" xml:space="preserve">
-    <value>the Empire Guardian 2 handler, on its map</value>
+    <value>the boss's rage, on Empire Guardian 2</value>
   </data>
   <data name="Reader Empire Guardian 3" xml:space="preserve">
-    <value>the Empire Guardian 3 handler, on its map</value>
+    <value>the boss's rage, on Empire Guardian 3</value>
   </data>
   <data name="Reader Empire Guardian 4" xml:space="preserve">
-    <value>the Empire Guardian 4 handler, on its map</value>
+    <value>the bosses' rage, on Empire Guardian 4</value>
   </data>
   <data name="Reader traps" xml:space="preserve">
-    <value>SetPlayerAttack, by the trap models; their effects and sounds stay code</value>
+    <value>the traps' effects, by the trap models</value>
   </data>
-  <data name="Reader Bali" xml:space="preserve">
-    <value>SetPlayerAttack, by Bali's model</value>
+  <data name="Map code that also runs" xml:space="preserve">
+    <value>Map code that also runs:</value>
   </data>
   <data name="Player shaped monsters choose a player attack" xml:space="preserve">
     <value>A player-shaped monster chooses a player attack from its equipment; attacks do not apply to it.</value>
@@ -2677,12 +3019,6 @@
   <data name="Remove the attacks" xml:space="preserve">
     <value>Remove the attacks</value>
   </data>
-  <data name="No code reads these attacks." xml:space="preserve">
-    <value>No handler reads these attacks: they do nothing until code reads them.</value>
-  </data>
-  <data name="Read by" xml:space="preserve">
-    <value>Read by:</value>
-  </data>
   <data name="Monster skills note" xml:space="preserve">
     <value>The monster skill of packet 0x69; the game plays an attack for skills 1 to 77.</value>
   </data>
@@ -2704,6 +3040,45 @@
   <data name="A draw" xml:space="preserve">
     <value>A draw</value>
   </data>
+  <data name="A rotation" xml:space="preserve">
+    <value>A rotation</value>
+  </data>
+  <data name="The generic pattern" xml:space="preserve">
+    <value>The generic pattern (attack 1, attack 2, attack 2)</value>
+  </data>
+  <data name="Played in turn, counted for each monster from its creation." xml:space="preserve">
+    <value>Played in turn, counted for each monster from its creation.</value>
+  </data>
+  <data name="Add an animation" xml:space="preserve">
+    <value>Add an animation</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="All maps" xml:space="preserve">
+    <value>All maps</value>
+  </data>
+  <data name="Add a map variant" xml:space="preserve">
+    <value>Add a map variant</value>
+  </data>
+  <data name="Plays on" xml:space="preserve">
+    <value>Plays on</value>
+  </data>
+  <data name="No map yet" xml:space="preserve">
+    <value>no map yet</value>
+  </data>
+  <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
+    <value>Pick the maps of the variant; until then Save refuses the monsters.</value>
+  </data>
+  <data name="Variant maps in another variant" xml:space="preserve">
+    <value>{0}: another variant names this too; while two variants name a map, Save refuses the monsters.</value>
+  </data>
+  <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
+    <value>On its maps the variant's attacks replace the monster's.</value>
+  </data>
+  <data name="Remove the map variant" xml:space="preserve">
+    <value>Remove the map variant</value>
+  </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Clear the monster skill</value>
   </data>
@@ -2714,7 +3089,7 @@
     <value>Sound events</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Sounds the game plays on top of the slots for a character in one of an event's animations: when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero. An event plays sounds of this model.</value>
+    <value>Sounds the game plays for the monsters of this set: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), on its cues of the monster's model, or at its moments, whatever the animation. An event plays sounds of this set.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Frames</value>
@@ -2735,7 +3110,7 @@
     <value>One of two</value>
   </data>
   <data name="Sound event pick note" xml:space="preserve">
-    <value>Plays the first of two sounds when a draw of one in two comes up, else the second; needs two sounds.</value>
+    <value>Plays the first sound when a draw of one in two comes up, else the second, or none with one sound.</value>
   </data>
   <data name="Sound draw rand" xml:space="preserve">
     <value>random (rand)</value>
@@ -2752,11 +3127,47 @@
   <data name="Sound event every map" xml:space="preserve">
     <value>every map</value>
   </data>
+  <data name="Sound event when" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="Sound event when note" xml:space="preserve">
+    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Cues: in the frames of a cue of the monster's model. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, cues or moments.</value>
+  </data>
+  <data name="Sound event on" xml:space="preserve">
+    <value>on</value>
+  </data>
+  <data name="Sound event moments" xml:space="preserve">
+    <value>Moments</value>
+  </data>
+  <data name="Sound event any SubType" xml:space="preserve">
+    <value>any</value>
+  </data>
+  <data name="Sound event only SubType" xml:space="preserve">
+    <value>only</value>
+  </data>
+  <data name="Sound event not SubType" xml:space="preserve">
+    <value>not</value>
+  </data>
+  <data name="Sound event SubType note" xml:space="preserve">
+    <value>The SubType a monster's creator code gives it. Death Centurion and Illusion of Kundun have 9 and play the second set of their model's sounds: their models' events say only 9 or not 9.</value>
+  </data>
+  <data name="Sound event heard anywhere" xml:space="preserve">
+    <value>Anywhere</value>
+  </data>
+  <data name="Sound event heard anywhere note" xml:space="preserve">
+    <value>Heard at any distance from the hero and on every map; else within 500 units and on the maps below.</value>
+  </data>
+  <data name="Sound event at the monster" xml:space="preserve">
+    <value>At monster</value>
+  </data>
+  <data name="Sound event at the monster note" xml:space="preserve">
+    <value>Played at the monster: a sound that still plays is not started again.</value>
+  </data>
   <data name="Add a sound event" xml:space="preserve">
     <value>Add a sound event</value>
   </data>
   <data name="Sound event needs a sound of the model" xml:space="preserve">
-    <value>An event plays sounds of this model, and it loads none.</value>
+    <value>An event plays sounds of this set, and it has none.</value>
   </data>
   <data name="Step what sound events" xml:space="preserve">
     <value>sound events</value>
@@ -2787,5 +3198,440 @@
   </data>
   <data name="Preview volume note" xml:space="preserve">
     <value>The volume of the monster tools' sound previews (Play, the preview's sounds). The game's sound volume stays as it is, and this is not saved.</value>
+  </data>
+  <data name="Taken by the item {0}" xml:space="preserve">
+    <value>Taken by the item {0}</value>
+  </data>
+  <data name="Taken by a model without an item {0}" xml:space="preserve">
+    <value>Taken by a model without an item: {0}</value>
+  </data>
+  <data name="The code calls it {0}" xml:space="preserve">
+    <value>The code calls it {0}</value>
+  </data>
+  <data name="The Item Browser lists it as No item at this number" xml:space="preserve">
+    <value>The Item Browser lists it as "No item at this number"</value>
+  </data>
+  <data name="Entry without a name" xml:space="preserve">
+    <value>Entry without a name</value>
+  </data>
+  <data name="Taken by an entry without a name" xml:space="preserve">
+    <value>Taken by an entry without a name</value>
+  </data>
+  <data name="Its model {0}" xml:space="preserve">
+    <value>Its model: {0}</value>
+  </data>
+  <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
+    <value>The Item Browser lists it as "Entry without a name"</value>
+  </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Update from server</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Admin panel address</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Update from {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>Downloading {0} ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Update from server downloads the items of an OpenMU server from its admin panel and lists how they differ from the client's, as Import does. Enter an API key of the admin panel; Remember keeps it for the address in the system's key store. Without one, the environment variable {0} fills the field.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Enter the address of the OpenMU admin panel, e.g. https://admin.example.org or http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>The admin panel's address must start with https://; http:// only works for this computer (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>The admin panel could not be reached ({0}).</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>The API key may not download the items (403): it needs the Viewer role, and the admin panel needs a user.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>The admin panel has no item exchange file (404): it needs a newer OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Too many requests (429): try again in a minute.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>The admin panel answered with HTTP status {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>The update was cancelled.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>The file does not carry all of an item's fields: it is not added.</value>
+  </data>
+  <data name="Every item of the file matches the client" xml:space="preserve">
+    <value>Every item the file has matches the client.</value>
+  </data>
+  <data name="Items only in the client {0} stay unless checked" xml:space="preserve">
+    <value>{0} items are only in the client: they stay as they are unless you check them in their list below.</value>
+  </data>
+  <data name="Only in the client ({0}), not on the server" xml:space="preserve">
+    <value>Only in the client ({0}), not on the server</value>
+  </data>
+  <data name="Only in the client ({0}), not in the file" xml:space="preserve">
+    <value>Only in the client ({0}), not in the file</value>
+  </data>
+  <data name="Copy as Markdown" xml:space="preserve">
+    <value>Copy as Markdown</value>
+  </data>
+  <data name="Copied {0} rows" xml:space="preserve">
+    <value>Copied {0} rows</value>
+  </data>
+  <data name="Copies the list as a Markdown table" xml:space="preserve">
+    <value>Copies the list as a Markdown table (group, number and English name of each item), e.g. for an issue on GitHub.</value>
+  </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>It removes {0} items from the client, with their models. Undo brings them back.</value>
+  </data>
+  <data name="Api key" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Remember</value>
+  </data>
+  <data name="Keeps the key for this address in {0}" xml:space="preserve">
+    <value>Keeps the key for this address in {0}, not in a file.</value>
+  </data>
+  <data name="This build cannot keep the key" xml:space="preserve">
+    <value>This build cannot keep the key: libsecret (the system keyring) was not found when MuEditor was built. The key stays until the editor closes.</value>
+  </data>
+  <data name="The key could not be stored in {0}" xml:space="preserve">
+    <value>The key could not be stored in {0}.</value>
+  </data>
+  <data name="the Windows Credential Manager" xml:space="preserve">
+    <value>the Windows Credential Manager</value>
+  </data>
+  <data name="the macOS Keychain" xml:space="preserve">
+    <value>the macOS Keychain</value>
+  </data>
+  <data name="the system keyring" xml:space="preserve">
+    <value>the system keyring</value>
+  </data>
+  <data name="Enter an api key of the admin panel {0}" xml:space="preserve">
+    <value>Enter an API key of the admin panel (its API keys page; the Viewer role is enough), or set the environment variable {0} before starting the editor.</value>
+  </data>
+  <data name="The admin panel does not know the api key" xml:space="preserve">
+    <value>The admin panel does not know the API key (401).</value>
+  </data>
+  <data name="From the server" xml:space="preserve">
+    <value>From the server</value>
+  </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Not saved yet: the changes are only in the editor until you save the items.</value>
+  </data>
+  <data name="New folder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="Folder name" xml:space="preserve">
+    <value>Folder name</value>
+  </data>
+  <data name="A folder name of 1 to 32 characters that no other folder here has." xml:space="preserve">
+    <value>A folder name of 1 to 32 characters that no other folder here has.</value>
+  </data>
+  <data name="New color folder" xml:space="preserve">
+    <value>New color folder</value>
+  </data>
+  <data name="Rename a color folder" xml:space="preserve">
+    <value>Rename a color folder</value>
+  </data>
+  <data name="Remove a color folder" xml:space="preserve">
+    <value>Remove a color folder</value>
+  </data>
+  <data name="Move a color folder" xml:space="preserve">
+    <value>Move a color folder</value>
+  </data>
+  <data name="Move a color" xml:space="preserve">
+    <value>Move a color</value>
+  </data>
+  <data name="Colors tree note" xml:space="preserve">
+    <value>A root holds the colors of one use. Folders only sort them: drag a color or a folder onto a folder or onto its root. A color stays in its root.</value>
+  </data>
+  <data name="Folder note" xml:space="preserve">
+    <value>Removing a folder moves what it holds into the folder above it.</value>
+  </data>
+  <data name="It holds {0} colors and {1} folders." xml:space="preserve">
+    <value>It holds {0} colors and {1} folders.</value>
+  </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Folders go at most {0} levels deep.</value>
+  </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Edit colors...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>The list's own colors, each with a shade per theme. The button color rules and the load name them by their ID; Save in the Server List window writes them.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Remove a color</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Remove unused colors</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Apply to the color</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Change a color</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Used by {0} rules and load parts</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>The change reaches these {0} rules and load parts:</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>No rule and no load part uses these colors: {0}</value>
+  </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Show offline servers in the game</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Their load</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Editor only: the login screen also lists every channel 1 to 20 of every group that the connect server did not send, at this load, so you can see its name, color and load bar. It cannot be joined. In a group's channel list each one can be left out or given a load of its own, until the game closes.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Only the editor shows this server; the connect server did not send it.</value>
+  </data>
+  <data name="Offline channels:" xml:space="preserve">
+    <value>Offline channels:</value>
+  </data>
+  <data name="All offline channels" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="No offline channel" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Show offline channel" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Offline channel note" xml:space="preserve">
+    <value>Editor only: whether the login screen lists this channel, which the connect server did not send, and at which load. Without a load of its own it has Their load. Kept until the game closes.</value>
+  </data>
+  <data name="Load slider note" xml:space="preserve">
+    <value>Drag, or double-click or Ctrl+click to type a value.</value>
+  </data>
+  <data name="Use Their load again" xml:space="preserve">
+    <value>Use Their load again</value>
+  </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>from {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Could not write the tokens.ini of: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>A theme color: each theme folder's tokens.ini sets it, and a theme built on another takes that one's value until it sets its own. Apply writes the changed themes' tokens.ini at once and the game redraws with it; Undo doesn't take it back.</value>
+  </data>
+  <data name="Monster Sounds" xml:space="preserve">
+    <value>Monster Sounds</value>
+  </data>
+  <data name="Monster sound sets" xml:space="preserve">
+    <value>Monster sound sets</value>
+  </data>
+  <data name="Sound set" xml:space="preserve">
+    <value>Sound set</value>
+  </data>
+  <data name="No sound set" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="No sound set is shown" xml:space="preserve">
+    <value>Pick a sound set in the list, or add one.</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Open in Monster Sounds" xml:space="preserve">
+    <value>Open in Monster Sounds</value>
+  </data>
+  <data name="Random variants" xml:space="preserve">
+    <value>Random variants</value>
+  </data>
+  <data name="Random variants note" xml:space="preserve">
+    <value>The looks the game draws when the monster appears (Chaos Castle: the elf or the wizard). A look plays its own sound set, or the entry's. The code draws the look until the setup moves into data (MN4).</value>
+  </data>
+  <data name="Random variant note" xml:space="preserve">
+    <value>the game draws one when the monster appears</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Variant</value>
+  </data>
+  <data name="Variant {0}" xml:space="preserve">
+    <value>variant {0}</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="The entry" xml:space="preserve">
+    <value>the entry</value>
+  </data>
+  <data name="The entry set" xml:space="preserve">
+    <value>the entry's</value>
+  </data>
+  <data name="Add a sound set" xml:space="preserve">
+    <value>Add a sound set</value>
+  </data>
+  <data name="New sound set" xml:space="preserve">
+    <value>New sound set</value>
+  </data>
+  <data name="Sound set copy of {0}" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="Sound set in use note" xml:space="preserve">
+    <value>Monsters play the set: give them another set first.</value>
+  </data>
+  <data name="Sound set name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Played by" xml:space="preserve">
+    <value>Played by:</value>
+  </data>
+  <data name="No monster plays the set" xml:space="preserve">
+    <value>no monster</value>
+  </data>
+  <data name="Sound files {0}" xml:space="preserve">
+    <value>Sound files ({0})</value>
+  </data>
+  <data name="The set has no sounds" xml:space="preserve">
+    <value>The set has no sound files.</value>
+  </data>
+  <data name="Sound file in use note" xml:space="preserve">
+    <value>An event of the set plays it: remove the sound from the event first.</value>
+  </data>
+  <data name="Sound id hint" xml:space="preserve">
+    <value>SOUND_ id (optional)</value>
+  </data>
+  <data name="Sound file missing" xml:space="preserve">
+    <value>Enter a file below Data/Sound.</value>
+  </data>
+  <data name="Sound file twice" xml:space="preserve">
+    <value>The set has this file already.</value>
+  </data>
+  <data name="Sound file not in client folder" xml:space="preserve">
+    <value>The file is not in the client folder: the sound plays nothing.</value>
+  </data>
+  <data name="Add a file" xml:space="preserve">
+    <value>Add a file</value>
+  </data>
+  <data name="Cues" xml:space="preserve">
+    <value>Cues</value>
+  </data>
+  <data name="Cues note" xml:space="preserve">
+    <value>Points of the model's animations that sound events play on, such as where a foot lands in the walk. Their frames are edited on the events in Monster Sounds; Monster Preview marks them.</value>
+  </data>
+  <data name="The model has no cues" xml:space="preserve">
+    <value>The model has no cues.</value>
+  </data>
+  <data name="Model sounds note" xml:space="preserve">
+    <value>The sounds are in the sound set the monster names (Sounds.json), not in the model: monsters with one model can sound different.</value>
+  </data>
+  <data name="The monster names no sound set" xml:space="preserve">
+    <value>The selected monster names no sound set.</value>
+  </data>
+  <data name="The monster plays {0}" xml:space="preserve">
+    <value>The selected monster plays the set {0}.</value>
+  </data>
+  <data name="Sound event cue" xml:space="preserve">
+    <value>cue</value>
+  </data>
+  <data name="Sound event cues of {0}" xml:space="preserve">
+    <value>Cues of {0}</value>
+  </data>
+  <data name="Sound event new cue at {0} {1}" xml:space="preserve">
+    <value>New cue at the preview's frame ({0} {1})</value>
+  </data>
+  <data name="Sound event no cue {0}" xml:space="preserve">
+    <value>The model has no cue "{0}": the event does not play for this monster.</value>
+  </data>
+  <data name="Sound event cue of {0} {1}" xml:space="preserve">
+    <value>cue of {0}: a change reaches its {1} monsters</value>
+  </data>
+  <data name="Use the preview frame" xml:space="preserve">
+    <value>Use the preview's frame</value>
+  </data>
+  <data name="Use the preview frame note" xml:space="preserve">
+    <value>The cue starts at the frame Monster Preview shows, in its animation, and keeps its length.</value>
+  </data>
+  <data name="Preview frame needs the preview" xml:space="preserve">
+    <value>Monster Preview does not show this monster's model: open it there to take its frame.</value>
+  </data>
+  <data name="Remove the cue" xml:space="preserve">
+    <value>Remove the cue</value>
+  </data>
+  <data name="Remove the cue question {0} {1}" xml:space="preserve">
+    <value>No other sound event plays on the cue {0} of {1}. Remove the cue from the model too?</value>
+  </data>
+  <data name="Remove the cue too" xml:space="preserve">
+    <value>Remove the cue too</value>
+  </data>
+  <data name="Keep the cue" xml:space="preserve">
+    <value>Keep the cue</value>
+  </data>
+  <data name="Add a sound at this frame" xml:space="preserve">
+    <value>Add a sound at this frame</value>
+  </data>
+  <data name="Add a sound needs a set" xml:space="preserve">
+    <value>The monster names no sound set for this look: give it one in Monster Sounds.</value>
+  </data>
+  <data name="Add a sound needs a file" xml:space="preserve">
+    <value>The sound set has no sound files yet: add one in Monster Sounds.</value>
+  </data>
+  <data name="Cue name" xml:space="preserve">
+    <value>Cue</value>
+  </data>
+  <data name="Cue name taken" xml:space="preserve">
+    <value>The model has a cue of this name.</value>
+  </data>
+  <data name="Cue of the model {0}" xml:space="preserve">
+    <value>a cue of {0}, for all its monsters</value>
+  </data>
+  <data name="In the sound set {0}" xml:space="preserve">
+    <value>An event in the sound set {0}</value>
+  </data>
+  <data name="Cue tag {0} {1} {2} {3}" xml:space="preserve">
+    <value>{0}: frames {1} to {2}, plays {3}</value>
+  </data>
+  <data name="Cue plays nothing" xml:space="preserve">
+    <value>nothing in this set</value>
+  </data>
+  <data name="Step sound set" xml:space="preserve">
+    <value>{0} (sound set): {1}</value>
+  </data>
+  <data name="Step monster sound set" xml:space="preserve">
+    <value>{0}: sound set</value>
+  </data>
+  <data name="Step what add" xml:space="preserve">
+    <value>add</value>
+  </data>
+  <data name="Step what remove" xml:space="preserve">
+    <value>remove</value>
+  </data>
+  <data name="Step what name" xml:space="preserve">
+    <value>name</value>
+  </data>
+  <data name="Step what sound files" xml:space="preserve">
+    <value>sound files</value>
+  </data>
+  <data name="Step what cue {0}" xml:space="preserve">
+    <value>cue {0}</value>
+  </data>
+  <data name="Cue frames need a monster of the set" xml:space="preserve">
+    <value>Select a monster that plays the set to edit the cue.</value>
+  </data>
+  <data name="Sound id unknown" xml:space="preserve">
+    <value>The id is not a SOUND_ id that code plays a monster sound by; leave it empty for a sound named by its file.</value>
+  </data>
+  <data name="Sound name twice" xml:space="preserve">
+    <value>Another sound of the set has this id: an event could not tell the two apart.</value>
+  </data>
+  <data name="Cue in use note" xml:space="preserve">
+    <value>Sound events play on the cue: move them to another cue or a moment first.</value>
   </data>
 </root>

@@ -51,9 +51,9 @@ public:
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
 public:
-    bool UpdateMouseEvent();
-    bool UpdateKeyEvent();
-    bool Update();
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override;
+    bool Update() override;
 
 public:
     void OpenningProcess();
@@ -63,7 +63,7 @@ private:
     void UpdateResult();
 
 public:
-    bool Render();
+    bool Render() override;
 
 private:
     void BuildRmlUi();
@@ -71,7 +71,7 @@ private:
     void SyncTexts();
 
 public:
-    float GetLayerDepth(); //. 5.0f
+    float GetLayerDepth() override; //. 5.0f
 
 public:
     void SetMyTeam(SEASON3A::eCursedTempleTeam myteam);

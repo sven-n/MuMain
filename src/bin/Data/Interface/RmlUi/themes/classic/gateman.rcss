@@ -1,0 +1,174 @@
+/* Classic theme for the gateman (CGatemanWindow, the Castle Hunting Area entry). 0.97 has no Castle
+   Siege; the Season 1 client's (00611d80, docked at x 450): the 0.97 frame, the title
+   bold white centred at y 15; the lord's page: the restriction bold at y 55, the members' lines at
+   75 / 85 / 95, the check box (9 x 9 outline (146, 134, 121), win_check's mark) at (35, 115) with its
+   label at 55, the entry fee at (35, 133), the fee title bold at 163, the fee on a black 30% box
+   (90 x 30 at (20, 185)) ending at x 90, the fee buttons Season 1 text buttons 16 x 16 at (120, 183)
+   and (120, 203) with the CursorSitDown arrow over them (flipped for up), Apply at (70, 228), the
+   rules white at 253 / 266 / 279 and Enter at (70, 329); the member's and the guest's lines from
+   y 55, 10 apart, Enter under them. Buttons: Season 1's win_button 50 x 18, grey 0.8 at rest, white
+   under the mouse, 0.6 pressed, red (1, 0.4, 0.4) locked, labelled (230, 220, 200). The 0.97 Close
+   at (25, 395). Legacy's rules first, then the classic ones. */
+
+/* Legacy theme for CGatemanWindow, reproducing its RenderFrame() and pages: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the texts in their bound
+   fonts and colours, the master's RenderCheckBox() (a 9 x 9 (146, 134, 121) outline at (35, 110),
+   win_check's 5 x 5 mark when public), the fee backdrop (black at alpha 77, 90 x 30 at (20, 180)),
+   the fee arrows (newui_Bt_scroll_up / dn, 15 x 13: up / over / down) at (118, 180) / (118, 196),
+   the 53 x 23 newui_btn_empty_very_small buttons (a locked Enter tinted (100, 100, 100) with a
+   grey label, never hovered), the exit button at (13, 391). Reference px inside #panel. */
+
+@spritesheet gk-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	gk-btn-up: 0px 0px 53px 23px;
+	gk-btn-over: 0px 23px 53px 23px;
+	gk-btn-down: 0px 46px 53px 23px;
+}
+@spritesheet gk-up-sheet
+{
+	src: "../../../newui_Bt_scroll_up.jpg";
+	gk-up-up: 0px 0px 15px 13px;
+	gk-up-over: 0px 13px 15px 13px;
+	gk-up-down: 0px 26px 15px 13px;
+}
+@spritesheet gk-dn-sheet
+{
+	src: "../../../newui_Bt_scroll_dn.jpg";
+	gk-dn-up: 0px 0px 15px 13px;
+	gk-dn-over: 0px 13px 15px 13px;
+	gk-dn-down: 0px 26px 15px 13px;
+}
+@spritesheet gk-check-sheet { src: "../../../win_check.tga"; gk-check: 0px 0px 5px 5px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+
+#public_toggle { position: absolute; left: 35px; top: 110px; width: 100px; height: 16px; pointer-events: auto; }
+#checkbox { position: absolute; left: 0; top: 0; width: 9px; height: 9px; pointer-events: none; border: 1px #928679; box-sizing: border-box; }
+#check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; pointer-events: none; decorator: image(gk-check); }
+#fee_back { position: absolute; left: 20px; top: 180px; width: 90px; height: 30px; background-color: rgba(0, 0, 0, 77); }
+
+.fee-btn { position: absolute; left: 118px; width: 15px; height: 13px; pointer-events: auto; }
+.fee-up { top: 180px; decorator: image(gk-up-up); }
+.fee-up:hover { decorator: image(gk-up-over); }
+.fee-up:active { decorator: image(gk-up-down); }
+.fee-down { top: 196px; decorator: image(gk-dn-up); }
+.fee-down:hover { decorator: image(gk-dn-over); }
+.fee-down:active { decorator: image(gk-dn-down); }
+
+.gk-btn { display: block; position: absolute; width: 53px; height: 23px; decorator: image(gk-btn-up); pointer-events: auto; }
+.gk-btn:hover { decorator: image(gk-btn-over); }
+.gk-btn:active { decorator: image(gk-btn-down); }
+.gk-btn.locked, .gk-btn.locked:hover, .gk-btn.locked:active { decorator: image(gk-btn-up); image-color: #646464; }
+.gk-label { left: 0; text-align: center; color: #ffffff; }
+.gk-btn.locked .gk-label { color: #646464; }
+
+#btn_exit { top: 391px; pointer-events: auto; }
+
+/* The window's own text. Each line is named, so the theme decides where it sits, what colour it
+   is and how it is aligned; only its font size stays bound. Its width is reference px times --root-scale. */
+.gk-page { position: static; }
+.gk-heading, .gk-line { text-align: center; }
+.gk-heading { left: 15px; top: 13px; font-weight: bold; }
+.gk-line { left: 0; }
+
+#restriction { top: 50px; font-weight: bold; }
+#members_1 { top: 70px; }
+#members_2 { top: 80px; }
+#members_3 { top: 90px; }
+#open_to_non_members { left: 55px; top: 110px; }
+#entrance_fee { left: 35px; top: 128px; }
+#fee_setting_label { top: 158px; font-weight: bold; }
+/* RT3_WRITE_RIGHT_TO_LEFT: the text ends at x 80. */
+#view_fee { right: 110px; top: 190px; text-align: right; }
+#fee_range { top: 248px; }
+#fee_range_for { top: 261px; }
+#fee_increment { top: 274px; }
+
+#member_question { top: 50px; font-weight: bold; }
+
+#guest_fee { top: 50px; font-weight: bold; }
+#guest_pay_prompt { top: 60px; font-weight: bold; }
+#guest_question { top: 70px; font-weight: bold; }
+#denied_1 { top: 50px; font-weight: bold; }
+#denied_2 { top: 60px; font-weight: bold; }
+#denied_3 { top: 70px; font-weight: bold; }
+#denied_4 { top: 80px; font-weight: bold; }
+
+/* The master's page pushes Enter below the fee controls. */
+#btn_confirm { left: 68px; top: 220px; }
+#btn_enter { left: 68px; top: 100px; }
+#panel.master #btn_enter { top: 320px; }
+
+.gk-heading, .gk-line, .gk-note { color: #dcdcdc; }
+#fee_range, #fee_range_for, #fee_increment, #guest_pay_prompt, #guest_question { color: #ffffff; }
+/* RenderGuestMode() reddened the fee the hero cannot pay. */
+#guest_fee { color: rgb(255, 255, 100); }
+#guest_fee.unaffordable { color: rgb(255, 100, 50); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#heading { width: calc(160px * var(--root-scale)); }
+#restriction { width: calc(190px * var(--root-scale)); }
+#members_1 { width: calc(190px * var(--root-scale)); }
+#members_2 { width: calc(190px * var(--root-scale)); }
+#members_3 { width: calc(190px * var(--root-scale)); }
+#fee_setting_label { width: calc(190px * var(--root-scale)); }
+#fee_range { width: calc(190px * var(--root-scale)); }
+#fee_range_for { width: calc(190px * var(--root-scale)); }
+#fee_increment { width: calc(190px * var(--root-scale)); }
+#member_question { width: calc(190px * var(--root-scale)); }
+#guest_fee { width: calc(190px * var(--root-scale)); }
+#guest_pay_prompt { width: calc(190px * var(--root-scale)); }
+#guest_question { width: calc(190px * var(--root-scale)); }
+#denied_1 { width: calc(190px * var(--root-scale)); }
+#denied_2 { width: calc(190px * var(--root-scale)); }
+#denied_3 { width: calc(190px * var(--root-scale)); }
+#denied_4 { width: calc(190px * var(--root-scale)); }
+.gk-label { width: calc(53px * var(--root-scale)); }
+
+/* --- Classic ---------------------------------------------------------------------------------- */
+@spritesheet gk-classic-btn-sheet   { src: "../../../win_button.tga"; gk-classic-btn: 0px 0px 49px 16px; }
+@spritesheet gk-classic-arrow-sheet { src: "../../../CursorSitDown.tga"; gk-classic-arrow: 0px 0px 32px 32px; }
+.gk-heading { top: 15px; color: #ffffff; }
+#restriction { top: 55px; }
+#members_1 { top: 75px; }
+#members_2 { top: 85px; }
+#members_3 { top: 95px; }
+#public_toggle { left: 35px; top: 115px; width: 150px; }
+#checkbox { border-color: rgb(146, 134, 121); }
+#open_to_non_members { left: 55px; top: 115px; }
+#entrance_fee { left: 35px; top: 133px; }
+#fee_setting_label { top: 163px; }
+#fee_back { left: 20px; top: 185px; width: 90px; height: 30px; background-color: rgba(0, 0, 0, 77); }
+#view_fee { right: 100px; top: 195px; }
+.fee-btn, .fee-btn:hover, .fee-btn:active { left: 120px; width: 16px; height: 16px; image-color: #cccccc; }
+.fee-up, .fee-up:hover, .fee-up:active { top: 183px; decorator: image(gk-classic-arrow flip-vertical fill), image(gk-classic-btn fill); }
+.fee-down, .fee-down:hover, .fee-down:active { top: 203px; decorator: image(gk-classic-arrow fill), image(gk-classic-btn fill); }
+.fee-btn:hover { image-color: #ffffff; }
+.fee-btn:active { image-color: #999999; }
+#fee_range { top: 253px; }
+#fee_range_for { top: 266px; }
+#fee_increment { top: 279px; }
+#member_question { top: 55px; }
+#guest_fee { top: 55px; }
+#guest_pay_prompt { top: 65px; }
+#guest_question { top: 75px; }
+#denied_1 { top: 55px; }
+#denied_2 { top: 65px; }
+#denied_3 { top: 75px; }
+#denied_4 { top: 85px; }
+
+.gk-btn, .gk-btn:hover, .gk-btn:active { width: 50px; height: 18px; decorator: image(gk-classic-btn fill); image-color: #cccccc; }
+.gk-btn:hover { image-color: #ffffff; }
+.gk-btn:active { image-color: #999999; }
+.gk-btn.locked, .gk-btn.locked:hover, .gk-btn.locked:active { decorator: image(gk-classic-btn fill); image-color: #ff6666; }
+.gk-label, .gk-btn.locked .gk-label { color: #e6dcc8; }
+.gk-btn:active .gk-label { margin-left: calc(1px * var(--root-scale)); margin-top: calc(1px * var(--root-scale)); }
+.gk-label { width: calc(50px * var(--root-scale)); }
+#btn_confirm { left: 70px; top: 228px; }
+#btn_enter { left: 70px; top: 100px; }
+#panel.master #btn_enter { top: 329px; }
+#btn_exit { top: 395px; }

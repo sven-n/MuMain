@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -18,6 +19,21 @@
 class CItemListModel
 {
 public:
+    // Whether the list without an item filter (tag, rule flag, missing name,
+    // missing model) has the numbers without an item too, the entries without a
+    // name and the model entries without an item entry: the item browser's All
+    // items lists everything that is at a number.
+    enum class NumbersWithoutItem : uint8_t
+    {
+        OnlyWithTheirFilter,
+        InAllItems,
+    };
+
+    explicit CItemListModel(NumbersWithoutItem numbersWithoutItem = NumbersWithoutItem::OnlyWithTheirFilter)
+        : m_numbersWithoutItem(numbersWithoutItem)
+    {
+    }
+
     struct Filter
     {
         // Matches "group,number", the item type or a name in any language;
@@ -53,6 +69,9 @@ public:
 private:
     std::vector<int> m_itemTypes;
     bool Lists(int itemType, const Filter& filter) const;
+    bool ListsNumberWithoutItem(int itemType, bool hasEntry, const Filter& filter) const;
+
+    NumbersWithoutItem m_numbersWithoutItem;
 
     Filter m_filter;
     int m_version = -1;

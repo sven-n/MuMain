@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Globals/_define.h"
+#include "Core/Utilities/Random.h"
 
 #include <optional>
 #include <string>
@@ -19,12 +20,12 @@ constexpr int NoAttackAnimation = -1;
 // `otherwise`: the old code's random choices.
 enum class MonsterAttackRandom
 {
-    // Attack 1 or attack 2 by rand() % 2 (Hellas).
+    // Attack 1 or attack 2 by Random::Rand() % 2 (Hellas).
     Rand,
     // Attack 1 when rand_fps_check(2), else attack 2; the chance depends on
     // the frame rate (Kanturu 1st, P18).
     RandFps,
-    // Bali's draw: rand() % 8 above 2 picks attack 1 or 2 by rand() % 2,
+    // Bali's draw: Random::Rand() % 8 above 2 picks attack 1 or 2 by Random::Rand() % 2,
     // above 0 attack 3, else attack 4.
     Bali,
 };
@@ -56,8 +57,13 @@ struct MonsterAttacks
     std::vector<MonsterAttackEntry> monsterSkills;
     // The player skills (packets 0x19 and 0x1E, CHARACTER::Skill), sorted.
     std::vector<MonsterAttackEntry> skills;
-    // What any other skill, a stale skill or a normal attack plays.
-    int otherwise = MONSTER01_ATTACK1;
+    // What any other skill, a stale skill or a normal attack plays: one
+    // animation, or several played in turn (a rotation, counted per monster
+    // from its creation, Q-MN69). Never empty.
+    std::vector<int> otherwise{MONSTER01_ATTACK1};
+    // Plays the generic pattern in place of `otherwise`: attack 1 or attack 2
+    // by CHARACTER::SwordCount, as a monster without attacks does.
+    bool otherwiseGeneric = false;
     // Picks that in place of `otherwise` when it is set.
     std::optional<MonsterAttackRandom> otherwiseRandom;
     MonsterSkillClear clearSkill = MonsterSkillClear::Never;
@@ -74,14 +80,22 @@ struct MonsterAttacks
 // skill entry first, then a player skill entry, else `otherwise`.
 struct MonsterAttackChoice
 {
-    // The animation, or NoAttackAnimation; with `random` the draw picks it.
+    // The animation, or NoAttackAnimation; with `random` the draw picks it,
+    // with `generic` the generic pattern.
     int animation = NoAttackAnimation;
     std::optional<MonsterAttackRandom> random;
     bool clearMonsterSkill = false;
+    bool generic = false;
+    // The rotation of `otherwise` played: its count goes on by one.
+    bool advancesRotation = false;
 
     bool operator==(const MonsterAttackChoice&) const = default;
 };
-MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill);
+// `rotation` is the monster's count of its rotation's attacks.
+MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill, int rotation = 0);
+
+// Whether `otherwise` is a rotation: more than one animation, in turn.
+bool IsRotation(const MonsterAttacks& attacks);
 
 // Whether the monster skill is cleared after the skill's own attack
 // (AfterAttack).

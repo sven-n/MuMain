@@ -118,7 +118,7 @@ public:
     PET_INFO* GetEquipedPetInfo(int iPetType);
     void			PostMoveProcess_Active(unsigned int uiLimitCount);
     unsigned int	PostMoveProcess_GetCurProcessCount();
-    bool			PostMoveProcess_IsProcessing();
+    bool PostMoveProcess_IsProcessing() const;
     bool			PostMoveProcess_Process();
     bool			Blood;
     bool			Ride;
@@ -156,6 +156,9 @@ public:
     float        Dead; // Number of reference frames after death
     WORD		Skill;
     BYTE        SwordCount;
+    // The attacks a monster's rotation (its attacks' `otherwise`, Q-MN69)
+    // played since the monster was created.
+    int AttackRotation;
     BYTE		byExtensionSkill;
     WORD		m_byDieType;
     BYTE        TargetX;

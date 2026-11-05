@@ -1,24 +1,3 @@
-add_test(
-    NAME no_raw_getasynckeystate
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_getasynckeystate.cmake
-)
-
-add_test(
-    NAME no_raw_win32_mouse
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_win32_mouse.cmake
-)
-
-add_test(
-    NAME no_raw_imm_apis
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_imm.cmake
-)
-
 mu_add_test(
     NAME sdl_window_flags_tests
     SOURCES
@@ -40,6 +19,16 @@ mu_add_test(
         test_secure_crt.cpp
 )
 
+# The .ini profile functions: Windows' own, and the shim (WinIni.cpp) on the other platforms.
+mu_add_test(
+    NAME win_ini_tests
+    SOURCES
+        test_win_ini.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinIni.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinNls.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+)
+
 # Font sizing uses the real UI scaling layer. Supply its application-owned globals and
 # preferences through the same entry-point glue as ui_scaling_tests, including editor builds.
 mu_add_test(
@@ -47,7 +36,7 @@ mu_add_test(
     SOURCES
         test_bundled_font_roles.cpp
         test_translation_glyph_coverage.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient SDL3_ttf::SDL3_ttf SDL3::SDL3
 )
 target_compile_definitions(bundled_font_role_tests PRIVATE
@@ -61,10 +50,4 @@ add_test(
         "-DMU_ASSET_SOURCE=${CMAKE_SOURCE_DIR}/src/bin"
         "-DMU_COPY_SCRIPT=${CMAKE_SOURCE_DIR}/cmake/CopyRuntimeAssets.cmake"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_bundled_font_assets.cmake"
-)
-
-add_test(
-    NAME copy_runtime_assets
-    COMMAND "${CMAKE_COMMAND}"
-        -P "${CMAKE_SOURCE_DIR}/tests/test_copy_runtime_assets.cmake"
 )

@@ -37,9 +37,9 @@ public:
     virtual ~CMsgBoxIGSBuyPackageItem();
 
     bool Create(float fPriority = 3.f);
-    void Release();
-    bool Update();
-    bool Render();
+    void Release() override;
+    bool Update() override;
+    bool Render() override;
     Rml::Element* GetPanel() const override
     {
         return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;

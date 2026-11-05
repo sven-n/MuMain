@@ -19,7 +19,7 @@ MonsterEditHistory::MonsterEditHistory(Hooks hooks) : m_hooks(std::move(hooks)) 
 
 void MonsterEditHistory::Record(MonsterEditEntry entry)
 {
-    if (entry.steps.empty() && entry.models.empty())
+    if (entry.steps.empty() && entry.models.empty() && entry.soundSets.empty())
     {
         return;
     }
@@ -121,16 +121,19 @@ bool MonsterEditHistory::IsModifiedSinceSave() const
     return m_saved != m_done;
 }
 
-// Undoing: the monsters and models are as the entry's steps left them.
+// Undoing: the monsters, models and sets are as the entry's steps left them.
 // Redoing: as they were before them.
 bool MonsterEditHistory::IsAsLeft(const MonsterEditEntry& entry, bool undoing) const
 {
     const bool monstersAsLeft =
         std::ranges::all_of(entry.steps, [&](const MonsterEditStep& step)
                             { return m_hooks.readMonster(step.number) == (undoing ? step.after : step.before); });
-    return monstersAsLeft &&
-           std::ranges::all_of(entry.models, [&](const MonsterModelEditStep& step)
-                               { return m_hooks.readModel(step.slot) == (undoing ? step.after : step.before); });
+    const bool modelsAsLeft =
+        std::ranges::all_of(entry.models, [&](const MonsterModelEditStep& step)
+                            { return m_hooks.readModel(step.slot) == (undoing ? step.after : step.before); });
+    return monstersAsLeft && modelsAsLeft &&
+           std::ranges::all_of(entry.soundSets, [&](const MonsterSoundSetEditStep& step)
+                               { return m_hooks.readSoundSet(step.name) == (undoing ? step.after : step.before); });
 }
 
 // Undoing puts the steps back last first.
@@ -176,17 +179,38 @@ void MonsterEditHistory::Apply(const MonsterEditEntry& entry, bool undoing)
         }
         m_hooks.restoreModels(snapshots);
     }
+    if (!entry.soundSets.empty())
+    {
+        std::vector<Data::Monsters::MonsterSoundSetSnapshot> snapshots;
+        snapshots.reserve(entry.soundSets.size());
+        if (undoing)
+        {
+            for (const MonsterSoundSetEditStep& step : std::views::reverse(entry.soundSets))
+            {
+                snapshots.push_back({step.name, step.before});
+            }
+        }
+        else
+        {
+            for (const MonsterSoundSetEditStep& step : entry.soundSets)
+            {
+                snapshots.push_back({step.name, step.after});
+            }
+        }
+        m_hooks.restoreSoundSets(snapshots);
+    }
+    m_lastChangedMonster.reset();
     if (!entry.steps.empty())
     {
         m_lastChangedMonster = entry.steps.front().number;
     }
-    else if (entry.models.front().monster >= 0)
+    else if (!entry.models.empty() && entry.models.front().monster >= 0)
     {
         m_lastChangedMonster = entry.models.front().monster;
     }
-    else
+    else if (!entry.soundSets.empty() && entry.soundSets.front().monster >= 0)
     {
-        m_lastChangedMonster.reset();
+        m_lastChangedMonster = entry.soundSets.front().monster;
     }
 }
 } // namespace MuEditor::Monsters

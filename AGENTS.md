@@ -46,6 +46,8 @@ Quick references:
 - Keep changes focused — one concern per commit (see rule 10 in the coding
   rules). Smaller diffs review faster.
 - Match the style of existing commit messages in `git log`.
+- Run `scripts/install-hooks.sh` once per clone: the pre-push hook runs the same
+  static checks and formatting check as CI's Quality Gates.
 - Reference the related issue in the PR description when applicable.
 
 ## Out of scope for AI changes

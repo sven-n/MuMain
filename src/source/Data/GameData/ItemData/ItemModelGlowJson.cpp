@@ -110,7 +110,7 @@ void ReadMeshes(ModelJson::ItemModelValueReader& reader, const char* meshesKey, 
 {
     if (reader.Has(meshesKey) && reader.Has(hiddenMeshKey))
     {
-        reader.Error(meshesKey, std::string("cannot be used together with ") + hiddenMeshKey);
+        reader.Fatal(meshesKey, std::string("cannot be used together with ") + hiddenMeshKey);
     }
     reader.ReadIndexes(meshesKey, meshes.only, MaxMesh);
     ReadOptionalIndex(reader, hiddenMeshKey, meshes.hidden, MaxMesh);

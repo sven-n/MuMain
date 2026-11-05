@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Core/Utilities/ReadScript.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -66,31 +68,46 @@ BuffScriptLoader::BuffScriptLoader()
 
 BuffScriptLoader::~BuffScriptLoader() {}
 
+namespace
+{
+// Like DataFileIO::ReportUnusableFile, but logged through mu::log instead of the error report (g_ErrorReport): the
+// buff list comes with every character, and the error report would bring the crash reporter, and with it the
+// renderer and the audio, into every binary that links it, the unit tests without Winmain.cpp included.
+void ReportUnusableBuffFile(const std::wstring& fileName, const wchar_t* issue)
+{
+    mu::log::Get("gameplay")->warn("{} - {}", mu_wchar_to_utf8(fileName.c_str()), mu_wchar_to_utf8(issue));
+    wchar_t text[256]{};
+    mu_swprintf(text, L"%ls - %ls", fileName.c_str(), issue);
+    MessageBox(g_hWnd, text, NULL, MB_OK);
+    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+}
+} // namespace
+
 bool BuffScriptLoader::Load(const std::wstring& pchFileName)
 {
-    FILE* fp = _wfopen(pchFileName.c_str(), L"rb");
+    Core::Utilities::FileHandle fp(_wfopen(pchFileName.c_str(), L"rb"));
 
-    if (fp != NULL)
+    if (fp)
     {
         DWORD structsize = sizeof(_BUFFINFO);
 
         DWORD listsize;
-        fread(&listsize, sizeof(DWORD), 1, fp);
-
-        BYTE* Buffer = new BYTE[structsize * listsize];
-        fread(Buffer, structsize * listsize, 1, fp);
-
-        DWORD dwCheckSum;
-        fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-
-        fclose(fp);
-        if (dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
+        if (!DataFileIO::ReadExact(fp.get(), &listsize, sizeof(DWORD)))
         {
-            mu::log::Get("gameplay")->warn("{} - File corrupted.", mu_wchar_to_utf8(pchFileName.c_str()));
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls - File corrupted.", pchFileName.c_str());
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+            ReportUnusableBuffFile(pchFileName, L"File corrupted.");
+            return true;
+        }
+
+        std::vector<BYTE> content(static_cast<std::size_t>(structsize) * listsize);
+        BYTE* Buffer = content.data();
+        DWORD dwCheckSum;
+        const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, structsize * listsize) &&
+                              DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+
+        fp.reset();
+        if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
+        {
+            ReportUnusableBuffFile(pchFileName, L"File corrupted.");
         }
         else
         {
@@ -123,15 +140,10 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
                 pSeek += structsize;
             }
         }
-        delete[] Buffer;
     }
     else
     {
-        mu::log::Get("gameplay")->warn("{} - File not exist.", mu_wchar_to_utf8(pchFileName.c_str()));
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", pchFileName.c_str());
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        ReportUnusableBuffFile(pchFileName, L"File not exist.");
     }
 
     return true;

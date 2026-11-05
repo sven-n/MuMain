@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "Network/Server/WSclient.h"
+#include "Core/Globals/_enum.h" // MESSAGE_SERVER_LOST_RECONNECT
 
 #include "json.hpp"
 
@@ -57,7 +58,7 @@ struct LoginFailureEntry
 
 // The client's own failure vocabulary, by the named macros only: the
 // numbers are upstream's and may be renumbered.
-constexpr std::array<LoginFailureEntry, 19> LoginFailures = {{
+constexpr std::array<LoginFailureEntry, 20> LoginFailures = {{
     {RECEIVE_LOG_IN_FAIL_PASSWORD, "password is incorrect"},
     {RECEIVE_LOG_IN_FAIL_ID, "account is invalid"},
     {RECEIVE_LOG_IN_FAIL_ID_CONNECTED, "account is already connected"},
@@ -77,6 +78,8 @@ constexpr std::array<LoginFailureEntry, 19> LoginFailures = {{
     {RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO, "no charge information"},
     {RECEIVE_LOG_IN_FAIL_ONLY_OVER_15, "account is below the age limit"},
     {RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL, "this channel requires a paid subscription"},
+    // The login screen could not reach the server again (LoginSceneReconnect).
+    {MESSAGE_SERVER_LOST_RECONNECT, "the server cannot be reached"},
 }};
 
 // The entry for a message code, or nullptr: the one scan behind both
@@ -193,10 +196,50 @@ const std::vector<std::string>& CommandNames()
     // the whole client into that test. The dispatcher checks itself against
     // this list instead (ControlDispatcher.cpp, CommandTable).
     static const std::vector<std::string> names = {
-        "ping",   "scene", "state",      "nearby", "events",   "wait-for", "screenshot", "login",   "select-char",
-        "logout", "quit",  "move",       "warp",   "teleport", "attack",   "skill",      "pickup",  "use",
-        "equip",  "say",   "whisper",    "party",  "halt",     "hotkey",   "click-ui",   "drag-ui", "hover-ui",
-        "type",   "ui",    "slot-pixel", "trade",  "console",  "bench",    "bones",      "tooltip", "tooltip-snapshot",
+        "ping",
+        "scene",
+        "state",
+        "nearby",
+        "events",
+        "wait-for",
+        "screenshot",
+        "login",
+        "select-char",
+        "logout",
+        "quit",
+        "move",
+        "warp",
+        "teleport",
+        "attack",
+        "skill",
+        "pickup",
+        "use",
+        "equip",
+        "say",
+        "whisper",
+        "party",
+        "halt",
+        "hotkey",
+        "click-ui",
+        "drag-ui",
+        "hover-ui",
+        "type",
+        "ui",
+        "slot-pixel",
+        "trade",
+        "console",
+        "bench",
+        "bones",
+        "drawspawns",
+        "drawpurity",
+        "drawlater",
+        "drawparity",
+        "spawn-effect",
+        "tooltip",
+        "tooltip-snapshot",
+        "item-name",
+        "item-name-snapshot",
+        "repair-tooltip",
     };
     return names;
 }

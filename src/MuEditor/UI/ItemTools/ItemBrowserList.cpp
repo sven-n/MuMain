@@ -14,6 +14,7 @@
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "ItemLevelModels.h"
 #include "ItemNamesakes.h"
+#include "ItemUsage.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -48,7 +49,7 @@ void RenderRow(int itemType, bool selected, int& clicked)
     }
     else
     {
-        ImGui::TextDisabled("%s", I18N::Editor::NoItemAtThisNumber);
+        ImGui::TextDisabled("%s", GetNumberWithoutItemLabel(itemType));
     }
     ImGui::TableSetColumnIndex(2);
     if (const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType))

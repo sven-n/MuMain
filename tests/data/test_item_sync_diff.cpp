@@ -6,8 +6,10 @@
 
 #include "ClientDataScope.h"
 
+#include "Core/SecretStore.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSyncDiff.h"
+#include "UI/ItemTools/ItemSyncServer.h"
 #include "UI/ItemTools/MuItemSyncUI.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -17,11 +19,16 @@
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <optional>
 #include <random>
+#include <set>
 #include <string>
+#include <string_view>
+#include <thread>
 #include <vector>
 
 using namespace MuEditor::Items;
@@ -365,7 +372,7 @@ TEST_CASE("Formulas the item stat file's checks refuse are not taken [data][item
     }
     std::vector<ItemDataIssue> issues;
     const ItemExchangeFile applied = ApplyItemSyncDiff(sides.client, sides.file, diff, issues);
-    CHECK(HasErrors(issues));
+    CHECK(HasFatal(issues));
     CHECK(*applied.formulas == *sides.client.formulas);
 }
 
@@ -463,6 +470,285 @@ TEST_CASE("Item Sync imports the checked rows of a file as one undo step [data][
     CHECK(g_ItemDatabase.Find(MakeItemType(0, 101)) == nullptr);
     CHECK(g_ItemDataHandler.GetStatFile() == statFile);
     g_ItemEdits.GetHistory().Clear();
+}
+
+// OpenMU's export adds its fields one at a time: only the fields a file names are compared and
+// taken, and an item only the file has is not added while the file lacks fields.
+TEST_CASE("A file with a field list changes only those fields and adds no item [data][items][editor]")
+{
+    Sides sides;
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "width"};
+    const ItemDefinition kris = Sides::Find(sides.client, KrisType);
+    ItemDefinition& fileKris = sides.FileItem(KrisType);
+    fileKris.width = static_cast<BYTE>(kris.width + 1);
+    fileKris.damageMin = static_cast<WORD>(kris.damageMin + 7);
+    // A file without names.
+    fileKris.names = Data::LocalizedString{};
+    ItemDefinition added = fileKris;
+    added.number = 200;
+    sides.file.items.push_back(added);
+
+    const ItemSyncDiff diff = sides.Diff();
+    const SyncItem* row = FindRow(diff, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(row->name == "Kris");
+    REQUIRE(row->fields.size() == 1);
+    CHECK(row->fields[0].field == "width");
+    CHECK(row->fields[0].checked);
+    const SyncItem* addedRow = FindRow(diff, MakeItemType(0, 200));
+    REQUIRE(addedRow != nullptr);
+    CHECK(addedRow->change == SyncChange::New);
+    CHECK_FALSE(addedRow->checked);
+    CHECK(addedRow->locked == std::string(I18N::Editor::TheFileDoesNotCarryAllFieldsOfAnItemItIsNotAdded));
+
+    std::vector<ItemDataIssue> issues;
+    ItemExchangeFile applied = ApplyItemSyncDiff(sides.client, sides.file, diff, issues);
+    CHECK_FALSE(HasFatal(issues));
+    const ItemDefinition& appliedKris = Sides::Find(applied, KrisType);
+    CHECK(appliedKris.width == kris.width + 1);
+    CHECK(appliedKris.damageMin == kris.damageMin);
+    CHECK(appliedKris.names == kris.names);
+    CHECK(std::ranges::none_of(applied.items, [](const ItemDefinition& item)
+                               { return MakeItemType(item.group, item.number) == MakeItemType(0, 200); }));
+}
+
+// Import and Update from server list an item only the client has apart from the others, unchecked;
+// Check all checks it too (Undo takes back an import), Check none unchecks it.
+TEST_CASE("Check all checks the items only the client has too [data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+
+    ItemSyncDiff diff = sides.Diff();
+    const SyncItem* krisRow = FindRow(diff, KrisType);
+    const SyncItem* shortSwordRow = FindRow(diff, ShortSwordType);
+    REQUIRE(krisRow != nullptr);
+    REQUIRE(shortSwordRow != nullptr);
+    SyncItem& kris = diff.items[static_cast<size_t>(krisRow - diff.items.data())];
+    SyncItem& shortSword = diff.items[static_cast<size_t>(shortSwordRow - diff.items.data())];
+    REQUIRE(kris.fields.size() == 1);
+    CHECK_FALSE(IsOnlyInClient(kris));
+    CHECK(IsOnlyInClient(shortSword));
+    CHECK_FALSE(shortSword.checked);
+
+    SetAllRowsChecked(diff, false);
+    CHECK_FALSE(kris.fields[0].checked);
+    SetAllRowsChecked(diff, true);
+    CHECK(kris.fields[0].checked);
+    CHECK(shortSword.checked);
+
+    SetAllRowsChecked(diff, false);
+    CHECK_FALSE(shortSword.checked);
+    SetRowChecked(shortSword, true);
+    CHECK(shortSword.checked);
+}
+
+TEST_CASE("Copy as Markdown writes the rows as a table [data][items][editor]")
+{
+    SyncItem added;
+    added.group = 12;
+    added.number = 73;
+    added.change = SyncChange::New;
+    added.name = "Sphere (4)";
+    added.fields.resize(2);
+    SyncItem removed;
+    removed.group = 14;
+    removed.number = 15;
+    removed.change = SyncChange::Removed;
+    removed.name = "Zen | Gold\nCoin";
+    const std::vector<const SyncItem*> rows = {&added, &removed};
+
+    const std::string onlyInClient = "Items only in the client (2)\n\n"
+                                     "| Group | Number | Item |\n"
+                                     "|---|---|---|\n"
+                                     "| 12 | 73 | Sphere (4) |\n"
+                                     "| 14 | 15 | Zen \\| Gold Coin |\n";
+    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (2)", "") == onlyInClient);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (2)", "In the client") ==
+          "Items that differ (2)\n\n"
+          "| In the client | Group | Number | Item | Fields |\n"
+          "|---|---|---|---|---|\n"
+          "| Added | 12 | 73 | Sphere (4) | 2 |\n"
+          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |\n");
+}
+
+// Update from server compares the downloaded text as Import compares a file, and Apply compares
+// it again afterwards, without a path.
+TEST_CASE("Item Sync applies a file from the server [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "width"};
+    ++sides.FileItem(KrisType).width;
+    const std::string url = "http://localhost:8080/api/items/exchange";
+
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    CHECK(g_MuItemSyncUI.GetApplyBlocker() == CMuItemSyncUI::ApplyBlocker::None);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width + 1);
+    CHECK(g_ItemDatabase.Find(KrisType)->damageMin == kris.damageMin);
+    // Compared again from the same text: nothing is left.
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->items.empty());
+
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->width == kris.width);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// Sphere 4 and 5: the client has their numbers as entries without a name (models, no item), the
+// server has the items. Neither side has an item where the server has nothing.
+TEST_CASE("Update from server fills the client's entry without a name [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const int sphere4Type = MakeItemType(12, 73);
+    const ItemDefinition before = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    REQUIRE(before.entryWithoutName);
+    ItemDefinition sphere4;
+    sphere4.group = 12;
+    sphere4.number = 73;
+    sphere4.names = Data::LocalizedString::Parse("Sphere (4)");
+    // A size the client's entry does not have (it is 1x1).
+    sphere4.width = 2;
+    sphere4.height = 2;
+    sphere4.statProfile = std::string(StatProfileNames::Default);
+    sides.file.items.push_back(sphere4);
+    const std::string url = "http://localhost:8080/api/items/exchange";
+
+    // Without fields there is nothing to compare: no row, as for every other item.
+    sides.file.fields = std::set<std::string, std::less<>>{};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->items.empty());
+
+    // Its size is a change of the entry, applied to it: it stays an entry without a name.
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "width"};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    const SyncItem& row = g_MuItemSyncUI.GetDiff()->items.front();
+    CHECK(MakeItemType(row.group, row.number) == sphere4Type);
+    CHECK(row.change == SyncChange::Changed);
+    CHECK(row.locked.empty());
+    CHECK(row.fields.size() == 2);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    const ItemDefinition& entry = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    CHECK(entry.entryWithoutName);
+    CHECK(entry.width == 2);
+    CHECK(entry.height == 2);
+    CHECK(g_ItemDatabase.Find(sphere4Type) == nullptr);
+
+    // Its name makes it the item.
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "name", "width"};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    REQUIRE(g_ItemDatabase.Find(sphere4Type) != nullptr);
+    CHECK(g_ItemDatabase.Find(sphere4Type)->names.GetNeutral() == "Sphere (4)");
+    CHECK_FALSE(g_ItemDatabase.Find(sphere4Type)->entryWithoutName);
+
+    REQUIRE(g_ItemEdits.Undo());
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type] == before);
+    g_ItemEdits.GetHistory().Clear();
+}
+
+TEST_CASE("The API key is kept per admin panel address [data][items][editor]")
+{
+    CHECK(GetApiKeySecretName(" https://admin.example.org/ ") == "OpenMU API key https://admin.example.org");
+    CHECK(GetApiKeySecretName("http://localhost:8080") == "OpenMU API key http://localhost:8080");
+}
+
+// A secret of its own goes into the system's key store and out again. A build without a store,
+// or a store that refuses (a locked keychain on a build machine), has nothing to test.
+TEST_CASE("The key store keeps, replaces and removes a secret [data][items][editor]")
+{
+    if (!MuEditor::SecretStore::IsAvailable())
+    {
+        MESSAGE("this build has no key store");
+        return;
+    }
+    const std::string name = "test " + std::to_string(std::random_device{}());
+    if (!MuEditor::SecretStore::Write(name, "first key"))
+    {
+        MESSAGE("the key store refuses secrets here");
+        return;
+    }
+    CHECK(MuEditor::SecretStore::Read(name) == std::optional<std::string>("first key"));
+    CHECK(MuEditor::SecretStore::Write(name, "second key"));
+    CHECK(MuEditor::SecretStore::Read(name) == std::optional<std::string>("second key"));
+    CHECK(MuEditor::SecretStore::Remove(name));
+    CHECK_FALSE(MuEditor::SecretStore::Read(name).has_value());
+    CHECK(MuEditor::SecretStore::Remove(name));
+}
+
+TEST_CASE("Update from server needs an address and an API key [data][items][editor]")
+{
+    // The address field is empty in a new editor.
+    CHECK_FALSE(g_MuItemSyncUI.UpdateFromServer());
+    CHECK(g_MuItemSyncUI.GetServerMessage() == std::string(I18N::Editor::EnterTheAddressOfTheOpenMUAdminPanel));
+}
+
+// Against a running OpenMU: MU_TEST_OPENMU_URL is the exchange file's address (e.g.
+// http://127.0.0.1:18080/api/items/exchange) and MU_OPENMU_API_KEY a Viewer key. Without them the
+// test does nothing. The file must read without errors, and the diff may only list the fields the
+// file names.
+TEST_CASE("Update from server reads the file of a running OpenMU [data][items][editor]")
+{
+    const char* url = std::getenv("MU_TEST_OPENMU_URL");
+    if (url == nullptr || ReadOpenMUApiKey().empty())
+    {
+        MESSAGE("MU_TEST_OPENMU_URL or MU_OPENMU_API_KEY is not set: no server to read");
+        return;
+    }
+    Sides sides;
+    CItemSyncDownload download;
+    REQUIRE(download.Start(url, ReadOpenMUApiKey()));
+    std::optional<ServerDownload> result;
+    for (int attempt = 0; attempt < 1200 && !result; ++attempt)
+    {
+        result = download.TakeResult();
+        if (!result)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+    REQUIRE(result);
+    REQUIRE(result->problem == ServerUpdateProblem::None);
+
+    std::vector<ItemDataIssue> issues;
+    ItemExchangeFile file;
+    ReadItemExchangeJson(result->body, url, file, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        MESSAGE(issue.ToString());
+    }
+    REQUIRE(CanImportItemExchange(file, issues));
+    CHECK(file.source == ItemExchangeSourceOpenMU);
+
+    g_MuItemSyncUI.CompareServerFile(result->body, url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    for (const SyncItem& row : g_MuItemSyncUI.GetDiff()->items)
+    {
+        for (const SyncField& field : row.fields)
+        {
+            CAPTURE(field.field);
+            CHECK(CarriesField(file, std::string_view(field.field).substr(0, field.field.find('.'))));
+        }
+        if (row.change == SyncChange::New && !CarriesEveryField(file))
+        {
+            CHECK_FALSE(row.checked);
+        }
+    }
+    MESSAGE("rows: " << g_MuItemSyncUI.GetDiff()->items.size()
+                     << ", same items: " << g_MuItemSyncUI.GetDiff()->sameItems);
 }
 
 // The checks of a save run on the data as it would be: an item that names a profile the

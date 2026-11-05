@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
@@ -50,6 +51,11 @@ using namespace mu::ui::window;
 
 namespace
 {
+bool IsTargetedTempleSkill(int skill)
+{
+    return skill == AT_SKILL_CURSED_TEMPLE_RESTRAINT || skill == AT_SKILL_CURSED_TEMPLE_SUBLIMATION;
+}
+
     const int HolyItemNpc = 380;
     const int AlliedNpc = 381;
     const int IllusionNpc = 382;
@@ -63,6 +69,29 @@ namespace
     // RenderSkill()'s three hover tooltips are the only Tooltip::Show() callers in this file and
     // their hover regions are disjoint, so one shared owner token is enough.
     const int kSkillHoverTooltipOwner = 0;
+
+    // The temple skills' descriptions, from AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION.
+    const wchar_t* const* const kSkillDescriptions[] = {
+        &I18N::Game::AbsorbDamageWithTheProtectionShield,
+        &I18N::Game::MobilityDisabled,
+        &I18N::Game::RelocateToTheCharacterThatCarriesTheSacredItem,
+        &I18N::Game::ShieldGageReducedOf50,
+    };
+    static_assert(std::size(kSkillDescriptions) ==
+                      AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1,
+                  "one description per temple skill");
+
+    // The skill panel's description of temple skill `skill` (AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION); empty for any other skill.
+    const wchar_t* SkillDescription(int skill)
+    {
+        if (skill < AT_SKILL_CURSED_TEMPLE_PRODECTION || skill > AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        {
+            return L"";
+        }
+        return *kSkillDescriptions[skill - AT_SKILL_CURSED_TEMPLE_PRODECTION];
+    }
 
     //#ifdef _DEBUG
     const float posX[7] =
@@ -133,18 +162,18 @@ namespace
                     Vector(0.f, 0.f, i * (90.f / 4.f), Angle);
                     Vector(0.6f, 1.f, 0.8f, Light);
 
-                    Position[0] += cosf(Q_PI / 180.f * 10.0f * i) * (float)(rand() % 240 + 140);
-                    Position[1] += sinf(Q_PI / 180.f * 10.0f * i) * (float)(rand() % 240 + 140);
-                    Position[2] += rand() % 200 + 100;
+                    Position[0] += cosf(Q_PI / 180.f * 10.0f * i) * (float)(Random::Rand() % 240 + 140);
+                    Position[1] += sinf(Q_PI / 180.f * 10.0f * i) * (float)(Random::Rand() % 240 + 140);
+                    Position[2] += Random::Rand() % 200 + 100;
 
                     Vector(0.f, 0.f, 0.f, vRelativePos);
                     VectorCopy(o->Position, b->BodyOrigin);
 
-                    b->TransformPosition(o->BoneTransform[rand() % 50], vRelativePos, vtaWorldPos, true);
+                    b->TransformPosition(o->BoneTransform[Random::Rand() % 50], vRelativePos, vtaWorldPos, true);
 
                     Vector(0.7f, 1.f, 0.4f, Light);
 
-                    if (rand() % 2 == 1)
+                    if (Random::Rand() % 2 == 1)
                     {
                         CreateJoint(BITMAP_JOINT_ENERGY, Position, vtaWorldPos, Angle, 44, o, 15.f, -1, 0, 0, -1, Light);
                     }
@@ -180,13 +209,13 @@ namespace
                     VectorCopy(o->Position, Position);
                     Vector(0.f, 0.f, 0.f, Angle);
 
-                    Position[0] += cosf(Q_PI / 180.f * 10.0f * i) * (float)(rand() % 50 + 20);
-                    Position[1] += sinf(Q_PI / 180.f * 10.0f * i) * (float)(rand() % 50 + 20);
+                    Position[0] += cosf(Q_PI / 180.f * 10.0f * i) * (float)(Random::Rand() % 50 + 20);
+                    Position[1] += sinf(Q_PI / 180.f * 10.0f * i) * (float)(Random::Rand() % 50 + 20);
                     Position[2] -= 120.f;
 
-                    if (rand() % 3 == 1)
+                    if (Random::Rand() % 3 == 1)
                     {
-                        if (rand() % 2 == 1)
+                        if (Random::Rand() % 2 == 1)
                         {
                             Vector(0.3f, 0.3f, 0.8f, Light);
                         }
@@ -836,8 +865,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
         mu_swprintf(TextList[TextNum], L"\n");
         TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"%ls",
-                    I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
+        mu_swprintf(TextList[TextNum], L"%ls", SkillDescription(CursedTempleCurSkillType));
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextNum++;
 
@@ -1103,21 +1131,27 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
 
     float Distance = gSkillManager.GetSkillDistance(CursedTempleCurSkillType, c);
 
+    const bool targetedSkill = IsTargetedTempleSkill(CursedTempleCurSkillType);
     bool checktile = true;
 
-    if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-        || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+    if (targetedSkill)
     {
         checktile = CheckTile(c, o, Distance);
     }
 
     if (checktile)
     {
-        CHARACTER* tc = NULL;
+        CHARACTER* tc = Hero;
 
-        if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-            || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        if (targetedSkill)
         {
+            // Protect the character-table access in the teammate loop below.
+            if (selectcharacterindex >= MAX_CHARACTERS_CLIENT || getTargetCharacterKey(c, selectcharacterindex) == -1)
+            {
+                MouseRButtonPush = false;
+                return;
+            }
+
             for (int i = 0; i < m_CursedTempleMyTeamCount; ++i)
             {
                 if (m_CursedTempleMyTeam[i].userIndex == CharactersClient[selectcharacterindex].Key)
@@ -1127,31 +1161,10 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
                 }
             }
 
-            if (selectcharacterindex == -1)
-            {
-                MouseRButtonPush = false;
-                return;
-            }
-            else if (getTargetCharacterKey(c, selectcharacterindex) == -1)
-            {
-                MouseRButtonPush = false;
-                return;
-            }
-
             tc = &CharactersClient[selectcharacterindex];
         }
-        else
-        {
-            tc = Hero;
-        }
-
-        if (tc == NULL)
-        {
-            MouseRButtonPush = false;
-            return;
-        }
-
-        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType, static_cast<BYTE>(tc->Key), Distance);
+        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType,
+                                                                     static_cast<uint16_t>(tc->Key), Distance);
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 

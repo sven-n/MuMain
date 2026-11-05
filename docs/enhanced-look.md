@@ -209,7 +209,7 @@ for the whole file.
 ## Developer commands
 
 Builds with the control socket (`ENABLE_CONTROL_SOCKET=ON`, the `-mueditor`
-presets) or the DevEditor have commands for tuning. Players' builds have none
+and `-in-game-tests` presets) or the DevEditor have commands for tuning. Players' builds have none
 of them; there only `$look enhanced|classic` exists.
 
 Live tuning of the look profile (session only until `$look save`). A value

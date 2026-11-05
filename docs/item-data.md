@@ -18,6 +18,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
+| `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
@@ -61,10 +62,23 @@ The file name is only a convention; the group comes from the file content.
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
 - Files are UTF-8 with LF line endings.
+- **The item files list every number the client uses.** An entry without
+  a name (`{ "number": 73 }`) is a number the client uses without an
+  item there: Sphere 4 and 5 (12,73 and 12,74) have their models and code
+  names them, but there is no item for them yet. The game treats such a
+  number as empty, and only its number is checked. It has no `name` key
+  at all: an empty name (`"name": ""`) is an item without its English
+  name and stops the start. Every number with a
+  model entry has an entry here, an item or one without a name; a model
+  entry without one is an error in **Data Checks** (the game runs, and a
+  save is not refused). An entry
+  without a name becomes an item when it gets an English name (Item
+  Basics, or an import that brings the name).
 
 ### Names and translations
 
-`name` holds the item's names by language: `en` (English, required) first,
+`name` holds the item's names by language: `en` (English, required for an
+item) first,
 then the translations sorted by language code. The codes are the same as
 for the UI texts (`de`, `pt`, `es`, …). A plain text (`"name": "Kris"`) is
 read as the English name only; saving writes the object form.
@@ -93,8 +107,9 @@ names, ancient set prefixes are omitted, and money uses `Zen +amount`. A languag
 change may require updating saved keywords; option words follow the UI language
 too. Ordinary equipment keeps contiguous keywords such as `+7+Skill` in English.
 `+N` matches the displayed name's number, not necessarily the raw source level:
-Kundun tiers and jewel bundles use their displayed numbers, while seeds and some
-quest items omit their source level. Unmapped variant levels fall back to the base
+Kundun tiers use their displayed numbers, while seeds and some quest items omit
+their source level. Jewel and stone bundles show their count instead (`x10` to
+`x30`), so a keyword such as `Bless +2` no longer matches them; `Bless x20` does. Unmapped variant levels fall back to the base
 name and `+level`.
 
 A saved keyword holds **at most 14 encoded bytes** (14 single-byte characters,
@@ -116,6 +131,9 @@ variants or option words. An online keyword need not select the same items offli
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
+| `groundLabels` | The styles of the item's name on the ground, by level: `[{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}]`. The first rule whose `levels` hold gives the style; at a level none holds at, the standard rules do (see [Ground labels](#ground-labels)). A client-only field; the bmd import keeps it |
+| `tooltipLayout` | The [tooltip layout](#tooltip-layouts) the item uses, a preset like `"noClassLines"` (left out: `default`; `"default"` is read as left out, and a save leaves it out). A client-only field; the bmd import keeps it |
+| `tooltipLayoutChanges` | The item's own changes to its tooltip layout: `{"hide": ["blankAfterOptions"], "add": [{"after": "classLines", "lines": [{"text": ""}]}]}`, the ids of the layout lines it leaves out and the lines it adds after a line, each written like a `description` line without `after` (see [Presets](#presets)). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -135,7 +153,7 @@ variants or option words. An online keyword need not select the same items offli
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
-| `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
+| `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed, 1 to 3 (first to third class; above 3 is a warning, as no character reaches it) |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
 | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
@@ -173,50 +191,74 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
-| `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
-| `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
-| `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
 
-Wings need no tag: an item is a wing when its `slot` is `wings`.
+Wings need no tag: an item is a wing when its `slot` is `wings`. Which lines an
+item's tooltip leaves out (its class lines, its durability line, …) is no tag
+but its [tooltip layout](#presets). An item file that still has one of the
+former tags `noClassLines`, `noDurabilityLine`, `noLevelRequirement` or
+`noBlankAfterOptions` still loads: the tag is read as what replaces it (the
+preset `noClassLines`, `noDurabilityLine` or, with both, `noClassOrDurabilityLines`;
+the line ids `requiredLevel` and `lackingLevel`, or `blankAfterOptions`, among
+the item's own `hide`), with a warning, and Save Items writes that instead.
+An item that names another layout itself is an error, since which of the two
+it means is the author's call. A condition can't name them either
+(`"!tag:noDurabilityLine"`): nothing in a condition stands for the item's
+layout, so it is an error that says what replaced the tag; the line it left out
+for those items needs no condition, as their layout leaves it out.
 
 ### Tooltip layouts
 
 `Tooltips/Tooltip.json` says which lines an item tooltip shows besides the
-item's own description: damage, defense, magic defense, defense rate, the
-speeds, the resistances, the requirements with their "(lacking …)" lines, and
-the wizardry, curse and pet attack increases. It has the **shared texts**, by
-name and with their translations, and the **layouts**. Every item uses the
-layout `default` for now.
+item's own description: the blank rows between its parts, damage, defense,
+magic defense, defense rate, the speeds, the resistances, the requirements with
+their "(lacking …)" lines, the class lines ("Can be equipped by …"), the boots'
+and gloves' texts from +5, the wizardry, curse and pet attack increases, and a
+timed item's end. It has the **shared texts**, by name and with their
+translations, and the **layouts**: `default`, and the [presets](#presets) made
+from it.
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "texts": {
     "defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defense}"},
-    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"}
+    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"},
+    "canBeEquippedBy": {"en": "Can be equipped by {className}", "de": "Kann von {className} ausgerüstet werden"}
   },
   "layouts": [
     {
       "name": "default",
       "lines": [
+        {"id": "firstRow", "text": ""},
         {"section": "name"},
+        {"id": "blankAfterName", "text": ""},
+        {"section": "itemCases"},
         {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
         {"section": "description"},
-        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
-        {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
-        {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
+        {"id": "durability", "text": "@durability", "when": ["hasDurability", "!timed"]},
+        {"id": "requiredLevel", "text": "@requiredLevel", "when": ["requiredLevel"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
+        {"id": "lackingLevel", "text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "missingLevel"], "color": "red"},
         {"section": "classes"},
-        {"text": "", "when": ["tag:sceptre"]},
-        {"text": "@petAttackIncrease", "when": ["tag:sceptre"], "color": "blue", "bold": true},
-        {"section": "options"}
+        {"id": "classLinesBlank", "text": ""},
+        {"id": "classLines", "text": "@canBeEquippedBy", "forEachClass": true, "when": ["!allClasses"], "colors": [{"when": ["!classUsable"], "color": "darkRed"}]},
+        {"text": "@increasesMovingSpeed", "when": ["boots", "level>=5"], "color": "blue", "bold": true},
+        {"id": "blankBeforeOptions", "text": "", "when": ["hasOptions", "!tag:gemJewelry"]},
+        {"section": "options"},
+        {"id": "blankAfterOptions", "text": ""},
+        {"section": "afterOptions"},
+        {"text": "@expiredItem", "when": ["timed", "expired"], "color": "red"},
+        {"text": "{expireDate}", "when": ["timed", "!expired"], "color": "blue"}
       ]
-    }
+    },
+    {"name": "noClassLines", "base": "default", "hide": ["classLinesBlank", "classLines"]}
   ]
 }
 ```
 
 A layout line has:
 
+- **`id`**: a name of letters and digits, for the presets and the items that
+  hide the line or add lines after it; most lines have none.
 - **`text`**: `"@name"` for a shared text, a text written in place (with its
   translations, as in a description), or `""` for a blank line. Its
   placeholders are the [built-in values](#description-placeholders) and those
@@ -243,6 +285,17 @@ A layout line has:
 - **`bold`**: `true` for a bold line.
 - **`values`**: a placeholder of the text and the built-in value it shows on
   this line. One "(lacking {missing})" serves every requirement this way.
+- **`forEachClass`**: `true` writes the line once for each class the item's
+  `classRequirements` name, in their order, with `{className}` the class at the
+  level the item needs (Dark Knight, Blade Knight or Blade Master) and the state
+  `classUsable` for that class. A level the class skips names its next one,
+  the first that can use the item (a Magic Gladiator's `2` is the Dual
+  Master); a level above `3` names none and writes no line, and the item data
+  warns about it. The default layout's class lines are such a
+  line: white for the hero who can use the item, dark red for the others, and
+  none when every class can from its first class (`allClasses`). On any other
+  line, a layout's, an item's own or a ground label rule, `{className}` is
+  empty and `classUsable` never holds, so naming them there is a warning.
 
 The **states** a condition can name:
 
@@ -260,21 +313,60 @@ The **states** a condition can name:
 | `hasDurability` | The item keeps a durability: an item of groups 0 to 11 or 13 with a `durability` or `magicDurability`, or the wings and capes 12/0–6, 12/36–43 and 12/49–50 |
 | `timed` | A timed item, one that expires |
 | `hasOptions` | The item has options to show: a skill, luck, an additional or an excellent option |
+| `skillLuckOrOption` | The item has its skill, luck or an additional option; excellent options don't count |
+| `setItem` | An ancient item of a set: its discriminator names one of the item's sets, whose name the item's name starts with (`ancient` is any discriminator) |
+| `socketItem` | An item that can have sockets |
+| `upperTierWings` | Wings or a cape of the second or third tier (`wingTier`) |
+| `allClasses` | Every class can use the item from its first class: its `classRequirements` name all seven at level 1, the original client's rule. An item that a class can use only from its second or third class shows its class lines |
+| `classUsable` | On a line with `forEachClass`: the hero is that class at the level the item needs or above |
+| `boots`, `gloves` | Boots (group 11) or gloves (group 10) |
+| `expired` | A timed item whose time is up |
 
 A **section** is a part of the tooltip the code still writes, and the lines
-of a layout go between them:
+of a layout go between them: the lines after a section come right after what
+the code writes there, and the lines before the first section come first.
 
 | Section | What the code writes there |
 |---|---|
-| `name` | Everything up to the item's name, and the name |
+| `name` | The shop prices, and the item's name |
+| `itemCases` | The lines of the items that need the game: the reset fruits' points, the Talismans' saved places, the socket seeds and spheres, the Sign of Dimensions' count |
 | `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
-| `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
-| `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
+| `classes` | Nothing: the class lines and the boots' and gloves' texts are layout lines |
+| `options` | The Jewel of Harmony, excellent and other options |
+| `afterOptions` | The description's lines after the options and the Horn of Fenrir's lines; the set and socket options come after the lines of this section |
 
-Each layout has the four sections once each, in this order: it starts with
-`name` and ends with `options`.
+Each layout has the six sections once each, in this order.
 
-**Errors** when the item data loads: a `@name` that is not a shared text (in a
+#### Presets
+
+A layout with a `base` is a **preset**: its base's lines without the lines
+whose `id` its `hide` lists, and with the lines of each `add` entry right after
+the line of that entry's `after` id (`{"after": "classLines", "lines": [...]}`),
+so a change to `default` reaches every preset. A preset can be based on another
+one. An item uses a preset with `tooltipLayout`, and changes its layout itself
+with `tooltipLayoutChanges` (the same `hide` and `add`, the added lines written
+as its description lines are, with `levels`); without either it uses
+`default`. So no item writes the blank rows or the class lines itself, and an
+exception is a preset or an item's own change, without code. The shipped
+presets:
+
+| Preset | What it leaves out | Items |
+|---|---|---|
+| `noClassLines` | The class lines and the blank row before them | 72: the Jewel of Chaos, the Gem of Secret, the Bundles of Jewel of Bless and Soul, the ribbon boxes, the Armor of Guardsman, the event transformation rings (Elite Skeleton, Jack O'Lantern, Christmas, GM, Snowman, Panda and Skeleton Ring), the seals, the talismans, the Chaos Cards, the Rare Item Tickets, the elite potions, the buff, battle and strength scrolls, the elixirs and the Summoner Character Card |
+| `noDurabilityLine` | The durability line, where an item shows none or its description has its own (a stack's "Number of items", a ticket's "usable … times") | 30: arrows and bolts, the Guardian Angel and the Imp, the Horns of Uniria and Dinorant, the Dark Horse and Dark Raven, the quest items (Contract, Order, Scroll of Archangel, Blood Bone, Invisibility Cloak, Wizard's Ring, Splinter of Armor, Bless of Guardian, Claw of Beast, Fragment of Horn), the Invitation to Santa Village, the Pet Skeleton and the lucky item tickets |
+| `noClassOrDurabilityLines` | Both (based on `noClassLines`) | 27: the Transformation Ring, the Absolute Weapon of Archangel, the Horn of Fenrir, the event tickets (Devil Square, Blood Castle, Kalima, Illusion Temple, Chaos Castle, Doppelganger, Varka), the reset fruits, the Talisman of Mobility, the gamble items and five pets (Demon, Spirit of Guardian, Rudolf, Panda, Unicorn) |
+
+Loch's Feather hides its level requirement itself (`requiredLevel`,
+`lackingLevel`), and the Pet Skeleton and the Invitation to Santa Village the
+blank row after the options (`blankAfterOptions`), so their lines there follow
+the options directly. Every item with `elitePotion`, `buffScroll`, `elixir`,
+`gambleItem`, `battleOrStrengthScroll` or `guardianPet` uses a layout without
+the class lines, as the original client's list did; one whose layout has them
+is a warning.
+
+**Errors** when the item data loads: a `Tooltip.json` of `formatVersion` 1,
+from before the code lines became layout lines (its layout lacks them and their
+sections; copy its changes into this client's file), a `@name` that is not a shared text (in a
 layout or a description), an entry of `when` that is neither a value, a
 comparison of a value with a whole number, a state nor a known tag, an unknown
 color, a placeholder that is neither built in nor named by the line's
@@ -283,11 +375,15 @@ color, a placeholder that is neither built in nor named by the line's
 are not those of the English text,
 a text (other than a blank line) without its English text, a language code
 that has more than letters, digits and `-`, a `values` entry that names no
-built-in value, missing or misplaced sections, and no layout `default`. The
-messages suggest the name meant for a typo. **Warnings**: a shared text that
-neither a layout nor a description uses, a `values` entry the text does not
-have (a layout's or a description's line), a translation in a language the game has no texts in (as for item
-names), and a layout other than `default` (nothing uses it yet).
+built-in value, missing or misplaced sections, no layout `default`, two lines
+of a layout with the same `id`, a preset whose `base` is no layout (or whose
+bases go round in a circle), a `hide` or `after` id its base doesn't have, and
+an item's `tooltipLayout` the file doesn't have or a `tooltipLayoutChanges` id
+its layout doesn't have. The messages suggest the name meant for a typo.
+**Warnings**: a shared text that neither a layout nor a description uses, a
+`values` entry the text does not have (a layout's or a description's line),
+`{className}` or `classUsable` on a line without `forEachClass`, and
+a translation in a language the game has no texts in (as for item names).
 
 ### Flight equipment
 
@@ -339,7 +435,9 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
-  line).
+  line). A line's text is shown up to 511 characters (with its placeholders
+  filled, before it wraps), a name line's up to 255; a text written longer
+  is a warning, and the tooltip cuts it there.
 - **`color`** is one of the tooltip colors: `white` (left out), `blue`,
   `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
   `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.
@@ -370,7 +468,9 @@ In the tooltip:
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
 - **Size:** at most 32 rows. The description has them to itself, so a long
-  one never takes the room of the tooltip's other lines.
+  one never takes the room of the tooltip's other lines. The lines an item
+  adds to its [tooltip layout](#presets) (`tooltipLayoutChanges`) are wrapped
+  as its description lines are, in 16 rows of their own.
 - **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
   pet window writes their tooltip.
 
@@ -413,6 +513,74 @@ jewels); `{"text": "{monster} Transformation Ring", "values": {"monster":
 "monsterName:2"}, "levels": [0, 0]}` names a +0 Transformation Ring after the
 Budge Dragon.
 
+### Ground labels
+
+The name above an item on the ground (while the pointer is over it, or with
+Alt for every item) is its name line's text, Zen's with its amount. Its look
+comes from a **label style** of `Tooltips/GroundLabels.json`: a text color, a
+background (opaque black when left out) and bold.
+
+```json
+{
+  "formatVersion": 2,
+  "styles": {
+    "ticket": {"color": "#e58721"},
+    "jewel": {"color": "#ffcc19", "bold": true},
+    "setItem": {"color": "#00ff00", "background": "#3c3cc8", "bold": true},
+    "level0": {"color": "#b2b2b2"},
+    "faint": {"color": "#ffffff", "background": "#00000080"}
+  },
+  "standard": [
+    {"when": ["setItem"], "style": "setItem"},
+    {"when": ["level=0"], "style": "level0"}
+  ]
+}
+```
+
+- **An item's own styles** are its `groundLabels`: the first rule whose
+  `levels` hold gives the style. The Devil Square Ticket has
+  `[{"style": "ticket"}]`; the Pink Chocolate Box has
+  `[{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}]`. A rule
+  without `levels` holds at every level, also above +15 (Zen's amount is its
+  level).
+- **The standard rules** give the style at the levels where an item has none
+  of its own: the first rule whose `when` holds, with the
+  [conditions](#tooltip-layouts) of the tooltip lines. They are the level ladder
+  of the original client: the set items, the divine archangel weapons, the
+  socket items, the excellent items (not the second- and third-tier wings and
+  capes), from +7, with a skill, luck or option, then by level. A tag is read
+  from the item the drop is drawn as: the Weapon of Archangel at +0 to +2 is
+  drawn as a divine archangel weapon. Without a rule that holds the label is
+  white on black.
+- **Only a label of the standard rules** has the set's name in front of the
+  name and " +Skill", " +Option" and " +Luck" after it.
+- Colors are `"#rrggbb"`, red, green and blue from `00` to `ff`. A
+  background may also have its alpha, `"#rrggbbaa"`: `80` draws it half
+  transparent, `00` not at all (the text alone); without it, it is opaque, as
+  the original client draws every label. A file with such a background is
+  `"formatVersion": 2`, which Save Items writes; without one it stays `1`, so
+  a client from before the alpha still reads it.
+- The first styles are named by role and keep the looks of the original
+  client: `ticket`, `seal`, `pet`, `jewel`, `cashShopItem`, `giftBoxRed`, …
+  Two of them don't match their kind and are left as they were: the Open Access
+  Ticket to Chaos Castle is yellow (`eventItem`) beside the orange tickets, and
+  the Summoner Character Card is orange (`cashShopItem`) beside the yellow
+  character cards.
+
+In the item editor, the [Colors](#colors) window's Ground labels root changes
+the styles, and [Item Tooltip](#item-tooltip) previews an item's label and
+changes its own rules. The labels on the ground take a change at once, and
+Save Items writes the file.
+
+**Errors** when the item data loads: a style without a color or with a color
+that is not `"#rrggbb"` (`"#rrggbbaa"` for a background), a rule or an item naming a style the file doesn't have
+(the message suggests the name meant for a typo), and an unknown condition.
+**Warnings**: a style neither a rule nor an item names, a standard rule without
+conditions that isn't the last (the warning is on that rule: it always holds,
+so the rules after it are never used), and an item's rule whose levels the
+rules before it all take, such as every rule after one without `levels` (never
+used).
+
 ### Description placeholders
 
 A description or name text can show values of the item: `{value}` is replaced
@@ -436,9 +604,12 @@ placeholder is one of:
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
   `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
-  (its `name` in the item names' language), `levelPlusOne` (a packed jewel's count)
-  and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
-  1, 2 and 4 are its Destroy, Protect and Illusion kinds);
+  (its `name` in the item names' language), `levelPlusOne` (its level + 1),
+  `bundleCount` (how many jewels or stones a bundle holds, as the game counts
+  them; 0 for other items) and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
+  1, 2 and 4 are its Destroy, Protect and Illusion kinds); and for the layout's lines
+  `className` (on a line with `forEachClass`, the class at the level the item needs)
+  and `expireDate` (when a timed item ends, in local time: "2026-11-30  18:00");
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a
@@ -707,14 +878,52 @@ a profile no item names is a warning.
 
 ---
 
+## Ancient set options
+
+What an ancient set gives is not in the item files: `Data/Local/ItemSetType.bmd`
+says which items belong to which set, and
+`Data/Local/<Eng|Por|Spn>/ItemSetOption_<Eng|Por|Spn>.bmd` holds each set's
+name and options. A set has standard options (the first counts from two of its
+items worn, each further one from one more item), up to two ext options (from
+two items) and up to five full options (with the complete set). An option is a
+number and a value:
+
+| Number | Option |
+|---|---|
+| 0 to 23 | Strength, agility, energy, stamina, command; min and max damage; wizardry damage; damage; attack success rate; defense; max life, mana and AG; AG recovery; critical damage rate and critical damage; excellent damage rate and excellent damage; skill damage; double damage rate; ignore the enemy's defense; defense with a shield; damage with a two-handed weapon |
+| 24 to 28 | Not supported. In the original client these were class bonuses that grew with a stat; no set uses them, in the shipped data or in OpenMU. A set that has one gets nothing for it and shows no line |
+| 29 to 35 | Damage of one element's skills (the skill's mastery type): 29 ice, 30 poison, 31 lightning, 32 fire, 33 earth, 34 wind, 35 water |
+
+The element options (29 to 35) count only for a class the set names in its
+class requirement: 1 for the class as it is, 2 only once it has its second
+class (Soul Master, Blade Knight, Muse Elf, Bloody Summoner), as in the
+original client. A set that names no class gives them to nobody. The client
+adds them to the skill damage it shows; OpenMU has no such option, so the
+server's damage does not include them.
+
+Typing a set's name after `/` in the chat shows the set's options with their
+values: standard options blue, ext options green, full options yellow.
+Capitals and the apostrophe (`'` or the typographic `’` some names use) don't
+matter, and the trailing `s` is optional: `/Warrior`, `/warrior`, `/Warriors`
+and `/Warrior's` all show the set "Warrior's". When a text fits two sets, the
+set whose name it is (apart from capitals and the apostrophe's form) wins, then
+the set with the lower number; an item named like the text (`/<item name>`)
+opens before any set. No two shipped sets, and no set and item, fit the same
+text. The original client needed the exact name.
+
+---
+
 ## Loading and errors
 
 At startup all `*.json` files in `Data/Items` and `Stats/ItemStats.json` are
-read and checked.
+read and checked. Problems have three levels, the same in every data area
+and editor tool: **fatal** ones make the data unusable, **errors** name
+something that is missing (the game runs without it), **warnings** are worth
+knowing.
 
-**Errors** stop the start with a message that names the file, the item and
-the field (**Copy text** copies it). All problems are also written to
-`MuError.log`. Errors are:
+**Fatal problems** stop the start with a message that names the file, the
+item and the field (**Copy text** copies it). All problems are also written to
+`MuError.log`. Fatal problems are:
 
 - invalid JSON, a missing or unsupported `formatVersion`, an invalid `group`
 - an item without `number` or `name`, a number outside 0–511
@@ -855,7 +1064,7 @@ A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
 `white`, `azure`). The item editor adds colors, changes their values and
-removes the ones no item uses ([Glow Colors](#glow-colors)), and Save Items
+removes the ones no item uses (the [Colors window's Glow root](#glow-colors)), and Save Items
 writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
@@ -889,8 +1098,9 @@ to 44), `socketSeed`, `socketSeedSphere`, `characterCard` and
 `divineAndSuccubusSkin`.
 
 Some styles only apply to some drawings, and the model is drawn plainly
-otherwise: `runeBlade`, `greatScepter`, `grandSoulShield` and the
-`violentWindToEternalWing…` styles not for doppelgangers, `monsterBattleBow`
+otherwise: `runeBlade`, `greatScepter`, `grandSoulShield`, the
+`violentWindToEternalWing…` styles and the Magic Gladiator sets' `stormCrow`,
+`thunderHawk` and `hurricane` not for doppelgangers, `monsterBattleBow`
 only in the hands of the Metal Balrog and the Orc Archer of Doom,
 `helperNpcPlate` only on the helper NPCs (Luke and Leo the Helper, Helper
 Ellen; in the code the flag of a PC room look, which no player gets).
@@ -953,8 +1163,9 @@ letter or `..`), `\` in a path, display or glow values of the wrong kind
 `textureFolders` or `noneBlendMeshes`, a `model` that is not in
 `SharedModels.json`, or a shared model defined twice stop the start with
 a message; unknown fields and a shared model that no item uses are
-warnings. The automated tests also check that every model file and
-texture folder exists, that every texture of a model is in one of its
+warnings. The automated tests also check that every number with a model
+has an entry in the item files, that every model file and texture folder
+exists, that every texture of a model is in one of its
 texture folders, that every texture is a `.jpg` or `.tga` texture, and
 that every model file that several items use is a shared model.
 
@@ -1038,8 +1249,14 @@ shows it in the others.
 - **Item Browser**: the items with a search (a name in any language,
   `group,number` or the item type) and filters: group, tag, a rule flag
   that is off, items without a model, numbers that have a model but no
-  item, items without a name in a language. An item whose name another
-  item has too shows in grey what tells them apart, in the list and above
+  item, items without a name in a language. *All items* lists everything
+  that is at a number: the entries without a name (Sphere 4 and 5) are
+  among the items, as *Entry without a name*, and so is a model entry
+  without an item entry (only in files the checks report), as *No item at
+  this number*; a filter of the items (tag, rule flag, missing model or
+  name) leaves them out. An
+  item whose name another item has too shows in grey what tells them
+  apart, in the list and above
   each tool: the tags it has that not all its namesakes have (the lucky
   sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Seals of
   Wealth, the tiers of the seed spheres); the one namesake without such a tag
@@ -1047,16 +1264,26 @@ shows it in the others.
   UI language. It has **Save Items**,
   **Import from bmd**, **Export as bmd**, **Export as S6E3** and
   **Export as CSV**, and:
-  - **Add item**: a group, a free number (one with neither an item nor a
-    model entry), the English name, and either the selected item's values
-    or a size and slot of its own (no slot to start with, for an item that
-    cannot be worn; an item that can be worn starts usable by every class).
+  - **Add item**: a group, a free number (one with neither an entry in the
+    item files nor a model entry), the English name, and either the
+    selected item's values or a size and slot of its own (no slot to start
+    with, for an item that cannot be worn; an item that can be worn starts
+    usable by every class).
     Its model is linked in **Item Model**.
   - **Duplicate item**: a copy with its model. A model file of its own
     becomes a shared model that both items use, so it is opened once.
   - **Move item**: to a free number, with its model (the model data and the
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
+
+  An entry without a name moves and is removed as an item is; there is
+  nothing to duplicate.
+
+  Below a number that is not free, the add, duplicate and move dialogs say
+  what takes it: the item on it, an entry without a name (Sphere 4 and 5:
+  their models, but no item yet) or a model entry without an item entry,
+  with what the code calls the number, how the Item Browser lists it and
+  what uses the number.
 
   Moving and removing first list what goes with the item (its tags, its
   model entry and the shared model it names) and what uses it by its
@@ -1080,7 +1307,8 @@ shows it in the others.
   the vault, a trade, a shop): an item grid frees the cells by the size an
   item has when it is taken out. Such an item is not moved or removed
   either, an undo step that would change it is refused, and Import from bmd
-  keeps its size and slot.
+  keeps its size and slot. An entry without a name is edited here too; its
+  English name makes it an item.
 - **Item Requirements**: the stat profile, as in Item Basics, then the level
   and stat requirements. A stat requirement whose profile gives it a formula
   shows its value at +0 (what a normal item needs without an option level,
@@ -1113,19 +1341,19 @@ shows it in the others.
 - **Item Categories**: a tag and its items; add the selected item or remove
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
-- **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
+- **Glow Colors**: the glow color list, the Glow root of the
+  [Colors](#colors) window.
+- **Ground Label Styles**: the looks of the item names on the ground, the
+  Ground labels root of the [Colors](#colors) window.
+- **Item Tooltip**: how the item is shown, see [Item Tooltip](#item-tooltip).
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
-- **Item Checks**: the checks of a save as a list, errors first. A click on
-  a problem of an item selects it and opens the tool of its field; an arrow
-  key onto it only selects the item. A click on a problem of the item stat
-  file (a profile or a table nothing uses) opens Item Formulas at it.
 - **Item Sync**: Export and Import of the items and item formulas with an
   OpenMU server, see [Item Sync](#item-sync).
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
-In the browser, Item Rules, Item Categories, Item Checks and Item
-Translations, the arrow keys move the selection (see
+In the browser, Item Rules, Item Categories and Item Translations, the
+arrow keys move the selection (see
 [dev-editor.md](dev-editor.md)). In the lists of the items that use a model
 or a look they only move the cursor: selecting one there shows that item's
 form instead, with its own list.
@@ -1152,8 +1380,12 @@ How changes work:
   `Data/Effects/GlowColors.json` when a glow color changed and
   `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
-  how many. With errors nothing is written, and the errors are listed in
-  the editor console and in **Item Checks**. Warnings (a model file that is
+  how many. With fatal problems nothing is written, and they are listed in
+  the editor console and in **Data Checks** (see
+  [dev-editor.md → Data Checks](dev-editor.md#data-checks)): a click on a
+  problem of an item selects it and opens the tool of its field; one of the
+  item stat file (a profile or a table nothing uses) opens Item Formulas at
+  it. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
   shared model, a render style or item effect that does not exist) do not
   stop it. If a file cannot be written (read-only folder, full disk), no
@@ -1177,7 +1409,8 @@ number that has a model but no item:
 - A preview of the model as the game has it opened, at an item level,
   excellent or ancient, standing as the inventory turns it or lying as on
   the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
-  wheel to zoom, double click to put it back).
+  wheel to zoom, double click to put it back). A click on a part of the
+  item finds its mesh in the mesh list and keeps it shown.
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's
   folder as its texture folder; a model whose only texture folder is its
@@ -1190,8 +1423,22 @@ number that has a model but no item:
   this item** gives the item a file entry of its own instead (a variant).
   A shared model that items use cannot be removed; the ones no item uses
   are listed with a button that removes them.
-- For a file of its own, the texture folders and none-blend meshes; then
-  the inventory display as sliders, each with a number field to type the
+- For a file of its own, the texture folders and none-blend meshes.
+- **Meshes**: a row for each mesh of the opened model, with its number, its
+  texture's name, its marks (*hidden*: a texture name starting with `hid`
+  or the `_H` script, never drawn; *glows*: `_R`; *scrolls*: `_S`; *no
+  chrome*: `_N` or a none-blend mesh, which the chrome-type passes and the
+  level glow skip; *holes*: its texture has pixels the alpha test drops,
+  alpha 0.25 or less) and the fields that name it (none-blend meshes, glow
+  and shine meshes, excellent mesh). The mouse on a row shows the texture's
+  file and size and the mesh's vertices and triangles. Pointing at a row,
+  or at a number in one of those mesh fields, draws that mesh in the preview
+  as it is and the others see-through; a click on a row keeps it so until
+  it is clicked again. At a level the preview draws with another model (the
+  Box of Luck's levels, for example), the list says so and the preview
+  shows none of its meshes. Which meshes a render style or item effect draws is
+  still drawing code and not listed.
+- The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of
   its size, drawn as
   the game's inventory draws it at the preview's item level (it turns while
@@ -1205,9 +1452,9 @@ number that has a model but no item:
   those models by level (the Box of Luck, the Wizard's Ring, ...); the
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
-- The render style and the item effect, picked from their lists with how
-  many models use each, and the items that use the picked one (a click
-  selects one). What a look is made of is drawing code.
+- **Style and effect**: the render style and the item effect, picked from
+  their lists with how many models use each, and the items that use the
+  picked one (a click selects one). What they are made of is drawing code.
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game
@@ -1215,9 +1462,29 @@ changes in code after loading (the cloth of some pants, the second models
 of the Rage Fighter gloves, the inventory models of the Rage Fighter
 armors) may need a restart to show a new file.
 
-### Glow Colors
+### Colors
 
-The colors of the glow color list, each with how many models use it (also
+The named colors as a tree, a root per use: **Glow**, **Ground labels** and
+the server list's colors ([server-list.md](server-list.md)); the tooltip color
+groups get a root of their own. **Windows > Colors** opens the window on what
+was picked last, and **Items > Glow Colors** and **Items > Ground Label
+Styles** on their root. It docks with the item tools. The changes of the item
+roots are steps of the item undo history, Save Items writes them.
+
+Under a root you sort its colors into **folders**, also folders in folders,
+at most eight levels deep: **New folder** adds one under the picked root or
+folder (a name of 1 to 32 characters no other folder there has), **Rename** and
+**Remove** change the picked folder (its folders and colors move up into the
+folder above it), and **Move up** and **Move down** order folders and colors.
+Drag a color or a folder onto a folder or onto its root to move it there; a
+color stays in its root. **New color** adds one to the picked folder. Each file
+keeps its folders next to its colors as `"colorFolders"`, a list of folders
+each with a `name`, its `folders` and its `colors`; the game reads and
+checks them (a problem shows in its data report too) but doesn't use them.
+
+#### Glow Colors
+
+The Glow root lists the glow colors, each with how many models use it (also
 as the default they leave out). **New glow color** adds one: a name of
 letters and digits no other color has, and its red, green and blue. A
 picked color's value is changed with the color field and **Apply to the
@@ -1226,6 +1493,58 @@ shared model. A color no item uses is removed (**Remove**, or **Remove
 them** for all of them); the defaults (`orange`, `white`, `azure`) stay,
 since items without colors of their own glow with them. Every change is a
 step of the undo history; renaming a color is left out.
+
+#### Ground labels
+
+The Ground labels root lists the [label styles](#ground-labels), each with how
+many items name it in their own rules. A picked style's text color,
+background (with its alpha, over a checkerboard) and bold are changed in its fields, under which the selected
+item's name is shown in that look, and **Apply to the style** takes them;
+when items name the style, the change lists them first. The labels on the
+ground take it at once. **New label style** adds one: a name of letters and
+digits no other style has, starting with the look of the picked style. A
+style no item names is removed (**Remove**, or **Remove them** for all of
+them); the styles of the standard rules stay. Renaming a style is left out.
+The editor has no bold font, so it draws a bold label twice, a pixel apart.
+
+### Item Tooltip
+
+How the selected item is shown, for now its name in the tooltip and on the
+ground, and its [tooltip layout](#presets). The preview takes a level, skill,
+luck, an option, the excellent options and a set (one of the item's sets),
+and shows such an item's name in two rows:
+
+- **In the tooltip**: the name row its tooltip writes, bold, in the colors the
+  game's tooltip has in the active UI theme (its line's color and highlight
+  bar as RmlUi computes them from the theme's style sheets, on the tooltip's
+  box), with what gives it: one of its
+  [name lines](#name-lines) ("Name line 2"), or the standard name and color.
+- **On the ground**: the [ground label](#ground-labels) the game draws for such
+  a drop, with the rule that gives it: one of the item's own, or the standard
+  rules.
+
+The two differ: the tooltip says "Excellent" and leaves out the options, the
+label leaves out "Excellent" and adds " +Skill", " +Option" and " +Luck".
+
+Under them, in **Ground label**, are the item's own label rules, the first
+whose levels hold giving the style: a style, **All levels** or the levels from
+and to, and buttons to move a rule up or down and to remove it. **Add rule**
+adds a rule for the previewed level with the style the label has there (the
+item's own rule's, else the one the standard rules give), before the item's
+rule that holds at that level (a rule after it would not be used there). Every
+change is a step of the undo history, and Save Items writes it to the item
+file.
+
+**Tooltip layout** picks the layout the item's tooltip uses from the layouts
+of `Tooltips/Tooltip.json`: `default` or a preset such as `noClassLines`
+(`tooltipLayout`). A layout the item's own changes don't fit (a line they
+hide or add after that it doesn't have) is greyed out, with the reason when
+the pointer is on it: the item could not be saved with it. The item's own
+changes (`tooltipLayoutChanges`) are shown under it: the line ids it hides,
+and each line it adds under the line it follows, numbered from 1 as Item
+Checks counts them from 0 (`add[0].lines[1]` is the second line under the
+first), in the UI's language with its levels; they are changed in the item
+file. Item Checks opens Item Tooltip for a problem of either.
 
 ### Item Formulas
 
@@ -1279,8 +1598,8 @@ values until they are made again.
 
 Item Sync exchanges the items and the item formulas with an OpenMU server
 through a file, the *item exchange file*. The server stays authoritative:
-the client never writes to it. (OpenMU's export and import of the file, and
-Update from server, which downloads it, are later steps of phase 7; see the
+the client never writes to it. (OpenMU's import page is a later step of
+phase 7; see the
 [design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
 
 - **Import…** opens a file and lists how it differs from the client's
@@ -1299,6 +1618,25 @@ Update from server, which downloads it, are later steps of phase 7; see the
   change"), or that it cannot be read as an exchange file; a file that has
   the client's data already is left as it is. The written file says
   `"source": "MuMain"`.
+- **Update from server** downloads the server's file from its admin panel
+  and goes on as Import (the summary says "Update from …"). Enter the admin
+  panel's address next to the button (e.g. `https://admin.example.org`; it
+  is kept in `MuEditor/MuEditor.ini`, `[OpenMU] AdminPanelUrl`). The address
+  must be https; plain http only works for this computer (`localhost`,
+  `127.0.0.1`, `[::1]`). The editor asks for
+  `<address>/api/items/exchange` with the API key in the **API key** field:
+  create a key on the admin panel's API keys page (the Viewer role is
+  enough). **Remember** keeps it for that address in the system's key store
+  (the Windows Credential Manager, the macOS Keychain, or the Linux keyring
+  when MuEditor was built with libsecret), so the field has it again at the
+  next start; unchecking it removes it there. Without a remembered key, the
+  environment variable `MU_OPENMU_API_KEY` fills the field. The key is never
+  written to a file or a log. The download runs in
+  the background and can be cancelled; the window says why one failed (no
+  address, no key, the server cannot be reached, 401 unknown key, 403 the
+  key lacks the Viewer role or the admin panel has no user yet, 404 an
+  OpenMU without the file, 429 too many requests). After Apply, the window
+  compares the downloaded file again without downloading it again.
 - **Compare two files** (folded under the path field) compares two exchange
   files, e.g. a client export with a server export, without the client's
   data: pick file A and file B (**Swap** swaps them), then **Compare the
@@ -1319,7 +1657,9 @@ Update from server, which downloads it, are later steps of phase 7; see the
   take: a name in a language the file lacks, or one the client's UI does
   not show, is not compared (no language is removed).
 - After applying, the window compares again: what was applied no longer
-  differs and leaves the list. A green line above says what was applied;
+  differs and leaves the list. Apply changes the editor's items only: until
+  they are saved, the window says so (and its title has a `*`) next to its
+  own **Save Items**. A green line above says what was applied;
   what was not checked stays listed and unchecked. An import is refused
   when an item it would add, resize, give another slot or remove is worn or
   in an item window by then (compare again).
@@ -1354,6 +1694,14 @@ number, fields with their default value left out, LF line endings.
   names the server's installation.
 - Only `season6` data is exchanged; a file of another `gameVersion` is
   refused, as is a `formatVersion` the client does not know.
+- `fields` (format version 2) lists the item fields the file carries, by
+  their keys (`"fields": ["width", "height"]`). OpenMU's export adds its
+  fields one at a time, so it names the ones it has. Only these fields are
+  compared and taken; the client keeps its values of the others, and a file
+  that does not list `name` has items without one. A file without `fields`
+  carries every field; the client's own export writes it so, as version 1.
+  An editor that only reads version 1 refuses a file with the list, instead
+  of reading the fields it lacks as their defaults.
 - `formulas` is the [item stat file](#item-stats-by-level) without its
   `formatVersion` and its profile rules, which stay with the client.
 - `items` has the fields both sides have, with the keys and meanings of the
@@ -1374,11 +1722,17 @@ number, fields with their default value left out, LF line endings.
 **The diff of an import**:
 
 - The **Items** list says for each item what the import does to it in the
-  client (Added, Changed, Removed). The box of an added or removed item
-  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
+  client (Added, Changed). The items only the client has are listed apart,
+  folded: "Only in the client (219), not on the server" (or "not in the
+  file"). The file leaves them as they are, and the summary says so; each
+  one is removed only when it is checked (Removed), by its own box or
+  Check all. The box of an
+  added or removed item
+  checks the whole item, the box of a changed one all its fields. A click
+  on a row, or the arrow keys, show its fields (and select the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
-  `tags.ammunition`, …) with its value now and the file's, and a box of its
-  own.
+  `tags.ammunition`, …) with its value now and the file's (*From the
+  server* after Update from server), and a box of its own.
 - The **Formulas** list has the drop level bonus, each table, each term of
   the default and of each profile (`default.damage.table`,
   `profiles.scroll.requirements.energy`, …) and a profile only one side
@@ -1390,13 +1744,26 @@ number, fields with their default value left out, LF line endings.
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.
-- **Check all** and **Check none** take every row; **A field in all items**
-  checks or unchecks one field in every changed item.
+- **Check all** and **Check none** take every row, also the items only
+  the client has; the confirmation of the import says how many items it
+  removes, and Undo brings them back with their models. **A field in all items** checks or
+  unchecks one field in every changed item.
+- **Copy as Markdown** on a list's header copies the list (also a folded
+  one) as a Markdown table in English: each item's group, number and name,
+  for the items that differ also the change and the number of fields. Paste
+  it into an issue, e.g. one asking OpenMU for the items it lacks.
 - **Names**: only the client's UI languages are taken from the file; a
   language the file lacks stays as it is, and no language is removed.
 - **Stat profile**: a file's profile that the item's profile rules give
   leaves the item following its rules; another one becomes a pick (see
   Item Basics).
+- An item only a file with a `fields` list has is a locked row: the file
+  lacks some of its fields, so it is not added.
+- **The client's entries without a name** count where the file has an item
+  at their number: the row changes the entry with the fields the file
+  carries (Changed), and it stays an entry without a name until the file
+  gives it a name. Where the file has no item either, neither side has
+  one: there is no row. The export leaves them out.
 - **Added items** get the client-only fields at their defaults; the
   two-handed flag follows the rule of the shipped items (groups 0 to 5, a
   hand slot, two cells wide or more) and the weapon kind follows the group,
@@ -1409,8 +1776,8 @@ number, fields with their default value left out, LF line endings.
 - An item a file has more than once (OpenMU does not keep the group and
   number unique) is a locked row: the import leaves it as it is.
 - Before the import is applied, the data as it would be gets the checks of
-  a save. With errors nothing changes; the errors are listed and the rows of
-  their items are unchecked.
+  a save. With fatal problems nothing changes; they are listed and the rows
+  of their items are unchecked.
 
 **Known differences** are fields and formula entries meant to differ
 between the client and the server. Ticking **Known** on a field, on an
@@ -1454,7 +1821,12 @@ only item data. The import is there to bring in your own old item files.
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
   The imported items are at their bmd numbers, so the models of items you
-  moved since the start go back to their old numbers too.
+  moved since the start go back to their old numbers too. The entries
+  without a name stay where the import brings no item (the bmd format has
+  none); a moved one goes back to its old number with its model. A model
+  entry stays even where the bmd files have no item (an item added or
+  named since the start): its number gets an entry without a name, so
+  every number with a model still has an entry.
   Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.

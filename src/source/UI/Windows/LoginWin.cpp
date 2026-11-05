@@ -16,6 +16,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
@@ -74,13 +75,7 @@ CLoginWin g_LoginWin;
 
 CLoginWin::CLoginWin() = default;
 
-CLoginWin::~CLoginWin()
-{
-    // Backstop join: std::thread's destructor calls std::terminate() if still joinable, and
-    // there's no guarantee ProcessPendingConnectionReconnect() ran one last time before shutdown.
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-}
+CLoginWin::~CLoginWin() = default;
 
 void CLoginWin::Create()
 {
@@ -470,10 +465,9 @@ void CLoginWin::SyncRmlModel()
         m_RmlView.MarkDirty("save_password_checked");
     }
 
-    wchar_t szServerName[MAX_TEXT_LENGTH] = {};
-    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
-    mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverNameUtf8 =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::Login);
     if (m_RmlView.GetModel().serverName != serverNameUtf8)
     {
         m_RmlView.GetModel().serverName = serverNameUtf8;
@@ -563,6 +557,13 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // reaches the game afterwards. Hiding an already hidden window is a no-op.
     Show(false);
 
+    // The game server may have dropped the idle login screen; log in once it is back.
+    const std::wstring username = pszUsername;
+    const std::wstring password = pszPassword;
+    const auto submitAgain = [username, password] { g_LoginWin.SubmitCredentials(username.c_str(), password.c_str()); };
+    if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Game, submitAgain))
+        return;
+
     g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", pszUsername);
 
     g_ErrorReport.Write(L"> Login Request.\r\n");
@@ -588,36 +589,8 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
 
 void CLoginWin::CancelLogin()
 {
-    // Hide immediately, run the blocking reconnect on a background thread. Guard against ESC-spam
-    // stacking threads: if one is already in flight, this press is a no-op.
+    // Back to the server list over a new connection to the connect server. The reconnect
+    // checks the server in the background first, so one that is down doesn't hold the screen.
     Show(false);
-
-    if (m_bConnectionReconnectInFlight.load())
-        return;
-
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join(); // previous run already finished and was consumed
-
-    m_bConnectionReconnectInFlight.store(true);
-    m_bConnectionReconnectDone.store(false);
-    m_ConnectionReconnectThread = std::thread([this]
-    {
-        ConnectConnectionServer();
-        m_bConnectionReconnectDone.store(true);
-    });
-}
-
-void CLoginWin::ProcessPendingConnectionReconnect()
-{
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-    m_bConnectionReconnectDone.store(false);
-    m_bConnectionReconnectInFlight.store(false);
-}
-
-void CLoginWin::ConnectConnectionServer()
-{
-    LogIn = 0;
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    CreateSocket(szServerIpAddress, g_ServerPort);
+    LoginSceneReconnect::Instance().ReturnToServerList();
 }

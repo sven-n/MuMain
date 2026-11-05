@@ -87,23 +87,25 @@ the seconds of a frame are `FPS_ANIMATION_FACTOR / REFERENCE_FPS`. Below 25 FPS 
 
 ## Skeletons: who builds them, and which one is drawn
 
-`BMD::Animation` builds a skeleton (`Render/Models/ZzzBMD.cpp`). A character's is built **more than once a frame**:
+`BMD::Animation` builds a skeleton (`Render/Models/ZzzBMD.cpp`). An object's own pose is built once in the update
+and reused by every draw while its animation state is unchanged (`Engine/Object/ObjectPose.h`):
 
 | Build | When | Into | What it's for |
 | --- | --- | --- | --- |
-| `AnimateCharacterBones` | move phase, after `MoveCharacterClient`; on worker threads when enabled and 20+ characters | `o->BoneTransform` | current bones for pets, effects, joints and particles in the move phase |
-| `Calc_ObjectAnimation` | render, players | `o->BoneTransform` | **what's drawn** for players |
-| `Calc_RenderObject` | render, monsters, NPCs, mounts | `o->BoneTransform` (mounts: the shared `BoneTransform`) | **what's drawn** for everyone else |
+| `Engine::Object::Pose::Build` (`AnimateCharacterBones`, `RefreshCharacterPoses`) | move phase, after `MoveCharacterClient`; on worker threads when enabled and 20+ characters | `o->BoneTransform`, model space | the character's pose: effects, pets and the draws read it |
+| `Engine::Object::Pose::World` | mounts in `MoveMount`, map objects | the object's own bones, world space | the mount's pose for its spawns and its draw |
+| `DrawPose` (`Calc_ObjectAnimation`, `Calc_RenderObject`) | render, only when the pose isn't current (or for a ghost at another frame) | draw bones of its own | **what's drawn** then |
 | weapon blur, after-images, map and pet hooks | various | mostly the shared `BoneTransform` | positions for effects, extra ghost copies |
 
-**The render builds are what's drawn**; they recompute rather than reuse the prepass. So anything that changes how a
-character looks (a turn offset, the ponytail lag, a mount's head) has to reach all three main builds. So all three
-call **one builder**, `Engine::Characters::AnimateBones` (`Engine/Object/Movement/MovementBones.cpp`): the facing plus
+`Pose::IsCurrent` decides whether a draw may reuse a pose: the animation state it records (`PoseInputs`) includes what
+the movement features add (`Engine::Characters::CurrentMovementPoseKey`: the option, the drawn sudden turn, the
+ponytail lag, the pose fade, where the feet stand, a mount's head), so a change to any of them rebuilds it. Every build
+calls **one builder**, `Engine::Characters::AnimateBones` (`Engine/Object/Movement/MovementBones.cpp`): the facing plus
 `SnapTurnOffset`, `TurnLag` for the ponytail, the pose fade (`CharacterPoseFade`), `MountHeadTurn` / `MountHeadRoll`
 for a mount's head, then `BMD::Animation`, then, for bones built in model space, `PlaceFeet`. The callers differ only
-in where the bones go, whether they're translated, and the prepass passing its own `CurrentAction`. A new input goes
-there and reaches every build. The `bones` control command (`App/Control/ControlCommandsQuery.cpp`) compares builds
-and reports mismatches.
+in where the bones go, whether they're translated, and the frame and `CurrentAction` they pass. A new input goes there
+(and into `CurrentMovementPoseKey`) and reaches every build. The `bones` control command
+(`App/Control/ControlCommandsQuery.cpp`) compares builds and reports mismatches.
 
 **Threading:** only `AnimateCharacterBones` runs on workers (`AnimationTaskPool.cpp`), off by default
 (`EnableAnimationTaskPool` in config.ini, or `--enable-taskpool`), from 20 characters up. Each worker writes only its

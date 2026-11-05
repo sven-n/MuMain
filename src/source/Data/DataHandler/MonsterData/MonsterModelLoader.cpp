@@ -6,12 +6,13 @@
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
-#include "Engine/Object/MonsterSlotSound.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "World/MapInfra/MapManager.h"
@@ -56,28 +57,35 @@ bool OpenFile(int slot, const std::string& file)
     return gLoadData.AccessModel(slot, folder.c_str(), name.c_str());
 }
 
-void OpenTextures(int slot, const std::vector<std::string>& folders)
+std::vector<std::wstring> LoaderFolders(const std::vector<std::string>& folders)
 {
-    if (Models[slot].NumMeshs <= 0)
-    {
-        return;
-    }
     std::vector<std::wstring> loaderFolders;
     for (const std::string& folder : folders)
     {
         loaderFolders.push_back(ToLoaderPath(folder) + L'\\');
     }
-    gLoadData.OpenTexture(slot, loaderFolders);
+    return loaderFolders;
+}
+
+void OpenTextures(int slot, const std::vector<std::string>& folders)
+{
+    if (::Models[slot].NumMeshs <= 0)
+    {
+        return;
+    }
+    gLoadData.OpenTexture(slot, LoaderFolders(folders));
 }
 
 // The texture folders of the map that is loaded.
-const std::vector<std::string>& FoldersOnWorld(const MonsterModelDefinition& model)
+const std::vector<std::string>& FoldersOnMap(const MonsterModelDefinition& model)
 {
-    for (const MonsterModelWorldFolders& world : model.worldTextureFolders)
+    const int map = gMapManager.GetServerMap();
+    const int stage = gMapManager.GetServerStage();
+    for (const MonsterModelMapFolders& entry : model.mapTextureFolders)
     {
-        if (std::find(world.worlds.begin(), world.worlds.end(), gMapManager.WorldActive) != world.worlds.end())
+        if (Data::Maps::Names(entry.maps, map, stage))
         {
-            return world.folders;
+            return entry.folders;
         }
     }
     return model.load.textureFolders;
@@ -140,7 +148,7 @@ void OpenPart(const MonsterModelPart& part, int slot)
 {
     OpenFile(slot, part.load.file);
     OpenTextures(slot, part.load.textureFolders);
-    ApplyAnimations(Models[slot], part.load, Defaults::None);
+    ApplyAnimations(::Models[slot], part.load, Defaults::None);
 }
 
 void OpenParts(const MonsterModelDefinition& model)
@@ -149,49 +157,23 @@ void OpenParts(const MonsterModelDefinition& model)
     {
         const std::optional<int> slot = PartSlot(part);
         // Parts of a map are opened with the map.
-        if (slot && part.worlds.empty())
+        if (slot && part.maps.empty())
         {
             OpenPart(part, *slot);
         }
     }
 }
 
-void LoadSounds(const MonsterModelDefinition& model)
+// The sounds of the sets the slot's monsters use, in the order of the sets
+// and their files.
+void LoadSounds(int slot)
 {
-    for (const MonsterModelSound& sound : model.sounds)
+    for (const MonsterSoundSet* set : FindSoundSetsOfSlot(slot))
     {
-        LoadSound(sound);
-    }
-}
-
-// The sound slot value of a sound the slot names: its number from
-// SOUND_MONSTER on; -1 for no sound.
-short SlotValue(const MonsterModelDefinition& model, const std::string& value)
-{
-    if (value.empty())
-    {
-        return -1;
-    }
-    const std::optional<int> number = FindSoundNumber(model, value);
-    return number ? static_cast<short>(*number - SOUND_MONSTER) : -1;
-}
-
-// The entry's sound slots. Without slots in the entry, every slot has no
-// sound: a slot keeps no 0, which is the Bull Fighter's first sound
-// (SOUND_MONSTER), so a model without slots played it where it was loaded
-// (P9).
-void SetSoundSlots(BMD& target, const MonsterModelDefinition& model)
-{
-    std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
-    if (!model.soundSlots)
-    {
-        return;
-    }
-    for (size_t i = 0; i < SoundSlotSetSize; ++i)
-    {
-        target.Sounds[i] = SlotValue(model, model.soundSlots->first[i]);
-        target.Sounds[SoundSlotSetSize + i] =
-            model.soundSlots->second ? SlotValue(model, (*model.soundSlots->second)[i]) : -1;
+        for (const MonsterSound& sound : set->sounds)
+        {
+            LoadSound(sound);
+        }
     }
 }
 
@@ -236,31 +218,56 @@ bool Open(int slot)
         return false;
     }
     const bool monsterRange = IsMonsterRangeSlot(slot);
-    BMD& target = Models[slot];
+    BMD& target = ::Models[slot];
     // A model whose file is missing has no body, and the game keeps running
-    // (P1): AccessModel logs the file, and Monster Checks lists it.
+    // (P1): AccessModel logs the file, and Data Checks lists it.
     OpenFile(slot, model->load.file);
-    // A monster model without meshes gets nothing more, and its sound slots
-    // stay without sounds; an NPC model still loads its sounds.
+    // A monster model without meshes gets nothing more, its sounds are not
+    // loaded; an NPC model still loads its sounds.
     if (monsterRange && target.NumMeshs == 0)
     {
-        std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
         return true;
     }
-    ApplyTextureNames(target, model->textureNames);
-    OpenTextures(slot, FoldersOnWorld(*model));
+    // A monster model the model file table names is drawn from its glTF binary (with the BMD's actions);
+    // otherwise, or when the file is refused, from the BMD.
+    const Data::Models::ModelFiles& modelFiles = Data::Models::GetModelFileTable();
+    // The file may order its bones differently, so the head bone is found by the BMD bone's name.
+    std::string headBoneName;
+    if (model->headBone && *model->headBone >= 0 && *model->headBone < target.NumBones)
+    {
+        const char* name = target.Bones[*model->headBone].Name;
+        headBoneName.assign(name, strnlen(name, sizeof(target.Bones[0].Name)));
+    }
+    const bool fromModelFile = monsterRange && Data::Models::ApplyModelFile(target, slot, modelFiles);
+    if (fromModelFile)
+    {
+        Data::Models::OpenModelFileTextures(slot, LoaderFolders(FoldersOnMap(*model)), modelFiles);
+    }
+    else
+    {
+        ApplyTextureNames(target, model->textureNames);
+        OpenTextures(slot, FoldersOnMap(*model));
+    }
     OpenParts(*model);
     ApplyAnimations(target, model->load, monsterRange ? Defaults::MonsterRange : Defaults::NpcRange);
     SetMeshValues(target, *model);
-    LoadSounds(*model);
-    SetSoundSlots(target, *model);
+    if (fromModelFile && !headBoneName.empty())
+    {
+        target.BoneHead = target.FindBoneOrRoot(headBoneName);
+    }
+    LoadSounds(slot);
     LoadBitmaps(*model);
     return true;
 }
 
-std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const std::string& value)
+std::vector<const MonsterSoundSet*> FindSoundSetsOfSlot(int slot)
 {
-    for (const MonsterModelSound& sound : model.sounds)
+    return SoundSetLinks::FindSetsOfSlot(slot);
+}
+
+std::optional<int> FindSoundNumber(const MonsterSoundSet& set, const std::string& value)
+{
+    for (const MonsterSound& sound : set.sounds)
     {
         if (SoundNameOf(sound) == value)
         {
@@ -270,7 +277,7 @@ std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const st
     return FindMonsterSoundId(value);
 }
 
-int SoundNumber(const MonsterModelSound& sound)
+int SoundNumber(const MonsterSound& sound)
 {
     if (!sound.id.empty())
     {
@@ -282,7 +289,7 @@ int SoundNumber(const MonsterModelSound& sound)
     return static_cast<int>(Audio::SoundNumbers::ForFile(ToLoaderPath(sound.file)));
 }
 
-void LoadSound(const MonsterModelSound& sound)
+void LoadSound(const MonsterSound& sound)
 {
     const ESound number = static_cast<ESound>(SoundNumber(sound));
     const std::wstring file = ToLoaderPath(sound.file);
@@ -294,15 +301,33 @@ void LoadSound(const MonsterModelSound& sound)
 
 bool IsOpen(int slot)
 {
-    if (Models == nullptr || (!IsMonsterRangeSlot(slot) && !IsNpcRangeSlot(slot)))
+    if (::Models == nullptr || (!IsMonsterRangeSlot(slot) && !IsNpcRangeSlot(slot)))
     {
         return false;
     }
-    const BMD& model = Models[slot];
+    const BMD& model = ::Models[slot];
     return model.NumActions > 0 || model.NumMeshs > 0;
 }
 
 #ifdef _EDITOR
+void LoadSoundsOfOpenModels()
+{
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        const std::optional<int> slot = FindMonsterModelSlot(model->slot);
+        if (!slot || !IsOpen(*slot))
+        {
+            continue;
+        }
+        // As Open: a monster model without meshes loads no sounds.
+        if (IsMonsterRangeSlot(*slot) && ::Models[*slot].NumMeshs == 0)
+        {
+            continue;
+        }
+        LoadSounds(*slot);
+    }
+}
+
 std::vector<int> Reopen(int slot)
 {
     std::vector<int> reopened;
@@ -310,7 +335,7 @@ std::vector<int> Reopen(int slot)
     {
         return reopened;
     }
-    BMD& target = Models[slot];
+    BMD& target = ::Models[slot];
     const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
     if (model == nullptr)
     {
@@ -328,11 +353,11 @@ std::vector<int> Reopen(int slot)
             continue;
         }
         // The map's parts that the loaded map opened; Open opened the others.
-        if (!part.worlds.empty())
+        if (!part.maps.empty())
         {
             const bool onThisMap =
-                std::find(part.worlds.begin(), part.worlds.end(), gMapManager.WorldActive) != part.worlds.end();
-            const BMD& partModel = Models[*partSlot];
+                Data::Maps::Names(part.maps, gMapManager.GetServerMap(), gMapManager.GetServerStage());
+            const BMD& partModel = ::Models[*partSlot];
             if (!onThisMap || (partModel.NumActions <= 0 && partModel.NumMeshs <= 0))
             {
                 continue;
@@ -345,14 +370,14 @@ std::vector<int> Reopen(int slot)
 }
 #endif
 
-void OpenMapParts(int world)
+void OpenMapParts(int map, int stage)
 {
     for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
     {
         for (const MonsterModelPart& part : model->parts)
         {
             const std::optional<int> slot = PartSlot(part);
-            if (slot && std::find(part.worlds.begin(), part.worlds.end(), world) != part.worlds.end())
+            if (slot && Data::Maps::Names(part.maps, map, stage))
             {
                 OpenPart(part, *slot);
             }

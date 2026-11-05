@@ -16,6 +16,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Pets/w_PetProcess.h"
+#include "I18N/All.h"
 #include "UI/Core/UIManager.h"
 
 namespace MuEditor::Items
@@ -92,6 +93,48 @@ ItemUsage FindItemUsage(int itemType)
     usage.code = references.Find(itemType);
     FindGameData(itemType, usage);
     return usage;
+}
+
+ItemNumberHolder FindItemNumberHolder(int itemType)
+{
+    ItemNumberHolder holder;
+    if (!Data::Items::IsValidItemType(itemType))
+    {
+        return holder;
+    }
+    if (g_ItemDatabase.Find(itemType) != nullptr)
+    {
+        holder.item = g_ItemDatabase.GetLogName(itemType);
+        return holder;
+    }
+    holder.entryWithoutName = g_ItemDatabase.FindEntry(itemType) != nullptr;
+    const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+    if (model == nullptr && !holder.entryWithoutName)
+    {
+        return holder;
+    }
+    if (model != nullptr)
+    {
+        holder.model = model->model.empty() ? model->file : model->model;
+    }
+    holder.codeName = GetItemCodeReferences().GetCodeName(itemType);
+    return holder;
+}
+
+std::string GetEntryLabel(int itemType)
+{
+    if (g_ItemDatabase.Find(itemType) != nullptr || g_ItemDatabase.FindEntry(itemType) == nullptr)
+    {
+        return g_ItemDatabase.GetLogName(itemType);
+    }
+    return std::string(I18N::Editor::EntryWithoutAName) + " (" + std::to_string(Data::Items::GetItemGroup(itemType)) +
+           "," + std::to_string(Data::Items::GetItemNumber(itemType)) + ")";
+}
+
+const char* GetNumberWithoutItemLabel(int itemType)
+{
+    return g_ItemDatabase.FindEntry(itemType) != nullptr ? I18N::Editor::EntryWithoutAName
+                                                         : I18N::Editor::NoItemAtThisNumber;
 }
 } // namespace MuEditor::Items
 

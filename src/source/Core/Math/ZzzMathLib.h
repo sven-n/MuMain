@@ -81,7 +81,7 @@ extern "C" {
     vec_t Q_rint(vec_t in);
     inline float VectorLength(vec3_t v) { return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); }
 
-    void VectorMul(vec3_t va, vec3_t vb, vec3_t vc);
+    void VectorMul(const vec3_t va, const vec3_t vb, vec3_t vc);
     void VectorMulF(const vec3_t vIn01, const float fIn01, vec3_t vOut);
     void VectorDivF(const vec3_t vIn01, const float fIn01, vec3_t vOut);
     void VectorDivFSelf(vec3_t vInOut, const float fIn01);

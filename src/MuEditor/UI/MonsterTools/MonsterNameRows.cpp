@@ -82,7 +82,7 @@ void MonsterNameRows::CommitName(int id, const char* locale, const char* text)
     // Through the monster tools' history, so the name can be undone like any
     // edit. The number has an entry and the grid's languages are language
     // codes: only an emptied English name is refused. An English name that is
-    // empty already (252) stays so; Monster Checks warns about it.
+    // empty already (252) stays so; Data Checks warns about it.
     if (!g_MonsterEdits.SetMonsterName(StepLabel::Name(*monster, locale), id, locale, text))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::TheEnglishNameCannotBeEmpty);

@@ -1,0 +1,169 @@
+/* Classic (0.97) NEW CHARACTER window. From the 0.97 client: New_Character01 (213x256) over
+   New_Character02 (213x119), centred at the top (x = 214, y = 11 of 640x480), dropping in;
+   positions below are in the window's own pixels. 1 original pixel = 1/480 of the screen height.
+   The text does not stretch with the art: 0.97 drew its font at screen pixels inside the stretched
+   frame, so it is 13rem, 13 px growing like the native text (the body is "scene-window-scale",
+   RmlNativeText.h). */
+
+@spritesheet classic-charmake-top-sheet
+{
+	src: ../../../../Logo/Classic/New_character01.tga;
+	classic-charmake-top: 0px 0px 213px 256px;
+}
+@spritesheet classic-charmake-bottom-sheet
+{
+	src: ../../../../Logo/Classic/New_character02.tga;
+	classic-charmake-bottom: 0px 0px 213px 119px;
+}
+@spritesheet classic-charmake-arrow-previous-sheet
+{
+	src: ../../../../Logo/Classic/New_character001.jpg;
+	classic-arrow-previous: 0px 0px 20px 19px;
+}
+@spritesheet classic-charmake-arrow-next-sheet
+{
+	src: ../../../../Logo/Classic/New_character002.jpg;
+	classic-arrow-next: 0px 0px 20px 19px;
+}
+@spritesheet classic-charmake-arrow-previous2-sheet
+{
+	src: ../../../../Logo/Classic/New_character003.jpg;
+	classic-arrow-previous2: 0px 0px 20px 18px;
+}
+@spritesheet classic-charmake-arrow-next2-sheet
+{
+	src: ../../../../Logo/Classic/New_character004.jpg;
+	classic-arrow-next2: 0px 0px 20px 18px;
+}
+@spritesheet classic-charmake-cancel-sheet
+{
+	src: ../../../../Logo/Classic/New_character_cancel.jpg;
+	classic-charmake-cancel: 0px 0px 72px 21px;
+}
+@spritesheet classic-charmake-ok-sheet
+{
+	src: ../../../../Logo/Classic/New_character_ok.jpg;
+	classic-charmake-ok: 0px 0px 72px 21px;
+}
+
+/* Drops from above the screen to y = 11 (0.52 s in 0.97). */
+@keyframes classic-charmake-drop
+{
+	from { transform: translateY(-72%); }
+	to   { transform: translateY(0%); }
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+	--px: calc(100vh / 480);
+}
+
+#panel {
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+
+#classic_window {
+	position: absolute;
+	left: 50%;
+	top: calc(11 * var(--px));
+	width: calc(213 * var(--px));
+	height: calc(375 * var(--px));
+	margin-left: calc(-106.5 * var(--px));
+	font-family: "token(font-body)";
+	font-size: 13rem;
+	color: #ffffff;
+	pointer-events: auto;
+	animation: 0.5s cubic-out 1 classic-charmake-drop;
+}
+.window-top {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: calc(256 * var(--px));
+	decorator: image(classic-charmake-top);
+}
+.window-bottom {
+	position: absolute;
+	left: 0;
+	top: calc(256 * var(--px));
+	width: 100%;
+	height: calc(119 * var(--px));
+	decorator: image(classic-charmake-bottom);
+}
+
+/* 3D portrait, drawn by C++ into a render target the size of this box (74x79 at (71, 90)). */
+#preview {
+	position: absolute;
+	left: calc(71 * var(--px));
+	top: calc(90 * var(--px));
+	width: calc(74 * var(--px));
+	height: calc(79 * var(--px));
+}
+/* Hidden until C++ has drawn its first frame into it (legacy's rule). */
+#preview.awaiting-frame { visibility: hidden; }
+
+.char-make-name-field {
+	position: absolute;
+	left: calc(71 * var(--px));
+	top: calc(178 * var(--px));
+	width: calc(73 * var(--px));
+	height: calc(16 * var(--px));
+	padding: 0;
+	color: #ffe6d2;
+	background-color: transparent;
+	border-width: 0;
+	box-shadow: none;
+	decorator: none;
+}
+
+.class-name {
+	position: absolute;
+	left: calc(71 * var(--px));
+	top: calc(198 * var(--px));
+	white-space: nowrap;
+}
+
+/* Arrows: the pressed art shows only while the button is held; at the first / last class the
+   arrow is covered in black (80%), as in 0.97. */
+.arrow {
+	position: absolute;
+	width: calc(20 * var(--px));
+	height: calc(19 * var(--px));
+	cursor: pointer;
+}
+.arrow-previous { left: calc(149 * var(--px)); top: calc(196 * var(--px)); }
+.arrow-next     { left: calc(170 * var(--px)); top: calc(196 * var(--px)); }
+.arrow-previous:active { decorator: image(classic-arrow-previous); }
+.arrow-next:active     { decorator: image(classic-arrow-next); }
+.arrow.blocked {
+	background-color: rgba(0, 0, 0, 204);
+	pointer-events: none;
+}
+.arrow-row2 {
+	top: calc(215 * var(--px));
+	height: calc(18 * var(--px));
+}
+.arrow-previous-row2 { left: calc(149 * var(--px)); }
+.arrow-next-row2     { left: calc(170 * var(--px)); }
+.arrow-previous-row2:active { decorator: image(classic-arrow-previous2); }
+.arrow-next-row2:active     { decorator: image(classic-arrow-next2); }
+
+/* CANCEL and OK are part of the art; the plate lights up under the mouse. */
+.btn {
+	position: absolute;
+	top: calc(349 * var(--px));
+	width: calc(72 * var(--px));
+	height: calc(21 * var(--px));
+	cursor: pointer;
+	decorator: none;
+}
+.btn-cancel { left: calc(21 * var(--px)); }
+.btn-ok     { left: calc(121 * var(--px)); }
+.btn-cancel:hover, .btn-cancel:active { decorator: image(classic-charmake-cancel); }
+.btn-ok:hover, .btn-ok:active         { decorator: image(classic-charmake-ok); }

@@ -4,6 +4,7 @@
 
 #include "MuItemSyncUI.h"
 
+#include "ItemEdits.h"
 #include "ItemHeldByCharacter.h"
 #include "ItemSelection.h"
 #include "ItemSyncApply.h"
@@ -11,7 +12,12 @@
 #include "ItemToolWindow.h"
 #include "ItemUsageView.h"
 
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/SecretStore.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
@@ -27,6 +33,7 @@
 #include <cstdint>
 #include <set>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
@@ -41,13 +48,25 @@ constexpr float FieldsColumnWidth = 80.0f;
 constexpr float FieldColumnWidth = 220.0f;
 constexpr float KnownColumnWidth = 60.0f;
 constexpr float ItemListHeight = 260.0f;
+// What a short item list adds to its rows' height (the table's borders).
+constexpr float ItemListBorders = 4.0f;
 constexpr float FieldListHeight = 220.0f;
 constexpr float PopupTextWidth = 480.0f;
+constexpr float ApiKeyWidth = 320.0f;
 constexpr const char* NoValue = "-";
 constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
 // it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
 constexpr const char* CheckColumn = "##CheckColumn";
+// The titles and change columns of Copy as Markdown: English whatever the editor's language, as
+// the copied table is meant for issues and chats.
+constexpr const char* MarkdownDifferFromServer = "Items that differ between the client and the server";
+constexpr const char* MarkdownDifferFromFile = "Items that differ between the client and the file";
+constexpr const char* MarkdownDifferBetweenFiles = "Items that differ from file A to file B";
+constexpr const char* MarkdownOnlyInClientFromServer = "Items only in the client, not on the server";
+constexpr const char* MarkdownOnlyInClientFromFile = "Items only in the client, not in the file";
+constexpr const char* MarkdownInTheClient = "In the client";
+constexpr const char* MarkdownFromAToB = "From A to B";
 constexpr const char* ApplyPopupId = "###ItemSyncApply";
 constexpr const char* ExportPopupId = "###ItemSyncExport";
 
@@ -87,9 +106,18 @@ const char* ChangeName(SyncChange change)
     }
 }
 
-std::string ItemLabel(const SyncItem& row)
+// An item without a name on both sides is the client's entry without a name, unless two files
+// are compared.
+std::string ItemLabel(const SyncItem& row, bool comparingFiles)
 {
-    return row.name + " (" + std::to_string(row.group) + "," + std::to_string(row.number) + ")";
+    std::string name = row.name;
+    const int itemType = Data::Items::MakeItemType(row.group, row.number);
+    if (name.empty() && !comparingFiles && Data::Items::IsValidItemType(itemType) &&
+        g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    {
+        name = I18N::Editor::EntryWithoutAName;
+    }
+    return name + " (" + std::to_string(row.group) + "," + std::to_string(row.number) + ")";
 }
 
 // The fields a click on the row's box changes: New and Removed rows are one box.
@@ -178,19 +206,6 @@ void KeepUnchecked(ItemSyncDiff& diff, const UncheckedRows& unchecked)
     }
 }
 
-void SetRowChecked(SyncItem& row, bool checked)
-{
-    if (IsWhole(row))
-    {
-        row.checked = checked && row.locked.empty();
-        return;
-    }
-    for (SyncField& field : row.fields)
-    {
-        field.checked = checked && field.locked.empty();
-    }
-}
-
 void RenderValue(const std::optional<std::string>& value)
 {
     ImGui::PushTextWrapPos(0.0f);
@@ -226,24 +241,62 @@ float ChangeColumnWidth()
     return width;
 }
 
-// Reads an exchange file into `file`, its problems into `issues`; false when it cannot be used (an
-// item it has twice is no obstacle: the diff locks its row).
-bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name, Data::Items::ItemExchangeFile& file,
-                      std::vector<ItemDataIssue>& issues)
+// Reads the text of an exchange file (nothing: it could not be read) into `file`, its problems
+// into `issues`; false when it cannot be used (an item it has twice is no obstacle: the diff locks
+// its row).
+bool ReadExchangeText(const std::optional<std::string>& text, const std::string& name,
+                      Data::Items::ItemExchangeFile& file, std::vector<ItemDataIssue>& issues)
 {
     std::vector<ItemDataIssue> fileIssues;
-    if (const std::optional<std::string> text = Data::Items::Json::ReadTextFile(path))
+    if (text)
     {
         ReadItemExchangeJson(*text, name, file, fileIssues);
     }
     else
     {
-        fileIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, name, ItemDataIssue::NoItem,
+        fileIssues.push_back({Data::Items::ItemDataIssueSeverity::Fatal, name, ItemDataIssue::NoItem,
                               ItemDataIssue::NoItem, "", "could not be read"});
     }
     const bool usable = Data::Items::CanImportItemExchange(file, fileIssues);
     issues.insert(issues.end(), fileIssues.begin(), fileIssues.end());
     return usable;
+}
+
+bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name, Data::Items::ItemExchangeFile& file,
+                      std::vector<ItemDataIssue>& issues)
+{
+    return ReadExchangeText(Data::Items::Json::ReadTextFile(path), name, file, issues);
+}
+
+// What an Update from server that has no file says.
+std::string DescribeServerProblem(const ServerDownload& download)
+{
+    switch (download.problem)
+    {
+    case ServerUpdateProblem::NoUrl:
+        return I18N::Editor::EnterTheAddressOfTheOpenMUAdminPanel;
+    case ServerUpdateProblem::InsecureUrl:
+        return I18N::Editor::TheAdminPanelAddressMustBeHttps;
+    case ServerUpdateProblem::NoKey:
+        return I18N::Format(I18N::Editor::EnterAnApiKeyOfTheAdminPanel0, {OpenMUApiKeyVariable});
+    case ServerUpdateProblem::NoConnection:
+        return I18N::Format(I18N::Editor::TheAdminPanelCouldNotBeReached0, {download.detail});
+    case ServerUpdateProblem::KeyRefused:
+        return I18N::Editor::TheAdminPanelDoesNotKnowTheApiKey;
+    case ServerUpdateProblem::NotAllowed:
+        return I18N::Editor::TheApiKeyMayNotDownloadTheItems;
+    case ServerUpdateProblem::NoEndpoint:
+        return I18N::Editor::TheAdminPanelHasNoItemExchange;
+    case ServerUpdateProblem::TooManyRequests:
+        return I18N::Editor::TooManyRequestsTryAgainInAMinute;
+    case ServerUpdateProblem::OtherStatus:
+        return I18N::Format(I18N::Editor::TheAdminPanelAnsweredWithHttpStatus0, {std::to_string(download.status)});
+    case ServerUpdateProblem::Cancelled:
+        return I18N::Editor::TheUpdateWasCancelled;
+    case ServerUpdateProblem::None:
+        break;
+    }
+    return {};
 }
 
 // How many rows add, change and remove an item.
@@ -286,7 +339,13 @@ CMuItemSyncUI& CMuItemSyncUI::GetInstance()
 
 void CMuItemSyncUI::Render(bool* open)
 {
-    if (ToolWindow::Begin(I18N::Editor::ItemSync, MuEditor::WindowIds::ItemSync, open))
+    // A mark in the title while there are changes that are not saved, as the Item Browser has.
+    std::string title = I18N::Editor::ItemSync;
+    if (g_ItemEdits.GetHistory().IsModifiedSinceSave())
+    {
+        title += " *";
+    }
+    if (ToolWindow::Begin(title.c_str(), MuEditor::WindowIds::ItemSync, open))
     {
         if (!m_knownLoaded)
         {
@@ -299,7 +358,10 @@ void CMuItemSyncUI::Render(bool* open)
             m_knownLoaded = true;
         }
         TakeChosenFile();
+        TakeServerDownload();
+        RenderUnsaved();
         RenderButtons();
+        RenderServer();
         RenderExportResult();
         // An Apply whose comparison afterwards could not read the file still says what it did.
         if (!m_diff && !m_result.empty())
@@ -392,6 +454,168 @@ void CMuItemSyncUI::OpenFileDialog(FileAction action)
     }
 }
 
+void CMuItemSyncUI::LoadServerSettings()
+{
+    if (m_adminPanelUrlLoaded)
+    {
+        return;
+    }
+    m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
+    m_adminPanelUrlLoaded = true;
+    LoadApiKey();
+}
+
+// The key the store keeps for the address, else the field's text, else MU_OPENMU_API_KEY.
+void CMuItemSyncUI::LoadApiKey()
+{
+    m_apiKeyMessage.clear();
+    const std::optional<std::string> remembered =
+        m_adminPanelUrl.empty() ? std::nullopt : MuEditor::SecretStore::Read(GetApiKeySecretName(m_adminPanelUrl));
+    m_rememberApiKey = remembered.has_value();
+    if (remembered)
+    {
+        m_apiKey = *remembered;
+    }
+    else if (m_apiKey.empty())
+    {
+        m_apiKey = ReadOpenMUApiKey();
+    }
+}
+
+// Remember on: the store keeps the key for the address; off (or no key): it forgets it.
+void CMuItemSyncUI::StoreApiKey()
+{
+    m_apiKeyMessage.clear();
+    if (m_adminPanelUrl.empty())
+    {
+        return;
+    }
+    const std::string name = GetApiKeySecretName(m_adminPanelUrl);
+    const bool done = m_rememberApiKey && !m_apiKey.empty() ? MuEditor::SecretStore::Write(name, m_apiKey)
+                                                            : MuEditor::SecretStore::Remove(name);
+    if (!done)
+    {
+        m_apiKeyMessage =
+            I18N::Format(I18N::Editor::TheKeyCouldNotBeStoredIn0, {MuEditor::SecretStore::GetStoreName()});
+    }
+}
+
+void CMuItemSyncUI::RenderApiKey()
+{
+    ImGui::SetNextItemWidth(Scaled(ApiKeyWidth));
+    InputString(I18N::Editor::ApiKey, m_apiKey, ImGuiInputTextFlags_Password);
+    if (ImGui::IsItemDeactivatedAfterEdit() && m_rememberApiKey)
+    {
+        StoreApiKey();
+    }
+    ImGui::SameLine();
+    const bool available = MuEditor::SecretStore::IsAvailable();
+    ImGui::BeginDisabled(!available);
+    if (ImGui::Checkbox(I18N::Editor::Remember, &m_rememberApiKey))
+    {
+        StoreApiKey();
+    }
+    ImGui::EndDisabled();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", available ? I18N::Format(I18N::Editor::KeepsTheKeyForThisAddressIn0,
+                                                         {MuEditor::SecretStore::GetStoreName()})
+                                                .c_str()
+                                          : I18N::Editor::ThisBuildCannotKeepTheKey);
+    }
+    if (!m_apiKeyMessage.empty())
+    {
+        ImGui::TextColored(ErrorColor, "%s", m_apiKeyMessage.c_str());
+    }
+}
+
+bool CMuItemSyncUI::UpdateFromServer()
+{
+    m_serverMessage.clear();
+    if (m_download.IsRunning())
+    {
+        return false;
+    }
+    LoadServerSettings();
+    ServerDownload refused;
+    const std::optional<std::string> url = GetExchangeUrl(m_adminPanelUrl, refused.problem);
+    const std::string apiKey = url ? m_apiKey : std::string();
+    if (url && apiKey.empty())
+    {
+        refused.problem = ServerUpdateProblem::NoKey;
+    }
+    if (refused.problem != ServerUpdateProblem::None)
+    {
+        m_serverMessage = DescribeServerProblem(refused);
+        return false;
+    }
+    m_downloadUrl = *url;
+    return m_download.Start(*url, apiKey);
+}
+
+void CMuItemSyncUI::TakeServerDownload()
+{
+    std::optional<ServerDownload> download = m_download.TakeResult();
+    if (!download)
+    {
+        return;
+    }
+    if (download->problem != ServerUpdateProblem::None)
+    {
+        m_serverMessage = DescribeServerProblem(*download);
+        g_MuEditorConsoleUI.LogEditor(m_downloadUrl + ": " + m_serverMessage);
+        return;
+    }
+    // A diff must not change under an open confirmation; the download is then dropped.
+    if (m_confirmApply || m_pendingExport)
+    {
+        m_serverMessage = I18N::Editor::TheUpdateWasCancelled;
+        return;
+    }
+    CompareServerFile(download->body, m_downloadUrl);
+}
+
+void CMuItemSyncUI::RenderServer()
+{
+    LoadServerSettings();
+    const bool downloading = m_download.IsRunning();
+    ImGui::BeginDisabled(downloading);
+    if (ImGui::Button(I18N::Editor::UpdateFromServer))
+    {
+        UpdateFromServer();
+    }
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(-Scaled(FieldColumnWidth));
+    InputString(I18N::Editor::AdminPanelAddress, m_adminPanelUrl);
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        g_MuEditorConfig.SetOpenMUAdminPanelUrl(m_adminPanelUrl);
+        g_MuEditorConfig.Save();
+        LoadApiKey();
+    }
+    RenderApiKey();
+    ImGui::EndDisabled();
+    ImGui::PushTextWrapPos(0.0f);
+    if (downloading)
+    {
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::Downloading0, {m_downloadUrl}).c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::Cancel))
+        {
+            m_download.Cancel();
+        }
+    }
+    else if (!m_serverMessage.empty())
+    {
+        ImGui::TextColored(ErrorColor, "%s", m_serverMessage.c_str());
+    }
+    else
+    {
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::WhatUpdateFromServerDoes, {OpenMUApiKeyVariable}).c_str());
+    }
+    ImGui::PopTextWrapPos();
+}
+
 void CMuItemSyncUI::RenderButtons()
 {
     if (ImGui::Button(I18N::Editor::Import))
@@ -469,20 +693,35 @@ void CMuItemSyncUI::RenderExportResult()
 
 void CMuItemSyncUI::Compare(const std::filesystem::path& path)
 {
+    m_fromServer = false;
+    m_serverText.clear();
+    m_path = ToText(path);
+    CompareText(Data::Items::Json::ReadTextFile(path), m_path);
+}
+
+void CMuItemSyncUI::CompareServerFile(const std::string& text, const std::string& url)
+{
+    m_fromServer = true;
+    m_serverText = text;
+    CompareText(text, url);
+}
+
+void CMuItemSyncUI::CompareText(const std::optional<std::string>& text, const std::string& name)
+{
     m_comparingFiles = false;
     m_toggleFields.clear();
-    m_path = ToText(path);
-    m_comparedPath = m_path;
+    m_comparedPath = name;
     m_result.clear();
     m_messages.clear();
     m_messagesAreErrors = false;
     m_diff.reset();
     m_shownItem = -1;
     m_shownUsage = {};
+    m_copiedList = ItemList::None;
     m_file = {};
 
     std::vector<ItemDataIssue> issues;
-    const bool usable = ReadExchangeFile(path, m_path, m_file, issues);
+    const bool usable = ReadExchangeText(text, name, m_file, issues);
     for (const ItemDataIssue& issue : issues)
     {
         m_messages.push_back(issue.ToString());
@@ -499,7 +738,7 @@ void CMuItemSyncUI::Compare(const std::filesystem::path& path)
         locales.emplace_back(locale);
     }
     const SyncOptions options{&m_known, locales, [](int itemType) { return IsHeldByCharacter(itemType); }};
-    m_diff = BuildItemSyncDiff(BuildClientExchange(), m_file, options);
+    m_diff = BuildItemSyncDiff(BuildClientComparison(m_file), m_file, options);
     m_diffVersion = g_ItemDatabase.GetVersion();
     std::set<std::string> names;
     for (const SyncItem& row : m_diff->items)
@@ -532,6 +771,7 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
     m_diff.reset();
     m_shownItem = -1;
     m_shownUsage = {};
+    m_copiedList = ItemList::None;
     m_fileA = {};
     m_file = {};
 
@@ -555,7 +795,8 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
 
 CMuItemSyncUI::ApplyBlocker CMuItemSyncUI::GetApplyBlocker() const
 {
-    if (m_path != m_comparedPath)
+    // A file from the server is not the path field's.
+    if (!m_fromServer && m_path != m_comparedPath)
     {
         return ApplyBlocker::OtherPath;
     }
@@ -618,7 +859,7 @@ bool CMuItemSyncUI::Apply()
         for (const ItemDataIssue& issue : issues)
         {
             m_messages.push_back(issue.ToString());
-            // The rows of the items with errors are unchecked; an error of no item is one of the
+            // The rows of the items with fatal problems are unchecked; a fatal problem of no item is one of the
             // formulas, which an issue cannot trace back to its row: all of them are unchecked.
             formulasRefused = formulasRefused || issue.group == ItemDataIssue::NoItem;
             for (SyncItem& row : m_diff->items)
@@ -647,7 +888,14 @@ bool CMuItemSyncUI::Apply()
     // The differences that are left; what was not checked stays unchecked, so a second click
     // does not take it after all.
     const UncheckedRows unchecked = FindUnchecked(*m_diff);
-    Compare(ToPath(path));
+    if (m_fromServer)
+    {
+        CompareServerFile(std::string(m_serverText), path);
+    }
+    else
+    {
+        Compare(ToPath(path));
+    }
     if (m_diff)
     {
         KeepUnchecked(*m_diff, unchecked);
@@ -722,16 +970,32 @@ bool CMuItemSyncUI::WriteExport()
     return true;
 }
 
+// Apply changes the editor's items only: while they differ from the saved ones, Save Items is
+// at hand here too.
+void CMuItemSyncUI::RenderUnsaved()
+{
+    if (!g_ItemEdits.GetHistory().IsModifiedSinceSave())
+    {
+        return;
+    }
+    CItemEditorActions::RenderSaveButton();
+    CItemEditorPopups::RenderAll();
+    ImGui::SameLine();
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextColored(WarningColor, "%s", I18N::Editor::NotSavedYetTheChangesAreOnlyInTheEditor);
+    ImGui::PopTextWrapPos();
+    ImGui::Separator();
+}
+
+// The heading of the incoming values: the server's after Update from server, else the file's.
+const char* CMuItemSyncUI::FromTheSource() const
+{
+    return m_fromServer ? I18N::Editor::FromTheServer : I18N::Editor::FromTheFile;
+}
+
 void CMuItemSyncUI::SetAllChecked(bool checked)
 {
-    for (SyncItem& row : m_diff->items)
-    {
-        SetRowChecked(row, checked);
-    }
-    for (SyncFormula& row : m_diff->formulas)
-    {
-        row.checked = checked;
-    }
+    SetAllRowsChecked(*m_diff, checked);
 }
 
 void CMuItemSyncUI::RenderSummary()
@@ -761,19 +1025,24 @@ void CMuItemSyncUI::RenderSummary()
         ImGui::PopTextWrapPos();
         return;
     }
-    RenderFileLine(I18N::Editor::ImportFrom0, m_comparedPath, m_file);
+    RenderFileLine(m_fromServer ? I18N::Editor::UpdateFrom0 : I18N::Editor::ImportFrom0, m_comparedPath, m_file);
     ImGui::PushTextWrapPos(0.0f);
     // What the last Apply did comes before what it left.
     if (!m_result.empty())
     {
         ImGui::TextColored(SuccessColor, "%s", m_result.c_str());
     }
-    if (m_diff->IsEmpty())
+    // The items only the client has are no difference the file makes: they stay as they are.
+    if (added + changed == 0 && m_diff->formulas.empty())
     {
         // The client always has formulas, so they were compared when the file has them too.
-        ImGui::TextColored(SuccessColor, "%s",
-                           m_file.formulas ? I18N::Editor::TheFileMatchesTheClient
-                                           : I18N::Editor::TheFileMatchesTheClientInAllItems);
+        const char* matches = I18N::Editor::EveryItemOfTheFileMatchesTheClient;
+        if (removed == 0)
+        {
+            matches = m_file.formulas ? I18N::Editor::TheFileMatchesTheClient
+                                      : I18N::Editor::TheFileMatchesTheClientInAllItems;
+        }
+        ImGui::TextColored(SuccessColor, "%s", matches);
         ImGui::TextDisabled("%s", I18N::Editor::HowToSeeDifferences);
     }
     else
@@ -782,10 +1051,15 @@ void CMuItemSyncUI::RenderSummary()
         {
             ImGui::TextDisabled("%s", I18N::Editor::StillListedBelowTheRowsThatWereNotChecked);
         }
-        ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheDiffCounts,
-                                            {std::to_string(added), std::to_string(changed), std::to_string(removed),
-                                             std::to_string(m_diff->formulas.size())})
-                                   .c_str());
+        ImGui::TextUnformatted(
+            I18N::Format(I18N::Editor::TheDiffCounts,
+                         {std::to_string(added), std::to_string(changed), std::to_string(m_diff->formulas.size())})
+                .c_str());
+    }
+    if (removed > 0)
+    {
+        ImGui::TextUnformatted(
+            I18N::Format(I18N::Editor::ItemsOnlyInTheClient0StayUnlessChecked, {std::to_string(removed)}).c_str());
     }
     if (g_ItemDatabase.GetVersion() != m_diffVersion)
     {
@@ -850,7 +1124,16 @@ void CMuItemSyncUI::RenderFieldToggle()
 
 void CMuItemSyncUI::RenderItems()
 {
-    if (m_diff->items.empty())
+    // An import lists the items only the client has apart from the others, folded: the file does
+    // not change them. A comparison of two files lists them with the others.
+    std::vector<int> differ;
+    std::vector<int> onlyInClient;
+    for (int index = 0; index < static_cast<int>(m_diff->items.size()); ++index)
+    {
+        const bool apart = !m_comparingFiles && IsOnlyInClient(m_diff->items[static_cast<size_t>(index)]);
+        (apart ? onlyInClient : differ).push_back(index);
+    }
+    if (differ.empty())
     {
         if (m_diff->comparedItems > 0)
         {
@@ -858,21 +1141,93 @@ void CMuItemSyncUI::RenderItems()
                 m_comparingFiles ? I18N::Editor::ItemsAll0AreTheSameInBothFiles : I18N::Editor::ItemsAll0AreTheSame;
             ImGui::TextDisabled("%s", I18N::Format(format, {std::to_string(m_diff->sameItems)}).c_str());
         }
-        return;
     }
-    const std::string header =
-        I18N::Format(I18N::Editor::ItemsThatDiffer0Of1,
-                     {std::to_string(m_diff->items.size()), std::to_string(m_diff->comparedItems)}) +
-        "###SyncItems";
-    if (!ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+    else
     {
-        return;
+        const int compared = m_diff->comparedItems - static_cast<int>(onlyInClient.size());
+        const std::string header =
+            I18N::Format(I18N::Editor::ItemsThatDiffer0Of1, {std::to_string(differ.size()), std::to_string(compared)}) +
+            "###SyncItems";
+        if (RenderItemListHeader(ItemList::Differ, header, differ))
+        {
+            RenderItemTable("##SyncItems", differ);
+        }
     }
+    if (!onlyInClient.empty())
+    {
+        const char* format =
+            m_fromServer ? I18N::Editor::OnlyInTheClient0NotOnTheServer : I18N::Editor::OnlyInTheClient0NotInTheFile;
+        const std::string header = I18N::Format(format, {std::to_string(onlyInClient.size())}) + "###SyncOnlyInClient";
+        if (RenderItemListHeader(ItemList::OnlyInClient, header, onlyInClient))
+        {
+            RenderItemTable("##SyncOnlyInClient", onlyInClient);
+        }
+    }
+}
+
+bool CMuItemSyncUI::RenderItemListHeader(ItemList list, const std::string& header, const std::vector<int>& rows)
+{
+    // The header spans the window; the button is drawn over its right end.
+    const float right = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_AllowOverlap;
+    if (list == ItemList::Differ)
+    {
+        flags |= ImGuiTreeNodeFlags_DefaultOpen;
+    }
+    const bool open = ImGui::CollapsingHeader(header.c_str(), flags);
+    const std::string label =
+        (m_copiedList == list ? I18N::Format(I18N::Editor::Copied0Rows, {std::to_string(m_copiedRows)})
+                              : std::string(I18N::Editor::CopyAsMarkdown)) +
+        "###CopyItemList";
+    const float width = ImGui::CalcTextSize(label.c_str(), nullptr, true).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+    ImGui::SameLine(right - width);
+    ImGui::PushID(static_cast<int>(list));
+    if (ImGui::SmallButton(label.c_str()))
+    {
+        CopyItemList(list, rows);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::CopiesTheListAsAMarkdownTable);
+    }
+    ImGui::PopID();
+    return open;
+}
+
+void CMuItemSyncUI::CopyItemList(ItemList list, const std::vector<int>& rows)
+{
+    std::vector<const SyncItem*> items;
+    items.reserve(rows.size());
+    for (const int index : rows)
+    {
+        items.push_back(&m_diff->items[static_cast<size_t>(index)]);
+    }
+    const char* title = m_fromServer ? MarkdownOnlyInClientFromServer : MarkdownOnlyInClientFromFile;
+    std::string_view changeColumn;
+    if (list == ItemList::Differ)
+    {
+        title = m_comparingFiles ? MarkdownDifferBetweenFiles
+                                 : (m_fromServer ? MarkdownDifferFromServer : MarkdownDifferFromFile);
+        changeColumn = m_comparingFiles ? MarkdownFromAToB : MarkdownInTheClient;
+    }
+    const std::string text =
+        WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")", changeColumn);
+    ImGui::SetClipboardText(text.c_str());
+    m_copiedList = list;
+    m_copiedRows = static_cast<int>(rows.size());
+}
+
+void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows)
+{
     // A comparison of two files has no boxes.
     const bool checkable = !m_comparingFiles;
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
-    if (ImGui::BeginTable("##SyncItems", checkable ? 4 : 3, Flags, ImVec2(0.0f, Scaled(ItemListHeight))))
+    // A short list is as high as its rows (and the head), a long one scrolls.
+    const float rowHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2.0f;
+    const float height =
+        std::min(Scaled(ItemListHeight), rowHeight * static_cast<float>(rows.size() + 1) + Scaled(ItemListBorders));
+    if (ImGui::BeginTable(id, checkable ? 4 : 3, Flags, ImVec2(0.0f, height)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
         if (checkable)
@@ -885,11 +1240,12 @@ void CMuItemSyncUI::RenderItems()
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldsColumnWidth));
         ImGui::TableHeadersRow();
         ImGuiListClipper clipper;
-        clipper.Begin(static_cast<int>(m_diff->items.size()));
+        clipper.Begin(static_cast<int>(rows.size()));
         while (clipper.Step())
         {
-            for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
+            for (int line = clipper.DisplayStart; line < clipper.DisplayEnd; ++line)
             {
+                const int index = rows[static_cast<size_t>(line)];
                 SyncItem& row = m_diff->items[static_cast<size_t>(index)];
                 ImGui::PushID(index);
                 ImGui::TableNextRow();
@@ -911,8 +1267,10 @@ void CMuItemSyncUI::RenderItems()
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
                 }
-                if (ImGui::Selectable(ItemLabel(row).c_str(), m_shownItem == index,
-                                      ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+                // The arrow keys move through the rows and show their fields as a click does.
+                if (ImGui::Selectable(ItemLabel(row, m_comparingFiles).c_str(), m_shownItem == index,
+                                      ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap |
+                                          MuEditor::KeyboardSelection::RowFlags))
                 {
                     m_shownItem = index;
                     const int itemType = Data::Items::MakeItemType(row.group, row.number);
@@ -934,7 +1292,8 @@ void CMuItemSyncUI::RenderItems()
         }
         ImGui::EndTable();
     }
-    if (m_shownItem >= 0 && m_shownItem < static_cast<int>(m_diff->items.size()))
+    // The shown item's fields come under the list it is in.
+    if (std::ranges::find(rows, m_shownItem) != rows.end())
     {
         RenderItemFields(m_diff->items[static_cast<size_t>(m_shownItem)]);
     }
@@ -942,7 +1301,7 @@ void CMuItemSyncUI::RenderItems()
 
 void CMuItemSyncUI::RenderItemFields(SyncItem& row)
 {
-    ImGui::TextUnformatted(I18N::Format(I18N::Editor::FieldsOf0, {ItemLabel(row)}).c_str());
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::FieldsOf0, {ItemLabel(row, m_comparingFiles)}).c_str());
     if (!row.locked.empty())
     {
         ImGui::TextColored(WarningColor, "%s", row.locked.c_str());
@@ -1009,9 +1368,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     {
         ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
     }
-    ImGui::TableSetupColumn(removed     ? I18N::Editor::FileA
-                            : checkable ? I18N::Editor::FromTheFile
-                                        : I18N::Editor::FileB);
+    ImGui::TableSetupColumn(removed ? I18N::Editor::FileA : checkable ? FromTheSource() : I18N::Editor::FileB);
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
@@ -1112,7 +1469,7 @@ void CMuItemSyncUI::RenderFormulas()
     }
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
-    ImGui::TableSetupColumn(checkable ? I18N::Editor::FromTheFile : I18N::Editor::FileB);
+    ImGui::TableSetupColumn(checkable ? FromTheSource() : I18N::Editor::FileB);
     ImGui::TableSetupColumn(I18N::Editor::Known, ImGuiTableColumnFlags_WidthFixed, Scaled(KnownColumnWidth));
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < m_diff->formulas.size(); ++index)
@@ -1197,6 +1554,12 @@ void CMuItemSyncUI::RenderApplyPopup()
                                         {m_comparedPath, std::to_string(changes.added), std::to_string(changes.changed),
                                          std::to_string(changes.removed), std::to_string(changes.formulaEntries)})
                                .c_str());
+    if (changes.removed > 0)
+    {
+        ImGui::TextColored(
+            WarningColor, "%s",
+            I18N::Format(I18N::Editor::ItRemoves0ItemsFromTheClient, {std::to_string(changes.removed)}).c_str());
+    }
     ImGui::TextDisabled("%s", I18N::Editor::WhatTheImportLeaves);
     ImGui::PopTextWrapPos();
     ImGui::BeginDisabled(GetApplyBlocker() != ApplyBlocker::None);

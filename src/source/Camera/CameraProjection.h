@@ -13,19 +13,17 @@ class CameraProjection
 {
 public:
     /**
-     * @brief Sets up OpenGL perspective projection
+     * @brief Builds the view the frame draws and picks with, from the camera
      *
-     * Replaces gluPerspective2(). Updates both OpenGL state and
-     * caches perspective factors in CameraState.
-     *
-     * @param state Camera state to update with cached factors
-     * @param fov Field of view (degrees)
-     * @param aspect Aspect ratio (width/height)
-     * @param zNear Near clipping plane
-     * @param zFar Far clipping plane
+     * The view matrix, and the screen centre and perspective factors of the
+     * viewport (window pixels) the view is drawn into.
      */
-    static void SetupPerspective(CameraState& state, float fov, float aspect,
-                                  float zNear, float zFar);
+    static void UpdateView(CameraState& state, int x, int y, int width, int height);
+
+    /**
+     * @brief Sets the renderer's projection and view to the state's view, for a target of width x height
+     */
+    static void ApplyView(const CameraState& state, int width, int height);
 
     /**
      * @brief Sets OpenGL viewport with Y-axis flip

@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemListFields.h"
+#include "ItemMeshFields.h"
 #include "ItemNumberList.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
@@ -205,6 +206,7 @@ void CItemSharedModelForm::RenderEdit()
             m_edit.noneBlendMeshes = *meshes;
         }
     }
+    MeshFields::PointAtNumber(m_meshesText);
     ImGui::PopID();
 }
 

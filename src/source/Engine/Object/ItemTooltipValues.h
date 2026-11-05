@@ -3,11 +3,16 @@
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// The room of a timed item's end date ({expireDate}, "2026-11-30  18:00"), its end included: the date has 17
+// characters, a year with more digits the rest.
+constexpr size_t ItemExpireDateLength = 24;
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
 // the built-in placeholders of the item descriptions ({damageMin}, {requiredStrength}, ...), and the states the
@@ -68,6 +73,31 @@ struct ItemTooltipValues
     bool timed = false;
     // The item has options to show (SpecialNum > 0: its skill, luck, additional and excellent options).
     bool hasOptions = false;
+    // An item that can have sockets (CSocketItemMgr::IsSocketItem).
+    bool socketItem = false;
+    // Wings or a cape of the second or third tier (its data's wingTier).
+    bool upperTierWings = false;
+    // The item has its skill, luck or an additional option (an option level above 0); excellent options don't count.
+    bool skillLuckOrOption = false;
+    // The item's ancient discriminator names one of its sets, so its name starts with the set's (GetSetItemName);
+    // `ancient` is any discriminator.
+    bool setItem = false;
+    // Every class can use the item from its first class (its classRequirements name all of them at level 1): its
+    // tooltip has no class lines.
+    bool allClasses = false;
+    // Boots (group 11) or gloves (group 10).
+    bool boots = false;
+    bool gloves = false;
+    // A timed item whose time is up.
+    bool expired = false;
+    // For a line written once for each class (a layout line's "forEachClass"): the class at the level the item needs
+    // ({className}, "Dark Knight", "Blade Master", ...), and whether the hero is that class at that level or above
+    // (classUsable). No class and false on the other lines.
+    const wchar_t* className = nullptr;
+    bool classUsable = false;
+    // When a timed item that isn't expired ends, in local time ("2026-11-30  18:00"); empty for another item, and with
+    // the Basics values.
+    std::array<wchar_t, ItemExpireDateLength> expireDate{};
     // The hero's level.
     int heroLevel = 0;
     // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its
@@ -75,6 +105,9 @@ struct ItemTooltipValues
     // kinds).
     const wchar_t* name = nullptr;
     int levelPlusOne = 0;
+    // How many jewels or stones a bundle holds, as the game counts them (COMGEM::CalcCompiledCount); 0 for anything
+    // else, a single jewel too.
+    int bundleCount = 0;
     int excellentFlags = 0;
     // The item's add option (the potions', scrolls' and seals' effects of ItemAddOption): its two values, and how long
     // it lasts in seconds, which {addOptionDuration} writes as the tooltip does ("1 Hour") only for a line showing it.
@@ -85,18 +118,41 @@ struct ItemTooltipValues
 
 namespace Engine::Items::TooltipValues
 {
+// How much of the values ComputeItemTooltipValues works out. Basics leaves the stat lines' values that need lookups
+// beyond the item and its data at 0: damage and defense with the Jewel of Harmony's bonus, the full durability, the
+// requirements (the hero's stats, the harmony and socket reductions), the add option and the bundle count. A caller on
+// a hot path (the ground labels, each frame for every drop) takes Basics while its conditions name none of them
+// (NeedsAllTooltipValues).
+enum class TooltipValueScope
+{
+    All,
+    Basics,
+};
+
 // The values of `item` for the hero as he is (CharacterAttribute); without a hero (none set yet), the requirements
 // are shown but nothing is missing.
-ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
+ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope scope = TooltipValueScope::All);
 
-// The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
-// name.
+// Whether the value, the state, or one of the conditions is one that Basics leaves out.
+bool NeedsAllTooltipValues(Data::Items::TooltipValue value);
+bool NeedsAllTooltipValues(Data::Items::TooltipState state);
+bool NeedsAllTooltipValues(std::span<const Data::Items::TooltipCondition> conditions);
+
+// The value of a built-in value that is a number, or nothing for {level} (the item's level, which the caller has) and
+// the texts ({name}, {addOptionDuration}, {className}, {expireDate}).
+std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The text of a built-in value that is a text ({name}, {addOptionDuration}, {className}, {expireDate}), or nullptr for
+// another. The duration is
+// written here, for a line showing it, and kept until another time or another UI language is asked for; empty without
+// the buff system.
+const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The state.
+bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipState state);
+
+// The same by name (ItemDescriptionPlaceholders' and GetTooltipStates' names), for the tests and the editor: nothing,
+// or false, for another name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
-
-// The value of a built-in placeholder that is a text ({name}, {addOptionDuration}), or nothing for another name.
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name);
-
-// The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
 // Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, or {level}) is not 0

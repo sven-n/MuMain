@@ -148,13 +148,13 @@ TEST_CASE("Broken braces in a description are errors in every language [data][it
 
     const std::vector<ItemDataIssue> english = IssuesOf(CheckSyntax(MakeJewel("up to {level")), "description[0].text");
     REQUIRE(english.size() == 1);
-    CHECK(english.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(english.front().severity == ItemDataIssueSeverity::Fatal);
 
     ItemDefinition translated = MakeJewel("up to +{level}");
     translated.description[0].text.Set("de", "bis zu +{level");
     const std::vector<ItemDataIssue> german = IssuesOf(CheckSyntax(translated), "description[0].text.de");
     REQUIRE(german.size() == 1);
-    CHECK(german.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(german.front().severity == ItemDataIssueSeverity::Fatal);
 }
 
 TEST_CASE("A translation has the placeholders of the English text [data][items]")
@@ -169,7 +169,7 @@ TEST_CASE("A translation has the placeholders of the English text [data][items]"
     CHECK(IssuesOf(issues, "description[0].text.de").empty());
     const std::vector<ItemDataIssue> spanish = IssuesOf(issues, "description[0].text.es");
     REQUIRE(spanish.size() == 1);
-    CHECK(spanish.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(spanish.front().severity == ItemDataIssueSeverity::Fatal);
     CHECK(spanish.front().message.find("{table:wingDamge}") != std::string::npos);
     CHECK(IssuesOf(issues, "description[0].text.pt").size() == 1);
 }
@@ -192,7 +192,7 @@ TEST_CASE("A description placeholder is a built-in value or a stat file table [d
     const std::vector<ItemDataIssue> typo =
         CheckNames(MakeJewel("Increases damage by {table:wingDamge}, {table:wingDamge}"));
     REQUIRE(typo.size() == 1);
-    CHECK(typo.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(typo.front().severity == ItemDataIssueSeverity::Fatal);
     CHECK(typo.front().field == "description[0].text");
     CHECK(typo.front().message == "has the unknown placeholder {table:wingDamge}; did you mean {table:wingDamage}?");
 

@@ -21,6 +21,8 @@ std::vector<int> FindItemEffectUsers(std::string_view name);
 // The items with the color in any of their glow colors (glow, shine,
 // ancient), also as the default they leave out.
 std::vector<int> FindGlowColorUsers(std::string_view name);
+// The items whose own ground label rules name the style.
+std::vector<int> FindGroundLabelStyleUsers(std::string_view name);
 // Whether `name` is the item's stat profile; "" and "default" both name the
 // default profile.
 bool UsesStatProfile(const Data::Items::ItemDefinition& item, std::string_view name);

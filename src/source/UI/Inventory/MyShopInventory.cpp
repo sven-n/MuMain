@@ -145,6 +145,7 @@ void ShowPriceTypeMenu(const std::wstring& title, const std::vector<GameLogic::P
     constexpr size_t MaximumSingleColumnButtons = 6;
 
     GenericMenuConfig cfg;
+    cfg.id = "personal-shop-price-type";
     cfg.title = title;
     for (const auto& priceType : priceTypes)
     {

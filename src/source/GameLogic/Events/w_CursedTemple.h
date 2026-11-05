@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 namespace SEASON3A
 {
@@ -33,7 +35,6 @@ namespace SEASON3A
         CHARACTER* CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey);
 
     public:
-        bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
         bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
         void PlayBGM();
         void ResetCursedTemple();
@@ -45,10 +46,10 @@ namespace SEASON3A
         void MoveMonsterSoundVisual(OBJECT* o, BMD* b);
 
     public:
-        bool RenderObject_AfterCharacter(OBJECT* o, BMD* b);
-        bool RenderObjectVisual(OBJECT* o, BMD* b);
-        bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-        bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+        bool RenderObject_AfterCharacter(const OBJECT* o, DrawLook& look, BMD* b);
+        bool UpdateObjectEffects(OBJECT* o, BMD* b);
+        bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
         void UpdateTempleSystemMsg(int _Value);
         void SetGaugebarEnabled(bool bFlag);
         void SetGaugebarCloseTimer();

@@ -73,6 +73,12 @@ TEST_CASE("The item checks send each field of an item to the tool that edits it 
         {"tradable", ItemTool::Rules},
         {"sellableWhenRentalExpired", ItemTool::Rules},
         {"tags", ItemTool::Categories},
+        {"groundLabels[1]", ItemTool::Tooltip},
+        // The tooltip layout and the item's own changes to it (the class-line warning, a layout or line id the
+        // tooltip file doesn't have, an added line's text).
+        {"tooltipLayout", ItemTool::Tooltip},
+        {"tooltipLayoutChanges.hide[0]", ItemTool::Tooltip},
+        {"tooltipLayoutChanges.add[0].lines[1].text", ItemTool::Tooltip},
         {"name", ItemTool::Basics},
         {"name.en", ItemTool::Basics},
         {"name.de", ItemTool::Translations},
@@ -174,6 +180,7 @@ TEST_CASE("The item checks open the window of each item tool [editor][items]")
         {ItemTool::Categories, MuEditor::WindowIds::ItemCategories, &MuEditor::ToolWindows::itemCategories},
         {ItemTool::Model, MuEditor::WindowIds::ItemModel, &MuEditor::ToolWindows::itemModel},
         {ItemTool::Translations, MuEditor::WindowIds::ItemTranslations, &MuEditor::ToolWindows::itemTranslations},
+        {ItemTool::Tooltip, MuEditor::WindowIds::ItemTooltip, &MuEditor::ToolWindows::itemTooltip},
         {ItemTool::Browser, MuEditor::WindowIds::ItemBrowser, &MuEditor::ToolWindows::itemBrowser},
     };
     for (const ExpectedWindow& entry : expected)

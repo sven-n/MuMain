@@ -127,9 +127,9 @@ public:
 
 private:
     void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
-    void AddError(const std::string& field, const std::string& message)
+    void AddFatal(const std::string& field, const std::string& message)
     {
-        AddIssue(ItemDataIssueSeverity::Error, field, message);
+        AddIssue(ItemDataIssueSeverity::Fatal, field, message);
     }
     bool ReadFile(const OrderedJson& json, std::string& file);
     void ReadTextureFolders(const OrderedJson& json, std::vector<std::string>& folders);
@@ -142,14 +142,14 @@ private:
     int m_number = ItemDataIssue::NoItem;
     // Shared models: their name before the fields in messages.
     std::string m_fieldPrefix;
-    bool m_hasErrors = false;
+    bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
 };
 
 void ItemModelReader::AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
 {
     m_issues.push_back({severity, m_source, m_group, m_number, m_fieldPrefix + field, message});
-    m_hasErrors = m_hasErrors || severity == ItemDataIssueSeverity::Error;
+    m_hasFatal = m_hasFatal || severity == ItemDataIssueSeverity::Fatal;
 }
 
 bool ItemModelReader::ReadFile(const OrderedJson& json, std::string& file)
@@ -157,20 +157,20 @@ bool ItemModelReader::ReadFile(const OrderedJson& json, std::string& file)
     const auto field = json.find(Keys::File);
     if (field == json.end() || !field->is_string() || field->get_ref<const std::string&>().empty())
     {
-        AddError(Keys::File, "missing or not a text");
+        AddFatal(Keys::File, "missing or not a text");
         return false;
     }
 
     file = field->get<std::string>();
     if (!EndsWithIgnoringCase(file, ModelFileExtension))
     {
-        AddError(Keys::File, "must name a " + std::string(ModelFileExtension) + " file");
+        AddFatal(Keys::File, "must name a " + std::string(ModelFileExtension) + " file");
         return false;
     }
     const std::string pathProblem = FindPathProblem(file);
     if (!pathProblem.empty())
     {
-        AddError(Keys::File, pathProblem);
+        AddFatal(Keys::File, pathProblem);
         return false;
     }
     return true;
@@ -185,7 +185,7 @@ void ItemModelReader::ReadTextureFolders(const OrderedJson& json, std::vector<st
     }
     if (!list->is_array())
     {
-        AddError(Keys::TextureFolders, "must be a list of folder names");
+        AddFatal(Keys::TextureFolders, "must be a list of folder names");
         return;
     }
 
@@ -194,7 +194,7 @@ void ItemModelReader::ReadTextureFolders(const OrderedJson& json, std::vector<st
         const bool isFolder = entry.is_string() && !entry.get_ref<const std::string&>().empty();
         if (!isFolder)
         {
-            AddError(Keys::TextureFolders, entry.dump() + " is not a folder name");
+            AddFatal(Keys::TextureFolders, entry.dump() + " is not a folder name");
             continue;
         }
 
@@ -202,7 +202,7 @@ void ItemModelReader::ReadTextureFolders(const OrderedJson& json, std::vector<st
         const std::string pathProblem = FindPathProblem(folder);
         if (!pathProblem.empty())
         {
-            AddError(Keys::TextureFolders, "\"" + folder + "\" " + pathProblem);
+            AddFatal(Keys::TextureFolders, "\"" + folder + "\" " + pathProblem);
             continue;
         }
         folders.push_back(folder);
@@ -218,7 +218,7 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
     }
     if (!list->is_array())
     {
-        AddError(Keys::NoneBlendMeshes, "must be a list of mesh indexes");
+        AddFatal(Keys::NoneBlendMeshes, "must be a list of mesh indexes");
         return;
     }
 
@@ -227,7 +227,7 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
         long long mesh = 0;
         if (!Json::ReadWholeNumber(entry, mesh) || mesh < 0 || mesh > std::numeric_limits<int>::max())
         {
-            AddError(Keys::NoneBlendMeshes, entry.dump() + " is not a mesh index");
+            AddFatal(Keys::NoneBlendMeshes, entry.dump() + " is not a mesh index");
             continue;
         }
         meshes.push_back(static_cast<int>(mesh));
@@ -245,7 +245,7 @@ void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std
     }
     if (!field->is_string() || !Json::IsName(field->get_ref<const std::string&>()))
     {
-        AddError(key, "must be a name of letters and digits");
+        AddFatal(key, "must be a name of letters and digits");
         return;
     }
     name = field->get<std::string>();
@@ -261,11 +261,11 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
 {
     if (!json.is_object())
     {
-        AddError("", "a model must be an object");
+        AddFatal("", "a model must be an object");
         return false;
     }
 
-    const auto addError = [this](const std::string& field, const std::string& message) { AddError(field, message); };
+    const auto addError = [this](const std::string& field, const std::string& message) { AddFatal(field, message); };
     if (!Json::ReadNumber(json, m_number, addError))
     {
         return false;
@@ -281,7 +281,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
         {
             if (json.contains(key))
             {
-                AddError(key, std::string("is the shared model's; leave it out with \"") + Keys::Model + "\"");
+                AddFatal(key, std::string("is the shared model's; leave it out with \"") + Keys::Model + "\"");
             }
         }
     }
@@ -302,7 +302,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
     ReadLookName(json, Keys::ItemEffect, model.itemEffect);
     WarnAboutUnknownKeys(json, ItemModelKeys);
-    return !m_hasErrors;
+    return !m_hasFatal;
 }
 
 bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model)
@@ -310,14 +310,14 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedIt
     const std::string position = std::string(Keys::Models) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddError(position, "a shared model must be an object");
+        AddFatal(position, "a shared model must be an object");
         return false;
     }
 
     const auto name = json.find(Keys::Name);
     if (name == json.end() || !name->is_string() || !Json::IsName(name->get_ref<const std::string&>()))
     {
-        AddError(position + "." + Keys::Name, "missing or not a name of letters and digits");
+        AddFatal(position + "." + Keys::Name, "missing or not a name of letters and digits");
         return false;
     }
     model.name = name->get<std::string>();
@@ -329,7 +329,7 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedIt
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
     WarnAboutUnknownKeys(json, SharedModelKeys);
-    return !m_hasErrors;
+    return !m_hasFatal;
 }
 
 // Calls read(entry, index) for every entry of the "models" list of a model

@@ -26,13 +26,53 @@ constexpr const char* FormatVersion = "formatVersion";
 constexpr const char* Source = "source";
 constexpr const char* Server = "server";
 constexpr const char* GameVersion = "gameVersion";
+constexpr const char* Fields = "fields";
 constexpr const char* Formulas = "formulas";
 constexpr const char* Items = "items";
 constexpr const char* Group = "group";
 } // namespace Keys
 
-const Json::KeySet RootKeys = {Keys::FormatVersion, Keys::Source,   Keys::Server,
-                               Keys::GameVersion,   Keys::Formulas, Keys::Items};
+const Json::KeySet RootKeys = {Keys::FormatVersion, Keys::Source,   Keys::Server, Keys::GameVersion,
+                               Keys::Fields,        Keys::Formulas, Keys::Items};
+
+// The keys of the item fields the exchange file has, in the order of the item files: what
+// CopyExchangeFields copies, and the stat profile.
+constexpr const char* ExchangeFieldKeys[] = {"name",
+                                             "tags",
+                                             "width",
+                                             "height",
+                                             "slot",
+                                             "statProfile",
+                                             "skill",
+                                             "level",
+                                             "durability",
+                                             "magicDurability",
+                                             "damageMin",
+                                             "damageMax",
+                                             "blockRate",
+                                             "defense",
+                                             "attackSpeed",
+                                             "walkSpeed",
+                                             "magicPower",
+                                             "excellentBonus",
+                                             "excellentRaisesLevel",
+                                             "sellValue",
+                                             "buyPrice",
+                                             "tradable",
+                                             "droppable",
+                                             "storable",
+                                             "sellable",
+                                             "personalShopSellable",
+                                             "repairable",
+                                             "requirements",
+                                             "requirementsByLevel",
+                                             "classRequirements",
+                                             "resistances"};
+
+bool IsExchangeField(std::string_view key)
+{
+    return std::ranges::any_of(ExchangeFieldKeys, [&](const char* field) { return key == field; });
+}
 
 bool LessByKey(const ItemDefinition& left, const ItemDefinition& right)
 {
@@ -57,11 +97,14 @@ private:
 
     // A text of `root`; false when it is missing (and required) or not a text.
     bool ReadText(const OrderedJson& root, const char* key, bool required, std::string& value);
+    void ReadFields(const OrderedJson& root, ItemExchangeFile& file);
     void ReadItems(const OrderedJson& root, ItemExchangeFile& file);
     void ReadItem(const OrderedJson& json, size_t index, std::vector<ItemDefinition>& items);
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
+    // Whether the items need a name: unless a "fields" list leaves it out.
+    bool m_nameRequired = true;
 };
 
 bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool required, std::string& value)
@@ -71,13 +114,13 @@ bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool req
     {
         if (required)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "missing");
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "missing");
         }
         return false;
     }
     if (!field->is_string())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
         return false;
     }
     if (field->get_ref<const std::string&>().empty())
@@ -85,12 +128,49 @@ bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool req
         // An empty optional text is as if it were not there (the writer leaves it out).
         if (required)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
         }
         return false;
     }
     value = field->get<std::string>();
     return true;
+}
+
+void ExchangeReader::ReadFields(const OrderedJson& root, ItemExchangeFile& file)
+{
+    const auto list = root.find(Keys::Fields);
+    if (list == root.end())
+    {
+        return;
+    }
+    if (!list->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Fields,
+                 "must be a list of the item fields the file carries");
+        return;
+    }
+    std::set<std::string, std::less<>> fields;
+    for (size_t index = 0; index < list->size(); ++index)
+    {
+        const OrderedJson& entry = (*list)[index];
+        const std::string field = std::string(Keys::Fields) + "[" + std::to_string(index) + "]";
+        if (!entry.is_string())
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
+                     "must be the name of an item field");
+            continue;
+        }
+        const std::string& key = entry.get_ref<const std::string&>();
+        if (!IsExchangeField(key))
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
+                     "\"" + key + "\" is not an item field of the exchange file, ignored");
+            continue;
+        }
+        fields.insert(key);
+    }
+    file.fields = std::move(fields);
+    m_nameRequired = file.fields->contains("name");
 }
 
 void ExchangeReader::Read(const OrderedJson& root, ItemExchangeFile& file)
@@ -104,7 +184,7 @@ void ExchangeReader::Read(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (text != ItemExchangeSourceMuMain && text != ItemExchangeSourceOpenMU)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Source,
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Source,
                      std::string("must be \"") + ItemExchangeSourceMuMain + "\" or \"" + ItemExchangeSourceOpenMU +
                          "\"");
         }
@@ -115,11 +195,12 @@ void ExchangeReader::Read(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (text != ItemExchangeGameVersion)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::GameVersion,
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::GameVersion,
                      std::string("only \"") + ItemExchangeGameVersion + "\" data can be exchanged");
         }
         file.gameVersion = text;
     }
+    ReadFields(root, file);
 
     if (const auto formulas = root.find(Keys::Formulas); formulas != root.end())
     {
@@ -135,7 +216,7 @@ void ExchangeReader::ReadItems(const OrderedJson& root, ItemExchangeFile& file)
     const auto list = root.find(Keys::Items);
     if (list == root.end() || !list->is_array())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Items,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Items,
                  "missing or not a list");
         return;
     }
@@ -155,7 +236,7 @@ void ExchangeReader::ReadItems(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (count > 1)
         {
-            AddIssue(ItemDataIssueSeverity::Error, key.first, key.second, "",
+            AddIssue(ItemDataIssueSeverity::Fatal, key.first, key.second, "",
                      "is in the file " + std::to_string(count) + " times; none of them is read");
             file.repeatedItems.push_back(key);
         }
@@ -170,7 +251,7 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     const std::string field = std::string(Keys::Items) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
                  "an item must be an object");
         return;
     }
@@ -179,7 +260,7 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     if (groupField == json.end() || !groupField->is_number_integer() || !Json::ReadWholeNumber(*groupField, group) ||
         group < 0 || group >= MAX_ITEM_TYPE)
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + Keys::Group,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + Keys::Group,
                  "missing or not a group from 0 to " + std::to_string(MAX_ITEM_TYPE - 1));
         return;
     }
@@ -188,7 +269,7 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     OrderedJson itemJson = json;
     itemJson.erase(Keys::Group);
     ItemDefinition item;
-    if (!ReadItemJson(itemJson, m_source, static_cast<int>(group), item, m_issues))
+    if (!ReadItemJson(itemJson, m_source, static_cast<int>(group), item, m_issues, m_nameRequired))
     {
         return;
     }
@@ -205,6 +286,21 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     items.push_back(std::move(shared));
 }
 } // namespace
+
+std::span<const char* const> GetExchangeFieldKeys()
+{
+    return ExchangeFieldKeys;
+}
+
+bool CarriesField(const ItemExchangeFile& file, std::string_view key)
+{
+    return !file.fields || file.fields->contains(key);
+}
+
+bool CarriesEveryField(const ItemExchangeFile& file)
+{
+    return std::ranges::all_of(ExchangeFieldKeys, [&](const char* key) { return CarriesField(file, key); });
+}
 
 ExchangeItemIndex IndexExchangeItems(const ItemExchangeFile& file)
 {
@@ -283,7 +379,7 @@ void ReadItemExchangeJson(std::string_view text, const std::string& source, Item
                           std::vector<ItemDataIssue>& issues)
 {
     OrderedJson root;
-    if (!Json::ReadFileVersion(text, source, ItemExchangeFormatVersion, root, issues))
+    if (!Json::ReadFileVersion(text, source, ItemExchangeMaxFormatVersion, root, issues))
     {
         return;
     }
@@ -293,13 +389,25 @@ void ReadItemExchangeJson(std::string_view text, const std::string& source, Item
 std::string WriteItemExchangeJson(const ItemExchangeFile& file)
 {
     OrderedJson root;
-    root[Keys::FormatVersion] = ItemExchangeFormatVersion;
+    // A file with only some fields is one that a client of version 1 must not read.
+    root[Keys::FormatVersion] = file.fields ? ItemExchangeMaxFormatVersion : ItemExchangeFormatVersion;
     root[Keys::Source] = file.source;
     if (!file.server.empty())
     {
         root[Keys::Server] = file.server;
     }
     root[Keys::GameVersion] = file.gameVersion;
+    if (file.fields)
+    {
+        root[Keys::Fields] = OrderedJson::array();
+        for (const char* key : ExchangeFieldKeys)
+        {
+            if (file.fields->contains(key))
+            {
+                root[Keys::Fields].push_back(key);
+            }
+        }
+    }
     if (file.formulas)
     {
         root[Keys::Formulas] = WriteItemStatFormulasJson(*file.formulas);
@@ -320,7 +428,10 @@ std::string WriteItemExchangeJson(const ItemExchangeFile& file)
         OrderedJson fields = WriteItemJson(*item);
         for (auto& [key, value] : fields.items())
         {
-            json[key] = std::move(value);
+            if (key == Json::Keys::Number || CarriesField(file, key))
+            {
+                json[key] = std::move(value);
+            }
         }
         root[Keys::Items].push_back(std::move(json));
     }
@@ -336,7 +447,7 @@ bool CanImportItemExchange(const ItemExchangeFile& file, std::span<const ItemDat
                                 [&](const ItemDataIssue& issue)
                                 {
                                     const std::pair<int, int> key{issue.group, issue.number};
-                                    return issue.severity == ItemDataIssueSeverity::Error &&
+                                    return issue.severity == ItemDataIssueSeverity::Fatal &&
                                            std::ranges::find(file.repeatedItems, key) == file.repeatedItems.end();
                                 });
 }

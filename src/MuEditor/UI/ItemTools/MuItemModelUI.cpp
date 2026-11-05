@@ -6,6 +6,7 @@
 
 #include "ItemEdits.h"
 #include "ItemLevelModels.h"
+#include "ItemMeshFocus.h"
 #include "ItemModelForms.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
@@ -56,6 +57,7 @@ void CMuItemModelUI::Render(bool* open)
     if (ToolWindow::Begin(I18N::Editor::ItemModel, MuEditor::WindowIds::ItemModel, open))
     {
         const int itemType = g_ItemSelection.GetItemType();
+        g_ItemMeshFocus.BeginFrame(itemType);
         ItemModelDefinition* model = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
         ShowInventoryDisplay(model, itemType);
         // Also a number with a model but no item can be edited here.
@@ -116,13 +118,14 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     {
         ModelForms::RenderOwnFile(m_draft, *model);
     }
+    m_meshList.Render(itemType, *model, m_preview.ShowsListedModel(itemType));
     if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
     {
         RenderInventory(*model, itemType);
     }
     ModelForms::RenderGround(m_draft, *model);
     ModelForms::RenderGlow(m_draft, *model, m_counts, m_newGlowColor);
-    if (ImGui::CollapsingHeader(I18N::Editor::Looks, ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(I18N::Editor::StyleAndEffect, ImGuiTreeNodeFlags_DefaultOpen))
     {
         ModelForms::RenderLooks(m_draft, *model, m_counts);
     }

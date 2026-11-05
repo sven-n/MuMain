@@ -13,6 +13,7 @@
 
 #include "stdafx.h"
 
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "DSPlaySound.h"
 #include "Core/Platform/IPlatformAudio.h"
 #ifdef _EDITOR
@@ -84,6 +85,7 @@ HRESULT ReleaseBuffer(int bufferId)
 
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
+    Diagnostics::DrawSpawnCheck::Note("sound");
 #ifdef _EDITOR
     // Nothing started; no caller reads the result.
     if (Audio::EditorMute::IsMuted() && looped == FALSE)
@@ -98,6 +100,7 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 
 HRESULT PlayBufferAtLevel(ESound bufferId, float level)
 {
+    Diagnostics::DrawSpawnCheck::Note("sound");
 #ifdef _EDITOR
     if (Audio::EditorMute::IsMuted())
         return S_FALSE;

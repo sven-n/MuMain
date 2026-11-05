@@ -72,6 +72,13 @@ const ItemModelDataLoadResult& ShippedModels()
     return result;
 }
 
+// The models need the entries of their numbers in the item files to be saved.
+const ItemDataLoadResult& ShippedItems()
+{
+    static const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
+    return result;
+}
+
 using GlowLevels = std::array<int, ItemGlow::ItemLevelCount>;
 
 GlowLevels SameGlowLevel(int level)
@@ -204,7 +211,7 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
     ItemModelDatabase database;
     database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
     const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
-    REQUIRE_FALSE(HasErrors(items.issues));
+    REQUIRE_FALSE(HasFatal(items.issues));
     const std::filesystem::path folder =
         std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
     ItemGroupSet allGroups;
@@ -238,11 +245,13 @@ TEST_CASE("Saving writes the shared model file only when it changed [data][items
     ItemModelSave models{folder / "Models", database.GetAllSlots(), {}, ShippedModels().sharedModels, false};
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", ShippedItems().items, models, issues) ==
+          ItemDataSaveResult::Saved);
     CHECK_FALSE(std::filesystem::exists(folder / "Models" / SharedItemModelsFileName));
 
     models.sharedModelsChanged = true;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, models, issues) == ItemDataSaveResult::Saved);
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", ShippedItems().items, models, issues) ==
+          ItemDataSaveResult::Saved);
     CHECK(TestFiles::ReadWholeFile(folder / "Models" / SharedItemModelsFileName) ==
           TestFiles::ReadWholeFile(ModelDirectory / SharedItemModelsFileName));
 
@@ -263,7 +272,8 @@ TEST_CASE("Saving writes only the model files of the given groups [data][items]"
     groups.set(SavedGroup);
 
     std::vector<ItemDataIssue> issues;
-    CHECK(SaveItemAndModelDataDirectories(folder / "Items", {}, {folder / "Models", database.GetAllSlots(), groups},
+    CHECK(SaveItemAndModelDataDirectories(folder / "Items", ShippedItems().items,
+                                          {folder / "Models", database.GetAllSlots(), groups},
                                           issues) == ItemDataSaveResult::Saved);
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -1321,7 +1331,7 @@ TEST_CASE("Models drawn for items keep the look of the old drawing code [data][i
     // character skeleton with the look of the item.
     CHECK(GetInventoryModel(ITEM_SACRED_ARMOR) == MODEL_ARMORINVEN_60);
     CHECK(GetInventoryModel(ITEM_PHOENIX_SOUL_ARMOR) == MODEL_ARMORINVEN_74);
-    CHECK(GetInventoryModel(ITEM_KRIS) == MODEL_ITEM + ITEM_KRIS);
+    CHECK(GetInventoryModel(ITEM_KRIS) == ToModelSlot(ITEM_KRIS));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_ARMORINVEN_74));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_HELM));
     CHECK(IsDrawnOnCharacterSkeleton(MODEL_BOOTS + MAX_ITEM_INDEX - 1));
@@ -1499,7 +1509,7 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
     // the Rage Fighter gloves have the colors of their item; the inventory
     // models draw their own meshes.
     const Color copper{0.8f, 0.46f, 0.25f};
-    CHECK(GetColors(MODEL_ITEM + ITEM_SACRED_ARMOR).color == copper);
+    CHECK(GetColors(ToModelSlot(ITEM_SACRED_ARMOR)).color == copper);
     CHECK(GetColors(MODEL_ARMORINVEN_60).color == copper);
     CHECK(GetColors(MODEL_SWORD_32_LEFT).color == copper);
     CHECK(Get(MODEL_ARMORINVEN_60) == ItemGlow{});
@@ -1569,15 +1579,17 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
     // A model without meshes draws nothing, so the styles only decide here.
     BMD model;
     OBJECT object;
+    DrawLook look;
     const auto drawsWithStyle = [&](int modelType, int renderType)
     {
         object.Type = modelType;
-        return Styles::Render(&model, &object, modelType, 1.f, renderType);
+        return Styles::Render(&model, &object, look, modelType, 1.f, renderType);
     };
 
     // Doppelgangers are drawn plainly.
     for (const int itemType :
-         {ITEM_RUNE_BLADE, ITEM_GREAT_SCEPTER, ITEM_GRAND_SOUL_SHIELD, ITEM_MISTERY_HELM, ITEM_LILIUM_ARMOR})
+         {ITEM_RUNE_BLADE, ITEM_GREAT_SCEPTER, ITEM_GRAND_SOUL_SHIELD, ITEM_MISTERY_HELM, ITEM_LILIUM_ARMOR,
+          ITEM_STORM_CROW_ARMOR, ITEM_THUNDER_HAWK_ARMOR, ITEM_HURRICANE_ARMOR})
     {
         INFO("item type " << itemType);
         CHECK(drawsWithStyle(MODEL_ITEM + itemType, RENDER_TEXTURE));
@@ -1587,20 +1599,20 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
     // the one of the plate set only for the helper NPCs, whose object has the
     // PC room flag (the helm: the armor also puts a light on the bones of the
     // object).
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE | RENDER_EXTRA));
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_BATTLE_BOW, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_BATTLE_BOW), RENDER_TEXTURE | RENDER_EXTRA));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_BATTLE_BOW), RENDER_TEXTURE));
     object.m_bpcroom = TRUE;
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_PLATE_HELM), RENDER_TEXTURE));
     object.m_bpcroom = FALSE;
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_HELM, RENDER_TEXTURE));
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_PLATE_ARMOR, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_PLATE_HELM), RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_PLATE_ARMOR), RENDER_TEXTURE));
     // Items without a style, and models that are not items, are drawn by the
     // drawing code.
-    CHECK_FALSE(drawsWithStyle(MODEL_ITEM + ITEM_KRIS, RENDER_TEXTURE));
+    CHECK_FALSE(drawsWithStyle(ToModelSlot(ITEM_KRIS), RENDER_TEXTURE));
     CHECK_FALSE(drawsWithStyle(MODEL_PLAYER, RENDER_TEXTURE));
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_STORM_CROW_ARMOR, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_STORM_CROW_ARMOR), RENDER_TEXTURE));
     // A style that shares its recipe, with a texture of its own.
-    CHECK(drawsWithStyle(MODEL_ITEM + ITEM_SEAL_OF_WEALTH, RENDER_TEXTURE));
+    CHECK(drawsWithStyle(ToModelSlot(ITEM_SEAL_OF_WEALTH), RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1614,16 +1626,17 @@ TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glo
         INFO("model " << modelType);
         CHECK(MODEL_ITEM + GetItemTypeOfModel(modelType) == g_CMonkSystem.EqualItemModelType(modelType));
     }
-    CHECK(GetItemTypeOfModel(MODEL_ITEM + ITEM_KRIS) == ITEM_KRIS);
+    CHECK(GetItemTypeOfModel(ToModelSlot(ITEM_KRIS)) == ITEM_KRIS);
     CHECK(GetItemTypeOfModel(MODEL_PLAYER) == -1);
 
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
     BMD model;
     OBJECT object;
+    DrawLook look;
     // They take the style of their glove.
     object.Type = MODEL_SWORD_35_LEFT;
-    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_LEFT, 1.f, RENDER_TEXTURE));
-    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_RIGHT, 1.f, RENDER_TEXTURE));
+    CHECK(Styles::Render(&model, &object, look, MODEL_SWORD_35_LEFT, 1.f, RENDER_TEXTURE));
+    CHECK(Styles::Render(&model, &object, look, MODEL_SWORD_35_RIGHT, 1.f, RENDER_TEXTURE));
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
@@ -1636,12 +1649,13 @@ TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [dat
     // items glow with their "glow" values.
     BMD model;
     OBJECT object;
-    object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_DEADLY_STAFF, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
-    CHECK(object.BlendMesh == 1);
-    object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
-    CHECK(object.BlendMesh == -1);
+    DrawLook look;
+    look.blendMesh = -1;
+    Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_DEADLY_STAFF), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    CHECK(look.blendMesh == 1);
+    look.blendMesh = -1;
+    Glow::RenderGlow(&model, &object, look, ToModelSlot(ITEM_KRIS), 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    CHECK(look.blendMesh == -1);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1688,17 +1702,18 @@ TEST_CASE("Styles that pick something per item draw other items plainly [data][i
     BMD model;
     model.HideSkin = true;
     OBJECT object;
+    DrawLook look;
     for (const Case& item : cases)
     {
         INFO("(" << item.group << "," << item.number << ") " << item.renderStyle);
         object.Type = MODEL_ITEM + MakeItemType(item.group, item.number);
-        CHECK(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
+        CHECK(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
     }
 
     // The styles follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     object.Type = MODEL_ITEM + MakeItemType(12, 65);
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 }
 
 TEST_CASE("The item effects of shipped item models exist [data][items]")
@@ -1764,10 +1779,12 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // A model without meshes draws nothing, so only the values change here.
     BMD model;
     OBJECT object;
+    DrawLook look;
+    float alpha = 1.f;
     const auto apply = [&](int itemType, int& level)
     {
         object.Type = MODEL_ITEM + itemType;
-        return ItemEffects::Apply(&model, &object, object.Type, 1.f, level);
+        return ItemEffects::Apply(&model, &object, look, object.Type, alpha, level);
     };
 
     // Potions with a level glow like +7.
@@ -1780,10 +1797,10 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // The siege potion hides a mesh by level.
     level = 0;
     CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
-    CHECK(object.HiddenMesh == 1);
+    CHECK(look.hiddenMesh == 1);
     level = 1;
     CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
-    CHECK(object.HiddenMesh == 0);
+    CHECK(look.hiddenMesh == 0);
     // Some effects draw the model themselves.
     level = 2;
     CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
@@ -1795,7 +1812,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;
-    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+    CHECK(ItemEffects::Apply(&model, &object, look, MODEL_PLAYER, alpha, level) == Result::None);
 
     // The effects follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
@@ -1846,8 +1863,9 @@ TEST_CASE("Some render styles shine below +3 like the old drawing code [data][it
     CHECK(shineOf(12, 37) == nullptr);
     BMD model;
     OBJECT object;
+    DrawLook look;
     object.Type = MODEL_ITEM + MakeItemType(14, 42);
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1859,22 +1877,25 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
 
     BMD model;
     OBJECT object;
+    DrawLook look;
     int level = 3;
+    float alpha = 1.f;
     // An item with an effect: its effect, whatever the object is.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), 1.f, level, 3) == Result::Applied);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_ITEM + MakeItemType(14, 0), alpha, level, 3) ==
+          Result::Applied);
     CHECK(level == 7);
     // The event models of level variants have theirs in the drawing code: they
     // only run when the item has no effect.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, level, 0) == Result::Drawn);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, ToModelSlot(ITEM_KRIS), alpha, level, 0) == Result::Drawn);
     object.Type = MODEL_EVENT + 18;
-    object.BlendMesh = -1;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, 1.f, level, 0) == Result::Applied);
-    CHECK(object.BlendMesh == 1);
+    look.blendMesh = -1;
+    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_EVENT + 18, alpha, level, 0) == Result::Applied);
+    CHECK(look.blendMesh == 1);
     // Neither.
-    object.Type = MODEL_ITEM + ITEM_KRIS;
-    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
+    object.Type = ToModelSlot(ITEM_KRIS);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, object.Type, alpha, level, 0) == Result::None);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }

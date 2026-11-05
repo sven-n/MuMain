@@ -9,10 +9,13 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemExchangeFile.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -132,29 +135,29 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
     SUBCASE("a file of another game version")
     {
         ReadExchange(FileWithItem(kris, R"("source": "OpenMU", "gameVersion": "season4")"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "season6"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "season6"));
     }
     SUBCASE("an unknown source")
     {
         ReadExchange(FileWithItem(kris, R"("source": "Other", "gameVersion": "season6")"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "MuMain"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "MuMain"));
     }
     SUBCASE("an empty server is as if there were none")
     {
         const ItemExchangeFile file = ReadExchange(
             R"({"formatVersion": 1, "source": "OpenMU", "server": "", "gameVersion": "season6", "items": []})", issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(file.server.empty());
     }
     SUBCASE("a newer format")
     {
-        ReadExchange(R"({"formatVersion": 2, "source": "OpenMU", "gameVersion": "season6", "items": []})", issues);
-        CHECK(HasErrors(issues));
+        ReadExchange(R"({"formatVersion": 3, "source": "OpenMU", "gameVersion": "season6", "items": []})", issues);
+        CHECK(HasFatal(issues));
     }
     SUBCASE("an item without a group")
     {
         const ItemExchangeFile file = ReadExchange(FileWithItem(R"({"number": 0, "name": "Kris"})"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "group"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "group"));
         CHECK(file.items.empty());
         CHECK_FALSE(CanImportItemExchange(file, issues));
     }
@@ -162,13 +165,115 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
     {
         const std::string other = R"({"group": 0, "number": 1, "name": "Short Sword"})";
         const ItemExchangeFile file = ReadExchange(FileWithItem(kris + ", " + other + ", " + kris), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "2 times"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "2 times"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].number == 1);
         CHECK(file.repeatedItems == std::vector<std::pair<int, int>>{{0, 0}});
         // The rest of the file can be imported.
         CHECK(CanImportItemExchange(file, issues));
     }
+}
+
+// OpenMU's export adds its fields one at a time: a file of version 2 names the ones it carries.
+TEST_CASE("A file of version 2 carries only the fields of its list [data][items][editor]")
+{
+    const std::string header = R"({"formatVersion": 2, "source": "OpenMU", "gameVersion": "season6", )";
+    std::vector<ItemDataIssue> issues;
+
+    SUBCASE("its items need no name while the list leaves it out")
+    {
+        const ItemExchangeFile file = ReadExchange(
+            header + R"("fields": ["width", "height"], "items": [{"group": 0, "number": 0, "width": 1, "height": 2}]})",
+            issues);
+        CHECK_FALSE(HasFatal(issues));
+        REQUIRE(file.fields);
+        CHECK(*file.fields == std::set<std::string, std::less<>>{"height", "width"});
+        CHECK(CarriesField(file, "width"));
+        CHECK_FALSE(CarriesField(file, "damageMin"));
+        CHECK_FALSE(CarriesEveryField(file));
+        REQUIRE(file.items.size() == 1);
+        CHECK(file.items[0].names.GetNeutral().empty());
+        CHECK(file.items[0].height == 2);
+    }
+    SUBCASE("a name it lists is required")
+    {
+        ReadExchange(header + R"("fields": ["name", "width"], "items": [{"group": 0, "number": 0, "width": 1}]})",
+                     issues);
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "name"));
+    }
+    SUBCASE("a field the exchange file has not got is ignored with a warning")
+    {
+        const ItemExchangeFile file =
+            ReadExchange(header + R"("fields": ["width", "weaponKind", "group"], "items": []})", issues);
+        CHECK_FALSE(HasFatal(issues));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
+        REQUIRE(file.fields);
+        CHECK(*file.fields == std::set<std::string, std::less<>>{"width"});
+    }
+    SUBCASE("a list that is not a list of field names is refused")
+    {
+        ReadExchange(header + R"("fields": "width", "items": []})", issues);
+        CHECK(HasFatal(issues));
+    }
+    SUBCASE("a file without the list carries every field")
+    {
+        const ItemExchangeFile file = ReadExchange(header + R"("items": []})", issues);
+        CHECK_FALSE(HasFatal(issues));
+        CHECK_FALSE(file.fields);
+        CHECK(CarriesEveryField(file));
+    }
+}
+
+TEST_CASE("A file with a field list is written as version 2 with only those fields [data][items][editor]")
+{
+    const ShippedItems shipped;
+    ItemExchangeFile file = BuildItemExchange(g_ItemDatabase.GetAllSlots(), g_ItemDataHandler.GetStatFile());
+    file.source = ItemExchangeSourceOpenMU;
+    file.fields = std::set<std::string, std::less<>>{"height", "width"};
+
+    const std::string text = WriteItemExchangeJson(file);
+    CHECK(text.find(R"("formatVersion": 2)") != std::string::npos);
+    CHECK(text.find(R"("damageMin")") == std::string::npos);
+    CHECK(text.find(R"("en": "Kris")") == std::string::npos);
+
+    std::vector<ItemDataIssue> issues;
+    const ItemExchangeFile read = ReadExchange(text, issues);
+    CHECK_FALSE(HasFatal(issues));
+    CHECK(read.fields == file.fields);
+    REQUIRE(read.items.size() == file.items.size());
+    for (size_t index = 0; index < read.items.size(); ++index)
+    {
+        CHECK(read.items[index].width == file.items[index].width);
+        CHECK(read.items[index].height == file.items[index].height);
+        CHECK(read.items[index].damageMin == 0);
+    }
+    // The client's own export has every field, as version 1.
+    file.fields.reset();
+    CHECK(WriteItemExchangeJson(file).find(R"("formatVersion": 1)") != std::string::npos);
+}
+
+// The list of the fields a "fields" list may name is the list of what an exchange item has.
+TEST_CASE("The exchange field keys are the fields of the exchange items [data][items][editor]")
+{
+    const ShippedItems shipped;
+    std::set<std::string> written;
+    for (const ItemDefinition& item :
+         BuildItemExchange(g_ItemDatabase.GetAllSlots(), g_ItemDataHandler.GetStatFile()).items)
+    {
+        // A temporary's items() would outlive it in the loop.
+        const Json::OrderedJson json = WriteItemJson(item);
+        for (const auto& [key, value] : json.items())
+        {
+            written.insert(key);
+        }
+    }
+    written.erase("number");
+    std::set<std::string> listed;
+    for (const char* key : GetExchangeFieldKeys())
+    {
+        listed.insert(key);
+    }
+    CHECK(written == listed);
 }
 
 TEST_CASE("The exchange file reader leaves out what stays with the client [data][items][editor]")
@@ -181,7 +286,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
             FileWithItem(
                 R"({"group": 0, "number": 0, "name": "Kris", "weaponKind": "sword", "statProfile": "weapon"})"),
             issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "stay with the client"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].weaponKind == WeaponKind::None);
@@ -192,7 +297,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
         const ItemExchangeFile file = ReadExchange(
             FileWithItem(R"({"group": 0, "number": 0, "name": "Kris", "description": [{"text": "A short dagger"}]})"),
             issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "stay with the client"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].description.empty());
@@ -207,7 +312,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
         REQUIRE(at != std::string::npos);
         text.insert(at, R"("profileRules": [{"profile": "default", "tags": ["ammunition"]}], )");
         const ItemExchangeFile file = ReadExchange(text, issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "profile rules"));
         REQUIRE(file.formulas);
         CHECK(file.formulas->profileRules.empty());

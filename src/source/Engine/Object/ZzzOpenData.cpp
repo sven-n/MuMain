@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -31,6 +32,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
+#include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
@@ -110,8 +112,10 @@ void OpenModels(int Model, wchar_t* FileName, int i)
 void OpenPlayers()
 {
     ModelsDump = new BMD[MAX_MODELS + 1024];
-    Models = ModelsDump + (rand() % 1024);
-    ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
+    Models = ModelsDump + (Random::Rand() % 1024);
+    // Zeroes the constructed models as the original client did, which also sets the constructor's
+    // iBillType (-1) and m_LastBoneScale (1) to 0; the cast says BMD is not a plain struct.
+    ZeroMemory(static_cast<void*>(Models), MAX_MODELS * sizeof(BMD));
 
     gLoadData.AccessModel(MODEL_PLAYER, L"Data\\Player\\", L"Player");
 
@@ -374,7 +378,7 @@ void OpenPlayerTextures()
     }
 }
 
-// The game cannot run with broken item, effect or server list data: shows the errors and quits.
+// The game cannot run with broken item, effect or server list data: shows the fatal problems and quits.
 static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
@@ -400,12 +404,14 @@ static void OpenServerList()
 }
 
 // Loads the monster list (Data/Monsters/Monsters.json), with the names in the
-// UI language, and the model list (Data/Monsters/Models.json), which names
-// effect types; errors stop the game.
+// UI language, the model list (Data/Monsters/Models.json), which names effect
+// types, and the sound sets (Data/Monsters/Sounds.json), which the monsters
+// name; errors stop the game.
 static void OpenMonsterData()
 {
     std::string errorMessage;
-    if (!g_MonsterDataHandler.Load(errorMessage) || !g_MonsterDataHandler.LoadModels(errorMessage))
+    if (!g_MonsterDataHandler.Load(errorMessage) || !g_MonsterDataHandler.LoadModels(errorMessage) ||
+        !g_MonsterDataHandler.LoadSounds(errorMessage))
     {
         StopOnDataError("Monster data error", errorMessage);
     }
@@ -413,6 +419,18 @@ static void OpenMonsterData()
 
 // Loads the effect types (Data/Effects) and builds the effect registry from
 // their creation values; errors stop the game.
+// Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
+// first); errors stop the game, as for the effect data. A missing table names
+// no model file.
+static void OpenModelFileData()
+{
+    std::string errorMessage;
+    if (!Data::Models::LoadModelFileTable(errorMessage))
+    {
+        StopOnDataError("Model file data error", errorMessage);
+    }
+}
+
 static void OpenEffectTypeData()
 {
     std::string errorMessage;
@@ -823,7 +841,6 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_LACEARROW, L"Data\\Skill\\", L"LaceArrow");
     gLoadData.OpenTexture(MODEL_LACEARROW, L"Item\\", GL_CLAMP_TO_EDGE);
 
-    gLoadData.AccessModel(MODEL_MANY_FLAG, L"Data\\Skill\\", L"ManyFlag");
     gLoadData.AccessModel(MODEL_WEBZEN_MARK, L"Data\\Skill\\", L"MuSign");
     gLoadData.AccessModel(MODEL_STUN_STONE, L"Data\\Skill\\", L"GroundCrystal");
     gLoadData.AccessModel(MODEL_SKIN_SHELL, L"Data\\Skill\\", L"skinshell");
@@ -887,7 +904,6 @@ void OpenSkills()
     gLoadData.OpenTexture(MODEL_GROUND_STONE2, L"Skill\\");
     gLoadData.OpenTexture(MODEL_WATER_WAVE, L"Skill\\", GL_CLAMP_TO_EDGE);
     gLoadData.OpenTexture(MODEL_SKULL, L"Skill\\", GL_CLAMP_TO_EDGE);
-    gLoadData.OpenTexture(MODEL_MANY_FLAG, L"Skill\\");
     gLoadData.OpenTexture(MODEL_WEBZEN_MARK, L"Skill\\");
 
     gLoadData.OpenTexture(MODEL_FLY_BIG_STONE1, L"Npc\\");
@@ -1136,15 +1152,11 @@ void OpenSkills()
     LoadBitmap(L"Effect\\Kwave2.jpg", BITMAP_KWAVE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Damage2.jpg", BITMAP_DAMAGE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\volcano_core.jpg", BITMAP_VOLCANO_CORE, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    gLoadData.AccessModel(MODEL_SHOCKWAVE03, L"Data\\Effect\\", L"shockwave03");
-    gLoadData.OpenTexture(MODEL_SHOCKWAVE03, L"Effect\\");
     LoadBitmap(L"Effect\\ground_smoke.tga", BITMAP_GROUND_SMOKE, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\knightSt_blue.jpg", BITMAP_KNIGHTST_BLUE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
     gLoadData.AccessModel(MODEL_PHOENIX_SHOT, L"Data\\Effect\\", L"phoenix_shot_effect");
     gLoadData.OpenTexture(MODEL_PHOENIX_SHOT, L"Effect\\");
-    gLoadData.AccessModel(MODEL_WINDSPIN01, L"Data\\Effect\\", L"wind_spin01");
-    gLoadData.OpenTexture(MODEL_WINDSPIN01, L"Effect\\");
     gLoadData.AccessModel(MODEL_WINDSPIN02, L"Data\\Effect\\", L"wind_spin02");
     gLoadData.OpenTexture(MODEL_WINDSPIN02, L"Effect\\");
     gLoadData.AccessModel(MODEL_WINDSPIN03, L"Data\\Effect\\", L"wind_spin03");
@@ -2095,6 +2107,7 @@ void OpenBasicData(HDC hDC)
 
     OpenItems();
     OpenEffectTypeData();
+    OpenModelFileData();
     TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();

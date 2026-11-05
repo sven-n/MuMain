@@ -1,0 +1,86 @@
+/* Classic (0.97) NPC shop (CNPCShop), from the 0.97 client's 004f1f50: Item_Back01 over Item_Back02, the title at the top,
+   the 8x15 grid at (15, 50), Repair and Repair all (repair_01, 24x24, the second image while
+   pressed) at (85, 365) and (115, 365), and the repair cost: "Repair all" at (20, 398) on its dark
+   box and the bar (Item_Money) at (55, 395). 0.97's Buy / Sell mode buttons (25 and 55) have no
+   MuMain counterpart (buying and selling are by click and drag). No tax line (not in 0.97).
+   #panel's left/top/scale come from C++; everything below is the window's own units. */
+
+@spritesheet shop-classic-back1-sheet { src: ../../../Classic/Item_back01.jpg; shop-classic-back1: 0px 0px 190px 256px; }
+@spritesheet shop-classic-back2-sheet { src: ../../../Classic/Item_Back02.jpg; shop-classic-back2: 0px 0px 190px 177px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom { position: absolute; pointer-events: none; }
+.bg-top  { left: 0; top: 0;     width: 190px; height: 256px; decorator: image(shop-classic-back1); }
+.bg-fill { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(shop-classic-back2); }
+.bg-left, .bg-right, .bg-bottom { display: none; }
+
+#title {
+	position: absolute;
+	/* 0.97: a 120-wide box at x 35, centred. */
+	left: 35px;
+	top: 12px;
+	width: calc(120px * var(--root-scale));
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+}
+#tax_rate { display: none; }
+
+@spritesheet shop-classic-repair1-sheet { src: ../../../Classic/Repair_01.jpg; shop-classic-repair: 0px 0px 24px 24px; }
+@spritesheet shop-classic-repair2-sheet { src: ../../../Classic/Repair_02.jpg; shop-classic-repair-pressed: 0px 0px 24px 24px; }
+.shop-btn {
+	position: absolute;
+	top: 365px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(shop-classic-repair);
+}
+.shop-btn:active { decorator: image(shop-classic-repair-pressed); }
+.shop-btn.hidden { display: none; }
+.shop-btn-repair     { left: 85px; }
+.shop-btn-repair-all { left: 115px; }
+
+@spritesheet shop-classic-money-sheet { src: ../../../Classic/Item_money.jpg; shop-classic-money: 0px 0px 113px 18px; }
+.repair-money {
+	position: absolute;
+	left: 55px;
+	top: 395px;
+	width: 113px;
+	height: 18px;
+	pointer-events: none;
+	decorator: image(shop-classic-money);
+}
+.repair-money.hidden { display: none; }
+.repair-money-label, .repair-money-value {
+	position: absolute;
+	top: 398px;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.repair-money-label { left: 20px; color: #ffdc96; background-color: #282828; }
+.repair-money-value { left: 65px; color: #ffdc96; }
+.repair-money-value.gold-hundred-thousand { color: #00c918; }
+.repair-money-value.gold-million { color: #ff9600; }
+.repair-money-value.gold-ten-million { color: #ff0000; }
+.repair-money-label.hidden, .repair-money-value.hidden { display: none; }
+
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid, #item_grid_counts { left: 15px; top: 50px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }
+#item_view { height: 473px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rules, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

@@ -2,6 +2,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
+#include "Render/Effects/EffectDraw.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -58,7 +61,8 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    Diagnostics::DrawSpawnCheck::Note("particle");
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return false;
     }
@@ -94,62 +98,62 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 1)
                 {
                     o->TexType = BITMAP_EXT_LOG_IN + 2;
-                    o->Scale = (float)(rand() % 10 + 20) * 0.01f;
-                    o->Gravity = (float)(rand() % 10 + 20) * 0.05f;
+                    o->Scale = (float)(Random::Rand() % 10 + 20) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 20) * 0.05f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->Gravity = 0.0f;
-                    o->Scale = (float)(rand() % 5 + 12) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 5 + 12) * 0.1f;
                 }
                 else if (o->SubType == 3)
                 {
                     o->TexType = BITMAP_CLUD64;
-                    o->Scale = (float)(rand() % 5 + 10) * 0.01f;
-                    o->Gravity = (float)(rand() % 10 + 20) * 0.05f;
+                    o->Scale = (float)(Random::Rand() % 5 + 10) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 20) * 0.05f;
                 }
                 else if (o->SubType == 0)
                 {
                     o->Gravity = 0.0f;
-                    o->Scale = (float)(rand() % 5 + 20) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 5 + 20) * 0.1f;
                 }
-                o->LifeTime = 20 + rand() % 3;
+                o->LifeTime = 20 + Random::Rand() % 3;
                 if (o->SubType == 2)
                 {
-                    o->LifeTime = 40 + rand() % 3;
+                    o->LifeTime = 40 + Random::Rand() % 3;
                 }
-                o->Position[0] += ((float)(rand() % 50 - 25));
-                o->Position[1] += ((float)(rand() % 50 - 25));
-                o->Position[2] += ((float)(rand() % 200 - 100) + 250.0f);
+                o->Position[0] += ((float)(Random::Rand() % 50 - 25));
+                o->Position[1] += ((float)(Random::Rand() % 50 - 25));
+                o->Position[2] += ((float)(Random::Rand() % 200 - 100) + 250.0f);
 
                 if (o->SubType == 4)
                 {
                     o->Gravity = 0.0f;
-                    o->Scale = (float)(rand() % 5 + 20) * 0.1f * 1.3f;
-                    o->Position[0] = Position[0] + (float)(rand() % 80 - 40) * 1.3f;
-                    o->Scale = (float)(rand() % 5 + 20) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 5 + 20) * 0.1f * 1.3f;
+                    o->Position[0] = Position[0] + (float)(Random::Rand() % 80 - 40) * 1.3f;
+                    o->Scale = (float)(Random::Rand() % 5 + 20) * 0.1f;
 
-                    o->Position[0] = Position[0] + (float)(rand() % 80 - 40);
+                    o->Position[0] = Position[0] + (float)(Random::Rand() % 80 - 40);
                     o->Position[2] -= 100.f;
                 }
                 else if (o->SubType == 5)
                 {
                     o->TexType = BITMAP_EXT_LOG_IN + 2;
-                    o->Scale = (float)(rand() % 10 + 20) * 0.01f * 1.3f;
-                    o->Gravity = (float)(rand() % 10 + 20) * 0.05f * 1.3f;
+                    o->Scale = (float)(Random::Rand() % 10 + 20) * 0.01f * 1.3f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 20) * 0.05f * 1.3f;
                     o->Position[2] -= 100.f;
                 }
                 else if (o->SubType == 6)
                 {
-                    o->Gravity = (float)(rand() % 20 + 80) * 0.1f;
-                    o->Scale = (float)(rand() % 5 + 20) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 20 + 80) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 5 + 20) * 0.1f;
                     o->Position[2] -= 200.f;
                 }
                 else if (o->SubType == 7)
                 {
                     o->TexType = BITMAP_EXT_LOG_IN + 2;
-                    o->Scale = (float)(rand() % 10 + 20) * 0.01f;
-                    o->Gravity = (float)(rand() % 20 + 80) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 10 + 20) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 20 + 80) * 0.1f;
 
                     o->Position[2] -= 100.f;
                 }
@@ -158,37 +162,37 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_FLOWER01:
             case BITMAP_FLOWER01 + 1:
             case BITMAP_FLOWER01 + 2:
-                o->LifeTime = 15 + rand() % 10;
-                o->Scale = (float)(rand() % 8 + 4) * 0.03f;
+                o->LifeTime = 15 + Random::Rand() % 10;
+                o->Scale = (float)(Random::Rand() % 8 + 4) * 0.03f;
                 Vector(1.f, 1.f, 1.f, o->Light);
-                o->Velocity[0] = (float)(rand() % 32 - 16) * 0.1f;
-                o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-                o->Velocity[2] = (float)(rand() % 32 - 32) * 0.1f;
+                o->Velocity[0] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+                o->Velocity[1] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+                o->Velocity[2] = (float)(Random::Rand() % 32 - 32) * 0.1f;
                 break;
             case BITMAP_FLARE_BLUE:
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = 30 + rand() % 10;
+                    o->LifeTime = 30 + Random::Rand() % 10;
                     Vector(1.f, 1.f, 1.f, o->Light);
-                    Vector(0.f, 0.f, (rand() % 100) / 50.f, o->Velocity);
+                    Vector(0.f, 0.f, (Random::Rand() % 100) / 50.f, o->Velocity);
                 }
                 else if (o->SubType == 1)
                 {
-                    o->LifeTime = 26 + (rand() % 2);
+                    o->LifeTime = 26 + (Random::Rand() % 2);
                     o->Gravity = 0;
                     o->Velocity[0] = 0;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.1f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.1f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 break;
             case BITMAP_FLARE + 1:
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = 110 + rand() % 10;
-                    o->Gravity = ((rand() % 100) / 100.f) * 2.f + 1.f;
-                    o->Velocity[0] = (float)(rand() % 100 - 50);
-                    o->Scale = Scale + (float)(rand() % 2) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->LifeTime = 110 + Random::Rand() % 10;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 2.f + 1.f;
+                    o->Velocity[0] = (float)(Random::Rand() % 100 - 50);
+                    o->Scale = Scale + (float)(Random::Rand() % 2) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     Vector(0.f, 0.f, 0.f, o->Angle);
 
@@ -200,30 +204,30 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                 case 0:
                 case 1:
-                    o->LifeTime = 30 + rand() % 10;
-                    o->Scale = (float)(rand() % 6 + 4) * 0.03f;
+                    o->LifeTime = 30 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 6 + 4) * 0.03f;
                     Vector(1.f, 1.f, 1.f, o->Light);
                     break;
                 case 2:
-                    o->LifeTime = 30 + rand() % 10;
-                    o->Scale = (float)(rand() % 6 + 4) * 0.03f;
+                    o->LifeTime = 30 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 6 + 4) * 0.03f;
                     Vector(1.f, 1.f, 1.f, o->Light);
                     PlayBuffer(SOUND_DEATH_BUBBLE);
                     break;
                 case 3:
-                    o->LifeTime = 30 + rand() % 10;
-                    o->Scale = (float)(rand() % 6 + 4) * 0.03f + Scale;
-                    o->Gravity = (float)(rand() % 6 + 4) * 0.03f;
+                    o->LifeTime = 30 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 6 + 4) * 0.03f + Scale;
+                    o->Gravity = (float)(Random::Rand() % 6 + 4) * 0.03f;
                     Vector(1.f, 1.f, 1.f, o->Light);
                     break;
                 case 4:
-                    o->LifeTime = 30 + rand() % 10;
-                    o->Scale = (float)(rand() % 6 + 4) * 0.03f;
+                    o->LifeTime = 30 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 6 + 4) * 0.03f;
                     Vector(1.f, 1.f, 1.f, o->Light);
                     break;
                 case 5:
-                    o->LifeTime = 30 + rand() % 10;
-                    o->Scale = (float)(rand() % 6 + 4) * 0.04f;
+                    o->LifeTime = 30 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 6 + 4) * 0.04f;
                     Vector(1.f, 1.f, 1.f, o->Light);
                     break;
                 }
@@ -271,82 +275,83 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->LifeTime = 10;
                 o->Scale = 1.8f;
                 o->Angle[0] = 30.f;
-                Vector((float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, o->Light);
+                Vector((float)(Random::Rand() % 4 + 6) * 0.1f, (float)(Random::Rand() % 4 + 6) * 0.1f,
+                       (float)(Random::Rand() % 4 + 6) * 0.1f, o->Light);
                 o->Position[2] += 260.f;
                 break;
             case BITMAP_CHROME_ENERGY2:
                 o->LifeTime = 8;
                 Vector(0.f, 0.f, 0.f, o->Velocity);
-                o->Scale = Scale * (float)(rand() % 64 + 128) * 0.01f;
-                o->Rotation = (float)(rand() % 360);
+                o->Scale = Scale * (float)(Random::Rand() % 64 + 128) * 0.01f;
+                o->Rotation = (float)(Random::Rand() % 360);
                 break;
             case BITMAP_FIRE_CURSEDLICH:
             case BITMAP_FIRE_HIK2_MONO:
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = (rand() % 12 + 8);
+                    o->LifeTime = (Random::Rand() % 12 + 8);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 30 + 20) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 15 + 15) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 30 + 20) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 15 + 15) * 0.01f;
                 }
                 else if (o->SubType == 1)
                 {
-                    o->Position[0] += (rand() % 10 - 5) * 0.2f;
-                    o->Position[1] += (rand() % 10 - 5) * 0.2f;
-                    o->Position[2] += (rand() % 10 - 5) * 0.2f;
-                    o->LifeTime = (rand() % 28 + 4);
+                    o->Position[0] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->Position[1] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->Position[2] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->LifeTime = (Random::Rand() % 28 + 4);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 5 + 50) * 0.016f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 5 + 10) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 5 + 50) * 0.016f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 5 + 10) * 0.01f;
                     VectorCopy(o->Target->Position, o->StartPosition);
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = (rand() % 12 + 8);
+                    o->LifeTime = (Random::Rand() % 12 + 8);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 30 + 20) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 15 + 15) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 30 + 20) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 15 + 15) * 0.01f;
                 }
                 else if (o->SubType == 3)
                 {
-                    o->LifeTime = (rand() % 12 + 16);
+                    o->LifeTime = (Random::Rand() % 12 + 16);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 30 + 20) * 0.02f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 15 + 15) * 0.02f;
+                    o->Scale = (float)(Random::Rand() % 30 + 20) * 0.02f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 15 + 15) * 0.02f;
                     VectorCopy(o->Target->Position, o->StartPosition);
                 }
                 else if (o->SubType == 4 || o->SubType == 9)
                 {
-                    o->LifeTime = rand() % 5 + 12;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 12;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 5)
                 {
-                    o->LifeTime = rand() % 5 + 24;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 74) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 24;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 74) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 6)
                 {
-                    o->LifeTime = rand() % 5 + 24;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 100) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 24;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 100) * 0.1f;
                     VectorCopy(o->Angle, o->Velocity);
-                    float fRand = (float)(rand() % 50) * 0.03f;
+                    float fRand = (float)(Random::Rand() % 50) * 0.03f;
                     Vector(2.5f + fRand, -5.0f - fRand, 0.f, o->Velocity);
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
@@ -354,10 +359,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 7)
                 {
-                    o->LifeTime = rand() % 5 + 12;
-                    o->Scale = (float)(rand() % 72 + 52) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 12;
+                    o->Scale = (float)(Random::Rand() % 72 + 52) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -365,9 +370,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 8)
                 {
                     o->LifeTime = 8;
-                    o->Scale = (float)(rand() % 42 + 12) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 42 + 12) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -375,14 +380,14 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 break;
             case BITMAP_LEAF_TOTEMGOLEM:
-                o->LifeTime = rand() % 10 + 40;
+                o->LifeTime = Random::Rand() % 10 + 40;
                 Vector(0.f, 0.f, 0.f, o->Velocity);
-                o->Scale = (float)(rand() % 20 + 10) * 0.04f;
-                o->Rotation = (float)(rand() % 360);
-                o->Gravity = (rand() % 40 + 30) * -0.05f;
-                o->Velocity[0] = rand() % 10 - 5;
-                o->Velocity[1] = rand() % 10 - 5;
-                o->Velocity[2] = rand() % 5 + 10;
+                o->Scale = (float)(Random::Rand() % 20 + 10) * 0.04f;
+                o->Rotation = (float)(Random::Rand() % 360);
+                o->Gravity = (Random::Rand() % 40 + 30) * -0.05f;
+                o->Velocity[0] = Random::Rand() % 10 - 5;
+                o->Velocity[1] = Random::Rand() % 10 - 5;
+                o->Velocity[2] = Random::Rand() % 5 + 10;
                 o->Alpha = 1.0f;
                 break;
             case BITMAP_FIRE:
@@ -394,16 +399,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 0:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 64 + 128) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 64 + 128) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 1:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 4 + 10) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 4 + 10) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 17:
                 case 5:
@@ -412,54 +417,54 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->LifeTime = 10;
                     else
                         o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = Scale * (float)(rand() % 64 + 128) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = Scale * (float)(Random::Rand() % 64 + 128) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 7:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    Vector(0.f, -(float)(rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 64 + 128) * 0.008f + Scale;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 64 + 128) * 0.008f + Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 9:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    int range = rand() % 60 - 30;
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    int range = Random::Rand() % 60 - 30;
                     o->StartPosition[0] = (float)range;
                     o->StartPosition[1] = (float)range;
                     o->StartPosition[2] = 190.f - abs(range) * 1.5f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 10:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 11:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 64 + 128) * 0.008f + Scale;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 64 + 128) * 0.008f + Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 12:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
-                    o->Scale = Scale * (float)(rand() % 16 + 150) * 0.012f;
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Scale = Scale * (float)(Random::Rand() % 16 + 150) * 0.012f;
                 }break;
                 case 13:
                 {
                     o->LifeTime = 20;
-                    Vector(0.f, 0.f, (float)(rand() % 128 + 128) * 0.15f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
-                    o->Scale = (float)(rand() % 16 + 150) * 0.012f;
+                    Vector(0.f, 0.f, (float)(Random::Rand() % 128 + 128) * 0.15f, o->Velocity);
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 16 + 150) * 0.012f;
                 }break;
                 case 14:
                 {
@@ -467,16 +472,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Scale = 1.5f;
                     o->TexType = BITMAP_CLUD64;
                     Vector(0.f, 0.0f, 0.f, o->Velocity);
-                    //	o->Gravity = (float)(rand()%60 - 30)/10.0f;
-                    o->Rotation = (float)(rand() % 360);
+                    //	o->Gravity = (float)(Random::Rand()%60 - 30)/10.0f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 15:
                 {
                     o->LifeTime = 10;
-                    o->Scale = (float)(rand() % 64 + 128) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 64 + 128) * 0.01f;
                     o->TexType = BITMAP_CLUD64;
                     Vector(0.f, 0.0f, 0.f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }break;
                 case 16:
                 {
@@ -485,8 +490,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 18:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->TexType = BITMAP_GROUND_SMOKE;
                     Vector(1.0f, 1.0f, 1.0f, o->Light);
                 }
@@ -494,8 +499,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 default:
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 32 - 16) * 0.1f, 0.f, o->Velocity);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 }
             }
@@ -504,28 +509,28 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 1)
                 {
                     o->LifeTime = 3;
-                    Vector(0.f, -(float)(rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
                     //o->Scale = 0.8f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 5;
-                    Vector(0.f, -(float)(rand() % 8 + 32) * 0.1f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 32) * 0.1f, 0.f, o->Velocity);
                     //o->Scale = 0.8f;
                 }
                 else if (o->SubType == 3)
                 {
                     o->LifeTime = 7;
-                    Vector(0.f, -(float)(rand() % 8 + 32) * 0.1f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 32) * 0.1f, 0.f, o->Velocity);
                     //o->Scale = 0.8f;
                 }
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 100;
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + 1.f;
-                    o->Velocity[0] = (float)(rand() % 300 - 150);
-                    o->Scale = Scale + (float)(rand() % 6) * 0.15f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + 1.f;
+                    o->Velocity[0] = (float)(Random::Rand() % 300 - 150);
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.15f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     Vector(0.f, 0.f, 0.f, o->Angle);
                     VectorCopy(o->Position, o->StartPosition);
@@ -533,18 +538,18 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 5)
                 {
                     o->LifeTime = 6;
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f;//45.f;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.20f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f; // 45.f;
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.20f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     VectorCopy(o->Position, o->StartPosition);
                 }
                 else if (o->SubType == 6)
                 {
                     o->LifeTime = 6;
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + 5.f;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.10f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + 5.f;
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.10f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     VectorCopy(o->Position, o->StartPosition);
                 }
@@ -554,75 +559,75 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 8)
                 {
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
-                    o->Position[2] += (float)(rand() % 20 - 10);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[2] += (float)(Random::Rand() % 20 - 10);
                     o->LifeTime = 32;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 5 + 5) / 5.0f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 5 + 5) / 5.0f;
                 }
                 else if (o->SubType == 9)
                 {
                     o->TexType = BITMAP_LIGHT + 2;
                     o->LifeTime = 32;
-                    //o->Scale    = Scale+(float)(rand()%6)*0.10f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 5 + 5) / 10.0f;
+                    // o->Scale    = Scale+(float)(Random::Rand()%6)*0.10f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 5 + 5) / 10.0f;
                 }
                 else if (o->SubType == 0)
                 {
                     o->LifeTime = 12;
-                    Vector(0.f, -(float)(rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
                     o->Scale = 0.8f;
                 }
-                o->Rotation = (float)(rand() % 360);
+                o->Rotation = (float)(Random::Rand() % 360);
                 break;
             case BITMAP_FLAME:
                 switch (o->SubType)
                 {
                 case 0:
                     o->LifeTime = 20;
-                    Vector(0.f, 0.f, (float)(rand() % 128 + 128) * 0.15f, o->Velocity);
-                    o->Scale = Scale * (float)(rand() % 64 + 64) * 0.01f;
+                    Vector(0.f, 0.f, (float)(Random::Rand() % 128 + 128) * 0.15f, o->Velocity);
+                    o->Scale = Scale * (float)(Random::Rand() % 64 + 64) * 0.01f;
                     break;
                 case 6:
                     o->LifeTime = 10;
-                    Vector(0.f, 0.f, (float)(rand() % 128 + 256) * 0.12f, o->Velocity);
-                    o->Scale = Scale * (float)(rand() % 64 + 64) * 0.01f;
+                    Vector(0.f, 0.f, (float)(Random::Rand() % 128 + 256) * 0.12f, o->Velocity);
+                    o->Scale = Scale * (float)(Random::Rand() % 64 + 64) * 0.01f;
                     break;
                 case 8:
                 case 7:
                 {
                     o->LifeTime = 33;
-                    o->Scale = -(float)(rand() % 20) / 100.0f + o->Scale;
-                    o->Rotation = (float)(rand() % 360) - 180.0f;
+                    o->Scale = -(float)(Random::Rand() % 20) / 100.0f + o->Scale;
+                    o->Rotation = (float)(Random::Rand() % 360) - 180.0f;
                     o->StartPosition[0] = o->Position[0];
-                    o->Position[0] += ((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale;
-                    o->Gravity = ((float)(rand() % 100) / 100.0f + 1.8f) * o->Scale;
+                    o->Position[0] += ((float)(Random::Rand() % 2) / 2.0f - 0.0f) * o->Scale;
+                    o->Gravity = ((float)(Random::Rand() % 100) / 100.0f + 1.8f) * o->Scale;
                     float fTemp = 0.0f;
-                    if (rand() % 10 >= 3)
-                        fTemp = ((float)(rand() % 20) / 10.0f - 1.0f) * o->Scale;
+                    if (Random::Rand() % 10 >= 3)
+                        fTemp = ((float)(Random::Rand() % 20) / 10.0f - 1.0f) * o->Scale;
                     Vector(0.0f, fTemp, 0.0f, o->Velocity);
                     o->Position[1] += o->Position[0] - o->StartPosition[0];
                 }
                 break;
                 case 1:
                     o->LifeTime = 15;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
-                    Vector(0.f, (float)(rand() % 4 + 4) * 0.15f, 0.f, o->Velocity);
+                    o->Scale += (float)(Random::Rand() % 32 + 32) * 0.01f;
+                    Vector(0.f, (float)(Random::Rand() % 4 + 4) * 0.15f, 0.f, o->Velocity);
                     break;
                 case 5:
                     o->LifeTime = 4;
-                    Vector(0.f, (float)(rand() % 4 + 4) * 0.15f, 0.f, o->Velocity);
+                    Vector(0.f, (float)(Random::Rand() % 4 + 4) * 0.15f, 0.f, o->Velocity);
                     break;
                 case 2:
                 {
                     float Luminosity;
 
                     o->LifeTime = 10;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
+                    o->Scale += (float)(Random::Rand() % 32 + 32) * 0.01f;
 
-                    float inter = Light[0] * (rand() % 80) / 100.0f;
+                    float inter = Light[0] * (Random::Rand() % 80) / 100.0f;
                     Vector(0.f, inter, 0.f, o->Velocity);
                     MovePosition(o->Position, o->Angle, o->Velocity);
 
@@ -640,7 +645,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     float Luminosity;
 
                     o->LifeTime = 10;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
+                    o->Scale += (float)(Random::Rand() % 32 + 32) * 0.01f;
                     Vector(0.f, 0.f, 0.f, o->Velocity);
 
                     Luminosity = (float)sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
@@ -652,7 +657,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     float Luminosity;
 
                     o->LifeTime = 5;
-                    o->Scale += (float)(rand() % 32 + 32) * 0.01f;
+                    o->Scale += (float)(Random::Rand() % 32 + 32) * 0.01f;
                     o->Gravity = 10.f;
                     VectorCopy(o->Target->Position, o->StartPosition);
 
@@ -663,67 +668,67 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 9:
                 {
                     o->LifeTime = 40;
-                    o->Scale = -(float)(rand() % 20) / 100.0f + o->Scale;
-                    o->Rotation = (float)(rand() % 360) - 180.0f;
+                    o->Scale = -(float)(Random::Rand() % 20) / 100.0f + o->Scale;
+                    o->Rotation = (float)(Random::Rand() % 360) - 180.0f;
                     o->StartPosition[0] = o->Position[0];
-                    o->Position[0] += ((float)(rand() % 2) / 2.0f - 0.0f) * o->Scale;
-                    o->Gravity = ((float)(rand() % 100) / 100.0f + 1.8f) * o->Scale + 2.0f;
+                    o->Position[0] += ((float)(Random::Rand() % 2) / 2.0f - 0.0f) * o->Scale;
+                    o->Gravity = ((float)(Random::Rand() % 100) / 100.0f + 1.8f) * o->Scale + 2.0f;
                     float fTemp = 0.0f;
-                    if (rand() % 10 >= 3)
+                    if (Random::Rand() % 10 >= 3)
                     {
-                        fTemp = ((float)(rand() % 20) / 10.0f - 1.0f) * o->Scale;
+                        fTemp = ((float)(Random::Rand() % 20) / 10.0f - 1.0f) * o->Scale;
                     }
                     Vector(0.0f, fTemp * 2.0f, 0.0f, o->Velocity);
                     o->Position[1] += o->Position[0] - o->StartPosition[0];
                 }
                 break;
                 case 10:
-                    o->LifeTime = 20 + rand() % 5;
+                    o->LifeTime = 20 + Random::Rand() % 5;
                     o->Rotation = 0.f;
-                    o->Scale = Scale * 0.5f + (float)(rand() % 10) * 0.02f;
-                    o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
-                    o->Velocity[1] = (float)(rand() % 10 - 5) * 0.4f;
-                    o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                    o->Scale = Scale * 0.5f + (float)(Random::Rand() % 10) * 0.02f;
+                    o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
+                    o->Velocity[1] = (float)(Random::Rand() % 10 - 5) * 0.4f;
+                    o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                     break;
                 case 11:
                     o->LifeTime = 20;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->TexType = BITMAP_FIRE_HIK2_MONO;
-                    Vector(0.f, 0.f, (float)(rand() % 128 + 128) * 0.15f, o->Velocity);
-                    o->Scale = Scale * (float)(rand() % 64 + 64) * 0.01f;
+                    Vector(0.f, 0.f, (float)(Random::Rand() % 128 + 128) * 0.15f, o->Velocity);
+                    o->Scale = Scale * (float)(Random::Rand() % 64 + 64) * 0.01f;
                     break;
                 case 12:
                     o->LifeTime = 10;
-                    Vector(0.f, 0.f, (float)(rand() % 128 + 128) * 0.15f, o->Velocity);
-                    o->Scale = Scale * (float)(rand() % 64 + 64) * 0.01f;
+                    Vector(0.f, 0.f, (float)(Random::Rand() % 128 + 128) * 0.15f, o->Velocity);
+                    o->Scale = Scale * (float)(Random::Rand() % 64 + 64) * 0.01f;
                     break;
                 }
                 break;
             case BITMAP_FIRE_RED:
                 o->LifeTime = 20;
-                Vector(0.f, 0.f, (float)(rand() % 100 + 100) * 0.15f, o->Velocity);
-                o->Scale = Scale * (float)(rand() % 64 + 64) * 0.01f;
+                Vector(0.f, 0.f, (float)(Random::Rand() % 100 + 100) * 0.15f, o->Velocity);
+                o->Scale = Scale * (float)(Random::Rand() % 64 + 64) * 0.01f;
                 break;
             case BITMAP_RAIN_CIRCLE:
             case BITMAP_RAIN_CIRCLE + 1:
                 o->LifeTime = 20;
-                o->Scale = (rand() % 6 + 8) * 0.1f;
+                o->Scale = (Random::Rand() % 6 + 8) * 0.1f;
                 if (o->Type == BITMAP_RAIN_CIRCLE + 1 || o->SubType == 1)
                 {
-                    o->Position[0] += (rand() % 10 - 5) * 1.f;
-                    o->Position[1] += (rand() % 10 - 5) * 1.f;
-                    o->Position[2] += (rand() % 10 - 5) * 1.f;
+                    o->Position[0] += (Random::Rand() % 10 - 5) * 1.f;
+                    o->Position[1] += (Random::Rand() % 10 - 5) * 1.f;
+                    o->Position[2] += (Random::Rand() % 10 - 5) * 1.f;
                 }
                 if (o->SubType == 1)
                 {
                     o->Scale = Scale;
-                    o->Gravity = rand() % 100 / 1000.f;
+                    o->Gravity = Random::Rand() % 100 / 1000.f;
                     o->Velocity[1] = 1.f;
                 }
                 break;
             case BITMAP_ENERGY://thunder energy
-                o->Scale = Scale * (float)(rand() % 8 + 6) * 0.1f;
-                o->Rotation = (float)(rand() % 360);
+                o->Scale = Scale * (float)(Random::Rand() % 8 + 6) * 0.1f;
+                o->Rotation = (float)(Random::Rand() % 360);
                 o->Gravity = 20.f;
 
                 if (o->SubType == 1)
@@ -735,7 +740,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->TexType = BITMAP_MAGIC + 1;
                     o->LifeTime = 10;
-                    o->Scale = 0.3f + Scale * (float)(rand() % 8 + 6) * 0.1f;
+                    o->Scale = 0.3f + Scale * (float)(Random::Rand() % 8 + 6) * 0.1f;
                     VectorCopy(o->Light, Light);
                     o->Rotation = 0;
                     o->Gravity = 0;
@@ -769,25 +774,25 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     || o->SubType == 10
                     )
                 {
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + 1.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + 1.f;
                 }
                 else if (o->SubType == 2)
                 {
-                    o->Gravity = ((rand() % 100) / 100.f) * 5.f + 5.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 5.f + 5.f;
                 }
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 40;
-                    o->Gravity = ((rand() % 100) / 100.f) * 5.f + 1.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 5.f + 1.f;
                 }
                 else if (o->SubType == 5)
                 {
                     o->LifeTime = 40;
-                    o->Gravity = ((rand() % 100) / 100.f) * 5.f + 1.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 5.f + 1.f;
                 }
-                o->Velocity[0] = (float)(rand() % 300 - 150);
-                o->Scale = Scale + (float)(rand() % 6) * 0.01f;
-                o->Rotation = (float)(rand() % 360);
+                o->Velocity[0] = (float)(Random::Rand() % 300 - 150);
+                o->Scale = Scale + (float)(Random::Rand() % 6) * 0.01f;
+                o->Rotation = (float)(Random::Rand() % 360);
 
                 Vector(0.f, 0.f, 0.f, o->Angle);
 
@@ -800,17 +805,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 11)
                 {
-                    o->LifeTime = 26 + (rand() % 2);
+                    o->LifeTime = 26 + (Random::Rand() % 2);
                     o->Gravity = 0;
                     o->Velocity[0] = 0;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.1f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.1f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 else
                     if (o->SubType == 12)
                     {
                         o->LifeTime = 80;
-                        o->Gravity = ((rand() % 100) / 100.f) * 4.f + 1.f;
+                        o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + 1.f;
                         Vector(0.2f, 0.6f, 1.f, o->Light);
                     }
                 break;
@@ -818,41 +823,41 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 16;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 32 + 48) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                 }
                 else if (o->SubType == 1)
                 {
                     o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 20;
-                    o->Scale += (float)(rand() % 10 + 10) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 10 + 10) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
-                    o->Gravity = (float)(rand() % 10 + 40) * 0.04f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 40) * 0.04f;
                     o->Position[1] += 10.f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 10;
-                    o->Scale -= (float)(rand() % 40 + 48) * 0.008f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale -= (float)(Random::Rand() % 40 + 48) * 0.008f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     o->Gravity = 0.0f;
                 }
                 else if (o->SubType == 3)
                 {
                     o->LifeTime = 20;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.008f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 32 + 48) * 0.008f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     VectorCopy(o->Target->Position, o->StartPosition);
                 }
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 16;
-                    o->Scale += (float)(rand() % 32 + 48) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 32 + 48) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                 }
                 else if (o->SubType == 5)
@@ -864,7 +869,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                     vec3_t vRelative, p1;
                     Vector(0.0f, 0.0f, 0.0f, vRelative);
-                    pModel->TransformPosition(o->Target->BoneTransform[rand() % iNumBones], vRelative, o->Position, false);
+                    pModel->TransformPosition(o->Target->BoneTransform[Random::Rand() % iNumBones], vRelative,
+                                              o->Position, false);
                     VectorScale(o->Position, pModel->BodyScale, o->Position);
                     VectorAdd(o->Position, o->Target->Position, o->Position);
 
@@ -873,12 +879,12 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[2] = 0;
 
                     o->LifeTime = 21;
-                    o->Scale = (float)(rand() % 4 + 8) * 0.01f;
-                    o->Gravity = (float)(rand() % 1 + 4) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 4 + 8) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 1 + 4) * 0.1f;
 
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
+                    Vector(0.f, (float)(Random::Rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
                     o->TurningForce[2] += 4.0f;
@@ -888,13 +894,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 6)
                 {
                     o->LifeTime = 21;
-                    o->Scale = Scale + (float)(rand() % 4 + 8) * 0.01f;
-                    o->Gravity = (float)(rand() % 1 + 1) * 0.1f;
+                    o->Scale = Scale + (float)(Random::Rand() % 4 + 8) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 1 + 1) * 0.1f;
 
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     vec3_t p1;
-                    Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
+                    Vector(0.f, (float)(Random::Rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
                     o->TurningForce[2] += 2.0f;
@@ -908,13 +914,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 7)
                 {
                     o->LifeTime = 18;
-                    o->Scale = Scale + (float)(rand() % 4 + 8) * 0.01f;
-                    o->Gravity = (float)(rand() % 1 + 1) * 0.1f;
+                    o->Scale = Scale + (float)(Random::Rand() % 4 + 8) * 0.01f;
+                    o->Gravity = (float)(Random::Rand() % 1 + 1) * 0.1f;
 
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     vec3_t p1;
-                    Vector(0.f, (float)(rand() % 2 + 60) * 0.1f, 0.f, p1);
+                    Vector(0.f, (float)(Random::Rand() % 2 + 60) * 0.1f, 0.f, p1);
                     VectorRotate(p1, Matrix, o->TurningForce);
 
                     o->TurningForce[2] += 2.0f;
@@ -928,8 +934,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_MAGIC + 1:
                 o->LifeTime = 10;
-                o->Scale += (float)(rand() % 32 + 48) * 0.001f;
-                o->Angle[0] = (float)(rand() % 360);
+                o->Scale += (float)(Random::Rand() % 32 + 48) * 0.001f;
+                o->Angle[0] = (float)(Random::Rand() % 360);
                 o->Rotation = (float)((int)WorldTime % 360);
                 break;
             case BITMAP_BLUE_BLUR:
@@ -937,15 +943,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                 case 0:
                     o->LifeTime = 30;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 1:
                     o->LifeTime = 30;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     o->Position[2] -= 45.00f;
                     o->TexType = BITMAP_POUNDING_BALL;
                     break;
@@ -955,66 +961,66 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             {
                 if (o->SubType == 0 || o->SubType == 2)
                 {
-                    if (rand() % 4 != 0)
+                    if (Random::Rand() % 4 != 0)
                         o->TexType = BITMAP_SMOKE;
 
                     o->LifeTime = 40;
-                    o->Scale = (float)(rand() % 20 + 250) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Scale = (float)(Random::Rand() % 20 + 250) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
                     o->Position[2] -= 20.f;
-                    o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 12;
-                    o->Scale += (float)(rand() % 30) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 30) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Position[2] += 30.0f;
                 }
                 else if (o->SubType == 3)
                 {
-                    if (rand() % 2 != 0)
+                    if (Random::Rand() % 2 != 0)
                         o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 50;
-                    o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Scale = Scale + (float)(Random::Rand() % 10 + 10) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
                     o->Position[2] -= 20.f;
-                    o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 4)
                 {
-                    if (rand() % 2 != 0)
+                    if (Random::Rand() % 2 != 0)
                         o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 4;
-                    o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Scale = Scale + (float)(Random::Rand() % 10 + 10) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
                     o->Position[2] -= 20.f;
-                    o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 5)
                 {
-                    if (rand() % 2 != 0)
+                    if (Random::Rand() % 2 != 0)
                         o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 50;
-                    o->Scale = Scale + (float)(rand() % 10 + 10) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
+                    o->Scale = Scale + (float)(Random::Rand() % 10 + 10) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
                     o->Position[2] -= 20.f;
-                    o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 10 + 5) * 0.1f;
                 }
                 else if (o->SubType == 6)	// ◎
                 {
                     o->LifeTime = 25;
-                    o->Scale = (float)(rand() % 8 + 50) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 10 + 35) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 8 + 50) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 10 + 35) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1023,9 +1029,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 7)
                 {
                     o->LifeTime = 40;
-                    o->Velocity[0] = (float)(rand() % 20 - 10) * 0.1f;
-                    o->Velocity[1] = (float)(rand() % 20 - 10) * 0.1f;
-                    //o->Velocity[2] = (float)(rand()%20-10)*0.2f;
+                    o->Velocity[0] = (float)(Random::Rand() % 20 - 10) * 0.1f;
+                    o->Velocity[1] = (float)(Random::Rand() % 20 - 10) * 0.1f;
+                    // o->Velocity[2] = (float)(Random::Rand()%20-10)*0.2f;
                     o->Position[2] += 80.0f;
                     o->Gravity = 0;
                     o->Alpha = 0.5f;
@@ -1033,50 +1039,50 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 8)
                 {
                     o->LifeTime = 20;
-                    o->Velocity[0] = (float)(rand() % 20 - 10) * 0.1f;
-                    o->Velocity[1] = (float)(rand() % 20 - 10) * 0.1f;
-                    //o->Velocity[2] = (float)(rand()%20-10)*0.2f;
+                    o->Velocity[0] = (float)(Random::Rand() % 20 - 10) * 0.1f;
+                    o->Velocity[1] = (float)(Random::Rand() % 20 - 10) * 0.1f;
+                    // o->Velocity[2] = (float)(Random::Rand()%20-10)*0.2f;
                     o->Position[2] += 80.0f;
                     o->Gravity = 0;
                     o->Alpha = 0.5f;
                 }
                 else if (o->SubType == 9)
                 {
-                    if (rand() % 2 != 0)
+                    if (Random::Rand() % 2 != 0)
                         o->TexType = BITMAP_SMOKE;
                     o->LifeTime = 40;
                     o->Alpha = 0.5f;
                     float fIntervalScale = Scale * 0.1f;
-                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
-                    o->Rotation = (float)(rand() % 360);
-                    o->Velocity[0] = (float)(rand() % 20 - 10) * 0.03f;
-                    o->Velocity[1] = (float)(rand() % 20 - 10) * 0.03f;
-                    o->Velocity[2] = -((1.2f) + ((float)(rand() % 20 - 10) * 0.025f));
-                    o->Gravity = 2.f + ((float)(rand() % 20 - 10) * 0.05f);
+                    o->Scale += ((float((Random::Rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Velocity[0] = (float)(Random::Rand() % 20 - 10) * 0.03f;
+                    o->Velocity[1] = (float)(Random::Rand() % 20 - 10) * 0.03f;
+                    o->Velocity[2] = -((1.2f) + ((float)(Random::Rand() % 20 - 10) * 0.025f));
+                    o->Gravity = 2.f + ((float)(Random::Rand() % 20 - 10) * 0.05f);
                 }
                 else if (o->SubType == 10)	// BITMAP_FIRE_CURSEDLICH o->SubType == 1과 비슷.
                 {
-                    o->Position[0] += (rand() % 10 - 5) * 0.2f;
-                    o->Position[1] += (rand() % 10 - 5) * 0.2f;
-                    o->Position[2] += (rand() % 10 - 5) * 0.2f;
-                    o->LifeTime = (rand() % 28 + 4);
+                    o->Position[0] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->Position[1] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->Position[2] += (Random::Rand() % 10 - 5) * 0.2f;
+                    o->LifeTime = (Random::Rand() % 28 + 4);
                     Vector(0.f, 0.f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 5 + 70) * 0.016f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 5 + 10) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 5 + 70) * 0.016f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 5 + 10) * 0.01f;
                     VectorCopy(o->Target->Position, o->StartPosition);
                 }
                 else if (o->SubType == 11)
                 {
-                    if (rand() % 4 != 0)
+                    if (Random::Rand() % 4 != 0)
                         o->TexType = BITMAP_SMOKE;
 
                     o->LifeTime = 30;
                     o->Scale = Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 20 - 10);
-                    o->Position[1] += (float)(rand() % 20 - 10);
-                    o->Position[2] += (float)(rand() % 20 - 10);
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10);
+                    o->Position[2] += (float)(Random::Rand() % 20 - 10);
                     o->Gravity = -1.5f;
                 }
             }
@@ -1085,32 +1091,32 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             {
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = rand() % 10 + 140;
-                    o->Gravity = rand() % 10 + 5.0f;
-                    o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
-                    o->Position[0] += (float)(rand() % 100 - 50);
-                    o->Position[1] += (float)(rand() % 100 - 50);
+                    o->LifeTime = Random::Rand() % 10 + 140;
+                    o->Gravity = Random::Rand() % 10 + 5.0f;
+                    o->Scale = (Random::Rand() % 20 + 20.f) / 100.f * Scale;
+                    o->Position[0] += (float)(Random::Rand() % 100 - 50);
+                    o->Position[1] += (float)(Random::Rand() % 100 - 50);
                 }
                 else if (o->SubType == 1)
                 {
                     o->Scale = 0.1f;
                     o->StartPosition[0] = o->Scale;
-                    o->LifeTime = rand() % 10 + 20;
-                    o->Position[0] += (float)(rand() % 50 - 25);
-                    o->Position[1] += (float)(rand() % 50 - 25);
-                    o->Position[2] += (float)(rand() % 50 - 25);
+                    o->LifeTime = Random::Rand() % 10 + 20;
+                    o->Position[0] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[1] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[2] += (float)(Random::Rand() % 50 - 25);
 
                     o->Gravity = 1.0f;
 
-                    o->Angle[0] = (float)(rand() % 360);
-                    o->Angle[1] = (float)(rand() % 360);
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
+                    o->Angle[1] = (float)(Random::Rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.5f, 0.5f, 0.5f, p);
                     VectorScale(p, 0.8f, p);
                     VectorRotate(p, Matrix, o->Velocity);
 
-                    o->Rotation = rand() % 20 - 10;
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
             }
             break;
@@ -1118,31 +1124,31 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             {
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = 50 + rand() % 10;
-                    o->Scale = (float)(rand() % 32 + 140) * 0.01f;
-                    o->Position[0] += (float)(rand() % 120 - 60);
-                    o->Position[1] += (float)(rand() % 100 - 50);
-                    o->Position[2] += (float)(rand() % 100);
+                    o->LifeTime = 50 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 32 + 140) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 120 - 60);
+                    o->Position[1] += (float)(Random::Rand() % 100 - 50);
+                    o->Position[2] += (float)(Random::Rand() % 100);
                 }
                 else if (o->SubType == 1)
                 {
-                    o->LifeTime = 20 + rand() % 10;
-                    o->Scale = (float)(rand() % 32 + 50) * 0.01f;
-                    o->Position[0] += (float)(rand() % 80 - 40);
-                    o->Position[1] += (float)(rand() % 80 - 40);
-                    o->Position[2] += (float)(rand() % 80);
+                    o->LifeTime = 20 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 32 + 50) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 80 - 40);
+                    o->Position[1] += (float)(Random::Rand() % 80 - 40);
+                    o->Position[2] += (float)(Random::Rand() % 80);
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = 60 + rand() % 10;
-                    o->Scale = (float)(rand() % 32 + 50) * 0.02f;
-                    o->Position[0] += (float)(rand() % 40 - 20);
-                    o->Position[1] += (float)(rand() % 40 - 20);
-                    o->Position[2] += (float)(rand() % 40);
+                    o->LifeTime = 60 + Random::Rand() % 10;
+                    o->Scale = (float)(Random::Rand() % 32 + 50) * 0.02f;
+                    o->Position[0] += (float)(Random::Rand() % 40 - 20);
+                    o->Position[1] += (float)(Random::Rand() % 40 - 20);
+                    o->Position[2] += (float)(Random::Rand() % 40);
                 }
-                o->Angle[0] = (float)(rand() % 360);
-                o->Angle[2] = (float)(rand() % 360);
-                o->Gravity = (float)(rand() % 10 + 20) * 0.1f;
+                o->Angle[0] = (float)(Random::Rand() % 360);
+                o->Angle[2] = (float)(Random::Rand() % 360);
+                o->Gravity = (float)(Random::Rand() % 10 + 20) * 0.1f;
             }
             break;
             case BITMAP_SMOKE:
@@ -1155,23 +1161,23 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 23:
                     o->LifeTime = 16;
                     if (o->Type == MODEL_SLAUGHTERER)
-                        o->Scale = (float)(rand() % 3 + 28) * 0.01f;
+                        o->Scale = (float)(Random::Rand() % 3 + 28) * 0.01f;
                     else
-                        o->Scale = (float)(rand() % 32 + 48) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                        o->Scale = (float)(Random::Rand() % 32 + 48) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 42:
                     o->LifeTime = 16;
-                    o->Scale = (float)(rand() % 32 + 48) * 0.006f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 32 + 48) * 0.006f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 17:
                     VectorCopy(o->Light, o->TurningForce);
                     o->LifeTime = 12;
-                    o->Scale = Scale * (float)(rand() % 32 + 8) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = Scale * (float)(Random::Rand() % 32 + 8) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 36:
@@ -1186,20 +1192,21 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     else
                         Vector(1.0f, 0.3f, 0.0f, o->Light);
                     o->LifeTime = 25;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Angle[0] = (float)(rand() % 360);
-                    Vector((float)(rand() % 50 - 25), (float)(rand() % 50 - 25), -(float)(rand() % 50), o->StartPosition);
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
+                    Vector((float)(Random::Rand() % 50 - 25), (float)(Random::Rand() % 50 - 25),
+                           -(float)(Random::Rand() % 50), o->StartPosition);
                     break;
                 case 38:
                     o->TexType = BITMAP_WATERFALL_2;
                     o->LifeTime = 35;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     break;
                 case 34:
                 case 35:
                     Vector(1.0f, 0.2f, 0.2f, o->Light);
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     if (SubType == 35)
                     {
                         Vector(0.0f, -5.0f, 0.0f, o->Velocity);
@@ -1211,20 +1218,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     break;
                 case 33:
                 {
-                    o->LifeTime = rand() % 150;
+                    o->LifeTime = Random::Rand() % 150;
                     o->Scale = Scale + 0.1f;
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8), 0.f, o->Velocity);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8), 0.f, o->Velocity);
                 }
                 break;
                 case 32:
                 {
                     o->LifeTime = 10;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                 }
                 break;
                 case 10:
@@ -1232,154 +1239,154 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     break;
                 case 12:
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 13:
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 18:
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 3:
                     o->LifeTime = 10;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                     break;
                 case 11:
                 case 14:
                     o->LifeTime = 50;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Position[2] += (float)(rand() % 64 + 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    o->Rotation = (float)(rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[2] += (float)(Random::Rand() % 64 + 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     VectorCopy(o->Light, o->TurningForce);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                     break;
                 case 15:
                     o->LifeTime = 80;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 53:
                 case 56:
                 case 1:
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Position[2] += (float)(rand() % 64 + 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[2] += (float)(Random::Rand() % 64 + 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                     break;
                 case 2:
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 16:
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 5:
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 64 + 98) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 98) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 6:
                     o->LifeTime = 30;
-                    o->Gravity = (float)(rand() % 1000);
-                    o->Scale = (float)(rand() % 20 + 180) * 0.01f;
-                    o->Position[0] += (float)(rand() % 200 - 100) * Scale;
-                    o->Position[1] += (float)(rand() % 200 - 100) * Scale;
-                    o->Position[2] += (float)(rand() % 20 + 20);
+                    o->Gravity = (float)(Random::Rand() % 1000);
+                    o->Scale = (float)(Random::Rand() % 20 + 180) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 200 - 100) * Scale;
+                    o->Position[1] += (float)(Random::Rand() % 200 - 100) * Scale;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 20);
                     o->Rotation = o->Position[2];
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     break;
 
                 case 7:
                     o->LifeTime = 30;
-                    Vector(0.f, (float)(rand() % 4 + 6) * o->Scale, 0.f, o->Velocity);
+                    Vector(0.f, (float)(Random::Rand() % 4 + 6) * o->Scale, 0.f, o->Velocity);
 
-                    o->Gravity = (float)(rand() % 200 / 200.0f);
-                    o->Scale *= (float)(rand() % 20 + 120) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 200 / 200.0f);
+                    o->Scale *= (float)(Random::Rand() % 20 + 120) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                     break;
                 case 8:
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 32) * 0.3f, 0.f, o->Velocity);
                     o->Scale *= 0.8f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     break;
                 case 19:
                     VectorCopy(o->Light, o->TurningForce);
                     o->LifeTime = 40;
-                    o->Scale = Scale * (float)(rand() % 32 + 8) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = Scale * (float)(Random::Rand() % 32 + 8) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 20:
                     o->LifeTime = 40;
-                    o->Scale = Scale * (float)(rand() % 32 + 8) * 0.01f;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = Scale * (float)(Random::Rand() % 32 + 8) * 0.01f;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 21:
                     o->LifeTime = 80;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 22:
                     o->LifeTime = 60;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 24:
                 case 57:
                     o->LifeTime = 32;
-                    o->Scale = Scale + (float)(rand() % 32 + 48) * 0.01f * Scale;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 32 + 48) * 0.01f * Scale;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 25:
                     o->LifeTime = 25;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 26:
                     o->LifeTime = 25;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 27:
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->TexType = BITMAP_CHROME3;
                     break;
                 case 28:
                     o->LifeTime = 12;
                     o->Scale = 2.3f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Gravity = 33.0f;
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 15;
                     o->TexType = BITMAP_POUNDING_BALL;
@@ -1387,7 +1394,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 29:
                     o->LifeTime = 12;
                     o->Scale = 2.3f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Gravity = 33.0f;
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 15;
                     break;
@@ -1395,7 +1402,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 4;
                     o->Scale = 1.8f;
                     o->Gravity = 15.0f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 15;
                     o->Position[0] += (float)sinf(WorldTime) * 5.0f;
                     o->Position[1] += (float)sinf(WorldTime) * 5.0f;
@@ -1403,52 +1410,52 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 31:
                     o->LifeTime = 15;
                     o->Scale = Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 40:
                 {
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Position[2] += (float)(rand() % 64 + 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[2] += (float)(Random::Rand() % 64 + 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                 }
                 break;
                 case 41:
                 {
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Position[2] += (float)(rand() % 64 + 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
-                    o->Gravity = (float)(rand() % 100 - 50) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[2] += (float)(Random::Rand() % 64 + 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Gravity = (float)(Random::Rand() % 100 - 50) * 0.1f;
                 }
                 break;
                 case 43:
                 {
                     o->TexType = BITMAP_CLUD64;
                     o->LifeTime = 40;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Angle[0] = 90.0f;
-                    Vector(rand() % 20 / 10.0f - 1.0f, 2.0f, 15.0f, o->Velocity);
+                    Vector(Random::Rand() % 20 / 10.0f - 1.0f, 2.0f, 15.0f, o->Velocity);
                 }
                 break;
                 case 44:
                 {
                     o->LifeTime = 60;
-                    o->Scale += (float)(rand() % 10) / 2.0f;
-                    o->Position[0] += (float)(rand() % 500) - 250.0f;
-                    o->Position[1] += (float)(rand() % 700) - 350.0f;
-                    o->Position[2] += (float)(rand() % 100) + 150.0f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 50) - 25.0f;
+                    o->Scale += (float)(Random::Rand() % 10) / 2.0f;
+                    o->Position[0] += (float)(Random::Rand() % 500) - 250.0f;
+                    o->Position[1] += (float)(Random::Rand() % 700) - 350.0f;
+                    o->Position[2] += (float)(Random::Rand() % 100) + 150.0f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 50) - 25.0f;
                     Vector(0.1f, 0.2f, 0.3f, o->Light);
                 }
                 break;
@@ -1456,43 +1463,43 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->TexType = BITMAP_LIGHT + 2;
                     o->LifeTime = 15;
-                    o->Scale += (float)(rand() % 10) / 20.0f;
-                    o->Position[0] += (float)(rand() % 40) - 20.0f;
-                    o->Position[1] += (float)(rand() % 40) - 20.0f;
-                    o->Position[2] += (float)(rand() % 40) - 20.0f;
+                    o->Scale += (float)(Random::Rand() % 10) / 20.0f;
+                    o->Position[0] += (float)(Random::Rand() % 40) - 20.0f;
+                    o->Position[1] += (float)(Random::Rand() % 40) - 20.0f;
+                    o->Position[2] += (float)(Random::Rand() % 40) - 20.0f;
                 }
                 break;
                 case 46:
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = 60 + (int)(o->Scale * 10.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 30 + 50) * 0.05f;
+                    o->Scale += (float)(Random::Rand() % 50) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 30 + 50) * 0.05f;
                 }
                 break;
                 case 47:
                 {
                     o->TexType = BITMAP_MAGIC + 1;
                     o->LifeTime = 5;
-                    o->Scale += (float)(rand() % 50) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale += (float)(Random::Rand() % 50) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 break;
                 case 59:
                 case 48:
                     o->LifeTime = 40;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     break;
                 case 49:
                 {
                     o->TexType = BITMAP_CLOUD;
-                    o->LifeTime = rand() % 50 + 100;
-                    o->Rotation = (float)(rand() % 360);
+                    o->LifeTime = Random::Rand() % 50 + 100;
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = Scale * 0.4f;
-                    if (rand() % 2 == 0)
+                    if (Random::Rand() % 2 == 0)
                         o->Angle[0] = 1.0f;
                     else
                         o->Angle[0] = -1.0f;
@@ -1500,29 +1507,29 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
                 case 50:
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 32 + 32) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 16 + 16) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 32 + 32) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 16 + 16) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                     break;
                 case 51:
                     o->LifeTime = 25;
-                    o->Scale = (float)(rand() % 64 + 64) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 64 + 64) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                     VectorCopy(Light, o->TurningForce);
                     break;
                 case 52:
                 {
                     o->LifeTime = 40;
-                    o->Scale = Scale + (float)(rand() % 10 + 10) * 0.05f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 10 + 10) * 0.05f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     vec3_t vAngle, vPos, vPos2;
                     Vector(0.f, 10.f, 0.f, vPos);
-                    float fAngle = o->Angle[2] + (float)(rand() % 100 - 50) + 150;
+                    float fAngle = o->Angle[2] + (float)(Random::Rand() % 100 - 50) + 150;
                     Vector(0.f, 0.f, fAngle, vAngle);
                     AngleMatrix(vAngle, Matrix);
                     VectorRotate(vPos, Matrix, vPos2);
@@ -1533,57 +1540,57 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = (int)(o->Scale * 8.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 30 + 50) * 0.05f;
+                    o->Scale += (float)(Random::Rand() % 50) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 30 + 50) * 0.05f;
                 }
                 break;
                 case 55:
                 {
                     o->LifeTime = 30;
-                    o->Scale = Scale + (float)(rand() % 32 + 48) * 0.01f * Scale;
-                    o->Angle[0] = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 32 + 48) * 0.01f * Scale;
+                    o->Angle[0] = (float)(Random::Rand() % 360);
                     o->Rotation = (float)((int)WorldTime % 360);
                 }
                 break;
                 case 58:
                     o->LifeTime = 50;
-                    o->Scale = (float)(rand() % 32 + 80) * 0.01f;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Position[2] += (float)(rand() % 64 + 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8 + 40), 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 32 + 80) * 0.01f;
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[2] += (float)(Random::Rand() % 64 + 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8 + 40), 0.f, o->Velocity);
                     VectorCopy(o->Light, o->StartPosition);
                     break;
                 case 60:
                 {
                     Vector(0.4f, 0.4f, 0.4f, o->Light);
                     o->LifeTime = 60;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                 }
                 break;
                 case 62:
                 {
                     o->LifeTime = 50;
                     //	Vector(0.9f,0.4f,0.1f,o->Light);
-                    //	o->Scale = (float)(rand()%32+80)*0.01f;
+                    //	o->Scale = (float)(Random::Rand()%32+80)*0.01f;
                     o->Scale = o->Scale;
-                    o->Position[0] += (float)(rand() % 64 - 32);
-                    o->Position[1] += (float)(rand() % 64 - 32);
-                    o->Angle[0] = (float)(rand() % 90 - 45);
-                    o->Angle[2] = (float)(rand() % 360);
-                    Vector(0.f, -(float)(rand() % 8), 0.f, o->Velocity);
+                    o->Position[0] += (float)(Random::Rand() % 64 - 32);
+                    o->Position[1] += (float)(Random::Rand() % 64 - 32);
+                    o->Angle[0] = (float)(Random::Rand() % 90 - 45);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 8), 0.f, o->Velocity);
                 }
                 break;
                 case 63:
                 {
                     o->TexType = BITMAP_CLUD64;
                     o->LifeTime = 10;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Angle[0] = 90.0f;
                     Vector(0.0f, 30.0f, 15.0f, o->Velocity);
                 }
@@ -1599,7 +1606,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                     const float ANG_REVISION = 20.0f;
                     float fAng;
-                    fAng = (float)((rand() % (int)ANG_REVISION) + 10);
+                    fAng = (float)((Random::Rand() % (int)ANG_REVISION) + 10);
 
                     o->Angle[0] = o->Angle[0] + fAng;
                 }
@@ -1607,19 +1614,19 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 65:
                 {
                     o->LifeTime = 45;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 10 + 18) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 10 + 18) * 0.1f;
                 }
                 break;
                 case 66:
                 {
                     //o->TexType = BITMAP_CLOUD;
                     o->LifeTime = (int)(o->Scale * 30.0f);
-                    o->Scale += (float)(rand() % 50) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 30 + 50) * 0.01f;
-                    int iAngle = rand() % 360;
+                    o->Scale += (float)(Random::Rand() % 50) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 30 + 50) * 0.01f;
+                    int iAngle = Random::Rand() % 360;
                     o->TurningForce[0] = sinf(iAngle / Q_PI * 180);
                     o->TurningForce[1] = cosf(iAngle / Q_PI * 180);
                 }
@@ -1628,16 +1635,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 45;
                     o->Alpha = 1.0f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 32 + 60) * 0.1f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 32 + 60) * 0.1f;
                 }
                 break;
                 case 68:
                 {
                     o->LifeTime = 45;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 10 + 18) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 10 + 18) * 0.1f;
                     o->Alpha = 1.0f;
 
                     vec3_t	v3BasisDir, v3Dir;
@@ -1655,9 +1662,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 #ifdef ASG_ADD_MAP_KARUTAN
                 case 69:
                     o->LifeTime = 60;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.005f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 16 + 30) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.005f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 16 + 30) * 0.1f;
                     VectorCopy(Light, o->Angle);
                     break;
 #endif	// ASG_ADD_MAP_KARUTAN
@@ -1666,17 +1673,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_SMOKE + 1:
             case BITMAP_SMOKE + 4:
                 o->LifeTime = 32;
-                o->Position[0] += (float)(rand() % 16 - 8);
-                o->Position[1] += (float)(rand() % 16 - 8);
+                o->Position[0] += (float)(Random::Rand() % 16 - 8);
+                o->Position[1] += (float)(Random::Rand() % 16 - 8);
 
                 if (o->Type == BITMAP_SMOKE + 4)
                 {
-                    o->Scale = (float)(rand() % 32 + 32) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 32 + 32) * 0.01f;
                     o->Scale *= Scale;
                 }
                 else
                 {
-                    o->Scale = (float)(rand() % 32 + 32) * 0.01f * Scale;
+                    o->Scale = (float)(Random::Rand() % 32 + 32) * 0.01f * Scale;
                 }
 
                 if (SubType == 0)
@@ -1686,36 +1693,36 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else
                 {
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.f, 15.f, 0.f, p);
                 }
                 VectorRotate(p, Matrix, o->Velocity);
-                o->Angle[0] = (float)(rand() % 360);
+                o->Angle[0] = (float)(Random::Rand() % 360);
 
                 if (SubType == 1)
                 {
                     o->LifeTime = 40;
                     Vector(0.f, 0.0f, 0.0f, o->Velocity);
-                    o->Position[2] += (float)(rand() % 16 - 8);
+                    o->Position[2] += (float)(Random::Rand() % 16 - 8);
                 }
                 else if (SubType == 6)
                 {
                     o->LifeTime = 40;
                     Vector(0.f, 0.0f, 0.0f, o->Velocity);
-                    o->Position[2] += (float)(rand() % 16 - 8);
+                    o->Position[2] += (float)(Random::Rand() % 16 - 8);
                 }
                 break;
             case BITMAP_SMOKE + 2:
                 o->LifeTime = 50;
-                o->Scale = (float)(rand() % 32 + 64) * 0.01f;
-                Vector(0.f, 0.f, (float)(rand() % 360), o->Angle);
+                o->Scale = (float)(Random::Rand() % 32 + 64) * 0.01f;
+                Vector(0.f, 0.f, (float)(Random::Rand() % 360), o->Angle);
                 AngleMatrix(o->Angle, Matrix);
-                Vector(0.f, (float)(rand() % 64), (float)(rand() % 16 + 16), p);
+                Vector(0.f, (float)(Random::Rand() % 64), (float)(Random::Rand() % 16 + 16), p);
                 VectorRotate(p, Matrix, o->StartPosition);
                 Vector(0.f, 0.f, 0.f, o->Angle);
-                //o->Rotation = (float)(rand()%360);
-                //Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
+                // o->Rotation = (float)(Random::Rand()%360);
+                // Vector(0.f,-(float)(Random::Rand()%8+40),0.f,o->Velocity);
                 break;
             case BITMAP_SMOKE + 3:
                 switch (SubType)
@@ -1723,44 +1730,44 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 0:
                     VectorCopy(o->Light, o->TurningForce);
                     o->LifeTime = 55;
-                    //o->Scale = (float)(rand()%32+48)*0.01f;
-                    o->Angle[0] = -2 + (float)(rand() % 4);
+                    // o->Scale = (float)(Random::Rand()%32+48)*0.01f;
+                    o->Angle[0] = -2 + (float)(Random::Rand() % 4);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 1:
                     VectorCopy(o->Light, o->TurningForce);
                     o->LifeTime = 30;
-                    //o->Scale = (float)(rand()%32+48)*0.01f;
-                    o->Angle[0] = -2 + (float)(rand() % 4);
+                    // o->Scale = (float)(Random::Rand()%32+48)*0.01f;
+                    o->Angle[0] = -2 + (float)(Random::Rand() % 4);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 2:
                     VectorCopy(o->Light, o->TurningForce);
                     o->LifeTime = 55;
-                    //o->Scale = (float)(rand()%32+48)*0.01f;
-                    o->Angle[0] = -2 + (float)(rand() % 4);
+                    // o->Scale = (float)(Random::Rand()%32+48)*0.01f;
+                    o->Angle[0] = -2 + (float)(Random::Rand() % 4);
                     o->Rotation = (float)((int)WorldTime % 360);
                     break;
                 case 3:
                     o->TexType = BITMAP_CLUD64;
                     o->LifeTime = 60;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.02f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 250 - 125);
-                    o->Position[1] += (float)(rand() % 250 - 125);
-                    o->Position[2] -= (float)(rand() % 45);
-                    o->Gravity = (float)(rand() % 100 - 50) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.02f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 250 - 125);
+                    o->Position[1] += (float)(Random::Rand() % 250 - 125);
+                    o->Position[2] -= (float)(Random::Rand() % 45);
+                    o->Gravity = (float)(Random::Rand() % 100 - 50) * 0.1f;
                     Vector(1.0f, 1.0f, 1.0f, o->Light);
                     break;
                 case 4:
                     o->TexType = BITMAP_WATERFALL_3;
                     o->LifeTime = 30;
-                    o->Scale *= (float)(rand() % 64 + 64) * 0.02f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += (float)(rand() % 250 - 125);
-                    o->Position[1] += (float)(rand() % 250 - 125);
-                    o->Position[2] -= (float)(rand() % 45);
-                    o->Gravity = (float)(rand() % 100 - 50) * 0.1f;
+                    o->Scale *= (float)(Random::Rand() % 64 + 64) * 0.02f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += (float)(Random::Rand() % 250 - 125);
+                    o->Position[1] += (float)(Random::Rand() % 250 - 125);
+                    o->Position[2] -= (float)(Random::Rand() % 45);
+                    o->Gravity = (float)(Random::Rand() % 100 - 50) * 0.1f;
                     Vector(1.0f, 1.0f, 1.0f, o->Light);
                     break;
                 }
@@ -1778,9 +1785,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     {
                         o->LifeTime = 35;
                     }
-                    o->Scale = (float)(rand() % 96 + 96) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 16 + 12) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 96 + 96) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 16 + 12) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1792,9 +1799,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 25;
-                    o->Scale = (float)(rand() % 50 + 55) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 4 + 35) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 50 + 55) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 4 + 35) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1803,25 +1810,25 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if ((o->SubType == 2) || (o->SubType == 3))
                 {
                     o->LifeTime = 45;
-                    o->Scale = (float)(rand() % 96 + 96) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 16 + 12) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 96 + 96) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 16 + 12) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 4)
                 {
-                    o->Position[0] += (float)(rand() % 20 - 10) * 2.f;
-                    o->Position[1] += (float)(rand() % 20 - 10) * 2.f;
-                    o->Position[2] += (float)(rand() % 20 - 10) * 2.f;
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10) * 2.f;
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10) * 2.f;
+                    o->Position[2] += (float)(Random::Rand() % 20 - 10) * 2.f;
 
-                    o->Scale = o->Scale + ((float)(rand() % 20 - 10) * (o->Scale * 0.03f));
+                    o->Scale = o->Scale + ((float)(Random::Rand() % 20 - 10) * (o->Scale * 0.03f));
                     o->LifeTime = 45;
                     o->Alpha = 1.0f;
 
                     o->Gravity = 0.2f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 break;
             case BITMAP_LIGHTNING_MEGA1:
@@ -1833,7 +1840,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 0:
                 {
                     o->LifeTime = 5;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Gravity = 0;
                     o->Alpha = 1.0f;
                     VectorCopy(Light, o->TurningForce);
@@ -1847,31 +1854,31 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_FIRE_HIK1_MONO:
                 if (o->SubType == 0 || o->SubType == 6)
                 {
-                    o->LifeTime = rand() % 5 + 27;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 27;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 1)
                 {
-                    o->LifeTime = rand() % 5 + 54;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 74) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 54;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 74) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = rand() % 5 + 27;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 100) * 0.1f;
-                    float fRand = (float)(rand() % 50) * 0.03f;
+                    o->LifeTime = Random::Rand() % 5 + 27;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 100) * 0.1f;
+                    float fRand = (float)(Random::Rand() % 50) * 0.03f;
                     Vector(2.5f + fRand, -7.0f - fRand, 0.f, o->Velocity);
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
@@ -1879,20 +1886,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 3)
                 {
-                    o->LifeTime = rand() % 5 + 27;
-                    o->Scale = (float)(rand() % 72 + 52) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 27;
+                    o->Scale = (float)(Random::Rand() % 72 + 52) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 4)
                 {
-                    o->LifeTime = 8;//rand()%5+5;
-                    o->Scale = (float)(rand() % 42 + 12) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->LifeTime = 8; // Random::Rand()%5+5;
+                    o->Scale = (float)(Random::Rand() % 42 + 12) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1900,20 +1907,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 5)
                 {
-                    o->LifeTime = rand() % 5 + 27;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 27;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 if (o->SubType == 10)
                 {
-                    o->LifeTime = rand() % 5 + 47;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 47;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1924,31 +1931,31 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_FIRE_HIK3_MONO:
                 if (o->SubType == 0 || o->SubType == 6)
                 {
-                    o->LifeTime = rand() % 5 + 17;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 17;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 1)
                 {
-                    o->LifeTime = rand() % 5 + 34;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 74) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 34;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 74) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = rand() % 5 + 17;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 100) * 0.1f;
-                    float fRand = (float)(rand() % 50) * 0.03f;
+                    o->LifeTime = Random::Rand() % 5 + 17;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 100) * 0.1f;
+                    float fRand = (float)(Random::Rand() % 50) * 0.03f;
                     Vector(2.5f + fRand, -5.0f - fRand, 0.f, o->Velocity);
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
@@ -1956,30 +1963,30 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 3)
                 {
-                    o->LifeTime = rand() % 5 + 17;
-                    o->Scale = (float)(rand() % 72 + 52) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 17;
+                    o->Scale = (float)(Random::Rand() % 72 + 52) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 4)
                 {
-                    o->LifeTime = rand() % 5 + 34;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 10 + 40) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 34;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 10 + 40) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 else if (o->SubType == 5)
                 {
-                    o->LifeTime = 8;//rand()%5+5;
-                    o->Scale = (float)(rand() % 42 + 12) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
+                    o->LifeTime = 8; // Random::Rand()%5+5;
+                    o->Scale = (float)(Random::Rand() % 42 + 12) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 14 + 44) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
@@ -1987,16 +1994,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 break;
             case BITMAP_LIGHT + 1:
-                o->LifeTime = 20 + rand() % 8;
+                o->LifeTime = 20 + Random::Rand() % 8;
                 if (o->SubType == 1)
                 {
                     o->LifeTime = 5;
-                    o->Angle[0] = -2 + (float)(rand() % 4);
+                    o->Angle[0] = -2 + (float)(Random::Rand() % 4);
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 19;
-                    o->Position[1] += -30.0f + (float)(rand() % 60);
+                    o->Position[1] += -30.0f + (float)(Random::Rand() % 60);
                 }
                 else if (o->SubType == 3)
                 {
@@ -2006,7 +2013,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 4;
-                    o->Rotation = -360.0f + (float)(rand() % 180);
+                    o->Rotation = -360.0f + (float)(Random::Rand() % 180);
                     o->TexType = BITMAP_SHINY + 1;
                 }
                 else if (o->SubType == 5)
@@ -2015,15 +2022,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 break;
             case BITMAP_SPARK:
-                o->Scale = (float)(rand() % 4 + 4) * 0.1f;
+                o->Scale = (float)(Random::Rand() % 4 + 4) * 0.1f;
                 if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3 || o->SubType == 4 || o->SubType == 6 || o->SubType == 11
                     || o->SubType == 13)
                 {
-                    o->LifeTime = rand() % 16 + 24;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->LifeTime = Random::Rand() % 16 + 24;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 16 + 6);
-                    Vector(0.f, (float)(rand() % 20 + 20) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 16 + 6);
+                    Vector(0.f, (float)(Random::Rand() % 20 + 20) * 0.1f, 0.f, p);
 
                     if (o->SubType == 2)
                     {
@@ -2037,11 +2044,11 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     }
                     else if (o->SubType == 6)
                     {
-                        o->LifeTime = rand() % 4 + 4;
+                        o->LifeTime = Random::Rand() % 4 + 4;
                         o->Scale = Scale;
                         o->Gravity = 0.0f;
                         o->TexType = BITMAP_SPARK + 1;
-                        Vector(0.f, (float)(rand() % 20 + 20) * 0.2f, 0.f, p);
+                        Vector(0.f, (float)(Random::Rand() % 20 + 20) * 0.2f, 0.f, p);
                     }
                     else if (o->SubType == 11)
                     {
@@ -2058,7 +2065,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 7)
                 {
-                    o->LifeTime = rand() % 12 + 12;
+                    o->LifeTime = Random::Rand() % 12 + 12;
                 }
                 else if (o->SubType == 8 || o->SubType == 10)
                 {
@@ -2069,33 +2076,33 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     else
                         o->TexType = BITMAP_SPARK + 1;
 
-                    o->LifeTime = rand() % 16 + 24;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->LifeTime = Random::Rand() % 16 + 24;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 16 + 6);
-                    Vector(0.f, (float)(rand() % 60 - 30) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 16 + 6);
+                    Vector(0.f, (float)(Random::Rand() % 60 - 30) * 0.1f, 0.f, p);
                     o->Scale *= 1.5f;
                     VectorScale(p, 3.f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 else if (o->SubType == 9)
                 {
-                    o->Scale = Scale * 1.2f + (float)(rand() % 4 + 4) * 0.1f;
-                    o->LifeTime = rand() % 16 + 50;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = Scale * 1.2f + (float)(Random::Rand() % 4 + 4) * 0.1f;
+                    o->LifeTime = Random::Rand() % 16 + 50;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 2);
-                    Vector(0.f, (float)(rand() % 10 + 10) * 0.05f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 2);
+                    Vector(0.f, (float)(Random::Rand() % 10 + 10) * 0.05f, 0.f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 else if (o->SubType == 12)
                 {
-                    o->Scale = Scale + (float)(rand() % 4 + 4) * 0.1f;
-                    o->LifeTime = rand() % 16 + 24;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = Scale + (float)(Random::Rand() % 4 + 4) * 0.1f;
+                    o->LifeTime = Random::Rand() % 16 + 24;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 16 + 6);
-                    Vector(0.f, (float)(rand() % 20 + 20) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 16 + 6);
+                    Vector(0.f, (float)(Random::Rand() % 20 + 20) * 0.1f, 0.f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 else
@@ -2104,13 +2111,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     {
                         VectorCopy(o->Target->Position, o->StartPosition);
                         o->Scale = Scale;
-                        o->LifeTime = rand() % 4 + 12;
+                        o->LifeTime = Random::Rand() % 4 + 12;
                         o->Gravity = 0;
                         o->TexType = BITMAP_SPARK + 1;
                     }
                     else
                     {
-                        o->LifeTime = rand() % 8 + 8;
+                        o->LifeTime = Random::Rand() % 8 + 8;
                     }
 
                     if (o->SubType == 7)
@@ -2123,7 +2130,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 switch (o->SubType)
                 {
                 case 1:
-                    Vector((float)(rand() % 360), (float)(rand() % 360), (float)(rand() % 360), o->Angle);
+                    Vector((float)(Random::Rand() % 360), (float)(Random::Rand() % 360), (float)(Random::Rand() % 360),
+                           o->Angle);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.f, -50.f, 0.f, p);
                     VectorRotate(p, Matrix, o->Velocity);
@@ -2152,27 +2160,27 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 10;
                     Vector(0.f, 0.f, Angle[2], o->Angle);
                     AngleMatrix(o->Angle, Matrix);
-                    Vector(-(rand() % 2 + 2.f), 0.f, 0.f, p);
+                    Vector(-(Random::Rand() % 2 + 2.f), 0.f, 0.f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                     break;
                 case 6:
-                    if (rand() % 50 == 0)
+                    if (Random::Rand() % 50 == 0)
                     {
                         o->LifeTime = 50;
-                        o->Gravity = 1.0f + (float)(rand() % 20) / 5.f;
-                        o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
+                        o->Gravity = 1.0f + (float)(Random::Rand() % 20) / 5.f;
+                        o->Scale = (float)(Random::Rand() % 5) / 10.0f + 1.0f;
                     }
                     else
                         o->LifeTime = 0;
                     break;
                 case 7:
                     o->Alpha = 1.0f;
-                    o->Position[0] += -30.0f + (float)(rand() % 60);
-                    o->Position[1] += -30.0f + (float)(rand() % 60);
-                    o->Position[2] += -30.0f + (float)(rand() % 60);
+                    o->Position[0] += -30.0f + (float)(Random::Rand() % 60);
+                    o->Position[1] += -30.0f + (float)(Random::Rand() % 60);
+                    o->Position[2] += -30.0f + (float)(Random::Rand() % 60);
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
-                    o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 1.0f;
                     break;
                 case 8:
                     o->LifeTime = 10;
@@ -2180,9 +2188,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 9:
                 {
                     o->LifeTime = 30;
-                    Vector(0.0f, (float)(rand() % 360), 0.0f, o->Angle);
+                    Vector(0.0f, (float)(Random::Rand() % 360), 0.0f, o->Angle);
                     AngleMatrix(o->Angle, Matrix);
-                    Vector(0.0f, 0.0f, (float)(rand() % 10) + 160.0f, p);
+                    Vector(0.0f, 0.0f, (float)(Random::Rand() % 10) + 160.0f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                     VectorAdd(o->Velocity, o->Position, o->Position);
                     Vector(12.0f, 0.0f, -2.0f, o->Velocity);
@@ -2190,20 +2198,20 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
                 case 10:
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = -4.0f + (float)(rand() % 8);
+                    o->Velocity[0] = -4.0f + (float)(Random::Rand() % 8);
                     o->Velocity[1] = 0.0f;
-                    o->Velocity[2] = -4.0f + (float)(rand() % 8);
+                    o->Velocity[2] = -4.0f + (float)(Random::Rand() % 8);
                     o->LifeTime = 20;
-                    o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 1.0f;
                     break;
                 case 13:
                 case 11:
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = -4.0f + (float)(rand() % 8);
-                    o->Velocity[1] = (float)(rand() % 4);
-                    o->Velocity[2] = (float)(rand() % 4);
+                    o->Velocity[0] = -4.0f + (float)(Random::Rand() % 8);
+                    o->Velocity[1] = (float)(Random::Rand() % 4);
+                    o->Velocity[2] = (float)(Random::Rand() % 4);
                     o->LifeTime = 30;
-                    o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 1.0f;
                     break;
                 case 12:
                     o->TexType = BITMAP_SHINY;
@@ -2215,33 +2223,33 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     VectorRotate(p1, Matrix, p2);
                     VectorAdd(o->Position, p2, o->Position);
 
-                    o->Position[0] += -8.0f + (float)(rand() % 16);
-                    o->Position[1] += -8.0f + (float)(rand() % 16);
+                    o->Position[0] += -8.0f + (float)(Random::Rand() % 16);
+                    o->Position[1] += -8.0f + (float)(Random::Rand() % 16);
                     o->Position[2] += 150.0f;
 
-                    o->Velocity[0] = -1.0f + (float)(rand() % 20) / 10.f;
-                    o->Velocity[1] = -1.0f + (float)(rand() % 20) / 10.f;
-                    o->Velocity[2] = -(float)(rand() % 3) - 3.0f;
+                    o->Velocity[0] = -1.0f + (float)(Random::Rand() % 20) / 10.f;
+                    o->Velocity[1] = -1.0f + (float)(Random::Rand() % 20) / 10.f;
+                    o->Velocity[2] = -(float)(Random::Rand() % 3) - 3.0f;
                     o->LifeTime = 40;
-                    o->Scale = -(float)(rand() % 15) / 10.0f + Scale;
+                    o->Scale = -(float)(Random::Rand() % 15) / 10.0f + Scale;
                     break;
                 case 14:
-                    if (rand() % 2 == 0)
+                    if (Random::Rand() % 2 == 0)
                     {
                         o->Alpha = 1.0f;
-                        o->Velocity[0] = -4.0f + (float)(rand() % 4);
-                        o->Velocity[1] = (float)(rand() % 4);
-                        o->Velocity[2] = (float)(rand() % 4);
+                        o->Velocity[0] = -4.0f + (float)(Random::Rand() % 4);
+                        o->Velocity[1] = (float)(Random::Rand() % 4);
+                        o->Velocity[2] = (float)(Random::Rand() % 4);
                         o->LifeTime = 30;
-                        o->Scale = (float)(rand() % 5) / 10.0f + 0.4f;
+                        o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.4f;
                     }
                     break;
                 case 15:
-                    if (rand() % 3 == 0)
+                    if (Random::Rand() % 3 == 0)
                     {
                         o->Alpha = 1.0f;
                         o->LifeTime = 35;
-                        o->Velocity[2] = -((float)(rand() % 5) + 5) * 0.5f;
+                        o->Velocity[2] = -((float)(Random::Rand() % 5) + 5) * 0.5f;
                     }
                     break;
                 case 16:
@@ -2254,15 +2262,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->LifeTime = 80;
                     }
                     o->Frame = 77;
-                    o->Scale = -(float)(rand() % 3) / 3.0f + Scale + 0.01f;
+                    o->Scale = -(float)(Random::Rand() % 3) / 3.0f + Scale + 0.01f;
 
-                    o->Velocity[0] = (float)(rand() % 50) / 10.0f - 2.5f;
-                    o->Velocity[1] = (float)(rand() % 4) / 10.0f - 0.2f;
+                    o->Velocity[0] = (float)(Random::Rand() % 50) / 10.0f - 2.5f;
+                    o->Velocity[1] = (float)(Random::Rand() % 4) / 10.0f - 0.2f;
                     if (o->SubType == 18)
                     {
-                        o->Velocity[1] = (float)(rand() % 50) / 10.0f - 2.5f;
+                        o->Velocity[1] = (float)(Random::Rand() % 50) / 10.0f - 2.5f;
                     }
-                    o->Velocity[2] = (float)(rand() % 50) / 10.0f - 2.5f;
+                    o->Velocity[2] = (float)(Random::Rand() % 50) / 10.0f - 2.5f;
 
                     vec3_t p1, p2;
                     Vector(o->Velocity[0] * 10.0f, o->Velocity[1] * 10.0f, o->Velocity[2] * 10.0f + 100.0f, p1);
@@ -2276,30 +2284,30 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 17:
                 {
                     o->LifeTime = 200;
-                    o->Scale += (float)(rand() % 3) * 0.1f;
-                    o->Gravity = (float)(rand() % 5) * 0.3f + 2.0f;
-                    o->Rotation = (float)(rand() % 20) * 0.0001f + 0.002f;
-                    o->Alpha = (float)(rand() % 10) * 0.1f + 0.5f;
+                    o->Scale += (float)(Random::Rand() % 3) * 0.1f;
+                    o->Gravity = (float)(Random::Rand() % 5) * 0.3f + 2.0f;
+                    o->Rotation = (float)(Random::Rand() % 20) * 0.0001f + 0.002f;
+                    o->Alpha = (float)(Random::Rand() % 10) * 0.1f + 0.5f;
                     VectorCopy(o->Position, o->StartPosition);
                 }
                 break;
                 case 19:
                 {
                     o->LifeTime = 50;
-                    o->Gravity = 1.0f + (float)(rand() % 20) * 0.1;
+                    o->Gravity = 1.0f + (float)(Random::Rand() % 20) * 0.1;
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) - 5.f;
-                    o->Scale = (float)(rand() % 10) * 0.08f + 0.8f;
+                    o->Scale = (float)(Random::Rand() % 10) * 0.08f + 0.8f;
                     VectorCopy(Light, o->Light);
                 }
                 break;
                 case 20:
                 {
-                    o->Scale = Scale + (rand() % 10) * 0.02f;
-                    o->LifeTime = rand() % 10 + 60;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
+                    o->LifeTime = Random::Rand() % 10 + 60;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 10 + 15);
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 10 + 15);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.5f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
@@ -2308,62 +2316,62 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 21:
                 {
                     vec3_t vSpeed;
-                    vSpeed[0] = -8.0f + (float)(rand() % 16);
-                    vSpeed[1] = -8.0f + (float)(rand() % 16);
-                    vSpeed[2] = -8.0f + (float)(rand() % 16);
+                    vSpeed[0] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[1] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[2] = -8.0f + (float)(Random::Rand() % 16);
 
                     VectorNormalize(vSpeed);
                     VectorScale(vSpeed, 12.0f, vSpeed);
                     VectorCopy(vSpeed, o->Velocity);
 
-                    o->LifeTime = rand() % 10 + 20;
-                    o->Scale = (float)(rand() % 20) / 20.0f + 1.0f;
+                    o->LifeTime = Random::Rand() % 10 + 20;
+                    o->Scale = (float)(Random::Rand() % 20) / 20.0f + 1.0f;
                 }
                 break;
                 case 22:
                 {
                     vec3_t vSpeed;
-                    vSpeed[0] = -8.0f + (float)(rand() % 16);
-                    vSpeed[1] = -8.0f + (float)(rand() % 16);
-                    vSpeed[2] = -8.0f + (float)(rand() % 16);
+                    vSpeed[0] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[1] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[2] = -8.0f + (float)(Random::Rand() % 16);
 
                     VectorNormalize(vSpeed);
                     VectorScale(vSpeed, 14.0f, vSpeed);
                     VectorCopy(vSpeed, o->Velocity);
 
-                    o->Scale = (float)(rand() % 20) / 20.0f + 1.0f;
-                    o->LifeTime = rand() % 10 + 20;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 20) / 20.0f + 1.0f;
+                    o->LifeTime = Random::Rand() % 10 + 20;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = 20.0f;//(float)(rand()%10+15);
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    o->Gravity = 20.0f; //(float)(Random::Rand()%10+15);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.5f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 break;
                 case 23:
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = (float)(-1 + rand() % 3) * 1.5f;
-                    o->Velocity[1] = (float)(-1 + rand() % 3) * 1.5f;
-                    o->Velocity[2] = (float)(-1 + rand() % 3) * 1.5f;
+                    o->Velocity[0] = (float)(-1 + Random::Rand() % 3) * 1.5f;
+                    o->Velocity[1] = (float)(-1 + Random::Rand() % 3) * 1.5f;
+                    o->Velocity[2] = (float)(-1 + Random::Rand() % 3) * 1.5f;
                     o->LifeTime = 20;
                     o->Rotation = 0;
-                    o->Scale = (float)(rand() % 5) / 10.0f + 0.8f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.8f;
                     break;
                 case 24:
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = (float)(-1 + rand() % 3) * 2.0f;
-                    o->Velocity[1] = (float)(-1 + rand() % 3) * 2.0f;
-                    o->Velocity[2] = (float)(-1 + rand() % 3) * 2.0f;
+                    o->Velocity[0] = (float)(-1 + Random::Rand() % 3) * 2.0f;
+                    o->Velocity[1] = (float)(-1 + Random::Rand() % 3) * 2.0f;
+                    o->Velocity[2] = (float)(-1 + Random::Rand() % 3) * 2.0f;
                     o->LifeTime = 16;
                     o->Rotation = 0;
-                    o->Scale = (float)(rand() % 5) / 10.0f + 0.4f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.4f;
                     break;
                 case 25:
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = -2.0f + (float)(rand() % 6);
-                    o->Velocity[1] = (float)(rand() % 4);
-                    o->Velocity[2] = (float)(rand() % 4);
+                    o->Velocity[0] = -2.0f + (float)(Random::Rand() % 6);
+                    o->Velocity[1] = (float)(Random::Rand() % 4);
+                    o->Velocity[2] = (float)(Random::Rand() % 4);
                     o->LifeTime = 20;
                     break;
                 case 26:
@@ -2378,63 +2386,63 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 27:
                 {
                     vec3_t vSpeed;
-                    vSpeed[0] = -8.0f + (float)(rand() % 16);
-                    vSpeed[1] = -8.0f + (float)(rand() % 16);
-                    vSpeed[2] = -8.0f + (float)(rand() % 16);
+                    vSpeed[0] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[1] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[2] = -8.0f + (float)(Random::Rand() % 16);
 
                     VectorNormalize(vSpeed);
                     VectorScale(vSpeed, 12.0f, vSpeed);
                     VectorCopy(vSpeed, o->Velocity);
 
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Scale = (float)(rand() % 20) / 20.0f + 1.0f;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Scale = (float)(Random::Rand() % 20) / 20.0f + 1.0f;
                 }
                 break;
                 case 28:
                 {
-                    o->Scale = (float)(rand() % 20) / 20.0f + 1.0f;
-                    o->LifeTime = rand() % 10 + 20;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 20) / 20.0f + 1.0f;
+                    o->LifeTime = Random::Rand() % 10 + 20;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     o->Gravity = 20.0f;
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.5f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 break;
                 case 29:
                 {
-                    o->Scale = (float)(rand() % 20) / 20.0f + 0.5f;
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 20) / 20.0f + 0.5f;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     o->Gravity = -20.0f;
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.5f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 break;
                 case 30:
                 {
-                    o->LifeTime = rand() % 5 + 50;
+                    o->LifeTime = Random::Rand() % 5 + 50;
 
-                    o->Scale = (float)(rand() % 10) / 10.0f + 0.2f;
+                    o->Scale = (float)(Random::Rand() % 10) / 10.0f + 0.2f;
 
-                    o->Velocity[0] = -2.0f + (float)(rand() % 5);
-                    o->Velocity[1] = -2.0f + (float)(rand() % 5);
-                    o->Velocity[2] = -2.0f + (float)(rand() % 5);
+                    o->Velocity[0] = -2.0f + (float)(Random::Rand() % 5);
+                    o->Velocity[1] = -2.0f + (float)(Random::Rand() % 5);
+                    o->Velocity[2] = -2.0f + (float)(Random::Rand() % 5);
 
                     o->Gravity = 0.5f;
                 }
                 break;
                 case 31:
                 {
-                    o->Scale = (float)(rand() % 4 + 4) * 0.1f;
-                    o->LifeTime = rand() % 16 + 24;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 4 + 4) * 0.1f;
+                    o->LifeTime = Random::Rand() % 16 + 24;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 16 + 6);
-                    Vector(0.f, (float)(rand() % 20 + 20) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 16 + 6);
+                    Vector(0.f, (float)(Random::Rand() % 20 + 20) * 0.1f, 0.f, p);
 
                     VectorScale(p, 3.f, p);
 
@@ -2447,10 +2455,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 16;
-                    o->Scale = Scale + (float)(rand() % 10 - 5) * 0.03f;
-                    o->Position[0] += (float)(rand() % 10 - 5);
-                    o->Position[1] += (float)(rand() % 10 - 5);
-                    o->Position[2] += (float)(rand() % 10 - 5);
+                    o->Scale = Scale + (float)(Random::Rand() % 10 - 5) * 0.03f;
+                    o->Position[0] += (float)(Random::Rand() % 10 - 5);
+                    o->Position[1] += (float)(Random::Rand() % 10 - 5);
+                    o->Position[2] += (float)(Random::Rand() % 10 - 5);
                 }
                 else if (o->SubType == 1)
                 {
@@ -2490,7 +2498,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_SPOT_WATER:
                 o->LifeTime = 32;
-                o->Scale = (float)((rand() % 170 + 1) * 0.01f);
+                o->Scale = (float)((Random::Rand() % 170 + 1) * 0.01f);
                 break;
             case BITMAP_FLARE_RED:
                 o->LifeTime = 18;
@@ -2509,7 +2517,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 2)
                 {
                     o->LifeTime = 25;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     o->Velocity[0] = -0.1f;
                     o->Velocity[1] = -0.5f;
@@ -2518,95 +2526,95 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 3)
                 {
                     o->Alpha = 1.0f;
-                    o->Velocity[0] = -4.0f + (float)(rand() % 8);
-                    o->Velocity[1] = (float)(rand() % 4);
-                    o->Velocity[2] = (float)(rand() % 4);
+                    o->Velocity[0] = -4.0f + (float)(Random::Rand() % 8);
+                    o->Velocity[1] = (float)(Random::Rand() % 4);
+                    o->Velocity[2] = (float)(Random::Rand() % 4);
                     o->LifeTime = 30;
-                    o->Scale = (float)(rand() % 10) / 20.0f + 0.5f;
+                    o->Scale = (float)(Random::Rand() % 10) / 20.0f + 0.5f;
                 }
                 else if (o->SubType == 4)
                 {
-                    o->Scale = Scale + (rand() % 10) * 0.02f;
-                    o->LifeTime = rand() % 10 + 15;
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
+                    o->LifeTime = Random::Rand() % 10 + 15;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = (float)(rand() % 10 + 10);
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    o->Gravity = (float)(Random::Rand() % 10 + 10);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.0f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
                 else if (o->SubType == 5)
                 {
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Scale = Scale + (rand() % 10) * 0.02f;
-                    o->Position[0] += (float)(rand() % 10 - 5);
-                    o->Position[1] += (float)(rand() % 10 - 5);
-                    o->Gravity = -(float)(rand() % 10) * 0.3f;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
+                    o->Position[0] += (float)(Random::Rand() % 10 - 5);
+                    o->Position[1] += (float)(Random::Rand() % 10 - 5);
+                    o->Gravity = -(float)(Random::Rand() % 10) * 0.3f;
                 }
                 else if (o->SubType == 6)
                 {
-                    o->Scale = (float)(rand() % 5) / 10.0f + 0.5f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.5f;
                     o->StartPosition[0] = o->Scale;
-                    o->LifeTime = rand() % 10 + 60;
+                    o->LifeTime = Random::Rand() % 10 + 60;
                     o->Gravity = 20.0f;
 
-                    o->Angle[0] = (float)(rand() % 360);
-                    o->Angle[1] = (float)(rand() % 360);
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
+                    o->Angle[1] = (float)(Random::Rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(1, 1, 1, p);
                     VectorScale(p, 8.0f, p);
                     VectorRotate(p, Matrix, o->Velocity);
 
-                    o->Rotation = rand() % 20 - 10;
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
                 else if (o->SubType == 7)
                 {
-                    o->Scale = 0.1f;//(float)(rand()%5)/6.0f+0.5f;
+                    o->Scale = 0.1f; //(float)(Random::Rand()%5)/6.0f+0.5f;
                     o->StartPosition[0] = o->Scale;
-                    o->LifeTime = rand() % 10 + 20;
-                    o->Position[0] += (float)(rand() % 50 - 25);
-                    o->Position[1] += (float)(rand() % 50 - 25);
-                    o->Position[2] += (float)(rand() % 50 - 25);
+                    o->LifeTime = Random::Rand() % 10 + 20;
+                    o->Position[0] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[1] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[2] += (float)(Random::Rand() % 50 - 25);
 
                     o->Gravity = 1.0f;
 
-                    o->Angle[0] = (float)(rand() % 360);
-                    o->Angle[1] = (float)(rand() % 360);
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
+                    o->Angle[1] = (float)(Random::Rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.5f, 0.5f, 0.5f, p);
                     VectorScale(p, 0.8f, p);
                     VectorRotate(p, Matrix, o->Velocity);
 
-                    o->Rotation = rand() % 20 - 10;
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
                 else if (o->SubType == 8)
                 {
-                    o->Scale = (float)(rand() % 5) / 10.0f + 0.5f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.5f;
                     o->StartPosition[0] = o->Scale;
-                    o->LifeTime = rand() % 10 + 40;
+                    o->LifeTime = Random::Rand() % 10 + 40;
                     o->Gravity = 20.0f;
                     Vector(0, 0, 1.0f, o->Velocity);
 
-                    o->Rotation = rand() % 20 - 10;
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
                 else if (o->SubType == 9)
                 {
-                    o->Scale = (float)(rand() % 5) / 10.0f + 0.5f;
+                    o->Scale = (float)(Random::Rand() % 5) / 10.0f + 0.5f;
                     o->StartPosition[0] = o->Scale;
-                    o->LifeTime = rand() % 10 + 60;
+                    o->LifeTime = Random::Rand() % 10 + 60;
                     o->Gravity = 20.0f;
 
-                    o->Angle[0] = (float)(rand() % 360);
-                    o->Angle[1] = (float)(rand() % 360);
-                    o->Angle[2] = (float)(rand() % 360);
+                    o->Angle[0] = (float)(Random::Rand() % 360);
+                    o->Angle[1] = (float)(Random::Rand() % 360);
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
                     Vector(1, 1, 1, p);
                     VectorScale(p, 8.0f, p);
                     VectorRotate(p, Matrix, o->Velocity);
 
-                    o->Rotation = rand() % 20 - 10;
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
                 break;
             case BITMAP_CHERRYBLOSSOM_EVENT_PETAL:
@@ -2615,13 +2623,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->Alpha = 1.0f;
                     o->LifeTime = 30;
-                    o->Scale = (float)(rand() % 10) / 20.0f + 0.5f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = -(float)(rand() % 10 + 10);
+                    o->Scale = (float)(Random::Rand() % 10) / 20.0f + 0.5f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = -(float)(Random::Rand() % 10 + 10);
                     Vector(0.0f, 0.0f, 0.0f, o->Angle);
-                    o->Velocity[2] = -4.0f + (float)(rand() % 8);
-                    o->Velocity[1] = (float)(rand() % 4);
-                    o->Velocity[0] = (float)(rand() % 4);
+                    o->Velocity[2] = -4.0f + (float)(Random::Rand() % 8);
+                    o->Velocity[1] = (float)(Random::Rand() % 4);
+                    o->Velocity[0] = (float)(Random::Rand() % 4);
                 }
                 else if (o->SubType == 1)
                 {
@@ -2629,14 +2637,14 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 70;
                     o->Alpha = 1.0f;
 
-                    o->Velocity[0] = -2.0f + (float)(rand() % 6);
-                    o->Velocity[1] = (float)(rand() % 4);
-                    o->Velocity[2] = (float)(rand() % 4);
+                    o->Velocity[0] = -2.0f + (float)(Random::Rand() % 6);
+                    o->Velocity[1] = (float)(Random::Rand() % 4);
+                    o->Velocity[2] = (float)(Random::Rand() % 4);
 
-                    //o->Velocity[0] = -2.0f + (float)(rand()%2);
-                    //o->Velocity[1] = (float)(rand()%2);
-                    //o->Velocity[2] = (float)(rand()%2);
-                    o->Rotation = (float)(rand() % 360);
+                    // o->Velocity[0] = -2.0f + (float)(Random::Rand()%2);
+                    // o->Velocity[1] = (float)(Random::Rand()%2);
+                    // o->Velocity[2] = (float)(Random::Rand()%2);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
             }
             break;
@@ -2646,22 +2654,22 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     vec3_t vSpeed;
-                    vSpeed[0] = -8.0f + (float)(rand() % 16);
-                    vSpeed[1] = -8.0f + (float)(rand() % 16);
-                    vSpeed[2] = -8.0f + (float)(rand() % 16);
+                    vSpeed[0] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[1] = -8.0f + (float)(Random::Rand() % 16);
+                    vSpeed[2] = -8.0f + (float)(Random::Rand() % 16);
 
                     VectorNormalize(vSpeed);
                     VectorScale(vSpeed, 14.0f, vSpeed);
                     VectorCopy(vSpeed, o->Velocity);
 
                     o->Alpha = 1.0f;
-                    //o->Scale = (float)(rand()%20)/20.0f+1.0f;	//(1~2 20단계)
-                    o->LifeTime = rand() % 30 + 20;
-                    o->Angle[2] = (float)(rand() % 360);
-                    o->Rotation = (float)(rand() % 360);
+                    // o->Scale = (float)(Random::Rand()%20)/20.0f+1.0f;	//(1~2 20단계)
+                    o->LifeTime = Random::Rand() % 30 + 20;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     AngleMatrix(o->Angle, Matrix);
-                    o->Gravity = 20.0f;//(float)(rand()%10+15);
-                    Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                    o->Gravity = 20.0f; //(float)(Random::Rand()%10+15);
+                    Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                     VectorScale(p, 2.5f, p);
                     VectorRotate(p, Matrix, o->Velocity);
                 }
@@ -2671,9 +2679,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 5)
                 {
                     o->LifeTime = 14;
-                    //Vector(0.f,-(float)(rand()%16+32)*0.1f,0.f,o->Velocity);
-                    //o->Scale = (float)(rand()%70+40)*0.009f;
-                    o->Rotation = (float)(rand() % 360);
+                    // Vector(0.f,-(float)(Random::Rand()%16+32)*0.1f,0.f,o->Velocity);
+                    // o->Scale = (float)(Random::Rand()%70+40)*0.009f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Gravity = 0.0f;
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     //Vector ( 0.5f, 0.5f, 0.5f, o->Light );
@@ -2698,7 +2706,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 15;
                     o->Gravity = 0.f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                 }
                 else if (o->SubType == 2)
                 {
@@ -2709,36 +2717,36 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->Alpha = 1.0f;
-                    o->Position[0] += -5.0f + (float)(rand() % 10);
-                    o->Position[1] += -5.0f + (float)(rand() % 10);
-                    o->Position[2] += -5.0f + (float)(rand() % 10);
+                    o->Position[0] += -5.0f + (float)(Random::Rand() % 10);
+                    o->Position[1] += -5.0f + (float)(Random::Rand() % 10);
+                    o->Position[2] += -5.0f + (float)(Random::Rand() % 10);
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
-                    o->Scale += (float)(rand() % 3) / 10.0f;
+                    o->Scale += (float)(Random::Rand() % 3) / 10.0f;
                 }
                 else if (o->SubType == 1)
                 {
                     o->Alpha = 1.0f;
-                    o->LifeTime = rand() % 3 + 10;
+                    o->LifeTime = Random::Rand() % 3 + 10;
                     o->Scale = 0.3f;
 
-                    o->Position[0] += (float)(rand() % 50 - 25);
-                    o->Position[1] += (float)(rand() % 50 - 25);
-                    o->Position[2] += (float)(rand() % 50 - 25);
-                    o->Rotation = rand() % 20 - 10;
+                    o->Position[0] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[1] += (float)(Random::Rand() % 50 - 25);
+                    o->Position[2] += (float)(Random::Rand() % 50 - 25);
+                    o->Rotation = Random::Rand() % 20 - 10;
                 }
                 break;
             case BITMAP_PIN_LIGHT:
                 o->Alpha = 1.0f;
 
                 {
-                    o->Position[0] += -5.0f + (float)(rand() % 10);
-                    o->Position[1] += -5.0f + (float)(rand() % 10);
-                    o->Position[2] += -5.0f + (float)(rand() % 10);
+                    o->Position[0] += -5.0f + (float)(Random::Rand() % 10);
+                    o->Position[1] += -5.0f + (float)(Random::Rand() % 10);
+                    o->Position[2] += -5.0f + (float)(Random::Rand() % 10);
                 }
                 o->LifeTime = 30;
                 o->Gravity = 10.0f;
-                o->Scale += (float)(rand() % 5) / 10.0f;
+                o->Scale += (float)(Random::Rand() % 5) / 10.0f;
                 if (o->SubType == 2)
                 {
                     o->Gravity = -5.0f;
@@ -2747,7 +2755,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->Gravity = -5.0f;
                     o->TexType = BITMAP_SHINY + 6;
-                    o->Rotation = rand() % 360;
+                    o->Rotation = Random::Rand() % 360;
                 }
                 break;
             case BITMAP_ORORA:
@@ -2762,28 +2770,28 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_SNOW_EFFECT_1:
             case BITMAP_SNOW_EFFECT_2:
-                o->Scale = Scale + (rand() % 10) * 0.02f;
-                o->LifeTime = rand() % 10 + 30;
-                o->Angle[2] = (float)(rand() % 360);
+                o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
+                o->LifeTime = Random::Rand() % 10 + 30;
+                o->Angle[2] = (float)(Random::Rand() % 360);
                 AngleMatrix(o->Angle, Matrix);
-                o->Gravity = (float)(rand() % 10 + 20);
-                Vector((float)(rand() % 40 - 20) * 0.1f, (float)(rand() % 40 - 20) * 0.1f, 0.f, p);
+                o->Gravity = (float)(Random::Rand() % 10 + 20);
+                Vector((float)(Random::Rand() % 40 - 20) * 0.1f, (float)(Random::Rand() % 40 - 20) * 0.1f, 0.f, p);
                 VectorScale(p, 1.5f, p);
                 VectorRotate(p, Matrix, o->Velocity);
                 break;
 
             case BITMAP_DS_EFFECT:
-                o->Scale = Scale + (rand() % 10) * 0.02f;
+                o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
                 o->LifeTime = 100;
                 break;
             case BITMAP_BLOOD:
             case BITMAP_BLOOD + 1:
                 o->LifeTime = 12;
-                o->Scale = (float)(rand() % 4 + 8) * 0.05f;
-                o->Angle[0] = (float)(rand() % 360);
-                //o->Gravity = (float)(rand()%16+32)*0.1f;
+                o->Scale = (float)(Random::Rand() % 4 + 8) * 0.05f;
+                o->Angle[0] = (float)(Random::Rand() % 360);
+                // o->Gravity = (float)(Random::Rand()%16+32)*0.1f;
                 AngleMatrix(Angle, Matrix);
-                Vector(0.f, -(float)(rand() % 16 + 8), (float)(rand() % 6 - 3), p);
+                Vector(0.f, -(float)(Random::Rand() % 16 + 8), (float)(Random::Rand() % 6 - 3), p);
                 VectorRotate(p, Matrix, o->Velocity);
                 if (o->Type == BITMAP_BLOOD + 1)
                 {
@@ -2792,7 +2800,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 break;
             case BITMAP_FIRECRACKER:
                 o->Angle[0] = o->Angle[1] = o->Angle[2] = 0.0f;
-                o->Rotation = (float)(rand() % 360);
+                o->Rotation = (float)(Random::Rand() % 360);
                 if (SubType == -1)
                 {
                     o->LifeTime = 2;
@@ -2801,9 +2809,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else
                 {
                     int iSize = 15 + SubType;
-                    o->Velocity[0] = (float)(rand() % iSize - iSize / 2) * 0.15f;
-                    o->Velocity[1] = (float)(rand() % iSize - iSize / 2) * 0.15f;
-                    o->Velocity[2] = (float)(rand() % iSize - iSize / 2) * 0.15f + 10.0f;
+                    o->Velocity[0] = (float)(Random::Rand() % iSize - iSize / 2) * 0.15f;
+                    o->Velocity[1] = (float)(Random::Rand() % iSize - iSize / 2) * 0.15f;
+                    o->Velocity[2] = (float)(Random::Rand() % iSize - iSize / 2) * 0.15f + 10.0f;
                     o->LifeTime = 50;
                     o->Scale = 0.10f;
                 }
@@ -2816,57 +2824,57 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_CLOUD:
                     if (o->SubType == 6)
                     {
-                        o->LifeTime = 25 + rand() % 5;
-                        o->Rotation = (float)(rand() % 360);
+                        o->LifeTime = 25 + Random::Rand() % 5;
+                        o->Rotation = (float)(Random::Rand() % 360);
                         o->Scale = 0.2f;
-                        o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
+                        o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
                         o->Velocity[1] = 0.f;
-                        o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                        o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                     }
                     else if (o->SubType == 8)
                     {
                         o->LifeTime = 300;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += (float)(rand() % 500 - 250);
-                        o->Position[1] += (float)(rand() % 500 - 250);
-                        o->Position[2] += (float)(rand() % 20 - 20);
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[2] += (float)(Random::Rand() % 20 - 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (float)(rand() % 20 + 180) * 0.01f;
-                        o->TurningForce[0] = Scale + rand() % 30 / 100.f;
+                        o->Scale = (float)(Random::Rand() % 20 + 180) * 0.01f;
+                        o->TurningForce[0] = Scale + Random::Rand() % 30 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 9)
                     {
                         o->LifeTime = 300;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += (float)(rand() % 500 - 250);
-                        o->Position[1] += (float)(rand() % 500 - 250);
-                        o->Position[2] += (float)(rand() % 20 - 20);
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[2] += (float)(Random::Rand() % 20 - 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (((float)(rand() % 20 + 180) * 0.01f) * o->Scale);
-                        o->TurningForce[0] = rand() % 10 / 100.f;
+                        o->Scale = (((float)(Random::Rand() % 20 + 180) * 0.01f) * o->Scale);
+                        o->TurningForce[0] = Random::Rand() % 10 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 10)
                     {
                         Vector(0.0f, 0.0f, 0.0f, o->Light);
                         o->LifeTime = 500;
-                        o->Position[0] += (float)(rand() % 400 - 200);
-                        o->Position[1] += (float)(rand() % 400 - 200);
-                        o->Position[2] += (float)(rand() % 400 - 200);
+                        o->Position[0] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[1] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[2] += (float)(Random::Rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
-                        o->Scale = (float)(rand() % 15 + 10) / 15.0f + Scale;
-                        float fTemp = (float)(rand() % 10 + 5) * 0.12f;
+                        o->Scale = (float)(Random::Rand() % 15 + 10) / 15.0f + Scale;
+                        float fTemp = (float)(Random::Rand() % 10 + 5) * 0.12f;
                         o->Velocity[0] = fTemp;
                         o->Velocity[1] = fTemp;
                         o->Velocity[2] = 0.0f;
@@ -2874,12 +2882,12 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     else if (o->SubType == 11)
                     {
                         o->LifeTime = 500;
-                        o->Position[0] += (float)(rand() % 400 - 200);
-                        o->Position[1] += (float)(rand() % 400 - 200);
-                        o->Position[2] += (float)(rand() % 400 - 200);
+                        o->Position[0] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[1] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[2] += (float)(Random::Rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
-                        o->Scale = (float)(rand() % 15 + 15) / 30.0f + Scale;
-                        float fTemp = (float)(rand() % 10 + 5) * 0.12f;
+                        o->Scale = (float)(Random::Rand() % 15 + 15) / 30.0f + Scale;
+                        float fTemp = (float)(Random::Rand() % 10 + 5) * 0.12f;
                         o->Velocity[0] = fTemp;
                         o->Velocity[1] = fTemp;
                         o->Velocity[2] = 0.0f;
@@ -2887,49 +2895,49 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     else if (o->SubType == 12)
                     {
                         o->LifeTime = 30;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
 
-                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[2] += (float)(rand() % 20 + 20);
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[2] += (float)(Random::Rand() % 20 + 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (float)(rand() % 20 + 180) * 0.01f;
-                        o->TurningForce[0] = Scale + rand() % 30 / 100.f;
+                        o->Scale = (float)(Random::Rand() % 20 + 180) * 0.01f;
+                        o->TurningForce[0] = Scale + Random::Rand() % 30 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 13)
                     {
                         o->LifeTime = 30;
-                        o->Rotation = rand() % 360;
-                        o->Gravity = (float)(rand() % 50 - 25) / 10.0f;
+                        o->Rotation = Random::Rand() % 360;
+                        o->Gravity = (float)(Random::Rand() % 50 - 25) / 10.0f;
                     }
                     else if (o->SubType == 14)
                     {
                         Vector(0.f, 0.f, 0.f, Light);
-                        o->LifeTime = 25 + rand() % 5;
-                        o->Rotation = float(rand() % 360);
+                        o->LifeTime = 25 + Random::Rand() % 5;
+                        o->Rotation = float(Random::Rand() % 360);
                         o->Scale = Scale * 0.2f;
-                        o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
+                        o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
                         o->Velocity[1] = 0.f;
-                        o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                        o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                     }
                     else if (o->SubType == 15)
                     {
                         o->LifeTime = 500;
 
-                        o->Position[0] += (float)(rand() % 400 - 200);
-                        o->Position[1] += (float)(rand() % 400 - 200);
-                        o->Position[2] += (float)(rand() % 400 - 200);
+                        o->Position[0] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[1] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[2] += (float)(Random::Rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
 
-                        o->Rotation = rand() % 360;
+                        o->Rotation = Random::Rand() % 360;
 
-                        o->Scale = (float)(rand() % 15 + 15) / 30.0f + Scale;
+                        o->Scale = (float)(Random::Rand() % 15 + 15) / 30.0f + Scale;
 
-                        float fTemp = (float)(rand() % 10 + 5) * 0.08f;
+                        float fTemp = (float)(Random::Rand() % 10 + 5) * 0.08f;
                         o->Velocity[0] = fTemp;
                         o->Velocity[1] = fTemp;
                         o->Velocity[2] = 0.0f;
@@ -2945,16 +2953,16 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                         o->LifeTime = 500;
 
-                        o->Position[0] += (float)(rand() % 400 - 200);
-                        o->Position[1] += (float)(rand() % 400 - 200);
-                        o->Position[2] += (float)(rand() % 400 - 200);
+                        o->Position[0] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[1] += (float)(Random::Rand() % 400 - 200);
+                        o->Position[2] += (float)(Random::Rand() % 400 - 200);
                         VectorCopy(o->Position, o->StartPosition);
 
-                        o->Rotation = rand() % 360;
+                        o->Rotation = Random::Rand() % 360;
 
-                        o->Scale = (float)(rand() % 15 + 10) / 15.0f + Scale;
+                        o->Scale = (float)(Random::Rand() % 15 + 10) / 15.0f + Scale;
 
-                        float fTemp = (float)(rand() % 10 + 5) * 0.05f;
+                        float fTemp = (float)(Random::Rand() % 10 + 5) * 0.05f;
                         o->Velocity[0] = fTemp;
                         o->Velocity[1] = fTemp;
                         o->Velocity[2] = 0.0f;
@@ -2964,15 +2972,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->TexType = BITMAP_EVENT_CLOUD;
                         o->LifeTime = 500;
 
-                        o->Position[0] += (float)(rand() % 900 - 450);
-                        o->Position[1] += (float)(rand() % 900 - 450);
-                        o->Position[2] += (float)(rand() % 20 + 50);
+                        o->Position[0] += (float)(Random::Rand() % 900 - 450);
+                        o->Position[1] += (float)(Random::Rand() % 900 - 450);
+                        o->Position[2] += (float)(Random::Rand() % 20 + 50);
                         VectorCopy(o->Position, o->StartPosition);
 
-                        o->Rotation = rand() % 360;
-                        o->Scale = (float)(rand() % 20 + 20) / 80.0f + Scale / 3.f;
+                        o->Rotation = Random::Rand() % 360;
+                        o->Scale = (float)(Random::Rand() % 20 + 20) / 80.0f + Scale / 3.f;
 
-                        float fTemp = (float)(rand() % 10 + 5) * 0.006f;
+                        float fTemp = (float)(Random::Rand() % 10 + 5) * 0.006f;
                         o->Velocity[0] = fTemp;
                         o->Velocity[1] = fTemp;
                         o->Velocity[2] = 0.0f;
@@ -2990,18 +2998,18 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Light[0] = 0.f;
                         o->Light[1] = 0.f;
                         o->Light[2] = 0.f;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
 
                         VectorCopy(Position, o->Position);
-                        o->Position[2] += (float)(rand() % 80);
-                        o->Rotation = rand() % 360;
+                        o->Position[2] += (float)(Random::Rand() % 80);
+                        o->Rotation = Random::Rand() % 360;
 
-                        o->StartPosition[0] = (rand() % 200 - 10) / 10.0f;
-                        o->StartPosition[1] = (rand() % 200 - 10) / 10.0f;
+                        o->StartPosition[0] = (Random::Rand() % 200 - 10) / 10.0f;
+                        o->StartPosition[1] = (Random::Rand() % 200 - 10) / 10.0f;
 
-                        o->Scale = (float)(rand() % 70 + 5) * 0.02f;
-                        o->TurningForce[0] = float(rand() % 40 + 10) / 10000.f;
-                        o->TurningForce[1] = rand() % 120 + 80;
+                        o->Scale = (float)(Random::Rand() % 70 + 5) * 0.02f;
+                        o->TurningForce[0] = float(Random::Rand() % 40 + 10) / 10000.f;
+                        o->TurningForce[1] = Random::Rand() % 120 + 80;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 19)
@@ -3012,124 +3020,124 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                         o->Light[0] = 0.f;
                         o->Light[1] = 0.f;
                         o->Light[2] = 0.f;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
 
-                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[2] += (float)(rand() % 20 + 20);
-                        o->Rotation = rand() % 360;
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[2] += (float)(Random::Rand() % 20 + 20);
+                        o->Rotation = Random::Rand() % 360;
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (float)(rand() % 90 + 220) * 0.02f;
-                        o->TurningForce[0] = Scale + rand() % 20 / 100.f;
+                        o->Scale = (float)(Random::Rand() % 90 + 220) * 0.02f;
+                        o->TurningForce[0] = Scale + Random::Rand() % 20 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 20)
                     {
                         o->LifeTime = 300;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += (float)(rand() % 500 - 250);
-                        o->Position[1] += (float)(rand() % 500 - 250);
-                        o->Position[2] += (float)(rand() % 20 - 20);
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250);
+                        o->Position[2] += (float)(Random::Rand() % 20 - 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (((float)(rand() % 20 + 180) * 0.01f) * o->Scale);
-                        o->TurningForce[0] = rand() % 10 / 100.f;
+                        o->Scale = (((float)(Random::Rand() % 20 + 180) * 0.01f) * o->Scale);
+                        o->TurningForce[0] = Random::Rand() % 10 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 21)
                     {
                         o->LifeTime = 100;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.6f;
 
-                        o->Position[0] += (float)(rand() % 200 - 100);
-                        o->Position[1] += (float)(rand() % 200 - 100);
-                        o->Position[2] += (float)(rand() % 20 - 20);
+                        o->Position[0] += (float)(Random::Rand() % 200 - 100);
+                        o->Position[1] += (float)(Random::Rand() % 200 - 100);
+                        o->Position[2] += (float)(Random::Rand() % 20 - 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (((float)(rand() % 20 + 180) * 0.01f) * o->Scale);
-                        o->TurningForce[0] = rand() % 10 / 100.f;
+                        o->Scale = (((float)(Random::Rand() % 20 + 180) * 0.01f) * o->Scale);
+                        o->TurningForce[0] = Random::Rand() % 10 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                     else if (o->SubType == 22)
                     {
                         o->LifeTime = 80;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += (float)(rand() % 20 - 10);
-                        o->Position[1] += (float)(rand() % 20 - 10);
-                        o->Position[2] += (float)(rand() % 20 - 20);
+                        o->Position[0] += (float)(Random::Rand() % 20 - 10);
+                        o->Position[1] += (float)(Random::Rand() % 20 - 10);
+                        o->Position[2] += (float)(Random::Rand() % 20 - 20);
 
-                        o->Scale = (((float)(rand() % 20 + 50) * 0.003f) * o->Scale);
+                        o->Scale = (((float)(Random::Rand() % 20 + 50) * 0.003f) * o->Scale);
                         Vector(0.f, 0.f, 0.f, o->TurningForce);
 
-                        float fAngle = o->Angle[2] + rand() % 360;
+                        float fAngle = o->Angle[2] + Random::Rand() % 360;
                         vec3_t vAngle, vDirection;
                         Vector(0.f, 0.f, fAngle, vAngle);
                         AngleMatrix(vAngle, Matrix);
-                        Vector(0.f, (rand() % 10) * 0.1f + 0.2f, 0.f, vDirection);
+                        Vector(0.f, (Random::Rand() % 10) * 0.1f + 0.2f, 0.f, vDirection);
                         VectorRotate(vDirection, Matrix, o->Velocity);
                         o->Velocity[2] = 0;
                     }
                     else if (o->SubType == 23)
                     {
                         o->LifeTime = 80;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
                         o->Alpha = 0.1f;
 
-                        o->Position[0] += (float)(rand() % 6 - 3);
-                        o->Position[1] += (float)(rand() % 6 - 3);
-                        o->Position[2] += (float)(rand() % 6 - 3);
+                        o->Position[0] += (float)(Random::Rand() % 6 - 3);
+                        o->Position[1] += (float)(Random::Rand() % 6 - 3);
+                        o->Position[2] += (float)(Random::Rand() % 6 - 3);
 
-                        o->Scale = 0;//(((float)(rand()%20+20)*0.001f) * o->Scale);
+                        o->Scale = 0; //(((float)(Random::Rand()%20+20)*0.001f) * o->Scale);
                         Vector(0.f, 0.f, 0.f, o->TurningForce);
-                        o->TurningForce[0] = ((rand() % 2 == 0) ? 1.0f : -1.0f);
+                        o->TurningForce[0] = ((Random::Rand() % 2 == 0) ? 1.0f : -1.0f);
 
-                        float fAngle = o->Angle[2] + 90 + (rand() % 40) - 20;
+                        float fAngle = o->Angle[2] + 90 + (Random::Rand() % 40) - 20;
                         vec3_t vAngle, vDirection;
                         Vector(0.f, 0.f, fAngle, vAngle);
                         AngleMatrix(vAngle, Matrix);
-                        Vector(0.f, (rand() % 10) * 0.2f + 1.0f, 0.f, vDirection);
+                        Vector(0.f, (Random::Rand() % 10) * 0.2f + 1.0f, 0.f, vDirection);
                         VectorRotate(vDirection, Matrix, o->Velocity);
                         o->Velocity[2] = 0;
                     }
                     else
                     {
                         o->LifeTime = 30;
-                        o->Gravity = (float)(rand() % 1000);
+                        o->Gravity = (float)(Random::Rand() % 1000);
 
-                        o->Position[0] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[1] += (float)(rand() % 500 - 250);//*Scale;
-                        o->Position[2] += (float)(rand() % 20 + 20);
+                        o->Position[0] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[1] += (float)(Random::Rand() % 500 - 250); //*Scale;
+                        o->Position[2] += (float)(Random::Rand() % 20 + 20);
 
-                        o->StartPosition[1] = (rand() % 100) / 100.f;
+                        o->StartPosition[1] = (Random::Rand() % 100) / 100.f;
                         o->StartPosition[2] = o->Position[2];
 
-                        o->Scale = (float)(rand() % 20 + 180) * 0.01f;
-                        o->TurningForce[0] = Scale + rand() % 30 / 100.f;
+                        o->Scale = (float)(Random::Rand() % 20 + 180) * 0.01f;
+                        o->TurningForce[0] = Scale + Random::Rand() % 30 / 100.f;
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                     }
                 break;
             case BITMAP_TORCH_FIRE:
             {
-                o->LifeTime = rand() % 5 + 60;
-                o->Scale = (float)(rand() % 30 + 30) * 0.02f + Scale / 3.f;
+                o->LifeTime = Random::Rand() % 5 + 60;
+                o->Scale = (float)(Random::Rand() % 30 + 30) * 0.02f + Scale / 3.f;
 
-                o->Position[0] += (float)(rand() % 4 - 2) * 0.25f;
-                o->Position[1] += (float)(rand() % 4 - 2) * 0.25f;
-                o->Position[2] += (float)(rand() % 10 - 5);
+                o->Position[0] += (float)(Random::Rand() % 4 - 2) * 0.25f;
+                o->Position[1] += (float)(Random::Rand() % 4 - 2) * 0.25f;
+                o->Position[2] += (float)(Random::Rand() % 10 - 5);
 
-                o->Gravity = (float)(rand() % 2 + 10) * 0.5f;
+                o->Gravity = (float)(Random::Rand() % 2 + 10) * 0.5f;
             }
             break;
 
@@ -3139,18 +3147,18 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 500;
-                    o->Position[0] += (float)(rand() % 400 - 200);
+                    o->Position[0] += (float)(Random::Rand() % 400 - 200);
 
-                    o->Position[1] += (float)(rand() % 400 - 200);
-                    o->Position[2] += (float)(rand() % 400 - 200);
+                    o->Position[1] += (float)(Random::Rand() % 400 - 200);
+                    o->Position[2] += (float)(Random::Rand() % 400 - 200);
                     VectorCopy(o->Position, o->StartPosition);
-                    o->Scale = (float)(rand() % 15 + 15) / 30.0f + Scale;
-                    float fTemp = (float)(rand() % 10 + 5) * 0.08f;
+                    o->Scale = (float)(Random::Rand() % 15 + 15) / 30.0f + Scale;
+                    float fTemp = (float)(Random::Rand() % 10 + 5) * 0.08f;
                     o->Velocity[0] = fTemp;
                     o->Velocity[1] = fTemp;
                     o->Velocity[2] = 0.0f;
 
-                    //o->Rotation = rand()%360;
+                    // o->Rotation = Random::Rand()%360;
 
                     VectorCopy(o->Light, o->TurningForce);
                     o->Light[0] = 0.f;
@@ -3162,9 +3170,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_LIGHT:
                 if (0 == o->SubType || 8 == o->SubType)
                 {
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Gravity = rand() % 10 + 10.f;
-                    o->Scale = (rand() % 50 + 50.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Gravity = Random::Rand() % 10 + 10.f;
+                    o->Scale = (Random::Rand() % 50 + 50.f) / 100.f * Scale;
                 }
                 else if (o->SubType == 9)
                 {
@@ -3172,15 +3180,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 7)
                 {
-                    o->LifeTime = rand() % 10 + 30;
-                    o->Gravity = rand() % 10 + 10.f;
-                    o->Scale = (rand() % 15 + 30.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 30;
+                    o->Gravity = Random::Rand() % 10 + 10.f;
+                    o->Scale = (Random::Rand() % 15 + 30.f) / 100.f * Scale;
                 }
                 else if (6 == o->SubType)
                 {
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Gravity = rand() % 10 + 10.f;
-                    o->Scale = (rand() % 50 + 50.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Gravity = Random::Rand() % 10 + 10.f;
+                    o->Scale = (Random::Rand() % 50 + 50.f) / 100.f * Scale;
                 }
                 else if (1 == o->SubType)
                 {
@@ -3188,9 +3196,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (2 == o->SubType)
                 {
-                    o->LifeTime = rand() % 10 + 10;
-                    o->Gravity = rand() % 10 + 10.f;
-                    o->Scale = (rand() % 50 + 50.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 10;
+                    o->Gravity = Random::Rand() % 10 + 10.f;
+                    o->Scale = (Random::Rand() % 50 + 50.f) / 100.f * Scale;
                 }
                 else if (3 == o->SubType)
                 {
@@ -3214,36 +3222,36 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 10)
                 {
                     o->LifeTime = 100;
-                    o->Scale = Scale + (rand() % 10) * 0.02f;
+                    o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
                 }
                 else if (o->SubType == 11)
                 {
-                    o->LifeTime = rand() % 10 + 130;
-                    o->Gravity = rand() % 2 + 2.f;
-                    o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 130;
+                    o->Gravity = Random::Rand() % 2 + 2.f;
+                    o->Scale = (Random::Rand() % 20 + 20.f) / 100.f * Scale;
                 }
                 else if (o->SubType == 12)
                 {
-                    o->LifeTime = rand() % 10 + 100;
-                    o->Gravity = rand() % 2 + 2.f;
-                    o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 100;
+                    o->Gravity = Random::Rand() % 2 + 2.f;
+                    o->Scale = (Random::Rand() % 20 + 20.f) / 100.f * Scale;
                 }
                 else if (o->SubType == 13)
                 {
-                    o->LifeTime = rand() % 10 + 100;
-                    o->Gravity = rand() % 2 + 2.f;
-                    o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 100;
+                    o->Gravity = Random::Rand() % 2 + 2.f;
+                    o->Scale = (Random::Rand() % 20 + 20.f) / 100.f * Scale;
                 }
                 else if (o->SubType == 14)
                 {
                     o->LifeTime = 50;
-                    o->Scale = Scale + (rand() % 10) * 0.02f;
+                    o->Scale = Scale + (Random::Rand() % 10) * 0.02f;
                 }
                 else if (o->SubType == 15)
                 {
-                    o->LifeTime = rand() % 10 + 100;
-                    o->Gravity = rand() % 3 + 2.f;
-                    o->Scale = (rand() % 20 + 20.f) / 100.f * Scale;
+                    o->LifeTime = Random::Rand() % 10 + 100;
+                    o->Gravity = Random::Rand() % 3 + 2.f;
+                    o->Scale = (Random::Rand() % 20 + 20.f) / 100.f * Scale;
                     VectorCopy(Position, o->StartPosition);
                     o->StartPosition[2] = 0;
                     VectorCopy(Light, o->TurningForce);
@@ -3254,96 +3262,96 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 24;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 128 + 128) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 128 + 128) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     Vector(0.5f, 0.5f, 0.5f, o->Light);
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 15;
-                    Vector(0.f, -(float)(rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
-                    o->Scale = (float)(rand() % 128 + 128) * 0.01f;
-                    o->Rotation = (float)(rand() % 360);
+                    Vector(0.f, -(float)(Random::Rand() % 16 + 32) * 0.1f, 0.f, o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 128 + 128) * 0.01f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     Vector(0.5f, 0.5f, 0.5f, o->Light);
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 20;
-                    //Vector(0.f,-(float)(rand()%16+32)*0.1f,0.f,o->Velocity);
-                    o->Scale = (float)(rand() % 128 + 80) * 0.009f;
-                    o->Rotation = (float)(rand() % 360);
+                    // Vector(0.f,-(float)(Random::Rand()%16+32)*0.1f,0.f,o->Velocity);
+                    o->Scale = (float)(Random::Rand() % 128 + 80) * 0.009f;
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Gravity = 0.0f;
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     Vector(0.5f, 0.5f, 0.5f, o->Light);
                 }
                 else if (o->SubType == 3)
                 {
-                    o->LifeTime = rand() % 5 + 47;
-                    o->Scale = (float)(rand() % 72 + 72) * 0.01f * Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (float)(rand() % 24 + 64) * 0.1f;
+                    o->LifeTime = Random::Rand() % 5 + 47;
+                    o->Scale = (float)(Random::Rand() % 72 + 72) * 0.01f * Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (float)(Random::Rand() % 24 + 64) * 0.1f;
                     o->Alpha = 0;
                     VectorCopy(Light, o->TurningForce);
                     Vector(0, 0, 0, o->Light);
                 }
                 break;
             case BITMAP_ADV_SMOKE:
-                o->LifeTime = 20 + rand() % 5;
+                o->LifeTime = 20 + Random::Rand() % 5;
                 o->Rotation = 0.f;
                 if (o->SubType == 0)
                 {
-                    o->Scale = 0.5f + (float)(rand() % 10) * 0.02f;
-                    o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
-                    o->Velocity[1] = (float)(rand() % 10 - 5) * 0.4f;
-                    o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                    o->Scale = 0.5f + (float)(Random::Rand() % 10) * 0.02f;
+                    o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
+                    o->Velocity[1] = (float)(Random::Rand() % 10 - 5) * 0.4f;
+                    o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                 }
                 else if (o->SubType == 2)
                 {
-                    o->Scale = Scale * 0.5f + (float)(rand() % 10) * 0.02f;
-                    o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
-                    o->Velocity[1] = (float)(rand() % 10 - 5) * 0.4f;
-                    o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                    o->Scale = Scale * 0.5f + (float)(Random::Rand() % 10) * 0.02f;
+                    o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
+                    o->Velocity[1] = (float)(Random::Rand() % 10 - 5) * 0.4f;
+                    o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                 }
                 else if (o->SubType == 3)
                 {
-                    o->Scale = Scale * 0.5f + (float)(rand() % 10) * 0.02f;
+                    o->Scale = Scale * 0.5f + (float)(Random::Rand() % 10) * 0.02f;
                     o->Alpha = 0.5f;
                     o->Velocity[0] = 0;
-                    o->Velocity[1] = (float)(rand() % 10 - 5) * 0.4f;
+                    o->Velocity[1] = (float)(Random::Rand() % 10 - 5) * 0.4f;
                     o->Velocity[2] = 0;
                 }
                 else
                 {
-                    o->Scale = 1.f + (float)(rand() % 10) * 0.1f;
-                    o->Velocity[0] = (float)(rand() % 10 + 5) * 0.2f;
-                    o->Velocity[1] = (float)(rand() % 10 - 5) * 0.2f;
-                    o->Velocity[2] = (float)(rand() % 10 + 5) * 0.1f;
+                    o->Scale = 1.f + (float)(Random::Rand() % 10) * 0.1f;
+                    o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.2f;
+                    o->Velocity[1] = (float)(Random::Rand() % 10 - 5) * 0.2f;
+                    o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.1f;
                 }
                 break;
             case BITMAP_ADV_SMOKE + 1:
-                o->LifeTime = 25 + rand() % 5;
-                o->Rotation = (float)(rand() % 360);
+                o->LifeTime = 25 + Random::Rand() % 5;
+                o->Rotation = (float)(Random::Rand() % 360);
                 o->Scale = 0.5f;
                 if (o->SubType == 1)
                 {
                     o->Scale *= Scale;
                 }
-                o->Velocity[0] = (float)(rand() % 10 + 5) * 0.4f;
+                o->Velocity[0] = (float)(Random::Rand() % 10 + 5) * 0.4f;
                 o->Velocity[1] = 0.f;
-                o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
 
             case BITMAP_TRUE_FIRE:
             case BITMAP_TRUE_BLUE:
                 if (o->SubType == 7)
                 {
-                    o->Scale = Scale + (float)(rand() % 30) / 100.f;
+                    o->Scale = Scale + (float)(Random::Rand() % 30) / 100.f;
                     o->LifeTime = 15;
-                    o->Position[0] += (float)(rand() % 10) / 10.f - 0.5f;
-                    o->Position[1] += (float)(rand() % 10) / 10.f - 0.5f;
-                    o->Position[2] += (float)(rand() % 10) / 10.f - 0.5f;
+                    o->Position[0] += (float)(Random::Rand() % 10) / 10.f - 0.5f;
+                    o->Position[1] += (float)(Random::Rand() % 10) / 10.f - 0.5f;
+                    o->Position[2] += (float)(Random::Rand() % 10) / 10.f - 0.5f;
                 }
                 else if (o->SubType == 5)
                     o->LifeTime = 20;
@@ -3364,15 +3372,15 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
                 if (o->SubType == 8 || o->SubType == 9)
                 {
-                    o->Velocity[0] = (float)(rand() % 4 - 2) * 0.4f;
+                    o->Velocity[0] = (float)(Random::Rand() % 4 - 2) * 0.4f;
                     o->Velocity[1] = 0.f;
-                    o->Velocity[2] = (float)(rand() % 4 + 2) * 0.2f;
+                    o->Velocity[2] = (float)(Random::Rand() % 4 + 2) * 0.2f;
                 }
                 else
                 {
-                    o->Velocity[0] = (float)(rand() % 10 - 5) * 0.4f;
+                    o->Velocity[0] = (float)(Random::Rand() % 10 - 5) * 0.4f;
                     o->Velocity[1] = 0.f;
-                    o->Velocity[2] = (float)(rand() % 10 + 5) * 0.2f;
+                    o->Velocity[2] = (float)(Random::Rand() % 10 + 5) * 0.2f;
                 }
 
                 VectorCopy(o->Position, o->StartPosition);
@@ -3380,13 +3388,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
             case BITMAP_HOLE:
                 o->LifeTime = 30;
-                o->Rotation = (float)(rand() % 360);
+                o->Rotation = (float)(Random::Rand() % 360);
                 Vector(0.1f, 0.1f, 0.1f, o->Light);
                 break;
             case BITMAP_WATERFALL_1:
                 o->LifeTime = 30;
-                o->Rotation = (float)(rand() % 360);
-                o->Velocity[2] = (float)(-(rand() % 5 + 7));
+                o->Rotation = (float)(Random::Rand() % 360);
+                o->Velocity[2] = (float)(-(Random::Rand() % 5 + 7));
 
                 Vector(0.2f, 0.2f, 0.2f, o->Light);
 
@@ -3396,7 +3404,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 1)
                 {
-                    o->Scale = (float)(rand() % 20 + 80) * 0.01f;
+                    o->Scale = (float)(Random::Rand() % 20 + 80) * 0.01f;
                     o->TexType = BITMAP_CLOUD + 2;
                 }
                 else if (o->SubType == 2)
@@ -3409,83 +3417,83 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 1.6f;
-                    o->Velocity[2] = (float)(-(rand() % 5 + 7));
+                    o->Velocity[2] = (float)(-(Random::Rand() % 5 + 7));
 
                     Vector(0.2f, 0.2f, 0.2f, o->Light);
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 20;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 1.f;
                     o->Position[2] += 50.f;
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 20;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 0.5f;
                     o->Position[2] += 50.f;
-                    o->Velocity[2] = (float)((rand() % 5 + 10));
+                    o->Velocity[2] = (float)((Random::Rand() % 5 + 10));
                 }
                 else if (o->SubType == 3)
                 {
                     o->LifeTime = 20;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 1.6f;
-                    o->Velocity[2] = (float)(-(rand() % 5 + 7));
+                    o->Velocity[2] = (float)(-(Random::Rand() % 5 + 7));
                 }
                 else if (o->SubType == 4)
                 {
                     o->LifeTime = 6;
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.20f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f;
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.20f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     VectorCopy(o->Position, o->StartPosition);
                 }
                 else if (o->SubType == 5)
                 {
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 1.6f * Scale;
-                    o->Velocity[2] = (float)(-(rand() % 5 + 10));
+                    o->Velocity[2] = (float)(-(Random::Rand() % 5 + 10));
 
                     Vector(0.2f, 0.2f, 0.2f, o->Light);
                 }
                 else if (o->SubType == 6)
                 {
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = Scale + 0.6f;
-                    o->Velocity[2] = -(rand() % 5 + 12);
+                    o->Velocity[2] = -(Random::Rand() % 5 + 12);
 
                     Vector(0.2f, 0.2f, 0.2f, o->Light);
                 }
                 else if (o->SubType == 7)
                 {
-                    o->TexType = (rand() % 2 == 0) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
+                    o->TexType = (Random::Rand() % 2 == 0) ? BITMAP_WATERFALL_4 : BITMAP_WATERFALL_5;
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Scale = (float)(rand() % 50) * 0.05f + Scale;
-                    o->Velocity[0] = -(rand() % 2 + 1);
-                    o->Velocity[1] = -(rand() % 2 + 3);
-                    o->Velocity[2] = (rand() % 3 + 3);
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Scale = (float)(Random::Rand() % 50) * 0.05f + Scale;
+                    o->Velocity[0] = -(Random::Rand() % 2 + 1);
+                    o->Velocity[1] = -(Random::Rand() % 2 + 3);
+                    o->Velocity[2] = (Random::Rand() % 3 + 3);
                 }
                 else if (o->SubType == 8)
                 {
                     o->LifeTime = 30;
-                    o->Velocity[2] = rand() % 3 + 1;
-                    o->Scale = (rand() % 5 + 5) * 0.05f + Scale;
+                    o->Velocity[2] = Random::Rand() % 3 + 1;
+                    o->Scale = (Random::Rand() % 5 + 5) * 0.05f + Scale;
                 }
                 else if (o->SubType == 9)
                 {
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 0.6f + Scale;
-                    o->Velocity[2] = (float)(-(rand() % 5 + 7));
+                    o->Velocity[2] = (float)(-(Random::Rand() % 5 + 7));
 
                     Vector(0.2f, 0.2f, 0.2f, o->Light);
                 }
@@ -3494,31 +3502,31 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_PLUS:
                 o->LifeTime = 20;
                 o->Scale = Scale;
-                o->Position[0] += rand() % 30 - 15.f;
-                o->Position[1] += rand() % 30 - 15.f;
+                o->Position[0] += Random::Rand() % 30 - 15.f;
+                o->Position[1] += Random::Rand() % 30 - 15.f;
                 o->Position[2] += 240.f;
                 break;
 
             case BITMAP_WATERFALL_2:
                 o->LifeTime = 30;
-                o->Rotation = (float)(rand() % 360);
+                o->Rotation = (float)(Random::Rand() % 360);
 
                 if (o->SubType == 2)
                 {
                     o->LifeTime = 40;
-                    o->Scale = (rand() % 6 + 6) * 0.1f + Scale;
+                    o->Scale = (Random::Rand() % 6 + 6) * 0.1f + Scale;
                 }
                 else if (o->SubType == 6)
                 {
-                    o->LifeTime = rand() % 50 + 20;
-                    o->Gravity = (float)(rand() % 20 + 10);
+                    o->LifeTime = Random::Rand() % 50 + 20;
+                    o->Gravity = (float)(Random::Rand() % 20 + 10);
                     o->Scale *= 0.2f;
                     VectorCopy(o->Position, o->StartPosition);
                 }
                 else
-                    o->Scale = (rand() % 6 + 6) * 0.1f;
+                    o->Scale = (Random::Rand() % 6 + 6) * 0.1f;
 
-                o->Velocity[2] = (float)(-(rand() % 3 + 3));
+                o->Velocity[2] = (float)(-(Random::Rand() % 3 + 3));
 
                 if (SceneFlag == CHARACTER_SCENE)
                 {
@@ -3529,53 +3537,53 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     Vector(0.4f, 0.4f, 0.4f, o->Light);
                 }
 
-                o->Position[0] += rand() % 20 - 10.f;
-                o->Position[1] += rand() % 20 - 10.f;
-                o->Position[2] += rand() % 40 - 20.f;
+                o->Position[0] += Random::Rand() % 20 - 10.f;
+                o->Position[1] += Random::Rand() % 20 - 10.f;
+                o->Position[2] += Random::Rand() % 40 - 20.f;
 
                 if (o->SubType == 1)
                 {
                     Vector(0.0f, 0.4f, 0.4f, o->Light);
                     o->LifeTime = 50;
-                    o->Velocity[2] = (float)(-(rand() % 3 + 3));
+                    o->Velocity[2] = (float)(-(Random::Rand() % 3 + 3));
                 }
                 if (o->SubType == 3)
                 {
                     o->TexType = BITMAP_LIGHT + 2;
                     VectorCopy(Light, o->Light);
                     o->LifeTime = 12;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Scale = (rand() % 3 + 3) * 0.18f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Scale = (Random::Rand() % 3 + 3) * 0.18f;
                     o->Velocity[2] = 2.0f;
 
-                    o->Position[0] += rand() % 20 - 10.f;
-                    o->Position[1] += rand() % 20 - 10.f;
-                    o->Position[2] += rand() % 40 - 20.f;
+                    o->Position[0] += Random::Rand() % 20 - 10.f;
+                    o->Position[1] += Random::Rand() % 20 - 10.f;
+                    o->Position[2] += Random::Rand() % 40 - 20.f;
                 }
                 if (o->SubType == 4)
                 {
                     o->LifeTime = 70;
-                    o->Scale = (rand() % 6 + 6) * 0.1f + Scale;
+                    o->Scale = (Random::Rand() % 6 + 6) * 0.1f + Scale;
                 }
                 if (o->SubType == 5)
                 {
                     o->LifeTime = 40;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = (rand() % 2 + 2);
-                    o->Scale = (rand() % 6 + 6) * 0.1f + Scale;
-                    o->Velocity[0] = -(rand() % 2 + 2);
-                    o->Velocity[1] = -(rand() % 2 + 2);
-                    o->Velocity[2] = (rand() % 2 + 1);
-                    o->Position[0] += rand() % 60 - 30.f;
-                    o->Position[1] += rand() % 60 - 30.f;
-                    o->Position[2] += rand() % 10;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = (Random::Rand() % 2 + 2);
+                    o->Scale = (Random::Rand() % 6 + 6) * 0.1f + Scale;
+                    o->Velocity[0] = -(Random::Rand() % 2 + 2);
+                    o->Velocity[1] = -(Random::Rand() % 2 + 2);
+                    o->Velocity[2] = (Random::Rand() % 2 + 1);
+                    o->Position[0] += Random::Rand() % 60 - 30.f;
+                    o->Position[1] += Random::Rand() % 60 - 30.f;
+                    o->Position[2] += Random::Rand() % 10;
                     break;
                 }
                 if (o->SubType == 11)
                 {
                     o->LifeTime = 30;
-                    o->Velocity[2] = rand() % 5 + 5;
-                    o->Scale = (rand() % 10 + 10) * 0.05f * Scale;
+                    o->Velocity[2] = Random::Rand() % 5 + 5;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.05f * Scale;
                 }
                 break;
             case BITMAP_WATERFALL_3:
@@ -3583,19 +3591,19 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 20;
-                    o->Velocity[2] = (float)(rand() % 5 + 2);
+                    o->Velocity[2] = (float)(Random::Rand() % 5 + 2);
                 }
                 else if (o->SubType == 1)
                 {
                     o->LifeTime = 10;
-                    o->Velocity[2] = (float)(rand() % 2 + 2);
+                    o->Velocity[2] = (float)(Random::Rand() % 2 + 2);
                 }
                 else if (o->SubType == 2)
                 {
                     o->LifeTime = 6;
-                    o->Gravity = ((rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f;
-                    o->Scale = Scale + (float)(rand() % 6) * 0.10f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 4.f + o->Angle[0] * 1.2f;
+                    o->Scale = Scale + (float)(Random::Rand() % 6) * 0.10f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     VectorCopy(o->Position, o->StartPosition);
                     break;
@@ -3604,21 +3612,21 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 60;
                     o->Velocity[2] = -1.0f;
-                    o->Scale *= (rand() % 10 + 15) * 0.02f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += rand() % 40 - 20.f;
-                    o->Position[2] += rand() % 25 - 10.f;
+                    o->Scale *= (Random::Rand() % 10 + 15) * 0.02f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += Random::Rand() % 40 - 20.f;
+                    o->Position[2] += Random::Rand() % 25 - 10.f;
                     break;
                 }
                 else if (o->SubType == 12)
                 {
-                    o->Rotation = (float)(rand() % 360);
-                    o->LifeTime = (rand() % 2 - 1) + 5;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->LifeTime = (Random::Rand() % 2 - 1) + 5;
                     float fIntervalScale = Scale * 0.3f;
-                    o->Scale += ((float((rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
-                    o->Position[0] += (float)(rand() % 20) - 10.f;
-                    o->Position[1] += (float)(rand() % 20) - 10.f;
-                    o->Position[2] += (float)(rand() % 20) - 10.f;
+                    o->Scale += ((float((Random::Rand() % 20) - 10) / 2.0f) * ((fIntervalScale / 2.f)));
+                    o->Position[0] += (float)(Random::Rand() % 20) - 10.f;
+                    o->Position[1] += (float)(Random::Rand() % 20) - 10.f;
+                    o->Position[2] += (float)(Random::Rand() % 20) - 10.f;
 
                     break;
                 }
@@ -3626,73 +3634,73 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 else if (o->SubType == 16)
                 {
                     o->LifeTime = 30;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = 0.6f + Scale;
-                    o->Velocity[2] = (float)(rand() % 3 + 5);
+                    o->Velocity[2] = (float)(Random::Rand() % 3 + 5);
                     break;
                 }
 #endif	// ASG_ADD_KARURAN
 
-                o->Rotation = (float)(rand() % 360);
-                o->Scale = (rand() % 10 + 10) * 0.02f;
+                o->Rotation = (float)(Random::Rand() % 360);
+                o->Scale = (Random::Rand() % 10 + 10) * 0.02f;
 
                 if (o->SubType == 4)
                 {
                     o->LifeTime = 20;
-                    o->Velocity[2] = rand() % 5 + 2;
-                    o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
+                    o->Velocity[2] = Random::Rand() % 5 + 2;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.02f + Scale;
                 }
                 else if (o->SubType == 5 || o->SubType == 6)
                 {
                     o->LifeTime = 20;
-                    o->Gravity = ((rand() % 100) / 100.f) * 2.f;
-                    o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += rand() % 40 - 20.f;
-                    o->Position[1] += rand() % 40 - 20.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 2.f;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.02f + Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += Random::Rand() % 40 - 20.f;
+                    o->Position[1] += Random::Rand() % 40 - 20.f;
                     o->Position[2] -= 50.f;
                     break;
                 }
                 else if (o->SubType == 7)
                 {
                     o->LifeTime = 60;
-                    o->Velocity[2] = (rand() % 4) * 0.1f + 0.8f;
-                    o->Scale *= (rand() % 10 + 15) * 0.02f;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += rand() % 18 - 9.f;
-                    o->Position[2] += rand() % 18 - 9.f;
+                    o->Velocity[2] = (Random::Rand() % 4) * 0.1f + 0.8f;
+                    o->Scale *= (Random::Rand() % 10 + 15) * 0.02f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += Random::Rand() % 18 - 9.f;
+                    o->Position[2] += Random::Rand() % 18 - 9.f;
                     break;
                 }
                 else if (o->SubType == 8)
                 {
                     o->LifeTime = 30;
-                    o->Velocity[2] = rand() % 5 + 5;
-                    o->Scale = (rand() % 10 + 10) * 0.05f;
+                    o->Velocity[2] = Random::Rand() % 5 + 5;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.05f;
                 }
                 else if (o->SubType == 9)
                 {
                     o->LifeTime = 30;
-                    o->Velocity[2] = rand() % 5 + 2;
-                    o->Scale = (rand() % 5 + 5) * 0.05f + Scale;
+                    o->Velocity[2] = Random::Rand() % 5 + 2;
+                    o->Scale = (Random::Rand() % 5 + 5) * 0.05f + Scale;
                 }
                 else if (o->SubType == 10)
                 {
                     o->LifeTime = 20;
-                    o->Gravity = ((rand() % 200) / 100.f) + 2.f;
-                    o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Velocity[0] = -(rand() % 2 + 1);
-                    o->Velocity[1] = -(rand() % 2 + 2);
+                    o->Gravity = ((Random::Rand() % 200) / 100.f) + 2.f;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.02f + Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Velocity[0] = -(Random::Rand() % 2 + 1);
+                    o->Velocity[1] = -(Random::Rand() % 2 + 2);
                 }
                 else if (o->SubType == 11)
                 {
                     o->LifeTime = 20;
-                    o->Scale = Scale + (rand() % 10 - 5) * 0.05f;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Scale = Scale + (Random::Rand() % 10 - 5) * 0.05f;
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     vec3_t vAngle, vPos, vPos2;
                     Vector(0.f, 5.f, 0.f, vPos);
-                    float fAngle = o->Angle[2] + (float)(rand() % 90 - 45) + 150;
+                    float fAngle = o->Angle[2] + (float)(Random::Rand() % 90 - 45) + 150;
                     Vector(0.f, 0.f, fAngle, vAngle);
                     AngleMatrix(vAngle, Matrix);
                     VectorRotate(vPos, Matrix, vPos2);
@@ -3704,30 +3712,30 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 {
                     o->LifeTime = 30;
                     o->Scale = Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Gravity = 2.5f + (float)(rand() % 10) * 0.1f;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Gravity = 2.5f + (float)(Random::Rand() % 10) * 0.1f;
                     break;
                 }
                 else if (o->SubType == 14)
                 {
                     o->LifeTime = 30;
-                    o->Velocity[2] = rand() % 5 + 5;
-                    o->Scale = (rand() % 10 + 10) * 0.05f * Scale;
+                    o->Velocity[2] = Random::Rand() % 5 + 5;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.05f * Scale;
                 }
                 else if (o->SubType == 15)
                 {
                     o->LifeTime = 20;
-                    o->Gravity = ((rand() % 100) / 100.f) * 2.f;
-                    o->Scale = (rand() % 10 + 10) * 0.02f + Scale;
-                    o->Rotation = (float)(rand() % 360);
-                    o->Position[0] += rand() % 40 - 20.f;
-                    o->Position[1] += rand() % 40 - 20.f;
+                    o->Gravity = ((Random::Rand() % 100) / 100.f) * 2.f;
+                    o->Scale = (Random::Rand() % 10 + 10) * 0.02f + Scale;
+                    o->Rotation = (float)(Random::Rand() % 360);
+                    o->Position[0] += Random::Rand() % 40 - 20.f;
+                    o->Position[1] += Random::Rand() % 40 - 20.f;
                     o->Position[2] -= 50.f;
                     break;
                 }
-                o->Position[0] += rand() % 40 - 20.f;
-                o->Position[1] += rand() % 40 - 20.f;
-                o->Position[2] += rand() % 20 - 10.f;
+                o->Position[0] += Random::Rand() % 40 - 20.f;
+                o->Position[1] += Random::Rand() % 40 - 20.f;
+                o->Position[2] += Random::Rand() % 20 - 10.f;
                 break;
             case BITMAP_SHOCK_WAVE:
                 if (o->SubType == 3)
@@ -3761,17 +3769,17 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             {
                 o->Alpha = 1.f;
                 o->LifeTime = 32;
-                o->Rotation = (float)(rand() % 360);
+                o->Rotation = (float)(Random::Rand() % 360);
             }
             break;
             case BITMAP_CHROME2:
             {
-                o->LifeTime = rand() % 5 + 5;
-                o->Rotation = rand() % 360;
-                // 					o->Gravity  = rand()%3+2.f;
-                // 					o->Scale    = (rand()%20+20.f)/100.f*Scale;
+                o->LifeTime = Random::Rand() % 5 + 5;
+                o->Rotation = Random::Rand() % 360;
+                // 					o->Gravity  = Random::Rand()%3+2.f;
+                // 					o->Scale    = (Random::Rand()%20+20.f)/100.f*Scale;
                 VectorCopy(Position, o->StartPosition);
-                o->Scale *= 1.0f + (rand() % 10) * 0.03f;
+                o->Scale *= 1.0f + (Random::Rand() % 10) * 0.03f;
                 // 					o->StartPosition[2] = 0;
                 // 					VectorCopy(Light, o->TurningForce);
                 // 					o->Alpha = 0;
@@ -3779,27 +3787,27 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             break;
             case BITMAP_AG_ADDITION_EFFECT:
             {
-                float _Scale;
+                float _Scale = o->Scale;
                 if (o->SubType == 0)
                 {
-                    o->LifeTime = 33 + rand() % 5;
-                    o->Rotation = (float)(rand() % 90) + 270;
-                    _Scale = (rand() % 20 + 20.0f) / 50.0f * 0.5f;
+                    o->LifeTime = 33 + Random::Rand() % 5;
+                    o->Rotation = (float)(Random::Rand() % 90) + 270;
+                    _Scale = (Random::Rand() % 20 + 20.0f) / 50.0f * 0.5f;
                 }
                 else if (o->SubType == 1)
                 {
-                    o->LifeTime = 27 + rand() % 5;
-                    o->Rotation = (float)(rand() % 90);
-                    _Scale = (rand() % 20 + 20.0f) / 50.0f * 1.5f;
+                    o->LifeTime = 27 + Random::Rand() % 5;
+                    o->Rotation = (float)(Random::Rand() % 90);
+                    _Scale = (Random::Rand() % 20 + 20.0f) / 50.0f * 1.5f;
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = 38 + rand() % 5;
-                    o->Rotation = (float)(rand() % 90) + 135;
-                    _Scale = (rand() % 20 + 20.0f) / 50.0f * 1.0f;
+                    o->LifeTime = 38 + Random::Rand() % 5;
+                    o->Rotation = (float)(Random::Rand() % 90) + 135;
+                    _Scale = (Random::Rand() % 20 + 20.0f) / 50.0f * 1.0f;
                 }
                 o->Scale = _Scale;
-                o->Gravity = (float)(rand() % 16 + 12) * 0.1f;
+                o->Gravity = (float)(Random::Rand() % 16 + 12) * 0.1f;
                 o->Alpha = 0;
                 Vector(1.0f, 0.0f, 0.6f, Light);
                 VectorCopy(Light, o->TurningForce);
@@ -3827,8 +3835,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             case BITMAP_DAMAGE2:
             {
                 o->LifeTime = 15;
-                o->Scale = Scale * 0.9f + (rand() % 2 + 2) * 0.1f;
-                o->Position[2] += 80.0f + rand() % 20;
+                o->Scale = Scale * 0.9f + (Random::Rand() % 2 + 2) * 0.1f;
+                o->Position[2] += 80.0f + Random::Rand() % 20;
             }
             break;
             }
@@ -3840,6 +3848,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
 void MoveParticles()
 {
+    // A particle its last move left below zero life is drawn so once, then counts from zero.
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        if (Particles[i].Live && Particles[i].LifeTime < 0)
+            Particles[i].LifeTime = 0;
+    }
+
     if (!g_pOption->GetRenderAllEffects())
     {
         return;
@@ -3847,7 +3862,7 @@ void MoveParticles()
 
     for (int i = 0; i < 2; ++i)
     {
-        g_vParticleWindVelo[i] += (rand() % 2001 - 1000) * (0.001f * 0.6f);
+        g_vParticleWindVelo[i] += (Random::Rand() % 2001 - 1000) * (0.001f * 0.6f);
         g_vParticleWindVelo[i] = std::max<float>(-.6f, std::min<float>(g_vParticleWindVelo[i], .6f));
         g_vParticleWindVelo[i] *= FPS_ANIMATION_FACTOR;
     }
@@ -3928,15 +3943,15 @@ void MoveParticles()
                 {
                     if (o->SubType == 0)
                     {
-                        o->Velocity[0] += ((float)(rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
-                        o->Velocity[1] += ((float)(rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
-                        o->Velocity[2] += ((float)(rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[0] += ((float)(Random::Rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[1] += ((float)(Random::Rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[2] += ((float)(Random::Rand() % 32 - 16) * 0.1f) * FPS_ANIMATION_FACTOR;
                     }
                     else if (o->SubType == 1)
                     {
-                        o->Velocity[0] += ((float)(rand() % 8 - 4) * 0.05f) * FPS_ANIMATION_FACTOR;
-                        o->Velocity[1] += ((float)(rand() % 8 - 4) * 0.05f) * FPS_ANIMATION_FACTOR;
-                        o->Velocity[2] -= ((float)(rand() % 8) * 0.05f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[0] += ((float)(Random::Rand() % 8 - 4) * 0.05f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[1] += ((float)(Random::Rand() % 8 - 4) * 0.05f) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[2] -= ((float)(Random::Rand() % 8) * 0.05f) * FPS_ANIMATION_FACTOR;
                     }
                     VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                 }
@@ -3947,7 +3962,7 @@ void MoveParticles()
                     Vector(0.f, 0.f, 0.f, o->Velocity);
                     o->Frame = 1;
                 }
-                o->Rotation += (rand() % 16) * FPS_ANIMATION_FACTOR;
+                o->Rotation += (Random::Rand() % 16) * FPS_ANIMATION_FACTOR;
                 break;
             case BITMAP_FLARE_BLUE:
                 if (o->SubType == 0)
@@ -4149,36 +4164,32 @@ void MoveParticles()
                 {
                 case 0:
                     o->Frame += REFERENCE_FRAME_STEP;
-                    o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     break;
 
                 case 1:
                     o->Frame += REFERENCE_FRAME_STEP;
-                    o->Position[0] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (float)(rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(Random::Rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (float)(Random::Rand() % 30 - 15) * 1.f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 0.3f * o->Scale * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.002f;
                     break;
 
                 case 2:
-                    o->Position[0];// += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[1];// += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     break;
 
                 case 3:
                     o->Frame += REFERENCE_FRAME_STEP;
-                    o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     break;
                 case 4:
-                    o->Position[0];// += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[1];// += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     if (o->Position[2] > 350)
                     {
@@ -4188,9 +4199,9 @@ void MoveParticles()
                     break;
                 case 5:
                     o->Frame += REFERENCE_FRAME_STEP;
-                    o->Position[0] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (float)(rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (float)(Random::Rand() % 20 - 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (float)(Random::Rand() % 20 + 10) * 2.5f * o->Scale * FPS_ANIMATION_FACTOR;
                     if (o->Position[2] > 550)
                         o->Live = false;
                     break;
@@ -4296,7 +4307,7 @@ void MoveParticles()
                 break;
             }
             case BITMAP_LIGHTNING:
-                o->Frame = rand() % 4;
+                o->Frame = Random::Rand() % 4;
                 Luminosity = (float)(o->LifeTime) / 5.f;
                 Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, o->Light);
                 Vector(-Luminosity * 0.6f, -Luminosity * 0.6f, -Luminosity * 0.6f, Light);
@@ -4315,13 +4326,13 @@ void MoveParticles()
             case BITMAP_FIRE_HIK2_MONO:
                 if (o->SubType == 0)
                 {
-                    o->Scale -= (rand() % 20 + 10) * 0.001f * FPS_ANIMATION_FACTOR;
+                    o->Scale -= (Random::Rand() % 20 + 10) * 0.001f * FPS_ANIMATION_FACTOR;
                     Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 1)
                 {
-                    o->Scale -= (rand() % 5 + 15) * 0.0016f * FPS_ANIMATION_FACTOR;
+                    o->Scale -= (Random::Rand() % 5 + 15) * 0.0016f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
 
                     if (o->Scale < 0 || !o->Target->Live)
@@ -4332,13 +4343,13 @@ void MoveParticles()
                 }
                 else if (o->SubType == 2)
                 {
-                    o->Scale -= (rand() % 20 + 10) * 0.004f * FPS_ANIMATION_FACTOR;
+                    o->Scale -= (Random::Rand() % 20 + 10) * 0.004f * FPS_ANIMATION_FACTOR;
                     Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 25.f * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 3)
                 {
-                    o->Scale -= 0.03f * FPS_ANIMATION_FACTOR;//(rand()%20+10)*0.001f;
+                    o->Scale -= 0.03f * FPS_ANIMATION_FACTOR; //(Random::Rand()%20+10)*0.001f;
                     Luminosity -= 0.05f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
 
@@ -4360,7 +4371,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -4373,7 +4384,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -= (rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
+                        o->Scale -= (Random::Rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
                     }
                     else
                     {
@@ -4395,7 +4406,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -4408,7 +4419,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -= (rand() % 2 + 5) * 0.01f * FPS_ANIMATION_FACTOR;
+                        o->Scale -= (Random::Rand() % 2 + 5) * 0.01f * FPS_ANIMATION_FACTOR;
                     }
                     else
                     {
@@ -4425,7 +4436,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -4438,7 +4449,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -= (rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
+                        o->Scale -= (Random::Rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
                     }
                     else
                     {
@@ -4457,7 +4468,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -4470,7 +4481,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -= (rand() % 3 + 3) * 0.01f * FPS_ANIMATION_FACTOR;
+                        o->Scale -= (Random::Rand() % 3 + 3) * 0.01f * FPS_ANIMATION_FACTOR;
                     }
                     else
                     {
@@ -4487,7 +4498,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -4499,7 +4510,7 @@ void MoveParticles()
                     Luminosity = o->Alpha;
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
 
-                    o->Scale += (rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (Random::Rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
                     if (o->LifeTime < 3)
                     {
                         o->Scale += (10 - o->LifeTime) * 0.02f * FPS_ANIMATION_FACTOR;
@@ -4590,7 +4601,7 @@ void MoveParticles()
                     o->Position[0] = o->Target->Position[0] + o->StartPosition[0];
                     o->Position[1] = o->Target->Position[1] + o->StartPosition[1];
                     o->Position[2] = o->Target->Position[2] + o->StartPosition[2];
-                    o->Gravity += (((rand() % 60) + 60) / 100) * FPS_ANIMATION_FACTOR;
+                    o->Gravity += (((Random::Rand() % 60) + 60) / 100) * FPS_ANIMATION_FACTOR;
                     o->Scale -= o->Gravity * FPS_ANIMATION_FACTOR / 90.f;
                     o->Frame = (23 - o->LifeTime) / 6;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
@@ -4622,7 +4633,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
-                    o->Rotation += ((float)(rand() % 10 + 10.f)) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += ((float)(Random::Rand() % 10 + 10.f)) * FPS_ANIMATION_FACTOR;
                     o->Scale -= 0.04f * FPS_ANIMATION_FACTOR;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
                     o->Frame = (23 - o->LifeTime) / 6;
@@ -4633,7 +4644,7 @@ void MoveParticles()
                 {
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) / 24.f;
-                    o->Rotation += ((float)(rand() % 10 + 10.f)) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += ((float)(Random::Rand() % 10 + 10.f)) * FPS_ANIMATION_FACTOR;
                     o->Scale -= 0.04f * FPS_ANIMATION_FACTOR;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
                     o->Frame = (23 - o->LifeTime) / 6;
@@ -4792,7 +4803,7 @@ void MoveParticles()
                         o->Velocity[1] += (32 * 0.2f) * FPS_ANIMATION_FACTOR;
                         o->Scale -= 0.15f * FPS_ANIMATION_FACTOR;
                     }
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Light[0] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[1] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[2] -= (0.05f) * FPS_ANIMATION_FACTOR;
@@ -4803,7 +4814,7 @@ void MoveParticles()
                         o->Velocity[1] += (32 * 0.2f) * FPS_ANIMATION_FACTOR;
                         o->Scale *= powf(0.8f, FPS_ANIMATION_FACTOR);
                     }
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Light[0] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[1] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[2] -= (0.05f) * FPS_ANIMATION_FACTOR;
@@ -4815,14 +4826,14 @@ void MoveParticles()
                         //                        o->Light[1] *= powf(1.0f / ((15-o->LifeTime)), FPS_ANIMATION_FACTOR);
                         //                        o->Light[2] *= powf(1.0f / ((15-o->LifeTime)), FPS_ANIMATION_FACTOR);
                     }
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Light[0] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[1] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[2] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     break;
 
                 case 3:
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     break;
 
                 case 4:
@@ -4831,7 +4842,7 @@ void MoveParticles()
                     o->Position[2] += o->Target->Position[2] - o->StartPosition[2] + o->Gravity * FPS_ANIMATION_FACTOR;
                     VectorCopy(o->Target->Position, o->StartPosition);
                     o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Light[0] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[1] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     o->Light[2] -= (0.05f) * FPS_ANIMATION_FACTOR;
@@ -5149,7 +5160,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 3) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 3) * 0.1f;
                     }
                     else
                     {
@@ -5162,7 +5173,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -= (rand() % 5 + 55) * 0.001f * FPS_ANIMATION_FACTOR;
+                        o->Scale -= (Random::Rand() % 5 + 55) * 0.001f * FPS_ANIMATION_FACTOR;
                     }
                     else if (o->Scale < 0.1f)
                     {
@@ -5182,11 +5193,11 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (float)(rand() % 20) * 0.005f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (float)(Random::Rand() % 20) * 0.005f;
                     }
 
                     VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
-                    o->Scale += ((float)(rand() % 10) * 0.01f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += ((float)(Random::Rand() % 10) * 0.01f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 8)
                 {
@@ -5197,24 +5208,24 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (float)(rand() % 20) * 0.005f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (float)(Random::Rand() % 20) * 0.005f;
                     }
 
                     VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
-                    o->Scale += ((float)(rand() % 10) * 0.01f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += ((float)(Random::Rand() % 10) * 0.01f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 9)
                 {
-                    o->Scale *= powf(0.98f + ((float)(rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
+                    o->Scale *= powf(0.98f + ((float)(Random::Rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
 
-                    o->Light[0] *= powf(0.95f + ((float)(rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
-                    o->Light[1] *= powf(0.95f + ((float)(rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
-                    o->Light[2] *= powf(0.95f + ((float)(rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
-                    o->Alpha *= powf(0.95f + ((float)(rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
+                    o->Light[0] *= powf(0.95f + ((float)(Random::Rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
+                    o->Light[1] *= powf(0.95f + ((float)(Random::Rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
+                    o->Light[2] *= powf(0.95f + ((float)(Random::Rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
+                    o->Alpha *= powf(0.95f + ((float)(Random::Rand() % 20 - 10) * 0.002f), FPS_ANIMATION_FACTOR);
                 }
                 else if (o->SubType == 10)
                 {
-                    o->Scale -= (rand() % 5 + 15) * 0.0016f * FPS_ANIMATION_FACTOR;
+                    o->Scale -= (Random::Rand() % 5 + 15) * 0.0016f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
 
                     if (o->Scale < 0 || !o->Target->Live)
@@ -5353,11 +5364,11 @@ void MoveParticles()
                 case 15:
                     Luminosity = (float)(o->LifeTime) / 40.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 0.5f, o->Light);
-                    o->Gravity += ((rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Gravity += ((Random::Rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
-                    o->Scale += (rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
+                    o->Scale += (Random::Rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
                     o->Rotation = o->Scale;
                     break;
                 case 1:
@@ -5408,7 +5419,7 @@ void MoveParticles()
                     Luminosity = (float)(o->LifeTime) / 10.f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
                     o->Gravity -= (0.1f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] -= (o->Gravity * (0.2f * (rand() % 2 + 1))) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] -= (o->Gravity * (0.2f * (Random::Rand() % 2 + 1))) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
                     o->Scale -=  FPS_ANIMATION_FACTOR * 0.01f;
                     break;
@@ -5467,21 +5478,21 @@ void MoveParticles()
                 case 19:
                     Luminosity = (float)(o->LifeTime) / 40.f;
                     Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 0.5f, o->Light);
-                    o->Gravity += ((rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Gravity += ((Random::Rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
-                    o->Scale += (rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
+                    o->Scale += (Random::Rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
                     o->Rotation = o->Scale;
                     break;
                 case 20:
                     Luminosity = (float)(o->LifeTime) / 40.f;
                     Vector(Luminosity, Luminosity, Luminosity, o->Light);
-                    o->Gravity += ((rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Gravity += ((Random::Rand() % 20) / 500.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((Random::Rand() % 100 - 20) / 100.f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
-                    o->Scale += (rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
+                    o->Scale += (Random::Rand() % 10) * FPS_ANIMATION_FACTOR / 1000.f;
                     o->Rotation = o->Scale;
                     break;
                 case 21:
@@ -5673,9 +5684,9 @@ void MoveParticles()
                         o->LifeTime = 0;
 
                     VectorScale(o->Velocity, powf(0.001f, FPS_ANIMATION_FACTOR), o->Velocity);
-                    o->Scale += (rand() % 15 + 4) * (0.001f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += (Random::Rand() % 15 + 4) * (0.001f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (o->Scale * 6.0f) * FPS_ANIMATION_FACTOR;
-                    o->Rotation += ((rand() % 10 + 10) * 0.1f * o->Angle[0]) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += ((Random::Rand() % 10 + 10) * 0.1f * o->Angle[0]) * FPS_ANIMATION_FACTOR;
                 }
                 break;
                 case 50:
@@ -5685,7 +5696,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 0.5f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 3 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 2) * 0.1f;
                     }
                     else
                     {
@@ -5808,13 +5819,13 @@ void MoveParticles()
 
                     MovePosition(o->Position, o->Angle, o->Velocity);
 
-                    o->Rotation += 0.05f * FPS_ANIMATION_FACTOR;//(rand()%100)/100.f) ;
+                    o->Rotation += 0.05f * FPS_ANIMATION_FACTOR; //(Random::Rand()%100)/100.f) ;
 
                     o->Gravity -= (0.1f) * FPS_ANIMATION_FACTOR;
                     o->Position[0] += (o->Gravity * sinf(WorldTime) * 0.05f) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
 
-                    o->Scale += (float)(rand() % 15 + 15) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (float)(Random::Rand() % 15 + 15) * 0.01f * FPS_ANIMATION_FACTOR;
 
                     if (16 > o->LifeTime)
                     {
@@ -5972,7 +5983,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 0.7f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 5 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 5 + 2) * 0.1f;
                     }
                     else
                     {
@@ -5985,7 +5996,7 @@ void MoveParticles()
                     }
                     Luminosity = o->Alpha;
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
-                    o->Scale += (rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;//0.07f;
+                    o->Scale += (Random::Rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR; // 0.07f;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
                     if (o->SubType == 5)
                     {
@@ -6002,7 +6013,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 5 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 5 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6017,7 +6028,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 10 + 10) * 0.001f;//0.07f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 10 + 10) * 0.001f; // 0.07f;
                     }
                     else
                     {
@@ -6036,7 +6047,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 0.7f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 5 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 5 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6049,7 +6060,7 @@ void MoveParticles()
                     }
                     Luminosity = o->Alpha;
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
-                    o->Scale += (rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (Random::Rand() % 3 + 6) * 0.01f * FPS_ANIMATION_FACTOR;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 4)
@@ -6100,7 +6111,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6113,7 +6124,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 5) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 5) * 0.01f;
                     }
                     else
                     {
@@ -6135,7 +6146,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6148,7 +6159,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 2 + 4) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 4) * 0.01f;
                     }
                     else
                     {
@@ -6165,7 +6176,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6178,7 +6189,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 7) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 7) * 0.01f;
                     }
                     else
                     {
@@ -6197,7 +6208,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6210,7 +6221,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 5) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 5) * 0.01f;
                     }
                     else
                     {
@@ -6227,7 +6238,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6240,7 +6251,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 2) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 2) * 0.01f;
                     }
                     else
                     {
@@ -6257,7 +6268,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6269,7 +6280,7 @@ void MoveParticles()
                     Luminosity = o->Alpha;
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
 
-                    o->Scale += (rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (Random::Rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
                     if (o->LifeTime < 3)
                     {
                         o->Scale += (10 - o->LifeTime) * 0.02f * FPS_ANIMATION_FACTOR;
@@ -6296,7 +6307,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6309,7 +6320,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 5) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 5) * 0.01f;
                     }
                     else
                     {
@@ -6329,7 +6340,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6342,7 +6353,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 7) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 7) * 0.01f;
                     }
                     else
                     {
@@ -6364,7 +6375,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6377,7 +6388,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 2 + 6) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 6) * 0.01f;
                     }
                     else
                     {
@@ -6394,7 +6405,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6407,7 +6418,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 7) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 7) * 0.01f;
                     }
                     else
                     {
@@ -6426,7 +6437,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6439,7 +6450,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 7) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 7) * 0.01f;
                     }
                     else
                     {
@@ -6456,7 +6467,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6469,7 +6480,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 4 + 5) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 4 + 5) * 0.01f;
                     }
                     else
                     {
@@ -6486,7 +6497,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -6498,7 +6509,7 @@ void MoveParticles()
                     Luminosity = o->Alpha;
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
 
-                    o->Scale += (rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
+                    o->Scale += (Random::Rand() % 3 + 8) * 0.01f * FPS_ANIMATION_FACTOR;
                     if (o->LifeTime < 3)
                     {
                         o->Scale += (10 - o->LifeTime) * 0.02f * FPS_ANIMATION_FACTOR;
@@ -6663,7 +6674,7 @@ void MoveParticles()
                     o->Position[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
                     o->Position[1] -= (1.f) * FPS_ANIMATION_FACTOR;
                     o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
-                    float fLight = (float)(rand() % 10) / 100.0f + 0.7f;
+                    float fLight = (float)(Random::Rand() % 10) / 100.0f + 0.7f;
                     Vector(o->Light[0], fLight, o->Light[2], o->Light);
                 }
                 break;
@@ -6673,7 +6684,7 @@ void MoveParticles()
                     o->Alpha -= FPS_ANIMATION_FACTOR * 0.001f;
                     if (o->Alpha <= 0.0f) o->Live = false;
                     o->Position[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
-                    float fLight = (float)(rand() % 50) / 100.0f + 0.2f;
+                    float fLight = (float)(Random::Rand() % 50) / 100.0f + 0.2f;
                     Vector(0.0f, fLight, 0.0f, o->Light);
                 }
                 break;
@@ -6717,7 +6728,7 @@ void MoveParticles()
                 break;
                 case 12:
                 {
-                    float fLight = rand() % 2;
+                    float fLight = Random::Rand() % 2;
                     Vector(fLight - 0.6f, fLight - 0.6f, fLight - 0.8f, o->Light);
                     o->Scale -=  FPS_ANIMATION_FACTOR * 0.04f;
                     o->Alpha -= FPS_ANIMATION_FACTOR * 0.001f;
@@ -6980,8 +6991,8 @@ void MoveParticles()
                 {
                     if (o->LifeTime <= 45)
                     {
-                        o->Velocity[0] += (sinf(Q_PI / 180.0f * float(rand() % 360))) * FPS_ANIMATION_FACTOR;
-                        o->Velocity[1] += (cosf(Q_PI / 180.0f * float(rand() % 360))) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[0] += (sinf(Q_PI / 180.0f * float(Random::Rand() % 360))) * FPS_ANIMATION_FACTOR;
+                        o->Velocity[1] += (cosf(Q_PI / 180.0f * float(Random::Rand() % 360))) * FPS_ANIMATION_FACTOR;
                     }
 
                     o->Light[0] *= powf(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
@@ -7023,9 +7034,9 @@ void MoveParticles()
                     {
                         vec3_t vPos;
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += ((float)(rand() % 100 - 50));
-                        vPos[1] += ((float)(rand() % 100 - 50));
-                        vPos[2] += ((float)(rand() % 100 - 50));
+                        vPos[0] += ((float)(Random::Rand() % 100 - 50));
+                        vPos[1] += ((float)(Random::Rand() % 100 - 50));
+                        vPos[2] += ((float)(Random::Rand() % 100 - 50));
                         CreateBomb(vPos, true);
                     }
                 }
@@ -7080,7 +7091,7 @@ void MoveParticles()
                 {
                     o->Rotation -= (12.f) * FPS_ANIMATION_FACTOR;
 
-                    o->Velocity[2] -= ((float)(rand() % 8) * 0.05f) * FPS_ANIMATION_FACTOR;
+                    o->Velocity[2] -= ((float)(Random::Rand() % 8) * 0.05f) * FPS_ANIMATION_FACTOR;
                     VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
                     o->Light[0] *= powf(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
@@ -7221,10 +7232,11 @@ void MoveParticles()
 
                         if (rand_fps_check(5))
                         {
-                            Position[0] = o->Position[0] + rand() % 40 - 20;
-                            Position[1] = o->Position[1] + rand() % 40 - 20;
+                            Position[0] = o->Position[0] + Random::Rand() % 40 - 20;
+                            Position[1] = o->Position[1] + Random::Rand() % 40 - 20;
                             Position[2] = o->Position[2];
-                            Vector(0.8f + (rand() % 200) * 0.001f, 0.5f + (rand() % 200) * 0.001f, 0.1f + (rand() % 100) * 0.001f, Light);
+                            Vector(0.8f + (Random::Rand() % 200) * 0.001f, 0.5f + (Random::Rand() % 200) * 0.001f,
+                                   0.1f + (Random::Rand() % 100) * 0.001f, Light);
                             CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 8);
                         }
                     }
@@ -7243,7 +7255,7 @@ void MoveParticles()
             {
                 if (o->SubType == 0)
                 {
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
                     o->Scale = sinf(o->LifeTime * (Q_PI / 180.f));
                     o->Alpha -= FPS_ANIMATION_FACTOR * 0.001f;
                     if (o->Alpha <= 0.0f) o->Live = false;
@@ -7263,7 +7275,7 @@ void MoveParticles()
 
                     //o->Scale = sinf(o->LifeTime*(Q_PI/240.f));
                     o->Alpha -= FPS_ANIMATION_FACTOR * 0.001f;
-                    //o->Rotation = (float)(rand()%360);
+                    // o->Rotation = (float)(Random::Rand()%360);
                     if (o->Alpha <= 0.0f) o->Live = false;
                 }
             }
@@ -7279,7 +7291,7 @@ void MoveParticles()
                     o->Position[2] += ((o->Gravity * 0.5f)) * FPS_ANIMATION_FACTOR;
                     o->Gravity -= (1.5f) * FPS_ANIMATION_FACTOR;
 
-                    o->Rotation = (float)(rand() % 360);
+                    o->Rotation = (float)(Random::Rand() % 360);
 
                     Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
                     if (o->Position[2] < Height + 3.f)
@@ -7361,7 +7373,7 @@ void MoveParticles()
                     if (o->Alpha <= 0.0f)
                         o->Live = false;
                     o->Position[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
-                    float fLight = (float)(rand() % 10) / 100.0f - 0.05f;
+                    float fLight = (float)(Random::Rand() % 10) / 100.0f - 0.05f;
                     o->Light[0] += (fLight) * FPS_ANIMATION_FACTOR;
                     o->Light[1] += (fLight) * FPS_ANIMATION_FACTOR;
                     o->Light[2] += (fLight) * FPS_ANIMATION_FACTOR;
@@ -7391,7 +7403,7 @@ void MoveParticles()
                 {
                     o->Position[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
                 }
-                float fLight = (float)(rand() % 10) / 100.0f - 0.05f;
+                float fLight = (float)(Random::Rand() % 10) / 100.0f - 0.05f;
                 o->Light[0] += (fLight) * FPS_ANIMATION_FACTOR;
                 o->Light[1] += (fLight) * FPS_ANIMATION_FACTOR;
                 o->Light[2] += (fLight) * FPS_ANIMATION_FACTOR;
@@ -7519,9 +7531,9 @@ void MoveParticles()
 
                     float fSin = sinf(WorldTime * 0.001f);
                     if (fSin > 0.f)
-                        o->Rotation += (0.2f + (rand() % 4 * 0.1f)) * FPS_ANIMATION_FACTOR;
+                        o->Rotation += (0.2f + (Random::Rand() % 4 * 0.1f)) * FPS_ANIMATION_FACTOR;
                     else
-                        o->Rotation -= (0.2f + (rand() % 4 * 0.1f)) * FPS_ANIMATION_FACTOR;
+                        o->Rotation -= (0.2f + (Random::Rand() % 4 * 0.1f)) * FPS_ANIMATION_FACTOR;
 
                     if (fTemp <= 20.f)
                     {
@@ -7555,14 +7567,14 @@ void MoveParticles()
                     o->Velocity[0] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                     o->Velocity[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                     o->Velocity[2] += (0.6f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += ((float)(Random::Rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Light[0] = (float)(o->LifeTime) / 50.f;
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
-                    o->Rotation += (1.f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (1.f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 8)
                 {
@@ -7633,7 +7645,7 @@ void MoveParticles()
                     VectorSubtract(o->Position, o->StartPosition, vTemp);
                     float fTemp = VectorLength(vTemp);
 
-                    o->Rotation += (0.5f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (0.5f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
 
                     if (fTemp > 500.0f)
                     {
@@ -7650,14 +7662,14 @@ void MoveParticles()
                     o->Velocity[0] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                     o->Velocity[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                     o->Velocity[2] += (0.6f) * FPS_ANIMATION_FACTOR;
-                    o->Position[0] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += ((float)(Random::Rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                     o->Light[0] = (float)(o->LifeTime) / 50.f;
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
-                    o->Rotation += (1.f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (1.f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 15)
                 {
@@ -7672,7 +7684,7 @@ void MoveParticles()
                     VectorSubtract(o->Position, o->StartPosition, vTemp);
                     float fTemp = VectorLength(vTemp);
 
-                    o->Rotation += (0.5f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (0.5f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
 
                     if (fTemp <= 50.f)
                     {
@@ -7713,7 +7725,7 @@ void MoveParticles()
                     VectorSubtract(o->Position, o->StartPosition, vTemp);
                     float fTemp = VectorLength(vTemp);
 
-                    o->Rotation += (0.5f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (0.5f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
 
                     if (fTemp <= 50.0f)
                     {
@@ -7750,7 +7762,7 @@ void MoveParticles()
                     VectorSubtract(o->Position, o->StartPosition, vTemp);
                     float fTemp = VectorLength(vTemp);
 
-                    o->Rotation += (0.08f + rand() % 2 * 0.15f) * FPS_ANIMATION_FACTOR;
+                    o->Rotation += (0.08f + Random::Rand() % 2 * 0.15f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime >= 400.f)
                     {
@@ -7797,7 +7809,7 @@ void MoveParticles()
                     if (o->TurningForce[1] > 0) o->TurningForce[1] -= (0.5f) * FPS_ANIMATION_FACTOR;
                     o->Position[0] = o->Target->Position[0] + o->StartPosition[0] + cosf((WorldTime + o->Rotation) * o->TurningForce[0]) * o->TurningForce[1];
                     o->Position[1] = o->Target->Position[1] + o->StartPosition[1] + sinf((WorldTime + o->Rotation) * o->TurningForce[0]) * o->TurningForce[1];
-                    o->Position[2] += ((rand() % 10) / 10.0f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += ((Random::Rand() % 10) / 10.0f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime <= 0)
                     {
@@ -7821,8 +7833,8 @@ void MoveParticles()
                         o->Light[1] -= (0.01f) * FPS_ANIMATION_FACTOR;
                         o->Light[2] -= (0.01f) * FPS_ANIMATION_FACTOR;
                     }
-                    //o->Position[0] -= (4.0f+(rand()%100)*0.1f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (8.0f + (rand() % 200) * 0.1f) * FPS_ANIMATION_FACTOR;
+                    // o->Position[0] -= (4.0f+(Random::Rand()%100)*0.1f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (8.0f + (Random::Rand() % 200) * 0.1f) * FPS_ANIMATION_FACTOR;
                     //o->Position[2] = o->StartPosition[2] + sinf((WorldTime+o->Gravity)/5000.0f)*20.0f;
 
                     if (o->LifeTime <= 0)
@@ -7903,7 +7915,7 @@ void MoveParticles()
                         o->Velocity[1] *= powf(0.7f, FPS_ANIMATION_FACTOR);
 
                         if (o->Alpha > 0.0f)
-                            o->Alpha -= FPS_ANIMATION_FACTOR * (rand() % 10 * 0.01f);
+                            o->Alpha -= FPS_ANIMATION_FACTOR * (Random::Rand() % 10 * 0.01f);
                         else
                             o->Live = false;
                         o->Position[2] += (0.2f) * FPS_ANIMATION_FACTOR;
@@ -7954,8 +7966,8 @@ void MoveParticles()
                     }
                     else
                     {
-                        vRandom[0] = ((float)(rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
-                        vRandom[1] = ((float)(rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
+                        vRandom[0] = ((float)(Random::Rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
+                        vRandom[1] = ((float)(Random::Rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
                         vRandom[2] = 0.f;
                         VectorAdd(vRandom, g_vParticleWind, vRandom);
                         VectorScale(vRandom, fScale, vRandom);
@@ -8018,8 +8030,8 @@ void MoveParticles()
                 {
                     float fScale = 0.5f;
                     vec3_t vRandom;
-                    vRandom[0] = ((float)(rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
-                    vRandom[1] = ((float)(rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
+                    vRandom[0] = ((float)(Random::Rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
+                    vRandom[1] = ((float)(Random::Rand() % 2001 - 1000)) * (0.001f * 0.4f) * FPS_ANIMATION_FACTOR;
                     vRandom[2] = 0.f;
                     VectorScale(vRandom, fScale, vRandom);
                     VectorAdd(o->Position, vRandom, o->Position);
@@ -8074,8 +8086,8 @@ void MoveParticles()
                         o->Live = false;
                     }
 
-                    o->Gravity += ((rand() % 40 + 60) / 100.f * 9.5f) * FPS_ANIMATION_FACTOR;
-                    o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 400 + 400) / 10000.f;
+                    o->Gravity += ((Random::Rand() % 40 + 60) / 100.f * 9.5f) * FPS_ANIMATION_FACTOR;
+                    o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 400 + 400) / 10000.f;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
 
                     o->Light[0] *= powf(1.0f / (1.35f), FPS_ANIMATION_FACTOR);
@@ -8139,7 +8151,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 15)
                 {
-                    o->StartPosition[2] += ((rand() % 10 + 5) * 0.01f) * FPS_ANIMATION_FACTOR;
+                    o->StartPosition[2] += ((Random::Rand() % 10 + 5) * 0.01f) * FPS_ANIMATION_FACTOR;
                     o->Position[0] = o->StartPosition[0] + sinf(o->StartPosition[2]) * o->Gravity * 2;
                     o->Position[1] = o->StartPosition[1] + cosf(o->StartPosition[2]) * o->Gravity * 2;
                     o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
@@ -8194,7 +8206,7 @@ void MoveParticles()
                     }
                     else if (o->Alpha < 1.0f)
                     {
-                        o->Alpha += FPS_ANIMATION_FACTOR * (rand() % 2 + 2) * 0.1f;
+                        o->Alpha += FPS_ANIMATION_FACTOR * (Random::Rand() % 2 + 2) * 0.1f;
                     }
                     else
                     {
@@ -8207,7 +8219,7 @@ void MoveParticles()
                     Vector(o->TurningForce[0] * Luminosity, o->TurningForce[1] * Luminosity, o->TurningForce[2] * Luminosity, o->Light);
                     if (o->Scale > 0)
                     {
-                        o->Scale -=  FPS_ANIMATION_FACTOR * (rand() % 3 + 5) * 0.01f;
+                        o->Scale -= FPS_ANIMATION_FACTOR * (Random::Rand() % 3 + 5) * 0.01f;
                     }
                     else
                     {
@@ -8252,9 +8264,9 @@ void MoveParticles()
                 o->Velocity[0] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 o->Velocity[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                 o->Velocity[2] += (0.6f) * FPS_ANIMATION_FACTOR;
-                o->Position[0] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += ((float)(rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
-                o->Position[2] += ((float)(rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += ((float)(Random::Rand() % 4 - 2)) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += ((float)(Random::Rand() % 4 - 2) * 0.8f) * FPS_ANIMATION_FACTOR;
                 o->Scale += FPS_ANIMATION_FACTOR * 0.05f;
                 if (o->SubType == 2)
                 {
@@ -8268,7 +8280,7 @@ void MoveParticles()
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
                 }
-                o->Rotation += (1.f + rand() % 2) * FPS_ANIMATION_FACTOR;
+                o->Rotation += (1.f + Random::Rand() % 2) * FPS_ANIMATION_FACTOR;
                 break;
 
             case BITMAP_TRUE_FIRE:
@@ -8394,15 +8406,15 @@ void MoveParticles()
                 else if (o->SubType == 1)
                 {
                     o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
-                    o->Position[0] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (Random::Rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (Random::Rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 2)
                 {
                     if (o->Scale < 1.0f)
                         o->Scale += FPS_ANIMATION_FACTOR * 0.1f;
-                    o->Position[0] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (Random::Rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (Random::Rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
                     o->Velocity[2] -= (1.0f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 3)
@@ -8467,8 +8479,8 @@ void MoveParticles()
 
             case BITMAP_PLUS:
                 o->Scale -=  FPS_ANIMATION_FACTOR * 0.01f;
-                o->Position[0] += (rand() % 2 - 1) * FPS_ANIMATION_FACTOR;
-                o->Position[1] += (rand() % 2 - 1) * FPS_ANIMATION_FACTOR;
+                o->Position[0] += (Random::Rand() % 2 - 1) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (Random::Rand() % 2 - 1) * FPS_ANIMATION_FACTOR;
                 o->Position[2] += (2.f) * FPS_ANIMATION_FACTOR;
 
                 o->Light[0] = o->LifeTime / 20.f;
@@ -8493,8 +8505,8 @@ void MoveParticles()
                 }
 
                 o->Scale += FPS_ANIMATION_FACTOR * 0.03f;
-                o->Velocity[0] = (rand() % 20 - 10) * 0.1f;
-                o->Velocity[1] = (rand() % 20 - 10) * 0.1f;
+                o->Velocity[0] = (Random::Rand() % 20 - 10) * 0.1f;
+                o->Velocity[1] = (Random::Rand() % 20 - 10) * 0.1f;
                 o->Velocity[2] += (0.1f) * FPS_ANIMATION_FACTOR;
                 if (o->LifeTime < 10)
                 {
@@ -8523,7 +8535,7 @@ void MoveParticles()
                 }
                 if (o->SubType == 6)
                 {
-                    o->Gravity += ((rand() % 5 + 1.5f * (o->LifeTime / 5.0f))) * FPS_ANIMATION_FACTOR;
+                    o->Gravity += ((Random::Rand() % 5 + 1.5f * (o->LifeTime / 5.0f))) * FPS_ANIMATION_FACTOR;
 
                     o->Velocity[0] += (1) * FPS_ANIMATION_FACTOR;
 
@@ -8539,7 +8551,7 @@ void MoveParticles()
                     o->Light[2] *= powf(0.77f, FPS_ANIMATION_FACTOR);
 
                     VectorCopy(o->StartPosition, o->Position);
-                    o->StartPosition[2] = o->StartPosition[2] + rand() % 5 + 10.0f;
+                    o->StartPosition[2] = o->StartPosition[2] + Random::Rand() % 5 + 10.0f;
                     o->Position[2] = o->StartPosition[2] + o->Gravity;
                 }
                 break;
@@ -8774,9 +8786,9 @@ void MoveParticles()
                     float	fRand1, fRand2, fRand3;
                     vec3_t	v3Pos_ShinyStar, v3OffsetPos_ShinyStar;
 
-                    fRand1 = (float)((rand() % 2000) - 1000) * 0.001f;
-                    fRand2 = (float)((rand() % 2000) - 1000) * 0.001f;
-                    fRand3 = (float)((rand() % 2000) - 1000) * 0.001f;
+                    fRand1 = (float)((Random::Rand() % 2000) - 1000) * 0.001f;
+                    fRand2 = (float)((Random::Rand() % 2000) - 1000) * 0.001f;
+                    fRand3 = (float)((Random::Rand() % 2000) - 1000) * 0.001f;
 
                     v3OffsetPos_ShinyStar[0] = BASERANGE_SHINYSTAR * fRand1;
                     v3OffsetPos_ShinyStar[1] = BASERANGE_SHINYSTAR * fRand2;
@@ -8838,7 +8850,7 @@ void MoveParticles()
 
                 if (!o->Live && g_isCharacterBuff(o->Target, eBuff_AG_Addition))
                 {
-                    float _Scale = (rand() % 20 + 20.0f) / 50.0f;
+                    float _Scale = (Random::Rand() % 20 + 20.0f) / 50.0f;
                     if (o->SubType == 0)
                         CreateParticleFpsChecked(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 0, 1.0f, o->Target);
                     else if (o->SubType == 1)
@@ -8894,6 +8906,13 @@ void MoveParticles()
             break;
             }
         }
+    }
+
+    // Damage numbers brighten each frame, as their draw brightened them.
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        if (Particles[i].Live && Particles[i].Type == BITMAP_DAMAGE1)
+            VectorScale(Particles[i].Light, 2.0f, Particles[i].Light);
     }
 }
 
@@ -8955,6 +8974,364 @@ namespace
     }
 }
 
+namespace
+{
+using Render::EffectDrawing::Blend;
+using Render::EffectDrawing::Sprite;
+using Render::EffectDrawing::Toggle;
+} // namespace
+
+// The sprites and state changes one particle draws with, given its quad size and its slot (some alternate by slot).
+void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height,
+                      Render::EffectDrawing::EffectDrawer& out)
+{
+    const PARTICLE* o = &particle;
+    int Frame;
+    switch (o->Type)
+    {
+    case BITMAP_WATERFALL_1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+
+    case BITMAP_BUBBLE:
+        Frame = o->Frame % 9;
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, Frame % 3 * 0.25f + 0.005f,
+                              Frame / 3 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_SPOT_WATER:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height * 0.125, o->Light, o->Angle[0], 0.f,
+                              o->Frame % 8 * 0.125f, 1.f, 0.125f));
+        break;
+
+    case BITMAP_SPARK + 2:
+        if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f,
+                                  o->Frame / 2 * 0.5f, 0.5f, 0.5f));
+        }
+        break;
+
+    case BITMAP_EXPLOTION_MONO:
+    case BITMAP_EXPLOTION:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f,
+                              o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_EXPLOTION + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_SUMMON_SAHAMUTT_EXPLOSION:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f,
+                              o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_CLUD64:
+    {
+        if (o->SubType == 0 || o->SubType == 5 || o->SubType == 11)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_TORCH_FIRE:
+    {
+        vec3_t vPos;
+        VectorCopy(o->Position, vPos);
+        for (int i = 0; i < 3; ++i)
+        {
+            out.DrawSprite(Sprite(o->Type, vPos, Width, Height, o->Light, o->Rotation));
+            vPos[2] -= 10.f;
+        }
+    }
+    break;
+    case BITMAP_GHOST_CLOUD1:
+    case BITMAP_GHOST_CLOUD2:
+    {
+        out.DrawSprite(Sprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_LIGHT + 3:
+    {
+        out.DrawSprite(Sprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_TWINTAIL_WATER:
+    {
+        out.SetState({.blend = Blend::Glow});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_SMOKE:
+        if (o->SubType == 2 || o->SubType == 5 || o->SubType == 12 || o->SubType == 14 || o->SubType == 15 ||
+            o->SubType == 20 || o->SubType == 21 || o->SubType == 29)
+            out.SetState({.blend = Blend::Subtract});
+        if (o->SubType == 37 || o->SubType == 38 || o->SubType == 59)
+            out.SetState({.blend = Blend::Subtract});
+        if (o->SubType == 6)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_SMOKE + 1:
+    case BITMAP_SMOKE + 4:
+        out.SetState({.blend = Blend::Blend3});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_ADV_SMOKE + 1:
+        if (o->SubType == 2)
+        {
+            out.SetState({.additiveTexture = Toggle::On});
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+            out.SetState({.additiveTexture = Toggle::Off});
+        }
+        else
+        {
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_SMOKE + 3:
+        if (o->SubType == 3 || o->SubType == 4)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        else
+        {
+            out.SetState({.blend = Blend::Blend3});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_LIGHTNING:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_BLOOD + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f,
+                              o->Frame / 2 * 0.5f, 0.5f, 0.5f));
+        break;
+    case BITMAP_CHROME_ENERGY2:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation,
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_FIRE_CURSEDLICH:
+    case BITMAP_FIRE_HIK2_MONO:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_LEAF_TOTEMGOLEM:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_FIRE:
+    case BITMAP_FIRE + 2:
+    case BITMAP_FIRE + 3:
+        if (o->SubType == 17 || o->SubType == 5 || o->SubType == 7 || o->SubType == 8 || o->SubType == 11 ||
+            o->SubType == 12 || o->SubType == 13)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation,
+                                  o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        }
+        else if (o->SubType == 18)
+        {
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType == 14 || o->SubType == 15)
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                                  o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        }
+        break;
+    case BITMAP_FIRECRACKER:
+    {
+        int iCount = i % 8 + 22;
+        vec3_t Position;
+        vec3_t Light;
+        int iTemp = o->LifeTime / 4 + o->SubType;
+        // int iTemp = 0;
+        int iColor = iTemp / 10;
+        int iColorChange = iTemp % 10;
+        for (int j = iCount; j >= 0; --j)
+        {
+            for (int k = 0; k < 3; ++k)
+            {
+                Position[k] = o->Position[k] - (float)j * o->Velocity[k] * 0.1f;
+                Light[k] =
+                    (float)(std::min<int>(iCount - j, 10)) *
+                    (o->Light[(k + iColor) % 3] * (10 - iColorChange) + o->Light[(k + iColor + 1) % 3] * iColorChange) *
+                    ((float)std::min<int>(o->LifeTime, 10) * 0.001f);
+            }
+            out.DrawSprite(Sprite(o->TexType, Position, Width, Height, Light, o->Rotation));
+        }
+    }
+    break;
+    case BITMAP_FLARE:
+        if (o->SubType == 11)
+        {
+            BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
+            Width = pBitmap->Width * 0.5f * o->Scale;
+            Height = pBitmap->Height * 0.4f;
+
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType != 4)
+        {
+            if (o->LifeTime != 60)
+                out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_FLARE_BLUE:
+        if (o->SubType == 0)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType == 1)
+        {
+            BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
+            Width = pBitmap->Width * 0.2f * o->Scale;
+            Height = pBitmap->Height * 0.3f;
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_FLARE + 1:
+        if (o->SubType == 0)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_LIGHT + 2:
+        if (o->SubType == 3 || o->SubType == 4 || o->SubType == 6) // || o->SubType == 7)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_MAGIC + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_CLOUD:
+    {
+        float rotation = o->Rotation;
+        switch (o->SubType)
+        {
+        case 10:
+        case 12:
+        case 7:
+        case 14:
+        case 16:
+            out.SetState({.blend = Blend::Subtract});
+            break;
+        case 0:
+        case 8:
+        case 3:
+        case 18:
+            if ((i % 2) == 0)
+            {
+                rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
+            }
+            else
+            {
+                rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
+            }
+            break;
+        }
+        if (o->SubType == 8 || o->SubType == 9 || o->SubType == 20 || o->SubType == 21)
+        {
+            vec3_t Light;
+            Light[0] = o->Light[0] * o->Alpha;
+            Light[1] = o->Light[1] * o->Alpha;
+            Light[2] = o->Light[2] * o->Alpha;
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, Light, rotation));
+        }
+        else if (o->SubType == 17)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else if (o->SubType == 18)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else if (o->SubType == 19)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        break;
+    }
+    case BITMAP_SPARK:
+        if (o->SubType == 10)
+            out.SetState({.blend = Blend::Subtract});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_FLAME:
+        if (o->SubType == 11)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_CURSEDTEMPLE_EFFECT_MASKER:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SHINY + 6:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        out.DrawSprite(Sprite(BITMAP_LIGHT, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SMOKELINE2:
+    {
+        if (o->SubType == 3)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_SBUMB:
+    {
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f,
+                              o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f));
+    }
+    break;
+    case BITMAP_DAMAGE1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SWORD_EFFECT_MONO:
+    {
+        vec3_t vPos;
+        VectorCopy(o->Position, vPos);
+        vPos[2] += (31.0f * o->Scale);
+        out.DrawSprite(Sprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_DAMAGE2:
+    {
+        vec3_t vLight;
+        VectorCopy(o->Light, vLight);
+        VectorScale(vLight, 1.4f, vLight);
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, vLight, o->Rotation));
+    }
+    break;
+    case BITMAP_TRUE_FIRE:
+    default:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    }
+}
+
 void RenderParticles(BYTE byRenderOneMore)
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -8979,10 +9356,11 @@ void RenderParticles(BYTE byRenderOneMore)
         Render::Effects::DrawOrder::GroupByTexture(drawOrder, drawCount, drawOrderScratch);
     }
 
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     for (std::size_t drawIndex = 0; drawIndex < drawCount; drawIndex++)
     {
         const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
-        PARTICLE* o = &Particles[i];
+        const PARTICLE* o = &Particles[i];
         if (o->Live)
         {
             if (byRenderOneMore == 1)
@@ -9002,11 +9380,11 @@ void RenderParticles(BYTE byRenderOneMore)
             // whether or not they are drawn.
             if (o->Type == BITMAP_LIGHT && o->SubType == 6)
             {
-                EnableDepthTest();
+                out.SetState({.depthTest = Toggle::On});
             }
             if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
             {
-                DisableDepthTest();
+                out.SetState({.depthTest = Toggle::Off});
             }
             // The margin covers the few types drawn a little off their position. Damage numbers
             // brighten on every draw and firecrackers trail far behind theirs, so those always draw.
@@ -9014,354 +9392,18 @@ void RenderParticles(BYTE byRenderOneMore)
                 !TestFrustrum(o->Position, std::max(Width, Height) + 50.f))
             {
                 FrameProfiler::Count(FrameProfiler::Counter::ParticlesCulled);
-                if (o->LifeTime < 0)
-                    o->LifeTime = 0;
                 continue;
             }
             if (pBitmap->Components == 3)
             {
-                EnableAlphaBlend();
+                out.SetState({.blend = Blend::Glow});
             }
             else
             {
-                EnableAlphaTest(false);
+                out.SetState({.blend = Blend::AlphaTestKeepDepthMask});
             }
 
-            int Frame;
-            switch (o->Type)
-            {
-            case BITMAP_WATERFALL_1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-
-            case BITMAP_BUBBLE:
-                Frame = o->Frame % 9;
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, Frame % 3 * 0.25f + 0.005f, Frame / 3 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_SPOT_WATER:
-                RenderSprite(o->TexType, o->Position, Width, Height * 0.125, o->Light, o->Angle[0], 0.f, o->Frame % 8 * 0.125f, 1.f, 0.125f);
-                break;
-
-            case BITMAP_SPARK + 2:
-                if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f, o->Frame / 2 * 0.5f, 0.5f, 0.5f);
-                }
-                break;
-
-            case BITMAP_EXPLOTION_MONO:
-            case BITMAP_EXPLOTION:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f, o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_EXPLOTION + 1:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_SUMMON_SAHAMUTT_EXPLOSION:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f, o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_CLUD64:
-            {
-                if (o->SubType == 0 || o->SubType == 5 || o->SubType == 11)
-                {
-                    EnableAlphaBlendMinus();
-                }
-
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_TORCH_FIRE:
-            {
-                vec3_t vPos;
-                VectorCopy(o->Position, vPos);
-                for (int i = 0; i < 3; ++i)
-                {
-                    RenderSprite(o->Type, vPos, Width, Height, o->Light, o->Rotation);
-                    vPos[2] -= 10.f;
-                }
-            }
-            break;
-            case BITMAP_GHOST_CLOUD1:
-            case BITMAP_GHOST_CLOUD2:
-            {
-                RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_LIGHT + 3:
-            {
-                RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_TWINTAIL_WATER:
-            {
-                EnableAlphaBlend();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_SMOKE:
-                if (o->SubType == 2 || o->SubType == 5 || o->SubType == 12 || o->SubType == 14 || o->SubType == 15 || o->SubType == 20 || o->SubType == 21 || o->SubType == 29)
-                    EnableAlphaBlendMinus();
-                if (o->SubType == 37 || o->SubType == 38 || o->SubType == 59)
-                    EnableAlphaBlendMinus();
-                if (o->SubType == 6)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_SMOKE + 1:
-            case BITMAP_SMOKE + 4:
-                EnableAlphaBlend3();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_ADV_SMOKE + 1:
-                if (o->SubType == 2)
-                {
-                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                }
-                else
-                {
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_SMOKE + 3:
-                if (o->SubType == 3 || o->SubType == 4)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                else
-                {
-                    EnableAlphaBlend3();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_LIGHTNING:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_BLOOD + 1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f, o->Frame / 2 * 0.5f, 0.5f, 0.5f);
-                break;
-            case BITMAP_CHROME_ENERGY2:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation, o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_FIRE_CURSEDLICH:
-            case BITMAP_FIRE_HIK2_MONO:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_LEAF_TOTEMGOLEM:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_FIRE:
-            case BITMAP_FIRE + 2:
-            case BITMAP_FIRE + 3:
-                if (
-                    o->SubType == 17 || o->SubType == 5 || o->SubType == 7 || o->SubType == 8 || o->SubType == 11 || o->SubType == 12 || o->SubType == 13)
-                {
-                    RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation, o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                }
-                else if (o->SubType == 18)
-                {
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 14 || o->SubType == 15)
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                }
-                break;
-            case BITMAP_FIRECRACKER:
-            {
-                int iCount = i % 8 + 22;
-                vec3_t Position;
-                vec3_t Light;
-                int iTemp = o->LifeTime / 4 + o->SubType;
-                //int iTemp = 0;
-                int iColor = iTemp / 10;
-                int iColorChange = iTemp % 10;
-                for (int j = iCount; j >= 0; --j)
-                {
-                    for (int k = 0; k < 3; ++k)
-                    {
-                        Position[k] = o->Position[k] - (float)j * o->Velocity[k] * 0.1f;
-                        Light[k] = (float)(std::min<int>(iCount - j, 10)) *
-                            (o->Light[(k + iColor) % 3] * (10 - iColorChange) +
-                                o->Light[(k + iColor + 1) % 3] * iColorChange) *
-                            ((float)std::min<int>(o->LifeTime, 10) * 0.001f);
-                    }
-                    RenderSprite(o->TexType, Position, Width, Height, Light, o->Rotation);
-                }
-            }
-            break;
-            case BITMAP_FLARE:
-                if (o->SubType == 11)
-                {
-                    BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
-                    Width = pBitmap->Width * 0.5f * o->Scale;
-                    Height = pBitmap->Height * 0.4f;
-
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType != 4)
-                {
-                    if (o->LifeTime != 60)
-                        RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_FLARE_BLUE:
-                if (o->SubType == 0)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 1)
-                {
-                    BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
-                    Width = pBitmap->Width * 0.2f * o->Scale;
-                    Height = pBitmap->Height * 0.3f;
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_FLARE + 1:
-                if (o->SubType == 0)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_LIGHT + 2:
-                if (o->SubType == 3 || o->SubType == 4 || o->SubType == 6)// || o->SubType == 7)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_MAGIC + 1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_CLOUD:
-                switch (o->SubType)
-                {
-                case 10:
-                case 12:
-                case 7:
-                case 14:
-                case 16:
-                    EnableAlphaBlendMinus();
-                    break;
-                case 0:
-                case 8:
-                case 3:
-                case 18:
-                    if ((i % 2) == 0)
-                    {
-                        o->Rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
-                    }
-                    else
-                    {
-                        o->Rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
-                    }
-                    break;
-                }
-                if (o->SubType == 8 || o->SubType == 9 || o->SubType == 20 || o->SubType == 21)
-                {
-                    vec3_t Light;
-                    Light[0] = o->Light[0] * o->Alpha;
-                    Light[1] = o->Light[1] * o->Alpha;
-                    Light[2] = o->Light[2] * o->Alpha;
-                    RenderSprite(o->TexType, o->Position, Width, Height, Light, o->Rotation);
-                }
-                else if (o->SubType == 17)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 18)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 19)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SPARK:
-                if (o->SubType == 10)
-                    EnableAlphaBlendMinus();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_FLAME:
-                if (o->SubType == 11)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_CURSEDTEMPLE_EFFECT_MASKER:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SHINY + 6:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                RenderSprite(BITMAP_LIGHT, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SMOKELINE2:
-            {
-                if (o->SubType == 3)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }break;
-            case BITMAP_SBUMB:
-            {
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f, o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f);
-            }
-            break;
-            case BITMAP_DAMAGE1:
-            {
-                VectorScale(o->Light, 2.0f, o->Light);
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_SWORD_EFFECT_MONO:
-            {
-                vec3_t vPos;
-                VectorCopy(o->Position, vPos);
-                vPos[2] += (31.0f * o->Scale);
-                RenderSprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_DAMAGE2:
-            {
-                vec3_t vLight;
-                VectorCopy(o->Light, vLight);
-                VectorScale(vLight, 1.4f, vLight);
-                RenderSprite(o->TexType, o->Position, Width, Height, vLight, o->Rotation);
-            }
-            break;
-            case BITMAP_TRUE_FIRE:
-            default:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            }
-
-            if (o->LifeTime < 0)
-            {
-                o->LifeTime = 0;
-            }
+            DescribeParticle(*o, i, Width, Height, out);
         }
     }
 }

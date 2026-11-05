@@ -162,10 +162,43 @@ bool IsName(std::string_view text)
            std::all_of(text.begin(), text.end(), [](unsigned char character) { return std::isalnum(character) != 0; });
 }
 
+bool ReadLineIds(const OrderedJson& json, std::vector<std::string>& ids)
+{
+    if (!json.is_array() || !std::all_of(json.begin(), json.end(), [](const OrderedJson& id)
+                                         { return id.is_string() && IsName(id.get_ref<const std::string&>()); }))
+    {
+        return false;
+    }
+    for (const OrderedJson& id : json)
+    {
+        ids.push_back(id.get<std::string>());
+    }
+    return true;
+}
+
+const OrderedJson* ReadLineAddition(const OrderedJson& entry, std::string& after)
+{
+    constexpr const char* AfterKey = "after";
+    constexpr const char* LinesKey = "lines";
+    if (!entry.is_object())
+    {
+        return nullptr;
+    }
+    const auto id = entry.find(AfterKey);
+    const auto lines = entry.find(LinesKey);
+    if (id == entry.end() || !id->is_string() || !IsName(id->get_ref<const std::string&>()) || lines == entry.end() ||
+        !lines->is_array())
+    {
+        return nullptr;
+    }
+    after = id->get<std::string>();
+    return &*lines;
+}
+
 void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
                   const std::string& message)
 {
-    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
+    issues.push_back({ItemDataIssueSeverity::Fatal, source, group, ItemDataIssue::NoItem, field, message});
 }
 
 bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
@@ -278,5 +311,47 @@ std::string PutListEntriesOnOneLine(const std::string& text, std::string_view ke
             }
         }
     }
+}
+
+std::vector<std::string> FindRepeatedKeys(std::string_view text, std::string_view rootKey)
+{
+    // The keys of an object that the parser is in; only those of the root key's object count.
+    struct ObjectKeys
+    {
+        bool isList = false;
+        std::set<std::string> keys;
+    };
+    constexpr int RootKeyDepth = 1;
+    std::vector<std::string> repeated;
+    std::vector<ObjectKeys> objects;
+    std::string lastRootKey;
+    const OrderedJson::parser_callback_t callback =
+        [&](int depth, OrderedJson::parse_event_t event, OrderedJson& parsed)
+    {
+        if (event == OrderedJson::parse_event_t::object_start)
+        {
+            objects.push_back({depth == RootKeyDepth && lastRootKey == rootKey, {}});
+        }
+        else if (event == OrderedJson::parse_event_t::object_end && !objects.empty())
+        {
+            objects.pop_back();
+        }
+        else if (event == OrderedJson::parse_event_t::key)
+        {
+            const std::string key = parsed.get<std::string>();
+            if (depth == RootKeyDepth)
+            {
+                lastRootKey = key;
+            }
+            else if (!objects.empty() && objects.back().isList && !objects.back().keys.insert(key).second)
+            {
+                repeated.push_back(key);
+            }
+        }
+        return true;
+    };
+    // Only what the callback found matters; nlohmann marks parse() so its result must be taken.
+    [[maybe_unused]] const OrderedJson document = OrderedJson::parse(text, callback, false);
+    return repeated;
 }
 } // namespace Data::Items::Json

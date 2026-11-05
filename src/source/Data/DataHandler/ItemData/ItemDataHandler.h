@@ -42,13 +42,13 @@ public:
     static std::wstring GetItemFilePath(const std::wstring& language);
 
     // Loads and validates Data/Items, builds the item database and fills
-    // ItemAttribute[]. On errors nothing is changed, false is returned and
-    // errorMessage describes the errors for the player.
+    // ItemAttribute[]. On fatal problems nothing is changed, false is returned and
+    // errorMessage describes the fatal problems for the player.
     bool Load(std::string& errorMessage);
 
     // Loads and validates the item models (Data/Items/Models) into the item
-    // model database. On errors nothing is changed, false is returned and
-    // errorMessage describes the errors for the player.
+    // model database. On fatal problems nothing is changed, false is returned and
+    // errorMessage describes the fatal problems for the player.
     bool LoadModels(std::string& errorMessage);
 
 #ifdef _EDITOR
@@ -76,12 +76,13 @@ public:
     // a pick; otherwise they follow the new item's data.
     bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model,
                  const Data::Items::ItemDefinition* copiedFrom = nullptr);
-    // Removes the item and its model entry; the item type is free again. False
-    // when there is no item.
+    // Removes the item, or the entry without a name, and its model entry; the
+    // item type is free again. False when the item files have no entry there
+    // (ItemDatabase::FindEntry).
     bool RemoveItem(int itemType);
-    // Moves the item, with its ItemAttribute row and its model, to a free item
-    // type (OnItemsSwapped). False when there is no item or the target is not
-    // free.
+    // Moves the item, or the entry without a name, with its ItemAttribute row
+    // and its model, to a free item type (OnItemsSwapped). False when the item
+    // files have no entry there or the target is not free.
     bool MoveItem(int fromItemType, int toItemType);
 
     // Sets the model entry at its (group, number); an entry without a file and
@@ -104,6 +105,8 @@ public:
     bool RemoveGlowColor(std::string_view name);
     // Makes the glow color list this one (an undo).
     void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
+    // The folders MuEditor sorts the glow colors in (D69); Save writes them with the colors.
+    void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>
@@ -147,6 +150,15 @@ public:
     // writes it. `file` must be valid (ValidateItemStatsAsWritten). Items keep
     // the profile they name.
     void SetStatFile(const Data::Items::ItemStatFile& file);
+    // Adds a ground label style or changes the one of its name (D68): every label that takes it looks that way at once.
+    // Save writes Data/Items/Tooltips/GroundLabels.json.
+    void SetGroundLabelStyle(const Data::Items::GroundLabelStyle& style);
+    // Removes a ground label style that no item and no standard rule names; false while one does.
+    bool RemoveGroundLabelStyle(std::string_view name);
+    // Makes the ground label styles these (an undo); the standard rules stay as they are.
+    void RestoreGroundLabelStyles(std::span<const Data::Items::GroundLabelStyle> styles);
+    // The folders MuEditor sorts the ground label styles in (D69); Save writes them with the styles.
+    void SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model
     // slot), and its weapon kind and stat profile follow its new group like
@@ -167,8 +179,8 @@ public:
     // Validates the item database and the item models (Validate) and writes Data/Items,
     // with the model files of Data/Items/Models whose models changed (moved,
     // edited) since they were loaded, SharedModels.json when a shared model
-    // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has errors,
-    // and no file is replaced when one of them cannot be written.
+    // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has fatal
+    // problems, and no file is replaced when one of them cannot be written.
     Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
@@ -263,6 +275,8 @@ private:
     // The item stat file as Load read it, and whether the editor changed it since.
     Data::Items::ItemStatFile m_statFile;
     bool m_statFileChanged = false;
+    // Whether the editor changed the ground label styles since Load.
+    bool m_groundLabelsChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
     OpenedModelHooks m_openedModelHooks;

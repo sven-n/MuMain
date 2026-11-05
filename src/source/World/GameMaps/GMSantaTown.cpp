@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -112,7 +113,7 @@ void CGMSantaTown::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	}
 }
 
-bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMSantaTown::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsSantaTown() == false)
         return false;
@@ -121,15 +122,15 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 16:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(0.0f, 0.5f, 0.5f, b->BodyLight);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
         return true;
     }
@@ -138,7 +139,7 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMSantaTown::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMSantaTown::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
@@ -177,7 +178,7 @@ bool CGMSantaTown::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMSantaTown::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMSantaTown::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     // 	vec3_t vPos, vRelative, vLight;
     //
@@ -188,7 +189,7 @@ bool CGMSantaTown::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMSantaTown::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
+void CGMSantaTown::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon) {}
 
 bool CGMSantaTown::CreateSnow(PARTICLE* o)
 {
@@ -196,18 +197,18 @@ bool CGMSantaTown::CreateSnow(PARTICLE* o)
         return false;
 
     o->Type = BITMAP_LEAF1;
-    o->Scale = (float)(rand() % 10 + 5);
+    o->Scale = (float)(Random::Rand() % 10 + 5);
     if (rand_fps_check(10))
     {
         o->Type = BITMAP_LEAF2;
         o->Scale = 12.f;
     }
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
+    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(Random::Rand() % 200 + 200), o->Position);
     Vector(-20.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 8 + 4), Velocity);
+    Vector(0.f, 0.f, -(float)(Random::Rand() % 8 + 4), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);

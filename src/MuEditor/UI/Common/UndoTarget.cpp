@@ -48,10 +48,15 @@ void Activate(UndoTarget& target)
     g_activeTarget = &target;
 }
 
-void RenderBarButtons(UndoTarget& fallback)
+UndoTarget& GetCurrent(UndoTarget& fallback)
 {
     const bool activeIsOpen = g_activeTarget != nullptr && g_activeTarget->IsOpen();
-    UndoTarget& target = activeIsOpen ? *g_activeTarget : fallback;
+    return activeIsOpen ? *g_activeTarget : fallback;
+}
+
+void RenderBarButtons(UndoTarget& fallback)
+{
+    UndoTarget& target = GetCurrent(fallback);
     // A click leaves the focus in the tool, where Ctrl+Z and Ctrl+Y work.
     ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
     RenderButton(I18N::Editor::Undo, "Ctrl+Z", UndoButton, target);

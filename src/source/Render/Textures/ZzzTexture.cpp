@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -202,8 +203,12 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     fseek(compressedFile, 24, SEEK_SET);
     const auto jpegSize = fileSize - 24;
     std::vector<unsigned char> jpegBuf(static_cast<size_t>(jpegSize));
-    fread(jpegBuf.data(), 1, jpegBuf.size(), compressedFile);
+    const bool complete = DataFileIO::ReadExact(compressedFile, jpegBuf.data(), jpegBuf.size());
     fclose(compressedFile);
+    if (!complete)
+    {
+        return false;
+    }
 
     int jpegWidth = 0;
     int jpegHeight = 0;

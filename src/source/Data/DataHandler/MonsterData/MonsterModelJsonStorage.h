@@ -27,7 +27,7 @@ struct MonsterModelsLoadResult
 // folder; a file that cannot be read is an error.
 MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file);
 
-// Writes the models to the file when they read back without errors, with the
+// Writes the models to the file when they read back without fatal problems, with the
 // checks of LoadMonsterModelsFile; the problems found are added to `issues`
 // (a missing model file is a warning and does not stop the save). The old
 // file stays when the new one cannot be written whole.
@@ -36,7 +36,7 @@ bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const Mo
 
 // The text SaveMonsterModelsFile writes, so that a caller can check more files
 // before it writes any (with WriteTextFiles): the text for the file when the
-// models read back without errors, nullopt otherwise; the problems found are
+// models read back without fatal problems, nullopt otherwise; the problems found are
 // added to `issues`.
 std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path& file,
                                                      std::span<const MonsterModelDefinition> models,

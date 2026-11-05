@@ -3,6 +3,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -19,7 +20,8 @@ namespace Data::Items
 // the required English name, and names that fit the LocalizedString format.
 // Also the description texts: the English text, the language codes, the
 // braces in every language, and the English text's placeholders in each
-// translation. Appends the problems to `issues`.
+// translation. An entry without a name is only checked for its id. Appends
+// the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
 // A translation of an item name or a description text in a language the game
@@ -30,6 +32,11 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
 
 // Checks that no item has more than one model. Appends the problems to `issues`.
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// The item files list every number the client uses: a model entry without an item entry (an
+// item or an entry without a name) at its number is an error.
+void ValidateModelsHaveItemEntries(std::span<const ItemDefinition> items, std::span<const ItemModelDefinition> models,
+                                   std::vector<ItemDataIssue>& issues);
 
 // The stat profiles of the items that exist against the item stat file
 // (`statFile` names it in messages): a profile the file does not have is an
@@ -53,9 +60,17 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 // The shared texts ("@name") of the items' descriptions and level values against the tooltip file (`tooltipFile`
 // names it in messages): a text the file does not have is an error, with the nearest name when it looks like a typo
 // (their placeholders are checked by ValidateDescriptionPlaceholders). A level value has no placeholders. A shared text
-// that neither a layout nor a description uses is a warning.
+// that neither a layout nor a description uses is a warning. The layout an item names and its changes are checked
+// against the file too (CheckItemTooltipLayout), and an item of a kind without class lines whose layout has them warns.
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                               const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
+
+// The styles the items' ground label rules and the standard rules name, against the ground label file (`labelFile`
+// names it in messages): a style the file does not have is an error, with the nearest name when it looks like a typo.
+// An item's rule whose levels the rules before it all take is never used, and a style nothing names is unused:
+// warnings.
+void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
+                          const std::string& labelFile, std::vector<ItemDataIssue>& issues);
 
 // The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
 // lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description

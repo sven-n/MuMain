@@ -410,8 +410,9 @@ std::optional<int> FindMonsterModelSlot(std::string_view symbol)
 
 std::string_view GetMonsterModelSymbol(int slot)
 {
-    if (slot >= MODEL_MONSTER01 && slot < MODEL_MONSTER01 + MONSTER_MODEL_COUNT)
-        return MonsterModelTypes[slot - MODEL_MONSTER01].symbol;
+    const int type = slot - MODEL_MONSTER01;
+    if (type >= 0 && type < MONSTER_MODEL_COUNT)
+        return MonsterModelTypes[type].symbol;
     if (IsNpcRangeSlot(slot))
         return NpcSlots[slot - MODEL_NPC_BEGIN - 1].symbol;
     return {};

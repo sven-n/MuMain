@@ -261,7 +261,7 @@ std::vector<LanguageFile> LoadLanguageFiles(std::span<const ItemBmdLanguage> lan
         const std::wstring path = CItemDataHandler::GetItemFilePath(language.folder);
         if (!ItemDataLoader::ReadRawFile(path.c_str(), file.raw, ItemDataLoader::Reporting::Quiet))
         {
-            const auto severity = files.empty() ? ItemDataIssueSeverity::Error : ItemDataIssueSeverity::Warning;
+            const auto severity = files.empty() ? ItemDataIssueSeverity::Fatal : ItemDataIssueSeverity::Warning;
             result.issues.push_back({severity, Core::Text::ToUtf8(path.c_str()), ItemDataIssue::NoItem,
                                      ItemDataIssue::NoItem, "", "could not be read, language skipped"});
             if (files.empty())

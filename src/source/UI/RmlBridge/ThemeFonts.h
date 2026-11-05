@@ -14,4 +14,7 @@ void ClearThemeFontCache();
 // font-* tokens and the Default choice keep the theme's family.
 void SetSelectedFontFamily(std::string family);
 std::optional<std::string> ResolveThemeFontToken(const ThemeInheritance& theme, const std::string& token);
+// Whether the family the font token resolves to ("font-body") has an italic face to draw italic
+// text in; without one, RmlUi draws no italic text at all.
+bool ThemeFontHasItalic(const ThemeInheritance& theme, const std::string& token);
 } // namespace UI::RmlBridge

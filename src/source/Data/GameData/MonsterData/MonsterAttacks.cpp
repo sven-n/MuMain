@@ -35,7 +35,7 @@ constexpr std::array<std::pair<MonsterSkillClear, std::string_view>, 5> ClearNam
 }};
 } // namespace
 
-MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill)
+MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monsterSkill, int skill, int rotation)
 {
     const MonsterAttackEntry* entry = FindEntry(attacks.monsterSkills, monsterSkill);
     if (entry == nullptr)
@@ -51,9 +51,19 @@ MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monst
     {
         choice.random = attacks.otherwiseRandom;
     }
-    else
+    else if (attacks.otherwiseGeneric)
     {
-        choice.animation = attacks.otherwise;
+        choice.generic = true;
+    }
+    else if (IsRotation(attacks))
+    {
+        const int count = static_cast<int>(attacks.otherwise.size());
+        choice.animation = attacks.otherwise[static_cast<size_t>(((rotation % count) + count) % count)];
+        choice.advancesRotation = true;
+    }
+    else if (!attacks.otherwise.empty())
+    {
+        choice.animation = attacks.otherwise.front();
     }
     switch (attacks.clearSkill)
     {
@@ -72,6 +82,11 @@ MonsterAttackChoice ChooseMonsterAttack(const MonsterAttacks& attacks, int monst
         break;
     }
     return choice;
+}
+
+bool IsRotation(const MonsterAttacks& attacks)
+{
+    return attacks.otherwise.size() > 1;
 }
 
 bool ClearsMonsterSkillAfterAttack(const MonsterAttacks& attacks)

@@ -7,7 +7,9 @@
 #include "doctest.h"
 
 #include "App/Control/ControlProtocol.h"
+#include "App/Control/ControlCommands.h"
 #include "App/Control/ControlTargets.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 
 #include <cstddef>
@@ -212,4 +214,34 @@ TEST_CASE("Control targets take the first monster in the table on a tie [network
 
     CHECK(ResolveMonster(MONSTER_SPIDER, key) == TargetLookup::Found);
     CHECK(key == 102);
+}
+
+TEST_CASE("Control move waits for interpolation after logical arrival [network][control-movement]")
+{
+    CharacterTableScope characters;
+    Hero->PositionX = HeroX - 1;
+    Hero->Object.Position[0] = (HeroX - 0.5f) * TERRAIN_SCALE;
+    Hero->Object.Position[1] = (HeroY + 0.5f) * TERRAIN_SCALE;
+    Hero->Movement = true;
+    Hero->Path.PathNum = 2;
+    Hero->Path.PathX[0] = HeroX - 1;
+    Hero->Path.PathX[1] = HeroX;
+    Hero->Path.PathY[0] = Hero->Path.PathY[1] = HeroY;
+    CHECK_FALSE(MovePath(Hero, false));
+    CHECK(Hero->PositionX == HeroX);
+    CHECK(Hero->Object.Position[0] < (HeroX + 0.5f) * TERRAIN_SCALE);
+
+    std::unique_ptr<App::Control::Act> act;
+    const auto request = Request::Parse(R"({"cmd":"move","x":100,"y":100})");
+    CHECK(App::Control::Commands::Move(request, act).empty());
+    REQUIRE(act);
+    std::string response;
+    CHECK(act->Tick(response) == App::Control::Act::Status::Running);
+    CHECK(response.empty());
+
+    Hero->Path.CurrentPath = Hero->Path.PathNum - 1;
+    Hero->Movement = false;
+    Hero->Object.Position[0] = (HeroX + 0.5f) * TERRAIN_SCALE;
+    CHECK(act->Tick(response) == App::Control::Act::Status::Finished);
+    CHECK_FALSE(response.empty());
 }

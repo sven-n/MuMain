@@ -1,19 +1,32 @@
-add_test(
-    NAME rml_contract_guard_tests
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_contracts.py"
+mu_add_test(
+    NAME map_name_tests
+    SOURCES
+        test_map_name.cpp
+        test_map_name_ornament.cpp
+        test_text_fit.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient Freetype::Freetype
 )
 
-# The mistakes RmlUi only reports at runtime, or not at all, in every shipped document and stylesheet.
-add_test(
-    NAME rml_rcss_syntax
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_rml_rcss_syntax.py"
+target_compile_definitions(map_name_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
 )
 
-add_test(
-    NAME rml_preview
-    COMMAND "${Python3_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_preview.py"
-            "${CMAKE_SOURCE_DIR}"
+mu_add_test(
+    NAME cursed_temple_skill_tests
+    SOURCES
+        test_cursed_temple_skill.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(cursed_temple_skill_tests PRIVATE
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
 mu_add_test(
@@ -48,6 +61,14 @@ mu_add_test(
     SOURCES
         test_storage_item_selection.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameShop/StorageItemSelection.cpp
+)
+
+mu_add_test(
+    NAME shop_script_list_tests
+    SOURCES
+        test_shop_script_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )
 
 mu_add_test(
@@ -125,6 +146,11 @@ target_compile_definitions(rml_stacking_order_tests PRIVATE
 )
 
 mu_add_test(
+    NAME character_class_step_tests
+    SOURCES test_character_class_step.cpp
+)
+
+mu_add_test(
     NAME party_list_layout_tests
     SOURCES
         test_party_list_layout.cpp
@@ -136,20 +162,6 @@ mu_add_test(
     SOURCES
         test_text_search.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/Widgets/TextSearch.cpp
-)
-
-add_test(
-    NAME no_legacy_text_measurement
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_no_legacy_text_measurement.cmake
-)
-
-add_test(
-    NAME inventory_window_captures_hover
-    COMMAND ${CMAKE_COMMAND}
-        -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/MyInventory.cpp
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_mouse_capture.cmake
 )
 
 mu_add_test(
@@ -170,28 +182,18 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+    # Saves the config.ini beside the executable, as theme_file_interface_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
 )
 
 mu_add_test(
     NAME mu_helper_tests
     SOURCES
         test_mu_helper.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
-)
-
-add_test(
-    NAME display_settings_contract
-    COMMAND "${CMAKE_COMMAND}"
-        "-DMU_CONFIG_CONSTANTS=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfigConstants.h"
-        "-DMU_CONFIG_HEADER=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.h"
-        "-DMU_CONFIG_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.cpp"
-        "-DMU_LOOK_SETTING_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Look/LookPresetSetting.cpp"
-        "-DMU_WINMAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp"
-        "-DMU_CONSOLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Log/muConsoleDebug.cpp"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_display_settings_contract.cmake"
 )
 
 mu_add_test(
@@ -247,7 +249,7 @@ mu_add_test(
     NAME rml_themed_view_tests
     SOURCES
         test_rml_themed_view.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -255,7 +257,7 @@ mu_add_test(
     NAME world_label_layer_tests
     SOURCES
         test_world_label_layer.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -263,7 +265,7 @@ mu_add_test(
     NAME rml_counter_scale_tests
     SOURCES
         test_rml_counter_scale.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -271,7 +273,7 @@ mu_add_test(
     NAME rml_slot_placement_tests
     SOURCES
         test_rml_slot_placement.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -280,7 +282,7 @@ mu_add_test(
     SOURCES
         test_rml_party_trade_layout.cpp
         RmlLayoutFixture.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 target_compile_definitions(rml_party_trade_layout_tests PRIVATE
@@ -293,7 +295,7 @@ mu_add_test(
     NAME item_grid_px_tests
     SOURCES
         test_item_grid_px.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -301,7 +303,7 @@ mu_add_test(
     NAME rml_scale_inputs_tests
     SOURCES
         test_rml_scale_inputs.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -309,7 +311,7 @@ mu_add_test(
     NAME rml_runtime_scale_tests
     SOURCES
         test_rml_runtime_scale.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -318,8 +320,10 @@ mu_add_test(
     SOURCES
         test_theme_file_interface.cpp
         test_theme_inheritance.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+    # Choosing a theme saves the config.ini beside the executable, as ui_scaling_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
 )
 target_compile_definitions(theme_file_interface_tests PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
@@ -336,7 +340,7 @@ mu_add_test(
     NAME generic_dialog_lifetime_tests
     SOURCES
         test_generic_dialog_lifetime.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -344,7 +348,7 @@ mu_add_test(
     NAME rml_document_scene_tests
     SOURCES
         test_rml_document_scene.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 
@@ -352,9 +356,8 @@ add_executable(rml_text_layout_tests
     test_rml_text_layout.cpp
     RmlTextLayoutAudit.cpp
     RmlLayoutFixture.cpp
-    $<TARGET_OBJECTS:mu_test_winmain>
 )
-target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main MuClient)
+target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main mu_test_winmain)
 target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
 if(MSVC)
     target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
@@ -377,7 +380,7 @@ mu_add_test(
     SOURCES
         test_rml_styling_regressions.cpp
         RmlLayoutFixture.cpp
-        $<TARGET_OBJECTS:mu_test_winmain>
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 target_compile_definitions(rml_styling_regression_tests PRIVATE

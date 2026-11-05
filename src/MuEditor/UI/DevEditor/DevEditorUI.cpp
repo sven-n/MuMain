@@ -19,7 +19,7 @@
 #include "UI/Common/MuEditorLayout.h"
 
 // External C functions
-extern "C" CameraManager& CameraManager_Instance();
+CameraManager& CameraManager_Instance();
 extern "C" OrbitalCamera* GetOrbitalCameraInstance();
 
 // External camera state

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 
 namespace
@@ -67,7 +67,7 @@ TEST_CASE("Name files: bad lines, numbers outside 0-1023 and doubles are skipped
                                  "5\t1\t\"Five again\"\n"
                                  "6\t1\tNoQuotes\n");
 
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasIssueAbout(read.issues, "line 1", "skipped"));
     CHECK(HasIssueAbout(read.issues, "line 2", "0 to 1023"));
     CHECK(HasIssueAbout(read.issues, "line 4", "has a name already"));
@@ -97,7 +97,7 @@ TEST_CASE("Name files: a name that is not UTF-8 is skipped with a warning [data]
     const ReadResult read = Read("2\t1\t\"Drag\xE3o\"\r\n"
                                  "3\t1\t\"Drag\xC3\xA3o\"\r\n");
 
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasIssueAbout(read.issues, "line 1", "not UTF-8"));
     CHECK_FALSE(read.names.contains(2));
     CHECK(read.names.at(3) == "Drag\xC3\xA3o");
@@ -111,7 +111,7 @@ TEST_CASE("Name files: an overlong form, a surrogate or a code point above U+10F
                                  "4\t1\t\"Dragon \xF5\x80\x80\x80\"\r\n"
                                  "5\t1\t\"Dragon \xF0\x9F\x90\x89\"\r\n");
 
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasIssueAbout(read.issues, "line 1", "not UTF-8"));
     CHECK(HasIssueAbout(read.issues, "line 2", "not UTF-8"));
     CHECK(HasIssueAbout(read.issues, "line 3", "not UTF-8"));

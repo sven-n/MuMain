@@ -5,6 +5,8 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Drawing/LegacyCalls.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -13,6 +15,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Core/WindowSystem.h"
+#include <bit>
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
@@ -27,7 +30,7 @@ extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
 extern "C" void DevEditor_GetCameraFogRange(const char* cameraName, float viewFar, float* outStart, float* outEnd);
 #endif
 
-extern "C" CameraManager& CameraManager_Instance();
+CameraManager& CameraManager_Instance();
 
 int     OpenglWindowX = 0;
 int     OpenglWindowY = 0;
@@ -61,84 +64,9 @@ bool         MouseMButtonPush;
 int          MouseWheel;
 DWORD		 MouseRButtonPress = 0;
 
-//bool    showShoppingMall = false;
-
 void OpenExploper(wchar_t* Name, wchar_t* para)
 {
     ShellExecute(NULL, L"open", Name, para, L"", SW_SHOW);
-}
-
-bool CheckID_HistoryDay(wchar_t* Name, WORD day)
-{
-    typedef struct  __day_history__
-    {
-        wchar_t ID[MAX_USERNAME_SIZE + 1];
-        WORD date;
-    }dayHistory;
-
-    FILE* fp;
-    dayHistory days[100];
-    int   count = 0;
-    WORD  num = 0;
-    bool  sameName = false;
-    bool  update = true;
-
-    if ((fp = _wfopen(L"dconfig.ini", L"rb")) != NULL)
-    {
-        fread(&num, sizeof(WORD), 1, fp);
-
-        if (num > 100)
-        {
-            num = 0;
-        }
-        else
-        {
-            for (int i = 0; i < num; ++i)
-            {
-                fread(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
-                fread(&days[i].date, sizeof(WORD), 1, fp);
-
-                if (!wcscmp(days[i].ID, Name))
-                {
-                    sameName = true;
-                    if (days[i].date == day)
-                    {
-                        update = false;
-                        break;
-                    }
-                    days[i].date = day;
-                }
-                count++;
-            }
-        }
-        fclose(fp);
-    }
-
-    if (update)
-    {
-        if (!sameName)
-        {
-            memcpy(days[num].ID, Name, (MAX_USERNAME_SIZE + 1) * sizeof(char));
-            days[num].date = day;
-
-            num++;
-        }
-
-        fp = _wfopen(L"dconfig.ini", L"wb");
-
-        fwrite(&num, sizeof(WORD), 1, fp);
-        for (int i = 0; i < num; ++i)
-        {
-            fwrite(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
-            fwrite(&days[i].date, sizeof(WORD), 1, fp);
-        }
-
-        fclose(fp);
-    }
-
-    //    showShoppingMall = update;
-
-    return  update;
 }
 
 bool GrabEnable = false;
@@ -148,6 +76,7 @@ int  GrabScreen = 0;
 ///////////////////////////////////////////////////////////////////////////////
 // opengl render util
 ///////////////////////////////////////////////////////////////////////////////
+
 
 int  CachTexture = -1;
 bool TextureEnable;
@@ -159,6 +88,8 @@ int  AlphaBlendType;
 
 void BindTexture(int tex)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::BindTexture, tex))
+        return;
     // Always forward to the renderer. In the deferred SDL renderer this only
     // updates logical state, and caching can desync when callers bind directly.
     mu::GetRenderer().BindTexture(tex);
@@ -180,7 +111,9 @@ void EndTextureStream()
 
 void SetAlphaFuncRef(float ref)
 {
-    glAlphaFunc(GL_GREATER, ref);
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::SetAlphaFuncRef, std::bit_cast<int>(ref)))
+        return;
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, ref);
 }
 
 void EnableTexture2D()
@@ -246,6 +179,8 @@ void FlushGL()
 
 void EnableDepthTest()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableDepthTest, 0))
+        return;
     if (!DepthTestEnable)
     {
         DepthTestEnable = true;
@@ -255,6 +190,8 @@ void EnableDepthTest()
 
 void DisableDepthTest()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableDepthTest, 0))
+        return;
     if (DepthTestEnable)
     {
         DepthTestEnable = false;
@@ -264,6 +201,8 @@ void DisableDepthTest()
 
 void EnableDepthMask()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableDepthMask, 0))
+        return;
     if (!DepthMaskEnable)
     {
         DepthMaskEnable = true;
@@ -273,6 +212,8 @@ void EnableDepthMask()
 
 void DisableDepthMask()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableDepthMask, 0))
+        return;
     if (DepthMaskEnable)
     {
         DepthMaskEnable = false;
@@ -282,6 +223,8 @@ void DisableDepthMask()
 
 void EnableCullFace()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableCullFace, 0))
+        return;
     if (!CullFaceEnable)
     {
         CullFaceEnable = true;
@@ -291,6 +234,8 @@ void EnableCullFace()
 
 void DisableCullFace()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableCullFace, 0))
+        return;
     if (CullFaceEnable)
     {
         CullFaceEnable = false;
@@ -300,6 +245,8 @@ void DisableCullFace()
 
 void DisableTexture(bool AlphaTest)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableTexture, AlphaTest))
+        return;
     EnableDepthMask();
     if (AlphaTest == true)
     {
@@ -326,6 +273,8 @@ void DisableTexture(bool AlphaTest)
 
 void DisableAlphaBlend()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::DisableAlphaBlend, 0))
+        return;
     if (AlphaBlendType != 0)
     {
         AlphaBlendType = 0;
@@ -349,6 +298,8 @@ void DisableAlphaBlend()
 
 void EnableAlphaTest(bool DepthMask)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaTest, DepthMask))
+        return;
     if (AlphaBlendType != 2)
     {
         AlphaBlendType = 2;
@@ -373,6 +324,8 @@ void EnableAlphaTest(bool DepthMask)
 
 void EnableAlphaBlend()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend, 0))
+        return;
     if (AlphaBlendType != 3)
     {
         AlphaBlendType = 3;
@@ -396,6 +349,8 @@ void EnableAlphaBlend()
 
 void EnableAlphaBlendMinus()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlendMinus, 0))
+        return;
     if (AlphaBlendType != 4)
     {
         AlphaBlendType = 4;
@@ -419,6 +374,8 @@ void EnableAlphaBlendMinus()
 
 void EnableAlphaBlend2()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend2, 0))
+        return;
     if (AlphaBlendType != 5)
     {
         AlphaBlendType = 5;
@@ -442,6 +399,8 @@ void EnableAlphaBlend2()
 
 void EnableAlphaBlend3()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend3, 0))
+        return;
     if (AlphaBlendType != 6)
     {
         AlphaBlendType = 6;
@@ -465,6 +424,8 @@ void EnableAlphaBlend3()
 
 void EnableAlphaBlend4()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableAlphaBlend4, 0))
+        return;
     if (AlphaBlendType != 7)
     {
         AlphaBlendType = 7;
@@ -488,6 +449,8 @@ void EnableAlphaBlend4()
 
 void EnableLightMap()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EnableLightMap, 0))
+        return;
     if (AlphaBlendType != 1)
     {
         AlphaBlendType = 1;
@@ -592,12 +555,23 @@ float ConvertPositionY(float y)
     return ConvertY(y) + g_fScreenOffset_y;
 }
 
-void BeginOpengl(int x, int y, int Width, int Height)
+static void ToWindowPixels(int& x, int& y, int& Width, int& Height)
 {
     x = static_cast<int>(ConvertPositionX(static_cast<float>(x)));
     y = static_cast<int>(ConvertPositionY(static_cast<float>(y)));
     Width = static_cast<int>(ConvertX(static_cast<float>(Width)));
     Height = static_cast<int>(ConvertY(static_cast<float>(Height)));
+}
+
+void UpdateCameraView(int x, int y, int Width, int Height)
+{
+    ToWindowPixels(x, y, Width, Height);
+    CameraProjection::UpdateView(g_Camera, x, y, Width, Height);
+}
+
+void BeginOpengl(int x, int y, int Width, int Height)
+{
+    ToWindowPixels(x, y, Width, Height);
     BeginOpenglPhysical(x, y, Width, Height);
 }
 
@@ -614,26 +588,12 @@ void BeginOpenglForTarget(int width, int height)
     width = std::max(width, 1);
     height = std::max(height, 1);
 
+    // The view was built in the update (CameraProjection::UpdateView); the draw only applies it.
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-
-    // Calculate aspect ratio dynamically from viewport dimensions
-    // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
-    // FOV stays constant, aspect ratio scales the horizontal view accordingly
-    const float aspectRatio = static_cast<float>(width) / height;
-
-    // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    mu::GetRenderer().Rotate(g_Camera.Angle[1], 0.f, 1.f, 0.f);
-    if (g_Camera.TopViewEnable == false)
-        mu::GetRenderer().Rotate(g_Camera.Angle[0], 1.f, 0.f, 0.f);
-    mu::GetRenderer().Rotate(g_Camera.Angle[2], 0.f, 0.f, 1.f);
-    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+    CameraProjection::ApplyView(g_Camera, width, height);
 
     mu::GetRenderer().SetAlphaTest(false);
     mu::GetRenderer().SetTexture2D(true);
@@ -685,8 +645,6 @@ void BeginOpenglForTarget(int width, int height)
     {
         mu::GetRenderer().SetFogEnabled(false);
     }
-
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 }
 
 void EndOpengl()
@@ -695,18 +653,6 @@ void EndOpengl()
     mu::GetRenderer().PopMatrix();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PopMatrix();
-}
-
-void UpdateMousePositionn()
-{
-    vec3_t vPos;
-
-    mu::GetRenderer().LoadIdentity();
-    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-
-    Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
-    VectorIRotate(vPos, g_Camera.Matrix, MousePosition);
 }
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
@@ -870,12 +816,16 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
 
 void BeginSprite()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::BeginSprite))
+        return;
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
 }
 
 void EndSprite()
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::EndSprite))
+        return;
     mu::GetRenderer().PopMatrix();
 }
 
@@ -951,7 +901,8 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -983,10 +934,11 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
-void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
+void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha, float Scale)
 {
     vec3_t p;
     VectorCopy(Position, p);
@@ -1472,11 +1424,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
         flag <<= 3;
 
     int i;
-    vec3_t* vtx[4];
-    vtx[0] = (vec3_t*)v1;
-    vtx[1] = (vec3_t*)v2;
-    vtx[2] = (vec3_t*)v3;
-    vtx[3] = (vec3_t*)v4;
+    const float* vtx[4] = {v1, v2, v3, v4};
 
     int j = n - 1;
     switch (flag)
@@ -1484,7 +1432,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 1:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d <= 0.f)
                 return false;
         }
@@ -1492,7 +1440,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 2:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d <= 0.f)
                 return false;
         }
@@ -1500,7 +1448,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 4:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d <= 0.f)
                 return false;
         }
@@ -1508,7 +1456,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 8:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d >= 0.f)
                 return false;
         }
@@ -1516,7 +1464,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 16:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d >= 0.f)
                 return false;
         }
@@ -1524,7 +1472,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 32:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d >= 0.f)
                 return false;
         }

@@ -45,6 +45,30 @@ source under `src/MuEditor/` was compiled into the non-editor client.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
 
+## Static checks and the pre-push hook
+
+Checks that only read the repository (no compiler, dependencies or build output),
+such as the policy guards above and the RML and workflow contracts, are registered
+in `tests/static/CMakeLists.txt`. That directory is a standalone CMake project, so
+the checks run in seconds without a build:
+
+```bash
+cmake -S tests/static -B out/static-checks
+ctest --test-dir out/static-checks -C Release --output-on-failure
+```
+
+Quality Gates runs them before any native build starts. The full test tree includes
+them with the `static` label, and the native CI jobs skip that label. Register a new
+check there only if it stays fast and never reads build output.
+
+Run `scripts/install-hooks.sh` once per clone to enable `.githooks/pre-push`. Before
+each push it runs these checks and the changed-lines formatting check with the scripts
+Quality Gates uses, on Linux, macOS and Windows (Git Bash). It finds CMake on `PATH`
+or, on Windows, Visual Studio's bundled copy. It checks formatting only with the
+clang-format version CI pins (`pip install clang-format==<version from ci.yml>`) and
+diffs against `origin/main` (set `MU_PUSH_BASE` to change it). A missing tool skips
+that check with a message; CI still enforces it. `git push --no-verify` skips the hook.
+
 ## Adding a test module
 
 1. Create `tests/<module>/` with a `CMakeLists.txt` and one or more

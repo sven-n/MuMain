@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-// What Monster Checks finds in the monster table and which monster tool a
+// What Data Checks finds in the monster table and which monster tool a
 // problem opens (MN1), without ImGui.
 #ifdef _EDITOR
 
@@ -26,6 +26,7 @@ using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterKind;
+using MuEditor::Monsters::GetMapVariantOfField;
 using MuEditor::Monsters::GetMonsterField;
 using MuEditor::Monsters::GetToolForField;
 using MuEditor::Monsters::MonsterTool;
@@ -68,6 +69,19 @@ const ItemDataIssue* FindField(const std::vector<ItemDataIssue>& issues, std::st
     return found != issues.end() ? &*found : nullptr;
 }
 } // namespace
+
+TEST_CASE("Monster checks: a problem of a map variant's attacks names the variant Monster Attacks shows (Q-MN65) "
+          "[editor][monsters]")
+{
+    CHECK(GetMapVariantOfField("monster 291 mapVariants[0].attacks") == 0);
+    CHECK(GetMapVariantOfField("monster 291 mapVariants[12].attacks.otherwise") == 12);
+    CHECK(GetMapVariantOfField("mapVariants[1].maps") == 1);
+    CHECK_FALSE(GetMapVariantOfField("monster 291 attacks").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants[x]").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants[3").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 name").has_value());
+}
 
 TEST_CASE("Monster checks: a name opens Monster Translations, every other field the browser [editor][monsters]")
 {
@@ -141,6 +155,24 @@ TEST_CASE("Monster checks: the tools of the targets are the monster tools' windo
     CHECK(GetToolWindow(MonsterTool::Translations).open == &MuEditor::ToolWindows::monsterTranslations);
     CHECK(std::string_view(GetToolWindow(MonsterTool::Attacks).windowId) == MuEditor::WindowIds::MonsterAttacks);
     CHECK(GetToolWindow(MonsterTool::Attacks).open == &MuEditor::ToolWindows::monsterAttacks);
+    CHECK(std::string_view(GetToolWindow(MonsterTool::Sounds).windowId) == MuEditor::WindowIds::MonsterSounds);
+    CHECK(GetToolWindow(MonsterTool::Sounds).open == &MuEditor::ToolWindows::monsterSounds);
+}
+
+TEST_CASE("Monster checks: the sound sets and the monsters' sound fields go to Monster Sounds (Q-MN78) "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::GetSoundSetOfField;
+    CHECK(GetToolForField("monster 5 soundSet") == MonsterTool::Sounds);
+    CHECK(GetToolForField("monster 163 randomVariants[0].soundSet") == MonsterTool::Sounds);
+    CHECK(GetToolForField("monster 163 randomVariants[0].model") == MonsterTool::Sounds);
+    CHECK(GetToolForField("sound set Raymond soundEvents[0].cues") == MonsterTool::Sounds);
+    // A set's name may have spaces; its field has none.
+    CHECK(GetSoundSetOfField("sound set Chaos Castle Wizard soundEvents[0].sounds[1]") == "Chaos Castle Wizard");
+    CHECK(GetSoundSetOfField("sound set Raymond name") == "Raymond");
+    CHECK_FALSE(GetSoundSetOfField("monster 5 soundSet"));
+    CHECK_FALSE(GetSoundSetOfField("sound set Raymond"));
+    CHECK_FALSE(GetSoundSetOfField("model MONSTER_MODEL_HOUND cues[0]"));
 }
 
 TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]")
@@ -149,9 +181,12 @@ TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]"
     CHECK(GetToolForField("monster 459 attacks.monsterSkills") == MonsterTool::Attacks);
     CHECK(GetToolForField("attacks") == MonsterTool::Attacks);
     CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
+    // The map variants hold attacks only yet (Q-MN65).
+    CHECK(GetToolForField("monster 291 mapVariants[0].maps") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 291 mapVariants[1].attacks.otherwise") == MonsterTool::Attacks);
 }
 
-TEST_CASE("Monster checks: Run finds the name problems of the table and sends them to Monster Translations "
+TEST_CASE("Monster checks: RunMonsters finds the name problems of the table and sends them to Monster Translations "
           "[editor][monsters]")
 {
     MonsterDefinition unknownLanguage = Monster(9, "Thunder Lich");
@@ -162,12 +197,12 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     g_MonsterModelDatabase.Build({});
     std::vector<ItemDataIssue> issues;
 
-    MuEditor::Monsters::MonsterChecks::Run(issues);
+    MuEditor::Monsters::MonsterChecks::RunMonsters(issues);
 
     REQUIRE(issues.size() == 4);
     const ItemDataIssue* separator = FindIssue(issues, 7, "must not contain");
     REQUIRE(separator != nullptr);
-    CHECK(separator->severity == ItemDataIssueSeverity::Error);
+    CHECK(separator->severity == ItemDataIssueSeverity::Fatal);
     const ItemDataIssue* language = FindIssue(issues, 9, "never shown");
     REQUIRE(language != nullptr);
     CHECK(language->severity == ItemDataIssueSeverity::Warning);
@@ -186,7 +221,7 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     }
 }
 
-TEST_CASE("Monster checks: Run lists a model whose file is not in the client folder (P1) [editor][monsters]")
+TEST_CASE("Monster checks: RunModels lists a model whose file is not in the client folder (P1) [editor][monsters]")
 {
     g_MonsterDatabase.Build({}, "en");
     Data::Monsters::MonsterModelDefinition molt;
@@ -195,7 +230,7 @@ TEST_CASE("Monster checks: Run lists a model whose file is not in the client fol
     g_MonsterModelDatabase.Build(std::array{molt});
     std::vector<ItemDataIssue> issues;
 
-    MuEditor::Monsters::MonsterChecks::Run(issues);
+    MuEditor::Monsters::MonsterChecks::RunModels(issues);
     g_MonsterModelDatabase.Build({});
 
     REQUIRE(issues.size() == 1);

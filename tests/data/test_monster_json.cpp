@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
@@ -119,14 +119,14 @@ TEST_CASE("Monster data: a number twice is an error, the first one is kept [data
 
 TEST_CASE("Monster data: a bad header or list is an error, unknown fields are warnings [data][monsters]")
 {
-    CHECK(HasErrors(Read("not json").issues));
-    CHECK(HasErrors(Read(R"({ "formatVersion": 2, "monsters": [] })").issues));
+    CHECK(HasFatal(Read("not json").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "monsters": [] })").issues));
     CHECK(HasIssueAbout(Read(R"({ "formatVersion": 1, "monsters": {} })").issues, "monsters", "a list"));
     CHECK(HasIssueAbout(Read(MonsterFile("5")).issues, "monsters[0]", "an object"));
 
     const ReadResult unknown = Read(R"({ "formatVersion": 1, "color": "red", "monsters": [
         { "number": 7, "name": "X", "kind": "monster", "scale": 2 } ] })");
-    CHECK_FALSE(HasErrors(unknown.issues));
+    CHECK_FALSE(HasFatal(unknown.issues));
     CHECK(HasIssueAbout(unknown.issues, "color", "unknown field"));
     CHECK(HasIssueAbout(unknown.issues, "monster 7 scale", "unknown field"));
     CHECK(unknown.monsters.size() == 1);
@@ -172,7 +172,7 @@ TEST_CASE("Monster data: an empty English name and a long name are warnings [dat
 
     Data::Monsters::ValidateMonsterNames(monsters, issues);
 
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
     REQUIRE(issues.size() == 2);
     CHECK(issues[0].number == 252);
     CHECK(issues[0].message.find("English name is empty") != std::string::npos);
@@ -219,7 +219,7 @@ TEST_CASE("Monster data: the separator and bad language codes are errors [data][
 
     CHECK(HasIssueAbout(issues, "monster 7 name", "must not contain"));
     CHECK(HasIssueAbout(issues, "monster 8 name", "not a language code"));
-    CHECK(HasErrors(issues));
+    CHECK(HasFatal(issues));
 }
 
 TEST_CASE("Monster data: a name in a language the game has no texts for is a warning [data][monsters]")
@@ -310,4 +310,71 @@ TEST_CASE("Monster data: the models a monster can name, and back [data][monsters
         CHECK(Data::Monsters::FindMonsterModelReference(Data::Monsters::GetMonsterModelReference(slot)) == slot);
     }
     CHECK(Data::Monsters::GetMonsterModelReference(MODEL_ARROW).empty());
+}
+
+TEST_CASE("Monster data: a monster names its sound set and its random variants' (Q-MN78, Q-MN83) [data][monsters]")
+{
+    const ReadResult read = Read(MonsterFile(
+        R"({ "number": 163, "name": "Chaos Castle 2", "kind": "monster", "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+             "soundSet": "Chaos Castle",
+             "randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}] })"));
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    const MonsterDefinition& elf = read.monsters[0];
+    CHECK(elf.soundSet == "Chaos Castle");
+    REQUIRE(elf.randomVariants.size() == 1);
+    CHECK(elf.randomVariants[0].model == "MONSTER_MODEL_CHAOSCASTLE_WIZARD");
+    CHECK(elf.randomVariants[0].soundSet == "Chaos Castle Wizard");
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::array{elf});
+    INFO(text);
+    CHECK(text.find("\"model\": \"MONSTER_MODEL_CHAOSCASTLE_ELF\",\n      \"soundSet\": \"Chaos Castle\",\n") !=
+          std::string::npos);
+    CHECK(text.find("\"randomVariants\": [\n        {\"model\": \"MONSTER_MODEL_CHAOSCASTLE_WIZARD\", \"soundSet\": "
+                    "\"Chaos Castle Wizard\"}\n      ]") != std::string::npos);
+    const ReadResult back = Read(text);
+    REQUIRE(back.monsters.size() == 1);
+    CHECK(back.monsters[0] == elf);
+
+    // A variant that names no set keeps the entry's.
+    MonsterDefinition plain = elf;
+    plain.randomVariants[0].soundSet.reset();
+    const ReadResult plainBack = Read(Data::Monsters::WriteMonstersJson(std::array{plain}));
+    REQUIRE(plainBack.monsters.size() == 1);
+    CHECK(plainBack.monsters[0] == plain);
+}
+
+TEST_CASE("Monster data: a wrong sound set or random variant is an error [data][monsters]")
+{
+    struct Case
+    {
+        std::string fields;
+        std::string field;
+        std::string message;
+    };
+    const std::vector<Case> cases = {
+        {R"("soundSet": "")", "monster 163 soundSet", "name of a sound set"},
+        {R"("soundSet": 5)", "monster 163 soundSet", "name of a sound set"},
+        {R"("randomVariants": {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"})", "monster 163 randomVariants",
+         "list of random variants"},
+        {R"("randomVariants": [{"soundSet": "X"}])", "monster 163 randomVariants[0].model", "the model of the look"},
+        {R"("randomVariants": [{"model": "MODEL_HOUND"}])", "monster 163 randomVariants[0].model",
+         "the model of the look"},
+        {R"("randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_ELF"}])", "monster 163 randomVariants[0].model",
+         "the entry's model or another variant's"},
+        {R"("randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"}, {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"}])",
+         "monster 163 randomVariants[1].model", "the entry's model or another variant's"},
+        {R"("randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": ""}])",
+         "monster 163 randomVariants[0].soundSet", "name of a sound set"},
+    };
+    for (const Case& test : cases)
+    {
+        const ReadResult read = Read(MonsterFile(
+            R"({ "number": 163, "name": "X", "kind": "monster", "model": "MONSTER_MODEL_CHAOSCASTLE_ELF", )" +
+            test.fields + " }"));
+        INFO(test.fields);
+        INFO(Messages(read.issues));
+        CHECK(read.monsters.empty());
+        CHECK(HasIssueAbout(read.issues, test.field, test.message));
+    }
 }

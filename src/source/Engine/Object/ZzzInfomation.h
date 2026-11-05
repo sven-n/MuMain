@@ -3,9 +3,6 @@
 
 #pragma once
 
-
-void SaveTextFile(wchar_t* FileName);
-
 extern wchar_t AbuseFilter[MAX_FILTERS][20];
 extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int AbuseFilterNumber;
@@ -23,7 +20,7 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 extern ActionSkillType GetSkillByBook(int Type);
 void SetItemAttributes(ITEM* ip);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);
-extern int64_t ItemValue(ITEM* ip, int goldType = 1);
+extern int64_t ItemValue(const ITEM* ip, int goldType = 1);
 
 // The monster's name from the monster list; "()" for a number without an entry.
 extern const wchar_t* getMonsterName(int type);

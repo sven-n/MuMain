@@ -9,11 +9,11 @@ network library, output layout).
 ## Prerequisites (one-time)
 
 ```bash
-# Build tools and Native AOT prerequisites
+# Build tools, Native AOT prerequisites, and curl for the .NET installer below
 sudo apt-get update
 sudo apt-get install -y \
   build-essential cmake ninja-build pkg-config \
-  clang zlib1g-dev
+  clang zlib1g-dev curl ca-certificates
 
 # OpenGL / GLEW / GLU / turbojpeg
 sudo apt-get install -y \
@@ -22,6 +22,10 @@ sudo apt-get install -y \
 
 # Crypto++ (the ciphers of version 14 models)
 sudo apt-get install -y libcrypto++-dev
+
+# OpenSSL (the saved login) and libcurl (the in-game shop downloads).
+# An installed libcurl4-gnutls-dev works too: then leave out libcurl4-openssl-dev.
+sudo apt-get install -y libssl-dev libcurl4-openssl-dev
 
 # SDL3 build dependencies (X11 + Wayland + audio)
 sudo apt-get install -y \
@@ -61,24 +65,29 @@ test scripts need to drive the client (see `docs/control-socket.md`); it is
 
 ### Using the presets
 
-`CMakePresets.json` carries the same two configurations, with a
+`CMakePresets.json` carries these configurations, with a
 `Ninja Multi-Config` generator and `CMAKE_EXPORT_COMPILE_COMMANDS=ON`:
 
 ```bash
 # Configure (pick one)
 cmake --preset linux-x64                  # player build: ENABLE_EDITOR=OFF, ENABLE_CONTROL_SOCKET=OFF
 cmake --preset linux-x64-mueditor         # developer build: ENABLE_EDITOR=ON, ENABLE_CONTROL_SOCKET=ON
+cmake --preset linux-x64-in-game-tests    # developer build: control socket + in-game tester; no editor, no unit tests
 
-# Build (pick the matching Debug/Release build preset)
+# Build (pick the matching build preset)
 cmake --build --preset linux-x64-mueditor-debug
 cmake --build --preset linux-x64-mueditor-release
+cmake --build --preset linux-x64-in-game-tests-gui    # builds, then opens the tester
 ```
 
-Each preset builds into `out/build/<preset-name>/`, so the two configurations
+Each preset builds into `out/build/<preset-name>/`, so the configurations
 never share a build tree. The plain preset is the player configuration: it
 contains neither the editor nor the control socket, and the `control_socket_leak`
 test in its test suite proves the latter. To get the socket without the editor,
-configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`.
+configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`, or use
+`linux-x64-in-game-tests` for the socket and the in-game tester; its build
+presets are `-release` and `-gui` (see [in-game tests](../../in-game-tests.md);
+its trade scenarios still fail on Linux).
 
 Because `src/MuEditor/` is only added to the target when `ENABLE_EDITOR=ON`, the
 `linux-x64` compile database contains no editor translation units and clangd
@@ -89,7 +98,7 @@ enabled); point your editor's clangd at it with
 `--compile-commands-dir=out/build/linux-x64-mueditor`. Configuring is enough for
 indexing — you do not have to build that tree.
 
-If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links those libraries at build time and `Main` records their `RUNPATH`.
+If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), install the Vulkan loader's development files (`sudo apt-get install -y libvulkan-dev`) and configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links its video backends at build time, `Main` links the Vulkan loader, and `Main` records their directories in its `RUNPATH`. SDL still loads the Vulkan loader at run time and finds it there; if the loader is missing, `Main` stops at start-up with `error while loading shared libraries: libvulkan.so.1`.
 
 ## Run
 
@@ -145,6 +154,9 @@ creates a local archive and does not upload it.
 ## Tests
 
 ```bash
+# Optional: glslang and SPIRV-Cross, for the shader reflection tests that CI runs
+sudo apt-get install -y glslang-tools spirv-cross
+
 cmake -S . -B build-linux -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
 cmake --build build-linux -j"$(nproc)"
 ctest --test-dir build-linux --output-on-failure
@@ -153,3 +165,7 @@ ctest --test-dir build-linux --output-on-failure
 They run natively (no emulation). With `ENABLE_EDITOR=OFF` this includes the
 `editor_leak` guard, which fails the build if any `src/MuEditor/` source was
 compiled into the non-editor client.
+
+Without `spirv-cross`, CTest leaves out `checked_in_shader_reflection_validation`,
+`staged_shader_reflection_validation` and `shader_reflection_validation`; without
+`glslang-tools`, only `shader_reflection_validation`.

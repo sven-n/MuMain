@@ -105,14 +105,6 @@ bool ParseMapIndex(const std::string& text, int& map)
     return true;
 }
 
-// True while the character is still walking a planned path. Re-issuing a
-// move before it ends restarts the walk from the current tile, so an act
-// that walks into range would crawl.
-bool WalkInProgress()
-{
-    return Hero != nullptr && Hero->Path.PathNum > 0 && Hero->Path.CurrentPath < Hero->Path.PathNum - 1;
-}
-
 // True when the next step of a per-frame act is due, remembering when the
 // previous one was taken.
 bool StepIsDue(std::chrono::steady_clock::time_point& last, std::chrono::milliseconds interval = PrimitiveInterval)
@@ -196,24 +188,15 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (Hero == nullptr)
+        // Logical arrival precedes the end of the visible movement segment.
+        if (Hero == nullptr || Automation::IsWalkInProgress())
         {
             return Status::Running;
         }
 
         if (std::abs(Hero->PositionX - m_tileX) <= ArrivalTiles && std::abs(Hero->PositionY - m_tileY) <= ArrivalTiles)
         {
-            json result;
-            result["position"] = PositionObject();
-            response = App::Control::EncodeResult(EncodedId(), result.dump());
-            return Status::Finished;
-        }
-
-        // Let the planned path play out before planning the next one:
-        // re-planning every frame would restart the walk mid-step.
-        if (WalkInProgress())
-        {
-            return Status::Running;
+            return FinishArrival(response);
         }
 
         // Pace the walk packets like a player's clicks; the server treats a
@@ -233,16 +216,21 @@ public:
 
         if (result == Automation::MoveResult::Arrived)
         {
-            json arrived;
-            arrived["position"] = PositionObject();
-            response = App::Control::EncodeResult(EncodedId(), arrived.dump());
-            return Status::Finished;
+            return FinishArrival(response);
         }
 
         return Status::Running;
     }
 
 private:
+    Status FinishArrival(std::string& response) const
+    {
+        json result;
+        result["position"] = PositionObject();
+        response = App::Control::EncodeResult(EncodedId(), result.dump());
+        return Status::Finished;
+    }
+
     int m_tileX;
     int m_tileY;
     std::chrono::steady_clock::time_point m_lastWalkAt{};
@@ -292,7 +280,7 @@ public:
             return Status::Running;
         }
 
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }
@@ -389,7 +377,7 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }
@@ -482,7 +470,7 @@ public:
             return Status::Finished;
         }
 
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }

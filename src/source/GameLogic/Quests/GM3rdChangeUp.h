@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 
 namespace SEASON3A
@@ -29,21 +31,20 @@ namespace SEASON3A
         bool CreateBalgasBarrackObject(OBJECT* pObject);
         bool CreateBalgasRefugeObject(OBJECT* pObject);
         bool MoveObject(OBJECT* pObject);
-        bool RenderObjectVisual(OBJECT* pObject, BMD* pModel);
-        bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        void RenderAfterObjectMesh(OBJECT* o, BMD* b);
+        bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
+        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
 
         bool CreateFireSnuff(PARTICLE* o);
         void PlayEffectSound(OBJECT* o);
         void PlayBGM();
 
         CHARACTER* CreateBalgasBarrackMonster(int iType, int PosX, int PosY, int Key);
-        bool SetCurrentActionBalgasBarrackMonster(CHARACTER* c, OBJECT* o);
         bool AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b);
         bool MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
         void MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-        bool RenderMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
-        bool RenderBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+        bool RenderMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon);
+        bool UpdateBalgasBarrackMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     };
 }
 
