@@ -2,6 +2,7 @@
 
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_define.h"
+#include "Render/Renderer/RenderUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -128,29 +129,39 @@ void AddLight(float (*grid)[3], float x, float y, const float* color, int range)
     }
 }
 
-void AddSignedLight(float (*grid)[3], float x, float y, const float* color, int range)
+void RemovePinnedLights(float (*grid)[3], const mu::DynamicLightsUniform& lights)
 {
-    const float xf = x / TERRAIN_SCALE;
-    const float yf = y / TERRAIN_SCALE;
-    const int xi = static_cast<int>(xf);
-    const int yi = static_cast<int>(yf);
-    for (int syi = yi - range; syi <= yi + range; ++syi)
+    for (std::uint32_t light = 0; light < lights.lightCount; ++light)
     {
-        const float yd = yf - static_cast<float>(syi);
-        for (int sxi = xi - range; sxi <= xi + range; ++sxi)
+        const float xf = lights.positionAndRadius[light][0] / TERRAIN_SCALE;
+        const float yf = lights.positionAndRadius[light][1] / TERRAIN_SCALE;
+        const int range = static_cast<int>(std::lround(lights.positionAndRadius[light][3] / TERRAIN_SCALE));
+        const int xi = static_cast<int>(xf);
+        const int yi = static_cast<int>(yf);
+        for (int syi = yi - range; syi <= yi + range; ++syi)
         {
-            const float xd = xf - static_cast<float>(sxi);
-            const float falloff = Falloff(sqrtf(xd * xd + yd * yd), range);
-            if (falloff > 0.f)
+            const float yd = yf - static_cast<float>(syi);
+            for (int sxi = xi - range; sxi <= xi + range; ++sxi)
             {
-                float* vertex = grid[RepeatedGridIndex(sxi, syi)];
-                for (int i = 0; i < kColorComponents; ++i)
+                const float xd = xf - static_cast<float>(sxi);
+                const float falloff = Falloff(sqrtf(xd * xd + yd * yd), range);
+                if (falloff > 0.f)
                 {
-                    vertex[i] += color[i] * falloff;
+                    float* vertex = grid[RepeatedGridIndex(sxi, syi)];
+                    for (int i = 0; i < kColorComponents; ++i)
+                    {
+                        vertex[i] -= lights.color[light][i] * falloff;
+                    }
                 }
             }
         }
     }
+}
+
+GroundVertexLight EncodeGroundLight(const float* light, float alpha)
+{
+    return {{(std::min)(light[0], 0.f), (std::min)(light[1], 0.f), 1.f + (std::min)(light[2], 0.f)},
+            mu::PackABGR(light[0], light[1], light[2], alpha)};
 }
 
 void AddDynamicLight(float (*grid)[3], Lighting::DynamicLightList& frameLights, float x, float y, const float* color,

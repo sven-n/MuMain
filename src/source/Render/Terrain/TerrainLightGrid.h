@@ -8,7 +8,9 @@
 #include "Render/Lighting/DynamicLight.h"
 #include "Render/Lighting/DynamicLightList.h"
 #include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/Renderer/SceneLighting.h"
 
+#include <cstdint>
 #include <span>
 
 namespace Render::Terrain::LightGrid
@@ -21,8 +23,18 @@ namespace Render::Terrain::LightGrid
 // Adds color * Falloff to every grid vertex within range cells of world (x, y), clamping each
 // vertex at 0 after the addition (Classic AddTerrainLight).
 void AddLight(float (*grid)[3], float x, float y, const float* color, int range);
-// AddLight without the clamp, for a grid that holds what is left once lights are taken out.
-void AddSignedLight(float (*grid)[3], float x, float y, const float* color, int range);
+// Takes the pinned lights the shader adds back per pixel out of a copy of the terrain light, without clamping: where
+// darkening outweighs the rest, the vertex keeps what is below zero.
+void RemovePinnedLights(float (*grid)[3], const mu::DynamicLightsUniform& lights);
+
+// What a lit ground vertex carries of a signed light: the part from zero up in its colour, and the part below zero,
+// which a packed colour cannot hold, in its normal as an offset from straight up (world_lit.vert).
+struct GroundVertexLight
+{
+    float normal[3];
+    std::uint32_t color;
+};
+[[nodiscard]] GroundVertexLight EncodeGroundLight(const float* light, float alpha);
 
 // AddLight, and records the light in the frame's light list as a point light over terrain of the
 // given height. A light without range changes no vertex and is not recorded.

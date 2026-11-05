@@ -116,16 +116,46 @@ TEST_CASE("terrain light grid adds lights exactly as Classic AddTerrainLight [re
     CHECK(classic == extracted);
 }
 
-TEST_CASE("taking a pinned light out keeps the darkening below zero [render][dynamic_lights]")
+TEST_CASE("taking a pinned light out keeps the darkening below zero, through to the vertex [render][dynamic_lights]")
 {
-    // Base 0.1, a torch adding 0.5, then an ice effect taking 0.4: the frame's light is 0.2.
-    Grid grid = MakeGrid(0.2f);
-    const float torch[3] = {-0.5f, -0.5f, -0.5f};
-    LightGrid::AddSignedLight(Data(grid), 10.f * TERRAIN_SCALE, 20.f * TERRAIN_SCALE, torch, 1);
-    const float left = grid[20 * TERRAIN_SIZE + 10][0];
-    CHECK(left == doctest::Approx(-0.3f));
-    // The shader adds the torch back per pixel, which gives the frame's light again.
-    CHECK(left + 0.5f == doctest::Approx(0.2f));
+    // Base 0.1, a torch adding 0.5, then an ice effect taking 0.4, built as the frame builds them: 0.2 at the torch.
+    Grid grid(kGridVertices, {0.1f, 0.1f, 0.1f});
+    const float x = 10.f * TERRAIN_SCALE;
+    const float y = 20.f * TERRAIN_SCALE;
+    const float torchColor[3] = {0.5f, 0.5f, 0.5f};
+    const float iceColor[3] = {-0.4f, -0.4f, -0.4f};
+    LightGrid::AddLight(Data(grid), x, y, torchColor, 3);
+    LightGrid::AddLight(Data(grid), x, y, iceColor, 3);
+    const std::size_t centre = 20 * TERRAIN_SIZE + 10;
+    CHECK(grid[centre][0] == doctest::Approx(0.2f));
+
+    mu::DynamicLightsUniform pinned{};
+    pinned.lightCount = 1;
+    pinned.positionAndRadius[0][0] = x;
+    pinned.positionAndRadius[0][1] = y;
+    pinned.positionAndRadius[0][3] = 3.f * TERRAIN_SCALE;
+    pinned.color[0][0] = pinned.color[0][1] = pinned.color[0][2] = 0.5f;
+    LightGrid::RemovePinnedLights(Data(grid), pinned);
+    CHECK(grid[centre][0] == doctest::Approx(-0.3f));
+    CHECK(grid[centre][1] == doctest::Approx(-0.3f));
+
+    const LightGrid::GroundVertexLight vertex = LightGrid::EncodeGroundLight(grid[centre].data(), 1.f);
+    CHECK((vertex.color & 0x00FFFFFFu) == 0u);
+    CHECK((vertex.color >> 24u) == 0xFFu);
+    CHECK(vertex.normal[0] == doctest::Approx(-0.3f));
+    CHECK(vertex.normal[2] - 1.f == doctest::Approx(-0.3f));
+    // world_lit adds the torch back to the offset: only the arithmetic, the shader's own run is checked in game.
+    CHECK(0.5f + vertex.normal[0] == doctest::Approx(0.2f));
+}
+
+TEST_CASE("a light at or above zero leaves the vertex's normal straight up [render][dynamic_lights]")
+{
+    const float light[3] = {0.25f, 0.5f, 0.f};
+    const LightGrid::GroundVertexLight vertex = LightGrid::EncodeGroundLight(light, 0.5f);
+    CHECK(vertex.normal[0] == 0.f);
+    CHECK(vertex.normal[1] == 0.f);
+    CHECK(vertex.normal[2] == 1.f);
+    CHECK(vertex.color != 0u);
 }
 
 TEST_CASE("dynamic terrain lights are recorded as point lights without changing the grid [render][dynamic_lights]")

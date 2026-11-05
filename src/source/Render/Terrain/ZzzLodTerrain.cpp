@@ -1433,13 +1433,6 @@ static vec3_t* s_faceLight = PrimaryTerrainLight;
 
 extern int FrustrumBoundMinX, FrustrumBoundMinY, FrustrumBoundMaxX, FrustrumBoundMaxY;
 
-// A lit ground vertex's light below 0, where darkening outweighed the pinned lights taken out: the vertex colour
-// cannot hold it, so it rides in the normal as an offset from straight up, and world_lit adds it back.
-static float DarkeningNormal(const float* light, int channel)
-{
-    return (std::min)(light[channel], 0.f);
-}
-
 void BuildGroundLight()
 {
     for (int yi = FrustrumBoundMinY; yi <= FrustrumBoundMaxY + 3; ++yi)
@@ -1450,14 +1443,8 @@ void BuildGroundLight()
             VectorCopy(PrimaryTerrainLight[index], GroundTerrainLight[index]);
         }
     }
-    const mu::DynamicLightsUniform& lights = Render::Lighting::FrameWorldDynamicLights().Selection().uniform;
-    for (std::uint32_t i = 0; i < lights.lightCount; ++i)
-    {
-        const float removed[3] = {-lights.color[i][0], -lights.color[i][1], -lights.color[i][2]};
-        const int range = static_cast<int>(std::lround(lights.positionAndRadius[i][3] / TERRAIN_SCALE));
-        Render::Terrain::LightGrid::AddSignedLight(GroundTerrainLight, lights.positionAndRadius[i][0],
-                                                   lights.positionAndRadius[i][1], removed, range);
-    }
+    Render::Terrain::LightGrid::RemovePinnedLights(GroundTerrainLight,
+                                                   Render::Lighting::FrameWorldDynamicLights().Selection().uniform);
     s_groundLightBuilt = true;
 }
 
@@ -1548,15 +1535,9 @@ void RenderFace(int Texture, int mx, int my)
 
     auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
     {
-        return {pos[0],
-                pos[1],
-                pos[2],
-                DarkeningNormal(light, 0),
-                DarkeningNormal(light, 1),
-                1.f + DarkeningNormal(light, 2),
-                tc[0],
-                tc[1],
-                mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
     const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
@@ -1579,15 +1560,9 @@ void RenderFace_After(int Texture, int mx, int my)
 
     auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
     {
-        return {pos[0],
-                pos[1],
-                pos[2],
-                DarkeningNormal(light, 0),
-                DarkeningNormal(light, 1),
-                1.f + DarkeningNormal(light, 2),
-                tc[0],
-                tc[1],
-                mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
     const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
@@ -1630,15 +1605,9 @@ void RenderFaceAlpha(int Texture, int mx, int my)
 {
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
     {
-        return {pos[0],
-                pos[1],
-                pos[2],
-                DarkeningNormal(light, 0),
-                DarkeningNormal(light, 1),
-                1.f + DarkeningNormal(light, 2),
-                tc[0],
-                tc[1],
-                mu::PackABGR(light[0], light[1], light[2], alpha)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, alpha);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
     const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1],
                                      TerrainMappingAlpha[TerrainIndex1]);
@@ -1846,15 +1815,9 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 #endif	// ASG_ADD_MAP_KARUTAN
                 const auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
                 {
-                    return {pos[0],
-                            pos[1],
-                            pos[2],
-                            DarkeningNormal(light, 0),
-                            DarkeningNormal(light, 1),
-                            1.f + DarkeningNormal(light, 2),
-                            tc[0],
-                            tc[1],
-                            mu::PackABGR(light[0], light[1], light[2], 1.f)};
+                    const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+                    return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                            ground.normal[2], tc[0],  tc[1],  ground.color};
                 };
                 const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
                 const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
@@ -2082,19 +2045,17 @@ void RenderTerrainBitmapTile(int Texture, float xf, float yf, float lodf, int lo
     mu::Vertex3D verts[4];
     for (int i = 0; i < 4; i++)
     {
-        std::uint32_t color = fallbackColor;
-        if (LightEnable)
-            color = mu::PackABGR(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        const float* light = Light[i];
+        const auto ground = LightEnable ? Render::Terrain::LightGrid::EncodeGroundLight(Light[i], Alpha)
+                                        : Render::Terrain::LightGrid::GroundVertexLight{{0.f, 0.f, 1.f}, fallbackColor};
         verts[i] = {TerrainVertex[i][0],
                     TerrainVertex[i][1],
                     TerrainVertex[i][2],
-                    LightEnable ? DarkeningNormal(light, 0) : 0.f,
-                    LightEnable ? DarkeningNormal(light, 1) : 0.f,
-                    LightEnable ? 1.f + DarkeningNormal(light, 2) : 1.f,
+                    ground.normal[0],
+                    ground.normal[1],
+                    ground.normal[2],
                     c[i][0],
                     c[i][1],
-                    color};
+                    ground.color};
     }
     mu::GetRenderer().RenderQuad3D(verts, static_cast<std::uint32_t>(Texture));
 }
