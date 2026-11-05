@@ -93,7 +93,8 @@ public:
     // The folders, also the history's steps, keep the sounds whose keys
     // changed since the last call in any window (FollowedKeys: a set renamed
     // in Monster Sounds, a file picked in the Map Editor's Sounds tab); Save
-    // then writes the new keys. The editor calls it each frame.
+    // then writes the new keys. A set renamed elsewhere keeps this window's
+    // changes and steps under its new name. The editor calls it each frame.
     void FollowKeyChanges();
     // What kept the folders' file from being read (its fatal problems): the
     // folders stay as they are, so Save never writes over the file, until
@@ -134,8 +135,8 @@ public:
     // one was refused (the problems in `issues`); the others are written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
     // Reads the files whose tables changed again (a monster set this window
-    // changed: as Data/Monsters/Sounds.json has it) and the folders; the
-    // history goes.
+    // changed: as Data/Monsters/Sounds.json has it, under the name another
+    // window gave it since) and the folders; the history goes.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
     // The tables as they are now, and the folders as their file has them, are
     // what Save and Revert compare with.
@@ -153,13 +154,23 @@ private:
     void ReadFolders();
     // In the folders and in the steps' folders.
     void RenameInFolders(const std::map<std::string, std::string>& renamed);
+    // Sets renamed in another window since (RenamedSets): the saved sets and
+    // the steps name them by their new names.
+    void FollowRenamedSets(const std::map<std::string, std::string>& renamed);
+    // The sets this window changed, as Data/Monsters/Sounds.json has them now
+    // (Revert): the Monster Sounds window's unsaved changes of them go too, a
+    // set renamed there since keeps its new name, and a set the file does not
+    // have goes. False when the file could not be read.
+    bool RevertSets(std::vector<Data::Items::ItemDataIssue>& issues);
 
     std::vector<SoundEdit> m_undo;
     std::vector<SoundEdit> m_redo;
     bool m_lastRefused = false;
     std::optional<std::vector<Data::Sounds::SoundFile>> m_savedCode;
-    // The sets changed since the last save, as they were before the first
-    // change (IsModified, Save); Revert reads them from the file.
+    // The sets changed since the last save, by their names now (a rename in
+    // another window follows), each as it was before the first change, with
+    // its name then, the file's (IsModified, Save); Revert reads them from the
+    // file.
     std::map<std::string, Data::Monsters::MonsterSoundSet> m_savedSets;
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;

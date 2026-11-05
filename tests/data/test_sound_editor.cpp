@@ -522,6 +522,47 @@ TEST_CASE("Sound Editor: Revert puts a set it changed back as Data/Monsters/Soun
     CHECK_FALSE(g_SoundEdits.IsModified());
 }
 
+TEST_CASE("Sound Editor: a set renamed in Monster Sounds keeps this window's change under its new name, so undo, "
+          "redo and Revert act on it and the old name does not come back [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    std::filesystem::create_directories("Data/Monsters");
+    std::ofstream(Data::Monsters::GetMonsterSoundsFile(), std::ios::binary)
+        << Data::Monsters::WriteMonsterSoundsJson(std::vector<Data::Monsters::MonsterSoundSet>{DeathTree()});
+    g_SoundEdits.TakeSaved();
+    const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+    const SoundRow* idle = FindRow(rows, "set:Death Tree:Data/Sound/EditorTest/ok.wav");
+    REQUIRE(idle != nullptr);
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(*idle);
+    values.name = "Named";
+    REQUIRE(g_SoundEdits.Change(*idle, values));
+    REQUIRE(g_MonsterEdits.RenameSoundSet("Rename the set", "Death Tree", "Tree of Death", -1));
+    g_SoundEdits.FollowKeyChanges();
+    CHECK(g_SoundEdits.IsModified());
+
+    REQUIRE(g_SoundEdits.Undo());
+    const Data::Monsters::MonsterSoundSet* renamed = g_MonsterSoundSetDatabase.Find("Tree of Death");
+    REQUIRE(renamed != nullptr);
+    CHECK(renamed->sounds[0].name.empty());
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Redo());
+    CHECK(g_MonsterSoundSetDatabase.Find("Tree of Death")->sounds[0].name == "Named");
+
+    // Revert: the file's sounds, under the new name.
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(g_MonsterSoundSetDatabase.Find("Death Tree") == nullptr);
+    renamed = g_MonsterSoundSetDatabase.Find("Tree of Death");
+    REQUIRE(renamed != nullptr);
+    Data::Monsters::MonsterSoundSet expected = DeathTree();
+    expected.name = "Tree of Death";
+    CHECK(*renamed == expected);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
 TEST_CASE("Sound Editor: Save writes the sets it changed into Data/Monsters/Sounds.json alone, and the monster "
           "tools' other changes stay unsaved [sounds][editor]")
 {

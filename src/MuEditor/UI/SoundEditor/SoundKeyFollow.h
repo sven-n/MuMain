@@ -31,6 +31,10 @@ KeyedTables CurrentKeyedTables();
 // of the same key came or went. Where sounds came, went and changed between
 // the same neighbours, which one became which is not known: none of those.
 std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const KeyedTables& after);
+
+// The sets of `before` that `after` has under another name (renamed, alike
+// otherwise, as FollowedKeys finds them), old name to new.
+std::map<std::string, std::string> RenamedSets(const KeyedTables& before, const KeyedTables& after);
 } // namespace MuEditor::SoundEditor
 
 #endif // _EDITOR

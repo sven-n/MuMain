@@ -116,6 +116,13 @@ const MonsterSoundSet* RenamedTo(const MonsterSoundSet& set, const KeyedTables& 
     return another ? nullptr : renamed;
 }
 
+// The set of `after` that `set` of `before` is: by its name, else renamed.
+const MonsterSoundSet* SetAfter(const MonsterSoundSet& set, const KeyedTables& before, const KeyedTables& after)
+{
+    const MonsterSoundSet* now = Named(after.sets, set.name);
+    return now != nullptr ? now : RenamedTo(set, before, after);
+}
+
 void Follow(const std::vector<std::string>& from, const std::vector<std::string>& to,
             const std::vector<std::optional<size_t>>& places, std::map<std::string, std::string>& renamed)
 {
@@ -147,17 +154,26 @@ std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const
     std::map<std::string, std::string> renamed;
     for (const MonsterSoundSet& set : before.sets)
     {
-        const MonsterSoundSet* now = Named(after.sets, set.name);
-        if (now == nullptr)
-        {
-            now = RenamedTo(set, before, after);
-        }
-        if (now != nullptr)
+        if (const MonsterSoundSet* now = SetAfter(set, before, after))
         {
             Follow(from.sets.at(set.name), to.sets.at(now->name), PlacesAfter(set.sounds, now->sounds), renamed);
         }
     }
     Follow(from.objects, to.objects, PlacesAfter(before.objects, after.objects), renamed);
+    return renamed;
+}
+
+std::map<std::string, std::string> RenamedSets(const KeyedTables& before, const KeyedTables& after)
+{
+    std::map<std::string, std::string> renamed;
+    for (const MonsterSoundSet& set : before.sets)
+    {
+        const MonsterSoundSet* now = SetAfter(set, before, after);
+        if (now != nullptr && now->name != set.name)
+        {
+            renamed.emplace(set.name, now->name);
+        }
+    }
     return renamed;
 }
 } // namespace MuEditor::SoundEditor
