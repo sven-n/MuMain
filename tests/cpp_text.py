@@ -1,5 +1,19 @@
 """C++ source text as the compiler reads it, for the static checks that read the code."""
 
+import os
+from pathlib import Path
+
+SOURCE_SUFFIXES = (".cpp", ".h")
+
+
+def source_files(root, skipped_dirs, suffixes=SOURCE_SUFFIXES):
+    """The files with these suffixes under root, sorted, without entering any directory named in skipped_dirs."""
+    found = []
+    for directory, subdirectories, files in os.walk(root):
+        subdirectories[:] = [name for name in subdirectories if name not in skipped_dirs]
+        found += [Path(directory, name) for name in files if Path(name).suffix in suffixes]
+    return sorted(found)
+
 
 def blank(text, start, stop):
     return "".join(c if c == "\n" else " " for c in text[start:stop])

@@ -22,8 +22,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from cpp_text import code_only  # noqa: E402
+from cpp_text import code_only, source_files  # noqa: E402
 
+SKIPPED_DIRS = {"ThirdParty"}
 TYPE_NAMES = ("OBJECT", "CHARACTER", "PART_t", "JOINT", "PARTICLE", "ITEM", "ITEM_t")
 TYPES = "(?:" + "|".join(TYPE_NAMES) + ")"
 NAME = re.compile(r"\b((?:\w+::)*(?:Render|Draw|Describe)\w*)\s*\(")
@@ -341,11 +342,11 @@ def offences(path, text, kinds):
 
 def main():
     root = Path(sys.argv[1])
-    paths = [p for p in sorted(root.rglob("*")) if p.suffix in (".cpp", ".h") and "ThirdParty" not in p.parts]
+    paths = source_files(root, SKIPPED_DIRS)
     texts = {p: code_only(p.read_text(encoding="utf-8-sig", errors="replace")) for p in paths}
     game = Path(__file__).resolve().parents[2] / "src" / "source"
     headers = [code_only(p.read_text(encoding="utf-8-sig", errors="replace"))
-               for p in sorted(game.rglob("*.h")) if "ThirdParty" not in p.parts]
+               for p in source_files(game, SKIPPED_DIRS, suffixes=(".h",))]
     kinds = Kinds([text for path, text in texts.items() if path.suffix == ".h"] + headers)
     found = []
     for path, text in texts.items():

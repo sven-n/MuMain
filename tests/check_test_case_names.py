@@ -26,14 +26,13 @@ left out, adjacent literals joined, escapes decoded. Prints each name CMake woul
 one, when a name is not written as string literals alone (a macro in it, say), or when it finds no test case at all.
 """
 
-import os
 import re
 import sys
 import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cpp_text import code_and_source  # noqa: E402
+from cpp_text import code_and_source, source_files  # noqa: E402
 
 # The macros that register a case; TEST_CASE_FIXTURE takes the fixture before the name, the others the name first.
 CASE = re.compile(r"\b(?:DOCTEST_)?(TEST_CASE(?:_FIXTURE|_CLASS|_TEMPLATE(?:_DEFINE)?)?"
@@ -56,7 +55,6 @@ SCENARIO_PREFIX = "  Scenario: "
 # The lines of doctest's list output around the names, which the discovery skips.
 LIST_HEADER = "[doctest] "
 LIST_SEPARATOR = "=" * 79
-SOURCE_SUFFIXES = (".cpp", ".h")
 SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
@@ -156,22 +154,13 @@ def problem(name):
     return None
 
 
-def sources(root):
-    """The .cpp and .h files under root in order, without entering third_party or fixtures directories."""
-    found = []
-    for directory, subdirectories, files in os.walk(root):
-        subdirectories[:] = sorted(name for name in subdirectories if name not in SKIPPED_DIRS)
-        found += [Path(directory, name) for name in sorted(files) if Path(name).suffix in SOURCE_SUFFIXES]
-    return found
-
-
 def main():
     # Piped output on Windows (CTest, the pre-push hook) uses the ANSI code page: escape what it cannot show.
     sys.stdout.reconfigure(errors="backslashreplace")
     root = Path(sys.argv[1])
     checked = 0
     found = []
-    for path in sources(root):
+    for path in source_files(root, SKIPPED_DIRS):
         for line, name in cases(path.read_text(encoding="utf-8-sig", errors="replace")):
             checked += 1
             if reason := problem(name):
