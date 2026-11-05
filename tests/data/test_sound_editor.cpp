@@ -1953,6 +1953,76 @@ TEST_CASE("Sound Editor: the Events tab draws each event's rules (Q-SE1) [sounds
     g_SoundEventDatabase.Build(previous);
 }
 
+TEST_CASE("Sound Editor: the Events tab takes a field's text that reads and says why it does not take one that "
+          "does not (Q-SE1) [sounds][editor]")
+{
+    EditorScope scope;
+    const std::vector<Data::Sounds::SoundEvent> previous = g_SoundEventDatabase.GetAll();
+    Data::Sounds::SoundEvent footsteps;
+    footsteps.event = "heroFootstep";
+    Data::Sounds::SoundEventRule grass;
+    grass.worlds = {0};
+    MuEditor::SoundEditor::AddPlay(grass, "SOUND_HUMAN_WALK_GRASS");
+    footsteps.rules = {grass};
+    g_SoundEventDatabase.Build(std::vector<Data::Sounds::SoundEvent>{footsteps});
+    g_SoundEdits.TakeSaved();
+    TestImGuiContext context;
+    bool selectEvents = true;
+    const auto frame = [&selectEvents]
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        ImGui::SetNextWindowSize(ImVec2(1200.0f, 400.0f));
+        g_MuSoundEditorUI.Render(&open);
+        // The Events tab, from the next frame on.
+        for (int index = 0; selectEvents && index < ImGui::GetCurrentContext()->TabBars.GetMapSize(); ++index)
+        {
+            ImGuiTabBar* bar = ImGui::GetCurrentContext()->TabBars.TryGetMapData(index);
+            if (bar != nullptr && bar->Tabs.Size == 2)
+            {
+                bar->NextSelectedTabId = bar->Tabs[1].ID;
+                selectEvents = false;
+            }
+        }
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName(MuEditor::WindowIds::SoundEditor);
+    REQUIRE(window != nullptr);
+    const ImGuiID tabs = ImGui::GetIDWithSeed("##SoundEditorTabs", nullptr, window->ID);
+    const ImGuiID events = ImGui::GetIDWithSeed(I18N::Editor::SoundEditorTabEvents, nullptr, tabs);
+    const ImGuiID rules = ImGui::GetIDWithSeed("##Rules", nullptr, ImGui::GetIDWithSeed(0, events));
+    const ImGuiID worlds = ImGui::GetIDWithSeed("##Worlds", nullptr, ImGui::GetIDWithSeed(0, rules));
+    // Activation selects the field's text; the typed text replaces it, and
+    // Enter leaves the field.
+    const auto type = [&](const char* text)
+    {
+        ImGui::ActivateItemByID(worlds);
+        frame();
+        ImGui::GetIO().AddInputCharactersUTF8(text);
+        frame();
+        ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, true);
+        frame();
+        ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, false);
+        frame();
+    };
+    const auto worldsOf = [] { return g_SoundEventDatabase.Find("heroFootstep")->rules[0].worlds; };
+
+    // Past the highest world: not taken, and the status line says why.
+    type("7, 300");
+    CHECK(worldsOf() == std::vector<int>{0});
+    CHECK(g_MuSoundEditorUI.GetStatus() ==
+          I18N::Format(I18N::Editor::SoundEventNumbersNotRead01,
+                       {I18N::Editor::SoundEventColumnWorlds, std::to_string(Data::Sounds::MaxEventWorld)}));
+    // Text that reads is taken, and the status line clears.
+    type("7, 24-26");
+    CHECK(worldsOf() == std::vector<int>{7, 24, 25, 26});
+    CHECK(g_MuSoundEditorUI.GetStatus().empty());
+    g_SoundEventDatabase.Build(previous);
+}
+
 TEST_CASE("Sound Editor: the window draws the rows, filtered and with only the problems (Q-SE1) "
           "[sounds][editor]")
 {

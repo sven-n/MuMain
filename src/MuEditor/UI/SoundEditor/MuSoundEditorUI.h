@@ -25,13 +25,24 @@ class MuSoundEditorUI
 public:
     void Render(bool* open);
 
+    // The status line's text: the last Save, Revert or refused step, or why
+    // a field's text was not taken.
+    const std::string& GetStatus() const
+    {
+        return m_status;
+    }
+
 private:
     void RenderToolbar();
     void RenderEvents();
     void RenderEventRules(const std::vector<Data::Sounds::SoundEvent>& events, size_t eventIndex);
     // A field of numbers ("7, 24-29"); the numbers when an edit ends and they
     // read.
-    std::optional<std::vector<int>> RenderNumbersField(const char* id, const std::vector<int>& numbers, int highest);
+    // A field of numbers from 0 to `highest`, the column `label`: the numbers
+    // when its text was changed and reads; the status line says why when it
+    // does not.
+    std::optional<std::vector<int>> RenderNumbersField(const char* id, const char* label,
+                                                       const std::vector<int>& numbers, int highest);
     // A text field of a list ("7, 24-29", "confirm, cancel"): its text when an edit ends.
     std::optional<std::string> RenderListField(const char* id, const std::string& shown);
     void RenderSafeZoneCell(const Data::Sounds::SoundEventRule& rule,

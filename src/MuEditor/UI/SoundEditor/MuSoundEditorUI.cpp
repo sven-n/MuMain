@@ -254,7 +254,8 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
             if (fields.worlds)
             {
                 ImGui::TableNextColumn();
-                if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, Data::Sounds::MaxEventWorld))
+                if (const auto worlds = RenderNumbersField("##Worlds", I18N::Editor::SoundEventColumnWorlds,
+                                                           rule.worlds, Data::Sounds::MaxEventWorld))
                 {
                     SoundEventRule after = rule;
                     after.worlds = *worlds;
@@ -265,7 +266,8 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
             if (fields.tiles)
             {
                 ImGui::TableNextColumn();
-                if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, Data::Sounds::MaxEventTile))
+                if (const auto tiles = RenderNumbersField("##Tiles", I18N::Editor::SoundEventColumnTiles, rule.tiles,
+                                                          Data::Sounds::MaxEventTile))
                 {
                     SoundEventRule after = rule;
                     after.tiles = *tiles;
@@ -288,7 +290,11 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
                 ImGui::TableNextColumn();
                 if (const auto text = RenderListField("##Kinds", MuEditor::SoundEditor::KindsText(rule.kinds)))
                 {
-                    if (const auto kinds = MuEditor::SoundEditor::ParseKinds(*text))
+                    // Text that does not read is not taken, and the status
+                    // line says why.
+                    const auto kinds = MuEditor::SoundEditor::ParseKinds(*text);
+                    m_status = kinds ? std::string() : std::string(I18N::Editor::SoundEventKindsNotRead);
+                    if (kinds)
                     {
                         SoundEventRule after = rule;
                         after.kinds = *kinds;
@@ -421,14 +427,18 @@ std::optional<std::string> MuSoundEditorUI::RenderListField(const char* id, cons
     return edited;
 }
 
-std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* id, const std::vector<int>& numbers,
-                                                                    int highest)
+std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* id, const char* label,
+                                                                    const std::vector<int>& numbers, int highest)
 {
-    if (const std::optional<std::string> text = RenderListField(id, MuEditor::SoundEditor::NumbersText(numbers)))
+    const std::optional<std::string> text = RenderListField(id, MuEditor::SoundEditor::NumbersText(numbers));
+    if (!text)
     {
-        return MuEditor::SoundEditor::ParseNumbers(*text, highest);
+        return std::nullopt;
     }
-    return std::nullopt;
+    std::optional<std::vector<int>> read = MuEditor::SoundEditor::ParseNumbers(*text, highest);
+    m_status =
+        read ? std::string() : I18N::Format(I18N::Editor::SoundEventNumbersNotRead01, {label, std::to_string(highest)});
+    return read;
 }
 
 void MuSoundEditorUI::RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule,

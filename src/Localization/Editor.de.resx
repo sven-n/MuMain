@@ -3604,6 +3604,12 @@
   <data name="Sound event step {0}" xml:space="preserve">
     <value>Geräusch-Ereignis: {0}</value>
   </data>
+  <data name="Sound event numbers not read {0} {1}" xml:space="preserve">
+    <value>Nicht geändert: {0} nimmt ganze Zahlen von 0 bis {1}, einzeln oder als Bereich, durch Kommas getrennt (7, 24-29).</value>
+  </data>
+  <data name="Sound event kinds not read" xml:space="preserve">
+    <value>Nicht geändert: Klickarten bestehen aus Kleinbuchstaben, Ziffern und -, durch Kommas getrennt (confirm, cancel).</value>
+  </data>
   <data name="Sound event column worlds" xml:space="preserve">
     <value>Welten</value>
   </data>

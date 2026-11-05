@@ -3823,6 +3823,12 @@
   <data name="Sound event step {0}" xml:space="preserve">
     <value>Sound event: {0}</value>
   </data>
+  <data name="Sound event numbers not read {0} {1}" xml:space="preserve">
+    <value>Not changed: {0} takes whole numbers from 0 to {1}, one or a range, between commas (7, 24-29).</value>
+  </data>
+  <data name="Sound event kinds not read" xml:space="preserve">
+    <value>Not changed: click kinds are lower-case letters, digits and -, between commas (confirm, cancel).</value>
+  </data>
   <data name="Sound event column worlds" xml:space="preserve">
     <value>Worlds</value>
   </data>
