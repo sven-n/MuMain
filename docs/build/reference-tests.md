@@ -52,9 +52,11 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   binary reads its filter in the ANSI code page. Then no entry runs the case. The
   static check `test_case_names_reach_ctest_whole` finds such names before any
   build.
-- A CTest entry that runs no case fails (doctest reports `test cases: 0`), so a
-  name the discovery cut or joined fails in CI even where the static check cannot
-  read it. Decide an opt-in case at run time (return early) rather than with
+- A CTest entry that runs no case fails (doctest reports `test cases: 0`), and
+  each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
+  entries and its cases differ in number. So a name the discovery cut, joined or
+  dropped fails in CI even where the static check cannot read it. Decide an
+  opt-in case at run time (return early) rather than with
   `doctest::skip(condition)`: the discovery evaluates the condition when the
   binary is built, so a condition read from the environment can differ when the
   tests run.

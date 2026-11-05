@@ -16,8 +16,8 @@ case when it has
   those lines, so the case gets no entry either;
 - a character outside ASCII: on Windows the test binary reads its `--test-case=` argument in the ANSI code page, not as
   the UTF-8 the name is compiled to, so the filter matches no case there.
-A comma is safe: the discovery escapes it for doctest's filter. tests/CMakeLists.txt fails an entry that runs no case;
-this check finds such names before any build, the empty ones too, which get no entry that could fail.
+A comma is safe: the discovery escapes it for doctest's filter. After a build, tests/CMakeLists.txt fails an entry that
+runs no case and a binary whose entries are not one per case; this check finds such names before any build.
 
 Usage: check_test_case_names.py <tests dir>. Reads the name of every case a doctest macro registers (TEST_CASE,
 TEST_CASE_FIXTURE, TEST_CASE_CLASS, SCENARIO and their template forms, with or without the DOCTEST_ prefix) in the .cpp

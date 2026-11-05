@@ -44,6 +44,9 @@ set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 # so a name the discovery cut or joined (see tests/check_test_case_names.py) cannot pass unseen. The '.' stands for
 # doctest's '|': on Windows the discovery's post-build command line would read a '|' as a pipe.
 set(MU_TEST_RAN_NO_CASE "test cases: +0 . +0 passed")
+# A dropped name leaves no entry that could fail: every test binary also gets an entry that compares its CTest
+# entries with its test cases.
+set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake")
 
 # Helper for module CMakeLists. Usage:
 #   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>])
@@ -83,6 +86,20 @@ function(mu_add_test)
         TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
         RESOURCE_LOCK ${MAT_RESOURCE_LOCK}
         FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}")
+    # The file doctest_discover_tests writes the entries to: doctest.cmake names it after a hash of the TEST_SPEC and
+    # EXTRA_ARGS, both empty here.
+    string(SHA1 discovery_hash " ")
+    string(SUBSTRING ${discovery_hash} 0 7 discovery_hash)
+    get_property(emulator TARGET ${MAT_NAME} PROPERTY CROSSCOMPILING_EMULATOR)
+    add_test(NAME ${MAT_NAME}_has_one_ctest_entry_per_case
+        COMMAND "${CMAKE_COMMAND}"
+            "-DTEST_EXECUTABLE=$<TARGET_FILE:${MAT_NAME}>"
+            "-DTEST_EXECUTOR=${emulator}"
+            "-DCTEST_FILE=${CMAKE_CURRENT_BINARY_DIR}/${MAT_NAME}_tests-${discovery_hash}.cmake"
+            -P "${MU_CHECK_CTEST_ENTRIES}")
+    set_tests_properties(${MAT_NAME}_has_one_ctest_entry_per_case PROPERTIES
+        TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
+        RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
