@@ -232,21 +232,19 @@ jobs:
           Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP
           Join-Path $env:RUNNER_TEMP $name | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
-      - name: Identify compiler cache
-        id: compiler
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        # Its compiler output, the start of cl.exe's SHA-256, also names the compiler cache.
         shell: pwsh
-        run: |
-          $compiler = (Get-Command cl.exe -ErrorAction Stop).Source
-          $identity = (Get-FileHash -LiteralPath $compiler -Algorithm SHA256).Hash.Substring(0, 16).ToLowerInvariant()
-          "identity=$identity" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        run: ./scripts/ci_vcpkg_cache_key.ps1
 
       - name: Cache Windows compilation
         id: ccache
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-windows-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
-          restore-keys: ccache-windows-x64-${{ steps.compiler.outputs.identity }}-
+          key: ccache-windows-x64-${{ steps.vcpkg.outputs.compiler }}-${{ github.sha }}
+          restore-keys: ccache-windows-x64-${{ steps.vcpkg.outputs.compiler }}-
 
       - name: Restore dependencies
         id: deps
@@ -265,11 +263,6 @@ jobs:
             .nuget
           key: windows-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: windows-x64-release-dep-sources-
-
-      - name: Identify vcpkg toolchain
-        id: vcpkg
-        shell: pwsh
-        run: ./scripts/ci_vcpkg_cache_key.ps1
 
       - name: Restore vcpkg packages
         id: vcpkg_cache

@@ -406,8 +406,11 @@ windows_ccache_install = step(native_job, "build-windows", "Install compiler cac
 for required in ("$version = '", "$sha256 = '", "Get-FileHash", "GITHUB_PATH", "-MaximumRetryCount"):
     check(required in windows_ccache_install, f"Windows must install a pinned, checked ccache: {required}")
 windows_cache = step(native_job, "build-windows", "Cache Windows compilation")
-for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v6", "steps.vcpkg.outputs.compiler", "github.sha", "restore-keys:"):
     check(required in windows_cache, f"Windows compiler cache missing {required}")
+# scripts/ci_vcpkg_cache_key.ps1 hashes cl.exe for both caches; the job does not do it a second time.
+check("Get-FileHash -LiteralPath $compiler" not in native_job,
+      "Windows must name its compiler cache with the vcpkg script's hash")
 windows_cache_save = step(native_job, "build-windows", "Save Windows compilation cache")
 for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
                  "steps.ccache.outputs.cache-primary-key"):

@@ -237,6 +237,7 @@ class BuildPlanTests(unittest.TestCase):
             compiler = Path(temporary) / "cl.exe"
             output = Path(temporary) / "output.txt"
             identities = set()
+            compilers = []
             inputs = (("image1", b"compiler1", "vcpkg1"),
                       ("image2", b"compiler1", "vcpkg1"),
                       ("image1", b"compiler2", "vcpkg1"),
@@ -249,8 +250,15 @@ class BuildPlanTests(unittest.TestCase):
                            TEST_CACHE_SCRIPT=str(ROOT / "scripts/ci_vcpkg_cache_key.ps1"))
                 subprocess.run([POWERSHELL, "-NoProfile", "-NonInteractive", "-Command", command],
                                env=env, check=True, capture_output=True)
-                identities.add(output.read_text(encoding="utf-8-sig").strip())
+                lines = dict(line.split("=", 1) for line in output.read_text(encoding="utf-8-sig").split())
+                identities.add(lines["identity"])
+                compilers.append(lines["compiler"])
             self.assertEqual(len(identities), len(inputs))
+            # The compiler cache's name follows the compiler alone.
+            self.assertEqual(compilers[0], compilers[1])
+            self.assertEqual(compilers[0], compilers[3])
+            self.assertNotEqual(compilers[0], compilers[2])
+            self.assertRegex(compilers[0], r"^[0-9a-f]{16}$")
 
 
 if __name__ == "__main__":
