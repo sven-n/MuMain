@@ -609,6 +609,10 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
             check(required in save, f"{job_name} {save_name} must save on a miss, under the restored key: {required}")
         check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
               f"{job_name} {save_name} must save the paths {restore_name} restores")
+    # .nuget holds the NativeAOT compiler packages of the .NET SDK in use; a new SDK needs a new entry.
+    check("id: dotnet" in step(job_body, job_name, "Setup .NET 10")
+          and "steps.dotnet.outputs.dotnet-version" in step(job_body, job_name, "Restore dependencies"),
+          f"{job_name} must name the library cache after the .NET SDK version")
 # A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each
 # cache the build jobs restore by a key prefix.
 caches_job = job(ci, "caches")
