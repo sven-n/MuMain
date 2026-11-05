@@ -287,13 +287,15 @@ jobs:
       # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
       # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
       # SDL and RmlUi build without their precompiled headers, which ccache does not cache: only the game's own
-      # code would hit, and the two libraries' files, over a quarter of the build, compiled again on every run.
+      # code would hit, and the two libraries' files, over a quarter of the build, compiled again on every run. The
+      # nightly and manual release builds, which save no cache, keep them: local builds use them, and what ships
+      # should be built the way they are, so a change that breaks only with them still fails a nightly.
       - name: Configure CMake
         run: >
           python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
-          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
@@ -725,14 +727,14 @@ jobs:
         # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
-      # (docs/build/README.md).
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers except in the
+      # release builds (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
-          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
@@ -898,14 +900,14 @@ jobs:
         # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
-      # (docs/build/README.md).
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers except in the
+      # release builds (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
-          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DENABLE_EDITOR=OFF
           -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
