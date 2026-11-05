@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "Data/GameData/ColorFolders/ColorFolder.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/LookData/LookJson.h"
 
@@ -213,6 +214,41 @@ TEST_CASE("The Style Editor's folders are the editor's: the file reads without a
         Read(R"({ "formatVersion": 1, "kind": "renderStyle", "lookFolders": [{"name": "Tickets"}], "looks": [] })");
     INFO(Describe(result.issues));
     CHECK(result.issues.empty());
+}
+
+TEST_CASE("The Style Editor's folders write each on a line before the looks, and read back [looks][files]")
+{
+    const std::vector<LookDefinition> looks{{"b", {Layer{}}, {}}, {"a", {Layer{}}, {}}};
+    const std::vector<Data::Colors::ColorFolder> folders{
+        {"Tickets", {{"Old", {}, {"a"}}}, {"b", "gone"}},
+    };
+    const std::string text = WriteRenderStylesJson(looks, folders);
+    CHECK(text.find("\"lookFolders\"") < text.find("\"looks\": [\n"));
+    CHECK(text.find(R"({"name": "Tickets", "folders": [{"name": "Old", "looks": ["a"]}], "looks": ["b"]})") !=
+          std::string::npos);
+    RenderStylesFile file;
+    std::vector<ItemDataIssue> issues;
+    ReadRenderStylesFile(text, Source, file, issues);
+    INFO(Describe(issues));
+    CHECK(issues.empty());
+    // The look that is gone is left out.
+    CHECK(file.folders == std::vector<Data::Colors::ColorFolder>{{"Tickets", {{"Old", {}, {"a"}}}, {"b"}}});
+    REQUIRE(file.looks.size() == 2);
+    CHECK(file.looks[0].name == "a");
+}
+
+TEST_CASE("A folder naming a look the file doesn't have is a warning that leaves it out [looks][files]")
+{
+    RenderStylesFile file;
+    std::vector<ItemDataIssue> issues;
+    ReadRenderStylesFile(File(R"([{"name": "a", "layers": [{"kind": "texture"}]}], "lookFolders": [
+        {"name": "Tickets", "looks": ["a", "missing"], "colors": ["a"]}])"),
+                         Source, file, issues);
+    INFO(Describe(issues));
+    CHECK(Find(issues, ItemDataIssueSeverity::Warning, "lookFolders[0].looks[1]") != nullptr);
+    CHECK(Find(issues, ItemDataIssueSeverity::Warning, "lookFolders[0].colors") != nullptr);
+    CHECK_FALSE(Data::Items::HasFatal(issues));
+    CHECK(file.folders == std::vector<Data::Colors::ColorFolder>{{"Tickets", {}, {"a"}}});
 }
 
 TEST_CASE("A layer of every mesh, the item's hidden one too, reads and writes as allEvenHidden [looks][files]")

@@ -2,12 +2,14 @@
 
 #include "LookJson.h"
 
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterJsonCommon.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <iterator>
 #include <limits>
 #include <set>
 
@@ -815,9 +817,10 @@ std::string_view GetRenderStylesFileName()
     return "RenderStyles.json";
 }
 
-void ReadRenderStylesJson(std::string_view text, const std::string& source, std::vector<LookDefinition>& looks,
+void ReadRenderStylesFile(std::string_view text, const std::string& source, RenderStylesFile& file,
                           std::vector<Items::ItemDataIssue>& issues)
 {
+    std::vector<LookDefinition>& looks = file.looks;
     OrderedJson root;
     if (!Items::Json::ReadFileVersion(text, source, LookFileFormatVersion, root, issues))
     {
@@ -832,6 +835,13 @@ void ReadRenderStylesJson(std::string_view text, const std::string& source, std:
     }
     LookReader reader(source, issues);
     reader.ReadLooks(root, looks);
+    std::set<std::string, std::less<>> names;
+    for (const LookDefinition& look : looks)
+    {
+        names.insert(look.name);
+    }
+    file.folders = Colors::ReadColorFolders(
+        root, source, [&names](std::string_view name) { return names.contains(name); }, issues, Colors::LookFolderKeys);
     Items::Json::WarnAboutUnknownKeys(
         root, {Items::Json::Keys::FormatVersion, Keys::Kind, Keys::LookFolders, Keys::Looks}, "",
         [&](const std::string& field, const std::string& message)
@@ -839,6 +849,14 @@ void ReadRenderStylesJson(std::string_view text, const std::string& source, std:
             issues.push_back(
                 {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
         });
+}
+
+void ReadRenderStylesJson(std::string_view text, const std::string& source, std::vector<LookDefinition>& looks,
+                          std::vector<Items::ItemDataIssue>& issues)
+{
+    RenderStylesFile file;
+    ReadRenderStylesFile(text, source, file, issues);
+    looks.insert(looks.end(), std::make_move_iterator(file.looks.begin()), std::make_move_iterator(file.looks.end()));
 }
 
 std::vector<std::string> ReadLookNames(std::string_view text)
@@ -862,7 +880,7 @@ std::vector<std::string> ReadLookNames(std::string_view text)
     return names;
 }
 
-std::string WriteRenderStylesJson(std::vector<LookDefinition> looks)
+std::string WriteRenderStylesJson(std::vector<LookDefinition> looks, std::span<const Colors::ColorFolder> folders)
 {
     std::sort(looks.begin(), looks.end(),
               [](const LookDefinition& a, const LookDefinition& b) { return a.name < b.name; });
@@ -886,8 +904,15 @@ std::string WriteRenderStylesJson(std::vector<LookDefinition> looks)
     OrderedJson root = OrderedJson::object();
     root[Items::Json::Keys::FormatVersion] = LookFileFormatVersion;
     root[Keys::Kind] = RenderStyleKind;
+    if (!folders.empty())
+    {
+        const auto isLook = [&looks](std::string_view name)
+        { return std::ranges::any_of(looks, [name](const LookDefinition& look) { return look.name == name; }); };
+        root[Colors::LookFolderKeys.list] = Colors::WriteColorFolders(folders, isLook, Colors::LookFolderKeys);
+    }
     root[Keys::Looks] = std::move(list);
     std::string text = root.dump(Items::Json::Indent);
+    text = Colors::PutColorFoldersOnLines(text, Colors::LookFolderKeys);
     text = Items::Json::PutListEntriesOnOneLine(text, Keys::Layers);
     text = Items::Json::PutObjectsOnOneLine(text, Keys::ItemValuesAfter);
     return text + "\n";
