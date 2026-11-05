@@ -77,6 +77,11 @@ add_test(
     NAME copy_runtime_assets
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
 )
+add_test(
+    NAME sdl_image_archive_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_sdl_image_archive.cmake"
+)
 
 # Render and effects contracts.
 add_test(
