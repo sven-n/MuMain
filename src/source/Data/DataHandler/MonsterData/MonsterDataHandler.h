@@ -155,6 +155,15 @@ public:
     // The monster list, the model list and the sound sets together: no file
     // is written when the checks of one find errors.
     bool SaveAll(std::vector<Items::ItemDataIssue>& issues);
+    // The sound sets file as it is, with the sets of these names as the table
+    // has them (the Sound Editor's Save, which changes the sounds of sets but
+    // no set's name): the monster and model lists and the file's other sets
+    // stay as written, so the monster tools' unsaved changes stay theirs. A
+    // name the table or the file lacks (renamed, added or removed in the
+    // monster tools since) is left to them. False, with nothing written, when
+    // the file cannot be read or the sets would not read back; the problems
+    // are added to `issues`.
+    bool SaveSoundSets(std::span<const std::string> names, std::vector<Items::ItemDataIssue>& issues);
     // The three files read again together: no table changes when one file
     // has fatal problems.
     bool RevertAll(std::vector<Items::ItemDataIssue>& issues);

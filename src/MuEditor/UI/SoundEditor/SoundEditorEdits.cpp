@@ -9,6 +9,7 @@
 #include "../MuEditor/UI/MonsterTools/MonsterEdits.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
@@ -469,7 +470,13 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
     }
     if (SetsDiffer(m_savedSets))
     {
-        if (g_MonsterEdits.Save(issues))
+        std::vector<std::string> names;
+        for (const auto& entry : m_savedSets)
+        {
+            names.push_back(entry.first);
+        }
+        // Only the sets: not the monster tools' other unsaved changes.
+        if (g_MonsterDataHandler.SaveSoundSets(names, issues))
         {
             m_savedSets.clear();
         }

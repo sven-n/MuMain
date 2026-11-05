@@ -215,7 +215,10 @@ at it.
 it is: its name, its file, its channels and 3D, its type, the folder it is
 in, and which sound the game's code plays when. Every change reaches the game
 at once; **Save** writes the files that changed, **Revert** reads them again,
-**Undo** and **Redo** step through the changes.
+**Undo** and **Redo** step through the changes. A monster set's change is
+written into `Data/Monsters/Sounds.json` alone: what the monster tools
+changed and did not save is not saved with it, and they say **Not saved
+yet** until their own **Save**.
 
 - **Where sounds live.** The code's sounds, which C++ loads by their `SOUND_`
   id (`LoadGameSound`), take their file, channels and 3D from

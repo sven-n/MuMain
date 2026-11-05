@@ -127,8 +127,9 @@ public:
 
     // Whether a file's table differs from what was last read or saved.
     bool IsModified() const;
-    // Writes the files whose tables changed: SoundFiles.json, the monster
-    // data (the monster tools' Save, all three of its files),
+    // Writes the files whose tables changed: SoundFiles.json, the sets this
+    // window changed into Data/Monsters/Sounds.json (SaveSoundSets: the
+    // monster tools' own unsaved changes stay unsaved),
     // ObjectSounds.json, SoundFolders.json and SoundEvents.json. False when
     // one was refused (the problems in `issues`); the others are written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
