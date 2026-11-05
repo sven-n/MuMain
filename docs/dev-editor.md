@@ -150,9 +150,10 @@ only.
   character, a ground item, a bird or fish, a mount by its rider); else a
   loop is ambience and the rest is everything else. Each type has **Hear**
   (off mutes it), **Show** (off: Show in world draws nothing of it, but it
-  is still heard), a volume slider and **Solo**. The volume is per sound
-  file, so a sound two types play (a swing of yours and of another player)
-  follows the type of its latest start.
+  is still heard), a volume slider and **Solo**. A sound two types play (a
+  swing of yours and of another player) keeps each copy at the volume of
+  the type it started as: muting other players leaves your own swing
+  heard, also while one of theirs still plays.
 - **Sounds heard**: one row per sound, in the order they were first heard,
   so that a row stays where it is (a music track too, with its file below
   `Data/Music`: its Mute, Solo and volume act on the music while that track
