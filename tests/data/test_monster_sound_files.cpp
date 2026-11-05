@@ -161,8 +161,8 @@ TEST_CASE("Monster sounds: the ranged Chaos Castle soldiers' wizard look plays i
     CHECK(Find(shipped.monsters, 162).randomVariants.empty());
 }
 
-TEST_CASE("Monster sounds: the steps of the shipped models are cues, which their sets play on (Q-MN79) "
-          "[data][monsters]")
+TEST_CASE("Monster sounds: the steps of the shipped models are cues, which their sets play on, and Dreadfear's "
+          "second attack (Q-MN79, Q-MN90) [data][monsters]")
 {
     const Shipped shipped = LoadShipped();
     std::vector<std::string> withCues;
@@ -170,6 +170,16 @@ TEST_CASE("Monster sounds: the steps of the shipped models are cues, which their
     {
         if (model.cues.empty())
         {
+            continue;
+        }
+        if (model.slot == "MONSTER_MODEL_DREADFEAR")
+        {
+            // The first frames of its second attack, frame 2 in, as its draw
+            // code played them (Q-MN90).
+            REQUIRE(model.cues.size() == 1);
+            CHECK(model.cues[0].name == "attack2 sound");
+            CHECK(model.cues[0].animation == MONSTER01_ATTACK2);
+            CHECK(model.cues[0].frames == std::pair<float, float>{0.0f, 2.001f});
             continue;
         }
         withCues.push_back(model.slot);

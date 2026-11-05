@@ -259,7 +259,13 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
         }
         for (size_t event = 0; event < set.soundEvents.size(); ++event)
         {
-            for (const std::string& cue : set.soundEvents[event].cues)
+            const auto& soundEvent = set.soundEvents[event];
+            // The cues or timers the event names, which the models must have.
+            const bool onTimers = !soundEvent.timers.empty();
+            const bool drawn = !soundEvent.duringCues.empty();
+            const std::vector<std::string>& names =
+                onTimers ? soundEvent.timers : (drawn ? soundEvent.duringCues : soundEvent.cues);
+            for (const std::string& cue : names)
             {
                 std::set<int> lacking;
                 for (const SetUser& user : found->second)
@@ -267,8 +273,11 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
                     const auto model = user.slot ? bySlot.find(*user.slot) : bySlot.end();
                     const bool has =
                         model != bySlot.end() &&
-                        std::any_of(model->second->cues.begin(), model->second->cues.end(),
-                                    [&](const MonsterModelCue& candidate) { return candidate.name == cue; });
+                        (onTimers
+                             ? std::any_of(model->second->timers.begin(), model->second->timers.end(),
+                                           [&](const MonsterModelTimer& timer) { return timer.name == cue; })
+                             : std::any_of(model->second->cues.begin(), model->second->cues.end(),
+                                           [&](const MonsterModelCue& candidate) { return candidate.name == cue; }));
                     if (!has)
                     {
                         lacking.insert(user.monster);
@@ -283,10 +292,12 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
                 {
                     numbers += (numbers.empty() ? "" : ", ") + std::to_string(number);
                 }
-                AddIssue(issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
-                         MonsterSoundSetField(set.name, "soundEvents[" + std::to_string(event) + "].cues"),
-                         "the model of monster " + numbers + " has no cue \"" + cue +
-                             "\": the event never plays for it");
+                AddIssue(
+                    issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
+                    MonsterSoundSetField(set.name, "soundEvents[" + std::to_string(event) +
+                                                       (onTimers ? "].timers" : (drawn ? "].duringCues" : "].cues"))),
+                    "the model of monster " + numbers + " has no " + (onTimers ? "timer" : "cue") + " \"" + cue +
+                        "\": the event never plays for it");
             }
         }
     }

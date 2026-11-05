@@ -211,6 +211,7 @@ to `MuError.log`:
 | `streamMesh` | The mesh drawn as a stream; without it as the file has it |
 | `noneBlendMeshes` | Meshes drawn without blending |
 | `cues` | Named points of its animations that [sound events](#sound-events) play on: `name` (unique in the model), `animation`, and `frames`, from the first to below the second (the game checks the frame each game frame): where Raymond's feet land in the walk |
+| `timers` | Up to 4 timers of its animations (Q-MN91): `name` (unique in the model), `animation`, and `everyMs`, 1 to 60000; one ticks while the character is in the animation, each time more than `everyMs` passed since its last tick. The map's code for the model may ask for one by name (Twintail's `hair swing`, which swings its hair) and sound events play on it (`timers`), on the same tick. The timers the code asks for are listed in `CodeModelTimers` (`MonsterModelDefinition.h`): a model without its timer is an error of the model list |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
 | `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
@@ -297,7 +298,7 @@ the Evil Goblin).
 |---|---|
 | `name` | The set's name, unique; monsters name it |
 | `sounds` | The sound files: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
-| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model or at moments, see [Sound events](#sound-events) |
+| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model, at moments, each frame it is drawn or once until it stands, see [Sound events](#sound-events) |
 | `maps` | The maps the sound events play on; without it every map |
 
 Sets are sorted by name and written in one way, as the other files; a test
@@ -326,8 +327,19 @@ names when: `animations`, played while the character is in one of them, when
 it starts an attack, is hit or dies, at each step of a walk and at the end of
 each loop of stop1 and stop2; `cues`, played while the character is in the
 frames of one of the named [cues](#model-fields) of its model (the Empire
-Guardian and Karutan monsters' steps); or `on` moments, played where the
-game reaches them, whatever the animation:
+Guardian and Karutan monsters' steps); `during`, played each frame the
+character is drawn in one of the animations (on screen; the `chance` draws
+each frame); `once`, played the first frame the character is drawn in one of
+them, after which none of the set's once events plays until it is drawn in
+stop1, stop2 or walk (Q-MN89: the maps' draw code cleared its flag in stop1
+and stop2, in Kanturu Relics also in walk, for some Kanturu monsters never; a
+death right after an attack, with no stand or walk between, is silent);
+`duringCues`, played each frame the character is drawn in the frames of one of
+the named cues of its model (Q-MN90: Kanturu Relics' Dreadfear in the first
+frames of its second attack; the once flag stays as it is); `timers`, played in
+a drawn frame where one of the named timers of its model ticks (Q-MN91:
+Twintail's walk sound with its hair swing); or `on`
+moments, played where the game reaches them, whatever the animation:
 
 | Moment | Where the game plays it |
 |---|---|
@@ -359,7 +371,11 @@ unless it is `heardAnywhere`:
 | Field | Meaning |
 |---|---|
 | `animations` | The animations it plays in |
+| `during` | The animations it plays in each drawn frame, instead of animations |
+| `once` | The animations it plays once in until the character stands or walks, instead of animations; once events of one frame all play (the Witch Queen's thunder and attack). In stop1, stop2 or walk it would play each frame (a warning) |
 | `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `duringCues` | The cues of the monster's model it plays in each drawn frame, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `timers` | The timers of the monster's model it plays on, in a drawn frame where one ticks, instead of animations; a model without the timer plays nothing for it (Data Checks warns) |
 | `on` | The moments it plays at, instead of animations |
 | `deathEffectArmed` | Only while the character's death effect is armed |
 | `heardAnywhere` | Heard at any distance from the hero and on every map |
@@ -375,12 +391,29 @@ own nor one of its random variants', plays none. The `subType`, `notSubType`
 and `frames` of the events before the sound sets are fatal problems that
 name what replaced them: the monsters' own sets, and the cues.
 
-Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
-the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
-(among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
-their map's per-frame drawing code, and their maps load them; they name no
-sound set. They move into sound events with the monsters' looks (design,
-MN8).
+Not all monster sounds are data yet: the monsters of Crywolf, the Kanturu
+tower, the Hunting Ground, the Balgass barracks, Illusion Temple and a few
+others (among them 340 to 349, 361 to 365, 386 to 403 and 409 to 412) play
+their sounds from their map's per-frame monster effects, and their maps load
+them; they name no sound set. They move into sound events with the monsters'
+looks (design, MN8). The monsters of Kanturu Ruins and Kanturu Relics and
+Relics' gateway machine play theirs from their sets (MNK): walks as `during`
+events and attacks as `once` events, heard anywhere as their map's code
+played them, and each death when it starts, also right after an attack
+(animation events, Q-MN93); Dreadfear's
+second attack on a cue of its first frames (`duringCues`), Twintail's walk on
+its model's 500 ms timer, which also swings its hair (`timers`), and Blade
+Hunter's walk smoke comes with its step sound (Q-MN92). The Aida monsters'
+walk sounds are `during` events of their sets; their monster effects play
+them where they played their sounds (`SoundEvents::PlayDrawn`), and for every
+other character `UpdateDrawnCharacterEffects` plays them after the maps'
+monster effects. Like those effects they run in the update for the characters
+the last frame drew, so they start one frame after a monster comes into view
+([ADR 0003](adr/0003-draw-does-not-change-game-state.md)). Their attacks and
+deaths are animation events, as regular monsters' (Q-MN86): each attack and
+death plays when it starts, heard anywhere as their walks (Q-MN94); the
+original draw code played them once until the monster stood, so an attack
+right after another or a death right after an attack was silent.
 
 ## Attacks
 
@@ -630,7 +663,9 @@ item tools.
     plays), and a row to add a file with its `SOUND_*` id (optional),
     channels and 3D;
   - **Sound events**: a row per [sound event](#sound-events): **When**, its
-    moments, animations or cues of the shown look's model (one or more;
+    moments, animations, animations of **Each frame in** (`during`) or
+    **Once until it stands** (`once`), or cues of the shown look's model
+    (one or more;
     picking one of another kind makes the event one of it; **New cue at the
     preview's frame** adds a cue to the model there), on a cue's event the
     cue's animation and frames, which change the model's cue for all its
@@ -653,8 +688,10 @@ item tools.
   play as the game plays them: those of the animation and its cues when it
   starts, at each loop of stop1 and stop2 and frame by frame in a walk, then
   those of its moment (stand for stop1 and stop2, attack for the attacks, hit
-  for the shock, death, and walk at each frame of a walk); on any map and at
-  any distance, with the death effect counted as armed. The hit frame of
+  for the shock, death, and walk at each frame of a walk); `during` events
+  at each frame of their animations and `once` events on the first frame
+  after each start of the animation; on any map and at any distance, with
+  the death effect counted as armed. The hit frame of
   attacks 1 and 2 is marked on the slider, and the line under it says what
   the game adds. The model's cues of the animation are tags under the
   slider: hovering one says its frames and what it plays, a click shows its

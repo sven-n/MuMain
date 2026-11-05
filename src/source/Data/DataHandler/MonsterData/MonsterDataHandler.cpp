@@ -389,6 +389,35 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
+    ++m_filesVersion;
+    return true;
+}
+
+bool MonsterDataHandler::SaveSoundSets(const std::function<bool(std::vector<MonsterSoundSet>& sets)>& change,
+                                       std::vector<Items::ItemDataIssue>& issues)
+{
+    MonsterSoundsLoadResult file = LoadMonsterSoundsFile(GetMonsterSoundsFile());
+    if (Items::HasFatal(file.issues))
+    {
+        issues.insert(issues.end(), file.issues.begin(), file.issues.end());
+        return false;
+    }
+    if (!change(file.sets))
+    {
+        return false;
+    }
+    const std::optional<std::string> text = MakeMonsterSoundsFileText(GetMonsterSoundsFile(), file.sets, issues);
+    if (!text)
+    {
+        return false;
+    }
+    std::string error;
+    if (!WriteTextFile(GetMonsterSoundsFile(), *text, error))
+    {
+        issues.push_back({Items::ItemDataIssueSeverity::Fatal, GetMonsterSoundsFile().generic_string(),
+                          Items::ItemDataIssue::NoItem, Items::ItemDataIssue::NoItem, "", error});
+        return false;
+    }
     return true;
 }
 
@@ -408,6 +437,7 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     UseMonsters(monsters.monsters);
     UseModels(models.models);
     UseSoundSets(sounds.sets);
+    ++m_filesVersion;
     return true;
 }
 

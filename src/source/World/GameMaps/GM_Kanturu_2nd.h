@@ -37,7 +37,6 @@ namespace M38Kanturu2nd
     bool		Is_Kanturu2nd_3rd();					// 칸투루내부와 3차 맵인가?
 
     // 사운드
-    void	Sound_Kanturu2nd_Object(OBJECT* o);		// 오브젝트 사운드
     void	PlayBGM();
 };
 

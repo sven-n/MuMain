@@ -4,8 +4,10 @@
 #include "Core/Utilities/Random.h"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -26,6 +28,41 @@ struct MonsterModelCue
 
     bool operator==(const MonsterModelCue&) const = default;
 };
+
+// The most timers a model has (CHARACTER keeps their last ticks), and the
+// longest interval of one.
+constexpr std::size_t MaxModelTimers = 4;
+constexpr int MaxModelTimerMs = 60000;
+
+// A timer of one of the model's animations (monsters design, Q-MN91): it
+// ticks while the character is in the animation, each time more than
+// `everyMs` passed since its last tick. The map's code for the model and its
+// sound events share it: Twintail's hair swings and its walk sound.
+struct MonsterModelTimer
+{
+    std::string name;
+    int animation = 0;
+    int everyMs = 0;
+
+    bool operator==(const MonsterModelTimer&) const = default;
+};
+
+// A timer that the game's code asks a model for by name, and what stops
+// without it. The model list's check (ValidateMonsterModelNames) finds a
+// model of the list that lacks it, as the sound events' check finds an
+// event's timer.
+struct CodeModelTimer
+{
+    std::string_view slot;
+    std::string_view name;
+    std::string_view use;
+};
+
+// Twintail's hair swing, which its map's code asks for (GM_Kanturu_2nd.cpp).
+inline constexpr std::string_view TwinTailHairSwingTimer = "hair swing";
+inline constexpr std::array<CodeModelTimer, 1> CodeModelTimers = {{
+    {"MONSTER_MODEL_TWIN_TAIL", TwinTailHairSwingTimer, "Twintail's hair does not swing and its walk sound stops"},
+}};
 
 // Texture folders that the model uses on some maps (server map numbers)
 // instead of its own.
@@ -121,6 +158,9 @@ struct MonsterModelDefinition
     // The points of its animations that sound events play on; the names are
     // unique. The sounds are in the sound sets that its monsters name.
     std::vector<MonsterModelCue> cues;
+    // The timers of its animations, at most MaxModelTimers; the names are
+    // unique (Q-MN91).
+    std::vector<MonsterModelTimer> timers;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

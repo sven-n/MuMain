@@ -21,6 +21,7 @@
 #include "miniaudio.h"
 
 #include <array>
+#include <cstdint>
 #include <deque>
 #include <string>
 #include <vector>
@@ -46,6 +47,7 @@ public:
     void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL, bool enable3D = false) override;
     [[nodiscard]] bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) override;
     [[nodiscard]] bool PlaySoundAtLevel(ESound buffer, float level) override;
+    [[nodiscard]] bool PlaySoundOnFreeChannel(ESound buffer, float level) override;
     void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
     void ReleaseSound(ESound buffer) override;
@@ -62,12 +64,26 @@ public:
     // Volume controls (Story 5.4.1)
     void SetBGMVolume(float level) override;
     void SetSFXVolume(float level) override;
+    void SetSoundMixGain(ESound buffer, int group, float gain) override;
+    void SetMusicMixGain(float gain) override;
+    [[nodiscard]] std::uint32_t GetSoundStarts(ESound buffer) const override;
+    [[nodiscard]] std::uint32_t GetMusicStarts() const override;
+    [[nodiscard]] bool IsSoundPlaying(ESound buffer) const override;
+    [[nodiscard]] float GetSoundLength(ESound buffer) const override;
     [[nodiscard]] float GetBGMVolume() const override;
     [[nodiscard]] float GetSFXVolume() const override;
 
 private:
-    // PlaySound at `volume`.
-    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume);
+    // PlaySound at `level`: of the effect volume and times the sound's mix
+    // gain when `mixed` (the game's plays), a preview's own level otherwise.
+    bool StartSound(ESound buffer, const void* pObject, bool looped, float level, bool mixed);
+
+    // A channel that starts takes its sound's mix gain and group for the next
+    // start and keeps its level, then SetChannelVolume.
+    void StartChannelVolume(int buffer, int channel, float level, bool mixed);
+    // Sets the channel to `volume`, times the mix gain it started with when
+    // `mixed`, and keeps both for a later change of the gain.
+    void SetChannelVolume(int buffer, int channel, float volume, bool mixed);
 
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
@@ -96,6 +112,24 @@ private:
     // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
     // APIs on uninitialized ma_sound handles (UB).
     std::deque<int> m_loadedChannels = std::deque<int>(MAX_BUFFER);
+    // The Sound Mixer's gain and group for a sound number's next start (1 and
+    // 0 unless the editor sets them); each channel's volume without the gain,
+    // the level it started at (a mixed channel's share of the effect volume:
+    // 1, or a map object copy's distance level), the gain and group it started
+    // with, and whether the gain and the effect volume apply to the channel
+    // (not to a preview's PlaySoundAtLevel).
+    std::deque<float> m_mixGain = std::deque<float>(MAX_BUFFER, 1.0f);
+    std::deque<int> m_mixGroup = std::deque<int>(MAX_BUFFER);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelVolume = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelLevel = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelGain = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<int, MAX_CHANNEL>> m_channelGroup = std::deque<std::array<int, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<bool, MAX_CHANNEL>> m_channelMixed = std::deque<std::array<bool, MAX_CHANNEL>>(MAX_BUFFER);
+    // How often each sound started on a mixed channel (GetSoundStarts).
+    std::deque<std::uint32_t> m_starts = std::deque<std::uint32_t>(MAX_BUFFER);
+    float m_musicMixGain = 1.0f;
+    // How many tracks started (GetMusicStarts).
+    std::uint32_t m_musicStarts = 0;
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

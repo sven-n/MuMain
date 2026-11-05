@@ -177,6 +177,15 @@ the game server.
 
 ---
 
+### Sounds
+- The object sounds of the map shown (`Data/Maps/ObjectSounds.json`): which object
+  types play which sound while they are drawn ([docs/map-data.md](../../../../docs/map-data.md)).
+- **Add a sound to an object type**, then the entry's objects (**Add a type**, or
+  **Pick an object in the world**: the next click on an object takes its type), file
+  (**Play**), channels, plays and maps; **Remove**.
+- Edits play at once; **Save** writes the file after its checks, **Revert** reads it
+  again. Data Checks lists its problems under **Map sounds**.
+
 ## 4. On-disk formats & save encryption
 
 Files live in `Data\World{N}\`. **World folder = world enum value + 1**

@@ -47,6 +47,7 @@ private:
     void RenderSounds(int slot);
     // The cues, with Remove for those no sound event plays on.
     void RenderCues(Data::Monsters::MonsterModelDefinition& model, int slot);
+    void RenderTimers(Data::Monsters::MonsterModelDefinition& model, int slot);
     void RenderMore(const Data::Monsters::MonsterModelDefinition& model);
 
     ModelDraft m_draft;

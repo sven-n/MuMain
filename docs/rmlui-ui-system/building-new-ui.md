@@ -128,6 +128,17 @@ Give interactive panels `pointer-events: auto`; `base.rcss` makes document bodie
 by default. Decorations over the world should not claim the pointer unless their interaction
 requires it. Scroll-pane click-through behavior is in [Scrolling pane](component-catalog.md#scrolling-pane).
 
+A button's click sound belongs to its style, not to its callback. The theme's style sheet gives
+it a click kind, `click-sound: confirm;` (the themes use `confirm`, `cancel`, `select` and
+`menu`; `none` silences an element inside one that sounds), and the `interfaceClick` event of
+`Data/Audio/SoundEvents.json`, edited in the Sound Editor's Events tab, picks each kind's sound
+([`RmlClickSounds.h`](../../src/source/UI/RmlBridge/RmlClickSounds.h)). One listener hears each
+click before the callbacks, so a callback plays no sound of its own, and a button with the class
+`disabled` plays none. A key that stands for a button (Enter for OK) plays that button's sound
+through `PlayClickSoundOf(element)`. Every theme that styles the window names the kinds in its
+style sheet. So far the login, server list and character select windows do; the other windows
+still play their sounds from code.
+
 For managed-window mouse dispatch, `UpdateMouseEvent()` returns `false` only when it consumes
 input. A pure RmlUi panel can return `!UI::RmlBridge::IsPointerOver(document)`; native content can
 query its own element through `IsPointerWithin()` or `PointerIn()`.

@@ -8,6 +8,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
+#include <functional>
 #include <optional>
 #include <span>
 #include <vector>
@@ -155,9 +156,23 @@ public:
     // The monster list, the model list and the sound sets together: no file
     // is written when the checks of one find errors.
     bool SaveAll(std::vector<Items::ItemDataIssue>& issues);
+    // The sound sets file as it is, its sets changed by `change` (the Sound
+    // Editor's Save, which writes what that window changed): the monster and
+    // model lists and the rest of the file stay as written, so the monster
+    // tools' unsaved changes stay theirs. False, with nothing written, when
+    // the file cannot be read, `change` returns false or the sets would not
+    // read back; the problems are added to `issues`.
+    bool SaveSoundSets(const std::function<bool(std::vector<MonsterSoundSet>& sets)>& change,
+                       std::vector<Items::ItemDataIssue>& issues);
     // The three files read again together: no table changes when one file
     // has fatal problems.
     bool RevertAll(std::vector<Items::ItemDataIssue>& issues);
+    // How often SaveAll or RevertAll made the tables and the three files
+    // alike: the Sound Editor then takes the sets' names as the file's.
+    int GetFilesVersion() const
+    {
+        return m_filesVersion;
+    }
 
     // Told after ReopenChangedModels with the slots it opened again; the
     // game clamps the animations of the characters that use them.
@@ -202,6 +217,7 @@ private:
     // A set or a monster's set changed: the open models load their sets'
     // sounds again.
     bool m_soundsToLoad = false;
+    int m_filesVersion = 0;
 #endif
 };
 } // namespace Data::Monsters

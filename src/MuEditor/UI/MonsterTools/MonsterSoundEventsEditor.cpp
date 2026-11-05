@@ -151,14 +151,33 @@ bool SoundCombo(const char* id, const MonsterSoundSet& set, std::string& value, 
 {
     bool picked = false;
     ImGui::SetNextItemWidth(width);
-    if (ImGui::BeginCombo(id, value.c_str()))
+    // A sound the Sound Editor named shows its name, its id or file after it
+    // (Q-SE1).
+    const auto labelOf = [](const MonsterSound& sound)
+    {
+        const std::string& name = Data::Monsters::SoundNameOf(sound);
+        return sound.name.empty() ? name : sound.name + " (" + name + ")";
+    };
+    std::string shown = value;
+    for (const MonsterSound& sound : set.sounds)
+    {
+        if (Data::Monsters::SoundNameOf(sound) == value)
+        {
+            shown = labelOf(sound);
+        }
+    }
+    if (ImGui::BeginCombo(id, shown.c_str()))
     {
         bool listed = false;
-        for (const MonsterSound& sound : set.sounds)
+        for (size_t index = 0; index < set.sounds.size(); ++index)
         {
+            const MonsterSound& sound = set.sounds[index];
             const std::string& name = Data::Monsters::SoundNameOf(sound);
             listed = listed || name == value;
-            if (ImGui::Selectable(name.c_str(), name == value) && name != value)
+            ImGui::PushID(static_cast<int>(index));
+            const bool chosen = ImGui::Selectable(labelOf(sound).c_str(), name == value);
+            ImGui::PopID();
+            if (chosen && name != value)
             {
                 value = name;
                 picked = true;
@@ -212,8 +231,9 @@ public:
     }
 
 private:
-    // The moments, the animations, then the model's cues; picking one of
-    // another kind makes the event one of it.
+    // The moments, the animations, each frame in, once until it stands, then
+    // the model's cues (Q-MN88); picking one of another kind makes the event
+    // one of it.
     void RenderWhen(MonsterSoundEvent& event)
     {
         ImGui::SetNextItemWidth(WhenWidth * m_scale);
@@ -258,8 +278,37 @@ private:
             ImGui::EndDisabled();
             ImGui::PopID();
         }
+        RenderDrawnChoices(event, I18N::Editor::SoundEventEachFrameIn, event.during, ToggleDuring, "during");
+        RenderDrawnChoices(event, I18N::Editor::SoundEventOnceUntilItStands, event.once, ToggleOnce, "once");
         RenderCueChoices(event);
+        RenderDuringCueChoices(event);
+        RenderTimerChoices(event);
         ImGui::EndCombo();
+    }
+
+    // A section of the When list for the events of drawn frames (Q-MN84,
+    // Q-MN85): the animations, those of `chosen` marked.
+    void RenderDrawnChoices(MonsterSoundEvent& event, const char* heading, const std::vector<int>& chosen,
+                            bool (*toggle)(MonsterSoundEvent&, int), const char* id)
+    {
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", heading);
+        ImGui::PushID(id);
+        for (const int animation : OfferedAnimations(m_context))
+        {
+            const bool picked = std::find(chosen.begin(), chosen.end(), animation) != chosen.end();
+            const std::string name = Data::Monsters::GetMonsterAnimationName(animation);
+            ImGui::PushID(animation);
+            // An event plays in one animation at least.
+            ImGui::BeginDisabled(picked && chosen.size() == 1);
+            if (ImGui::Selectable(name.c_str(), picked, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(toggle(event, animation), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
     }
 
     void RenderCueChoices(MonsterSoundEvent& event)
@@ -313,21 +362,75 @@ private:
         }
     }
 
+    // The model's cues for each drawn frame in them (Q-MN90).
+    void RenderDuringCueChoices(MonsterSoundEvent& event)
+    {
+        if (m_context.model == nullptr || m_context.model->cues.empty())
+        {
+            return;
+        }
+        ImGui::Separator();
+        ImGui::TextDisabled("%s",
+                            I18N::Format(I18N::Editor::SoundEventEachFrameInCuesOf0, {m_context.model->slot}).c_str());
+        ImGui::PushID("duringCues");
+        for (const MonsterModelCue& cue : m_context.model->cues)
+        {
+            const bool chosen =
+                std::find(event.duringCues.begin(), event.duringCues.end(), cue.name) != event.duringCues.end();
+            ImGui::PushID(cue.name.c_str());
+            ImGui::BeginDisabled(chosen && event.duringCues.size() == 1);
+            if (ImGui::Selectable(cue.name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(ToggleDuringCue(event, cue.name), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
+    }
+
+    // The model's timers, a drawn frame where one ticks (Q-MN91); Monster
+    // Model edits them.
+    void RenderTimerChoices(MonsterSoundEvent& event)
+    {
+        if (m_context.model == nullptr || m_context.model->timers.empty())
+        {
+            return;
+        }
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEventTimersOf0, {m_context.model->slot}).c_str());
+        ImGui::PushID("timers");
+        for (const Data::Monsters::MonsterModelTimer& timer : m_context.model->timers)
+        {
+            const bool chosen = std::find(event.timers.begin(), event.timers.end(), timer.name) != event.timers.end();
+            ImGui::PushID(timer.name.c_str());
+            ImGui::BeginDisabled(chosen && event.timers.size() == 1);
+            if (ImGui::Selectable(timer.name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(ToggleTimer(event, timer.name), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
+    }
+
     // On a cue's event: the cue's animation and frames, which are the model's
     // and change for every monster of it (Q-MN81).
     void RenderCueFrames(MonsterSoundEvent& event)
     {
         // The cues are those of the selected monster's look, which plays
         // another set (or none).
+        const std::vector<std::string>& names = event.cues.empty() ? event.duringCues : event.cues;
         if (m_context.model == nullptr)
         {
-            if (!event.cues.empty())
+            if (!names.empty())
             {
                 ImGui::TextDisabled("%s", I18N::Editor::CueFramesNeedAMonsterOfTheSet);
             }
             return;
         }
-        for (const std::string& name : event.cues)
+        for (const std::string& name : names)
         {
             ImGui::PushID(name.c_str());
             MonsterModelCue* cue = FindCue(m_context.model, name);
@@ -542,7 +645,8 @@ void RenderMaps(MonsterSoundSet& set, SetDraft& draft)
 std::vector<std::string> CuesOnlyThisEventUses(const MonsterSoundSet& set, size_t index, int slot)
 {
     std::vector<std::string> alone;
-    for (const std::string& cue : set.soundEvents[index].cues)
+    const MonsterSoundEvent& event = set.soundEvents[index];
+    for (const std::string& cue : event.cues.empty() ? event.duringCues : event.cues)
     {
         if (!IsCueUsed(slot, cue, set.name, index))
         {
@@ -630,6 +734,35 @@ void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& 
 }
 } // namespace
 
+namespace
+{
+// Makes the event name nothing yet: picking a choice of another kind
+// replaces what it named.
+void ClearWhen(MonsterSoundEvent& event)
+{
+    event.moments.clear();
+    event.animations.clear();
+    event.cues.clear();
+    event.during.clear();
+    event.once.clear();
+    event.duringCues.clear();
+    event.timers.clear();
+}
+
+// Toggles `animation` in `list`, one of the event's lists of animations; the
+// first pick in it makes the event one of its kind.
+bool ToggleAnimationOf(MonsterSoundEvent& event, std::vector<int>& list, int animation)
+{
+    if (list.empty())
+    {
+        ClearWhen(event);
+        list = {animation};
+        return true;
+    }
+    return Toggle(list, animation);
+}
+} // namespace
+
 SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store)
 {
     return SetDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
@@ -664,6 +797,32 @@ std::string WhenText(const MonsterSoundEvent& event)
         }
         return text;
     }
+    if (!event.during.empty())
+    {
+        return std::string(I18N::Editor::SoundEventEachFrame) + " " + AnimationsText(event.during);
+    }
+    if (!event.once.empty())
+    {
+        return std::string(I18N::Editor::SoundEventOnce) + " " + AnimationsText(event.once);
+    }
+    if (!event.timers.empty())
+    {
+        std::string text = I18N::Editor::SoundEventOnTimer;
+        for (size_t index = 0; index < event.timers.size(); ++index)
+        {
+            text += (index == 0 ? " " : ", ") + event.timers[index];
+        }
+        return text;
+    }
+    if (!event.duringCues.empty())
+    {
+        std::string text = I18N::Editor::SoundEventEachFrameInCue;
+        for (size_t index = 0; index < event.duringCues.size(); ++index)
+        {
+            text += (index == 0 ? " " : ", ") + event.duringCues[index];
+        }
+        return text;
+    }
     if (event.moments.empty())
     {
         return AnimationsText(event.animations);
@@ -681,8 +840,7 @@ bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 {
     if (event.moments.empty())
     {
-        event.animations.clear();
-        event.cues.clear();
+        ClearWhen(event);
         event.moments = {moment};
         return true;
     }
@@ -691,26 +849,50 @@ bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 
 bool ToggleAnimation(MonsterSoundEvent& event, int animation)
 {
-    if (event.animations.empty())
-    {
-        event.moments.clear();
-        event.cues.clear();
-        event.animations = {animation};
-        return true;
-    }
-    return Toggle(event.animations, animation);
+    return ToggleAnimationOf(event, event.animations, animation);
+}
+
+bool ToggleDuring(MonsterSoundEvent& event, int animation)
+{
+    return ToggleAnimationOf(event, event.during, animation);
+}
+
+bool ToggleOnce(MonsterSoundEvent& event, int animation)
+{
+    return ToggleAnimationOf(event, event.once, animation);
 }
 
 bool ToggleCue(MonsterSoundEvent& event, const std::string& cue)
 {
     if (event.cues.empty())
     {
-        event.moments.clear();
-        event.animations.clear();
+        ClearWhen(event);
         event.cues = {cue};
         return true;
     }
     return Toggle(event.cues, cue, false);
+}
+
+bool ToggleTimer(MonsterSoundEvent& event, const std::string& timer)
+{
+    if (event.timers.empty())
+    {
+        ClearWhen(event);
+        event.timers = {timer};
+        return true;
+    }
+    return Toggle(event.timers, timer, false);
+}
+
+bool ToggleDuringCue(MonsterSoundEvent& event, const std::string& cue)
+{
+    if (event.duringCues.empty())
+    {
+        ClearWhen(event);
+        event.duringCues = {cue};
+        return true;
+    }
+    return Toggle(event.duringCues, cue, false);
 }
 
 std::vector<std::string> PreviewSounds(const MonsterSoundEvent& event, int draw)
@@ -745,9 +927,11 @@ bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, s
     {
         for (size_t index = 0; index < set->soundEvents.size(); ++index)
         {
-            const std::vector<std::string>& cues = set->soundEvents[index].cues;
+            const MonsterSoundEvent& event = set->soundEvents[index];
             const bool skipped = set->name == exceptSet && index == except;
-            if (!skipped && std::find(cues.begin(), cues.end(), cue) != cues.end())
+            const auto names = [&](const std::vector<std::string>& cues)
+            { return std::find(cues.begin(), cues.end(), cue) != cues.end(); };
+            if (!skipped && (names(event.cues) || names(event.duringCues)))
             {
                 return true;
             }
@@ -764,6 +948,7 @@ std::vector<std::string> FindUnusedCues(const MonsterModelDefinition& model, int
         for (const MonsterSoundEvent& event : set->soundEvents)
         {
             used.insert(used.end(), event.cues.begin(), event.cues.end());
+            used.insert(used.end(), event.duringCues.begin(), event.duringCues.end());
         }
     }
     std::vector<std::string> unused;

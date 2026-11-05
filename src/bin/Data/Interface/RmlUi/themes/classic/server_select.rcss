@@ -232,3 +232,8 @@ body {
 #desc_panel {
 	display: none;
 }
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+.server-group-btn { click-sound: select; }
+.server-option-btn { click-sound: confirm; }
