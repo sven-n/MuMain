@@ -578,9 +578,20 @@ check(
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
-# entries out of the repository's 10 GB.
+# entries out of the repository's 10 GB. Each job's caches are saved by one kind of run on main: main pushes and the
+# nightly run side by side, so with both saving, an older commit's entry could be saved last and be the one the prune
+# job keeps.
+CACHE_SAVERS = {
+    "build-windows": "needs.quality.outputs.release == 'true'",
+    "build-linux": "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+    "build-macos": "needs.quality.outputs.release == 'true'",
+}
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
+    for job_step in re.split(r"(?m)^      - name: ", job_body)[1:]:
+        if "uses: actions/cache/save@v6" in job_step:
+            check(f"if: {CACHE_SAVERS[job_name]} && steps." in job_step,
+                  f"{job_name} {job_step.splitlines()[0]} must save only in {CACHE_SAVERS[job_name]}")
     cache_steps = [("Restore dependencies", "Save dependencies")]
     if job_name == "build-windows":
         cache_steps.append(("Restore vcpkg packages", "Save vcpkg packages"))
@@ -593,11 +604,9 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
         if restore_id is None:
             continue
         restore_id = restore_id.group(1)
-        for required in ("uses: actions/cache/save@v6", "github.event_name != 'pull_request'",
-                         f"steps.{restore_id}.outputs.cache-hit != 'true'",
+        for required in ("uses: actions/cache/save@v6", f"steps.{restore_id}.outputs.cache-hit != 'true'",
                          f"key: ${{{{ steps.{restore_id}.outputs.cache-primary-key }}}}"):
-            check(required in save, f"{job_name} {save_name} must save only outside PRs, under the restored key: "
-                                    f"{required}")
+            check(required in save, f"{job_name} {save_name} must save on a miss, under the restored key: {required}")
         check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
               f"{job_name} {save_name} must save the paths {restore_name} restores")
 # A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each

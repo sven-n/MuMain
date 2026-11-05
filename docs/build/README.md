@@ -241,10 +241,13 @@ file in `src/CMakeLists.txt`.
 PR runs only read the library and vcpkg caches, as they do the compiler caches:
 **Restore dependencies** and **Restore vcpkg packages** read them, and
 **Save dependencies** (after the build) and **Save vcpkg packages** (after the
-configure step) store them only in runs on main (pushes, the nightly and manual
-release builds), when the exact key was missing. A PR's own entry would serve that
-PR alone, and the repository's caches share 10 GB: past that, GitHub deletes the
-least recently used entries, which are main's Windows ones, used once a night.
+configure step) store them only in runs on main, when the exact key was missing. A
+PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
+past that, GitHub deletes the least recently used entries, which are main's Windows
+ones, used once a night. Each job's caches have one kind of run that saves them:
+main pushes for Linux, the nightly and manual release builds for macOS and Windows.
+Pushes and the nightly run side by side, so with both saving, an older commit's
+entry could be saved last and be the one the prune job keeps.
 
 A save under a new key leaves the older entries of that cache behind, such as a
 compiler cache for each main push. After the builds of a run on main, the
