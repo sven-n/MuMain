@@ -209,9 +209,9 @@ jobs:
         # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
         # their sources, and the ClientLibrary projects and the .NET SDK pick the NuGet packages (the SDK's version
         # picks those of its NativeAOT compiler). src/CMakeLists.txt is not part of it: it changes with every new
-        # source file of the game. Only the release runs, the runs on main that build Windows, save it (Save
-        # dependencies): a PR's own copy would serve that PR alone and push main's entries out of the 10 GB cache. One
-        # kind of run saves each cache, so its newest entry, the one the prune job keeps, is always the newest commit's.
+        # source file of the game. Only main pushes save it (Save dependencies): a PR's own copy would serve that PR
+        # alone and push main's entries out of the 10 GB cache. One kind of run saves each cache, so its newest entry,
+        # the one the prune job keeps, is always the newest commit's.
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -229,7 +229,7 @@ jobs:
 
       - name: Restore vcpkg packages
         id: vcpkg_cache
-        # Saved after the configure step, which builds what the archives lack, by the release runs only.
+        # Saved after the configure step, which builds what the archives lack, by main pushes only.
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -302,7 +302,7 @@ jobs:
           }
 
       - name: Save vcpkg packages
-        if: needs.quality.outputs.release == 'true' && steps.vcpkg_cache.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.vcpkg_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -315,7 +315,7 @@ jobs:
         run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
 
       - name: Save dependencies
-        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -808,7 +808,7 @@ jobs:
           python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
 
       - name: Save dependencies
-        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -860,9 +860,8 @@ jobs:
             fi
           done
 
-      # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
       - name: Save macOS compilation cache
-        if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: ${{ env.CCACHE_DIR }}

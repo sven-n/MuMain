@@ -232,12 +232,11 @@ their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
 `-latest` label: GitHub moves repositories to a new latest image one by one and
 warns about the move in every job meanwhile.
 
-Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
-summary show hits and misses; compare the Build step duration on a warm run with
-the first run. All builds restore the compiler cache; only successful main pushes
-save it, so PR-only entries do not displace shared caches. macOS uses the same
-compiler cache (**macOS compiler cache** summary); main pushes skip macOS, so
-successful nightly/manual release builds save it instead. Windows vcpkg primary
+Linux and macOS use a compiler cache (ccache). The job logs and the **Linux
+compiler cache** and **macOS compiler cache** step summaries show hits and misses;
+compare the Build step duration on a warm run with the first run. All builds
+restore the compiler cache; only successful main pushes save it, so PR-only entries
+do not displace shared caches, and a PR starts from the latest main. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
@@ -253,13 +252,12 @@ file in `src/CMakeLists.txt`.
 PR runs only read the library and vcpkg caches, as they do the compiler caches:
 **Restore dependencies** and **Restore vcpkg packages** read them, and
 **Save dependencies** (after the build) and **Save vcpkg packages** (after the
-configure step) store them only in runs on main, when the exact key was missing. A
+configure step) store them only in main pushes, when the exact key was missing. A
 PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
-past that, GitHub deletes the least recently used entries, which are main's Windows
-ones, used once a night. Each job's caches have one kind of run that saves them:
-main pushes for Linux, the nightly and manual release builds for macOS and Windows.
-Pushes and the nightly run side by side, so with both saving, an older commit's
-entry could be saved last and be the one the prune job keeps.
+past that, GitHub deletes the least recently used entries, main's included. The
+nightly and manual release runs save nothing either: they run beside the pushes,
+so with both saving, an older commit's entry could be saved last and be the one the
+prune job keeps.
 
 A save under a new key leaves the older entries of that cache behind, such as a
 compiler cache for each main push. After the builds of a run on main, the

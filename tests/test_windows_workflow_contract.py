@@ -581,20 +581,15 @@ check(
 )
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
-# entries out of the repository's 10 GB. Each job's caches are saved by one kind of run on main: main pushes and the
-# nightly run side by side, so with both saving, an older commit's entry could be saved last and be the one the prune
-# job keeps.
-CACHE_SAVERS = {
-    "build-windows": "needs.quality.outputs.release == 'true'",
-    "build-linux": "github.event_name == 'push' && github.ref == 'refs/heads/main'",
-    "build-macos": "needs.quality.outputs.release == 'true'",
-}
+# entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
+# saving, an older commit's entry could be saved last and be the one the prune job keeps.
+CACHE_SAVER = "github.event_name == 'push' && github.ref == 'refs/heads/main'"
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
     for job_step in re.split(r"(?m)^      - name: ", job_body)[1:]:
         if "uses: actions/cache/save@v6" in job_step:
-            check(f"if: {CACHE_SAVERS[job_name]} && steps." in job_step,
-                  f"{job_name} {job_step.splitlines()[0]} must save only in {CACHE_SAVERS[job_name]}")
+            check(f"if: {CACHE_SAVER} && steps." in job_step,
+                  f"{job_name} {job_step.splitlines()[0]} must save only in main pushes")
     cache_steps = [("Restore dependencies", "Save dependencies")]
     if job_name == "build-windows":
         cache_steps.append(("Restore vcpkg packages", "Save vcpkg packages"))
@@ -669,9 +664,9 @@ macos_cache = step(macos_job, "build-macos", "Cache macOS compilation")
 for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in macos_cache, f"macOS compiler cache missing {required}")
 macos_cache_save = step(macos_job, "build-macos", "Save macOS compilation cache")
-for required in ("uses: actions/cache/save@v6", "needs.quality.outputs.release == 'true'",
+for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
                  "steps.ccache.outputs.cache-primary-key"):
-    check(required in macos_cache_save, f"macOS compiler cache must save only validated release builds: {required}")
+    check(required in macos_cache_save, f"macOS compiler cache must save only validated main builds: {required}")
 check("ccache --show-stats" in macos_job, "macOS compiler cache must report hit statistics")
 check(
     "cmake --build out/build/macos-ci --config Release"
