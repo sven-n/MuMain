@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <utility>
 #include <vector>
 
 namespace World::MapObjectSounds
@@ -47,6 +48,68 @@ LoadedMap& Loaded()
 {
     static LoadedMap loaded;
     return loaded;
+}
+
+// A copy a drawn object asks for, in the order they were drawn.
+struct DrawnStart
+{
+    ESound sound = Audio::SoundNumbers::NoNumber;
+    // By the object's distance from the hero (DistanceLevel).
+    float level = 1.0f;
+    int objectType = -1;
+    std::array<float, 3> position{};
+};
+
+// The starts of the drawn objects until PlayDrawnSounds, and the loudest
+// level of each of their sounds: kept between frames (no allocation each
+// frame), only the main loop uses them.
+std::vector<DrawnStart>& DrawnStarts()
+{
+    static std::vector<DrawnStart> starts;
+    return starts;
+}
+
+std::vector<std::pair<ESound, float>>& LoudestLevels()
+{
+    static std::vector<std::pair<ESound, float>> levels;
+    return levels;
+}
+
+void NoteStart(const OBJECT& object, ESound sound, float level)
+{
+    DrawnStarts().push_back({sound, level, object.Type, {object.Position[0], object.Position[1], object.Position[2]}});
+}
+
+// The loudest level each sound of the starts has: a map plays a handful.
+void FindLoudestLevels(const std::vector<DrawnStart>& starts)
+{
+    std::vector<std::pair<ESound, float>>& levels = LoudestLevels();
+    levels.clear();
+    for (const DrawnStart& start : starts)
+    {
+        const auto same = std::find_if(levels.begin(), levels.end(), [&start](const std::pair<ESound, float>& entry)
+                                       { return entry.first == start.sound; });
+        if (same == levels.end())
+        {
+            levels.emplace_back(start.sound, start.level);
+        }
+        else
+        {
+            same->second = std::max(same->second, start.level);
+        }
+    }
+}
+
+float LoudestLevel(ESound sound)
+{
+    for (const auto& [number, level] : LoudestLevels())
+    {
+        if (number == sound)
+        {
+            return level;
+        }
+    }
+    return 1.0f;
 }
 
 // "Data/Sound/a.wav" -> "Data\Sound\a.wav", as LoadWaveFile takes it.
@@ -148,15 +211,25 @@ void OnObjectDrawn(const OBJECT& object)
 #ifdef _EDITOR
         NoteForOverlay(object, *sound);
 #endif
-        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type, object.Position);
-        PlayBufferOnFreeChannel(*sound, DistanceLevel(DistanceFromHero(object)));
+        NoteStart(object, *sound, DistanceLevel(DistanceFromHero(object)));
     }
     // A map-wide sound: at full volume, as no one object is its place.
     for (const ESound sound : Loaded().anyObject)
     {
-        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type, object.Position);
-        PlayBufferOnFreeChannel(sound, 1.0f);
+        NoteStart(object, sound, 1.0f);
     }
+}
+
+void PlayDrawnSounds()
+{
+    std::vector<DrawnStart>& starts = DrawnStarts();
+    FindLoudestLevels(starts);
+    for (const DrawnStart& start : starts)
+    {
+        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, start.objectType, start.position.data());
+        PlayBufferOnFreeChannel(start.sound, LoudestLevel(start.sound));
+    }
+    starts.clear();
 }
 
 float DistanceLevel(float distance)

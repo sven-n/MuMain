@@ -289,6 +289,7 @@ TEST_CASE("Map object sounds: an entry without objects plays for any object of i
     farObject.Position[0] = 5000.0f;
     World::MapObjectSounds::OnObjectDrawn(wheelObject);
     World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays == std::vector<int>{wheelNumber, humNumber, humNumber});
     CHECK(scope.audio.freeLevels == std::vector<float>{1.0f, 1.0f, 1.0f});
     // Not a type of its own.
@@ -298,6 +299,7 @@ TEST_CASE("Map object sounds: an entry without objects plays for any object of i
     scope.audio.freePlays.clear();
     World::MapObjectSounds::LoadForMap(38, 0);
     World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays.empty());
     Hero = previousHero;
     World::MapObjectSounds::LoadForMap(-1, 0);
@@ -422,6 +424,9 @@ TEST_CASE("Map object sounds: a drawn object of an entry's type plays its sound 
     World::MapObjectSounds::OnObjectDrawn(waterfall);
     World::MapObjectSounds::OnObjectDrawn(waterfall);
     World::MapObjectSounds::OnObjectDrawn(other);
+    // They start after the drawn objects.
+    CHECK(scope.audio.freePlays.empty());
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays == std::vector<int>{static_cast<int>(number), static_cast<int>(number)});
     CHECK(scope.audio.plays.empty());
     CHECK(World::MapObjectSounds::FindSound(38) == number);
@@ -431,6 +436,7 @@ TEST_CASE("Map object sounds: a drawn object of an entry's type plays its sound 
     scope.audio.freePlays.clear();
     World::MapObjectSounds::LoadForMap(2, 0);
     World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays.empty());
     CHECK_FALSE(World::MapObjectSounds::FindSound(37));
 
@@ -441,14 +447,16 @@ TEST_CASE("Map object sounds: a drawn object of an entry's type plays its sound 
     g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{edited});
     scope.audio.freePlays.clear();
     World::MapObjectSounds::OnObjectDrawn(other);
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays == std::vector<int>{static_cast<int>(number)});
     World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::PlayDrawnSounds();
     CHECK(scope.audio.freePlays.size() == 1);
     World::MapObjectSounds::LoadForMap(-1, 0);
 }
 
-TEST_CASE("Map object sounds: a copy plays quieter the farther its object is from the hero (D-MP7, a test) "
-          "[data][maps]")
+TEST_CASE("Map object sounds: a sound's copies play quieter the farther its nearest drawn object is from the hero "
+          "(D-MP7, a test) [data][maps]")
 {
     using World::MapObjectSounds::DistanceLevel;
     CHECK(DistanceLevel(0.0f) == 1.0f);
@@ -474,14 +482,21 @@ TEST_CASE("Map object sounds: a copy plays quieter the farther its object is fro
     farObject.Position[0] = 1000.0f;
     farObject.Position[1] = 1900.0f;
 
-    World::MapObjectSounds::OnObjectDrawn(nearObject);
+    // Only the far one drawn: its level.
     World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::PlayDrawnSounds();
+    // The far one drawn first, then the near one: both copies at the near
+    // one's level, whichever finds a free channel.
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+    World::MapObjectSounds::OnObjectDrawn(nearObject);
+    World::MapObjectSounds::PlayDrawnSounds();
 
     Hero = previousHero;
     World::MapObjectSounds::LoadForMap(-1, 0);
-    REQUIRE(scope.audio.freeLevels.size() == 2);
-    CHECK(scope.audio.freeLevels[0] == 1.0f);
-    CHECK(scope.audio.freeLevels[1] == doctest::Approx(0.625f));
+    REQUIRE(scope.audio.freeLevels.size() == 3);
+    CHECK(scope.audio.freeLevels[0] == doctest::Approx(0.625f));
+    CHECK(scope.audio.freeLevels[1] == 1.0f);
+    CHECK(scope.audio.freeLevels[2] == 1.0f);
 }
 
 #ifdef _EDITOR
@@ -497,6 +512,7 @@ TEST_CASE("Map object sounds: the Sound Mixer hears them as map object sounds of
     OBJECT waterfall;
     waterfall.Type = 38;
     World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::PlayDrawnSounds();
     const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard();
     World::MapObjectSounds::LoadForMap(-1, 0);
     Audio::Mixer::Clear();
@@ -522,9 +538,11 @@ TEST_CASE("Map object sounds: the Sound Mixer's overlay marks a drawn object wit
     waterfall.Position[2] = 50.0f;
     Audio::Overlay::SetOn(false);
     World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::PlayDrawnSounds();
     const bool notedWhileOff = !Audio::Overlay::TakeDrawn().empty();
     Audio::Overlay::SetOn(true);
     World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::PlayDrawnSounds();
     const std::vector<Audio::Overlay::DrawnSource> drawn = Audio::Overlay::TakeDrawn();
     Audio::Overlay::SetOn(false);
     const std::vector<Audio::Mixer::PlacedStart> starts = Audio::Mixer::RecentStarts(Audio::Mixer::Now(), 60.0);

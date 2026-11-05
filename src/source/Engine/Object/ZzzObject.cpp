@@ -4120,6 +4120,8 @@ void UpdateObjectEffects()
             UpdateObjectVisual(o);
         }
     }
+    // The sounds of the objects drawn, each at its nearest object's level.
+    World::MapObjectSounds::PlayDrawnSounds();
 }
 
 #ifdef _EDITOR

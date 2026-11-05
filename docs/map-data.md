@@ -36,8 +36,9 @@ sound that has ended starts again and a playing one is left alone. With 3
 channels, up to three copies run, a frame or two apart. When the objects
 leave the screen, nothing new starts and the copies play to their end. A
 copy starts at full volume within 3 tiles of the hero and quieter the
-farther its object is, down to a quarter at 15 tiles (a test of how it
-feels; the original played at full volume at any distance).
+farther the nearest object of its sound drawn that frame is, down to a
+quarter at 15 tiles (a test of how it feels; the original played at full
+volume at any distance).
 
 An entry without `objects` plays while any object of its maps is drawn, at
 full volume: the hum of a whole map, which Kanturu Ruins and Kanturu Relics
