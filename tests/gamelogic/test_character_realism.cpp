@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "../data/TestModelSlots.h"
 
 #include <algorithm>
 #include <array>
@@ -900,4 +901,126 @@ TEST_CASE("A character that greeted may greet again once its cooldown has run ou
         UpdateNod(&c);
     }
     CHECK(c.Motion.NodCooldown == 0.f);
+}
+namespace
+{
+// A frame of the reference rate (FPS_ANIMATION_FACTOR 1, as LookWorld sets it).
+constexpr int FramesPerSecond = static_cast<int>(REFERENCE_FPS);
+
+// The hero at (100, 100) and another character of `kind` next to it, looking at it, in `action`.
+struct GreetScene
+{
+    // Empty model slots: a greeting looks up the character's model and its actions.
+    TestModelSlots models;
+    LookWorld world;
+    CHARACTER* hero = nullptr;
+    CHARACTER* other = nullptr;
+
+    GreetScene(BYTE kind, int action)
+    {
+        hero = &world.Place(0, KIND_PLAYER, 100, 100);
+        hero->Object.CurrentAction = PLAYER_STOP_MALE;
+        Hero = hero;
+        other = &world.Place(1, kind, 101, 101);
+        other->Object.CurrentAction = static_cast<unsigned short>(action);
+        other->Motion.LookTarget = 0;
+        // The hero faces it, so it can answer.
+        hero->Object.Angle[2] = CreateAngle2D(hero->Object.Position, other->Object.Position);
+        // No answer left pending from an earlier test (switching the option off forgets it).
+        const EnhancedMovementOff off;
+        UpdateNod(hero);
+    }
+};
+
+// Whether `c` nodded or bowed at any point over `seconds` of UpdateNod.
+bool NodsOrBows(CHARACTER& c, float seconds)
+{
+    bool moved = false;
+    for (int frame = 0; frame < static_cast<int>(seconds * FramesPerSecond); ++frame)
+    {
+        RemoveNod(&c);
+        UpdateNod(&c);
+        moved = moved || c.Motion.NodLeft > 0.f || c.Motion.NodApplied != 0.f || c.Object.Angle[0] != 0.f;
+    }
+    return moved;
+}
+} // namespace
+
+TEST_CASE("Only a character standing on foot greets the hero; walking, fighting, flying or riding it doesn't "
+          "[gamelogic][nod]")
+{
+    struct Case
+    {
+        int action;
+        bool greets;
+    };
+    for (const Case& test :
+         {Case{PLAYER_STOP_MALE, true}, Case{PLAYER_STOP_WAND, true}, Case{PLAYER_WALK_MALE, false},
+          Case{PLAYER_RUN, false}, Case{PLAYER_ATTACK_FIST, false}, Case{PLAYER_STOP_FLY, false},
+          Case{PLAYER_STOP_RIDE, false}, Case{PLAYER_STOP_RIDE_WEAPON, false}, Case{PLAYER_GREETING1, false}})
+    {
+        CAPTURE(test.action);
+        GreetScene scene(KIND_PLAYER, test.action);
+        const bool moved = NodsOrBows(*scene.other, 3.f);
+        CHECK(scene.other->Motion.NoddedAtHero == test.greets);
+        if (!test.greets)
+        {
+            // No nod and no bow in the middle of a walk or an attack.
+            CHECK_FALSE(moved);
+            CHECK(scene.other->Object.Angle[0] == 0.f);
+        }
+    }
+}
+
+TEST_CASE("A nod under way stops when the character starts walking, and its bow comes off [gamelogic][nod]")
+{
+    // An NPC without a second animation nods.
+    GreetScene scene(KIND_NPC, MONSTER01_STOP1);
+    CHARACTER& npc = *scene.other;
+    for (int frame = 0; frame < 2 * FramesPerSecond && npc.Motion.NodLeft <= 0.f; ++frame)
+    {
+        RemoveNod(&npc);
+        UpdateNod(&npc);
+    }
+    REQUIRE(npc.Motion.NodLeft > 0.f);
+    RemoveNod(&npc);
+    UpdateNod(&npc);
+    REQUIRE(npc.Object.Angle[0] != 0.f);
+
+    npc.Object.CurrentAction = MONSTER01_WALK;
+    RemoveNod(&npc);
+    UpdateNod(&npc);
+    CHECK(npc.Motion.NodLeft == 0.f);
+    CHECK(npc.Object.Angle[0] == 0.f);
+    CHECK_FALSE(NodsOrBows(npc, 2.f));
+}
+
+TEST_CASE("The hero nods back only while it stands on foot [gamelogic][nod]")
+{
+    for (const bool walking : {false, true})
+    {
+        CAPTURE(walking);
+        GreetScene scene(KIND_NPC, MONSTER01_STOP1);
+        CHARACTER& npc = *scene.other;
+        CHARACTER& hero = *scene.hero;
+        if (walking)
+        {
+            hero.Object.CurrentAction = PLAYER_WALK_MALE;
+        }
+        bool heroNodded = false;
+        bool heroAttended = false;
+        for (int frame = 0; frame < 6 * FramesPerSecond; ++frame)
+        {
+            RemoveNod(&npc);
+            UpdateNod(&npc);
+            RemoveNod(&hero);
+            UpdateNod(&hero);
+            heroNodded = heroNodded || hero.Motion.NodLeft > 0.f || hero.Object.Angle[0] != 0.f;
+            heroAttended = heroAttended || HeroNodAttention() == &npc;
+        }
+        REQUIRE(npc.Motion.NoddedAtHero);
+        CHECK(heroNodded == !walking);
+        // Its head turns to the nodder either way.
+        CHECK(heroAttended);
+    }
 }

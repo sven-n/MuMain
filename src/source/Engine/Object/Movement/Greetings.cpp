@@ -50,6 +50,13 @@ void StartNod(CHARACTER* c)
     c->Motion.NodCooldown = NodCooldownSeconds;
 }
 
+// Whether `o` is drawn with the player's skeleton and actions: a player, or an NPC built on it (Leo the Helper).
+bool UsesPlayerSkeleton(const OBJECT* o)
+{
+    const int actions = Models[o->Type].NumActions;
+    return o->Type == MODEL_PLAYER || (actions > 0 && actions == Models[MODEL_PLAYER].NumActions);
+}
+
 // Whether `c` is one of the client's character slots (a character screen's isn't).
 bool InClientSlots(const CHARACTER* c)
 {
@@ -57,20 +64,15 @@ bool InClientSlots(const CHARACTER* c)
     return slot >= 0 && slot <= MAX_CHARACTERS_CLIENT;
 }
 
-// A character greeting the hero instead of nodding (only on this screen: the server isn't told). Another player, or
-// an NPC built on the player skeleton (Leo the Helper), standing: its Hello. Another NPC with a second animation
-// plays that once (its own idle variation, which reads as a greeting). Whether it greeted.
+// A character greeting the hero instead of nodding (only on this screen: the server isn't told), standing on foot
+// (StandsOnFoot). Another player, or an NPC built on the player skeleton (Leo the Helper): its Hello. Another NPC with
+// a second animation plays that once (its own idle variation, which reads as a greeting). Whether it greeted.
 bool Greet(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
     const BMD& model = Models[o->Type];
-    const bool playerSkeleton = o->Type == MODEL_PLAYER || model.NumActions == Models[MODEL_PLAYER].NumActions;
-    if (playerSkeleton)
+    if (UsesPlayerSkeleton(o))
     {
-        if (o->CurrentAction < PLAYER_STOP_MALE || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON)
-        {
-            return false;
-        }
         SetAction(o, gCharacterManager.IsFemale(c->Class) ? PLAYER_GREETING_FEMALE1 : PLAYER_GREETING1);
     }
     else if (o->Kind == KIND_NPC && model.NumActions >= 2 && o->CurrentAction == 0 &&
@@ -121,7 +123,8 @@ void AnswerNod(CHARACTER* hero, float seconds)
     if (s_heroNodReplyIn >= 0.f)
     {
         s_heroNodReplyIn -= seconds;
-        if (s_heroNodReplyIn < 0.f)
+        // Only standing on foot: walking, fighting or riding, its head turns to them and that's all.
+        if (s_heroNodReplyIn < 0.f && StandsOnFoot(hero))
         {
             StartNod(hero);
         }
@@ -138,8 +141,9 @@ void WatchHero(CHARACTER* c, float seconds)
 {
     c->Motion.WatchedHeroSeconds += seconds;
     const bool close = TilesFromHero(c) <= NodTiles;
+    // Walking, fighting, flying or riding, it doesn't greet; it may once it stands, still looking.
     if (!close || c->Motion.NoddedAtHero || c->Motion.WatchedHeroSeconds < NodWatchSeconds ||
-        c->Motion.NodCooldown > 0.f)
+        c->Motion.NodCooldown > 0.f || !StandsOnFoot(c))
     {
         return;
     }
@@ -169,9 +173,14 @@ void ForgetHero(CHARACTER* c)
     }
 }
 
-// One frame of a nod under way: down and back up, eased, the body bowing with it.
+// One frame of a nod under way: down and back up, eased, the body bowing with it. A character that starts walking,
+// fighting or anything else meanwhile stops nodding.
 void PlayNod(CHARACTER* c, float seconds)
 {
+    if (c->Motion.NodLeft > 0.f && !StandsOnFoot(c))
+    {
+        c->Motion.NodLeft = 0.f;
+    }
     if (c->Motion.NodLeft <= 0.f)
     {
         if (c->Motion.NodBowApplied != 0.f)
@@ -189,6 +198,18 @@ void PlayNod(CHARACTER* c, float seconds)
     BowFor(c, NodBowDegrees * dip);
 }
 } // namespace
+
+bool StandsOnFoot(const CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    const int action = o->CurrentAction;
+    if (UsesPlayerSkeleton(o))
+    {
+        return (action >= PLAYER_STOP_MALE && action <= PLAYER_STOP_WAND) || action == PLAYER_STOP_TWO_HAND_SWORD_TWO ||
+               action == PLAYER_STOP_RAGEFIGHTER || action == PLAYER_DARKLORD_STAND;
+    }
+    return action == MONSTER01_STOP1 || action == MONSTER01_STOP2;
+}
 
 void RemoveNod(CHARACTER* c)
 {

@@ -8,6 +8,9 @@ namespace Engine::Characters
 // greetings on and puts this frame's back (each frame, everyone).
 void RemoveNod(CHARACTER* c);
 void UpdateNod(CHARACTER* c);
+// Whether `c` stands on foot (a player's standing actions, not flying or riding; an NPC's or a monster's standing
+// ones): the only time it greets or nods.
+bool StandsOnFoot(const CHARACTER* c);
 // Who the hero is turning its head to, to nod back (MoveHero's head), or nullptr.
 const CHARACTER* HeroNodAttention();
 } // namespace Engine::Characters
