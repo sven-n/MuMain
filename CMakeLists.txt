@@ -293,18 +293,18 @@ set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
-# SDL_image's own defaults, set here too because the submodules below are not fetched: without stb_image, PNG and
-# JPEG would build from the vendored libpng, jpeg and zlib, and JXL from libjxl.
+# SDL_image's own defaults, set here too because the archive below holds none of its vendored libraries: without
+# stb_image, PNG and JPEG would build from the vendored libpng, jpeg and zlib, and JXL from libjxl.
 set(SDLIMAGE_BACKEND_STB ON CACHE BOOL "" FORCE)
 set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
-# With those formats off, no part of SDL_image builds from its git submodules (aom, dav1d, libavif, libjxl, libpng,
-# jpeg, libtiff, libwebp, zlib): stb_image covers PNG and JPEG without libpng, jpeg or zlib. Cloned with their whole
-# history, they were about 1 GB of each build folder's 1.1 GB of SDL_image, so they are not fetched.
+# With those formats off, no part of SDL_image builds from its vendored libraries (aom, dav1d, libavif, libjxl, libpng,
+# jpeg, libtiff, libwebp, zlib): stb_image covers PNG and JPEG without libpng, jpeg or zlib. So SDL_image comes as its
+# release archive, which leaves them out: 11 MB to download and 36 MB unpacked, where the tag's git clone took 84 MB
+# and, with its submodules, 1.1 GB. The hash pins the sources, which a tag does not.
 FetchContent_Declare(SDL3_image
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-    GIT_TAG        release-3.2.4
-    GIT_SHALLOW    TRUE
-    GIT_SUBMODULES ""
+    URL      https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
+    URL_HASH SHA256=a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 add_subdirectory("src")
