@@ -213,6 +213,13 @@ float StepMountShake(const OBJECT* o, int slot)
     return 0.f;
 }
 
+// The mounts a player rides (the Guardian Angel and the other helpers in Mounts fly on their own).
+bool IsRiddenMount(int type)
+{
+    return type == MODEL_UNICON || type == MODEL_PEGASUS || type == MODEL_DARK_HORSE ||
+           (type >= MODEL_FENRIR_BLACK && type <= MODEL_FENRIR_GOLD);
+}
+
 // One frame of a mount's feel, after it copied its rider's place and angles: it leans into a turn (all of the lean
 // its rider takes a share of), its head looks where the rider's does, and it shakes its head when idle.
 void UpdateMountFeel(OBJECT* o, int slot)
@@ -748,7 +755,16 @@ bool MoveMount(OBJECT* o, bool bForceRender)
         b->CurrentAction = o->CurrentAction;
         if (o >= Mounts && o < Mounts + MAX_MOUNTS)
         {
-            UpdateMountFeel(o, static_cast<int>(o - Mounts));
+            const int slot = static_cast<int>(o - Mounts);
+            if (IsRiddenMount(o->Type))
+            {
+                UpdateMountFeel(o, slot);
+            }
+            else
+            {
+                MountHeadTurn[slot] = 0.f;
+                MountHeadRoll[slot] = 0.f;
+            }
         }
 
         b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity, o->Position, o->Angle);
