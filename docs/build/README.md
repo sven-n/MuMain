@@ -238,9 +238,13 @@ compiler cache**, **Linux compiler cache** and **macOS compiler cache** step
 summaries show hits and misses; compare the Build step duration on a warm run with
 the first run. Windows downloads a pinned ccache release and checks it against its
 SHA-256 (**Install compiler cache**); its cache may grow to 3 GB, as MSVC's objects
-carry their debug info (`/Z7`). All builds
-restore the compiler cache; only successful main pushes save it, so PR-only entries
-do not displace shared caches, and a PR starts from the latest main. Windows vcpkg primary
+carry their debug info (`/Z7`). CI configures with
+`-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL and RmlUi use precompiled headers,
+which ccache does not cache, so their files (over a quarter of each build: 503 of
+1666 compile calls on Linux, 421 of 1584 on macOS) compiled again on every run
+while the game's own files hit. All builds restore the compiler cache; only
+successful main pushes save it, so PR-only entries do not displace shared caches,
+and a PR starts from the latest main. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.

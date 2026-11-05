@@ -280,11 +280,14 @@ jobs:
 
       # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
       # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
+      # SDL and RmlUi build without their precompiled headers, which ccache does not cache: only the game's own
+      # code would hit, and the two libraries' files, over a quarter of the build, compiled again on every run.
       - name: Configure CMake
         run: >
           python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
@@ -695,12 +698,14 @@ jobs:
           key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
-      # As on Windows: no warning may come back (docs/build/README.md).
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
+      # (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
@@ -849,12 +854,14 @@ jobs:
           key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
-      # As on Windows: no warning may come back (docs/build/README.md).
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers
+      # (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
           -DENABLE_EDITOR=OFF
           -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
