@@ -16,6 +16,8 @@ OFFENCES = {
     "semicolon": "has a ';', which cuts it in two",
     "comment_between_literals": "has a ';', which cuts it in two",
     "escaped_semicolon": "has a ';', which cuts it in two",
+    "delimited_escape": "has a ';', which cuts it in two",
+    "undecodable_escape": "an escape that stands for no character",
     "line_break": "has a line break",
     "brackets": "has unbalanced brackets",
     "close_bracket": "has unbalanced brackets",

@@ -29,6 +29,7 @@ one, when a name is not written as string literals alone (a macro in it, say), o
 import os
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -45,8 +46,10 @@ RAW_LITERAL = re.compile(r'\s*R"([^()\\\s]{0,16})\((.*?)\)\1"', re.DOTALL)
 LITERAL = re.compile(r'\s*"((?:[^"\\\n]|\\.|\\\n)*)"')
 LINE_SPLICE = "\\\n"
 NAME_END = re.compile(r"\s*[),*]")
-# A C escape: a hexadecimal or octal code, a universal character name, or the one character after the '\'.
-ESCAPE = re.compile(r"\\(x[0-9A-Fa-f]+|[0-7]{1,3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|.)")
+# A C escape: a hexadecimal or octal code, a universal character name, their delimited forms (\x{41}, \o{101},
+# \u{41}, \N{LATIN CAPITAL LETTER A}), or the one character after the '\'.
+ESCAPE = re.compile(r"\\(x\{[0-9A-Fa-f]+\}|x[0-9A-Fa-f]+|o\{[0-7]+\}|[0-7]{1,3}|u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}"
+                    r"|U[0-9A-Fa-f]{8}|N\{[^}\n]+\}|.)")
 SIMPLE_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
 # doctest's SCENARIO macros put this before the name they list.
 SCENARIO_PREFIX = "  Scenario: "
@@ -58,21 +61,32 @@ SKIPPED_DIRS = {"third_party", "fixtures"}
 
 
 def unescaped(escape):
-    """The character a C escape stands for."""
+    """The character a C escape stands for. Raises ValueError or KeyError for one that stands for none, such as \\x
+    without digits or a code past U+10FFFF."""
     code = escape.group(1)
+    delimited = code[1:2] == "{"
+    digits = code[2:-1] if delimited else code[1:]
     if code[0] in "xuU":
-        return chr(int(code[1:], 16))
+        return chr(int(digits, 16))
+    if code[0] == "o" and delimited:
+        return chr(int(digits, 8))
+    if code[0] == "N" and delimited:
+        return unicodedata.lookup(digits)
     if code[0] in "01234567":
         return chr(int(code, 8))
     return SIMPLE_ESCAPES.get(code, code)
 
 
 def literal_at(text, at):
-    """The text of the string literal at `at` as the compiler reads it and where the literal ends, or None."""
+    """The text of the string literal at `at` as the compiler reads it and where the literal ends, or None if there
+    is none or it holds an escape this check cannot decode."""
     if raw := RAW_LITERAL.match(text, at):
         return raw.group(2), raw.end()
     if plain := LITERAL.match(text, at):
-        return ESCAPE.sub(unescaped, plain.group(1).replace(LINE_SPLICE, "")), plain.end()
+        try:
+            return ESCAPE.sub(unescaped, plain.group(1).replace(LINE_SPLICE, "")), plain.end()
+        except (ValueError, KeyError):
+            return None
     return None
 
 
@@ -120,7 +134,8 @@ def cases(text):
 
 def problem(name):
     if name is None:
-        return "is not written as string literals, so this check cannot read it"
+        return ("is not written as string literals this check can read (a macro in it, or an escape that stands for "
+                "no character)")
     if not name:
         return "is empty, which the discovery drops; the case gets no entry"
     if name.startswith(LIST_HEADER) or name == LIST_SEPARATOR:
