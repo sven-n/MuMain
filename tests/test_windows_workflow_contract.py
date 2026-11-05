@@ -446,6 +446,9 @@ check(
     in native_archive,
     "Main Windows build must archive the runtime before artifact upload",
 )
+# Windows builds every PR and main push now; like Linux and macOS, only the release runs hand their build on.
+for windows_step, body in (("Archive runtime", native_archive), ("Upload runtime artifact", native_upload)):
+    check("if: needs.quality.outputs.release == 'true'" in body, f"Windows {windows_step} must run only for releases")
 for required in (
     "uses: actions/upload-artifact@v7",
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",

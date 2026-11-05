@@ -23,11 +23,11 @@ class BuildPlanTests(unittest.TestCase):
         with patch("ci_build_plan.scheduled_release_needed", return_value=True):
             return build_plan(event_name, ref, repository, {"pull_request": {"draft": draft}}, paths)
 
-    def test_code_pr_builds_both_platforms(self):
-        self.assertEqual(self.plan(), dict(linux=True, macos=True, windows=False, release=False))
+    def test_code_pr_builds_every_platform(self):
+        self.assertEqual(self.plan(), dict(linux=True, macos=True, windows=True, release=False))
 
-    def test_main_push_only_builds_linux(self):
-        self.assertEqual(self.plan("push"), dict(linux=True, macos=False, windows=False, release=False))
+    def test_main_push_builds_every_platform(self):
+        self.assertEqual(self.plan("push"), dict(linux=True, macos=True, windows=True, release=False))
 
     def test_drafts_defer_builds_until_ready(self):
         self.assertFalse(any(self.plan(draft=True).values()))
@@ -41,8 +41,8 @@ class BuildPlanTests(unittest.TestCase):
 
     def test_asset_prs_preserve_native_validation_without_rebuilding_main(self):
         paths = ("src/bin/Data/item.bmd", "src/bin/fonts/font.ttf")
-        self.assertTrue(self.plan(paths=paths)["linux"])
-        self.assertTrue(self.plan(paths=paths)["macos"])
+        for platform in ("linux", "macos", "windows"):
+            self.assertTrue(self.plan(paths=paths)[platform])
         self.assertFalse(any(self.plan("push", paths).values()))
 
     def test_mixed_deleted_renamed_and_build_inputs_require_compilation(self):

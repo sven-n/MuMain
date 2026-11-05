@@ -559,10 +559,13 @@ jobs:
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
+      # Only the release runs hand their builds on, as on Linux and macOS.
       - name: Archive runtime
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
 
       - name: Upload runtime artifact
+        if: needs.quality.outputs.release == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main

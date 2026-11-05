@@ -162,11 +162,12 @@ Run the client from that directory so it finds its assets and the library.
 
 Feature branches target `main`. Every PR runs Quality Gates, which include the
 [static checks](reference-tests.md#static-checks-and-the-pre-push-hook); ready code
-PRs then run Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
+PRs then run Windows x64, Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
 **Ready for review**; documentation-only changes run the cheap checks without
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.
-Code merges to main run Linux integration checks. Newer revisions cancel older
+Code merges to main run the same three builds, which save the caches the next PRs
+start from (see the CI caches below). Newer revisions cancel older
 PR/integration runs. Releases finish the running revision and keep only the newest
 pending trigger; another nightly/manual trigger can replace an older pending one.
 This deliberately coalesces work rather than guaranteeing a run for every request.
@@ -180,8 +181,7 @@ checks scoped subjects and breaking-change notes, and builds conservatively for
 an initial release or unsupported release rules. Manual dispatch bypasses this skip.
 All jobs use the same revision selected when the workflow is triggered. Semantic
 Release publishes only when those commits warrant a version change; main merges
-no longer publish immediately. Windows integration failures may first appear in
-the nightly run. The separate Data Assets workflow still publishes data on merge.
+no longer publish immediately. The separate Data Assets workflow still publishes data on merge.
 Publishing also waits for **CI Required**. If no release is published and main has
 advanced during the build, the release job fails with a manual-rerun instruction
 instead of silently reporting success. It never substitutes untested newer code.

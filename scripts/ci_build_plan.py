@@ -80,10 +80,13 @@ def build_plan(event_name, ref, repository, event, paths):
         or (pull_request and any(path.startswith(DATA_PREFIXES) for path in paths))
     )
     main_push = event_name == "push" and ref == MAIN_REF
+    # Every system builds every PR, so a break shows before the merge, and every main push, which saves the caches
+    # the next PRs start from.
+    build = release or (native and (pull_request or main_push))
     return {
-        "linux": release or (native and (pull_request or main_push)),
-        "macos": release or (native and pull_request),
-        "windows": release,
+        "linux": build,
+        "macos": build,
+        "windows": build,
         "release": release,
     }
 
