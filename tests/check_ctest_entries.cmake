@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.25)
 # A test binary gets one CTest entry per test case. doctest_discover_tests registers an entry per name the binary
 # lists, so a name it drops (an empty one, or one shaped like doctest's own output), cuts or joins makes the counts
 # differ. An entry that runs no case fails by itself (MU_TEST_RAN_NO_CASE in tests/CMakeLists.txt), but a dropped name
-# leaves no entry that could fail; this check compares the counts instead.
+# leaves no entry that could fail; this check compares the counts instead. A doctest::skip() condition is evaluated
+# both when the discovery lists the cases at build time and when this check counts them, so one that reads the
+# environment can make the counts differ too.
 # Usage: cmake -DTEST_EXECUTABLE=<test binary> -DTEST_EXECUTOR=<emulator, may be empty>
 #              -DDISCOVERY_INCLUDE_FILE=<file doctest_discover_tests added to TEST_INCLUDE_FILES>
 #              -P check_ctest_entries.cmake
@@ -41,7 +43,10 @@ endif()
 set(case_count ${CMAKE_MATCH_1})
 
 if(NOT entry_count EQUAL case_count)
-    message(FATAL_ERROR "${entry_count} CTest entries for ${case_count} test cases in ${TEST_EXECUTABLE}: CTest's "
-        "discovery dropped, cut or joined a test case name. tests/check_test_case_names.py lists the names it changes.")
+    message(FATAL_ERROR "${entry_count} CTest entries for ${case_count} test cases in ${TEST_EXECUTABLE}. Either "
+        "CTest's discovery dropped, cut or joined a test case name (tests/check_test_case_names.py lists the names it "
+        "changes), or a doctest::skip() condition, such as one that reads an environment variable, gave another "
+        "answer when the binary was built than it gives now (decide such a case at run time, see "
+        "docs/build/reference-tests.md).")
 endif()
 message(STATUS "${entry_count} CTest entries for ${case_count} test cases")
