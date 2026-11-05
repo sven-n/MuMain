@@ -11,6 +11,9 @@ bool IsFlying(const OBJECT* o);
 
 // A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
 void UpdateFlightFeel(CHARACTER* c);
+// The server put the character at a position of its own: the sideways shift a flying bank added (so it pivots at the
+// waist) is not in it, and isn't taken off again (UpdateFlightFeel adds this frame's back).
+void ForgetFlightPivotShift(CHARACTER* c);
 // A mount's lean into a turn from its rider's (UpdateFlightFeel leans a rider a share of the mount's).
 float MountLeanFromRider(float riderLean);
 } // namespace Engine::Characters

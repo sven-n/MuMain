@@ -3,6 +3,7 @@
 
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FlightFeel.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Models/HeadTurn.h"
 #include "../data/TestModelSlots.h"
@@ -417,4 +418,21 @@ TEST_CASE("A turn toward the cursor tells the server its facing only when it arr
         CHECK(sent == 1);
         CHECK(hero.Object.Angle[2] == doctest::Approx(270.f).epsilon(0.01));
     }
+}
+
+TEST_CASE("A position from the server keeps no flight pivot shift, through the next walks [gamelogic][flight]")
+{
+    static CHARACTER flyer;
+    flyer.Initialize();
+    // Banking while hovering had shifted it sideways; then the server put it on its tile centre.
+    flyer.Motion.FlightPivotShift[0] = 9.f;
+    flyer.Motion.FlightPivotShift[1] = -4.f;
+    flyer.Object.Position[0] = 10.5f * TERRAIN_SCALE;
+    flyer.Object.Position[1] = 10.5f * TERRAIN_SCALE;
+    Engine::Characters::ForgetFlightPivotShift(&flyer);
+    // The next walk takes off no shift that isn't in the position.
+    flyer.Path.PathNum = 0;
+    MovePath(&flyer);
+    CHECK(flyer.Object.Position[0] == 10.5f * TERRAIN_SCALE);
+    CHECK(flyer.Object.Position[1] == 10.5f * TERRAIN_SCALE);
 }

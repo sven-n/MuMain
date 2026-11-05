@@ -50,6 +50,12 @@ float MountLeanFromRider(float riderLean)
     return riderLean / MountRiderLeanShare;
 }
 
+void ForgetFlightPivotShift(CHARACTER* c)
+{
+    c->Motion.FlightPivotShift[0] = 0.f;
+    c->Motion.FlightPivotShift[1] = 0.f;
+}
+
 void UpdateFlightFeel(CHARACTER* c)
 {
     OBJECT* o = &c->Object;

@@ -34,6 +34,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/Movement/FlightFeel.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -2211,6 +2212,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     OBJECT* o = &Hero->Object;
     o->Position[0] = ((float)(Hero->PositionX) + 0.5f) * TERRAIN_SCALE;
     o->Position[1] = ((float)(Hero->PositionY) + 0.5f) * TERRAIN_SCALE;
+    Engine::Characters::ForgetFlightPivotShift(Hero);
 
     if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
     {
@@ -3659,6 +3661,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
 
     c->Object.Position[0] = c->TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
     c->Object.Position[1] = c->TargetY * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
+    Engine::Characters::ForgetFlightPivotShift(c);
     switch (Data->Action)
     {
     case AT_STAND1:
