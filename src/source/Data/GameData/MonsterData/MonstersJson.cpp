@@ -634,6 +634,14 @@ bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList&
         entry.randomVariants.clear();
         valid = ReadRandomVariants(json, entry, entry.randomVariants, issues) && valid;
     }
+    if (const auto maps = json.find(MapsKey); maps != json.end())
+    {
+        entry.maps.clear();
+        valid = Data::Maps::ReadMapRefs(*maps, MonsterField(number, MapsKey), entry.maps,
+                                        [&](const std::string& field, const std::string& message)
+                                        { issues.Fatal(field, message, number); }) &&
+                valid;
+    }
     // An own model may be the model of a look the number shares.
     const bool modelIsALook = std::any_of(entry.randomVariants.begin(), entry.randomVariants.end(),
                                           [&](const MonsterRandomVariant& look) { return look.model == entry.model; });
@@ -702,10 +710,10 @@ std::optional<MonsterGroup> ReadMonster(const OrderedJson& json, const std::stri
         MonsterDefinition entry = monster.shared;
         entry.number = number;
         const bool ownValid = ReadOwnValues(*entryJson, entry, issues);
-        WarnAboutUnknownMonsterKeys(
-            *entryJson,
-            {NumberKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey}, number,
-            issues);
+        WarnAboutUnknownMonsterKeys(*entryJson,
+                                    {NumberKey, MapsKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey,
+                                     MapVariantsKey, RandomVariantsKey},
+                                    number, issues);
         if (ownValid)
         {
             monster.numbers.push_back(std::move(entry));
@@ -803,11 +811,16 @@ OrderedJson WriteSharedValues(const MonsterDefinition& shared)
     return json;
 }
 
-// A number with the values its entry has differently from the shared ones.
+// A number with its maps and the values its entry has differently from the
+// shared ones.
 OrderedJson WriteNumber(const MonsterDefinition& shared, const MonsterDefinition& entry)
 {
     OrderedJson json = OrderedJson::object();
     json[NumberKey] = entry.number;
+    if (!entry.maps.empty())
+    {
+        json[MapsKey] = Data::Maps::WriteMapRefs(entry.maps);
+    }
     if (entry.names != shared.names)
     {
         json[NameKey] = Items::Json::WriteLocalizedString(entry.names);

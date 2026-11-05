@@ -7,7 +7,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 0}
+        {"number": 0, "maps": [0]}
       ]
     },
     {
@@ -16,7 +16,7 @@
       "model": "MONSTER_MODEL_HOUND",
       "soundSet": "Hound",
       "numbers": [
-        {"number": 1}
+        {"number": 1, "maps": [0]}
       ]
     },
     {
@@ -25,7 +25,7 @@
       "model": "MONSTER_MODEL_BUDGE_DRAGON",
       "soundSet": "Budge Dragon",
       "numbers": [
-        {"number": 2}
+        {"number": 2, "maps": [0]}
       ]
     },
     {
@@ -34,7 +34,7 @@
       "model": "MONSTER_MODEL_SPIDER",
       "soundSet": "Spider",
       "numbers": [
-        {"number": 3}
+        {"number": 3, "maps": [0]}
       ]
     },
     {
@@ -43,7 +43,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 4}
+        {"number": 4, "maps": [0]}
       ]
     },
     {
@@ -52,7 +52,7 @@
       "model": "MONSTER_MODEL_HOUND",
       "soundSet": "Hound",
       "numbers": [
-        {"number": 5}
+        {"number": 5, "maps": [1, 9]}
       ]
     },
     {
@@ -61,7 +61,7 @@
       "model": "MONSTER_MODEL_LICH",
       "soundSet": "LIch",
       "numbers": [
-        {"number": 6}
+        {"number": 6, "maps": [0]}
       ]
     },
     {
@@ -70,7 +70,7 @@
       "model": "MONSTER_MODEL_GIANT",
       "soundSet": "Giant",
       "numbers": [
-        {"number": 7}
+        {"number": 7, "maps": [0]}
       ]
     },
     {
@@ -79,7 +79,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 8}
+        {"number": 8, "maps": [1, 9]}
       ]
     },
     {
@@ -88,7 +88,7 @@
       "model": "MONSTER_MODEL_LICH",
       "soundSet": "LIch",
       "numbers": [
-        {"number": 9}
+        {"number": 9, "maps": [1]}
       ]
     },
     {
@@ -97,7 +97,7 @@
       "model": "MONSTER_MODEL_DARK_KNIGHT",
       "soundSet": "Dark Knight",
       "numbers": [
-        {"number": 10}
+        {"number": 10, "maps": [1, 9]}
       ]
     },
     {
@@ -106,7 +106,7 @@
       "model": "MONSTER_MODEL_GHOST",
       "soundSet": "Ghost",
       "numbers": [
-        {"number": 11}
+        {"number": 11, "maps": [1]}
       ]
     },
     {
@@ -115,7 +115,7 @@
       "model": "MONSTER_MODEL_LARVA",
       "soundSet": "Larva",
       "numbers": [
-        {"number": 12},
+        {"number": 12, "maps": [1]},
         {"number": 532}
       ]
     },
@@ -125,7 +125,7 @@
       "model": "MONSTER_MODEL_HELL_SPIDER",
       "soundSet": "Hell Spider",
       "numbers": [
-        {"number": 13}
+        {"number": 13, "maps": [1, 9]}
       ]
     },
     {
@@ -133,7 +133,7 @@
       "kind": "monster",
       "model": "player",
       "numbers": [
-        {"number": 14}
+        {"number": 14, "maps": [0, 1]}
       ]
     },
     {
@@ -141,7 +141,7 @@
       "kind": "monster",
       "model": "player",
       "numbers": [
-        {"number": 15}
+        {"number": 15, "maps": [1, 9]}
       ]
     },
     {
@@ -149,7 +149,7 @@
       "kind": "monster",
       "model": "player",
       "numbers": [
-        {"number": 16}
+        {"number": 16, "maps": [1]}
       ]
     },
     {
@@ -158,7 +158,7 @@
       "model": "MONSTER_MODEL_CYCLOPS",
       "soundSet": "Cyclops",
       "numbers": [
-        {"number": 17}
+        {"number": 17, "maps": [1, 9]}
       ]
     },
     {
@@ -167,7 +167,7 @@
       "model": "MONSTER_MODEL_GORGON",
       "soundSet": "Gorgon",
       "numbers": [
-        {"number": 18}
+        {"number": 18, "maps": [1, 9]}
       ]
     },
     {
@@ -185,7 +185,7 @@
       "model": "MONSTER_MODEL_ELITE_YETI",
       "soundSet": "Elite Yeti",
       "numbers": [
-        {"number": 20}
+        {"number": 20, "maps": [2]}
       ]
     },
     {
@@ -194,7 +194,7 @@
       "model": "MONSTER_MODEL_ASSASSIN",
       "soundSet": "Assassin",
       "numbers": [
-        {"number": 21}
+        {"number": 21, "maps": [2]}
       ]
     },
     {
@@ -203,7 +203,7 @@
       "model": "MONSTER_MODEL_ICE_MONSTER",
       "soundSet": "Ice Monster",
       "numbers": [
-        {"number": 22}
+        {"number": 22, "maps": [2]}
       ]
     },
     {
@@ -212,7 +212,7 @@
       "model": "MONSTER_MODEL_HOMMERD",
       "soundSet": "Hommerd",
       "numbers": [
-        {"number": 23}
+        {"number": 23, "maps": [2]}
       ]
     },
     {
@@ -221,7 +221,7 @@
       "model": "MONSTER_MODEL_WORM",
       "soundSet": "Worm",
       "numbers": [
-        {"number": 24}
+        {"number": 24, "maps": [2]}
       ]
     },
     {
@@ -230,7 +230,7 @@
       "model": "MONSTER_MODEL_ICE_QUEEN",
       "soundSet": "Ice Queen",
       "numbers": [
-        {"number": 25}
+        {"number": 25, "maps": [2]}
       ]
     },
     {
@@ -239,7 +239,7 @@
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
       "numbers": [
-        {"number": 26}
+        {"number": 26, "maps": [3]}
       ]
     },
     {
@@ -248,7 +248,7 @@
       "model": "MONSTER_MODEL_CHAIN_SCORPION",
       "soundSet": "Chain Scorpion",
       "numbers": [
-        {"number": 27}
+        {"number": 27, "maps": [3]}
       ]
     },
     {
@@ -257,7 +257,7 @@
       "model": "MONSTER_MODEL_BEETLE_MONSTER",
       "soundSet": "Beetle Monster",
       "numbers": [
-        {"number": 28}
+        {"number": 28, "maps": [3]}
       ]
     },
     {
@@ -266,7 +266,7 @@
       "model": "MONSTER_MODEL_HUNTER",
       "soundSet": "Hunter",
       "numbers": [
-        {"number": 29}
+        {"number": 29, "maps": [3]}
       ]
     },
     {
@@ -275,7 +275,7 @@
       "model": "MONSTER_MODEL_FOREST_MONSTER",
       "soundSet": "Forest Monster",
       "numbers": [
-        {"number": 30}
+        {"number": 30, "maps": [3]}
       ]
     },
     {
@@ -284,7 +284,7 @@
       "model": "MONSTER_MODEL_AGON",
       "soundSet": "Agon",
       "numbers": [
-        {"number": 31}
+        {"number": 31, "maps": [3]}
       ]
     },
     {
@@ -293,7 +293,7 @@
       "model": "MONSTER_MODEL_STONE_GOLEM",
       "soundSet": "Stone Golem",
       "numbers": [
-        {"number": 32}
+        {"number": 32, "maps": [3]}
       ]
     },
     {
@@ -302,7 +302,7 @@
       "model": "MONSTER_MODEL_GOBLIN",
       "soundSet": "Goblin",
       "numbers": [
-        {"number": 33}
+        {"number": 33, "maps": [3]}
       ]
     },
     {
@@ -310,7 +310,7 @@
       "kind": "monster",
       "model": "player",
       "numbers": [
-        {"number": 34}
+        {"number": 34, "maps": [4, 9]}
       ]
     },
     {
@@ -319,7 +319,7 @@
       "model": "MONSTER_MODEL_GORGON",
       "soundSet": "Gorgon",
       "numbers": [
-        {"number": 35}
+        {"number": 35, "maps": [4, 9]}
       ]
     },
     {
@@ -328,7 +328,7 @@
       "model": "MONSTER_MODEL_SHADOW",
       "soundSet": "Shadow",
       "numbers": [
-        {"number": 36}
+        {"number": 36, "maps": [4, 9]}
       ]
     },
     {
@@ -337,7 +337,7 @@
       "model": "MONSTER_MODEL_DEVIL",
       "soundSet": "Devil",
       "numbers": [
-        {"number": 37}
+        {"number": 37, "maps": [4, 9]}
       ]
     },
     {
@@ -346,7 +346,7 @@
       "model": "MONSTER_MODEL_BALROG",
       "soundSet": "Balrog",
       "numbers": [
-        {"number": 38}
+        {"number": 38, "maps": [4]}
       ]
     },
     {
@@ -355,7 +355,7 @@
       "model": "MONSTER_MODEL_SHADOW",
       "soundSet": "Shadow",
       "numbers": [
-        {"number": 39}
+        {"number": 39, "maps": [4, 9]}
       ]
     },
     {
@@ -364,7 +364,7 @@
       "model": "MONSTER_MODEL_DEATH_KNIGHT",
       "soundSet": "Dark Knight",
       "numbers": [
-        {"number": 40}
+        {"number": 40, "maps": [4, 9]}
       ]
     },
     {
@@ -373,7 +373,7 @@
       "model": "MONSTER_MODEL_DEATH_COW",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 41}
+        {"number": 41, "maps": [4, 9]}
       ]
     },
     {
@@ -409,7 +409,7 @@
       "model": "MONSTER_MODEL_BAHAMUT",
       "soundSet": "Bahamut",
       "numbers": [
-        {"number": 45}
+        {"number": 45, "maps": [7]}
       ]
     },
     {
@@ -418,7 +418,7 @@
       "model": "MONSTER_MODEL_VEPAR",
       "soundSet": "Vepar",
       "numbers": [
-        {"number": 46}
+        {"number": 46, "maps": [7]}
       ]
     },
     {
@@ -427,7 +427,7 @@
       "model": "MONSTER_MODEL_VALKYRIE",
       "soundSet": "Valkyrie",
       "numbers": [
-        {"number": 47}
+        {"number": 47, "maps": [7]}
       ]
     },
     {
@@ -436,7 +436,7 @@
       "model": "MONSTER_MODEL_LIZARD",
       "soundSet": "Lizard King",
       "numbers": [
-        {"number": 48}
+        {"number": 48, "maps": [7]}
       ]
     },
     {
@@ -445,7 +445,7 @@
       "model": "MONSTER_MODEL_HYDRA",
       "soundSet": "Hydra",
       "numbers": [
-        {"number": 49}
+        {"number": 49, "maps": [7, 9]}
       ]
     },
     {
@@ -462,7 +462,7 @@
       "model": "MONSTER_MODEL_BAHAMUT",
       "soundSet": "Bahamut",
       "numbers": [
-        {"number": 51}
+        {"number": 51, "maps": [7]}
       ]
     },
     {
@@ -471,7 +471,7 @@
       "model": "MONSTER_MODEL_VALKYRIE",
       "soundSet": "Valkyrie",
       "numbers": [
-        {"number": 52}
+        {"number": 52, "maps": [7]}
       ]
     },
     {
@@ -514,7 +514,7 @@
       "model": "MONSTER_MODEL_GOLDEN_WHEEL",
       "soundSet": "Iron Wheel",
       "numbers": [
-        {"number": 57}
+        {"number": 57, "maps": [8, 9, 32]}
       ]
     },
     {
@@ -523,7 +523,7 @@
       "model": "MONSTER_MODEL_TANTALLOS",
       "soundSet": "Tantalos",
       "numbers": [
-        {"number": 58}
+        {"number": 58, "maps": [8]}
       ]
     },
     {
@@ -532,7 +532,7 @@
       "model": "MONSTER_MODEL_TANTALLOS",
       "soundSet": "Tantalos",
       "numbers": [
-        {"number": 59}
+        {"number": 59, "maps": [8]}
       ]
     },
     {
@@ -541,7 +541,7 @@
       "model": "MONSTER_MODEL_BLOODY_WOLF",
       "soundSet": "Bloody wolf",
       "numbers": [
-        {"number": 60}
+        {"number": 60, "maps": [8, 9, 32]}
       ]
     },
     {
@@ -550,7 +550,7 @@
       "model": "MONSTER_MODEL_BEAM_KNIGHT",
       "soundSet": "Beam Knight",
       "numbers": [
-        {"number": 61}
+        {"number": 61, "maps": [8, 32]}
       ]
     },
     {
@@ -559,7 +559,7 @@
       "model": "MONSTER_MODEL_MUTANT",
       "soundSet": "Mutant",
       "numbers": [
-        {"number": 62}
+        {"number": 62, "maps": [8]}
       ]
     },
     {
@@ -568,7 +568,7 @@
       "model": "MONSTER_MODEL_BEAM_KNIGHT",
       "soundSet": "Beam Knight",
       "numbers": [
-        {"number": 63}
+        {"number": 63, "maps": [8]}
       ]
     },
     {
@@ -577,7 +577,7 @@
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
       "numbers": [
-        {"number": 64}
+        {"number": 64, "maps": [9]}
       ]
     },
     {
@@ -586,7 +586,7 @@
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
       "numbers": [
-        {"number": 65}
+        {"number": 65, "maps": [9]}
       ]
     },
     {
@@ -595,7 +595,7 @@
       "model": "MONSTER_MODEL_CURSED_KING",
       "soundSet": "Cursed king",
       "numbers": [
-        {"number": 66}
+        {"number": 66, "maps": [9]}
       ]
     },
     {
@@ -604,7 +604,7 @@
       "model": "MONSTER_MODEL_BALROG",
       "soundSet": "Balrog",
       "numbers": [
-        {"number": 67}
+        {"number": 67, "maps": [9]}
       ]
     },
     {
@@ -622,7 +622,7 @@
       "model": "MONSTER_MODEL_ALQUAMOS",
       "soundSet": "Alquamos",
       "numbers": [
-        {"number": 69}
+        {"number": 69, "maps": [9, 10]}
       ]
     },
     {
@@ -631,7 +631,7 @@
       "model": "MONSTER_MODEL_QUEEN_RAINER",
       "soundSet": "Queen Rainier",
       "numbers": [
-        {"number": 70}
+        {"number": 70, "maps": [9, 10, 32]}
       ]
     },
     {
@@ -640,7 +640,7 @@
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
       "numbers": [
-        {"number": 71}
+        {"number": 71, "maps": [10, 32]}
       ]
     },
     {
@@ -649,7 +649,7 @@
       "model": "MONSTER_MODEL_PHANTOM_KNIGHT",
       "soundSet": "Phantom Knight",
       "numbers": [
-        {"number": 72}
+        {"number": 72, "maps": [10]}
       ]
     },
     {
@@ -658,7 +658,7 @@
       "model": "MONSTER_MODEL_DRAKAN",
       "soundSet": "Drakan",
       "numbers": [
-        {"number": 73}
+        {"number": 73, "maps": [10, 32]}
       ]
     },
     {
@@ -667,7 +667,7 @@
       "model": "MONSTER_MODEL_CRUST",
       "soundSet": "Mega Crust",
       "numbers": [
-        {"number": 74}
+        {"number": 74, "maps": [10, 32]}
       ]
     },
     {
@@ -676,7 +676,7 @@
       "model": "MONSTER_MODEL_DRAKAN",
       "soundSet": "Drakan",
       "numbers": [
-        {"number": 75}
+        {"number": 75, "maps": [10]}
       ]
     },
     {
@@ -694,7 +694,7 @@
       "model": "MONSTER_MODEL_DARK_PHOENIX_SHIELD",
       "soundSet": "Phoenix of Darkness",
       "numbers": [
-        {"number": 77}
+        {"number": 77, "maps": [10]}
       ]
     },
     {
@@ -757,14 +757,14 @@
       "model": "MONSTER_MODEL_ORC",
       "soundSet": "Elite Ogre",
       "numbers": [
-        {"number": 84},
-        {"number": 90},
-        {"number": 96},
-        {"number": 113},
-        {"number": 119},
-        {"number": 125},
-        {"number": 138},
-        {"number": 428}
+        {"number": 84, "maps": [11]},
+        {"number": 90, "maps": [12]},
+        {"number": 96, "maps": [13]},
+        {"number": 113, "maps": [14]},
+        {"number": 119, "maps": [15]},
+        {"number": 125, "maps": [16]},
+        {"number": 138, "maps": [17]},
+        {"number": 428, "maps": [52]}
       ]
     },
     {
@@ -773,14 +773,14 @@
       "model": "MONSTER_MODEL_ORC_ARCHER",
       "soundSet": "Ogre archer",
       "numbers": [
-        {"number": 85},
-        {"number": 91},
-        {"number": 97},
-        {"number": 114},
-        {"number": 120},
-        {"number": 126},
-        {"number": 139},
-        {"number": 429}
+        {"number": 85, "maps": [11]},
+        {"number": 91, "maps": [12]},
+        {"number": 97, "maps": [13]},
+        {"number": 114, "maps": [14]},
+        {"number": 120, "maps": [15]},
+        {"number": 126, "maps": [16]},
+        {"number": 139, "maps": [17]},
+        {"number": 429, "maps": [52]}
       ]
     },
     {
@@ -789,14 +789,14 @@
       "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
       "soundSet": "Dark Skull Soldier",
       "numbers": [
-        {"number": 86},
-        {"number": 92},
-        {"number": 98},
-        {"number": 115},
-        {"number": 121},
-        {"number": 127},
-        {"number": 140},
-        {"number": 430}
+        {"number": 86, "maps": [11]},
+        {"number": 92, "maps": [12]},
+        {"number": 98, "maps": [13]},
+        {"number": 115, "maps": [14]},
+        {"number": 121, "maps": [15]},
+        {"number": 127, "maps": [16]},
+        {"number": 140, "maps": [17]},
+        {"number": 430, "maps": [52]}
       ]
     },
     {
@@ -805,14 +805,14 @@
       "model": "MONSTER_MODEL_GIANT_OGRE",
       "soundSet": "Giant Ogre",
       "numbers": [
-        {"number": 87},
-        {"number": 93},
-        {"number": 99},
-        {"number": 116},
-        {"number": 122},
-        {"number": 128},
-        {"number": 141},
-        {"number": 431}
+        {"number": 87, "maps": [11]},
+        {"number": 93, "maps": [12]},
+        {"number": 99, "maps": [13]},
+        {"number": 116, "maps": [14]},
+        {"number": 122, "maps": [15]},
+        {"number": 128, "maps": [16]},
+        {"number": 141, "maps": [17]},
+        {"number": 431, "maps": [52]}
       ]
     },
     {
@@ -821,14 +821,14 @@
       "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
       "soundSet": "Red Skeleton Knight",
       "numbers": [
-        {"number": 88},
-        {"number": 94},
-        {"number": 111},
-        {"number": 117},
-        {"number": 123},
-        {"number": 129},
-        {"number": 142},
-        {"number": 432}
+        {"number": 88, "maps": [11]},
+        {"number": 94, "maps": [12]},
+        {"number": 111, "maps": [13]},
+        {"number": 117, "maps": [14]},
+        {"number": 123, "maps": [15]},
+        {"number": 129, "maps": [16]},
+        {"number": 142, "maps": [17]},
+        {"number": 432, "maps": [52]}
       ]
     },
     {
@@ -837,14 +837,14 @@
       "model": "MONSTER_MODEL_MAGIC_SKELETON",
       "soundSet": "Magic Skeleton",
       "numbers": [
-        {"number": 89},
-        {"number": 95},
-        {"number": 112},
-        {"number": 118},
-        {"number": 124},
-        {"number": 130},
-        {"number": 143},
-        {"number": 433}
+        {"number": 89, "maps": [11]},
+        {"number": 95, "maps": [12]},
+        {"number": 112, "maps": [13]},
+        {"number": 118, "maps": [14]},
+        {"number": 124, "maps": [15]},
+        {"number": 130, "maps": [16]},
+        {"number": 143, "maps": [17]},
+        {"number": 433, "maps": [52]}
       ]
     },
     {
@@ -858,7 +858,7 @@
         "soundAtMonster": true
       },
       "numbers": [
-        {"number": 100}
+        {"number": 100, "maps": [1]}
       ]
     },
     {
@@ -872,7 +872,7 @@
         "soundAtMonster": true
       },
       "numbers": [
-        {"number": 101}
+        {"number": 101, "maps": [1]}
       ]
     },
     {
@@ -885,7 +885,7 @@
         "sound": "SOUND_FLAME"
       },
       "numbers": [
-        {"number": 102}
+        {"number": 102, "maps": [1]}
       ]
     },
     {
@@ -893,7 +893,7 @@
       "kind": "trap",
       "model": "mapObject 25",
       "numbers": [
-        {"number": 103}
+        {"number": 103, "maps": [4]}
       ]
     },
     {
@@ -909,7 +909,7 @@
       "kind": "trap",
       "model": "MODEL_TRAP_CANON",
       "numbers": [
-        {"number": 105}
+        {"number": 105, "maps": [38]}
       ]
     },
     {
@@ -922,7 +922,7 @@
         "sound": "SOUND_FLAME"
       },
       "numbers": [
-        {"number": 106}
+        {"number": 106, "maps": [38, 39]}
       ]
     },
     {
@@ -930,7 +930,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_CASTLE_GATE",
       "numbers": [
-        {"number": 131}
+        {"number": 131, "maps": [11, 12, 13, 14, 15, 16, 17, 52]}
       ]
     },
     {
@@ -976,13 +976,13 @@
       "model": "MONSTER_MODEL_DEATH_ANGEL",
       "soundSet": "Death Angel",
       "numbers": [
-        {"number": 144},
-        {"number": 174},
-        {"number": 182},
-        {"number": 190},
-        {"number": 260},
-        {"number": 268},
-        {"number": 334}
+        {"number": 144, "maps": [24]},
+        {"number": 174, "maps": [25]},
+        {"number": 182, "maps": [26]},
+        {"number": 190, "maps": [27, 32]},
+        {"number": 260, "maps": [28]},
+        {"number": 268, "maps": [29]},
+        {"number": 334, "maps": [36]}
       ]
     },
     {
@@ -996,13 +996,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 145},
-        {"number": 175},
-        {"number": 183},
-        {"number": 191},
-        {"number": 261},
-        {"number": 269},
-        {"number": 336, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 145, "maps": [24]},
+        {"number": 175, "maps": [25]},
+        {"number": 183, "maps": [26]},
+        {"number": 191, "maps": [27]},
+        {"number": 261, "maps": [28]},
+        {"number": 269, "maps": [29]},
+        {"number": 336, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1011,13 +1011,13 @@
       "model": "MONSTER_MODEL_BLOOD_SOLDIER",
       "soundSet": "Blood Soldier",
       "numbers": [
-        {"number": 146},
-        {"number": 176},
-        {"number": 184},
-        {"number": 192},
-        {"number": 262},
-        {"number": 270},
-        {"number": 333}
+        {"number": 146, "maps": [24]},
+        {"number": 176, "maps": [25]},
+        {"number": 184, "maps": [26]},
+        {"number": 192, "maps": [27]},
+        {"number": 262, "maps": [28]},
+        {"number": 270, "maps": [29]},
+        {"number": 333, "maps": [36]}
       ]
     },
     {
@@ -1031,13 +1031,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 147},
-        {"number": 177},
-        {"number": 185},
-        {"number": 193},
-        {"number": 263},
-        {"number": 271},
-        {"number": 331, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 147, "maps": [24]},
+        {"number": 177, "maps": [25]},
+        {"number": 185, "maps": [26]},
+        {"number": 193, "maps": [27]},
+        {"number": 263, "maps": [28]},
+        {"number": 271, "maps": [29]},
+        {"number": 331, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1051,13 +1051,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 148},
-        {"number": 178},
-        {"number": 186},
-        {"number": 194},
-        {"number": 264},
-        {"number": 272},
-        {"number": 332, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 148, "maps": [24]},
+        {"number": 178, "maps": [25]},
+        {"number": 186, "maps": [26]},
+        {"number": 194, "maps": [27]},
+        {"number": 264, "maps": [28]},
+        {"number": 272, "maps": [29]},
+        {"number": 332, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1071,13 +1071,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 149},
-        {"number": 179},
-        {"number": 187},
-        {"number": 195},
-        {"number": 265},
-        {"number": 273},
-        {"number": 335, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 149, "maps": [24]},
+        {"number": 179, "maps": [25]},
+        {"number": 187, "maps": [26]},
+        {"number": 195, "maps": [27]},
+        {"number": 265, "maps": [28]},
+        {"number": 273, "maps": [29]},
+        {"number": 335, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1168,13 +1168,13 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 160},
-        {"number": 180},
-        {"number": 188},
-        {"number": 196},
-        {"number": 266},
-        {"number": 274},
-        {"number": 337, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 160, "maps": [24]},
+        {"number": 180, "maps": [25]},
+        {"number": 188, "maps": [26]},
+        {"number": 196, "maps": [27]},
+        {"number": 266, "maps": [28]},
+        {"number": 274, "maps": [29]},
+        {"number": 337, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1187,12 +1187,12 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 161},
-        {"number": 181},
-        {"number": 189},
-        {"number": 197},
-        {"number": 267},
-        {"number": 338, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 161, "maps": [24]},
+        {"number": 181, "maps": [25]},
+        {"number": 189, "maps": [26]},
+        {"number": 197, "maps": [27, 32]},
+        {"number": 267, "maps": [28]},
+        {"number": 338, "maps": [29], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -1201,7 +1201,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 162}
+        {"number": 162, "maps": [18]}
       ]
     },
     {
@@ -1213,7 +1213,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 163}
+        {"number": 163, "maps": [18]}
       ]
     },
     {
@@ -1222,7 +1222,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 164}
+        {"number": 164, "maps": [19]}
       ]
     },
     {
@@ -1234,7 +1234,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 165}
+        {"number": 165, "maps": [19]}
       ]
     },
     {
@@ -1243,7 +1243,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 166}
+        {"number": 166, "maps": [20]}
       ]
     },
     {
@@ -1255,7 +1255,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 167}
+        {"number": 167, "maps": [20]}
       ]
     },
     {
@@ -1264,7 +1264,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 168}
+        {"number": 168, "maps": [21]}
       ]
     },
     {
@@ -1276,7 +1276,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 169}
+        {"number": 169, "maps": [21]}
       ]
     },
     {
@@ -1285,7 +1285,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 170}
+        {"number": 170, "maps": [22]}
       ]
     },
     {
@@ -1297,7 +1297,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 171}
+        {"number": 171, "maps": [22]}
       ]
     },
     {
@@ -1306,7 +1306,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 172}
+        {"number": 172, "maps": [23]}
       ]
     },
     {
@@ -1318,7 +1318,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 173}
+        {"number": 173, "maps": [23]}
       ]
     },
     {
@@ -1326,7 +1326,7 @@
       "kind": "monster",
       "model": "MODEL_BALL",
       "numbers": [
-        {"number": 200}
+        {"number": 200, "maps": [6]}
       ]
     },
     {
@@ -1334,7 +1334,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_STATUE",
       "numbers": [
-        {"number": 204}
+        {"number": 204, "maps": [34]}
       ]
     },
     {
@@ -1342,7 +1342,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR1",
       "numbers": [
-        {"number": 205}
+        {"number": 205, "maps": [34]}
       ]
     },
     {
@@ -1350,7 +1350,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR2",
       "numbers": [
-        {"number": 206}
+        {"number": 206, "maps": [34]}
       ]
     },
     {
@@ -1358,7 +1358,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR3",
       "numbers": [
-        {"number": 207}
+        {"number": 207, "maps": [34]}
       ]
     },
     {
@@ -1366,7 +1366,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR4",
       "numbers": [
-        {"number": 208}
+        {"number": 208, "maps": [34]}
       ]
     },
     {
@@ -1374,7 +1374,7 @@
       "kind": "npc",
       "model": "MODEL_CRYWOLF_ALTAR5",
       "numbers": [
-        {"number": 209}
+        {"number": 209, "maps": [34]}
       ]
     },
     {
@@ -1390,7 +1390,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CROWN",
       "numbers": [
-        {"number": 216}
+        {"number": 216, "maps": [30]}
       ]
     },
     {
@@ -1398,7 +1398,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CHECK_FLOOR",
       "numbers": [
-        {"number": 217}
+        {"number": 217, "maps": [30]}
       ]
     },
     {
@@ -1406,7 +1406,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CHECK_FLOOR",
       "numbers": [
-        {"number": 218}
+        {"number": 218, "maps": [30]}
       ]
     },
     {
@@ -1414,7 +1414,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_GATE_SWITCH",
       "numbers": [
-        {"number": 219}
+        {"number": 219, "maps": [30]}
       ]
     },
     {
@@ -1427,7 +1427,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 220}
+        {"number": 220, "maps": [30]}
       ]
     },
     {
@@ -1435,7 +1435,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CAPATULT_ATT",
       "numbers": [
-        {"number": 221}
+        {"number": 221, "maps": [30]}
       ]
     },
     {
@@ -1443,7 +1443,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CAPATULT_DEF",
       "numbers": [
-        {"number": 222}
+        {"number": 222, "maps": [30]}
       ]
     },
     {
@@ -1451,7 +1451,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_SENATUS",
       "numbers": [
-        {"number": 223}
+        {"number": 223, "maps": [30]}
       ]
     },
     {
@@ -1459,7 +1459,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CLERK",
       "numbers": [
-        {"number": 224}
+        {"number": 224, "maps": [30, 34]}
       ]
     },
     {
@@ -1467,7 +1467,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_BREEDER",
       "numbers": [
-        {"number": 226}
+        {"number": 226, "maps": [0, 34]}
       ]
     },
     {
@@ -1475,7 +1475,7 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 229}
+        {"number": 229, "maps": [0, 2, 3, 7]}
       ]
     },
     {
@@ -1483,7 +1483,7 @@
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
       "numbers": [
-        {"number": 230}
+        {"number": 230, "maps": [0]}
       ]
     },
     {
@@ -1499,7 +1499,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_ARCHANGEL",
       "numbers": [
-        {"number": 232}
+        {"number": 232, "maps": [11, 12, 13, 14, 15, 16, 17, 52]}
       ]
     },
     {
@@ -1507,7 +1507,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_ARCHANGEL_MESSENGER",
       "numbers": [
-        {"number": 233}
+        {"number": 233, "maps": [2]}
       ]
     },
     {
@@ -1524,7 +1524,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_SEVINA",
       "numbers": [
-        {"number": 235}
+        {"number": 235, "maps": [2]}
       ]
     },
     {
@@ -1532,7 +1532,7 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 236}
+        {"number": 236, "maps": [0]}
       ]
     },
     {
@@ -1540,7 +1540,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_DEVILSQUARE",
       "numbers": [
-        {"number": 237}
+        {"number": 237, "maps": [3]}
       ]
     },
     {
@@ -1549,7 +1549,7 @@
       "model": "MODEL_MIX_NPC",
       "soundSet": "Chaos Goblin",
       "numbers": [
-        {"number": 238}
+        {"number": 238, "maps": [3]}
       ]
     },
     {
@@ -1557,7 +1557,7 @@
       "kind": "npc",
       "model": "MODEL_TOURNAMENT",
       "numbers": [
-        {"number": 239}
+        {"number": 239, "maps": [6]}
       ]
     },
     {
@@ -1565,7 +1565,7 @@
       "kind": "npc",
       "model": "MODEL_STORAGE",
       "numbers": [
-        {"number": 240}
+        {"number": 240, "maps": [0, 2, 3, 4, 6, 7, 34, 51, 80]}
       ]
     },
     {
@@ -1573,7 +1573,7 @@
       "kind": "npc",
       "model": "MODEL_MASTER",
       "numbers": [
-        {"number": 241}
+        {"number": 241, "maps": [2]}
       ]
     },
     {
@@ -1582,7 +1582,7 @@
       "model": "MODEL_ELF_WIZARD",
       "soundSet": "Elf Lala",
       "numbers": [
-        {"number": 242}
+        {"number": 242, "maps": [3]}
       ]
     },
     {
@@ -1590,7 +1590,7 @@
       "kind": "npc",
       "model": "MODEL_ELF_MERCHANT",
       "numbers": [
-        {"number": 243}
+        {"number": 243, "maps": [3]}
       ]
     },
     {
@@ -1598,7 +1598,7 @@
       "kind": "npc",
       "model": "MODEL_SNOW_MERCHANT",
       "numbers": [
-        {"number": 244}
+        {"number": 244, "maps": [2]}
       ]
     },
     {
@@ -1606,7 +1606,7 @@
       "kind": "npc",
       "model": "MODEL_SNOW_WIZARD",
       "numbers": [
-        {"number": 245}
+        {"number": 245, "maps": [2]}
       ]
     },
     {
@@ -1614,7 +1614,7 @@
       "kind": "npc",
       "model": "MODEL_SNOW_SMITH",
       "numbers": [
-        {"number": 246}
+        {"number": 246, "maps": [2]}
       ]
     },
     {
@@ -1622,8 +1622,8 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 247},
-        {"number": 249}
+        {"number": 247, "maps": [0, 2]},
+        {"number": 249, "maps": [0]}
       ]
     },
     {
@@ -1631,7 +1631,7 @@
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
       "numbers": [
-        {"number": 248}
+        {"number": 248, "maps": [0, 34]}
       ]
     },
     {
@@ -1639,7 +1639,7 @@
       "kind": "npc",
       "model": "MODEL_MERCHANT_MAN",
       "numbers": [
-        {"number": 250}
+        {"number": 250, "maps": [0]}
       ]
     },
     {
@@ -1648,7 +1648,7 @@
       "model": "MODEL_SMITH",
       "soundSet": "Hanzo the Blacksmith",
       "numbers": [
-        {"number": 251}
+        {"number": 251, "maps": [0, 34]}
       ]
     },
     {
@@ -1665,7 +1665,7 @@
       "kind": "npc",
       "model": "MODEL_MERCHANT_GIRL",
       "numbers": [
-        {"number": 253}
+        {"number": 253, "maps": [0, 3, 4]}
       ]
     },
     {
@@ -1673,7 +1673,7 @@
       "kind": "npc",
       "model": "MODEL_SCIENTIST",
       "numbers": [
-        {"number": 254}
+        {"number": 254, "maps": [0]}
       ]
     },
     {
@@ -1681,7 +1681,7 @@
       "kind": "npc",
       "model": "MODEL_MERCHANT_FEMALE",
       "numbers": [
-        {"number": 255}
+        {"number": 255, "maps": [0]}
       ]
     },
     {
@@ -1689,7 +1689,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
       "numbers": [
-        {"number": 256}
+        {"number": 256, "maps": [2, 34, 51]}
       ]
     },
     {
@@ -1697,7 +1697,7 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 257}
+        {"number": 257, "maps": [0, 2, 3, 51]}
       ]
     },
     {
@@ -1713,7 +1713,7 @@
       "kind": "npc",
       "model": "MODEL_KALIMA_SHOP",
       "numbers": [
-        {"number": 259}
+        {"number": 259, "maps": [24, 25, 26, 27, 28, 29, 36]}
       ]
     },
     {
@@ -1726,7 +1726,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 275}
+        {"number": 275, "maps": [36]}
       ]
     },
     {
@@ -1735,7 +1735,7 @@
       "model": "MONSTER_MODEL_CASTLE_GATE1",
       "soundSet": "Castle Gate",
       "numbers": [
-        {"number": 277}
+        {"number": 277, "maps": [30]}
       ]
     },
     {
@@ -1751,7 +1751,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_GUARDIAN_STATUE",
       "numbers": [
-        {"number": 283}
+        {"number": 283, "maps": [30]}
       ]
     },
     {
@@ -1801,7 +1801,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LIZARD_WARRIOR",
       "numbers": [
-        {"number": 290}
+        {"number": 290, "maps": [31, 32]}
       ]
     },
     {
@@ -1823,7 +1823,7 @@
         }
       ],
       "numbers": [
-        {"number": 291}
+        {"number": 291, "maps": [31, 32]}
       ]
     },
     {
@@ -1831,7 +1831,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_QUEEN_BEE",
       "numbers": [
-        {"number": 292}
+        {"number": 292, "maps": [31, 32]}
       ]
     },
     {
@@ -1839,7 +1839,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_POISON_GOLEM",
       "numbers": [
-        {"number": 293}
+        {"number": 293, "maps": [31, 32]}
       ]
     },
     {
@@ -1847,7 +1847,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_AXE_HERO",
       "numbers": [
-        {"number": 294}
+        {"number": 294, "maps": [9, 31, 32]}
       ]
     },
     {
@@ -1855,7 +1855,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_EROHIM",
       "numbers": [
-        {"number": 295}
+        {"number": 295, "maps": [31]}
       ]
     },
     {
@@ -1919,7 +1919,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 304}
+        {"number": 304, "maps": [33]}
       ]
     },
     {
@@ -1932,7 +1932,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 305}
+        {"number": 305, "maps": [33]}
       ]
     },
     {
@@ -1941,7 +1941,7 @@
       "model": "MONSTER_MODEL_DEATH_RIDER",
       "soundSet": "Death Rider",
       "numbers": [
-        {"number": 306}
+        {"number": 306, "maps": [33]}
       ]
     },
     {
@@ -1950,7 +1950,7 @@
       "model": "MONSTER_MODEL_FOREST_ORC",
       "soundSet": "Forest Orc",
       "numbers": [
-        {"number": 307}
+        {"number": 307, "maps": [33]}
       ]
     },
     {
@@ -1959,7 +1959,7 @@
       "model": "MONSTER_MODEL_DEATH_TREE",
       "soundSet": "Death Tree",
       "numbers": [
-        {"number": 308}
+        {"number": 308, "maps": [33]}
       ]
     },
     {
@@ -1973,7 +1973,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 309}
+        {"number": 309, "maps": [33]}
       ]
     },
     {
@@ -1981,7 +1981,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SCOUT",
       "numbers": [
-        {"number": 310}
+        {"number": 310, "maps": [34]}
       ]
     },
     {
@@ -1989,7 +1989,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SOLAM",
       "numbers": [
-        {"number": 311}
+        {"number": 311, "maps": [34]}
       ]
     },
     {
@@ -1997,7 +1997,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_VALAM",
       "numbers": [
-        {"number": 312}
+        {"number": 312, "maps": [34]}
       ]
     },
     {
@@ -2005,7 +2005,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_WEREWOLF_HERO",
       "numbers": [
-        {"number": 313}
+        {"number": 313, "maps": [34]}
       ]
     },
     {
@@ -2013,7 +2013,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SCOUT",
       "numbers": [
-        {"number": 314}
+        {"number": 314, "maps": [34]}
       ]
     },
     {
@@ -2021,7 +2021,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_WEREWOLF_HERO",
       "numbers": [
-        {"number": 315}
+        {"number": 315, "maps": [34]}
       ]
     },
     {
@@ -2029,8 +2029,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BALRAM",
       "numbers": [
-        {"number": 316},
-        {"number": 344, "attacks": {"monsterSkills": {"9": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
+        {"number": 316, "maps": [34]},
+        {"number": 344, "maps": [34], "attacks": {"monsterSkills": {"9": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2038,8 +2038,8 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SORAM",
       "numbers": [
-        {"number": 317},
-        {"number": 341, "attacks": {"monsterSkills": {"11": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
+        {"number": 317, "maps": [34]},
+        {"number": 341, "maps": [34], "attacks": {"monsterSkills": {"11": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2060,8 +2060,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 340},
-        {"number": 440, "attacks": {"monsterSkills": {"8": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
+        {"number": 340, "maps": [34]},
+        {"number": 440, "maps": [32], "attacks": {"monsterSkills": {"8": "attack1"}, "otherwise": "attack1", "clearSkill": "always"}}
       ]
     },
     {
@@ -2074,7 +2074,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 345}
+        {"number": 345, "maps": [34]}
       ]
     },
     {
@@ -2082,7 +2082,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_BALLISTA",
       "numbers": [
-        {"number": 348}
+        {"number": 348, "maps": [34]}
       ]
     },
     {
@@ -2095,7 +2095,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 349}
+        {"number": 349, "maps": [34]}
       ]
     },
     {
@@ -2108,8 +2108,8 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 350},
-        {"number": 435, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 350, "maps": [37]},
+        {"number": 435, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2122,7 +2122,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 351}
+        {"number": 351, "maps": [37]}
       ]
     },
     {
@@ -2135,7 +2135,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 352}
+        {"number": 352, "maps": [37]}
       ]
     },
     {
@@ -2144,7 +2144,7 @@
       "model": "MONSTER_MODEL_SATYROS",
       "soundSet": "Satyros",
       "numbers": [
-        {"number": 353}
+        {"number": 353, "maps": [37]}
       ]
     },
     {
@@ -2153,7 +2153,7 @@
       "model": "MONSTER_MODEL_BLADE_HUNTER",
       "soundSet": "Blade Hunter",
       "numbers": [
-        {"number": 354}
+        {"number": 354, "maps": [37, 39]}
       ]
     },
     {
@@ -2167,7 +2167,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 355}
+        {"number": 355, "maps": [37]}
       ]
     },
     {
@@ -2180,8 +2180,8 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 356},
-        {"number": 434, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 356, "maps": [37]},
+        {"number": 434, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2194,7 +2194,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 357}
+        {"number": 357, "maps": [37, 39]}
       ]
     },
     {
@@ -2208,8 +2208,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 358},
-        {"number": 438, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 358, "maps": [38, 39]},
+        {"number": 438, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2223,7 +2223,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 359}
+        {"number": 359, "maps": [38, 39]}
       ]
     },
     {
@@ -2237,8 +2237,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 360},
-        {"number": 439, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 360, "maps": [38, 39]},
+        {"number": 439, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2251,7 +2251,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 361}
+        {"number": 361, "maps": [39]}
       ]
     },
     {
@@ -2264,7 +2264,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 362}
+        {"number": 362, "maps": [39]}
       ]
     },
     {
@@ -2277,7 +2277,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 363}
+        {"number": 363, "maps": [39]}
       ]
     },
     {
@@ -2289,7 +2289,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 364}
+        {"number": 364, "maps": [39]}
       ]
     },
     {
@@ -2306,7 +2306,7 @@
       "model": "MODEL_KANTURU2ND_ENTER_NPC",
       "soundSet": "Gateway Machine",
       "numbers": [
-        {"number": 367}
+        {"number": 367, "maps": [38]}
       ]
     },
     {
@@ -2314,7 +2314,7 @@
       "kind": "npc",
       "model": "MODEL_SMELTING_NPC",
       "numbers": [
-        {"number": 368}
+        {"number": 368, "maps": [39]}
       ]
     },
     {
@@ -2322,7 +2322,7 @@
       "kind": "npc",
       "model": "MODEL_REFINERY_NPC",
       "numbers": [
-        {"number": 369}
+        {"number": 369, "maps": [33]}
       ]
     },
     {
@@ -2330,7 +2330,7 @@
       "kind": "npc",
       "model": "MODEL_RECOVERY_NPC",
       "numbers": [
-        {"number": 370}
+        {"number": 370, "maps": [33]}
       ]
     },
     {
@@ -2338,7 +2338,7 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 371}
+        {"number": 371, "maps": [0]}
       ]
     },
     {
@@ -2370,7 +2370,7 @@
       "kind": "npc",
       "model": "player",
       "numbers": [
-        {"number": 375}
+        {"number": 375, "maps": [0]}
       ]
     },
     {
@@ -2378,7 +2378,7 @@
       "kind": "npc",
       "model": "MODEL_BC_NPC1",
       "numbers": [
-        {"number": 376}
+        {"number": 376, "maps": [30]}
       ]
     },
     {
@@ -2386,7 +2386,7 @@
       "kind": "npc",
       "model": "MODEL_BC_NPC2",
       "numbers": [
-        {"number": 377}
+        {"number": 377, "maps": [30]}
       ]
     },
     {
@@ -2402,7 +2402,7 @@
       "kind": "npc",
       "model": "MODEL_WEDDING_NPC",
       "numbers": [
-        {"number": 379}
+        {"number": 379, "maps": [2]}
       ]
     },
     {
@@ -2450,7 +2450,7 @@
       "kind": "npc",
       "model": "MODEL_CURSEDTEMPLE_ENTER_NPC",
       "numbers": [
-        {"number": 385}
+        {"number": 385, "maps": [2, 51]}
       ]
     },
     {
@@ -2518,7 +2518,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_DEVIN",
       "numbers": [
-        {"number": 406}
+        {"number": 406, "maps": [2, 34]}
       ]
     },
     {
@@ -2526,7 +2526,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_QUARREL",
       "numbers": [
-        {"number": 407}
+        {"number": 407, "maps": [34]}
       ]
     },
     {
@@ -2534,7 +2534,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CASTEL_GATE",
       "numbers": [
-        {"number": 408}
+        {"number": 408, "maps": [41]}
       ]
     },
     {
@@ -2546,8 +2546,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 409},
-        {"number": 436, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 409, "maps": [41]},
+        {"number": 436, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2559,7 +2559,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 410}
+        {"number": 410, "maps": [41, 42]}
       ]
     },
     {
@@ -2571,8 +2571,8 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 411},
-        {"number": 437, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+        {"number": 411, "maps": [41, 42]},
+        {"number": 437, "maps": [32], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
     {
@@ -2585,7 +2585,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 412}
+        {"number": 412, "maps": [42]}
       ]
     },
     {
@@ -2609,7 +2609,7 @@
       "kind": "npc",
       "model": "MODEL_ELBELAND_SILVIA",
       "numbers": [
-        {"number": 415}
+        {"number": 415, "maps": [51]}
       ]
     },
     {
@@ -2617,7 +2617,7 @@
       "kind": "npc",
       "model": "MODEL_ELBELAND_RHEA",
       "numbers": [
-        {"number": 416}
+        {"number": 416, "maps": [51]}
       ]
     },
     {
@@ -2625,7 +2625,7 @@
       "kind": "npc",
       "model": "MODEL_ELBELAND_MARCE",
       "numbers": [
-        {"number": 417}
+        {"number": 417, "maps": [51]}
       ]
     },
     {
@@ -2634,7 +2634,7 @@
       "model": "MONSTER_MODEL_RABBIT",
       "soundSet": "Strange Rabbit",
       "numbers": [
-        {"number": 418}
+        {"number": 418, "maps": [51]}
       ]
     },
     {
@@ -2643,7 +2643,7 @@
       "model": "MONSTER_MODEL_BUTTERFLY",
       "soundSet": "Hideous Rabbit",
       "numbers": [
-        {"number": 419}
+        {"number": 419, "maps": [51]}
       ]
     },
     {
@@ -2652,7 +2652,7 @@
       "model": "MONSTER_MODEL_HIDEOUS_RABBIT",
       "soundSet": "Werewolf",
       "numbers": [
-        {"number": 420}
+        {"number": 420, "maps": [51]}
       ]
     },
     {
@@ -2661,7 +2661,7 @@
       "model": "MONSTER_MODEL_WEREWOLF2",
       "soundSet": "Polluted Butterfly",
       "numbers": [
-        {"number": 421}
+        {"number": 421, "maps": [51]}
       ]
     },
     {
@@ -2670,7 +2670,7 @@
       "model": "MONSTER_MODEL_CURSED_LICH",
       "soundSet": "Cursed Lich",
       "numbers": [
-        {"number": 422}
+        {"number": 422, "maps": [51]}
       ]
     },
     {
@@ -2679,7 +2679,7 @@
       "model": "MONSTER_MODEL_TOTEM_GOLEM",
       "soundSet": "Totem Golem",
       "numbers": [
-        {"number": 423}
+        {"number": 423, "maps": [51]}
       ]
     },
     {
@@ -2688,7 +2688,7 @@
       "model": "MONSTER_MODEL_GRIZZLY",
       "soundSet": "Grizzly",
       "numbers": [
-        {"number": 424}
+        {"number": 424, "maps": [51]}
       ]
     },
     {
@@ -2697,7 +2697,7 @@
       "model": "MONSTER_MODEL_CAPTAIN_GRIZZLY",
       "soundSet": "Captain Grizzly",
       "numbers": [
-        {"number": 425}
+        {"number": 425, "maps": [51]}
       ]
     },
     {
@@ -2706,7 +2706,7 @@
       "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
       "soundSet": "Chaos Castle",
       "numbers": [
-        {"number": 426}
+        {"number": 426, "maps": [53]}
       ]
     },
     {
@@ -2718,7 +2718,7 @@
         {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
       ],
       "numbers": [
-        {"number": 427}
+        {"number": 427, "maps": [53]}
       ]
     },
     {
@@ -2727,7 +2727,7 @@
       "model": "MONSTER_MODEL_SAPIUNUS",
       "soundSet": "Sapi-Unus",
       "numbers": [
-        {"number": 441}
+        {"number": 441, "maps": [56]}
       ]
     },
     {
@@ -2736,7 +2736,7 @@
       "model": "MONSTER_MODEL_SAPIDUO",
       "soundSet": "Sapi-Unus",
       "numbers": [
-        {"number": 442}
+        {"number": 442, "maps": [56]}
       ]
     },
     {
@@ -2745,7 +2745,7 @@
       "model": "MONSTER_MODEL_SAPITRES",
       "soundSet": "Sapi-Tres",
       "numbers": [
-        {"number": 443}
+        {"number": 443, "maps": [56]}
       ]
     },
     {
@@ -2754,7 +2754,7 @@
       "model": "MONSTER_MODEL_SHADOW_PAWN",
       "soundSet": "Shadow Pawn",
       "numbers": [
-        {"number": 444}
+        {"number": 444, "maps": [56]}
       ]
     },
     {
@@ -2763,7 +2763,7 @@
       "model": "MONSTER_MODEL_SHADOW_KNIGHT",
       "soundSet": "Shadow Knight",
       "numbers": [
-        {"number": 445}
+        {"number": 445, "maps": [56]}
       ]
     },
     {
@@ -2772,7 +2772,7 @@
       "model": "MONSTER_MODEL_SHADOW_LOOK",
       "soundSet": "Shadow Look",
       "numbers": [
-        {"number": 446}
+        {"number": 446, "maps": [56]}
       ]
     },
     {
@@ -2781,7 +2781,7 @@
       "model": "MONSTER_MODEL_NAPIN",
       "soundSet": "Thunder Napin",
       "numbers": [
-        {"number": 447}
+        {"number": 447, "maps": [56]}
       ]
     },
     {
@@ -2790,7 +2790,7 @@
       "model": "MONSTER_MODEL_GHOST_NAPIN",
       "soundSet": "Ghost Napin",
       "numbers": [
-        {"number": 448}
+        {"number": 448, "maps": [56]}
       ]
     },
     {
@@ -2799,7 +2799,7 @@
       "model": "MONSTER_MODEL_BLAZE_NAPIN",
       "soundSet": "Blaze Napin",
       "numbers": [
-        {"number": 449}
+        {"number": 449, "maps": [56]}
       ]
     },
     {
@@ -2807,7 +2807,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_CHERRYBLOSSOM",
       "numbers": [
-        {"number": 450}
+        {"number": 450, "maps": [3]}
       ]
     },
     {
@@ -2815,7 +2815,7 @@
       "kind": "other",
       "model": "MODEL_NPC_CHERRYBLOSSOMTREE",
       "numbers": [
-        {"number": 451}
+        {"number": 451, "maps": [3]}
       ]
     },
     {
@@ -2823,7 +2823,7 @@
       "kind": "npc",
       "model": "MODEL_SEED_MASTER",
       "numbers": [
-        {"number": 452}
+        {"number": 452, "maps": [51]}
       ]
     },
     {
@@ -2831,7 +2831,7 @@
       "kind": "npc",
       "model": "MODEL_SEED_INVESTIGATOR",
       "numbers": [
-        {"number": 453}
+        {"number": 453, "maps": [51]}
       ]
     },
     {
@@ -2845,7 +2845,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 454},
+        {"number": 454, "maps": [57]},
         {"number": 531, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
       ]
     },
@@ -2860,7 +2860,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 455}
+        {"number": 455, "maps": [57]}
       ]
     },
     {
@@ -2874,7 +2874,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 456}
+        {"number": 456, "maps": [57]}
       ]
     },
     {
@@ -2888,7 +2888,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 457}
+        {"number": 457, "maps": [57, 58]}
       ]
     },
     {
@@ -2902,7 +2902,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 458}
+        {"number": 458, "maps": [57]}
       ]
     },
     {
@@ -2916,7 +2916,7 @@
         "clearSkill": "afterAttack"
       },
       "numbers": [
-        {"number": 459}
+        {"number": 459, "maps": [58]}
       ]
     },
     {
@@ -2924,7 +2924,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_1",
       "numbers": [
-        {"number": 460}
+        {"number": 460, "maps": [58]}
       ]
     },
     {
@@ -2932,7 +2932,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_2",
       "numbers": [
-        {"number": 461}
+        {"number": 461, "maps": [58]}
       ]
     },
     {
@@ -2940,7 +2940,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_SPIDER_EGGS_3",
       "numbers": [
-        {"number": 462}
+        {"number": 462, "maps": [58]}
       ]
     },
     {
@@ -2981,7 +2981,7 @@
       "kind": "npc",
       "model": "MODEL_XMAS2008_SNOWMAN_NPC",
       "numbers": [
-        {"number": 467}
+        {"number": 467, "maps": [62]}
       ]
     },
     {
@@ -2989,7 +2989,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA",
       "numbers": [
-        {"number": 468}
+        {"number": 468, "maps": [62]}
       ]
     },
     {
@@ -2997,7 +2997,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+1",
       "numbers": [
-        {"number": 469}
+        {"number": 469, "maps": [62]}
       ]
     },
     {
@@ -3005,7 +3005,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+2",
       "numbers": [
-        {"number": 470}
+        {"number": 470, "maps": [62]}
       ]
     },
     {
@@ -3013,7 +3013,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+3",
       "numbers": [
-        {"number": 471}
+        {"number": 471, "maps": [62]}
       ]
     },
     {
@@ -3021,7 +3021,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+4",
       "numbers": [
-        {"number": 472}
+        {"number": 472, "maps": [62]}
       ]
     },
     {
@@ -3029,7 +3029,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+5",
       "numbers": [
-        {"number": 473}
+        {"number": 473, "maps": [62]}
       ]
     },
     {
@@ -3037,7 +3037,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+6",
       "numbers": [
-        {"number": 474}
+        {"number": 474, "maps": [62]}
       ]
     },
     {
@@ -3045,7 +3045,7 @@
       "kind": "npc",
       "model": "MODEL_LITTLESANTA+7",
       "numbers": [
-        {"number": 475}
+        {"number": 475, "maps": [62]}
       ]
     },
     {
@@ -3071,7 +3071,7 @@
       "kind": "npc",
       "model": "MODEL_NPC_SERBIS",
       "numbers": [
-        {"number": 478}
+        {"number": 478, "maps": [2]}
       ]
     },
     {
@@ -3080,7 +3080,7 @@
       "model": "MODEL_DUEL_NPC_TITUS",
       "soundSet": "Doorkeeper Titus",
       "numbers": [
-        {"number": 479}
+        {"number": 479, "maps": [63]}
       ]
     },
     {
@@ -3089,8 +3089,8 @@
       "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
       "soundSet": "Zombie Fighter",
       "numbers": [
-        {"number": 480},
-        {"number": 481}
+        {"number": 480, "maps": [63]},
+        {"number": 481, "maps": [63]}
       ]
     },
     {
@@ -3099,8 +3099,8 @@
       "model": "MONSTER_MODEL_GLADIATOR",
       "soundSet": "Resurrected Gladiator",
       "numbers": [
-        {"number": 482},
-        {"number": 483}
+        {"number": 482, "maps": [63]},
+        {"number": 483, "maps": [63]}
       ]
     },
     {
@@ -3109,8 +3109,8 @@
       "model": "MONSTER_MODEL_SLAUGTHERER",
       "soundSet": "Ash Slaughterer",
       "numbers": [
-        {"number": 484},
-        {"number": 485}
+        {"number": 484, "maps": [63]},
+        {"number": 485, "maps": [63]}
       ]
     },
     {
@@ -3119,7 +3119,7 @@
       "model": "MONSTER_MODEL_BLOOD_ASSASSIN",
       "soundSet": "Blood Assassin",
       "numbers": [
-        {"number": 486}
+        {"number": 486, "maps": [63]}
       ]
     },
     {
@@ -3128,8 +3128,8 @@
       "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
       "soundSet": "Cruel Blood Assassin",
       "numbers": [
-        {"number": 487},
-        {"number": 488}
+        {"number": 487, "maps": [63]},
+        {"number": 488, "maps": [63]}
       ]
     },
     {
@@ -3138,7 +3138,7 @@
       "model": "MONSTER_MODEL_BURNING_LAVA_GIANT",
       "soundSet": "Burning Lava Giant",
       "numbers": [
-        {"number": 489}
+        {"number": 489, "maps": [63]}
       ]
     },
     {
@@ -3147,8 +3147,8 @@
       "model": "MONSTER_MODEL_LAVA_GIANT",
       "soundSet": "Ruthless Lava Giant",
       "numbers": [
-        {"number": 490},
-        {"number": 491}
+        {"number": 490, "maps": [63]},
+        {"number": 491, "maps": [63]}
       ]
     },
     {
@@ -3156,7 +3156,7 @@
       "kind": "npc",
       "model": "MODEL_GAMBLE_NPC_MOSS",
       "numbers": [
-        {"number": 492}
+        {"number": 492, "maps": [51]}
       ]
     },
     {
@@ -3268,7 +3268,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 504}
+        {"number": 504, "maps": [72]}
       ]
     },
     {
@@ -3282,7 +3282,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 505}
+        {"number": 505, "maps": [72]}
       ]
     },
     {
@@ -3296,7 +3296,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 506}
+        {"number": 506, "maps": [71, 72]}
       ]
     },
     {
@@ -3319,7 +3319,7 @@
         }
       ],
       "numbers": [
-        {"number": 507}
+        {"number": 507, "maps": [70, 72]}
       ]
     },
     {
@@ -3333,7 +3333,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 508}
+        {"number": 508, "maps": [69]}
       ]
     },
     {
@@ -3347,7 +3347,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 509}
+        {"number": 509, "maps": [70]}
       ]
     },
     {
@@ -3361,7 +3361,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 510}
+        {"number": 510, "maps": [71]}
       ]
     },
     {
@@ -3375,7 +3375,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 511}
+        {"number": 511, "maps": [69]}
       ]
     },
     {
@@ -3384,7 +3384,7 @@
       "model": "MONSTER_MODEL_QUARTER_MASTER",
       "soundSet": "Quartermaster",
       "numbers": [
-        {"number": 512}
+        {"number": 512, "maps": [69]}
       ]
     },
     {
@@ -3398,7 +3398,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 513}
+        {"number": 513, "maps": [69]}
       ]
     },
     {
@@ -3412,7 +3412,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 514}
+        {"number": 514, "maps": [70]}
       ]
     },
     {
@@ -3426,7 +3426,7 @@
         "clearSkill": "afterAttack"
       },
       "numbers": [
-        {"number": 515}
+        {"number": 515, "maps": [70]}
       ]
     },
     {
@@ -3440,7 +3440,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 516}
+        {"number": 516, "maps": [71]}
       ]
     },
     {
@@ -3454,7 +3454,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 517}
+        {"number": 517, "maps": [71]}
       ]
     },
     {
@@ -3468,7 +3468,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 518}
+        {"number": 518, "maps": [69, 70, 71, 72]}
       ]
     },
     {
@@ -3482,7 +3482,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 519}
+        {"number": 519, "maps": [69, 70, 71, 72]}
       ]
     },
     {
@@ -3490,7 +3490,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_OCELOT",
       "numbers": [
-        {"number": 520}
+        {"number": 520, "maps": [69, 70, 71]}
       ]
     },
     {
@@ -3498,7 +3498,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_ERIC",
       "numbers": [
-        {"number": 521}
+        {"number": 521, "maps": [69, 70, 71, 72]}
       ]
     },
     {
@@ -3507,7 +3507,7 @@
       "model": "MONSTER_MODEL_JERRY",
       "soundSet": "Jerint",
       "numbers": [
-        {"number": 522}
+        {"number": 522, "maps": [2]}
       ]
     },
     {
@@ -3516,7 +3516,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 523}
+        {"number": 523, "maps": [69, 70, 71, 72]}
       ]
     },
     {
@@ -3524,7 +3524,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_EVIL_GATE",
       "numbers": [
-        {"number": 524}
+        {"number": 524, "maps": [69, 70, 71]}
       ]
     },
     {
@@ -3532,7 +3532,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_LION_GATE",
       "numbers": [
-        {"number": 525}
+        {"number": 525, "maps": [69, 70, 71]}
       ]
     },
     {
@@ -3540,7 +3540,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_STATUE",
       "numbers": [
-        {"number": 526}
+        {"number": 526, "maps": [69, 70, 71, 72]}
       ]
     },
     {
@@ -3548,7 +3548,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_STAR_GATE",
       "numbers": [
-        {"number": 527}
+        {"number": 527, "maps": [72]}
       ]
     },
     {
@@ -3556,7 +3556,7 @@
       "kind": "monster",
       "model": "MONSTER_MODEL_RUSH_GATE",
       "numbers": [
-        {"number": 528}
+        {"number": 528, "maps": [72]}
       ]
     },
     {
@@ -3640,7 +3640,7 @@
       "model": "MODEL_DOPPELGANGER_NPC_LUGARD",
       "soundSet": "Lugard",
       "numbers": [
-        {"number": 540}
+        {"number": 540, "maps": [2, 51]}
       ]
     },
     {
@@ -3666,7 +3666,7 @@
       "kind": "npc",
       "model": "MODAL_GENS_NPC_DUPRIAN",
       "numbers": [
-        {"number": 543}
+        {"number": 543, "maps": [0]}
       ]
     },
     {
@@ -3674,7 +3674,7 @@
       "kind": "npc",
       "model": "MODAL_GENS_NPC_BARNERT",
       "numbers": [
-        {"number": 544}
+        {"number": 544, "maps": [3]}
       ]
     },
     {
@@ -3682,7 +3682,7 @@
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_CHRISTIN",
       "numbers": [
-        {"number": 545}
+        {"number": 545, "maps": [79]}
       ]
     },
     {
@@ -3690,7 +3690,7 @@
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_RAUL",
       "numbers": [
-        {"number": 546}
+        {"number": 546, "maps": [79]}
       ]
     },
     {
@@ -3698,7 +3698,7 @@
       "kind": "npc",
       "model": "MODEL_UNITEDMARKETPLACE_JULIA",
       "numbers": [
-        {"number": 547}
+        {"number": 547, "maps": [0, 79]}
       ]
     },
     {
@@ -3719,7 +3719,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 549}
+        {"number": 549, "maps": [33]}
       ]
     },
     {
@@ -3732,7 +3732,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 550}
+        {"number": 550, "maps": [33]}
       ]
     },
     {
@@ -3746,7 +3746,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 551}
+        {"number": 551, "maps": [33]}
       ]
     },
     {
@@ -3760,7 +3760,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 552}
+        {"number": 552, "maps": [33]}
       ]
     },
     {
@@ -3774,7 +3774,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 553}
+        {"number": 553, "maps": [37]}
       ]
     },
     {
@@ -3788,7 +3788,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 554}
+        {"number": 554, "maps": [37]}
       ]
     },
     {
@@ -3801,7 +3801,7 @@
         "clearSkill": "never"
       },
       "numbers": [
-        {"number": 555}
+        {"number": 555, "maps": [37]}
       ]
     },
     {
@@ -3815,7 +3815,7 @@
         "clearSkill": "onMatch"
       },
       "numbers": [
-        {"number": 556}
+        {"number": 556, "maps": [37]}
       ]
     },
     {
@@ -3829,7 +3829,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 557},
+        {"number": 557, "maps": [56]},
         {"number": 560}
       ]
     },
@@ -3844,7 +3844,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 558}
+        {"number": 558, "maps": [56]}
       ]
     },
     {
@@ -3858,7 +3858,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 559}
+        {"number": 559, "maps": [56]}
       ]
     },
     {
@@ -3885,7 +3885,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 562}
+        {"number": 562, "maps": [57]}
       ]
     },
     {
@@ -3899,7 +3899,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 563}
+        {"number": 563, "maps": [57]}
       ]
     },
     {
@@ -3913,7 +3913,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 564}
+        {"number": 564, "maps": [57]}
       ]
     },
     {
@@ -3927,7 +3927,7 @@
         "clearSkill": "always"
       },
       "numbers": [
-        {"number": 565}
+        {"number": 565, "maps": [57]}
       ]
     },
     {
@@ -3935,7 +3935,7 @@
       "kind": "npc",
       "model": "MODEL_TERSIA",
       "numbers": [
-        {"number": 566}
+        {"number": 566, "maps": [2]}
       ]
     },
     {
@@ -3951,7 +3951,7 @@
       "kind": "npc",
       "model": "MODEL_GAMBLE_NPC_MOSS",
       "numbers": [
-        {"number": 568}
+        {"number": 568, "maps": [0, 2, 51]}
       ]
     },
     {
@@ -3960,7 +3960,7 @@
       "model": "MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION",
       "soundSet": "Venomous Chain Scorpion",
       "numbers": [
-        {"number": 569}
+        {"number": 569, "maps": [80]}
       ]
     },
     {
@@ -3969,7 +3969,7 @@
       "model": "MONSTER_MODEL_BONE_SCORPION",
       "soundSet": "Bone Scorpion",
       "numbers": [
-        {"number": 570}
+        {"number": 570, "maps": [80]}
       ]
     },
     {
@@ -3978,7 +3978,7 @@
       "model": "MONSTER_MODEL_ORCUS",
       "soundSet": "Orcus",
       "numbers": [
-        {"number": 571}
+        {"number": 571, "maps": [80, 81]}
       ]
     },
     {
@@ -3987,7 +3987,7 @@
       "model": "MONSTER_MODEL_GOLLOCK",
       "soundSet": "Gollock",
       "numbers": [
-        {"number": 572}
+        {"number": 572, "maps": [81]}
       ]
     },
     {
@@ -3996,7 +3996,7 @@
       "model": "MONSTER_MODEL_CRYPTA",
       "soundSet": "Crypta",
       "numbers": [
-        {"number": 573}
+        {"number": 573, "maps": [80]}
       ]
     },
     {
@@ -4005,7 +4005,7 @@
       "model": "MONSTER_MODEL_CRYPOS",
       "soundSet": "Crypos",
       "numbers": [
-        {"number": 574}
+        {"number": 574, "maps": [80]}
       ]
     },
     {
@@ -4014,7 +4014,7 @@
       "model": "MONSTER_MODEL_CONDRA",
       "soundSet": "Condra",
       "numbers": [
-        {"number": 575}
+        {"number": 575, "maps": [81]}
       ]
     },
     {
@@ -4023,7 +4023,7 @@
       "model": "MONSTER_MODEL_NACONDRA",
       "soundSet": "Narcondra",
       "numbers": [
-        {"number": 576}
+        {"number": 576, "maps": [81]}
       ]
     },
     {
@@ -4031,7 +4031,7 @@
       "kind": "npc",
       "model": "MODEL_KARUTAN_NPC_REINA",
       "numbers": [
-        {"number": 577}
+        {"number": 577, "maps": [80]}
       ]
     },
     {
@@ -4039,7 +4039,7 @@
       "kind": "npc",
       "model": "MODEL_KARUTAN_NPC_VOLVO",
       "numbers": [
-        {"number": 578}
+        {"number": 578, "maps": [80]}
       ]
     },
     {
@@ -4047,7 +4047,7 @@
       "kind": "npc",
       "model": "MODEL_LUCKYITEM_NPC",
       "numbers": [
-        {"number": 579}
+        {"number": 579, "maps": [51]}
       ]
     },
     {
@@ -4065,7 +4065,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 658}
+        {"number": 658, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4074,7 +4074,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 659}
+        {"number": 659, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4083,7 +4083,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 660}
+        {"number": 660, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4092,7 +4092,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 661}
+        {"number": 661, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4101,7 +4101,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 662}
+        {"number": 662, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4110,7 +4110,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 663}
+        {"number": 663, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4119,7 +4119,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 664}
+        {"number": 664, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4128,7 +4128,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 665}
+        {"number": 665, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4137,7 +4137,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 666}
+        {"number": 666, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4146,7 +4146,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 667}
+        {"number": 667, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     },
     {
@@ -4155,7 +4155,7 @@
       "model": "MONSTER_MODEL_BULL_FIGHTER",
       "soundSet": "Bull Fighter",
       "numbers": [
-        {"number": 668}
+        {"number": 668, "maps": [45, 46, 47, 48, 49, 50]}
       ]
     }
   ]

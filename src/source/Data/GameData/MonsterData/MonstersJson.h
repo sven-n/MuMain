@@ -18,18 +18,18 @@
 //         "kind": "monster",
 //         "model": "MONSTER_MODEL_DEATH_CENTURION",
 //         "numbers": [
-//           {"number": 145},
-//           {"number": 336, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+//           {"number": 145, "maps": [24]},
+//           {"number": 336, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
 //         ]
 //       } ] }
 //
 // A monster holds the values its numbers share; "numbers" lists each of its
-// numbers as the server sends them (0-1023) with the values that number has as
-// its own (monsters design, D61). "name" are the names by language (a plain
-// text is the English name), "kind" what the game does with it: monster, npc,
-// trap or other. A number's own value may be empty where the monster's is not:
-// "model": "", "soundSet": "", "attacks": null, "mapVariants": [] and
-// "randomVariants": [].
+// numbers as the server sends them (0-1023) with the maps it appears on and
+// the values that number has as its own (monsters design, D61, Q-MN61).
+// "name" are the names by language (a plain text is the English name), "kind"
+// what the game does with it: monster, npc, trap or other. A number's own
+// value may be empty where the monster's is not: "model": "", "soundSet": "",
+// "attacks": null, "mapVariants": [] and "randomVariants": [].
 //
 // Version 1 listed each number with its values ("number" next to "name");
 // such a file is read as a monster for each entry.

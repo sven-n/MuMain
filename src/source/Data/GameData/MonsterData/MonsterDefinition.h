@@ -68,6 +68,10 @@ struct MonsterDefinition
     std::string soundSet;
     // Its other looks; no model is in two.
     std::vector<MonsterRandomVariant> randomVariants;
+    // The maps the number appears on, by the numbers the server sends
+    // (Q-MN61): where OpenMU's Season 6 data places it, and empty for a number
+    // it places nowhere. Each number has its own; only the tools read them.
+    std::vector<Data::Maps::MapRef> maps;
 
     bool operator==(const MonsterDefinition& other) const = default;
 };

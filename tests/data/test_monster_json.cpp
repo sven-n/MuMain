@@ -673,3 +673,54 @@ TEST_CASE("Monster data: a file of version 1 has a monster for each entry [data]
     CHECK(read.monsters[0].numbers[0].attacks.has_value());
     CHECK_FALSE(read.monsters[1].numbers[0].attacks.has_value());
 }
+
+TEST_CASE("Monster data: each number names the maps it appears on (Q-MN61) [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(GroupFile(
+        R"({ "name": "Illusion of Kundun", "kind": "monster",
+             "numbers": [ {"number": 161, "maps": [24]},
+                          {"number": 197, "maps": [{"map": 32, "stage": 6}, 27]},
+                          {"number": 338} ] })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    const std::vector<MonsterDefinition>& numbers = read.monsters[0].numbers;
+    REQUIRE(numbers.size() == 3);
+    CHECK(numbers[0].maps == std::vector<Data::Maps::MapRef>{{24, 0}});
+    // Sorted, a stage after its map's number.
+    CHECK(numbers[1].maps == std::vector<Data::Maps::MapRef>{{27, 0}, {32, 6}});
+    CHECK(numbers[2].maps.empty());
+    // A monster has no maps of its own; each number has its maps.
+    CHECK(read.monsters[0].shared.maps.empty());
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(read.monsters));
+    INFO(text);
+    CHECK(text.find("{\"number\": 161, \"maps\": [24]},\n") != std::string::npos);
+    CHECK(text.find("{\"number\": 197, \"maps\": [27, {\"map\": 32, \"stage\": 6}]},\n") != std::string::npos);
+    CHECK(text.find("{\"number\": 338}\n") != std::string::npos);
+    CHECK(ReadGroups(text).monsters == read.monsters);
+
+    // A monster with one number writes its maps with the number too.
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.maps = {{0, 0}, {2, 0}};
+    const std::string single = Data::Monsters::WriteMonstersJson(std::array{budge});
+    CHECK(single.find("{\"number\": 2, \"maps\": [0, 2]}") != std::string::npos);
+    CHECK(Read(single).monsters == std::vector{budge});
+}
+
+TEST_CASE("Monster data: maps that are no list of maps are an error, a monster's maps a warning [data][monsters]")
+{
+    const GroupsResult bad = ReadGroups(GroupFile(
+        R"({ "name": "X", "kind": "monster", "numbers": [{"number": 7, "maps": 24}, {"number": 8, "maps": ["x"]}] })"));
+    CHECK(HasIssueAbout(bad.issues, "monster 7 maps", ""));
+    CHECK(HasIssueAbout(bad.issues, "monster 8 maps[0]", ""));
+    CHECK(HasFatal(bad.issues));
+    CHECK(bad.monsters.empty());
+
+    const GroupsResult shared =
+        ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster", "maps": [24], "numbers": [{"number": 7}] })"));
+    CHECK_FALSE(HasFatal(shared.issues));
+    CHECK(HasIssueAbout(shared.issues, "monster 7 maps", "unknown field"));
+    REQUIRE(shared.monsters.size() == 1);
+    CHECK(shared.monsters[0].numbers[0].maps.empty());
+}

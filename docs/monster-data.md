@@ -98,6 +98,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 | Field | Meaning |
 |---|---|
 | `numbers` | The monster's numbers, 0–1023, each `{"number": …}` with its own values |
+| `maps` | Of a number: the maps it appears on, by the server's map numbers (as in [map variants](#map-variants)). Filled from where OpenMU's Season 6 data places the number: its maps' spawns, with the event waves of Kanturu and Raklion, and the spawn lists of Crywolf, the Imperial Guardian and the Castle Siege (430 of the 547 numbers; Devil Square's stages are their map, 9 or 32). The others have none: the server's plug-ins place them (the golden invasions, Doppelganger), a player calls them up (the Kalima gates, summons), or no server sends them. Only the editor uses them; a monster has no `maps`, only its numbers |
 | `name` | The names by language, see [Names and translations](#names-and-translations) |
 | `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
 | `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), or `mapObject <number>` (a map object, a trap). The code still chooses the model; the field says which one, for the tools |
