@@ -11,7 +11,9 @@ case when it has
 - a '\\' at its end: it escapes the separator, so the name and the next one become one entry that matches none;
 - a '\\' anywhere else: the discovery escapes only commas for doctest's filter, and the filter reads '\\\\' as one '\\'
   and splits at '\\,', so the entry's filter may match no case;
-- nothing at all: CMake drops an empty element, so the case gets no entry and never runs.
+- nothing at all: CMake drops an empty element, so the case gets no entry and never runs;
+- a character outside ASCII: on Windows the test binary reads its `--test-case=` argument in the ANSI code page, not as
+  the UTF-8 the name is compiled to, so the filter matches no case there.
 A comma is safe: the discovery escapes it for doctest's filter. tests/CMakeLists.txt fails an entry that runs no case;
 this check finds such names before any build, the empty ones too, which get no entry that could fail.
 
@@ -92,6 +94,8 @@ def problem(name):
     if "\\" in name:
         return ("has a '\\', which doctest's filter reads as an escape before a '\\' or a ',' "
                 "(then the entry runs no case)")
+    if not name.isascii():
+        return "has a character outside ASCII, which the test binary misreads on Windows; that entry runs no case there"
     return None
 
 
@@ -112,8 +116,8 @@ def main():
     for offence in found:
         print(offence)
     if found:
-        print("Write each name as string literals, not empty, without ';', a line break or '\\' (a comma is fine) "
-              "and with balanced brackets.")
+        print("Write each name in ASCII as string literals, not empty, without ';', a line break or '\\' (a comma is "
+              "fine) and with balanced brackets.")
         return 1
     if checked == 0:
         print(f"No TEST_CASE found under {root}")
