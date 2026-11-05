@@ -315,10 +315,13 @@ mu_add_test(
     SOURCES
         test_look_files.cpp
         test_look_drawing.cpp
+        test_look_recorder.cpp
+        LookRecorder.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
 target_compile_definitions(render_style_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )

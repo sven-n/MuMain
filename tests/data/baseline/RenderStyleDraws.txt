@@ -1,0 +1,4 @@
+# How the render styles moved from code into Data/Effects/RenderStyles.json draw: one line per item and
+# situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of
+# what the drawing left on the model (tests/data/LookRecorder.h). Written from each look's old code before the
+# code was deleted (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.
