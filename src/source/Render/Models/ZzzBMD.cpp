@@ -359,7 +359,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
     // The bones turned lie between these: the loop below looks for a bone among them only in that range.
     int turnedFirst = NumBones;
     int turnedLast = -1;
-    if (hasHeadBone && !gltf)
+    if (hasHeadBone)
     {
         namespace HeadTurn = Render::Models::HeadTurn;
         // The neck and spine found at load, while this model's head is the Biped's and turned to the side (without
@@ -387,7 +387,10 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             turnedFirst = std::min(turnedFirst, turned[t].bone);
             turnedLast = std::max(turnedLast, turned[t].bone);
         }
-
+    }
+    // A BMD's turned bones are worked out here; a model from a glTF binary turns its sampled joints in the loop.
+    if (turnedCount > 0 && !gltf)
+    {
         // One key of a turned bone: its share of the turn to the side, and the nod for the head.
         const auto turnedKey = [&](const TurnedBone& tb, const Sampling::KeySample& sample, int key, vec4_t out)
         {
@@ -500,10 +503,15 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             Render::Models::Gltf::JointPose from, to;
             GltfSample(*gltf, Actions, i, pose.from, from);
             GltfSample(*gltf, Actions, i, pose.to, to);
-            if (i == BoneHead && hasHeadBone)
+            for (int t = 0; i >= turnedFirst && i <= turnedLast && t < turnedCount; ++t)
             {
-                Render::Models::Gltf::SkinnedModel::TurnHead(from.rotation, HeadAngleX, HeadAngleY);
-                Render::Models::Gltf::SkinnedModel::TurnHead(to.rotation, HeadAngleX, HeadAngleY);
+                if (turned[t].bone == i)
+                {
+                    const float nod = i == BoneHead ? HeadAngleY : 0.f;
+                    Render::Models::Gltf::SkinnedModel::TurnHead(from.rotation, turned[t].share, nod);
+                    Render::Models::Gltf::SkinnedModel::TurnHead(to.rotation, turned[t].share, nod);
+                    break;
+                }
             }
             QuaternionCopy(from.rotation.data(), rotationScratch1);
             QuaternionCopy(to.rotation.data(), rotationScratch2);
