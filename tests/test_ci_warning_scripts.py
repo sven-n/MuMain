@@ -126,6 +126,21 @@ class RunTests(unittest.TestCase):
         result = self.run_script("run", *child, PYTHONIOENCODING="cp1252")
         self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
 
+    def test_scan_escapes_the_annotation_title(self):
+        # Two logs make a title with ", " in it (and a Windows path a ':'); either ends the title unless escaped.
+        logs = [self.summary.parent / "a.log", self.summary.parent / "b.log"]
+        for log in logs:
+            log.write_text("2026-11-04T01:26:43.0922614Z a.cpp:1:2: warning: x\n", encoding="utf-8")
+        result = self.run_script("scan", *map(str, logs))
+        self.assertEqual(result.returncode, 1)
+        line = result.stdout.decode().splitlines()[0]
+        title, _, message = line.removeprefix("::error title=").partition("::")
+        self.assertNotIn(",", title)
+        self.assertNotIn(":", title)
+        self.assertIn("%2C", title)
+        self.assertEqual(message, "a.cpp:1:2: warning: x")
+        self.assertEqual(ci_warnings.escape_property("D:\\a: b, 100%"), "D%3A\\a%3A b%2C 100%25")
+
 
 class AnnotationTests(unittest.TestCase):
     JOBS = [

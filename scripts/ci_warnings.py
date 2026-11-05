@@ -59,13 +59,18 @@ def escape_annotation(text):
     return text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
+def escape_property(text):
+    """A workflow command's property value, e.g. its title: unescaped, ':' and ',' would end it."""
+    return escape_annotation(text).replace(":", "%3A").replace(",", "%2C")
+
+
 def report(problems, what, enforce=True):
     """Prints the problems (as error annotations when enforced) and a step summary; returns whether there were any."""
     if not problems:
         return False
     unique = list(dict.fromkeys(problems))
     for kind, line in unique[:MAX_ANNOTATIONS] if enforce else ():
-        print(f"::error title={kind} in {escape_annotation(what)}::{escape_annotation(line)}", flush=True)
+        print(f"::error title={escape_property(f'{kind} in {what}')}::{escape_annotation(line)}", flush=True)
     print(f"{len(problems)} line(s) report a warning, note or deprecation ({len(unique)} different).", flush=True)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
