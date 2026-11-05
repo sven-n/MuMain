@@ -293,10 +293,14 @@ set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
 set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
+# With those formats off, no part of SDL_image builds from its git submodules (aom, dav1d, libavif, libjxl, libpng,
+# jpeg, libtiff, libwebp, zlib): stb_image covers PNG and JPEG without libpng, jpeg or zlib. Cloned with their whole
+# history, they were about 1 GB of each build folder's 1.1 GB of SDL_image, so they are not fetched.
 FetchContent_Declare(SDL3_image
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
     GIT_TAG        release-3.2.4
     GIT_SHALLOW    TRUE
+    GIT_SUBMODULES ""
 )
 
 add_subdirectory("src")
