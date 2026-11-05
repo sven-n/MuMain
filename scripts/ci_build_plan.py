@@ -88,7 +88,7 @@ def build_plan(event_name, ref, repository, event, paths):
     }
 
 
-def check_results(needs):
+def check_results(needs, event_name):
     if needs["quality"]["result"] != "success":
         raise ValueError("Quality Gates did not succeed")
     outputs = needs["quality"]["outputs"]
@@ -99,6 +99,10 @@ def check_results(needs):
         actual = needs[f"build-{platform}"]["result"]
         if actual != expected:
             raise ValueError(f"{platform}: expected {expected}, got {actual}")
+    # Every run but a PR's prunes the caches after its builds; a prune that fails lets them fill up again.
+    expected = "skipped" if event_name == "pull_request" else "success"
+    if needs["caches"]["result"] != expected:
+        raise ValueError(f"caches: expected {expected}, got {needs['caches']['result']}")
 
 
 def check_release_revision():
@@ -136,7 +140,7 @@ def write_plan():
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["check"]:
-        check_results(json.loads(os.environ["CI_JOB_RESULTS"]))
+        check_results(json.loads(os.environ["CI_JOB_RESULTS"]), os.environ["GITHUB_EVENT_NAME"])
         print("All applicable CI checks passed")
     elif sys.argv[1:] == ["check-release"]:
         check_release_revision()

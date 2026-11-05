@@ -893,7 +893,9 @@ jobs:
 
   required:
     name: CI Required
-    needs: [quality, build-windows, build-linux, build-macos]
+    # The prune job too: its failures and warning annotations count like a build's. Without it running, the caches
+    # fill up again and push main's entries out.
+    needs: [quality, build-windows, build-linux, build-macos, caches]
     if: always()
     runs-on: ubuntu-26.04
     permissions:
