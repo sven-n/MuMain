@@ -36,6 +36,13 @@ TEST_CASE("An item has a name in a language when it has a translation, also one 
     CHECK(GetOwnName(kris, "de").empty());
 }
 
+TEST_CASE("Item names are shown in the UI language, or in English while translated item names are off [data][items]")
+{
+    CHECK(GetItemNameLocale("de", true) == "de");
+    CHECK(GetItemNameLocale("de", false) == "en");
+    CHECK(GetItemNameLocale("en", false) == "en");
+}
+
 TEST_CASE("Item names are counted by language over the items that exist [data][items]")
 {
     const std::vector<ItemDefinition> items = {MakeNamedItem(0, "Kris||pt=Kris"),

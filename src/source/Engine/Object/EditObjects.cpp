@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Engine/Object/EditObjects.h"
 
@@ -47,9 +48,8 @@
 #include "GameLogic/Combat/DuelMgr.h"
 
 // File-scope editor state still owned by ZzzInterface.cpp (no shared header yet).
-extern int MonsterKey;
 extern int EditFlag;
-extern int SelectMonster, SelectModel, SelectMapping, SelectColor, SelectWall;
+extern int SelectModel, SelectMapping, SelectColor, SelectWall;
 extern float SelectMappingAngle, WallAngle;
 extern int BrushSize;
 extern bool EnableRandomObject;
@@ -62,27 +62,6 @@ namespace Editor
 {
 void EditObjects()
 {
-    if (EditFlag == EDIT_MONSTER)
-    {
-        if (MouseLButtonPush)
-        {
-            MouseLButtonPush = false;
-            bool Success = RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true);
-            if (Success)
-            {
-                CHARACTER* c = CreateMonster((EMonsterType)MonsterScript[SelectMonster].Type, (BYTE)(CollisionPosition[0] / TERRAIN_SCALE), (BYTE)(CollisionPosition[1] / TERRAIN_SCALE), MonsterKey++);
-                c->Object.Kind = KIND_EDIT;
-            }
-        }
-        if (MouseRButtonPush)
-        {
-            MouseRButtonPush = false;
-            if (SelectedCharacter != -1)
-            {
-                CharactersClient[SelectedCharacter].Object.Live = false;
-            }
-        }
-    }
     if (EditFlag == EDIT_OBJECT)
     {
         if (MouseRButtonPush)
@@ -164,11 +143,12 @@ void EditObjects()
                     {
                         VectorCopy(PickObject->Position, Position);
                         VectorCopy(PickObject->Angle, Angle);
-                        Position[0] += (float)(rand() % 2000 - 1000);
-                        Position[1] += (float)(rand() % 2000 - 1000);
+                        Position[0] += (float)(Random::Rand() % 2000 - 1000);
+                        Position[1] += (float)(Random::Rand() % 2000 - 1000);
                         Position[2] = RequestTerrainHeight(Position[0], Position[1]);
-                        Angle[2] = (float)(rand() % 360);
-                        CreateObject(PickObject->Type, Position, Angle, PickObject->Scale + (float)(rand() % 16 - 8) * 0.01f);
+                        Angle[2] = (float)(Random::Rand() % 360);
+                        CreateObject(PickObject->Type, Position, Angle,
+                                     PickObject->Scale + (float)(Random::Rand() % 16 - 8) * 0.01f);
                     }
                 }
                 DeleteObject(PickObject, &ObjectBlock[PickObject->Block]);

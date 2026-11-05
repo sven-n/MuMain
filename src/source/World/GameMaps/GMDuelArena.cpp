@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -70,7 +71,7 @@ bool CGMDuelArena::MoveObject(OBJECT* o)
     break;
     case 34:
     {
-        float Luminosity = (float)(rand() % 3 + 5) * 0.1f;
+        float Luminosity = (float)(Random::Rand() % 3 + 5) * 0.1f;
         vec3_t Light;
         Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -101,7 +102,7 @@ void CGMDuelArena::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	}
 }
 
-bool CGMDuelArena::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMDuelArena::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsDuelArena() == false)
         return false;
@@ -113,7 +114,7 @@ bool CGMDuelArena::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDuelArena::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDuelArena::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
@@ -138,7 +139,7 @@ bool CGMDuelArena::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -157,7 +158,7 @@ bool CGMDuelArena::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDuelArena::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMDuelArena::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     // 	vec3_t vPos, vRelative, vLight;
     //
@@ -168,7 +169,7 @@ bool CGMDuelArena::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMDuelArena::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
+void CGMDuelArena::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon) {}
 
 bool IsDuelArena()
 {
@@ -201,13 +202,6 @@ bool CGMDuelArena::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     // 	{
     // 	}
 
-    return false;
-}
-
-bool CGMDuelArena::PlayMonsterSound(OBJECT* o)
-{
-    if (IsDuelArena() == false)
-        return false;
     return false;
 }
 

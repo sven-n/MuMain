@@ -174,6 +174,10 @@ namespace SEASON3A
         int m_iNumMixSoruces;
     } MIX_RECIPE;
 
+    // The text of a number in a recipe's m_iMixName, m_iMixDesc or m_iMixAdvice (as mix.bmd
+    // stores them); empty for a number mix.bmd does not use.
+    const wchar_t* GetMixRecipeText(int textId);
+
     enum _MIX_SOURCE_STATUS { MIX_SOURCE_ERROR, MIX_SOURCE_NO, MIX_SOURCE_PARTIALLY, MIX_SOURCE_YES };
 
     class CMixRecipes

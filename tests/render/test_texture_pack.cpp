@@ -1,3 +1,4 @@
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -13,10 +14,13 @@ namespace
 namespace TexturePack = Render::Textures::TexturePack;
 using Render::Textures::TexturePackFiles;
 
-// A fresh folder under the temp directory, removed when the test ends.
+// A fresh folder under the temp directory, removed when the test ends; one per process, so parallel cases
+// cannot delete each other's files.
 struct TempFolder
 {
-    std::filesystem::path path = std::filesystem::temp_directory_path() / "mu_texture_pack_tests";
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() /
+        ("mu_texture_pack_tests_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
 
     TempFolder()
     {

@@ -810,7 +810,7 @@ int mu::ui::window::CInventoryCtrl::FindItemReverseIndex(short sType, int iLevel
     return -1;
 }
 
-int mu::ui::window::CInventoryCtrl::GetIndexByItem(ITEM* pItem)
+int mu::ui::window::CInventoryCtrl::GetIndexByItem(const ITEM* pItem)
 {
     if (pItem == nullptr)
     {

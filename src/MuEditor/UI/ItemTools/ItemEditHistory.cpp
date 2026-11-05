@@ -157,7 +157,7 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             const int occupied = undoing ? step.otherItemType : step.itemType;
             const int empty = undoing ? step.itemType : step.otherItemType;
             if (m_hooks.readSlot(occupied) != (undoing ? step.after : step.before) ||
-                m_hooks.readSlot(empty).item.Exists())
+                m_hooks.readSlot(empty).item.HasEntry())
             {
                 return false;
             }
@@ -181,6 +181,19 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             break;
         case ItemEditStep::Kind::StatFile:
             if (m_hooks.readStatFile() != *(undoing ? step.statFileAfter : step.statFileBefore))
+            {
+                return false;
+            }
+            break;
+        case ItemEditStep::Kind::GroundLabelStyles:
+            if (m_hooks.readGroundLabelStyles() != (undoing ? step.stylesAfter : step.stylesBefore))
+            {
+                return false;
+            }
+            break;
+        case ItemEditStep::Kind::ColorFolders:
+            if (m_hooks.readColorFolders &&
+                m_hooks.readColorFolders(step.folderRoot) != (undoing ? step.foldersAfter : step.foldersBefore))
             {
                 return false;
             }
@@ -220,6 +233,8 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::SharedModel:
         case ItemEditStep::Kind::GlowColors:
         case ItemEditStep::Kind::StatFile:
+        case ItemEditStep::Kind::GroundLabelStyles:
+        case ItemEditStep::Kind::ColorFolders:
             break;
         }
     }
@@ -285,6 +300,15 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         break;
     case ItemEditStep::Kind::StatFile:
         m_hooks.restoreStatFile(*(undoing ? step.statFileBefore : step.statFileAfter));
+        break;
+    case ItemEditStep::Kind::GroundLabelStyles:
+        m_hooks.restoreGroundLabelStyles(undoing ? step.stylesBefore : step.stylesAfter);
+        break;
+    case ItemEditStep::Kind::ColorFolders:
+        if (m_hooks.restoreColorFolders)
+        {
+            m_hooks.restoreColorFolders(step.folderRoot, undoing ? step.foldersBefore : step.foldersAfter);
+        }
         break;
     }
 }

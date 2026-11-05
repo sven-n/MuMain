@@ -1,0 +1,241 @@
+/* Classic theme for the friends shell: the Season 1 client's window (CUIFriendWindow, the code this
+   client's own native window ran before its RmlUi port; Season 1's main.exe draws it with the same
+   palette, 480000.c). Not 0.97's: 0.97 has no friend system. Where legacy wraps the window in the
+   message box's stone frame, Season 1 drew flat lines in its window palette (SetLineColor()):
+   - the body black at 179/255, a 5-unit outline on every side (146,134,121 / 37,37,37 three units /
+     106,97,88), and a 15-unit title bar (win_titlebar) at (6, 5) closed by a 106,97,88 line at y 20,
+     the title in bold at (9, 8) in 230,220,200, minimize / maximize / close (win_size, 9x9) at
+     w-38 / w-27 / w-16, y 8, the resize grip (win_resize) at the bottom-right corner;
+   - inside (5 units in, 21 down), a black strip with three 53x19 tabs drawn in lines (the selected
+     one 53,49,48 and open below, the others 26,22,21), "refuse chat" right-aligned on it, and from
+     y 21 the page: a 53,49,48 header band 16 high, the list, and a black foot 22 high with the
+     buttons (win_button, 50x14) at x 2, 53, 104 and 155, 17 above the bottom (64 wide here);
+   - list scrollbars of win_scrollbar: 13x13 arrows at both ends, the track between two lines, a
+     grey thumb sized to the list.
+   1dp is one of the window's units. The window, its tabs and its buttons are wider than Season 1's
+   (below) for longer captions. */
+
+@spritesheet fs-titlebar-sheet { src: "../../../win_titlebar.jpg"; fs-titlebar: 0px 0px 4px 15px; }
+@spritesheet fs-size-sheet
+{
+	src: "../../../win_size.jpg";
+	fs-minimize: 0px 0px 9px 9px;
+	fs-maximize: 9px 0px 9px 9px;
+	fs-restore:  9px 9px 9px 9px;
+	fs-close:    0px 9px 9px 9px;
+}
+@spritesheet fs-resize-sheet { src: "../../../win_resize.tga"; fs-resize-grip: 0px 0px 9px 9px; }
+@spritesheet fs-button-sheet { src: "../../../win_button.tga"; fs-button: 0px 0px 49px 16px; }
+@spritesheet fs-check-sheet  { src: "../../../win_check.tga";  fs-check-mark: 0px 0px 5px 5px; }
+@spritesheet fs-mail-sheet   { src: "../../../win_mail.tga";   fs-mail-unread: 0px 0px 13px 9px; fs-mail-read: 0px 9px 13px 10px; }
+@spritesheet fs-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	fs-scroll-thumb: 0px 1px 11px 1px;
+	fs-scroll-up: 0px 3px 13px 13px;
+	fs-scroll-down: 0px 16px 13px 13px;
+}
+
+/* The template's body carries base.rcss's .center-both; an id beats the positioned toggle's class
+   (see legacy's friend_shell.rcss). */
+#panel { transform: none; }
+/* CUIFriendWindow::Init(): SetSize(250, 170), SetLimitSize(250, 150), widened to 300 (min 290) so
+   the tabs and buttons, widened too, hold longer captions than Season 1's Korean and English ones.
+   font-size 1rem, never dp: the theme sizes text natively (window_shell's body carries native-text). */
+#panel { width: 300dp; height: 170dp; min-width: 290dp; min-height: 150dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); }
+
+/* The frame: CUIBaseWindow::DrawOutLine(), in its drawing order. The top and bottom bands (146 /
+   37 three units / 106) run the full width; then each side's 146 line and 106 line run the full
+   height (the 106 one from y 1 to h-1, so the inner lines cross into the corners), the sides' 37
+   only between the bands; last, a 173,167,150 dot in the middle of each corner, all but the
+   bottom-right one, where a resizeable window has its grip. On the template's layers: the back
+   is the body (black at 179 from y 5 to h-5) with the sides' 37 bands, the top layer the two
+   horizontal bands, the middle layer the side lines over them, the bottom layer the two top dots
+   and the footer anchor (unused by this window) the bottom-left one. */
+.window-shell-sprite-back {
+	left: 0;
+	right: 0;
+	top: 5dp;
+	bottom: 5dp;
+	background-color: rgba(0, 0, 0, 179);
+	decorator: linear-gradient(to right, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp),
+	           linear-gradient(to left, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp);
+}
+.window-shell-sprite-top {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	height: auto;
+	decorator: linear-gradient(to bottom, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to top, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+/* The inner 106 lines start one unit in (y 1 to h-1): the outer 146 line keeps the corner. */
+.window-shell-sprite-middle {
+	left: 0;
+	right: 0;
+	top: 1dp;
+	bottom: 1dp;
+	decorator: linear-gradient(to right, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to left, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-bottom {
+	left: 2dp;
+	right: 2dp;
+	top: 2dp;
+	bottom: auto;
+	height: 1dp;
+	decorator: linear-gradient(to right, rgb(173, 167, 150) 1dp, transparent 1dp),
+	           linear-gradient(to left, rgb(173, 167, 150) 1dp, transparent 1dp);
+}
+#window_shell_footer {
+	left: 2dp;
+	right: auto;
+	top: auto;
+	bottom: 2dp;
+	width: 1dp;
+	height: 1dp;
+	background-color: rgb(173, 167, 150);
+}
+
+/* The title bar: win_titlebar stretched over (6, 5, w-12, 15), a one-unit edge each side, and the
+   line under it at y 20. It stays the drag handle. */
+.window-shell-header-rail {
+	left: 5dp;
+	right: 5dp;
+	top: 5dp;
+	height: 16dp;
+	box-sizing: border-box;
+	border-left: 1dp rgb(136, 138, 147);
+	border-right: 1dp rgb(0, 0, 8);
+	border-bottom: 1dp rgb(106, 97, 88);
+	decorator: image(fs-titlebar fill);
+}
+.window-shell-header-title {
+	left: 9dp;
+	right: 50dp;
+	top: 8dp;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	color: rgb(230, 220, 200);
+}
+
+/* The client area: 5 units in from the sides and the bottom, 21 down. pointer-events none: it
+   covers the title rail's neighbourhood, and each interactive part opts back in. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 5dp;
+	right: 5dp;
+	top: 21dp;
+	bottom: 5dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); cursor: pointer; pointer-events: auto; }
+
+/* Minimize, maximize and close at w-38, w-27 and w-16 (2 apart), y 8: relative to the client area,
+   2 in from its right edge and 13 above it. */
+#window_controls { position: absolute; right: 2dp; top: -13dp; z-index: 10; pointer-events: auto; white-space: nowrap; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 2dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(fs-minimize); }
+#btn_maximize { decorator: image(fs-maximize); }
+#btn_maximize.restore { decorator: image(fs-restore); }
+#btn_close { decorator: image(fs-close); }
+
+/* The tab strip: black, 20 high, the 106,97,88 line along its foot (y 20), which the selected tab
+   covers. The tabs 19 high from y 2 (Season 1: 53 wide; 66 here), captions centred, white when
+   selected or hovered. */
+#tabs {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 21dp;
+	padding-top: 2dp;
+	box-sizing: border-box;
+	white-space: nowrap;
+	decorator: linear-gradient(to bottom, rgb(0, 0, 0) 20dp, rgb(106, 97, 88) 20dp);
+}
+#tabs .btn {
+	width: 66dp;
+	height: 18dp;
+	margin: 1dp 0 0 0;
+	padding: 0;
+	line-height: 16dp;
+	box-sizing: border-box;
+	border-top: 1dp rgb(106, 97, 88);
+	border-right: 1dp rgb(106, 97, 88);
+	border-bottom: 1dp rgb(106, 97, 88);
+	decorator: none;
+	background-color: rgb(26, 22, 21);
+}
+#tabs .btn.selected {
+	height: 19dp;
+	margin-top: 0;
+	line-height: 18dp;
+	border-bottom-width: 0;
+	border-left: 1dp rgb(106, 97, 88);
+	background-color: rgb(53, 49, 48);
+}
+#tabs .btn:hover, #tabs .btn.selected { color: #ffffff; }
+#tabs .btn:active { padding-top: 0; }
+#reject { position: absolute; right: 2dp; top: 0; height: 20dp; line-height: 20dp; padding: 0; background-color: transparent; z-index: 1; }
+
+/* win_button stretched whole over the button, pressed one unit in. In-flow inline boxes (base.rcss's
+   .btn is the absolute 108x30 hero button). */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 14dp; padding: 0 2dp; line-height: 14dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: image(fs-button fill); }
+/* base.rcss's .btn:hover / :active swap in legacy's button art; these keep win_button. */
+.btn:hover, .btn:active { decorator: image(fs-button fill); }
+.btn:active { padding-top: 1dp; padding-left: 3dp; }
+.headers .sorted { color: #ffffff; }
+
+.check { display: inline-block; width: 7dp; height: 7dp; margin-right: 3dp; margin-top: 6dp; box-sizing: border-box; background-color: rgb(106, 97, 88); border: 1dp rgb(146, 134, 121); }
+.checked .check { decorator: image(fs-check-mark); }
+
+/* A page from y 21: the header band (0-15) and its line (16), the list, the line closing it and the
+   black foot (22 high) with the buttons 17 above the bottom. */
+.page { position: absolute; left: 0; right: 0; top: 21dp; bottom: 0; }
+.headers { position: absolute; left: 0; right: 0; top: 0; height: 17dp; line-height: 16dp; white-space: nowrap; box-sizing: border-box; border-bottom: 1dp rgb(106, 97, 88); background-color: rgb(53, 49, 48); }
+.headers button { display: inline-block; box-sizing: border-box; height: 16dp; padding: 0 4dp; line-height: 16dp; text-align: left; overflow: hidden; background-color: transparent; decorator: none; }
+.headers button:hover { color: #ffffff; }
+.scroll-pane { position: absolute; left: 0; right: 0; top: 17dp; bottom: 22dp; overflow: hidden scroll; background-color: transparent; pointer-events: auto; }
+
+.row { height: 13dp; line-height: 13dp; padding-left: 4dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.row:hover { background-color: rgb(106, 97, 88); }
+.row.selected { background-color: rgb(146, 134, 121); color: rgb(0, 0, 0); }
+.row span { display: inline-block; vertical-align: top; overflow: hidden; }
+.row .check { margin-top: 3dp; }
+.unread { font-weight: bold; }
+.row .read_state { height: 9dp; margin-top: 2dp; decorator: image(fs-mail-unread); }
+.row .read_state.read { decorator: image(fs-mail-read); }
+
+.friend_columns .name { width: 62%; }
+.friend_columns .server { width: 38%; }
+.mail_columns .check_column { display: inline-block; box-sizing: border-box; width: 7%; height: 13dp; padding: 0; vertical-align: top; background-color: transparent; decorator: none; }
+.mail_columns .sender { width: 24%; }
+.mail_columns .date { width: 24%; }
+.mail_columns .subject { width: 34%; }
+.mail_columns .read_state { width: 11%; }
+
+.actions { position: absolute; left: 0; right: 0; bottom: 0; height: 22dp; padding: 4dp 0 0 2dp; box-sizing: border-box; white-space: nowrap; border-top: 1dp rgb(106, 97, 88); background-color: rgb(0, 0, 0); }
+.actions .btn { width: 64dp; margin-right: 1dp; }
+.actions .btn.wide { width: 129dp; }
+
+/* win_scrollbar: the arrows at both ends (clickable, as Season 1's were), the track between two
+   106,97,88 lines, the grey thumb sized to the list. */
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(fs-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(fs-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(fs-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }
+
+/* The resize grip at (w-10, h-10): 4 units out of the client area's bottom-right corner. */
+#resize { display: block; position: absolute; right: -4dp; bottom: -4dp; width: 9dp; height: 9dp; z-index: 10; pointer-events: auto; decorator: image(fs-resize-grip); cursor: resize; }

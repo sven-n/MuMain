@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MuEditorConfig.h"
+#include <charconv>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -71,6 +72,26 @@ void CMuEditorConfig::Load()
             {
                 m_skillEditorColumnVisibility[key] = (value == "1" || value == "true");
             }
+            else if (currentSection == "OpenMU")
+            {
+                if (key == "AdminPanelUrl")
+                {
+                    m_openMUAdminPanelUrl = value;
+                }
+            }
+            else if (currentSection == "ServerList")
+            {
+                if (key == "ShowOfflineServers")
+                {
+                    m_showOfflineServers = value == "1" || value == "true";
+                }
+                else if (key == "OfflineServerLoad")
+                {
+                    int load = m_offlineServerLoad;
+                    std::from_chars(value.data(), value.data() + value.size(), load);
+                    m_offlineServerLoad = load;
+                }
+            }
         }
     }
 
@@ -101,6 +122,16 @@ void CMuEditorConfig::Save()
         file << col.first << "=" << (col.second ? "1" : "0") << "\n";
     }
 
+    // [OpenMU]: the server of the Item Sync window's Update from server. Its API key is not
+    // kept here (MU_OPENMU_API_KEY).
+    file << "\n[OpenMU]\n";
+    file << "AdminPanelUrl=" << m_openMUAdminPanelUrl << "\n";
+
+    // [ServerList]: the Server List window's preview of the servers the connect server didn't send.
+    file << "\n[ServerList]\n";
+    file << "ShowOfflineServers=" << (m_showOfflineServers ? "1" : "0") << "\n";
+    file << "OfflineServerLoad=" << m_offlineServerLoad << "\n";
+
     file.close();
 }
 
@@ -112,6 +143,16 @@ std::string CMuEditorConfig::GetLanguage() const
 void CMuEditorConfig::SetLanguage(const std::string& language)
 {
     m_language = language;
+}
+
+const std::string& CMuEditorConfig::GetOpenMUAdminPanelUrl() const
+{
+    return m_openMUAdminPanelUrl;
+}
+
+void CMuEditorConfig::SetOpenMUAdminPanelUrl(const std::string& url)
+{
+    m_openMUAdminPanelUrl = url;
 }
 
 #endif // _EDITOR

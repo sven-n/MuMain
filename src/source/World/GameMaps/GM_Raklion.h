@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 
 #include "World/MapInfra/w_BaseMap.h"
@@ -53,20 +55,19 @@ namespace SEASON4A
     public:	// Object
         virtual bool CreateObject(OBJECT* o);
         virtual bool MoveObject(OBJECT* o);
-        virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-        virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+        virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
+        virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
     public:	// Character
         virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
         virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
         virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-        virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+        virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
         virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
         virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
     public: // Sound
-        virtual bool PlayMonsterSound(OBJECT* o);
         virtual void PlayObjectSound(OBJECT* o);
         void PlayBGM();
 
@@ -78,8 +79,8 @@ namespace SEASON4A
 
     private:
         CGM_Raklion();
-        bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        void SetBossMonsterAction(CHARACTER* c, OBJECT* o);
+        bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        bool SetBossMonsterAction(CHARACTER* c, OBJECT* o);
 
     public:
         bool CreateSnow(PARTICLE* o);

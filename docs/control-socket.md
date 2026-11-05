@@ -9,8 +9,9 @@ on Linux.
 ## Turning it on
 
 The socket is a build-time feature. It exists only in a client configured
-with `ENABLE_CONTROL_SOCKET=ON` — the `-mueditor` presets and hand-configured
-developer builds; the plain presets (`linux-x64`, `windows-x64`, …) and any
+with `ENABLE_CONTROL_SOCKET=ON` — the `-mueditor` and `-in-game-tests` presets
+and hand-configured developer builds (`ENABLE_IN_GAME_TESTS` turns it on too,
+see [in-game tests](in-game-tests.md)); the plain presets (`linux-x64`, `windows-x64`, …) and any
 build that does not opt in compile none of it, and the `control_socket_leak`
 test in their test suite proves it. A player build ignores the variable
 below entirely: no socket, no log line, no change of behaviour.
@@ -67,27 +68,37 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
-| `nearby` | the objects the client can see |
+| `nearby` | the objects the client can see, with their monster numbers |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
-| `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
+| `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, `alt` (shows every drop's name until pressed again), … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
 | `console` (`text`) | run one `$` developer command (`$fps 60`, …) as if typed into the chat box, without opening it, so nothing typed shows in the frame; `bad_request` when the text is not a `$` command the client knows, or its arguments are missing or malformed |
 | `bench` | the benchmark's progress: `running`, its `status` line, and `last_run`, the folder the last finished run was written to. Start a run with `console` and `$bench run <pattern>`; see [benchmark.md](benchmark.md) |
-| `bones` | in the world: how render's bones compare with the character animation pre-pass. `{"start":true}` clears the counts and starts checking; each answer gives `checked` (characters drawn), `players` (of those, player models), `mismatched` (any bone off by more than 0.01), `max_delta`, and the pre-pass's last `characters` count and whether it ran `parallel` |
+| `bones` | in the world: how the poses drawn characters reuse from the update compare with a fresh animation of their state. `{"start":true}` clears the counts and starts checking; each answer gives `checked` (characters drawn with a reused pose), `players` (of those, player models), `mismatched` (any bone off by more than 0.01), `rebuilt` (draws that animated a character again because its state changed after the update), `parts_reused` / `parts_advanced_in_draw` (draws of a character's own weapon, wing or other linked part that reused the update's animation step, or advanced it themselves: an attachment's first frame), `max_delta`, and the pre-pass's last `characters` count and whether it ran `parallel` |
+| `drawspawns` | in the world: what the draw still spawns or animates, which the update should own. `{"start":true}` clears the counts and starts checking; each answer gives `draws` (frames drawn since) and `sites`, most frequent first: `kind` (`sprite`, `particle`, `effect`, `delete-effect`, `joint`, `set-action`, `play-animation`), `callers` (the spawn function's callers, nearest first) and `count` |
+| `drawpurity` | in the world: the game state the draw still writes. `{"start":true}` clears the counts and starts comparing the gameplay fields of characters, effects, items, map objects, mounts, boids, particles and joints before and after each draw; every request returns `draws` and `changes`, each a `what` ("effect 312 LifeTime": kind, type, field) with its `count`, most frequent first |
+| `drawlater` (`on`) | in the world: whether the world pass is described first and drawn at the end of the pass through `Render::Drawing::DeferredDraws`, as a render thread would; `{"on":true}` or `{"on":false}` switches it, and every request returns `on` |
+| `drawparity` (`start`, `later`) | in the world: whether drawing the world pass later gives the renderer what drawing it at once gives. `{"start":true}` asks for the next frame's world pass to be drawn into two logs of every draw and the state it is drawn with, at once and later (`"later":false` draws both at once: the baseline of drawing the pass twice); the frame still shows the pass once. Every request returns the last result: `done`, `later`, `at_once_calls`, `later_calls`, `first_difference` (the first call that differs in place; the call count when none does) with `first` (`at_once` and `later` there), and `only_at_once` / `only_later` (calls one log has more often than the other, wherever they are) with up to five `only_at_once_examples` / `only_later_examples`. |
+| `spawn-effect` (`kind`, `type`, `subtype`) | in the world: create an effect (`kind` `effect`, the default, `particle` or `joint`) of a `type` by its code name (`MODEL_ARROW`, `BITMAP_SMOKE+1`) at the character, owned by and aimed at it; without `type`, the kind's types as `code` and `type` |
 | `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
+| `tooltip` (`group`, `number`, `level`, `durability`, `luck`, `skill`, `option`, `excellent`, `ancient`, `harmony`, `harmony_level`) | the lines of an item's information tooltip (an item number no item uses, or `harmony_level` without `harmony`, is a `bad_request`), as the inventory builds them for an item made from these fields (as the server would send it; left out: 0, and full durability: the most the item has at its level and options, as the repair window counts it) and the hero as he is, without drawing them: `lines`, each with `text` (`"\n"` for a blank line), `color` (the `TEXT_COLOR_*` number) and `bold` |
+| `tooltip-snapshot` (`out`, `group`) | writes the `tooltip` lines of every item (of `group` only, when given: one group per request keeps the frame short) at every level 0 to 15, as plain, full (luck, skill, +4 option, every excellent option), ancient (set 1) and Jewel of Harmony (option 1 at level 13) items; with luck, skill, the +1 option or one excellent option (the first) alone; at durability 1 and 0; and expired, for the hero as he is, to the text file `out`: a line `<group>/<number> <variant> +<level>`, then one line `  <color> [bold ]<text>` per tooltip line (`  <blank>` for a blank line, without its color: a blank line shows none). Two files compare with any diff tool, e.g. before and after a change of the tooltip code. Each request writes `out` anew, so a snapshot by groups takes one file per group. `out` is resolved like `screenshot`'s; replies `tooltips`, the count, and `out`, the absolute path written. The Dark Horse and the Dark Raven get their header line but no tooltip lines, since the pet manager draws their tooltip |
+| `item-name` (`group`, `number`, `level`) | an item's `name` at a level (0 when left out), as the item windows, messages and quests name it (an item number no item uses is a `bad_request`) |
+| `item-name-snapshot` (`out`, `group`) | writes the name of every item (of `group` only, when given) at every level 0 to 15 to the text file `out`, a line `<group>/<number> +<level> <name>` each, to compare with any diff tool before and after a change of the names. `out` is resolved like `screenshot`'s; replies `names`, the count, and `out`, the absolute path written |
+| `repair-tooltip` (`tooltip`'s fields) | the lines of an item's repair tooltip (inventory repair mode, or an NPC that repairs), built for an item made from these fields as `tooltip` makes it (an item number no item uses is a `bad_request`; left out: 0, and full durability) without drawing them: `lines`, each with `text` (a lone line break for a blank line), `color` (the `TEXT_COLOR_*` number) and `bold`; no lines for an item that can't be repaired. The cost is what the open window charges, as in the game: an NPC that repairs, or the inventory (self-repair); 0 with neither open |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
 | `move` (`x`, `y`) | walk there with the client's own path finder |
 | `warp` (`gate`) | use a warp-list entry by name |
 | `teleport` (`x`, `y`, `map`) | the game master's own move command; `map` is an index, the current map when omitted |
-| `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
+| `attack` (`target`, `times`, `interval`) | plain attacks on a `target` |
 | `skill` (`skill`, `target`) | cast a skill the character owns — with `target` it is aimed at that object, without one it is cast where the character stands |
 | `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
@@ -95,6 +106,12 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
 | `trade` (`action`, `target`) | `request` a trade with another player at most one tile away (`not_allowed` otherwise), or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
+
+A `target` is an object id (the `id` of `nearby`), a character name, or
+`{"monster": <number>}`: the nearest living monster or NPC with that monster
+number. Traps, objects of the kind `other`, and summons, Kalima gates and
+transformed players are not found by their number; a trade needs a player
+either way.
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
@@ -131,6 +148,19 @@ dialog on screen (`quest`, `page`, `text`, `need_zen`, and its `answers`, each
 with its `text` and `action`: `next` turns the page, `accept` takes the quest,
 `complete` hands it in, `close` ends the talk) or `null`.
 
+An object's `kind` is `player`, `monster`, `npc`, `trap` or `other` (the
+Cherry Blossom Tree, and the players of the castle siege preview), `item` for
+a drop, and `unknown` for anything else. Monster, npc, trap and other are the
+kinds of the monster list (`Data/Monsters/Monsters.json`, see
+[monster-data.md](monster-data.md#kinds)); summons, Kalima gates and
+transformed players are `player`.
+
+A character also carries `monster`, the monster number the server created it
+with (the `number` in the monster list), or `null` for a player. Summons,
+Kalima gates and transformed players have one too, with the kind `player`. Monster and NPC
+`name`s are in the client's language, so a script finds an NPC by its
+`monster` number rather than by its name.
+
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
 percentage of full health (`100` is untouched) and is `null` when the server
@@ -138,7 +168,11 @@ has not told the client that object's health — a threshold test has to allow
 for the null rather than read it as zero. A player, monster or NPC also
 carries `pixel`, the window pixel `{x, y}` at the middle of the box the mouse
 picks it by, or `null` while it is not drawn: `click-ui` there talks to an NPC
-or targets a player the way a player's click does. The pixel is taken from the
+or targets a player the way a player's click does. A drop carries `pixel` too
+(`hover-ui` there shows its name and lights it, `click-ui` picks it up), and
+`label`, the name it shows on the ground: `text`, `color` and `background` as
+`#rrggbb` (a background that isn't opaque as `#rrggbbaa`, as the ground label
+file writes it), and `bold`. The pixel is taken from the
 last rendered frame, so it lags a moving object by a frame, and a window drawn
 over it catches the click instead.
 
@@ -154,7 +188,7 @@ panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
 clicked remotely; use their keyboard navigation instead. Keys are
 case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
 `home`, `end`, `insert`, `delete`, `pageup`, `pagedown`, arrows,
-`printscreen` and `f1`–`f12`.
+`printscreen`, `f1`–`f12` and `alt`.
 
 Focus a text field with a supported UI click or keyboard navigation before
 `type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;
@@ -189,7 +223,7 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 
 | Event | Fields |
 |---|---|
-| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind}`, `damage`, `shield_damage`, `critical`, `missed` |
+| `hit` | `direction` (`dealt`/`received`), `attacker`/`target` `{id,name,kind,monster}`, `damage`, `shield_damage`, `critical`, `missed` |
 | `killed` | `victim`, `killer` |
 | `stat` | `stat` (`life`, `mana`, `sd`, `ag`, `level`, `experience_gained` — the experience of one kill, and `damage_dealt` with it — the cumulative total is `state.experience`), `value`, `max` |
 | `chat` | `sender`, `text`, `kind` (`public`, `whisper`, `party`, `guild`, `union`, `gens`, `gm`) |

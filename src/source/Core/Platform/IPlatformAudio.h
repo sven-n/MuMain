@@ -27,6 +27,15 @@ public:
     virtual void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL,
                            bool enable3D = false) = 0;
     [[nodiscard]] virtual bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) = 0;
+    // Plays a sound effect once at `level` (linear, 0 to 1) instead of the
+    // effect volume: the editor's previews of a sound, heard also while the
+    // game's effect volume is down. A backend without it plays the sound as
+    // PlaySound does.
+    [[nodiscard]] virtual bool PlaySoundAtLevel(ESound buffer, float level)
+    {
+        static_cast<void>(level);
+        return PlaySound(buffer, nullptr, false);
+    }
     virtual void StopSound(ESound buffer, bool resetPosition) = 0;
     virtual void AllStopSound() = 0;
     virtual void ReleaseSound(ESound buffer) = 0;

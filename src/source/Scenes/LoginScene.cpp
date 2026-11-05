@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "LoginScene.h"
 #include "Camera/CameraUtility.h"
 #include "Camera/CameraManager.h"
@@ -22,6 +23,7 @@
 #include "UI/Windows/CreditWin.h"
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/ReconnectManager.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -157,8 +159,8 @@ static void SelectNextWaypoint()
 {
     if (SceneFlag == LOG_IN_SCENE)
     {
-        g_loginCamera.currentNumber = rand() % 4 + 1;
-        g_loginCamera.currentWalkType = rand() % 2;
+        g_loginCamera.currentNumber = Random::Rand() % 4 + 1;
+        g_loginCamera.currentWalkType = Random::Rand() % 2;
     }
     else
     {
@@ -262,8 +264,13 @@ void CreateLogInScene()
 
     CSceneUICoordinator::Instance().CreateLoginScene();
 
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    CreateSocket(szServerIpAddress, g_ServerPort);
+    // The in-game reconnect logs in again on the game server it lost; otherwise the
+    // login starts at the connect server's list.
+    const ReconnectManager& reconnect = ReconnectManager::Instance();
+    if (reconnect.IsActive())
+        ConnectForLogin(reconnect.GetServerIp(), reconnect.GetServerPort());
+    else
+        ConnectForLogin(szServerIpAddress, g_ServerPort);
 
     GuildInputEnable = false;
     TabInputEnable = false;
@@ -297,6 +304,31 @@ void CreateLogInScene()
     g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
+// Moves the camera, builds the view the frame draws with, and culls the map objects and the effects against it.
+static void UpdateLogInSceneView()
+{
+    MoveMainCamera();
+
+#ifdef _EDITOR
+    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
+#else
+    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
+#endif
+    g_Camera.ViewNear = 100.f; // Push near plane out to preserve z-buffer precision
+
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    UpdateCameraView(viewport.x, viewport.y, viewport.width, viewport.height);
+
+    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
+    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
+    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
+    // don't restrict the render loop.
+    ResetFrustrumBoundsFullTerrain();
+    // Behind the credits the world is not drawn.
+    if (!g_CreditWin.IsVisible())
+        CullWorld();
+}
+
 void NewMoveLogInScene()
 {
     if (!InitLogIn)
@@ -304,6 +336,9 @@ void NewMoveLogInScene()
         InitLogIn = true;
         CreateLogInScene();
     }
+
+    // Starts the theme again when it ends; a no-op while it plays.
+    ::PlayMp3(MUSIC_LOGIN_THEME);
 
     if (!g_CreditWin.IsVisible())
     {
@@ -323,7 +358,13 @@ void NewMoveLogInScene()
         MoveParticles();
         MoveBoids();
         ThePetProcess().UpdatePets();
+        UpdateCharacterEffects();
+        UpdateObjectEffects();
+        UpdateMountEffects();
+        UpdateEffectModelEffects();
     }
+
+    UpdateLogInSceneView();
 
     // ESC menu toggle is handled by CSceneUICoordinator::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
@@ -382,37 +423,11 @@ bool NewRenderLogInScene(HDC hDC)
 
     FogEnable = true;
 
-    vec3_t pos;
-    VectorCopy(g_Camera.Position, pos);
-    if (CCameraMove::GetInstancePtr()->IsCameraMove())
-    {
-        VectorCopy(g_Camera.Position, pos);
-    }
-
-    MoveMainCamera();
-
-    // Play login music (called every frame — PlayMp3 no-ops if already playing)
-    ::PlayMp3(MUSIC_LOGIN_THEME);
-
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
-
-    // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
-#ifdef _EDITOR
-    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
-#else
-    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
-#endif
-    g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
 
     const auto viewport = UI::Scaling::FullReferenceViewport();
     BeginOpengl(viewport.x, viewport.y, viewport.width, viewport.height);
     Scenes::Lighting::SubmitSceneLighting();
-
-    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
-    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
-    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
-    // don't restrict the render loop.
-    ResetFrustrumBoundsFullTerrain();
 
     if (!g_CreditWin.IsVisible())
     {
@@ -428,7 +443,6 @@ bool NewRenderLogInScene(HDC hDC)
         }
         { FRAME_PROFILE(Effects); RenderJoints(); }
         { FRAME_PROFILE(Effects); RenderEffects(); }
-        { FRAME_PROFILE(Effects); CheckSprites(); }
         { FRAME_PROFILE(Effects); RenderLeaves(); }
         { FRAME_PROFILE(Effects); RenderBoids(); }
         {

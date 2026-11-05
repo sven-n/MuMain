@@ -62,6 +62,8 @@ public:
     // Once a frame from the letter window: the wheel zoom over the well, and the player's own
     // look while it shows the player.
     void DoAction(BOOL bMessageOnly = FALSE);
+    // Poses, moves and places the photo's character and mount; its owner calls it every update, the draw only draws.
+    void Update();
     // A letter the player can turn, zoom and ask help on (the reader's and the writer's).
     void SetCanControl(bool canControl) { m_bCanControl = canControl; }
 

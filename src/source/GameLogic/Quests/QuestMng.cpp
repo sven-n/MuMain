@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "QuestMng.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 
 
@@ -101,8 +103,8 @@ void CQuestMng::LoadQuestProgressScript()
 
 void CQuestMng::LoadQuestWordsScript()
 {
-    FILE* fp = ::_wfopen(QM_QUESTWORDS_FILE, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(::_wfopen(QM_QUESTWORDS_FILE, L"rb"));
+    if (!fp)
     {
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTWORDS_FILE);
@@ -125,19 +127,23 @@ void CQuestMng::LoadQuestWordsScript()
     char rawWords[1024] { };
     wchar_t szWords[1024] { };
 
-    while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
+    while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp.get()))
     {
-        ::BuxConvert((BYTE*)&sQuestWordsHeader, nSize);
+        ::BuxConvert(reinterpret_cast<BYTE*>(&sQuestWordsHeader), nSize);
 
-        ::fread(rawWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
-        ::BuxConvert((BYTE*)rawWords, sQuestWordsHeader.m_nWordsLen);
+        const short wordsLength = sQuestWordsHeader.m_nWordsLen;
+        if (wordsLength < 0 || static_cast<std::size_t>(wordsLength) > sizeof(rawWords) ||
+            !DataFileIO::ReadExact(fp.get(), rawWords, static_cast<std::size_t>(wordsLength)))
+        {
+            DataFileIO::ReportUnusableFile(QM_QUESTWORDS_FILE, L"File corrupted.");
+            return;
+        }
+        ::BuxConvert(reinterpret_cast<BYTE*>(rawWords), wordsLength);
         CMultiLanguage::ConvertFromUtf8(szWords, rawWords, 1024);
 
         std::wstring strWords = szWords;
         m_mapQuestWords.insert(std::make_pair(sQuestWordsHeader.m_nIndex, strWords));
     }
-
-    ::fclose(fp);
 }
 
 void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)
@@ -471,11 +477,12 @@ void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
         break;
 
     case QUEST_REWARD_ITEM:
-        wchar_t szItemName[32];
-        ::GetItemName((int)reward.m_pItem->Type, reward.m_pItem->Level, szItemName);
-        FormatRequestRewardText(line, I18N::Game::QuestRewardItem, szItemName,
+    {
+        const std::wstring itemName = ::GetItemName((int)reward.m_pItem->Type, reward.m_pItem->Level);
+        FormatRequestRewardText(line, I18N::Game::QuestRewardItem, itemName.c_str(),
                                 static_cast<unsigned long>(reward.m_dwValue));
         break;
+    }
 
     case QUEST_REWARD_BUFF:
     {
@@ -490,6 +497,32 @@ void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
         FormatRequestRewardText(line, I18N::Game::ContributionLu, static_cast<unsigned long>(reward.m_dwValue));
         break;
 #endif // ASG_ADD_GENS_SYSTEM
+    }
+}
+
+// The format of an event map request line (QUEST_REQUEST_EVENT_MAP_*); empty for any other request type.
+const wchar_t* GetEventMapRequestFormat(DWORD dwRequestType)
+{
+    switch (dwRequestType)
+    {
+    case QUEST_REQUEST_EVENT_MAP_MON_KILL:
+        return I18N::Game::ChaosCastleLvLuGuardsmanXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_BLOOD_GATE:
+        return I18N::Game::BloodCastleLvLuGateDestructionXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_USER_KILL:
+        return I18N::Game::ChaosCastleLvLuPlayerXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_DEVIL_POINT:
+        return I18N::Game::DevilSquareLvLuPointXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD:
+        return I18N::Game::BloodCastleLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS:
+        return I18N::Game::ChaosCastleLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL:
+        return I18N::Game::DevilSquareLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION:
+        return I18N::Game::IllusionTempleLvLuCleared;
+    default:
+        return L"";
     }
 }
 } // namespace
@@ -553,10 +586,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 break;
             case QUEST_REQUEST_ITEM:
             {
-                wchar_t szItemName[32];
-                ::GetItemName((int)pRequestInfo->m_pItem->Type,
-                    (pRequestInfo->m_pItem->Level, szItemName);
-                FormatRequestRewardText(aDest[nLine], I18N::Game::QuestRequirementItem, szItemName,
+                const std::wstring itemName =
+                    ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::QuestRequirementItem, itemName.c_str(),
                     static_cast<unsigned long>(MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue)),
                     static_cast<unsigned long>(pRequestInfo->m_dwValue));
             }
@@ -628,13 +661,14 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            wchar_t szItemName[32];
-            ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
-                szItemName);
-            FormatRequestRewardText(
-                aDest[nLine], I18N::Game::QuestRequirementItem, szItemName,
-                static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
-                static_cast<unsigned long>(pRequestInfo->m_dwValue));
+            {
+                const std::wstring itemName =
+                    ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::QuestRequirementItem, itemName.c_str(),
+                    static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
+            }
             break;
 
         case QUEST_REQUEST_LEVEL:
@@ -711,29 +745,13 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            int nTextIndex = 0;
-            switch (pRequestInfo->m_dwType)
-            {
-            case QUEST_REQUEST_EVENT_MAP_MON_KILL:
-                nTextIndex = 3074;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_BLOOD_GATE:
-                nTextIndex = 3077;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_USER_KILL:
-                nTextIndex = 3075;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_DEVIL_POINT:
-                nTextIndex = 3079;
-                break;
-            }
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue);
 #else	// ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue);
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
-            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex, curValue,
-                                    pRequestInfo->m_dwValue);
+            FormatRequestRewardText(aDest[nLine], GetEventMapRequestFormat(pRequestInfo->m_dwType),
+                                    pRequestInfo->m_wIndex, curValue, pRequestInfo->m_dwValue);
         }
         break;
 
@@ -754,23 +772,8 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            int nTextIndex = 0;
-            switch (pRequestInfo->m_dwType)
-            {
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD:
-                nTextIndex = 3078;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS:
-                nTextIndex = 3076;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL:
-                nTextIndex = 3080;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION:
-                nTextIndex = 3081;
-                break;
-            }
-            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex);
+            FormatRequestRewardText(aDest[nLine], GetEventMapRequestFormat(pRequestInfo->m_dwType),
+                                    pRequestInfo->m_wIndex);
         }
         break;
         }
@@ -844,7 +847,7 @@ bool CQuestMng::IsQuestByEtc(DWORD dwQuestIndex)
         return false;
 }
 
-void CQuestMng::SetQuestIndexByEtcList(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CQuestMng::SetQuestIndexByEtcList(const DWORD* adwSrcQuestIndex, int nIndexCount)
 {
     m_listQuestIndexByEtc.clear();
 
@@ -888,7 +891,7 @@ void CQuestMng::DelQuestIndexByEtcList(DWORD dwQuestIndex)
     }
 }
 
-void CQuestMng::SetCurQuestIndexList(DWORD* adwCurQuestIndex, int nIndexCount)
+void CQuestMng::SetCurQuestIndexList(const DWORD* adwCurQuestIndex, int nIndexCount)
 {
     m_listCurQuestIndex.clear();
 

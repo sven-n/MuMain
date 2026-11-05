@@ -1,4 +1,5 @@
 #include "Render/Lighting/DynamicLightHistory.h"
+#include "Core/Utilities/Fnv1aHash.h"
 
 #include <algorithm>
 #include <cmath>
@@ -391,6 +392,47 @@ std::span<const LightCall> DynamicLightHistory::Take(float seconds, const LightH
     m_tickOpen = false;
     m_drawing = true;
     return {m_out.data(), out};
+}
+
+std::uint64_t DynamicLightHistory::StateHash() const
+{
+    Fnv1aHash hash;
+    hash.Add(m_callCount);
+    hash.Add(m_tickStart);
+    hash.Add(m_tickOpen);
+    for (std::size_t i = 0; i < m_callCount; ++i)
+    {
+        const LightCall& call = m_calls[i];
+        hash.Add(call.x);
+        hash.Add(call.y);
+        for (const float channel : call.color)
+            hash.Add(channel);
+        hash.Add(call.range);
+        hash.Add(call.source);
+    }
+    hash.Add(m_followedCount);
+    for (std::size_t i = 0; i < m_followedCount; ++i)
+    {
+        const Followed& light = m_followed[i];
+        hash.Add(light.x);
+        hash.Add(light.y);
+        hash.Add(light.range);
+        hash.Add(light.source);
+        for (int k = 0; k < 3; ++k)
+        {
+            hash.Add(light.target[k]);
+            hash.Add(light.value[k]);
+        }
+        hash.Add(light.called);
+        hash.Add(light.fresh);
+    }
+    hash.Add(m_generation);
+    hash.Add(m_overflow);
+    hash.Add(m_classicOverflow);
+    hash.Add(m_drawing);
+    hash.Add(m_world);
+    hash.Add(m_calledOut);
+    return hash.Value();
 }
 
 void DynamicLightHistory::Clear()

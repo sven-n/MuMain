@@ -26,10 +26,9 @@ namespace   battleCastle
     void    CollisionTempCharacter(vec3_t Position, float Range, int AniType);
     bool    CollisionEffectToObject(OBJECT* eff, float Range, float RangeZ, bool bCollisionGround, bool bRealCollision = false);
     void    SetCastleGate_Attribute(int x, int y, BYTE Operator, bool bAllClear = false);
-    void    RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light);
+    void RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, const vec3_t light);
     void    SetBuildTimeLocation(OBJECT* o);
     void    RenderBuildTimes(void);
-    void    RenderBuffMagicIcon(CHARACTER* c);
     void    InitEtcSetting(void);
     void    StartFog(vec3_t Color);
     void    EndFog(void);
@@ -39,20 +38,25 @@ namespace   battleCastle
     bool    MoveBattleCastleObject(OBJECT* o, int& object, int& visibleObject);
     bool    CreateBattleCastleObject(OBJECT* o);
     bool    MoveBattleCastleVisual(OBJECT* o);
-    bool    RenderBattleCastleVisual(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b);
+    bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b);
+    bool RenderBattleCastleObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
     void    MoveFlyBigStone(OBJECT* o);
     CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
-    bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type);
+    // Castle Gate 1 counts its attacks from 0 again when it appears.
+    void ResetCastleGateAttackCount(CHARACTER* c, int Type);
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o);
     bool    MoveBattleCastleMonster(CHARACTER* c, OBJECT* o);
-    bool    SetCurrentAction_BattleCastleMonster(CHARACTER* c, OBJECT* o);
+    // A guard that attacks takes its attack state; its animation is data.
+    void SetGuardAttackState(OBJECT* o);
     bool    AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool    MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
-    bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b);
-    void    RenderMonsterHitEffect(OBJECT* o);
+    bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select);
+    // The vertex spawns and state changes of RenderBattleCastleObjectMesh, for an object the last frame drew.
+    void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+    void SpawnMonsterHitEffect(OBJECT* o);
 }
 
 using namespace battleCastle;

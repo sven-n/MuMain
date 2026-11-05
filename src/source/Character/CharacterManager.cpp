@@ -17,33 +17,32 @@ namespace
     struct ClassTextEntry
     {
         CLASS_TYPE type;
-        int textIndex;
+        const wchar_t* const* text;
     };
 
-    constexpr int kDefaultClassTextIndex = 2305;
+    const wchar_t* const* const kDefaultClassText = &I18N::Game::ErrorCode;
     constexpr int kMasterExperienceUnlockLevel = 400;
 
-    constexpr std::array<ClassTextEntry, 18> kClassTextEntries{{
-        { CLASS_WIZARD, 20 },
-        { CLASS_SOULMASTER, 25 },
-        { CLASS_GRANDMASTER, 1669 },
-        { CLASS_KNIGHT, 21 },
-        { CLASS_BLADEKNIGHT, 26 },
-        { CLASS_BLADEMASTER, 1668 },
-        { CLASS_ELF, 22 },
-        { CLASS_MUSEELF, 27 },
-        { CLASS_HIGHELF, 1670 },
-        { CLASS_DARK, 23 },
-        { CLASS_DUELMASTER, 1671 },
-        { CLASS_DARK_LORD, 24 },
-        { CLASS_LORDEMPEROR, 1672 },
-        { CLASS_SUMMONER, 1687 },
-        { CLASS_BLOODYSUMMONER, 1688 },
-        { CLASS_DIMENSIONMASTER, 1689 },
-        { CLASS_RAGEFIGHTER, 3150 },
-        { CLASS_TEMPLENIGHT, 3151 },
-    }};
-
+    const ClassTextEntry kClassTextEntries[] = {
+        {CLASS_WIZARD, &I18N::Game::DarkWizard},
+        {CLASS_SOULMASTER, &I18N::Game::SoulMaster},
+        {CLASS_GRANDMASTER, &I18N::Game::GrandMaster},
+        {CLASS_KNIGHT, &I18N::Game::DarkKnight},
+        {CLASS_BLADEKNIGHT, &I18N::Game::BladeKnight},
+        {CLASS_BLADEMASTER, &I18N::Game::BladeMaster},
+        {CLASS_ELF, &I18N::Game::Elf},
+        {CLASS_MUSEELF, &I18N::Game::MuseElf},
+        {CLASS_HIGHELF, &I18N::Game::HighElf},
+        {CLASS_DARK, &I18N::Game::MagicGladiator},
+        {CLASS_DUELMASTER, &I18N::Game::DualMaster},
+        {CLASS_DARK_LORD, &I18N::Game::DarkLord},
+        {CLASS_LORDEMPEROR, &I18N::Game::LordEmperor},
+        {CLASS_SUMMONER, &I18N::Game::Summoner},
+        {CLASS_BLOODYSUMMONER, &I18N::Game::BloodySummoner},
+        {CLASS_DIMENSIONMASTER, &I18N::Game::DimensionMaster},
+        {CLASS_RAGEFIGHTER, &I18N::Game::RageFighter},
+        {CLASS_TEMPLENIGHT, &I18N::Game::FistMaster},
+    };
 }
 
 CCharacterManager gCharacterManager;
@@ -123,6 +122,16 @@ CLASS_TYPE CCharacterManager::GetBaseClass(CLASS_TYPE iClass)
         return CLASS_DARK_LORD;
     case CLASS_TEMPLENIGHT:
         return CLASS_RAGEFIGHTER;
+    // Every class is listed, without a default: a new class makes the compiler ask for its base class.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return iClass;
@@ -137,6 +146,23 @@ bool CCharacterManager::IsSecondClass(const CLASS_TYPE byClass)
     case CLASS_MUSEELF:
     case CLASS_BLOODYSUMMONER:
         return true;
+    // Every class is listed, without a default: a new class makes the compiler ask which step it is.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_GRANDMASTER:
+    case CLASS_BLADEMASTER:
+    case CLASS_HIGHELF:
+    case CLASS_DUELMASTER:
+    case CLASS_LORDEMPEROR:
+    case CLASS_DIMENSIONMASTER:
+    case CLASS_TEMPLENIGHT:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return false;
@@ -154,6 +180,20 @@ bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR:
     case CLASS_TEMPLENIGHT:
         return true;
+    // Every class is listed, without a default: a new class makes the compiler ask which step it is.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_BLOODYSUMMONER:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return false;
@@ -171,9 +211,10 @@ bool CCharacterManager::IsMasterExperienceActive(const CLASS_TYPE byClass, const
 
 const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
-        [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
-    return (it != kClassTextEntries.end()) ? I18N::Game::Lookup(it->textIndex) : I18N::Game::Lookup(kDefaultClassTextIndex);
+    const auto it =
+        std::find_if(std::begin(kClassTextEntries), std::end(kClassTextEntries),
+                     [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
+    return (it != std::end(kClassTextEntries)) ? *it->text : *kDefaultClassText;
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
@@ -188,6 +229,20 @@ CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
     case CLASS_LORDEMPEROR: return SKIN_CLASS_LORDEMPEROR;
     case CLASS_DIMENSIONMASTER: return SKIN_CLASS_DIMENSIONMASTER;
     case CLASS_TEMPLENIGHT: return SKIN_CLASS_TEMPLENIGHT;
+    // Every class is listed, without a default: a new class makes the compiler ask for its skin. These classes
+    // use the skin with their own number.
+    case CLASS_WIZARD:
+    case CLASS_KNIGHT:
+    case CLASS_ELF:
+    case CLASS_DARK:
+    case CLASS_DARK_LORD:
+    case CLASS_SUMMONER:
+    case CLASS_RAGEFIGHTER:
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_UNDEFINED:
+        break;
     }
 
     return static_cast<CLASS_SKIN_INDEX>(byClass);
@@ -209,7 +264,7 @@ BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
     }
 }
 
-int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
+int CCharacterManager::GetEquipedBowType(const CHARACTER* pChar)
 {
     if (GameLogic::Items::IsBowModel(pChar->Weapon[1].Type))
     {
@@ -287,8 +342,9 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
     *piMinDamage = CharacterMachine->Character.MagicDamageMin + Damage;
     *piMaxDamage = CharacterMachine->Character.MagicDamageMax + Damage + Damage / 2;
 
-    Damage = 0;
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_MAGIC_POWER);
+    WORD magicPower = 0;
+    g_csItemOption.PlusSpecial(&magicPower, AT_SET_OPTION_IMPROVE_MAGIC_POWER);
+    Damage = magicPower;
     if (Damage != 0)
     {
         float fratio = 1.f + (float)Damage / 100.f;
@@ -298,7 +354,9 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
 
     Damage = 0;
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    WORD skillAttack = 0;
+    g_csItemOption.PlusSpecial(&skillAttack, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    Damage += skillAttack;
     *piMinDamage += Damage;
     *piMaxDamage += Damage;
 }
@@ -332,7 +390,9 @@ void CCharacterManager::GetSkillDamage(int iType, int* piMinDamage, int* piMaxDa
 
     Damage = 0;
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    WORD skillAttack = 0;
+    g_csItemOption.PlusSpecial(&skillAttack, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    Damage += skillAttack;
     *piMinDamage += Damage;
     *piMaxDamage += Damage;
 }

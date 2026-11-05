@@ -282,14 +282,14 @@ void CMuItemCategoriesUI::UpdateTagLabels()
 
 void CMuItemCategoriesUI::UpdateRows()
 {
-    const std::string& locale = g_ItemDatabase.GetDisplayLocale();
-    if (m_rowsVersion == g_ItemDatabase.GetVersion() && m_rowsTag == m_tag && m_rowsLocale == locale)
+    if (m_rowsVersion == g_ItemDatabase.GetVersion() && m_rowsNameVersion == g_ItemDatabase.GetNameVersion() &&
+        m_rowsTag == m_tag)
     {
         return;
     }
     m_rowsVersion = g_ItemDatabase.GetVersion();
+    m_rowsNameVersion = g_ItemDatabase.GetNameVersion();
     m_rowsTag = m_tag;
-    m_rowsLocale = locale;
     m_rows.clear();
     for (const int itemType : g_ItemDatabase.GetItemTypesWithTag(m_tag))
     {

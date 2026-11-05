@@ -31,6 +31,17 @@ public:
     // The text for the locale, or the neutral text if it has no translation.
     const std::string& Get(std::string_view locale) const;
 
+    // The text of the locale itself: the neutral text for the neutral locale,
+    // else its translation, also one written like the neutral text. Empty
+    // when it has none (Get then gives the neutral text).
+    const std::string& GetOwn(std::string_view locale) const;
+    // Whether the locale has a text of its own (GetOwn).
+    bool HasOwn(std::string_view locale) const
+    {
+        // A translation is never stored empty (Set removes it).
+        return !GetOwn(locale).empty();
+    }
+
     // Setting the neutral locale sets the neutral text. An empty text removes
     // the translation.
     void Set(std::string_view locale, std::string text);
@@ -46,6 +57,13 @@ public:
     }
 
     bool operator==(const LocalizedString& other) const = default;
+
+    // A text holding the separator would split into two parts when parsed.
+    static bool ContainsSeparator(std::string_view text);
+
+    // Locale codes like "pt" or "zh-TW". Anything else (empty, "=", "||")
+    // would break the format.
+    static bool IsValidLocaleCode(std::string_view locale);
 
 private:
     std::string m_neutral;

@@ -32,10 +32,10 @@ public:
     ~CMsgBoxIGSSendGift();
 
     bool Create(float fPriority = 3.f);
-    void Release();
+    void Release() override;
 
-    bool Update();
-    bool Render();
+    bool Update() override;
+    bool Render() override;
     Rml::Element* GetPanel() const override
     {
         return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include "Core/Utilities/Random.h"
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -123,14 +124,13 @@ struct CreateParams
 using CreateHook = void (*)(OBJECT* o);
 
 // Per-frame update. `luminosity` is the per-frame flicker value MoveEffect
-// computes once for every effect (so handlers don't draw an extra rand()).
+// computes once for every effect (so handlers don't draw an extra Random::Rand()).
 // Returns true to run MoveEffect's shared tail (lifetime decrement, particle
 // trail, destruction); false to skip it, mirroring the handful of legacy
 // cases that `return` early out of the move switch.
 using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
 
 // Per-frame draw. Defaults to RenderObject() when left null.
-using RenderHandler = void (*)(OBJECT* o);
 
 // The creation parameters of one SubType that has a variant (D35): the row's
 // with the variant's on top, resolved when the registry is built.
@@ -141,10 +141,11 @@ struct SubTypeCreateParams
 };
 
 // A descriptor migrates each lifecycle stage independently: a type can have
-// its rendering driven by the registry while its creation still runs through
+// its movement driven by the registry while its creation still runs through
 // the legacy switch, or vice versa. CreateEffect treats creation as migrated
-// only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
-// their respective handlers. An unset stage falls back to the legacy switch.
+// only when `create` or `onCreate` is set; MoveEffect gates on `move`. An
+// unset stage falls back to the legacy switch. Drawing is described from the
+// effect's state, never by the registry.
 struct EffectDescriptor
 {
     std::optional<CreateParams> create;
@@ -152,7 +153,6 @@ struct EffectDescriptor
     std::vector<SubTypeCreateParams> createBySubType;
     CreateHook onCreate = nullptr;
     MoveHandler move = nullptr;
-    RenderHandler render = nullptr;
 
     // The creation parameters of `subType`, or null when the type has none.
     // The few SubTypes of a row are searched in order, which costs less than a

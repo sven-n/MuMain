@@ -5,6 +5,9 @@
 
 #include <array>
 #include <cstdint>
+#ifdef _EDITOR
+#include <span>
+#endif
 
 #include "Core/Utilities/Singleton.h"
 #include "Core/Globals/_enum.h"
@@ -67,6 +70,15 @@ public:
     bool BeQuestItem();
     int FindQuestItemsInInven(int nType, int nCount, int nLevel = -1);
     int GetKillMobCount(int nMobType);
+
+#ifdef _EDITOR
+    // The quests as the quest script defines them, for the editor's monster
+    // tools (the NPC and the monsters to kill of each quest).
+    std::span<const QUEST_ATTRIBUTE> GetQuests() const
+    {
+        return m_Quest;
+    }
+#endif
 
 private:
     std::uint8_t    m_byClass;

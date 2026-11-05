@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Combat/SkillCast.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "GameLogic/Social/MonkSystem.h" // g_CMonkSystem
@@ -165,6 +166,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 return false;
             }
             break;
+        default:
+            break;
         }
         int iMana, iSkillMana;
         gSkillManager.GetSkillInformation(Skill, 1, NULL, &iMana, NULL, &iSkillMana);
@@ -242,6 +245,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
             case AT_SKILL_RIDER:
                 if (CheckAttack())
                     Success = CastWarriorSkill(c, o, p, Skill);
+                break;
+            default:
                 break;
             }
         }
@@ -371,7 +376,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         )
     {
         CreateParticle(BITMAP_SHINY + 2, o->Position, o->Angle, Light, 0, 0.f, o);
-        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
+        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2));
     }
 
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -476,6 +481,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEATHSTAB:
     case AT_SKILL_DEATHSTAB_STR:
         return;
+    default:
+        break;
     }
 
     if (Skill == AT_SKILL_DEATH_CANNON)
@@ -530,6 +537,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     SetPlayerMagic(c);
     LetHeroStop();
     break;
+    default:
+        break;
     }
 
     c->SkillSuccess = true;

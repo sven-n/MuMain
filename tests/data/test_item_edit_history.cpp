@@ -77,13 +77,21 @@ public:
                 {
                     m_statFile = file;
                     ++m_statFileRestores;
-                }};
+                },
+                [this] { return m_styles; },
+                [this](std::span<const Data::Items::GroundLabelStyle> styles)
+                { m_styles.assign(styles.begin(), styles.end()); },
+                [this](std::string_view root) { return m_folders[std::string(root)]; },
+                [this](std::string_view root, std::span<const Data::Colors::ColorFolder> folders)
+                { m_folders[std::string(root)].assign(folders.begin(), folders.end()); }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
     std::vector<Data::Effects::GlowColor> m_colors;
     Data::Items::ItemStatFile m_statFile;
     int m_statFileRestores = 0;
+    std::vector<Data::Items::GroundLabelStyle> m_styles;
+    std::map<std::string, std::vector<Data::Colors::ColorFolder>> m_folders;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -225,6 +233,68 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
         items.m_colors.push_back({"gold", {1, 0.7, 0.2}});
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("the folders of a root of the Colors window")
+    {
+        const std::vector<Data::Colors::ColorFolder> before{{"Warm", {}, {"orange"}}};
+        const std::vector<Data::Colors::ColorFolder> after{{"Warm", {{"Reds", {}, {"red"}}}, {"orange"}}};
+        items.m_folders["glow"] = after;
+        ItemEditStep step{ItemEditStep::Kind::ColorFolders};
+        step.folderRoot = "glow";
+        step.foldersBefore = before;
+        step.foldersAfter = after;
+        history.Record({"New color folder", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_folders["glow"] == before);
+        CHECK(items.m_folders["groundLabels"].empty());
+        CHECK_FALSE(history.GetLastChangedItem().has_value());
+        REQUIRE(history.Redo());
+        CHECK(items.m_folders["glow"] == after);
+
+        // Folders changed past the history are not overwritten.
+        items.m_folders["glow"].clear();
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("a changed and a removed ground label style")
+    {
+        const std::vector<Data::Items::GroundLabelStyle> before{{"ticket", {0xe5, 0x87, 0x21}}, {"spare"}};
+        std::vector<Data::Items::GroundLabelStyle> after = {before[0]};
+        after[0].bold = true;
+        after[0].background = {0x10, 0x20, 0x30};
+        items.m_styles = after;
+        ItemEditStep step{ItemEditStep::Kind::GroundLabelStyles};
+        step.stylesBefore = before;
+        step.stylesAfter = after;
+        history.Record({"Change a label style", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_styles == before);
+        CHECK_FALSE(history.GetLastChangedItem().has_value());
+        REQUIRE(history.Redo());
+        CHECK(items.m_styles == after);
+
+        // Styles changed past the history are not overwritten.
+        items.m_styles[0].color = {0, 0, 0};
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("an item's own ground label rules go with the item")
+    {
+        ItemSlotState kris = items.Slot(Kris);
+        ItemSlotState krisAfter = kris;
+        krisAfter.item.groundLabels = {{"ticket", true, 0, 2}, {"spare"}};
+        items.Slot(Kris) = krisAfter;
+        ItemEditStep step{ItemEditStep::Kind::Slot, Kris};
+        step.before = kris;
+        step.after = krisAfter;
+        history.Record({"Change the ground label rules", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.Slot(Kris).item.groundLabels.empty());
+        REQUIRE(history.Redo());
+        CHECK(items.Slot(Kris).item.groundLabels == krisAfter.item.groundLabels);
     }
 
     SUBCASE("the item stat file with the items it gave another profile")

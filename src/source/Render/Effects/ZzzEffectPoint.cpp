@@ -47,7 +47,7 @@ void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMo
     }
 }
 
-void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
+void RenderNumberPoints(const vec3_t Position, int Num, const vec3_t Color, float Alpha, float Scale)
 {
     vec3_t p;
     VectorCopy(Position, p);
@@ -92,7 +92,7 @@ void RenderPoints(BYTE byRenderOneMore)
     DisableDepthTest();
     for (int i = 0; i < MAX_POINTS; i++)
     {
-        PARTICLE* o = &Points[i];
+        const PARTICLE* o = &Points[i];
         if (o->Live)
         {
             if (byRenderOneMore == 1)

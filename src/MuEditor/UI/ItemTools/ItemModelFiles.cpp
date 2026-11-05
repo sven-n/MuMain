@@ -4,7 +4,7 @@
 
 #include "ItemModelFiles.h"
 
-#include "../MuEditor/UI/ItemEditor/ItemListModel.h"
+#include "../MuEditor/UI/Common/TextSearch.h"
 
 #include <algorithm>
 #include <system_error>
@@ -67,7 +67,7 @@ std::vector<std::string_view> ItemModelFiles::Find(std::string_view search)
     std::vector<std::string_view> found;
     for (const std::string& file : GetFiles())
     {
-        if (ContainsIgnoringCase(file, search))
+        if (TextSearch::ContainsIgnoringCase(file, search))
         {
             found.emplace_back(file);
         }

@@ -16,11 +16,11 @@ struct BundledFont
     const char* bold;
 };
 
-// Traditional Chinese (zh-TW): selectable as the UI font and the first
-// missing-glyph fallback. Simplified Chinese (zh-CN) would need Noto Sans SC,
-// because the glyph forms differ.
+// Chinese faces are selectable so each locale can use its own glyph forms.
 inline constexpr BundledFont kNotoSansTcFont{"Noto Sans TC", "fonts/NotoSansTC-Regular.otf",
                                              "fonts/NotoSansTC-Bold.otf"};
+inline constexpr BundledFont kNotoSansScFont{"Noto Sans SC", "fonts/NotoSansSC-Regular.otf",
+                                             "fonts/NotoSansSC-Bold.otf"};
 
 inline constexpr BundledFont kDejaVuSansFont{"DejaVu Sans", "fonts/DejaVuSans.ttf", "fonts/DejaVuSans-Bold.ttf"};
 
@@ -28,6 +28,7 @@ inline constexpr BundledFont kBundledFonts[] = {
     {"Liberation Sans", "fonts/LiberationSans-Regular.ttf", "fonts/LiberationSans-Bold.ttf"},
     kDejaVuSansFont,
     kNotoSansTcFont,
+    kNotoSansScFont,
 };
 
 inline constexpr std::string_view kDefaultBundledFontFamily = "DejaVu Sans";
@@ -41,11 +42,13 @@ inline constexpr BundledFont kBundledFixedFont{
 //   that Chinese text keeps its centered punctuation (，。「」) instead of the
 //   Korean forms. It also has the Hangul jamo (ㅋ), but no Hangul syllables.
 // - Nanum Gothic: Hangul syllables.
+// - Noto Sans SC: Simplified Chinese characters missing from the earlier faces.
 // ponytail: one Hangul face; SDL_ttf synthesizes bold, bundle NanumGothic-Bold if metric parity requires it.
 inline constexpr BundledFont kBundledFallbackFonts[] = {
     kDejaVuSansFont,
     kNotoSansTcFont,
     {"Nanum Gothic", "fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Regular.ttf"},
+    kNotoSansScFont,
 };
 
 [[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)

@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Windows/CreditWin.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Core/Input/Input.h"
 #include "Core/Globals/_enum.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -19,6 +20,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -183,12 +185,12 @@ bool CCreditWin::Render()
 
 void CCreditWin::CloseWin()
 {
-	Show(false);
+    Show(false);
 
-	SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 
-	::StopMp3(MUSIC_MUTHEME);
-	::PlayMp3(MUSIC_MAIN_THEME);
+    ::StopMp3(MUSIC_MUTHEME);
+    ::PlayMp3(MUSIC_MAIN_THEME);
 }
 
 void CCreditWin::Init()
@@ -240,17 +242,20 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 			m_byIllust = ++m_byIllust == CRW_ILLUST_MAX ? 0 : m_byIllust;
 		}
 		break;
-	}
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
+        break;
+    }
 }
 
 void CCreditWin::LoadText()
 {
 #ifdef _WIN32
-	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(kCreditDataPath.data(), "rb"), &std::fclose);
+    Core::Utilities::FileHandle file(std::fopen(kCreditDataPath.data(), "rb"));
 #else
 	// The path is Windows-spelled (backslashes, mixed case); resolve it against
 	// the case-sensitive filesystem.
-	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"), &std::fclose);
+    Core::Utilities::FileHandle file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"));
 #endif
 	if (!file)
 	{
@@ -355,7 +360,10 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 				SetTextIndex();
 		}
 		break;
-	}
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
+        break;
+    }
 }
 
 void CCreditWin::SyncRmlModel()

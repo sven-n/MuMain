@@ -1,6 +1,7 @@
 ﻿// GMDoppelGanger4.cpp: implementation of the CGMDoppelGanger4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -89,13 +90,13 @@ bool CGMDoppelGanger4::MoveObject(OBJECT* o)
         o->BlendMeshLight = (float)sinf(WorldTime * 0.0015f) * 0.8f + 1.0f;
         return true;
     case 60:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
         o->HiddenMesh = -2;
         return true;
     case 61:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
         o->HiddenMesh = -2;
@@ -198,8 +199,8 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
                     for (i = 0; i < 6; ++i)
                     {
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += (float)(rand() % 140 - 70);
-                        vPos[1] += (float)(rand() % 140 - 70);
+                        vPos[0] += (float)(Random::Rand() % 140 - 70);
+                        vPos[1] += (float)(Random::Rand() % 140 - 70);
                         Vector(0.2f, 1.0f, 0.3f, vLight);
                         CreateEffectFpsChecked(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
                     }
@@ -207,27 +208,28 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
                     Vector(0.4f, 1.0f, 0.6f, vLight);
                     for (i = 0; i < 3; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 100 - 50) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 100 - 50) * 1.0f;
-                        vPos[2] = o->Position[2] + 10.f + (rand() % 20) * 10.0f;
-                        CreateParticleFpsChecked(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, (rand() % 8 + 7) * 0.1f);
+                        vPos[0] = o->Position[0] + (Random::Rand() % 100 - 50) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 100 - 50) * 1.0f;
+                        vPos[2] = o->Position[2] + 10.f + (Random::Rand() % 20) * 10.0f;
+                        CreateParticleFpsChecked(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0,
+                                                 (Random::Rand() % 8 + 7) * 0.1f);
                     }
 
                     Vector(0.0f, 0.5f, 0.0f, vLight);
                     for (i = 0; i < 15; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 200 - 100) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 200 - 100) * 1.0f;
-                        vPos[2] = o->Position[2] + (rand() % 10) * 10.0f;
+                        vPos[0] = o->Position[0] + (Random::Rand() % 200 - 100) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 200 - 100) * 1.0f;
+                        vPos[2] = o->Position[2] + (Random::Rand() % 10) * 10.0f;
                         CreateEffectFpsChecked(MODEL_DOPPELGANGER_SLIME_CHIP, vPos, o->Angle, vLight, 0, o, 0, 0);
                     }
 
                     Vector(0.2f, 0.9f, 0.3f, vLight);
                     for (i = 0; i < 30; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 300 - 150) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 300 - 150) * 1.0f;
-                        vPos[2] = o->Position[2] + 20.0f + (rand() % 10) * 10.0f;
+                        vPos[0] = o->Position[0] + (Random::Rand() % 300 - 150) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 300 - 150) * 1.0f;
+                        vPos[2] = o->Position[2] + 20.0f + (Random::Rand() % 10) * 10.0f;
                         CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 31);
                     }
 
@@ -280,7 +282,7 @@ void CGMDoppelGanger4::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
 }
 
-bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMDoppelGanger4::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsDoppelGanger4() == false)
         return false;
@@ -293,14 +295,15 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 20:
     case 31:
     case 33:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 103:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        o->HiddenMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        look.hiddenMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV);
     }
     return true;
     case 76:
@@ -309,33 +312,47 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 92:
     case 95:
     case 105:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 142:
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return true;
     case MODEL_ICE_WALKER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER0);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER1);
         return true;
     case MODEL_LARVA:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_SNAKE01);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_DOPPELGANGER_SNAKE01);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return true;
     case MODEL_MAD_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_BUGBEAR_R);
         return true;
     case MODEL_TERRIBLE_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_BUGBEAR_R);
         return true;
     case MODEL_DOPPELGANGER:
         return true;
@@ -344,7 +361,7 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDoppelGanger4::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (IsDoppelGanger4() == false)
         return false;
@@ -354,6 +371,18 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
+    case 95:
+    {
+        vec3_t sparkP, sparkPosition, sparkLight;
+        Vector(0.0f, 0.0f, 0.0f, sparkP);
+        Vector(0.1f, 0.1f, 0.3f, sparkLight);
+        for (int i = 0; i <= 9; ++i)
+        {
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[i], sparkP, sparkPosition, false);
+            CreateSprite(BITMAP_SPARK + 1, sparkPosition, 7.5f, sparkLight, o);
+        }
+        return true;
+    }
     case 37:
     {
         int time = timeGetTime() % 1024;
@@ -369,7 +398,7 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         vec3_t vLight;
         Vector(0.1f, 0.4f, 1.0f, vLight);
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
@@ -391,8 +420,8 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
             Vector(0.6f, 0.8f, 1.0f, Light);
             VectorCopy(o->Position, vPos);
             int iScale = o->Scale * 60;
-            vPos[0] += rand() % iScale - iScale / 2;
-            vPos[1] += rand() % iScale - iScale / 2;
+            vPos[0] += Random::Rand() % iScale - iScale / 2;
+            vPos[1] += Random::Rand() % iScale - iScale / 2;
             CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
@@ -424,7 +453,7 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
     case 70:
         Vector(0.0f, 0.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[6], p, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[6], p, Position, false);
         Luminosity = (float)sinf(WorldTime * 0.002f) + 1.8f;
         Vector(0.8f, 0.4f, 0.2f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, Luminosity * 7.0f, Light, o);
@@ -445,39 +474,23 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         if (rand_fps_check(3))
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 1, o->Scale);
         return true;
-    case 85:
-        b->BeginRender(o->Alpha);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_CHROME | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-        b->EndRender();
-        return true;
     case 92:
     {
         vec3_t EndRelative, StartPos, EndPos;
         Vector(0.f, 0.f, 0.f, EndRelative);
-        b->TransformPosition(BoneTransform[1], EndRelative, StartPos, false);
-        b->TransformPosition(BoneTransform[2], EndRelative, EndPos, false);
-        if (rand() % 30 == 1)
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], EndRelative, StartPos, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[2], EndRelative, EndPos, false);
+        if (Random::Rand() % 30 == 1)
             CreateJointFpsChecked(BITMAP_JOINT_THUNDER, StartPos, EndPos, o->Angle, 8, NULL, 50.f);
     }
     return true;
-    case 96:
-        b->StreamMesh = 0;
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
-        b->RenderMesh(
-            0, RENDER_TEXTURE, 1.0f, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            -(int)WorldTime % 20000 * 0.00005f);
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
-        b->StreamMesh = -1;
-        return true;
     case 98:
     {
         if (rand_fps_check(3))
         {
             vec3_t vPos;
             Vector(0.0f, 0.0f, 0.0f, vPos);
-            b->TransformPosition(BoneTransform[1], vPos, Position, false);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
             Vector(0.5f, 0.6f, 0.1f, Light);
             CreateParticle(BITMAP_TWINTAIL_WATER, Position, o->Angle, Light, 2);
         }
@@ -489,17 +502,17 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vPos;
         Vector(0.0f, 0.0f, 0.0f, vPos);
         Vector(fLumi, fLumi, fLumi, Light);
-        b->TransformPosition(BoneTransform[4], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[4], vPos, Position, false);
         CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light, 0, 1.5f);
         CreateSprite(BITMAP_SPARK + 1, Position, 10.0f, Light, o);
         vec3_t StartPos, EndPos;
         VectorCopy(Position, StartPos);
         VectorCopy(Position, EndPos);
         StartPos[0] -= 50.f;
-        StartPos[0] -= rand() % 100;
-        EndPos[0] += rand() % 80;
-        StartPos[1] -= rand() % 50;
-        EndPos[1] += rand() % 50;
+        StartPos[0] -= Random::Rand() % 100;
+        EndPos[0] += Random::Rand() % 80;
+        StartPos[1] -= Random::Rand() % 50;
+        EndPos[1] += Random::Rand() % 50;
         StartPos[2] += 10.0f;
         EndPos[2] += 10.f;
         if (rand_fps_check(20))
@@ -532,7 +545,7 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(fLumi * 0.6f, fLumi * 1.0f, fLumi * 0.8f, Light);
         vec3_t vPos;
         Vector(0.0f, 0.0f, 0.0f, vPos);
-        b->TransformPosition(BoneTransform[1], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, 1.1f, Light, o);
     }
     return true;
@@ -541,7 +554,35 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMDoppelGanger4::RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
+{
+    if (IsDoppelGanger4() == false)
+        return false;
+
+    switch (o->Type)
+    {
+    case 85:
+        b->BeginRender(look.alpha);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(3, RENDER_CHROME | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
+        b->EndRender();
+        return true;
+    case 96:
+        b->StreamMesh = 0;
+        SetAlphaFuncRef(0.f);
+        b->RenderMesh(0, RENDER_TEXTURE, 1.0f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      -(int)WorldTime % 20000 * 0.00005f);
+        SetAlphaFuncRef(0.25f);
+        b->StreamMesh = -1;
+        return true;
+    }
+
+    return false;
+}
+
+bool CGMDoppelGanger4::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t vPos, vLight;
 
@@ -559,9 +600,9 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         if (c->Dead == 0 && rand_fps_check(4))
         {
-            Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                o->Position[1] + (float)(rand() % 64 - 32),
-                o->Position[2] + (float)(rand() % 32 - 16), vPos);
+            Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[2] + (float)(Random::Rand() % 32 - 16), vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, vLight, 0);
         }
 
@@ -582,12 +623,12 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, vLight);
             for (int i = 0; i < 30; ++i)
             {
-                b->TransformByObjectBone(vPos, o, rand() % 50);
-                vPos[0] += rand() % 10 - 20;
-                vPos[1] += rand() % 10 - 20;
-                vPos[2] += rand() % 10 - 20;
+                b->TransformByObjectBone(vPos, o, Random::Rand() % 50);
+                vPos[0] += Random::Rand() % 10 - 20;
+                vPos[1] += Random::Rand() % 10 - 20;
+                vPos[2] += Random::Rand() % 10 - 20;
 
-                switch (rand() % 3)
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
@@ -602,6 +643,15 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
         }
         return true;
+    }
+
+    return true;
+}
+
+bool CGMDoppelGanger4::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
+{
+    switch (o->Type)
+    {
     case MODEL_DOPPELGANGER:
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -612,7 +662,7 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMDoppelGanger4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void CGMDoppelGanger4::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (!IsDoppelGanger4())
         return;
@@ -622,11 +672,13 @@ void CGMDoppelGanger4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 19:
     case 20:
     case 31:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         break;
     case 33:
         b->StreamMesh = 0;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, (int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
         break;
     case 76:
@@ -635,44 +687,36 @@ void CGMDoppelGanger4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->BodyLight[1] = 0.52f;
         b->BodyLight[2] = 0.52f;
         b->StreamMesh = 0;
-        b->RenderMesh(
-            0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, -(int)WorldTime % 100000 * 0.00001f,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      -(int)WorldTime % 100000 * 0.00001f, look.blendMeshV);
         b->StreamMesh = -1;
     }
     break;
     case 95:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
 
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         b->EndRender();
-
-        vec3_t p, Position, Light;
-        for (int i = 0; i < 10; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            b->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 7.5f, Light, o);
-        }
     }
     break;
     case 105:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
     }
     break;
     case 77:
     case 91:
     case 92:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     break;
     }
@@ -717,28 +761,6 @@ bool CGMDoppelGanger4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 }
 
 // 몬스터 사운드
-bool CGMDoppelGanger4::PlayMonsterSound(OBJECT* o)
-{
-    if (IsDoppelGanger4() == false)
-        return false;
-
-    return g_DoppelGanger1.PlayMonsterSound(o);
-
-    // 	float fDis_x, fDis_y;
-    // 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-    // 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-    // 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-    //
-    // 	if (fDistance > 500.0f)
-    // 		return true;
-    //
-    // 	switch(o->Type)
-    // 	{
-    // 	}
-
-    return false;
-}
-
 void CGMDoppelGanger4::PlayObjectSound(OBJECT* o)
 {
 }

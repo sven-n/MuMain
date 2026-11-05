@@ -155,4 +155,72 @@ TEST_CASE("A change of the item stat file reaches the users of the profiles whos
     CHECK(FindItemsReached(items, {}, std::vector<std::string>{"shield"}) == std::vector<int>{MakeItemType(6, 0)});
 }
 
+TEST_CASE("Renaming a table renames it in the descriptions that name it [editor][items]")
+{
+    const auto describe = [](ItemDefinition item, const char* english, const char* german)
+    {
+        ItemDescriptionLine line;
+        line.text.Set("en", english);
+        line.text.Set("de", german);
+        item.description = {line};
+        return item;
+    };
+    // The bonus in English and German; another table; a deleted item that still has a description.
+    std::vector<ItemDefinition> items = {
+        describe(MakeShield(0, ""), "Block +{table:bonus}", "Abwehr +{table:bonus}"),
+        describe(MakeShield(1, ""), "Block +{table:bonus2}", "Abwehr +{table:bonus2}"),
+        describe(MakeShield(2, ""), "Block +{table:bonus}", "Abwehr +{table:bonus}"),
+    };
+    items[2].names = {};
+
+    CHECK(FindTableDescriptionUsers(items, "bonus") == std::vector<int>{MakeItemType(6, 0)});
+    CHECK(FindTableDescriptionUsers(items, "bonus2") == std::vector<int>{MakeItemType(6, 1)});
+    CHECK(FindTableDescriptionUsers(items, "other").empty());
+
+    // The shield of another change (here a new profile) keeps that change.
+    ItemDefinition repointed = items[0];
+    repointed.statProfile = "guard";
+    std::vector<ItemDefinition> changed = {repointed};
+    RenameTableInDescriptions(items, changed, "bonus2", "blockBonus");
+    RenameTableInDescriptions(items, changed, "bonus", "shieldBonus");
+    REQUIRE(changed.size() == 2);
+    CHECK(changed[0].number == 0);
+    CHECK(changed[0].statProfile == "guard");
+    CHECK(changed[0].description[0].text.GetNeutral() == "Block +{table:shieldBonus}");
+    CHECK(changed[0].description[0].text.Get("de") == "Abwehr +{table:shieldBonus}");
+    CHECK(changed[1].number == 1);
+    CHECK(changed[1].description[0].text.GetNeutral() == "Block +{table:blockBonus}");
+    CHECK(changed[1].description[0].text.Get("de") == "Abwehr +{table:blockBonus}");
+}
+
+TEST_CASE("A table a line's values name is used and renamed there [editor][items]")
+{
+    ItemDefinition shield = MakeShield(0, "");
+    ItemDescriptionLine line;
+    line.textName = "increaseBlock";
+    line.values = {{"percent", "table:bonus"}, {"level", "level"}};
+    shield.description = {line};
+    const std::vector<ItemDefinition> items = {shield};
+
+    CHECK(FindTableDescriptionUsers(items, "bonus") == std::vector<int>{MakeItemType(6, 0)});
+    std::vector<ItemDefinition> changed;
+    RenameTableInDescriptions(items, changed, "bonus", "blockBonus");
+    REQUIRE(changed.size() == 1);
+    CHECK(changed[0].description[0].values ==
+          std::vector<std::pair<std::string, std::string>>{{"percent", "table:blockBonus"}, {"level", "level"}});
+
+    // A name line too.
+    ItemDefinition named = MakeShield(1, "");
+    ItemNameLine nameLine;
+    nameLine.text.Set("en", "{name} +{table:bonus}");
+    nameLine.hasText = true;
+    named.nameLines = {nameLine};
+    const std::vector<ItemDefinition> namedItems = {named};
+    CHECK(FindTableDescriptionUsers(namedItems, "bonus") == std::vector<int>{MakeItemType(6, 1)});
+    changed.clear();
+    RenameTableInDescriptions(namedItems, changed, "bonus", "blockBonus");
+    REQUIRE(changed.size() == 1);
+    CHECK(changed[0].nameLines[0].text.GetNeutral() == "{name} +{table:blockBonus}");
+}
+
 #endif // _EDITOR

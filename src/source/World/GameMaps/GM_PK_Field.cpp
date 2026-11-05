@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "stdafx.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -268,7 +269,7 @@ bool CGM_PK_Field::MoveObject(OBJECT* o)
     return false;
 }
 
-bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGM_PK_Field::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsPKField())
     {
@@ -384,51 +385,18 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         }
     }
     return true;
-    }
-    return false;
-}
-
-bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
-{
-    if (!gMapManager.IsPKField())
+    case 67:
     {
-        return false;
-    }
-
-    if (o->Type >= MODEL_ZOMBIE_FIGHTER && o->Type <= MODEL_BURNING_LAVA_GIANT)
-    {
-        RenderMonster(o, b, ExtraMon);
-
-        return true;
-    }
-    else if (o->Type == 15)
-    {
-        b->StreamMesh = 0;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-
-        return true;
-    }
-    else if (o->Type == 67)
-    {
-        b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-        vec3_t light;
-        Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
         vec3_t vLightFire, Position, vPos;
         Vector(1.0f, 0.0f, 0.0f, vLightFire);
         Vector(0.0f, 0.0f, 0.0f, vPos);
 
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         if (o->AnimationFrame >= 35 && o->AnimationFrame <= 37)
@@ -454,49 +422,95 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(0.4f, 0.1f, 0.1f, Light);
         //Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         Vector(-150.0f, 0.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
+        b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
-
-        return true;
     }
-    else if (o->Type == 68)
+        return true;
+    case 68:
     {
-        b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-
-        vec3_t light;
-        Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
         vec3_t vLightFire, Position, vPos;
         Vector(1.0f, 0.0f, 0.0f, vLightFire);
         Vector(0.0f, 0.0f, 0.0f, vPos);
 
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         vec3_t p, Pos, Light;
         //Vector(0.08f, 0.08f, 0.08f, Light);
         Vector(0.3f, 0.1f, 0.1f, Light);
         Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
+        b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
+    }
+        return true;
+    }
+    return false;
+}
+
+bool CGM_PK_Field::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
+{
+    if (!gMapManager.IsPKField())
+    {
+        return false;
+    }
+
+    if (o->Type >= MODEL_ZOMBIE_FIGHTER && o->Type <= MODEL_BURNING_LAVA_GIANT)
+    {
+        RenderMonster(o, look, b, ExtraMon);
+
+        return true;
+    }
+    else if (o->Type == 15)
+    {
+        b->StreamMesh = 0;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      -(int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+
+        return true;
+    }
+    else if (o->Type == 67)
+    {
+        b->StreamMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      (int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+        vec3_t light;
+        Vector(1.0f, 0.0f, 0.0f, light);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        VectorCopy(light, b->BodyLight);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, look.blendMeshU, look.blendMeshV);
+
+        return true;
+    }
+    else if (o->Type == 68)
+    {
+        b->StreamMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      (int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+
+        vec3_t light;
+        Vector(1.0f, 0.0f, 0.0f, light);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        VectorCopy(light, b->BodyLight);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, look.blendMeshU, look.blendMeshV);
 
         return true;
     }
     return false;
 }
 
-void CGM_PK_Field::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void CGM_PK_Field::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (!gMapManager.IsPKField())
         return;
@@ -506,7 +520,7 @@ void CGM_PK_Field::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 16:		//song_lava2 fade in-out
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
     }
     break;
     default:
@@ -606,7 +620,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsPKField())
     {
@@ -618,11 +632,14 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
-    {
-    }
-    return true;
     case MODEL_GLADIATOR:
     {
+        auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
+        float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
+        vec3_t vWorldPos;
+        Vector(0.1f, 0.4f, 0.5f, vLight);
+        b->TransformByObjectBone(vWorldPos, o, 9);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
     }
     return true;
     case MODEL_SLAUGHTERER:
@@ -697,6 +714,9 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if ((int)o->LifeTime == 100)
             {
+                CreateEffect(o->Type == MODEL_BLOOD_ASSASSIN ? MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY
+                                                             : MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,
+                             o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
 
@@ -802,41 +822,38 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGM_PK_Field::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (!gMapManager.IsPKField())
     {
         return false;
     }
 
-    auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
     float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
-    vec3_t vWorldPos, vLight;
-    Vector(0.1f, 0.4f, 0.5f, vLight);
 
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         DisableDepthTest();
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight * fAngle, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, look.blendMeshLight * fAngle, look.blendMeshU,
+                      look.blendMeshV);
         EnableDepthTest();
     }
     return true;
     case MODEL_GLADIATOR:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         DisableDepthTest();
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight * fAngle, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, look.blendMeshLight * fAngle, look.blendMeshU,
+                      look.blendMeshV);
         EnableDepthTest();
     }
     return true;
@@ -845,76 +862,74 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         float fBlendMeshLight = 0.0f;
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f;
 
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_BUGBEAR_R);
     }
     return true;
     case MODEL_BLOOD_ASSASSIN:
     case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if ((int)o->LifeTime == 100)
-            {
-                switch (o->Type)
-                {
-                case MODEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                case MODEL_CRUEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                }
-            }
-        }
-        else
+        if (o->CurrentAction != MONSTER01_DIE)
         {
             float fBlendMeshLight = 0.0f;
             fBlendMeshLight = (sinf(WorldTime * 0.005f) + 1.0f) * 0.3f + 0.3f;
 
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
 
             switch (o->Type)
             {
             case MODEL_BLOOD_ASSASSIN:
             {
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON02);
+                b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fBlendMeshLight, look.blendMeshU, look.blendMeshV,
+                              BITMAP_PKMON02);
 
-                b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON01);
+                b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(3, RENDER_TEXTURE, look.alpha, 3, fBlendMeshLight, look.blendMeshU, look.blendMeshV,
+                              BITMAP_PKMON01);
             }
             break;
             case MODEL_CRUEL_BLOOD_ASSASSIN:
             {
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON04);
+                b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fBlendMeshLight, look.blendMeshU, look.blendMeshV,
+                              BITMAP_PKMON04);
 
-                b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON03);
+                b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(3, RENDER_TEXTURE, look.alpha, 3, fBlendMeshLight, look.blendMeshU, look.blendMeshV,
+                              BITMAP_PKMON03);
             }
             break;
             }
             Vector(b->BodyLight[0] * 0.65f, b->BodyLight[0] * 0.65f, b->BodyLight[0] * 0.65f, b->BodyLight);
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
 
             Vector(b->BodyLight[0] * 2.0f, b->BodyLight[0] * 1.0f, b->BodyLight[0] * 0.4f, b->BodyLight);
-            b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
         }
     }
     return true;
     case MODEL_LAVA_GIANT:
     case MODEL_BURNING_LAVA_GIANT:
     {
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         float fBlendMeshLight = 0.0f;
         fBlendMeshLight = (sinf(WorldTime * 0.001f));
@@ -925,7 +940,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         case MODEL_BURNING_LAVA_GIANT:
         {
             float fAlpha = 1.0f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
 
             int iTexture = (o->Type == MODEL_LAVA_GIANT) ? BITMAP_PKMON06 : BITMAP_PKMON05;
 
@@ -933,13 +949,16 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
             {
                 //fBlendMeshLight = fabs(fBlendMeshLight);
                 fBlendMeshLight = -(fBlendMeshLight);
-                //b->RenderMesh(0,RENDER_TEXTURE|RENDER_DARK, fAlpha, 0,fBlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, iTexture);
-                b->RenderMesh(0, RENDER_TEXTURE, fAlpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, iTexture);
+                // b->RenderMesh(0,RENDER_TEXTURE|RENDER_DARK, fAlpha,
+                // 0,fBlendMeshLight,look.blendMeshU,look.blendMeshV, iTexture);
+                b->RenderMesh(0, RENDER_TEXTURE, fAlpha, 0, fBlendMeshLight, look.blendMeshU, look.blendMeshV,
+                              iTexture);
             }
             else
             {
                 for (int i = 0; i < 3; ++i)
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, fAlpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, iTexture);
+                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, fAlpha, 0, fBlendMeshLight, look.blendMeshU,
+                                  look.blendMeshV, iTexture);
             }
         }
         break;
@@ -949,13 +968,15 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD:
     case MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     return true;
     case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY:
     case MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     return true;
     }
@@ -990,162 +1011,6 @@ bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
     Vector(1.f, 0.f, 0.f, o->Light);
 
     return true;
-}
-
-bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
-{
-    if (!gMapManager.IsPKField())
-        return false;
-
-    float fDis_x, fDis_y;
-    fDis_x = o->Position[0] - Hero->Object.Position[0];
-    fDis_y = o->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f)
-        return true;
-
-    switch (o->Type)
-    {
-    case MODEL_ZOMBIE_FIGHTER:
-    {
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK);
-        }
-        else if (MONSTER01_SHOCK == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH);
-        }
-
-        //	SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE02,
-        //	SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02,
-    }
-    return true;
-    case MODEL_GLADIATOR:
-    {
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK);
-        }
-        else if (MONSTER01_SHOCK == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_RAISEDGLADIATOR_DEATH);
-        }
-
-        //	SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE02,
-        //	SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02,
-    }
-    return true;
-    case MODEL_SLAUGHTERER:
-    {
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ASHESBUTCHER_ATTACK);
-        }
-        else if (MONSTER01_SHOCK == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_PKFIELD_ASHESBUTCHER_MOVE01);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_ASHESBUTCHER_DEATH);
-        }
-
-        //SOUND_PKFIELD_ASHESBUTCHER_DAMAGE02,
-        //SOUND_PKFIELD_ASHESBUTCHER_MOVE02,
-    }
-    return true;
-    case MODEL_BLOOD_ASSASSIN:
-    case MODEL_CRUEL_BLOOD_ASSASSIN:
-    {
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BLOODASSASSIN_ATTACK);
-        }
-        else if (MONSTER01_SHOCK == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_PKFIELD_BLOODASSASSIN_MOVE01);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BLOODASSASSIN_DEDTH);
-        }
-
-        //	SOUND_PKFIELD_BLOODASSASSIN_DAMAGE02,
-        //	SOUND_PKFIELD_BLOODASSASSIN_MOVE01,
-    }
-    return true;
-    case MODEL_LAVA_GIANT:
-    case MODEL_BURNING_LAVA_GIANT:
-    {
-        if (MONSTER01_ATTACK1 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01);
-        }
-        else if (MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02);
-        }
-        else if (MONSTER01_SHOCK == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH);
-        }
-
-        //SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE02,
-        //SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE02,
-    }
-    return true;
-    }
-
-    return false;
 }
 
 void CGM_PK_Field::PlayObjectSound(OBJECT* o)

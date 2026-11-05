@@ -1,0 +1,90 @@
+/* Classic (0.97) frame for the docked single-document windows (character_info, my_quest_info,
+   pet_info, party_info): 0.97 drew its right-hand windows on Item_Back01 (190x256) over
+   Item_Back02 (190x177), with the Close button (exit_01, 24x24) at (25, 395). Link this before the window's own
+   .rcss, as with legacy. The group-box sprites the windows' contents use stay legacy's. */
+
+@spritesheet docked-classic-back1-sheet { src: ../../../Classic/Item_back01.jpg; docked-bg-top-a: 0px 0px 190px 256px; }
+@spritesheet docked-classic-back1b-sheet { src: ../../../Classic/Item_back01.jpg; docked-bg-top-b: 0px 0px 190px 256px; }
+@spritesheet docked-classic-back2-sheet { src: ../../../Classic/Item_Back02.jpg; docked-classic-back2: 0px 0px 190px 177px; }
+
+@spritesheet docked-corner-tl-sheet { src: "../../../newui_item_table01(L).tga"; docked-corner-tl: 0px 0px 14px 14px; }
+@spritesheet docked-corner-tr-sheet { src: "../../../newui_item_table01(R).tga"; docked-corner-tr: 0px 0px 14px 14px; }
+@spritesheet docked-corner-bl-sheet { src: "../../../newui_item_table02(L).tga"; docked-corner-bl: 0px 0px 14px 14px; }
+@spritesheet docked-corner-br-sheet { src: "../../../newui_item_table02(R).tga"; docked-corner-br: 0px 0px 14px 14px; }
+@spritesheet docked-edge-top-sheet    { src: "../../../newui_item_table03(Up).tga"; docked-edge-top:    0px 0px 1px 14px; }
+@spritesheet docked-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; docked-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet docked-edge-left-sheet   { src: "../../../newui_item_table03(L).tga";  docked-edge-left:   0px 0px 14px 1px; }
+@spritesheet docked-edge-right-sheet  { src: "../../../newui_item_table03(R).tga";  docked-edge-right:  0px 0px 14px 1px; }
+
+@spritesheet docked-exit-sheet  { src: ../../../Classic/Exit_01.jpg; docked-exit-btn: 0px 0px 24px 24px; }
+@spritesheet docked-exit2-sheet { src: ../../../Classic/Exit_02.jpg; docked-exit-btn-pressed: 0px 0px 24px 24px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+.frame-piece { position: absolute; pointer-events: none; }
+/* The window's own .rcss picks .frame-top's sprite (docked-bg-top-a or -b): both are Item_Back01
+   here. .frame-left carries Item_Back02; the other two pieces are not part of the 0.97 frame. */
+.frame-top    { left: 0; top: 0;     width: 190px; height: 256px; }
+.frame-left   { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(docked-classic-back2); }
+.frame-right, .frame-bottom { display: none; }
+
+.gbox-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+.gbox-edge { position: absolute; pointer-events: none; }
+.gbox-edge-top { height: 14px; decorator: image(docked-edge-top); }
+.gbox-edge-bottom { height: 14px; decorator: image(docked-edge-bottom); }
+.gbox-edge-left { width: 14px; decorator: image(docked-edge-left); }
+.gbox-edge-right { width: 14px; decorator: image(docked-edge-right); }
+.gbox-title-fill { position: absolute; background-color: token(surface-panel-title); pointer-events: none; }
+.gbox-content-fill { position: absolute; background-color: token(surface-panel-content); pointer-events: none; }
+.gbox-title-text {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1em;
+	color: token(text-heading);
+	pointer-events: none;
+}
+
+#btn_exit {
+	position: absolute;
+	left: 25px;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(docked-exit-btn);
+}
+#btn_exit:active { decorator: image(docked-exit-btn-pressed); }
+
+#panel.fill-placement { box-sizing: border-box; }
+/* 0.97 has no corner close. */
+#frame_corner_close { display: none; }
+
+/* Scrolling lists: the Season 1 client's win_scrollbar (as the classic social windows'), in place of
+   base.rcss's S6 track and knob: 13x13 arrows at both ends, the track between two 106,97,88 lines,
+   a grey thumb sized to the list. */
+@spritesheet docked-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	docked-scroll-thumb: 0px 1px 11px 1px;
+	docked-scroll-up: 0px 3px 13px 13px;
+	docked-scroll-down: 0px 16px 13px 13px;
+}
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(docked-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(docked-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(docked-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }

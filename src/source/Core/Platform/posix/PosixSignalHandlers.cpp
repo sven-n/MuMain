@@ -37,6 +37,21 @@ static struct sigaction s_oldSIGBUS;  // NOLINT
 // Async-signal-safe crash handler.
 // Only write(), backtrace_symbols_fd(), and _exit() are called here.
 // spdlog is NOT safe inside a signal handler — do not call it here.
+// write() is async-signal-safe; a handler can only drop what a failed write did not write.
+static void WriteFromSignalHandler(int fd, const char* data, std::size_t size)
+{
+    while (size > 0)
+    {
+        const ssize_t written = write(fd, data, size);
+        if (written <= 0)
+        {
+            return;
+        }
+        data += written;
+        size -= static_cast<std::size_t>(written);
+    }
+}
+
 static void CrashHandler(int signum, siginfo_t* info, void* context)
 {
     // Re-entry guard: .NET runtime uses SIGSEGV internally — if the previous handler
@@ -83,17 +98,17 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
     static const int prefixLen = static_cast<int>(sizeof(prefix) - 1);
 
     // Write to stderr (always available, async-signal-safe)
-    write(STDERR_FILENO, prefix, prefixLen);
-    write(STDERR_FILENO, name, nameLen);
-    write(STDERR_FILENO, newline, 1);
+    WriteFromSignalHandler(STDERR_FILENO, prefix, prefixLen);
+    WriteFromSignalHandler(STDERR_FILENO, name, nameLen);
+    WriteFromSignalHandler(STDERR_FILENO, newline, 1);
 
     // Write to MuError.log fd if available (async-signal-safe: write() on raw fd)
     int fd = mu::log::g_errorReportFd;
     if (fd >= 0)
     {
-        write(fd, prefix, prefixLen);
-        write(fd, name, nameLen);
-        write(fd, newline, 1);
+        WriteFromSignalHandler(fd, prefix, prefixLen);
+        WriteFromSignalHandler(fd, name, nameLen);
+        WriteFromSignalHandler(fd, newline, 1);
     }
 
 #ifdef MU_HAS_BACKTRACE

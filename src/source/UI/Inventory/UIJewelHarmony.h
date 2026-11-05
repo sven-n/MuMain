@@ -95,7 +95,8 @@ public:
 
 private:
     JewelHarmonyInfo();
-    const bool OpenJewelHarmonyInfoFile(const std::wstring& filename);
+    // What is wrong with the file, e.g. L"file not found."; nullptr when it loaded.
+    const wchar_t* OpenJewelHarmonyInfoFile(const std::wstring& filename);
 
 private:
     HARMONYJEWELOPTION m_OptionData[MAXHARMONYJEWELOPTIONTYPE][MAXHARMONYJEWELOPTIONINDEX];

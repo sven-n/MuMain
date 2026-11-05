@@ -1629,13 +1629,11 @@ void CMyInventory::RenderItemToolTip(int iSlotIndex) const
 {
     if (m_iPointedSlot != -1)
     {
-        ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[iSlotIndex];
+        const ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[iSlotIndex];
         if (pEquipmentItemSlot->Type != -1)
         {
             const float targetX = m_EquipmentSlots[iSlotIndex].x + m_EquipmentSlots[iSlotIndex].width / 2.f;
             const float targetY = m_EquipmentSlots[iSlotIndex].y + m_EquipmentSlots[iSlotIndex].height / 2.f;
-
-            pEquipmentItemSlot->bySelectedSlotIndex = iSlotIndex;
 
             if (m_RepairMode == SEASON3B::REPAIR_MODE_OFF)
             {

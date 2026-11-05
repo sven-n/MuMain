@@ -3,11 +3,14 @@
 #ifdef _EDITOR
 
 #include "ItemUsers.h"
+#include "ItemStatFileChange.h"
 
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
+
+#include <algorithm>
 
 namespace MuEditor::Items
 {
@@ -69,6 +72,21 @@ std::vector<int> FindGlowColorUsers(std::string_view name)
         { return model.glow.color == name || model.glow.shineColor == name || model.glow.ancientColor == name; });
 }
 
+std::vector<int> FindGroundLabelStyleUsers(std::string_view name)
+{
+    std::vector<int> users;
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        const ItemDefinition* item = g_ItemDatabase.Find(itemType);
+        if (item != nullptr && std::ranges::any_of(item->groundLabels, [name](const Data::Items::ItemGroundLabel& label)
+                                                   { return label.style == name; }))
+        {
+            users.push_back(itemType);
+        }
+    }
+    return users;
+}
+
 bool UsesStatProfile(const ItemDefinition& item, std::string_view name)
 {
     return IsDefaultProfile(name) ? IsDefaultProfile(item.statProfile) : item.statProfile == name;
@@ -114,6 +132,14 @@ int ItemStatProfileUseCounts::Rules(std::string_view name)
     return FindCount(m_rules, name);
 }
 
+const std::vector<int>& ItemStatProfileUseCounts::DescriptionUsers(std::string_view table)
+{
+    static const std::vector<int> None;
+    Update();
+    const auto found = m_descriptionUsers.find(table);
+    return found != m_descriptionUsers.end() ? found->second : None;
+}
+
 void ItemStatProfileUseCounts::Update()
 {
     if (m_version == g_ItemDatabase.GetVersion())
@@ -123,6 +149,7 @@ void ItemStatProfileUseCounts::Update()
     m_version = g_ItemDatabase.GetVersion();
     m_items.clear();
     m_rules.clear();
+    m_descriptionUsers.clear();
     for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
     {
         if (item.Exists())
@@ -133,6 +160,10 @@ void ItemStatProfileUseCounts::Update()
     for (const Data::Items::StatProfileRule& rule : g_ItemDatabase.GetStatProfiles().GetRules())
     {
         ++m_rules[std::string(CountKey(rule.profile))];
+    }
+    for (const std::string& table : g_ItemDatabase.GetStatProfiles().GetTableNames())
+    {
+        m_descriptionUsers[table] = FindTableDescriptionUsers(g_ItemDatabase.GetAllSlots(), table);
     }
 }
 } // namespace MuEditor::Items

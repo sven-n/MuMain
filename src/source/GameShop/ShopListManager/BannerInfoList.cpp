@@ -34,7 +34,7 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
 
     std::wstring path = strDirPath + strScriptFileName;
 
-    ifs.open(mu_narrow_path(path), std::ifstream::in);
+    ifs.open(mu_resolved_narrow_path(path), std::ifstream::in);
 
     if (ifs.is_open())
     {
@@ -44,7 +44,7 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
 
         while (true)
         {
-            if (!ifs.getline(buff, sizeof(buff)))
+            if (!ifs.getline(buff, std::size(buff)))
                 break;
 
             CBannerInfo info;

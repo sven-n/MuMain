@@ -1,0 +1,415 @@
+/* Classic (0.97) look for the generic confirm dialog (CGenericConfirmDialog): the stone box of the
+   in-game confirmations (RenderMessageBox 0051af50, codes 0x97 / 0x99: selling a dear item,
+   combining, a changed trade, a split server, using a fruit) and of the personal-code keypad
+   (FUN_004eb070). The box is Message_box2 (213x5) as the top edge, N strips of Message_box1
+   (213x40, the stone with its golden sides) and Message_box2 again as the bottom edge, 213 wide
+   at x 213 with its top at y 100 of the 640x480 frame: 213x130 (three strips) for a
+   confirmation, 213x170 (four) for the keypad. OK is Ok / Ok2 and Cancel is Cancel / Cancel2
+   (70x21, the second image under the mouse) at (234, 190) and (333, 190): 21 and 120 from the
+   box's left, 90 from its top. The lines are bold, 18 apart from y 130, golden (1.0, 0.7, 0)
+   with a warning line red. The keypad: eleven Item_box cells (32x32, tinted (0.85, 0.85, 0.65),
+   (1, 1, 0.8) under the mouse, Inventorybox2 while pressed) at (223 + 40 * (i % 5),
+   154 + 38 * (i / 5)), the eleventh the delete key on Back1 / Back2 / Back3; the digits
+   (128, 128, 196) and the one under the mouse yellow (196, 196, 0); the digit field a Bar plate
+   (40x18) tinted 0.3 at y 134, 16 tall and 52 wide; OK and Cancel at (265, 239) and (343, 239),
+   beside the delete key.
+
+   Copied from legacy's generic_confirm_dialog.rcss (a theme sheet replaces the whole file).
+   #panel is placed like the 0.97 box (overriding the markup's .center-both); every dimension is
+   dp -- the panel carries no transform:scale(root_scale) -- and text is rem (native text size,
+   RmlNativeText.h), as legacy does. What legacy has and 0.97 does not (the duel portrait, the
+   text field, the progress bar, the live 3D item, a labelled or third button) keeps legacy's
+   rule, over the 0.97 box.
+
+   The lines' default colour stays white: generic_confirm_dialog.rml binds every line's colour
+   inline ('#ffffff' when the caller gives none) and an inline value outranks this sheet, so the
+   0.97 gold needs the markup; a caller's own colour (the red warning line) shows as given. */
+#panel {
+	/* 0.97: centred horizontally, top edge at y 100, three strips tall (5 + 3 * 40 + 5 = 130;
+	   legacy's 117 is the S6 cap and foot) for up to three lines and growing with each further
+	   line -- so no centering transform and no fixed height: the flowing .gcd-body below sizes
+	   it. y 100 counts from the 640x480 canvas top: the markup adds that canvas's offset
+	   (canvas_top, RmlDialogCanvas.h) as margin-top. 213 wide, not legacy's 230: the 0.97 box
+	   and its button places are 213 wide, so the edges are Message_box2 itself. */
+	top: 100dp;
+	left: 50%;
+	margin-left: -106.5dp;
+	transform: none;
+	width: 213dp;
+	min-height: 130dp;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	color: token(text-primary);
+}
+/* Optional taller variant (GenericDialogConfig::tallPanel): the keypad's four-strip box (5 + 4 *
+   40 + 5 = 170; legacy's 240) -- the duel portrait sets it too and takes its own size below. The
+   bottom-anchored buttons and the edges follow the panel on their own. */
+#panel.tall {
+	min-height: 170dp;
+}
+/* The keypad's box: its lines start where 0.97 wrote the title (10 under the top edge, the
+   subtitle at 22), and OK and Cancel sit at (265, 239) and (343, 239) -- 52 and 130 from the
+   box's left, 10 above its bottom edge -- beside the delete key, whose row ends 8 above that
+   edge: the body keeps 2 under the grid (its cells leave 6 more) instead of the button blank.
+   The sides keep 6, so the five 40-wide columns fit (200) and the first cell starts 10 from the
+   box's left (x 223). 0.97's box is 170 tall with its field at 34 and its cells from 54; here
+   the two lines take their own rows, so the box grows past 170 by the same flow as any other.
+   The duel portrait, tall as well, takes its own placement back below. */
+#panel.tall .gcd-body { margin: 10dp 6dp 2dp 6dp; }
+#panel.tall .gcd-btn-primary { left: 52dp; bottom: 10dp; }
+#panel.tall .gcd-btn-primary.solo { left: 71dp; }
+#panel.tall .gcd-btn-secondary, #panel.tall .gcd-btn-cancel { left: 130dp; bottom: 10dp; }
+
+/* The four sprite layers carry the 0.97 composite: the edges are Message_box2 at its own 213, the
+   middle the Message_box1 strips. */
+@spritesheet classic-gcd-edge-sheet  { src: ../../../Classic/Message_box2.jpg; classic-gcd-edge: 0px 0px 213px 5px; }
+@spritesheet classic-gcd-stone-sheet { src: ../../../Classic/Message_box1.jpg; classic-gcd-stone: 0px 0px 213px 40px; }
+.gcd-sprite-back, .gcd-sprite-top, .gcd-sprite-middle, .gcd-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	pointer-events: none;
+}
+/* 0.97 has no backing behind its strips (legacy's newui_msgbox_back): the stone is opaque, so the
+   layer stays and draws nothing. */
+.gcd-sprite-back { left: 4dp; right: 4dp; top: 5dp; bottom: 5dp; decorator: none; }
+.gcd-sprite-top { top: 0; height: 5dp; decorator: image(classic-gcd-edge); }
+/* The strips, stacked from the top edge and cut at the bottom one (0.97 drew whole strips; a box
+   grown by lines shows part of the last). An atlas sprite repeats as clipped quads inside its
+   own rectangle (engine-findings.md, image repeat modes). */
+.gcd-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-gcd-stone repeat-y left top); }
+.gcd-sprite-bottom { bottom: 0; height: 5dp; decorator: image(classic-gcd-edge); }
+/* The overlay-portrait box is the duel request (CDuelMsgBox) and result. 0.97 has no duel; the
+   Season 1 client's request (005c8af0) is a 0.97 box at (213, 110), four stones tall
+   (5 + 4 * 40 + 5 = 170), its DuelWindow crest (128 x 128) at (256, 120) behind the text, the
+   caption bold (255, 207, 24) centred at y 141, the two lines at 180 and 200, each text over a
+   black copy one unit down and right, and OK / Cancel (70 x 21) at (237, 250) and (332, 250).
+   In the box: the caption at 31, the lines 20 apart ending at 106 (more lines grow upwards), the
+   buttons 24 and 119 from its left, 9 above its bottom. */
+#panel.portrait {
+	top: 110dp;
+	min-height: 170dp;
+}
+#panel.portrait .gcd-body {
+	margin: 27dp 6dp 64dp 6dp;
+	height: 79dp; /* 170 - 27 top - 64 under the last line */
+	align-items: stretch;
+}
+#panel.portrait .gcd-text-col {
+	justify-content: flex-end;
+	overflow: visible; /* a fixed native box never scrolls */
+}
+#panel.portrait .gcd-portrait2d-text { margin-bottom: auto; color: rgb(255, 207, 24); font-effect: shadow(1dp 1dp black); }
+/* Positioned so they paint above the (positioned) crest, which comes first in the markup. Regular
+   weight unless the caller asks for bold, as Season 1 draws them. */
+#panel.portrait .gcd-line {
+	position: relative;
+	line-height: 20dp;
+	min-height: 20dp; /* an empty line keeps its row, as native draws every row at its own y */
+	font-weight: normal;
+	font-effect: shadow(1dp 1dp black);
+}
+#panel.portrait .gcd-line.bold { font-weight: bold; }
+#panel.portrait .gcd-btn-primary { left: 24dp; bottom: 9dp; }
+#panel.portrait .gcd-btn-secondary, #panel.portrait .gcd-btn-cancel { left: 119dp; bottom: 9dp; }
+
+/* GenericDialogConfig::Portrait2D's own art -- the duel crest: Season 1's DuelWindow (128 x 128),
+   which Season 1 drew additively (its black square vanishes over the stone): the derived
+   DuelWindow_add (tools/classic_theme/make_classic_derived_textures.py) carries that as alpha. */
+@spritesheet portrait2d-sheet
+{
+	src: ../../../Classic/s1/DuelWindow_add.tga;
+	portrait2d-image: 0px 0px 128px 128px;
+}
+
+/* 0.97 has no title banner (legacy's IMAGE_MSGBOX_TOP_TITLEBAR, newui_Message_03.tga, dropped
+   with its @spritesheet): a title is a bold line over the stone, so the rail stays and draws
+   nothing, and the title text below stays. */
+.gcd-header-rail {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: none;
+}
+/* Title text over the box -- one centered line rather than native's exact pixel-wrap math -- 10
+   under the top edge, where 0.97 centres the keypad's title (y 110). No conflict with
+   .gcd-body's own top blank below -- the title sits above that. */
+.gcd-header-title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10dp;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-weight: bold;
+	color: token(accent-gold);
+	pointer-events: none;
+}
+.gcd-header-title.warning { color: token(semantic-warning); }
+.gcd-header-title.error { color: token(semantic-danger); }
+
+/* Text floats transparently over the stone (painted by the sprite layers above it). 0.97's lines
+   start 30 under the top edge (y 130) and its buttons take the bottom 40 (90 from the top, 21
+   tall, 19 above the bottom edge): a 30 top blank and a 46 bottom one (the buttons and a 6 gap).
+   The sides keep legacy's 184 text column ((213 - 184) / 2 = 14.5), native's wrap width
+   (MSGBOX_TEXT_MAXWIDTH 180 plus the renderer's ~2%); the bold 0.97 lines run a little wider, so
+   a long line may break one word earlier than in legacy.
+
+   top+bottom (not top+height) deliberately -- this engine's box model is content-box only (no
+   box-sizing support anywhere in this codebase), so an explicit height combined with a bordered/
+   padded box can push past the intended bottom edge. Anchoring both edges keeps the box's outer
+   size exact regardless of its own content.
+
+   display:flex row: #gcd_item3d_anchor (item icon, left) + .gcd-text-col (fills the rest, right).
+   The title is NOT a child of this box -- it overlays #panel's own top edge instead. */
+.gcd-body {
+	/* In flow (not absolute) so the panel grows with it. */
+	margin: 30dp 14.5dp 46dp 14.5dp;
+	/* Positioned so it paints above the sprite composite, which comes first in the markup. */
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+/* Holds lines/input-row/progress-track. Fills .gcd-body's full height explicitly (rather than
+   relying on align-items, which wouldn't stretch under align-items:center) so the .scroll-pane
+   class it also carries has a real bound to scroll within once content grows taller than the
+   panel. The overflow/pointer-events rules and the whole scrollbar chrome now come from
+   base.rcss's .scroll-pane -- this element was the case they were generalized from, so only its
+   own layout stays here. */
+.gcd-text-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	max-height: 320dp;
+	flex: 1 1 auto;
+}
+/* 0.97 draws the lines bold, 18 apart in the 640x480 frame (y 130, 148, 166: three lines fill the
+   130 box, 30 + 3 * 18 + 46). Colour: see the header. */
+.gcd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	line-height: 18dp;
+	min-height: 18dp; /* a blank line (" ") keeps its row, as native's AddMsg(L" ") does */
+	font-weight: bold;
+	color: token(text-primary);
+}
+.gcd-line.bold { font-weight: bold; }
+
+/* The live 3D item: native C3DItemCommonMsgBox's 40x40 slot (C++ frames the item by this
+   element's drawn box: legacy's rule, untouched). */
+.gcd-item3d {
+	position: relative;
+	width: 40dp;
+	height: 40dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
+}
+/* Collapses when there's no item, so .gcd-text-col alone fills the row. */
+.gcd-item3d.hidden { display: none; }
+/* The model reaches past its slot, and past the panel, as natively: the image around it is far larger. */
+#gcd_item3d { position: absolute; left: -80dp; top: -80dp; width: 200dp; height: 200dp; pointer-events: none; }
+
+/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a direct
+   #panel child at Season 1's crest position (y+10, 128x128), behind the text, unlike .gcd-item3d
+   (icon-left/text-right, that's the Beside layout below). */
+.gcd-portrait2d {
+	position: absolute;
+	left: 43dp; /* Season 1: 256 - 213 */
+	top: 10dp;
+	width: 128dp;
+	height: 128dp;
+	decorator: image(portrait2d-image);
+}
+/* Same cascade-tie fix as .gcd-item3d above. */
+.gcd-portrait2d.hidden { display: none; }
+/* Beside layout -- same row-sibling slot/sizing convention as .gcd-item3d, sized a little
+   larger since this reads as hero art rather than a small icon. No text overlay in this layout --
+   .gcd-portrait2d-text is never a child of this element in the .rml. */
+.gcd-portrait2d-beside {
+	position: static;
+	width: 60dp;
+	height: 56dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
+	margin-bottom: 0;
+	decorator: image(portrait2d-image);
+}
+/* The caption row over the crest (native draws it ON TOP of the art): native's bold yellow, first
+   row of .gcd-text-col, positioned so it paints above the (positioned) crest. */
+.gcd-portrait2d-text {
+	position: relative;
+	display: block;
+	width: 100%;
+	line-height: 20dp;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1rem;
+	color: token(text-heading);
+}
+.gcd-portrait2d-text.hidden { display: none; } /* display: block above outranks .hidden */
+
+/* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
+   `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
+   static so they can flex-wrap into a grid instead of stacking on top of each other. */
+@spritesheet classic-gcd-plate-sheet          { src: ../../../Classic/Bar.jpg;           classic-gcd-plate: 0px 0px 40px 18px; }
+@spritesheet classic-gcd-cell-sheet           { src: ../../../Classic/Item_box.jpg;      classic-gcd-cell: 0px 0px 32px 32px; }
+@spritesheet classic-gcd-cell-pressed-sheet   { src: ../../../Classic/Inventorybox2.jpg; classic-gcd-cell-pressed: 0px 0px 32px 32px; }
+@spritesheet classic-gcd-delete-sheet         { src: ../../../Classic/Back1.jpg;         classic-gcd-delete: 0px 0px 32px 32px; }
+@spritesheet classic-gcd-delete-hover-sheet   { src: ../../../Classic/Back2.jpg;         classic-gcd-delete-hover: 0px 0px 32px 32px; }
+@spritesheet classic-gcd-delete-pressed-sheet { src: ../../../Classic/Back3.jpg;         classic-gcd-delete-pressed: 0px 0px 32px 32px; }
+.gcd-input-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 4dp;
+}
+/* .gcd-input-row sets its own `display`, so an earlier same-specificity `.hidden { display: none;
+   }` (base.rcss) loses the cascade tie without this later, more specific override. */
+.gcd-input-row.hidden { display: none; }
+/* The digit field: 0.97's Bar plate stretched to 52x16 and tinted 0.3, the digits C++ masks
+   centred on it in legacy's prompt colour (0.97's own is not known). */
+.gcd-keypad-display {
+	width: 52dp;
+	height: 16dp;
+	line-height: 16dp;
+	text-align: center;
+	color: token(text-prompt);
+	font-weight: bold;
+	letter-spacing: 4dp;
+	margin-bottom: 4dp;
+	decorator: image(classic-gcd-plate fill);
+	image-color: #4d4d4d;
+}
+/* Five 32x32 cells per row, 40 apart, the rows 38 apart (4 at each side of a cell, 6 under it);
+   the eleventh, the delete key, starts the third row at the left, where 0.97 draws it beside OK
+   and Cancel (#panel.tall above). */
+.gcd-keypad-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	width: 200dp;
+}
+.gcd-keypad-grid.hidden { display: none; } /* same cascade-tie fix as .gcd-input-row above */
+.btn.gcd-keypad-btn, .btn.gcd-keypad-delete {
+	position: static;
+	width: 32dp;
+	height: 32dp;
+	margin: 0 4dp 6dp 4dp;
+	line-height: 26dp; /* the digit high in the cell, as 0.97 wrote it at (x + 12, y + 6) */
+	font-size: 1rem;
+	font-weight: bold;
+}
+/* The digit cells: Item_box tinted (0.85, 0.85, 0.65), lit (1, 1, 0.8) under the mouse with its
+   digit yellow; a pressed one shows the sunk Inventorybox2. */
+.btn.gcd-keypad-btn { color: #8080c4; decorator: image(classic-gcd-cell); image-color: #d9d9a6; }
+.btn.gcd-keypad-btn:hover { decorator: image(classic-gcd-cell); image-color: #ffffcc; color: #c4c400; }
+.btn.gcd-keypad-btn:active { decorator: image(classic-gcd-cell-pressed); image-color: #ffffcc; }
+/* The delete key's own art carries its arrow (Back1, Back2 under the mouse, Back3 while pressed),
+   so its "Del" label is hidden. */
+.btn.gcd-keypad-delete { decorator: image(classic-gcd-delete); color: rgba(0, 0, 0, 0); }
+.btn.gcd-keypad-delete:hover { decorator: image(classic-gcd-delete-hover); }
+.btn.gcd-keypad-delete:active { decorator: image(classic-gcd-delete-pressed); }
+/* Text-mode field (no 0.97 counterpart in this box: legacy's rule): takes the same flow slot the
+   old native-widget position reference occupied, so the column layout is unchanged. Sizing only
+   -- fill/border/focus/selection come from base.rcss's shared .text-field. */
+.gcd-input-field {
+	position: static;
+	width: 150dp;
+	height: 18dp;
+	padding: 0 3dp;
+	font-size: 0.85rem;
+}
+
+/* Optional progress bar (no 0.97 counterpart in this box: legacy's rule) -- same `x_fraction *
+   100 + '%'` fill technique main_frame.rml's own HP/MP/AG/SD/EXP gauges use. */
+.gcd-progress-track {
+	width: 150dp;
+	height: 10dp;
+	margin-top: 4dp;
+	background-color: token(surface-recessed);
+	border: 1dp token(border-inner);
+}
+.gcd-progress-fill {
+	height: 100%;
+	background-color: token(accent-gold);
+}
+
+/* 0.97's OK / Cancel plates (70x21, the second image under the mouse): paired at 21 and 120 from
+   the box's left (x 234 and 333), 90 from its top -- 19 above the bottom edge of the 130 box, so
+   they follow the growing panel from the bottom. A lone OK is centred (71, as 0.97's single OK
+   at x 284). A button with another label (Decrease / Gift / Discard...; 0.97 has none) gets the
+   plain 0.97 plate (Bar, 40x18) stretched to the same size, with its text, as
+   message_box_view.rcss does.
+
+   Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
+   comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
+   Cancel; `.gcd-btn-cancel` is the always-Cancel/Close slot. Every existing Ok/OkCancel consumer
+   always renders solo or paired (primary+cancel), never triple. Legacy's newui_button_ok /
+   newui_button_cancel sheets are dropped with the S6 art. */
+@spritesheet classic-gcd-ok-sheet      { src: ../../../Classic/Ok.jpg;      classic-gcd-ok: 0px 0px 70px 21px; }
+@spritesheet classic-gcd-ok2-sheet     { src: ../../../Classic/Ok2.jpg;     classic-gcd-ok-hover: 0px 0px 70px 21px; }
+@spritesheet classic-gcd-cancel-sheet  { src: ../../../Classic/Cancel.jpg;  classic-gcd-cancel: 0px 0px 70px 21px; }
+@spritesheet classic-gcd-cancel2-sheet { src: ../../../Classic/Cancel2.jpg; classic-gcd-cancel-hover: 0px 0px 70px 21px; }
+.btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
+	bottom: 19dp;
+	width: 70dp;
+	height: 21dp;
+	line-height: 21dp;
+	font-size: 1rem;
+	color: #ffffff;
+	decorator: image(classic-gcd-plate fill);
+}
+.btn.gcd-btn-primary:hover, .btn.gcd-btn-secondary:hover, .btn.gcd-btn-cancel:hover {
+	decorator: image(classic-gcd-plate fill);
+	image-color: #ffe6b4;
+}
+.btn.gcd-btn-primary:active, .btn.gcd-btn-secondary:active, .btn.gcd-btn-cancel:active {
+	decorator: image(classic-gcd-plate fill);
+	image-color: #b4b4b4;
+}
+/* The stock OK / Cancel: 0.97's lettered plates, with the label text hidden. */
+.btn.gcd-btn-primary.stock-ok { decorator: image(classic-gcd-ok); image-color: #ffffff; color: rgba(0, 0, 0, 0); }
+.btn.gcd-btn-primary.stock-ok:hover, .btn.gcd-btn-primary.stock-ok:active { decorator: image(classic-gcd-ok-hover); image-color: #ffffff; }
+.btn.gcd-btn-cancel.stock-cancel { decorator: image(classic-gcd-cancel); image-color: #ffffff; color: rgba(0, 0, 0, 0); }
+.btn.gcd-btn-cancel.stock-cancel:hover, .btn.gcd-btn-cancel.stock-cancel:active { decorator: image(classic-gcd-cancel-hover); image-color: #ffffff; }
+.gcd-btn-primary   { left: 21dp; }
+.gcd-btn-primary.solo { left: 71dp; }
+/* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both
+   selectors share the position since only one is ever visible outside of `.triple`. */
+.gcd-btn-secondary, .gcd-btn-cancel { left: 120dp; }
+/* Triple (all three shown, e.g. Create/Decrease/Cancel; 0.97 has none) -- native's own `triwidth =
+   panelWidth/3` centering (CUseFruitCheckMsgBox::SetButtonInfo(), CustomMessageBox.cpp), each
+   plate narrowed to 64 and centred within its own 213dp/3 = 71dp third. #panel-qualified so a
+   tall or portrait box's paired places above do not override it. */
+#panel .gcd-btn-primary.triple { left: 4dp; width: 64dp; }
+#panel .gcd-btn-secondary.triple { left: 75dp; width: 64dp; }
+#panel .gcd-btn-cancel.triple { left: 146dp; width: 64dp; }
+
+/* Scrolling lists: the Season 1 client's win_scrollbar (as the classic social windows'), in place of
+   base.rcss's S6 track and knob: 13x13 arrows at both ends, the track between two 106,97,88 lines,
+   a grey thumb sized to the list. */
+@spritesheet gcd-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	gcd-scroll-thumb: 0px 1px 11px 1px;
+	gcd-scroll-up: 0px 3px 13px 13px;
+	gcd-scroll-down: 0px 16px 13px 13px;
+}
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(gcd-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(gcd-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(gcd-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }

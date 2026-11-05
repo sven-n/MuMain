@@ -302,6 +302,21 @@
         "pt": "Bastão divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -737,6 +752,9 @@
       }
     },
     {
+      "number": 32
+    },
+    {
       "number": 33,
       "name": {
         "en": "Chromatic Staff",
@@ -800,6 +818,21 @@
         "pt": "Bastão Divino do Arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 1,
       "height": 4,
       "slot": "mainHand",

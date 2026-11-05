@@ -14,6 +14,9 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 // CItemDataHandler::Load and the bmd import read Data\... relative to the
 // working directory; Load also fills the global ItemAttribute, like the game
 // does at startup. This points both at test-owned state and restores them.
+// A test that switches the UI language needs one too: once a test has loaded
+// the item data, every language switch refills ItemAttribute, which is null
+// outside a scope.
 class ClientDataScope
 {
 public:

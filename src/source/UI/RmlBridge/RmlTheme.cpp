@@ -7,6 +7,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Core.h>
@@ -15,9 +16,11 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -79,11 +82,40 @@ namespace UI::RmlBridge
             return usesNativeTextSize;
         }
 
+        // The active theme's chain, for its [Stacking] entries: read once per theme, not on every
+        // document load. Built on first use and dropped by SetActiveThemeName().
+        std::unique_ptr<ThemeInheritance>& ActiveThemeInheritanceStorage()
+        {
+            static std::unique_ptr<ThemeInheritance> theme;
+            return theme;
+        }
+
+        const ThemeInheritance& ActiveThemeInheritance()
+        {
+            auto& theme = ActiveThemeInheritanceStorage();
+            if (!theme)
+                theme = std::make_unique<ThemeInheritance>(std::filesystem::path("Data/Interface/RmlUi/themes") /
+                                                           ActiveThemeNameStorage());
+            return *theme;
+        }
     }
 
     const std::string& GetActiveThemeName()
     {
         return ActiveThemeNameStorage();
+    }
+
+    std::optional<std::string> GetActiveThemeToken(const std::string& token)
+    {
+        const auto setting = ActiveThemeInheritance().GetSetting("Tokens", token);
+        if (!setting)
+            return std::nullopt;
+        return setting->value;
+    }
+
+    bool ActiveThemeFontHasItalic(const std::string& token)
+    {
+        return ThemeFontHasItalic(ActiveThemeInheritance(), token);
     }
 
     std::string ResolveStartupThemeName(const std::string& savedName)
@@ -113,6 +145,7 @@ namespace UI::RmlBridge
     {
         ActiveThemeNameStorage() = ToLower(themeName);
         UsesNativeTextSizeStorage() = ComputeUsesNativeTextSize(ActiveThemeNameStorage());
+        ActiveThemeInheritanceStorage().reset();
 
         // Both themes deliberately reuse the same <template name="..."> for a shared concept
         // (e.g. "window_shell_bg") in their own themes/<theme>/ copy. Rml::TemplateCache caches a
@@ -215,9 +248,9 @@ namespace UI::RmlBridge
     {
     std::optional<std::string> ReadThemedMarkup(const std::string& sourceUrl, const char* documentPath)
     {
-        std::ifstream file(std::filesystem::u8path(ResolveThemeResource(sourceUrl)), std::ios::binary);
+        std::ifstream file(Core::Text::PathFromUtf8(ResolveThemeResource(sourceUrl)), std::ios::binary);
         if (!file)
-            file.open(std::filesystem::u8path(documentPath), std::ios::binary);
+            file.open(Core::Text::PathFromUtf8(documentPath), std::ios::binary);
         if (!file)
         {
             g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);
@@ -275,12 +308,37 @@ namespace UI::RmlBridge
         return doc;
     }
 
+    std::optional<float> ThemedStackingDepth(const ThemeInheritance& theme, std::string_view documentName)
+    {
+        const auto setting = theme.GetSetting("Stacking", std::string(documentName));
+        if (!setting)
+            return StackingDepthForDocument(documentName);
+
+        char* end = nullptr;
+        const float depth = std::strtof(setting->value.c_str(), &end);
+        if (end == setting->value.c_str() || *end != '\0' || !std::isfinite(depth))
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] Bad [Stacking] depth '%hs' for '%hs'.\r\n", setting->value.c_str(),
+                                std::string(documentName).c_str());
+            return StackingDepthForDocument(documentName);
+        }
+        return depth;
+    }
+
+    namespace
+    {
+    std::optional<float> ActiveThemeStackingDepth(const std::string& documentName)
+    {
+        return ThemedStackingDepth(ActiveThemeInheritance(), documentName);
+    }
+    } // namespace
+
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName)
     {
         if (document == nullptr)
             return;
 
-        const std::optional<float> depth = StackingDepthForDocument(documentName);
+        const std::optional<float> depth = ActiveThemeStackingDepth(documentName);
         if (!depth)
         {
             g_ErrorReport.Write(L"> [RmlTheme] No stacking depth for '%hs'.\r\n", documentName.c_str());
@@ -295,7 +353,7 @@ namespace UI::RmlBridge
             return;
         if (SceneForDocument(documentName) == DocumentScene::Main)
             document->SetAttribute(MainSceneDocumentAttribute, true);
-        const std::optional<float> mainDepth = StackingDepthForDocument(documentName);
+        const std::optional<float> mainDepth = ActiveThemeStackingDepth(documentName);
         if (const std::optional<float> otherDepth = StackingDepthOutsideMainScene(documentName); otherDepth && mainDepth)
         {
             document->SetAttribute(MainSceneDepthAttribute, *mainDepth);

@@ -288,74 +288,83 @@ TEST_CASE("Item stat profiles without a file keep every stat at its base [data][
 TEST_CASE("Item stat file errors [data][items]")
 {
     using Severity = ItemDataIssueSeverity;
-    CHECK(HasIssue(Read(Changed(R"("dropLevelBonus": {"excellent": 25, "ancient": 30},)", "")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("dropLevelBonus": {"excellent": 25, "ancient": 30},)", "")).issues, Severity::Fatal,
                    "dropLevelBonus"));
-    CHECK(HasIssue(Read(Changed(R"("excellent": 25, )", "")).issues, Severity::Error, "dropLevelBonus.excellent"));
-    CHECK(HasIssue(Read(Changed(R"("leadership": "base",)", "")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("excellent": 25, )", "")).issues, Severity::Fatal, "dropLevelBonus.excellent"));
+    CHECK(HasIssue(Read(Changed(R"("leadership": "base",)", "")).issues, Severity::Fatal,
                    "default.requirements.leadership"));
-    CHECK(HasIssue(Read(Changed(R"("excellentLevelAdd": 20,)", "")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("excellentLevelAdd": 20,)", "")).issues, Severity::Fatal,
                    "default.requirements.excellentLevelAdd"));
-    CHECK(HasIssue(Read(Changed(R"("leadership": "base")", R"("leadership": "keep")")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("leadership": "base")", R"("leadership": "keep")")).issues, Severity::Fatal,
                    "default.requirements.leadership"));
-    CHECK(HasIssue(Read(Changed(R"("basis": "levelRequirement")", R"("basis": "dropLevel")")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("basis": "levelRequirement")", R"("basis": "dropLevel")")).issues, Severity::Fatal,
                    "profiles.shield.requirements.energy.basis"));
     CHECK(HasIssue(Read(Changed(R"("strengthPerOptionLevel": 5)", R"("strengthPerOptionLevel": 256)")).issues,
-                   Severity::Error, "profiles.shield.requirements.strengthPerOptionLevel"));
-    CHECK(HasIssue(Read(Changed(R"("ancient": 30)", R"("ancient": -1)")).issues, Severity::Error,
+                   Severity::Fatal, "profiles.shield.requirements.strengthPerOptionLevel"));
+    CHECK(HasIssue(Read(Changed(R"("ancient": 30)", R"("ancient": -1)")).issues, Severity::Fatal,
                    "dropLevelBonus.ancient"));
     CHECK(
-        HasIssue(Read(Changed(R"("name": "linear")", R"("name": "steps")")).issues, Severity::Error, "tables[1].name"));
-    CHECK(HasIssue(Read(Changed(R"("name": "linear")", R"("name": "lin ear")")).issues, Severity::Error,
+        HasIssue(Read(Changed(R"("name": "linear")", R"("name": "steps")")).issues, Severity::Fatal, "tables[1].name"));
+    CHECK(HasIssue(Read(Changed(R"("name": "linear")", R"("name": "lin ear")")).issues, Severity::Fatal,
                    "tables[0].name"));
-    CHECK(HasIssue(Read(Changed(R"("perLevel": 1)", R"("caption2": 1)")).issues, Severity::Error, "tables.linear"));
-    CHECK(HasIssue(Read(Changed("[0, 3, 6, 9, 12, 15,", "[0, 3, 6, 9, 12,")).issues, Severity::Error,
+    // Item descriptions write a table as {table:<name>}, apart from the built-in values, so a table may be named like
+    // one: the file reads without errors, with the table and the profile that names it.
+    std::string levelTable = Changed(R"("name": "linear")", R"("name": "level")");
+    const std::string linearUse = R"("table": "linear")";
+    levelTable.replace(levelTable.find(linearUse), linearUse.size(), R"("table": "level")");
+    const ReadResult level = Read(levelTable);
+    CHECK_FALSE(HasFatal(level.issues));
+    REQUIRE_FALSE(level.file.tables.empty());
+    CHECK(level.file.tables[0].name == "level");
+    CHECK(HasIssue(Read(Changed(R"("perLevel": 1)", R"("caption2": 1)")).issues, Severity::Fatal, "tables.linear"));
+    CHECK(HasIssue(Read(Changed("[0, 3, 6, 9, 12, 15,", "[0, 3, 6, 9, 12,")).issues, Severity::Fatal,
                    "tables.steps.values"));
-    CHECK(HasIssue(Read(Changed("[0, 3, 6,", "[0, -3, 6,")).issues, Severity::Error, "tables.steps.values[1]"));
+    CHECK(HasIssue(Read(Changed("[0, 3, 6,", "[0, -3, 6,")).issues, Severity::Fatal, "tables.steps.values[1]"));
     CHECK(HasIssue(Read(Changed(R"("magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"})",
                                 R"("magicDefense": {"table": "steps", "excellent": "none"})"))
                        .issues,
-                   Severity::Error, "default.magicDefense.ancient"));
+                   Severity::Fatal, "default.magicDefense.ancient"));
     CHECK(HasIssue(Read(Changed(R"(,
     "magicDefense": {"table": "steps", "excellent": "none", "ancient": "none"})",
                                 ""))
                        .issues,
-                   Severity::Error, "default.magicDefense"));
-    CHECK(HasIssue(Read(Changed(R"(, "perLevelAfterHalving": 2})", "}")).issues, Severity::Error,
+                   Severity::Fatal, "default.magicDefense"));
+    CHECK(HasIssue(Read(Changed(R"(, "perLevelAfterHalving": 2})", "}")).issues, Severity::Fatal,
                    "default.magicPower.perLevelAfterHalving"));
     CHECK(HasIssue(Read(Changed(R"("defense": {"table": "linear")", R"("defense": {"table": "missing")")).issues,
-                   Severity::Error, "profiles.shield.defense.table"));
-    CHECK(HasIssue(Read(Changed(R"("dropLevelDivisor": 40)", R"("dropLevelDivisor": 0)")).issues, Severity::Error,
+                   Severity::Fatal, "profiles.shield.defense.table"));
+    CHECK(HasIssue(Read(Changed(R"("dropLevelDivisor": 40)", R"("dropLevelDivisor": 0)")).issues, Severity::Fatal,
                    "default.damage.ancient.dropLevelDivisor"));
-    CHECK(HasIssue(Read(Changed(R"("ancient": "none"})", R"("ancient": "nothing"})")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("ancient": "none"})", R"("ancient": "nothing"})")).issues, Severity::Fatal,
                    "default.blockRate.ancient"));
-    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "default")")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "default")")).issues, Severity::Fatal,
                    "profiles[0].name"));
-    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "shield")")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("name": "sceptre")", R"("name": "shield")")).issues, Severity::Fatal,
                    "profiles[1].name"));
-    CHECK(HasIssue(Read(Changed(R"("afterLevelBonus": true)", R"("afterLevelBonus": 1)")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("afterLevelBonus": true)", R"("afterLevelBonus": 1)")).issues, Severity::Fatal,
                    "profiles.shield.defense.ancient.afterLevelBonus"));
-    CHECK(HasIssue(Read(R"({"formatVersion": 2})").issues, Severity::Error, "formatVersion"));
+    CHECK(HasIssue(Read(R"({"formatVersion": 2})").issues, Severity::Fatal, "formatVersion"));
 
     // Profile rules
     const std::string sceptreRule = R"({"profile": "sceptre", "tags": ["sceptre"]})";
     const std::string shieldRule = R"({"profile": "shield", "group": [6], "weaponKind": ["shield"]})";
-    CHECK(HasIssue(Read(Changed(R"("profileRules": [)", R"("profileRules": 5, "unused": [)")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(R"("profileRules": [)", R"("profileRules": 5, "unused": [)")).issues, Severity::Fatal,
                    "profileRules"));
-    CHECK(HasIssue(Read(Changed(sceptreRule, "7")).issues, Severity::Error, "profileRules[0]"));
-    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"tags": ["sceptre"]})")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(sceptreRule, "7")).issues, Severity::Fatal, "profileRules[0]"));
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"tags": ["sceptre"]})")).issues, Severity::Fatal,
                    "profileRules[0].profile"));
-    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "staff", "tags": ["sceptre"]})")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "staff", "tags": ["sceptre"]})")).issues, Severity::Fatal,
                    "profileRules[0].profile"));
-    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "sceptre", "colour": ["red"]})")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(sceptreRule, R"({"profile": "sceptre", "colour": ["red"]})")).issues, Severity::Fatal,
                    "profileRules[0].colour"));
-    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "weaponKind": []})")).issues, Severity::Error,
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "weaponKind": []})")).issues, Severity::Fatal,
                    "profileRules[1].weaponKind"));
     CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "weaponKind": ["shields"]})")).issues,
-                   Severity::Error, "profileRules[1].weaponKind[0]"));
-    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "group": [6, 16]})")).issues, Severity::Error,
+                   Severity::Fatal, "profileRules[1].weaponKind[0]"));
+    CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "group": [6, 16]})")).issues, Severity::Fatal,
                    "profileRules[1].group[1]"));
     CHECK(HasIssue(Read(Changed(shieldRule, R"({"profile": "shield", "requirements": ["luck"]})")).issues,
-                   Severity::Error, "profileRules[1].requirements[0]"));
+                   Severity::Fatal, "profileRules[1].requirements[0]"));
     // "default" names the default; a rule for it needs no profile.
     const ReadResult defaultRule = Read(Changed(sceptreRule, R"({"profile": "default", "slot": ["wings"]})"));
     CHECK(defaultRule.issues.empty());
@@ -365,7 +374,7 @@ TEST_CASE("Item stat file warnings [data][items]")
 {
     using Severity = ItemDataIssueSeverity;
     const auto warningsOnly = [](const std::vector<ItemDataIssue>& issues)
-    { return !HasErrors(issues) && !issues.empty(); };
+    { return !HasFatal(issues) && !issues.empty(); };
 
     const ReadResult unknownKey =
         Read(Changed(R"("perLevelAfterHalving": 0})", R"("perLevelAfterHalving": 0, "speed": 1})"));
@@ -383,9 +392,12 @@ TEST_CASE("Item stat file warnings [data][items]")
                      R"("excellent": {"times": 12, "add": 4, "dropLevelDivisor": 5, "afterLevelBonus": true})"));
     CHECK(HasIssue(excellentAfter.issues, Severity::Warning, "default.defense.excellent.afterLevelBonus"));
 
+    // A table no stat uses can be one for item descriptions, so the file alone does not warn about it
+    // (ValidateTableUses does, with the items).
     const ReadResult unusedTable = Read(Changed(R"("defense": {"table": "linear", )", R"("defense": {)"));
-    CHECK(warningsOnly(unusedTable.issues));
-    CHECK(HasIssue(unusedTable.issues, Severity::Warning, "tables.linear"));
+    CHECK(unusedTable.issues.empty());
+    CHECK_FALSE(ItemStatProfiles(unusedTable.file).IsTableUsedByStats("linear"));
+    CHECK(ItemStatProfiles(unusedTable.file).IsTableUsedByStats("steps"));
 
     const ReadResult noEnglish = Read(Changed(R"({"en": "Steps"})", R"({"de": "Stufen"})"));
     CHECK(HasIssue(noEnglish.issues, Severity::Warning, "tables.steps.caption"));

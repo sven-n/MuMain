@@ -10,8 +10,9 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <fstream>
 #include <optional>
+
+#include "Core/Text/Utf8Path.h"
 
 #ifndef _WIN32
 #include "Core/Platform/PathResolve.h"
@@ -22,7 +23,6 @@ namespace Data::Items
 namespace
 {
 constexpr const char* JsonExtension = ".json";
-constexpr const char* TemporaryExtension = ".tmp";
 
 // Same order as the ITEM_GROUP_* constants.
 constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
@@ -54,9 +54,9 @@ std::vector<std::filesystem::path> FindJsonFiles(const std::filesystem::path& di
     return files;
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
 {
-    issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
+    issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
 
 // Reads every *.json file of the folder with readFile(text, source).
@@ -67,7 +67,7 @@ void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMe
     const std::vector<std::filesystem::path> files = FindJsonFiles(directory);
     if (files.empty())
     {
-        AddError(issues, directory.string(), noFilesMessage);
+        AddFatal(issues, directory.string(), noFilesMessage);
         return;
     }
 
@@ -77,7 +77,7 @@ void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMe
         const std::optional<std::string> text = ReadTextFile(file);
         if (!text)
         {
-            AddError(issues, source, "could not be read");
+            AddFatal(issues, source, "could not be read");
             continue;
         }
         readFile(*text, source);
@@ -91,27 +91,12 @@ struct FileToSave
     std::string text;
 };
 
-std::filesystem::path GetTemporaryPath(const std::filesystem::path& path)
-{
-    std::filesystem::path temporaryPath = path;
-    temporaryPath += TemporaryExtension;
-    return temporaryPath;
-}
-
 bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issues)
 {
-    const std::filesystem::path temporaryPath = GetTemporaryPath(file.path);
-    std::error_code error;
-    std::filesystem::create_directories(file.path.parent_path(), error);
-    std::ofstream stream(temporaryPath, std::ios::binary | std::ios::trunc);
-    stream << file.text;
-    // Closing flushes; checking only afterwards also catches a failing final
-    // write (e.g. a full disk) before any old file is replaced.
-    stream.close();
-    if (!stream)
+    std::string error;
+    if (!Data::WriteTemporaryFile(file.path, file.text, error))
     {
-        AddError(issues, temporaryPath.string(), "could not be written");
-        std::filesystem::remove(temporaryPath, error);
+        AddFatal(issues, GetTemporaryPath(file.path).string(), error);
         return false;
     }
     return true;
@@ -119,13 +104,10 @@ bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issu
 
 bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::vector<ItemDataIssue>& issues)
 {
-    const std::filesystem::path temporaryPath = GetTemporaryPath(path);
-    std::error_code error;
-    std::filesystem::rename(temporaryPath, path, error);
-    if (error)
+    std::string error;
+    if (!Data::ReplaceWithTemporaryFile(path, error))
     {
-        AddError(issues, path.string(), "could not be replaced: " + error.message());
-        std::filesystem::remove(temporaryPath, error);
+        AddFatal(issues, path.string(), error);
         return false;
     }
     return true;
@@ -166,20 +148,21 @@ ItemDataSaveResult WriteChangedFiles(std::span<const FileToSave> files, std::vec
     return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
 }
 
-std::vector<ItemDefinition> GetExistingItems(std::span<const ItemDefinition> items)
+// The items and the entries without a name: what the item files have.
+std::vector<ItemDefinition> GetItemEntries(std::span<const ItemDefinition> items)
 {
-    std::vector<ItemDefinition> existingItems;
-    std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
-                 [](const ItemDefinition& definition) { return definition.Exists(); });
-    return existingItems;
+    std::vector<ItemDefinition> entries;
+    std::copy_if(items.begin(), items.end(), std::back_inserter(entries),
+                 [](const ItemDefinition& definition) { return definition.HasEntry(); });
+    return entries;
 }
 
-void AddItemGroupFiles(const std::filesystem::path& directory, std::span<const ItemDefinition> existingItems,
+void AddItemGroupFiles(const std::filesystem::path& directory, std::span<const ItemDefinition> entries,
                        std::vector<FileToSave>& files)
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
-        files.push_back({directory / GetItemGroupFileName(group), WriteItemGroupJson(group, existingItems)});
+        files.push_back({directory / GetItemGroupFileName(group), WriteItemGroupJson(group, entries)});
     }
 }
 
@@ -207,12 +190,17 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     }
     if (models.glowColorsChanged)
     {
-        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+        files.push_back(
+            {models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors, models.glowColorFolders)});
     }
 #ifdef _EDITOR
     if (models.statsChanged && models.stats != nullptr)
     {
         files.push_back({models.statsFile, WriteItemStatsJson(*models.stats)});
+    }
+    if (models.groundLabelsChanged && models.groundLabels != nullptr)
+    {
+        files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
     }
 #endif
 }
@@ -284,10 +272,48 @@ ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddError(result.issues, source, "could not be read");
+        AddFatal(result.issues, source, "could not be read");
         return result;
     }
     ReadItemStatsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
+std::filesystem::path GetItemTooltipFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / ItemTooltipFileName;
+}
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
+{
+    ItemTooltipLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemTooltipJson(*text, source, result.file, result.issues);
+    return result;
+}
+
+std::filesystem::path GetGroundLabelsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / GroundLabelsFileName;
+}
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
+{
+    GroundLabelsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadGroundLabelsJson(*text, source, result.file, result.issues);
     return result;
 }
 
@@ -303,10 +329,10 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddError(result.issues, source, "could not be read");
+        AddFatal(result.issues, source, "could not be read");
         return result;
     }
-    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.folders, result.issues);
     return result;
 }
 
@@ -316,13 +342,21 @@ ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory,
     return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
 }
 
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues)
+{
+    const FileToSave files[] = {{file, text}};
+    return WriteChangedFiles(files, issues);
+}
+
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
                                                    std::vector<ItemDataIssue>& issues)
 {
-    ValidateItems(GetExistingItems(items), issues);
+    ValidateItems(GetItemEntries(items), issues);
     ValidateExistingItemModels(models.models, issues);
-    if (HasErrors(issues))
+    ValidateModelsHaveItemEntries(items, models.models, issues);
+    if (HasFatal(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
@@ -334,7 +368,7 @@ ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path&
                                                     std::vector<ItemDataIssue>& issues)
 {
     std::vector<FileToSave> files;
-    AddItemGroupFiles(itemDirectory, GetExistingItems(items), files);
+    AddItemGroupFiles(itemDirectory, GetItemEntries(items), files);
     AddItemModelFiles(models, files);
     return WriteChangedFiles(files, issues);
 }
@@ -348,7 +382,7 @@ void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, st
         ReadItemModelGroupJson(WriteItemModelGroupJson(group, models), GetItemGroupFileName(group), readBack,
                                readIssues);
         std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
     }
 }
 
@@ -359,7 +393,7 @@ void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedMo
     std::vector<ItemDataIssue> readIssues;
     ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 
 void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
@@ -368,7 +402,7 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
     std::vector<ItemDataIssue> readIssues;
     Effects::ReadGlowColorsJson(Effects::WriteGlowColorsJson(colors), Effects::GlowColorsFile, readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 
 #ifdef _EDITOR
@@ -378,7 +412,16 @@ void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIs
     std::vector<ItemDataIssue> readIssues;
     ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
+}
+
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues)
+{
+    GroundLabelFile readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadGroundLabelsJson(WriteGroundLabelsJson(file), GetGroundLabelsFile().generic_string(), readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 #endif
 
@@ -391,7 +434,7 @@ void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, st
             continue;
         }
 #ifdef _WIN32
-        const std::filesystem::path path = std::filesystem::u8path(model.file);
+        const std::filesystem::path path = Core::Text::PathFromUtf8(model.file);
 #else
         // The data does not always spell the files in the case they have on disk.
         const std::filesystem::path path = MuResolvePath(model.file.c_str());

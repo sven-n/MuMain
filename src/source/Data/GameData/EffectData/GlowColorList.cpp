@@ -2,6 +2,10 @@
 
 #include "GlowColorList.h"
 
+#ifdef _EDITOR
+#include "Data/GameData/ColorFolders/ColorFolders.h"
+#endif
+
 #include <algorithm>
 
 namespace Data::Effects
@@ -16,6 +20,7 @@ void GlowColorList::Build(std::span<const GlowColor> colors)
 {
     m_colors.assign(colors.begin(), colors.end());
 #ifdef _EDITOR
+    // The folders stay as they are; a name in them that is no color any more is not shown or written.
     ++m_version;
 #endif
 }
@@ -46,6 +51,13 @@ void GlowColorList::Set(const GlowColor& color)
 void GlowColorList::Remove(std::string_view name)
 {
     std::erase_if(m_colors, [name](const GlowColor& color) { return color.name == name; });
+    Colors::RemoveColorFromFolders(m_folders, name);
+    ++m_version;
+}
+
+void GlowColorList::SetFolders(std::vector<Colors::ColorFolder> folders)
+{
+    m_folders = std::move(folders);
     ++m_version;
 }
 #endif

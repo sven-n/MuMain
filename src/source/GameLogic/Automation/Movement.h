@@ -10,6 +10,9 @@
 
 namespace GameLogic::Automation
 {
+// A logical tile advances before its interpolated walk finishes; replanning then skips ahead.
+[[nodiscard]] bool IsWalkInProgress();
+
 enum class MoveResult : std::uint8_t
 {
     // Already standing on (or within a tile of) the target.

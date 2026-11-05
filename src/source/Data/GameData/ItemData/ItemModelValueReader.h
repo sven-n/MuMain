@@ -38,7 +38,7 @@ public:
     const Json::OrderedJson* ReadJson(const char* key);
 
     bool Has(const char* key) const;
-    void Error(const char* key, const std::string& message);
+    void Fatal(const char* key, const std::string& message);
     void WarnAboutUnknownKeys();
 
 private:

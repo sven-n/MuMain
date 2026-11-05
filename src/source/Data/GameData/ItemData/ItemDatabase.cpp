@@ -46,6 +46,11 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
 {
+    if (m_displayLocale == locale)
+    {
+        return;
+    }
+    ++m_nameVersion;
     m_displayLocale = std::string(locale);
     for (ItemDefinition& definition : m_definitions)
     {
@@ -61,6 +66,16 @@ const ItemDefinition* ItemDatabase::Find(int group, int number) const
     }
 
     return Find(MakeItemType(group, number));
+}
+
+const ItemDefinition* ItemDatabase::FindEntry(int group, int number) const
+{
+    if (!IsValidItemId(group, number))
+    {
+        return nullptr;
+    }
+
+    return FindEntry(MakeItemType(group, number));
 }
 
 std::string ItemDatabase::GetLogName(int itemType) const
@@ -178,8 +193,14 @@ void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 void ItemDatabase::Store(int itemType, ItemDefinition definition)
 {
     ++m_version;
+    ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
+    // A name makes the entry an item.
+    if (definition.Exists())
+    {
+        definition.entryWithoutName = false;
+    }
     UpdateDisplayName(definition);
 
     RuleData ruleData;

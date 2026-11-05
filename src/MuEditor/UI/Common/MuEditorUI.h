@@ -6,6 +6,11 @@
 
 struct SDL_Window;
 
+namespace MuEditor
+{
+struct ToolGroup;
+}
+
 class CMuEditorUI
 {
 public:
@@ -36,6 +41,8 @@ private:
     // osWindow is the OS window of the window the menu is in (Fullscreen), null
     // while it is inside the game window.
     void RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* osWindow);
+    // The sub-menu of a tool group: its browser, then its tools.
+    void RenderToolGroupMenu(const MuEditor::ToolGroup& group, MuEditor::ToolWindows& windows);
     void RenderUIScale();
     void RenderLanguageSelector();
     void RenderCloseButton(bool& editorEnabled);

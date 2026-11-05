@@ -118,7 +118,6 @@ int   InputFrame = 0;
 int   EditFlag = EDIT_NONE;
 wchar_t  ColorTable[][10] = { L"White", L"Black", L"Red", L"Yellow", L"Green", L"Cyan", L"Blue", L"Magenta" };
 
-int   SelectMonster = 0;
 int   SelectModel = 0;
 int   SelectMapping = 0;
 int   SelectColor = 0;
@@ -1487,6 +1486,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
         }
         break;
+        default:
+            break;
         }
     }
     break;
@@ -3621,10 +3622,6 @@ bool CheckSkillUseCondition(OBJECT* o, int Type)
     return true;
 }
 
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-
 void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 {
     wchar_t buff[100];
@@ -3867,8 +3864,8 @@ void RenderPartyHP()
 
         if (p->index <= -1) continue;
 
-        CHARACTER* c = &CharactersClient[p->index];
-        OBJECT* o = &c->Object;
+        const CHARACTER* c = &CharactersClient[p->index];
+        const OBJECT* o = &c->Object;
         vec3_t      Position;
         int         ScreenX, ScreenY;
 
@@ -4060,9 +4057,6 @@ void ForwardSelectModel()
     }
 }
 
-extern int  EditMonsterNumber;
-
-extern int MonsterKey;
 
 
 int TotalPacketSize = 0;
@@ -4104,14 +4098,6 @@ void RenderDebugWindow()
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, 0, L"Garbage");
         CMultiLanguage::ConvertFromUtf8(Text, Models[SelectModel].Name, sizeof Models[SelectModel].Name);
         g_pRenderText->RenderText(0, 0, Text);
-    }
-    if (EditFlag == EDIT_MONSTER)
-    {
-        for (int i = 0; i < EditMonsterNumber; i++)
-        {
-            mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
-            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, i * 10, Text);
-        }
     }
     if (EditFlag == EDIT_LIGHT)
     {

@@ -54,6 +54,12 @@ Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
 Release, all with the editor OFF, and upload one no-data runtime artifact per OS.
 Build every other supported row locally using the setup guides above.
 
+A macOS build runs on the macOS version of the Mac that built it and newer: the
+Homebrew libraries it links (OpenSSL, libjpeg-turbo, Crypto++) are built for that
+version. The CI artifact needs macOS 26, which every Apple silicon Mac can install.
+CI builds it on the `macos-26` image by name, so that minimum changes only when the
+workflow names a newer image, not when GitHub moves `macos-latest`.
+
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
 > 32-bit Linux client could compile but could never load the network library,
@@ -94,11 +100,13 @@ SDL_mixer nor a separate FreeType submodule is required.
 |--------------|--------|---------|
 | `CMAKE_BUILD_TYPE` | `Release` / `Debug` / `RelWithDebInfo` | Build configuration for single-config generators. With Ninja Multi-Config, select it through a build preset or `--config` instead. |
 | `ENABLE_EDITOR` | `ON` / `OFF` | Builds the in-app ImGui editor (admin tooling). When `OFF`, nothing under `src/MuEditor/` is compiled in - enforced by the `editor_leak` test. |
-| `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` presets turn it `ON`. |
+| `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` and `-in-game-tests` presets turn it `ON`, and so does `ENABLE_IN_GAME_TESTS`. |
+| `ENABLE_IN_GAME_TESTS` | `ON` / `OFF` | Publishes the in-game tester next to `Main` and adds the `InGameTests` / `InGameTestsGui` targets (see [`in-game-tests.md`](../in-game-tests.md)); both need the .NET SDK, like the client's network library. Default `OFF`; while `ON`, it turns `ENABLE_CONTROL_SOCKET` on too, which the tester drives the client through. The `-mueditor` and `-in-game-tests` presets turn it `ON`, the player presets `OFF`. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
 | `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
-| `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) and the Vulkan loader at build time instead of loading them at run time, so a packaged runtime resolves them through the recorded `RUNPATH` without a global library path. Defaults to `OFF`. |
+| `MU_WARNINGS_AS_ERRORS` | `ON` / `OFF` | Turns compiler, linker and DXC shader warnings into errors in the game's own code and its tests; the third-party libraries keep their own settings. Linker warnings need CMake 4.0 or newer (an older CMake says so and keeps them warnings). Default `OFF`; CI's player builds turn it `ON` (see [No warnings](#no-warnings)). |
+| `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) at build time instead of loading them at run time, and links the Vulkan loader into `Main` (SDL still loads that one at run time). A packaged runtime then finds all of them through `Main`'s recorded `RUNPATH`, without a global library path. Defaults to `OFF`. |
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
 
@@ -141,13 +149,97 @@ Run the client from that directory so it finds its assets and the library.
 
 ## Hosted releases
 
+Feature branches target `main`. Every PR runs Quality Gates, which include the
+[static checks](reference-tests.md#static-checks-and-the-pre-push-hook); ready code
+PRs then run Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
+**Ready for review**; documentation-only changes run the cheap checks without
+native compilation. Mixed changes, build files, shaders, tests and asset PRs still
+get native builds; asset tests load game data and render shipped documents.
+Code merges to main run Linux integration checks. Newer revisions cancel older
+PR/integration runs. Releases finish the running revision and keep only the newest
+pending trigger; another nightly/manual trigger can replace an older pending one.
+This deliberately coalesces work rather than guaranteeing a run for every request.
+
+Full Windows/Linux/macOS release builds run daily at approximately **02:17 UTC+8**
+(18:17 UTC) and on demand. In **Actions > CI > Run workflow**, select **main** to
+force a full build without waiting for the nightly run. Before scheduled builds,
+CI scans commits since the latest reachable version tag and skips all native jobs
+when no release-producing change exists. It reads the configured release types,
+checks scoped subjects and breaking-change notes, and builds conservatively for
+an initial release or unsupported release rules. Manual dispatch bypasses this skip.
+All jobs use the same revision selected when the workflow is triggered. Semantic
+Release publishes only when those commits warrant a version change; main merges
+no longer publish immediately. Windows integration failures may first appear in
+the nightly run. The separate Data Assets workflow still publishes data on merge.
+Publishing also waits for **CI Required**. If no release is published and main has
+advanced during the build, the release job fails with a manual-rerun instruction
+instead of silently reporting success. It never substitutes untested newer code.
+
+### Required PR check (maintainer setup)
+
+After merging this workflow change, an administrator must edit the existing main
+branch ruleset in **Settings > Rules > Rulesets**, enable **Require status checks
+to pass**, and require **CI Required** from GitHub Actions. Preserve the existing
+pull-request, deletion and force-push protections. Repository files cannot enable
+this GitHub setting. If the check is not listed yet, run a PR with the new workflow
+first, then select it.
+
+`CI Required` verifies Quality Gates and every native job selected for the change.
+It rejects failures, cancellations and unexpected skips, while allowing the
+intentional native-build skips above. Require this aggregate check instead of
+individual platform jobs, which do not run on every event. Do not enable **Require
+branches to be up to date** just to reduce builds: it can force another build after
+each main merge. Update a PR when its integration state needs revalidation.
+
+### No warnings
+
+The three player builds (Windows, Linux and macOS, editor and control socket OFF)
+configure and build without a single warning, note or deprecation message, and CI
+fails as soon as one comes back:
+
+- The game's own code, its tests and the DXC shader compiles build with
+  `MU_WARNINGS_AS_ERRORS=ON`, so a compiler or linker warning stops the build where
+  it happens. Configure with `-DMU_WARNINGS_AS_ERRORS=ON` to get the same locally.
+- [`scripts/ci_warnings.py`](../../scripts/ci_warnings.py) runs the configure and
+  build commands and fails the step for any other such line in their output: CMake
+  and the libraries' CMake scripts, vcpkg's notes, glslang, wayland-scanner and the
+  .NET build. `python3 scripts/ci_warnings.py scan <job log>` lists them in a
+  downloaded log.
+- **CI Required** (and Fork CI's last job) fails when a job of the run ends with a
+  warning annotation, such as GitHub's notice that an action targets a deprecated
+  Node.js version. Notices, e.g. about runner queue times, are listed only, and so
+  are the warnings actions/cache logs when GitHub's cache service is busy, down or
+  unreachable ("Failed to restore: Cache service responded with 503", timeouts): the
+  build goes on without the cache. Its other warnings, such as a cache over the size
+  limit, fail the check.
+
+The libraries built from source (SDL3_ttf, SDL3_image, FreeType, HarfBuzz) compile
+with their warnings turned off (`-w`, `/w`), and miniaudio and glm are included as
+system headers: their warnings are for their authors to fix. A new compiler or CMake on a runner image can bring new warnings
+without any change here; fix them in a PR like any other failure. The jobs name
+their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
+`-latest` label: GitHub moves repositories to a new latest image one by one and
+warns about the move in every job meanwhile.
+
+Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
+summary show hits and misses; compare the Build step duration on a warm run with
+the first run. All builds restore the compiler cache; only successful main pushes
+save it, so PR-only entries do not displace shared caches. macOS uses the same
+compiler cache (**macOS compiler cache** summary); main pushes skip macOS, so
+successful nightly/manual release builds save it instead. Windows vcpkg primary
+keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
+A broader fallback also restores older binary archives; vcpkg checks compatibility
+before reusing packages across image or compiler updates.
+
+### Download artifacts
+
 Actions expose builds through CI artifacts and two coordinated release streams:
 
 - Semantic Release publishes these no-data runtime archives:
   `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`,
   `MuMain-linux-native-x64-release-editor-off-no-data.tar.gz`, and
   `MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz`.
-- Each main-branch CI run also uploads
+- Each nightly/manual release build also uploads
   `mu-client-windows-native-x64-release-editor-off-no-data-main`,
   `mu-client-linux-native-x64-release-editor-off-no-data-main`, and
   `mu-client-macos-native-arm64-release-editor-off-no-data-main` artifacts;

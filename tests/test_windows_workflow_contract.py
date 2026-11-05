@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
+FORK_CI_WORKFLOW = ROOT / ".github/workflows/fork-ci.yml"
 DATA_WORKFLOW = ROOT / ".github/workflows/data-assets.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 LINUX_WORKFLOW = ROOT / ".github/workflows/linux-build.yml"
@@ -21,7 +22,11 @@ COPY_RUNTIME_ASSETS = ROOT / "cmake/CopyRuntimeAssets.cmake"
 SRC_CMAKE = ROOT / "src/CMakeLists.txt"
 SOURCE_ROOT = ROOT / "src/source"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
+STATIC_CMAKE = ROOT / "tests/static/CMakeLists.txt"
+PRE_PUSH_HOOK = ROOT / ".githooks/pre-push"
+FORMAT_SCRIPT = ROOT / "scripts/check_format.sh"
 BUILD_GUIDE = ROOT / "docs/build/README.md"
+LINUX_GUIDE = ROOT / "docs/build/linux/console.md"
 README = ROOT / "README.md"
 CHAT_COMMAND_CATALOG_HEADER = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.h"
 CHAT_COMMAND_CATALOG_SOURCE = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.cpp"
@@ -96,6 +101,13 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "wtsapi32.dll",
 }
 
+# Packages the Linux CI job installs that the Linux guide leaves out, and why.
+CI_ONLY_LINUX_PACKAGES = {
+    "gcc": "the guide installs build-essential",
+    "g++": "the guide installs build-essential",
+    "ccache": "CI-only compiler cache trial",
+}
+
 EXPECTED_RELEASE_ASSETS = [
     {
         "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
@@ -153,6 +165,17 @@ def manifest(block, assignment):
     return re.findall(r'^\s*["\']([^"\']+)["\']\s*$', match.group(1), re.M)
 
 
+def apt_packages(text):
+    # Every package of every "apt-get install -y" command, including its "\" continuation
+    # lines. The command ends at a shell operator or a comment; an inline `command` in
+    # prose ends at its closing backtick.
+    packages = set()
+    for arguments in re.findall(r"apt-get install -y((?:[^\n`]*\\\n)*[^\n`]*)", text):
+        command = re.split(r"&&|\|\||[;|#]", arguments.replace("\\\n", " "), maxsplit=1)[0]
+        packages.update(word for word in command.split() if not word.startswith("-"))
+    return packages
+
+
 ci = read_optional(CI_WORKFLOW)
 data_workflow = read_optional(DATA_WORKFLOW)
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
@@ -183,6 +206,21 @@ check(
     )
     is not None,
     "MuClient MSVC builds must compile UTF-8 sources and reject invalid bytes",
+)
+
+# No CI job builds with MU_LINK_SDL_PLATFORM_BACKENDS=ON, so its Vulkan link is checked here.
+check(
+    '"LINKER:--push-state,--no-as-needed" "<LINK_ITEM>" "LINKER:--pop-state"' in src_cmake,
+    "MuNoAsNeeded must keep its library under --no-as-needed between --push-state and --pop-state",
+)
+src_cmake_code = "\n".join(
+    line for line in src_cmake.splitlines() if not line.lstrip().startswith("#")
+)
+check(
+    src_cmake_code.count("Vulkan::Vulkan") == 1
+    and "$<LINK_LIBRARY:MuNoAsNeeded,Vulkan::Vulkan>" in src_cmake_code,
+    "Vulkan::Vulkan must be linked once, through $<LINK_LIBRARY:MuNoAsNeeded,...>: a plain link "
+    "loses its DT_NEEDED entry under --as-needed, and CMake refuses a mix of both",
 )
 
 configure_presets = {
@@ -220,43 +258,110 @@ jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
     job_names
-    == ["quality", "build-windows", "build-linux", "build-macos", "release"],
-    "CI jobs must be quality, build-windows, build-linux, build-macos, "
+    == ["quality", "build-windows", "build-linux", "build-macos", "required", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, required, "
     f"release; found {job_names}",
 )
-for ignored_path in ("src/bin/Data/**", "src/bin/fonts/**"):
-    check(
-        "paths-ignore:" in ci and ignored_path in ci,
-        f"Code CI must ignore data-only pushes: {ignored_path}",
-    )
+check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
+for required in ("branches: [main]", "ready_for_review", "schedule:", "workflow_dispatch:"):
+    check(required in ci, f"CI trigger missing {required}")
 
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
 linux_job = job(ci, "build-linux")
 macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
+required_job = job(ci, "required")
 
+quality_history = step(quality_job, "quality", "Fetch history")
+check(
+    "--filter=blob:none --unshallow --tags" in quality_history,
+    "Quality Gates must fetch full commit history without past file versions",
+)
+check(
+    "fetch-depth: 2" in step(quality_job, "quality", "Checkout repository")
+    and "if: github.event_name != 'pull_request'" in quality_history,
+    "Pull requests diff against HEAD^1 and need no history beyond it",
+)
 quality_detection = step(quality_job, "quality", "Detect changed C++ files")
-check("diff_base=$DIFF_BASE" in quality_detection, "Quality detection must expose its diff base")
+check(
+    "DIFF_BASE: ${{ steps.plan.outputs.diff_base }}" in quality_detection,
+    "Quality detection must use the event's pinned diff base",
+)
+check("bash scripts/changed_cpp_files.sh" in quality_detection, "Quality detection must share the hook's file list")
+quality_static = step(quality_job, "quality", "Run static checks")
+for required in ("cmake -S tests/static -B out/static-checks", "ctest --test-dir out/static-checks"):
+    check(required in quality_static, f"Static checks must run before native builds: {required}")
+static_cmake = STATIC_CMAKE.read_text(encoding="utf-8")
+for test_name in ("windows_workflow_contract", "ci_build_plan"):
+    check(f"NAME {test_name}" in static_cmake, f"Static checks must include {test_name}")
+check("PROPERTIES LABELS static" in static_cmake, "Static checks must carry the label native jobs exclude")
+pre_push = PRE_PUSH_HOOK.read_text(encoding="utf-8")
+for required in ("-S tests/static -B out/static-checks", "scripts/changed_cpp_files.sh", "scripts/check_format.sh"):
+    check(required in pre_push, f"pre-push hook must run what Quality Gates runs: {required}")
+for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
+    check("needs: quality" in platform_job, f"{platform} must wait for Quality Gates")
+    check(
+        "--label-exclude static" in step(platform_job, platform, "Run tests"),
+        f"{platform} must not repeat the static checks Quality Gates already ran",
+    )
+    check(
+        f"if: needs.quality.outputs.{platform} == 'true'" in platform_job,
+        f"{platform} must follow the tested build plan",
+    )
+    check("timeout-minutes: 90" in platform_job, f"{platform} must bound job duration")
+for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
+                 "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
+    check(required in required_job, f"Required CI check missing {required}")
+# No warning may come back in the player builds (docs/build/README.md).
+for required in ("checks: read", "actions: read", "python3 scripts/ci_job_annotations.py"):
+    check(required in required_job, f"Required CI check must fail on warning annotations: {required}")
+for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
+    platform_configure = step(platform_job, f"build-{platform}", "Configure CMake")
+    platform_build = step(platform_job, f"build-{platform}", "Build")
+    for required in ("scripts/ci_warnings.py run", "-DMU_WARNINGS_AS_ERRORS=ON"):
+        check(required in platform_configure, f"{platform} configure must fail on warnings: {required}")
+    check("scripts/ci_warnings.py run" in platform_build, f"{platform} build must fail on warnings")
+# Every job names its runner image: a -latest label moves to a new image whenever GitHub decides, with new
+# warnings and, for macOS, a new minimum macOS (cmake/toolchains/macos-arm64.cmake).
+for workflow_name, workflow in (("ci.yml", ci), ("fork-ci.yml", read_optional(FORK_CI_WORKFLOW))):
+    for runner in re.findall(r"(?m)^\s*runs-on:\s*(\S+)", workflow):
+        check(not runner.endswith("-latest"), f"{workflow_name} must name its runner image, not {runner}")
+# Fork CI's Windows build is the only Windows build a pull request gets: its editor OFF row holds the same rule,
+# and its last job checks the annotations.
+fork_ci_workflow = read_optional(FORK_CI_WORKFLOW)
+if fork_ci_workflow:
+    fork_windows = job(fork_ci_workflow, "windows")
+    fork_wrapper = "python scripts/ci_warnings.py ${{ matrix.editor == 'OFF' && 'run' || 'report' }}"
+    fork_configure = step(fork_windows, "windows", "Configure CMake")
+    for required in (fork_wrapper, "-DMU_WARNINGS_AS_ERRORS=${{ matrix.editor == 'OFF' && 'ON' || 'OFF' }}"):
+        check(required in fork_configure, f"Fork CI's editor OFF configure must fail on warnings: {required}")
+    check(fork_wrapper in step(fork_windows, "windows", "Build"), "Fork CI's editor OFF build must fail on warnings")
+    fork_annotations = job(fork_ci_workflow, "annotations")
+    for required in ("needs: [windows, linux-editor, macos-editor]", "if: always()", "actions: read",
+                     "checks: read", "python3 scripts/ci_job_annotations.py"):
+        check(required in fork_annotations, f"Fork CI must fail on warning annotations: {required}")
+check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
+check("bash scripts/check_format.sh" in quality_formatting, "Formatting gate must share the hook's script")
+format_script = FORMAT_SCRIPT.read_text(encoding="utf-8")
 for required in (
     "git diff --unified=0 --no-color",
     'format_args+=(--lines="${start}:${end}")',
     'clang-format --dry-run --Werror "${format_args[@]}" "$file"',
 ):
-    check(required in quality_formatting, f"Formatting gate missing {required}")
+    check(required in format_script, f"Formatting gate missing {required}")
 
 check("strategy:" not in native_job, "Main Windows asset job must not use a matrix")
 check("matrix." not in native_job, "Main Windows asset job must use fixed values")
 for required in (
     "name: Windows Native Build (x64, Release, editor OFF)",
-    "runs-on: windows-latest",
-    "if: github.event_name == 'push' && github.ref == 'refs/heads/main'",
+    "runs-on: windows-2025-vs2026",
 ):
     check(required in native_job, f"Main Windows job missing {required}")
 
 activation = step(native_job, "build-windows", "Activate Visual Studio developer environment")
-check("arch: x64" in activation, "Main Windows build must activate the x64 compiler")
+check("vcvars64.bat" in activation, "Main Windows build must activate the x64 compiler")
 environment_assertion = step(
     native_job, "build-windows", "Assert MSVC developer environment"
 )
@@ -335,14 +440,14 @@ check(
     "Main Windows build must archive the runtime before artifact upload",
 )
 for required in (
-    "uses: actions/upload-artifact@v4",
+    "uses: actions/upload-artifact@v7",
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
     "path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
     "if-no-files-found: error",
 ):
     check(required in native_upload, f"Main Windows upload missing {required}")
 check(
-    native_job.count("uses: actions/upload-artifact@v4") == 1,
+    native_job.count("uses: actions/upload-artifact@v7") == 1,
     "Main Windows job must upload exactly one runtime artifact",
 )
 
@@ -359,7 +464,7 @@ for (
         linux_job,
         "build-linux",
         "Linux Native Build (x64, Release, editor OFF)",
-        "ubuntu-latest",
+        "ubuntu-26.04",
         "mu-client-linux-native-x64-release-editor-off-no-data-main",
         "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz "
@@ -369,7 +474,7 @@ for (
         macos_job,
         "build-macos",
         "macOS Native Build (arm64, Release, editor OFF)",
-        "macos-latest",
+        "macos-26",
         "mu-client-macos-native-arm64-release-editor-off-no-data-main",
         "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
         "tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz "
@@ -381,13 +486,12 @@ for (
     for required in (
         f"name: {display_name}",
         f"runs-on: {runner}",
-        "if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'",
     ):
         check(required in platform_job, f"{display_name} missing {required}")
     platform_archive = step(platform_job, job_name, "Archive runtime")
     check(
-        "if: github.event_name == 'push'" in platform_archive,
-        f"{display_name} must archive only for artifact-producing pushes",
+        "if: needs.quality.outputs.release == 'true'" in platform_archive,
+        f"{display_name} must archive only for scheduled/manual releases",
     )
     check(
         archive_command in platform_archive,
@@ -395,15 +499,15 @@ for (
     )
     platform_upload = step(platform_job, job_name, "Upload runtime artifact")
     for required in (
-        "if: github.event_name == 'push'",
-        "uses: actions/upload-artifact@v4",
+        "if: needs.quality.outputs.release == 'true'",
+        "uses: actions/upload-artifact@v7",
         f"name: {artifact_name}",
         f"path: {archive_name}",
         "if-no-files-found: error",
     ):
         check(required in platform_upload, f"{display_name} upload missing {required}")
     check(
-        platform_job.count("uses: actions/upload-artifact@v4") == 1,
+        platform_job.count("uses: actions/upload-artifact@v7") == 1,
         f"{display_name} must upload exactly one runtime artifact",
     )
 
@@ -414,6 +518,8 @@ for required in (
     "-DENABLE_EDITOR=OFF",
     "-DMU_COPY_RUNTIME_ASSETS=OFF",
     "-DBUILD_TESTING=ON",
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
 ):
     check(required in linux_configure, f"Linux configure missing {required}")
 check(
@@ -436,6 +542,47 @@ for required in (
 ):
     check(required in linux_validation, f"Linux validation missing {required}")
 
+linux_guide_packages = apt_packages(LINUX_GUIDE.read_text(encoding="utf-8"))
+linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
+fork_ci = read_optional(FORK_CI_WORKFLOW)
+if fork_ci:
+    linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
+    for windows_job in (native_job, job(fork_ci, "windows")):
+        cache_key = step(windows_job, "windows", "Identify vcpkg toolchain")
+        check("scripts/ci_vcpkg_cache_key.ps1" in cache_key, "Windows must identify its actual toolchain")
+        cache = step(windows_job, "windows", "Cache vcpkg packages")
+        for required in ("steps.vcpkg.outputs.identity", "toolchain-x64.cmake", "~/AppData/Local/vcpkg/archives"):
+            check(required in cache, f"vcpkg cache missing {required}")
+        check(
+            "restore-keys: vcpkg-windows-x64-v2-\n" in cache,
+            "vcpkg binary archives must remain available across runner image updates",
+        )
+linux_cache = step(linux_job, "build-linux", "Cache Linux compilation")
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+    check(required in linux_cache, f"Compiler cache missing {required}")
+linux_cache_save = step(linux_job, "build-linux", "Save Linux compilation cache")
+for required in ("uses: actions/cache/save@v6", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
+                 "steps.ccache.outputs.cache-primary-key"):
+    check(required in linux_cache_save, f"Compiler cache must save only validated main builds: {required}")
+check(
+    "uses: actions/cache@v6" not in linux_cache,
+    "PR compilation must restore without creating isolated cache entries",
+)
+check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
+all_linux_ci_packages = set()
+for workflow_name, ci_job, job_name in linux_ci_jobs:
+    ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
+    check(ci_packages, f"{workflow_name} {job_name} must install its packages with apt-get install -y")
+    all_linux_ci_packages |= ci_packages
+    for package in sorted(ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
+        errors.append(
+            f"{workflow_name} {job_name} installs {package}, but "
+            f"{LINUX_GUIDE.relative_to(ROOT).as_posix()} doesn't list it; add it to the guide, "
+            "or to CI_ONLY_LINUX_PACKAGES with the reason"
+        )
+for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - all_linux_ci_packages):
+    errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which no Linux CI job installs")
+
 macos_configure = step(macos_job, "build-macos", "Configure CMake")
 for required in (
     "cmake --preset macos-arm64",
@@ -444,8 +591,18 @@ for required in (
     "-DMU_COPY_RUNTIME_ASSETS=OFF",
     "-DBUILD_TESTING=ON",
     "-DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)",
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
 ):
     check(required in macos_configure, f"macOS configure missing {required}")
+macos_cache = step(macos_job, "build-macos", "Cache macOS compilation")
+for required in ("uses: actions/cache/restore@v6", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+    check(required in macos_cache, f"macOS compiler cache missing {required}")
+macos_cache_save = step(macos_job, "build-macos", "Save macOS compilation cache")
+for required in ("uses: actions/cache/save@v6", "needs.quality.outputs.release == 'true'",
+                 "steps.ccache.outputs.cache-primary-key"):
+    check(required in macos_cache_save, f"macOS compiler cache must save only validated release builds: {required}")
+check("ccache --show-stats" in macos_job, "macOS compiler cache must report hit statistics")
 check(
     "cmake --build out/build/macos-ci --config Release"
     in step(macos_job, "build-macos", "Build"),
@@ -467,8 +624,8 @@ for required in (
     check(required in macos_validation, f"macOS validation missing {required}")
 
 check(
-    "needs: [quality, build-windows, build-linux, build-macos]" in release_job,
-    "Release must need quality and all hosted platform checks",
+    "needs: [quality, build-windows, build-linux, build-macos, required]" in release_job,
+    "Release must need quality, all hosted platform checks and CI Required",
 )
 for platform, artifact_name in (
     ("Windows", "mu-client-windows-native-x64-release-editor-off-no-data-main"),
@@ -499,6 +656,10 @@ check(
     "Release must use Semantic Release",
 )
 check("id: semantic" in release_semantic, "Semantic Release must expose action outputs")
+unpublished_check = step(release_job, "release", "Check unpublished release revision")
+for required in ("if: steps.semantic.outputs.new_release_published != 'true'",
+                 "python3 scripts/ci_build_plan.py check-release"):
+    check(required in unpublished_check, f"A stale unpublished release must fail explicitly: {required}")
 data_link = step(release_job, "release", "Link compatible data release")
 for required in (
     "if: steps.semantic.outputs.new_release_published == 'true'",
@@ -693,6 +854,7 @@ for toolchain_path in MINGW_TOOLCHAINS:
     )
 
 if errors:
-    raise SystemExit("Windows workflow contract failed:\n- " + "\n- ".join(errors))
+    # The checks cover the Windows, Linux and macOS jobs and the Linux guide, not only Windows.
+    raise SystemExit("Workflow contract failed:\n- " + "\n- ".join(errors))
 
-print("Windows workflow contract: OK")
+print("Workflow contract: OK")

@@ -60,14 +60,13 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
-        float GetLayerDepth();	//. 2.5f
+        float GetLayerDepth() override; //. 2.5f
         ITEM* FindItem(int iIndex) const;
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;

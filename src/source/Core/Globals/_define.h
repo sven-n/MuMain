@@ -261,7 +261,6 @@ enum struct STORAGE_TYPE
 #define EDIT_HEIGHT  4
 #define EDIT_LIGHT   5
 #define EDIT_SOUND   6
-#define EDIT_MONSTER 7
 
 #define IME_CONVERSIONMODE  1
 #define IME_SENTENCEMODE    2
@@ -301,7 +300,6 @@ enum struct STORAGE_TYPE
 
 #define CHAR_DEL_LIMIT_LV	300
 
-#define MAX_TEXTS               3000
 #define MAX_GLOBAL_TEXT_STRING	300
 #define MAX_FILTERS 1000
 

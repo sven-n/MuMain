@@ -30,16 +30,14 @@ Filename convention: `<Group>.<locale>.resx`.
   optional and fall back to `en` at runtime for any key they don't supply.
 
 A `.resx` file contains `<data name="...">` entries. The `name` attribute is
-the **key** (free text), the inner `<value>` is the translated string, and an
-optional `<comment>legacy_id=N[,N,...]</comment>` carries integer IDs that the
-old `GlobalText[N]` call sites still need for lookups by index.
+the **key** (free text) and the inner `<value>` is the translated string. An
+optional `<comment>` is a note for translators; the generator ignores it.
 
 Example (`src/Localization/Game.en.resx`):
 
 ```xml
 <data name="Beep sound for whispering" xml:space="preserve">
   <value>Beep sound for whispering</value>
-  <comment>legacy_id=387</comment>
 </data>
 <data name="Sound volume" xml:space="preserve">
   <value>Sound volume</value>
@@ -51,7 +49,6 @@ The matching German file uses the same `name=` keys with translated `<value>`s:
 ```xml
 <data name="Beep sound for whispering" xml:space="preserve">
   <value>Piepton zum Flüstern</value>
-  <comment>legacy_id=387</comment>
 </data>
 <data name="Sound volume" xml:space="preserve">
   <value>Soundlautstärke</value>
@@ -117,18 +114,24 @@ If you need to know the exact identifier before building, look at
 `Generated/I18N/<Group>.h` after one build, or follow the rule above. Two keys
 that slug to the same identifier are a build error from the loader.
 
-### Lookup by legacy integer ID
+### Texts chosen by a number
 
-Code paths that historically used `GlobalText[N]` keep working through a
-binary-search lookup:
+Some texts are still chosen by a number that comes from outside the code: a
+server packet's message number, or a recipe's name in `mix.bmd`. The code
+turns that number into a key where it arrives, with a table of slots, and
+shows no text for a number outside the table:
 
 ```cpp
-mu_swprintf_s(buf, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
+// Network/Server/ServerMessageTexts.cpp: the Rena hints, by message number.
+const wchar_t* const* const kRenaLines[] = {
+    &I18N::Game::AreYouThrowingRenaOnThe,
+    &I18N::Game::RyanTheMaidOfTheBar,
+    &I18N::Game::RenaIsATypeOfCoin,
+};
 ```
 
-`Lookup(int)` is generated only for groups that have at least one entry with
-a `legacy_id=` comment, and it's `static_assert`-checked to be strictly sorted
-so duplicate IDs fail the build (`Generated/I18N/<Group>.cpp`).
+Store the slot (`&I18N::Game::X`) and read it when the text is shown, so a
+language switch reaches it.
 
 ### Format / placeholder substitution
 
@@ -236,8 +239,6 @@ automatically without needing their own observer.
 - Active locale entirely absent -> `SetLocale` resolves it to the default
   locale silently.
 - Unknown locale code -> default locale.
-- Lookup by legacy ID that doesn't exist in the group -> returns an empty
-  string. The generator's static_assert prevents duplicate IDs from compiling.
 
 There's no per-key "key name shown in red" debug mode today; missing keys
 just fall back. If you want a hard-fail mode for new development, the
@@ -316,8 +317,9 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item names in the new language, add them to the item data; see
-   [Item names](#item-names).
+5. To show item, monster and NPC names in the new language, add them to the
+   item data and the monster list; see [Item names](#item-names) and
+   [Monster and NPC names](#monster-and-npc-names).
 
 ## Item names
 
@@ -326,7 +328,10 @@ Item names are not in the `.resx` files. They are part of the item data
 `src/bin/Data/Items/*.json` holds the names by language code, using the same
 codes as the UI texts. The game shows the name for the active locale and
 falls back to English, like the UI texts; switching the locale at runtime
-updates item names too.
+updates item names too. Players who know the items by their English names can
+untick **Translate item names** under the language in the options window
+(Interface tab): item names then stay English, also in the item editor, while
+every other text follows the language.
 
 ### In the JSON files
 
@@ -392,7 +397,7 @@ the item tools' Undo and Redo.
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+`tl`, `uk`, `zh-CN` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
 add names with that code (by hand or in the Item Translations window); nothing else is
 needed. The names show as soon as a player picks that language.
@@ -420,6 +425,139 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Simplified Chinese (`zh-CN`)
+
+Simplified Chinese is being added incrementally. Translated screens include the
+Options window and its graphics tuning labels and help text, and the system menu
+at character selection and in game (Esc). The login window also translates account
+and password fields, remember-account/password controls, the password-saving
+confirmation, server titles, login progress and common account errors. Character
+selection, creation and deletion include class and advancement names, class
+descriptions, base attributes, guild roles, controls and validation messages.
+Shared labels such as OK, Cancel and Close also appear translated wherever other
+screens use the same resource keys, including other dialogs and windows.
+Untranslated text falls back to English. Item names and server messages are
+separate data; translated item tooltips are also available.
+
+Use official Chinese terminology as a reference, check item IDs and version-specific
+behavior, and preserve the current English meaning and placeholders. Do not import
+a newer client's rules merely to match its wording.
+
+Rebuild the client, then select **简体中文** in the Options language dropdown.
+Select **Noto Sans SC** in the font dropdown to use Simplified Chinese glyph
+forms. The regular and bold faces are bundled under `fonts/` and provide
+missing-glyph fallback for other font choices; no system font install is needed.
+These fonts come from Noto CJK's `Sans/SubsetOTF/SC` distribution and are shipped
+with their SIL Open Font License in `fonts/NotoSansSC-LICENSE`.
+
+Alternatively, set the executable directory's `config.ini`:
+
+```ini
+[UI]
+Locale=zh-CN
+```
+
+After rebuilding, check the Options tabs and graphics tuning, and open the
+system menu at character selection and with Esc in game, in both themes.
+Chinese glyphs should render without boxes, and labels and help should fit at
+75% and 150% UI scale. Switch back to English and restart to check that the
+language choice is retained.
+
+The password-saving warning wraps within the dialog in both themes. Server
+names are preserved; untranslated connection and subscription errors use English.
+
+Character-selection captions, creation headings and class descriptions follow
+the selected language. Class descriptions also refresh while the window is open.
+Character names require at least four characters. Fruit names, attribute names
+and descriptions are translated; enable **Translate item names** to display the
+translated item names.
+
+Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
+resource keys, formatting arguments and command tokens unchanged.
+Missing translations intentionally use the existing English fallback.
+
+## Monster and NPC names
+
+Monster and NPC names are not in the `.resx` files either. They are in the
+monster list, `src/bin/Data/Monsters/Monsters.json`
+([monster-data.md](monster-data.md)): each monster's `name` holds the names by
+language code, like an item's. English (`en`) is the name
+every monster has; Portuguese (`pt`) and Spanish (`es`) come from the original
+client's name files.
+
+The game shows the name in the UI language and falls back to English. When
+the language changes, the monsters and NPCs on screen are renamed at once.
+Summons ("Budge Dragon of <owner>") and the Kalima gates keep the name they
+appeared with until they appear again; transformed players show the player's
+name. **Translate item names** does not change monster names; it only changes
+the monster's name inside a transformation ring's item name.
+
+The original client read the names from `Data/Local/<Language>/NpcName_<Language>.txt`
+in the `[LOGIN] Language`, apart from the UI language.
+
+The game holds up to 64 characters of a name (UTF-16 units); a longer name is
+cut, and loading warns about it. A Kalima gate shows "Magic stone of <owner>",
+which is the UI text `MagicStoneOfOwner` of the `Game` group, not a monster
+name.
+
+### In the JSON file
+
+Each monster's `name` lists its names by language code, as an item's does
+(see [In the JSON files](#in-the-json-files)):
+
+```json
+"name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
+```
+
+- Change, add and remove names as for items. Without an English name the
+  game shows no name for the monster in a language without a translation (a
+  warning at startup).
+- Names must not contain `||`, and names longer than 64 characters are cut
+  in the game (a warning at startup). Names for a code that is not a UI
+  language are never shown; loading warns about them.
+- The game reads `Data/Monsters` next to `Main`. The build copies
+  `src/bin/Data/Monsters` there, so after editing the file in `src/bin`,
+  build again (or edit the copy in the build folder and copy it back before
+  committing).
+
+### In the monster editor
+
+The **Monster Translations** window (editor builds, **Windows → Monsters →
+Monster Translations**) shows the monster names as a grid: one row per
+monster number, one column per UI language, English first. It works like
+[Item Translations](#in-the-item-editor):
+
+- Each language's column header says how many monsters have no name of
+  their own in it; **Missing in** lists only those monsters. A filled name
+  keeps its row until **Refresh** or another filter.
+- Edit a cell and leave it (click elsewhere, Tab or Enter) to store the
+  name. An empty cell shows the English name it falls back to, greyed.
+- Right-click a cell: **Same as English** writes the English name for a name
+  that is the same in that language; **Remove translation** removes it.
+- The search finds a monster by its number or by any of its names (A to Z in
+  either case). Clicking the number selects the monster in the other monster
+  tools and shows the **Monster Browser**. The monster the tools show is
+  marked, and a monster selected in another tool is scrolled to (the search
+  and filter are cleared when they hide it).
+- A name cannot contain `||`, and the English name cannot be emptied (252,
+  whose English name is empty, stays so). Names are stored whole, also when
+  they are longer than the 64 characters the game shows.
+- Each name change is one step of the monster tools' Undo and Redo, and it
+  reaches the monsters and NPCs of that number on screen at once.
+- **Save Monsters** writes the monster list file.
+
+### Old name files (NpcName txt)
+
+**Import names from NpcName txt** and **Export as NpcName txt** in Monster
+Translations read and write the original client's name files,
+`Data/Local/<Eng|Por|Spn>/NpcName_<Eng|Por|Spn>.txt` next to the game:
+English, Portuguese and Spanish only. The import sets the names by number
+and language on the monsters that have an entry, as one undo step; the
+export writes the names of every monster, in English where a language has
+none. Names in other languages exist only in the monster list. The rules
+are in
+[monster-data.md → Import and export of NpcName txt](monster-data.md#import-and-export-of-npcname-txt).
 
 ## Migration history
 

@@ -25,7 +25,7 @@ namespace mu::ui::window
 
     struct sText
     {
-        int		s_nTextIndex;	// 글로벌 텍스트 인덱스
+        const wchar_t* const* s_pText; // the line's text; nullptr for a blank line
         DWORD	s_dwColor;		// 텍스트 색깔
         int		s_nLine;		// 텍스트 정렬
     };
@@ -92,7 +92,7 @@ namespace mu::ui::window
         int		GetLuckyItemRate(int _nType);
         void	RenderMixEffect(void);
         void	Reset(void);
-        void	AddText(int _nGlobalTextIndex, DWORD _dwColor = 0xFFFFFFFF, int _bLine = RT3_SORT_CENTER);
+        void AddText(const wchar_t* const* _pText, DWORD _dwColor = 0xFFFFFFFF, int _bLine = RT3_SORT_CENTER);
 
         bool	Check_LuckyItem_Trade(ITEM* _pItem);
         bool	Check_LuckyItem_Refinery(ITEM* _pItem);
@@ -116,12 +116,12 @@ namespace mu::ui::window
         void	Release(void);
         void	OpeningProcess(void);
         bool	ClosingProcess(void);
-        bool	UpdateMouseEvent();
-        bool	UpdateKeyEvent();
-        bool	Update();
-        bool	Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-        float	GetLayerDepth();	//. 3.4f
+        float GetLayerDepth() override; //. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }
         __inline void	SetPos(int _nX, int _nY) { m_ptPos.x = _nX, m_ptPos.y = _nY; }

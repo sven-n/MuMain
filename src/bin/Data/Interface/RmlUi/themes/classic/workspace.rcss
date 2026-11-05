@@ -1,0 +1,139 @@
+/* Window placement for the classic theme (a copy of legacy's; only the chat and the system log differ). The game reads where each open slot lands; nothing here is drawn. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+#workspace_shell { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
+#shell_middle { position: relative; display: flex; flex-direction: row; flex: 1 1 0; min-height: 0; }
+#safe_area { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; }
+.region.shell-region { position: relative; display: flex; flex: 0 0 auto; }
+#shell_header { align-items: flex-start; }
+#shell_header .slot[data-window="top_bar"] { margin-left: auto; }
+#shell_footer { justify-content: center; }
+#shell_left, #shell_right { flex-direction: column; }
+.shell-region[data-participation="overlay"] { position: absolute; }
+#shell_header[data-participation="overlay"] { top: 0; left: 0; right: 0; }
+#shell_footer[data-participation="overlay"] { bottom: 0; left: 0; right: 0; }
+#shell_left[data-participation="overlay"] { left: 0; top: 0; bottom: 0; }
+#shell_right[data-participation="overlay"] { right: 0; top: 0; bottom: 0; }
+
+.region {
+	position: absolute;
+}
+
+/* The original's docked columns: open windows pack from the right edge, sitting on the HUD. */
+.dock-right {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: flex-start;
+}
+
+.slot {
+	display: none;
+	flex: 0 0 auto;
+}
+
+.slot.open {
+	display: block;
+}
+
+/* The original's left-docked warp list, standing on the HUD's left dragon (45 units over the bar),
+   which the HUD draws over the windows: capped to the room above it, the list is drawn at the
+   scale that fits (WindowPlacement's FitRegions). */
+.dock-left {
+	left: 0;
+	right: 0;
+	bottom: calc(45px * var(--hud-scale));
+	max-height: calc(100% - 45px * var(--hud-scale));
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+}
+
+/* Classic (0.97): the messages at the top-left corner of the screen, with no window (0.97 drew
+   six lines from y 13), and the input box centred over the bar, 268 wide, at 0.97's y 415-444:
+   its foot lies on the bar's top edge and is drawn over it (chat_input is raised over the HUD).
+   The region's bottom is 18 units above the bar, hence -29. */
+.chat-stack {
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}
+.chat-stack .slot[data-window="chat_log"] { position: absolute; left: 0; top: 0; }
+.chat-stack .slot[data-window="chat_input"] { position: absolute; left: 50%; bottom: -29dp; margin-left: -134dp; }
+
+/* The event HUDs: the original's 640x480 frame standing on the HUD, in its units (one unit is
+   --hud-scale px), its top 429 units above the HUD, each at the original's place in it. Classic:
+   centred on the area the open windows leave free, as 0.97 centred its event scores and timers on
+   it (004cb520, 004bc220, 004bf090), so they move aside with the windows. The spectator list's
+   slot is its bottom-left corner; the list grows upwards. */
+.event-hud {
+	left: calc((var(--world-left, 0px) + var(--world-right, 100%)) / 2);
+	margin-left: calc(-320px * var(--hud-scale));
+	bottom: 0;
+	width: calc(640px * var(--hud-scale));
+	height: calc(429px * var(--hud-scale));
+}
+.event-hud .slot { position: absolute; }
+.event-hud .slot[data-window="blood_castle_time"],
+.event-hud .slot[data-window="chaos_castle_time"],
+.event-hud .slot[data-window="empire_guardian_timer"] { left: calc(513px * var(--hud-scale)); top: calc(348px * var(--hud-scale)); }
+/* The guild war / battle soccer score: the 0.97 client's, at the top, 20 left of the centre. */
+.event-hud .slot[data-window="battle_soccer"] { left: calc(300px * var(--hud-scale)); top: 0; }
+/* The duel score: the Season 1 client's band at the top centre (duel_window.rcss). */
+.event-hud .slot[data-window="duel"] { left: calc(170px * var(--hud-scale)); top: calc(20px * var(--hud-scale)); }
+/* Kanturu: the Season 2 client's count box at (0, 300); its hourglass timer is placed from there
+   (kanturu_info.rcss). */
+.event-hud .slot[data-window="kanturu_info"] { left: 0; top: calc(300px * var(--hud-scale)); }
+/* Doppelganger: the event's own frame, raised clear of the 0.97 HUD's right dragon (its bottom at
+   y 380). */
+.event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(293px * var(--hud-scale)); }
+.event-hud .slot[data-window="duel_watch_users"] { left: calc(583px * var(--hud-scale)); top: calc(429px * var(--hud-scale)); }
+
+/* Where a free window (the friend list) first opens: the bottom-right corner above the HUD, raised
+   clear of the right dragon (45 units over the bar), which the HUD draws over the windows. */
+.free-bottom-right {
+	right: 0;
+	bottom: calc(45px * var(--hud-scale));
+}
+
+/* The original's centred NPC panels: a 640x480 stage in the screen's centre (1dp is one of its
+   units at the panel scale), each panel centred across it at the original's height. */
+.panel-stage {
+	left: 50%;
+	top: 50%;
+	width: 640dp;
+	height: 480dp;
+	margin-left: -320dp;
+	margin-top: -240dp;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+/* Kanturu: the Season 2 client's entry box at y 15. */
+.panel-stage .slot[data-window="kanturu_entry"] { margin-top: 15dp; }
+.panel-stage .slot[data-window="cursed_temple_entry"] { margin-top: 80dp; }
+.panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }
+.panel-stage .slot[data-window="in_game_shop"] { margin-top: 0; }
+
+/* The six-line message area; it never collapses between messages. */
+.system-log-stack {
+    left: 4dp;
+    /* Classic: under the chat's six lines at the top-left corner (the chat region starts under the
+       top bar, so its sixth line ends near 133). */
+    top: 136dp;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+/* The performance overlays start at the top-left corner, over the HUD's corner widgets. */
+.diagnostics-corner { left: 0; top: 0; }

@@ -8,7 +8,7 @@
 #include "Core/Platform/PathResolve.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
-#include "Core/Globals/_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +24,11 @@
 
 namespace
 {
+// Sound effects are pre-decoded and always played in 2D. The original client hard-coded
+// g_Enable3DSound = false, so nothing was ever spatialized. Placing sounds at absolute
+// world positions while the listener stays at the origin makes them inaudible.
+constexpr ma_uint32 kSoundEffectFlags = MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_NO_SPATIALIZATION;
+
 std::string AudioPathToUtf8(const wchar_t* text)
 {
 #ifdef _WIN32
@@ -51,6 +56,19 @@ std::string AudioPathToUtf8(const wchar_t* text)
 void NormalizeSeparators(std::string& path)
 {
     std::replace(path.begin(), path.end(), '\\', '/');
+}
+
+// Converts a sound effect path to UTF-8 and resolves it for the current platform.
+// SFX paths use Windows backslashes (e.g. L"Data\\Sound\\nBlackSmith.wav"); forward
+// slashes work on Windows too, and other platforms also resolve the file name case.
+std::string ResolveSoundEffectPath(const wchar_t* filename)
+{
+    std::string utf8Path = AudioPathToUtf8(filename);
+    NormalizeSeparators(utf8Path);
+#ifndef _WIN32
+    utf8Path = MuResolvePath(utf8Path.c_str());
+#endif
+    return utf8Path;
 }
 
 // Same-track guard shared by PlayMusic()/StopMusic(). m_currentMusicName holds
@@ -89,8 +107,35 @@ MiniAudioBackend::~MiniAudioBackend()
 {
     if (m_initialized)
     {
-        Shutdown();
+        // Qualified call: dynamic dispatch does not apply in a destructor.
+        MiniAudioBackend::Shutdown();
     }
+}
+
+bool MiniAudioBackend::HasSlot(int buffer) const
+{
+    return buffer >= 0 && buffer < GetSlotCount();
+}
+
+int MiniAudioBackend::GetSlotCount() const
+{
+    return static_cast<int>(m_soundLoaded.size());
+}
+
+// A number after the SOUND_* list gets its slot (and the ones before it) when
+// its sound is loaded.
+bool MiniAudioBackend::AddSlotsUpTo(int buffer)
+{
+    if (buffer < static_cast<int>(MAX_BUFFER) || buffer >= static_cast<int>(MAX_BUFFER) + MAX_FILE_SOUNDS)
+    {
+        return false;
+    }
+    const size_t count = static_cast<size_t>(buffer) + 1;
+    m_sounds.resize(count);
+    m_soundLoaded.resize(count);
+    m_activeChannel.resize(count);
+    m_loadedChannels.resize(count);
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +172,7 @@ void MiniAudioBackend::Shutdown()
     }
 
     // Release all loaded sound effect slots
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (m_soundLoaded[buf])
         {
@@ -139,9 +184,6 @@ void MiniAudioBackend::Shutdown()
             m_soundLoaded[buf] = false;
             m_loadedChannels[buf] = 0;
         }
-        // Clear per-slot OBJECT* tracking to prevent dangling
-        // pointers if the backend is restarted. Safe even if slot was never loaded.
-        m_soundObjects[buf] = nullptr;
     }
 
     ReleaseMusicStream();
@@ -155,9 +197,10 @@ void MiniAudioBackend::Shutdown()
 // LoadSound — load a WAV/OGG sound file into polyphonic slots
 // Each ESound slot gets MAX_CHANNEL (4) duplicate ma_sound instances for polyphony.
 // Sound effects use MA_SOUND_FLAG_DECODE (pre-decode to PCM for low-latency).
-// 3D sounds also enable spatialization per slot.
+// The enable3D argument is ignored on purpose: sound effects always play in 2D,
+// as in the original client (see kSoundEffectFlags).
 // ---------------------------------------------------------------------------
-void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int channels, bool enable3D)
+void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int channels, bool /*enable3D*/)
 {
     if (!m_initialized)
     {
@@ -165,7 +208,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx) && !AddSlotsUpTo(bufIdx))
     {
         return;
     }
@@ -174,7 +217,6 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // slot (partial channels) leaves the slot in a consistent clean state rather than holding
     // stale values.
     m_activeChannel[bufIdx] = 0;
-    m_sound3DEnabled[bufIdx] = false;
 
     // Unload previously loaded sound at this slot
     if (m_soundLoaded[bufIdx])
@@ -184,22 +226,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
             ma_sound_uninit(&m_sounds[bufIdx][ch]);
         }
         m_soundLoaded[bufIdx] = false;
-        // Clear stale object pointer on reload so Set3DSoundPosition()
-        // cannot dereference a pointer that belonged to the previous load lifetime.
-        m_soundObjects[bufIdx] = nullptr;
     }
 
-    // Convert wchar_t filename to UTF-8 for miniaudio (which uses narrow char*)
-    std::string utf8Path = AudioPathToUtf8(filename);
-
-    // Normalize path separators for Linux/macOS.
-    // SFX file paths use Windows backslashes (e.g., L"Data\\Sound\\nBlackSmith.wav").
-    // mu_wchar_to_utf8() preserves them; replace before passing to ma_sound_init_from_file().
-    // On Windows, forward slashes work identically to backslashes for file paths.
-    NormalizeSeparators(utf8Path);
-#ifndef _WIN32
-    utf8Path = MuResolvePath(utf8Path.c_str());
-#endif
+    const std::string utf8Path = ResolveSoundEffectPath(filename);
 
     // Clamp channels to the array dimension
     const int numChannels = (channels > 0 && channels <= MAX_CHANNEL) ? channels : MAX_CHANNEL;
@@ -208,7 +237,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     for (int ch = 0; ch < numChannels; ++ch)
     {
         ma_result result = ma_sound_init_from_file(&m_engine, utf8Path.c_str(),
-                                                   MA_SOUND_FLAG_DECODE, // pre-decode for low-latency sound effects
+                                                   kSoundEffectFlags, // pre-decoded, 2D
                                                    nullptr, nullptr, &m_sounds[bufIdx][ch]);
 
         if (result != MA_SUCCESS)
@@ -224,15 +253,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
             }
             return;
         }
-
-        if (enable3D)
-        {
-            ma_sound_set_spatialization_enabled(&m_sounds[bufIdx][ch], MA_TRUE);
-        }
     }
 
     m_soundLoaded[bufIdx] = true;
-    m_sound3DEnabled[bufIdx] = enable3D;
     m_activeChannel[bufIdx] = 0;
     // Record how many slots were actually initialised so that
     // PlaySound/StopSound/AllStopSound never touch uninitialized ma_sound handles.
@@ -243,14 +266,24 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // PlaySound — start playback of a sound effect using round-robin channel selection
 // Mirrors DSPlaySound.h PlayBuffer() signature exactly.
 // Returns S_FALSE (not S_OK) when !m_initialized to signal a no-op to callers, matching
-// !m_soundLoaded behaviour. Applies the 3D world position from pObject BEFORE calling
-// ma_sound_start(), configuring all properties before starting per the correct miniaudio
-// pattern -- otherwise the first mix tick on the audio thread renders at the default origin
-// (0,0,0) instead of the correct spatial position. Also stops the channel with ma_sound_stop()
+// !m_soundLoaded behaviour. pObject only marks the call as object-anchored for the dedupe
+// below; sound effects play in 2D, so its position is not used. Configures all properties
+// before ma_sound_start(), because the audio thread starts mixing immediately. Also stops
+// the channel with ma_sound_stop()
 // before ma_sound_seek_to_pcm_frame() to prevent seeking a currently-playing channel (round-robin
 // reuse of looping SFX slots), avoiding a pop/click artifact from seeking mid-mix.
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
+{
+    return StartSound(buffer, pObject, looped, m_sfxVolume);
+}
+
+bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
+{
+    return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f));
+}
+
+bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume)
 {
     if (!m_initialized)
     {
@@ -258,7 +291,7 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return false;
     }
@@ -268,7 +301,7 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
         return false;
     }
 
-    // Dedupe ambient/positional SFX: when a caller passes a 3D-anchored
+    // Dedupe ambient/positional SFX: when a caller passes an object-anchored
     // pObject (the standard pattern for per-frame ambient triggers like
     // MapProcess::MoveObject -> BaseMap::PlayObjectSound -> PlayBuffer
     // (SOUND_X, pObject, false)), ignore the call if any channel is
@@ -311,26 +344,8 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     // start() is subject to a data race on the first mix tick.
     ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
 
-    // Set 3D position BEFORE start() so the audio thread
-    // never renders at the default origin (0,0,0) for even one mix tick.
-    // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
-    // pObject is void* — cast to OBJECT* for position access.
-    if (m_sound3DEnabled[bufIdx] && pObject != nullptr)
-    {
-        const auto* pObj = static_cast<const OBJECT*>(pObject);
-        ma_sound_set_position(pSound, pObj->Position[0], pObj->Position[1], pObj->Position[2]);
-    }
-
-    // Store the object pointer for per-frame position updates in Set3DSoundPosition(). Only
-    // track for 3D-enabled slots — mono/stereo SFX do not need per-frame position updates.
-    // pObject may be nullptr (checked in Set3DSoundPosition).
-    if (m_sound3DEnabled[bufIdx])
-    {
-        m_soundObjects[bufIdx] = pObject;
-    }
-
-    // Apply stored SFX volume to newly-started effect
-    ma_sound_set_volume(pSound, m_sfxVolume);
+    // The effect volume, or a preview's own level.
+    ma_sound_set_volume(pSound, volume);
 
     ma_sound_start(pSound);
 
@@ -348,7 +363,7 @@ void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return;
     }
@@ -367,13 +382,6 @@ void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
             ma_sound_seek_to_pcm_frame(&m_sounds[bufIdx][ch], 0);
         }
     }
-
-    // Clear stale object pointer after stopping so Set3DSoundPosition() cannot
-    // dereference a pointer to an object that has since been deleted (e.g. NPC despawn).
-    // The slot remains loaded — m_soundLoaded stays true — so the next PlaySound()
-    // call can reuse the slot without reloading. Per-frame position updates simply
-    // skip this slot (m_soundObjects[bufIdx] == nullptr guard) until PlaySound() fires.
-    m_soundObjects[bufIdx] = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -386,7 +394,7 @@ void MiniAudioBackend::AllStopSound()
         return;
     }
 
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (m_soundLoaded[buf])
         {
@@ -407,7 +415,7 @@ void MiniAudioBackend::AllStopSound()
 void MiniAudioBackend::ReleaseSound(ESound buffer)
 {
     const int buf = static_cast<int>(buffer);
-    if (buf < 0 || buf >= static_cast<int>(MAX_BUFFER) || !m_initialized)
+    if (!HasSlot(buf) || !m_initialized)
     {
         return;
     }
@@ -424,54 +432,15 @@ void MiniAudioBackend::ReleaseSound(ESound buffer)
 
     m_soundLoaded[buf] = false;
     m_activeChannel[buf] = 0;
-    m_sound3DEnabled[buf] = false;
     m_loadedChannels[buf] = 0;
-    m_soundObjects[buf] = nullptr;
 }
 
 // ---------------------------------------------------------------------------
-// Set3DSoundPosition — update spatial positions for all 3D-enabled sounds
-// Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
-// Called each frame from the game loop for sounds that have an attached game object.
-//
-// Full implementation using per-slot m_soundObjects[].
-// PlaySound() stores the OBJECT* in m_soundObjects[bufIdx] for 3D-enabled slots.
-// This loop reads that pointer each frame and calls ma_sound_set_position() for
-// every actively-playing channel in the slot.
-// Guard order: !m_soundLoaded → skip; !m_sound3DEnabled → skip;
-//              m_soundObjects[buf] == nullptr → skip (safe — no object attached).
-// OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
-// Lifetime assumption: game engine guarantees the OBJECT outlives its attached sound
-// during normal play (same contract as DirectSoundManager::attachedObjects).
+// Set3DSoundPosition — intentionally empty: sound effects always play in 2D,
+// as in the original client, so there are no positions to update.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::Set3DSoundPosition()
 {
-    if (!m_initialized)
-    {
-        return;
-    }
-
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
-    {
-        if (!m_soundLoaded[buf] || !m_sound3DEnabled[buf] || m_soundObjects[buf] == nullptr)
-        {
-            continue;
-        }
-
-        for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
-        {
-            if (!ma_sound_is_playing(&m_sounds[buf][ch]))
-            {
-                continue;
-            }
-
-            // Update 3D position from the stored object pointer set in PlaySound().
-            // m_soundObjects[buf] is non-null (checked above); Position is vec3_t float[3].
-            // m_soundObjects is const void* — cast to OBJECT* for position access.
-            const auto* pObj = static_cast<const OBJECT*>(m_soundObjects[buf]);
-            ma_sound_set_position(&m_sounds[buf][ch], pObj->Position[0], pObj->Position[1], pObj->Position[2]);
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -487,7 +456,7 @@ void MiniAudioBackend::SetVolume(ESound buffer, long vol)
     }
 
     const int bufIdx = static_cast<int>(buffer);
-    if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
+    if (!HasSlot(bufIdx))
     {
         return;
     }
@@ -567,7 +536,7 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     const std::string filePath = MuResolvePath(identity.c_str());
 #endif
     std::error_code error;
-    if (!std::filesystem::is_regular_file(std::filesystem::u8path(filePath), error))
+    if (!std::filesystem::is_regular_file(Core::Text::PathFromUtf8(filePath), error))
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})",
             filePath, error ? error.message() : "not a regular file");
@@ -575,7 +544,9 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     }
 
     // Synchronous init keeps IsEndMusic() accurate while starting. Missing files never reach
-    // the resource-manager job queue; decoder failures are remembered by PlayMusic().
+    // the resource-manager job queue; decoder failures are remembered by PlayMusic(). The pinned
+    // miniaudio is patched so a failed stream load cannot stall the next one
+    // (cmake/patches/miniaudio-0.11.25-stream-load-signal-order.patch).
     ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM,
         nullptr, nullptr, &m_musicSound);
     if (result != MA_SUCCESS)
@@ -663,14 +634,10 @@ bool MiniAudioBackend::IsEndMusic()
 // Mirrors wzAudioGetStreamOffsetRange() return value from MuMain.cpp.
 // Returns 0 when not initialized or no music loaded.
 //
-// Music is loaded with
-// MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC. For streaming sounds,
-// ma_sound_get_length_in_pcm_frames() returns MA_RESULT indicating the length
-// is unavailable while the stream is still opening — totalFrames stays 0.
-// Fix: use ma_sound_get_cursor_in_seconds() for the cursor and
-// ma_sound_get_length_in_seconds() for the total length. The seconds API uses
-// the data-source length which streams can report even while decoding.
-// If length is still unavailable (streaming not yet started), fall back to 0.
+// Music is streamed with MA_SOUND_FLAG_STREAM and loaded synchronously, so the
+// stream's length is known once PlayMusic() has started it. Cursor and length
+// are read in seconds. A length of 0 (an empty file or a format that cannot
+// report one) gives 0.
 // ---------------------------------------------------------------------------
 int MiniAudioBackend::GetMusicPosition()
 {
@@ -683,15 +650,14 @@ int MiniAudioBackend::GetMusicPosition()
     float cursorSeconds = 0.0f;
     ma_sound_get_cursor_in_seconds(&m_musicSound, &cursorSeconds);
 
-    // Get total track length in seconds — works for streaming sounds unlike
-    // ma_sound_get_length_in_pcm_frames() which returns 0 until fully decoded.
+    // Get total track length in seconds
     float totalSeconds = 0.0f;
     ma_sound_get_length_in_seconds(&m_musicSound, &totalSeconds);
 
     if (totalSeconds <= 0.0f)
     {
-        // Length not yet available (stream still opening) — return 0.
-        // Callers checking for "IsEndMusic()" should use IsEndMusic() instead.
+        // No length to divide by. Callers checking for the end of the track
+        // should use IsEndMusic() instead.
         return 0;
     }
 
@@ -747,7 +713,7 @@ void MiniAudioBackend::SetSFXVolume(float level)
         return;
     }
     // Update all currently-loaded SFX slots
-    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    for (int buf = 0; buf < GetSlotCount(); ++buf)
     {
         if (!m_soundLoaded[buf])
         {

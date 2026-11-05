@@ -2,11 +2,24 @@
 #include "App/Control/ControlCommands.h"
 
 #include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Data/GameData/EffectData/EffectTypeSymbols.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Inventory/ItemMng.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -20,6 +33,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -228,7 +242,8 @@ std::string& MutableBuildIdentifier()
 }
 
 // Absolute path for a caller-given one, so the answer names a file the
-// caller can open regardless of the client's working directory.
+// caller can open regardless of the client's working directory. Used by every
+// command that writes a file (`screenshot`, `tooltip-snapshot`, `item-name-snapshot`).
 std::filesystem::path ResolveScreenshotPath(const std::string& requested)
 {
     // Through the wide form: a std::string given to std::filesystem::path is
@@ -444,9 +459,169 @@ std::string Bones(const Request& request, std::unique_ptr<Act>&)
     result["checked"] = g_PrepassBoneCheck.checked;
     result["players"] = g_PrepassBoneCheck.players;
     result["mismatched"] = g_PrepassBoneCheck.mismatched;
+    result["rebuilt"] = g_PrepassBoneCheck.rebuilt;
+    result["parts_reused"] = g_PrepassBoneCheck.partsReused;
+    result["parts_drawn_unadvanced"] = g_PrepassBoneCheck.partsDrawnUnadvanced;
     result["max_delta"] = g_PrepassBoneCheck.maxDelta;
     result["characters"] = g_LastActiveCharacterCount;
     result["parallel"] = g_LastAnimationWasParallel;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// What the draw spawned or animated since `start`, by the spawn function's callers; the update should own all of it.
+std::string DrawSpawns(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawSpawnCheck::Start();
+    }
+    int draws = 0;
+    json sites = json::array();
+    for (const Diagnostics::DrawSpawnCheck::Site& site : Diagnostics::DrawSpawnCheck::Report(draws))
+    {
+        sites.push_back({{"kind", site.kind}, {"callers", site.callers}, {"count", site.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["sites"] = sites;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawPurity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawPurityCheck::Start();
+    }
+    int draws = 0;
+    json changes = json::array();
+    for (const Diagnostics::DrawPurityCheck::Change& change : Diagnostics::DrawPurityCheck::Report(draws))
+    {
+        changes.push_back({{"what", change.what}, {"count", change.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["changes"] = changes;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
+{
+    bool on = Render::Drawing::DrawsWorldLater();
+    if (request.Has("on") && !request.GetBool("on", on))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "on must be a boolean");
+    }
+    Render::Drawing::SetDrawsWorldLater(on);
+    json result;
+    result["on"] = on;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawParity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    bool later = true;
+    if (request.Has("later") && !request.GetBool("later", later))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "later must be a boolean");
+    }
+    if (start)
+    {
+        Render::Drawing::RequestDrawParity(later);
+    }
+    const Render::Drawing::DrawParityReport& report = Render::Drawing::LastDrawParityReport();
+    json result;
+    result["done"] = report.done;
+    result["later"] = report.later;
+    result["at_once_calls"] = report.atOnceCalls;
+    result["later_calls"] = report.laterCalls;
+    result["first_difference"] = report.firstDifference;
+    result["first"] = {{"at_once", report.first.first}, {"later", report.first.second}};
+    result["only_at_once"] = report.onlyAtOnce;
+    result["only_later"] = report.onlyLater;
+    result["only_at_once_examples"] = report.onlyAtOnceExamples;
+    result["only_later_examples"] = report.onlyLaterExamples;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string SpawnEffect(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string kindText = "effect";
+    if (request.Has("kind") && !request.GetString("kind", kindText))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` must be a string");
+    }
+    Data::Effects::EffectKind kind;
+    if (kindText == "effect")
+        kind = Data::Effects::EffectKind::Effect;
+    else if (kindText == "particle")
+        kind = Data::Effects::EffectKind::Particle;
+    else if (kindText == "joint")
+        kind = Data::Effects::EffectKind::Joint;
+    else
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` is effect, particle or joint");
+
+    const auto symbols = Data::Effects::GetEffectTypeSymbols(kind);
+    std::string code;
+    if (!request.GetString("type", code))
+    {
+        // Without a type, the types of the kind, for a sweep to go through.
+        json types = json::array();
+        for (const Data::Effects::EffectTypeSymbol& symbol : symbols)
+            types.push_back({{"code", std::string(symbol.code)}, {"type", symbol.type}});
+        json result;
+        result["types"] = types;
+        return EncodeResult(request.EncodedId(), result.dump());
+    }
+    const auto symbol = std::ranges::find(symbols, code, &Data::Effects::EffectTypeSymbol::code);
+    if (symbol == symbols.end())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "no " + kindText + " type `" + code + "`");
+    }
+    int subType = 0;
+    if (request.Has("subtype") && !request.GetInt("subtype", subType))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`subtype` must be a number");
+    }
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
+    // At the hero, owned by and aimed at the hero, as most skills create them.
+    OBJECT* o = &Hero->Object;
+    vec3_t light = {1.f, 1.f, 1.f};
+    switch (kind)
+    {
+    case Data::Effects::EffectKind::Effect:
+        CreateEffect(symbol->type, o->Position, o->Angle, light, subType, o);
+        break;
+    case Data::Effects::EffectKind::Particle:
+        CreateParticle(symbol->type, o->Position, o->Angle, light, subType, 1.f, o);
+        break;
+    default:
+        CreateJoint(symbol->type, o->Position, o->Position, o->Angle, subType, o);
+        break;
+    }
+    json result;
+    result["kind"] = kindText;
+    result["type"] = code;
+    result["subtype"] = subType;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
@@ -474,6 +649,252 @@ std::string State(const Request& request, std::unique_ptr<Act>&)
     }
 
     return EncodeResult(request.EncodedId(), WorldStateObject());
+}
+
+namespace
+{
+// Reads the integer `key` into `value` when the request has it; false when it is not a number from 0 to `max`.
+bool ReadBounded(const Request& request, const char* key, int max, int& value)
+{
+    return !request.Has(key) || (request.GetInt(key, value) && value >= 0 && value <= max);
+}
+
+// The answer to a request that names an item number no item uses: it would get the lines of an empty item.
+std::string NoSuchItem(const Request& request, int group, int number)
+{
+    return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                       "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+}
+
+// Reads the item a request names into `params`: `group` and `number`, and the fields `level`, `durability`, `luck`,
+// `skill`, `option`, `excellent`, `ancient`, `harmony` and `harmony_level`, as the server would send them (left out:
+// 0, and full durability for the item as made). Returns the `bad_request` to answer when a field is missing or can't
+// be held, or no item uses the number; empty when the item is read.
+std::string ReadItemParameters(const Request& request, const std::string& command, ItemCreationParams& params)
+{
+    int group = -1;
+    int number = -1;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`" + command + "` needs `group` and `number` of an item");
+    }
+
+    // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
+    // not a wrapped one. Checked before the item is made from the item data. -1: left out.
+    int level = -1;
+    int durability = -1;
+    int option = 0;
+    int excellent = 0;
+    int ancient = 0;
+    int harmony = 0;
+    int harmonyLevel = -1;
+    if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
+        !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
+        !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
+        !ReadBounded(request, "harmony", 15, harmony) || !ReadBounded(request, "harmony_level", 15, harmonyLevel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
+                           "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
+    }
+    // A harmony level counts only with a harmony option; alone it would be ignored.
+    if (harmonyLevel >= 0 && harmony == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`harmony_level` needs `harmony`, the Jewel of Harmony option");
+    }
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return NoSuchItem(request, group, number);
+    }
+
+    params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+    if (level >= 0)
+        params.Level = static_cast<BYTE>(level);
+    bool flag = false;
+    if (request.GetBool("luck", flag))
+        params.WithLuck = flag;
+    if (request.GetBool("skill", flag))
+        params.WithSkill = flag;
+    if (option > 0)
+    {
+        params.WithOption = true;
+        params.OptionLevel = static_cast<BYTE>(option);
+    }
+    if (excellent > 0)
+    {
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
+    }
+    if (ancient > 0)
+    {
+        params.IsAncient = true;
+        params.AncientDiscriminator = static_cast<BYTE>(ancient);
+    }
+    if (harmony > 0)
+    {
+        params.HasHarmonyOption = true;
+        params.HarmonyOptionType = static_cast<BYTE>(harmony);
+        if (harmonyLevel >= 0)
+            params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
+    }
+    // The full durability grows with the level and the options, so it is taken once they are set.
+    params.Durability =
+        durability >= 0 ? static_cast<BYTE>(durability) : Engine::Items::TooltipSnapshot::FullDurability(params);
+    return {};
+}
+} // namespace
+
+std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    ItemCreationParams params{};
+    if (std::string refusal = ReadItemParameters(request, "tooltip", params); !refusal.empty())
+    {
+        return refusal;
+    }
+
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+
+    json result;
+    result["lines"] = json::array();
+    for (const ItemTooltipLine& line : lines)
+    {
+        result["lines"].push_back(
+            {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`tooltip-snapshot` needs `out`, the file to write");
+    }
+
+    // One group per request keeps the frame that builds them short. Checked before `out` is opened: opening it
+    // empties it, and a mistyped request must not wipe a recorded snapshot.
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    const int tooltips = Engine::Items::TooltipSnapshot::WriteItemTooltipSnapshot(out, onlyGroup);
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["tooltips"] = tooltips;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemName(const Request& request, std::unique_ptr<Act>&)
+{
+    int group = -1;
+    int number = -1;
+    int level = 0;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX ||
+        !ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name` needs `group` and `number` of an item, and a `level` of 0 to 15");
+    }
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return NoSuchItem(request, group, number);
+    }
+
+    json result;
+    result["name"] = Core::Text::ToUtf8(App::Control::ItemDisplayName(group * MAX_ITEM_INDEX + number, level).c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name-snapshot` needs `out`, the file to write");
+    }
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    int names = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists() || (onlyGroup >= 0 && definition.group != onlyGroup))
+        {
+            continue;
+        }
+        const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            out << definition.group << '/' << definition.number << " +" << level << ' '
+                << Core::Text::ToUtf8(App::Control::ItemDisplayName(type, level).c_str()) << '\n';
+            ++names;
+        }
+    }
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["names"] = names;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string RepairTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    ItemCreationParams params{};
+    if (std::string refusal = ReadItemParameters(request, "repair-tooltip", params); !refusal.empty())
+    {
+        return refusal;
+    }
+    ITEM item;
+    FillItemFromParameters(item, params);
+    const RepairInfoText repair = BuildRepairInfoText(&item);
+
+    json result;
+    result["lines"] = json::array();
+    for (int line = 0; line < repair.lineCount; ++line)
+    {
+        result["lines"].push_back({{"text", Core::Text::ToUtf8(TextList[line])},
+                                   {"color", TextListColor[line]},
+                                   {"bold", TextBold[line] != 0}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string Nearby(const Request& request, std::unique_ptr<Act>&)

@@ -74,6 +74,9 @@ struct _MASTER_SKILL_TOOLTIP_FILE
     char Info7[64];
 };
 
+// The header texts of one class family's master skill tree (MasterLevel.cpp).
+struct MasterTreeHeaderTexts;
+
 namespace mu::ui::window
 {
 // The master skill tree. Drawn entirely by RmlUi (master_level.rml): the window keeps the tree
@@ -115,8 +118,7 @@ private:
     BYTE ConsumePoint;
     int CurSkillID;
     MASTER_SKILL_TREE_CLASS classCode;
-    DWORD CategoryTextIndex;
-    DWORD ClassNameTextIndex;
+    const MasterTreeHeaderTexts* HeaderTexts;
 
     std::map<ActionSkillType, _MASTER_SKILL_TOOLTIP> map_masterSkillToolTip;
     std::map<BYTE, _MASTER_SKILLTREE_DATA> map_masterData;

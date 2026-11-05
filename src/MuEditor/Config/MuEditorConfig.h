@@ -20,6 +20,27 @@ public:
     std::string GetLanguage() const;
     void SetLanguage(const std::string& language);
 
+    // The address of the OpenMU admin panel which the Item Sync window updates from
+    // ([OpenMU] AdminPanelUrl).
+    const std::string& GetOpenMUAdminPanelUrl() const;
+    void SetOpenMUAdminPanelUrl(const std::string& url);
+
+    // The Server List window's preview of the offline servers ([ServerList] ShowOfflineServers,
+    // OfflineServerLoad): CServerListManager::SetOfflinePreview.
+    bool GetShowOfflineServers() const
+    {
+        return m_showOfflineServers;
+    }
+    int GetOfflineServerLoad() const
+    {
+        return m_offlineServerLoad;
+    }
+    void SetOfflineServers(bool show, int load)
+    {
+        m_showOfflineServers = show;
+        m_offlineServerLoad = load;
+    }
+
     // Skill Editor column visibility settings
     const std::map<std::string, bool>& GetSkillEditorColumnVisibility() const { return m_skillEditorColumnVisibility; }
     void SetSkillEditorColumnVisibility(const std::map<std::string, bool>& visibility) { m_skillEditorColumnVisibility = visibility; }
@@ -33,6 +54,9 @@ private:
     // Settings storage
     std::string m_language;
     std::map<std::string, bool> m_skillEditorColumnVisibility;  // Skill Editor columns
+    std::string m_openMUAdminPanelUrl;
+    bool m_showOfflineServers = false;
+    int m_offlineServerLoad = 50;
 
     // Helper functions for INI parsing
     std::string Trim(const std::string& str);

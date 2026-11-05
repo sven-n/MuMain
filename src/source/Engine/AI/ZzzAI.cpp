@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -327,6 +328,7 @@ bool IsAliceRideAction_Fenrir(unsigned short byAction)
 
 void SetAction(OBJECT* o, int Action, bool bBlending)
 {
+    Diagnostics::DrawSpawnCheck::Note("set-action");
     BMD* b = &Models[o->Type];
     if (Action >= b->NumActions)
         return;

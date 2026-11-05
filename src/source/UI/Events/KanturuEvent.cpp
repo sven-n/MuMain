@@ -33,6 +33,27 @@
 
 namespace
 {
+// The entry answers' texts, from POPUP_NONE to POPUP_NOT_MUNSTONE.
+const wchar_t* const* const kEntryResultTexts[] = {
+    &I18N::Game::FailedToEnter,
+    &I18N::Game::_15PlayersHaveAlreadyEnteredYouCanNoLongerEnter,
+    &I18N::Game::MoonstonePendantAuthenticationHasFailed,
+};
+static_assert(std::size(kEntryResultTexts) == mu::ui::window::CKanturu2ndEnterNpc::POPUP_NOT_MUNSTONE + 1,
+              "one text per entry result from POPUP_NONE to POPUP_NOT_MUNSTONE");
+
+// The entry answer's text for the results CreateMessageBox has no check of its own for
+// (POPUP_NONE to POPUP_NOT_MUNSTONE); empty for any other number.
+const wchar_t* EntryResultText(int result)
+{
+    using Npc = mu::ui::window::CKanturu2ndEnterNpc;
+    if (result < Npc::POPUP_NONE || result > Npc::POPUP_NOT_MUNSTONE)
+    {
+        return L"";
+    }
+    return *kEntryResultTexts[result];
+}
+
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
 float KanturuTextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float boxWidth)
 {
@@ -220,7 +241,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::CreateMessageBox(MSGBOX_TYPE result)
     }
     else
     {
-        wcscpy(strMessage, I18N::Game::Lookup(2170 + static_cast<int>(result)));
+        wcscpy(strMessage, EntryResultText(result));
     }
 
     mu::ui::window::CreateOkMessageBox(strMessage);

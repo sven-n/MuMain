@@ -2,9 +2,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "I18N/All.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 
 #include <codecvt>
 #include <sstream>
@@ -30,9 +32,9 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
-MONSTER_SCRIPT      MonsterScript[MAX_MONSTER];
 GATE_ATTRIBUTE* GateAttribute = NULL;
 SKILL_ATTRIBUTE* SkillAttribute = NULL;
 ITEM_ATTRIBUTE* ItemAttribute = NULL;
@@ -44,22 +46,6 @@ static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
 
-void SaveTextFile(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"wb");
-
-    int Size = MAX_GLOBAL_TEXT_STRING;
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_TEXTS; i++)
-    {
-        memcpy(Buffer, I18N::Game::Lookup(i), Size);
-        BuxConvert(Buffer, Size);
-        fwrite(Buffer, Size, 1, fp);
-    }
-    delete[] Buffer;
-    fclose(fp);
-}
-
 wchar_t AbuseFilter[MAX_FILTERS][20];
 wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 int  AbuseFilterNumber = 0;
@@ -67,69 +53,69 @@ int  AbuseNameFilterNumber = 0;
 
 void OpenFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
 
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_FILTERS];
-    fread(Buffer, Size * MAX_FILTERS, 1, fp);
-    DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-    fclose(fp);
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_FILTERS);
+    BYTE* Buffer = content.data();
+    // The list ends at its first empty entry; the checksum behind the table is not checked. A file made for a
+    // smaller table ends early, after that entry, and still loads.
+    const std::size_t entries = fread(Buffer, Size, MAX_FILTERS, fp.get());
+    fp.reset();
 
+    bool ended = false;
     {
         BYTE* pSeek = Buffer;
-        for (int i = 0; i < MAX_FILTERS; i++)
+        for (std::size_t i = 0; i < entries; i++)
         {
             BuxConvert(pSeek, Size);
             memcpy(AbuseFilter[i], pSeek, Size);
             if (AbuseFilter[i][0] == 0)
             {
-                AbuseFilterNumber = i;
+                AbuseFilterNumber = static_cast<int>(i);
+                ended = true;
                 break;
             }
             pSeek += Size;
         }
     }
 
-    delete[] Buffer;
+    if (!ended && entries < MAX_FILTERS)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+    }
+    else if (entries < MAX_FILTERS)
+    {
+        // A file cut short after the list's end loads the same way; the error log says how much was there.
+        g_ErrorReport.Write(L"%ls - %d of %d filter entries; the list ends at entry %d.\r\n", FileName,
+                            static_cast<int>(entries), MAX_FILTERS, AbuseFilterNumber);
+    }
 }
 
 void OpenNameFilterFile(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
         return;
     }
     int Size = 20;
-    BYTE* Buffer = new BYTE[Size * MAX_NAMEFILTERS];
-
-    fread(Buffer, Size * MAX_NAMEFILTERS, 1, fp);
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * MAX_NAMEFILTERS);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-    fclose(fp);
-    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * MAX_NAMEFILTERS) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
     }
     else
     {
@@ -146,7 +132,6 @@ void OpenNameFilterFile(const wchar_t* FileName)
             pSeek += Size;
         }
     }
-    delete[] Buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,63 +140,42 @@ void OpenNameFilterFile(const wchar_t* FileName)
 
 void OpenGateScript(const wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (fp)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
-        BYTE* Buffer = new BYTE[Size];
+        std::vector<BYTE> record(static_cast<std::size_t>(Size));
+        BYTE* Buffer = record.data();
+        int loaded = 0;
+        bool corrupted = false;
         for (int i = 0; i < MAX_GATES; i++)
         {
-            fread(Buffer, Size, 1, fp);
+            // A file made for fewer gates ends between two of them; the gates it lacks stay empty. A file that
+            // ends inside a gate is corrupt.
+            const std::size_t read = fread(Buffer, 1, Size, fp.get());
+            if (read == 0 && feof(fp.get()))
+            {
+                break;
+            }
+            if (read != static_cast<std::size_t>(Size))
+            {
+                DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+                corrupted = true;
+                break;
+            }
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
+            ++loaded;
         }
-        delete[] Buffer;
-        fclose(fp);
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
-
-void OpenMonsterSkillScript(const wchar_t* FileName)
-{
-    memset(MonsterSkill, -1, sizeof(Script_Skill));
-
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        int Size = (sizeof(Script_Skill) + sizeof(int));
-        BYTE* Buffer = new BYTE[Size];
-        int FileCount = 0;
-        fread(&FileCount, sizeof(int), 1, fp);
-        for (int i = 0; i < FileCount; i++)
+        // A file cut short between two gates loads the same way; the error log says how many there were.
+        if (!corrupted && loaded < MAX_GATES)
         {
-            fread(Buffer, Size, 1, fp);
-            BuxConvert(Buffer, Size);
-            int dummy = -1;
-            int Seek = 0;
-            memcpy(&dummy, Buffer + Seek, sizeof(int));
-            Seek += sizeof(int);
-            memcpy(MonsterSkill[dummy].Skill_Num, Buffer + Seek, sizeof(int) * MAX_MONSTERSKILL_NUM);
-            Seek += (sizeof(int) * MAX_MONSTERSKILL_NUM);
-            memcpy(&MonsterSkill[dummy].Slot, Buffer + Seek, sizeof(int));
+            g_ErrorReport.Write(L"%ls - %d of %d gates; the others stay empty.\r\n", FileName, loaded, MAX_GATES);
         }
-        delete[] Buffer;
-        fclose(fp);
     }
     else
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
     }
 }
 
@@ -547,7 +511,7 @@ void SetItemAttributes(ITEM* ip)
         *p, {ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, ip->OptionLevel});
     ip->DamageMin = static_cast<WORD>(stats.damageMin);
     ip->DamageMax = static_cast<WORD>(stats.damageMax);
-    ip->MagicPower = static_cast<BYTE>(stats.magicPower);
+    ip->MagicPower = static_cast<WORD>(stats.magicPower);
     ip->SuccessfulBlocking = static_cast<BYTE>(stats.blockRate);
     ip->Defense = static_cast<WORD>(stats.defense);
     ip->MagicDefense = static_cast<WORD>(stats.magicDefense);
@@ -885,7 +849,7 @@ void SetItemAttributes(ITEM* ip)
     CalcExcellentOptions(ip);
 }
 
-int64_t ItemValue(ITEM* ip, int goldType)
+int64_t ItemValue(const ITEM* ip, int goldType)
 {
     if (ip->Type == -1) return 0;
 
@@ -1783,63 +1747,9 @@ WORD ItemWalkSpeed(ITEM* Item)
     return WalkSpeed;
 }
 
-int EditMonsterNumber = 0;
-int MonsterKey = 0;
-
-void OpenMonsterScript(wchar_t* FileName)
-{
-    if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        return;
-    }
-
-    while (true)
-    {
-        SMDToken token = GetToken();
-        if (token == END) break;
-        if (token == NAME && strcmp("end", TokenString) == 0) break;
-        MONSTER_SCRIPT* m = &MonsterScript[EditMonsterNumber++];
-        m->Type = static_cast<int>(TokenNumber);
-        token = GetToken();
-        token = GetToken();
-
-        CMultiLanguage::ConvertFromUtf8(m->Name, TokenString);
-        m->Name[MAX_MONSTER_NAME] = L'\0';
-        
-        //Token = (*GetToken)();m->Level = (int)TokenNumber;
-        //for(int i=0;i<23;i++) Token = (*GetToken)();
-    }
-    fclose(SMDFile);
-}
-
 const wchar_t* getMonsterName(int type)
 {
-    for (int i = 0; i < MAX_MONSTER; ++i)
-    {
-        if (MonsterScript[i].Type == type)
-        {
-            return MonsterScript[i].Name;
-        }
-    }
-
-    return L"()";
-}
-
-void MonsterConvert(MONSTER* m, int Level)
-{
-    MONSTER_SCRIPT* p = &MonsterScript[m->Type];
-    MONSTER_ATTRIBUTE* c = &p->Attribute;
-    m->Level = Level;
-    m->Attribute.AttackSpeed = c->AttackSpeed;
-    m->Attribute.AttackDamageMin = c->AttackDamageMin / 2 + c->AttackDamageMin / 2 * (m->Level) / 9;
-    m->Attribute.AttackDamageMax = c->AttackDamageMax / 2 + c->AttackDamageMax / 2 * (m->Level) / 9;
-    m->Attribute.Defense = c->Defense / 2 + c->Defense / 2 * (m->Level) / 9;
-    m->Attribute.AttackRating = c->AttackRating / 2 + c->AttackRating / 2 * (m->Level) / 9;
-    m->Attribute.SuccessfulBlocking = c->SuccessfulBlocking / 2 + c->SuccessfulBlocking / 2 * (m->Level) / 9;
+    return Data::Monsters::GetMonsterName(type);
 }
 
 void CreateClassAttribute(int Class, int Strength, int Dexterity, int Vitality, int Energy, int Life, int Mana, int LevelLife, int LevelMana, int VitalityToLife, int EnergyToMana)
@@ -2175,20 +2085,6 @@ void CHARACTER_MACHINE::CalculateDamage()
     Character.AttackDamageMaxLeft += Damage;
     Character.AttackDamageMaxRight += Damage;
 
-    Damage = 0;
-    g_csItemOption.PlusSpecialLevel(&Damage, Dexterity, AT_SET_OPTION_IMPROVE_ATTACK_1);
-    Character.AttackDamageMinRight += Damage;
-    Character.AttackDamageMaxRight += Damage;
-    Character.AttackDamageMinLeft += Damage;
-    Character.AttackDamageMaxLeft += Damage;
-
-    Damage = 0;
-    g_csItemOption.PlusSpecialLevel(&Damage, Strength, AT_SET_OPTION_IMPROVE_ATTACK_2);
-    Character.AttackDamageMinRight += Damage;
-    Character.AttackDamageMaxRight += Damage;
-    Character.AttackDamageMinLeft += Damage;
-    Character.AttackDamageMaxLeft += Damage;
-
     if (GameLogic::Items::IsBowCrossbowOrAmmunition(Right) && GameLogic::Items::IsBowCrossbowOrAmmunition(Left))
     {
         int LLevel = Left->Level;
@@ -2417,13 +2313,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
         PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
     }
-
-    WORD MagicDamage = 0;
-
-    MagicDamage = 0;
-    g_csItemOption.PlusSpecialLevel(&MagicDamage, Energy, AT_SET_OPTION_IMPROVE_MAGIC);
-    Character.MagicDamageMin += MagicDamage;
-    Character.MagicDamageMax += MagicDamage;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
     {
@@ -2669,10 +2558,9 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 
 void CHARACTER_MACHINE::CalculateDefense()
 {
-    WORD Dexterity, Vitality;
+    WORD Dexterity;
 
     Dexterity = Character.Dexterity + Character.AddDexterity;
-    Vitality = Character.Vitality + Character.AddVitality;
 
     int CharacterClass = gCharacterManager.GetBaseClass(Character.Class);
 
@@ -2778,8 +2666,6 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     g_csItemOption.PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE);
-    g_csItemOption.PlusSpecialLevel(&Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3);
-    g_csItemOption.PlusSpecialLevel(&Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4);
 
     if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
     {
@@ -3015,7 +2901,7 @@ void CHARACTER_MACHINE::CalculateAll()
     MONSTER_ATTRIBUTE* c = &Enemy.Attribute;
     const int finalAttackDamageRight = static_cast<int>(AttackDamageRight) - c->Defense;
     const int finalAttackDamageLeft = static_cast<int>(AttackDamageLeft) - c->Defense;
-    int EnemyAttackDamage = c->AttackDamageMin + rand() % (c->AttackDamageMax - c->AttackDamageMin + 1);
+    int EnemyAttackDamage = c->AttackDamageMin + Random::Rand() % (c->AttackDamageMax - c->AttackDamageMin + 1);
     const int finalHitPoint = EnemyAttackDamage - Character.Defense;
     const int finalAttackRating = static_cast<int>(Character.AttackRating) - c->SuccessfulBlocking;
     const int finalDefenseRating = static_cast<int>(Character.SuccessfulBlocking) - c->AttackRating;
@@ -3037,11 +2923,11 @@ void CHARACTER_MACHINE::CalculateAll()
         FinalDefenseRating = 100;
     else
         FinalDefenseRating = static_cast<WORD>(finalDefenseRating);
-    if (rand() % 100 < FinalAttackRating)
+    if (Random::Rand() % 100 < FinalAttackRating)
         FinalSuccessAttack = true;
     else
         FinalSuccessAttack = false;
-    if (rand() % 100 < FinalDefenseRating)
+    if (Random::Rand() % 100 < FinalDefenseRating)
         FinalSuccessDefense = true;
     else
         FinalSuccessDefense = false;

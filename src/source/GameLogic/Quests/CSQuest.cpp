@@ -284,13 +284,9 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 
 void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
-    if (Class != -1)
-    {
-        m_bOnce = true;
-        bCheckNPC = false;
-
-        m_byClass = gCharacterManager.GetBaseClass(Class);
-    }
+    m_bOnce = true;
+    bCheckNPC = false;
+    m_byClass = gCharacterManager.GetBaseClass(Class);
 
     m_byQuestList.fill(0);
     if (byList != nullptr)
@@ -522,13 +518,10 @@ std::uint8_t CSQuest::getQuestState2(int questIndex)
 
 std::uint8_t CSQuest::CheckQuestState(std::uint8_t state)
 {
-    if (Hero->Class != -1)
+    if (m_bOnce)
     {
-        if (m_bOnce)
-        {
-            m_bOnce = false;
-            m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
-        }
+        m_bOnce = false;
+        m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
     }
 
     QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
@@ -577,7 +570,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    const wchar_t* text = I18N::Dialog::Lookup(iDialogIndex);
+    const wchar_t* text = GameLogic::Quests::Dialog::GetText(iDialogIndex);
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(
         text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
@@ -590,8 +583,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < entry.numAnswer; ++i)
     {
-        const wchar_t* answerText = I18N::Dialog::Lookup(
-            GameLogic::Quests::Dialog::DialogAnswerLegacyId(iDialogIndex, i));
+        const wchar_t* answerText = GameLogic::Quests::Dialog::GetAnswerText(iDialogIndex, i);
         mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)

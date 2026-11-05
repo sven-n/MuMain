@@ -34,7 +34,6 @@ extern uint64_t  RemainingMacroCooldownTime;
 extern int  ItemHelp;
 extern bool DontMove;
 extern int  EditFlag;
-extern int  SelectMonster;
 extern int  SelectModel;
 extern int  SelectMapping;
 extern bool DebugEnable;

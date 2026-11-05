@@ -45,6 +45,10 @@ struct ItemCreationParams
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 
+// Makes `item` the item the parameters describe, with its stats (SetItemAttributes); its Key and reference count are
+// left 0 (the item manager gives them).
+void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters);
+
 namespace mu::ui::window
 {
     class CItemMng

@@ -1,12 +1,16 @@
 #include <doctest.h>
 #include "stdafx.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
+#include "UI/RmlBridge/RmlStackingOrder.h"
+#include "UI/RmlBridge/RmlTheme.h"
 
 #include <chrono>
 #include <fstream>
 
 using UI::RmlBridge::ThemeInheritance;
 using UI::RmlBridge::ResolveThemeResource;
+using UI::RmlBridge::StackingDepthForDocument;
+using UI::RmlBridge::ThemedStackingDepth;
 
 namespace
 {
@@ -43,6 +47,17 @@ TEST_CASE("theme chains merge settings and replace files from child to ancestor 
     CHECK(theme.GetSetting("Tokens", "muted")->value == "gray");
     CHECK(theme.GetSetting("Capabilities", "NativeTextSize")->value == "0");
     CHECK(theme.GetSetting("Fonts", "body")->directory == files.root / "base");
+    // Section and key in any case; a key no theme of the chain has is none. GetSetting gives what Section() has.
+    CHECK(theme.GetSetting("TOKENS", "Accent")->value == "blue");
+    CHECK_FALSE(theme.GetSetting("Tokens", "missing"));
+    CHECK_FALSE(theme.GetSetting("Missing", "accent"));
+    for (const auto& [key, setting] : theme.Section("Tokens"))
+    {
+        CAPTURE(key);
+        REQUIRE(theme.GetSetting("Tokens", key));
+        CHECK(theme.GetSetting("Tokens", key)->value == setting.value);
+        CHECK(theme.GetSetting("Tokens", key)->directory == setting.directory);
+    }
     CHECK(theme.ResolveFile("base.rcss") == files.root / "base/base.rcss");
     CHECK(theme.ResolveFile("panel.rcss") == files.root / "child/panel.rcss");
     CHECK_FALSE(theme.ResolveFile("../base/base.rcss"));
@@ -58,6 +73,7 @@ TEST_CASE("invalid ancestry fails without partial settings or file fallback [ui]
     CHECK_FALSE(ThemeInheritance(files.root / "a").IsValid());
     CHECK_FALSE(ThemeInheritance(files.root / "a").ResolveFile("base.rcss"));
     CHECK(ThemeInheritance(files.root / "a").Section("Theme").empty());
+    CHECK_FALSE(ThemeInheritance(files.root / "a").GetSetting("Theme", "Base"));
     files.Write("b/theme.ini", "[Theme]\nBase=b\n");
     CHECK_FALSE(ThemeInheritance(files.root / "b").IsValid());
     files.Write("b/theme.ini", "[Theme]\nBase=missing\n");
@@ -82,4 +98,42 @@ TEST_CASE("inherited images resolve container files but keep logical extensions 
     files.Write("child/images/panel.OZT", "override");
     CHECK(ResolveThemeResource(virtualImage.generic_string(), true) == virtualImage.generic_string());
     CHECK(ResolveThemeResource("Data/Interface/ordinary.tga", true) == "Data/Interface/ordinary.tga");
+}
+
+TEST_CASE("a theme restacks documents through [Stacking], inherited like any setting [ui][rml-theme]")
+{
+    ThemeFiles files;
+    files.Write("base/theme.ini", "[Stacking]\nchat_input.rml=10.65\nchat_log.rml=over\nmain_frame_top.rml=nan\ntooltip.rml=inf\n");
+    files.Write("child/theme.ini", "[Theme]\nBase=base\n");
+    const ThemeInheritance theme(files.root / "child");
+    REQUIRE(theme.IsValid());
+    const auto input = ThemedStackingDepth(theme, "chat_input.rml");
+    REQUIRE(input);
+    CHECK(*input == doctest::Approx(10.65f));
+    // Not listed, not a number, or not finite: the stacking table's depth.
+    CHECK(ThemedStackingDepth(theme, "main_frame.rml") == StackingDepthForDocument("main_frame.rml"));
+    CHECK(ThemedStackingDepth(theme, "chat_log.rml") == StackingDepthForDocument("chat_log.rml"));
+    CHECK(ThemedStackingDepth(theme, "main_frame_top.rml") == StackingDepthForDocument("main_frame_top.rml"));
+    CHECK(ThemedStackingDepth(theme, "tooltip.rml") == StackingDepthForDocument("tooltip.rml"));
+    CHECK_FALSE(ThemedStackingDepth(theme, "no_such_document.rml"));
+}
+
+TEST_CASE("the classic theme stacks its chat input over the HUD and under the tooltips [ui][rml-theme]")
+{
+    const ThemeInheritance classic(std::filesystem::path(MU_RMLUI_DIR) / "themes/classic");
+    REQUIRE(classic.IsValid());
+    const auto input = ThemedStackingDepth(classic, "chat_input.rml");
+    REQUIRE(input);
+    CHECK(*input > *StackingDepthForDocument("main_frame.rml"));
+    // Over the command windows it can overlap, never at their depth (equal depths order by focus).
+    CHECK(*input > *StackingDepthForDocument("command_window.rml"));
+    CHECK(*input > *StackingDepthForDocument("chat_command.rml"));
+    CHECK(*input < *StackingDepthForDocument("option_window.rml"));
+    CHECK(*input < *StackingDepthForDocument("tooltip.rml"));
+    // The HUD keeps its own depth, over the windows, so the skill list beside them stays reachable.
+    CHECK(ThemedStackingDepth(classic, "main_frame.rml") == StackingDepthForDocument("main_frame.rml"));
+
+    const ThemeInheritance legacy(std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy");
+    REQUIRE(legacy.IsValid());
+    CHECK(ThemedStackingDepth(legacy, "chat_input.rml") == StackingDepthForDocument("chat_input.rml"));
 }

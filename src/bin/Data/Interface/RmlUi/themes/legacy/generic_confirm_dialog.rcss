@@ -305,12 +305,24 @@
 	msgbox-cancel-hover:  0px 30px 54px 30px;
 	msgbox-cancel-active: 0px 60px 54px 30px;
 }
+/* An input's Max button (the vault zen dialogs) uses its own lettered art (newui_button_max.tga, same
+   layout as the OK/Cancel sheets); any other secondary button keeps the plain button. */
+@spritesheet msgbox-max-sheet
+{
+	src: "../../../newui_button_max.tga";
+	msgbox-max-idle:   0px  0px 54px 30px;
+	msgbox-max-hover:  0px 30px 54px 30px;
+	msgbox-max-active: 0px 60px 54px 30px;
+}
 .btn.gcd-btn-primary.stock-ok { decorator: image(msgbox-ok-idle); color: rgba(0, 0, 0, 0); }
 .btn.gcd-btn-primary.stock-ok:hover { decorator: image(msgbox-ok-hover); }
 .btn.gcd-btn-primary.stock-ok:active { decorator: image(msgbox-ok-active); }
 .btn.gcd-btn-cancel.stock-cancel { decorator: image(msgbox-cancel-idle); color: rgba(0, 0, 0, 0); }
 .btn.gcd-btn-cancel.stock-cancel:hover { decorator: image(msgbox-cancel-hover); }
 .btn.gcd-btn-cancel.stock-cancel:active { decorator: image(msgbox-cancel-active); }
+.btn.gcd-btn-secondary.stock-max { decorator: image(msgbox-max-idle); color: rgba(0, 0, 0, 0); }
+.btn.gcd-btn-secondary.stock-max:hover { decorator: image(msgbox-max-hover); }
+.btn.gcd-btn-secondary.stock-max:active { decorator: image(msgbox-max-active); }
 .gcd-btn-primary   { left: 30dp; }
 .gcd-btn-primary.solo { left: 88dp; }
 /* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both

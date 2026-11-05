@@ -25,7 +25,7 @@ void CItemEditorPopups::RenderAll()
 {
     // Save popups
     RenderSimplePopup("Save Success", I18N::Editor::ItemsSavedSuccessfully);
-    RenderSimplePopup("Save Failed", I18N::Editor::ItemDataHasErrors);
+    RenderSimplePopup("Save Failed", I18N::Editor::ItemDataHasFatalProblems);
     RenderSimplePopup("Save Write Failed", I18N::Editor::ItemDataCouldNotBeWritten);
 
     // CSV Export popups

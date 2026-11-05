@@ -346,14 +346,12 @@ std::vector<Entry> HandlerEntries()
                 descriptor.onCreate = d.onCreate;
             if (d.move)
                 descriptor.move = d.move;
-            if (d.render)
-                descriptor.render = d.render;
         }
     };
 
     // MODEL_DESAIR: rides a joint and sheds feathers (see
-    // Behaviors::MoveDesair). Default render.
-    add({MODEL_DESAIR}, {.move = &Behaviors::MoveDesair, .render = &Behaviors::RenderDefault});
+    // Behaviors::MoveDesair). Drawn as a skill model.
+    add({MODEL_DESAIR}, {.move = &Behaviors::MoveDesair});
 
     // --- Effects with creation values and a move handler ---------
     add({MODEL_MAGIC_CAPSULE2}, {.move = &Behaviors::MoveMagicCapsule2});
@@ -375,8 +373,7 @@ std::vector<Entry> HandlerEntries()
     // --- Move handlers mechanically extracted from MoveEffect -----
     // (see Behaviors/MoveHandlers.cpp). Creation for these types still
     // runs through the legacy switch unless the catalogue gives them
-    // creation values, and rendering unless a render handler is listed
-    // above.
+    // creation values.
     for (const auto& [type, move] : Behaviors::ExtractedMoveHandlers())
         FindOrAdd(e, type).descriptor.move = move;
 

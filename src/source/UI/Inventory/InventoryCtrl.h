@@ -229,7 +229,7 @@ namespace mu::ui::window
         ITEM* FindTypeItem(short int siType);
         int FindItemIndex(short int siType, int iLevel);
         int FindItemReverseIndex(short sType, int iLevel);
-        int GetIndexByItem(ITEM* pItem);
+        int GetIndexByItem(const ITEM* pItem);
         short int FindItemTypeByPos(int iColumnX, int iRowY);
 
         ITEM* FindItemPointedSquareIndex();

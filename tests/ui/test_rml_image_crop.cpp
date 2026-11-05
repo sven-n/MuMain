@@ -11,6 +11,9 @@ const Rml::Vector2i TextureSize{256, 128};
 constexpr float ArtworkWidth = 166.f;
 constexpr float NameHeight = 90.f;
 constexpr float StrifeHeight = 28.f;
+// ElementImage holds its texture coordinates half a texel inside the crop, so the crop's far edge is drawn from the
+// last texel's centre.
+constexpr float HalfTexel = 0.5f;
 
 class ImageCropFixture
 {
@@ -18,9 +21,11 @@ class ImageCropFixture
     {
         std::optional<Rml::Vector2f> crop;
 
+        // The image is one grid of quads (the clamped mapping adds vertices); its largest texture coordinates are
+        // where the crop ends.
         Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int>) override
         {
-            if (vertices.size() != 4)
+            if (vertices.empty())
                 return 0;
             crop = Rml::Vector2f{};
             for (const auto& vertex : vertices)
@@ -80,8 +85,8 @@ public:
     void CheckCrop(float height) const
     {
         REQUIRE(m_Renderer.crop.has_value());
-        CHECK(m_Renderer.crop->x == doctest::Approx(ArtworkWidth / TextureSize.x));
-        CHECK(m_Renderer.crop->y == doctest::Approx(height / TextureSize.y));
+        CHECK(m_Renderer.crop->x == doctest::Approx((ArtworkWidth - HalfTexel) / TextureSize.x));
+        CHECK(m_Renderer.crop->y == doctest::Approx((height - HalfTexel) / TextureSize.y));
     }
 
 private:

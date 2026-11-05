@@ -138,6 +138,11 @@ public:
     const Model& GetModel() const { return m_Binder.GetModel(); }
     RmlModelBinder<Model>& Binder() { return m_Binder; }
     void MarkDirty(const Rml::String& field) { m_Binder.MarkDirty(field); }
+    // Whether RmlUi has yet to show the field's last change (RmlModelBinder::IsDirty).
+    bool IsDirty(const Rml::String& field)
+    {
+        return m_Binder.IsDirty(field);
+    }
 
 protected:
     bool CreateModel(Rml::Context* context) override

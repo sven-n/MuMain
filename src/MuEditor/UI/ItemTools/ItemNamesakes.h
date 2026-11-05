@@ -7,7 +7,7 @@
 
 namespace MuEditor::Items
 {
-// Items whose name (in the UI language) another item has too, e.g. the lucky
+// Items whose name (as the game shows it) another item has too, e.g. the lucky
 // sets and the tiers of the seed spheres: a short text that tells them apart
 // in the item lists. It names the tags an item has that not all its
 // namesakes have ("luckyItem"); namesakes that no tag tells apart count up
@@ -24,12 +24,12 @@ public:
 private:
     ItemNamesakes() = default;
 
-    // Again when the items or the UI language changed.
+    // Again when the items or their names changed.
     void Update();
 
     std::vector<std::string> m_qualifiers;
     int m_version = -1;
-    std::string m_locale;
+    int m_nameVersion = -1;
 };
 
 // Draws the qualifier after the item's name on the same line, greyed out;

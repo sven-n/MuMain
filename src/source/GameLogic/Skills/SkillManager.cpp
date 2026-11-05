@@ -31,6 +31,18 @@ CSkillManager::~CSkillManager() // OK
 {
 }
 
+int CSkillManager::FindSkillIndex(int skillType) const
+{
+    if (skillType == AT_SKILL_NOVA_BEGIN)
+        skillType = AT_SKILL_NOVA;
+    for (int slot = 0; slot < MAX_MAGIC; ++slot)
+    {
+        if (CharacterAttribute->Skill[slot] == skillType)
+            return slot;
+    }
+    return -1;
+}
+
 bool CSkillManager::FindHeroSkill(ActionSkillType eSkillType)
 {
     for (int i = 0; i < CharacterAttribute->SkillNumber; ++i)

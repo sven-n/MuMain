@@ -3,6 +3,8 @@
 #include "ItemStatProfiles.h"
 #include "ItemStatFile.h"
 
+#include <algorithm>
+
 namespace Data::Items
 {
 namespace
@@ -98,6 +100,17 @@ ItemStatProfiles::ItemStatProfiles(const ItemStatFile& file)
         m_names.push_back(profile.name);
         m_profiles.push_back(LayProfile(m_profiles[DefaultProfile], profile.stats, profile.requirements, m_tables));
     }
+    m_tableUsedByStats.resize(m_tables.size());
+    for (const ItemStatProfile& profile : m_profiles)
+    {
+        for (const StatTerms& terms : profile.stats)
+        {
+            if (terms.table >= 0 && static_cast<size_t>(terms.table) < m_tables.size())
+            {
+                m_tableUsedByStats[static_cast<size_t>(terms.table)] = true;
+            }
+        }
+    }
     for (const StatProfileRule& rule : m_rules)
     {
         m_ruleProfiles.push_back(Find(rule.profile) > DefaultProfile ? rule.profile : std::string());
@@ -156,5 +169,35 @@ int ItemStatProfiles::GetLevelBonus(const StatTerms& terms, int level) const
         return 0;
     }
     return m_tables[static_cast<size_t>(terms.table)].GetBonus(level);
+}
+
+const LevelBonusTable* ItemStatProfiles::FindTable(std::string_view name) const
+{
+    const auto found = std::find_if(m_tables.begin(), m_tables.end(),
+                                    [&](const LevelBonusTable& table) { return table.name == name; });
+    return found != m_tables.end() ? &*found : nullptr;
+}
+
+bool ItemStatProfiles::IsTableUsedByStats(std::string_view name) const
+{
+    for (size_t index = 0; index < m_tables.size(); ++index)
+    {
+        if (m_tables[index].name == name)
+        {
+            return m_tableUsedByStats[index];
+        }
+    }
+    return false;
+}
+
+std::vector<std::string> ItemStatProfiles::GetTableNames() const
+{
+    std::vector<std::string> names;
+    names.reserve(m_tables.size());
+    for (const LevelBonusTable& table : m_tables)
+    {
+        names.push_back(table.name);
+    }
+    return names;
 }
 } // namespace Data::Items

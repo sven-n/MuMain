@@ -37,10 +37,10 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
     issues.push_back({severity, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
               const std::string& message)
 {
-    AddIssue(issues, ItemDataIssueSeverity::Error, source, field, message);
+    AddIssue(issues, ItemDataIssueSeverity::Fatal, source, field, message);
 }
 
 bool IsTypeName(std::string_view name)
@@ -94,7 +94,7 @@ void ReadCreateParams(const OrderedJson& json, const std::string& field, const s
     const std::string createField = field + "." + CreateKey;
     if (!create->is_object())
     {
-        AddError(issues, source, createField, "must be an object with the creation values");
+        AddFatal(issues, source, createField, "must be an object with the creation values");
         return;
     }
     const Items::ModelJson::ReportIssue report =
@@ -122,7 +122,7 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     const std::string field = std::string(Keys::Types) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddError(issues, source, field, "must be an object with a name and a code");
+        AddFatal(issues, source, field, "must be an object with a name and a code");
         return false;
     }
     const auto readText = [&](const char* key, std::string& text)
@@ -131,7 +131,7 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
         {
             return true;
         }
-        AddError(issues, source, field + "." + key, "missing or not text");
+        AddFatal(issues, source, field + "." + key, "missing or not text");
         return false;
     };
     const bool hasName = readText(Keys::Name, entry.name);
@@ -186,14 +186,14 @@ void ReadEffectTypesJson(std::string_view text, const std::string& source, Effec
     }
     if (!HasKind(root, kind))
     {
-        AddError(issues, source, Keys::Kind, "missing or not \"" + std::string(GetEffectKindName(kind)) + "\"");
+        AddFatal(issues, source, Keys::Kind, "missing or not \"" + std::string(GetEffectKindName(kind)) + "\"");
         return;
     }
 
     const auto list = root.find(Keys::Types);
     if (list == root.end() || !list->is_array())
     {
-        AddError(issues, source, Keys::Types, "missing or not a list of types");
+        AddFatal(issues, source, Keys::Types, "missing or not a list of types");
         return;
     }
     for (size_t index = 0; index < list->size(); ++index)
@@ -222,22 +222,22 @@ void ValidateEffectTypes(EffectKind kind, std::span<const EffectTypeEntry> types
     {
         if (!IsTypeName(entry.name))
         {
-            AddError(issues, source, entry.name, "is not a name of letters and digits that starts with a letter");
+            AddFatal(issues, source, entry.name, "is not a name of letters and digits that starts with a letter");
         }
         else if (!names.insert(entry.name).second)
         {
-            AddError(issues, source, entry.name, "is the name of more than one type");
+            AddFatal(issues, source, entry.name, "is the name of more than one type");
         }
 
         if (!codes.contains(entry.code))
         {
-            AddError(issues, source, entry.name, "the code " + entry.code + " is no type of this kind");
+            AddFatal(issues, source, entry.name, "the code " + entry.code + " is no type of this kind");
             continue;
         }
         const auto [named, inserted] = nameOfCode.emplace(entry.code, entry.name);
         if (!inserted)
         {
-            AddError(issues, source, entry.name, entry.code + " is already named " + std::string(named->second));
+            AddFatal(issues, source, entry.name, entry.code + " is already named " + std::string(named->second));
         }
     }
 
@@ -245,7 +245,7 @@ void ValidateEffectTypes(EffectKind kind, std::span<const EffectTypeEntry> types
     {
         if (!nameOfCode.contains(code))
         {
-            AddError(issues, source, std::string(code), "has no name; every type the code uses needs one");
+            AddFatal(issues, source, std::string(code), "has no name; every type the code uses needs one");
         }
     }
 }

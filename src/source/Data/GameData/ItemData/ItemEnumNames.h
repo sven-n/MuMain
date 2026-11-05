@@ -19,6 +19,7 @@ std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot);
 std::span<const EnumName<WingTier>> GetEnumNames(WingTier);
 std::span<const EnumName<WeaponKind>> GetEnumNames(WeaponKind);
 std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag);
+std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor);
 // The keys of "requirements" in the item files.
 std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement);
 

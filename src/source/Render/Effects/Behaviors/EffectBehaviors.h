@@ -11,7 +11,6 @@ namespace Render::Effects::Behaviors
 {
     // Renders with a plain RenderObject(). Effects whose legacy render case was
     // just "RenderObject(o); break;" opt into the registry render path with this.
-    void RenderDefault(OBJECT* o);
 
     // onCreate hook for effects whose creation mixes randomness with directional
     // setup, which doesn't reduce to independent scalar parameters.

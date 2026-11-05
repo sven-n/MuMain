@@ -102,9 +102,9 @@ private:
         m_issues.push_back({severity, m_source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
     }
 
-    void AddError(const std::string& field, const std::string& message)
+    void AddFatal(const std::string& field, const std::string& message)
     {
-        AddIssue(ItemDataIssueSeverity::Error, field, message);
+        AddIssue(ItemDataIssueSeverity::Fatal, field, message);
     }
 
     void WarnAboutUnknownKeys(const OrderedJson& json, const KeySet& knownKeys, const std::string& prefix);
@@ -124,7 +124,6 @@ private:
                           WrittenRequirementSection& section);
     void ReadRequirementFormula(const OrderedJson& json, const std::string& field,
                                 std::optional<RequirementFormula>& formula);
-    void WarnAboutUnusedTables(const ItemStatFile& file);
     void ReadProfileRules(const OrderedJson& root, ItemStatFile& file);
     bool ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file, StatProfileRule& rule);
     // A condition's list of values: the names of `TEnum`, `what` being their kind
@@ -149,7 +148,7 @@ bool ItemStatsReader::ReadNumber(const OrderedJson& json, const std::string& fie
     long long number = 0;
     if (!json.is_number_integer() || !Json::ReadWholeNumber(json, number) || number < minimum || number > maximum)
     {
-        AddError(field, "must be a whole number from " + std::to_string(minimum) + " to " + std::to_string(maximum));
+        AddFatal(field, "must be a whole number from " + std::to_string(minimum) + " to " + std::to_string(maximum));
         return false;
     }
     value = static_cast<int>(number);
@@ -161,7 +160,7 @@ bool ItemStatsReader::ReadName(const OrderedJson& json, const std::string& field
     const auto value = json.find(Keys::Name);
     if (value == json.end() || !value->is_string() || !Json::IsName(value->get_ref<const std::string&>()))
     {
-        AddError(field + "." + Keys::Name, "missing or not a name of letters and digits");
+        AddFatal(field + "." + Keys::Name, "missing or not a name of letters and digits");
         return false;
     }
     name = value->get<std::string>();
@@ -176,7 +175,6 @@ void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
     ReadDefaults(root, file);
     ReadProfiles(root, file);
     ReadProfileRules(root, file);
-    WarnAboutUnusedTables(file);
 }
 
 void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& file)
@@ -184,7 +182,7 @@ void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& 
     const auto bonus = root.find(Keys::DropLevelBonus);
     if (bonus == root.end() || !bonus->is_object())
     {
-        AddError(Keys::DropLevelBonus, "missing or not an object");
+        AddFatal(Keys::DropLevelBonus, "missing or not an object");
         return;
     }
     const std::string prefix = std::string(Keys::DropLevelBonus) + ".";
@@ -194,7 +192,7 @@ void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& 
         const auto field = bonus->find(key);
         if (field == bonus->end())
         {
-            AddError(prefix + key, "missing");
+            AddFatal(prefix + key, "missing");
             return;
         }
         ReadNumber(*field, prefix + key, 0, MaxDropLevelBonus, value);
@@ -208,7 +206,7 @@ void ItemStatsReader::ReadTables(const OrderedJson& root, ItemStatFile& file)
     const auto tables = root.find(Keys::Tables);
     if (tables == root.end() || !tables->is_array())
     {
-        AddError(Keys::Tables, "missing or not a list");
+        AddFatal(Keys::Tables, "missing or not a list");
         return;
     }
     std::set<std::string, std::less<>> names;
@@ -218,7 +216,7 @@ void ItemStatsReader::ReadTables(const OrderedJson& root, ItemStatFile& file)
         const OrderedJson& json = (*tables)[index];
         if (!json.is_object())
         {
-            AddError(field, "a table must be an object");
+            AddFatal(field, "a table must be an object");
             continue;
         }
         LevelBonusTable table;
@@ -228,7 +226,7 @@ void ItemStatsReader::ReadTables(const OrderedJson& root, ItemStatFile& file)
         }
         if (!names.insert(table.name).second)
         {
-            AddError(field + "." + Keys::Name, "\"" + table.name + "\" is defined more than once");
+            AddFatal(field + "." + Keys::Name, "\"" + table.name + "\" is defined more than once");
             continue;
         }
         ReadTable(json, std::string(Keys::Tables) + "." + table.name, table);
@@ -247,7 +245,7 @@ void ItemStatsReader::ReadTable(const OrderedJson& json, const std::string& fiel
     const auto perLevel = json.find(Keys::PerLevel);
     if (values == json.end() && perLevel == json.end())
     {
-        AddError(field, "needs \"values\" or \"perLevel\"");
+        AddFatal(field, "needs \"values\" or \"perLevel\"");
         return;
     }
     if (values != json.end())
@@ -264,7 +262,7 @@ void ItemStatsReader::ReadCaption(const OrderedJson& json, const std::string& fi
 {
     const bool read = Json::ReadLocalizedString(json, field, caption,
                                                 [this](const std::string& errorField, const std::string& message)
-                                                { AddError(errorField, message); });
+                                                { AddFatal(errorField, message); });
     if (read && caption.GetNeutral().empty())
     {
         AddIssue(ItemDataIssueSeverity::Warning, field, "has no English text");
@@ -277,7 +275,7 @@ void ItemStatsReader::ReadValues(const OrderedJson& json, const std::string& fie
     Json::ReadPerLevelValues(
         json, field, values, [this](const OrderedJson& entry, const std::string& entryField, int& value)
         { ReadNumber(entry, entryField, 0, MaxValue, value); },
-        [this](const std::string& errorField, const std::string& message) { AddError(errorField, message); });
+        [this](const std::string& errorField, const std::string& message) { AddFatal(errorField, message); });
 }
 
 void ItemStatsReader::ReadDefaults(const OrderedJson& root, ItemStatFile& file)
@@ -285,7 +283,7 @@ void ItemStatsReader::ReadDefaults(const OrderedJson& root, ItemStatFile& file)
     const auto defaults = root.find(Keys::Default);
     if (defaults == root.end() || !defaults->is_object())
     {
-        AddError(Keys::Default, "missing or not an object");
+        AddFatal(Keys::Default, "missing or not an object");
         return;
     }
     KeySet defaultKeys(StatKeys.begin(), StatKeys.end());
@@ -297,7 +295,7 @@ void ItemStatsReader::ReadDefaults(const OrderedJson& root, ItemStatFile& file)
         const auto section = defaults->find(StatKeys[stat]);
         if (section == defaults->end())
         {
-            AddError(field, "missing");
+            AddFatal(field, "missing");
             continue;
         }
         ReadSection(*section, field, static_cast<ItemStat>(stat), true, file, file.defaults[stat]);
@@ -306,7 +304,7 @@ void ItemStatsReader::ReadDefaults(const OrderedJson& root, ItemStatFile& file)
     const auto requirements = defaults->find(Keys::Requirements);
     if (requirements == defaults->end())
     {
-        AddError(requirementsField, "missing");
+        AddFatal(requirementsField, "missing");
         return;
     }
     ReadRequirements(*requirements, requirementsField, true, file.defaultRequirements);
@@ -321,7 +319,7 @@ void ItemStatsReader::ReadProfiles(const OrderedJson& root, ItemStatFile& file)
     }
     if (!profiles->is_array())
     {
-        AddError(Keys::Profiles, "must be a list");
+        AddFatal(Keys::Profiles, "must be a list");
         return;
     }
     KeySet profileKeys(StatKeys.begin(), StatKeys.end());
@@ -334,7 +332,7 @@ void ItemStatsReader::ReadProfiles(const OrderedJson& root, ItemStatFile& file)
         const OrderedJson& json = (*profiles)[index];
         if (!json.is_object())
         {
-            AddError(position, "a profile must be an object");
+            AddFatal(position, "a profile must be an object");
             continue;
         }
         WrittenStatProfile profile;
@@ -344,12 +342,12 @@ void ItemStatsReader::ReadProfiles(const OrderedJson& root, ItemStatFile& file)
         }
         if (profile.name == StatProfileNames::Default)
         {
-            AddError(position + "." + Keys::Name, "\"" + profile.name + "\" names the default, not a profile");
+            AddFatal(position + "." + Keys::Name, "\"" + profile.name + "\" names the default, not a profile");
             continue;
         }
         if (!names.insert(profile.name).second)
         {
-            AddError(position + "." + Keys::Name, "\"" + profile.name + "\" is defined more than once");
+            AddFatal(position + "." + Keys::Name, "\"" + profile.name + "\" is defined more than once");
             continue;
         }
         const std::string field = std::string(Keys::Profiles) + "." + profile.name;
@@ -375,7 +373,7 @@ void ItemStatsReader::ReadSection(const OrderedJson& json, const std::string& fi
 {
     if (!json.is_object())
     {
-        AddError(field, "must be an object");
+        AddFatal(field, "must be an object");
         return;
     }
     const bool magicPower = stat == ItemStat::MagicPower;
@@ -385,7 +383,7 @@ void ItemStatsReader::ReadSection(const OrderedJson& json, const std::string& fi
     {
         if (isDefault && !json.contains(key))
         {
-            AddError(field + "." + key, "missing; the default writes every term");
+            AddFatal(field + "." + key, "missing; the default writes every term");
         }
     };
     missing(Keys::Table);
@@ -404,7 +402,7 @@ void ItemStatsReader::ReadSection(const OrderedJson& json, const std::string& fi
                                               { return entry.name == table->get_ref<const std::string&>(); });
         if (!known)
         {
-            AddError(tableField, "must name a table of \"tables\"");
+            AddFatal(tableField, "must name a table of \"tables\"");
         }
         else
         {
@@ -441,7 +439,7 @@ void ItemStatsReader::ReadTerm(const OrderedJson& json, const std::string& field
     }
     if (!json.is_object())
     {
-        AddError(field, std::string("must be an object or \"") + NoneValue + "\"");
+        AddFatal(field, std::string("must be an object or \"") + NoneValue + "\"");
         return;
     }
     WarnAboutUnknownKeys(json, ancient ? AncientTermKeys : ExcellentTermKeys, field + ".");
@@ -465,7 +463,7 @@ void ItemStatsReader::ReadTerm(const OrderedJson& json, const std::string& field
         {
             if (!after->is_boolean())
             {
-                AddError(field + "." + Keys::AfterLevelBonus, "must be true or false");
+                AddFatal(field + "." + Keys::AfterLevelBonus, "must be true or false");
             }
             else
             {
@@ -480,7 +478,7 @@ void ItemStatsReader::ReadRequirements(const OrderedJson& json, const std::strin
 {
     if (!json.is_object())
     {
-        AddError(field, "must be an object");
+        AddFatal(field, "must be an object");
         return;
     }
     WarnAboutUnknownKeys(json, RequirementKeys, field + ".");
@@ -492,7 +490,7 @@ void ItemStatsReader::ReadRequirements(const OrderedJson& json, const std::strin
         {
             if (isDefault)
             {
-                AddError(field + "." + key, "missing; the default writes every term");
+                AddFatal(field + "." + key, "missing; the default writes every term");
             }
             return;
         }
@@ -512,7 +510,7 @@ void ItemStatsReader::ReadRequirements(const OrderedJson& json, const std::strin
         {
             if (isDefault)
             {
-                AddError(statField, "missing; the default writes every term");
+                AddFatal(statField, "missing; the default writes every term");
             }
             continue;
         }
@@ -531,7 +529,7 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
     }
     if (!json.is_object())
     {
-        AddError(field, std::string("must be an object or \"") + BaseValue + "\"");
+        AddFatal(field, std::string("must be an object or \"") + BaseValue + "\"");
         return;
     }
     WarnAboutUnknownKeys(json, RequirementFormulaKeys, field + ".");
@@ -553,7 +551,7 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
     {
         if (!basis->is_string() || basis->get_ref<const std::string&>() != LevelRequirementBasis)
         {
-            AddError(field + "." + Keys::Basis, std::string("must be \"") + LevelRequirementBasis + "\"");
+            AddFatal(field + "." + Keys::Basis, std::string("must be \"") + LevelRequirementBasis + "\"");
         }
         else
         {
@@ -561,34 +559,6 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
         }
     }
     formula = values;
-}
-
-void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
-{
-    std::set<std::string, std::less<>> used;
-    const auto collect = [&used](const std::array<WrittenStatSection, ItemStatCount>& sections)
-    {
-        for (const WrittenStatSection& section : sections)
-        {
-            if (section.table)
-            {
-                used.insert(*section.table);
-            }
-        }
-    };
-    collect(file.defaults);
-    for (const WrittenStatProfile& profile : file.profiles)
-    {
-        collect(profile.stats);
-    }
-    for (const LevelBonusTable& table : file.tables)
-    {
-        if (!used.contains(table.name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Tables) + "." + table.name,
-                     "no stat uses this table");
-        }
-    }
 }
 
 void AddValue(ItemTagSet& values, ItemTag tag)
@@ -606,7 +576,7 @@ bool ItemStatsReader::ReadCondition(const OrderedJson& json, const std::string& 
 {
     if (!json.is_array() || json.empty())
     {
-        AddError(field, std::string("must be a list of one or more ") + what + "s");
+        AddFatal(field, std::string("must be a list of one or more ") + what + "s");
         return false;
     }
     bool valid = true;
@@ -616,7 +586,7 @@ bool ItemStatsReader::ReadCondition(const OrderedJson& json, const std::string& 
         TEnum value{};
         if (!entry.is_string() || !FindEnumValue(entry.get_ref<const std::string&>(), value))
         {
-            AddError(field + "[" + std::to_string(index) + "]",
+            AddFatal(field + "[" + std::to_string(index) + "]",
                      entry.dump() + " is not a " + what + "; " + what + "s are " + JoinEnumNames<TEnum>());
             valid = false;
             continue;
@@ -630,7 +600,7 @@ bool ItemStatsReader::ReadGroups(const OrderedJson& json, const std::string& fie
 {
     if (!json.is_array() || json.empty())
     {
-        AddError(field, "must be a list of one or more groups");
+        AddFatal(field, "must be a list of one or more groups");
         return false;
     }
     bool valid = true;
@@ -654,7 +624,7 @@ bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field
     const auto profile = json.find(Keys::Profile);
     if (profile == json.end() || !profile->is_string() || !Json::IsName(profile->get_ref<const std::string&>()))
     {
-        AddError(field + "." + Keys::Profile, "missing or not a name of letters and digits");
+        AddFatal(field + "." + Keys::Profile, "missing or not a name of letters and digits");
         valid = false;
     }
     else
@@ -665,7 +635,7 @@ bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field
                                        [&rule](const WrittenStatProfile& p) { return p.name == rule.profile; });
         if (!known)
         {
-            AddError(field + "." + Keys::Profile, "\"" + rule.profile + "\" is not a profile of \"" + Keys::Profiles +
+            AddFatal(field + "." + Keys::Profile, "\"" + rule.profile + "\" is not a profile of \"" + Keys::Profiles +
                                                       "\" or \"" + StatProfileNames::Default + "\"");
             valid = false;
         }
@@ -705,7 +675,7 @@ bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field
         }
         else
         {
-            AddError(conditionField, std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"" +
+            AddFatal(conditionField, std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"" +
                                          Keys::Slot + "\", \"" + Keys::WingTier + "\", \"" + Keys::WeaponKind +
                                          "\", \"" + Keys::Tags + "\" and \"" + Keys::Requirements + "\"");
             read = false;
@@ -724,7 +694,7 @@ void ItemStatsReader::ReadProfileRules(const OrderedJson& root, ItemStatFile& fi
     }
     if (!rules->is_array())
     {
-        AddError(Keys::ProfileRules, "must be a list");
+        AddFatal(Keys::ProfileRules, "must be a list");
         return;
     }
     for (size_t index = 0; index < rules->size(); ++index)
@@ -733,7 +703,7 @@ void ItemStatsReader::ReadProfileRules(const OrderedJson& root, ItemStatFile& fi
         const OrderedJson& json = (*rules)[index];
         if (!json.is_object())
         {
-            AddError(field, "a rule must be an object");
+            AddFatal(field, "a rule must be an object");
             continue;
         }
         StatProfileRule rule;
@@ -957,6 +927,22 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
 {
     OrderedJson root;
     root[Keys::FormatVersion] = ItemStatsJsonFormatVersion;
+    OrderedJson formulas = WriteItemStatFormulasJson(file);
+    for (auto& [key, value] : formulas.items())
+    {
+        root[key] = std::move(value);
+    }
+    root[Keys::ProfileRules] = OrderedJson::array();
+    for (const StatProfileRule& rule : file.profileRules)
+    {
+        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+    }
+    return LayOutItemStatsText(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+}
+
+OrderedJson WriteItemStatFormulasJson(const ItemStatFile& file)
+{
+    OrderedJson root;
     root[Keys::DropLevelBonus][Keys::Excellent] = file.excellentDropLevelBonus;
     root[Keys::DropLevelBonus][Keys::Ancient] = file.ancientDropLevelBonus;
 
@@ -993,14 +979,28 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         }
         root[Keys::Profiles].push_back(std::move(json));
     }
+    return root;
+}
 
-    root[Keys::ProfileRules] = OrderedJson::array();
-    for (const StatProfileRule& rule : file.profileRules)
+void ReadItemStatFormulasJson(const OrderedJson& json, const std::string& source, ItemStatFile& file,
+                              std::vector<ItemDataIssue>& issues)
+{
+    if (!json.is_object())
     {
-        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the formulas must be an object");
+        return;
     }
+    ItemStatsReader(source, issues).Read(json, file);
+    if (json.contains(Keys::ProfileRules))
+    {
+        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                          Keys::ProfileRules, "the profile rules stay with the client, ignored"});
+        file.profileRules.clear();
+    }
+}
 
-    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+std::string LayOutItemStatsText(std::string text)
+{
     text = Json::PutListEntriesOnOneLine(text, Keys::ProfileRules);
     text = Json::PutObjectsOnOneLine(text, Keys::DropLevelBonus);
     text = Json::PutObjectsOnOneLine(text, Keys::Caption);
@@ -1013,6 +1013,6 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         text = Json::PutObjectsOnOneLine(text, requirementKey);
     }
     text = Json::PutListsOnOneLine(text, Keys::Values);
-    return text + "\n";
+    return text;
 }
 } // namespace Data::Items

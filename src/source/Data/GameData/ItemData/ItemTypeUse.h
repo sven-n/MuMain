@@ -6,12 +6,12 @@
 
 namespace Data::Items
 {
-// Whether a new item can take the item type: it has neither an item nor a
-// model entry (a model without an item still belongs to that number, e.g. a
-// model the game draws for an item of another number).
+// Whether a new item can take the item type: the item files have no entry for
+// it (an item or an entry without a name) and it has no model entry (a model
+// needs an entry, but a file may still lack it).
 inline bool IsFreeItemType(int itemType)
 {
-    return IsValidItemType(itemType) && g_ItemDatabase.Find(itemType) == nullptr &&
+    return IsValidItemType(itemType) && g_ItemDatabase.FindEntry(itemType) == nullptr &&
            g_ItemModelDatabase.Find(itemType) == nullptr;
 }
 } // namespace Data::Items
