@@ -55,7 +55,8 @@ source under `src/MuEditor/` was compiled into the non-editor client.
 - A CTest entry that runs no case fails (doctest reports `test cases: 0`), and
   each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
   entries and its cases differ in number. So a name the discovery cut, joined or
-  dropped fails in CI even where the static check cannot read it. Decide an
+  dropped fails in CI even where the static check cannot read it. The canary
+  binaries in `tests/fixtures/ctest_guards/` check that both guards still fail. Decide an
   opt-in case at run time rather than with `doctest::skip(condition)`: the
   discovery evaluates the condition when the binary is built, so a condition
   read from the environment can differ when the tests run. Print

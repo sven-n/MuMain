@@ -53,9 +53,10 @@ set(MU_TEST_SKIPPED "MU_TEST_SKIPPED:")
 set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake")
 
 # Helper for module CMakeLists. Usage:
-#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>])
+#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>] [WILL_FAIL])
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
-# failures point at the specific case in CI logs.
+# failures point at the specific case in CI logs. WILL_FAIL makes every entry of
+# the binary pass only by failing; only the canaries below use it.
 set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
 # Most tests need the client globals of Winmain.cpp; compile it once for all of them, not per test.
 add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}")
@@ -66,7 +67,7 @@ if(MSVC)
 endif()
 
 function(mu_add_test)
-    cmake_parse_arguments(MAT "" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
+    cmake_parse_arguments(MAT "WILL_FAIL" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
     list(FIND MAT_SOURCES "${MU_TEST_WINMAIN}" winmain_index)
     if(NOT winmain_index EQUAL -1)
         list(REMOVE_AT MAT_SOURCES ${winmain_index})
@@ -86,9 +87,11 @@ function(mu_add_test)
     if(NOT MAT_RESOURCE_LOCK)
         set(MAT_RESOURCE_LOCK ${MAT_NAME})
     endif()
-    doctest_discover_tests(${MAT_NAME} PROPERTIES
-        TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
-        RESOURCE_LOCK ${MAT_RESOURCE_LOCK}
+    set(entry_properties TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
+    if(MAT_WILL_FAIL)
+        list(APPEND entry_properties WILL_FAIL TRUE)
+    endif()
+    doctest_discover_tests(${MAT_NAME} PROPERTIES ${entry_properties}
         FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
         SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
     # doctest_discover_tests adds a file to the directory's TEST_INCLUDE_FILES that includes the entries it writes.
@@ -101,10 +104,14 @@ function(mu_add_test)
             "-DTEST_EXECUTOR=${emulator}"
             "-DDISCOVERY_INCLUDE_FILE=${discovery_include_file}"
             -P "${MU_CHECK_CTEST_ENTRIES}")
-    set_tests_properties(${MAT_NAME}_has_one_ctest_entry_per_case PROPERTIES
-        TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS}
-        RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
+    set_tests_properties(${MAT_NAME}_has_one_ctest_entry_per_case PROPERTIES ${entry_properties})
 endfunction()
+
+# Canaries of the two guards above, with names the discovery cuts and drops (their sources sit under fixtures/, which
+# the static name check skips). Every entry they get must fail, so a guard that stopped working, after a doctest
+# update that changes its summary line, say, fails CI here.
+mu_add_test(NAME ctest_guard_cut_name SOURCES fixtures/ctest_guards/cut_name.cpp WILL_FAIL)
+mu_add_test(NAME ctest_guard_dropped_name SOURCES fixtures/ctest_guards/dropped_name.cpp WILL_FAIL)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_subdirectory(static)
