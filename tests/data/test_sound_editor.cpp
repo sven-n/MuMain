@@ -43,6 +43,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -1301,6 +1302,31 @@ TEST_CASE("Sound Editor: a sound whose file changes stays in its folder under it
     REQUIRE(g_SoundEdits.Redo());
     REQUIRE(g_SoundEdits.Redo());
     CHECK(g_SoundEdits.Folders() == moved);
+}
+
+TEST_CASE("Sound Editor: the keys follow a set renamed among others in the file's order and a sound changed in its "
+          "place, and a known name finds a set renamed and changed (Q-SE4) [sounds][editor]")
+{
+    using MuEditor::SoundEditor::KeyedTables;
+    const auto set = [](const char* name, const char* file)
+    {
+        Data::Monsters::MonsterSoundSet made;
+        made.name = name;
+        made.sounds.resize(1);
+        made.sounds[0].file = file;
+        return made;
+    };
+    const KeyedTables before{{set("B", "b.wav"), set("A", "a.wav"), set("D", "d.wav")}, {}};
+    KeyedTables after{{set("D", "d.wav"), set("C", "a.wav"), set("B", "b2.wav")}, {}};
+    CHECK(MuEditor::SoundEditor::RenamedSets(before, after) == std::map<std::string, std::string>{{"A", "C"}});
+    CHECK(MuEditor::SoundEditor::FollowedKeys(before, after) ==
+          std::map<std::string, std::string>{{"set:A:a.wav", "set:C:a.wav"}, {"set:B:b.wav", "set:B:b2.wav"}});
+
+    // Renamed and changed: alike no longer, found by its known name.
+    after.sets[1].sounds[0].channels = 2;
+    CHECK(MuEditor::SoundEditor::RenamedSets(before, after).empty());
+    CHECK(MuEditor::SoundEditor::FollowedKeys(before, after, {{"A", "C"}}) ==
+          std::map<std::string, std::string>{{"set:A:a.wav", "set:C:a.wav"}, {"set:B:b.wav", "set:B:b2.wav"}});
 }
 
 // The editor calls FollowKeyChanges each frame, after the other windows.

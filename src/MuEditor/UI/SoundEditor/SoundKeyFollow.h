@@ -22,8 +22,8 @@ struct KeyedTables
     std::vector<Data::Maps::MapObjectSound> objects;
 };
 
-// The sets and the map object sounds as they are now.
-KeyedTables CurrentKeyedTables();
+// The sets as they are now.
+std::vector<Data::Monsters::MonsterSoundSet> CurrentKeyedSets();
 
 // The keys of the sounds `after` still has under another key, before to
 // after: a set's sounds when the set was renamed (it is the same otherwise),

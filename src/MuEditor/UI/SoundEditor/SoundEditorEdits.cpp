@@ -406,7 +406,48 @@ void SoundEdits::FollowKeyChanges()
 
 void SoundEdits::FollowTables()
 {
-    KeyedTables now = CurrentKeyedTables();
+    // Only the tables whose versions moved are copied and keyed: a change of
+    // the map object sounds touches no set, and the other way round.
+    const std::pair<int, int> versions = KeyedVersions();
+    const bool sets = !m_keyed || versions.first != m_keyedVersions.first;
+    const bool objects = !m_keyed || versions.second != m_keyedVersions.second;
+    KeyedTables now;
+    if (sets)
+    {
+        now.sets = CurrentKeyedSets();
+    }
+    if (objects)
+    {
+        now.objects = g_MapObjectSoundDatabase.GetAll();
+    }
+    if (m_keyed)
+    {
+        // The tables that changed as they were; the others are empty on both
+        // sides, so nothing of them is followed.
+        KeyedTables before;
+        if (sets)
+        {
+            before.sets = std::move(m_keyed->sets);
+            FollowRenamedSets(RenamedSets(before, now));
+        }
+        if (objects)
+        {
+            before.objects = std::move(m_keyed->objects);
+        }
+        // A file that could not be read is never written: its folders stay.
+        if (m_folders && m_folderProblems.empty())
+        {
+            RenameInFolders(FollowedKeys(before, now));
+        }
+        if (!sets)
+        {
+            now.sets = std::move(m_keyed->sets);
+        }
+        if (!objects)
+        {
+            now.objects = std::move(m_keyed->objects);
+        }
+    }
     if (!m_foldersFileTables)
     {
         // The files, and the folders' file with them, go with the tables as
@@ -416,17 +457,8 @@ void SoundEdits::FollowTables()
         m_folderNames.clear();
         m_foldersFileStale = false;
     }
-    if (m_keyed)
-    {
-        FollowRenamedSets(RenamedSets(*m_keyed, now));
-        // A file that could not be read is never written: its folders stay.
-        if (m_folders && m_folderProblems.empty())
-        {
-            RenameInFolders(FollowedKeys(*m_keyed, now));
-        }
-    }
     m_keyed = std::move(now);
-    m_keyedVersions = KeyedVersions();
+    m_keyedVersions = versions;
 }
 
 void SoundEdits::FollowRenamedSets(const std::map<std::string, std::string>& renamed)

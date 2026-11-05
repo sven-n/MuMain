@@ -10,6 +10,8 @@
 
 #include <algorithm>
 #include <optional>
+#include <string_view>
+#include <unordered_map>
 
 namespace MuEditor::SoundEditor
 {
@@ -76,12 +78,47 @@ std::vector<std::optional<size_t>> PlacesAfter(const std::vector<Entry>& before,
     return places;
 }
 
-const MonsterSoundSet* Named(const std::vector<MonsterSoundSet>& sets, const std::string& name)
+// The sets of a table by their names, which a lookup finds without going
+// through all of them.
+class SetIndex
 {
-    const auto found =
-        std::find_if(sets.begin(), sets.end(), [&name](const MonsterSoundSet& set) { return set.name == name; });
-    return found != sets.end() ? &*found : nullptr;
-}
+public:
+    explicit SetIndex(const std::vector<MonsterSoundSet>& sets)
+    {
+        m_byName.reserve(sets.size());
+        for (const MonsterSoundSet& set : sets)
+        {
+            m_byName.emplace(set.name, &set);
+        }
+    }
+
+    const MonsterSoundSet* Find(std::string_view name) const
+    {
+        const auto found = m_byName.find(name);
+        return found != m_byName.end() ? found->second : nullptr;
+    }
+
+private:
+    std::unordered_map<std::string_view, const MonsterSoundSet*> m_byName;
+};
+
+// Two tables, the sets of each by name, and the sets known to be renamed
+// from one to the other (before's name to after's).
+struct SetLookup
+{
+    SetLookup(const KeyedTables& beforeTables, const KeyedTables& afterTables,
+              const std::map<std::string, std::string>& knownNames)
+        : before(beforeTables), after(afterTables), beforeByName(beforeTables.sets), afterByName(afterTables.sets),
+          names(knownNames)
+    {
+    }
+
+    const KeyedTables& before;
+    const KeyedTables& after;
+    SetIndex beforeByName;
+    SetIndex afterByName;
+    const std::map<std::string, std::string>& names;
+};
 
 bool AlikeButName(const MonsterSoundSet& left, MonsterSoundSet right)
 {
@@ -97,13 +134,12 @@ bool IsKnownName(const std::map<std::string, std::string>& names, const std::str
 // A set of `after` that `before` does not have by name and no known rename
 // (`names`) takes, alike `set` but its name, when it is the only one and no
 // other set gone from `before` is alike.
-const MonsterSoundSet* RenamedTo(const MonsterSoundSet& set, const KeyedTables& before, const KeyedTables& after,
-                                 const std::map<std::string, std::string>& names)
+const MonsterSoundSet* RenamedTo(const MonsterSoundSet& set, const SetLookup& lookup)
 {
     const MonsterSoundSet* renamed = nullptr;
-    for (const MonsterSoundSet& candidate : after.sets)
+    for (const MonsterSoundSet& candidate : lookup.after.sets)
     {
-        if (Named(before.sets, candidate.name) != nullptr || IsKnownName(names, candidate.name) ||
+        if (lookup.beforeByName.Find(candidate.name) != nullptr || IsKnownName(lookup.names, candidate.name) ||
             !AlikeButName(set, candidate))
         {
             continue;
@@ -119,22 +155,21 @@ const MonsterSoundSet* RenamedTo(const MonsterSoundSet& set, const KeyedTables& 
         return nullptr;
     }
     const bool another = std::any_of(
-        before.sets.begin(), before.sets.end(), [&](const MonsterSoundSet& other)
-        { return &other != &set && Named(after.sets, other.name) == nullptr && AlikeButName(other, *renamed); });
+        lookup.before.sets.begin(), lookup.before.sets.end(), [&](const MonsterSoundSet& other)
+        { return &other != &set && lookup.afterByName.Find(other.name) == nullptr && AlikeButName(other, *renamed); });
     return another ? nullptr : renamed;
 }
 
-// The set of `after` that `set` of `before` is: by a name known for it
-// (`names`), by its own, else renamed.
-const MonsterSoundSet* SetAfter(const MonsterSoundSet& set, const KeyedTables& before, const KeyedTables& after,
-                                const std::map<std::string, std::string>& names = {})
+// The set of `after` that `set` of `before` is: by a name known for it, by
+// its own, else renamed.
+const MonsterSoundSet* SetAfter(const MonsterSoundSet& set, const SetLookup& lookup)
 {
-    if (const auto known = names.find(set.name); known != names.end())
+    if (const auto known = lookup.names.find(set.name); known != lookup.names.end())
     {
-        return Named(after.sets, known->second);
+        return lookup.afterByName.Find(known->second);
     }
-    const MonsterSoundSet* now = Named(after.sets, set.name);
-    return now != nullptr ? now : RenamedTo(set, before, after, names);
+    const MonsterSoundSet* now = lookup.afterByName.Find(set.name);
+    return now != nullptr ? now : RenamedTo(set, lookup);
 }
 
 void Follow(const std::vector<std::string>& from, const std::vector<std::string>& to,
@@ -150,15 +185,15 @@ void Follow(const std::vector<std::string>& from, const std::vector<std::string>
 }
 } // namespace
 
-KeyedTables CurrentKeyedTables()
+std::vector<MonsterSoundSet> CurrentKeyedSets()
 {
-    KeyedTables tables;
+    std::vector<MonsterSoundSet> sets;
+    sets.reserve(g_MonsterSoundSetDatabase.GetAll().size());
     for (const MonsterSoundSet* set : g_MonsterSoundSetDatabase.GetAll())
     {
-        tables.sets.push_back(*set);
+        sets.push_back(*set);
     }
-    tables.objects = g_MapObjectSoundDatabase.GetAll();
-    return tables;
+    return sets;
 }
 
 std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const KeyedTables& after,
@@ -166,10 +201,11 @@ std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const
 {
     const PlacedKeys from = KeysOf(before);
     const PlacedKeys to = KeysOf(after);
+    const SetLookup lookup(before, after, names);
     std::map<std::string, std::string> renamed;
     for (const MonsterSoundSet& set : before.sets)
     {
-        if (const MonsterSoundSet* now = SetAfter(set, before, after, names))
+        if (const MonsterSoundSet* now = SetAfter(set, lookup))
         {
             Follow(from.sets.at(set.name), to.sets.at(now->name), PlacesAfter(set.sounds, now->sounds), renamed);
         }
@@ -180,10 +216,12 @@ std::map<std::string, std::string> FollowedKeys(const KeyedTables& before, const
 
 std::map<std::string, std::string> RenamedSets(const KeyedTables& before, const KeyedTables& after)
 {
+    const std::map<std::string, std::string> none;
+    const SetLookup lookup(before, after, none);
     std::map<std::string, std::string> renamed;
     for (const MonsterSoundSet& set : before.sets)
     {
-        const MonsterSoundSet* now = SetAfter(set, before, after);
+        const MonsterSoundSet* now = SetAfter(set, lookup);
         if (now != nullptr && now->name != set.name)
         {
             renamed.emplace(set.name, now->name);
