@@ -624,6 +624,11 @@ for job_name, job_body, system in (("build-windows", native_job, "Windows"), ("b
                      "BUILD_STARTED"):
         check(required in trim, f"{job_name} compiler cache trim missing {required}")
     check("BUILD_STARTED=" in step(job_body, job_name, "Build"), f"{job_name} Build must note when it starts")
+    # Only a build that passed its tests and checks saves its objects: a step that fails skips the steps after it.
+    validate = "Validate artifacts" if job_name == "build-windows" else "Validate runtime"
+    for earlier in ("Run tests", validate):
+        check(earlier in names and save_name in names and names.index(earlier) < names.index(save_name),
+              f"{job_name} must save its compiler cache after {earlier}")
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("uses: actions/cache@v6" not in job_body, f"{job_name} must restore and save its caches in separate steps")
     for job_step in re.split(r"(?m)^      - name: ", job_body)[1:]:
