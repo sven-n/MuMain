@@ -94,6 +94,7 @@ the rule that holds.
 | O30 | Known differences (R8, 2026-11-06) | No `Sync/KnownDifferences.json` is shipped: Item Sync shows the option differences, the user ticks **Known** or imports the client's values into the server, and `docs/item-data.md` lists the differences with their reasons. |
 | O31 | Stale bold (R9, 2026-11-06) | A fix of its own before the first snapshot variants that show rows setting no bold (9a4's ancient bonus levels, 9b5's Horn of Fenrir; the option loop sets bold itself, so 9a2's and 9a3's variants don't need it): every tooltip starts with no bold rows and no colours, for all `MaxTextListRows` rows (98: the original 50, the description's 32 and the added lines' 16, `ZzzInventory.h:91-95`; P29), with a test that draws the same Horn of Fenrir tooltip after a bold one and alone. |
 | O32 | 380 pants' PvP defense (R10, 2026-11-06) | 100 on both sides, exchanged 1:1, so OpenMU's data stays as it is and the pants leave the OpenMU issue. OpenMU halves all defense (`DefenseFinal` = 0.5 × `DefenseBase`, `CharacterClassInitialization.cs:105-107`) and adds the pants' `DefensePvp` after that (`200 / 2`, `GuardianOptions.cs:62`), so its 100 already gives Season 6's effect; O26's move to 200 would have doubled it. The client's `guardian` pants definition holds 100 where the bmd has 200, so the tooltip line (`DefensiveSkillD`, `ItemAddOptioninfo.cpp:85`) shows +100; no other client code reads that value (the character window reads only option types 1 and 3, `CharacterInfoWindow.cpp:739-757`). 9b3 names it as the one value it changes (P6). |
+| O33 | Item files saved before 9a1 (R11, 2026-11-06) | No warning and no new `formatVersion`: O24 stays as written. The shipped item files get their lists in 9a1's data commit; an item file someone saved before 9a1 has no lists, so its items have no options in the client (OpenMU still applies its own) until the editor writes them. Unlike a missing `statProfile` (`ValidateStatProfileGiven`, `ItemDataValidation.cpp:266-279`), the game gives no warning, because it never reads the rules (O34). |
 
 ## Current state
 
@@ -585,7 +586,7 @@ shown but adds nothing (O6).
   saving gives the same file.
 - **Written in the file (O24):** the game reads only this list. An item
   without `options` has no options; the writer leaves the field out only for
-  an empty list. The rules (below) are read by the editor only, as
+  an empty list. An item file saved before 9a1 gives no warning (O33). The rules (below) are read by the editor only, as
   `statProfile`'s are (`WithDerivedFields`, `#ifdef _EDITOR`, P18), with
   one difference: an empty list stays empty, it is never "follow the
   rules". The bmd import, Item Add and an edit that changes what a rule
