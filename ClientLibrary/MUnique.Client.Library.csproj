@@ -34,6 +34,8 @@
 
   <ItemGroup>
     <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="$(OpenMuPacketsVersion)" />
+    <!-- Read by LibraryVersion for MuError.log. -->
+    <AssemblyMetadata Include="OpenMuPacketsVersion" Value="$(OpenMuPacketsVersion)" />
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
   </ItemGroup>
 

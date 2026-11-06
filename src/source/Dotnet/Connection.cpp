@@ -68,6 +68,19 @@ void CORECLR_DELEGATE_CALLTYPE WriteManagedLog(BYTE level, const char* message)
 
 using ManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(BYTE, const char*);
 using SetManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(ManagedLogCallback);
+using GetManagedLibraryVersion = const char*(CORECLR_DELEGATE_CALLTYPE*)();
+
+// In a release download the library's commit is the client's, so a different one means a library from another
+// download. (A local build rebuilds the library only when its sources change, so there it can be older.)
+// Looked up without LoadManagedSymbol: a library from before this function is no error worth a dialog.
+void WriteLibraryVersion()
+{
+    const auto getLibraryVersion = reinterpret_cast<GetManagedLibraryVersion>(
+        mu::platform::GetSymbol(munique_client_library_handle, "ConnectionManager_GetLibraryVersion"));
+    const char* version = getLibraryVersion != nullptr ? getLibraryVersion() : nullptr;
+    g_ErrorReport.Write(L"ClientLibrary \t\t: %hs\r\n",
+                        version != nullptr ? version : "version unknown (older library)");
+}
 
 } // anonymous namespace
 
@@ -76,9 +89,11 @@ void InitializeDotNetBridge()
     if (!munique_client_library_handle)
     {
         mu::log::Get("dotnet")->error("NET: InitializeDotNetBridge -- library not loaded, skipping");
+        g_ErrorReport.Write(L"ClientLibrary \t\t: not loaded\r\n");
         return;
     }
 
+    WriteLibraryVersion();
     const auto setManagedLogCallback =
         LoadManagedSymbol<SetManagedLogCallback>("ConnectionManager_SetLogCallback");
     if (setManagedLogCallback != nullptr)
