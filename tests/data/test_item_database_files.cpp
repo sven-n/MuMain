@@ -340,6 +340,27 @@ TEST_CASE("The shipped option files load without problems and are written as the
     CHECK(WriteOptionRulesJson(rules.rules) == TestFiles::ReadWholeFile(rulesFile));
 }
 
+// The game reads the items' lists; the editor writes them from the option rules. The shipped lists are the ones the
+// rules give (no item differs on purpose yet). Outside the editor's tests, as the test above.
+TEST_CASE("Every shipped item's option list is the one the option rules give [data][items]")
+{
+    const OptionRulesLoadResult rules = LoadOptionRulesFile(DataDirectory / "Items" / "Options" / OptionRulesFileName);
+    REQUIRE(rules.issues.empty());
+    int withOptions = 0;
+    for (const ItemDefinition& item : LoadItemDataDirectory(DataDirectory / "Items").items)
+    {
+        if (!item.Exists())
+        {
+            continue;
+        }
+        CAPTURE(item.group);
+        CAPTURE(item.number);
+        CHECK(item.options == DeriveItemOptions(rules.rules, item));
+        withOptions += item.options.empty() ? 0 : 1;
+    }
+    CHECK(withOptions > 400);
+}
+
 // The shipped tooltip file, read once.
 const ItemTooltipFile& ShippedTooltips()
 {

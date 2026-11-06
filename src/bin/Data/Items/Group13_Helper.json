@@ -2003,6 +2003,7 @@
         "pt": "Capa do Lorde"
       },
       "tags": ["cape", "valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
