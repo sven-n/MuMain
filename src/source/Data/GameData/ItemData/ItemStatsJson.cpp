@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
 #include "ItemStatsJson.h"
-#include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
+#include "ItemRuleConditionsJson.h"
 #include "ItemStatProfiles.h"
 
 #include <algorithm>
@@ -43,11 +43,6 @@ constexpr const char* Percent = "percent";
 constexpr const char* Basis = "basis";
 constexpr const char* ProfileRules = "profileRules";
 constexpr const char* Profile = "profile";
-constexpr const char* Group = "group";
-constexpr const char* Slot = "slot";
-constexpr const char* WingTier = "wingTier";
-constexpr const char* WeaponKind = "weaponKind";
-constexpr const char* Tags = "tags";
 } // namespace Keys
 
 constexpr const char* NoneValue = "none";
@@ -126,11 +121,6 @@ private:
                                 std::optional<RequirementFormula>& formula);
     void ReadProfileRules(const OrderedJson& root, ItemStatFile& file);
     bool ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file, StatProfileRule& rule);
-    // A condition's list of values: the names of `TEnum`, `what` being their kind
-    // ("slot") for messages.
-    template <typename TEnum, typename TSet>
-    bool ReadCondition(const OrderedJson& json, const std::string& field, const char* what, TSet& values);
-    bool ReadGroups(const OrderedJson& json, const std::string& field, std::bitset<MAX_ITEM_TYPE>& groups);
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
@@ -561,62 +551,6 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
     formula = values;
 }
 
-void AddValue(ItemTagSet& values, ItemTag tag)
-{
-    values.Set(tag);
-}
-
-template <size_t Size, typename TEnum> void AddValue(std::bitset<Size>& values, TEnum value)
-{
-    values.set(static_cast<size_t>(value));
-}
-
-template <typename TEnum, typename TSet>
-bool ItemStatsReader::ReadCondition(const OrderedJson& json, const std::string& field, const char* what, TSet& values)
-{
-    if (!json.is_array() || json.empty())
-    {
-        AddFatal(field, std::string("must be a list of one or more ") + what + "s");
-        return false;
-    }
-    bool valid = true;
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        const OrderedJson& entry = json[index];
-        TEnum value{};
-        if (!entry.is_string() || !FindEnumValue(entry.get_ref<const std::string&>(), value))
-        {
-            AddFatal(field + "[" + std::to_string(index) + "]",
-                     entry.dump() + " is not a " + what + "; " + what + "s are " + JoinEnumNames<TEnum>());
-            valid = false;
-            continue;
-        }
-        AddValue(values, value);
-    }
-    return valid;
-}
-
-bool ItemStatsReader::ReadGroups(const OrderedJson& json, const std::string& field, std::bitset<MAX_ITEM_TYPE>& groups)
-{
-    if (!json.is_array() || json.empty())
-    {
-        AddFatal(field, "must be a list of one or more groups");
-        return false;
-    }
-    bool valid = true;
-    for (size_t index = 0; index < json.size(); ++index)
-    {
-        int group = 0;
-        if (!ReadNumber(json[index], field + "[" + std::to_string(index) + "]", 0, MAX_ITEM_TYPE - 1, group))
-        {
-            valid = false;
-            continue;
-        }
-        groups.set(static_cast<size_t>(group));
-    }
-    return valid;
-}
-
 bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file,
                                StatProfileRule& rule)
 {
@@ -648,39 +582,14 @@ bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field
         {
             continue;
         }
-        bool read = true;
-        if (key == Keys::Group)
+        const RuleConditionRead read = ReadRuleCondition(
+            key, value, conditionField, rule.conditions,
+            [this](const std::string& errorField, const std::string& message) { AddFatal(errorField, message); });
+        if (read == RuleConditionRead::NotACondition)
         {
-            read = ReadGroups(value, conditionField, rule.groups);
+            AddFatal(conditionField, DescribeRuleConditionKeys());
         }
-        else if (key == Keys::Slot)
-        {
-            read = ReadCondition<ItemSlot>(value, conditionField, "slot", rule.slots);
-        }
-        else if (key == Keys::WingTier)
-        {
-            read = ReadCondition<WingTier>(value, conditionField, "wing tier", rule.wingTiers);
-        }
-        else if (key == Keys::WeaponKind)
-        {
-            read = ReadCondition<WeaponKind>(value, conditionField, "weapon kind", rule.weaponKinds);
-        }
-        else if (key == Keys::Tags)
-        {
-            read = ReadCondition<ItemTag>(value, conditionField, "tag", rule.tags);
-        }
-        else if (key == Keys::Requirements)
-        {
-            read = ReadCondition<ItemRequirement>(value, conditionField, "requirement", rule.requirements);
-        }
-        else
-        {
-            AddFatal(conditionField, std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"" +
-                                         Keys::Slot + "\", \"" + Keys::WingTier + "\", \"" + Keys::WeaponKind +
-                                         "\", \"" + Keys::Tags + "\" and \"" + Keys::Requirements + "\"");
-            read = false;
-        }
-        valid = valid && read;
+        valid = valid && read == RuleConditionRead::Read;
     }
     return valid;
 }
@@ -836,67 +745,11 @@ OrderedJson WriteRequirements(const WrittenRequirementSection& section)
     return json;
 }
 
-bool HasValue(const ItemTagSet& values, ItemTag tag)
-{
-    return values.Has(tag);
-}
-
-template <size_t Size, typename TEnum> bool HasValue(const std::bitset<Size>& values, TEnum value)
-{
-    const auto index = static_cast<size_t>(value);
-    return index < Size && values.test(index);
-}
-
-// The names of the values, in the order of the enum's names.
-template <typename TEnum, typename TSet> OrderedJson WriteCondition(const TSet& values)
-{
-    OrderedJson json = OrderedJson::array();
-    for (const EnumName<TEnum>& entry : GetEnumNames(TEnum{}))
-    {
-        if (HasValue(values, entry.value))
-        {
-            json.push_back(entry.name);
-        }
-    }
-    return json;
-}
-
 OrderedJson WriteProfileRule(const StatProfileRule& rule)
 {
     OrderedJson json;
     json[Keys::Profile] = rule.profile;
-    if (rule.groups.any())
-    {
-        OrderedJson groups = OrderedJson::array();
-        for (size_t group = 0; group < rule.groups.size(); ++group)
-        {
-            if (rule.groups.test(group))
-            {
-                groups.push_back(group);
-            }
-        }
-        json[Keys::Group] = std::move(groups);
-    }
-    if (rule.slots.any())
-    {
-        json[Keys::Slot] = WriteCondition<ItemSlot>(rule.slots);
-    }
-    if (rule.wingTiers.any())
-    {
-        json[Keys::WingTier] = WriteCondition<WingTier>(rule.wingTiers);
-    }
-    if (rule.weaponKinds.any())
-    {
-        json[Keys::WeaponKind] = WriteCondition<WeaponKind>(rule.weaponKinds);
-    }
-    if (!rule.tags.IsEmpty())
-    {
-        json[Keys::Tags] = WriteCondition<ItemTag>(rule.tags);
-    }
-    if (rule.requirements.any())
-    {
-        json[Keys::Requirements] = WriteCondition<ItemRequirement>(rule.requirements);
-    }
+    WriteRuleConditions(rule.conditions, json);
     return json;
 }
 

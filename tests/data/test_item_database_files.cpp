@@ -4160,7 +4160,7 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
         const auto armor = std::ranges::find_if(changed.profileRules,
                                                 [](const StatProfileRule& rule) { return rule.profile == "armor"; });
         REQUIRE(armor != changed.profileRules.end());
-        armor->slots.reset(static_cast<size_t>(ItemSlot::Boots));
+        armor->conditions.slots.reset(static_cast<size_t>(ItemSlot::Boots));
         const std::vector<MuEditor::Items::StatProfileChange> changes = MuEditor::Items::FindStatProfileChanges(
             g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), ItemStatProfiles(changed));
         REQUIRE(changes.size() == boots.size());
