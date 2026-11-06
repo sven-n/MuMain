@@ -15,6 +15,13 @@ get_filename_component(library "${DESTINATION}" NAME)
 get_filename_component(archive_name "${URL}" NAME)
 set(archive "${ARCHIVE_DIR}/${library}-${archive_name}")
 
+# The configure's TLS and netrc settings (CMAKE_TLS_VERIFY, CMAKE_TLS_CAINFO, CMAKE_TLS_VERSION, CMAKE_NETRC,
+# CMAKE_NETRC_FILE) come as -D values, as ExternalProject hands them to its own downloads; file(DOWNLOAD) reads them.
+# Without a setting, TLS is verified.
+if(NOT DEFINED CMAKE_TLS_VERIFY AND "$ENV{CMAKE_TLS_VERIFY}" STREQUAL "")
+    set(CMAKE_TLS_VERIFY ON)
+endif()
+
 if(EXISTS "${archive}")
     file(SHA256 "${archive}" archive_sha256)
     if(NOT archive_sha256 STREQUAL SHA256)
@@ -28,7 +35,6 @@ if(NOT EXISTS "${archive}")
     set(retry_results 6 7 8 15 28 35)
     foreach(attempt RANGE 1 5)
         file(DOWNLOAD "${URL}" "${archive}.part"
-            TLS_VERIFY ON
             INACTIVITY_TIMEOUT 60
             STATUS download_status
         )

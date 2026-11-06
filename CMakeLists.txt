@@ -246,6 +246,14 @@ set(MU_APPLY_GIT_PATCH_GIT "")
 if(GIT_EXECUTABLE)
     set(MU_APPLY_GIT_PATCH_GIT "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}")
 endif()
+# UnpackArchive.cmake downloads with the configure's TLS and netrc settings, as ExternalProject does for SDL_ttf's
+# own archive (e.g. CMAKE_TLS_CAINFO behind a proxy that inspects TLS).
+set(MU_UNPACK_ARCHIVE_SETTINGS "")
+foreach(setting IN ITEMS CMAKE_TLS_VERIFY CMAKE_TLS_CAINFO CMAKE_TLS_VERSION CMAKE_NETRC CMAKE_NETRC_FILE)
+    if(DEFINED ${setting})
+        list(APPEND MU_UNPACK_ARCHIVE_SETTINGS "-D${setting}=${${setting}}")
+    endif()
+endforeach()
 # SDL_ttf comes as its release archive, which holds the sources of the commit release-3.2.2 points to (its .git-hash
 # names a1ce3670) but none of the four libraries SDL_ttf vendors as git submodules. The first four patch commands
 # unpack an archive of each, at the commit release-3.2.2 pins it to (git ls-tree release-3.2.2 external/), into
@@ -262,6 +270,7 @@ FetchContent_Declare(SDL3_ttf
     DOWNLOAD_EXTRACT_TIMESTAMP FALSE
     PATCH_COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_UNPACK_ARCHIVE_SETTINGS}
         "-DURL=https://github.com/libsdl-org/freetype/archive/9973564cfa63763a3e4ac67c09147899539b1e07.tar.gz"
         "-DSHA256=026a05a49d114a1235d2926f4c03a9330e4b1a6efe7c217ec9607904c32907d4"
         "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
@@ -269,6 +278,7 @@ FetchContent_Declare(SDL3_ttf
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_UNPACK_ARCHIVE_SETTINGS}
         "-DURL=https://github.com/libsdl-org/harfbuzz/archive/564bf9818a18709776856533829c0c04950773d6.tar.gz"
         "-DSHA256=a448dd6c22d8e1e1cf39438c662251c1f97f810b8780eed4a6d6ada948c99ddc"
         "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
@@ -276,6 +286,7 @@ FetchContent_Declare(SDL3_ttf
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_UNPACK_ARCHIVE_SETTINGS}
         "-DURL=https://github.com/libsdl-org/plutosvg/archive/2983eb6919feea272d793bc386384e3f5b97b03c.tar.gz"
         "-DSHA256=cd416a2bbc63f5ca9c7a3582ce0c06e69e15b6087aef991cf36c38f68851dc17"
         "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
@@ -283,6 +294,7 @@ FetchContent_Declare(SDL3_ttf
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
+        ${MU_UNPACK_ARCHIVE_SETTINGS}
         "-DURL=https://github.com/libsdl-org/plutovg/archive/3e6f922f453da1c9e7d1d7f66cac1d9724a18b47.tar.gz"
         "-DSHA256=491ee12761688a61f98bf956fa858d4610d106ade950e0530f5b19ce195d0164"
         "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
