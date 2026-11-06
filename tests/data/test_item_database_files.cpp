@@ -4227,6 +4227,47 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
                               }));
 }
 
+TEST_CASE("The shipped name cases file is in the written format [data][items][texts]")
+{
+    const std::filesystem::path file = DataDirectory / "Items" / "Tooltips" / ItemNameCasesFileName;
+    const ItemNameCasesLoadResult shipped = LoadItemNameCasesFile(file);
+    CHECK(shipped.issues.empty());
+    CHECK(shipped.cases.Uses("pl", "gen"));
+    CHECK(WriteItemNameCasesJson(shipped.cases) == TestFiles::ReadWholeFile(file));
+}
+
+TEST_CASE("Save Items writes the name cases file when the editor changed it [data][items][editor][texts]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const std::filesystem::path casesFile = folder.Directory() / GetItemNameCasesFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(casesFile);
+
+    SUBCASE("unchanged, it is left as it is")
+    {
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(casesFile) == shippedText);
+    }
+
+    SUBCASE("changed, it is written and reads back the same")
+    {
+        ItemNameCases changed = g_ItemDatabase.GetNameCases();
+        changed.SetCases("ru", {"gen", "acc"});
+        g_ItemDataHandler.SetNameCases(changed);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const ItemNameCasesLoadResult saved = LoadItemNameCasesFile(casesFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.cases == changed);
+    }
+}
+
 TEST_CASE("Save Items writes the item stat file when the editor changed it [data][items][editor]")
 {
     TemporaryClientFolder folder;
