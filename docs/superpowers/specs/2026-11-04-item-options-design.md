@@ -510,7 +510,7 @@ into `SpecialValue`, as today's code does or does not:
 | `excellent` | `attackSpeedAny` | add | `AT_IMPROVE_ATTACK_SPEED` | yes (7) |
 | `excellent` | `healthAfterMonsterKillMultiplier` | add | `AT_IMPROVE_GAIN_LIFE` | no |
 | `excellent` | `manaAfterMonsterKillMultiplier` | add | `AT_IMPROVE_GAIN_MANA` | no |
-| `ancientBonus` | `totalStrength` … `totalVitality` | add | none: read by `CSItemOption::GetDefaultOptionValue` (`CSItemOption.cpp:546-594`), which asks the definition | – |
+| `ancientBonus` | `totalStrength` … `totalVitality` | add | none: `CSItemOption::GetDefaultOptionValue` (`CSItemOption.cpp:546-558`) returns the definition's value at the bonus level instead of the level, and its two callers in `getAllAddState` (`:675-687`, `:765-777`) add it without today's `* 5`, so `[5, 10]` adds what it adds today and an edited list is added as written | – |
 
 "No" keeps today's `SpecialValue` of 0 where the stat code uses a fixed
 number instead of the value (the blocking 10 % of `AT_IMPROVE_BLOCKING_PERCENT`,
@@ -1093,7 +1093,7 @@ What each later 9a pull request removes from the code:
 |---|---|---|
 | 9a2 | In `SetItemAttributes`, the additional option branches for groups 0-4, 5, 6, 7-11 and `ITEM_RING_OF_ICE` to the end of group 13 (`ZzzInfomation.cpp:572-616`); the magic sword special case in the tooltip loop (`ZzzInventory.cpp:2166-2171`) | the Horn of Dinorant (`:557-570`, 9b5), the wing and cape chain (`:620-826`, 9b1) |
 | 9a3 | In `CalcExcellentOptions`, the defensive and offensive blocks (`:375-450`) | the Wizard's rings (`:451-483`, 9b5) |
-| 9a4 | In `CSItemOption::GetDefaultOptionText` (`CSItemOption.cpp:567-590`), the switch on `attackType`: the value and text come from the bonus definition | the second line `IncreaseAttributeDamage` for rings and pendants (`RenderDefaultOptionText`, `:641-658`, depends on the item, not the bonus; phase 10 decides), and `GetDefaultOptionValue`'s result `SET_OPTION_*` for its callers (`getAllAddState`) |
+| 9a4 | In `CSItemOption::GetDefaultOptionText` (`CSItemOption.cpp:567-590`), the switch on `attackType`: the value and text come from the bonus definition; `GetDefaultOptionValue` (`:553`) gives the definition's value, not `AncientBonusOption`, and the `Result * 5` of both callers (`:675-687`, `:765-777`) goes | the second line `IncreaseAttributeDamage` for rings and pendants (`RenderDefaultOptionText`, `:641-658`, depends on the item, not the bonus; phase 10 decides), and `GetDefaultOptionValue`'s result `SET_OPTION_*` for its callers (`getAllAddState`) |
 
 ### 15. The 9a data
 
