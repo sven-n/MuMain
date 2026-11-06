@@ -105,7 +105,9 @@ void MonsterRemoveDialog::Render()
     {
         numbers += (numbers.empty() ? "" : ", ") + std::to_string(member);
     }
-    const std::string name = monster->names.GetNeutral();
+    // A whole monster by the name its numbers share, not its first number's.
+    const std::string name =
+        m_wholeMonster ? g_MonsterEdits.ReadSharedValues(m_number)->names.GetNeutral() : monster->names.GetNeutral();
     if (m_wholeMonster)
     {
         RenderWrapped(I18N::Format(I18N::Editor::RemoveMonsterWithNumbers01, {name, numbers}).c_str(), false);

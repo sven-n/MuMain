@@ -335,6 +335,25 @@ TEST_CASE("Monster Browser: Add number and Split number out work on the selectio
     CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{145, 175, 336, 337});
 }
 
+TEST_CASE("Monster Browser: Remove monster names the monster by its shared name [editor][monsters]")
+{
+    GroupedTools tools;
+    TestImGuiContext context;
+    MonsterDefinition own = Entry(145);
+    own.names.Set("en", "Rogue Centurion");
+    REQUIRE(g_MonsterEdits.SetMonster("own name", own));
+    g_MonsterSelection.SelectMonster(145);
+    RenderBrowser();
+
+    Press(MuEditor::WindowIds::MonsterBrowser, I18N::Editor::RemoveMonster);
+    RenderBrowser();
+    Press("###MonsterRemoveDialog", I18N::Editor::Remove);
+    RenderBrowser();
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(145).empty());
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() ==
+          I18N::Format(I18N::Editor::StepRemoveMonsterWithNumbers, {"Death Centurion", "3"}));
+}
+
 TEST_CASE("Monster Translations rows: a monster with several numbers is translated once, numbers with names "
           "of their own have rows [editor][monsters]")
 {
