@@ -131,50 +131,58 @@ void CCreditWin::BindRmlModel(Rml::DataModelConstructor& c, CreditWinRmlModel& m
 
 void CCreditWin::Release()
 {
-	// Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
-	m_RmlView.Hide();
+    // Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+    Show(false);
 }
 
 void CCreditWin::Show(bool bShow)
 {
-	mu::ui::window::CObject::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
-	if (m_RmlView.Document())
-	{
-		if (bShow) m_RmlView.Document()->Show();
-		else       m_RmlView.Document()->Hide();
-	}
+    if (m_RmlView.Document())
+    {
+        if (bShow)
+            m_RmlView.Document()->Show();
+        else if (m_RmlView.Document()->IsVisible())
+            m_RmlView.Document()->Hide();
+    }
 
-	if (bShow)
-		Init();
-	else
-		m_eIllustState = HIDE;
+    if (bShow)
+        Init();
+    else
+    {
+        m_eIllustState = HIDE;
+        m_bRmlCloseClicked = false;
+    }
 }
 
 bool CCreditWin::Update()
 {
-	// Reconstructs the per-frame delta tick directly rather than via g_pTimer (total uptime, not a delta).
-	extern float FPS_ANIMATION_FACTOR;
-	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
+    if (!IsVisible())
+        return true;
 
-	if (m_bRmlCloseClicked)
-	{
-		m_bRmlCloseClicked = false;
-		CloseWin();
-	}
-	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		CloseWin();
-	}
+    // Reconstructs the per-frame delta tick directly rather than via g_pTimer (total uptime, not a delta).
+    extern float FPS_ANIMATION_FACTOR;
+    const DurationMs deltaTime{200.0 * static_cast<double>(FPS_ANIMATION_FACTOR)};
 
-	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
-		AnimationText(i, deltaTime);
-	AnimationIllust(deltaTime);
+    if (m_bRmlCloseClicked)
+    {
+        m_bRmlCloseClicked = false;
+        CloseWin();
+    }
+    else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+    {
+        ::PlayBuffer(SOUND_CLICK01);
+        CloseWin();
+    }
 
-	SyncRmlModel();
+    for (int i = 0; i <= CRW_INDEX_NAME; ++i)
+        AnimationText(i, deltaTime);
+    AnimationIllust(deltaTime);
 
-	return true;
+    SyncRmlModel();
+
+    return true;
 }
 
 bool CCreditWin::Render()
