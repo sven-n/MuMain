@@ -31,6 +31,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_version_files
+    SOURCES
+        test_version_files.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_narrow_path
     SOURCES
         test_narrow_path.cpp

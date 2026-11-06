@@ -374,6 +374,34 @@ tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
 The assembled directory contains `Main.exe`, the network and runtime DLLs,
 configuration, shaders, `Data/`, and `fonts/`.
 
+### Which client a log came from
+
+`MuError.log` starts with the client's identity, so a bug report shows what it ran:
+
+```text
+Release       : v1.37.0
+Build commit  : <the commit the client was built from>
+Build         : Release NoEditor MSVC x64, built Nov  6 2026 14:02:11
+Data          : data-<id> (matches this client)
+```
+
+- **Release** comes from `release-version.txt`, which the release job adds to each
+  runtime archive. Self-built clients and CI artifacts say `none`.
+- **Build commit** ends in `(with local changes)` when tracked files differed from
+  the commit. `https://github.com/sven-n/MuMain/compare/<commit>...main` lists what
+  main has gained since.
+- **Data** compares `Data/DataVersion.txt`, which the data workflow adds to the data
+  archive, with the data release the client was built for. A different id means the
+  runtime and data downloads don't belong together; data archives from before the
+  file, and self-built clients, say `unknown`.
+
+The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the language,
+and, once the renderer is up, the GPU, its graphics API and driver version.
+`ClientLibrary` names the commit the .NET library was built from and its OpenMU
+packets version. In a release download that commit is the client's, so a different
+one means a library from another download. A local build rebuilds the library only
+when its sources change, so there it can name an older commit.
+
 If a music file is missing or cannot be decoded, the client logs the failure and leaves
 that track silent for the rest of the audio session. Scene changes do not repeatedly
 retry it. After restoring or replacing a file under `Data/Music/`, restart the client

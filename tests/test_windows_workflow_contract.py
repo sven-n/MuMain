@@ -788,6 +788,10 @@ check(
     "Release must use Semantic Release",
 )
 check("id: semantic" in release_semantic, "Semantic Release must expose action outputs")
+check(
+    "@semantic-release/exec@" in release_semantic,
+    "Semantic Release must install the exec plugin that stamps the release version",
+)
 unpublished_check = step(release_job, "release", "Check unpublished release revision")
 for required in ("if: steps.semantic.outputs.new_release_published != 'true'",
                  "python3 scripts/ci_build_plan.py check-release"):
@@ -826,6 +830,32 @@ check(
     "Semantic Release must skip fork-incompatible success comments",
 )
 
+# The release tag goes into every archive before the GitHub plugin uploads them (MuError.log's Release line).
+plugin_names = [plugin[0] if isinstance(plugin, list) and plugin else plugin
+                for plugin in release_config.get("plugins", [])]
+exec_plugins = [
+    plugin
+    for plugin in release_config.get("plugins", [])
+    if isinstance(plugin, list) and plugin and plugin[0] == "@semantic-release/exec"
+]
+check(len(exec_plugins) == 1, "Release config must contain one exec plugin")
+prepare_command = ""
+if len(exec_plugins) == 1 and len(exec_plugins[0]) == 2 and isinstance(exec_plugins[0][1], dict):
+    prepare_command = exec_plugins[0][1].get("prepareCmd", "")
+check(
+    prepare_command.startswith("bash scripts/stamp_release_version.sh ${nextRelease.gitTag} "),
+    "The exec plugin must stamp the release tag",
+)
+check(
+    prepare_command.split()[3:] == [asset["path"] for asset in EXPECTED_RELEASE_ASSETS],
+    "The exec plugin must stamp every published archive",
+)
+if "@semantic-release/exec" in plugin_names and "@semantic-release/github" in plugin_names:
+    check(
+        plugin_names.index("@semantic-release/exec") < plugin_names.index("@semantic-release/github"),
+        "The release version must be stamped before the GitHub plugin",
+    )
+
 for required in (
     "workflow_dispatch:",
     "src/bin/Data/**",
@@ -839,6 +869,8 @@ for required in (
     "data-${asset_id}",
     "tar -czf",
     "-C src/bin Data fonts",
+    'printf \'%s\\n\' "$tag" > "${version_folder}/Data/DataVersion.txt"',
+    '-C "${version_folder}" Data/DataVersion.txt',
     "gh release view",
     "gh release create",
     "--latest=false",

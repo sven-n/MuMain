@@ -12,6 +12,7 @@
 #include "Core/Platform/Audio/AudioDeviceNames.h"
 #include "Core/Utilities/BuildInfo.h"
 #include "Core/Utilities/PlatformInfo.h"
+#include "Core/Utilities/VersionFiles.h"
 #include "MuGitCommit.h"
 #include "Render/Renderer/MuRenderer.h"
 
@@ -117,14 +118,22 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
     }
 }
 
-// Which client a report came from: the commit it was built from (so an old build is easy to spot) and how it was
-// built.
+// Which client a report came from: the release download, the commit it was built from (so an old build is easy
+// to spot), how it was built, and whether the installed data belongs to it.
 void CErrorReport::WriteBuildInfo(void)
 {
+    const std::string release =
+        Core::Build::DescribeRelease(Core::Build::ReadVersionFile(Core::Build::kReleaseVersionFile));
+    Write(L"Release \t\t: %hs\r\n", release.c_str());
+
     const bool hasLocalChanges = MU_GIT_COMMIT_CHANGED != 0;
     Write(L"Build commit \t\t: %hs%ls\r\n", MU_GIT_COMMIT, hasLocalChanges ? L" (with local changes)" : L"");
     Write(L"Build \t\t\t: %hs %hs %hs %hs, built %hs %hs\r\n", Core::Build::kConfiguration, Core::Build::kEditor,
           Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
+
+    const std::string data =
+        Core::Build::DescribeData(Core::Build::ReadVersionFile(Core::Build::kDataVersionFile), MU_DATA_ASSET_ID);
+    Write(L"Data \t\t\t: %hs\r\n", data.c_str());
 }
 
 void CErrorReport::WriteSystemInfo(void)
