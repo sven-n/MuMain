@@ -1,4 +1,5 @@
-// doctest unit tests for the game's side of the login screen's reconnect and login-window input gate.
+// doctest unit tests for the game's side of the login screen's reconnect and login-window input gate,
+// and for the music the login screen plays.
 //
 // GameLoginSceneLink reads the login scene's windows and protocol state to tell
 // LoginSceneReconnect which server the screen waits for, and whether the server
@@ -11,9 +12,12 @@
 #include "doctest.h"
 
 #include "Character/CharMakeWin.h"
+#include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
+#include "Core/Platform/IPlatformAudio.h"
 #include "Network/Reconnect/GameLoginSceneLink.h"
 #include "Network/Server/WSclient.h" // CurrentProtocolState and its states
+#include "Scenes/LoginScene.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Windows/CreditWin.h"
@@ -25,6 +29,8 @@
 #include "UI/Windows/SysMenuWin.h"
 
 #include <array>
+#include <string>
+#include <vector>
 
 extern BOOL g_bGameServerConnected;
 extern bool g_bWndActive;
@@ -64,6 +70,90 @@ private:
 
     int m_protocolState = CurrentProtocolState;
     BOOL m_gameServerConnected = g_bGameServerConnected;
+};
+
+// An audio backend that keeps one music track the way the real one does: asking for the
+// track that plays starts nothing, any other track replaces it from its start. Logs each start.
+class MusicLog final : public mu::IPlatformAudio
+{
+public:
+    std::vector<std::string> starts;
+
+    bool Initialize() override
+    {
+        return true;
+    }
+    void Shutdown() override {}
+    void LoadSound(ESound, const wchar_t*, int, bool) override {}
+    bool PlaySound(ESound, const void*, bool) override
+    {
+        return true;
+    }
+    void StopSound(ESound, bool) override {}
+    void AllStopSound() override {}
+    void ReleaseSound(ESound) override {}
+    void Set3DSoundPosition() override {}
+    void SetVolume(ESound, long) override {}
+    void SetMasterVolume(long) override {}
+    void PlayMusic(const char* name, bool enforce) override
+    {
+        if (!enforce && m_track == name)
+            return;
+        m_track = name;
+        starts.emplace_back(name);
+    }
+    void StopMusic(const char* name, bool enforce) override
+    {
+        if (enforce || name == nullptr || m_track == name)
+            m_track.clear();
+    }
+    bool IsEndMusic() override
+    {
+        return m_track.empty();
+    }
+    int GetMusicPosition() override
+    {
+        return 0;
+    }
+    void SetBGMVolume(float) override {}
+    void SetSFXVolume(float) override {}
+    float GetBGMVolume() const override
+    {
+        return 1.0f;
+    }
+    float GetSFXVolume() const override
+    {
+        return 1.0f;
+    }
+
+private:
+    std::string m_track;
+};
+
+// Puts a MusicLog in as the audio backend, with the music on; puts both back afterwards.
+class MusicScope
+{
+public:
+    MusicScope()
+    {
+        g_platformAudio = &log;
+        m_MusicOnOff = 1;
+    }
+
+    ~MusicScope()
+    {
+        g_platformAudio = m_backend;
+        m_MusicOnOff = m_musicOnOff;
+    }
+
+    MusicScope(const MusicScope&) = delete;
+    MusicScope& operator=(const MusicScope&) = delete;
+
+    MusicLog log;
+
+private:
+    mu::IPlatformAudio* m_backend = g_platformAudio;
+    int m_musicOnOff = m_MusicOnOff;
 };
 } // namespace
 
@@ -298,5 +388,25 @@ TEST_SUITE("Game login scene link")
         CHECK_FALSE(screen.link.IsFailureShown());
         screen.link.HideFailure(); // nothing to close
         CHECK_FALSE(g_MsgWin.IsVisible());
+    }
+
+    TEST_CASE("the credits play their own theme, and the login theme comes back when they close")
+    {
+        LoginScreen screen;
+        MusicScope music;
+
+        // The scene asks for its track every frame; two frames per screen.
+        PlayLogInSceneMusic();
+        PlayLogInSceneMusic();
+        g_CreditWin.mu::ui::window::CObject::Show(true);
+        PlayLogInSceneMusic();
+        PlayLogInSceneMusic();
+        g_CreditWin.mu::ui::window::CObject::Show(false);
+        PlayLogInSceneMusic();
+        PlayLogInSceneMusic();
+
+        // One start per screen: no track starts over while its screen is up.
+        const std::vector<std::string> expected{MUSIC_LOGIN_THEME, MUSIC_MUTHEME, MUSIC_LOGIN_THEME};
+        CHECK(music.log.starts == expected);
     }
 }

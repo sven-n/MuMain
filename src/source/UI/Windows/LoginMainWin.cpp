@@ -10,7 +10,6 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Network/Reconnect/LoginSceneReconnect.h"
-#include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlNativeText.h"
@@ -158,8 +157,6 @@ void CLoginMainWin::OpenCredits()
 {
     LoginSceneReconnect::Instance().RequestServerList();
 
+    // The login scene switches to the credits' theme (PlayLogInSceneMusic).
     g_CreditWin.Show(true);
-
-    ::StopMp3(MUSIC_MAIN_THEME);
-    ::PlayMp3(MUSIC_MUTHEME);
 }

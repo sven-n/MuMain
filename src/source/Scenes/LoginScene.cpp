@@ -329,6 +329,12 @@ static void UpdateLogInSceneView()
         CullWorld();
 }
 
+void PlayLogInSceneMusic()
+{
+    // The credits have their own theme. Starts the track again when it ends; a no-op while it plays.
+    ::PlayMp3(g_CreditWin.IsVisible() ? MUSIC_MUTHEME : MUSIC_LOGIN_THEME);
+}
+
 void NewMoveLogInScene()
 {
     if (!InitLogIn)
@@ -337,8 +343,7 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
-    // Starts the theme again when it ends; a no-op while it plays.
-    ::PlayMp3(MUSIC_LOGIN_THEME);
+    PlayLogInSceneMusic();
 
     if (!g_CreditWin.IsVisible())
     {
