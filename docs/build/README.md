@@ -85,14 +85,36 @@ all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
 [nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
 the repository's submodule entry, for the SDL GPU renderer integration.
 
+CMake fetches the pinned commits without their history; git also brings the newest
+commit of each submodule's default branch. That is about 30 MB instead of 300 MB in
+every checkout and worktree. A submodule that already has its history keeps it.
+To work on a submodule with its history and all its branches, fetch them there,
+e.g. for RmlUi:
+
+```sh
+git -C src/ThirdParty/RmlUi remote set-branches origin "*"
+git -C src/ThirdParty/RmlUi fetch --unshallow
+```
+
+A clone can bring the submodules the same way from the start; `--depth 1` also
+leaves out MuMain's own history, for a checkout that only builds:
+
+```sh
+git clone --recurse-submodules --shallow-submodules https://github.com/sven-n/MuMain.git
+```
+
 If automatic initialization fails, run from the repository root:
 
 ```sh
-git submodule update --init -- src/ThirdParty/SDL src/ThirdParty/RmlUi
+git submodule update --init --depth 1 -- src/ThirdParty/SDL src/ThirdParty/RmlUi
 
 # For editor builds:
-git submodule update --init -- src/ThirdParty/imgui
+git submodule update --init --depth 1 -- src/ThirdParty/imgui
 ```
+
+A git server that sends only branch tips refuses `--depth 1` here for a pinned commit
+that is none, as SDL's and ImGui's are. Without `--depth 1`, git fetches the whole
+history; CMake falls back to that by itself.
 
 CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.
 Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
@@ -162,13 +184,18 @@ Run the client from that directory so it finds its assets and the library.
 
 Feature branches target `main`. Every PR runs Quality Gates, which include the
 [static checks](reference-tests.md#static-checks-and-the-pre-push-hook); ready code
-PRs then run Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
+PRs then run Windows x64, Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
 **Ready for review**; documentation-only changes run the cheap checks without
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.
-Code merges to main run Linux integration checks. Newer revisions cancel older
-PR/integration runs. Releases finish the running revision and keep only the newest
-pending trigger; another nightly/manual trigger can replace an older pending one.
+Code merges to main run the same three builds, which save the caches the next PRs
+start from (see the CI caches below). A main push compares against the commit main's
+last successful run built, not the previous push: a push still waiting for its run
+is replaced by a newer one, and would otherwise never be built. Without such a run,
+everything builds. A PR's newer revision cancels its older run.
+Main pushes and releases finish the running revision and keep only the newest
+pending trigger, so a main push's caches get saved; a newer push or nightly/manual
+trigger can replace an older pending one.
 This deliberately coalesces work rather than guaranteeing a run for every request.
 
 Full Windows/Linux/macOS release builds run daily at approximately **02:17 UTC+8**
@@ -180,8 +207,7 @@ checks scoped subjects and breaking-change notes, and builds conservatively for
 an initial release or unsupported release rules. Manual dispatch bypasses this skip.
 All jobs use the same revision selected when the workflow is triggered. Semantic
 Release publishes only when those commits warrant a version change; main merges
-no longer publish immediately. Windows integration failures may first appear in
-the nightly run. The separate Data Assets workflow still publishes data on merge.
+no longer publish immediately. The separate Data Assets workflow still publishes data on merge.
 Publishing also waits for **CI Required**. If no release is published and main has
 advanced during the build, the release job fails with a manual-rerun instruction
 instead of silently reporting success. It never substitutes untested newer code.
@@ -232,12 +258,23 @@ their image (`ubuntu-26.04`, `macos-26`, `windows-2025-vs2026`) instead of a
 `-latest` label: GitHub moves repositories to a new latest image one by one and
 warns about the move in every job meanwhile.
 
-Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
-summary show hits and misses; compare the Build step duration on a warm run with
-the first run. All builds restore the compiler cache; only successful main pushes
-save it, so PR-only entries do not displace shared caches. macOS uses the same
-compiler cache (**macOS compiler cache** summary); main pushes skip macOS, so
-successful nightly/manual release builds save it instead. Windows vcpkg primary
+All three builds use a compiler cache (ccache). The job logs and the **Windows
+compiler cache**, **Linux compiler cache** and **macOS compiler cache** step
+summaries show hits and misses; compare the Build step duration on a warm run with
+the first run. Windows downloads a pinned ccache release and checks it against its
+SHA-256 (**Install compiler cache**). Before a compiler cache is saved, **Trim
+compiler cache** removes the objects the build did not use (ccache marks each object
+it finds), so an entry holds one build's objects, not every build's since the cache
+began: about 0.5 GB on Windows, whose objects carry their debug info (`/Z7`). PR
+and main push builds configure with `-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL
+and RmlUi use precompiled headers, which ccache does not cache, so their files
+(over a quarter of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on
+macOS) compiled again on every run while the game's own files hit. The nightly and
+manual release builds keep the precompiled headers, as local builds do, so a change
+that breaks only with them fails there; those builds save no cache, so only SDL and
+RmlUi compile without one. All builds restore the compiler cache; only
+successful main pushes save it, so PR-only entries do not displace shared caches,
+and a PR starts from the latest main. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.
@@ -253,13 +290,12 @@ file in `src/CMakeLists.txt`.
 PR runs only read the library and vcpkg caches, as they do the compiler caches:
 **Restore dependencies** and **Restore vcpkg packages** read them, and
 **Save dependencies** (after the build) and **Save vcpkg packages** (after the
-configure step) store them only in runs on main, when the exact key was missing. A
+configure step) store them only in main pushes, when the exact key was missing. A
 PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
-past that, GitHub deletes the least recently used entries, which are main's Windows
-ones, used once a night. Each job's caches have one kind of run that saves them:
-main pushes for Linux, the nightly and manual release builds for macOS and Windows.
-Pushes and the nightly run side by side, so with both saving, an older commit's
-entry could be saved last and be the one the prune job keeps.
+past that, GitHub deletes the least recently used entries, main's included. The
+nightly and manual release runs save nothing either: they run beside the pushes,
+so with both saving, an older commit's entry could be saved last and be the one the
+prune job keeps.
 
 A save under a new key leaves the older entries of that cache behind, such as a
 compiler cache for each main push. After the builds of a run on main, the
@@ -268,7 +304,10 @@ deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
 and while GitHub moves the runners to a new image, jobs land on both images. An
 entry a job read in the last 15 minutes is left for a later run, as that job may
-still be downloading it. It is the only job with a token that can delete caches.
+still be downloading it, unless the last read was the run's own: each build job
+notes when its restores ended (**Note when the caches were read**), so the entry a
+build started from goes in the same run. It is the only job with a token that can
+delete caches.
 CI Required waits for it: a prune that fails or warns fails the run like a build,
 since without it the caches fill up again. A new cache that is restored by a
 key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that
