@@ -582,33 +582,39 @@ bool HasEmptyText(const OrderedJson& json, const char* key)
     return value != json.end() && value->is_string() && value->get_ref<const std::string&>().empty();
 }
 
-// The values a number of a monster has as its own, read onto `entry`, which
-// holds the shared ones: each field the object has replaces the entry's. They
-// may be empty where a monster's are not: "model": "", "soundSet": "",
-// "attacks": null, and empty lists of variants.
-bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
+// The names and the kind of a number that names them, in place of the
+// monster's.
+bool ReadOwnNamesAndKind(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
 {
-    // Each field WriteOwnValue writes is read here; a new one needs both.
-    static_assert(MonsterValueFields.size() == 7, "read the new own value here and write it in WriteOwnValue");
     const int number = entry.number;
     bool valid = true;
     if (json.contains(NameKey))
     {
         LocalizedString names;
-        valid = ReadNames(json, number, names, issues) && valid;
+        valid = ReadNames(json, number, names, issues);
         entry.names = std::move(names);
     }
     if (json.contains(KindKey))
     {
         valid = ReadKind(json, number, entry.kind, issues) && valid;
     }
+    return valid;
+}
+
+// The model, sound set and attacks of a number that names them, which may be
+// none where the monster has them: "model": "", "soundSet": "", "attacks":
+// null.
+bool ReadOwnModelSetAndAttacks(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
+{
+    const int number = entry.number;
+    bool valid = true;
     if (HasEmptyText(json, ModelKey))
     {
         entry.model.clear();
     }
     else
     {
-        valid = ReadModel(json, number, entry.model, issues) && valid;
+        valid = ReadModel(json, number, entry.model, issues);
     }
     if (HasEmptyText(json, SoundSetKey))
     {
@@ -626,10 +632,19 @@ bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList&
     {
         valid = ReadAttacks(json, MonsterField(number, AttacksKey), number, entry.attacks, issues) && valid;
     }
+    return valid;
+}
+
+// The lists of a number that names them, in place of the monster's, also
+// empty: its map variants and random variants, and the maps it appears on.
+bool ReadOwnLists(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
+{
+    const int number = entry.number;
+    bool valid = true;
     if (json.contains(MapVariantsKey))
     {
         entry.mapVariants.clear();
-        valid = ReadMapVariants(json, number, entry.mapVariants, issues) && valid;
+        valid = ReadMapVariants(json, number, entry.mapVariants, issues);
     }
     if (json.contains(RandomVariantsKey))
     {
@@ -644,16 +659,35 @@ bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList&
                                         { issues.Fatal(field, message, number); }) &&
                 valid;
     }
-    // An own model may be the model of a look the number shares.
+    return valid;
+}
+
+// An own model may not be the model of a look the number shares.
+bool CheckModelIsNoLook(const MonsterDefinition& entry, IssueList& issues)
+{
     const bool modelIsALook = std::any_of(entry.randomVariants.begin(), entry.randomVariants.end(),
                                           [&](const MonsterRandomVariant& look) { return look.model == entry.model; });
-    if (modelIsALook)
+    if (!modelIsALook)
     {
-        issues.Fatal(MonsterField(number, RandomVariantsKey), entry.model + " is the entry's model and a variant's",
-                     number);
-        valid = false;
+        return true;
     }
-    return valid;
+    issues.Fatal(MonsterField(entry.number, RandomVariantsKey), entry.model + " is the entry's model and a variant's",
+                 entry.number);
+    return false;
+}
+
+// The values a number of a monster has as its own, read onto `entry`, which
+// holds the shared ones: each field the object has replaces the entry's. They
+// may be empty where a monster's are not: "model": "", "soundSet": "",
+// "attacks": null, and empty lists of variants.
+bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
+{
+    // Each field WriteOwnValue writes is read here; a new one needs both.
+    static_assert(MonsterValueFields.size() == 7, "read the new own value here and write it in WriteOwnValue");
+    bool valid = ReadOwnNamesAndKind(json, entry, issues);
+    valid = ReadOwnModelSetAndAttacks(json, entry, issues) && valid;
+    valid = ReadOwnLists(json, entry, issues) && valid;
+    return CheckModelIsNoLook(entry, issues) && valid;
 }
 
 void WarnAboutUnknownMonsterKeys(const OrderedJson& json, const Items::Json::KeySet& known, int number,
@@ -662,6 +696,58 @@ void WarnAboutUnknownMonsterKeys(const OrderedJson& json, const Items::Json::Key
     Items::Json::WarnAboutUnknownKeys(json, known, "monster " + std::to_string(number) + " ",
                                       [&](const std::string& unknown, const std::string& message)
                                       { issues.Warning(unknown, message, number); });
+}
+
+// An entry of a monster's "numbers" and the number it names.
+struct NumberJson
+{
+    const OrderedJson* json = nullptr;
+    int number = 0;
+};
+
+// The entries of a monster's "numbers" that name a number; the others are
+// problems.
+std::vector<NumberJson> ReadNumberList(const OrderedJson& list, const std::string& field, IssueList& issues)
+{
+    std::vector<NumberJson> numbers;
+    for (size_t index = 0; index < list.size(); ++index)
+    {
+        const OrderedJson& entry = list[index];
+        const std::string key = field + "." + NumbersKey + "[" + std::to_string(index) + "]";
+        if (!entry.is_object())
+        {
+            issues.Fatal(key, "must be an object with the number and its own values");
+            continue;
+        }
+        if (const std::optional<int> number = ReadMonsterNumber(entry, key, issues))
+        {
+            numbers.push_back({&entry, *number});
+        }
+    }
+    return numbers;
+}
+
+// The entry of each number: the shared values with the number's own. A
+// number with an error in its own values is left out.
+std::vector<MonsterDefinition> ReadNumberEntries(const std::vector<NumberJson>& numbers,
+                                                 const MonsterDefinition& shared, IssueList& issues)
+{
+    std::vector<MonsterDefinition> entries;
+    for (const NumberJson& number : numbers)
+    {
+        MonsterDefinition entry = shared;
+        entry.number = number.number;
+        const bool valid = ReadOwnValues(*number.json, entry, issues);
+        WarnAboutUnknownMonsterKeys(*number.json,
+                                    {NumberKey, MapsKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey,
+                                     MapVariantsKey, RandomVariantsKey},
+                                    number.number, issues);
+        if (valid)
+        {
+            entries.push_back(std::move(entry));
+        }
+    }
+    return entries;
 }
 
 // A monster of the list: its shared values and its numbers with their own.
@@ -678,27 +764,13 @@ std::optional<MonsterGroup> ReadMonster(const OrderedJson& json, const std::stri
         issues.Fatal(field + "." + NumbersKey, "missing or not a list of one or more numbers");
         return std::nullopt;
     }
-    std::vector<std::pair<const OrderedJson*, int>> numbers;
-    for (size_t index = 0; index < list->size(); ++index)
-    {
-        const OrderedJson& entry = (*list)[index];
-        const std::string key = field + "." + NumbersKey + "[" + std::to_string(index) + "]";
-        if (!entry.is_object())
-        {
-            issues.Fatal(key, "must be an object with the number and its own values");
-            continue;
-        }
-        if (const std::optional<int> number = ReadMonsterNumber(entry, key, issues))
-        {
-            numbers.emplace_back(&entry, *number);
-        }
-    }
+    const std::vector<NumberJson> numbers = ReadNumberList(*list, field, issues);
     if (numbers.empty())
     {
         return std::nullopt;
     }
     MonsterGroup monster;
-    const int first = numbers.front().second;
+    const int first = numbers.front().number;
     const bool valid = ReadSharedValues(json, first, monster.shared, issues);
     WarnAboutUnknownMonsterKeys(
         json, {NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey, NumbersKey},
@@ -707,20 +779,7 @@ std::optional<MonsterGroup> ReadMonster(const OrderedJson& json, const std::stri
     {
         return std::nullopt;
     }
-    for (const auto& [entryJson, number] : numbers)
-    {
-        MonsterDefinition entry = monster.shared;
-        entry.number = number;
-        const bool ownValid = ReadOwnValues(*entryJson, entry, issues);
-        WarnAboutUnknownMonsterKeys(*entryJson,
-                                    {NumberKey, MapsKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey,
-                                     MapVariantsKey, RandomVariantsKey},
-                                    number, issues);
-        if (ownValid)
-        {
-            monster.numbers.push_back(std::move(entry));
-        }
-    }
+    monster.numbers = ReadNumberEntries(numbers, monster.shared, issues);
     if (monster.numbers.empty())
     {
         return std::nullopt;
