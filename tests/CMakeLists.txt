@@ -3,6 +3,7 @@
 # CMakeLists.txt files own their own sources, link, and call mu_add_test().
 
 include(third_party/doctest/doctest.cmake)
+include("${CMAKE_SOURCE_DIR}/cmake/StdafxPrecompiledHeader.cmake")
 
 # When cross-compiling Windows binaries on a non-Windows host (CI's Linux
 # runner, WSL/MinGW), wine has to launch the .exe. Setting this once makes
@@ -94,28 +95,18 @@ if(NOT CMAKE_DISABLE_PRECOMPILE_HEADERS)
 endif()
 
 # Usage: mu_test_use_pch(<target>), for a test executable that links MuClient. Its files that include stdafx.h use the
-# precompiled stdafx.h of mu_test_pch; the others compile without it, as before. The check reads the files at
-# configure time, like MuClient's in src/CMakeLists.txt. Without mu_test_pch it does nothing: CMake would warn about
+# precompiled stdafx.h of mu_test_pch; the others compile without it, as before (cmake/StdafxPrecompiledHeader.cmake,
+# as for MuClient). Without mu_test_pch it does nothing: CMake would warn about
 # every test that reuses a precompiled header while precompiled headers are off, and CI fails on a warning.
 function(mu_test_use_pch target)
     if(NOT TARGET mu_test_pch)
         return()
     endif()
     target_precompile_headers(${target} REUSE_FROM mu_test_pch)
-    # GCC 13 reports -Wstringop-overflow for concatenations like std::string(300, 'x') + ".json" in test files that use
-    # the precompiled header, the false positive MuClient has too (src/CMakeLists.txt), which GCC 15 does not report.
-    # It stays a warning in these tests, so a local build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
-    target_compile_options(${target} PRIVATE
-        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>>:-Wno-error=stringop-overflow>")
     get_target_property(sources ${target} SOURCES)
-    get_target_property(source_dir ${target} SOURCE_DIR)
-    foreach(source IN LISTS sources)
-        cmake_path(ABSOLUTE_PATH source BASE_DIRECTORY "${source_dir}" OUTPUT_VARIABLE path)
-        file(STRINGS "${path}" stdafx_include REGEX "^[ \t]*#[ \t]*include[ \t]+\"(App/)?stdafx\\.h\"" LIMIT_COUNT 1)
-        if(NOT stdafx_include)
-            set_source_files_properties("${path}" TARGET_DIRECTORY ${target} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-        endif()
-    endforeach()
+    mu_skip_pch_without_stdafx(${target} ${sources})
+    # The -Wstringop-overflow false positive GCC 13 reports with the precompiled header, as MuClient has it.
+    mu_allow_gcc13_stringop_overflow(${target} ${sources})
 endfunction()
 
 # Helper for files that more than one test compiles. Usage:
