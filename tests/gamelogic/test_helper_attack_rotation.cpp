@@ -28,11 +28,14 @@
 #include <winsock2.h>
 #include "Dotnet/Connection.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Sprites/GpuUploadSkip.h"
+#include "Render/Textures/TextureFailure.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Options/OptionWindow.h"
 #include "World/MapInfra/MapManager.h"
 #include <chrono>
 #include <filesystem>
+#include <string>
 #include <vector>
 extern DWORD g_dwLatestMagicTick;
 extern int CurrentSkill;
@@ -280,6 +283,16 @@ private:
     bool m_started = false;
 };
 
+std::string* activeTextureErrors = nullptr;
+
+void RecordTextureError(const std::string& message)
+{
+    if (activeTextureErrors)
+    {
+        activeTextureErrors->append(message).push_back('\n');
+    }
+}
+
 struct CombatGlobals
 {
     std::unique_ptr<Connection>& connection;
@@ -293,12 +306,22 @@ struct CombatGlobals
     int mouseTimeMax = MouseUpdateTimeMax;
     std::wstring language = g_strSelectedML;
     std::filesystem::path directory = std::filesystem::current_path();
+    Render::Textures::TextureErrorCollector textureCollector = Render::Textures::GetTextureErrorCollector();
+    std::string textureErrors;
+    bool ownsHeadlessServices = false;
     bool ownsUi = false;
 
     ~CombatGlobals()
     {
         if (ownsUi)
             g_pNewUISystem->Release();
+        if (ownsHeadlessServices)
+        {
+            Render::Textures::SetTextureErrorCollector(textureCollector);
+            activeTextureErrors = nullptr;
+            // This isolated binary owns the upload-skip test service, as does TempleSkillFixture.
+            Render::Sprites::SetGpuUploadsSkipped(false);
+        }
         connection.reset();
         SocketClient = socket;
         Models = models;
@@ -325,6 +348,7 @@ struct AcceptedCastFixture : SkillFixture
     AcceptedCastFixture()
     {
         REQUIRE(g_pNewUIMng == nullptr);
+        REQUIRE(activeTextureErrors == nullptr);
         std::filesystem::current_path(MU_BIN_DIR);
         REQUIRE(std::filesystem::is_regular_file("Data/Local/Eng/Slide_Eng.bmd"));
         g_strSelectedML = L"Eng";
@@ -348,8 +372,14 @@ struct AcceptedCastFixture : SkillFixture
         SocketClient = connection.get();
         REQUIRE(connection->IsConnected());
         peer.Accept();
+        restore.ownsHeadlessServices = true;
+        Render::Sprites::SetGpuUploadsSkipped(true);
+        activeTextureErrors = &restore.textureErrors;
+        Render::Textures::SetTextureErrorCollector(&RecordTextureError);
         restore.ownsUi = true;
         REQUIRE(g_pNewUISystem->Create());
+        INFO(restore.textureErrors);
+        REQUIRE(restore.textureErrors.empty());
         g_pOption->SetAutoAttack(false);
     }
 
