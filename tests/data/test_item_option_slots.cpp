@@ -142,3 +142,41 @@ TEST_CASE("An option keeps a value above 255 [items]")
     REQUIRE(horse.SpecialNum == 1);
     CHECK(horse.SpecialValue[0] == 256);
 }
+
+// The Wings of Despair's additional option is wizardry damage (option type 2) or curse damage (type 0), as on the other
+// second tier wings. A type the client has no option for takes no slot: it took one with option 0, which has no text,
+// and the tooltip stops at its first empty line, so every line after it was gone.
+TEST_CASE("The Wings of Despair take no option slot for an option type they have no option for [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+
+    const auto wingsWithOption = [](BYTE optionType)
+    {
+        ItemCreationParams params{};
+        params.Group = ITEM_WINGS_OF_DESPAIR / MAX_ITEM_INDEX;
+        params.Number = ITEM_WINGS_OF_DESPAIR % MAX_ITEM_INDEX;
+        params.WithOption = true;
+        params.OptionLevel = 2;
+        params.OptionType = optionType;
+        ITEM wings;
+        FillItemFromParameters(wings, params);
+        return wings;
+    };
+
+    const ITEM wizardry = wingsWithOption(2);
+    REQUIRE(wizardry.SpecialNum == 1);
+    CHECK(wizardry.Special[0] == AT_IMPROVE_MAGIC);
+    CHECK(wizardry.SpecialValue[0] == 8);
+    const ITEM curse = wingsWithOption(0);
+    REQUIRE(curse.SpecialNum == 1);
+    CHECK(curse.Special[0] == AT_IMPROVE_CURSE);
+    CHECK(curse.SpecialValue[0] == 8);
+    for (const int otherType : {1, 3})
+    {
+        CAPTURE(otherType);
+        CHECK(wingsWithOption(static_cast<BYTE>(otherType)).SpecialNum == 0);
+    }
+}

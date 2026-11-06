@@ -660,17 +660,14 @@ void SetItemAttributes(ITEM* ip)
             }
             else if (ip->Type == ITEM_WINGS_OF_DESPAIR)
             {
-                // Another option type takes a slot with option 0, as it always did (the item starts zeroed).
-                WORD option = 0;
                 if (ip->OptionType == 2)
                 {
-                    option = AT_IMPROVE_MAGIC;
+                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC, Option3 * 4);
                 }
                 if (ip->OptionType == 0)
                 {
-                    option = AT_IMPROVE_CURSE;
+                    GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_CURSE, Option3 * 4);
                 }
-                GameLogic::Items::AddOptionSlot(*ip, option, Option3 * 4);
             }
             else if (ip->Type == ITEM_WING_OF_STORM)
             {
