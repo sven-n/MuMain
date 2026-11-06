@@ -4,6 +4,7 @@
 
 #include "MonsterShownModel.h"
 
+#include "MonsterEdits.h"
 #include "MonsterSelection.h"
 
 #include "Core/Globals/_enum.h"
@@ -16,6 +17,7 @@
 #include "imgui.h"
 
 #include <set>
+#include <string>
 #include <string_view>
 
 namespace MuEditor::Monsters::ShownModel
@@ -102,6 +104,15 @@ void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* 
     {
         ImGui::TextDisabled("%s", number == MonsterSelection::NoMonster ? I18N::Editor::NoMonsterIsSelected
                                                                         : I18N::Editor::NoMonsterAtThisNumber);
+        return;
+    }
+    // A monster as a whole (D61): the tools show the values its numbers share.
+    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
+    if (g_MonsterSelection.IsWholeMonster() && numbers.size() > 1)
+    {
+        const std::string name = g_MonsterEdits.ReadSharedValues(number)->names.Get(I18N::GetCurrentLocale());
+        ImGui::TextUnformatted(
+            I18N::Format(I18N::Editor::TheValuesThe0NumbersOf1Share, {std::to_string(numbers.size()), name}).c_str());
         return;
     }
     // The name is an argument, never the format: names may hold a "%".

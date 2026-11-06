@@ -56,12 +56,28 @@ std::string Joined(const std::vector<std::string>& names)
 
 void MonsterRemoveDialog::Open(int number)
 {
+    Open(number, false);
+}
+
+void MonsterRemoveDialog::OpenWholeMonster(int number)
+{
+    Open(number, true);
+}
+
+void MonsterRemoveDialog::Open(int number, bool wholeMonster)
+{
     if (g_MonsterDatabase.Find(number) == nullptr)
     {
         return;
     }
     m_number = number;
-    m_dataUsers = FindMonsterDataUsers(number);
+    m_wholeMonster = wholeMonster && g_MonsterEdits.ReadMonsterNumbers(number).size() > 1;
+    m_numbers = m_wholeMonster ? g_MonsterEdits.ReadMonsterNumbers(number) : std::vector{number};
+    m_dataUsers.clear();
+    for (const int member : m_numbers)
+    {
+        m_dataUsers.push_back(FindMonsterDataUsers(member));
+    }
     // Reads the sources on the first remove, not when the editor starts.
     GetMonsterCodeReferences();
     m_open = true;
@@ -84,19 +100,52 @@ void MonsterRemoveDialog::Render()
         ImGui::EndPopup();
         return;
     }
-    ImGui::TextUnformatted(StepLabel::LogName(*monster).c_str());
-    ImGui::TextUnformatted(I18N::Editor::TheMonsterEntryIsRemoved);
-    const char* legacyKind = KindField::GetLabel(KindField::GetLegacyKind(m_number));
-    RenderWrapped(I18N::Format(I18N::Editor::MonsterWithoutEntryInGame, {legacyKind}).c_str(), false);
+    std::string numbers;
+    for (const int member : m_numbers)
+    {
+        numbers += (numbers.empty() ? "" : ", ") + std::to_string(member);
+    }
+    const std::string name = monster->names.GetNeutral();
+    if (m_wholeMonster)
+    {
+        RenderWrapped(I18N::Format(I18N::Editor::RemoveMonsterWithNumbers01, {name, numbers}).c_str(), false);
+    }
+    else
+    {
+        ImGui::TextUnformatted(StepLabel::LogName(*monster).c_str());
+        ImGui::TextUnformatted(I18N::Editor::TheMonsterEntryIsRemoved);
+        const char* legacyKind = KindField::GetLabel(KindField::GetLegacyKind(m_number));
+        RenderWrapped(I18N::Format(I18N::Editor::MonsterWithoutEntryInGame, {legacyKind}).c_str(), false);
+    }
     RenderWrapped(I18N::Editor::RemovedMonsterInGame, true);
     ImGui::Separator();
-    RenderUses();
+    for (size_t index = 0; index < m_numbers.size(); ++index)
+    {
+        if (m_wholeMonster)
+        {
+            ImGui::TextUnformatted(std::to_string(m_numbers[index]).c_str());
+            ImGui::Indent();
+        }
+        RenderUses(m_numbers[index], m_dataUsers[index]);
+        if (m_wholeMonster)
+        {
+            ImGui::Unindent();
+        }
+    }
     ImGui::Separator();
 
     ImGui::PushStyleColor(ImGuiCol_Button, RemoveColor);
     if (ImGui::Button(I18N::Editor::Remove))
     {
-        g_MonsterEdits.RemoveMonster(StepLabel::Remove(*monster), m_number);
+        if (m_wholeMonster)
+        {
+            g_MonsterEdits.RemoveMonsterWithNumbers(
+                StepLabel::RemoveMonsterWithNumbers(name, static_cast<int>(m_numbers.size())), m_number);
+        }
+        else
+        {
+            g_MonsterEdits.RemoveMonster(StepLabel::Remove(*monster), m_number);
+        }
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopStyleColor();
@@ -108,16 +157,16 @@ void MonsterRemoveDialog::Render()
     ImGui::EndPopup();
 }
 
-void MonsterRemoveDialog::RenderUses() const
+void MonsterRemoveDialog::RenderUses(int number, const MonsterDataUsers& users) const
 {
     const MonsterCodeReferences& references = GetMonsterCodeReferences();
-    const std::span<const CodeReference> code = references.Find(m_number);
+    const std::span<const CodeReference> code = references.Find(number);
     // Without the sources, code may still name the monster.
-    if (references.IsLoaded() && code.empty() && m_dataUsers.IsEmpty())
+    if (references.IsLoaded() && code.empty() && users.IsEmpty())
     {
         ImGui::TextDisabled("%s", I18N::Editor::NothingUsesTheMonster);
     }
-    RenderDataUsers();
+    RenderDataUsers(users);
     CodeReferenceList::Render(references.IsLoaded(), code,
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheMonsterIsNotKnown);
     if (references.IsLoaded())
@@ -126,23 +175,22 @@ void MonsterRemoveDialog::RenderUses() const
     }
 }
 
-void MonsterRemoveDialog::RenderDataUsers() const
+void MonsterRemoveDialog::RenderDataUsers(const MonsterDataUsers& users) const
 {
     // Quest names are data: arguments, never the format.
-    if (!m_dataUsers.npcOfQuests.empty())
+    if (!users.npcOfQuests.empty())
     {
-        ImGui::BulletText("%s", I18N::Format(I18N::Editor::NPCOfTheQuests0, {Joined(m_dataUsers.npcOfQuests)}).c_str());
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::NPCOfTheQuests0, {Joined(users.npcOfQuests)}).c_str());
     }
-    if (!m_dataUsers.killedInQuests.empty())
+    if (!users.killedInQuests.empty())
     {
-        ImGui::BulletText("%s",
-                          I18N::Format(I18N::Editor::KilledInTheQuests0, {Joined(m_dataUsers.killedInQuests)}).c_str());
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::KilledInTheQuests0, {Joined(users.killedInQuests)}).c_str());
     }
-    if (m_dataUsers.dialogueStates > 0)
+    if (users.dialogueStates > 0)
     {
         ImGui::BulletText(
-            "%s", I18N::Format(I18N::Editor::DialoguesOfTheQuestSystem0, {std::to_string(m_dataUsers.dialogueStates)})
-                      .c_str());
+            "%s",
+            I18N::Format(I18N::Editor::DialoguesOfTheQuestSystem0, {std::to_string(users.dialogueStates)}).c_str());
     }
 }
 } // namespace MuEditor::Monsters

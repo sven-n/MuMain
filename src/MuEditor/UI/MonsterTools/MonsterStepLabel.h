@@ -27,6 +27,16 @@ std::string Model(const std::string& slot, const std::string& what);
 std::string SoundSetOf(const Data::Monsters::MonsterDefinition& monster);
 // A change of a sound set: "Hound (sound set): sound events".
 std::string SoundSet(const std::string& name, const std::string& what);
+// The Monster Browser's number actions (D61): "Add number 600 to Death
+// Centurion", "Copy Death Centurion (336) as 601", "Move Balram (409) to
+// Balram", "Split Death Centurion (175) out of Death Centurion", "Remove
+// Death Centurion with 7 numbers", "Death Centurion (145): maps".
+std::string AddNumber(int number, const std::string& monster);
+std::string CopyNumber(const Data::Monsters::MonsterDefinition& source, int number);
+std::string MoveNumber(const Data::Monsters::MonsterDefinition& number, const std::string& monster);
+std::string SplitNumber(const Data::Monsters::MonsterDefinition& number, const std::string& monster);
+std::string RemoveMonsterWithNumbers(const std::string& monster, int numberCount);
+std::string Maps(const Data::Monsters::MonsterDefinition& number);
 } // namespace MuEditor::Monsters::StepLabel
 
 #endif // _EDITOR

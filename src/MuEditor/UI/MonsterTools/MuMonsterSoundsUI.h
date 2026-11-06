@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "MonsterShownValues.h"
 #include "MonsterSoundEventsEditor.h"
 
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
@@ -51,8 +52,9 @@ private:
     // Shows the set of the selected monster's look once the selection or the
     // look changed, or the set shown is gone.
     void FollowSelection(const Data::Monsters::MonsterDefinition* monster);
-    void RenderMonster(const Data::Monsters::MonsterDefinition& monster);
-    void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
+    // The shown values' sound set and their random variants' (D61).
+    void RenderMonster(const ShownValues::ShownMonster& shown);
+    void RenderVariants(const ShownValues::ShownMonster& shown);
     void RenderSetList();
     void RenderSet(Data::Monsters::MonsterSoundSet& set, const SoundEventsEditor::Context& context);
     void RenderName(const Data::Monsters::MonsterSoundSet& set);

@@ -1,0 +1,247 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "MonsterOwnValues.h"
+
+#include "MonsterEdits.h"
+#include "MonsterStepLabel.h"
+
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "I18N/All.h"
+#include "imgui.h"
+
+#include <algorithm>
+#include <optional>
+#include <set>
+#include <utility>
+
+namespace MuEditor::Monsters::OwnValues
+{
+namespace
+{
+using Data::Monsters::MonsterDefinition;
+using Data::Monsters::MonsterValueField;
+
+// Grey for a shared value, yellow for an own one (Q-MN50).
+constexpr ImVec4 SharedTextColor{0.62f, 0.62f, 0.62f, 1.0f};
+constexpr ImVec4 OwnTextColor{0.95f, 0.75f, 0.25f, 1.0f};
+constexpr ImVec4 OwnFrameColor{0.55f, 0.40f, 0.08f, 0.60f};
+constexpr ImVec4 OwnButtonColor{0.60f, 0.45f, 0.10f, 0.70f};
+
+std::set<std::pair<int, MonsterValueField>>& Unlocked()
+{
+    static std::set<std::pair<int, MonsterValueField>> unlocked;
+    return unlocked;
+}
+
+std::string MonsterName(int number)
+{
+    const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(number);
+    return shared ? shared->names.GetNeutral() : std::string();
+}
+
+// "Attacks: Shared by the 3 numbers of Death Centurion".
+std::string SharedLine(int number, MonsterValueField field)
+{
+    return std::string(GetFieldName(field)) + ": " +
+           I18N::Format(I18N::Editor::SharedByThe0NumbersOf1,
+                        {std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size()), MonsterName(number)});
+}
+
+void RenderSourcesMenu(int number, MonsterValueField field)
+{
+    for (const Source& source : FindSources(number, field))
+    {
+        if (ImGui::MenuItem(source.label.c_str()))
+        {
+            TakeValue(number, field, source);
+        }
+    }
+}
+} // namespace
+
+State GetNumberState(int number, MonsterValueField field)
+{
+    const std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
+    if (!entry || g_MonsterEdits.ReadMonsterNumbers(number).size() < 2)
+    {
+        return State::Plain;
+    }
+    if (!Data::Monsters::HasSameValue(*entry, *g_MonsterEdits.ReadSharedValues(number), field))
+    {
+        return State::Own;
+    }
+    return Unlocked().contains({number, field}) ? State::Unlocked : State::Shared;
+}
+
+State GetState(const ShownValues::ShownMonster& shown, MonsterValueField field)
+{
+    return shown.wholeMonster ? State::Plain : GetNumberState(shown.monster.number, field);
+}
+
+void RenderLine(const ShownValues::ShownMonster& shown, MonsterValueField field)
+{
+    const int number = shown.monster.number;
+    ImGui::PushID(static_cast<int>(field));
+    switch (GetState(shown, field))
+    {
+    case State::Plain:
+        break;
+    case State::Shared:
+        ImGui::TextColored(SharedTextColor, "%s", SharedLine(number, field).c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::MakeItThisNumberSOwn))
+        {
+            Unlock(number, field);
+        }
+        break;
+    case State::Unlocked:
+        ImGui::TextColored(SharedTextColor, "%s", SharedLine(number, field).c_str());
+        break;
+    case State::Own:
+        ImGui::TextColored(OwnTextColor, "%s: %s", GetFieldName(field),
+                           I18N::Format(I18N::Editor::OwnValueOf0, {std::to_string(number)}).c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::BackTo))
+        {
+            ImGui::OpenPopup("##BackTo");
+        }
+        if (ImGui::BeginPopup("##BackTo"))
+        {
+            RenderSourcesMenu(number, field);
+            ImGui::EndPopup();
+        }
+        break;
+    }
+    ImGui::PopID();
+}
+
+void BeginField(State state)
+{
+    if (state == State::Shared)
+    {
+        ImGui::BeginDisabled(true);
+    }
+    else if (state == State::Own)
+    {
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, OwnFrameColor);
+        ImGui::PushStyleColor(ImGuiCol_Button, OwnButtonColor);
+    }
+}
+
+void EndField(State state)
+{
+    if (state == State::Shared)
+    {
+        ImGui::EndDisabled();
+    }
+    else if (state == State::Own)
+    {
+        ImGui::PopStyleColor(2);
+    }
+}
+
+void RenderMenuItems(int number, MonsterValueField field)
+{
+    const State state = GetNumberState(number, field);
+    const std::string prefix = std::string(GetFieldName(field)) + ": ";
+    if (state == State::Shared)
+    {
+        if (ImGui::MenuItem((prefix + I18N::Editor::MakeItThisNumberSOwn).c_str()))
+        {
+            Unlock(number, field);
+        }
+    }
+    else if (state == State::Own && ImGui::BeginMenu((prefix + I18N::Editor::BackTo).c_str()))
+    {
+        RenderSourcesMenu(number, field);
+        ImGui::EndMenu();
+    }
+}
+
+const char* GetFieldName(MonsterValueField field)
+{
+    switch (field)
+    {
+    case MonsterValueField::Names:
+        return I18N::Editor::Name;
+    case MonsterValueField::Kind:
+        return I18N::Editor::Kind;
+    case MonsterValueField::Model:
+        return I18N::Editor::Model;
+    case MonsterValueField::SoundSet:
+        return I18N::Editor::SoundSet;
+    case MonsterValueField::Attacks:
+        return I18N::Editor::Attacks;
+    case MonsterValueField::MapVariants:
+        return I18N::Editor::MapVariants;
+    case MonsterValueField::RandomVariants:
+        return I18N::Editor::RandomVariants;
+    }
+    return "";
+}
+
+std::vector<Source> FindSources(int number, MonsterValueField field)
+{
+    std::vector<Source> sources;
+    const std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
+    const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(number);
+    if (!entry || !shared)
+    {
+        return sources;
+    }
+    const auto offered = [&](const MonsterDefinition& values)
+    {
+        return Data::Monsters::HasSameValue(values, *entry, field) ||
+               std::ranges::any_of(sources, [&](const Source& source)
+                                   { return Data::Monsters::HasSameValue(source.values, values, field); });
+    };
+    if (!offered(*shared))
+    {
+        sources.push_back({I18N::Editor::TheMonsterSValue, *shared});
+    }
+    for (const int other : g_MonsterEdits.ReadMonsterNumbers(number))
+    {
+        const std::optional<MonsterDefinition> values = g_MonsterDataHandler.ReadMonster(other);
+        if (other != number && values && !offered(*values))
+        {
+            sources.push_back({I18N::Format(I18N::Editor::LikeNumber0, {std::to_string(other)}), *values});
+        }
+    }
+    return sources;
+}
+
+bool TakeValue(int number, MonsterValueField field, const Source& source)
+{
+    std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
+    if (!entry)
+    {
+        return false;
+    }
+    Data::Monsters::CopyValue(*entry, source.values, field);
+    const std::string label =
+        I18N::Format(I18N::Editor::StepBackTo, {StepLabel::LogName(*entry), GetFieldName(field), source.label});
+    if (!g_MonsterEdits.SetMonster(label, *entry))
+    {
+        return false;
+    }
+    if (GetNumberState(number, field) != State::Own)
+    {
+        Unlocked().erase({number, field});
+    }
+    return true;
+}
+
+void Unlock(int number, MonsterValueField field)
+{
+    Unlocked().insert({number, field});
+}
+
+void LockAll()
+{
+    Unlocked().clear();
+}
+} // namespace MuEditor::Monsters::OwnValues
+
+#endif // _EDITOR

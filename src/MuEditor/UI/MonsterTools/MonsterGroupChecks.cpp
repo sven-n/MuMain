@@ -1,0 +1,129 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "MonsterGroupChecks.h"
+
+#include "MonsterEdits.h"
+
+#include "../MuEditor/UI/Common/MapPicker.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/GameData/MapData/MapRef.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+
+#include <algorithm>
+#include <bitset>
+#include <optional>
+#include <string>
+
+namespace MuEditor::Monsters::GroupChecks
+{
+namespace
+{
+using Data::Items::ItemDataIssue;
+using Data::Items::ItemDataIssueSeverity;
+using Data::Maps::MapRef;
+using Data::Monsters::MonsterAttacks;
+using Data::Monsters::MonsterDefinition;
+using Data::Monsters::MonsterMapVariant;
+
+// Only the generic pattern: what the P26 numbers have as their own attacks.
+bool IsGenericOnly(const std::optional<MonsterAttacks>& attacks)
+{
+    return attacks && attacks->otherwiseGeneric && attacks->skills.empty() && attacks->monsterSkills.empty();
+}
+
+// The maps of the variant that none of `maps` names.
+std::vector<MapRef> MapsElsewhere(const MonsterMapVariant& variant, const std::vector<MapRef>& maps)
+{
+    std::vector<MapRef> elsewhere;
+    for (const MapRef& map : variant.maps)
+    {
+        if (std::ranges::none_of(maps, [&](const MapRef& on) { return Data::Maps::Overlaps(map, on); }))
+        {
+            elsewhere.push_back(map);
+        }
+    }
+    return elsewhere;
+}
+
+void CheckVariants(int number, const std::vector<MonsterMapVariant>& variants, const std::vector<MapRef>& maps,
+                   const std::string& where, const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    if (maps.empty())
+    {
+        return;
+    }
+    for (size_t index = 0; index < variants.size(); ++index)
+    {
+        const std::vector<MapRef> elsewhere = MapsElsewhere(variants[index], maps);
+        if (elsewhere.empty())
+        {
+            continue;
+        }
+        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, number,
+                          "monster " + std::to_string(number) + " mapVariants[" + std::to_string(index) + "].attacks",
+                          "the map variant plays on " + MapPicker::Describe(elsewhere, "") + ", where " + where +
+                              " does not appear (" + MapPicker::Describe(maps, "") + ")"});
+    }
+}
+
+std::vector<MapRef> MapsOfNumbers(const std::vector<int>& numbers)
+{
+    std::vector<MapRef> maps;
+    for (const int number : numbers)
+    {
+        const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
+        maps.insert(maps.end(), entry->maps.begin(), entry->maps.end());
+    }
+    std::ranges::sort(maps);
+    maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
+    return maps;
+}
+} // namespace
+
+void Validate(std::vector<ItemDataIssue>& issues)
+{
+    const std::string source = Data::Monsters::GetMonstersFile().generic_string();
+    std::bitset<Data::Monsters::MonsterNumberCount> checked;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (checked[static_cast<std::size_t>(number)] || g_MonsterDatabase.Find(number) == nullptr)
+        {
+            continue;
+        }
+        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
+        for (const int member : numbers)
+        {
+            checked.set(static_cast<std::size_t>(member));
+        }
+        const MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(number);
+        const std::string name = shared.names.GetNeutral();
+        // The shared variants, once for the monster: on the maps of all its
+        // numbers.
+        CheckVariants(numbers.front(), shared.mapVariants, MapsOfNumbers(numbers),
+                      numbers.size() > 1 ? "no number of " + name : "the monster", source, issues);
+        if (numbers.size() < 2)
+        {
+            continue;
+        }
+        for (const int member : numbers)
+        {
+            const MonsterDefinition& entry = *g_MonsterDatabase.Find(member);
+            if (entry.mapVariants != shared.mapVariants)
+            {
+                CheckVariants(member, entry.mapVariants, entry.maps, "the number", source, issues);
+            }
+            if (entry.attacks != shared.attacks && shared.attacks && IsGenericOnly(entry.attacks))
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, member,
+                                  "monster " + std::to_string(member) + " attacks",
+                                  "has the generic pattern as its own attacks, while " + name +
+                                      " has attacks: it attacks as in the original game (P26)"});
+            }
+        }
+    }
+}
+} // namespace MuEditor::Monsters::GroupChecks
+
+#endif // _EDITOR

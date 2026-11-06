@@ -3,6 +3,8 @@
 #ifdef _EDITOR
 
 #include "MonsterAttackPreview.h"
+#include "MonsterOwnValues.h"
+#include "MonsterShownValues.h"
 
 #include "../MuEditor/UI/ItemTools/ItemEditDraft.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
@@ -20,6 +22,9 @@ namespace MuEditor::Monsters
 // change is an undo step of the monster tools and reaches the monsters'
 // next attack. Play plays an entry's animation in the Monster Preview, Play
 // next attack the animation the next other attack plays.
+// A monster with several numbers as a whole edits the attacks its numbers
+// share; a number's shared attacks are locked until they are made its own
+// (Q-MN96).
 class MuMonsterAttacksUI
 {
 public:
@@ -39,7 +44,7 @@ public:
     void ShowMapVariant(int monster, std::optional<int> variant);
 
 private:
-    using MonsterDraft = Items::ItemEditDraft<Data::Monsters::MonsterDefinition>;
+    using MonsterDraft = Items::ItemEditDraft<ShownValues::ShownMonster>;
 
     MuMonsterAttacksUI();
 
@@ -67,8 +72,15 @@ private:
     // A combo of the animations the model has (with a speed above 0) and
     // none; true when one was picked.
     bool AnimationCombo(const char* id, int& animation, int modelSlot);
+    // "Death Centurion (145): attacks", or "(3 numbers)" for a whole monster.
+    std::string AttacksLabel() const;
 
     MonsterDraft m_draft;
+    // The shown values while the tool draws them, and the states of their
+    // attacks and map variants.
+    const ShownValues::ShownMonster* m_shown = nullptr;
+    OwnValues::State m_attacksState = OwnValues::State::Plain;
+    OwnValues::State m_variantsState = OwnValues::State::Plain;
     int m_newMonsterSkill = 0;
     int m_newSkill = 0;
     // The text of the sound field while it is edited, and whether the last

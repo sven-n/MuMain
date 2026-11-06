@@ -219,10 +219,20 @@ std::vector<LanguageImport> Import(const std::filesystem::path& clientFolder, st
                                    std::span<const Data::LegacyLanguage> languages)
 {
     std::vector<LanguageImport> results;
-    g_MonsterEdits.BeginGroup(std::move(label));
+    g_MonsterEdits.BeginGroup(label);
     for (const Data::LegacyLanguage& language : languages)
     {
         results.push_back(ImportLanguage(clientFolder, language));
+    }
+    // The files name each number: names all numbers of a monster got alike
+    // are the monster's again (D61), not an own copy in each number.
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
+        if (numbers.size() > 1 && numbers.front() == number)
+        {
+            g_MonsterEdits.ShareEqualValues(label, number, Data::Monsters::MonsterValueField::Names);
+        }
     }
     g_MonsterEdits.EndGroup();
     return results;
