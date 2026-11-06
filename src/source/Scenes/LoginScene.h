@@ -10,7 +10,8 @@ void CreateLogInScene();
 void NewMoveLogInScene();
 bool NewRenderLogInScene(HDC hDC);
 
-// The login screen's music, asked for every frame: the credits' theme while they are open, the login theme otherwise.
+// The login screen's music, asked for every frame: the credits' theme while they are open, the login theme
+// otherwise and on the frame a login goes through, so the character select keeps the login theme.
 void PlayLogInSceneMusic();
 
 // Camera animation

@@ -409,4 +409,24 @@ TEST_SUITE("Game login scene link")
         const std::vector<std::string> expected{MUSIC_LOGIN_THEME, MUSIC_MUTHEME, MUSIC_LOGIN_THEME};
         CHECK(music.log.starts == expected);
     }
+
+    TEST_CASE("a login that goes through with the credits open takes the login theme to the character select")
+    {
+        LoginScreen screen;
+        MusicScope music;
+
+        // The login was sent, and the credits were opened before its answer came.
+        CurrentProtocolState = REQUEST_LOG_IN;
+        g_CreditWin.mu::ui::window::CObject::Show(true);
+        PlayLogInSceneMusic();
+        PlayLogInSceneMusic();
+
+        // The answer: this frame leaves for the character select, which asks for no music of its own and
+        // hides the credits. The loading screen after it stops only the login theme.
+        CurrentProtocolState = RECEIVE_LOG_IN_SUCCESS;
+        PlayLogInSceneMusic();
+
+        const std::vector<std::string> expected{MUSIC_MUTHEME, MUSIC_LOGIN_THEME};
+        CHECK(music.log.starts == expected);
+    }
 }

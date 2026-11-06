@@ -329,9 +329,13 @@ static void UpdateLogInSceneView()
 
 void PlayLogInSceneMusic()
 {
-    // The credits have their own theme. Tracks loop; asking every frame also starts the track once the music is
+    // The credits have their own theme. A login that went through leaves for the character select this frame,
+    // and that screen asks for no music of its own: it keeps the login theme, also when the credits were opened
+    // while the login was on its way. Tracks loop; asking every frame also starts the track once the music is
     // switched on. A no-op while it plays.
-    ::PlayMp3(g_CreditWin.IsVisible() ? MUSIC_MUTHEME : MUSIC_LOGIN_THEME);
+    const bool leavingForCharacterSelect = CurrentProtocolState == RECEIVE_LOG_IN_SUCCESS;
+    const bool creditsPlay = g_CreditWin.IsVisible() && !leavingForCharacterSelect;
+    ::PlayMp3(creditsPlay ? MUSIC_MUTHEME : MUSIC_LOGIN_THEME);
 }
 
 void NewMoveLogInScene()
