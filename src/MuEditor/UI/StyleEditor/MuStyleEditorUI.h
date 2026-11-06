@@ -20,8 +20,8 @@
 // fields of the picked line, the problems of the look as it is now (Apply is off while a fatal one is left) and the
 // items that use it. Above them, staying where it is while they scroll, a preview of the item picked in the item tools:
 // the look as applied beside the look as the fields have it, before it is applied, with one camera, the time stopped
-// or moving, an eye per layer (for the edited one) and "Draw as: doppelganger". Apply lists the items a change reaches (D26). The changes are steps of the editor's look history
-// (LookEdits); Save writes the file.
+// or moving, an eye per layer (for the edited one) and "Draw as: doppelganger". Apply lists the items a change reaches
+// (D26). The changes are item edits (L39): one undo history with the item tools, and Save Items writes the file.
 class CMuStyleEditorUI
 {
 public:
@@ -110,8 +110,6 @@ private:
     // The look Copy and Rename start from.
     std::string m_nameFrom;
     std::vector<int> m_confirmUsers;
-    std::string m_status;
-    bool m_statusIsError = false;
 };
 
 #define g_MuStyleEditorUI CMuStyleEditorUI::GetInstance()

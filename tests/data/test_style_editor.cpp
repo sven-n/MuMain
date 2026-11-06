@@ -17,6 +17,7 @@
 #include "Render/Items/ItemRenderStyles.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/StyleEditor/LookEdits.h"
 #include "UI/StyleEditor/MuStyleEditorUI.h"
@@ -37,7 +38,8 @@ using Data::Looks::LookDefinition;
 
 namespace
 {
-// The looks of the editor and of the game for one test, and the ones before it again after it.
+// The looks of the editor and of the game for one test, with nothing to undo and nothing to save, and the ones before
+// it again after it.
 class LookEditsScope
 {
 public:
@@ -46,9 +48,13 @@ public:
                      Data::Looks::g_LookStore.GetRenderStyles().end())
     {
         g_LookEdits.ResetForTest({std::move(looks), std::move(folders)});
+        g_ItemEdits.GetHistory().Clear();
+        g_ItemEdits.GetHistory().MarkSaved();
     }
     ~LookEditsScope()
     {
+        g_ItemEdits.GetHistory().Clear();
+        g_ItemEdits.GetHistory().MarkSaved();
         g_LookEdits.ResetForTest({m_previous, {}});
     }
     LookEditsScope(const LookEditsScope&) = delete;
@@ -78,7 +84,7 @@ void RenderStyleEditor()
 }
 } // namespace
 
-TEST_CASE("The Style Editor's changes of a look reach the game at once and are undo steps [editor][looks]")
+TEST_CASE("The Style Editor's changes of a look reach the game at once and are item edits (design L39) [editor][looks]")
 {
     const LookEditsScope looks({Plain("brightBlade")});
     LookDefinition glowing = Plain("brightBlade");
@@ -87,21 +93,30 @@ TEST_CASE("The Style Editor's changes of a look reach the game at once and are u
     g_LookEdits.SetLook("Change a look", "brightBlade", glowing);
     REQUIRE(GameLook("brightBlade") != nullptr);
     CHECK(GameLook("brightBlade")->layers[0].blend == Blend::Glow);
-    CHECK(g_LookEdits.HasUnsavedChanges());
-    CHECK(g_LookEdits.GetUndoLabel() == "Change a look");
+    // A step of the item tools' history, which Save Items saves.
+    CHECK(g_ItemEdits.GetHistory().IsModifiedSinceSave());
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change a look");
 
-    g_LookEdits.Undo();
+    CHECK(g_ItemEdits.Undo());
     CHECK(GameLook("brightBlade")->layers[0].blend == Blend::Normal);
-    CHECK_FALSE(g_LookEdits.HasUnsavedChanges());
-    CHECK(g_LookEdits.GetRedoLabel() == "Change a look");
+    CHECK_FALSE(g_ItemEdits.GetHistory().IsModifiedSinceSave());
+    CHECK(g_ItemEdits.GetHistory().GetRedoLabel() == "Change a look");
 
-    g_LookEdits.Redo();
+    CHECK(g_ItemEdits.Redo());
     CHECK(GameLook("brightBlade")->layers[0].blend == Blend::Glow);
 
     // A step that changes nothing is none.
-    g_LookEdits.Undo();
+    CHECK(g_ItemEdits.Undo());
     g_LookEdits.SetLook("Change a look", "brightBlade", Plain("brightBlade"));
-    CHECK_FALSE(g_LookEdits.CanUndo());
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // A look and an item changed together are one step.
+    g_ItemEdits.BeginGroup("Only this item");
+    g_LookEdits.AddLook("Only this item", Plain("brightBladeGold"), {});
+    g_ItemEdits.EndGroup();
+    CHECK(GameLook("brightBladeGold") != nullptr);
+    CHECK(g_ItemEdits.Undo());
+    CHECK(GameLook("brightBladeGold") == nullptr);
 }
 
 TEST_CASE("A look added, renamed or removed in the Style Editor takes its place in the folders along [editor][looks]")
@@ -124,9 +139,9 @@ TEST_CASE("A look added, renamed or removed in the Style Editor takes its place 
     CHECK(g_LookEdits.GetState().folders == std::vector<ColorFolder>{{"Blades", {}, {"c"}}});
     CHECK(GameLook("b") == nullptr);
 
-    g_LookEdits.Undo();
-    g_LookEdits.Undo();
-    g_LookEdits.Undo();
+    CHECK(g_ItemEdits.Undo());
+    CHECK(g_ItemEdits.Undo());
+    CHECK(g_ItemEdits.Undo());
     CHECK(g_LookEdits.GetState().folders == std::vector<ColorFolder>{{"Blades", {}, {"a"}}});
     CHECK(GameLook("a") != nullptr);
 }
@@ -159,7 +174,7 @@ TEST_CASE("The Style Editor opens on a look of the file with its fields, and on 
     g_MuStyleEditorUI.ShowRenderStyle("brightBlade");
     RenderStyleEditor();
     CHECK(g_MuStyleEditorUI.GetDraft() == plain);
-    g_LookEdits.Undo();
+    CHECK(g_ItemEdits.Undo());
     RenderStyleEditor();
     CHECK(g_MuStyleEditorUI.GetDraft() == look);
 }

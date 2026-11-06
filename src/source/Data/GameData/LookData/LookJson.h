@@ -30,6 +30,8 @@ struct RenderStylesFile
 {
     std::vector<LookDefinition> looks;
     std::vector<Colors::ColorFolder> folders;
+
+    bool operator==(const RenderStylesFile&) const = default;
 };
 
 // Reads a render style file; problems go to `issues`, and a fatal one makes the file unusable. A problem of the folders

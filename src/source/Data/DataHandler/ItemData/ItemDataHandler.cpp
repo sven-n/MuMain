@@ -18,6 +18,9 @@
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
+#include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -600,6 +603,93 @@ void CItemDataHandler::SetGlowColorFolders(std::vector<Data::Colors::ColorFolder
     m_glowColorsChanged = true;
 }
 
+namespace
+{
+std::filesystem::path RenderStylesFilePath()
+{
+    return Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName();
+}
+
+void SortLooks(std::vector<Data::Looks::LookDefinition>& looks)
+{
+    std::ranges::sort(looks, {}, &Data::Looks::LookDefinition::name);
+}
+} // namespace
+
+void CItemDataHandler::ReadRenderStylesOnce()
+{
+    if (m_renderStylesRead)
+    {
+        return;
+    }
+    m_renderStylesRead = true;
+    const std::filesystem::path file = RenderStylesFilePath();
+    const std::string source = file.generic_string();
+    Data::Looks::RenderStylesFile read;
+    if (const std::optional<std::string> text = Data::ReadTextFile(file))
+    {
+        Data::Looks::ReadRenderStylesFile(*text, source, read, m_renderStyleIssues);
+    }
+    else
+    {
+        m_renderStyleIssues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
+                                       ItemDataIssue::NoItem, "", "could not be read"});
+    }
+    m_renderStylesComplete = !HasFatal(m_renderStyleIssues);
+    if (m_renderStylesComplete)
+    {
+        SortLooks(read.looks);
+        m_renderStyles = std::move(read);
+    }
+    else
+    {
+        // The game keeps the looks it read at start.
+        const auto looks = Data::Looks::g_LookStore.GetRenderStyles();
+        m_renderStyles = {{looks.begin(), looks.end()}, {}};
+    }
+    ++m_renderStylesVersion;
+}
+
+const Data::Looks::RenderStylesFile& CItemDataHandler::GetRenderStyles()
+{
+    ReadRenderStylesOnce();
+    return m_renderStyles;
+}
+
+void CItemDataHandler::SetRenderStyles(Data::Looks::RenderStylesFile file)
+{
+    ReadRenderStylesOnce();
+    SortLooks(file.looks);
+    m_renderStyles = std::move(file);
+    Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
+    m_renderStylesChanged = true;
+    ++m_renderStylesVersion;
+}
+
+const std::vector<ItemDataIssue>& CItemDataHandler::GetRenderStyleReadIssues()
+{
+    ReadRenderStylesOnce();
+    return m_renderStyleIssues;
+}
+
+bool CItemDataHandler::CanSaveRenderStyles()
+{
+    ReadRenderStylesOnce();
+    return m_renderStylesComplete;
+}
+
+void CItemDataHandler::ResetRenderStylesForTest(Data::Looks::RenderStylesFile file)
+{
+    SortLooks(file.looks);
+    m_renderStyles = std::move(file);
+    Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
+    m_renderStylesRead = true;
+    m_renderStylesComplete = true;
+    m_renderStyleIssues.clear();
+    m_renderStylesChanged = false;
+    ++m_renderStylesVersion;
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
     std::vector<int> itemTypes;
@@ -790,6 +880,24 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groundLabelsFile = GetGroundLabelsFile();
     models.groundLabels = &g_ItemDatabase.GetGroundLabels();
     models.groundLabelsChanged = m_groundLabelsChanged;
+    // The render style file as the Style Editor changed it (design L39), when the read could use the whole file.
+    if (m_renderStylesChanged && m_renderStylesComplete)
+    {
+        models.renderStylesFile = RenderStylesFilePath();
+        models.renderStylesText = Data::Looks::WriteRenderStylesJson(m_renderStyles.looks, m_renderStyles.folders);
+        models.renderStylesChanged = true;
+        // What the game would refuse is not written.
+        Data::Looks::RenderStylesFile readBack;
+        std::vector<ItemDataIssue> styleIssues;
+        Data::Looks::ReadRenderStylesFile(models.renderStylesText, models.renderStylesFile.generic_string(), readBack,
+                                          styleIssues);
+        const bool fatal = HasFatal(styleIssues);
+        issues.insert(issues.end(), styleIssues.begin(), styleIssues.end());
+        if (fatal)
+        {
+            return ItemDataSaveResult::InvalidData;
+        }
+    }
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 

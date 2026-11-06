@@ -13,7 +13,10 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Common/SourceText.h"
 #include "../MuEditor/UI/Common/ToolGroups.h"
-#include "../MuEditor/UI/Common/ToolWindowFrame.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
+#include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "../MuEditor/UI/ItemTools/ItemUsers.h"
@@ -157,13 +160,9 @@ CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_itemEffects},
 
 void CMuStyleEditorUI::Render(bool* open)
 {
-    if (!g_LookEdits.IsLoaded())
-    {
-        g_LookEdits.Load();
-    }
     m_tree.KeepPickValid();
-    if (MuEditor::ToolWindowFrame::Begin(I18N::Editor::StyleEditor, MuEditor::WindowIds::StyleEditor, open,
-                                         MuEditor::GetItemTools(), g_LookEdits))
+    // One of the item tools (design L39): their docking, undo history and Save Items.
+    if (MuEditor::Items::ToolWindow::Begin(I18N::Editor::StyleEditor, MuEditor::WindowIds::StyleEditor, open))
     {
         const MuEditor::NamedTreeTexts texts = TreeTexts();
         RenderFileBar();
@@ -191,16 +190,12 @@ void CMuStyleEditorUI::Render(bool* open)
 
         m_tree.RunAction();
     }
-    MuEditor::ToolWindowFrame::End();
+    MuEditor::Items::ToolWindow::End();
 }
 
 void CMuStyleEditorUI::ShowRenderStyle(const std::string& name)
 {
     g_MuEditorCore.GetToolWindows().styleEditor = true;
-    if (!g_LookEdits.IsLoaded())
-    {
-        g_LookEdits.Load();
-    }
     if (m_renderStyles.Has(name))
     {
         m_tree.PickEntry(RenderStylesRootIndex, name);
@@ -225,47 +220,17 @@ const LookDefinition* CMuStyleEditorUI::GetPickedFileLook() const
 
 void CMuStyleEditorUI::RenderFileBar()
 {
-    const std::string file =
-        (Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName()).generic_string();
-    // A save after a read that left something out would remove it from the file.
-    ImGui::BeginDisabled(!g_LookEdits.IsComplete());
-    if (ImGui::Button(I18N::Editor::Save))
-    {
-        const bool saved = g_LookEdits.Save();
-        m_status = saved ? I18N::Format(I18N::Editor::SavedTo0, {file}) : I18N::Editor::NotSavedSeeTheProblemsBelow;
-        m_statusIsError = !saved;
-    }
-    ImGui::EndDisabled();
-    if (!g_LookEdits.IsComplete() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-    {
-        ImGui::SetTooltip("%s", I18N::Editor::TheLookFileHasAFatalProblem);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button(I18N::Editor::Revert))
-    {
-        g_LookEdits.Load();
-        m_status.clear();
-    }
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::Reads0AgainUnsavedChangesAreLost, {file}).c_str());
-    }
-    if (g_LookEdits.HasUnsavedChanges())
+    // The looks are item data (design L39): Save Items writes their file with the items.
+    CItemEditorActions::RenderSaveButton();
+    CItemEditorPopups::RenderAll();
+    if (g_ItemEdits.GetHistory().IsModifiedSinceSave())
     {
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
     }
-    if (!m_status.empty())
+    if (!g_LookEdits.IsComplete())
     {
-        ImGui::SameLine();
-        if (m_statusIsError)
-        {
-            ImGui::TextColored(SeverityColor(ItemDataIssueSeverity::Fatal), "%s", m_status.c_str());
-        }
-        else
-        {
-            ImGui::TextDisabled("%s", m_status.c_str());
-        }
+        RenderNote(I18N::Editor::TheLookFileHasAFatalProblem);
     }
 }
 

@@ -154,6 +154,10 @@ struct ItemModelSave
     std::filesystem::path groundLabelsFile;
     const GroundLabelFile* groundLabels = nullptr;
     bool groundLabelsChanged = false;
+    // The text of the render style file (Data/Effects/RenderStyles.json), written when renderStylesChanged.
+    std::filesystem::path renderStylesFile;
+    std::string renderStylesText;
+    bool renderStylesChanged = false;
 #endif
 };
 
