@@ -231,7 +231,6 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 
 #include "Core/Globals/_crypt.h"
 
-inline std::wstring g_strSelectedML = L"";
 // Active logical-to-window transform. Screen overlays use full-window scale;
 // panel UI uses centered, capped scale plus offsets.
 inline float g_fScreenRate_x = 0;

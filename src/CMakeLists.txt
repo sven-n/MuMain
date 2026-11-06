@@ -777,7 +777,8 @@ set_source_files_properties(
 # MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
 # that uses the header, and the linker takes it from whichever object of MuClient defines it, with everything that
 # object uses. Keep such variables out of stdafx.h's headers, or a test that links MuClient without Winmain.cpp fails
-# to link (unresolved g_hWnd and the like).
+# to link (unresolved g_hWnd and the like). In a Debug build a std::string or std::wstring counts too: its debug
+# iterator support allocates.
 target_precompile_headers(MuClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/App/stdafx.h")
 set(MU_SOURCES_WITHOUT_STDAFX "")
 foreach(source IN LISTS MU_CLIENT_SOURCES)
