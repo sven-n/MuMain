@@ -30,6 +30,7 @@ public:
     void AddSeparator(void);
     void WriteLogBegin(void);
     void WriteCurrentTime(BOOL bLineShift = TRUE);
+    void WriteBuildCommit(void);
 
     void WriteSystemInfo(ER_SystemInfo* si);
     void WriteOpenGLInfo(void);

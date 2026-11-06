@@ -13,7 +13,7 @@
 #include "Scenes/SceneManager.h"
 #include "World/MapInfra/MapManager.h"
 
-// The control-socket build records the commit it was built from.
+// The build records the commit it was built from.
 #if __has_include("MuGitCommit.h")
 #include "MuGitCommit.h"
 #endif

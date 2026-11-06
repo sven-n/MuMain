@@ -1,6 +1,7 @@
-# Writes the git commit of the source tree into OUTPUT, for the control
-# socket's `ping`: which client a test run tested. Runs on every build, but
-# writes only when the content changed, so an unchanged commit rebuilds nothing.
+# Writes the git commit of the source tree into OUTPUT, for MuError.log (which
+# client a bug report came from) and the control socket's `ping` (which client a
+# test run tested). Runs on every build, but writes only when the content
+# changed, so an unchanged commit rebuilds nothing.
 #
 #   cmake -DSOURCE_DIR=<repo> -DOUTPUT=<header> -P WriteGitCommit.cmake
 

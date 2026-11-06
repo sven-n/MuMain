@@ -1941,6 +1941,7 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng", fileVersion[0],
                         fileVersion[1], fileVersion[2], fileVersion[3]);
+    g_ErrorReport.WriteBuildCommit();
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
                           fileVersion[2], fileVersion[3]);
 

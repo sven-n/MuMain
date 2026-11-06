@@ -13,6 +13,7 @@
 #endif
 #include "ErrorReport.h"
 #include "Core/Platform/Audio/AudioDeviceNames.h"
+#include "MuGitCommit.h"
 #include "Render/Renderer/MuRenderer.h"
 
 #include <string>
@@ -109,6 +110,13 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
     {
         g_ErrorReport.Write(L"\r\n");
     }
+}
+
+// The commit tells which source a reported client was built from, so an old build is easy to spot.
+void CErrorReport::WriteBuildCommit(void)
+{
+    const bool hasLocalChanges = MU_GIT_COMMIT_CHANGED != 0;
+    Write(L"Build commit \t\t: %hs%ls\r\n", MU_GIT_COMMIT, hasLocalChanges ? L" (with local changes)" : L"");
 }
 
 void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
