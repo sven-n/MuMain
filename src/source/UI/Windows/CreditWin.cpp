@@ -6,7 +6,6 @@
 #include "UI/Windows/CreditWin.h"
 #include "Core/Utilities/FileHandle.h"
 #include "Core/Input/Input.h"
-#include "Core/Globals/_enum.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -193,12 +192,10 @@ bool CCreditWin::Render()
 
 void CCreditWin::CloseWin()
 {
+    // The login scene switches back to the login theme (PlayLogInSceneMusic).
     Show(false);
 
     LoginSceneReconnect::Instance().RequestServerList();
-
-    ::StopMp3(MUSIC_MUTHEME);
-    ::PlayMp3(MUSIC_MAIN_THEME);
 }
 
 void CCreditWin::Init()
