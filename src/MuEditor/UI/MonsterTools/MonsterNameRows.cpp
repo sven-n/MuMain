@@ -5,6 +5,7 @@
 #include "MonsterNameRows.h"
 
 #include "MonsterEdits.h"
+#include "MonsterOwnValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownValues.h"
 #include "MonsterStepLabel.h"
@@ -32,6 +33,13 @@ using ShownValues::WholeMonsterKey;
 int NumberOf(int id)
 {
     return id >= WholeMonsterKey ? id - WholeMonsterKey : id;
+}
+
+// A number of a monster with several numbers has a row of its own when its
+// names are its own (Q-MN50); else they are in its monster's row.
+bool HasOwnRow(int number)
+{
+    return OwnValues::GetNumberState(number, Data::Monsters::MonsterValueField::Names) == OwnValues::State::Own;
 }
 } // namespace
 
@@ -85,10 +93,9 @@ std::vector<MonsterNameRows::Row> MonsterNameRows::CollectRows() const
         rows.push_back({numbers.front() + WholeMonsterKey, shared});
         for (const int member : numbers)
         {
-            const MonsterDefinition* own = g_MonsterDatabase.Find(member);
-            if (own->names != shared.names)
+            if (HasOwnRow(member))
             {
-                rows.push_back({member, *own});
+                rows.push_back({member, *g_MonsterDatabase.Find(member)});
             }
         }
     }
@@ -196,13 +203,15 @@ void MonsterNameRows::CommitName(int id, const char* locale, const char* text)
 int MonsterNameRows::GetSelected() const
 {
     const int number = g_MonsterSelection.GetNumber();
-    if (g_MonsterSelection.IsWholeMonster())
+    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
+    if (numbers.size() < 2)
     {
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-        if (numbers.size() > 1)
-        {
-            return numbers.front() + WholeMonsterKey;
-        }
+        return number;
+    }
+    // A number that shares its monster's names is shown in the monster's row.
+    if (g_MonsterSelection.IsWholeMonster() || !HasOwnRow(number))
+    {
+        return numbers.front() + WholeMonsterKey;
     }
     return number;
 }

@@ -300,6 +300,11 @@ TEST_CASE("Monster Translations rows: a monster with several numbers is translat
     CHECK(Entry(336).names.Get("de") == "Todeszenturio");
     CHECK(rows.FindNames(whole)->Get("de") == "Todeszenturio");
 
+    // A number that shares the names (selected in the Browser) is in its
+    // monster's row.
+    g_MonsterSelection.Select(175);
+    CHECK(rows.GetSelected() == whole);
+
     // 175 with a name of its own gets a row after its monster's.
     MonsterDefinition own = Entry(175);
     own.names.Set("en", "Rogue Centurion");
