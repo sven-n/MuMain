@@ -8,6 +8,7 @@
         "en": "Mace",
         "de": "Streitkolben",
         "es": "Maza",
+        "pl": "Buława",
         "pt": "Maça"
       },
       "width": 1,
@@ -37,6 +38,7 @@
         "en": "Morning Star",
         "de": "Morgenstern",
         "es": "Estrella del Alba",
+        "pl": "Morgenstern",
         "pt": "Estrela da manhã"
       },
       "width": 1,
@@ -67,6 +69,7 @@
         "en": "Flail",
         "de": "Flegel",
         "es": "Mayal",
+        "pl": "Cep bojowy",
         "pt": "Mangual"
       },
       "width": 1,
@@ -97,6 +100,7 @@
         "en": "Great Hammer",
         "de": "Großartiger Hammer",
         "es": "Gran Martillo",
+        "pl": "Wielki młot",
         "pt": "Martelo grande"
       },
       "width": 2,
@@ -127,6 +131,7 @@
         "en": "Crystal Morning Star",
         "de": "Kristallmorgenstern",
         "es": "Estrella del Alba de Cristal",
+        "pl": "Kryształowy morgenstern",
         "pt": "Estrela da manhã de cristal"
       },
       "width": 2,
@@ -159,6 +164,7 @@
         "en": "Crystal Sword",
         "de": "Kristallschwert",
         "es": "Espada de Cristal",
+        "pl": "Kryształowy miecz",
         "pt": "Espada de cristal"
       },
       "width": 2,
@@ -191,6 +197,7 @@
         "en": "Chaos Dragon Axe",
         "de": "Chaos-Drachenaxt",
         "es": "Hacha Dragón del Caos",
+        "pl": "Topór Smoka Chaosu",
         "pt": "Machado do dragão do caos"
       },
       "width": 2,
@@ -221,6 +228,7 @@
         "en": "Elemental Mace",
         "de": "Elementarstreitkolben",
         "es": "Maza Elemental",
+        "pl": "Buława żywiołów",
         "pt": "Maça elemental"
       },
       "width": 1,
@@ -248,6 +256,7 @@
         "en": "Battle Scepter",
         "de": "Kampfzepter",
         "es": "Cetro de Batalla",
+        "pl": "Berło bojowe",
         "pt": "Cetro de batalha"
       },
       "tags": ["sceptre"],
@@ -278,6 +287,7 @@
         "en": "Master Scepter",
         "de": "Meisterzepter",
         "es": "Cetro Maestro",
+        "pl": "Berło Mistrza",
         "pt": "Cetro do mestre"
       },
       "tags": ["sceptre"],
@@ -308,6 +318,7 @@
         "en": "Great Scepter",
         "de": "Großartiges Zepter",
         "es": "Gran Cetro",
+        "pl": "Wielkie berło",
         "pt": "Grande cetro"
       },
       "tags": ["sceptre"],
@@ -338,6 +349,7 @@
         "en": "Lord Scepter",
         "de": "Lordzepter",
         "es": "Cetro del Señor",
+        "pl": "Berło Lorda",
         "pt": "Cetro do Lorde"
       },
       "tags": ["sceptre"],
@@ -368,6 +380,7 @@
         "en": "Great Lord Scepter",
         "de": "Großartiges Lordzepter",
         "es": "Gran Cetro del Señor",
+        "pl": "Berło Wielkiego Lorda",
         "pt": "Grande cetro do Lorde"
       },
       "tags": ["sceptre"],
@@ -398,6 +411,7 @@
         "en": "Divine Scepter of Archangel",
         "de": "Göttliches Zepter des Erzengels",
         "es": "Cetro Divino de Arcángel",
+        "pl": "Boskie Berło Archanioła",
         "pt": "Cetro divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "sceptre", "valuable"],
@@ -443,6 +457,7 @@
         "en": "Soleil Sceptor",
         "de": "Sonnenzepter",
         "es": "Cetro Soleil",
+        "pl": "Berło Soleil",
         "pt": "Cetro Soleil"
       },
       "tags": ["sceptre"],
@@ -474,6 +489,7 @@
         "en": "Shining Scepter",
         "de": "Strahlendes Zepter",
         "es": "Cetro Brillante",
+        "pl": "Lśniące berło",
         "pt": "Cetro brilhante"
       },
       "tags": ["sceptre"],
@@ -503,6 +519,7 @@
         "en": "Frost Mace",
         "de": "Froststreitkolben",
         "es": "Mazo Congelado",
+        "pl": "Mroźna buława",
         "pt": "Maça de gelo"
       },
       "width": 1,
@@ -531,6 +548,7 @@
         "en": "Absolute Scepter",
         "de": "Absolutes Zepter",
         "es": "Cetro Absoluto",
+        "pl": "Absolutne berło",
         "pt": "Cetro absoluto"
       },
       "tags": ["sceptre"],
@@ -561,6 +579,7 @@
         "en": "Striker Scepter",
         "de": "Stürmerzepter",
         "es": "Cero Ariete",
+        "pl": "Berło Uderzenia",
         "pt": "Cetro golpeador"
       },
       "tags": ["sceptre"],

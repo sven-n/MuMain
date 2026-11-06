@@ -8,6 +8,7 @@
         "en": "Small Axe",
         "de": "Kleine Axt",
         "es": "Hacha Pequeña",
+        "pl": "Mały topór",
         "pt": "Machado pequeno"
       },
       "width": 1,
@@ -40,6 +41,7 @@
         "en": "Hand Axe",
         "de": "Handaxt",
         "es": "Hacha de Mano",
+        "pl": "Toporek",
         "pt": "Machado de mão"
       },
       "width": 1,
@@ -72,6 +74,7 @@
         "en": "Double Axe",
         "de": "Doppelaxt",
         "es": "Hacha Doble",
+        "pl": "Podwójny topór",
         "pt": "Machado duplo"
       },
       "width": 1,
@@ -101,6 +104,7 @@
         "en": "Tomahawk",
         "de": "Tomahawk",
         "es": "Tomahawk",
+        "pl": "Tomahawk",
         "pt": "Machadinha"
       },
       "width": 1,
@@ -131,6 +135,7 @@
         "en": "Elven Axe",
         "de": "Elfenaxt",
         "es": "Hacha de los Elfos",
+        "pl": "Elfi topór",
         "pt": "Machado élfico"
       },
       "width": 1,
@@ -161,6 +166,7 @@
         "en": "Battle Axe",
         "de": "Kampfaxt",
         "es": "Hacha de Batalla",
+        "pl": "Topór bojowy",
         "pt": "Machado de batalha"
       },
       "width": 2,
@@ -191,6 +197,7 @@
         "en": "Nikea Axe",
         "de": "Nikea-Axt",
         "es": "Hacha Nikea",
+        "pl": "Topór Nikei",
         "pt": "Machado de Nikea"
       },
       "width": 2,
@@ -221,6 +228,7 @@
         "en": "Larkan Axe",
         "de": "Larkan-Axt",
         "es": "Hacha Larkan",
+        "pl": "Topór Larkana",
         "pt": "Machado de Larkan"
       },
       "width": 2,
@@ -250,6 +258,7 @@
         "en": "Crescent Axe",
         "de": "Halbmondaxt",
         "es": "Hacha Medialuna",
+        "pl": "Topór półksiężyca",
         "pt": "Machado crescente"
       },
       "width": 2,
