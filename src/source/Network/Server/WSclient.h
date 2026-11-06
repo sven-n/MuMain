@@ -2810,7 +2810,7 @@ typedef struct
     char		GameId[MAX_USERNAME_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
-    SERVER_CLASS_TYPE		btClass;
+    BYTE btClass; // OpenMU evolution:line nibbles; see DecodeIllusionTempleClass.
     int			nAddExp;
 } PMSG_CURSED_TEMPLE_USER_ADD_EXP, * LPPMSG_CURSED_TEMPLE_USER_ADD_EXP;
 

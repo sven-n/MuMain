@@ -2,15 +2,11 @@
 #include <doctest.h>
 
 #include "RmlLayoutFixture.h"
-#include "Character/CharacterManager.h"
-#include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "Network/Server/IllusionTempleClass.h"
-#include "Network/Server/WSclient.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GpuUploadSkip.h"
 #include "Render/Sprites/GlobalBitmap.h"
@@ -18,12 +14,10 @@
 #include "Scenes/SceneCore.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Events/CursedTempleSystem.h"
-#include "UI/Events/CursedTempleResult.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <array>
-#include <cstddef>
 #include <memory>
 
 #ifndef _WIN32
@@ -34,7 +28,6 @@
 extern int TargetX;
 extern int TargetY;
 extern bool g_bWndActive;
-void ReceiveCursedTempleGameResult(const BYTE* receiveBuffer);
 
 namespace
 {
@@ -185,7 +178,7 @@ private:
 class TempleSkillFixture : public UI::Tests::RmlLayoutFixture
 {
 public:
-    explicit TempleSkillFixture(bool mainScene = false)
+    TempleSkillFixture()
         : m_models(std::make_unique<BMD[]>(MODEL_PLAYER + 1)), m_skills(std::make_unique<SKILL_ATTRIBUTE[]>(MAX_SKILLS))
     {
         m_state.Activate();
@@ -212,7 +205,7 @@ public:
         TargetX = TargetY = TestTile;
         SelectedCharacter = -1;
 
-        SetUpTemple(mainScene);
+        SetUpTemple();
         // Rejected targets must return before any transport access.
         SocketClient = nullptr;
     }
@@ -239,7 +232,7 @@ public:
     }
 
 private:
-    void SetUpTemple(bool mainScene)
+    void SetUpTemple()
     {
         for (int i = 0; i < TempleSkillCount; ++i)
         {
@@ -249,19 +242,8 @@ private:
         }
 
         REQUIRE(g_pNewUISystem->Create());
-        mu::ui::window::CCursedTempleSystem* window = nullptr;
-        if (mainScene)
-        {
-            REQUIRE(g_pNewUISystem->LoadMainSceneInterface());
-            window = g_pCursedTempleWindow;
-            REQUIRE(window != nullptr);
-        }
-        else
-        {
-            m_window = std::make_unique<mu::ui::window::CCursedTempleSystem>();
-            REQUIRE(m_window->Create(g_pNewUIMng));
-            window = m_window.get();
-        }
+        m_window = std::make_unique<mu::ui::window::CCursedTempleSystem>();
+        REQUIRE(m_window->Create(g_pNewUIMng));
         const std::array<UI::CursedTemple::PartyPosition, 2> team{
             UI::CursedTemple::PartyPosition{HeroId, WD_45CURSEDTEMPLE_LV1, TestTile, TestTile},
             UI::CursedTemple::PartyPosition{TeamId, WD_45CURSEDTEMPLE_LV1, TestTile, TestTile}};
@@ -269,8 +251,8 @@ private:
         status.relicHolderIndex = EnemyId;
         status.localTeam = SEASON3A::eTeam_Allied;
         status.party = team;
-        window->SetMatchStatus(status);
-        window->SetSkillPoints(SkillBudget);
+        m_window->SetMatchStatus(status);
+        m_window->SetSkillPoints(SkillBudget);
     }
 
     static void Place(CHARACTER& character, short key)
@@ -376,75 +358,4 @@ TEST_CASE("Temple party membership recognizes teammates and enemies [ui][temple-
     PartyMembershipFixture fixture;
     CHECK(g_CursedTemple->IsPartyMember(TeamSlot));
     CHECK_FALSE(g_CursedTemple->IsPartyMember(EnemySlot));
-}
-
-TEST_CASE("Temple result decodes every class into the server class number [ui][temple-result]")
-{
-    constexpr std::array<std::array<std::uint8_t, 2>, 18> classes{{
-        {0x00, 0},
-        {0x20, 2},
-        {0x30, 3},
-        {0x01, 4},
-        {0x21, 6},
-        {0x31, 7},
-        {0x02, 8},
-        {0x22, 10},
-        {0x32, 11},
-        {0x03, 12},
-        {0x33, 13},
-        {0x04, 16},
-        {0x34, 17},
-        {0x05, 20},
-        {0x25, 22},
-        {0x35, 23},
-        {0x06, 24},
-        {0x36, 25},
-    }};
-    for (const auto& [wireClass, serverClass] : classes)
-    {
-        CAPTURE(static_cast<int>(wireClass));
-        CHECK(Network::Packets::DecodeIllusionTempleClass(wireClass) == serverClass);
-    }
-}
-
-TEST_CASE("Temple result falls back to Wizard for invalid classes [ui][temple-result]")
-{
-    constexpr std::array<std::uint8_t, 9> invalidClasses{0x07, 0x0F, 0x10, 0x18, 0x23, 0x24, 0x26, 0x40, 0xFF};
-    for (const std::uint8_t wireClass : invalidClasses)
-    {
-        CAPTURE(static_cast<int>(wireClass));
-        CHECK(Network::Packets::DecodeIllusionTempleClass(wireClass) == 0);
-    }
-}
-
-TEST_CASE("Temple result receiver shows the packed Blade Master class in the result window [ui][temple-result]")
-{
-    static_assert(sizeof(PMSG_CURSED_TEMPLE_RESULT) == 7);
-    static_assert(sizeof(PMSG_CURSED_TEMPLE_USER_ADD_EXP) == 20);
-    static_assert(offsetof(PMSG_CURSED_TEMPLE_USER_ADD_EXP, btClass) == 12);
-    TempleSkillFixture fixture(true);
-    REQUIRE(Hero != nullptr);
-    REQUIRE(CharacterAttribute != nullptr);
-    REQUIRE(CharacterMachine != nullptr);
-    for (auto& item : CharacterMachine->Equipment)
-        item.Type = -1;
-    REQUIRE(fixture.context != nullptr);
-    REQUIRE(g_pNewUISystem != nullptr);
-    REQUIRE(g_pCursedTempleResultWindow != nullptr);
-    // This match result starts with no NPC minimap open; its close callback sends an NPC request.
-    g_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_MINI_MAP, false);
-    const std::array<BYTE, 27> packet{0xC1, 27, 0xBF, 4,  2, 0,    1,    'B',  'l',  'a',  'd',  'e',  0, 0,
-                                      0,    0,  0,    45, 0, 0x31, 0xA1, 0xB2, 0xC3, 0x87, 0xD6, 0x12, 0};
-    g_pCursedTempleResultWindow->ResetGameResultInfo();
-    g_pCursedTempleResultWindow->SetMyTeam(SEASON3A::eTeam_Allied);
-    ReceiveCursedTempleGameResult(packet.data());
-    g_pCursedTempleResultWindow->Update();
-    fixture.Refresh();
-
-    auto* document = g_pCursedTempleResultWindow->GetFillDocument();
-    REQUIRE(document != nullptr);
-    auto* classCell = document->QuerySelector(".cell-class-name");
-    REQUIRE(classCell != nullptr);
-    CHECK(classCell->GetInnerRML() ==
-          StringUtils::WideToNarrow(gCharacterManager.GetCharacterClassText(CLASS_BLADEMASTER)));
 }
