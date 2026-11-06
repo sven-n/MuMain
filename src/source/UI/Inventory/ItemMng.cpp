@@ -6,8 +6,37 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Network/Server/SocketSystem.h"
 
+#include <algorithm>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+// The byte at `index` of an item's data, 0 past its end: an item cut short reads as one without the missing options.
+BYTE ItemByteAt(std::span<const BYTE> itemData, size_t index)
+{
+    return index < itemData.size() ? itemData[index] : 0;
+}
+
+// The socket byte at `index` (the bonus option in the high half, the socket count in the low half) and one byte per
+// socket after it. The count has room for 15, but an item has at most MAX_SOCKETS sockets: the first ones are kept, and
+// no more than the bytes there are.
+void ReadSockets(std::span<const BYTE> itemData, size_t index, ItemCreationParams& params)
+{
+    const BYTE socketByte = ItemByteAt(itemData, index);
+    params.SocketBonusOption = (socketByte >> 4) & 0xF;
+
+    const size_t first = index + 1;
+    const size_t present = itemData.size() > first ? itemData.size() - first : 0;
+    const size_t count = std::min({static_cast<size_t>(socketByte & 0xF), static_cast<size_t>(MAX_SOCKETS), present});
+    params.SocketCount = static_cast<BYTE>(count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        params.SocketOptions[i] = itemData[first + i];
+    }
+}
+} // namespace
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
 {
@@ -24,44 +53,44 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
     params.WithLuck = flags & ItemOptionFlags::HasLuck;
     params.WithSkill = flags & ItemOptionFlags::HasSkill;
 
-    int offset = 0;
+    size_t offset = 0;
     if (flags & ItemOptionFlags::HasOption)
     {
-        params.OptionLevel = itemData[5] & 0xF;
-        params.OptionType = (itemData[5] >> 4) & 0xF;
+        const BYTE optionByte = ItemByteAt(itemData, 5);
+        params.OptionLevel = optionByte & 0xF;
+        params.OptionType = (optionByte >> 4) & 0xF;
         offset++;
     }
 
     if (flags & ItemOptionFlags::HasExcellent)
     {
-        params.ExcellentFlags = itemData[5 + offset];
+        params.ExcellentFlags = ItemByteAt(itemData, 5 + offset);
         offset++;
     }
 
     if (flags & ItemOptionFlags::HasAncient)
     {
-        params.AncientDiscriminator = itemData[5 + offset] & 0xF;
-        params.AncientBonusOption = (itemData[5 + offset] >> 4) & 0xF;
+        const BYTE ancientByte = ItemByteAt(itemData, 5 + offset);
+        params.AncientDiscriminator = ancientByte & 0xF;
+        params.AncientBonusOption = (ancientByte >> 4) & 0xF;
         offset++;
     }
 
     if (flags & ItemOptionFlags::HasHarmony)
     {
+        const BYTE harmonyByte = ItemByteAt(itemData, 5 + offset);
         params.HasHarmonyOption = true;
-        params.HarmonyOptionLevel = itemData[5 + offset] & 0xF;
-        params.HarmonyOptionType = (itemData[5 + offset] >> 4) & 0xF;
+        params.HarmonyOptionLevel = harmonyByte & 0xF;
+        params.HarmonyOptionType = (harmonyByte >> 4) & 0xF;
         offset++;
     }
 
+    // The guardian (380) option is only this flag: no byte of its own follows.
+    params.HasGuardianOption = flags & ItemOptionFlags::HasGuardian;
+
     if (flags & ItemOptionFlags::HasSockets)
     {
-        params.SocketBonusOption = (itemData[5 + offset] >> 4) & 0xF;
-        params.SocketCount = itemData[5 + offset] & 0xF;
-
-        for (int i = 0; i < params.SocketCount; ++i)
-        {
-            params.SocketOptions[i] = itemData[6 + offset + i];
-        }
+        ReadSockets(itemData, 5 + offset, params);
     }
 
     return params;
@@ -97,8 +126,8 @@ ITEM* mu::ui::window::CItemMng::CreateItem(std::span<const BYTE> itemData)
 ///     HasSkill
 ///     HasExc
 ///     HasAnc
-///     HasGuardian
 ///     HasHarmony
+///     HasGuardian (no byte of its own)
 ///     HasSockets
 ///   Optional, depending on Flags:
 ///     Opt_Lvl 4 bit

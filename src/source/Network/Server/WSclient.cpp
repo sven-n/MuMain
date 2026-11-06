@@ -1690,7 +1690,13 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 
 int CalcItemLength(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = safe_cast<PITEM_EXTENDED_BASE>(ReceiveBuffer);
+    const int available = static_cast<int>(ReceiveBuffer.size());
+    auto Data = safe_cast<PITEM_EXTENDED_BASE>(ReceiveBuffer, "item");
+    if (Data == nullptr)
+    {
+        return available;
+    }
+
     int size = 5;
     if (Data->OptionFlags & ItemOptionFlags::HasOption)
     {
@@ -1714,11 +1720,16 @@ int CalcItemLength(std::span<const BYTE> ReceiveBuffer)
 
     if (Data->OptionFlags & ItemOptionFlags::HasSockets)
     {
-        auto socketCount = ReceiveBuffer[size] & 0xF;
+        const int socketCount = size < available ? ReceiveBuffer[size] & 0xF : 0;
         size++;
         size += socketCount;
     }
 
+    if (size > available)
+    {
+        g_ConsoleDebug->Write(MCD_ERROR, L"Item data cut short: %d of %d bytes", available, size);
+        return available;
+    }
     return size;
 }
 

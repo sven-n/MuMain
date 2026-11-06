@@ -180,6 +180,7 @@ mu_add_test(
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
         test_dark_lord_pet_tooltip.cpp
+        test_item_bytes.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_exchange_file.cpp

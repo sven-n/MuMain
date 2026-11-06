@@ -24,6 +24,7 @@
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
+#include "Network/Server/WSclient.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -575,6 +576,73 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
         Engine::Items::TooltipValues::GetItemTooltipText(values, "addOptionDuration");
     REQUIRE(duration.has_value());
     CHECK_FALSE(duration->empty());
+}
+
+// The server marks an item's guardian (380) option with one bit of its option flags and no byte of its own; such an
+// item shows its 380 lines.
+TEST_CASE("An item from the server with a guardian option shows its 380 lines [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    TextMeasureScope measure(&FixedWidthMeasure);
+
+    // Bone Blade (0/22) +9 as the server writes it: group and number, level, durability, the option flags, then the
+    // additional option's byte (level 2) and the excellent options' byte.
+    const auto fromServer = [](ItemOptionFlags flags)
+    {
+        const std::array<BYTE, 7> itemData{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x01};
+        return ParseItemData(itemData);
+    };
+    const ItemOptionFlags optionAndExcellent = ItemOptionFlags::HasOption | ItemOptionFlags::HasExcellent;
+    const ItemCreationParams guarded = fromServer(optionAndExcellent | ItemOptionFlags::HasGuardian);
+    const ItemCreationParams plain = fromServer(optionAndExcellent);
+    CHECK(guarded.HasGuardianOption);
+    CHECK_FALSE(plain.HasGuardianOption);
+    CHECK(guarded.OptionLevel == 2);
+    CHECK(guarded.ExcellentFlags == 0x01);
+
+    // The flag takes no byte. The sockets are the only bytes read after it: they read the same with it, and the item
+    // is as long (CalcItemLength finds where the next item of a packet starts). Their first byte is the bonus option
+    // (high half) and the socket count (low half), then comes one byte per socket.
+    const auto socketed = [](ItemOptionFlags flags)
+    { return std::array<BYTE, 9>{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x32, 0x0A, 0x0B}; };
+    const ItemOptionFlags optionAndSockets = ItemOptionFlags::HasOption | ItemOptionFlags::HasSockets;
+    for (const ItemOptionFlags flags : {optionAndSockets, optionAndSockets | ItemOptionFlags::HasGuardian})
+    {
+        CAPTURE(static_cast<int>(flags));
+        const std::array<BYTE, 9> itemData = socketed(flags);
+        CHECK(CalcItemLength(itemData) == static_cast<int>(itemData.size()));
+        const ItemCreationParams params = ParseItemData(itemData);
+        CHECK(params.HasGuardianOption == ((flags & ItemOptionFlags::HasGuardian) != 0));
+        CHECK(params.SocketBonusOption == 3);
+        CHECK(params.SocketCount == 2);
+        CHECK(params.SocketOptions[0] == 0x0A);
+        CHECK(params.SocketOptions[1] == 0x0B);
+    }
+
+    ITEM withGuardian;
+    FillItemFromParameters(withGuardian, guarded);
+    ITEM without;
+    FillItemFromParameters(without, plain);
+    // The Bone Blade's row in ItemAddOption.bmd has both its 380 options. Checked on the row: GetItemAddOtioninfoText
+    // writes two lines even for a row that has none.
+    const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(withGuardian.Type);
+    REQUIRE(addOption.m_byOption1 != 0);
+    REQUIRE(addOption.m_byOption2 != 0);
+    std::vector<std::wstring> lines380;
+    g_pItemAddOptioninfo->GetItemAddOtioninfoText(lines380, withGuardian.Type);
+    const std::vector<ItemTooltipLine> guardedLines = BuildItemTooltipLines(&withGuardian, false);
+    const std::vector<ItemTooltipLine> plainLines = BuildItemTooltipLines(&without, false);
+    for (const std::wstring& line : lines380)
+    {
+        CHECK(HasLine(guardedLines, line, TEXT_COLOR_REDPURPLE));
+        CHECK_FALSE(HasLine(plainLines, line));
+    }
 }
 
 // A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
