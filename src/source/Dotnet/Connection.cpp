@@ -72,11 +72,12 @@ using GetManagedLibraryVersion = const char*(CORECLR_DELEGATE_CALLTYPE*)();
 
 // In a release download the library's commit is the client's, so a different one means a library from another
 // download. (A local build rebuilds the library only when its sources change, so there it can be older.)
-// Looked up without LoadManagedSymbol: a library from before this function is no error worth a dialog.
+// Looked up with FindSymbol, not LoadManagedSymbol: a library from before this function is no error worth a dialog
+// or an error line in the log.
 void WriteLibraryVersion()
 {
     const auto getLibraryVersion = reinterpret_cast<GetManagedLibraryVersion>(
-        mu::platform::GetSymbol(munique_client_library_handle, "ConnectionManager_GetLibraryVersion"));
+        mu::platform::FindSymbol(munique_client_library_handle, "ConnectionManager_GetLibraryVersion"));
     const char* version = getLibraryVersion != nullptr ? getLibraryVersion() : nullptr;
     g_ErrorReport.Write(L"ClientLibrary \t\t: %hs\r\n",
                         version != nullptr ? version : "version unknown (older library)");
