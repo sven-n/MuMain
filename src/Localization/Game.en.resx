@@ -5137,10 +5137,10 @@
     <value>and press the button for no. of jewels</value>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
-    <value>Jewel of Bless</value>
+    <value>{item:14,13}</value>
   </data>
   <data name="Jewel of Soul" xml:space="preserve">
-    <value>Jewel of Soul</value>
+    <value>{item:14,14}</value>
   </data>
   <data name="Combine %d (%d zen is required)" xml:space="preserve">
     <value>Combine %d (%d zen is required)</value>
@@ -5731,7 +5731,7 @@
     <value>%s success %s : %d%%</value>
   </data>
   <data name="Jewel stone" xml:space="preserve">
-    <value>Jewel stone</value>
+    <value>{item:14,41}</value>
   </data>
   <data name="Weapons or shields" xml:space="preserve">
     <value>Weapons or shields</value>
@@ -5986,7 +5986,7 @@
     <value>About refinery</value>
   </data>
   <data name="Jewel of Harmony" xml:space="preserve">
-    <value>Jewel of Harmony</value>
+    <value>{item:14,42}</value>
   </data>
   <data name="Refine Gemstone" xml:space="preserve">
     <value>Refine Gemstone</value>
@@ -8092,22 +8092,22 @@
     <value>Select a jewel to dissolve.</value>
   </data>
   <data name="Jewel of Life" xml:space="preserve">
-    <value>Jewel of Life</value>
+    <value>{item:14,16}</value>
   </data>
   <data name="Jewel of Creation" xml:space="preserve">
-    <value>Jewel of Creation</value>
+    <value>{item:14,22}</value>
   </data>
   <data name="Jewel of Guardian" xml:space="preserve">
-    <value>Jewel of Guardian</value>
+    <value>{item:14,31}</value>
   </data>
   <data name="Jewel of Chaos" xml:space="preserve">
-    <value>Jewel of Chaos</value>
+    <value>{item:12,15}</value>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Lower Refining Stone</value>
+    <value>{item:14,43}</value>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Higher Refining Stone</value>
+    <value>{item:14,44}</value>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
     <value>Are you sure you want to dissolve</value>

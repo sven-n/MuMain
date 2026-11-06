@@ -203,6 +203,7 @@ mu_add_test(
         test_item_sync_diff.cpp
         test_item_sync_server.cpp
         test_item_tooltip_text.cpp
+        test_item_texts.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
