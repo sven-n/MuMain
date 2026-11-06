@@ -318,7 +318,7 @@ void CItemAddDialog::Duplicate()
     {
         // The file goes into a shared model that both items name.
         const Data::Items::SharedItemModel shared{MakeSharedModelName(source->names.GetNeutral()), model.file,
-                                                  model.textureFolders, model.noneBlendMeshes};
+                                                  model.textureFolders, model.noneBlendMeshes, model.meshNames};
         g_ItemEdits.SetSharedModel(I18N::Editor::DuplicateItem, shared);
         ItemModelDefinition sourceShared = *sourceModel;
         sourceShared.model = shared.name;

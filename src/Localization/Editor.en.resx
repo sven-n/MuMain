@@ -892,6 +892,12 @@
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="Name this part" xml:space="preserve">
+    <value>Name this part</value>
+  </data>
+  <data name="Name a part" xml:space="preserve">
+    <value>Name a part</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
   </data>

@@ -1112,6 +1112,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
         model.file = shared->second->file;
         model.textureFolders = shared->second->textureFolders;
         model.noneBlendMeshes = shared->second->noneBlendMeshes;
+        model.meshNames = shared->second->meshNames;
         usedNames.insert(model.model);
     }
 

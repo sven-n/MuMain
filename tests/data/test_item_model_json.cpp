@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 
 #include <algorithm>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -188,9 +189,41 @@ TEST_CASE("A model with a shared model leaves out its file, texture folders and 
     CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "file": "Data/Item/Ring01.bmd"})", "file"));
     CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "textureFolders": ["Item"]})", "textureFolders"));
     CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "noneBlendMeshes": [1]})", "noneBlendMeshes"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "meshNames": {"0": "Stone"}})", "meshNames"));
     CHECK(HasFatalIssue(R"({"number": 8, "model": "transformation ring"})", "model"));
     CHECK(HasFatalIssue(R"({"number": 8, "model": ""})", "model"));
     CHECK(HasFatalIssue(R"({"number": 8, "model": 3})", "model"));
+}
+
+TEST_CASE("A model's mesh names write by number on one line and read back (design L38) [data][items]")
+{
+    ItemModelDefinition staff = MakeDarkHorse();
+    staff.meshNames = {{10, "Tail"}, {0, "Shaft"}, {1, "Crystal"}};
+    const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{staff});
+    CHECK(text.find(R"("meshNames": {"0": "Shaft", "1": "Crystal", "10": "Tail"})") != std::string::npos);
+
+    const ReadResult result = Read(text);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].meshNames == staff.meshNames);
+}
+
+TEST_CASE("A mesh name that can't be one is a warning that leaves it out [data][items]")
+{
+    const ReadResult result = Read(GroupFile(13, R"({"number": 4, "file": "Data/Item/DarkHorseHorn.bmd",
+        "meshNames": {"0": "Shaft", "x": "Gem", "50": "Tail", "2": "", "3": " Stone", "4": 7, "5": "Crystal"}})"));
+    for (const char* field : {"meshNames.x", "meshNames.50", "meshNames.2", "meshNames.3", "meshNames.4"})
+    {
+        CAPTURE(field);
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, field));
+    }
+    CHECK_FALSE(HasFatal(result.issues));
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].meshNames == std::map<int, std::string>{{0, "Shaft"}, {5, "Crystal"}});
+
+    CHECK(HasIssue(
+        Read(GroupFile(13, R"({"number": 4, "file": "Data/Item/DarkHorseHorn.bmd", "meshNames": [1]})")).issues,
+        ItemDataIssueSeverity::Warning, "meshNames"));
 }
 
 TEST_CASE("The render style of a model is a name [data][items]")
@@ -345,7 +378,7 @@ SharedItemModel MakeSkillParchment()
 
 SharedItemModel MakeSeedSphere()
 {
-    return {"seedSphere1", "Data/Item/s30_sphere01.bmd", {"Item", "Effect"}, {0, 2}};
+    return {"seedSphere1", "Data/Item/s30_sphere01.bmd", {"Item", "Effect"}, {0, 2}, {{1, "Sphere"}}};
 }
 
 ItemModelDefinition MakeSharedModelItem(int number, const std::string& model)
@@ -366,6 +399,7 @@ TEST_CASE("Shared model JSON keeps every value through write and read, sorted by
     CHECK(text.find(R"("textureFolders": ["Item", "Effect"])") != std::string::npos);
     CHECK(text.find(R"("noneBlendMeshes": [0, 2])") != std::string::npos);
     CHECK(text.find("noneBlendMeshes", text.find("skillParchment")) == std::string::npos);
+    CHECK(text.find(R"("meshNames": {"1": "Sphere"})") != std::string::npos);
 
     const SharedReadResult result = ReadShared(text);
     CHECK(result.issues.empty());
@@ -414,6 +448,7 @@ TEST_CASE("The items that name a shared model get its file, texture folders and 
     CHECK(models[0].file == "Data/Item/s30_sphere01.bmd");
     CHECK(models[0].textureFolders == std::vector<std::string>{"Item", "Effect"});
     CHECK(models[0].noneBlendMeshes == std::vector<int>{0, 2});
+    CHECK(models[0].meshNames == MakeSeedSphere().meshNames);
     CHECK(models[2] == MakeDarkHorse());
 
     const auto hasIssue =

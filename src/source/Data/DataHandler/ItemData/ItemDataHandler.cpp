@@ -498,6 +498,7 @@ void CItemDataHandler::SetItemModel(const ItemModelDefinition& model)
         stored.file = shared->file;
         stored.textureFolders = shared->textureFolders;
         stored.noneBlendMeshes = shared->noneBlendMeshes;
+        stored.meshNames = shared->meshNames;
     }
     const ItemModelDefinition* before = g_ItemModelDatabase.Find(itemType);
     const bool opensDifferently = before == nullptr || !stored.Exists() || stored.model != before->model ||
