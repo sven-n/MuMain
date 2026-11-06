@@ -194,7 +194,7 @@ void MuMonsterAttacksUI::Render(bool* open)
         const int number = g_MonsterSelection.GetNumber();
         ShownValues::ShownMonster* shown = m_draft.Begin(ShownValues::GetSelectedKey(), ToolWindow::GetDataVersion());
         MonsterDefinition* monster = shown != nullptr ? &shown->monster : nullptr;
-        ShownModel::RenderSelectedMonster(number, monster);
+        ShownModel::RenderSelectedMonster(number, monster, shown != nullptr && shown->wholeMonster);
         if (monster != nullptr)
         {
             m_shown = shown;
