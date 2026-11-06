@@ -15,8 +15,9 @@ internal static class Program
         Expect(ConnectFailure.Describe(refused), "SocketException ConnectionRefused (");
         Expect(ConnectFailure.Describe(new IOException($"Unable to connect to {Address}:44405", refused)),
                "SocketException ConnectionRefused (");
-        Expect(ConnectFailure.Describe(new ArgumentOutOfRangeException("port")),
-               "ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'port')");
+        // The runtime's own text, which its versions may word differently.
+        var portOutOfRange = new ArgumentOutOfRangeException("port");
+        Expect(ConnectFailure.Describe(portOutOfRange), $"ArgumentOutOfRangeException: {portOutOfRange.Message}");
         Expect(ConnectFailure.Describe(new InvalidOperationException("Connection handle 3 already exists.")),
                "InvalidOperationException: Connection handle 3 already exists.");
     }
