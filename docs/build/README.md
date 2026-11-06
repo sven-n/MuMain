@@ -427,8 +427,10 @@ Data          : data-<id> (matches this client)
 The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the data language
 (`Eng`, `Por` or `Spn`, which picks the `Data/Local` files), and, once the renderer is
 up, the GPU, its graphics API and driver version, and the UI language the player reads
-(`en`, `de`, `zh-CN`, ...) with whether item names are translated. A switch later, in
-the options window or the editor, adds `> UI language changed to ...`.
+(`en`, `de`, `zh-CN`, ...) with whether item names are translated. A change later adds
+a line: `> UI language changed to ...` for a switch in the options window or the editor,
+`> Item names now translated.` or `> Item names now in English.` for the options window's
+item name setting.
 `ClientLibrary` names the commit the .NET library was built from and its OpenMU
 packets version. In a release download that commit is the client's, so a different
 one means a library from another download. A local build rebuilds the library only

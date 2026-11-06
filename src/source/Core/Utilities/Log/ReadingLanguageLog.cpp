@@ -25,9 +25,14 @@ std::string Describe(const std::optional<State>& logged, const State& now)
 {
     if (!logged)
         return "> UI language = " + now.uiLocale + ", item names " + DescribeItemNames(now.itemNamesTranslated) + ".";
-    if (logged->uiLocale == now.uiLocale)
-        return {};
-    return "> UI language changed to " + now.uiLocale + ".";
+
+    std::string changes;
+    if (logged->uiLocale != now.uiLocale)
+        changes = "UI language changed to " + now.uiLocale;
+    if (logged->itemNamesTranslated != now.itemNamesTranslated)
+        changes += (changes.empty() ? "Item names now " : ", item names now ") +
+                   std::string(DescribeItemNames(now.itemNamesTranslated));
+    return changes.empty() ? changes : "> " + changes + ".";
 }
 
 void Write(const State& now)
