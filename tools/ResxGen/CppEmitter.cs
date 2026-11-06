@@ -113,6 +113,15 @@ internal static class CppEmitter
         sb.Append($$"""
             #include "{{group.Name}}.h"
 
+            """);
+        if (group.NamesItems)
+        {
+            sb.AppendLine($"#include \"{MasterFileName}.h\"");
+            sb.AppendLine();
+            sb.AppendLine("#include <span>");
+            sb.AppendLine();
+        }
+        sb.Append($$"""
             namespace {{RootNamespace}}::{{group.Name}} {
 
             namespace {
@@ -130,6 +139,11 @@ internal static class CppEmitter
         WriteSlotTable(sb, group, masterLocales);
         sb.AppendLine();
         WriteApplyLocale(sb);
+        if (group.NamesItems)
+        {
+            sb.AppendLine();
+            WriteItemTexts(sb, group, masterLocales);
+        }
 
         sb.Append($$"""
 
@@ -147,6 +161,7 @@ internal static class CppEmitter
 
         sb.AppendLine("#pragma once");
         sb.AppendLine();
+        sb.AppendLine("#include <cstdint>");
         sb.AppendLine("#include <initializer_list>");
         sb.AppendLine("#include <span>");
         sb.AppendLine("#include <string>");
@@ -204,6 +219,47 @@ internal static class CppEmitter
             // is not currently registered.
             void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
 
+            // Calls every registered LocaleObserver, as SetLocale does after
+            // switching. For texts that changed without a locale switch, e.g.
+            // item names in texts after "Translate item names" changed.
+            void NotifyLocaleObservers() noexcept;
+
+            // The position of the current locale in GetAvailableLocales.
+            int GetCurrentLocaleIndex() noexcept;
+
+            // A text of an item text group (ResxGen --item-text-groups) that names
+            // an item with {item:group,number} in at least one locale
+            // (docs/translation-system.md, "Texts that name items").
+            struct ItemText
+            {
+                const char* group;             // "Game"
+                const char* key;               // the .resx key, UTF-8
+                const wchar_t** slot;          // the key's runtime pointer, e.g. &Game::JewelOfBless
+                const wchar_t* const* values;  // one per locale in GetAvailableLocales order; the
+                                               // English text where a locale has none of its own
+                std::uint32_t ownLocales;      // bit i: locale i has a text of its own
+            };
+
+            // Every text that names an item, group by group in file order. The
+            // span backs static storage and is valid for the program's lifetime.
+            std::span<const ItemText> GetItemTexts() noexcept;
+
+            // Returns `text` with its item references replaced by item names, or
+            // `text` itself. `textLocaleIndex` is the locale whose text it is: the
+            // current one, or the default locale when the current locale has no
+            // text of its own. The returned string must stay valid for the
+            // program's lifetime: copies of the old pointer may still be read.
+            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex) noexcept;
+
+            // Sets the expander that ExpandItemTexts uses; null shows the texts as
+            // written. Set by the item data once its names are known.
+            void SetItemTextExpander(ItemTextExpander expander) noexcept;
+
+            // Points every text that names an item at its expansion in the current
+            // locale. SetLocale does this before it calls the observers. Returns
+            // true when a text changed.
+            bool ExpandItemTexts() noexcept;
+
             }  // namespace {{RootNamespace}}
 
             """);
@@ -224,6 +280,16 @@ internal static class CppEmitter
             #include <vector>
 
             namespace {{RootNamespace}} {
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"namespace {g.Name} {{ std::span<const ItemText> ItemTexts() noexcept; }}");
+        }
+
+        sb.Append($$"""
+
             namespace {
 
             """);
@@ -234,6 +300,8 @@ internal static class CppEmitter
 
             constexpr int kDefaultLocaleIndex = 0;
             const char* g_currentLocale = kLocales[kDefaultLocaleIndex];
+            int g_currentLocaleIndex = kDefaultLocaleIndex;
+            ItemTextExpander g_itemTextExpander = nullptr;
 
             struct ObserverEntry { LocaleObserver cb; void* ctx; };
 
@@ -264,6 +332,7 @@ internal static class CppEmitter
                 int idx = LocaleIndex(locale);
                 if (idx < 0) idx = kDefaultLocaleIndex;
                 g_currentLocale = kLocales[idx];
+                g_currentLocaleIndex = idx;
 
             """);
 
@@ -274,6 +343,13 @@ internal static class CppEmitter
 
         sb.Append($$"""
 
+                // Item names in texts first: observers copy texts.
+                ExpandItemTexts();
+                NotifyLocaleObservers();
+            }
+
+            void NotifyLocaleObservers() noexcept
+            {
                 // Snapshot the registry so observers that unregister themselves
                 // (e.g. via a destructor triggered as a side effect of the
                 // callback) don't shift indices mid-iteration.
@@ -282,6 +358,54 @@ internal static class CppEmitter
                 {
                     if (entry.cb != nullptr) entry.cb(entry.ctx);
                 }
+            }
+
+            int GetCurrentLocaleIndex() noexcept
+            {
+                return g_currentLocaleIndex;
+            }
+
+            std::span<const ItemText> GetItemTexts() noexcept
+            {
+                static const std::vector<ItemText> texts = [] {
+                    std::vector<ItemText> all;
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
+            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
+        }
+
+        sb.Append($$"""
+                    return all;
+                }();
+                return texts;
+            }
+
+            void SetItemTextExpander(ItemTextExpander expander) noexcept
+            {
+                g_itemTextExpander = expander;
+            }
+
+            bool ExpandItemTexts() noexcept
+            {
+                bool changed = false;
+                for (const ItemText& text : GetItemTexts())
+                {
+                    const wchar_t* written = text.values[g_currentLocaleIndex];
+                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale) : written;
+                    if (shown == nullptr) shown = written;
+                    if (*text.slot != shown)
+                    {
+                        *text.slot = shown;
+                        changed = true;
+                    }
+                }
+                return changed;
             }
 
             void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
@@ -492,6 +616,53 @@ internal static class CppEmitter
         sb.AppendLine("};");
         sb.AppendLine("}  // namespace");
     }
+
+    /// Emits the group's texts that name items (ItemReferenceSyntax) as `ItemTexts()`, the table
+    /// I18N::GetItemTexts joins: per text its key, runtime pointer, the value of every master locale
+    /// (as kSlots has them) and a bit per locale with a text of its own.
+    private static void WriteItemTexts(StringBuilder sb, ResourceGroup group, IReadOnlyList<string> masterLocales)
+    {
+        var defaultSanitized = Naming.SanitizeLocale(ResxLoader.DefaultLocale);
+        var groupLocaleSet = new HashSet<string>(group.Locales, StringComparer.Ordinal);
+        var entries = group.Entries.Where(e => e.Translations.Values.Any(ItemReferenceSyntax.HasReference)).ToList();
+
+        sb.AppendLine("namespace {");
+        foreach (var entry in entries)
+        {
+            sb.Append($"constexpr const wchar_t* kItemTextValues_{entry.Identifier}[] = {{ ");
+            for (var i = 0; i < masterLocales.Count; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                var key = groupLocaleSet.Contains(masterLocales[i]) ? Naming.SanitizeLocale(masterLocales[i]) : defaultSanitized;
+                sb.Append($"k_{key}_{entry.Identifier}");
+            }
+            sb.AppendLine(" };");
+        }
+        if (entries.Count > 0)
+        {
+            sb.AppendLine($"constexpr {RootNamespace}::ItemText kItemTexts[] = {{");
+            foreach (var entry in entries)
+            {
+                uint own = 0;
+                for (var i = 0; i < masterLocales.Count; i++)
+                {
+                    if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
+                }
+                sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
+                              $"kItemTextValues_{entry.Identifier}, 0x{own:X}u }},");
+            }
+            sb.AppendLine("};");
+        }
+        sb.AppendLine("}  // namespace");
+        sb.AppendLine();
+        sb.AppendLine($"std::span<const {RootNamespace}::ItemText> ItemTexts() noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine(entries.Count > 0 ? "    return kItemTexts;" : "    return {};");
+        sb.AppendLine("}");
+    }
+
+    /// "Game" -> "game", for local variable names in the emitted code.
+    private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];
 
     private static void WriteApplyLocale(StringBuilder sb)
     {
