@@ -451,9 +451,6 @@ add_test(NAME texture_failure_dispatch_decline COMMAND "${Python3_EXECUTABLE}"
 
 mu_add_test(
     NAME bitmap_loader_tests
-    SOURCES
-        test_bitmap_loader.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapLoad.cpp
+    SOURCES test_bitmap_loader.cpp
     LINK_LIBS MuClient
 )

@@ -212,9 +212,7 @@ mu_add_test(
 
 mu_add_test(
     NAME window_geometry_tests
-    SOURCES
-        test_window_geometry.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/Core/WindowGeometry.cpp
+    SOURCES test_window_geometry.cpp
     LINK_LIBS MuClient
 )
 
