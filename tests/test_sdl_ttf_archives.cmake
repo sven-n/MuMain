@@ -29,6 +29,19 @@ if(NOT declares MATCHES "/releases/download/${sdl_ttf_release}/")
         "${CMAKE_CURRENT_LIST_FILE} for the new release (git ls-tree <tag> external/), and the four archives and "
         "hashes in FetchContent_Declare(SDL3_ttf).")
 endif()
+# The unpacked files must get the time of unpacking: with the archives' older dates, a build after a version change
+# would keep the objects compiled from the previous sources.
+if(NOT declares MATCHES "DOWNLOAD_EXTRACT_TIMESTAMP[ \t\r\n]+(FALSE|OFF|NO|0)[ \t\r\n)]")
+    message(FATAL_ERROR
+        "FetchContent_Declare(SDL3_ttf) must set DOWNLOAD_EXTRACT_TIMESTAMP FALSE, so its files get the time of "
+        "unpacking, not the archive's dates")
+endif()
+file(READ "${CMAKE_CURRENT_LIST_DIR}/../cmake/UnpackArchive.cmake" unpack_script)
+if(NOT unpack_script MATCHES "file\\(ARCHIVE_EXTRACT[^)]*[ \t\r\n]TOUCH[ \t\r\n)]")
+    message(FATAL_ERROR
+        "cmake/UnpackArchive.cmake must unpack with file(ARCHIVE_EXTRACT ... TOUCH), so the four libraries' files get "
+        "the time of unpacking, not the archives' dates")
+endif()
 if(NOT cmake_code MATCHES "set\\([ \t]*SDLTTF_VENDORED[ \t]+ON[ \t]+CACHE[ \t]+BOOL[ \t]+\"[^\"]*\"[ \t]+FORCE[ \t]*\\)")
     message(FATAL_ERROR "${MU_ROOT_CMAKE} must set SDLTTF_VENDORED ON with CACHE BOOL \"\" FORCE: the archives below "
         "are SDL_ttf's vendored libraries")
