@@ -582,7 +582,9 @@ TEST_CASE("MG Inferno completes ExecuteSkill and emits its area packet [helper_a
     AcceptedCastFixture fixture;
     fixture.PrepareKnightCast(AT_SKILL_INFERNO_STR_MG);
     Hero->Class = CLASS_DARK;
-    fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT].Type = ITEM_SKULL_STAFF;
+    // Unarmed Inferno avoids weapon classification from the unloaded item database.
+    REQUIRE(fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT].Type == -1);
+    REQUIRE(fixture.machine.Equipment[EQUIPMENT_WEAPON_LEFT].Type == -1);
     // PrepareKnightCast resets selection; the non-attackable selected character avoids terrain rendering.
     SelectedCharacter = 0;
     constexpr float SkillDistance = 2.f;
