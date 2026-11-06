@@ -81,6 +81,16 @@ void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
     g_ItemDataHandler.RestoreGlowColors(colors);
 }
 
+Data::Items::ItemNameCases ReadNameCases()
+{
+    return g_ItemDatabase.GetNameCases();
+}
+
+void RestoreNameCases(const Data::Items::ItemNameCases& cases)
+{
+    g_ItemDataHandler.SetNameCases(cases);
+}
+
 std::vector<Data::Items::GroundLabelStyle> ReadGroundLabelStyles()
 {
     return g_ItemDatabase.GetGroundLabels().styles;
@@ -163,7 +173,8 @@ ItemEdits::ItemEdits()
                  [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
                  &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
                  &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
-                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles})
+                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles, &ReadNameCases,
+                 &RestoreNameCases})
 {
 }
 
@@ -462,6 +473,20 @@ void ItemEdits::AddFolderStep(ItemEditEntry& entry, std::string_view root,
     step.foldersBefore = std::move(before);
     step.foldersAfter = std::move(after);
     entry.steps.push_back(std::move(step));
+}
+
+void ItemEdits::SetNameCases(std::string label, const Data::Items::ItemNameCases& cases)
+{
+    Data::Items::ItemNameCases before = ReadNameCases();
+    if (before == cases)
+    {
+        return;
+    }
+    g_ItemDataHandler.SetNameCases(cases);
+    ItemEditStep step{ItemEditStep::Kind::NameCases};
+    step.casesBefore = std::move(before);
+    step.casesAfter = cases;
+    Record({std::move(label), {std::move(step)}});
 }
 
 void ItemEdits::SetGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style)
