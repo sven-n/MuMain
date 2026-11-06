@@ -73,27 +73,34 @@ endif()
 # with MSVC, GCC and Clang. Its only file is empty, and no target links it: with MSVC, CMake links the precompiled
 # header's object into every test that reuses it, and into every test that links an object library which has or reuses
 # it, so a test that got it both ways would fail with LNK4042 (object specified more than once) and warnings as errors.
-file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp"
-    CONTENT "// Compiled only to precompile stdafx.h for the tests (tests/CMakeLists.txt, mu_test_use_pch).\n")
-add_library(mu_test_pch OBJECT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp")
-target_link_libraries(mu_test_pch PRIVATE MuClient)
-target_include_directories(mu_test_pch PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
-if(MSVC)
-    target_compile_options(mu_test_pch PRIVATE /utf-8)
-endif()
-target_precompile_headers(mu_test_pch PRIVATE "${CMAKE_SOURCE_DIR}/src/source/App/stdafx.h")
-# GCC and Clang take a precompiled header only into compiles with the same position-independent setting. With
-# CMAKE_POSITION_INDEPENDENT_CODE an object library compiles with -fPIC and an executable with -fPIE (GCC then ignores
-# the header with a warning, Clang stops), so this library compiles as the test executables do.
-if(CMAKE_POSITION_INDEPENDENT_CODE)
-    set_target_properties(mu_test_pch PROPERTIES POSITION_INDEPENDENT_CODE OFF)
-    target_compile_options(mu_test_pch PRIVATE ${CMAKE_CXX_COMPILE_OPTIONS_PIE})
+# With CMAKE_DISABLE_PRECOMPILE_HEADERS=ON (CI's PR and main-push builds) there is no such library.
+if(NOT CMAKE_DISABLE_PRECOMPILE_HEADERS)
+    file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp"
+        CONTENT "// Compiled only to precompile stdafx.h for the tests (tests/CMakeLists.txt, mu_test_use_pch).\n")
+    add_library(mu_test_pch OBJECT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp")
+    target_link_libraries(mu_test_pch PRIVATE MuClient)
+    target_include_directories(mu_test_pch PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+    if(MSVC)
+        target_compile_options(mu_test_pch PRIVATE /utf-8)
+    endif()
+    target_precompile_headers(mu_test_pch PRIVATE "${CMAKE_SOURCE_DIR}/src/source/App/stdafx.h")
+    # GCC and Clang take a precompiled header only into compiles with the same position-independent setting. With
+    # CMAKE_POSITION_INDEPENDENT_CODE an object library compiles with -fPIC and an executable with -fPIE (GCC then
+    # ignores the header with a warning, Clang stops), so this library compiles as the test executables do.
+    if(CMAKE_POSITION_INDEPENDENT_CODE)
+        set_target_properties(mu_test_pch PROPERTIES POSITION_INDEPENDENT_CODE OFF)
+        target_compile_options(mu_test_pch PRIVATE ${CMAKE_CXX_COMPILE_OPTIONS_PIE})
+    endif()
 endif()
 
 # Usage: mu_test_use_pch(<target>), for a test executable that links MuClient. Its files that include stdafx.h use the
 # precompiled stdafx.h of mu_test_pch; the others compile without it, as before. The check reads the files at
-# configure time, like MuClient's in src/CMakeLists.txt.
+# configure time, like MuClient's in src/CMakeLists.txt. Without mu_test_pch it does nothing: CMake would warn about
+# every test that reuses a precompiled header while precompiled headers are off, and CI fails on a warning.
 function(mu_test_use_pch target)
+    if(NOT TARGET mu_test_pch)
+        return()
+    endif()
     target_precompile_headers(${target} REUSE_FROM mu_test_pch)
     # GCC 13 reports -Wstringop-overflow for concatenations like std::string(300, 'x') + ".json" in test files that use
     # the precompiled header, the false positive MuClient has too (src/CMakeLists.txt), which GCC 15 does not report.
