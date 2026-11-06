@@ -27,6 +27,7 @@
 #include "UI/MonsterTools/MonsterOwnValues.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterShownValues.h"
+#include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MonsterTreeModel.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterSoundsUI.h"
@@ -251,6 +252,26 @@ TEST_CASE("Monster tools: a monster as a whole shows and stores the values its n
     CHECK(ShownValues::ReadSelected()->monster.attacks);
     g_MonsterSelection.SelectMonster(2);
     CHECK_FALSE(ShownValues::ReadSelected()->wholeMonster);
+}
+
+TEST_CASE("Monster tools: a change of only the shared values is a change of the tools' data [editor][monsters]")
+{
+    GroupedTools tools;
+    // Every number has a set of its own: the shared set changes no entry.
+    for (const int number : {145, 175, 336})
+    {
+        MonsterDefinition own = Entry(number);
+        own.soundSet = "Own" + std::to_string(number);
+        REQUIRE(g_MonsterEdits.SetMonster("own set", own));
+    }
+    const int before = MuEditor::Monsters::ToolWindow::GetDataVersion();
+    MonsterDefinition values = *g_MonsterEdits.ReadSharedValues(145);
+    values.soundSet = "Centurion";
+    REQUIRE(g_MonsterEdits.SetSharedValues("shared set", 145, values));
+    CHECK(Entry(145).soundSet == "Own145");
+    // A whole monster's draft (Monster Attacks) takes the new shared set
+    // before its next store.
+    CHECK(MuEditor::Monsters::ToolWindow::GetDataVersion() != before);
 }
 
 TEST_CASE("Monster Sounds: a monster as a whole shows the set its numbers share, a number its own [editor][monsters]")
