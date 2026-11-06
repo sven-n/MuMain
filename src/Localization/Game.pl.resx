@@ -9447,4 +9447,10 @@
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Magiczny kamień gracza %ls</value>
   </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Base Attributes" xml:space="preserve">
+    <value>Statystyki bazowe</value>
+  </data>
 </root>

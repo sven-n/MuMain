@@ -487,6 +487,72 @@
   <data name="Look Save" xml:space="preserve">
     <value>Zapisz</value>
   </data>
+  <data name="Style and effect" xml:space="preserve">
+    <value>Styl i efekt</value>
+  </data>
+  <data name="Graphics look" xml:space="preserve">
+    <value>Wygląd grafiki</value>
+  </data>
+  <data name="Meshes" xml:space="preserve">
+    <value>Siatki</value>
+  </data>
+  <data name="Mesh list note" xml:space="preserve">
+    <value>Wskaż wiersz, aby zobaczyć w podglądzie samą jego siatkę, a pozostałe przezroczyste; kliknięcie ją zatrzymuje, kolejne kliknięcie zwalnia. Kliknięcie części podglądu znajduje jej wiersz.</value>
+  </data>
+  <data name="Meshes not in preview note" xml:space="preserve">
+    <value>Na tym poziomie podgląd rysuje inny model, więc nie może pokazać tych siatek, a kliknięcie go nie znajdzie żadnej z nich.</value>
+  </data>
+  <data name="No meshes loaded" xml:space="preserve">
+    <value>Model nie jest wczytany, więc nie ma siatek do wyświetlenia.</value>
+  </data>
+  <data name="Mesh texture" xml:space="preserve">
+    <value>Tekstura</value>
+  </data>
+  <data name="Mesh marks" xml:space="preserve">
+    <value>Oznaczenia</value>
+  </data>
+  <data name="Mesh used by" xml:space="preserve">
+    <value>Używane przez</value>
+  </data>
+  <data name="Mesh hidden" xml:space="preserve">
+    <value>ukryta</value>
+  </data>
+  <data name="Mesh glows" xml:space="preserve">
+    <value>świeci</value>
+  </data>
+  <data name="Mesh scrolls" xml:space="preserve">
+    <value>przewija się</value>
+  </data>
+  <data name="Mesh no chrome" xml:space="preserve">
+    <value>bez chromu</value>
+  </data>
+  <data name="Mesh holes" xml:space="preserve">
+    <value>dziury</value>
+  </data>
+  <data name="Mesh all but this one" xml:space="preserve">
+    <value>wszystkie oprócz tej</value>
+  </data>
+  <data name="Mesh texture file 0" xml:space="preserve">
+    <value>Wczytana z {0}</value>
+  </data>
+  <data name="Mesh texture size 0 1" xml:space="preserve">
+    <value>{0} x {1}, tak jak używa jej gra</value>
+  </data>
+  <data name="Mesh texture not loaded" xml:space="preserve">
+    <value>Tekstura nie jest wczytana.</value>
+  </data>
+  <data name="Mesh counts 0 1" xml:space="preserve">
+    <value>Wierzchołki: {0}, trójkąty: {1}</value>
+  </data>
+  <data name="Mesh never drawn" xml:space="preserve">
+    <value>Nigdy nie jest rysowana, więc podgląd nie może pokazać jej samej.</value>
+  </data>
+  <data name="Mesh code looks note" xml:space="preserve">
+    <value>Styl renderowania i efekt przedmiotu to kod rysujący: to, które siatki rysują, pokaże się tu, gdy staną się danymi.</value>
+  </data>
+  <data name="Preview pick note" xml:space="preserve">
+    <value>Kliknij część, aby znaleźć jej siatkę na liście siatek.</value>
+  </data>
   <data name="Model file" xml:space="preserve">
     <value>Plik modelu</value>
   </data>
@@ -1474,6 +1540,48 @@
   <data name="Colors" xml:space="preserve">
     <value>Kolory</value>
   </data>
+  <data name="Ground labels" xml:space="preserve">
+    <value>Etykiety na ziemi</value>
+  </data>
+  <data name="Ground Label Styles" xml:space="preserve">
+    <value>Style etykiet na ziemi</value>
+  </data>
+  <data name="Item Tooltip" xml:space="preserve">
+    <value>Opis przedmiotu</value>
+  </data>
+  <data name="New label style" xml:space="preserve">
+    <value>Nowy styl etykiety</value>
+  </data>
+  <data name="Items name these styles in their ground label rules" xml:space="preserve">
+    <value>Przedmioty wskazują te style we własnych regułach etykiet na ziemi (Opis przedmiotu); pozostałe wskazują reguły standardowe.</value>
+  </data>
+  <data name="Apply to the style" xml:space="preserve">
+    <value>Zastosuj do stylu</value>
+  </data>
+  <data name="Change a label style" xml:space="preserve">
+    <value>Zmień styl etykiety</value>
+  </data>
+  <data name="Remove a label style" xml:space="preserve">
+    <value>Usuń styl etykiety</value>
+  </data>
+  <data name="Remove unused label styles" xml:space="preserve">
+    <value>Usuń nieużywane style etykiet</value>
+  </data>
+  <data name="No item uses these label styles: {0}" xml:space="preserve">
+    <value>Żaden przedmiot nie używa tych stylów etykiet: {0}</value>
+  </data>
+  <data name="A style of the standard rules" xml:space="preserve">
+    <value>Styl reguł standardowych: przedmiot bez własnej reguły dla danego poziomu dostaje na nim ten styl.</value>
+  </data>
+  <data name="A name of letters and digits that no other label style has" xml:space="preserve">
+    <value>Nazwa z liter i cyfr, której nie ma żaden inny styl etykiety</value>
+  </data>
+  <data name="Text color" xml:space="preserve">
+    <value>Kolor tekstu</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>Tło</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Kolory poświaty</value>
   </data>
@@ -2116,6 +2224,33 @@
   <data name="Bold" xml:space="preserve">
     <value>Pogrubienie</value>
   </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Umiejętność</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Szczęście</value>
+  </data>
+  <data name="Option" xml:space="preserve">
+    <value>Opcja</value>
+  </data>
+  <data name="No set" xml:space="preserve">
+    <value>Bez zestawu</value>
+  </data>
+  <data name="Set {0}: {1}" xml:space="preserve">
+    <value>Zestaw {0}: {1}</value>
+  </data>
+  <data name="Ground label" xml:space="preserve">
+    <value>Etykieta na ziemi</value>
+  </data>
+  <data name="All levels" xml:space="preserve">
+    <value>Wszystkie poziomy</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Od</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Do</value>
+  </data>
   <data name="Italic" xml:space="preserve">
     <value>Kursywa</value>
   </data>
@@ -2160,6 +2295,54 @@
   </data>
   <data name="Add rule" xml:space="preserve">
     <value>Dodaj regułę</value>
+  </data>
+  <data name="Change the ground label rules" xml:space="preserve">
+    <value>Zmień reguły etykiet na ziemi</value>
+  </data>
+  <data name="The first rule whose levels hold gives the style" xml:space="preserve">
+    <value>Styl daje pierwsza reguła, której poziomy pasują; na pozostałych poziomach dają go reguły standardowe.</value>
+  </data>
+  <data name="No rules of its own" xml:space="preserve">
+    <value>Brak własnych reguł: styl dają reguły standardowe.</value>
+  </data>
+  <data name="Its own rule {0}" xml:space="preserve">
+    <value>Własna reguła {0}</value>
+  </data>
+  <data name="The standard rules" xml:space="preserve">
+    <value>Reguły standardowe</value>
+  </data>
+  <data name="Tooltip layout" xml:space="preserve">
+    <value>Układ opisu</value>
+  </data>
+  <data name="Tooltip layout note" xml:space="preserve">
+    <value>Które wiersze opis pokazuje oprócz własnych wierszy przedmiotu: układ domyślny albo szablon, który pomija część z nich (wiersze klas, wiersz wytrzymałości).</value>
+  </data>
+  <data name="Change the tooltip layout" xml:space="preserve">
+    <value>Zmień układ opisu</value>
+  </data>
+  <data name="Its own changes hide {0}" xml:space="preserve">
+    <value>Jego własne zmiany ukrywają: {0}</value>
+  </data>
+  <data name="Its own changes do not fit this layout {0}" xml:space="preserve">
+    <value>Jego własne zmiany nie pasują do tego układu: {0}</value>
+  </data>
+  <data name="It adds after the line {0}" xml:space="preserve">
+    <value>Dodaje po wierszu {0}:</value>
+  </data>
+  <data name="A blank line" xml:space="preserve">
+    <value>(pusty wiersz)</value>
+  </data>
+  <data name="At levels {0} to {1}" xml:space="preserve">
+    <value>(+{0} do +{1})</value>
+  </data>
+  <data name="In the tooltip" xml:space="preserve">
+    <value>W opisie</value>
+  </data>
+  <data name="Name line {0}" xml:space="preserve">
+    <value>Wiersz nazwy {0}</value>
+  </data>
+  <data name="Standard name" xml:space="preserve">
+    <value>Nazwa standardowa</value>
   </data>
   <data name="Another rule fits the same channels." xml:space="preserve">
     <value>Inna reguła pasuje do tych samych kanałów.</value>
@@ -2563,20 +2746,11 @@
   <data name="As the file has it" xml:space="preserve">
     <value>tak jak w pliku</value>
   </data>
-  <data name="Attack sound 1" xml:space="preserve">
-    <value>Dźwięk ataku 1</value>
-  </data>
-  <data name="Attack sound 2" xml:space="preserve">
-    <value>Dźwięk ataku 2</value>
-  </data>
   <data name="Bounding box max" xml:space="preserve">
     <value>Obszar ograniczający max</value>
   </data>
   <data name="Bounding box min" xml:space="preserve">
     <value>Obszar ograniczający min</value>
-  </data>
-  <data name="Die sound" xml:space="preserve">
-    <value>Dźwięk śmierci</value>
   </data>
   <data name="Fixed bitmaps" xml:space="preserve">
     <value>Bitmapy w stałych slotach</value>
@@ -2601,12 +2775,6 @@
   </data>
   <data name="Holds last frame" xml:space="preserve">
     <value>Zatrzymuje ostatnią klatkę</value>
-  </data>
-  <data name="Idle sound 1" xml:space="preserve">
-    <value>Dźwięk bezczynności 1</value>
-  </data>
-  <data name="Idle sound 2" xml:space="preserve">
-    <value>Dźwięk bezczynności 2</value>
   </data>
   <data name="In game" xml:space="preserve">
     <value>W grze</value>
@@ -2640,9 +2808,6 @@
   </data>
   <data name="No monster is selected" xml:space="preserve">
     <value>Nie zaznaczono potwora</value>
-  </data>
-  <data name="No sound" xml:space="preserve">
-    <value>(brak dźwięku)</value>
   </data>
   <data name="Not in the client folder" xml:space="preserve">
     <value>nie ma w folderze klienta</value>
@@ -2698,9 +2863,6 @@
   <data name="Sound id" xml:space="preserve">
     <value>Id</value>
   </data>
-  <data name="Sound slots note" xml:space="preserve">
-    <value>Dźwięki, które gra odtwarza, gdy model stoi, chodzi, atakuje, zostaje trafiony i umiera; z pary wybiera jeden losowo.</value>
-  </data>
   <data name="Sounds" xml:space="preserve">
     <value>Dźwięki</value>
   </data>
@@ -2728,9 +2890,6 @@
   <data name="Step what hold of {0}" xml:space="preserve">
     <value>zatrzymuje ostatnią klatkę {0}</value>
   </data>
-  <data name="Step what sound slots" xml:space="preserve">
-    <value>sloty dźwięków</value>
-  </data>
   <data name="Step what speed of {0}" xml:space="preserve">
     <value>prędkość {0}</value>
   </data>
@@ -2751,9 +2910,6 @@
   </data>
   <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
     <value>Pliku nie ma w folderze klienta; model nie ma ciała.</value>
-  </data>
-  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
-    <value>Model ma drugi zestaw dźwięków, który odtwarzają potwory z SubType 9 (pięć numerów dalej); edytuje się go w pliku.</value>
   </data>
   <data name="The model is not open; it shows when it is." xml:space="preserve">
     <value>Model nie jest otwarty (może brakować jego pliku); pokaże się, gdy gra go otworzy.</value>
@@ -2927,7 +3083,7 @@
     <value>Zdarzenia dźwiękowe</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Dźwięki, które gra odtwarza oprócz slotów dla postaci w jednej z animacji zdarzenia: gdy zaczyna się atak, gdy postać zostaje trafiona lub umiera, przy każdym kroku i na końcu każdej pętli bezczynności, w promieniu 500 jednostek od bohatera. Zdarzenie odtwarza dźwięki tego modelu.</value>
+    <value>Dźwięki, które gra odtwarza dla potworów tego zestawu: w animacjach zdarzenia (gdy zaczyna się atak, gdy potwór zostaje trafiony lub umiera, przy każdym kroku i na końcu każdej pętli bezczynności, w promieniu 500 jednostek od bohatera), w każdej klatce, w której potwór jest w nich rysowany, raz w nich, dopóki nie stanie lub nie ruszy, na znacznikach modelu potwora albo w swoich momentach, niezależnie od animacji. Zdarzenie odtwarza dźwięki tego zestawu.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Klatki</value>
@@ -2948,7 +3104,7 @@
     <value>Jeden z dwóch</value>
   </data>
   <data name="Sound event pick note" xml:space="preserve">
-    <value>Odtwarza pierwszy z dwóch dźwięków, gdy wypadnie losowanie jeden na dwa, w przeciwnym razie drugi; wymaga dwóch dźwięków.</value>
+    <value>Odtwarza pierwszy dźwięk, gdy wypadnie losowanie jeden na dwa, w przeciwnym razie drugi, a przy jednym dźwięku żaden.</value>
   </data>
   <data name="Sound draw rand" xml:space="preserve">
     <value>losowo (rand)</value>
@@ -2965,11 +3121,47 @@
   <data name="Sound event every map" xml:space="preserve">
     <value>każda mapa</value>
   </data>
+  <data name="Sound event when" xml:space="preserve">
+    <value>Kiedy</value>
+  </data>
+  <data name="Sound event when note" xml:space="preserve">
+    <value>Animacje: zdarzenie gra w nich, gdy zaczyna się atak, trafienie lub śmierć, przy każdym kroku chodu i na końcu każdej pętli stop1 i stop2. W każdej klatce w: w każdej klatce, w której potwór jest rysowany w jednej z nich; szansa jest losowana w każdej klatce. Raz, dopóki nie stanie: w pierwszej klatce, w której potwór jest rysowany w jednej z nich; potem żadne zdarzenie „raz” zestawu nie gra, dopóki nie zostanie narysowany w stop1, stop2 lub walk. Znaczniki: w klatkach znacznika modelu potwora. W każdej klatce w znaczniku: w każdej klatce, w której potwór jest rysowany w klatkach znacznika swojego modelu. Timery: w rysowanej klatce, w której tyka timer modelu potwora. Momenty: tam, gdzie gra je odtwarza, niezależnie od animacji: atak i trafienie, gdy się zaczynają, śmierć, gdy się zaczyna (także w Chaos Castle), postój, gdy potwór zostaje zatrzymany (koniec chodu, serwer go zatrzymuje), chód przy każdym kroku. Zdarzenie wskazuje animacje, każdą klatkę, raz, znaczniki, każdą klatkę w znacznikach, timery albo momenty.</value>
+  </data>
+  <data name="Sound event on" xml:space="preserve">
+    <value>w</value>
+  </data>
+  <data name="Sound event moments" xml:space="preserve">
+    <value>Momenty</value>
+  </data>
+  <data name="Sound event any SubType" xml:space="preserve">
+    <value>dowolny</value>
+  </data>
+  <data name="Sound event only SubType" xml:space="preserve">
+    <value>tylko</value>
+  </data>
+  <data name="Sound event not SubType" xml:space="preserve">
+    <value>nie</value>
+  </data>
+  <data name="Sound event SubType note" xml:space="preserve">
+    <value>SubType, który nadaje potworowi kod jego tworzenia. Death Centurion i Illusion of Kundun mają 9 i odtwarzają drugi zestaw dźwięków swojego modelu: zdarzenia ich modeli mówią „tylko 9” albo „nie 9”.</value>
+  </data>
+  <data name="Sound event heard anywhere" xml:space="preserve">
+    <value>Wszędzie</value>
+  </data>
+  <data name="Sound event heard anywhere note" xml:space="preserve">
+    <value>Słychać w dowolnej odległości od bohatera i na każdej mapie; w przeciwnym razie w promieniu 500 jednostek i na mapach poniżej.</value>
+  </data>
+  <data name="Sound event at the monster" xml:space="preserve">
+    <value>Przy potworze</value>
+  </data>
+  <data name="Sound event at the monster note" xml:space="preserve">
+    <value>Odtwarzany przy potworze: dźwięk, który jeszcze gra, nie jest uruchamiany ponownie.</value>
+  </data>
   <data name="Add a sound event" xml:space="preserve">
     <value>Dodaj zdarzenie dźwiękowe</value>
   </data>
   <data name="Sound event needs a sound of the model" xml:space="preserve">
-    <value>Zdarzenie odtwarza dźwięki tego modelu, a model nie wczytuje żadnych.</value>
+    <value>Zdarzenie odtwarza dźwięki tego zestawu, a zestaw nie ma żadnych.</value>
   </data>
   <data name="Step what sound events" xml:space="preserve">
     <value>zdarzenia dźwiękowe</value>
@@ -3197,10 +3389,31 @@
     <value>Ich obciążenie</value>
   </data>
   <data name="Offline servers note" xml:space="preserve">
-    <value>Tylko w edytorze: ekran logowania pokazuje też każdy kanał od 1 do 20 każdej grupy, którego Connect Server nie wysłał, z tym obciążeniem, żeby było widać jego nazwę, kolor i pasek obciążenia. Nie można do niego dołączyć.</value>
+    <value>Tylko w edytorze: ekran logowania pokazuje też każdy kanał od 1 do 20 każdej grupy, którego Connect Server nie wysłał, z tym obciążeniem, żeby było widać jego nazwę, kolor i pasek obciążenia. Nie można do niego dołączyć. Na liście kanałów grupy każdy można pominąć albo nadać mu własne obciążenie, do zamknięcia gry.</value>
   </data>
   <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
     <value>Ten serwer pokazuje tylko edytor; Connect Server go nie wysłał.</value>
+  </data>
+  <data name="Offline channels:" xml:space="preserve">
+    <value>Kanały offline:</value>
+  </data>
+  <data name="All offline channels" xml:space="preserve">
+    <value>Wszystkie</value>
+  </data>
+  <data name="No offline channel" xml:space="preserve">
+    <value>Żaden</value>
+  </data>
+  <data name="Show offline channel" xml:space="preserve">
+    <value>Pokaż</value>
+  </data>
+  <data name="Offline channel note" xml:space="preserve">
+    <value>Tylko w edytorze: czy ekran logowania pokazuje ten kanał, którego Connect Server nie wysłał, i z jakim obciążeniem. Bez własnego obciążenia ma Ich obciążenie. Zachowane do zamknięcia gry.</value>
+  </data>
+  <data name="Load slider note" xml:space="preserve">
+    <value>Przeciągnij albo kliknij dwukrotnie lub Ctrl+kliknij, aby wpisać wartość.</value>
+  </data>
+  <data name="Use Their load again" xml:space="preserve">
+    <value>Wróć do Ich obciążenia</value>
   </data>
   <data name="from {0}" xml:space="preserve">
     <value>z {0}</value>
@@ -3210,5 +3423,743 @@
   </data>
   <data name="Theme color note" xml:space="preserve">
     <value>Kolor motywu: ustawia go tokens.ini w folderze każdego motywu, a motyw oparty na innym przejmuje jego wartość, dopóki nie ustawi własnej. Zastosuj od razu zapisuje tokens.ini zmienionych motywów i gra przerysowuje się z nimi; Cofnij tego nie wycofuje.</value>
+  </data>
+  <data name="Monster Sounds" xml:space="preserve">
+    <value>Dźwięki potworów</value>
+  </data>
+  <data name="Monster sound sets" xml:space="preserve">
+    <value>Zestawy dźwięków potworów</value>
+  </data>
+  <data name="Sound set" xml:space="preserve">
+    <value>Zestaw dźwięków</value>
+  </data>
+  <data name="No sound set" xml:space="preserve">
+    <value>brak</value>
+  </data>
+  <data name="No sound set is shown" xml:space="preserve">
+    <value>Wybierz zestaw dźwięków z listy albo dodaj nowy.</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Otwórz</value>
+  </data>
+  <data name="Open in Monster Sounds" xml:space="preserve">
+    <value>Otwórz w Dźwiękach potworów</value>
+  </data>
+  <data name="Random variants" xml:space="preserve">
+    <value>Losowe warianty</value>
+  </data>
+  <data name="Random variants note" xml:space="preserve">
+    <value>Wyglądy, które gra losuje, gdy potwór się pojawia (Chaos Castle: elf albo czarodziej). Wygląd odtwarza własny zestaw dźwięków albo zestaw wpisu. Kod losuje wygląd, dopóki ta konfiguracja nie trafi do danych (MN4).</value>
+  </data>
+  <data name="Random variant note" xml:space="preserve">
+    <value>gra losuje jeden, gdy potwór się pojawia</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Wariant</value>
+  </data>
+  <data name="Variant {0}" xml:space="preserve">
+    <value>wariant {0}</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="The entry" xml:space="preserve">
+    <value>wpis</value>
+  </data>
+  <data name="The entry set" xml:space="preserve">
+    <value>zestaw wpisu</value>
+  </data>
+  <data name="Add a sound set" xml:space="preserve">
+    <value>Dodaj zestaw dźwięków</value>
+  </data>
+  <data name="New sound set" xml:space="preserve">
+    <value>Nowy zestaw dźwięków</value>
+  </data>
+  <data name="Sound set copy of {0}" xml:space="preserve">
+    <value>{0} (kopia)</value>
+  </data>
+  <data name="Sound set in use note" xml:space="preserve">
+    <value>Potwory odtwarzają ten zestaw: najpierw daj im inny.</value>
+  </data>
+  <data name="Sound set name" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
+  <data name="Played by" xml:space="preserve">
+    <value>Odtwarzają:</value>
+  </data>
+  <data name="No monster plays the set" xml:space="preserve">
+    <value>żaden potwór</value>
+  </data>
+  <data name="Sound files {0}" xml:space="preserve">
+    <value>Pliki dźwięków ({0})</value>
+  </data>
+  <data name="The set has no sounds" xml:space="preserve">
+    <value>Zestaw nie ma plików dźwięków.</value>
+  </data>
+  <data name="Sound file in use note" xml:space="preserve">
+    <value>Odtwarza go zdarzenie zestawu: najpierw usuń dźwięk ze zdarzenia.</value>
+  </data>
+  <data name="Sound id hint" xml:space="preserve">
+    <value>Identyfikator SOUND_ (opcjonalny)</value>
+  </data>
+  <data name="Sound file missing" xml:space="preserve">
+    <value>Wpisz plik z Data/Sound.</value>
+  </data>
+  <data name="Sound file twice" xml:space="preserve">
+    <value>Zestaw ma już ten plik.</value>
+  </data>
+  <data name="Sound file not in client folder" xml:space="preserve">
+    <value>Pliku nie ma w folderze klienta: dźwięk nic nie odtwarza.</value>
+  </data>
+  <data name="Add a file" xml:space="preserve">
+    <value>Dodaj plik</value>
+  </data>
+  <data name="Cues" xml:space="preserve">
+    <value>Znaczniki</value>
+  </data>
+  <data name="Cues note" xml:space="preserve">
+    <value>Miejsca w animacjach modelu, w których grają zdarzenia dźwiękowe, np. moment, gdy stopa dotyka ziemi w chodzie. Ich klatki edytuje się przy zdarzeniach w Dźwiękach potworów; Podgląd potwora je zaznacza.</value>
+  </data>
+  <data name="The model has no cues" xml:space="preserve">
+    <value>Model nie ma znaczników.</value>
+  </data>
+  <data name="Model sounds note" xml:space="preserve">
+    <value>Dźwięki są w zestawie dźwięków wskazanym przez potwora (Sounds.json), nie w modelu: potwory z jednym modelem mogą brzmieć różnie.</value>
+  </data>
+  <data name="The monster names no sound set" xml:space="preserve">
+    <value>Wybrany potwór nie wskazuje zestawu dźwięków.</value>
+  </data>
+  <data name="The monster plays {0}" xml:space="preserve">
+    <value>Wybrany potwór odtwarza zestaw {0}.</value>
+  </data>
+  <data name="Sound event cue" xml:space="preserve">
+    <value>znacznik</value>
+  </data>
+  <data name="Sound event cues of {0}" xml:space="preserve">
+    <value>Znaczniki {0}</value>
+  </data>
+  <data name="Sound event timers of {0}" xml:space="preserve">
+    <value>Timery {0}</value>
+  </data>
+  <data name="Sound event on timer" xml:space="preserve">
+    <value>na timerze</value>
+  </data>
+  <data name="Model timers" xml:space="preserve">
+    <value>Timery</value>
+  </data>
+  <data name="Model timers note" xml:space="preserve">
+    <value>Timery animacji modelu: timer tyka, gdy potwór jest w swojej animacji, za każdym razem, gdy od ostatniego tyknięcia minęło więcej niż jego interwał. Kod mapy dla modelu (kołysanie włosów Twintail) i zdarzenia dźwiękowe (Dźwięki potworów, Kiedy: Timery) tykają na tym samym timerze.</value>
+  </data>
+  <data name="The model has no timers" xml:space="preserve">
+    <value>Model nie ma timerów.</value>
+  </data>
+  <data name="Add a timer" xml:space="preserve">
+    <value>Dodaj timer</value>
+  </data>
+  <data name="Timer every ms" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="Remove timer note" xml:space="preserve">
+    <value>Kod mapy może prosić o timer po nazwie (Twintail: "hair swing"); bez niego to, co odmierza, przestaje działać.</value>
+  </data>
+  <data name="Step what timer {0}" xml:space="preserve">
+    <value>timer {0}</value>
+  </data>
+  <data name="Sound event each frame in cues of {0}" xml:space="preserve">
+    <value>W każdej klatce w znaczniku {0}</value>
+  </data>
+  <data name="Sound event each frame in cue" xml:space="preserve">
+    <value>w każdej klatce w znaczniku</value>
+  </data>
+  <data name="Sound event new cue at {0} {1}" xml:space="preserve">
+    <value>Nowy znacznik w klatce podglądu ({0} {1})</value>
+  </data>
+  <data name="Sound event no cue {0}" xml:space="preserve">
+    <value>Model nie ma znacznika "{0}": zdarzenie nie gra dla tego potwora.</value>
+  </data>
+  <data name="Sound event cue of {0} {1}" xml:space="preserve">
+    <value>znacznik {0}: zmiana dotyczy jego potworów ({1})</value>
+  </data>
+  <data name="Use the preview frame" xml:space="preserve">
+    <value>Użyj klatki podglądu</value>
+  </data>
+  <data name="Use the preview frame note" xml:space="preserve">
+    <value>Znacznik zaczyna się w klatce, którą pokazuje Podgląd potwora, w jego animacji, i zachowuje swoją długość.</value>
+  </data>
+  <data name="Preview frame needs the preview" xml:space="preserve">
+    <value>Podgląd potwora nie pokazuje modelu tego potwora: otwórz go tam, aby pobrać klatkę.</value>
+  </data>
+  <data name="Remove the cue" xml:space="preserve">
+    <value>Usuń znacznik</value>
+  </data>
+  <data name="Remove the cue question {0} {1}" xml:space="preserve">
+    <value>Żadne inne zdarzenie dźwiękowe nie gra na znaczniku {0} modelu {1}. Usunąć znacznik także z modelu?</value>
+  </data>
+  <data name="Remove the cue too" xml:space="preserve">
+    <value>Usuń też znacznik</value>
+  </data>
+  <data name="Keep the cue" xml:space="preserve">
+    <value>Zachowaj znacznik</value>
+  </data>
+  <data name="Add a sound at this frame" xml:space="preserve">
+    <value>Dodaj dźwięk w tej klatce</value>
+  </data>
+  <data name="Add a sound needs a set" xml:space="preserve">
+    <value>Potwór nie wskazuje zestawu dźwięków dla tego wyglądu: nadaj mu go w Dźwiękach potworów.</value>
+  </data>
+  <data name="Add a sound needs a file" xml:space="preserve">
+    <value>Zestaw dźwięków nie ma jeszcze plików: dodaj plik w Dźwiękach potworów.</value>
+  </data>
+  <data name="Cue name" xml:space="preserve">
+    <value>Znacznik</value>
+  </data>
+  <data name="Cue name taken" xml:space="preserve">
+    <value>Model ma już znacznik o tej nazwie.</value>
+  </data>
+  <data name="Cue of the model {0}" xml:space="preserve">
+    <value>znacznik {0}, dla wszystkich jego potworów</value>
+  </data>
+  <data name="In the sound set {0}" xml:space="preserve">
+    <value>Zdarzenie w zestawie dźwięków {0}</value>
+  </data>
+  <data name="Cue tag {0} {1} {2} {3}" xml:space="preserve">
+    <value>{0}: klatki {1}–{2}, odtwarza {3}</value>
+  </data>
+  <data name="Cue plays nothing" xml:space="preserve">
+    <value>nic w tym zestawie</value>
+  </data>
+  <data name="Step sound set" xml:space="preserve">
+    <value>{0} (zestaw dźwięków): {1}</value>
+  </data>
+  <data name="Step monster sound set" xml:space="preserve">
+    <value>{0}: zestaw dźwięków</value>
+  </data>
+  <data name="Step what add" xml:space="preserve">
+    <value>dodanie</value>
+  </data>
+  <data name="Step what remove" xml:space="preserve">
+    <value>usunięcie</value>
+  </data>
+  <data name="Step what name" xml:space="preserve">
+    <value>nazwa</value>
+  </data>
+  <data name="Step what sound files" xml:space="preserve">
+    <value>pliki dźwięków</value>
+  </data>
+  <data name="Step what cue {0}" xml:space="preserve">
+    <value>znacznik {0}</value>
+  </data>
+  <data name="Cue frames need a monster of the set" xml:space="preserve">
+    <value>Wybierz potwora, który odtwarza ten zestaw, aby edytować znacznik.</value>
+  </data>
+  <data name="Sound id unknown" xml:space="preserve">
+    <value>To nie jest identyfikator SOUND_, po którym kod odtwarza dźwięk potwora; zostaw puste dla dźwięku nazwanego plikiem.</value>
+  </data>
+  <data name="Sound name twice" xml:space="preserve">
+    <value>Inny dźwięk zestawu ma ten identyfikator: zdarzenie nie odróżniłoby ich.</value>
+  </data>
+  <data name="Cue in use note" xml:space="preserve">
+    <value>Na tym znaczniku grają zdarzenia dźwiękowe: najpierw przenieś je na inny znacznik albo moment.</value>
+  </data>
+  <data name="Sound event each frame in" xml:space="preserve">
+    <value>W każdej klatce w</value>
+  </data>
+  <data name="Sound event once until it stands" xml:space="preserve">
+    <value>Raz, dopóki nie stanie</value>
+  </data>
+  <data name="Sound event each frame" xml:space="preserve">
+    <value>w każdej klatce:</value>
+  </data>
+  <data name="Sound event once" xml:space="preserve">
+    <value>raz:</value>
+  </data>
+  <data name="Map sounds" xml:space="preserve">
+    <value>Dźwięki map</value>
+  </data>
+  <data name="Map sounds note" xml:space="preserve">
+    <value>Dźwięki, które wydają obiekty mapy, gdy są rysowane, odtwarzane tak, jak w oryginalnym kliencie. Wpis wskazuje swoje mapy: mapy z tymi samymi obiektami go współdzielą.</value>
+  </data>
+  <data name="Map sounds of {0} {1}" xml:space="preserve">
+    <value>Mapa: {0} ({1})</value>
+  </data>
+  <data name="Add a sound to an object type" xml:space="preserve">
+    <value>Dodaj dźwięk do typu obiektu</value>
+  </data>
+  <data name="No object of this map makes a sound" xml:space="preserve">
+    <value>Żaden obiekt tej mapy nie wydaje dźwięku.</value>
+  </data>
+  <data name="Object types" xml:space="preserve">
+    <value>Obiekty</value>
+  </data>
+  <data name="Add an object type" xml:space="preserve">
+    <value>Dodaj typ</value>
+  </data>
+  <data name="Pick an object in the world" xml:space="preserve">
+    <value>Wybierz obiekt w świecie</value>
+  </data>
+  <data name="Click an object in the world" xml:space="preserve">
+    <value>Kliknij obiekt w świecie...</value>
+  </data>
+  <data name="Object sound plays" xml:space="preserve">
+    <value>Odtwarza</value>
+  </data>
+  <data name="While in view" xml:space="preserve">
+    <value>gdy widoczny</value>
+  </data>
+  <data name="While in view note" xml:space="preserve">
+    <value>W każdej klatce, w której rysowany jest obiekt tego typu, kanał, który się skończył, zaczyna od nowa, a grający zostaje bez zmian; kopia gra tym ciszej, im dalej jej obiekt jest od bohatera.</value>
+  </data>
+  <data name="Any object" xml:space="preserve">
+    <value>Dowolny obiekt</value>
+  </data>
+  <data name="Any object note" xml:space="preserve">
+    <value>Gra, gdy rysowany jest dowolny obiekt map wpisu: dźwięk całej mapy (szum), z pełną głośnością.</value>
+  </data>
+  <data name="Object sound types" xml:space="preserve">
+    <value>Typy</value>
+  </data>
+  <data name="Object sound maps" xml:space="preserve">
+    <value>Mapy</value>
+  </data>
+  <data name="No map" xml:space="preserve">
+    <value>brak mapy</value>
+  </data>
+  <data name="Not saved yet" xml:space="preserve">
+    <value>Jeszcze nie zapisano</value>
+  </data>
+  <data name="Not saved {0}" xml:space="preserve">
+    <value>Nie zapisano: {0}</value>
+  </data>
+  <data name="Not read again {0}" xml:space="preserve">
+    <value>Nie wczytano ponownie: {0}</value>
+  </data>
+  <data name="Sound mixer title" xml:space="preserve">
+    <value>Mikser dźwięku</value>
+  </data>
+  <data name="Sound editor title" xml:space="preserve">
+    <value>Edytor dźwięku</value>
+  </data>
+  <data name="Sound editor note" xml:space="preserve">
+    <value>Każdy dźwięk, który gra wczytuje: z kodu (Data/Audio/SoundFiles.json), z zestawów dźwięków potworów (Data/Monsters/Sounds.json) i dźwięki obiektów map (Data/Maps/ObjectSounds.json). Zmiana nazwy, pliku, kanałów lub 3D trafia do gry od razu; Zapisz zapisuje pliki, które się zmieniły. Pliki wybiera się z Data/Sound, który nigdy nie jest zmieniany.</value>
+  </data>
+  <data name="Sound editor at start" xml:space="preserve">
+    <value>przy starcie</value>
+  </data>
+  <data name="Sound editor not loaded yet" xml:space="preserve">
+    <value>jeszcze nie wczytany</value>
+  </data>
+  <data name="Sound editor with its monster" xml:space="preserve">
+    <value>razem z potworem</value>
+  </data>
+  <data name="Sound editor nothing loads it" xml:space="preserve">
+    <value>nic go nie wczytuje</value>
+  </data>
+  <data name="Sound editor step {0}" xml:space="preserve">
+    <value>Dźwięk {0}</value>
+  </data>
+  <data name="Sound editor filter hint" xml:space="preserve">
+    <value>Nazwa, identyfikator lub plik</value>
+  </data>
+  <data name="Sound editor only problems {0}" xml:space="preserve">
+    <value>Tylko problemy ({0})</value>
+  </data>
+  <data name="Sound editor shown {0} {1}" xml:space="preserve">
+    <value>Pokazano {0} z {1}</value>
+  </data>
+  <data name="Sound editor column name" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
+  <data name="Sound editor column id" xml:space="preserve">
+    <value>ID lub zestaw</value>
+  </data>
+  <data name="Sound editor column file" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="Sound editor column channels" xml:space="preserve">
+    <value>Kan.</value>
+  </data>
+  <data name="Sound editor column 3D" xml:space="preserve">
+    <value>3D</value>
+  </data>
+  <data name="Sound editor column loads" xml:space="preserve">
+    <value>Wczytuje</value>
+  </data>
+  <data name="Sound editor column lives in" xml:space="preserve">
+    <value>Znajduje się w</value>
+  </data>
+  <data name="Sound editor tab sounds" xml:space="preserve">
+    <value>Dźwięki</value>
+  </data>
+  <data name="Sound editor tab events" xml:space="preserve">
+    <value>Zdarzenia</value>
+  </data>
+  <data name="Sound editor events note" xml:space="preserve">
+    <value>Który dźwięk gra odtwarza i kiedy (Data/Audio/SoundEvents.json): dla każdego zdarzenia pierwsza pasująca reguła odtwarza jeden ze swoich dźwięków, losowo, gdy jest ich więcej. Puste pole pasuje do wszystkiego. Zmiany trafiają do gry od razu; Zapisz zapisuje plik.</value>
+  </data>
+  <data name="Sound event hero footstep" xml:space="preserve">
+    <value>Twoje kroki (każdy krok chodu, nie podczas lotu)</value>
+  </data>
+  <data name="Sound event interface click" xml:space="preserve">
+    <value>Kliknięcie przycisku, według rodzaju kliknięcia nadanego przez motyw (click-sound)</value>
+  </data>
+  <data name="Sound event character selected" xml:space="preserve">
+    <value>Kliknięcie postaci na ekranie wyboru postaci</value>
+  </data>
+  <data name="Sound event column kinds" xml:space="preserve">
+    <value>Rodzaje kliknięć</value>
+  </data>
+  <data name="Sound event kinds tip" xml:space="preserve">
+    <value>Rodzaje kliknięć, dla których gra ta reguła, tak jak motywy nadają je przyciskom (click-sound: confirm). Motywy używają confirm, cancel, select i menu. Puste: dowolny rodzaj.</value>
+  </data>
+  <data name="Sound event player attack swing" xml:space="preserve">
+    <value>Zamach gracza na początku ataku</value>
+  </data>
+  <data name="Sound event step {0}" xml:space="preserve">
+    <value>Zdarzenie dźwiękowe: {0}</value>
+  </data>
+  <data name="Sound event numbers not read {0} {1}" xml:space="preserve">
+    <value>Nie zmieniono: {0} przyjmuje liczby całkowite od 0 do {1}, pojedyncze lub zakresy, oddzielone przecinkami (7, 24-29).</value>
+  </data>
+  <data name="Sound event kinds not read" xml:space="preserve">
+    <value>Nie zmieniono: rodzaje kliknięć to małe litery, cyfry i -, oddzielone przecinkami (confirm, cancel).</value>
+  </data>
+  <data name="Sound event column worlds" xml:space="preserve">
+    <value>Światy</value>
+  </data>
+  <data name="Sound event column tiles" xml:space="preserve">
+    <value>Kafle podłoża</value>
+  </data>
+  <data name="Sound event column safe zone" xml:space="preserve">
+    <value>Strefa bezpieczna</value>
+  </data>
+  <data name="Sound event column holds" xml:space="preserve">
+    <value>Trzyma</value>
+  </data>
+  <data name="Sound event column plays" xml:space="preserve">
+    <value>Odtwarza</value>
+  </data>
+  <data name="Sound event any" xml:space="preserve">
+    <value>(dowolne)</value>
+  </data>
+  <data name="Sound event in safe zone" xml:space="preserve">
+    <value>w niej</value>
+  </data>
+  <data name="Sound event outside safe zone" xml:space="preserve">
+    <value>poza nią</value>
+  </data>
+  <data name="Sound event worlds tip" xml:space="preserve">
+    <value>Światy, w których gra, według numeru: "7, 24-29, 36". Puste: dowolny.</value>
+  </data>
+  <data name="Sound event tiles tip" xml:space="preserve">
+    <value>Kafle podłoża pod bohaterem, według numeru: "0-2, 4-9". Puste: dowolny.</value>
+  </data>
+  <data name="Sound event plays tip" xml:space="preserve">
+    <value>Wybierz dźwięki: gra jeden, losowo, gdy jest ich więcej.</value>
+  </data>
+  <data name="Sound event add rule" xml:space="preserve">
+    <value>Dodaj regułę</value>
+  </data>
+  <data name="Sound editor not sorted" xml:space="preserve">
+    <value>Nieposortowane</value>
+  </data>
+  <data name="Sound editor new folder" xml:space="preserve">
+    <value>Nowy folder</value>
+  </data>
+  <data name="Sound editor new folder name" xml:space="preserve">
+    <value>Nowy folder</value>
+  </data>
+  <data name="Sound editor rename folder" xml:space="preserve">
+    <value>Zmień nazwę</value>
+  </data>
+  <data name="Sound editor remove folder" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Sound editor remove folder tip" xml:space="preserve">
+    <value>Usuwa folder; jego foldery i dźwięki przechodzą piętro wyżej, do folderu nadrzędnego.</value>
+  </data>
+  <data name="Sound editor move up" xml:space="preserve">
+    <value>Przesuń w górę</value>
+  </data>
+  <data name="Sound editor move down" xml:space="preserve">
+    <value>Przesuń w dół</value>
+  </data>
+  <data name="Sound editor drag tip" xml:space="preserve">
+    <value>Przeciągnij dźwięk za identyfikator na folder.</value>
+  </data>
+  <data name="Sound editor step folders" xml:space="preserve">
+    <value>Foldery dźwięków</value>
+  </data>
+  <data name="Sound editor column type" xml:space="preserve">
+    <value>Typ, gdy brak miejsca</value>
+  </data>
+  <data name="Sound editor column heard as" xml:space="preserve">
+    <value>Słychać jako</value>
+  </data>
+  <data name="Sound editor no type" xml:space="preserve">
+    <value>(brak)</value>
+  </data>
+  <data name="Sound editor type tip" xml:space="preserve">
+    <value>Typ, do którego liczy się dźwięk z kodu, gdy nic nie wskazuje jego źródła ani miejsca: np. dźwięk komunikatów serwera. Najpierw i tak decyduje to, kto go odtwarza.</value>
+  </data>
+  <data name="Sound editor channels tip" xml:space="preserve">
+    <value>Kanały: ile kopii dźwięku gra jednocześnie (1 do 4).</value>
+  </data>
+  <data name="Sound editor 3D tip" xml:space="preserve">
+    <value>Umieszczony w 3D przy obiekcie, przy którym gra.</value>
+  </data>
+  <data name="Sound editor play tip" xml:space="preserve">
+    <value>Odtwarza plik raz z pełną głośnością; Mikser dźwięku go nie zmienia. Wyszarzone, gdy pliku nie ma w folderze klienta.</value>
+  </data>
+  <data name="Sound editor pick tip" xml:space="preserve">
+    <value>Wybierz inny plik z Data/Sound; najpierw odsłuchaj go przyciskiem odtwarzania.</value>
+  </data>
+  <data name="Sound editor pick for {0}" xml:space="preserve">
+    <value>Plik dla {0}</value>
+  </data>
+  <data name="Sound editor files {0} {1}" xml:space="preserve">
+    <value>Pliki: {0} z {1}</value>
+  </data>
+  <data name="Sound editor missing file" xml:space="preserve">
+    <value>Pliku nie ma w folderze klienta: dźwięk jest niemy.</value>
+  </data>
+  <data name="Sound editor shared file" xml:space="preserve">
+    <value>Ten plik wczytuje też inny dźwięk z kodu.</value>
+  </data>
+  <data name="Sound editor played not loaded" xml:space="preserve">
+    <value>Gra odtworzyła ten dźwięk, ale nic go nie wczytuje: jest niemy.</value>
+  </data>
+  <data name="Sound editor saved" xml:space="preserve">
+    <value>Zapisano.</value>
+  </data>
+  <data name="Sound editor reverted" xml:space="preserve">
+    <value>Wczytano ponownie z plików.</value>
+  </data>
+  <data name="Sound editor step refused" xml:space="preserve">
+    <value>Dźwięk z tego kroku zmienił się od tego czasu w innym oknie; zostaje bez zmian.</value>
+  </data>
+  <data name="Sound editor folders unreadable {0}" xml:space="preserve">
+    <value>Nie udało się odczytać pliku folderów, więc folderów nie można zmieniać, a Zapisz zostawia plik bez zmian. Popraw go, a Przywróć wczyta go ponownie. {0}</value>
+  </data>
+  <data name="Sound editor read files again" xml:space="preserve">
+    <value>Wczytaj ponownie Data/Sound</value>
+  </data>
+  <data name="Sound editor read files again tip" xml:space="preserve">
+    <value>Ponownie wyświetla pliki dźwięków z Data/Sound, dla wyboru plików i brakujących plików w wierszach. Edytor czyta folder raz, gdy pierwszy raz go potrzebuje, więc plik skopiowany później liczy się dopiero po tym.</value>
+  </data>
+  <data name="Sound editor gone sounds {0}" xml:space="preserve">
+    <value>Wpisy folderów ({0}) wskazują dźwięki, których już nie ma: usunięte w innym oknie albo ręcznie w pliku.</value>
+  </data>
+  <data name="Sound editor drop gone sounds" xml:space="preserve">
+    <value>Usuń je</value>
+  </data>
+  <data name="Sound editor drop gone sounds tip" xml:space="preserve">
+    <value>Usuwa je z folderów jako krok, który Cofnij przywraca.</value>
+  </data>
+  <data name="Sound mixer nothing changed" xml:space="preserve">
+    <value>Wszystkie dźwięki jak zwykle</value>
+  </data>
+  <data name="Sound mixer reset all" xml:space="preserve">
+    <value>Resetuj wszystko</value>
+  </data>
+  <data name="Sound mixer reset all tip" xml:space="preserve">
+    <value>Wyłącza wyciszenie i solo oraz przywraca każdemu typowi i dźwiękowi pełną głośność.</value>
+  </data>
+  <data name="Sound mixer filter hint" xml:space="preserve">
+    <value>Dźwięk lub źródło</value>
+  </data>
+  <data name="Sound mixer all kinds" xml:space="preserve">
+    <value>Wszystkie typy</value>
+  </data>
+  <data name="Sound mixer show all" xml:space="preserve">
+    <value>Wszystkie</value>
+  </data>
+  <data name="Sound mixer show playing" xml:space="preserve">
+    <value>Grające teraz</value>
+  </data>
+  <data name="Sound mixer show changed" xml:space="preserve">
+    <value>Tylko zmienione</value>
+  </data>
+  <data name="Sound mixer loops all" xml:space="preserve">
+    <value>Pętle i jednorazowe</value>
+  </data>
+  <data name="Sound mixer loops only" xml:space="preserve">
+    <value>Tylko pętle</value>
+  </data>
+  <data name="Sound mixer one-shots only" xml:space="preserve">
+    <value>Tylko jednorazowe</value>
+  </data>
+  <data name="Sound mixer minimum plays" xml:space="preserve">
+    <value>Odtworzeń co najmniej</value>
+  </data>
+  <data name="Sound mixer mute shown" xml:space="preserve">
+    <value>Wycisz wszystkie</value>
+  </data>
+  <data name="Sound mixer mute shown tip" xml:space="preserve">
+    <value>Wycisza każdy pokazany wiersz.</value>
+  </data>
+  <data name="Sound mixer unmute shown" xml:space="preserve">
+    <value>Wyłącz wyciszenie wszystkich</value>
+  </data>
+  <data name="Sound mixer unmute shown tip" xml:space="preserve">
+    <value>Wyłącza wyciszenie każdego pokazanego wiersza.</value>
+  </data>
+  <data name="Sound mixer clear filters" xml:space="preserve">
+    <value>Wyczyść filtry</value>
+  </data>
+  <data name="Sound mixer shown {0} {1}" xml:space="preserve">
+    <value>Pokazano {0} z {1}</value>
+  </data>
+  <data name="Sound mixer note" xml:space="preserve">
+    <value>Do odsłuchu w edytorze: wyciszaj, włączaj solo i ściszaj typy dźwięków oraz każdy usłyszany dźwięk. Zmiany działają od razu; wyciszona pętla dalej gra bezgłośnie. Głośności samej gry zostają bez zmian, przyciski odtwarzania i podglądy edytora nie są objęte, a każde uruchomienie gry odtwarza wszystko normalnie.</value>
+  </data>
+  <data name="Sound mixer show in world" xml:space="preserve">
+    <value>Pokaż w świecie</value>
+  </data>
+  <data name="Sound mixer show in world tip" xml:space="preserve">
+    <value>Zaznacza, skąd pochodzą dźwięki pokazanych wierszy: obiekt mapy z pierścieniami pełnej głośności (3 kafle) i najcichszej (15 kafli, przerywany), potwora z pierścieniem słyszalności 5 kafli (ciągły, gdy jesteś w środku) oraz miejsca, w których dźwięk odtwarza sam kod gry (pusty znacznik: postać, NPC, efekt, przedmiot, stworzenie). Źródło błyska, gdy zaczyna się jeden z jego dźwięków; dźwięki bez miejsca (interfejs, otoczenie, muzyka) są wypisywane w lewym górnym rogu. Najedź na wiersz, aby podświetlić jego źródła; pola Pokaż wybierają typy.</value>
+  </data>
+  <data name="Sound mixer overlay on" xml:space="preserve">
+    <value>nakładka włączona</value>
+  </data>
+  <data name="Sound mixer heard anywhere {0}" xml:space="preserve">
+    <value>{0} (słychać wszędzie)</value>
+  </data>
+  <data name="Sound mixer copy tip {0}" xml:space="preserve">
+    <value>#{0}, kliknij, aby skopiować nazwę</value>
+  </data>
+  <data name="Sound mixer copy named tip {0} {1}" xml:space="preserve">
+    <value>#{0}, {1}, kliknij, aby skopiować nazwę pliku</value>
+  </data>
+  <data name="Sound mixer copy music tip" xml:space="preserve">
+    <value>Utwór muzyczny, kliknij, aby skopiować nazwę jego pliku</value>
+  </data>
+  <data name="Sound mixer copied {0}" xml:space="preserve">
+    <value>Skopiowano: {0}</value>
+  </data>
+  <data name="Sound mixer kinds" xml:space="preserve">
+    <value>Typy</value>
+  </data>
+  <data name="Sound mixer hear" xml:space="preserve">
+    <value>Słychać</value>
+  </data>
+  <data name="Sound mixer hear tip" xml:space="preserve">
+    <value>Wyłączone: typ jest wyciszony.</value>
+  </data>
+  <data name="Sound mixer show" xml:space="preserve">
+    <value>Pokaż</value>
+  </data>
+  <data name="Sound mixer show tip" xml:space="preserve">
+    <value>Wyłączone: Pokaż w świecie nie rysuje nic z tego typu (bez znaczników, pierścieni, błysków i wpisów w logu); nadal go słychać.</value>
+  </data>
+  <data name="Sound mixer log {0} {1} {2}" xml:space="preserve">
+    <value>{0}  {1} ({2})</value>
+  </data>
+  <data name="Sound mixer log loop {0} {1} {2}" xml:space="preserve">
+    <value>{0}  {1} ({2}, pętla)</value>
+  </data>
+  <data name="Sound mixer log music {0} {1}" xml:space="preserve">
+    <value>{0}  Muzyka: {1}</value>
+  </data>
+  <data name="Sound mixer sounds heard" xml:space="preserve">
+    <value>Usłyszane dźwięki</value>
+  </data>
+  <data name="Sound mixer nothing heard" xml:space="preserve">
+    <value>Nie usłyszano jeszcze żadnego dźwięku.</value>
+  </data>
+  <data name="Sound mixer clear all" xml:space="preserve">
+    <value>Wyczyść wszystko</value>
+  </data>
+  <data name="Sound mixer clear all tip" xml:space="preserve">
+    <value>Opróżnia listę i liczy od nowa od 0. Wyciszone, solowe i ściszone dźwięki wracają do normy; typy powyżej zostają bez zmian.</value>
+  </data>
+  <data name="Sound mixer column sound" xml:space="preserve">
+    <value>Dźwięk</value>
+  </data>
+  <data name="Sound mixer column source" xml:space="preserve">
+    <value>Źródło</value>
+  </data>
+  <data name="Sound mixer column plays" xml:space="preserve">
+    <value>Odtworzenia</value>
+  </data>
+  <data name="Sound mixer column length" xml:space="preserve">
+    <value>Długość</value>
+  </data>
+  <data name="Sound mixer column last" xml:space="preserve">
+    <value>Ostatnio</value>
+  </data>
+  <data name="Sound mixer column volume" xml:space="preserve">
+    <value>Głośność</value>
+  </data>
+  <data name="Sound mixer playing" xml:space="preserve">
+    <value>gra</value>
+  </data>
+  <data name="Sound mixer ago {0}" xml:space="preserve">
+    <value>{0} temu</value>
+  </data>
+  <data name="Sound mixer loop {0}" xml:space="preserve">
+    <value>pętla {0}</value>
+  </data>
+  <data name="Sound mute" xml:space="preserve">
+    <value>Wycisz</value>
+  </data>
+  <data name="Sound muted" xml:space="preserve">
+    <value>Wyciszony</value>
+  </data>
+  <data name="Sound solo" xml:space="preserve">
+    <value>Solo</value>
+  </data>
+  <data name="Sound solo on" xml:space="preserve">
+    <value>Solo wł.</value>
+  </data>
+  <data name="Sound mixer muted {0}" xml:space="preserve">
+    <value>wyciszone: {0}</value>
+  </data>
+  <data name="Sound mixer solo {0}" xml:space="preserve">
+    <value>solo: {0}</value>
+  </data>
+  <data name="Sound mixer lowered {0}" xml:space="preserve">
+    <value>ściszone: {0}</value>
+  </data>
+  <data name="Sound mixer reminder {0}" xml:space="preserve">
+    <value>Mikser dźwięku: {0}</value>
+  </data>
+  <data name="Sound mixer object {0}" xml:space="preserve">
+    <value>obiekt {0}</value>
+  </data>
+  <data name="Sound kind music" xml:space="preserve">
+    <value>Muzyka</value>
+  </data>
+  <data name="Sound kind map ambience" xml:space="preserve">
+    <value>Otoczenie mapy</value>
+  </data>
+  <data name="Sound kind map objects" xml:space="preserve">
+    <value>Dźwięki obiektów mapy</value>
+  </data>
+  <data name="Sound kind monsters" xml:space="preserve">
+    <value>Potwory</value>
+  </data>
+  <data name="Sound kind npcs" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Sound kind hero" xml:space="preserve">
+    <value>Twoja postać</value>
+  </data>
+  <data name="Sound kind players" xml:space="preserve">
+    <value>Inni gracze</value>
+  </data>
+  <data name="Sound kind effects" xml:space="preserve">
+    <value>Efekty</value>
+  </data>
+  <data name="Sound kind items" xml:space="preserve">
+    <value>Przedmioty</value>
+  </data>
+  <data name="Sound kind creatures" xml:space="preserve">
+    <value>Stworzenia</value>
+  </data>
+  <data name="Sound kind interface" xml:space="preserve">
+    <value>Interfejs</value>
+  </data>
+  <data name="Sound kind everything else" xml:space="preserve">
+    <value>Wszystko inne</value>
   </data>
 </root>
