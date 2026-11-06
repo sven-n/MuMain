@@ -7,6 +7,7 @@
 #include "MonsterEdits.h"
 #include "MonsterKindField.h"
 #include "MonsterOwnValues.h"
+#include "MonsterShownValues.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
@@ -35,8 +36,6 @@ constexpr float NameColumnWidth = 240.0f;
 constexpr float KindColumnWidth = 110.0f;
 constexpr float NumberIndent = 14.0f;
 constexpr int ColumnCount = 4;
-// The ids of monster rows, apart from their first number's row.
-constexpr int MonsterRowId = 1 << 16;
 
 void RenderKindCell(const Row& row, Data::Monsters::MonsterKind current, MonsterBrowserList::Result& result)
 {
@@ -182,7 +181,9 @@ void RenderRow(const Row& row, bool selected, const char* monsterLabel, const ch
     {
         return;
     }
-    ImGui::PushID(row.kind == Row::Kind::Monster ? row.number + MonsterRowId : row.number);
+    // A monster row's id is apart from its first number's row, as the tools
+    // key a monster as a whole.
+    ImGui::PushID(row.kind == Row::Kind::Monster ? row.number + ShownValues::WholeMonsterKey : row.number);
     ImGui::TableSetColumnIndex(0);
     RenderNumberCell(row, selected, monsterLabel, result);
     ImGui::TableSetColumnIndex(1);

@@ -67,7 +67,6 @@ constexpr char GroupedMonstersJson[] = R"({ "formatVersion": 2, "monsters": [
                   {"number": 336, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}] } ] })";
 
 constexpr char NumberDialog[] = "###MonsterNumberDialog";
-constexpr int MonsterRowId = 1 << 16;
 
 // The grouped monsters read by the handler, with an empty history and every
 // field locked.
@@ -142,7 +141,7 @@ void Type(const char* window, const char* label, const char* text)
 }
 
 // The kind combo of a row: a number's, or a monster's (its first number with
-// MonsterRowId).
+// ShownValues::WholeMonsterKey).
 ImGuiID RowKindCombo(int rowId)
 {
     const ImGuiID table = WidgetId(MuEditor::WindowIds::MonsterBrowser, "##Monsters");
@@ -500,7 +499,7 @@ TEST_CASE("Monster Browser: a monster row's kind is the shared one, a number's s
     Press(RowKindCombo(175));
     CHECK(ImGui::FindWindowByName("##Combo_00") == nullptr);
 
-    Press(RowKindCombo(145 + MonsterRowId));
+    Press(RowKindCombo(145 + ShownValues::WholeMonsterKey));
     Press("##Combo_00", I18N::Editor::KindNPC);
     RenderBrowser();
     CHECK(Entry(145).kind == MonsterKind::Npc);
