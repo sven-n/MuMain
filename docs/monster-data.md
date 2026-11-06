@@ -629,23 +629,49 @@ In the first layout (also after **Windows > Reset Layout**) the Monster
 Browser is a tab beside the Item Browser and the others are tabs beside the
 item tools.
 
-- **Monster Browser**: the monsters with their number, their name in the UI
-  language and their kind, with a search (the whole number, or a part of a
-  name in any language; A to Z in either case) and filters: a kind, and the
-  monsters without a name in a language. **Clear filters** clears them. A
-  monster selected in another tool is scrolled to; the search and filters
-  are cleared when they hide it. It has **Save Monsters** and **Revert**,
-  and:
-  - **Add monster**: a number 0–1023 (the first free one to start with;
+- **Monster Browser**: the monsters with their numbers, their name in the UI
+  language, their kind and their maps, with a search (the whole number, or a
+  part of a name in any language; A to Z in either case) and filters: a
+  kind, and the monsters without a name in a language. **Clear filters**
+  clears them. A monster with several numbers is one row ("3 numbers") with
+  an arrow that opens it to its numbers; a search or filter opens the
+  monsters to the numbers it finds. The monster's row shows and changes the
+  values its numbers share (D61): selecting it shows them in the other tools
+  ("The values the 3 numbers of Death Centurion share"), and its kind combo
+  sets the kind of every number that shares it. On a number's row a shared
+  name or kind is grey and its kind locked, an own one yellow (see
+  **Shared and own values** below). The **Maps** column says
+  where each number appears, as OpenMU's Season 6 data places it; its button
+  opens the map picker, one undo step per change (Q-MN98). The maps are a
+  label for the tools: the server decides where monsters appear. A monster
+  or number selected in another tool is scrolled to, its monster opened; the
+  search and filters are cleared when they hide it. The buttons above the
+  list act on the selection, a right click on a row on that row. It has
+  **Save Monsters** and **Revert**, and:
+  - **Add monster**: a new monster with one number 0–1023 (the first free one to start with;
     **Next free** finds the next), the English name and the kind. A number
     with an entry is never free, also 252 with its empty name. The kind
     follows the old rules of the number (see
     [Numbers without an entry](#numbers-without-an-entry)) until you pick
     one. Its look still comes from the code by number: a number the code
     does not know appears with the Bull Fighter's body.
-  - **Copy monster**: the selected monster's English name and kind at the
-    next free number after it, without the translations.
-  - **Remove monster**: removes the entry. The dialog says what the game
+  - **Add number**: a free number in the selected monster (the next free
+    one after its last number), with the values its numbers share and no
+    maps. A monster of one number becomes a monster of two.
+  - **Copy monster**: a new monster with one number: the values the selected
+    monster's numbers share, with its English name and kind, at the next free
+    number after it, without the translations and maps (Q-MN99).
+  - **Copy number**: a new number in the same monster with the number's
+    values, its own ones included, without maps.
+  - **Move number to...**: the number into another monster (a search lists
+    them with their numbers). Its values stay, so nothing changes in the
+    game: those equal to the new monster's are shared there, the others its
+    own (Q-MN97). For numbers that belong together, such as a new stage
+    version that came as a monster of its own.
+  - **Split number out**: the number becomes a monster of its own, with its
+    values.
+  - **Remove number** and **Remove monster**: removes the number's entry, or
+    the entries of all numbers of a monster with several. The dialog says what the game
     then does with the number (the kind of the old rules, no name from the
     list) and lists what still uses it and stays there: the quests of the
     quest window whose NPC it is or that ask to kill it, how many dialogue
@@ -658,10 +684,24 @@ item tools.
     Code that uses the number in other ways is not found: a `case` label, a
     function argument (`getMonsterName(236)`), a variable with another name.
   - **Kind**: each row has a combo with the monster's kind; picking another
-    kind changes it (one undo step) and selects the monster.
+    kind changes it (one undo step) and selects the monster. A monster row's
+    combo changes the kind its numbers share.
+- **Shared and own values** (Q-MN95, Q-MN96): with a number of a monster
+  with several numbers selected, Monster Attacks and Monster Sounds say over
+  each field whether the number shares it ("Attacks: Shared by the 3 numbers
+  of Death Centurion", grey, locked) or has its own ("Attacks: 336's own
+  value", yellow). **Make it this number's own** unlocks a shared field; the
+  number has its own value once the field differs from the monster's. The
+  file stores only differences: a value set back to the monster's is shared
+  again, also after an edit of the monster row. **Back to...** gives an own
+  field the monster's value or another number's own one, picked from a list.
+  In the Monster Browser a right click on a number's row does the same for
+  its name and kind. Each change is one undo step.
 - **Monster Translations**: the names in all languages, with **Save
   Monsters**, **Import names from NpcName txt** and **Export as NpcName
-  txt**, see
+  txt**. A monster with several numbers is one row for the names its numbers
+  share ("145 (3)"), followed by a row for each of its numbers with names of
+  its own; see
   [translation-system.md → In the monster editor](translation-system.md#in-the-monster-editor)
   and [Import and export of NpcName txt](#import-and-export-of-npcname-txt).
 - **Monster Model**: the model of the selected monster, from the model list:
@@ -781,10 +821,16 @@ item tools.
   of a player-shaped monster, a monster skill that
   0x69 plays no attack for, and each animation the attacks can play that the
   open model lacks, whose speed is 0, after which the model does not go back
-  to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)). With the
-  shipped lists it shows 50 warnings: 252's empty name, Molt's missing file,
-  and 48 of the attacks (the bosses' appear and attack 3, Bali's draw, the
-  Battle Castle guards' shock and the like). The checks run when
+  to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)); and the
+  checks of the monsters with their numbers (warnings): a number whose own
+  attacks are the generic pattern while its monster has attacks (P26), and
+  a map variant on maps where its numbers do not appear (a shared variant
+  where none of the monster's numbers does, a number's own one where that
+  number does not; numbers without maps are not checked). With the
+  shipped lists it shows 64 warnings: 252's empty name, Molt's missing file,
+  48 of the attacks (the bosses' appear and attack 3, Bali's draw, the
+  Battle Castle guards' shock and the like), the 13 numbers of P26 and
+  Erkanne's map variant on map 79, where OpenMU does not place it. The checks run when
   the window is first shown and on **Check**; after a change the window says
   that the monsters changed since the last check. Errors come first, and
   each kind can be hidden with its box. A click on a problem selects the
