@@ -78,6 +78,11 @@ add_test(
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
 )
 add_test(
+    NAME ensure_submodule_leaves_history_out
+    COMMAND "${CMAKE_COMMAND}" "-DMU_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/ensure-submodule"
+        -P "${MU_TESTS}/test_ensure_submodule.cmake"
+)
+add_test(
     NAME sdl_image_archive_contract
     COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
         -P "${MU_TESTS}/test_sdl_image_archive.cmake"

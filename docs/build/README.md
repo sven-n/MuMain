@@ -85,14 +85,36 @@ all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
 [nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
 the repository's submodule entry, for the SDL GPU renderer integration.
 
+CMake fetches the pinned commits without their history; git also brings the newest
+commit of each submodule's default branch. That is about 30 MB instead of 300 MB in
+every checkout and worktree. A submodule that already has its history keeps it.
+To work on a submodule with its history and all its branches, fetch them there,
+e.g. for RmlUi:
+
+```sh
+git -C src/ThirdParty/RmlUi remote set-branches origin "*"
+git -C src/ThirdParty/RmlUi fetch --unshallow
+```
+
+A clone can bring the submodules the same way from the start; `--depth 1` also
+leaves out MuMain's own history, for a checkout that only builds:
+
+```sh
+git clone --recurse-submodules --shallow-submodules https://github.com/sven-n/MuMain.git
+```
+
 If automatic initialization fails, run from the repository root:
 
 ```sh
-git submodule update --init -- src/ThirdParty/SDL src/ThirdParty/RmlUi
+git submodule update --init --depth 1 -- src/ThirdParty/SDL src/ThirdParty/RmlUi
 
 # For editor builds:
-git submodule update --init -- src/ThirdParty/imgui
+git submodule update --init --depth 1 -- src/ThirdParty/imgui
 ```
+
+A git server that sends only branch tips refuses `--depth 1` here for a pinned commit
+that is none, as SDL's and ImGui's are. Without `--depth 1`, git fetches the whole
+history; CMake falls back to that by itself.
 
 CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.
 Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
