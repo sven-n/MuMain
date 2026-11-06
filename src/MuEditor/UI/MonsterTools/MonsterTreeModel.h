@@ -54,7 +54,8 @@ public:
 private:
     std::vector<Row> m_rows;
     MonsterListModel::Filter m_filter;
-    // The open monsters, by their first number.
+    // The open monsters, by their id (MonsterDataHandler::FindGroupOf), which
+    // stays while numbers move in and out.
     std::set<int> m_open;
     int m_version = -1;
     int m_groupsVersion = -1;

@@ -169,6 +169,14 @@ TEST_CASE("Monster Browser tree: a monster with several numbers is a row that op
                                                     {175, Row::Kind::Number, 3, false},
                                                     {336, Row::Kind::Number, 3, false}});
 
+    // An open monster stays open when its first number moves out or a lower
+    // one moves in.
+    tree.SetOpen(145, true);
+    REQUIRE(g_MonsterEdits.MoveNumber("move", 145, 2));
+    CHECK(tree.IsOpen(175));
+    REQUIRE(g_MonsterEdits.Undo());
+    tree.SetOpen(145, false);
+
     // The rows follow a move into another monster.
     REQUIRE(g_MonsterEdits.MoveNumber("move", 2, 145));
     CHECK(Rows(tree) == std::vector<Row>{{2, Row::Kind::Monster, 4, false}});

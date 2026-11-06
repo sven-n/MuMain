@@ -10,6 +10,7 @@
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 #include <bitset>
+#include <optional>
 
 namespace MuEditor::Monsters
 {
@@ -59,7 +60,7 @@ const std::vector<MonsterTreeModel::Row>& MonsterTreeModel::GetRows(const Monste
             m_rows.push_back({number, Row::Kind::Single, 1, false});
             continue;
         }
-        const bool open = filtered || m_open.contains(numbers.front());
+        const bool open = filtered || IsOpen(number);
         m_rows.push_back({numbers.front(), Row::Kind::Monster, count, open});
         if (open)
         {
@@ -78,26 +79,27 @@ const std::vector<MonsterTreeModel::Row>& MonsterTreeModel::GetRows(const Monste
 
 void MonsterTreeModel::SetOpen(int number, bool open)
 {
-    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-    if (numbers.empty())
+    // Only a monster with several numbers opens.
+    const std::optional<int> monster = g_MonsterDataHandler.FindGroupOf(number);
+    if (!monster)
     {
         return;
     }
     if (open)
     {
-        m_open.insert(numbers.front());
+        m_open.insert(*monster);
     }
     else
     {
-        m_open.erase(numbers.front());
+        m_open.erase(*monster);
     }
     m_built = false;
 }
 
 bool MonsterTreeModel::IsOpen(int number) const
 {
-    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-    return !numbers.empty() && m_open.contains(numbers.front());
+    const std::optional<int> monster = g_MonsterDataHandler.FindGroupOf(number);
+    return monster && m_open.contains(*monster);
 }
 
 void MonsterTreeModel::KeepRowsAfterOwnEdit()
