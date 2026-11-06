@@ -134,7 +134,7 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
 
     g_MonsterDatabase.Build(result.monsters, I18N::GetCurrentLocale());
 #ifdef _EDITOR
-    m_groups = std::move(result.groups);
+    SetGroups(result.groups);
 #endif
     RegisterLocaleObserver();
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - loadStart;
@@ -294,12 +294,7 @@ bool MonsterDataHandler::Save(std::vector<Items::ItemDataIssue>& issues)
 {
     ValidateLocales(CollectMonsters(), issues);
     std::vector<MonsterGroup> groups = CollectGroups();
-    if (!SaveMonstersFile(GetMonstersFile(), groups, issues))
-    {
-        return false;
-    }
-    m_groups = std::move(groups);
-    return true;
+    return SaveMonstersFile(GetMonstersFile(), groups, issues);
 }
 
 bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
@@ -320,7 +315,7 @@ void MonsterDataHandler::UseMonsters(std::span<const MonsterGroup> monsters)
     // The data changes, not the language the names are shown in.
     const std::string displayLocale = g_MonsterDatabase.GetDisplayLocale();
     g_MonsterDatabase.Build(CollectNumberEntries(monsters), displayLocale);
-    m_groups.assign(monsters.begin(), monsters.end());
+    SetGroups(monsters);
     RegisterLocaleObserver();
     NotifyNamesChanged(AllNumbers);
 }
@@ -329,21 +324,24 @@ std::vector<MonsterGroup> MonsterDataHandler::CollectGroups() const
 {
     std::vector<MonsterGroup> groups;
     std::bitset<MonsterNumberCount> grouped;
-    for (const MonsterGroup& loaded : m_groups)
+    if (HasCurrentGroups())
     {
-        MonsterGroup group{loaded.shared, {}};
-        for (const MonsterDefinition& entry : loaded.numbers)
+        for (const auto& [id, layout] : m_groups)
         {
-            const MonsterDefinition* now = g_MonsterDatabase.Find(entry.number);
-            if (now != nullptr && !grouped[static_cast<std::size_t>(entry.number)])
+            MonsterGroup group{layout.shared, {}};
+            for (const int number : layout.numbers)
             {
-                group.numbers.push_back(*now);
-                grouped.set(static_cast<std::size_t>(entry.number));
+                const MonsterDefinition* now = g_MonsterDatabase.Find(number);
+                if (now != nullptr && !grouped[static_cast<std::size_t>(number)])
+                {
+                    group.numbers.push_back(*now);
+                    grouped.set(static_cast<std::size_t>(number));
+                }
             }
-        }
-        if (!group.numbers.empty())
-        {
-            groups.push_back(std::move(group));
+            if (!group.numbers.empty())
+            {
+                groups.push_back(std::move(group));
+            }
         }
     }
     for (int number = 0; number < MonsterNumberCount; ++number)
@@ -355,6 +353,95 @@ std::vector<MonsterGroup> MonsterDataHandler::CollectGroups() const
         }
     }
     return groups;
+}
+
+void MonsterDataHandler::SetGroups(std::span<const MonsterGroup> monsters)
+{
+    m_groups.clear();
+    for (const MonsterGroup& monster : monsters)
+    {
+        MonsterGroupLayout layout{MakeSharedValues(GetSharedValues(monster)), {}};
+        for (const MonsterDefinition& entry : monster.numbers)
+        {
+            layout.numbers.push_back(entry.number);
+        }
+        std::ranges::sort(layout.numbers);
+        m_groups.emplace(m_nextGroupId++, std::move(layout));
+    }
+    m_groupsBuild = g_MonsterDatabase.GetBuildCount();
+    IndexGroups();
+}
+
+bool MonsterDataHandler::HasCurrentGroups() const
+{
+    return m_groupsBuild == g_MonsterDatabase.GetBuildCount();
+}
+
+void MonsterDataHandler::IndexGroups()
+{
+    m_groupOfNumber.fill(-1);
+    for (const auto& [id, layout] : m_groups)
+    {
+        for (const int number : layout.numbers)
+        {
+            if (number >= 0 && number < MonsterNumberCount)
+            {
+                m_groupOfNumber[static_cast<std::size_t>(number)] = id;
+            }
+        }
+    }
+    ++m_groupsVersion;
+}
+
+std::optional<int> MonsterDataHandler::FindGroupOf(int number) const
+{
+    if (number < 0 || number >= MonsterNumberCount || !HasCurrentGroups())
+    {
+        return std::nullopt;
+    }
+    const int id = m_groupOfNumber[static_cast<std::size_t>(number)];
+    return id >= 0 ? std::optional<int>(id) : std::nullopt;
+}
+
+std::optional<MonsterGroupLayout> MonsterDataHandler::ReadGroup(int id) const
+{
+    if (!HasCurrentGroups())
+    {
+        return std::nullopt;
+    }
+    const auto found = m_groups.find(id);
+    return found != m_groups.end() ? std::optional<MonsterGroupLayout>(found->second) : std::nullopt;
+}
+
+void MonsterDataHandler::RestoreGroups(std::span<const MonsterGroupSnapshot> snapshots)
+{
+    // The monsters of a table built elsewhere are gone: its numbers are
+    // monsters of their own until a change lists them.
+    if (!HasCurrentGroups())
+    {
+        m_groups.clear();
+        m_groupsBuild = g_MonsterDatabase.GetBuildCount();
+    }
+    for (const MonsterGroupSnapshot& snapshot : snapshots)
+    {
+        if (snapshot.group)
+        {
+            MonsterGroupLayout layout = *snapshot.group;
+            std::ranges::sort(layout.numbers);
+            m_groups.insert_or_assign(snapshot.id, std::move(layout));
+            m_nextGroupId = std::max(m_nextGroupId, snapshot.id + 1);
+        }
+        else
+        {
+            m_groups.erase(snapshot.id);
+        }
+    }
+    IndexGroups();
+}
+
+int MonsterDataHandler::MakeGroupId()
+{
+    return m_nextGroupId++;
 }
 
 std::optional<MonsterModelDefinition> MonsterDataHandler::ReadModel(int slot) const
@@ -431,7 +518,6 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
-    m_groups = std::move(groups);
     ++m_filesVersion;
     return true;
 }

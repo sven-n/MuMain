@@ -5,10 +5,12 @@
 #include "MonsterEditHistory.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace MuEditor::Monsters
@@ -37,8 +39,50 @@ public:
     // the English name is empty, or a name has the separator or a language
     // code that is not one.
     bool AddMonster(std::string label, const Data::Monsters::MonsterDefinition& monster);
-    // Removes the monster's entry; false when it has none.
+    // Removes the monster's entry, and the number from its monster; false
+    // when it has none.
     bool RemoveMonster(std::string label, int number);
+
+    // The monsters with their numbers (D61). A number's monster is the one
+    // MonsterDataHandler lists it in, else a monster of its own; the actions
+    // name a monster by one of its numbers.
+
+    // The numbers of the number's monster that have an entry, sorted; empty
+    // when the number has none.
+    std::vector<int> ReadMonsterNumbers(int number) const;
+    // The values the numbers of the number's monster share
+    // (Data::Monsters::MakeSharedValues): its entry's when it is the
+    // monster's only number; nullopt when it has no entry.
+    std::optional<Data::Monsters::MonsterDefinition> ReadSharedValues(int number) const;
+    // Sets the shared values of the number's monster (`number` and `maps` of
+    // `values` are not used): a field that changes changes in the numbers
+    // that share it; the numbers' own values stay (Q-MN96). For a monster
+    // with one number it is SetMonster. False, with nothing changed, when the
+    // number has no entry or a name has the separator or a language code
+    // that is not one.
+    bool SetSharedValues(std::string label, int number, const Data::Monsters::MonsterDefinition& values);
+    // Adds `number` to the monster of `memberNumber`, with the monster's
+    // shared values and no maps. False, with nothing changed, when
+    // `memberNumber` has no entry or `number` is not free (IsFreeMonsterNumber).
+    bool AddNumber(std::string label, int memberNumber, int number);
+    // Adds `number` to the monster of `from` with from's values, its own
+    // ones included, and no maps (Q-MN99). False like AddNumber.
+    bool CopyNumber(std::string label, int from, int number);
+    // Moves the number into the monster of `memberNumber`; its values stay,
+    // and those equal to that monster's are shared there (Q-MN97). False,
+    // with nothing changed, when one has no entry or both are in one monster.
+    bool MoveNumber(std::string label, int number, int memberNumber);
+    // Makes the number a monster of its own, with its values (Q-MN97). False
+    // when it has no entry or is its monster's only number.
+    bool SplitNumber(std::string label, int number);
+    // Removes every number of the number's monster; false when it has no
+    // entry.
+    bool RemoveMonsterWithNumbers(std::string label, int number);
+    // When every number of the number's monster has the same value in the
+    // field and the monster another one, the monster takes it: the numbers
+    // share it again (an import that gave each number the same name). No
+    // entry changes. False when nothing changed.
+    bool ShareEqualValues(std::string label, int number, Data::Monsters::MonsterValueField field);
 
     // Stores the model entry at its slot (MonsterModelDefinition::slot),
     // which must have an entry, for the monster the tool shows it for (its
@@ -101,6 +145,16 @@ private:
     // The same for a sound set.
     void ChangeSoundSet(std::string label, const std::string& name,
                         const std::optional<Data::Monsters::MonsterSoundSet>& after, int monster);
+    // The same for a monster with its numbers (nullopt removes it).
+    void ChangeGroup(std::string label, int id, const std::optional<Data::Monsters::MonsterGroupLayout>& after,
+                     int monster);
+    // The id and layout of the number's monster, which must have an entry:
+    // a new id and the number alone for a monster of its own. Numbers
+    // without an entry are left out; a monster with one number shares its
+    // entry's values.
+    std::pair<int, Data::Monsters::MonsterGroupLayout> ReadLayoutOf(int number);
+    // Adds the entry, whose number is free, to the monster of `memberNumber`.
+    void AddToMonsterOf(std::string label, int memberNumber, const Data::Monsters::MonsterDefinition& entry);
     // Into the history, or into the open group.
     void Record(MonsterEditEntry entry);
 

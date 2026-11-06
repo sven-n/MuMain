@@ -48,16 +48,29 @@ struct MonsterSoundSetEditStep
     int monster = -1;
 };
 
+// One monster with its numbers an edit changed (D61), by its id: before and
+// after (nullopt: none), and the number the tools showed, which its undo
+// selects again (-1: none).
+struct MonsterGroupEditStep
+{
+    int id = 0;
+    std::optional<Data::Monsters::MonsterGroupLayout> before;
+    std::optional<Data::Monsters::MonsterGroupLayout> after;
+    int monster = -1;
+};
+
 // What one action of a tool changed, undone and redone as a whole: an edited
 // name, a kind, an added monster, an import of names, a model's speed, a
-// sound set and the cue it plays on. Each number, model slot and set name is
-// in one step of an entry at most.
+// sound set and the cue it plays on, a number moved into another monster.
+// Each number, model slot, set name and monster is in one step of an entry
+// at most.
 struct MonsterEditEntry
 {
     std::string label;
     std::vector<MonsterEditStep> steps;
     std::vector<MonsterModelEditStep> models;
     std::vector<MonsterSoundSetEditStep> soundSets;
+    std::vector<MonsterGroupEditStep> groups;
 };
 
 // The undo history of the monster tools for the session. Entries are applied
@@ -81,6 +94,10 @@ public:
         // The same for the sound sets; needed only for entries with set steps.
         std::function<std::optional<Data::Monsters::MonsterSoundSet>(const std::string& name)> readSoundSet;
         std::function<void(std::span<const Data::Monsters::MonsterSoundSetSnapshot> snapshots)> restoreSoundSets;
+        // The same for the monsters with their numbers; needed only for
+        // entries with monster steps.
+        std::function<std::optional<Data::Monsters::MonsterGroupLayout>(int id)> readGroup;
+        std::function<void(std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)> restoreGroups;
     };
 
     // Why the last Undo or Redo did nothing.
@@ -117,7 +134,7 @@ public:
     }
 
     // The number the last Undo or Redo changed first, or the monster its
-    // first model step was made for, to select it.
+    // first model, set or monster step was made for, to select it.
     std::optional<int> GetLastChangedMonster() const
     {
         return m_lastChangedMonster;

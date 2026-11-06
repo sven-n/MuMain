@@ -2,6 +2,7 @@
 
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 
+#include <array>
 #include <span>
 #include <vector>
 
@@ -31,4 +32,33 @@ std::vector<MonsterDefinition> CollectNumberEntries(std::span<const MonsterGroup
 
 // A monster of its own for each entry, which shares all its values with it.
 std::vector<MonsterGroup> MakeOneNumberGroups(std::span<const MonsterDefinition> entries);
+
+// The fields a number may have as its own (Q-MN50); `number` and `maps` are
+// each number's and never shared.
+enum class MonsterValueField
+{
+    Names,
+    Kind,
+    Model,
+    SoundSet,
+    Attacks,
+    MapVariants,
+    RandomVariants,
+};
+
+inline constexpr std::array<MonsterValueField, 7> MonsterValueFields{
+    MonsterValueField::Names,          MonsterValueField::Kind,    MonsterValueField::Model,
+    MonsterValueField::SoundSet,       MonsterValueField::Attacks, MonsterValueField::MapVariants,
+    MonsterValueField::RandomVariants,
+};
+
+// Whether the two have the same value in the field.
+bool HasSameValue(const MonsterDefinition& left, const MonsterDefinition& right, MonsterValueField field);
+
+// Gives `to` the value `from` has in the field.
+void CopyValue(MonsterDefinition& to, const MonsterDefinition& from, MonsterValueField field);
+
+// The values as a monster's shared values hold them: without a number and
+// maps.
+MonsterDefinition MakeSharedValues(const MonsterDefinition& values);
 } // namespace Data::Monsters

@@ -63,6 +63,12 @@ public:
     {
         return m_version;
     }
+    // Counts the Build calls: the monster editor's list of the monsters and
+    // their numbers belongs to the table of one Build.
+    int GetBuildCount() const
+    {
+        return m_builds;
+    }
 
 private:
     using NameBuffer = std::array<wchar_t, MaxMonsterNameLength + 1>;
@@ -75,6 +81,7 @@ private:
     std::array<NameBuffer, MonsterNumberCount> m_englishNames{};
     std::string m_displayLocale = std::string(LocalizedString::NeutralLocale);
     int m_version = 0;
+    int m_builds = 0;
 };
 
 // What the game uses of the table, with the answers it gave before the table
