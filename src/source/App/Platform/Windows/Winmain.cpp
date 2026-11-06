@@ -1973,6 +1973,12 @@ static void SetWorkingDirectoryToBasePath()
 #endif
 }
 
+// A UI language switch after start-up (the options window, the editor), so a report shows the language it was in.
+static void LogUiLanguageChange(void* /*context*/) noexcept
+{
+    g_ErrorReport.Write(L"> UI language changed to %hs.\r\n", I18N::GetCurrentLocale());
+}
+
 // The connect server: the command line's (a launcher passes one) or else config.ini's.
 static void SelectConnectServer(wchar_t* commandLine)
 {
@@ -2307,8 +2313,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
-    // The editor still restores its own MuEditorConfig language preference
-    // later in its init, which feeds through to I18N::SetLocale as well.
+    // The options window and the editor's language box switch it later.
     {
         std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
@@ -2318,6 +2323,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
     g_ErrorReport.Write(L"> UI language = %hs, item names %ls.\r\n", I18N::GetCurrentLocale(),
                         GameConfig::GetInstance().GetTranslateItemNames() ? L"translated" : L"in English");
+    I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR
