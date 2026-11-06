@@ -5,9 +5,7 @@
 // need to state what was measured -- a frame time without a build configuration next to it is
 // not a result anybody can act on.
 //
-// The git fields are optional: the build system does not compute them, so a build script that
-// wants them in the exports defines MU_GIT_DESCRIBE (and MU_GIT_DIRTY when the tree was not
-// clean). Absent, the exports say "unknown" rather than inventing a commit.
+// The commit comes from MuGitCommit.h, which cmake/WriteGitCommit.cmake writes for every build.
 
 namespace Core::Build
 {
@@ -54,16 +52,4 @@ inline constexpr const char* kArchitecture =
 
 inline constexpr const char* kDate = __DATE__;
 inline constexpr const char* kTime = __TIME__;
-
-#ifdef MU_GIT_DESCRIBE
-inline constexpr const char* kGitDescribe = MU_GIT_DESCRIBE;
-#else
-inline constexpr const char* kGitDescribe = "";
-#endif
-
-#ifdef MU_GIT_DIRTY
-inline constexpr bool kGitDirty = true;
-#else
-inline constexpr bool kGitDirty = false;
-#endif
 } // namespace Core::Build
