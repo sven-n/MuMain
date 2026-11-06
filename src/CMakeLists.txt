@@ -770,8 +770,8 @@ set_source_files_properties(
     COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang,GNU>:-Wno-error=tautological-compare>"
 )
 
-# stdafx.h is the precompiled header of the files that include it: parsed once, not in each of them (issue #971,
-# step 4). A file that does not include it compiles without it, as before. The check runs at configure time, so a
+# stdafx.h is the precompiled header of the files that include it (as "stdafx.h" or "App/stdafx.h"): parsed once, not
+# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before. The check runs at configure time, so a
 # file that adds or drops the include after that still builds, only without or with the header until the next
 # configure. CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
 # MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
@@ -782,7 +782,7 @@ set_source_files_properties(
 target_precompile_headers(MuClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/App/stdafx.h")
 set(MU_SOURCES_WITHOUT_STDAFX "")
 foreach(source IN LISTS MU_CLIENT_SOURCES)
-  file(STRINGS "${source}" stdafx_include REGEX "^[ \t]*#[ \t]*include[ \t]+\"stdafx\\.h\"" LIMIT_COUNT 1)
+  file(STRINGS "${source}" stdafx_include REGEX "^[ \t]*#[ \t]*include[ \t]+\"(App/)?stdafx\\.h\"" LIMIT_COUNT 1)
   if(NOT stdafx_include)
     list(APPEND MU_SOURCES_WITHOUT_STDAFX "${source}")
   endif()
