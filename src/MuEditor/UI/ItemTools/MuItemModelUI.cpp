@@ -57,7 +57,7 @@ void CMuItemModelUI::Render(bool* open)
     if (ToolWindow::Begin(I18N::Editor::ItemModel, MuEditor::WindowIds::ItemModel, open))
     {
         const int itemType = g_ItemSelection.GetItemType();
-        g_ItemMeshFocus.BeginFrame(itemType);
+        g_ItemMeshFocus.BeginFrame(itemType, ImGui::GetFrameCount());
         ItemModelDefinition* model = m_draft.Begin(itemType, ToolWindow::GetDataVersion());
         ShowInventoryDisplay(model, itemType);
         // Also a number with a model but no item can be edited here.

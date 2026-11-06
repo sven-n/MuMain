@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "Data/GameData/LookData/LookDefinition.h"
+#include "Data/GameData/LookData/LookEffects.h"
 
 #include <string>
 
@@ -13,6 +14,17 @@ namespace MuEditor::Looks::Fields
 {
 bool Layer(Data::Looks::Layer& layer);
 bool ItemValues(Data::Looks::ItemValues& values);
+// A layer as its effect (design L35, L40): its meshes, then only the fields of its main effect and of what else it
+// does, as `effect` describes it (a pulse's strength with its curve, a shine's motion, an overlay's texture).
+bool Effect(Data::Looks::Layer& layer, const Data::Looks::LayerEffect& effect);
+
+// "Pulse", and the gallery's line about it ("" for the base).
+const char* EffectName(Data::Looks::EffectKind kind);
+const char* EffectNote(Data::Looks::EffectKind kind);
+// "Shine (glows, flows)": the main effect and what else the layer does.
+std::string EffectLabel(const Data::Looks::LayerEffect& effect);
+// "every mesh but 1", "meshes 0, 2".
+std::string DescribeMeshes(const Data::Looks::MeshSet& meshes);
 
 // One line written from a layer's fields, for the layer list: "Reflection: slow drift, glow, every mesh but 2; texture,
 // glow mesh".

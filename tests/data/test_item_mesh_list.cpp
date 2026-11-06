@@ -277,6 +277,21 @@ TEST_CASE("The preview shows the mesh pointed at in the frame before, else the k
     CHECK_FALSE(focus.Kept());
 }
 
+TEST_CASE("Two windows that show the item begin the same frame once [editor][items][mesh_list]")
+{
+    CItemMeshFocus focus;
+    focus.BeginFrame(100, 1);
+    // The Style Editor's part row is pointed at after the Item Model window began frame 2.
+    focus.BeginFrame(100, 2);
+    focus.BeginFrame(100, 2);
+    focus.Point(3);
+    focus.BeginFrame(100, 3);
+    focus.BeginFrame(100, 3);
+    CHECK(focus.Shown() == 3);
+    focus.BeginFrame(100, 4);
+    CHECK_FALSE(focus.Shown());
+}
+
 TEST_CASE("A click on the preview keeps the mesh it hit, or lets go [editor][items][mesh_list]")
 {
     CItemMeshFocus focus;

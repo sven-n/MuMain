@@ -12,6 +12,7 @@
 #include "Core/MuEditorCore.h"
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -20,6 +21,7 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/StyleEditor/LookEdits.h"
+#include "UI/StyleEditor/LookParts.h"
 #include "UI/StyleEditor/MuStyleEditorUI.h"
 #include "UI/StyleEditor/RenderStyleCheckArea.h"
 #include "imgui.h"
@@ -177,6 +179,46 @@ TEST_CASE("The Style Editor opens on a look of the file with its fields, and on 
     CHECK(g_ItemEdits.Undo());
     RenderStyleEditor();
     CHECK(g_MuStyleEditorUI.GetDraft() == look);
+}
+
+TEST_CASE("The Style Editor shows a look as parts with effects, and the gallery adds one on the picked part (design "
+          "L35, L40) [editor][looks]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    g_ItemSelection.Select(MuEditor::Items::ItemSelection::NoItem);
+    LookDefinition look = Plain("brightBlade");
+    Layer glow;
+    glow.meshes.meshes = {1};
+    glow.glowMesh = 1;
+    glow.glowStrength = 1.0f;
+    look.layers.push_back(glow);
+    const LookEditsScope looks({look});
+
+    g_MuStyleEditorUI.ShowRenderStyle("brightBlade");
+    RenderStyleEditor();
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetPickedPart() == MuEditor::Looks::EveryPart);
+
+    // Without an item the parts are the meshes the look names.
+    g_MuStyleEditorUI.PickPart(1);
+    g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Pulse);
+    REQUIRE(g_MuStyleEditorUI.GetDraft().layers.size() == 3);
+    const Layer& pulse = g_MuStyleEditorUI.GetDraft().layers[2];
+    CHECK(pulse.meshes.meshes == std::vector<int>{1});
+    CHECK(Data::Looks::DescribeEffect(pulse).kind == Data::Looks::EffectKind::Pulse);
+    CHECK(g_MuStyleEditorUI.GetPickedLine() == 2);
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetPickedPart() == 1);
+    CHECK(g_MuStyleEditorUI.GetDraft().layers.size() == 3);
+    // The game draws the look as applied until Apply.
+    CHECK(GameLook("brightBlade")->layers.size() == 2);
+
+    // On every part, an effect draws every mesh.
+    g_MuStyleEditorUI.PickPart(MuEditor::Looks::EveryPart);
+    g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Shine);
+    CHECK(g_MuStyleEditorUI.GetDraft().layers.back().meshes.IsAll());
+    RenderStyleEditor();
 }
 
 TEST_CASE("Data Checks: a click on a render style problem selects its item and opens the Style Editor [editor]")

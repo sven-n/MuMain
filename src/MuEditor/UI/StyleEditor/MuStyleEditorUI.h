@@ -2,26 +2,33 @@
 
 #ifdef _EDITOR
 
+#include "LookParts.h"
 #include "StyleEditorRoots.h"
 
 #include "../MuEditor/UI/Common/NamedTree.h"
 #include "../MuEditor/UI/ItemTools/ItemModelPreview.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/LookData/LookDefinition.h"
+#include "Data/GameData/LookData/LookEffects.h"
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
-// The Style Editor (design L18 to L20, L24, L31): Windows > Style Editor, built like the Colors window. A tree with the
-// roots Render styles and Item effects and the user's folders; each look with how many items use it, "(code)" for one
-// still in code, which can be looked at but not changed. The picked look of Data/Effects/RenderStyles.json shows its
-// layers in drawing order, one line each, and the item values it leaves after drawing as the last line; below, the
-// fields of the picked line, the problems of the look as it is now (Apply is off while a fatal one is left) and the
-// items that use it. Above them, staying where it is while they scroll, a preview of the item picked in the item tools:
-// the look as applied beside the look as the fields have it, before it is applied, with one camera, the time stopped
-// or moving, an eye per layer (for the edited one) and "Draw as: doppelganger". Apply lists the items a change reaches
-// (D26). The changes are item edits (L39): one undo history with the item tools, and Save Items writes the file.
+// The Style Editor (design L18 to L20, L24, L31, L35): Windows > Style Editor, built like the Colors window. A tree
+// with the roots Render styles and Item effects and the user's folders; each look with how many items use it, "(code)"
+// for one still in code, which can be looked at but not changed. The picked look of Data/Effects/RenderStyles.json
+// shows the parts of the item picked in the item tools, each with the effects on it, after a row for the look's base
+// (the item's own texture) and one for every part; a part is picked in the list or by a click on it in the preview, Add
+// effect puts an effect of the gallery on it (L40), and the picked effect shows only its own settings (All fields:
+// every field of its layer). "Show the layers" shows the look as its layers in drawing order instead, with the item
+// values it leaves after drawing as the last line, and the fields of the picked line. Below them, the problems of the
+// look as it is now (Apply is off while a fatal one is left) and the items that use it. Above them, staying where it is
+// while they scroll, a preview of the item: the look as applied beside the look as the fields have it, before it is
+// applied, with one camera, the time stopped or moving, an eye per effect or layer (for the edited one) and "Draw as:
+// doppelganger". Apply lists the items a change reaches (D26). The changes are item edits (L39): one undo history with
+// the item tools, and Save Items writes the file.
 class CMuStyleEditorUI
 {
 public:
@@ -45,6 +52,21 @@ public:
     [[nodiscard]] const Data::Looks::LookDefinition& GetDraft() const
     {
         return m_draft;
+    }
+    // The picked row of the parts list: a mesh, MuEditor::Looks::EveryPart or BasePart.
+    [[nodiscard]] int GetPickedPart() const
+    {
+        return m_part;
+    }
+    // A part shows alone in the preview, the others see-through, as a row of the mesh list keeps it; the base and every
+    // part show the whole item.
+    void PickPart(int part);
+    // Puts the gallery's effect on the picked part (every part for the base row) into the draft and picks it.
+    void AddEffect(Data::Looks::EffectKind kind);
+    // The picked line: a layer, or past the last one (the item values of the layers view, no effect in the parts view).
+    [[nodiscard]] std::size_t GetPickedLine() const
+    {
+        return m_line;
     }
 
 private:
@@ -73,6 +95,13 @@ private:
     void RenderConfirm();
     void RenderLayers();
     void RenderLayerToolbar();
+    void RenderParts();
+    void RenderPartRow(const char* label, int part, const std::vector<std::size_t>& layers);
+    void RenderEffectChip(std::size_t layer, int part);
+    void RenderAddEffect();
+    void RenderEffectSettings();
+    // The part rows: the meshes of the item's model, and the others the look names.
+    [[nodiscard]] std::vector<MuEditor::Looks::LookPart> PartRows() const;
     void RenderChecks();
     void RenderUsers(const std::vector<int>& users);
     void RenderPreview(const Data::Looks::LookDefinition* look);
@@ -95,6 +124,11 @@ private:
     std::size_t m_line = 0;
     // The layers the preview leaves out (the eyes), by layer: 1 for one left out.
     std::vector<std::uint8_t> m_hiddenLayers;
+    bool m_showLayers = false;
+    bool m_allFields = false;
+    int m_part = MuEditor::Looks::EveryPart;
+    // The mesh a click in the preview kept, as last seen: a new one picks its part.
+    std::optional<int> m_keptMesh;
     // The problems of the draft, as checked last, and what they were checked for.
     std::vector<Data::Items::ItemDataIssue> m_draftIssues;
     Data::Looks::LookDefinition m_checkedDraft;

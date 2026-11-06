@@ -6,6 +6,7 @@
 
 #include "LookEdits.h"
 #include "LookFields.h"
+#include "LookParts.h"
 #include "RenderStyleCheckArea.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -16,6 +17,7 @@
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemMeshFocus.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
@@ -27,6 +29,7 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookChecks.h"
+#include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookJson.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -43,14 +46,19 @@
 
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
+using Data::Looks::EffectKind;
 using Data::Looks::Layer;
 using Data::Looks::LookDefinition;
+using MuEditor::Looks::BasePart;
+using MuEditor::Looks::EveryPart;
+using MuEditor::Looks::LookPart;
 
 namespace
 {
 constexpr char FolderPopupId[] = "###LookFolder";
 constexpr char NamePopupId[] = "###LookName";
 constexpr char ConfirmPopupId[] = "###LookChange";
+constexpr char AddEffectPopupId[] = "###AddEffect";
 constexpr char DragPayloadType[] = "MU_LOOKS_TREE";
 // The roots in the order the tree shows them.
 constexpr std::size_t RenderStylesRootIndex = 0;
@@ -60,6 +68,9 @@ constexpr float TreeWidth = 260.0f;
 constexpr float NameWidth = 260.0f;
 constexpr float UserListLines = 6.0f;
 constexpr float LayerListLines = 7.0f;
+constexpr float PartListLines = 8.0f;
+constexpr float PartWidth = 200.0f;
+constexpr float EffectNoteColumn = 170.0f;
 constexpr float MaxPreviewSeconds = 60.0f;
 // The problems of a look are about "looks[0]", the only one checked.
 constexpr std::string_view CheckedLookField = "looks[0].";
@@ -123,6 +134,31 @@ void RenderIssue(const ItemDataIssue& issue)
     ImGui::PopStyleColor();
 }
 
+// The layers a row of the parts list shows: the base's, whatever meshes they draw, or the effects on the part.
+std::vector<std::size_t> RowLayers(const LookDefinition& look, int part)
+{
+    std::vector<std::size_t> layers;
+    if (part == BasePart)
+    {
+        for (std::size_t index = 0; index < look.layers.size(); ++index)
+        {
+            if (Data::Looks::DescribeEffect(look.layers[index]).kind == EffectKind::Base)
+            {
+                layers.push_back(index);
+            }
+        }
+        return layers;
+    }
+    for (const std::size_t index : MuEditor::Looks::LayersOn(look, part))
+    {
+        if (Data::Looks::DescribeEffect(look.layers[index]).kind != EffectKind::Base)
+        {
+            layers.push_back(index);
+        }
+    }
+    return layers;
+}
+
 // The clock of the game for one drawing: the preview's stopped time.
 class WorldTimeScope
 {
@@ -164,6 +200,8 @@ void CMuStyleEditorUI::Render(bool* open)
     // One of the item tools (design L39): their docking, undo history and Save Items.
     if (MuEditor::Items::ToolWindow::Begin(I18N::Editor::StyleEditor, MuEditor::WindowIds::StyleEditor, open))
     {
+        // The parts it points at show in the previews, the Item Model window's too.
+        g_ItemMeshFocus.BeginFrame(g_ItemSelection.GetItemType(), ImGui::GetFrameCount());
         const MuEditor::NamedTreeTexts texts = TreeTexts();
         RenderFileBar();
         RenderToolbar();
@@ -448,11 +486,19 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
     ImGui::TextUnformatted(name.c_str());
     RenderApply(look);
     RenderPreview(&m_draft);
-    // The look's problems, layers and fields scroll below the preview, which stays where it is.
+    // The look's problems, parts or layers and fields scroll below the preview, which stays where it is.
     if (ImGui::BeginChild("##Look"))
     {
         RenderChecks();
-        RenderLayers();
+        ImGui::Checkbox(I18N::Editor::ShowTheLayers, &m_showLayers);
+        if (m_showLayers)
+        {
+            RenderLayers();
+        }
+        else
+        {
+            RenderParts();
+        }
         ImGui::Separator();
         RenderUsers(MuEditor::Items::FindRenderStyleUsers(name));
     }
@@ -638,6 +684,229 @@ void CMuStyleEditorUI::RenderLayerToolbar()
         m_line = std::min(m_line, layers.size());
     }
     ImGui::EndDisabled();
+}
+
+std::vector<LookPart> CMuStyleEditorUI::PartRows() const
+{
+    std::vector<LookPart> rows = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
+    for (const Layer& layer : m_draft.layers)
+    {
+        if (layer.meshes.allBut)
+        {
+            continue;
+        }
+        for (const int mesh : layer.meshes.meshes)
+        {
+            if (std::ranges::find(rows, mesh, &LookPart::mesh) == rows.end())
+            {
+                rows.push_back({.mesh = mesh});
+            }
+        }
+    }
+    std::ranges::sort(rows, {}, &LookPart::mesh);
+    return rows;
+}
+
+void CMuStyleEditorUI::PickPart(int part)
+{
+    m_part = part;
+    const std::optional<int> kept = g_ItemMeshFocus.Kept();
+    if (part >= 0 ? kept != part : kept.has_value())
+    {
+        g_ItemMeshFocus.ToggleKept(part >= 0 ? part : *kept);
+    }
+    m_keptMesh = g_ItemMeshFocus.Kept();
+}
+
+void CMuStyleEditorUI::AddEffect(EffectKind kind)
+{
+    std::vector<int> meshes;
+    if (m_part >= 0)
+    {
+        meshes.push_back(m_part);
+    }
+    m_draft.layers.push_back(Data::Looks::MakeEffectLayer(kind, std::move(meshes)));
+    m_hiddenLayers.resize(m_draft.layers.size() - 1, 0);
+    m_hiddenLayers.push_back(0);
+    m_line = m_draft.layers.size() - 1;
+}
+
+void CMuStyleEditorUI::RenderParts()
+{
+    // A click on a part in the preview picks its row.
+    const std::optional<int> kept = g_ItemMeshFocus.Kept();
+    if (kept != m_keptMesh)
+    {
+        m_keptMesh = kept;
+        if (kept)
+        {
+            m_part = *kept;
+        }
+    }
+    const std::vector<LookPart> parts = PartRows();
+    if (m_part >= 0 && std::ranges::find(parts, m_part, &LookPart::mesh) == parts.end())
+    {
+        m_part = EveryPart;
+    }
+    m_hiddenLayers.resize(m_draft.layers.size(), 0);
+
+    ImGui::TextUnformatted(I18N::Editor::PartsAndTheirEffects);
+    RenderNote(I18N::Editor::PartsNote);
+    constexpr ImGuiTableFlags flags =
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable;
+    const float height = PartListLines * ImGui::GetFrameHeightWithSpacing();
+    std::string pickedLabel = I18N::Editor::EveryPart;
+    if (ImGui::BeginTable("##Parts", 2, flags, ImVec2(0.0f, height)))
+    {
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableSetupColumn(I18N::Editor::Part, ImGuiTableColumnFlags_WidthFixed,
+                                PartWidth * g_MuEditorCore.GetUIScale());
+        ImGui::TableSetupColumn(I18N::Editor::Effects, ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
+        RenderPartRow(I18N::Editor::BaseOwnTexture, BasePart, RowLayers(m_draft, BasePart));
+        RenderPartRow(I18N::Editor::EveryPart, EveryPart, RowLayers(m_draft, EveryPart));
+        for (const LookPart& part : parts)
+        {
+            const std::string label = MuEditor::Looks::PartLabel(part);
+            RenderPartRow(label.c_str(), part.mesh, RowLayers(m_draft, part.mesh));
+            if (part.mesh == m_part)
+            {
+                pickedLabel = label;
+            }
+        }
+        ImGui::EndTable();
+    }
+
+    // The base is the item's own texture, no effect of the gallery.
+    ImGui::BeginDisabled(m_part == BasePart);
+    const std::string add = I18N::Format(I18N::Editor::AddEffectTo0, {pickedLabel}) + AddEffectPopupId;
+    if (ImGui::Button(add.c_str()))
+    {
+        ImGui::OpenPopup(AddEffectPopupId);
+    }
+    ImGui::EndDisabled();
+    RenderAddEffect();
+    ImGui::Separator();
+    RenderEffectSettings();
+}
+
+void CMuStyleEditorUI::RenderPartRow(const char* label, int part, const std::vector<std::size_t>& layers)
+{
+    ImGui::PushID(part);
+    ImGui::TableNextRow();
+    ImGui::TableSetColumnIndex(0);
+    if (ImGui::Selectable(label, m_part == part,
+                          ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+    {
+        PickPart(part);
+    }
+    if (part >= 0 && ImGui::IsItemHovered())
+    {
+        g_ItemMeshFocus.Point(part);
+    }
+    ImGui::TableSetColumnIndex(1);
+    if (layers.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::NoEffect);
+    }
+    for (std::size_t index = 0; index < layers.size(); ++index)
+    {
+        if (index > 0)
+        {
+            ImGui::SameLine();
+        }
+        RenderEffectChip(layers[index], part);
+    }
+    ImGui::PopID();
+}
+
+void CMuStyleEditorUI::RenderEffectChip(std::size_t layer, int part)
+{
+    ImGui::PushID(static_cast<int>(layer));
+    bool shown = m_hiddenLayers[layer] == 0;
+    if (ImGui::Checkbox("##Shown", &shown))
+    {
+        m_hiddenLayers[layer] = static_cast<std::uint8_t>(shown ? 0 : 1);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::ShowThisEffectInThePreview);
+    }
+    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+    const Layer& drawn = m_draft.layers[layer];
+    std::string label = MuEditor::Looks::Fields::EffectLabel(Data::Looks::DescribeEffect(drawn));
+    // The rows of the base and of every part say which meshes, when not all.
+    if (part == BasePart || (part == EveryPart && !drawn.meshes.IsAll()))
+    {
+        label += ": " + MuEditor::Looks::Fields::DescribeMeshes(drawn.meshes);
+    }
+    const bool picked = m_line == layer;
+    if (picked)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+    }
+    if (ImGui::SmallButton(label.c_str()))
+    {
+        PickPart(part);
+        m_line = layer;
+    }
+    if (picked)
+    {
+        ImGui::PopStyleColor();
+    }
+    ImGui::PopID();
+}
+
+void CMuStyleEditorUI::RenderAddEffect()
+{
+    if (!ImGui::BeginPopup(AddEffectPopupId))
+    {
+        return;
+    }
+    for (const EffectKind kind : Data::Looks::GetGalleryEffects())
+    {
+        ImGui::PushID(static_cast<int>(kind));
+        if (ImGui::Selectable(MuEditor::Looks::Fields::EffectName(kind)))
+        {
+            AddEffect(kind);
+        }
+        ImGui::SameLine(EffectNoteColumn * g_MuEditorCore.GetUIScale());
+        ImGui::TextDisabled("%s", MuEditor::Looks::Fields::EffectNote(kind));
+        ImGui::PopID();
+    }
+    ImGui::EndPopup();
+}
+
+void CMuStyleEditorUI::RenderEffectSettings()
+{
+    std::vector<Layer>& layers = m_draft.layers;
+    if (m_line >= layers.size())
+    {
+        RenderNote(I18N::Editor::PickAnEffectOrAddOne);
+        return;
+    }
+    Layer& layer = layers[m_line];
+    const Data::Looks::LayerEffect effect = Data::Looks::DescribeEffect(layer);
+    ImGui::SeparatorText(MuEditor::Looks::Fields::EffectLabel(effect).c_str());
+    ImGui::Checkbox(I18N::Editor::AllFields, &m_allFields);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::RemoveTheEffect))
+    {
+        layers.erase(layers.begin() + static_cast<std::ptrdiff_t>(m_line));
+        m_hiddenLayers.erase(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(m_line));
+        m_line = layers.size();
+        return;
+    }
+    ImGui::PushID("Effect");
+    if (m_allFields)
+    {
+        MuEditor::Looks::Fields::Layer(layer);
+    }
+    else
+    {
+        MuEditor::Looks::Fields::Effect(layer, effect);
+    }
+    ImGui::PopID();
 }
 
 void CMuStyleEditorUI::RenderChecks()

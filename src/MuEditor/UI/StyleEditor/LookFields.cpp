@@ -652,6 +652,82 @@ template <typename T> std::string NameIn(const Names<T>& names, T value)
     }
     return "";
 }
+
+// The fields an effect shows, as bits.
+namespace EffectField
+{
+enum : unsigned
+{
+    Motion = 1u << 0,
+    Blend = 1u << 1,
+    Texture = 1u << 2,
+    Light = 1u << 3,
+    Opacity = 1u << 4,
+    GlowMesh = 1u << 5,
+    GlowStrength = 1u << 6,
+    Scroll = 1u << 7,
+};
+} // namespace EffectField
+
+bool DrawsGlowing(const GlowMesh& mesh)
+{
+    return std::holds_alternative<int>(mesh) || std::holds_alternative<AllGlowMeshes>(mesh);
+}
+
+// A glow is its glow mesh's strength, or the opacity of a layer added over the rest.
+unsigned GlowFields(const Data::Looks::Layer& layer)
+{
+    if (DrawsGlowing(layer.glowMesh) || std::holds_alternative<Shape>(layer.glowStrength))
+    {
+        return EffectField::GlowMesh | EffectField::GlowStrength;
+    }
+    return EffectField::Opacity | EffectField::Blend;
+}
+
+unsigned FieldsOf(const Data::Looks::Layer& layer, const LayerEffect& effect)
+{
+    unsigned fields = 0;
+    switch (effect.kind)
+    {
+    case EffectKind::Base:
+        fields = EffectField::Opacity;
+        break;
+    case EffectKind::Glow:
+    case EffectKind::Pulse:
+        fields = GlowFields(layer);
+        break;
+    case EffectKind::Shine:
+        fields = EffectField::Motion | EffectField::Blend | EffectField::Opacity;
+        break;
+    case EffectKind::Overlay:
+        fields = EffectField::Texture | EffectField::Blend | EffectField::Opacity;
+        break;
+    case EffectKind::Flowing:
+    case EffectKind::Frames:
+        fields = EffectField::Scroll;
+        break;
+    case EffectKind::Color:
+        fields = EffectField::Light;
+        break;
+    }
+    if (effect.glows)
+    {
+        fields |= EffectField::GlowMesh | EffectField::GlowStrength;
+    }
+    if (effect.pulses)
+    {
+        fields |= EffectField::GlowStrength | EffectField::Opacity;
+    }
+    if (effect.flows || effect.frames)
+    {
+        fields |= EffectField::Scroll;
+    }
+    if (effect.colored)
+    {
+        fields |= EffectField::Light;
+    }
+    return fields;
+}
 } // namespace
 
 double ShapeValueAt(const Shape& shape, double seconds)
@@ -714,6 +790,128 @@ bool Layer(Data::Looks::Layer& layer)
     return changed;
 }
 
+bool Effect(Data::Looks::Layer& layer, const LayerEffect& effect)
+{
+    const unsigned fields = FieldsOf(layer, effect);
+    bool changed = MeshesField(layer.meshes);
+    if ((fields & EffectField::Motion) != 0 && layer.kind == LayerKind::Reflection)
+    {
+        changed |= Choice(I18N::Editor::Motion, layer.motion, MotionNames());
+    }
+    if ((fields & EffectField::Blend) != 0)
+    {
+        changed |= Choice(I18N::Editor::Blend, layer.blend, BlendNames());
+    }
+    if ((fields & EffectField::Texture) != 0)
+    {
+        ImGui::SetNextItemWidth(Scaled(GraphWidth));
+        changed |= Items::InputStringWithHint(I18N::Editor::Texture, I18N::Editor::TextureHint, layer.texture);
+    }
+    if ((fields & EffectField::Light) != 0)
+    {
+        changed |= LightField(layer.light);
+    }
+    if ((fields & EffectField::Opacity) != 0)
+    {
+        changed |= ValueField(I18N::Editor::Opacity, layer.opacity, true);
+    }
+    if ((fields & EffectField::GlowMesh) != 0)
+    {
+        changed |= GlowMeshField(layer.glowMesh);
+    }
+    if ((fields & EffectField::GlowStrength) != 0)
+    {
+        changed |= ValueField(I18N::Editor::GlowStrength, layer.glowStrength, false);
+    }
+    if ((fields & EffectField::Scroll) != 0)
+    {
+        changed |= ValueField(I18N::Editor::ScrollU, layer.scrollU, false);
+        changed |= ValueField(I18N::Editor::ScrollV, layer.scrollV, false);
+    }
+    return changed;
+}
+
+const char* EffectName(EffectKind kind)
+{
+    switch (kind)
+    {
+    case EffectKind::Base:
+        return I18N::Editor::EffectBase;
+    case EffectKind::Glow:
+        return I18N::Editor::EffectGlow;
+    case EffectKind::Pulse:
+        return I18N::Editor::EffectPulse;
+    case EffectKind::Shine:
+        return I18N::Editor::EffectShine;
+    case EffectKind::Overlay:
+        return I18N::Editor::EffectOverlayTexture;
+    case EffectKind::Flowing:
+        return I18N::Editor::EffectFlowingTexture;
+    case EffectKind::Color:
+        return I18N::Editor::EffectColor;
+    case EffectKind::Frames:
+        return I18N::Editor::EffectFramesAndFlicker;
+    }
+    return "";
+}
+
+const char* EffectNote(EffectKind kind)
+{
+    switch (kind)
+    {
+    case EffectKind::Glow:
+        return I18N::Editor::EffectGlowNote;
+    case EffectKind::Pulse:
+        return I18N::Editor::EffectPulseNote;
+    case EffectKind::Shine:
+        return I18N::Editor::EffectShineNote;
+    case EffectKind::Overlay:
+        return I18N::Editor::EffectOverlayTextureNote;
+    case EffectKind::Flowing:
+        return I18N::Editor::EffectFlowingTextureNote;
+    case EffectKind::Color:
+        return I18N::Editor::EffectColorNote;
+    case EffectKind::Frames:
+        return I18N::Editor::EffectFramesAndFlickerNote;
+    case EffectKind::Base:
+        break;
+    }
+    return "";
+}
+
+std::string EffectLabel(const LayerEffect& effect)
+{
+    std::string also;
+    const auto add = [&also](bool set, const char* label)
+    {
+        if (set)
+        {
+            AddPart(also, label);
+        }
+    };
+    add(effect.glows, I18N::Editor::AlsoGlows);
+    add(effect.pulses, I18N::Editor::AlsoPulses);
+    add(effect.flows, I18N::Editor::AlsoFlows);
+    add(effect.frames, I18N::Editor::AlsoStepsThroughFrames);
+    add(effect.colored, I18N::Editor::AlsoColored);
+    const std::string name = EffectName(effect.kind);
+    return also.empty() ? name : name + " (" + also + ")";
+}
+
+std::string DescribeMeshes(const MeshSet& meshes)
+{
+    if (meshes.IsAll())
+    {
+        return meshes.evenHidden ? std::string(I18N::Editor::EveryMesh) + " + " + I18N::Editor::HiddenMesh
+                                 : std::string(I18N::Editor::EveryMesh);
+    }
+    if (meshes.allBut)
+    {
+        return std::string(I18N::Editor::EveryMeshBut) + " " + JoinMeshes(meshes.meshes);
+    }
+    return std::string(I18N::Editor::Meshes) + " " + JoinMeshes(meshes.meshes);
+}
+
 bool ItemValues(Data::Looks::ItemValues& values)
 {
     bool changed = false;
@@ -741,20 +939,7 @@ std::string DescribeLayer(const Data::Looks::Layer& layer)
     {
         AddPart(text, NameIn(BlendNames(), layer.blend));
     }
-    const MeshSet& meshes = layer.meshes;
-    if (meshes.IsAll())
-    {
-        AddPart(text, meshes.evenHidden ? std::string(I18N::Editor::EveryMesh) + " + " + I18N::Editor::HiddenMesh
-                                        : std::string(I18N::Editor::EveryMesh));
-    }
-    else if (meshes.allBut)
-    {
-        AddPart(text, std::string(I18N::Editor::EveryMeshBut) + " " + JoinMeshes(meshes.meshes));
-    }
-    else
-    {
-        AddPart(text, std::string(I18N::Editor::Meshes) + " " + JoinMeshes(meshes.meshes));
-    }
+    AddPart(text, DescribeMeshes(layer.meshes));
     std::string fields;
     if (!layer.texture.empty())
     {

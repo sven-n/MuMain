@@ -877,6 +877,102 @@
   <data name="Name a part" xml:space="preserve">
     <value>Teil benennen</value>
   </data>
+  <data name="Parts and their effects" xml:space="preserve">
+    <value>Teile und ihre Effekte</value>
+  </data>
+  <data name="Parts note" xml:space="preserve">
+    <value>Die Teile des Gegenstands, den die Vorschau zeichnet, jedes mit seinen Effekten; auch ein Klick auf ein Teil in der Vorschau wählt es. Effekte zielen auf Mesh-Nummern, sie passen also zu jedem Gegenstand, der den Look nutzt.</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>Teil</value>
+  </data>
+  <data name="Base: own texture" xml:space="preserve">
+    <value>Grundlage: eigene Textur</value>
+  </data>
+  <data name="Every part" xml:space="preserve">
+    <value>Jedes Teil</value>
+  </data>
+  <data name="No effect" xml:space="preserve">
+    <value>kein Effekt</value>
+  </data>
+  <data name="Add effect to {0}" xml:space="preserve">
+    <value>Effekt zu {0} hinzufügen</value>
+  </data>
+  <data name="Remove the effect" xml:space="preserve">
+    <value>Effekt entfernen</value>
+  </data>
+  <data name="Show this effect in the preview" xml:space="preserve">
+    <value>Diesen Effekt in der Vorschau zeigen</value>
+  </data>
+  <data name="Effect Base" xml:space="preserve">
+    <value>Eigene Textur</value>
+  </data>
+  <data name="Effect Glow" xml:space="preserve">
+    <value>Leuchten</value>
+  </data>
+  <data name="Effect Pulse" xml:space="preserve">
+    <value>Pulsieren</value>
+  </data>
+  <data name="Effect Shine" xml:space="preserve">
+    <value>Glanz</value>
+  </data>
+  <data name="Effect Overlay texture" xml:space="preserve">
+    <value>Überlagerte Textur</value>
+  </data>
+  <data name="Effect Flowing texture" xml:space="preserve">
+    <value>Fließende Textur</value>
+  </data>
+  <data name="Effect Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Effect Frames and flicker" xml:space="preserve">
+    <value>Bilder und Flackern</value>
+  </data>
+  <data name="Effect Glow note" xml:space="preserve">
+    <value>Zeichnet das Teil leuchtend in einer Stärke.</value>
+  </data>
+  <data name="Effect Pulse note" xml:space="preserve">
+    <value>Ein Leuchten, dessen Stärke schwankt.</value>
+  </data>
+  <data name="Effect Shine note" xml:space="preserve">
+    <value>Eine Spiegelung, die über das Teil wandert.</value>
+  </data>
+  <data name="Effect Overlay texture note" xml:space="preserve">
+    <value>Eine andere Textur über dem Teil.</value>
+  </data>
+  <data name="Effect Flowing texture note" xml:space="preserve">
+    <value>Eine Textur, die über das Teil gleitet.</value>
+  </data>
+  <data name="Effect Color note" xml:space="preserve">
+    <value>Zeichnet das Teil in einer Farbe.</value>
+  </data>
+  <data name="Effect Frames and flicker note" xml:space="preserve">
+    <value>Die Textur schaltet Bild für Bild weiter.</value>
+  </data>
+  <data name="Also glows" xml:space="preserve">
+    <value>leuchtet</value>
+  </data>
+  <data name="Also pulses" xml:space="preserve">
+    <value>pulsiert</value>
+  </data>
+  <data name="Also flows" xml:space="preserve">
+    <value>fließt</value>
+  </data>
+  <data name="Also steps through frames" xml:space="preserve">
+    <value>Bilder</value>
+  </data>
+  <data name="Also colored" xml:space="preserve">
+    <value>gefärbt</value>
+  </data>
+  <data name="Show the layers" xml:space="preserve">
+    <value>Ebenen zeigen (alle Felder, Zeichenreihenfolge)</value>
+  </data>
+  <data name="All fields" xml:space="preserve">
+    <value>Alle Felder</value>
+  </data>
+  <data name="Pick an effect or add one" xml:space="preserve">
+    <value>Wähle einen Effekt in der Liste, oder wähle ein Teil und füge einen hinzu.</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
   </data>
