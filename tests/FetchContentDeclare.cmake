@@ -6,8 +6,10 @@
 function(mu_read_fetchcontent_declare root_cmake name code_variable declare_variable declare_at_variable)
     file(READ "${root_cmake}" source)
     set(quoted_argument "\"([^\"\\\\]|\\\\.)*\"")
-    # A quoted argument is matched as a whole and kept; a comment outside one is matched and dropped.
-    string(REGEX REPLACE "(${quoted_argument})|#[^\r\n]*" "\\1" code "${source}")
+    # A line's code before its comment: text without '#' or a whole quoted argument, which may hold one. Both groups
+    # the replacement keeps take part in every match, as CMake before 3.29 requires.
+    set(code_before_comment "(([^\"#\r\n]|${quoted_argument})*)")
+    string(REGEX REPLACE "(^|\n)${code_before_comment}#[^\r\n]*" "\\1\\2" code "${source}")
     string(REGEX MATCHALL "FetchContent_Declare\\([ \t\r\n]*${name}[ \t\r\n]([^)\"]|${quoted_argument})*\\)"
         declares "${code}")
     list(LENGTH declares declare_count)
