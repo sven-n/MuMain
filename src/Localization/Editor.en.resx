@@ -548,7 +548,7 @@
     <value>Never drawn, so the preview can't show it alone.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>The render style and the item effect are drawing code: which meshes they draw shows here once they are data.</value>
+    <value>The Style Editor shows which parts the render style draws and with which effects; the item effect is drawing code.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Click a part to find its mesh in the mesh list.</value>
@@ -993,6 +993,36 @@
   </data>
   <data name="Pick an effect or add one" xml:space="preserve">
     <value>Pick an effect in the list, or pick a part and add one.</value>
+  </data>
+  <data name="Apply the change" xml:space="preserve">
+    <value>Apply the change</value>
+  </data>
+  <data name="For all {0} items that use it" xml:space="preserve">
+    <value>For all {0} items that use it</value>
+  </data>
+  <data name="This changes {0} for these items; Ctrl+Z undoes it." xml:space="preserve">
+    <value>This changes {0} for these items; Ctrl+Z undoes it.</value>
+  </data>
+  <data name="Only {0}, as a copy of the look" xml:space="preserve">
+    <value>Only {0}, as a copy of the look</value>
+  </data>
+  <data name="The other items keep {0}." xml:space="preserve">
+    <value>The other items keep {0}.</value>
+  </data>
+  <data name="A new item from {0}" xml:space="preserve">
+    <value>A new item from {0}</value>
+  </data>
+  <data name="New item note" xml:space="preserve">
+    <value>A copy of the item with its model, at a free number, wearing the copy of the look; the other items keep the look. The game shows it once the server knows the new item (Item Sync).</value>
+  </data>
+  <data name="Pick an item to apply to it" xml:space="preserve">
+    <value>Pick an item in the item tools to apply the change to it alone or to a new item.</value>
+  </data>
+  <data name="Only this item: a copy of the look" xml:space="preserve">
+    <value>Only this item: a copy of the look</value>
+  </data>
+  <data name="A new item with the look" xml:space="preserve">
+    <value>A new item with the look</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>

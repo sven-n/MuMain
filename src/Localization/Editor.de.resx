@@ -527,7 +527,7 @@
     <value>Wird nie gezeichnet; die Vorschau kann es nicht allein zeigen.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>Darstellungsstil und Gegenstandseffekt sind Zeichencode: welche Meshes sie zeichnen, steht hier, sobald sie Daten sind.</value>
+    <value>Der Stil-Editor zeigt, welche Teile der Darstellungsstil mit welchen Effekten zeichnet; der Gegenstandseffekt ist Zeichencode.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Ein Klick auf einen Teil findet sein Mesh in der Mesh-Liste.</value>
@@ -972,6 +972,36 @@
   </data>
   <data name="Pick an effect or add one" xml:space="preserve">
     <value>Wähle einen Effekt in der Liste, oder wähle ein Teil und füge einen hinzu.</value>
+  </data>
+  <data name="Apply the change" xml:space="preserve">
+    <value>Änderung übernehmen</value>
+  </data>
+  <data name="For all {0} items that use it" xml:space="preserve">
+    <value>Für alle {0} Gegenstände, die ihn nutzen</value>
+  </data>
+  <data name="This changes {0} for these items; Ctrl+Z undoes it." xml:space="preserve">
+    <value>Das ändert {0} für diese Gegenstände; Strg+Z macht es rückgängig.</value>
+  </data>
+  <data name="Only {0}, as a copy of the look" xml:space="preserve">
+    <value>Nur {0}, als Kopie des Looks</value>
+  </data>
+  <data name="The other items keep {0}." xml:space="preserve">
+    <value>Die anderen Gegenstände behalten {0}.</value>
+  </data>
+  <data name="A new item from {0}" xml:space="preserve">
+    <value>Ein neuer Gegenstand aus {0}</value>
+  </data>
+  <data name="New item note" xml:space="preserve">
+    <value>Eine Kopie des Gegenstands mit seinem Modell, an einer freien Nummer, mit der Kopie des Looks; die anderen Gegenstände behalten den Look. Das Spiel zeigt ihn, sobald der Server den neuen Gegenstand kennt (Item Sync).</value>
+  </data>
+  <data name="Pick an item to apply to it" xml:space="preserve">
+    <value>Wähle einen Gegenstand in den Gegenstandswerkzeugen, um die Änderung nur auf ihn oder auf einen neuen Gegenstand anzuwenden.</value>
+  </data>
+  <data name="Only this item: a copy of the look" xml:space="preserve">
+    <value>Nur dieser Gegenstand: Kopie des Looks</value>
+  </data>
+  <data name="A new item with the look" xml:space="preserve">
+    <value>Neuer Gegenstand mit dem Look</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>

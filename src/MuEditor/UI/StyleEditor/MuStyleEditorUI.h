@@ -27,8 +27,9 @@
 // look as it is now (Apply is off while a fatal one is left) and the items that use it. Above them, staying where it is
 // while they scroll, a preview of the item: the look as applied beside the look as the fields have it, before it is
 // applied, with one camera, the time stopped or moving, an eye per effect or layer (for the edited one) and "Draw as:
-// doppelganger". Apply lists the items a change reaches (D26). The changes are item edits (L39): one undo history with
-// the item tools, and Save Items writes the file.
+// doppelganger". Apply asks what the change is for (L36): all the items that use the look, which it lists (D26), only
+// the picked item (as a copy of the look) or a new item. The changes are item edits (L39): one undo history with the
+// item tools, and Save Items writes the file.
 class CMuStyleEditorUI
 {
 public:
@@ -77,6 +78,13 @@ private:
         Copy,
         Rename,
     };
+    // What Apply changes (design L36).
+    enum class ApplyTo
+    {
+        AllItems,
+        ThisItem,
+        NewItem,
+    };
 
     CMuStyleEditorUI();
 
@@ -92,7 +100,11 @@ private:
     void RenderCodeLook(const std::string& name, bool itemEffect);
     void RenderLook(const Data::Looks::LookDefinition& look);
     void RenderApply(const Data::Looks::LookDefinition& look);
+    void OpenApply(const Data::Looks::LookDefinition& look);
     void RenderConfirm();
+    // The Apply choices for one item, below its radio buttons; false while the copy or the new item can't be made.
+    [[nodiscard]] bool RenderApplyCopy();
+    [[nodiscard]] std::string UnusedLookName(const std::string& base) const;
     void RenderLayers();
     void RenderLayerToolbar();
     void RenderParts();
@@ -109,6 +121,7 @@ private:
     void UpdateDraft(const Data::Looks::LookDefinition& look);
     void CheckDraft();
     void Apply();
+    void ApplyCopy(ApplyTo to, const std::string& copyName, int itemType, int newItemType, const std::string& itemName);
 
     MuEditor::Looks::RenderStylesRoot m_renderStyles;
     MuEditor::Looks::ItemEffectsRoot m_itemEffects;
@@ -144,6 +157,12 @@ private:
     // The look Copy and Rename start from.
     std::string m_nameFrom;
     std::vector<int> m_confirmUsers;
+    ApplyTo m_applyTo = ApplyTo::AllItems;
+    // The item Apply was opened for, -1 for none; the copy's name, and the new item's number and name.
+    int m_applyItem = -1;
+    std::string m_copyName;
+    int m_newNumber = 0;
+    std::string m_newItemName;
 };
 
 #define g_MuStyleEditorUI CMuStyleEditorUI::GetInstance()

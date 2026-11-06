@@ -4,9 +4,12 @@
 
 #include "LookEdits.h"
 
+#include "../MuEditor/UI/ItemTools/ItemAddDialog.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Render/Items/LookDrawing.h"
 
 #include <algorithm>
@@ -109,6 +112,42 @@ void LookEdits::SetFolders(const char* step, std::vector<Data::Colors::ColorFold
     State next = GetState();
     next.folders = std::move(folders);
     Change(step, std::move(next));
+}
+
+void LookEdits::ApplyToItemOnly(const char* step, const std::string& original, LookDefinition copy, int itemType)
+{
+    const Data::Items::ItemModelDefinition* entry = g_ItemModelDatabase.Find(itemType);
+    if (entry == nullptr || Find(copy.name) != nullptr)
+    {
+        return;
+    }
+    Data::Items::ItemModelDefinition model = *entry;
+    model.renderStyle = copy.name;
+    g_ItemEdits.BeginGroup(step);
+    AddLook(step, std::move(copy), FolderOf(original));
+    g_ItemEdits.SetItemModel(step, model);
+    g_ItemEdits.EndGroup();
+}
+
+void LookEdits::ApplyToNewItem(const char* step, const std::string& original, LookDefinition copy, int itemType,
+                               int newItemType, const std::string& itemName)
+{
+    if (g_ItemModelDatabase.Find(itemType) == nullptr || Find(copy.name) != nullptr ||
+        !Data::Items::IsFreeItemType(newItemType))
+    {
+        return;
+    }
+    const std::string name = copy.name;
+    g_ItemEdits.BeginGroup(step);
+    AddLook(step, std::move(copy), FolderOf(original));
+    Items::DuplicateItem(step, itemType, newItemType, itemName, true,
+                         [&name](Data::Items::ItemModelDefinition& model) { model.renderStyle = name; });
+    g_ItemEdits.EndGroup();
+}
+
+Data::Colors::ColorFolderPath LookEdits::FolderOf(const std::string& name) const
+{
+    return Data::Colors::FindFolderOfColor(GetState().folders, name).value_or(Data::Colors::ColorFolderPath{});
 }
 
 void LookEdits::ResetForTest(State state)

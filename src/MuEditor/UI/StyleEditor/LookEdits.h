@@ -41,12 +41,22 @@ public:
     void RemoveLook(const char* step, const std::string& name);
     void SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders);
 
+    // Apply for one item (design L36): `copy`, the edited look under a name no look has, goes into the folder of
+    // `original`, and only the item at `itemType` names it; or a new item at the free item type `newItemType` with the
+    // English name `itemName`, duplicated from `itemType` with its model (Duplicate item), names it. The look and the
+    // item are one undo step `step`. Nothing happens for an item without a model.
+    void ApplyToItemOnly(const char* step, const std::string& original, Data::Looks::LookDefinition copy, int itemType);
+    void ApplyToNewItem(const char* step, const std::string& original, Data::Looks::LookDefinition copy, int itemType,
+                        int newItemType, const std::string& itemName);
+
     // A test's state, as if read from the file, with nothing to undo.
     void ResetForTest(State state);
 
 private:
     LookEdits() = default;
     void Change(const char* step, State next);
+    // The folder the look is in; the empty path for the root.
+    [[nodiscard]] Data::Colors::ColorFolderPath FolderOf(const std::string& name) const;
 };
 } // namespace MuEditor::Looks
 

@@ -75,7 +75,8 @@ public:
                      std::span<const Data::Items::ItemDefinition> repointed = {});
 
     // The changes until EndGroup are one undo step under `label` (an item
-    // duplicated with its model made shared).
+    // duplicated with its model made shared). A group begun inside one is
+    // part of it: its label is the outer one's.
     void BeginGroup(std::string label);
     void EndGroup();
 
@@ -109,6 +110,7 @@ private:
 
     ItemEditHistory m_history;
     std::optional<ItemEditEntry> m_group;
+    int m_groupDepth = 0;
 };
 } // namespace MuEditor::Items
 

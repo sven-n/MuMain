@@ -16,6 +16,7 @@
 #include "../MuEditor/UI/Common/ToolGroups.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
+#include "../MuEditor/UI/ItemEditor/ItemListModel.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "../MuEditor/UI/ItemTools/ItemMeshFocus.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
@@ -23,11 +24,13 @@
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "../MuEditor/UI/ItemTools/ItemUsers.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/LookData/LookChecks.h"
 #include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookJson.h"
@@ -71,6 +74,7 @@ constexpr float LayerListLines = 7.0f;
 constexpr float PartListLines = 8.0f;
 constexpr float PartWidth = 200.0f;
 constexpr float EffectNoteColumn = 170.0f;
+constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr float MaxPreviewSeconds = 60.0f;
 // The problems of a look are about "looks[0]", the only one checked.
 constexpr std::string_view CheckedLookField = "looks[0].";
@@ -513,17 +517,7 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
     ImGui::BeginDisabled(!edited || fatal);
     if (ImGui::Button(I18N::Editor::Apply))
     {
-        // D26: a change to a look reaches all its items; they are listed before it is applied.
-        m_confirmUsers = MuEditor::Items::FindRenderStyleUsers(look.name);
-        if (m_confirmUsers.empty())
-        {
-            // After the window is drawn: the look's place changes with it.
-            m_tree.Later([this] { Apply(); });
-        }
-        else
-        {
-            ImGui::OpenPopup(ConfirmPopupId);
-        }
+        OpenApply(look);
     }
     ImGui::SameLine();
     ImGui::EndDisabled();
@@ -544,35 +538,155 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
     }
 }
 
+void CMuStyleEditorUI::OpenApply(const LookDefinition& look)
+{
+    // D26: a change to a look reaches all its items; they are listed before it is applied.
+    m_confirmUsers = MuEditor::Items::FindRenderStyleUsers(look.name);
+    const int itemType = g_ItemSelection.GetItemType();
+    m_applyItem =
+        g_ItemDatabase.Find(itemType) != nullptr && g_ItemModelDatabase.Find(itemType) != nullptr ? itemType : -1;
+    if (m_confirmUsers.empty() && m_applyItem < 0)
+    {
+        // After the window is drawn: the look's place changes with it.
+        m_tree.Later([this] { Apply(); });
+        return;
+    }
+    m_applyTo = ApplyTo::AllItems;
+    m_copyName = UnusedLookName(look.name + "Copy");
+    if (m_applyItem >= 0)
+    {
+        m_newNumber =
+            GetNextFreeItemNumber(Data::Items::GetItemGroup(m_applyItem), Data::Items::GetItemNumber(m_applyItem));
+        m_newItemName = g_ItemDatabase.Find(m_applyItem)->names.GetNeutral();
+    }
+    ImGui::OpenPopup(ConfirmPopupId);
+}
+
+std::string CMuStyleEditorUI::UnusedLookName(const std::string& base) const
+{
+    std::string name = base;
+    for (int suffix = 2; m_renderStyles.Has(name); ++suffix)
+    {
+        name = base + std::to_string(suffix);
+    }
+    return name;
+}
+
 void CMuStyleEditorUI::RenderConfirm()
 {
-    const std::string title = std::string(I18N::Editor::ChangeALook) + ConfirmPopupId;
+    const std::string title = std::string(I18N::Editor::ApplyTheChange) + ConfirmPopupId;
     if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         return;
     }
-    ImGui::TextUnformatted(
-        I18N::Format(I18N::Editor::TheChangeReachesThese0Items, {std::to_string(m_confirmUsers.size())}).c_str());
-    if (ImGui::BeginListBox("##ConfirmUsers", ImVec2(NameWidth * g_MuEditorCore.GetUIScale(),
-                                                     UserListLines * ImGui::GetTextLineHeightWithSpacing())))
+    const auto choice = [this](ApplyTo to, const std::string& label)
     {
-        for (const int user : m_confirmUsers)
+        if (ImGui::RadioButton(label.c_str(), m_applyTo == to))
         {
-            ImGui::TextUnformatted(g_ItemDatabase.GetLogName(user).c_str());
+            m_applyTo = to;
         }
-        ImGui::EndListBox();
+    };
+    choice(ApplyTo::AllItems,
+           I18N::Format(I18N::Editor::ForAll0ItemsThatUseIt, {std::to_string(m_confirmUsers.size())}));
+    if (m_applyTo == ApplyTo::AllItems && !m_confirmUsers.empty())
+    {
+        ImGui::Indent();
+        RenderNote(I18N::Format(I18N::Editor::ThisChanges0ForTheseItemsCtrlZUndoesIt, {m_draftOf}).c_str());
+        if (ImGui::BeginListBox("##ConfirmUsers", ImVec2(NameWidth * g_MuEditorCore.GetUIScale(),
+                                                         UserListLines * ImGui::GetTextLineHeightWithSpacing())))
+        {
+            for (const int user : m_confirmUsers)
+            {
+                ImGui::TextUnformatted(g_ItemDatabase.GetLogName(user).c_str());
+            }
+            ImGui::EndListBox();
+        }
+        ImGui::Unindent();
     }
+    const bool item = m_applyItem >= 0;
+    const std::string itemName = item ? g_ItemDatabase.GetLogName(m_applyItem) : "";
+    ImGui::BeginDisabled(!item);
+    choice(ApplyTo::ThisItem, I18N::Format(I18N::Editor::Only0AsACopyOfTheLook, {itemName}));
+    choice(ApplyTo::NewItem, I18N::Format(I18N::Editor::ANewItemFrom0, {itemName}));
+    ImGui::EndDisabled();
+    if (!item)
+    {
+        RenderNote(I18N::Editor::PickAnItemToApplyToIt);
+    }
+    const bool usable = m_applyTo == ApplyTo::AllItems || (item && RenderApplyCopy());
+
+    ImGui::BeginDisabled(!usable);
     if (ImGui::Button(I18N::Editor::Apply))
     {
-        m_tree.Later([this] { Apply(); });
+        const ApplyTo to = m_applyTo;
+        const std::string copyName = MuEditor::SourceText::Trimmed(m_copyName);
+        const int itemType = m_applyItem;
+        const int newItemType = item ? Data::Items::MakeItemType(Data::Items::GetItemGroup(itemType), m_newNumber) : -1;
+        const std::string newItemName = m_newItemName;
+        m_tree.Later(
+            [this, to, copyName, itemType, newItemType, newItemName]
+            {
+                if (to == ApplyTo::AllItems)
+                {
+                    Apply();
+                }
+                else
+                {
+                    ApplyCopy(to, copyName, itemType, newItemType, newItemName);
+                }
+            });
         ImGui::CloseCurrentPopup();
     }
+    ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Cancel))
     {
         ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
+}
+
+bool CMuStyleEditorUI::RenderApplyCopy()
+{
+    if (m_applyTo == ApplyTo::AllItems)
+    {
+        return true;
+    }
+    ImGui::Indent();
+    const float width = NameWidth * g_MuEditorCore.GetUIScale();
+    RenderNote(m_applyTo == ApplyTo::ThisItem ? I18N::Format(I18N::Editor::TheOtherItemsKeep0, {m_draftOf}).c_str()
+                                              : I18N::Editor::NewItemNote);
+    ImGui::SetNextItemWidth(width);
+    MuEditor::Items::InputString(I18N::Editor::LookName, m_copyName);
+    const std::string copy = MuEditor::SourceText::Trimmed(m_copyName);
+    bool usable = Data::Items::Json::IsName(copy) && !m_renderStyles.Has(copy);
+    if (!usable)
+    {
+        RenderNote(I18N::Editor::ALookNameOfLettersAndDigitsThatNoOtherRenderStyleHas);
+    }
+    if (m_applyTo == ApplyTo::NewItem)
+    {
+        const int group = Data::Items::GetItemGroup(m_applyItem);
+        ImGui::SetNextItemWidth(width);
+        ImGui::InputInt(I18N::Editor::Number, &m_newNumber);
+        m_newNumber = std::clamp(m_newNumber, 0, MAX_ITEM_INDEX - 1);
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::NextFree))
+        {
+            m_newNumber = GetNextFreeItemNumber(group, m_newNumber + 1);
+        }
+        if (!Data::Items::IsFreeItemType(Data::Items::MakeItemType(group, m_newNumber)))
+        {
+            ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
+            usable = false;
+        }
+        ImGui::SetNextItemWidth(width);
+        MuEditor::Items::InputString(I18N::Editor::EnglishName, m_newItemName);
+        usable = usable && !m_newItemName.empty() &&
+                 m_newItemName.find(Data::LocalizedString::Separator) == std::string::npos;
+    }
+    ImGui::Unindent();
+    return usable;
 }
 
 void CMuStyleEditorUI::Apply()
@@ -583,6 +697,36 @@ void CMuStyleEditorUI::Apply()
     }
     g_LookEdits.SetLook(I18N::Editor::ChangeALook, m_draftOf, m_draft);
     m_draftLoaded = m_draft;
+}
+
+void CMuStyleEditorUI::ApplyCopy(ApplyTo to, const std::string& copyName, int itemType, int newItemType,
+                                 const std::string& itemName)
+{
+    if (g_LookEdits.Find(m_draftOf) == nullptr)
+    {
+        return;
+    }
+    LookDefinition copy = m_draft;
+    copy.name = copyName;
+    if (to == ApplyTo::ThisItem)
+    {
+        g_LookEdits.ApplyToItemOnly(I18N::Editor::OnlyThisItemACopyOfTheLook, m_draftOf, std::move(copy), itemType);
+    }
+    else
+    {
+        g_LookEdits.ApplyToNewItem(I18N::Editor::ANewItemWithTheLook, m_draftOf, std::move(copy), itemType, newItemType,
+                                   itemName);
+        if (g_ItemDatabase.Find(newItemType) != nullptr)
+        {
+            g_ItemSelection.Select(newItemType);
+        }
+    }
+    // The look keeps what it had; the editor goes on with the copy.
+    m_draft = m_draftLoaded;
+    if (g_LookEdits.Find(copyName) != nullptr)
+    {
+        m_tree.PickEntry(RenderStylesRootIndex, copyName);
+    }
 }
 
 void CMuStyleEditorUI::RenderLayers()

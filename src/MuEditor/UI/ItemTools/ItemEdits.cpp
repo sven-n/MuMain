@@ -553,7 +553,7 @@ void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& 
 
 void ItemEdits::BeginGroup(std::string label)
 {
-    if (!m_group)
+    if (m_groupDepth++ == 0)
     {
         m_group = ItemEditEntry{std::move(label), {}};
     }
@@ -561,6 +561,10 @@ void ItemEdits::BeginGroup(std::string label)
 
 void ItemEdits::EndGroup()
 {
+    if (m_groupDepth == 0 || --m_groupDepth > 0)
+    {
+        return;
+    }
     if (m_group)
     {
         ItemEditEntry entry = std::move(*m_group);

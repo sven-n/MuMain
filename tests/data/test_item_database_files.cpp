@@ -32,6 +32,7 @@
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -75,6 +76,7 @@
 #include "UI/ItemTools/MuItemTooltipUI.h"
 #include "UI/ItemTools/TooltipLineLooks.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "UI/StyleEditor/LookEdits.h"
 #include "../ui/RmlLayoutFixture.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -2760,6 +2762,69 @@ TEST_CASE("An entry without a name moves and goes as an item does [data][items][
     CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
     CHECK(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
     g_ItemEdits.GetHistory().Clear();
+}
+
+// The Style Editor's Apply for one item (design L36, L39): a copy of the look in the original's folder, which only that
+// item or a new duplicate of it names; one undo step takes back the look and the item together.
+TEST_CASE("Apply for only this item or a new item makes a copy of the look, which the item wears [data][items][editor]")
+{
+    using Data::Looks::Layer;
+    using Data::Looks::LookDefinition;
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const std::vector<LookDefinition> gameLooks(Data::Looks::g_LookStore.GetRenderStyles().begin(),
+                                                Data::Looks::g_LookStore.GetRenderStyles().end());
+    g_LookEdits.ResetForTest({{{"brightBlade", {Layer{}}, {}}}, {{"Blades", {}, {"brightBlade"}}}});
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+    REQUIRE(kris.model.empty());
+    LookDefinition gold{"brightBladeGold", {Layer{.blend = Data::Looks::Blend::Glow}}, {}};
+
+    g_LookEdits.ApplyToItemOnly("Only this item", "brightBlade", gold, KrisType);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->renderStyle == "brightBladeGold");
+    REQUIRE(g_LookEdits.Find("brightBladeGold") != nullptr);
+    CHECK(*g_LookEdits.Find("brightBladeGold") == gold);
+    CHECK(g_LookEdits.Find("brightBlade")->layers == std::vector<Layer>{Layer{}});
+    CHECK(g_LookEdits.GetState().folders ==
+          std::vector<Data::Colors::ColorFolder>{{"Blades", {}, {"brightBlade", "brightBladeGold"}}});
+    CHECK(Data::Looks::g_LookStore.FindRenderStyle("brightBladeGold") != nullptr);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Only this item");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(*g_ItemModelDatabase.Find(KrisType) == kris);
+    CHECK(g_LookEdits.Find("brightBladeGold") == nullptr);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // A new item: Duplicate item's steps (the model file becomes shared) are part of the one step.
+    const int newType = MakeItemType(0, GetNextFreeItemNumber(0, 0));
+    REQUIRE(IsFreeItemType(newType));
+    g_LookEdits.ApplyToNewItem("A new item", "brightBlade", gold, KrisType, newType, "Golden Kris");
+    REQUIRE(g_ItemDatabase.Find(newType) != nullptr);
+    CHECK(g_ItemDatabase.Find(newType)->names.GetNeutral() == "Golden Kris");
+    REQUIRE(g_ItemModelDatabase.Find(newType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(newType)->renderStyle == "brightBladeGold");
+    CHECK(g_ItemModelDatabase.Find(newType)->model == g_ItemModelDatabase.Find(KrisType)->model);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->renderStyle == kris.renderStyle);
+    CHECK(g_LookEdits.Find("brightBladeGold") != nullptr);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "A new item");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(IsFreeItemType(newType));
+    CHECK(*g_ItemModelDatabase.Find(KrisType) == kris);
+    CHECK(g_LookEdits.Find("brightBladeGold") == nullptr);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // A name a look has already is no copy.
+    g_LookEdits.ApplyToItemOnly("Only this item", "brightBlade", {"brightBlade", {}, {}}, KrisType);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    g_ItemEdits.GetHistory().Clear();
+    g_LookEdits.ResetForTest({gameLooks, {}});
 }
 
 namespace
