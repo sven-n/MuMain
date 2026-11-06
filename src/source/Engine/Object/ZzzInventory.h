@@ -238,7 +238,7 @@ template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
 }
 std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype = 0,

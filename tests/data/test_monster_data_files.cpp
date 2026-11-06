@@ -3,9 +3,9 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "LogCapture.h"
 #include "TemporaryMonsterFolder.h"
 
-#include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
@@ -14,14 +14,9 @@
 #include "Data/GameData/MonsterData/MonsterKind.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 
-#include <spdlog/sinks/ostream_sink.h>
-
 #include <algorithm>
 #include <filesystem>
-#include <memory>
-#include <sstream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 using Data::Items::HasFatal;
@@ -49,45 +44,6 @@ const MonsterDefinition* FindMonster(const std::vector<MonsterDefinition>& monst
                                     [&](const MonsterDefinition& monster) { return monster.number == number; });
     return found == monsters.end() ? nullptr : &*found;
 }
-
-// What the "data" log gets while it lives.
-class DataLogCapture
-{
-public:
-    DataLogCapture() : m_logger(mu::log::Get("data")), m_sink(std::make_shared<spdlog::sinks::ostream_sink_st>(m_text))
-    {
-        m_logger->sinks().push_back(m_sink);
-    }
-
-    ~DataLogCapture()
-    {
-        std::vector<spdlog::sink_ptr>& sinks = m_logger->sinks();
-        sinks.erase(std::remove(sinks.begin(), sinks.end(), m_sink), sinks.end());
-    }
-
-    DataLogCapture(const DataLogCapture&) = delete;
-    DataLogCapture& operator=(const DataLogCapture&) = delete;
-
-    // The logged line that holds `part`; empty when none does.
-    std::string LineWith(std::string_view part) const
-    {
-        std::istringstream lines(m_text.str());
-        std::string line;
-        while (std::getline(lines, line))
-        {
-            if (line.find(part) != std::string::npos)
-            {
-                return line;
-            }
-        }
-        return {};
-    }
-
-private:
-    std::ostringstream m_text;
-    std::shared_ptr<spdlog::logger> m_logger;
-    spdlog::sink_ptr m_sink;
-};
 } // namespace
 
 TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty name [data][monsters]")
@@ -218,7 +174,7 @@ TEST_CASE("Monster data: the game's load names the file in the problems it logs 
     folder.WriteMonsters(R"({ "formatVersion": 1, "monsters": [
         { "number": 2, "name": {"en": "Budge Dragon", "zz": "Dragon"}, "kind": "monster" } ] })");
     ClientDataScope scope(folder.Path());
-    DataLogCapture log;
+    LogCapture log("data");
     std::string error;
 
     REQUIRE(g_MonsterDataHandler.Load(error));

@@ -188,6 +188,7 @@ mu_add_test(
         test_item_exchange_file.cpp
         test_item_mesh_list.cpp
         test_item_model_files.cpp
+        test_item_option_slots.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_set_chrome.cpp

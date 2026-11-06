@@ -191,7 +191,7 @@ typedef struct tagITEM
     WORD  RequireLevel;
     BYTE  SpecialNum;
     WORD  Special[MAX_ITEM_SPECIAL];
-    BYTE  SpecialValue[MAX_ITEM_SPECIAL];
+    WORD SpecialValue[MAX_ITEM_SPECIAL];
     DWORD Key;	//client olny
 
     BYTE bySelectedSlotIndex;
