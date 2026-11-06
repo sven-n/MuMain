@@ -33,6 +33,7 @@ if(GIT_EXECUTABLE)
 
     # The data release's id, as data-assets.yml and ci.yml compute it: the first 16 hex digits of the SHA-256 of
     # the Data and fonts tree hashes, one per line. rev-parse prints exactly those lines.
+    # test_windows_workflow_contract.py pins the workflows' formula, test_write_git_commit.cmake this result.
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD:src/bin/Data HEAD:src/bin/fonts
       WORKING_DIRECTORY "${SOURCE_DIR}"

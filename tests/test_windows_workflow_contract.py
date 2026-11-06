@@ -41,6 +41,14 @@ MINGW_TOOLCHAINS = (
     ROOT / "cmake/toolchains/mingw-w64-i686.cmake",
     ROOT / "cmake/toolchains/mingw-w64-x86_64.cmake",
 )
+# The data release id, computed alike by data-assets.yml and the release job. cmake/WriteGitCommit.cmake computes it
+# once more for MuError.log, and tests/test_write_git_commit.cmake checks that against this formula's result: a
+# change here needs both.
+DATA_ASSET_ID_FORMULA = (
+    "data_tree=$(git rev-parse HEAD:src/bin/Data)",
+    "fonts_tree=$(git rev-parse HEAD:src/bin/fonts)",
+    "asset_id=$(printf '%s\\n%s\\n' \"$data_tree\" \"$fonts_tree\" | sha256sum | cut -c1-16)",
+)
 
 EXPECTED_WINDOWS_OS_DLLS = {
     "advapi32.dll",
@@ -773,9 +781,7 @@ check("tar -czf " not in release_job, "Release must consume runner-created archi
 
 data_release = step(release_job, "release", "Resolve compatible data release")
 for required in (
-    "git rev-parse HEAD:src/bin/Data",
-    "git rev-parse HEAD:src/bin/fonts",
-    "sha256sum",
+    *DATA_ASSET_ID_FORMULA,
     'data_tag="data-${asset_id}"',
     'gh release view "$data_tag" --json url --jq .url',
     'echo "DATA_ASSET_ID=${asset_id}"',
@@ -862,8 +868,7 @@ for required in (
     "src/bin/fonts/**",
     ".github/workflows/data-assets.yml",
     "contents: write",
-    "git rev-parse HEAD:src/bin/Data",
-    "git rev-parse HEAD:src/bin/fonts",
+    *DATA_ASSET_ID_FORMULA,
     "sha256sum",
     "MuMain-data-${asset_id}.tar.gz",
     "data-${asset_id}",
