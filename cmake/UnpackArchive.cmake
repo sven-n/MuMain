@@ -30,16 +30,33 @@ if(EXISTS "${archive}")
 endif()
 if(NOT EXISTS "${archive}")
     # Like ExternalProject's own downloads, a failed connection (no name, no connection, a broken answer, a timeout, a
-    # failed TLS handshake) is tried again after a pause, and a stalled download times out. EXPECTED_HASH would make
+    # failed TLS handshake) is tried again after a pause, and a stalled download times out. So are a transfer that
+    # breaks off (curl 18, 56, 92) and an HTTP answer of 408, 429 or 5xx (curl 22), which GitHub's archive service
+    # gives now and then; other HTTP errors, such as a 404 for a wrong commit, stop at once. EXPECTED_HASH would make
     # the first failure final, so the hash is checked afterwards.
-    set(retry_results 6 7 8 15 28 35)
+    set(retry_results 6 7 8 15 18 28 35 56 92)
     foreach(attempt RANGE 1 5)
         file(DOWNLOAD "${URL}" "${archive}.part"
             INACTIVITY_TIMEOUT 60
             STATUS download_status
+            LOG download_log
         )
         list(GET download_status 0 download_result)
-        if(download_result EQUAL 0 OR NOT download_result IN_LIST retry_results OR attempt EQUAL 5)
+        set(try_again FALSE)
+        if(download_result IN_LIST retry_results)
+            set(try_again TRUE)
+        elseif(download_result EQUAL 22)
+            # The last answer in the log is the one after the redirects.
+            string(REGEX MATCHALL "HTTP/[0-9.]+ [0-9][0-9][0-9]" http_answers "${download_log}")
+            list(POP_BACK http_answers http_answer)
+            if(http_answer)
+                string(APPEND download_status " (${http_answer})")
+            endif()
+            if(NOT http_answer OR http_answer MATCHES " (408|429|5[0-9][0-9])$")
+                set(try_again TRUE)
+            endif()
+        endif()
+        if(NOT try_again OR attempt EQUAL 5)
             break()
         endif()
         math(EXPR pause_seconds "${attempt} * 5")
