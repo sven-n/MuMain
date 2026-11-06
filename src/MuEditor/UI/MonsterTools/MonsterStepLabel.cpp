@@ -23,9 +23,9 @@ std::string Remove(const Data::Monsters::MonsterDefinition& monster)
     return I18N::Format(I18N::Editor::StepRemove, {LogName(monster)});
 }
 
-std::string Kind(const Data::Monsters::MonsterDefinition& monster)
+std::string Kind(const ShownValues::ShownMonster& shown)
 {
-    return I18N::Format(I18N::Editor::StepKind, {LogName(monster)});
+    return I18N::Format(I18N::Editor::StepKind, {ShownValues::LogName(shown)});
 }
 
 std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* locale)
@@ -33,9 +33,9 @@ std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* l
     return I18N::Format(I18N::Editor::StepMonsterName, {LogName(monster), I18N::GetLanguageDisplayName(locale)});
 }
 
-std::string Attacks(const Data::Monsters::MonsterDefinition& monster)
+std::string Attacks(const ShownValues::ShownMonster& shown)
 {
-    return I18N::Format(I18N::Editor::StepAttacks, {LogName(monster)});
+    return I18N::Format(I18N::Editor::StepAttacks, {ShownValues::LogName(shown)});
 }
 
 std::string Model(const std::string& slot, const std::string& what)
@@ -43,9 +43,9 @@ std::string Model(const std::string& slot, const std::string& what)
     return I18N::Format(I18N::Editor::StepModel, {slot, what});
 }
 
-std::string SoundSetOf(const Data::Monsters::MonsterDefinition& monster)
+std::string SoundSetOf(const ShownValues::ShownMonster& shown)
 {
-    return I18N::Format(I18N::Editor::StepMonsterSoundSet, {LogName(monster)});
+    return I18N::Format(I18N::Editor::StepMonsterSoundSet, {ShownValues::LogName(shown)});
 }
 
 std::string SoundSet(const std::string& name, const std::string& what)

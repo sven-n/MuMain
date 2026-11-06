@@ -294,8 +294,7 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
 
 std::string MuMonsterAttacksUI::AttacksLabel() const
 {
-    return m_shown != nullptr ? I18N::Format(I18N::Editor::StepAttacks, {ShownValues::LogName(*m_shown)})
-                              : std::string();
+    return m_shown != nullptr ? StepLabel::Attacks(*m_shown) : std::string();
 }
 
 void MuMonsterAttacksUI::ShowMapVariant(int key, std::optional<int> variant)

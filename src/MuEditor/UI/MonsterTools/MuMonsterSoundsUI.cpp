@@ -335,7 +335,7 @@ void MuMonsterSoundsUI::RenderMonster(const ShownValues::ShownMonster& shown)
     {
         ShownValues::ShownMonster changed = shown;
         changed.monster.soundSet = name;
-        ShownValues::Store(I18N::Format(I18N::Editor::StepMonsterSoundSet, {ShownValues::LogName(changed)}), changed);
+        ShownValues::Store(StepLabel::SoundSetOf(changed), changed);
     }
     OwnValues::EndField(state);
     if (!monster.soundSet.empty())
@@ -399,8 +399,7 @@ void MuMonsterSoundsUI::RenderVariants(const ShownValues::ShownMonster& shown)
             ShownValues::ShownMonster changed = shown;
             std::optional<std::string>& value = changed.monster.randomVariants[index].soundSet;
             value = name.empty() ? std::nullopt : std::optional<std::string>(name);
-            ShownValues::Store(I18N::Format(I18N::Editor::StepMonsterSoundSet, {ShownValues::LogName(changed)}),
-                               changed);
+            ShownValues::Store(StepLabel::SoundSetOf(changed), changed);
         }
         OwnValues::EndField(state);
         if (variant.soundSet)

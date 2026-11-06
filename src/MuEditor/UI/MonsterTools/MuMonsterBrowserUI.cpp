@@ -264,7 +264,7 @@ void MuMonsterBrowserUI::SetKind(int number, bool wholeMonster, MonsterKind kind
     ShownValues::ShownMonster changed = *shown;
     changed.monster.kind = kind;
     // "Death Centurion (3 numbers): kind" for a monster as a whole.
-    const std::string label = I18N::Format(I18N::Editor::StepKind, {ShownValues::LogName(changed)});
+    const std::string label = StepLabel::Kind(changed);
     if (ShownValues::Store(label, changed))
     {
         SelectFromList(number, wholeMonster);
