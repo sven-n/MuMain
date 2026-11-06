@@ -331,7 +331,8 @@ static void UpdateLogInSceneView()
 
 void PlayLogInSceneMusic()
 {
-    // The credits have their own theme. Starts the track again when it ends; a no-op while it plays.
+    // The credits have their own theme. Tracks loop; asking every frame also starts the track once the music is
+    // switched on. A no-op while it plays.
     ::PlayMp3(g_CreditWin.IsVisible() ? MUSIC_MUTHEME : MUSIC_LOGIN_THEME);
 }
 
