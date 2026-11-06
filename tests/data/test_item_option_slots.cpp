@@ -38,9 +38,9 @@ TEST_CASE("An item keeps the options its slots hold and drops the rest [items]")
     item.Key = key;
     for (int i = 0; i < MAX_ITEM_SPECIAL; ++i)
     {
-        CHECK(GameLogic::Items::AddOptionSlot(item, static_cast<std::uint16_t>(AT_IMPROVE_DAMAGE + i), i + 1));
+        GameLogic::Items::AddOptionSlot(item, static_cast<std::uint16_t>(AT_IMPROVE_DAMAGE + i), i + 1);
     }
-    CHECK_FALSE(GameLogic::Items::AddOptionSlot(item, AT_LUCK, 99));
+    GameLogic::Items::AddOptionSlot(item, AT_LUCK, 99);
 
     REQUIRE(item.SpecialNum == MAX_ITEM_SPECIAL);
     for (int i = 0; i < MAX_ITEM_SPECIAL; ++i)

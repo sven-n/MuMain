@@ -24,16 +24,15 @@ void ReportDroppedOption(const ITEM& item, std::uint16_t option)
 
 namespace GameLogic::Items
 {
-bool AddOptionSlot(ITEM& item, std::uint16_t option, int value)
+void AddOptionSlot(ITEM& item, std::uint16_t option, int value)
 {
     if (item.SpecialNum >= MAX_ITEM_SPECIAL)
     {
         ReportDroppedOption(item, option);
-        return false;
+        return;
     }
     item.Special[item.SpecialNum] = option;
     item.SpecialValue[item.SpecialNum] = static_cast<BYTE>(value);
     ++item.SpecialNum;
-    return true;
 }
 } // namespace GameLogic::Items
