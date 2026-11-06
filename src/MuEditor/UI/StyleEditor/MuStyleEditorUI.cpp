@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cstddef>
+#include <functional>
 #include <optional>
 #include <utility>
 
@@ -756,13 +757,29 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
         }
         Render::Items::Looks::PrepareTextures(shown);
     }
+    // Both views at the same moment.
     const WorldTimeScope time(m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt);
-    std::optional<Render::Items::Styles::PreviewLook> preview;
-    if (look != nullptr)
+    if (look == nullptr)
     {
-        preview.emplace(Data::Items::ToModelSlot(itemType), shown);
+        // A look in code: the item as the game draws it.
+        m_preview.Render(itemType);
+        return;
     }
-    m_preview.Render(itemType);
+    // The look as applied beside it as the fields have it, both on the picked item, whatever look it names.
+    const LookDefinition* applied = g_LookEdits.Find(look->name);
+    const int slot = Data::Items::ToModelSlot(itemType);
+    m_preview.RenderSideBySide(itemType, I18N::Editor::AsApplied, I18N::Editor::AsEdited,
+                               [&](int view, const std::function<void()>& draw)
+                               {
+                                   const LookDefinition* drawn = view == 0 ? applied : &shown;
+                                   if (drawn == nullptr)
+                                   {
+                                       draw();
+                                       return;
+                                   }
+                                   const Render::Items::Styles::PreviewLook preview(slot, *drawn);
+                                   draw();
+                               });
 }
 
 void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)

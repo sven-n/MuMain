@@ -1487,7 +1487,7 @@ number that has a model but no item:
 - A preview of the model as the game has it opened, at an item level,
   excellent or ancient, standing as the inventory turns it or lying as on
   the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
-  wheel to zoom, double click to put it back). A click on a part of the
+  wheel to zoom, double click to put it back; **Turn**, off at first, turns it). A click on a part of the
   item finds its mesh in the mesh list and keeps it shown. The preview
   stays at the top of the window while the fields below it scroll.
 - The model file, picked from the `.bmd` files below `Data/Item` and
@@ -1609,11 +1609,14 @@ The picked look shows:
 - **Apply** and **Revert**: the fields change a copy of the look; Apply makes
   it the look, after listing the items it reaches when items use it. Apply is
   off while the look has a fatal problem.
-- A **preview** of the item picked in the item tools, drawn with the look as
-  the fields have it, before Apply: the Item Model window's preview, with
-  **Stop time** and a time slider, an eye per layer that leaves it out, and
-  **Draw as a doppelganger**. It stays where it is while what is below it
-  scrolls.
+- A **preview** of the item picked in the item tools, in two views side by
+  side: **As applied**, the look as the game draws it now, for reference, and
+  **As edited**, the look as the fields have it, before Apply. Both draw the
+  picked item with the look, whatever look the item names. They share the
+  Item Model window's controls and one camera (a drag in either turns both),
+  with **Stop time** and a time slider, an eye per layer that leaves it out of
+  the edited view, and **Draw as a doppelganger**. A look still in code shows
+  one view. The preview stays where it is while what is below it scrolls.
 - The **problems** of the look as the fields have it, with the file's checks.
 - The **layers** in drawing order, one line each written from its fields,
   and **Item values after drawing** as the last line; **Add**, **Copy**,

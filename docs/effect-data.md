@@ -346,7 +346,7 @@ world (below) is for that.
   picks its frame (0 to 7) instead.
 - **The view**: drag to turn the camera, drag with the middle mouse button
   to move the picture, the wheel zooms, a double click or **Reset view**
-  puts it back; **Turn** turns the type slowly.
+  puts it back; **Turn** (off at first) turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
   a texture the code chooses, a model the game never draws itself, an effect
   whose values start it transparent or at size 0 (the preview shows it

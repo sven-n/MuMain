@@ -18,9 +18,9 @@
 // still in code, which can be looked at but not changed. The picked look of Data/Effects/RenderStyles.json shows its
 // layers in drawing order, one line each, and the item values it leaves after drawing as the last line; below, the
 // fields of the picked line, the problems of the look as it is now (Apply is off while a fatal one is left) and the
-// items that use it. Above them, staying where it is while they scroll, a preview of the item picked in the item tools
-// drawn with the look before it is applied, with the time stopped or moving, an eye per layer and "Draw as:
-// doppelganger". Apply lists the items a change reaches (D26). The changes are steps of the editor's look history
+// items that use it. Above them, staying where it is while they scroll, a preview of the item picked in the item tools:
+// the look as applied beside the look as the fields have it, before it is applied, with one camera, the time stopped
+// or moving, an eye per layer (for the edited one) and "Draw as: doppelganger". Apply lists the items a change reaches (D26). The changes are steps of the editor's look history
 // (LookEdits); Save writes the file.
 class CMuStyleEditorUI
 {

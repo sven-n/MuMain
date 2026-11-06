@@ -653,7 +653,13 @@
     <value>Wähle einen Gegenstand in den Gegenstandswerkzeugen oder einen der Gegenstände oben, um den Look an ihm zu sehen.</value>
   </data>
   <data name="The preview draws {0}" xml:space="preserve">
-    <value>Die Vorschau zeichnet {0} mit dem Look, wie seine Felder ihn jetzt haben.</value>
+    <value>Die Vorschau zeichnet {0} mit dem Look, wie er übernommen ist, und daneben, wie seine Felder ihn jetzt haben.</value>
+  </data>
+  <data name="As applied" xml:space="preserve">
+    <value>Wie übernommen</value>
+  </data>
+  <data name="As edited" xml:space="preserve">
+    <value>Wie bearbeitet</value>
   </data>
   <data name="Texture" xml:space="preserve">
     <value>Textur</value>

@@ -674,7 +674,13 @@
     <value>Pick an item in the item tools, or one of the items above, to see the look on it.</value>
   </data>
   <data name="The preview draws {0}" xml:space="preserve">
-    <value>The preview draws {0} with the look as its fields have it now.</value>
+    <value>The preview draws {0} with the look as applied, and beside it with the look as its fields have it now.</value>
+  </data>
+  <data name="As applied" xml:space="preserve">
+    <value>As applied</value>
+  </data>
+  <data name="As edited" xml:space="preserve">
+    <value>As edited</value>
   </data>
   <data name="Texture" xml:space="preserve">
     <value>Texture</value>
