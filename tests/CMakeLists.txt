@@ -95,6 +95,11 @@ endif()
 # configure time, like MuClient's in src/CMakeLists.txt.
 function(mu_test_use_pch target)
     target_precompile_headers(${target} REUSE_FROM mu_test_pch)
+    # GCC 13 reports -Wstringop-overflow for concatenations like std::string(300, 'x') + ".json" in test files that use
+    # the precompiled header, the false positive MuClient has too (src/CMakeLists.txt), which GCC 15 does not report.
+    # It stays a warning in these tests, so a local build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
+    target_compile_options(${target} PRIVATE
+        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>>:-Wno-error=stringop-overflow>")
     get_target_property(sources ${target} SOURCES)
     get_target_property(source_dir ${target} SOURCE_DIR)
     foreach(source IN LISTS sources)
