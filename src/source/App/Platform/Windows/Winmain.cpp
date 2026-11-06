@@ -19,8 +19,6 @@
 
 #ifdef _WIN32
 #include <dpapi.h>
-#elif defined(__APPLE__)
-#include <mach-o/dyld.h>
 #endif
 #include <clocale>
 #include <cstring>
@@ -1956,13 +1954,12 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
 static void SetWorkingDirectoryToBasePath()
 {
 #if defined(__APPLE__)
-    std::uint32_t pathSize = 0;
-    _NSGetExecutablePath(nullptr, &pathSize);
-    std::string executablePath(pathSize, '\0');
-    if (_NSGetExecutablePath(executablePath.data(), &pathSize) == 0)
+    // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
+    // absolute for every later caller (WinApiShims.h).
+    if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
         std::error_code error;
-        std::filesystem::current_path(std::filesystem::path(executablePath).parent_path(), error);
+        std::filesystem::current_path(executable.parent_path(), error);
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
@@ -2002,9 +1999,6 @@ static void SelectConnectServer(wchar_t* commandLine)
 
 static void InitializeWorkingDirectoryAndLog()
 {
-    // Before the working directory moves: on macOS the first query makes a relative start path absolute
-    // (WinApiShims.h), for every later caller.
-    static_cast<void>(Core::Platform::GetExecutablePath());
     SetWorkingDirectoryToBasePath();
     mu::log::Init();
 }
