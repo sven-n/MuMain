@@ -210,7 +210,8 @@ void MonsterNameRows::CommitName(int id, const char* locale, const char* text)
     }
     else
     {
-        stored = g_MonsterEdits.SetMonsterName(label, id, locale, text);
+        // A monster's row whose monster has one number left names that number.
+        stored = g_MonsterEdits.SetMonsterName(label, NumberOf(id), locale, text);
     }
     if (!stored)
     {

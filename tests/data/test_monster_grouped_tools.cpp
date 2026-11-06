@@ -331,6 +331,13 @@ TEST_CASE("Monster Translations rows: a monster with several numbers is translat
     CHECK(rows.GetSelected() == whole);
     rows.Select(175);
     CHECK(rows.GetSelected() == 175);
+
+    // A monster's row still shown after its monster lost its other numbers
+    // changes the number left.
+    REQUIRE(g_MonsterEdits.SplitNumber("split", 175));
+    REQUIRE(g_MonsterEdits.SplitNumber("split", 336));
+    rows.CommitName(whole, "de", "Zenturio");
+    CHECK(Entry(145).names.Get("de") == "Zenturio");
 }
 
 TEST_CASE("Monster Translations: a name the import gives every number of a monster is the monster's "
