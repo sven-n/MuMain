@@ -93,6 +93,11 @@ add_test(
     COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
         -P "${MU_TESTS}/test_sdl_image_archive.cmake"
 )
+add_test(
+    NAME sdl_ttf_archives_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_sdl_ttf_archives.cmake"
+)
 
 # Render and effects contracts.
 add_test(
