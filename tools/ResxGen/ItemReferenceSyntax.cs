@@ -16,7 +16,8 @@ internal static partial class ItemReferenceSyntax
     /// The grammatical cases a reference may ask for.
     public static readonly IReadOnlyList<string> CaseKeys = ["gen", "dat", "acc", "ins", "loc"];
 
-    [GeneratedRegex(@"\G\{item:\d{1,4},\d{1,4}(\+\d{1,4})?(:(?<case>[a-z]+))?\}", RegexOptions.CultureInvariant)]
+    // [0-9], not \d: .NET's \d takes every Unicode digit, the game's parser only ASCII ones.
+    [GeneratedRegex(@"\G\{item:[0-9]{1,4},[0-9]{1,4}(\+[0-9]{1,4})?(:(?<case>[a-z]+))?\}", RegexOptions.CultureInvariant)]
     private static partial Regex Reference();
 
     /// True when the text holds at least one reference.
