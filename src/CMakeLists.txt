@@ -788,10 +788,13 @@ foreach(source IN LISTS MU_CLIENT_SOURCES)
   endif()
 endforeach()
 set_source_files_properties(${MU_SOURCES_WITHOUT_STDAFX} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-# GCC 13 reports -Wstringop-overflow for "..." + std::to_string(n) + "..." in files that use the precompiled header
-# (MapRef.cpp, ModelFiles.cpp), a false positive; GCC 15 does not, 14 was not checked. It stays a warning there, so a
-# local build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
-target_compile_options(MuClient PRIVATE
+# GCC 13 reports -Wstringop-overflow for "..." + std::to_string(n) + "..." in these two files when they use the
+# precompiled header, a false positive; GCC 15 does not, 14 was not checked. It stays a warning in them, so a local
+# build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
+set_property(SOURCE
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/MapData/MapRef.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/ModelData/ModelFiles.cpp"
+  APPEND PROPERTY COMPILE_OPTIONS
   "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>>:-Wno-error=stringop-overflow>")
 
 # Basic compile definitions, roughly mirroring the original MSVC project
