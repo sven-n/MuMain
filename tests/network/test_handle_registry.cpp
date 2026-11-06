@@ -66,11 +66,17 @@ TEST_CASE("HandleRegistry Remove waits for a callback in progress [network][dotn
     });
     entered.get_future().wait();
 
+    // Wait until the destroying thread is about to call Remove(), so the sleep below measures
+    // Remove() blocking and not a thread that has not started yet.
+    std::promise<void> removing;
+    std::future<void> removingStarted = removing.get_future();
     std::atomic<bool> removed = false;
     std::thread destroyingThread([&] {
+        removing.set_value();
         registry.Remove(1);
         removed = true;
     });
+    removingStarted.wait();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     const bool removedWhileCallbackRan = removed;
