@@ -38,7 +38,8 @@ private:
     void Open(Mode mode, int source);
     void RenderNumber();
     void RenderTargets();
-    // The monsters the search finds, but the source's.
+    // The monsters the search finds, but the source's; the picked one stays
+    // picked only while it is among them.
     void BuildTargets();
     bool CanConfirm() const;
     void Confirm();

@@ -129,6 +129,18 @@ void Press(const char* window, const char* label)
     Press(WidgetId(window, label));
 }
 
+// Activation selects all of the field's text; the typed text replaces it. A
+// field still active from typing before (a press of a disabled button leaves
+// it so) is let go first, or the text would be added to it.
+void Type(const char* window, const char* label, const char* text)
+{
+    ImGui::ClearActiveID();
+    RenderBrowser();
+    Press(window, label);
+    ImGui::GetIO().AddInputCharactersUTF8(text);
+    RenderBrowser();
+}
+
 // The kind combo of a row: a number's, or a monster's (its first number with
 // MonsterRowId).
 ImGuiID RowKindCombo(int rowId)
@@ -522,7 +534,17 @@ TEST_CASE("Monster Browser: Move number to... lists the other monsters and moves
         std::find_if(windows.begin(), windows.end(), [](const ImGuiWindow* window)
                      { return std::string_view(window->Name).find("##Targets") != std::string_view::npos; });
     REQUIRE(targets != windows.end());
-    Press(ImGui::GetIDWithSeed("Budge Dragon (2)##2", nullptr, (*targets)->ID));
+    const ImGuiID budgeDragon = ImGui::GetIDWithSeed("Budge Dragon (2)##2", nullptr, (*targets)->ID);
+    Press(budgeDragon);
+
+    // A search that hides the picked monster drops it: Move moves nothing.
+    Type(NumberDialog, "##Search", "Centurion");
+    Press(NumberDialog, I18N::Editor::Move);
+    RenderBrowser();
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{145, 175, 336});
+
+    Type(NumberDialog, "##Search", "Budge");
+    Press(budgeDragon);
     Press(NumberDialog, I18N::Editor::Move);
     RenderBrowser();
     CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{2, 175});

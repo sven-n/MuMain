@@ -194,6 +194,12 @@ void MonsterNumberDialog::BuildTargets()
             m_targets.push_back({first, MonsterWithNumbers(first) + "##" + std::to_string(first)});
         }
     }
+    // A monster the list no longer shows is no longer picked: Move would
+    // move the number into a monster out of sight.
+    if (std::ranges::none_of(m_targets, [this](const Target& target) { return target.number == m_target; }))
+    {
+        m_target = -1;
+    }
 }
 
 bool MonsterNumberDialog::CanConfirm() const
