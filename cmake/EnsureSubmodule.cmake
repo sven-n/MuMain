@@ -13,6 +13,51 @@
 # Requires REPO_ROOT to be set in the calling scope (the repository root
 # used as the working directory for git operations).
 
+# Leaves in <out_var> the name .gitmodules gives the submodule at <path>. git names a submodule after its path
+# unless .gitmodules says otherwise; the name picks the submodule's git directory and its settings.
+function(_mu_submodule_name path out_var)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} config -f .gitmodules --get-regexp "^submodule\\..*\\.path$"
+    WORKING_DIRECTORY ${REPO_ROOT}
+    OUTPUT_VARIABLE entries
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  string(REPLACE "\n" ";" entries "${entries}")
+  set(name "${path}")
+  foreach(entry IN LISTS entries)
+    if (entry MATCHES "^submodule\\.(.+)\\.path (.+)$")
+      if (CMAKE_MATCH_2 STREQUAL path)
+        set(name "${CMAKE_MATCH_1}")
+      endif()
+    endif()
+  endforeach()
+  set(${out_var} "${name}" PARENT_SCOPE)
+endfunction()
+
+# A shallow clone tracks only the default branch. `git submodule update --remote` needs the branch .gitmodules
+# names for the submodule (RmlUi's integration/sdl-gpu-parity), so the clone's remote gets that branch too.
+function(_mu_track_submodule_branch name submodule_dir)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} config -f .gitmodules --get "submodule.${name}.branch"
+    WORKING_DIRECTORY ${REPO_ROOT}
+    OUTPUT_VARIABLE branch
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  # "." stands for the superproject's current branch, not a branch of the submodule's own.
+  if (branch STREQUAL "" OR branch STREQUAL ".")
+    return()
+  endif()
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} remote set-branches --add origin "${branch}"
+    WORKING_DIRECTORY "${submodule_dir}"
+    RESULT_VARIABLE rc
+    ERROR_VARIABLE err
+  )
+  if (NOT rc EQUAL 0)
+    message(FATAL_ERROR "Submodule ${name}: adding its branch ${branch} to the clone's remote failed:\n${err}")
+  endif()
+endfunction()
+
 function(mu_ensure_submodule rel_path)
   set(oneValueArgs INDICATOR URL)
   cmake_parse_arguments(MES "" "${oneValueArgs}" "" ${ARGN})
@@ -35,6 +80,16 @@ function(mu_ensure_submodule rel_path)
   if (NOT GIT_FOUND)
     message(FATAL_ERROR
       "Git not found. Run 'git submodule update --init --depth 1' manually from ${REPO_ROOT}.")
+  endif()
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --absolute-git-dir
+    WORKING_DIRECTORY ${REPO_ROOT}
+    RESULT_VARIABLE rc
+    OUTPUT_VARIABLE git_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if (NOT rc EQUAL 0)
+    message(FATAL_ERROR "Submodule ${rel_path} is missing, and ${REPO_ROOT} is not a git checkout.")
   endif()
 
   message(STATUS "Initializing submodule ${rel_path}...")
@@ -77,6 +132,12 @@ function(mu_ensure_submodule rel_path)
       WORKING_DIRECTORY ${REPO_ROOT}
       OUTPUT_QUIET ERROR_QUIET
     )
+    _mu_submodule_name("${submodule_repo_rel}" name)
+    set(module_git_dir "${git_dir}/modules/${name}")
+    set(new_clone FALSE)
+    if (NOT EXISTS "${module_git_dir}")
+      set(new_clone TRUE)
+    endif()
     # --depth 1 leaves the submodule's history out. `shallow = true` in .gitmodules would not: git then clones the
     # default branch's newest commit alone and fetches the pinned one, which is older, with all its history.
     execute_process(
@@ -88,6 +149,9 @@ function(mu_ensure_submodule rel_path)
     )
     if (NOT rc EQUAL 0)
       message(FATAL_ERROR "Submodule ${rel_path} init failed:\n${err}${out}")
+    endif()
+    if (new_clone)
+      _mu_track_submodule_branch("${name}" "${submodule_dir}")
     endif()
   endif()
 

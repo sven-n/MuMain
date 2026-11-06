@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 
-# mu_ensure_submodule leaves a submodule's history out. The library here has three commits and the superproject pins
-# the middle one, as the real submodules pin a commit behind their branch's newest: the commit before the pinned one
-# must not arrive (the newest one does, without its history).
+# mu_ensure_submodule on a library laid out like the real submodules: the pinned commit is on a side branch, which
+# .gitmodules names, and not on the default branch.
+#
+#   main: 1 - 2 - 3
+#   side:   \- s1 - s2      (s1 pinned)
+#
+# A new submodule leaves the history out: commit 1, before the pinned one, must not arrive (main's newest commit
+# does, without its history). `git submodule update --remote` then moves it to s2.
 
 if(NOT DEFINED MU_WORK_DIR)
     message(FATAL_ERROR "MU_WORK_DIR is required")
@@ -22,11 +27,11 @@ foreach(variable IN LISTS repository_variables)
 endforeach()
 
 set(library "${MU_WORK_DIR}/library")
-set(superproject "${MU_WORK_DIR}/superproject")
 file(REMOVE_RECURSE "${MU_WORK_DIR}")
-file(MAKE_DIRECTORY "${library}" "${superproject}")
+file(MAKE_DIRECTORY "${library}")
 
-# Without the user's git configuration (GIT_CONFIG_GLOBAL needs git 2.32). Git refuses file:// URLs for submodules unless protocol.file.allow says so.
+# Without the user's git configuration (GIT_CONFIG_GLOBAL needs git 2.32). Git refuses file:// URLs for submodules
+# unless protocol.file.allow says so.
 file(WRITE "${MU_WORK_DIR}/gitconfig" "")
 set(ENV{GIT_CONFIG_NOSYSTEM} 1)
 set(ENV{GIT_CONFIG_GLOBAL} "${MU_WORK_DIR}/gitconfig")
@@ -56,14 +61,23 @@ function(run_git dir)
     set(git_output "${output}" PARENT_SCOPE)
 endfunction()
 
-run_git("${library}" init -q)
-foreach(number IN ITEMS 1 2 3)
-    file(WRITE "${library}/indicator.txt" "${number}\n")
+# Commits <name> on the library's current branch and leaves its hash in commit_<name>.
+function(commit name)
+    file(WRITE "${library}/indicator.txt" "${name}\n")
     run_git("${library}" add indicator.txt)
-    run_git("${library}" commit -q -m "Commit ${number}")
+    run_git("${library}" commit -q -m "Commit ${name}")
     run_git("${library}" rev-parse HEAD)
-    set(commit_${number} "${git_output}")
-endforeach()
+    set(commit_${name} "${git_output}" PARENT_SCOPE)
+endfunction()
+
+run_git("${library}" init -q)
+commit(1)
+run_git("${library}" checkout -q -b side)
+commit(s1)
+commit(s2)
+run_git("${library}" checkout -q main)
+commit(2)
+commit(3)
 
 # A file:// URL, not a path: git ignores --depth for a local path.
 if(library MATCHES "^/")
@@ -71,31 +85,68 @@ if(library MATCHES "^/")
 else()
     set(library_url "file:///${library}")
 endif()
-run_git("${superproject}" init -q)
-file(WRITE "${superproject}/.gitmodules" "[submodule \"library\"]\n\tpath = library\n\turl = ${library_url}\n")
-run_git("${superproject}" update-index --add --cacheinfo "160000,${commit_2},library")
-run_git("${superproject}" add .gitmodules)
-run_git("${superproject}" commit -q -m "Pin commit 2")
+
+# Makes a superproject in <dir> whose submodule `library` is pinned to <pinned> and follows the side branch.
+function(make_superproject dir pinned)
+    file(MAKE_DIRECTORY "${dir}")
+    run_git("${dir}" init -q)
+    file(WRITE "${dir}/.gitmodules"
+        "[submodule \"library\"]\n\tpath = library\n\turl = ${library_url}\n\tbranch = side\n")
+    run_git("${dir}" update-index --add --cacheinfo "160000,${pinned},library")
+    run_git("${dir}" add .gitmodules)
+    run_git("${dir}" commit -q -m "Pin ${pinned}")
+endfunction()
 
 include("${CMAKE_CURRENT_LIST_DIR}/../cmake/EnsureSubmodule.cmake")
-set(REPO_ROOT "${superproject}")
-set(CMAKE_CURRENT_SOURCE_DIR "${superproject}")
-mu_ensure_submodule("library" INDICATOR "indicator.txt")
+function(ensure_library superproject)
+    set(REPO_ROOT "${superproject}")
+    set(CMAKE_CURRENT_SOURCE_DIR "${superproject}")
+    mu_ensure_submodule("library" INDICATOR "indicator.txt")
+endfunction()
 
-run_git("${superproject}/library" rev-parse HEAD)
-if(NOT git_output STREQUAL commit_2)
-    message(FATAL_ERROR "The submodule has ${git_output} checked out, not the pinned ${commit_2}")
-endif()
-execute_process(
-    COMMAND "${GIT_EXECUTABLE}" cat-file -e "${commit_1}^{commit}"
-    WORKING_DIRECTORY "${superproject}/library"
-    RESULT_VARIABLE has_commit_1
-    OUTPUT_QUIET ERROR_QUIET
-)
-if(has_commit_1 EQUAL 0)
+function(expect_checked_out superproject expected what)
+    run_git("${superproject}/library" rev-parse HEAD)
+    if(NOT git_output STREQUAL expected)
+        message(FATAL_ERROR "The submodule has ${git_output} checked out, not ${what} ${expected}")
+    endif()
+endfunction()
+
+# Leaves in has_commit whether <superproject>'s submodule holds <commit>.
+function(holds superproject commit)
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" cat-file -e "${commit}^{commit}"
+        WORKING_DIRECTORY "${superproject}/library"
+        RESULT_VARIABLE result
+        OUTPUT_QUIET ERROR_QUIET
+    )
+    if(result EQUAL 0)
+        set(has_commit TRUE PARENT_SCOPE)
+    else()
+        set(has_commit FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
+# A new submodule.
+set(fresh "${MU_WORK_DIR}/fresh")
+make_superproject("${fresh}" "${commit_s1}")
+ensure_library("${fresh}")
+expect_checked_out("${fresh}" "${commit_s1}" "the pinned")
+holds("${fresh}" "${commit_1}")
+if(has_commit)
     message(FATAL_ERROR
         "The submodule holds the commit before the pinned one: mu_ensure_submodule must leave the submodule's history "
         "out (git submodule update --init --depth 1).")
 endif()
+execute_process(
+    COMMAND "${GIT_EXECUTABLE}" submodule update --remote -- library
+    WORKING_DIRECTORY "${fresh}"
+    RESULT_VARIABLE result
+    ERROR_VARIABLE error
+)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR
+        "git submodule update --remote failed: the shallow clone must fetch the branch .gitmodules names.\n${error}")
+endif()
+expect_checked_out("${fresh}" "${commit_s2}" "the side branch's newest")
 
 file(REMOVE_RECURSE "${MU_WORK_DIR}")
