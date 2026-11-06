@@ -127,6 +127,22 @@ on also means fetching SDL_image with that library; the comment above
 `FetchContent_Declare(SDL3_image)` in `CMakeLists.txt` says how, and the
 `sdl_image_archive_contract` static check names what is missing.
 
+SDL3_ttf comes as its release archive too, and the four libraries it vendors
+(FreeType, HarfBuzz, plutosvg, plutovg) as archives of the commits SDL3_ttf pins
+them to, each checked by its SHA-256. SDL3_ttf's patch step unpacks them into its
+`external/` folder before the patches in `cmake/patches/` apply; the
+`sdl_ttf_archives_contract` static check keeps each one there. Updating SDL3_ttf
+means updating those four commits and hashes as well, and the list of the
+release's commits in `tests/test_sdl_ttf_archives.cmake`, which the check
+compares them with; the comment above `FetchContent_Declare(SDL3_ttf)` says
+where to find them.
+
+Each run of that patch step starts from the archives' sources: it unpacks
+SDL3_ttf's own archive, kept in the sub-build's download folder, again first.
+Each patch's SHA-256 is part of its patch command, so an edited patch in
+`cmake/patches/` runs the step again, also in an existing build folder and in
+CI's restored library caches, and applies to the unpatched sources.
+
 ### Build options
 
 | CMake option | Values | Meaning |
@@ -284,8 +300,9 @@ before reusing packages across image or compiler updates.
 The library caches keep the downloaded library sources (`_deps/*-src`,
 `_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
 recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
-(which declares the libraries), `cmake/patches` and the ClientLibrary projects, and
-name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
+(which declares the libraries), `cmake/patches`, the scripts that unpack and patch the
+sources (`cmake/UnpackArchive.cmake`, `cmake/ApplyGitPatch.cmake`) and the ClientLibrary
+projects, and name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
 so a new entry is stored only when one of those changes, not with every new source
 file in `src/CMakeLists.txt`.
 

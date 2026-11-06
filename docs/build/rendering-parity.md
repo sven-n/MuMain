@@ -109,7 +109,8 @@ documented platform-dependent font exception. Release packages may not use it.
 ## SDL_ttf patch policy
 
 SDL_ttf is pinned to revision
-`a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b` from the 3.2.2 line. Upstream
+`a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b` from the 3.2.2 line (the
+`release-3.2.2` archive, checked by its SHA-256). Upstream
 `main` was checked at `a42434b8c96daaf7650dbd0befe480c090d1c2eb`; it did
 not contain equivalent missing-glyph upload batching.
 
