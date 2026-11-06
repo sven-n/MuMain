@@ -88,6 +88,17 @@ class StampReleaseVersionTests(unittest.TestCase):
         self.assertIn("no client", result.stderr)
         self.assertEqual((self.folder / "moved.tar.gz").read_bytes(), before)
 
+    def test_a_macos_archive_without_its_client_fails_unchanged(self):
+        # Main.app is where the macOS job puts it, but Contents/MacOS holds no Main for the tag to sit next to.
+        write_archive(self.folder / "macos.tar.gz", {"Main.app/Contents/Info.plist": b"plist",
+                                                     "Main.app/Contents/MacOS/MuMain": b"bin"})
+        before = (self.folder / "macos.tar.gz").read_bytes()
+
+        result = self.stamp("v1.37.0", "macos.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no client", result.stderr)
+        self.assertEqual((self.folder / "macos.tar.gz").read_bytes(), before)
+
     def test_one_archive_without_a_client_leaves_every_archive_unchanged(self):
         # Checked before any is rewritten: a release that fails ships nothing, and a retry stamps each archive once.
         write_archive(self.folder / "windows.tar.gz", {"./Main.exe": b"exe"})
