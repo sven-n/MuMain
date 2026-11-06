@@ -48,6 +48,7 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Network/EndpointForLog.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
@@ -1971,6 +1972,27 @@ static void SetWorkingDirectoryToBasePath()
 #endif
 }
 
+// The connect server: the command line's (a launcher passes one) or else config.ini's.
+static void SelectConnectServer(wchar_t* commandLine)
+{
+    WORD port;
+    const bool fromCommandLine = GetConnectServerInfo(commandLine, g_lpszCmdURL, &port) != FALSE;
+    if (fromCommandLine)
+    {
+        szServerIpAddress = g_lpszCmdURL;
+        g_ServerPort = port;
+    }
+    else
+    {
+        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
+        szServerIpAddress = serverIPFromConfig.c_str();
+        g_ServerPort = GameConfig::GetInstance().GetServerPort();
+    }
+    g_ErrorReport.Write(L"> Server = %hs, from %ls.\r\n",
+                        Network::DescribeEndpointForLog(mu_wchar_to_utf8(szServerIpAddress), g_ServerPort).c_str(),
+                        fromCommandLine ? L"the command line" : L"config.ini");
+}
+
 static void InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
@@ -2030,20 +2052,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_bDisableAnimationTaskPool = false;
     }
 
-    // Check for command line server override
-    WORD wPortNumber;
-    if (GetConnectServerInfo(lpszCommandLine, g_lpszCmdURL, &wPortNumber))
-    {
-        szServerIpAddress = g_lpszCmdURL;
-        g_ServerPort = wPortNumber;
-    }
-    else
-    {
-        // Use config.ini settings if no command line override
-        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
-        szServerIpAddress = serverIPFromConfig.c_str();
-        g_ServerPort = GameConfig::GetInstance().GetServerPort();
-    }
+    SelectConnectServer(lpszCommandLine);
 
     // #ifdef _DEBUG
 

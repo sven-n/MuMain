@@ -46,6 +46,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_endpoint_for_log
+    SOURCES
+        test_endpoint_for_log.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_reachability_probe
     SOURCES
         test_reachability_probe.cpp

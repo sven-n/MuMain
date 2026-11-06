@@ -408,6 +408,21 @@ packets version. In a release download that commit is the client's, so a differe
 one means a library from another download. A local build rebuilds the library only
 when its sources change, so there it can name an older commit.
 
+The log names the connect server (`> Server = ..., from config.ini` or `from the
+command line`) and every server the client connects to (`NET: connecting to ...`).
+Players post their logs in public, so an address is written out only when it can't
+lead to a server:
+
+| Address | Written as |
+| --- | --- |
+| The local machine: `127.0.0.0`–`127.255.255.255`, `localhost` and `*.localhost`, `::1`, `::ffff:127.x.x.x` | as configured, e.g. `127.127.127.127:44405` |
+| A private network: `10.x`, `172.16.x`–`172.31.x`, `192.168.x`, `169.254.x`, `100.64.x`–`100.127.x`, `fc00::/7`, `fe80::/10` | as configured, with `(private network)` |
+| Any other IP address | `a public IPv4 address:44405` or `a public IPv6 address:44405` |
+| A host name, e.g. `mu.example.com` | `a host name:44405` |
+
+A failed connection logs the socket error (`SocketException ConnectionRefused (10061)`)
+instead of the exception text, which would name the address.
+
 If a music file is missing or cannot be decoded, the client logs the failure and leaves
 that track silent for the rest of the audio session. Scene changes do not repeatedly
 retry it. After restoring or replacing a file under `Data/Music/`, restart the client

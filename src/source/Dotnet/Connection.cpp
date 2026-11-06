@@ -13,6 +13,7 @@
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Network/EndpointForLog.h"
 
 // Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs
@@ -252,6 +253,10 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
         return;
     }
 
+    // Before connecting, so a failure the library logs follows the address it was for.
+    mu::log::Get("dotnet")->info("NET: connecting to {} (encrypted={})",
+                                 Network::DescribeEndpointForLog(std::u16string_view(host ? host : u""), port),
+                                 isEncrypted ? 1 : 0);
     this->_handle = connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
 
     mu::log::Get("dotnet")->info("NET: dotnet_connect returned handle={} (encrypted={})", GetHandle(),
