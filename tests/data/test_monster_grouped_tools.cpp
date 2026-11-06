@@ -224,6 +224,23 @@ TEST_CASE("Monster tools: a monster as a whole shows and stores the values its n
     CHECK(Entry(336).kind == MonsterKind::Npc);
     CHECK(Entry(175).maps == std::vector<Data::Maps::MapRef>{{25, 0}});
 
+    // Its undo and redo select the monster as a whole again.
+    g_MonsterSelection.Select(2);
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(Entry(145).kind == MonsterKind::Monster);
+    CHECK(g_MonsterSelection.IsWholeMonster());
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(g_MonsterSelection.GetNumber()).size() == 3);
+    g_MonsterSelection.Select(2);
+    REQUIRE(g_MonsterEdits.Redo());
+    CHECK(g_MonsterSelection.IsWholeMonster());
+    // A number's own edit selects the number.
+    MonsterDefinition own = Entry(336);
+    own.kind = MonsterKind::Trap;
+    REQUIRE(g_MonsterEdits.SetMonster("own kind", own));
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK_FALSE(g_MonsterSelection.IsWholeMonster());
+    CHECK(g_MonsterSelection.GetNumber() == 336);
+
     // A number shows its entry; a monster with one number too.
     g_MonsterSelection.Select(336);
     CHECK_FALSE(ShownValues::ReadSelected()->wholeMonster);

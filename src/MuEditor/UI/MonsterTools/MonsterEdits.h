@@ -111,8 +111,9 @@ public:
     void BeginGroup(std::string label);
     void EndGroup();
 
-    // Undo and Redo select the monster they changed. False when there is
-    // nothing to do or the monsters changed past the history
+    // Undo and Redo select the monster they changed, as a whole when the
+    // change was made on its shared values. False when there is nothing to do
+    // or the monsters changed past the history
     // (MonsterEditHistory::GetLastRefusal).
     bool Undo();
     bool Redo();
@@ -157,6 +158,8 @@ private:
     void AddToMonsterOf(std::string label, int memberNumber, const Data::Monsters::MonsterDefinition& entry);
     // Into the history, or into the open group.
     void Record(MonsterEditEntry entry);
+    // Selects what the last Undo or Redo changed.
+    void SelectLastChanged();
 
     MonsterEditHistory m_history;
     std::optional<MonsterEditEntry> m_group;

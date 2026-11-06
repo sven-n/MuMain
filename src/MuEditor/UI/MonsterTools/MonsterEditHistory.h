@@ -71,6 +71,9 @@ struct MonsterEditEntry
     std::vector<MonsterModelEditStep> models;
     std::vector<MonsterSoundSetEditStep> soundSets;
     std::vector<MonsterGroupEditStep> groups;
+    // Made on a monster with several numbers as a whole (its shared values):
+    // its undo selects the monster as a whole again.
+    bool wholeMonster = false;
 };
 
 // The undo history of the monster tools for the session. Entries are applied
@@ -139,6 +142,11 @@ public:
     {
         return m_lastChangedMonster;
     }
+    // Whether that entry was made on the number's monster as a whole.
+    bool WasLastChangeOnWholeMonster() const
+    {
+        return m_lastChangeOnWholeMonster;
+    }
 
     // Drops every entry, for data that replaced all monsters: it is not the
     // saved data until MarkSaved.
@@ -160,6 +168,7 @@ private:
     // m_done when the data was saved; nullopt when that state is gone.
     std::optional<std::size_t> m_saved = 0;
     std::optional<int> m_lastChangedMonster;
+    bool m_lastChangeOnWholeMonster = false;
     Refusal m_lastRefusal = Refusal::None;
 };
 } // namespace MuEditor::Monsters

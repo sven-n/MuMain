@@ -109,6 +109,7 @@ void MonsterEditHistory::Clear()
     m_done = 0;
     m_saved.reset();
     m_lastChangedMonster.reset();
+    m_lastChangeOnWholeMonster = false;
 }
 
 void MonsterEditHistory::MarkSaved()
@@ -239,6 +240,7 @@ void MonsterEditHistory::Apply(const MonsterEditEntry& entry, bool undoing)
     {
         m_lastChangedMonster = entry.groups.front().monster;
     }
+    m_lastChangeOnWholeMonster = entry.wholeMonster;
 }
 } // namespace MuEditor::Monsters
 

@@ -215,6 +215,7 @@ bool MonsterEdits::SetSharedValues(std::string label, int number, const MonsterD
     const MonsterDefinition after = Data::Monsters::MakeSharedValues(values);
     const bool grouped = m_group.has_value();
     BeginGroup(label);
+    m_group->wholeMonster = true;
     for (const int member : numbers)
     {
         MonsterDefinition changed = *g_MonsterDataHandler.ReadMonster(member);
@@ -633,10 +634,7 @@ bool MonsterEdits::Undo()
     {
         return false;
     }
-    if (const std::optional<int> changed = m_history.GetLastChangedMonster())
-    {
-        g_MonsterSelection.Select(*changed);
-    }
+    SelectLastChanged();
     return true;
 }
 
@@ -646,11 +644,25 @@ bool MonsterEdits::Redo()
     {
         return false;
     }
-    if (const std::optional<int> changed = m_history.GetLastChangedMonster())
+    SelectLastChanged();
+    return true;
+}
+
+void MonsterEdits::SelectLastChanged()
+{
+    const std::optional<int> changed = m_history.GetLastChangedMonster();
+    if (!changed)
+    {
+        return;
+    }
+    if (m_history.WasLastChangeOnWholeMonster())
+    {
+        g_MonsterSelection.SelectMonster(*changed);
+    }
+    else
     {
         g_MonsterSelection.Select(*changed);
     }
-    return true;
 }
 
 // Both files or neither: a save that stopped after the first would leave a
