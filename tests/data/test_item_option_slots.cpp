@@ -3,9 +3,9 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "HeroScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
-#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
 #include "I18N/All.h"
@@ -70,13 +70,10 @@ TEST_CASE("A weapon keeps its skill, luck, additional option and six excellent o
     const std::array<BYTE, 7> itemData{0x00, 5, 0, 30, flags, 0x04, 0x3F};
 
     // The excellent damage level option is the hero's level / 20.
-    CHARACTER_ATTRIBUTE hero{};
-    hero.Level = 100;
-    CHARACTER_ATTRIBUTE* const previousHero = CharacterAttribute;
-    CharacterAttribute = &hero;
+    HeroScope hero;
+    hero.Hero().Level = 100;
     ITEM blade;
     FillItemFromParameters(blade, ParseItemData(itemData));
-    CharacterAttribute = previousHero;
 
     const std::array<OptionSlot, 9> expected{{
         {bladeSkill, 0},

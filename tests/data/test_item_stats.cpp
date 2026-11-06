@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "HeroScope.h"
 #include "ItemStatProfilesScope.h"
 #include "LevelBasisScrollProfile.h"
 #include "TestFiles.h"
@@ -70,40 +71,6 @@ private:
 };
 
 using ItemInfoTable = std::array<std::array<int, _COLUMN_TYPE_COUNT>, iMaxLevel + 1>;
-
-// Points the item help window at a test-owned hero: ComputeItemInfo marks the levels its
-// attributes can equip, and the "Can be equipped by" lines compare its class.
-class ItemHelpScope
-{
-public:
-    ItemHelpScope() : m_previousHero(CharacterAttribute), m_previousHeroCharacter(::Hero)
-    {
-        CharacterAttribute = &m_hero;
-        ::Hero = &m_heroCharacter;
-    }
-
-    ~ItemHelpScope()
-    {
-        CharacterAttribute = m_previousHero;
-        ::Hero = m_previousHeroCharacter;
-    }
-
-    CHARACTER_ATTRIBUTE& Hero()
-    {
-        return m_hero;
-    }
-
-    CHARACTER& HeroCharacter()
-    {
-        return m_heroCharacter;
-    }
-
-private:
-    CHARACTER_ATTRIBUTE m_hero{};
-    CHARACTER m_heroCharacter;
-    CHARACTER_ATTRIBUTE* m_previousHero;
-    CHARACTER* m_previousHeroCharacter;
-};
 
 // The table of the first item the window shows, while the table is still empty.
 ItemInfoTable ComputeFirstItemInfo(int itemType)
@@ -371,7 +338,7 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
                                                   {itemType, level, excellentFlags, ancientDiscriminator, optionLevel});
     };
     // The checks against ComputeItem (the item SetItemAttributes fills) hold before and after it uses the profiles.
-    ItemHelpScope hero;
+    HeroScope hero;
 
     // Weapon: 20 + base * (drop level + 3 * level) * 3 / 100; excellent drop level + 25; 5 strength per option level.
     CHECK(stats(ITEM_BLADE, 0).requireStrength == 106);
@@ -711,7 +678,7 @@ TEST_CASE("Magic power passes 255 and defense rate stops there [data][items]")
 
     // The help table shows the same: 200 + 66 (+15) = 266.
     items[DragonShieldType].SuccessfulBlocking = 200;
-    ItemHelpScope help;
+    HeroScope help;
     ComputeItemInfo(DragonShieldType);
     CHECK(ComputeItem(DragonShieldType, 15).SuccessfulBlocking == 255);
     CHECK(g_iItemInfo[15][_COLUMN_TYPE_DEFRATE] == 255);
@@ -753,7 +720,7 @@ TEST_CASE("Item stats and requirements stop at 65535 [data][items]")
 TEST_CASE("The item help table shows the stats the item has at each level [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
 
     ComputeItemInfo(ITEM_DOUBLE_BLADE);
     CHECK(g_iItemInfo[15][_COLUMN_TYPE_ATTMIN] == items[ITEM_DOUBLE_BLADE].DamageMin + 66);
@@ -782,7 +749,7 @@ TEST_CASE("The item help table shows the stats the item has at each level [data]
 TEST_CASE("The item help table shows the command requirement the item has [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
     // No shipped item the window shows has a command requirement; the editor can give one.
     items[ITEM_DRAGON_ARMOR].RequireCharisma = 100;
     ComputeItemInfo(ITEM_DRAGON_ARMOR);
@@ -797,7 +764,7 @@ TEST_CASE("The item help table shows the command requirement the item has [data]
 TEST_CASE("The item help table shows the magic power in the item's own column [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
 
     for (const HelpTableCase& item : HelpTableCases)
     {
@@ -825,7 +792,7 @@ TEST_CASE("The item help table shows the magic power in the item's own column [d
 TEST_CASE("The item help table keeps nothing of the item shown before [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
 
     // The table is global: /Book of Samut and then /Legendary Staff showed a Curse column under
     // the staff, and /Book of Samut and then /Kris one under the Kris.
@@ -859,7 +826,7 @@ TEST_CASE("The item help table keeps nothing of the item shown before [data][ite
 TEST_CASE("The item help table follows the hero's level and stats while it shows the same item [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
     CHARACTER_ATTRIBUTE& hero = help.Hero();
     const int requiredLevel = items[ITEM_BONE_BLADE].RequireLevel;
     REQUIRE(requiredLevel > 0);
@@ -887,7 +854,7 @@ TEST_CASE("The item help table follows the hero's level and stats while it shows
 TEST_CASE("The item help table shows the item editor's changes to the item it shows [data][items]")
 {
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
     constexpr int AddedDamage = 10;
 
     ComputeItemInfo(ITEM_DOUBLE_BLADE);
@@ -910,7 +877,7 @@ TEST_CASE("The item help window builds its content again only when what it shows
     using mu::ui::window::GetItemHelpContentKey;
 
     ShippedItemAttributes items;
-    ItemHelpScope help;
+    HeroScope help;
     help.HeroCharacter().Class = CLASS_WIZARD;
     const auto shown = GetItemHelpContentKey(ITEM_BONE_BLADE);
 
