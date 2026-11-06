@@ -7,6 +7,7 @@
 #include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemReferenceNames.h"
 #include "Data/Translation/ItemReference.h"
+#include "Data/Translation/ItemReferenceChecks.h"
 #include "Data/Translation/ItemTextExpansion.h"
 
 #include <algorithm>
@@ -174,6 +175,27 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     // German has no text of its own for the line: the English line, with the English name.
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "de").text == "Bundle of Tear of Elf");
     CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::UnfillableLine);
+}
+
+TEST_CASE("The texts that name an item are listed from the UI texts and every item text [data][items][texts]")
+{
+    std::vector<ItemDefinition> items = NamedItems();
+    ItemDescriptionLine line;
+    line.text = Data::LocalizedString::Parse("Combine with {item:14,25}");
+    items[1].description.push_back(line);
+    items[1].tooltipLayoutChanges.add.push_back({"classLines", {line}});
+    ItemDatabase database;
+    database.Build(items);
+
+    const std::vector<std::string> texts = Data::Translation::FindTextsNamingItem(database, 14, 25);
+    const auto has = [&](std::string_view suffix)
+    {
+        return std::any_of(texts.begin(), texts.end(), [&](const std::string& text) { return text.ends_with(suffix); });
+    };
+    CHECK(has("Dialog: Answer_65_Slot_0"));
+    CHECK(has("(14,21): description[0]"));
+    CHECK(has("(14,21): tooltipLayoutChanges.add[0].lines[0]"));
+    CHECK(Data::Translation::FindTextsNamingItem(database, 14, 21).empty());
 }
 
 TEST_CASE(

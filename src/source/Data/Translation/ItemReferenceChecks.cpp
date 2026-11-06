@@ -267,6 +267,18 @@ std::vector<std::string> FindTextsNamingItem(const Items::ItemDatabase& database
                 found.push_back(owner + ": nameLines[" + std::to_string(index) + "]");
             }
         }
+        const auto& additions = definition.tooltipLayoutChanges.add;
+        for (size_t addition = 0; addition < additions.size(); ++addition)
+        {
+            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
+            {
+                if (namesInSome(additions[addition].lines[index].text))
+                {
+                    found.push_back(owner + ": tooltipLayoutChanges.add[" + std::to_string(addition) + "].lines[" +
+                                    std::to_string(index) + "]");
+                }
+            }
+        }
     }
     for (const auto& [name, text] : database.GetTooltipFile().texts)
     {
