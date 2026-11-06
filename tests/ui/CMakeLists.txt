@@ -220,7 +220,8 @@ mu_add_test(
     NAME master_skill_tree_layout_tests
     SOURCES
         test_master_skill_tree_layout.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
 )
 
 mu_add_test(
@@ -228,7 +229,8 @@ mu_add_test(
     SOURCES
         test_skill_icon_atlas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/SkillIconAtlas.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
 )
 
 mu_add_test(

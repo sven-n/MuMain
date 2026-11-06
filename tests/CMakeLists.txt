@@ -66,6 +66,35 @@ if(MSVC)
     target_compile_options(mu_test_winmain PRIVATE /utf-8)
 endif()
 
+# Helper for files that more than one test compiles. Usage:
+#   mu_add_test_objects(NAME <name> SOURCES a.cpp b.cpp [LINK_LIBS lib1 lib2])
+# Compiles the files once, as an object library with the include folder and options mu_add_test gives a test's own
+# files; LINK_LIBS are linked PUBLIC, so the objects and the tests that use them see the same usage requirements. A
+# test lists <name> in its LINK_LIBS instead of the files.
+function(mu_add_test_objects)
+    cmake_parse_arguments(MAO "" "NAME" "SOURCES;LINK_LIBS" ${ARGN})
+    add_library(${MAO_NAME} OBJECT ${MAO_SOURCES})
+    target_link_libraries(${MAO_NAME} PUBLIC ${MAO_LINK_LIBS})
+    target_compile_features(${MAO_NAME} PRIVATE cxx_std_20)
+    target_include_directories(${MAO_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+    if(MSVC)
+        target_compile_options(${MAO_NAME} PRIVATE /utf-8)
+    endif()
+endfunction()
+
+# Game files that more than one standalone test (one without MuClient) compiles: each is compiled once here.
+set(MU_GAME_SOURCE "${CMAKE_SOURCE_DIR}/src/source")
+mu_add_test_objects(NAME mu_test_bench_stats SOURCES
+    ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchStats.cpp
+    ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchTypes.cpp)
+mu_add_test_objects(NAME mu_test_asset_path SOURCES ${MU_GAME_SOURCE}/Render/Textures/AssetPath.cpp)
+mu_add_test_objects(NAME mu_test_path_resolve SOURCES ${MU_GAME_SOURCE}/Core/Platform/PathResolve.cpp)
+mu_add_test_objects(NAME mu_test_master_skill_tree_layout SOURCES
+    ${MU_GAME_SOURCE}/UI/HUD/Skills/MasterSkillTreeLayout.cpp)
+mu_add_test_objects(NAME mu_test_bitmap_gpu_resources SOURCES
+    ${MU_GAME_SOURCE}/Render/Renderer/BitmapGpuResources.cpp
+    LINK_LIBS SDL3::SDL3)
+
 function(mu_add_test)
     cmake_parse_arguments(MAT "WILL_FAIL" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
     list(FIND MAT_SOURCES "${MU_TEST_WINMAIN}" winmain_index)
