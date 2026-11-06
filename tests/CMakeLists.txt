@@ -99,6 +99,13 @@ endif()
 # as for MuClient). Without mu_test_pch it does nothing: CMake would warn about
 # every test that reuses a precompiled header while precompiled headers are off, and CI fails on a warning.
 function(mu_test_use_pch target)
+    # On an object library it would build everywhere but in the nightly: there, with MSVC, a test that links the
+    # library gets the header's object twice (LNK4042, see mu_test_pch above). So only test programs may use it.
+    get_target_property(type ${target} TYPE)
+    if(NOT type STREQUAL "EXECUTABLE")
+        message(FATAL_ERROR "mu_test_use_pch(${target}): ${target} has type ${type}; only a test executable may reuse "
+            "the tests' precompiled header.")
+    endif()
     if(NOT TARGET mu_test_pch)
         return()
     endif()
