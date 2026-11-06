@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include <string>
+#include <vector>
 
 namespace MuEditor::Monsters
 {
@@ -26,9 +27,19 @@ private:
         MoveNumber,
     };
 
+    // A monster Move number to... offers: its first number, and its name with
+    // its numbers as the row's label.
+    struct Target
+    {
+        int number = 0;
+        std::string label;
+    };
+
     void Open(Mode mode, int source);
     void RenderNumber();
     void RenderTargets();
+    // The monsters the search finds, but the source's.
+    void BuildTargets();
     bool CanConfirm() const;
     void Confirm();
 
@@ -39,6 +50,11 @@ private:
     // The monster to move into, by one of its numbers; -1 for none.
     int m_target = -1;
     std::string m_search;
+    // Built again when the search, the table or the monsters change, not
+    // each frame.
+    std::vector<Target> m_targets;
+    std::string m_targetsSearch;
+    int m_targetsVersion = -1;
 };
 } // namespace MuEditor::Monsters
 

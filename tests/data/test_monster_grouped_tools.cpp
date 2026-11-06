@@ -467,6 +467,26 @@ TEST_CASE("Monster Browser: Add number and Split number out work on the selectio
     CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{145, 175, 336, 337});
 }
 
+TEST_CASE("Monster Browser: Move number to... lists the other monsters and moves the number into one "
+          "[editor][monsters]")
+{
+    GroupedTools tools;
+    TestImGuiContext context;
+    g_MonsterSelection.Select(175);
+    RenderBrowser();
+    Press(MuEditor::WindowIds::MonsterBrowser, I18N::Editor::MoveNumberTo);
+    RenderBrowser();
+    const ImVector<ImGuiWindow*>& windows = ImGui::GetCurrentContext()->Windows;
+    const auto targets =
+        std::find_if(windows.begin(), windows.end(), [](const ImGuiWindow* window)
+                     { return std::string_view(window->Name).find("##Targets") != std::string_view::npos; });
+    REQUIRE(targets != windows.end());
+    Press(ImGui::GetIDWithSeed("Budge Dragon (2)##2", nullptr, (*targets)->ID));
+    Press(NumberDialog, I18N::Editor::Move);
+    RenderBrowser();
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{2, 175});
+}
+
 TEST_CASE("Monster Browser: Remove monster names the monster by its shared name [editor][monsters]")
 {
     GroupedTools tools;

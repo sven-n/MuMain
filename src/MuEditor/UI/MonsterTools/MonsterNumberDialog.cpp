@@ -11,6 +11,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -79,6 +80,7 @@ void MonsterNumberDialog::Open(Mode mode, int source)
     m_number = GetNextFreeMonsterNumber(numbers.back());
     m_target = -1;
     m_search.clear();
+    m_targetsVersion = -1;
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -163,6 +165,33 @@ void MonsterNumberDialog::RenderTargets()
         ImGui::EndChild();
         return;
     }
+    const int version = g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion();
+    if (version != m_targetsVersion || m_search != m_targetsSearch)
+    {
+        BuildTargets();
+        m_targetsVersion = version;
+        m_targetsSearch = m_search;
+    }
+    // Only the rows in view are drawn.
+    ImGuiListClipper clipper;
+    clipper.Begin(static_cast<int>(m_targets.size()));
+    while (clipper.Step())
+    {
+        for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
+        {
+            const Target& target = m_targets[static_cast<size_t>(index)];
+            if (ImGui::Selectable(target.label.c_str(), m_target == target.number))
+            {
+                m_target = target.number;
+            }
+        }
+    }
+    ImGui::EndChild();
+}
+
+void MonsterNumberDialog::BuildTargets()
+{
+    m_targets.clear();
     const std::vector<int> own = g_MonsterEdits.ReadMonsterNumbers(m_source);
     std::vector<bool> listed(Data::Monsters::MonsterNumberCount, false);
     for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
@@ -180,17 +209,11 @@ void MonsterNumberDialog::RenderTargets()
             matches = matches || MatchesMonsterSearch(*g_MonsterDatabase.Find(member), m_search);
         }
         // Not the monster the number is in.
-        if (!matches || numbers == own)
+        if (matches && numbers != own)
         {
-            continue;
-        }
-        const std::string label = MonsterWithNumbers(number) + "##" + std::to_string(number);
-        if (ImGui::Selectable(label.c_str(), m_target == numbers.front()))
-        {
-            m_target = numbers.front();
+            m_targets.push_back({numbers.front(), MonsterWithNumbers(number) + "##" + std::to_string(number)});
         }
     }
-    ImGui::EndChild();
 }
 
 bool MonsterNumberDialog::CanConfirm() const
