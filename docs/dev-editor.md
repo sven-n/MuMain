@@ -53,8 +53,8 @@ between sessions (`imgui.ini` in the game folder).
 The editor window's bar has the **Windows** menu, **Undo** and **Redo**, the UI
 scale and the language. Undo and Redo act on the tool used last: after a click
 into the Server List window on its changes, after a click into a monster tool
-on monster edits, after a click into the Style Editor on its looks, after a
-click into an item tool on item edits. While the
+on monster edits, after a click into an item tool (the Style Editor is one)
+on item edits. While the
 tool used last is closed (for the monster tools: all of them), they act on
 item edits. A window of tool windows floating outside the editor window has the
 same bar once, on the tab shown at its top left when several are docked in it,

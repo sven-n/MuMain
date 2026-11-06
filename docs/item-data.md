@@ -1000,9 +1000,10 @@ and server share.
 |---|---|
 | `number` | The item number (0–511) in the file's group. |
 | `file` | The `.bmd` model, relative to the game folder, with `/` between folders. |
-| `model` | The name of a shared model, instead of `file`, `textureFolders` and `noneBlendMeshes`; see [Shared models](#shared-models). |
+| `model` | The name of a shared model, instead of `file`, `textureFolders`, `noneBlendMeshes` and `meshNames`; see [Shared models](#shared-models). |
 | `textureFolders` | Folders below `Data/` with the model's textures. Each texture is taken from the **first** folder that has it. Without folders the model has no textures. |
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
+| `meshNames` | A name for each part (mesh) by its number, as `{"0": "Shaft", "1": "Crystal"}`, which the editor shows: 1 to 32 characters without a space at either end. Only shown, so a name that can't be one, or a key that is no mesh number from 0 to 49, is a warning that leaves it out. Optional. |
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
@@ -1161,7 +1162,7 @@ Model files are checked like the item files: invalid JSON, a missing
 letter or `..`), `\` in a path, display or glow values of the wrong kind
 (e.g. a rotation with two numbers, a scale of 0 or a color value above
 1), an item with two models, `model` together with `file`,
-`textureFolders` or `noneBlendMeshes`, a `model` that is not in
+`textureFolders`, `noneBlendMeshes` or `meshNames`, a `model` that is not in
 `SharedModels.json`, or a shared model defined twice stop the start with
 a message; unknown fields and a shared model that no item uses are
 warnings. The automated tests also check that every number with a model
@@ -1304,7 +1305,7 @@ instead of a file of their own. The shared models are in
 ```
 
 A shared model has a `name` of letters and digits and the `file`,
-`textureFolders` and `noneBlendMeshes` of a model entry. Its file is
+`textureFolders`, `noneBlendMeshes` and `meshNames` of a model entry. Its file is
 opened once, by the first of its items, and its textures are loaded once;
 the other items use that data. Everything else (`inventory`, `ground`,
 `glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
@@ -1455,7 +1456,9 @@ How changes work:
 - **Save Items** runs the checks and writes `Data/Items` next to the game,
   with the model files of the groups whose models changed,
   `SharedModels.json` when a shared model changed,
-  `Data/Effects/GlowColors.json` when a glow color changed and
+  `Data/Effects/GlowColors.json` when a glow color changed,
+  `Data/Effects/RenderStyles.json` when a look of the
+  [Style Editor](#style-editor) changed and
   `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
   how many. With fatal problems nothing is written, and they are listed in
@@ -1504,7 +1507,9 @@ number that has a model but no item:
   are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes.
 - **Meshes**: a row for each mesh of the opened model, with its number, its
-  texture's name, its marks (*hidden*: a texture name starting with `hid`
+  **Name** (typed in, stored in `meshNames` when the field is left, in the
+  shared model for an item that names one; the Style Editor lists the parts
+  by it), its texture's name, its marks (*hidden*: a texture name starting with `hid`
   or the `_H` script, never drawn; *glows*: `_R`; *scrolls*: `_S`; *no
   chrome*: `_N` or a none-blend mesh, which the chrome-type passes and the
   level glow skip; *holes*: its texture has pixels the alpha test drops,
@@ -1515,8 +1520,9 @@ number that has a model but no item:
   as it is and the others see-through; a click on a row keeps it so until
   it is clicked again. At a level the preview draws with another model (the
   Box of Luck's levels, for example), the list says so and the preview
-  shows none of its meshes. Which meshes a render style or item effect draws is
-  still drawing code and not listed.
+  shows none of its meshes. Which parts the render style draws, and with which
+  effects, shows in the [Style Editor](#style-editor); an item effect is
+  drawing code.
 - The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of
   its size, drawn as
@@ -1591,7 +1597,7 @@ The editor has no bold font, so it draws a bold label twice, a pixel apart.
 ### Style Editor
 
 **Windows > Style Editor** shows the looks of items as a tree, built like the
-[Colors](#colors) window and docked with the item tools: the roots **Render
+[Colors](#colors) window and docked with the item tools, one of them: the roots **Render
 styles** and **Item effects**, each look with how many models use it, and
 "(code)" for a look that is still drawing code, which you see with its items
 but can't change. Folders sort the render styles of the file as in the Colors
@@ -1606,31 +1612,60 @@ digits only, and no other render style has it, in the file or in code.
 
 The picked look shows:
 
-- **Apply** and **Revert**: the fields change a copy of the look; Apply makes
-  it the look, after listing the items it reaches when items use it. Apply is
-  off while the look has a fatal problem.
+- **Apply** and **Revert**: the fields change a copy of the look; Revert
+  takes it back, Apply asks what the change is for:
+  - **For all its items**: the look itself changes, so every item that uses
+    it does; the items are listed, and Ctrl+Z undoes it.
+  - **Only** the item picked in the item tools: the change becomes a copy of
+    the look under a name you give (`archangelStaffGold`), in the same
+    folder, and only that item's model names it (`renderStyle`); the other
+    items keep the look.
+  - **A new item** from the picked item: as **Duplicate item**, a copy of it
+    with its model at a free number and with a name, wearing the copy of the
+    look. The game shows it once the server knows the new item
+    ([Item Sync](#item-sync)).
+
+  The look and the item change as one undo step. Apply is off while the look
+  has a fatal problem.
 - A **preview** of the item picked in the item tools, in two views side by
   side: **As applied**, the look as the game draws it now, for reference, and
   **As edited**, the look as the fields have it, before Apply. Both draw the
   picked item with the look, whatever look the item names. They share the
   Item Model window's controls and one camera (a drag in either turns both),
-  with **Stop time** and a time slider, an eye per layer that leaves it out of
-  the edited view, and **Draw as a doppelganger**. A look still in code shows
-  one view. The preview stays where it is while what is below it scrolls.
+  with **Stop time** and a time slider, an eye per effect or layer that
+  leaves it out of the edited view, and **Draw as a doppelganger**. A look
+  still in code shows one view. The preview stays where it is while what is
+  below it scrolls.
 - The **problems** of the look as the fields have it, with the file's checks.
-- The **layers** in drawing order, one line each written from its fields,
-  and **Item values after drawing** as the last line; **Add**, **Copy**,
-  **Move up**, **Move down** and **Remove** change the list. Below it are the
-  fields of the picked line: kind, motion, blend, meshes, texture, light,
-  opacity, glow mesh and strength, scroll and the scrolling mesh. A value is
-  the item's, the drawing's (opacity), a number or a shape; a shape's curve
-  over time is drawn below its fields.
+- **Parts and their effects**: a row for the look's **base** (the item's own
+  texture), one for **every part** and one for each part of the picked item
+  (its mesh, by the name the [mesh list](#item-model) gives it, else its
+  number and texture), each with the effects on it. Pointing at a part draws
+  it in the previews as it is and the others see-through; a click on a part,
+  in the list or in a preview, picks it. **Add effect** puts an effect of the
+  gallery on the picked part: **Glow**, **Pulse** (a glow whose strength
+  waves), **Shine** (a reflection moving over it), **Overlay texture**,
+  **Flowing texture**, **Color** and **Frames and flicker**. A click on an
+  effect shows its settings only (a pulse's range and seconds with its curve,
+  a shine's motion, an overlay's texture); **All fields** shows every field of
+  its layer, and **Remove the effect** removes it. An effect is one layer of
+  the look and aims at mesh numbers, so it fits every item that uses the
+  look; a layer that does several things (an overlay that glows and flows)
+  shows as its main effect, with the others among its settings.
+- **Show the layers** shows the look as its layers instead, for what the
+  effects don't cover: the layers in drawing order, one line each written
+  from its fields, and **Item values after drawing** as the last line;
+  **Add**, **Copy**, **Move up**, **Move down** and **Remove** change the
+  list. Below it are the fields of the picked line: kind, motion, blend,
+  meshes, texture, light, opacity, glow mesh and strength, scroll and the
+  scrolling mesh. A value is the item's, the drawing's (opacity), a number or
+  a shape; a shape's curve over time is drawn below its fields.
 - The items that use the look; a click selects one.
 
-Each change of the looks or their folders is a step of the window's undo
-history and reaches the game at once. **Save** writes
-`Data/Effects/RenderStyles.json`, and **Revert** reads it again (unsaved
-changes are lost). After a read with a fatal problem Save is off.
+Each change of the looks or their folders is a step of the item undo history
+and reaches the game at once. **Save Items** writes
+`Data/Effects/RenderStyles.json` with the items. A file read with a fatal
+problem is never written; the editor then shows the looks the game has.
 
 ### Item Tooltip
 
