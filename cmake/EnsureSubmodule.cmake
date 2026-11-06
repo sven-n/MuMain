@@ -140,8 +140,13 @@ function(mu_ensure_submodule rel_path)
     endif()
     # --depth 1 leaves the submodule's history out. `shallow = true` in .gitmodules would not: git then clones the
     # default branch's newest commit alone and fetches the pinned one, which is older, with all its history.
+    # A git directory that already holds the history (left by `git submodule deinit`, say) keeps it.
+    set(depth --depth 1)
+    if (NOT new_clone AND NOT EXISTS "${module_git_dir}/shallow")
+      set(depth "")
+    endif()
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init --depth 1 -- "${submodule_repo_rel}"
+      COMMAND ${GIT_EXECUTABLE} submodule update --init ${depth} -- "${submodule_repo_rel}"
       WORKING_DIRECTORY ${REPO_ROOT}
       RESULT_VARIABLE rc
       ERROR_VARIABLE err

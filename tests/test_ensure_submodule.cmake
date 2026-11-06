@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 3.25)
 #   side:   \- s1 - s2      (s1 pinned)
 #
 # A new submodule leaves the history out: commit 1, before the pinned one, must not arrive (main's newest commit
-# does, without its history). `git submodule update --remote` then moves it to s2.
+# does, without its history). `git submodule update --remote` then moves it to s2. A submodule whose git directory
+# already holds the history keeps it.
 
 if(NOT DEFINED MU_WORK_DIR)
     message(FATAL_ERROR "MU_WORK_DIR is required")
@@ -148,5 +149,23 @@ if(NOT result EQUAL 0)
         "git submodule update --remote failed: the shallow clone must fetch the branch .gitmodules names.\n${error}")
 endif()
 expect_checked_out("${fresh}" "${commit_s2}" "the side branch's newest")
+
+# A submodule with its whole history, its folder emptied by `git submodule deinit` and the pin moved to a commit the
+# clone does not have yet.
+set(full "${MU_WORK_DIR}/full")
+make_superproject("${full}" "${commit_s1}")
+run_git("${full}" submodule update --init -- library)
+run_git("${library}" checkout -q side)
+commit(s3)
+run_git("${library}" checkout -q main)
+run_git("${full}" update-index --cacheinfo "160000,${commit_s3},library")
+run_git("${full}" commit -q -m "Pin s3")
+run_git("${full}" submodule deinit -f -- library)
+ensure_library("${full}")
+expect_checked_out("${full}" "${commit_s3}" "the pinned")
+run_git("${full}/library" rev-parse --is-shallow-repository)
+if(NOT git_output STREQUAL "false")
+    message(FATAL_ERROR "The submodule lost its history: mu_ensure_submodule must keep a whole history whole.")
+endif()
 
 file(REMOVE_RECURSE "${MU_WORK_DIR}")
