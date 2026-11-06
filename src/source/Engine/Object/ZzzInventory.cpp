@@ -14,6 +14,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ItemOptionLines.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/AI/ZzzAI.h"
@@ -38,6 +39,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
@@ -1071,6 +1073,23 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     return  maxDurability;
 }
 
+// The tooltip lines of an option of the option definitions, its texts with `value`, blue and not bold, from row
+// `textNum` on; returns the row after them. A text the option texts lack has no line.
+static int WriteOptionLines(const Data::Items::ItemOption& option, int value, int textNum)
+{
+    for (const std::string& name : option.texts)
+    {
+        if (textNum < MaxTextListRows &&
+            Engine::Items::OptionLines::Write(name, value, TextList[textNum], std::size(TextList[textNum])))
+        {
+            TextListColor[textNum] = TEXT_COLOR_BLUE;
+            TextBold[textNum] = false;
+            ++textNum;
+        }
+    }
+    return textNum;
+}
+
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
 {
     switch (Option)
@@ -1126,9 +1145,6 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int 
     case AT_SKILL_POWER_SLASH_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         mu_swprintf(Text, I18N::Game::PowerSlashSkillManaD, iMana);
-        break;
-    case AT_LUCK:
-        mu_swprintf(Text, I18N::Game::LuckSuccessRateOfJewelOfSoul25);
         break;
     case AT_IMPROVE_DAMAGE:
         mu_swprintf(Text, I18N::Game::AdditionalDmgD, Value);
@@ -2139,18 +2155,19 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             break;
         }
 
+        if (const Data::Items::ItemOption* option = GameLogic::Items::FindSlotOption(*ip, i))
+        {
+            TextNum = WriteOptionLines(*option, GameLogic::Items::GetItemOptionValue(*ip, i), TextNum);
+            continue;
+        }
+
         gSkillManager.GetSkillInformation(ip->Special[i], 1, NULL, &iMana, NULL);
         GetSpecialOptionText(ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++;
 
-        if (ip->Special[i] == AT_LUCK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::LuckCriticalDamageRate5, ip->SpecialValue[i]);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        }
-        else if (ip->Special[i] == AT_SKILL_RIDER)
+        if (ip->Special[i] == AT_SKILL_RIDER)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::KnightSpecificSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;

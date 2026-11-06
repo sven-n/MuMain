@@ -752,6 +752,29 @@ TEST_CASE("An item's duration text follows the UI's language [data][items][toolt
     CHECK(GetItemTooltipText(values, TooltipValue::AddOptionDuration) == english);
 }
 
+// Luck's two lines are its option texts (Data/Items/Tooltips/OptionTexts.json) in the UI's language, the critical
+// damage rate with the value of its definition (Data/Items/Options/Luck.json).
+TEST_CASE("An item's luck lines are its option texts in the UI's language [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    ItemCreationParams kris = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
+    kris.WithLuck = true;
+
+    const std::vector<ItemTooltipLine> english = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
+    CHECK(HasLine(english, L"Luck (success rate of Jewel of Soul +25%)", TEXT_COLOR_BLUE));
+    CHECK(HasLine(english, L"Luck (critical damage rate +5%)", TEXT_COLOR_BLUE));
+    {
+        UiLocaleScope german("de");
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
+        CHECK(HasLine(lines, L"Glück (Erfolgsrate von Juwel der Seele +25%)", TEXT_COLOR_BLUE));
+        CHECK(HasLine(lines, L"Glück (kritische Schadensrate +5%)", TEXT_COLOR_BLUE));
+    }
+    CHECK(Engine::Items::TooltipSnapshot::TooltipOfParameters(kris).size() == english.size());
+}
+
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
