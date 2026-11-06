@@ -127,6 +127,14 @@ on also means fetching SDL_image with that library; the comment above
 `FetchContent_Declare(SDL3_image)` in `CMakeLists.txt` says how, and the
 `sdl_image_archive_contract` static check names what is missing.
 
+SDL3_ttf comes as its release archive too, and the four libraries it vendors
+(FreeType, HarfBuzz, plutosvg, plutovg) as archives of the commits SDL3_ttf pins
+them to, each checked by its SHA-256. SDL3_ttf's patch step unpacks them into its
+`external/` folder before the patches in `cmake/patches/` apply; the
+`sdl_ttf_archives_contract` static check keeps each one there. Updating SDL3_ttf
+means updating those four commits and hashes as well; the comment above
+`FetchContent_Declare(SDL3_ttf)` says where to find them.
+
 ### Build options
 
 | CMake option | Values | Meaning |
