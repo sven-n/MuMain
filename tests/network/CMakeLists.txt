@@ -14,6 +14,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_illusion_temple_result
+    SOURCES
+        test_illusion_temple_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/IllusionTempleResult.cpp
+)
+
+mu_add_test(
     NAME test_transform_viewport_entry
     SOURCES
         test_transform_viewport_entry.cpp
