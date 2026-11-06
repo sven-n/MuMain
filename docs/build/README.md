@@ -396,6 +396,8 @@ Data          : data-<id> (matches this client)
   archive, with the data release the client was built for. A different id means the
   runtime and data downloads don't belong together; data archives from before the
   file, and self-built clients, say `unknown`.
+- Either line says `unreadable` when its file is there but holds no version, for
+  example after someone edited it.
 
 The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the data language
 (`Eng`, `Por` or `Spn`, which picks the `Data/Local` files), and, once the renderer is

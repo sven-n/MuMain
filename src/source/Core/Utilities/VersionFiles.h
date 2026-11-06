@@ -11,16 +11,23 @@ namespace Core::Build
 inline constexpr const char* kReleaseVersionFile = "release-version.txt";
 inline constexpr const char* kDataVersionFile = "Data/DataVersion.txt";
 
-// The file's first line without a UTF-8 byte order mark and trailing CRs and spaces, or empty when the file is
-// missing or the line isn't a version: 1 to 64 letters, digits, '.', '+', '-' or '_'.
-std::string ReadVersionFile(const std::filesystem::path& file);
+// A version file as read: whether it is there, and the version it holds.
+struct VersionFile
+{
+    bool found = false;  // the file exists and could be opened
+    std::string version; // its first line when that is a version, else empty
+};
 
-// The Release line: the release tag, or that the client is no release download.
-std::string DescribeRelease(const std::string& releaseTag);
+// The file's first line without a UTF-8 byte order mark and trailing CRs and spaces, when it is a version: 1 to 64
+// letters, digits, '.', '+', '-' or '_'.
+VersionFile ReadVersionFile(const std::filesystem::path& file);
+
+// The Release line: the release tag, that the client is no release download, or that the file holds no tag.
+std::string DescribeRelease(const VersionFile& release);
 
 // The Data line: the installed data release against the one the client was built with ("unknown" when the
 // build had no git).
-std::string DescribeData(const std::string& installedId, const std::string& expectedId);
+std::string DescribeData(const VersionFile& installed, const std::string& expectedId);
 
 // When the file was last written, e.g. "2026-11-06 12:03:17 UTC"; empty when that can't be read. For the client's
 // executable that is when it was linked, or in a download the time the archive keeps.

@@ -33,12 +33,17 @@ bool IsVersion(const std::string& text)
 }
 } // namespace
 
-std::string ReadVersionFile(const std::filesystem::path& file)
+VersionFile ReadVersionFile(const std::filesystem::path& file)
 {
     std::ifstream stream(file, std::ios::binary);
-    std::string line;
-    if (!stream || !std::getline(stream, line))
+    if (!stream)
         return {};
+
+    VersionFile result;
+    result.found = true;
+    std::string line;
+    if (!std::getline(stream, line))
+        return result;
 
     // Written on Linux, but someone may have opened and saved it on Windows, which can add a byte order mark
     // (Notepad before Windows 10 1903, PowerShell 5's -Encoding UTF8) and a CR.
@@ -46,23 +51,30 @@ std::string ReadVersionFile(const std::filesystem::path& file)
         line.erase(0, Utf8ByteOrderMark.size());
     while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
         line.pop_back();
-    return IsVersion(line) ? line : std::string();
+    if (IsVersion(line))
+        result.version = line;
+    return result;
 }
 
-std::string DescribeRelease(const std::string& releaseTag)
+std::string DescribeRelease(const VersionFile& release)
 {
-    if (releaseTag.empty())
+    if (!release.found)
         return "none (not a release download)";
-    return releaseTag;
+    if (release.version.empty())
+        return std::string("unreadable (") + kReleaseVersionFile + " holds no release tag)";
+    return release.version;
 }
 
-std::string DescribeData(const std::string& installedId, const std::string& expectedId)
+std::string DescribeData(const VersionFile& installed, const std::string& expectedId)
 {
     const bool expectedKnown = expectedId != UnknownId;
+    const std::string& installedId = installed.version;
     if (installedId.empty())
     {
         // Self-built clients copy Data from their checkout, and data downloads from before the file have none.
-        std::string text = std::string("unknown (no ") + kDataVersionFile + ")";
+        const std::string text = installed.found
+                                     ? std::string("unreadable (") + kDataVersionFile + " holds no data release id)"
+                                     : std::string("unknown (no ") + kDataVersionFile + ")";
         return expectedKnown ? text + ", this client expects " + expectedId : text;
     }
     if (!expectedKnown)

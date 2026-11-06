@@ -42,6 +42,22 @@ private:
     std::filesystem::path m_folder;
 };
 
+// The version a file with these contents reads as.
+std::string VersionIn(const std::string& contents)
+{
+    return Core::Build::ReadVersionFile(TemporaryFile(contents).Path()).version;
+}
+
+// A version file that isn't there, and one that is, holding this version (empty: none).
+Core::Build::VersionFile Missing()
+{
+    return {};
+}
+Core::Build::VersionFile Holding(const std::string& version)
+{
+    return {true, version};
+}
+
 // Sets the file's write time, in whole seconds since 1970.
 void SetWriteTime(const std::filesystem::path& file, std::time_t seconds)
 {
@@ -57,36 +73,52 @@ void SetWriteTime(const std::filesystem::path& file, std::time_t seconds)
 
 TEST_CASE("Version files give their first line [core][build]")
 {
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0\n").Path()) == "v1.37.0");
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("data-3f2a9c1e7b0d4a55").Path()) == "data-3f2a9c1e7b0d4a55");
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0 \r\nsecond line\n").Path()) == "v1.37.0");
+    CHECK(VersionIn("v1.37.0\n") == "v1.37.0");
+    CHECK(VersionIn("data-3f2a9c1e7b0d4a55") == "data-3f2a9c1e7b0d4a55");
+    CHECK(VersionIn("v1.37.0 \r\nsecond line\n") == "v1.37.0");
     // Saved with a UTF-8 byte order mark, as Windows tools can.
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("\xEF\xBB\xBFv1.37.0\r\n").Path()) == "v1.37.0");
+    CHECK(VersionIn("\xEF\xBB\xBFv1.37.0\r\n") == "v1.37.0");
+    CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0\n").Path()).found);
 }
 
-TEST_CASE("Version files that hold no version read as empty [core][build]")
+TEST_CASE("A missing version file is not found [core][build]")
 {
-    CHECK(Core::Build::ReadVersionFile("no-such-folder/version.txt").empty());
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("").Path()).empty());
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("\nv1.37.0\n").Path()).empty());
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0 %s\n").Path()).empty());
-    CHECK(Core::Build::ReadVersionFile(TemporaryFile(std::string(65, '1')).Path()).empty());
+    const Core::Build::VersionFile missing = Core::Build::ReadVersionFile("no-such-folder/version.txt");
+    CHECK_FALSE(missing.found);
+    CHECK(missing.version.empty());
 }
 
-TEST_CASE("The release line names the tag or no release [core][build]")
+TEST_CASE("Version files that hold no version are found with no version [core][build]")
 {
-    CHECK(Core::Build::DescribeRelease("v1.37.0") == "v1.37.0");
-    CHECK(Core::Build::DescribeRelease("") == "none (not a release download)");
+    for (const std::string& contents :
+         {std::string(), std::string("\nv1.37.0\n"), std::string("v1.37.0 %s\n"), std::string(65, '1')})
+    {
+        CAPTURE(contents);
+        const Core::Build::VersionFile file = Core::Build::ReadVersionFile(TemporaryFile(contents).Path());
+        CHECK(file.found);
+        CHECK(file.version.empty());
+    }
+}
+
+TEST_CASE("The release line names the tag, no release, or an unreadable file [core][build]")
+{
+    CHECK(Core::Build::DescribeRelease(Holding("v1.37.0")) == "v1.37.0");
+    CHECK(Core::Build::DescribeRelease(Missing()) == "none (not a release download)");
+    CHECK(Core::Build::DescribeRelease(Holding("")) == "unreadable (release-version.txt holds no release tag)");
 }
 
 TEST_CASE("The data line compares the installed and expected data releases [core][build]")
 {
-    CHECK(Core::Build::DescribeData("data-aaaa", "data-aaaa") == "data-aaaa (matches this client)");
-    CHECK(Core::Build::DescribeData("data-bbbb", "data-aaaa") == "data-bbbb, but this client expects data-aaaa");
-    CHECK(Core::Build::DescribeData("", "data-aaaa") ==
+    CHECK(Core::Build::DescribeData(Holding("data-aaaa"), "data-aaaa") == "data-aaaa (matches this client)");
+    CHECK(Core::Build::DescribeData(Holding("data-bbbb"), "data-aaaa") ==
+          "data-bbbb, but this client expects data-aaaa");
+    CHECK(Core::Build::DescribeData(Missing(), "data-aaaa") ==
           "unknown (no Data/DataVersion.txt), this client expects data-aaaa");
-    CHECK(Core::Build::DescribeData("", "unknown") == "unknown (no Data/DataVersion.txt)");
-    CHECK(Core::Build::DescribeData("data-bbbb", "unknown") == "data-bbbb (this client's data release is unknown)");
+    CHECK(Core::Build::DescribeData(Missing(), "unknown") == "unknown (no Data/DataVersion.txt)");
+    CHECK(Core::Build::DescribeData(Holding(""), "data-aaaa") ==
+          "unreadable (Data/DataVersion.txt holds no data release id), this client expects data-aaaa");
+    CHECK(Core::Build::DescribeData(Holding("data-bbbb"), "unknown") ==
+          "data-bbbb (this client's data release is unknown)");
 }
 
 TEST_CASE("A file's write time reads in UTC [core][build]")
