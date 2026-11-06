@@ -259,9 +259,9 @@ endforeach()
 # unpack an archive of each, at the commit release-3.2.2 pins it to (git ls-tree release-3.2.2 external/), into
 # external/, where the submodule would be: 39 MB to download and 121 MB unpacked, where the git clones with their
 # history took 392 MB. The archives stay in the download folder beside SDL_ttf's, so a patch step that runs again
-# unpacks them again without downloading. The hashes pin the sources. Updating SDL_ttf means updating those four commits and hashes too;
-# tests/test_sdl_ttf_archives.cmake checks that each library is unpacked before the patches. The patches keep LF line
-# endings (.gitattributes), as the archives do.
+# unpacks them again without downloading. The hashes pin the sources. Updating SDL_ttf means updating those four
+# commits and hashes too; tests/test_sdl_ttf_archives.cmake lists the commits of the release, and checks them and that
+# each library is unpacked before the patches. The patches keep LF line endings (.gitattributes), as the archives do.
 FetchContent_Declare(SDL3_ttf
     URL      https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
     URL_HASH SHA256=63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d
