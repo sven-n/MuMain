@@ -60,6 +60,8 @@ TEST_CASE("Version files give their first line [core][build]")
     CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0\n").Path()) == "v1.37.0");
     CHECK(Core::Build::ReadVersionFile(TemporaryFile("data-3f2a9c1e7b0d4a55").Path()) == "data-3f2a9c1e7b0d4a55");
     CHECK(Core::Build::ReadVersionFile(TemporaryFile("v1.37.0 \r\nsecond line\n").Path()) == "v1.37.0");
+    // Saved with a UTF-8 byte order mark, as Windows tools can.
+    CHECK(Core::Build::ReadVersionFile(TemporaryFile("\xEF\xBB\xBFv1.37.0\r\n").Path()) == "v1.37.0");
 }
 
 TEST_CASE("Version files that hold no version read as empty [core][build]")

@@ -9,12 +9,14 @@
 #include <cctype>
 #include <ctime>
 #include <fstream>
+#include <string_view>
 
 namespace Core::Build
 {
 namespace
 {
 constexpr std::size_t MaxVersionLength = 64;
+constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
 constexpr const char* UnknownId = "unknown";
 constexpr const char* FileTimeFormat = "%Y-%m-%d %H:%M:%S UTC";
 
@@ -38,7 +40,10 @@ std::string ReadVersionFile(const std::filesystem::path& file)
     if (!stream || !std::getline(stream, line))
         return {};
 
-    // Written on Linux, but someone may have opened and saved it on Windows.
+    // Written on Linux, but someone may have opened and saved it on Windows, which can add a byte order mark
+    // (Notepad before Windows 10 1903, PowerShell 5's -Encoding UTF8) and a CR.
+    if (line.starts_with(Utf8ByteOrderMark))
+        line.erase(0, Utf8ByteOrderMark.size());
     while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
         line.pop_back();
     return IsVersion(line) ? line : std::string();

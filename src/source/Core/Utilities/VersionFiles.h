@@ -11,8 +11,8 @@ namespace Core::Build
 inline constexpr const char* kReleaseVersionFile = "release-version.txt";
 inline constexpr const char* kDataVersionFile = "Data/DataVersion.txt";
 
-// The file's first line, or empty when the file is missing or the line isn't a version: 1 to 64 letters, digits,
-// '.', '+', '-' or '_'.
+// The file's first line without a UTF-8 byte order mark and trailing CRs and spaces, or empty when the file is
+// missing or the line isn't a version: 1 to 64 letters, digits, '.', '+', '-' or '_'.
 std::string ReadVersionFile(const std::filesystem::path& file);
 
 // The Release line: the release tag, or that the client is no release download.
