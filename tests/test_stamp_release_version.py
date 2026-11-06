@@ -70,6 +70,24 @@ class StampReleaseVersionTests(unittest.TestCase):
             "Main.app/Contents/MacOS/Main": b"bin", "Main.app/Contents/Info.plist": b"plist",
             "Main.app/Contents/MacOS/release-version.txt": b"v1.37.0\n"})
 
+    def test_linux_archives_get_the_tag_next_to_main(self):
+        write_archive(self.folder / "linux.tar.gz", {"./Main": b"elf", "./libSDL3.so.0": b"so"})
+
+        result = self.stamp("v1.37.0", "linux.tar.gz")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(read_archive(self.folder / "linux.tar.gz"), {
+            "./Main": b"elf", "./libSDL3.so.0": b"so", "./release-version.txt": b"v1.37.0\n"})
+
+    def test_an_archive_without_a_client_where_the_tag_goes_fails_unchanged(self):
+        # Main.app under "./" is not the layout the macOS job writes, so the tag would land outside the bundle.
+        write_archive(self.folder / "moved.tar.gz", {"./Main.app/Contents/MacOS/Main": b"bin"})
+        before = (self.folder / "moved.tar.gz").read_bytes()
+
+        result = self.stamp("v1.37.0", "moved.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no client", result.stderr)
+        self.assertEqual((self.folder / "moved.tar.gz").read_bytes(), before)
+
     def test_a_missing_archive_fails(self):
         result = self.stamp("v1.37.0", "missing.tar.gz")
         self.assertNotEqual(result.returncode, 0)

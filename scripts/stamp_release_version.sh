@@ -21,6 +21,19 @@ for archive in "$@"; do
   else
     folder="."
   fi
+
+  # The client reads the tag from its own folder, so that folder must hold the client: an archive laid out another
+  # way fails the release rather than shipping clients that say "none (not a release download)".
+  if [ "$folder" = "." ]; then
+    clients=(-e ./Main.exe -e ./Main -e Main.exe -e Main)
+  else
+    clients=(-e "$folder/Main")
+  fi
+  if ! grep -Fxq "${clients[@]}" "$work/entries.txt"; then
+    echo "$archive has no client in $folder; not stamping an archive laid out another way" >&2
+    exit 1
+  fi
+
   rm -rf "$work/stamp"
   mkdir -p "$work/stamp/$folder"
   printf '%s\n' "$tag" > "$work/stamp/$folder/release-version.txt"
