@@ -81,6 +81,12 @@ State GetNumberState(int number, MonsterValueField field)
     return Unlocked().contains({number, field}) ? State::Unlocked : State::Shared;
 }
 
+bool SharesValue(int number, MonsterValueField field)
+{
+    const State state = GetNumberState(number, field);
+    return state == State::Shared || state == State::Unlocked;
+}
+
 State GetState(const ShownValues::ShownMonster& shown, MonsterValueField field)
 {
     return shown.wholeMonster ? State::Plain : GetNumberState(shown.monster.number, field);

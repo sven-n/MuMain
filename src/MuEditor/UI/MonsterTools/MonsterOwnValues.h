@@ -31,6 +31,9 @@ enum class State
 State GetState(const ShownValues::ShownMonster& shown, Data::Monsters::MonsterValueField field);
 // The same for a number, as the selection would show it.
 State GetNumberState(int number, Data::Monsters::MonsterValueField field);
+// Whether the number has the field's value from its monster with several
+// numbers (Shared or Unlocked): it is changed on the monster as a whole.
+bool SharesValue(int number, Data::Monsters::MonsterValueField field);
 
 // The line over a field: grey "Shared by the 3 numbers of Death Centurion"
 // with "Make it this number's own", or yellow "336's own value" with "Back

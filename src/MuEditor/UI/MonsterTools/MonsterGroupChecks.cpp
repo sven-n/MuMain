@@ -99,10 +99,17 @@ void Validate(std::vector<ItemDataIssue>& issues)
         }
         const MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(number);
         const std::string name = shared.names.GetNeutral();
-        // The shared variants, once for the monster: on the maps of all its
-        // numbers.
-        CheckVariants(numbers.front(), shared.mapVariants, MapsOfNumbers(numbers),
-                      numbers.size() > 1 ? "no number of " + name : "the monster", source, issues);
+        // The shared variants, once for the monster: on the maps of the
+        // numbers that play them, named by the first of those, so that Data
+        // Checks opens the monster as a whole there.
+        std::vector<int> sharing = numbers;
+        std::erase_if(sharing,
+                      [&](int member) { return g_MonsterDatabase.Find(member)->mapVariants != shared.mapVariants; });
+        if (!sharing.empty())
+        {
+            CheckVariants(sharing.front(), shared.mapVariants, MapsOfNumbers(sharing),
+                          numbers.size() > 1 ? "no number of " + name : "the monster", source, issues);
+        }
         if (numbers.size() < 2)
         {
             continue;

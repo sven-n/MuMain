@@ -19,6 +19,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/MonsterTools/MonsterCheckArea.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterGroupChecks.h"
 #include "UI/MonsterTools/MonsterNameRows.h"
@@ -34,6 +35,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -452,6 +454,25 @@ TEST_CASE("Monster checks: generic own attacks of a monster with attacks, and ma
     CHECK(about(336, "monster 336 attacks")->message.find("(P26)") != std::string::npos);
     CHECK(std::ranges::all_of(issues, [](const ItemDataIssue& issue)
                               { return issue.severity == Data::Items::ItemDataIssueSeverity::Warning; }));
+
+    // Data Checks opens the shared variant on the monster as a whole, where
+    // it is changed, and a number's own one on the number.
+    const std::unique_ptr<MuEditor::DataChecks::DataCheckArea> area = MuEditor::Monsters::CreateMonsterCheckArea();
+    area->Open(*about(145, "monster 145 mapVariants[0].attacks"), false);
+    CHECK(g_MonsterSelection.IsWholeMonster());
+    area->Open(*about(175, "monster 175 mapVariants[0].attacks"), false);
+    CHECK_FALSE(g_MonsterSelection.IsWholeMonster());
+    CHECK(g_MonsterSelection.GetNumber() == 175);
+
+    // With variants of its own on the first number, a number that plays the
+    // shared ones names them.
+    MonsterDefinition first = Entry(145);
+    first.mapVariants.clear();
+    REQUIRE(g_MonsterEdits.SetMonster("no variants", first));
+    issues.clear();
+    MuEditor::Monsters::GroupChecks::Validate(issues);
+    CHECK(about(336, "monster 336 mapVariants[0].attacks") != issues.end());
+    CHECK(about(145, "monster 145 mapVariants[0].attacks") == issues.end());
 }
 
 TEST_CASE("Monster checks: the shipped list warns about the 13 numbers of P26 and Erkanne's map variant "
