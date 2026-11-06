@@ -560,7 +560,7 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // Put the login screen away before the request goes out. The manual path
     // hides it on the click; a caller that submits credentials directly must
     // not leave it up, or its text fields keep the keyboard focus and no key
-    // reaches the game afterwards. Hiding an already hidden window is a no-op.
+    // reaches the game afterwards. Show(false) guards the document visibility transition.
     Show(false);
 
     // The game server may have dropped the idle login screen; log in once it is back.
