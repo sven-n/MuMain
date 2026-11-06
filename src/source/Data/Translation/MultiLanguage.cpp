@@ -5,6 +5,8 @@
 
 #include <cstring>
 
+std::wstring g_strSelectedML;
+
 CMultiLanguage* CMultiLanguage::ms_Singleton = NULL;
 
 CMultiLanguage::CMultiLanguage(std::wstring strSelectedML)

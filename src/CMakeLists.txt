@@ -770,6 +770,33 @@ set_source_files_properties(
     COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang,GNU>:-Wno-error=tautological-compare>"
 )
 
+# stdafx.h is the precompiled header of the files that include it (as "stdafx.h" or "App/stdafx.h"): parsed once, not
+# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before. The check runs
+# at configure time, so a file that adds or drops the include after that still builds, only without or with the header
+# until the next configure. CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
+# MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
+# that uses the header, and the linker takes it from whichever object of MuClient defines it, with everything that
+# object uses. Keep such variables out of stdafx.h's headers, or a test that links MuClient without Winmain.cpp fails
+# to link (unresolved g_hWnd and the like). In a Debug build a std::string or std::wstring counts too: its debug
+# iterator support allocates.
+target_precompile_headers(MuClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/App/stdafx.h")
+set(MU_SOURCES_WITHOUT_STDAFX "")
+foreach(source IN LISTS MU_CLIENT_SOURCES)
+  file(STRINGS "${source}" stdafx_include REGEX "^[ \t]*#[ \t]*include[ \t]+\"(App/)?stdafx\\.h\"" LIMIT_COUNT 1)
+  if(NOT stdafx_include)
+    list(APPEND MU_SOURCES_WITHOUT_STDAFX "${source}")
+  endif()
+endforeach()
+set_source_files_properties(${MU_SOURCES_WITHOUT_STDAFX} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+# GCC 13 reports -Wstringop-overflow for "..." + std::to_string(n) + "..." in these two files when they use the
+# precompiled header, a false positive; GCC 15 does not, 14 was not checked. It stays a warning in them, so a local
+# build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
+set_property(SOURCE
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/MapData/MapRef.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/ModelData/ModelFiles.cpp"
+  APPEND PROPERTY COMPILE_OPTIONS
+  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>>:-Wno-error=stringop-overflow>")
+
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)
 target_compile_definitions(MuClient PUBLIC
@@ -1134,6 +1161,8 @@ if (DOTNET_EXECUTABLE)
     add_custom_target(ResxGen DEPENDS ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES})
     add_dependencies(MuClient ResxGen)
     target_sources(MuClient PRIVATE ${RESX_GEN_SOURCES})
+    # The generated accessors do not include stdafx.h, so they compile without the precompiled header.
+    set_source_files_properties(${RESX_GEN_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
     target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
   endif()
 

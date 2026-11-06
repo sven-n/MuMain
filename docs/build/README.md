@@ -136,6 +136,7 @@ on also means fetching SDL_image with that library; the comment above
 | `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` and `-in-game-tests` presets turn it `ON`, and so does `ENABLE_IN_GAME_TESTS`. |
 | `ENABLE_IN_GAME_TESTS` | `ON` / `OFF` | Publishes the in-game tester next to `Main` and adds the `InGameTests` / `InGameTestsGui` targets (see [`in-game-tests.md`](../in-game-tests.md)); both need the .NET SDK, like the client's network library. Default `OFF`; while `ON`, it turns `ENABLE_CONTROL_SOCKET` on too, which the tester drives the client through. The `-mueditor` and `-in-game-tests` presets turn it `ON`, the player presets `OFF`. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
+| `CMAKE_DISABLE_PRECOMPILE_HEADERS` | `ON` / `OFF` | `ON` compiles without precompiled headers: the game's `stdafx.h`, SDL's and RmlUi's. Default `OFF`: the game's files that include `stdafx.h` share one precompiled copy of it, so a cold build of the game library takes about half the time on Windows and 30% less on Linux. Which files include it is checked at configure time: a file that adds or drops the include follows after the next configure. CI's PR and main push builds turn it `ON`, so their compiler cache covers every file (see [Hosted releases](#hosted-releases)). |
 | `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
 | `MU_WARNINGS_AS_ERRORS` | `ON` / `OFF` | Turns compiler, linker and DXC shader warnings into errors in the game's own code and its tests; the third-party libraries keep their own settings. Linker warnings need CMake 4.0 or newer (an older CMake says so and keeps them warnings). Default `OFF`; CI's player builds turn it `ON` (see [No warnings](#no-warnings)). |
@@ -266,13 +267,14 @@ SHA-256 (**Install compiler cache**). Before a compiler cache is saved, **Trim
 compiler cache** removes the objects the build did not use (ccache marks each object
 it finds), so an entry holds one build's objects, not every build's since the cache
 began: about 0.5 GB on Windows, whose objects carry their debug info (`/Z7`). PR
-and main push builds configure with `-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL
-and RmlUi use precompiled headers, which ccache does not cache, so their files
-(over a quarter of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on
-macOS) compiled again on every run while the game's own files hit. The nightly and
-manual release builds keep the precompiled headers, as local builds do, so a change
-that breaks only with them fails there; those builds save no cache, so only SDL and
-RmlUi compile without one. All builds restore the compiler cache; only
+and main push builds configure with `-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`: SDL,
+RmlUi and the game (`stdafx.h`) use precompiled headers, which ccache does not
+cache, so their files would compile again on every run (SDL and RmlUi alone are over
+a quarter of each build: 503 of 1666 compile calls on Linux, 421 of 1584 on macOS).
+The nightly and manual release builds keep the precompiled headers, as local builds
+do, so a change that breaks only with them fails there; those builds save no cache,
+so SDL, RmlUi and the game files that include `stdafx.h` compile without one. All
+builds restore the compiler cache; only
 successful main pushes save it, so PR-only entries do not displace shared caches,
 and a PR starts from the latest main. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
