@@ -140,6 +140,10 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     const ReferencedName standard = ResolveReferencedName(database, Reference(14, 21, 5), "en");
     CHECK(standard.text == "Rena +5");
     CHECK(standard.problem == ItemReferenceProblem::StandardName);
+    // At +0 the standard name is the item's name: nothing to warn about.
+    const ReferencedName plain = ResolveReferencedName(database, Reference(14, 25, 0), "en");
+    CHECK(plain.text == "Tear of Elf");
+    CHECK(plain.problem == ItemReferenceProblem::None);
     CHECK(ResolveReferencedName(database, Reference(14, 21, 3), "en").problem == ItemReferenceProblem::UnfillableLine);
     CHECK(ResolveReferencedName(database, Reference(14, 99), "en").problem == ItemReferenceProblem::UnknownItem);
     CHECK(ResolveReferencedName(database, Reference(99, 25), "en").problem == ItemReferenceProblem::UnknownItem);

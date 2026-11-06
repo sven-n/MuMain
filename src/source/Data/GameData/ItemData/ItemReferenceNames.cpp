@@ -117,12 +117,13 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
     const ItemNameLine* line = FindNameLineAt(definition, level);
     if (line == nullptr)
     {
+        // The standard name: at +0 the item's name itself, above it with its level.
         ReferencedName name = NameIn(definition.names, definition.nameForms, locale, reference.form);
         if (level > 0)
         {
             name.text += " +" + std::to_string(level);
+            name.problem = ItemReferenceProblem::StandardName;
         }
-        name.problem = ItemReferenceProblem::StandardName;
         return name;
     }
     const LocalizedString* text = LineText(database, line->text, line->textName);
