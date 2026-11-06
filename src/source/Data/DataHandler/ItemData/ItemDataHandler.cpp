@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -49,6 +50,25 @@ double MillisecondsSince(std::chrono::steady_clock::time_point start)
 {
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
     return elapsed.count();
+}
+
+// The option files, the rules in the editor only (the game reads the items' lists), checked with the items' links,
+// whose names it puts in the order the item files write them in.
+ItemOptionDatabase LoadItemOptions(std::vector<ItemDefinition>& items, std::vector<ItemDataIssue>& issues)
+{
+#ifdef _EDITOR
+    constexpr bool WithRules = true;
+#else
+    constexpr bool WithRules = false;
+#endif
+    ItemOptionDatabase options = LoadItemOptionFiles(WithRules, I18N::GetAvailableLocales(), issues);
+    ValidateItemOptionLinks(items, options, issues);
+    ValidateOptionDefinitionUse(items, options, issues);
+    for (ItemDefinition& item : items)
+    {
+        options.OrderLinks(item.options);
+    }
+    return options;
 }
 
 // ITEM_ATTRIBUTE records with the item names of `locale`.
@@ -247,6 +267,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         ValidateGroundLabels(result.items, groundLabels.file, GetGroundLabelsFile().generic_string(), result.issues);
     }
+    ItemOptionDatabase options = LoadItemOptions(result.items, result.issues);
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
     {
@@ -265,6 +286,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.SetGroundLabels(std::move(groundLabels.file));
+    g_ItemDatabase.SetOptions(std::move(options));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
@@ -725,6 +747,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                       GetItemStatsFile().generic_string(), issues);
     ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
                          GetGroundLabelsFile().generic_string(), issues);
+    ValidateItemOptionLinks(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetOptions(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);

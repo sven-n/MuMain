@@ -23,6 +23,11 @@
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemNames.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
+#include "Data/GameData/ItemData/OptionRulesJson.h"
+#include "Data/GameData/ItemData/OptionTextsJson.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
@@ -286,6 +291,53 @@ TEST_CASE("The shipped ground labels load without problems and are written as th
         CHECK(false);
     }
     CHECK(WriteGroundLabelsJson(labels.file) == TestFiles::ReadWholeFile(file));
+}
+
+// The option files as the game and the editor read them, with the items' links. Outside the editor's tests, so the
+// pull request checks (with the editor off) run it too.
+TEST_CASE("The shipped option files load without problems and are written as they are read [data][items]")
+{
+    const std::filesystem::path optionsDirectory = DataDirectory / "Items" / "Options";
+    const std::filesystem::path textsFile = DataDirectory / "Items" / "Tooltips" / OptionTextsFileName;
+    const std::filesystem::path rulesFile = optionsDirectory / OptionRulesFileName;
+    const ItemOptionsLoadResult definitions = LoadItemOptionsDirectory(optionsDirectory);
+    const OptionTextsLoadResult texts = LoadOptionTextsFile(textsFile);
+    const OptionRulesLoadResult rules = LoadOptionRulesFile(rulesFile);
+    std::vector<ItemDataIssue> issues = definitions.issues;
+    issues.insert(issues.end(), texts.issues.begin(), texts.issues.end());
+    issues.insert(issues.end(), rules.issues.begin(), rules.issues.end());
+    ValidateOptionTextLocales(texts.texts, I18N::GetAvailableLocales(), OptionTextsFileName, issues);
+    ValidateItemOptions(definitions.definitions, texts.texts, OptionTextsFileName, issues);
+    ValidateOptionRules(rules.rules, definitions.definitions, OptionRulesFileName, issues);
+    const std::vector<ItemDefinition> items = LoadItemDataDirectory(DataDirectory / "Items").items;
+    const ItemOptionDatabase options(definitions.definitions, texts.texts, rules.rules);
+    ValidateItemOptionLinks(items, options, issues);
+    ValidateOptionDefinitionUse(items, options, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+    REQUIRE_FALSE(definitions.definitions.empty());
+
+    std::vector<std::string> files;
+    for (const ItemOptionDefinition& definition : definitions.definitions)
+    {
+        if (std::ranges::find(files, definition.file) == files.end())
+        {
+            files.push_back(definition.file);
+        }
+    }
+    for (const std::string& file : files)
+    {
+        CAPTURE(file);
+        std::vector<ItemOptionDefinition> inFile;
+        std::ranges::copy_if(definitions.definitions, std::back_inserter(inFile),
+                             [&](const ItemOptionDefinition& definition) { return definition.file == file; });
+        CHECK(WriteItemOptionsJson(inFile) == TestFiles::ReadWholeFile(optionsDirectory / file));
+    }
+    CHECK(WriteOptionTextsJson(texts.texts) == TestFiles::ReadWholeFile(textsFile));
+    CHECK(WriteOptionRulesJson(rules.rules) == TestFiles::ReadWholeFile(rulesFile));
 }
 
 // The shipped tooltip file, read once.
