@@ -583,11 +583,11 @@ bool ItemStatsReader::ReadRule(const OrderedJson& json, const std::string& field
             continue;
         }
         const RuleConditionRead read = ReadRuleCondition(
-            key, value, conditionField, rule.conditions,
+            key, value, conditionField, RuleConditionSet::ProfileRules, rule.conditions,
             [this](const std::string& errorField, const std::string& message) { AddFatal(errorField, message); });
         if (read == RuleConditionRead::NotACondition)
         {
-            AddFatal(conditionField, DescribeRuleConditionKeys());
+            AddFatal(conditionField, DescribeRuleConditionKeys(RuleConditionSet::ProfileRules));
         }
         valid = valid && read == RuleConditionRead::Read;
     }

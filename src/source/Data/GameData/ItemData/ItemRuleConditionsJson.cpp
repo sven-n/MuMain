@@ -12,12 +12,16 @@ using Json::OrderedJson;
 namespace Keys
 {
 constexpr const char* Group = "group";
+constexpr const char* Numbers = "numbers";
 constexpr const char* Slot = "slot";
 constexpr const char* WingTier = "wingTier";
 constexpr const char* WeaponKind = "weaponKind";
 constexpr const char* Tags = "tags";
 constexpr const char* Requirements = "requirements";
 } // namespace Keys
+
+// Before a tag an item must not have: "!ammunition".
+constexpr char WithoutMark = '!';
 
 void AddValue(ItemTagSet& values, ItemTag tag)
 {
@@ -67,27 +71,57 @@ bool ReadValues(const OrderedJson& json, const std::string& field, const char* w
     return valid;
 }
 
-bool ReadGroups(const OrderedJson& json, const std::string& field, std::bitset<MAX_ITEM_TYPE>& groups,
-                const AddRuleConditionIssue& addFatal)
+// A list of whole numbers from 0 to Size - 1: the groups, the item numbers.
+template <size_t Size>
+bool ReadNumbers(const OrderedJson& json, const std::string& field, const char* what, std::bitset<Size>& numbers,
+                 const AddRuleConditionIssue& addFatal)
 {
     if (!json.is_array() || json.empty())
     {
-        addFatal(field, "must be a list of one or more groups");
+        addFatal(field, std::string("must be a list of one or more ") + what);
         return false;
     }
     bool valid = true;
     for (size_t index = 0; index < json.size(); ++index)
     {
-        long long group = 0;
-        if (!json[index].is_number_integer() || !Json::ReadWholeNumber(json[index], group) || group < 0 ||
-            group >= MAX_ITEM_TYPE)
+        long long number = 0;
+        if (!json[index].is_number_integer() || !Json::ReadWholeNumber(json[index], number) || number < 0 ||
+            number >= static_cast<long long>(Size))
         {
             addFatal(field + "[" + std::to_string(index) + "]",
-                     "must be a whole number from 0 to " + std::to_string(MAX_ITEM_TYPE - 1));
+                     "must be a whole number from 0 to " + std::to_string(Size - 1));
             valid = false;
             continue;
         }
-        groups.set(static_cast<size_t>(group));
+        numbers.set(static_cast<size_t>(number));
+    }
+    return valid;
+}
+
+// The tags of an option rule: a tag the item must have, or one it must not have ("!ammunition").
+bool ReadTagsWithout(const OrderedJson& json, const std::string& field, ItemRuleConditions& conditions,
+                     const AddRuleConditionIssue& addFatal)
+{
+    if (!json.is_array() || json.empty())
+    {
+        addFatal(field, "must be a list of one or more tags");
+        return false;
+    }
+    bool valid = true;
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const OrderedJson& entry = json[index];
+        const std::string* name = entry.is_string() ? &entry.get_ref<const std::string&>() : nullptr;
+        const bool without = name != nullptr && !name->empty() && name->front() == WithoutMark;
+        ItemTag tag{};
+        if (name == nullptr || !FindEnumValue(without ? name->substr(1) : *name, tag))
+        {
+            addFatal(field + "[" + std::to_string(index) + "]",
+                     entry.dump() + " is not a tag, or \"!\" and a tag; tags are " + JoinEnumNames<ItemTag>());
+            valid = false;
+            continue;
+        }
+        (without ? conditions.withoutTags : conditions.tags).Set(tag);
     }
     return valid;
 }
@@ -106,27 +140,44 @@ template <typename TEnum, typename TSet> OrderedJson WriteValues(const TSet& val
     return json;
 }
 
-OrderedJson WriteGroups(const std::bitset<MAX_ITEM_TYPE>& groups)
+template <size_t Size> OrderedJson WriteNumbers(const std::bitset<Size>& numbers)
 {
     OrderedJson json = OrderedJson::array();
-    for (size_t group = 0; group < groups.size(); ++group)
+    for (size_t number = 0; number < numbers.size(); ++number)
     {
-        if (groups.test(group))
+        if (numbers.test(number))
         {
-            json.push_back(group);
+            json.push_back(number);
         }
+    }
+    return json;
+}
+
+// The tags an item must have, then those it must not have ("!ammunition").
+OrderedJson WriteTags(const ItemRuleConditions& conditions)
+{
+    OrderedJson json = WriteValues<ItemTag>(conditions.tags);
+    for (const OrderedJson& without : WriteValues<ItemTag>(conditions.withoutTags))
+    {
+        json.push_back(WithoutMark + without.get<std::string>());
     }
     return json;
 }
 } // namespace
 
 RuleConditionRead ReadRuleCondition(std::string_view key, const OrderedJson& value, const std::string& field,
-                                    ItemRuleConditions& conditions, const AddRuleConditionIssue& addFatal)
+                                    RuleConditionSet set, ItemRuleConditions& conditions,
+                                    const AddRuleConditionIssue& addFatal)
 {
+    const bool optionRule = set == RuleConditionSet::OptionRules;
     bool read = true;
     if (key == Keys::Group)
     {
-        read = ReadGroups(value, field, conditions.groups, addFatal);
+        read = ReadNumbers(value, field, "groups", conditions.groups, addFatal);
+    }
+    else if (optionRule && key == Keys::Numbers)
+    {
+        read = ReadNumbers(value, field, "item numbers", conditions.numbers, addFatal);
     }
     else if (key == Keys::Slot)
     {
@@ -142,7 +193,8 @@ RuleConditionRead ReadRuleCondition(std::string_view key, const OrderedJson& val
     }
     else if (key == Keys::Tags)
     {
-        read = ReadValues<ItemTag>(value, field, "tag", conditions.tags, addFatal);
+        read = optionRule ? ReadTagsWithout(value, field, conditions, addFatal)
+                          : ReadValues<ItemTag>(value, field, "tag", conditions.tags, addFatal);
     }
     else if (key == Keys::Requirements)
     {
@@ -155,23 +207,26 @@ RuleConditionRead ReadRuleCondition(std::string_view key, const OrderedJson& val
     return read ? RuleConditionRead::Read : RuleConditionRead::Invalid;
 }
 
-std::string DescribeRuleConditionKeys(std::string_view ownKeys)
+std::string DescribeRuleConditionKeys(RuleConditionSet set)
 {
-    std::string text = std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"" + Keys::Slot +
-                       "\", \"" + Keys::WingTier + "\", \"" + Keys::WeaponKind + "\", \"" + Keys::Tags + "\"";
-    if (!ownKeys.empty())
+    std::string text = std::string("is not a condition; the conditions are \"") + Keys::Group + "\", \"";
+    if (set == RuleConditionSet::OptionRules)
     {
-        text += ", \"" + std::string(Keys::Requirements) + "\" and " + std::string(ownKeys);
-        return text;
+        text += std::string(Keys::Numbers) + "\", \"";
     }
-    return text + " and \"" + Keys::Requirements + "\"";
+    return text + Keys::Slot + "\", \"" + Keys::WingTier + "\", \"" + Keys::WeaponKind + "\", \"" + Keys::Tags +
+           "\" and \"" + Keys::Requirements + "\"";
 }
 
 void WriteRuleConditions(const ItemRuleConditions& conditions, OrderedJson& json)
 {
     if (conditions.groups.any())
     {
-        json[Keys::Group] = WriteGroups(conditions.groups);
+        json[Keys::Group] = WriteNumbers(conditions.groups);
+    }
+    if (conditions.numbers.any())
+    {
+        json[Keys::Numbers] = WriteNumbers(conditions.numbers);
     }
     if (conditions.slots.any())
     {
@@ -185,9 +240,9 @@ void WriteRuleConditions(const ItemRuleConditions& conditions, OrderedJson& json
     {
         json[Keys::WeaponKind] = WriteValues<WeaponKind>(conditions.weaponKinds);
     }
-    if (!conditions.tags.IsEmpty())
+    if (!conditions.tags.IsEmpty() || !conditions.withoutTags.IsEmpty())
     {
-        json[Keys::Tags] = WriteValues<ItemTag>(conditions.tags);
+        json[Keys::Tags] = WriteTags(conditions);
     }
     if (conditions.requirements.any())
     {

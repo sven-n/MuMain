@@ -23,11 +23,15 @@ struct ItemRuleConditions
     std::bitset<MAX_ITEM_TYPE> groups;
     // A base requirement (ItemDefinition::requirements) above 0; a requirement given by level does not count.
     std::bitset<ItemRequirementCount> requirements;
+    // Only the option rules have these two: the item numbers (with groups), and the tags an item must not have
+    // ("!ammunition"), which it meets when it has none of them.
+    std::bitset<MAX_ITEM_INDEX> numbers;
+    ItemTagSet withoutTags;
 
     bool IsEmpty() const
     {
         return tags.IsEmpty() && slots.none() && wingTiers.none() && weaponKinds.none() && groups.none() &&
-               requirements.none();
+               requirements.none() && numbers.none() && withoutTags.IsEmpty();
     }
 
     bool operator==(const ItemRuleConditions& other) const = default;

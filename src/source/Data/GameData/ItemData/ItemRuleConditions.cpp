@@ -69,6 +69,14 @@ bool Matches(const ItemRuleConditions& conditions, const ItemDefinition& item)
     {
         return false;
     }
+    if (conditions.numbers.any() && (item.number < 0 || !Contains(conditions.numbers, item.number)))
+    {
+        return false;
+    }
+    if (item.tags.HasAny(conditions.withoutTags))
+    {
+        return false;
+    }
     return conditions.requirements.none() || HasRequirement(conditions.requirements, item.requirements);
 }
 } // namespace Data::Items
