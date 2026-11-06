@@ -58,6 +58,19 @@ void* GetSymbol(LibraryHandle handle, const char* name)
     return symbol;
 }
 
+void* FindSymbol(LibraryHandle handle, const char* name)
+{
+    if (handle == nullptr || name == nullptr)
+    {
+        return nullptr;
+    }
+
+    // As in GetSymbol, dlerror() tells a missing symbol from one whose value is 0.
+    dlerror();
+    void* symbol = dlsym(handle, name);
+    return dlerror() == nullptr ? symbol : nullptr;
+}
+
 void Unload(LibraryHandle handle)
 {
     if (handle == nullptr)

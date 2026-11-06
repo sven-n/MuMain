@@ -30,6 +30,10 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_cache_prune.py"
 )
 add_test(
+    NAME stamp_release_version
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_stamp_release_version.py"
+)
+add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )
@@ -82,6 +86,12 @@ add_test(
 add_test(
     NAME copy_runtime_assets
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
+)
+add_test(
+    NAME write_git_commit
+    COMMAND "${CMAKE_COMMAND}" "-DMU_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/write-git-commit"
+        "-DMU_SCRIPT=${MU_REPO_ROOT}/cmake/WriteGitCommit.cmake"
+        -P "${MU_TESTS}/test_write_git_commit.cmake"
 )
 add_test(
     NAME ensure_submodule_leaves_history_out

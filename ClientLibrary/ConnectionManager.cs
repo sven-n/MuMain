@@ -85,7 +85,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Error establishing connection: {ex}");
-            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Connection failed: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Connection failed: {DescribeConnectFailure(ex)}");
             return -1;
         }
     }
@@ -149,6 +149,19 @@ public unsafe partial class ConnectionManager
         {
             connection.DisconnectAndDispose();
         }
+    }
+
+    /// <summary>
+    /// Describes a failed connect for MuError.log without the exception text: a <see cref="SocketException"/>'s
+    /// message names the address, which the log leaves to the native side's "connecting to" line.
+    /// </summary>
+    /// <param name="ex">The exception.</param>
+    /// <returns>The description, e.g. "SocketException ConnectionRefused (10061)".</returns>
+    private static string DescribeConnectFailure(Exception ex)
+    {
+        return ex is SocketException socketException
+            ? $"SocketException {socketException.SocketErrorCode} ({socketException.ErrorCode})"
+            : ex.GetType().Name;
     }
 
     private static int ConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)

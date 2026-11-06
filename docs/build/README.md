@@ -399,6 +399,55 @@ tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
 The assembled directory contains `Main.exe`, the network and runtime DLLs,
 configuration, shaders, `Data/`, and `fonts/`.
 
+### Which client a log came from
+
+`MuError.log` starts with the client's identity, so a bug report shows what it ran:
+
+```text
+Release       : v1.37.0
+Build commit  : <the commit the client was built from>
+Build         : Release NoEditor MSVC x64, built 2026-11-06 13:02:11 UTC
+Data          : data-<id> (matches this client)
+```
+
+- **Release** comes from `release-version.txt`, which the release job adds to each
+  runtime archive. Self-built clients and CI artifacts say `none`.
+- **Build commit** ends in `(with local changes)` when tracked files differed from
+  the commit. `https://github.com/sven-n/MuMain/compare/<commit>...main` lists what
+  main has gained since.
+- **Build** names the configuration, editor, compiler and architecture, and when the
+  executable was written (linked, or in a download the time the archive keeps), in UTC.
+- **Data** compares `Data/DataVersion.txt`, which the data workflow adds to the data
+  archive, with the data release the client was built for. A different id means the
+  runtime and data downloads don't belong together; data archives from before the
+  file, and self-built clients, say `unknown`.
+- Either line says `unreadable` when its file is there but holds no version, for
+  example after someone edited it.
+
+The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the data language
+(`Eng`, `Por` or `Spn`, which picks the `Data/Local` files), and, once the renderer is
+up, the GPU, its graphics API and driver version, and the UI language the player reads
+(`en`, `de`, `zh-CN`, ...) with whether item names are translated.
+`ClientLibrary` names the commit the .NET library was built from and its OpenMU
+packets version. In a release download that commit is the client's, so a different
+one means a library from another download. A local build rebuilds the library only
+when its sources change, so there it can name an older commit.
+
+The log names the connect server (`> Server = ..., from config.ini` or `from the
+command line`) and every server the client connects to (`NET: connecting to ...`).
+Players post their logs in public, so an address is written out only when it can't
+lead to a server:
+
+| Address | Written as |
+| --- | --- |
+| The local machine: `127.0.0.0`–`127.255.255.255`, `localhost` and `*.localhost`, `::1`, `::ffff:127.x.x.x` | as configured, e.g. `127.127.127.127:44405` |
+| A private network: `10.x`, `172.16.x`–`172.31.x`, `192.168.x`, `169.254.x`, `100.64.x`–`100.127.x`, `fc00::/7`, `fe80::/10` | as configured, with `(private network)` |
+| Any other IP address | `a public IPv4 address:44405` or `a public IPv6 address:44405` |
+| A host name, e.g. `mu.example.com` | `a host name:44405` |
+
+A failed connection logs the socket error (`SocketException ConnectionRefused (10061)`)
+instead of the exception text, which would name the address.
+
 If a music file is missing or cannot be decoded, the client logs the failure and leaves
 that track silent for the rest of the audio session. Scene changes do not repeatedly
 retry it. After restoring or replacing a file under `Data/Music/`, restart the client

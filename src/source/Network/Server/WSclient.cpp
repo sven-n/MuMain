@@ -43,6 +43,7 @@
 #include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Network/EndpointForLog.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -397,7 +398,9 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         bResult = FALSE;
         wchar_t connectError[256];
         mu_swprintf_s(connectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
-        g_ErrorReport.Write(L"NET: %ls\r\n", connectError);
+        // The dialog names the address; the log, which players post, follows Network::DescribeEndpointForLog.
+        g_ErrorReport.Write(L"NET: Cannot connect to %hs. Server may be offline.\r\n",
+                            Network::DescribeEndpointForLog(mu_wchar_to_utf8(IpAddr), Port).c_str());
         g_ErrorReport.WriteCurrentTime();
         delete SocketClient;
         SocketClient = nullptr;
