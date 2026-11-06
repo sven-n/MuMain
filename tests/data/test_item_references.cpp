@@ -177,6 +177,22 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::UnfillableLine);
 }
 
+TEST_CASE("A UI translation that names other items than English is a warning on the item it names [data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    std::vector<ItemDataIssue> issues;
+    const std::string polish = "Znajdz {item:14,21}";
+    Data::Translation::CheckItemReferences(
+        database, {polish, "pl", "Game.pl.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Find"},
+        "Find {item:14,25}", issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    // Data Checks selects the item a click on it opens.
+    CHECK(issues[0].group == 14);
+    CHECK(issues[0].number == 21);
+}
+
 TEST_CASE("The texts that name an item are listed from the UI texts and every item text [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();

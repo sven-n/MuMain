@@ -87,11 +87,21 @@ void CheckNamedItems(const CheckedText& text, std::string_view english, std::vec
     {
         return;
     }
-    if (NamedItems(text.text) != NamedItems(english))
+    const std::set<NamedItem> named = NamedItems(text.text);
+    if (named == NamedItems(english))
     {
-        AddIssue(text, ItemDataIssueSeverity::Warning, text.group, text.number,
-                 "names other items than the English text: \"" + std::string(english) + "\"", issues);
+        return;
     }
+    // A UI text has no item of its own: the problem names the first item the translation names, so a click selects it.
+    int group = text.group;
+    int number = text.number;
+    if (group == ItemDataIssue::NoItem && !named.empty())
+    {
+        group = std::get<0>(*named.begin());
+        number = std::get<1>(*named.begin());
+    }
+    AddIssue(text, ItemDataIssueSeverity::Warning, group, number,
+             "names other items than the English text: \"" + std::string(english) + "\"", issues);
 }
 
 std::string TextField(const std::string& lineField, std::string_view locale)
