@@ -696,12 +696,18 @@ item tools.
   again, also after an edit of the monster row. **Back to...** gives an own
   field the monster's value or another number's own one, picked from a list.
   In the Monster Browser a right click on a number's row does the same for
-  its name and kind. Each change is one undo step.
+  its name and kind; a name made the number's own is edited in Monster
+  Translations. A field made a number's own stays so while the number is in
+  that monster: moved into another, it is locked there. Locked attacks still
+  play with **Play** and **Play next attack**. Each change is one undo step.
+  Monster Model and Monster Preview always show one number: for a monster
+  selected as a whole, the number of its row.
 - **Monster Translations**: the names in all languages, with **Save
   Monsters**, **Import names from NpcName txt** and **Export as NpcName
   txt**. A monster with several numbers is one row for the names its numbers
   share ("145 (3)"), followed by a row for each of its numbers with names of
-  its own; see
+  its own or made its own; a search for any of its numbers finds the
+  monster's row; see
   [translation-system.md → In the monster editor](translation-system.md#in-the-monster-editor)
   and [Import and export of NpcName txt](#import-and-export-of-npcname-txt).
 - **Monster Model**: the model of the selected monster, from the model list:
@@ -835,7 +841,8 @@ item tools.
   that the monsters changed since the last check. Errors come first, and
   each kind can be hidden with its box. A click on a problem selects the
   monster and opens the tool of its field (Monster Translations for a name,
-  Monster Attacks for the attacks);
+  Monster Attacks for the attacks), the monster as a whole when the number
+  shares the value with its monster's other numbers (a shared map variant);
   an arrow key onto it only selects the monster. There is no check of the
   kind: a kind that differs from the old rules (566, 567) is not a problem.
 
@@ -860,7 +867,7 @@ How changes work:
   [dev-editor.md](dev-editor.md); also Ctrl+Z and Ctrl+Y while a monster
   tool has the focus and no field is being typed in): the last 256 steps,
   for the whole session and across saves. Undo and Redo select the monster
-  they change. A step is not undone when the monster changed in a way the
+  they change, as a whole for a change of the values its numbers share. A step is not undone when the monster changed in a way the
   history did not record; the console says so. The Monster Browser's title
   has a `*` while there are changes that are not saved.
 - **Save Monsters** (in the Monster Browser and Monster Translations) runs
