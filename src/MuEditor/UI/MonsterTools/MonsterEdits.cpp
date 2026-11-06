@@ -268,16 +268,16 @@ bool MonsterEdits::CopyNumber(std::string label, int from, int number)
 
 bool MonsterEdits::MoveNumber(std::string label, int number, int memberNumber)
 {
-    if (!g_MonsterDataHandler.ReadMonster(number) || !g_MonsterDataHandler.ReadMonster(memberNumber))
+    // A number of no monster is a monster of its own: moving it onto itself
+    // is a move within one monster too.
+    const std::vector<int> target = ReadMonsterNumbers(memberNumber);
+    if (!g_MonsterDataHandler.ReadMonster(number) || target.empty() ||
+        std::ranges::find(target, number) != target.end())
     {
         return false;
     }
     auto [fromId, from] = ReadLayoutOf(number);
     auto [toId, to] = ReadLayoutOf(memberNumber);
-    if (fromId == toId)
-    {
-        return false;
-    }
     std::erase(from.numbers, number);
     to.numbers.push_back(number);
     std::ranges::sort(to.numbers);

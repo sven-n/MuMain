@@ -244,6 +244,10 @@ TEST_CASE("Monster edits: Move number and Split number out keep the number's val
     CHECK(g_MonsterEdits.ReadMonsterNumbers(145) == std::vector{145, 336});
     CHECK_FALSE(g_MonsterEdits.SplitNumber("alone", 175));
     CHECK_FALSE(g_MonsterEdits.SplitNumber("alone", 2));
+    // A number of no monster is in the same monster as itself.
+    CHECK_FALSE(g_MonsterEdits.MoveNumber("onto itself", 175, 175));
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{175});
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == "split");
     CHECK(SavedNumbers(data.Folder()) == std::vector<std::vector<int>>{{2}, {145, 336}, {175}});
 
     REQUIRE(g_MonsterEdits.Undo());
