@@ -22,14 +22,32 @@ if(EXISTS "${archive}")
     endif()
 endif()
 if(NOT EXISTS "${archive}")
-    file(DOWNLOAD "${URL}" "${archive}.part"
-        EXPECTED_HASH "SHA256=${SHA256}"
-        TLS_VERIFY ON
-        STATUS download_status
-    )
-    list(GET download_status 0 download_result)
+    # Like ExternalProject's own downloads, a failed connection (no name, no connection, a broken answer, a timeout, a
+    # failed TLS handshake) is tried again after a pause, and a stalled download times out. EXPECTED_HASH would make
+    # the first failure final, so the hash is checked afterwards.
+    set(retry_results 6 7 8 15 28 35)
+    foreach(attempt RANGE 1 5)
+        file(DOWNLOAD "${URL}" "${archive}.part"
+            TLS_VERIFY ON
+            INACTIVITY_TIMEOUT 60
+            STATUS download_status
+        )
+        list(GET download_status 0 download_result)
+        if(download_result EQUAL 0 OR NOT download_result IN_LIST retry_results OR attempt EQUAL 5)
+            break()
+        endif()
+        math(EXPR pause_seconds "${attempt} * 5")
+        message(STATUS "Downloading ${URL} failed (${download_status}); trying again in ${pause_seconds} s")
+        execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep ${pause_seconds})
+    endforeach()
     if(NOT download_result EQUAL 0)
+        file(REMOVE "${archive}.part")
         message(FATAL_ERROR "Could not download ${URL}: ${download_status}")
+    endif()
+    file(SHA256 "${archive}.part" downloaded_sha256)
+    if(NOT downloaded_sha256 STREQUAL SHA256)
+        file(REMOVE "${archive}.part")
+        message(FATAL_ERROR "${URL} has the SHA-256 ${downloaded_sha256}, not ${SHA256}")
     endif()
     file(RENAME "${archive}.part" "${archive}")
 endif()
