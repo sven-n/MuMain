@@ -931,6 +931,22 @@ if (DOTNET_EXECUTABLE)
   mu_native_path("${DOTNET_NUGET_DIR}" DOTNET_NUGET_DIR_NATIVE)
   mu_native_path("${DOTNET_TEMP_DIR}" DOTNET_TEMP_DIR_NATIVE)
 
+  # dotnet sets itself up on its first SDK command for a DOTNET_CLI_HOME, and on a machine that never ran dotnet,
+  # NuGet's part of that setup takes a machine-wide named mutex. The build starts several dotnet commands at once with
+  # this fresh home (the ClientLibrary publish, ResxGen), and on Linux and macOS two first runs at once can fail
+  # creating that mutex's files: "'NuGet-Migrations'. One or more system calls failed: mkdir...". One run here, before
+  # the build, leaves them nothing to set up. `dotnet --version` would not do: it skips the setup.
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}" "${DOTNET_EXECUTABLE}" help
+    RESULT_VARIABLE _dotnet_setup_rc
+    OUTPUT_VARIABLE _dotnet_setup_output
+    ERROR_VARIABLE _dotnet_setup_output
+  )
+  if (NOT _dotnet_setup_rc EQUAL 0)
+    message(WARNING "dotnet's first-time setup failed (rc=${_dotnet_setup_rc}), so the build's dotnet steps do it "
+      "themselves:\n${_dotnet_setup_output}")
+  endif()
+
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
 
