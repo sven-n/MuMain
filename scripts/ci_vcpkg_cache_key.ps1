@@ -11,3 +11,6 @@ if ($LASTEXITCODE -ne 0) {
 }
 "identity=$($env:ImageVersion)-$compilerHash-$vcpkgRevision" |
     Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+# The compiler cache's name, which only the compiler picks, in the form the Linux and macOS jobs use.
+"compiler=$($compilerHash.Substring(0, 16).ToLowerInvariant())" |
+    Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
