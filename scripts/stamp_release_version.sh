@@ -11,8 +11,12 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 for archive in "$@"; do
+  # Unpacked once: the tag is appended to the tar, so every other entry stays as the build wrote it.
+  gzip -dc "$archive" > "$work/archive.tar"
+  tar -tf "$work/archive.tar" > "$work/entries.txt"
+
   # The macOS archive holds Main.app, whose client runs in Contents/MacOS; the others hold the client's folder.
-  if tar -tzf "$archive" | grep -q '^Main\.app/'; then
+  if grep -q '^Main\.app/' "$work/entries.txt"; then
     folder="Main.app/Contents/MacOS"
   else
     folder="."
@@ -21,8 +25,6 @@ for archive in "$@"; do
   mkdir -p "$work/stamp/$folder"
   printf '%s\n' "$tag" > "$work/stamp/$folder/release-version.txt"
 
-  # Appended to the unpacked tar, so every other entry stays as the build wrote it.
-  gzip -dc "$archive" > "$work/archive.tar"
   tar -rf "$work/archive.tar" -C "$work/stamp" "$folder/release-version.txt"
   gzip -n -c "$work/archive.tar" > "$archive"
   echo "Stamped $archive with $tag ($folder/release-version.txt)"
