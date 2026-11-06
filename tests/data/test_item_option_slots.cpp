@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "HeroScope.h"
+#include "LogCapture.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -51,6 +52,45 @@ TEST_CASE("An item keeps the options its slots hold and drops the rest [items]")
         CHECK(item.SpecialValue[i] == i + 1);
     }
     CHECK(item.Key == key);
+}
+
+// The first option an item type drops is logged, with the item and the option; the type's later drops are not. The log
+// remembers the types for the whole run, so this test uses types no other test drops an option of.
+TEST_CASE("A dropped option is logged once per item type [items]")
+{
+    const auto fullItem = [](int type)
+    {
+        ITEM item{};
+        item.Type = static_cast<short>(type);
+        for (int i = 0; i < MAX_ITEM_SPECIAL; ++i)
+        {
+            GameLogic::Items::AddOptionSlot(item, AT_IMPROVE_DEFENSE);
+        }
+        return item;
+    };
+    const auto droppedLine = [](int type, int option)
+    {
+        return "Item " + std::to_string(type) + " has more than " + std::to_string(MAX_ITEM_SPECIAL) +
+               " options; option " + std::to_string(option) + " and those after it are dropped";
+    };
+
+    {
+        LogCapture log("gameplay");
+        ITEM shield = fullItem(ITEM_SMALL_SHIELD);
+        GameLogic::Items::AddOptionSlot(shield, AT_LUCK);
+        CHECK_FALSE(log.LineWith(droppedLine(ITEM_SMALL_SHIELD, AT_LUCK)).empty());
+    }
+    {
+        LogCapture log("gameplay");
+        ITEM shield = fullItem(ITEM_SMALL_SHIELD);
+        GameLogic::Items::AddOptionSlot(shield, AT_LUCK);
+        GameLogic::Items::AddOptionSlot(shield, AT_IMPROVE_BLOCKING);
+        ITEM otherShield = fullItem(ITEM_HORN_SHIELD);
+        GameLogic::Items::AddOptionSlot(otherShield, AT_IMPROVE_BLOCKING);
+
+        CHECK(log.LineWith("Item " + std::to_string(ITEM_SMALL_SHIELD) + " ").empty());
+        CHECK_FALSE(log.LineWith(droppedLine(ITEM_HORN_SHIELD, AT_IMPROVE_BLOCKING)).empty());
+    }
 }
 
 // A weapon with its skill, luck, an additional option and all six excellent options has nine options. With eight
