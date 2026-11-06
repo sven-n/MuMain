@@ -100,6 +100,10 @@ git submodule update --init --depth 1 -- src/ThirdParty/SDL src/ThirdParty/RmlUi
 git submodule update --init --depth 1 -- src/ThirdParty/imgui
 ```
 
+A git server that sends only branch tips refuses `--depth 1` here for a pinned commit
+that is none, as SDL's and ImGui's are. Without `--depth 1`, git fetches the whole
+history; CMake falls back to that by itself.
+
 CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.
 Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
 SDL_mixer nor a separate FreeType submodule is required.

@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.25)
 #
 # A new submodule leaves the history out: commit 1, before the pinned one, must not arrive (main's newest commit
 # does, without its history). `git submodule update --remote` then moves it to s2. A submodule whose git directory
-# already holds the history keeps it.
+# already holds the history keeps it, and a server that sends only branch tips gets the whole history fetched.
 
 if(NOT DEFINED MU_WORK_DIR)
     message(FATAL_ERROR "MU_WORK_DIR is required")
@@ -167,5 +167,16 @@ run_git("${full}/library" rev-parse --is-shallow-repository)
 if(NOT git_output STREQUAL "false")
     message(FATAL_ERROR "The submodule lost its history: mu_ensure_submodule must keep a whole history whole.")
 endif()
+
+# A server that sends only branch tips, as git's protocol version 0 does without uploadpack.allowReachableSHA1InWant:
+# s1 is no tip any more.
+set(tips_only "${MU_WORK_DIR}/tips-only")
+make_superproject("${tips_only}" "${commit_s1}")
+set(ENV{GIT_CONFIG_COUNT} 5)
+set(ENV{GIT_CONFIG_KEY_4} "protocol.version")
+set(ENV{GIT_CONFIG_VALUE_4} "0")
+ensure_library("${tips_only}")
+set(ENV{GIT_CONFIG_COUNT} 4)
+expect_checked_out("${tips_only}" "${commit_s1}" "the pinned")
 
 file(REMOVE_RECURSE "${MU_WORK_DIR}")

@@ -58,6 +58,20 @@ function(_mu_track_submodule_branch name submodule_dir)
   endif()
 endfunction()
 
+# Runs `git submodule update --init [<args>...] -- <path>`; leaves its exit code in update_rc and its output in
+# update_output.
+function(_mu_submodule_update path)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} submodule update --init ${ARGN} -- "${path}"
+    WORKING_DIRECTORY ${REPO_ROOT}
+    RESULT_VARIABLE rc
+    ERROR_VARIABLE err
+    OUTPUT_VARIABLE out
+  )
+  set(update_rc "${rc}" PARENT_SCOPE)
+  set(update_output "${err}${out}" PARENT_SCOPE)
+endfunction()
+
 function(mu_ensure_submodule rel_path)
   set(oneValueArgs INDICATOR URL)
   cmake_parse_arguments(MES "" "${oneValueArgs}" "" ${ARGN})
@@ -145,17 +159,20 @@ function(mu_ensure_submodule rel_path)
     if (NOT new_clone AND NOT EXISTS "${module_git_dir}/shallow")
       set(depth "")
     endif()
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init ${depth} -- "${submodule_repo_rel}"
-      WORKING_DIRECTORY ${REPO_ROOT}
-      RESULT_VARIABLE rc
-      ERROR_VARIABLE err
-      OUTPUT_VARIABLE out
-    )
-    if (NOT rc EQUAL 0)
-      message(FATAL_ERROR "Submodule ${rel_path} init failed:\n${err}${out}")
+    _mu_submodule_update("${submodule_repo_rel}" ${depth})
+    # The shallow clone fetches the pinned commit by its hash. GitHub sends any commit; a server that sends only
+    # branch tips refuses one that is none, as SDL's and ImGui's pins are, and the new clone then fetches the whole
+    # history instead.
+    if (NOT update_rc EQUAL 0 AND new_clone)
+      message(STATUS "Submodule ${rel_path}: the shallow fetch failed, fetching the whole history...")
+      file(REMOVE_RECURSE "${module_git_dir}" "${submodule_dir}")
+      set(depth "")
+      _mu_submodule_update("${submodule_repo_rel}")
     endif()
-    if (new_clone)
+    if (NOT update_rc EQUAL 0)
+      message(FATAL_ERROR "Submodule ${rel_path} init failed:\n${update_output}")
+    endif()
+    if (new_clone AND depth)
       _mu_track_submodule_branch("${name}" "${submodule_dir}")
     endif()
   endif()
