@@ -317,7 +317,8 @@ when they reach their target. A change that moves a type looks at these too.
 ### Preview
 
 The **Preview** section of the details shows what the selected type's slot
-holds in a small 3D view. It loads nothing: a slot that holds nothing on
+holds in a small 3D view; it stays where it is while the sections below it
+scroll. It loads nothing: a slot that holds nothing on
 this map says so. The effect's own move and draw code do not run, so nothing
 it would create (sprites, particles, sounds) appears; the preview in the
 world (below) is for that.

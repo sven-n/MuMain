@@ -2855,18 +2855,34 @@ void RenderModelTool()
     bool open = true;
     g_MuItemModelUI.BeforeFrame();
     ImGui::NewFrame();
+    // Tall enough for the fields below the preview: ImGui leaves out a part a window shows none of.
+    ImGui::SetNextWindowSize(ImVec2(900.0f, 1000.0f));
     g_MuItemModelUI.Render(&open);
     ImGui::Render();
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// The part of the model tool below its preview, which scrolls: its fields are there.
+const ImGuiWindow* ModelToolFields()
+{
+    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
+    REQUIRE(tool != nullptr);
+    for (const ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    {
+        if (window->ParentWindow == tool && std::strstr(window->Name, "##Fields") != nullptr)
+        {
+            return window;
+        }
+    }
+    FAIL("the model tool has no fields below its preview");
+    return nullptr;
 }
 
 // A widget of the shared model form: the tool pushes the selected item's ID,
 // the form's fields "SharedModel" too.
 ImGuiID SharedModelFormId(const char* label, const char* scope = nullptr)
 {
-    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
-    REQUIRE(tool != nullptr);
-    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), tool->ID);
+    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), ModelToolFields()->ID);
     if (scope != nullptr)
     {
         id = ImGui::GetIDWithSeed(scope, nullptr, id);

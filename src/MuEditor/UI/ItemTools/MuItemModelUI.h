@@ -19,7 +19,8 @@
 // inventory grid) and ground display, the model's meshes, cloth,
 // material, glow, and the render style and item effect picked from their
 // lists, each with the other items that use it (D24, D26). A changed file is
-// opened again before the next frame.
+// opened again before the next frame. The preview stays at the top while the
+// fields below it scroll.
 class CMuItemModelUI
 {
 public:
@@ -34,6 +35,7 @@ public:
 private:
     CMuItemModelUI();
 
+    void RenderPreview(const Data::Items::ItemModelDefinition* model, int itemType);
     void RenderModel(Data::Items::ItemModelDefinition* model, int itemType);
     void RenderInventory(Data::Items::ItemModelDefinition& model, int itemType);
     // The models the game draws the item with by code at some levels.

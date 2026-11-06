@@ -460,14 +460,18 @@ void CMuStyleEditorUI::RenderRoot()
 void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool itemEffect)
 {
     ImGui::TextUnformatted((name + " " + I18N::Editor::CodeMark).c_str());
-    RenderNote(itemEffect ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::CodeLookNote);
-    const std::vector<int> users =
-        itemEffect ? MuEditor::Items::FindItemEffectUsers(name) : MuEditor::Items::FindRenderStyleUsers(name);
-    RenderUsers(users);
     if (!itemEffect)
     {
         RenderPreview(nullptr);
     }
+    // Below the preview, which stays where it is.
+    if (ImGui::BeginChild("##Look"))
+    {
+        RenderNote(itemEffect ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::CodeLookNote);
+        RenderUsers(itemEffect ? MuEditor::Items::FindItemEffectUsers(name)
+                               : MuEditor::Items::FindRenderStyleUsers(name));
+    }
+    ImGui::EndChild();
 }
 
 void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
@@ -477,12 +481,16 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
     const std::string name = look.name;
     ImGui::TextUnformatted(name.c_str());
     RenderApply(look);
-    RenderChecks();
-    ImGui::Separator();
-    RenderLayers();
-    ImGui::Separator();
-    RenderUsers(MuEditor::Items::FindRenderStyleUsers(name));
     RenderPreview(&m_draft);
+    // The look's problems, layers and fields scroll below the preview, which stays where it is.
+    if (ImGui::BeginChild("##Look"))
+    {
+        RenderChecks();
+        RenderLayers();
+        ImGui::Separator();
+        RenderUsers(MuEditor::Items::FindRenderStyleUsers(name));
+    }
+    ImGui::EndChild();
     RenderConfirm();
 }
 

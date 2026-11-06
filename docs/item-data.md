@@ -1488,7 +1488,8 @@ number that has a model but no item:
   excellent or ancient, standing as the inventory turns it or lying as on
   the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
   wheel to zoom, double click to put it back). A click on a part of the
-  item finds its mesh in the mesh list and keeps it shown.
+  item finds its mesh in the mesh list and keeps it shown. The preview
+  stays at the top of the window while the fields below it scroll.
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's
   folder as its texture folder; a model whose only texture folder is its
@@ -1608,6 +1609,11 @@ The picked look shows:
 - **Apply** and **Revert**: the fields change a copy of the look; Apply makes
   it the look, after listing the items it reaches when items use it. Apply is
   off while the look has a fatal problem.
+- A **preview** of the item picked in the item tools, drawn with the look as
+  the fields have it, before Apply: the Item Model window's preview, with
+  **Stop time** and a time slider, an eye per layer that leaves it out, and
+  **Draw as a doppelganger**. It stays where it is while what is below it
+  scrolls.
 - The **problems** of the look as the fields have it, with the file's checks.
 - The **layers** in drawing order, one line each written from its fields,
   and **Item values after drawing** as the last line; **Add**, **Copy**,
@@ -1617,10 +1623,6 @@ The picked look shows:
   the item's, the drawing's (opacity), a number or a shape; a shape's curve
   over time is drawn below its fields.
 - The items that use the look; a click selects one.
-- A **preview** of the item picked in the item tools, drawn with the look as
-  the fields have it, before Apply: the Item Model window's preview, with
-  **Stop time** and a time slider, an eye per layer that leaves it out, and
-  **Draw as a doppelganger**.
 
 Each change of the looks or their folders is a step of the window's undo
 history and reaches the game at once. **Save** writes

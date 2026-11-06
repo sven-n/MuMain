@@ -12,7 +12,8 @@
 // The details of the type selected in the effect browser: name, code and
 // number, a preview of what its slot holds, the types of other kinds with
 // that number, what its slot holds, its stages, its creation values and the
-// data that names it.
+// data that names it. The name and the preview stay where they are while the
+// sections below them scroll.
 class CEffectBrowserDetails
 {
 public:

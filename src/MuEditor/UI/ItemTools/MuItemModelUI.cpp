@@ -62,20 +62,30 @@ void CMuItemModelUI::Render(bool* open)
         ShowInventoryDisplay(model, itemType);
         // Also a number with a model but no item can be edited here.
         ToolWindow::RenderSelectedItem(itemType);
-        if (Data::Items::IsValidItemType(itemType))
+        const bool valid = Data::Items::IsValidItemType(itemType);
+        if (valid)
+        {
+            ImGui::PushID(itemType);
+            RenderPreview(model, itemType);
+            ImGui::PopID();
+        }
+        // The fields scroll below the preview, which stays where it is.
+        if (ImGui::BeginChild("##Fields") && valid)
         {
             ImGui::PushID(itemType);
             RenderModel(model, itemType);
             ImGui::PopID();
         }
-        // Outside the item's ID scope: the warning's list selects other items.
+        ImGui::EndChild();
+        // Outside the item's ID scope: the warning's list selects other items. Outside the fields too, which a window
+        // as small as its preview leaves out.
         m_sharedForm.RenderConfirm();
         m_draft.End();
     }
     ToolWindow::End();
 }
 
-void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
+void CMuItemModelUI::RenderPreview(const ItemModelDefinition* model, int itemType)
 {
     // Some items are drawn by code with other models at some levels; the
     // Wizard's Ring only so, without a model entry.
@@ -85,6 +95,11 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     {
         m_preview.Render(itemType);
     }
+}
+
+void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
+{
+    const bool drawnByCode = g_ItemDatabase.Find(itemType) != nullptr && IsDrawnByCodeAtSomeLevel(itemType);
     if (drawnByCode)
     {
         RenderLevelModels(itemType);
