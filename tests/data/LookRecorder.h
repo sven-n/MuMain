@@ -93,8 +93,12 @@ constexpr int AllowedFloatSteps = 8;
 // draws and model after the drawing, their numbers at most AllowedFloatSteps apart.
 std::string FirstDifference(const Record& code, const Record& data);
 
-// A digest of the mesh draws and of what the drawing left on the model, with the numbers rounded to 6 digits, for the
-// baseline: GPU calls carry vertex hashes that differ between compilers, and the drawing of one mesh draw is the same
-// code for every look.
+// A digest of the mesh draws and of what the drawing left on the model, for the baseline: GPU calls carry vertex hashes
+// that differ between compilers, and the drawing of one mesh draw is the same code for every look. "7 <hash> <hash>
+// <hash>": the number of mesh draws, then a hash of the numbers in steps of 0.00001 on each of three grids whose edges
+// are a quarter step apart, so a number a float step of a sine away (macOS's sine, a fused multiply and add) changes
+// one at most.
 std::string Digest(const Record& record);
+// Whether a drawing's Digest is the baseline's: the same number of mesh draws, and one of the hashes the same.
+bool SameDigest(const std::string& digest, const std::string& baseline);
 } // namespace LookRecorder

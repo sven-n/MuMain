@@ -9,6 +9,8 @@
 #include "Data/GameData/LookData/LookStore.h"
 #include "Render/Items/ItemRenderStyles.h"
 
+#include <algorithm>
+#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -16,6 +18,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 // The draw recorder (LookRecorder.h) on real items of the test data, and the baseline of the render styles moved
@@ -23,6 +26,7 @@
 namespace
 {
 using namespace Data::Looks;
+using LookRecorder::Field;
 using LookRecorder::Record;
 using LookRecorder::Situation;
 
@@ -63,9 +67,10 @@ const std::filesystem::path Baseline = MU_RENDER_STYLE_BASELINE;
 
 constexpr const char* BaselineHeader =
     "# How the render styles moved from code into Data/Effects/RenderStyles.json draw: one line per item and\n"
-    "# situation, the look, the item and the situation, then the number of mesh draws and a digest of them and of\n"
-    "# what the drawing left on the model (tests/data/LookRecorder.h). Written when each look moved, once its data\n"
-    "# drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as its code did.\n";
+    "# situation, the look, the item and the situation, then the number of mesh draws and two digests of them and of\n"
+    "# what the drawing left on the model, rounded on two grids (tests/data/LookRecorder.h). Written when each look\n"
+    "# moved, once its data drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as\n"
+    "# its code did.\n";
 
 std::map<std::string, std::string> ReadBaseline()
 {
@@ -114,6 +119,39 @@ std::vector<std::string> SplitNames(const char* text)
     return names;
 }
 
+// The record with each number of its fields moved by `delta`, up and down by turns, as another platform's sine or a
+// fused multiply and add moves them: the opacities, glow strengths, scrolls and lights.
+Record Moved(Record record, double delta)
+{
+    double sign = 1.0;
+    const auto move = [&](Field& field)
+    {
+        const std::string_view name = field.first;
+        if (name != "alpha" && name != "blendMeshAlpha" && name != "blendMeshU" && name != "blendMeshV" &&
+            name != "bodyLight")
+        {
+            return;
+        }
+        std::istringstream numbers(field.second);
+        std::string moved;
+        double value = 0.0;
+        while (numbers >> value)
+        {
+            char text[40];
+            std::snprintf(text, sizeof(text), "%.9g", value + sign * delta);
+            moved += (moved.empty() ? "" : " ") + std::string(text);
+            sign = -sign;
+        }
+        field.second = moved;
+    };
+    for (std::vector<Field>& draw : record.meshDraws)
+    {
+        std::ranges::for_each(draw, move);
+    }
+    std::ranges::for_each(record.modelAfter, move);
+    return record;
+}
+
 // The baseline lines of a render style's items in every situation, as they draw now.
 std::map<std::string, std::string> RecordLook(const std::string& name)
 {
@@ -150,6 +188,36 @@ TEST_CASE("The draw recorder draws a real item the same way twice, and the draws
         CHECK(LookRecorder::FirstDifference(first, second).empty());
         CHECK(LookRecorder::Digest(first) == LookRecorder::Digest(second));
     }
+}
+
+TEST_CASE("A number a float step from a rounding edge keeps one of the two digests [looks][recorder]")
+{
+    // 0.123455 is at an edge of the grid that rounds to steps of 0.00001 (12345 or 12346 by its last float step) and a
+    // quarter step from the other grids' edges.
+    Record below;
+    Record above;
+    below.modelAfter = {{"x", "0.12345499999"}};
+    above.modelAfter = {{"x", "0.12345500001"}};
+    const std::string first = LookRecorder::Digest(below);
+    const std::string second = LookRecorder::Digest(above);
+    CHECK(first != second);
+    CHECK(LookRecorder::SameDigest(first, second));
+
+    // A number near another grid's edge (a quarter step below a whole one) keeps the other hashes.
+    Record lower;
+    Record upper;
+    lower.modelAfter = {{"x", "-0.09348749999"}};
+    upper.modelAfter = {{"x", "-0.09348750001"}};
+    CHECK(LookRecorder::Digest(lower) != LookRecorder::Digest(upper));
+    CHECK(LookRecorder::SameDigest(LookRecorder::Digest(lower), LookRecorder::Digest(upper)));
+
+    Record other;
+    other.modelAfter = {{"x", "0.2"}};
+    CHECK_FALSE(LookRecorder::SameDigest(first, LookRecorder::Digest(other)));
+    // Another number of mesh draws is never the same.
+    Record drawn = below;
+    drawn.meshDraws.push_back({{"x", "1"}});
+    CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(drawn), first));
 }
 
 TEST_CASE("The draw recorder names the first difference between two drawings [looks][recorder]")
@@ -222,7 +290,41 @@ TEST_CASE("Render styles moved into data draw as their old code did (the baselin
             CAPTURE(key);
             const auto line = baseline.find(key);
             REQUIRE(line != baseline.end());
-            CHECK(digest == line->second);
+            INFO(digest << " drawn, " << line->second << " kept");
+            CHECK(LookRecorder::SameDigest(digest, line->second));
+        }
+    }
+}
+
+TEST_CASE("Every baseline line keeps one of its digests when its numbers move by a platform's float steps "
+          "[looks][recorder]")
+{
+    // A sine is off by its last float step on another platform (about 1e-7 near 1), and a multiply and add the compiler
+    // fuses (ARM64) by a step of the result. Twice that, up and down by turns, keeps one of the hashes on every line.
+    constexpr double PlatformError = 2.0e-7;
+    RenderStylesLoadResult shipped = LoadRenderStyleFile(DataDirectory / "Effects");
+    REQUIRE_FALSE(Data::Items::HasFatal(shipped.issues));
+    std::vector<std::string> names;
+    for (const LookDefinition& look : shipped.looks)
+    {
+        names.push_back(look.name);
+    }
+    const LookStoreScope looks(std::move(shipped.looks));
+    for (const std::string& name : names)
+    {
+        const std::vector<int> items = LookRecorder::ItemsUsing(name);
+        LookRecorder::ShippedItems shippedItems;
+        shippedItems.Open(items);
+        for (const int item : items)
+        {
+            for (const Situation& situation : LookRecorder::Situations())
+            {
+                CAPTURE(name + " " + LookRecorder::DescribeItem(item) + " " + situation.Describe());
+                const Record record = LookRecorder::RecordItem(item, situation);
+                const std::string digest = LookRecorder::Digest(record);
+                CHECK(LookRecorder::SameDigest(LookRecorder::Digest(Moved(record, PlatformError)), digest));
+                CHECK(LookRecorder::SameDigest(LookRecorder::Digest(Moved(record, -PlatformError)), digest));
+            }
         }
     }
 }

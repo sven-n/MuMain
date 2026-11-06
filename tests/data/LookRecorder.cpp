@@ -24,7 +24,9 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -32,6 +34,9 @@
 #include <iterator>
 #include <filesystem>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace LookRecorder
 {
@@ -172,8 +177,16 @@ bool Close(const std::string& a, const std::string& b, int steps)
     return true;
 }
 
-// Every number of the text with 6 significant digits.
-std::string Rounded(const std::string& text)
+// The grids the digest's numbers are cut on: a number becomes floor(number / step + offset), so a grid's edges are at
+// whole steps minus its offset, a quarter step from the other grids' edges and from the whole steps (an exact number
+// such as 1 or 0.5).
+constexpr double GridStep = 0.00001;
+constexpr std::array<double, 3> GridOffsets{0.5, 0.75, 0.25};
+
+// Every number of the text as a whole number of steps on the grid. Another platform's sine, or a multiply and add the
+// compiler fuses (ARM64), moves a number by a last float step of the sine (about 1e-7 near 1, also for a small number
+// the sine was scaled to), far below a quarter step: a number near one grid's edge is far from the others'.
+std::string Rounded(const std::string& text, double offset)
 {
     std::string result;
     size_t i = 0;
@@ -190,7 +203,11 @@ std::string Rounded(const std::string& text)
         }
         char* end = nullptr;
         const double value = std::strtod(text.c_str() + i, &end);
-        result += Number(value, 6);
+        // Beyond this the steps don't fit a whole number; no look's number comes near it.
+        constexpr double MaxSteps = 1.0e15;
+        const double steps = std::floor(value / GridStep + offset);
+        result += std::isfinite(steps) && std::fabs(steps) < MaxSteps ? std::to_string(static_cast<long long>(steps))
+                                                                      : Number(value, 6);
         i = static_cast<size_t>(end - text.c_str());
     }
     return result;
@@ -475,17 +492,60 @@ std::string FirstDifference(const Record& code, const Record& data)
     return gpuDifference;
 }
 
-std::string Digest(const Record& record)
+namespace
+{
+std::string HashOf(const Record& record, double offset)
 {
     std::string text;
     for (const std::vector<Field>& draw : record.meshDraws)
     {
-        text += Rounded(Join(draw)) + "\n";
+        text += Rounded(Join(draw), offset) + "\n";
     }
-    text += Rounded(Join(record.modelAfter));
+    text += Rounded(Join(record.modelAfter), offset);
     const std::uint64_t hash = Render::Drawing::Hash(text.data(), text.size());
     char digest[24];
     std::snprintf(digest, sizeof(digest), "%016llx", static_cast<unsigned long long>(hash));
-    return std::to_string(record.meshDraws.size()) + " " + digest;
+    return digest;
+}
+
+std::vector<std::string> Words(const std::string& text)
+{
+    std::vector<std::string> words;
+    std::istringstream stream(text);
+    std::string word;
+    while (stream >> word)
+    {
+        words.push_back(word);
+    }
+    return words;
+}
+} // namespace
+
+std::string Digest(const Record& record)
+{
+    std::string digest = std::to_string(record.meshDraws.size());
+    for (const double offset : GridOffsets)
+    {
+        digest += " " + HashOf(record, offset);
+    }
+    return digest;
+}
+
+bool SameDigest(const std::string& digest, const std::string& baseline)
+{
+    const std::vector<std::string> drawn = Words(digest);
+    const std::vector<std::string> kept = Words(baseline);
+    if (drawn.size() < 2 || kept.size() < 2 || drawn[0] != kept[0])
+    {
+        return false;
+    }
+    for (std::size_t i = 1; i < std::min(drawn.size(), kept.size()); ++i)
+    {
+        if (drawn[i] == kept[i])
+        {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace LookRecorder
