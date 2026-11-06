@@ -5,6 +5,11 @@
 #include "MonsterListModel.h"
 
 #include "../MuEditor/UI/Common/NamesGridRows.h"
+#include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
+
+#include <map>
+#include <vector>
 
 namespace MuEditor::Monsters
 {
