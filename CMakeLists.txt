@@ -250,7 +250,8 @@ endif()
 # names a1ce3670) but none of the four libraries SDL_ttf vendors as git submodules. The first four patch commands
 # unpack an archive of each, at the commit release-3.2.2 pins it to (git ls-tree release-3.2.2 external/), into
 # external/, where the submodule would be: 39 MB to download and 121 MB unpacked, where the git clones with their
-# history took 392 MB. The hashes pin the sources. Updating SDL_ttf means updating those four commits and hashes too;
+# history took 392 MB. The archives stay in the download folder beside SDL_ttf's, so a patch step that runs again
+# unpacks them again without downloading. The hashes pin the sources. Updating SDL_ttf means updating those four commits and hashes too;
 # tests/test_sdl_ttf_archives.cmake checks that each library is unpacked before the patches. The patches keep LF line
 # endings (.gitattributes), as the archives do.
 FetchContent_Declare(SDL3_ttf
@@ -263,24 +264,28 @@ FetchContent_Declare(SDL3_ttf
         "${CMAKE_COMMAND}"
         "-DURL=https://github.com/libsdl-org/freetype/archive/9973564cfa63763a3e4ac67c09147899539b1e07.tar.gz"
         "-DSHA256=026a05a49d114a1235d2926f4c03a9330e4b1a6efe7c217ec9607904c32907d4"
+        "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
         "-DDESTINATION=<SOURCE_DIR>/external/freetype"
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
         "-DURL=https://github.com/libsdl-org/harfbuzz/archive/564bf9818a18709776856533829c0c04950773d6.tar.gz"
         "-DSHA256=a448dd6c22d8e1e1cf39438c662251c1f97f810b8780eed4a6d6ada948c99ddc"
+        "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
         "-DDESTINATION=<SOURCE_DIR>/external/harfbuzz"
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
         "-DURL=https://github.com/libsdl-org/plutosvg/archive/2983eb6919feea272d793bc386384e3f5b97b03c.tar.gz"
         "-DSHA256=cd416a2bbc63f5ca9c7a3582ce0c06e69e15b6087aef991cf36c38f68851dc17"
+        "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
         "-DDESTINATION=<SOURCE_DIR>/external/plutosvg"
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
         "-DURL=https://github.com/libsdl-org/plutovg/archive/3e6f922f453da1c9e7d1d7f66cac1d9724a18b47.tar.gz"
         "-DSHA256=491ee12761688a61f98bf956fa858d4610d106ade950e0530f5b19ce195d0164"
+        "-DARCHIVE_DIR=<DOWNLOAD_DIR>"
         "-DDESTINATION=<SOURCE_DIR>/external/plutovg"
         -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
     COMMAND
