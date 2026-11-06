@@ -21,6 +21,7 @@
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
@@ -591,15 +592,14 @@ static std::uint8_t g_tabBar = 0;
                 }
             }
 
+            const int defense = 5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2;
             if (Index == 0)
             {
-                ip->SpecialValue[ip->SpecialNum] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
-                ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE;
-                ip->SpecialNum++;
+                GameLogic::Items::AddOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
             }
             else
             {
-                ip->SpecialValue[Index] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
+                ip->SpecialValue[Index] = static_cast<std::uint8_t>(defense & 0xFF);
                 ip->Special[Index] = AT_SET_OPTION_IMPROVE_DEFENCE;
             }
         }
