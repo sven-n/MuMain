@@ -71,12 +71,16 @@ std::vector<Source> FindSources(int number, Data::Monsters::MonsterValueField fi
 bool TakeValue(int number, Data::Monsters::MonsterValueField field, const Source& source);
 
 // "Make it this number's own": the field may be changed on the number while
-// it is in this monster; moved into another one, it is locked there.
+// it is in this monster. A split, move or removal that takes the number out
+// of the monster or into another one locks it again, also once undone.
 void Unlock(int number, Data::Monsters::MonsterValueField field);
+// Locks the fields unlocked on the number: an action took it into or out of
+// a monster (MonsterEdits).
+void LockNumber(int number);
 // After a revert: every shared field is locked again.
 void LockAll();
-// Counts Unlock, LockAll and the locks of TakeValue, so a list of the
-// unlocked fields can tell it is out of date.
+// Counts Unlock, LockNumber, LockAll and the locks of TakeValue, so a list of
+// the unlocked fields can tell it is out of date.
 int GetUnlockVersion();
 } // namespace MuEditor::Monsters::OwnValues
 

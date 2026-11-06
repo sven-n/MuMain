@@ -195,12 +195,23 @@ TEST_CASE("Monster tools: a number's shared value is locked until it is made its
     CHECK(OwnValues::GetNumberState(145, MonsterValueField::Attacks) == OwnValues::State::Unlocked);
     CHECK(OwnValues::GetNumberState(175, MonsterValueField::Attacks) == OwnValues::State::Shared);
 
-    // Unlocked in one monster, a number moved into another is locked there.
+    // Unlocked in one monster, a number moved into another is locked there,
+    // and stays locked once the move is undone; the other numbers keep theirs.
     OwnValues::Unlock(175, MonsterValueField::Kind);
     REQUIRE(g_MonsterEdits.MoveNumber("move", 175, 2));
     CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Shared);
     REQUIRE(g_MonsterEdits.Undo());
-    CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Unlocked);
+    CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Shared);
+    CHECK(OwnValues::GetNumberState(145, MonsterValueField::Attacks) == OwnValues::State::Unlocked);
+
+    // Split out and moved back into the monster, which kept its other two
+    // numbers, the number is locked too.
+    OwnValues::Unlock(175, MonsterValueField::Kind);
+    REQUIRE(g_MonsterEdits.SplitNumber("split", 175));
+    REQUIRE(g_MonsterEdits.MoveNumber("move back", 175, 145));
+    CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Shared);
+    REQUIRE(g_MonsterEdits.Undo());
+    REQUIRE(g_MonsterEdits.Undo());
 
     // "Back to..." offers the monster's value and the other numbers' own ones.
     std::vector<OwnValues::Source> sources = OwnValues::FindSources(336, MonsterValueField::Attacks);

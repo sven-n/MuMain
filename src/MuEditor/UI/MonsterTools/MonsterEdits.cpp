@@ -5,6 +5,7 @@
 #include "MonsterEdits.h"
 
 #include "MonsterListModel.h"
+#include "MonsterOwnValues.h"
 #include "MonsterSelection.h"
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
@@ -63,6 +64,30 @@ bool IsMonsterNumber(int number)
 bool HasEntry(int number)
 {
     return g_MonsterDatabase.Find(number) != nullptr;
+}
+
+// Locks the fields unlocked on the numbers one layout has and the other has
+// not (OwnValues::LockNumber): an unlock belongs to the monster it was made
+// in, not to one the number left and comes back to.
+void LockMovedNumbers(const std::optional<MonsterGroupLayout>& before, const std::optional<MonsterGroupLayout>& after)
+{
+    const auto lockLeaving =
+        [](const std::optional<MonsterGroupLayout>& from, const std::optional<MonsterGroupLayout>& to)
+    {
+        if (!from)
+        {
+            return;
+        }
+        for (const int number : from->numbers)
+        {
+            if (!to || std::ranges::find(to->numbers, number) == to->numbers.end())
+            {
+                OwnValues::LockNumber(number);
+            }
+        }
+    };
+    lockLeaving(before, after);
+    lockLeaving(after, before);
 }
 
 // Renames the sound set where the values name it: their own set and their
@@ -576,6 +601,7 @@ void MonsterEdits::ChangeGroup(std::string label, int id, const std::optional<Mo
     {
         return;
     }
+    LockMovedNumbers(before, listed);
     const MonsterGroupSnapshot snapshot{id, listed};
     g_MonsterDataHandler.RestoreGroups(std::span<const MonsterGroupSnapshot>(&snapshot, 1));
     // What the handler stored, as the undo compares it.

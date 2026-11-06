@@ -31,8 +31,9 @@ constexpr ImVec4 OwnTextColor{0.95f, 0.75f, 0.25f, 1.0f};
 constexpr ImVec4 OwnFrameColor{0.55f, 0.40f, 0.08f, 0.60f};
 constexpr ImVec4 OwnButtonColor{0.60f, 0.45f, 0.10f, 0.70f};
 
-// A field unlocked on a number, in the monster it was unlocked in: a number
-// moved into another monster or split out and back is locked there.
+// A field unlocked on a number, in the monster it was unlocked in. An action
+// that takes the number out or in locks it (LockNumber); an undo that takes
+// it into another monster leaves the unlock behind, so it is locked there.
 using UnlockKey = std::tuple<int, int, MonsterValueField>;
 
 std::set<UnlockKey>& Unlocked()
@@ -280,6 +281,16 @@ void Unlock(int number, MonsterValueField field)
     if (const std::optional<UnlockKey> key = FindUnlockKey(number, field))
     {
         Unlocked().insert(*key);
+        ++UnlockVersion();
+    }
+}
+
+void LockNumber(int number)
+{
+    const auto locked =
+        std::erase_if(Unlocked(), [number](const UnlockKey& key) { return std::get<0>(key) == number; });
+    if (locked > 0)
+    {
         ++UnlockVersion();
     }
 }

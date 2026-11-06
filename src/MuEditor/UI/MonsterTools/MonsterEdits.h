@@ -159,7 +159,8 @@ private:
     void ChangeSoundSet(std::string label, const std::string& name,
                         const std::optional<Data::Monsters::MonsterSoundSet>& after, int monster);
     // The same for a monster with its numbers (nullopt removes it, as does a
-    // layout with fewer than two numbers).
+    // layout with fewer than two numbers). The numbers it takes in or out
+    // lose their unlocked fields (OwnValues::LockNumber).
     void ChangeGroup(std::string label, int id, const std::optional<Data::Monsters::MonsterGroupLayout>& after,
                      int monster);
     // The id and layout of the number's monster, which must have an entry.
