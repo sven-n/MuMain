@@ -2,8 +2,8 @@ mu_add_test(
     NAME test_bench_stats
     SOURCES
         test_bench_stats.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchStats.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchTypes.cpp
+    LINK_LIBS
+        mu_test_bench_stats
 )
 
 mu_add_test(
@@ -19,6 +19,6 @@ mu_add_test(
         test_bench_report.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchFindings.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchReport.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchStats.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Benchmark/BenchTypes.cpp
+    LINK_LIBS
+        mu_test_bench_stats
 )

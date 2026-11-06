@@ -199,11 +199,11 @@ mu_add_test(
         test_item_tooltip_text.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
-        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
-        ${CMAKE_SOURCE_DIR}/tests/ui/RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
+        mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
         MuCryptopp
 )
@@ -260,10 +260,10 @@ mu_add_test(
         test_effect_call_sites.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
-        ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        mu_test_effect_data
 )
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
