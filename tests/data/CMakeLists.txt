@@ -316,6 +316,7 @@ mu_add_test(
     SOURCES
         test_look_files.cpp
         test_look_checks.cpp
+        test_look_effects.cpp
         test_look_drawing.cpp
         test_look_recorder.cpp
         LookRecorder.cpp
