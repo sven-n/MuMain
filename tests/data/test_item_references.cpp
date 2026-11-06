@@ -149,6 +149,33 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     CHECK(ResolveReferencedName(database, Reference(99, 25), "en").problem == ItemReferenceProblem::UnknownItem);
 }
 
+TEST_CASE("A level's name line may name another item, in the language the line is written in [data][items][texts]")
+{
+    std::vector<ItemDefinition> items = NamedItems();
+    // A bundle whose name line names the Tear of Elf, in English and in Polish with its accusative.
+    ItemDefinition bundle;
+    bundle.group = 12;
+    bundle.number = 30;
+    bundle.names = Data::LocalizedString::Parse("Bundle||pl=Paczka");
+    bundle.nameLines.push_back(LiteralNameLine("Bundle of {item:14,25}||pl=Paczka {item:14,25:acc}", 0));
+    // A line that names its own level never ends.
+    ItemDefinition loop;
+    loop.group = 12;
+    loop.number = 31;
+    loop.names = Data::LocalizedString::Parse("Loop");
+    loop.nameLines.push_back(LiteralNameLine("{item:12,31+0}", 0));
+    items.push_back(bundle);
+    items.push_back(loop);
+    ItemDatabase database;
+    database.Build(items);
+
+    CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "en").text == "Bundle of Tear of Elf");
+    CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "pl").text == "Paczka Lze Elfa");
+    // German has no text of its own for the line: the English line, with the English name.
+    CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "de").text == "Bundle of Tear of Elf");
+    CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::UnfillableLine);
+}
+
 TEST_CASE(
     "A text's references are expanded with the resolver's names, and without a name they stay [data][items][texts]")
 {

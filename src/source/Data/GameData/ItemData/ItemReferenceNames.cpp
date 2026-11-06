@@ -15,6 +15,12 @@ using Translation::ItemReference;
 
 constexpr std::string_view NamePlaceholder = "name";
 constexpr std::string_view LevelPlusOnePlaceholder = "levelPlusOne";
+// How many name lines deep a name may come from name lines that name other items; deeper (a line that names its own
+// level) cannot be filled.
+constexpr int MaxNameDepth = 4;
+
+ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale,
+                       int depth);
 
 // The first name line that names the item at `level` by itself: shown at that level, with a text and without
 // conditions (those need the item and the hero).
@@ -73,9 +79,11 @@ std::optional<std::string> LevelValueOf(const ItemDatabase& database, const Item
     return std::nullopt;
 }
 
-// A name line's text with {name} (in the case's form), {level}, {levelPlusOne} and the level values filled in.
+// A name line's text with {name} (in the case's form), {level}, {levelPlusOne}, the level values and other items' names
+// ({item:14,13}, in `textLocale`, the language the line is written in) filled in.
 ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& definition, std::string_view text,
-                            const ItemReference& reference, std::string_view locale)
+                            const ItemReference& reference, std::string_view locale, std::string_view textLocale,
+                            int depth)
 {
     const int level = reference.level.value_or(0);
     const ReferencedName base = NameIn(definition.names, definition.nameForms, locale, reference.form);
@@ -95,6 +103,15 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
         {
             value = std::to_string(level + 1);
         }
+        else if (const std::optional<ItemReference> other = Translation::ParseItemReferenceName(placeholder))
+        {
+            const ReferencedName name = Resolve(database, *other, textLocale, depth + 1);
+            if (name.problem != ItemReferenceProblem::UnknownItem &&
+                name.problem != ItemReferenceProblem::UnfillableLine)
+            {
+                value = name.text;
+            }
+        }
         else
         {
             value = LevelValueOf(database, definition, placeholder, level, locale);
@@ -111,7 +128,7 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
 }
 
 ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& definition,
-                           const ItemReference& reference, std::string_view locale)
+                           const ItemReference& reference, std::string_view locale, int depth)
 {
     const int level = *reference.level;
     const ItemNameLine* line = FindNameLineAt(definition, level);
@@ -133,15 +150,18 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
     }
     if (text->Get(locale).find('{') != std::string::npos)
     {
-        return FillNameLine(database, definition, text->Get(locale), reference, locale);
+        const std::string_view textLocale = text->HasOwn(locale) ? locale : LocalizedString::NeutralLocale;
+        return FillNameLine(database, definition, text->Get(locale), reference, locale, textLocale, depth);
     }
     return NameIn(*text, line->nameForms, locale, reference.form);
 }
-} // namespace
 
-ReferencedName ResolveReferencedName(const ItemDatabase& database, const ItemReference& reference,
-                                     std::string_view locale)
+ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale, int depth)
 {
+    if (depth > MaxNameDepth)
+    {
+        return {{}, ItemReferenceProblem::UnfillableLine};
+    }
     const ItemDefinition* definition =
         IsValidItemId(reference.group, reference.number) ? database.Find(reference.group, reference.number) : nullptr;
     if (definition == nullptr)
@@ -150,8 +170,15 @@ ReferencedName ResolveReferencedName(const ItemDatabase& database, const ItemRef
     }
     if (reference.level)
     {
-        return NameAtLevel(database, *definition, reference, locale);
+        return NameAtLevel(database, *definition, reference, locale, depth);
     }
     return NameIn(definition->names, definition->nameForms, locale, reference.form);
+}
+} // namespace
+
+ReferencedName ResolveReferencedName(const ItemDatabase& database, const ItemReference& reference,
+                                     std::string_view locale)
+{
+    return Resolve(database, reference, locale, 0);
 }
 } // namespace Data::Items

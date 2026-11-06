@@ -17,8 +17,8 @@ enum class ItemReferenceProblem : unsigned char
     UnknownItem,
     // The level has no name line of its own: the name is the item's name and " +level", as the tooltip writes it.
     StandardName,
-    // The level's name line needs values only the game has (a skill's or monster's name, a bundle count): the text
-    // keeps the reference as written.
+    // The level's name line needs values only the game has (a skill's or monster's name, a bundle count), or names
+    // its own level through name lines: the text keeps the reference as written.
     UnfillableLine,
     // The language has no form of the name for the case: the name itself stands in.
     MissingForm,
@@ -34,7 +34,8 @@ struct ReferencedName
 // The name a text's item reference shows in `locale` (the item name language of the text, see GetItemNameLocale):
 // the item's name, or at a level the text of the first name line shown at that level without conditions, and the
 // form of the case when the reference asks for one. Needs no game state, unlike the tooltip's name (GetItemNameText):
-// a name line may fill in {name}, {level}, {levelPlusOne} and the item's level values.
+// a name line may fill in {name}, {level}, {levelPlusOne}, the item's level values and other items' names
+// ({item:14,13}, in the language the line is written in).
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const Translation::ItemReference& reference,
                                      std::string_view locale);
 } // namespace Data::Items
