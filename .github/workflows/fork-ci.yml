@@ -91,7 +91,7 @@ jobs:
             out/build/fork-ci-windows/_deps/*-src
             out/build/fork-ci-windows/_deps/*-subbuild
             .nuget
-          key: fork-windows-x64-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: fork-windows-x64-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: fork-windows-x64-dep-sources-
 
       - name: Identify vcpkg toolchain
@@ -179,7 +179,7 @@ jobs:
             out/build/fork-ci-linux-editor/_deps/*-src
             out/build/fork-ci-linux-editor/_deps/*-subbuild
             .nuget
-          key: fork-linux-x64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: fork-linux-x64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: fork-linux-x64-editor-ON-dep-sources-
 
       - name: Configure CMake
@@ -227,7 +227,7 @@ jobs:
             out/build/fork-ci-macos-editor/_deps/*-src
             out/build/fork-ci-macos-editor/_deps/*-subbuild
             .nuget
-          key: fork-macos-arm64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: fork-macos-arm64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: fork-macos-arm64-editor-ON-dep-sources-
 
       - name: Configure CMake

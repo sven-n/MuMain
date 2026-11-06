@@ -290,8 +290,9 @@ before reusing packages across image or compiler updates.
 The library caches keep the downloaded library sources (`_deps/*-src`,
 `_deps/*-subbuild`) and the NuGet packages, not the libraries' build folders: ninja
 recompiles restored build folders anyway. Their keys hash the root `CMakeLists.txt`
-(which declares the libraries), `cmake/patches` and the ClientLibrary projects, and
-name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
+(which declares the libraries), `cmake/patches`, the scripts that unpack and patch the
+sources (`cmake/UnpackArchive.cmake`, `cmake/ApplyGitPatch.cmake`) and the ClientLibrary
+projects, and name the .NET SDK version (which picks the NativeAOT compiler packages in `.nuget`),
 so a new entry is stored only when one of those changes, not with every new source
 file in `src/CMakeLists.txt`.
 
