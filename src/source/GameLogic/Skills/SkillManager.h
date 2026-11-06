@@ -4,6 +4,9 @@
 
 #include "Core/Globals/_enum.h"
 
+// The skill each strengthened, proficiency or mastery skill builds on.
+extern const std::map<ActionSkillType, ActionSkillType> SKILL_REPLACEMENTS;
+
 typedef struct DemendConditionInfo
 {
     WORD SkillType;

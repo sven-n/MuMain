@@ -539,11 +539,6 @@ enum ActionSkillType
     AT_SKILL_MASTER_END = 608,
 };
 
-// The skill each strengthened, proficiency or mastery skill builds on. Defined in SkillManager.cpp: MSVC links an
-// inline variable with a constructor in a header of the precompiled stdafx.h into every program built from one of
-// its files, from whichever object defines it, and that object brings in everything it uses.
-extern const std::map<ActionSkillType, ActionSkillType> SKILL_REPLACEMENTS;
-
 enum
 {
     SKILL_ABILITY_NONE = 0,
