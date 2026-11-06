@@ -454,10 +454,6 @@ void CalcExcellentOptions(ITEM* ip)
         switch (ip->Level)
         {
         case 0:
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC_PERCENT, 10);
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE_PERCENT, 10);
-            GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_ATTACK_SPEED, 10);
-            break;
         case 3:
             GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_MAGIC_PERCENT, 10);
             GameLogic::Items::AddOptionSlot(*ip, AT_IMPROVE_DAMAGE_PERCENT, 10);
