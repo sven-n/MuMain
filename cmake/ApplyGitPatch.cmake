@@ -6,6 +6,15 @@ endif()
 if(NOT DEFINED PATCH_FILE OR NOT EXISTS "${PATCH_FILE}")
     message(FATAL_ERROR "PATCH_FILE must name an existing file")
 endif()
+# A patch step passes the SHA-256 the configure read, so its command changes with the patch. Another patch here means
+# a wrong value or a patch edited after the configure.
+if(DEFINED PATCH_SHA256)
+    file(SHA256 "${PATCH_FILE}" patch_sha256)
+    if(NOT patch_sha256 STREQUAL PATCH_SHA256)
+        message(FATAL_ERROR
+            "${PATCH_FILE} has the SHA-256 ${patch_sha256}, not ${PATCH_SHA256} as the configure read; configure again")
+    endif()
+endif()
 
 # git searches upward from the real path, so the ceiling below must be computed from it too.
 file(REAL_PATH "${SOURCE_DIR}" SOURCE_DIR)

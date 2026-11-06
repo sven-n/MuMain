@@ -254,21 +254,37 @@ foreach(setting IN ITEMS CMAKE_TLS_VERIFY CMAKE_TLS_CAINFO CMAKE_TLS_VERSION CMA
         list(APPEND MU_UNPACK_ARCHIVE_SETTINGS "-D${setting}=${${setting}}")
     endif()
 endforeach()
+# Each patch's SHA-256 is part of its patch command, so an edited patch changes the patch step's commands and the step
+# runs again, from the archives' sources (below): in existing build folders and in CI's restored library caches too.
+# An edited patch also runs the configure again.
+foreach(mu_patch IN ITEMS
+        sdl_ttf-3.2.2-batch-glyph-uploads sdl_ttf-3.2.2-fallback-baseline harfbuzz-8.5.0-no-meson-message)
+    set(mu_patch_file "${CMAKE_SOURCE_DIR}/cmake/patches/${mu_patch}.patch")
+    file(SHA256 "${mu_patch_file}" MU_PATCH_SHA256_${mu_patch})
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${mu_patch_file}")
+endforeach()
 # SDL_ttf comes as its release archive, which holds the sources of the commit release-3.2.2 points to (its .git-hash
-# names a1ce3670) but none of the four libraries SDL_ttf vendors as git submodules. The first four patch commands
-# unpack an archive of each, at the commit release-3.2.2 pins it to (git ls-tree release-3.2.2 external/), into
-# external/, where the submodule would be: 39 MB to download and 121 MB unpacked, where the git clones with their
-# history took 392 MB. The archives stay in the download folder beside SDL_ttf's, so a patch step that runs again
-# unpacks them again without downloading. The hashes pin the sources. Updating SDL_ttf means updating those four
-# commits and hashes too; tests/test_sdl_ttf_archives.cmake lists the commits of the release, and checks them and that
-# each library is unpacked before the patches. The patches keep LF line endings (.gitattributes), as the archives do.
+# names a1ce3670) but none of the four libraries SDL_ttf vendors as git submodules. After SDL_ttf's own archive, four
+# patch commands unpack an archive of each, at the commit release-3.2.2 pins it to (git ls-tree release-3.2.2
+# external/), into external/, where the submodule would be: 39 MB to download and 121 MB unpacked, where the git clones
+# with their history took 392 MB. The archives stay in the download folder beside SDL_ttf's, so a patch step that runs
+# again unpacks them again without downloading. The hashes pin the sources. Updating SDL_ttf means updating those four
+# commits and hashes too; tests/test_sdl_ttf_archives.cmake lists the commits of the release, and checks them and the
+# order of the patch commands. The patches keep LF line endings (.gitattributes), as the archives do.
 FetchContent_Declare(SDL3_ttf
     URL      https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
     URL_HASH SHA256=63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d
     # The unpacked files get the time of unpacking, as UnpackArchive.cmake's do, not the archive's older dates: with
     # those, a build after a version change would keep objects compiled from the previous sources.
     DOWNLOAD_EXTRACT_TIMESTAMP FALSE
+    # Every patch step starts from the archives' sources: SDL_ttf's own archive, which the download step keeps, is
+    # unpacked again first (external/ goes with it), so an edited patch never lands on top of its previous version.
     PATCH_COMMAND
+        "${CMAKE_COMMAND}"
+        "-DARCHIVE=<DOWNLOAD_DIR>/SDL3_ttf-3.2.2.tar.gz"
+        "-DDESTINATION=<SOURCE_DIR>"
+        -P "${CMAKE_SOURCE_DIR}/cmake/UnpackArchive.cmake"
+    COMMAND
         "${CMAKE_COMMAND}"
         ${MU_UNPACK_ARCHIVE_SETTINGS}
         "-DURL=https://github.com/libsdl-org/freetype/archive/9973564cfa63763a3e4ac67c09147899539b1e07.tar.gz"
@@ -305,12 +321,14 @@ FetchContent_Declare(SDL3_ttf
         ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-batch-glyph-uploads.patch"
+        "-DPATCH_SHA256=${MU_PATCH_SHA256_sdl_ttf-3.2.2-batch-glyph-uploads}"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
     COMMAND
         "${CMAKE_COMMAND}"
         ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-fallback-baseline.patch"
+        "-DPATCH_SHA256=${MU_PATCH_SHA256_sdl_ttf-3.2.2-fallback-baseline}"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
     # The vendored HarfBuzz printed "WARNHarfBuzz has a Meson port ..." in every configure: a message(WARN) that asks
     # its users to build with Meson. SDL_ttf builds it with CMake, so the message goes.
@@ -319,6 +337,7 @@ FetchContent_Declare(SDL3_ttf
         ${MU_APPLY_GIT_PATCH_GIT}
         "-DSOURCE_DIR=<SOURCE_DIR>/external/harfbuzz"
         "-DPATCH_FILE=${CMAKE_SOURCE_DIR}/cmake/patches/harfbuzz-8.5.0-no-meson-message.patch"
+        "-DPATCH_SHA256=${MU_PATCH_SHA256_harfbuzz-8.5.0-no-meson-message}"
         -P "${CMAKE_SOURCE_DIR}/cmake/ApplyGitPatch.cmake"
 )
 

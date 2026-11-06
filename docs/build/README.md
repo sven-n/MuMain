@@ -137,6 +137,12 @@ release's commits in `tests/test_sdl_ttf_archives.cmake`, which the check
 compares them with; the comment above `FetchContent_Declare(SDL3_ttf)` says
 where to find them.
 
+Each run of that patch step starts from the archives' sources: it unpacks
+SDL3_ttf's own archive, kept in the sub-build's download folder, again first.
+Each patch's SHA-256 is part of its patch command, so an edited patch in
+`cmake/patches/` runs the step again, also in an existing build folder and in
+CI's restored library caches, and applies to the unpatched sources.
+
 ### Build options
 
 | CMake option | Values | Meaning |

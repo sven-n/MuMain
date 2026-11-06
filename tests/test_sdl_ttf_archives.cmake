@@ -61,6 +61,33 @@ foreach(command IN LISTS commands)
     math(EXPR index "${index} + 1")
 endforeach()
 
+# Every patch step starts from SDL_ttf's own archive, which the download step keeps. Unpacked again first, it undoes
+# the patches of an earlier run, so an edited patch doesn't land on top of its previous version.
+if(NOT declares MATCHES "URL[ \t]+https://[^ \t\r\n]+/([^/ \t\r\n]+\\.tar\\.gz)")
+    message(FATAL_ERROR "SDL3_ttf's URL must name a .tar.gz archive: ${declares}")
+endif()
+set(release_archive "${CMAKE_MATCH_1}")
+string(REPLACE "." "\\." release_archive_pattern "${release_archive}")
+list(GET commands 0 first_command)
+if(NOT first_command MATCHES "\"-DARCHIVE=<DOWNLOAD_DIR>/${release_archive_pattern}\""
+        OR NOT first_command MATCHES "\"-DDESTINATION=<SOURCE_DIR>\""
+        OR NOT first_command MATCHES "UnpackArchive\\.cmake")
+    message(FATAL_ERROR
+        "The first patch command of FetchContent_Declare(SDL3_ttf) must unpack SDL_ttf's own archive again "
+        "(-DARCHIVE=<DOWNLOAD_DIR>/${release_archive} -DDESTINATION=<SOURCE_DIR> -P cmake/UnpackArchive.cmake): "
+        "without it, a patch step that runs again applies the patches on top of the previous ones. It is: "
+        "${first_command}")
+endif()
+
+# A patch's SHA-256 in its command makes an edited patch run the patch step again.
+foreach(command IN LISTS commands)
+    if(command MATCHES "ApplyGitPatch\\.cmake" AND NOT command MATCHES "\"-DPATCH_SHA256=\\$\\{[^}]+\\}\"")
+        message(FATAL_ERROR
+            "Each patch command must pass its patch's SHA-256 (\"-DPATCH_SHA256=\${...}\"), so an edited patch runs "
+            "the patch step again: ${command}")
+    endif()
+endforeach()
+
 foreach(library IN ITEMS freetype harfbuzz plutosvg plutovg)
     set(unpack_index -1)
     set(index 0)

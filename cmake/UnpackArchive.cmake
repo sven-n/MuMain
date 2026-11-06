@@ -1,20 +1,35 @@
 cmake_minimum_required(VERSION 3.25)
 
-# Unpacks the one folder of the archive at URL as DESTINATION, replacing what is there. SDL3_ttf's patch step runs it
-# to put the libraries SDL_ttf vendors where its git submodules would be. The archive is kept in ARCHIVE_DIR and
-# downloaded only when it is missing or differs from SHA256; the library's archives of other commits are removed
-# there. DESTINATION is unpacked again on every run, so the patches after it start from the archive's sources also
-# when the patch step runs again because its commands changed.
+# Unpacks the one folder of an archive into DESTINATION, replacing what is in it. SDL3_ttf's patch step runs it first
+# for SDL_ttf's own release archive, which the download step keeps (ARCHIVE), and then for each library SDL_ttf vendors
+# (URL), to put it where its git submodule would be. A library's archive is kept in ARCHIVE_DIR and downloaded only
+# when it is missing or differs from SHA256; its archives of other commits are removed there. Every run unpacks again,
+# so the patches after it start from the archives' sources also when the patch step runs again, e.g. after a patch
+# changed.
 
-foreach(required_variable URL SHA256 ARCHIVE_DIR DESTINATION)
+if(DEFINED ARCHIVE)
+    set(required_variables ARCHIVE DESTINATION)
+else()
+    set(required_variables URL SHA256 ARCHIVE_DIR DESTINATION)
+endif()
+foreach(required_variable IN LISTS required_variables)
     if(NOT DEFINED ${required_variable} OR "${${required_variable}}" STREQUAL "")
         message(FATAL_ERROR "${required_variable} must be set")
     endif()
 endforeach()
 
-get_filename_component(library "${DESTINATION}" NAME)
-get_filename_component(archive_name "${URL}" NAME)
-set(archive "${ARCHIVE_DIR}/${library}-${archive_name}")
+if(DEFINED ARCHIVE)
+    if(NOT EXISTS "${ARCHIVE}")
+        message(FATAL_ERROR
+            "${ARCHIVE} is missing. The download step keeps it there; remove the sub-build folder that holds it, so "
+            "the next configure downloads it again.")
+    endif()
+    set(archive "${ARCHIVE}")
+else()
+    get_filename_component(library "${DESTINATION}" NAME)
+    get_filename_component(archive_name "${URL}" NAME)
+    set(archive "${ARCHIVE_DIR}/${library}-${archive_name}")
+endif()
 
 # The configure's TLS and netrc settings (CMAKE_TLS_VERIFY, CMAKE_TLS_CAINFO, CMAKE_TLS_VERSION, CMAKE_NETRC,
 # CMAKE_NETRC_FILE) come as -D values, as ExternalProject hands them to its own downloads; file(DOWNLOAD) reads them.
@@ -23,7 +38,7 @@ if(NOT DEFINED CMAKE_TLS_VERIFY AND "$ENV{CMAKE_TLS_VERIFY}" STREQUAL "")
     set(CMAKE_TLS_VERIFY ON)
 endif()
 
-if(EXISTS "${archive}")
+if(NOT DEFINED ARCHIVE AND EXISTS "${archive}")
     file(SHA256 "${archive}" archive_sha256)
     if(NOT archive_sha256 STREQUAL SHA256)
         file(REMOVE "${archive}")
@@ -78,13 +93,15 @@ endif()
 
 # Archives of the library's other commits, kept from before a version change, go: the download folder is part of
 # every build folder and of CI's library caches.
-file(GLOB library_archives "${ARCHIVE_DIR}/${library}-*.tar.gz" "${ARCHIVE_DIR}/${library}-*.tar.gz.part")
-foreach(library_archive IN LISTS library_archives)
-    get_filename_component(library_archive_name "${library_archive}" NAME)
-    if(NOT library_archive_name STREQUAL "${library}-${archive_name}")
-        file(REMOVE "${library_archive}")
-    endif()
-endforeach()
+if(NOT DEFINED ARCHIVE)
+    file(GLOB library_archives "${ARCHIVE_DIR}/${library}-*.tar.gz" "${ARCHIVE_DIR}/${library}-*.tar.gz.part")
+    foreach(library_archive IN LISTS library_archives)
+        get_filename_component(library_archive_name "${library_archive}" NAME)
+        if(NOT library_archive_name STREQUAL "${library}-${archive_name}")
+            file(REMOVE "${library_archive}")
+        endif()
+    endforeach()
+endif()
 
 set(work_dir "${DESTINATION}.unpack")
 file(REMOVE_RECURSE "${work_dir}")
@@ -93,9 +110,19 @@ file(ARCHIVE_EXTRACT INPUT "${archive}" DESTINATION "${work_dir}" TOUCH)
 file(GLOB top_entries LIST_DIRECTORIES true "${work_dir}/*")
 list(LENGTH top_entries top_entry_count)
 if(NOT top_entry_count EQUAL 1 OR NOT IS_DIRECTORY "${top_entries}")
-    message(FATAL_ERROR "${URL} must hold exactly one folder; it holds: ${top_entries}")
+    message(FATAL_ERROR "${archive} must hold exactly one folder; it holds: ${top_entries}")
 endif()
 
-file(REMOVE_RECURSE "${DESTINATION}")
-file(RENAME "${top_entries}" "${DESTINATION}")
+# DESTINATION itself stays and only what is in it is replaced: for SDL_ttf's own archive it is the folder the patch
+# step runs in, which Windows doesn't let a process remove.
+file(MAKE_DIRECTORY "${DESTINATION}")
+file(GLOB old_entries LIST_DIRECTORIES true "${DESTINATION}/*")
+if(old_entries)
+    file(REMOVE_RECURSE ${old_entries})
+endif()
+file(GLOB new_entries LIST_DIRECTORIES true "${top_entries}/*")
+foreach(new_entry IN LISTS new_entries)
+    get_filename_component(entry_name "${new_entry}" NAME)
+    file(RENAME "${new_entry}" "${DESTINATION}/${entry_name}")
+endforeach()
 file(REMOVE_RECURSE "${work_dir}")
