@@ -153,7 +153,7 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
                                    const std::string& lineField, std::vector<ItemDataIssue>& issues)
 {
     const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
-    const std::set<std::string> englishNames(english.names.begin(), english.names.end());
+    const std::set<std::string> englishNames = ToParityPlaceholders(english.names);
     if (!english.error.empty())
     {
         AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, english.error,
@@ -168,7 +168,7 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
             AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, scan.error, field.c_str());
             continue;
         }
-        const std::set<std::string> names(scan.names.begin(), scan.names.end());
+        const std::set<std::string> names = ToParityPlaceholders(scan.names);
         if (english.error.empty() && names != englishNames)
         {
             AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
@@ -475,8 +475,13 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
     {
         builtIns.push_back(MakeTablePlaceholder(table));
     }
+    // An item reference names an item; whether one has the number is the editor's Data Checks' concern, as the item
+    // data is read before it is known which numbers exist.
     const auto isValue = [&](std::string_view name)
-    { return IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles).has_value(); };
+    {
+        return IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles).has_value() ||
+               IsItemReferencePlaceholder(name);
+    };
     // A table written without "table:" is suggested with it. Its own name comes first, also when it is close to a
     // built-in value: {levels} for the table "levels" is not {level}.
     const auto suggest = [&](const std::string& name, std::span<const std::string> candidates)
@@ -918,6 +923,76 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
         {
             issues.push_back({ItemDataIssueSeverity::Warning, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               "texts." + name, "neither a layout nor an item description uses this text"});
+        }
+    }
+}
+
+namespace
+{
+// The problems of one name's forms; `names` is the text they are forms of (none for a shared text, whose languages
+// the tooltip file has).
+void CheckNameForms(const ItemDefinition& definition, const ItemNameForms& forms, const LocalizedString* names,
+                    const std::string& field, const ItemNameCases& cases, const std::string& casesFile,
+                    std::vector<ItemDataIssue>& issues)
+{
+    const auto warn = [&](const std::string& at, const std::string& message)
+    { issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, at, message}); };
+    for (const auto& [locale, caseForms] : forms.GetAll())
+    {
+        const std::string localeField = field + "." + locale;
+        if (locale == LocalizedString::NeutralLocale)
+        {
+            warn(localeField, "English names have no forms: a text in English shows the name itself");
+            continue;
+        }
+        if (cases.GetCases(locale).empty())
+        {
+            warn(localeField, "\"" + locale + "\" declines no names in " + casesFile + "; give it its cases there");
+            continue;
+        }
+        if (names != nullptr && !names->HasOwn(locale))
+        {
+            warn(localeField, "has forms, but the name has no \"" + locale + "\" text of its own to decline");
+        }
+        for (const auto& [caseKey, form] : caseForms)
+        {
+            if (!cases.Uses(locale, caseKey))
+            {
+                warn(localeField + "." + caseKey,
+                     "\"" + locale + "\" does not use the case " + caseKey + " in " + casesFile);
+            }
+        }
+    }
+}
+} // namespace
+
+void ValidateNameForms(std::span<const ItemDefinition> items, const ItemNameCases& cases, const std::string& casesFile,
+                       std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        CheckNameForms(definition, definition.nameForms, &definition.names, "nameForms", cases, casesFile, issues);
+        for (size_t index = 0; index < definition.nameLines.size(); ++index)
+        {
+            const ItemNameLine& line = definition.nameLines[index];
+            if (line.nameForms.IsEmpty())
+            {
+                continue;
+            }
+            const std::string field = "nameLines[" + std::to_string(index) + "].nameForms";
+            if (!line.hasText)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
+                                  "the line has no text of its own: it shows the standard name, whose forms are the "
+                                  "item's nameForms"});
+                continue;
+            }
+            CheckNameForms(definition, line.nameForms, line.textName.empty() ? &line.text : nullptr, field, cases,
+                           casesFile, issues);
         }
     }
 }

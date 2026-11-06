@@ -451,7 +451,8 @@ void ItemTooltipReader::CheckLinePlaceholders(const TooltipLayoutLine& line, con
     std::set<std::string> reported;
     for (const std::string& name : scan.names)
     {
-        if (std::find(known.begin(), known.end(), name) != known.end() || !reported.insert(name).second)
+        if (std::find(known.begin(), known.end(), name) != known.end() || IsItemReferencePlaceholder(name) ||
+            !reported.insert(name).second)
         {
             continue;
         }

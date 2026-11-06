@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemOptionDatabase.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -158,6 +159,19 @@ public:
         return m_groundLabels;
     }
 
+    // The cases each language declines item names in (Data/Items/Tooltips/NameCases.json). A name version change: the
+    // texts that name items look at which forms a language has.
+    void SetNameCases(ItemNameCases cases)
+    {
+        ++m_nameVersion;
+        m_nameCases = std::move(cases);
+    }
+
+    const ItemNameCases& GetNameCases() const
+    {
+        return m_nameCases;
+    }
+
     // The item's stat profile laid over the default; the default for empty
     // slots and invalid ids.
     const ItemStatProfile& GetStatProfile(int itemType) const
@@ -262,6 +276,7 @@ private:
     std::vector<std::vector<ItemOptionIndex>> m_optionLinks;
     ItemTooltipFile m_tooltipFile;
     GroundLabelFile m_groundLabels;
+    ItemNameCases m_nameCases;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.
