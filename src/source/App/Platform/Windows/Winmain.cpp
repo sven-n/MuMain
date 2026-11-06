@@ -73,6 +73,7 @@
 
 #include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
 #include "Core/Utilities/PlatformInfo.h"
 
 #include "MUHelper/MuHelper.h"
@@ -1970,10 +1971,16 @@ static void SetWorkingDirectoryToBasePath()
 #endif
 }
 
+// The language the player reads: SetLocale falls back to en for a locale it doesn't know.
+static Core::Log::ReadingLanguage::State CurrentReadingLanguage()
+{
+    return {I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames()};
+}
+
 // A UI language switch after start-up (the options window, the editor), so a report shows the language it was in.
 static void LogUiLanguageChange(void* /*context*/) noexcept
 {
-    g_ErrorReport.Write(L"> UI language changed to %hs.\r\n", I18N::GetCurrentLocale());
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
 }
 
 // The connect server: the command line's (a launcher passes one) or else config.ini's.
@@ -2315,9 +2322,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         I18N::SetLocale(uiLocale.c_str());
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
-    // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
-    g_ErrorReport.Write(L"> UI language = %hs, item names %ls.\r\n", I18N::GetCurrentLocale(),
-                        GameConfig::GetInstance().GetTranslateItemNames() ? L"translated" : L"in English");
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
     I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
