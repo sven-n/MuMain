@@ -25,8 +25,8 @@ VersionFile ReadVersionFile(const std::filesystem::path& file);
 // The Release line: the release tag, that the client is no release download, or that the file holds no tag.
 std::string DescribeRelease(const VersionFile& release);
 
-// The Data line: the installed data release against the one the client was built with ("unknown" when the
-// build had no git).
+// The Data line: the installed data release against the one the client was built with (MU_DATA_ASSET_ID, empty
+// when the build had no git).
 std::string DescribeData(const VersionFile& installed, const std::string& expectedId);
 
 // When the file was last written, e.g. "2026-11-06 12:03:17 UTC"; empty when that can't be read. For the client's

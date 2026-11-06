@@ -124,10 +124,10 @@ TEST_CASE("The data line compares the installed and expected data releases [core
           "data-bbbb, but this client expects data-aaaa");
     CHECK(Core::Build::DescribeData(Missing(), "data-aaaa") ==
           "unknown (no Data/DataVersion.txt), this client expects data-aaaa");
-    CHECK(Core::Build::DescribeData(Missing(), "unknown") == "unknown (no Data/DataVersion.txt)");
+    CHECK(Core::Build::DescribeData(Missing(), "") == "unknown (no Data/DataVersion.txt)");
     CHECK(Core::Build::DescribeData(Holding(""), "data-aaaa") ==
           "unreadable (Data/DataVersion.txt holds no data release id), this client expects data-aaaa");
-    CHECK(Core::Build::DescribeData(Holding("data-bbbb"), "unknown") ==
+    CHECK(Core::Build::DescribeData(Holding("data-bbbb"), "") ==
           "data-bbbb (this client's data release is unknown)");
 }
 
