@@ -27,7 +27,5 @@ const std::string& GetProcessorName();
 int GetSystemMemoryMB();
 
 // The running executable's file as an absolute path, e.g. "D:/MuMain/Main.exe"; empty when it can't be found.
-// Resolved once and cached. The first call must come before the working directory changes: macOS reports the path
-// the client was started with, which can be relative (Winmain calls it first).
-const std::filesystem::path& GetExecutablePath();
+std::filesystem::path GetExecutablePath();
 }

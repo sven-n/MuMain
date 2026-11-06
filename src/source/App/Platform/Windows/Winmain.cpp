@@ -2002,7 +2002,8 @@ static void SelectConnectServer(wchar_t* commandLine)
 
 static void InitializeWorkingDirectoryAndLog()
 {
-    // Cached before the working directory moves, while a relative macOS start path still leads to the client.
+    // Before the working directory moves: on macOS the first query makes a relative start path absolute
+    // (WinApiShims.h), for every later caller.
     static_cast<void>(Core::Platform::GetExecutablePath());
     SetWorkingDirectoryToBasePath();
     mu::log::Init();
