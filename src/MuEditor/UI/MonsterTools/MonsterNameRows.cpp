@@ -153,17 +153,20 @@ const Data::LocalizedString* MonsterNameRows::FindNames(int id) const
         const MonsterDefinition* monster = g_MonsterDatabase.Find(id);
         return monster != nullptr ? &monster->names : nullptr;
     }
-    const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(NumberOf(id));
-    if (!shared)
+    // Read each frame for each row shown: no copies. A monster's row whose
+    // monster has one number left shows that number's names.
+    const MonsterDefinition* shared = g_MonsterEdits.FindSharedValues(NumberOf(id));
+    const MonsterDefinition* values = shared != nullptr ? shared : g_MonsterDatabase.Find(NumberOf(id));
+    if (values == nullptr)
     {
         return nullptr;
     }
     // The grid reads the names where they are: the shared ones are kept
     // here, in place, so a pointer given before stays valid.
     Data::LocalizedString& kept = m_sharedNames[id];
-    if (kept != shared->names)
+    if (kept != values->names)
     {
-        kept = shared->names;
+        kept = values->names;
     }
     return &kept;
 }

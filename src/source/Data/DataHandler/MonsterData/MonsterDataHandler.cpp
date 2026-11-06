@@ -410,12 +410,18 @@ std::optional<int> MonsterDataHandler::FindGroupOf(int number) const
 
 std::optional<MonsterGroupLayout> MonsterDataHandler::ReadGroup(int id) const
 {
+    const MonsterGroupLayout* group = FindGroup(id);
+    return group != nullptr ? std::optional<MonsterGroupLayout>(*group) : std::nullopt;
+}
+
+const MonsterGroupLayout* MonsterDataHandler::FindGroup(int id) const
+{
     if (!HasCurrentGroups())
     {
-        return std::nullopt;
+        return nullptr;
     }
     const auto found = m_groups.find(id);
-    return found != m_groups.end() ? std::optional<MonsterGroupLayout>(found->second) : std::nullopt;
+    return found != m_groups.end() ? &found->second : nullptr;
 }
 
 void MonsterDataHandler::RestoreGroups(std::span<const MonsterGroupSnapshot> snapshots)

@@ -54,6 +54,10 @@ public:
     // (Data::Monsters::MakeSharedValues): its entry's when it is the
     // monster's only number; nullopt when it has no entry.
     std::optional<Data::Monsters::MonsterDefinition> ReadSharedValues(int number) const;
+    // The same without a copy, for the tools' reads each frame: the shared
+    // values of a monster with several numbers; nullptr for a number of a
+    // monster of its own or without an entry. Valid until the next change.
+    const Data::Monsters::MonsterDefinition* FindSharedValues(int number) const;
     // Sets the shared values of the number's monster (`number` and `maps` of
     // `values` are not used): a field that changes changes in the numbers
     // that share it; the numbers' own values stay (Q-MN96). For a monster
@@ -155,6 +159,9 @@ private:
     // number left) is the number alone with its entry's values, under a new
     // id when no monster lists it.
     std::pair<int, Data::Monsters::MonsterGroupLayout> ReadLayoutOf(int number);
+    // The layout of the number's monster when the number has an entry and
+    // the monster two or more numbers with one; else nullptr.
+    const Data::Monsters::MonsterGroupLayout* FindLayoutWithNumbers(int number) const;
     // Adds the entry, whose number is free, to the monster of `memberNumber`.
     void AddToMonsterOf(std::string label, int memberNumber, const Data::Monsters::MonsterDefinition& entry);
     // Into the history, or into the open group.

@@ -8,6 +8,7 @@
 #include "MonsterStepLabel.h"
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -56,8 +57,8 @@ int& UnlockVersion()
 
 std::string MonsterName(int number)
 {
-    const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(number);
-    return shared ? shared->names.GetNeutral() : std::string();
+    const MonsterDefinition* shared = g_MonsterEdits.FindSharedValues(number);
+    return shared != nullptr ? shared->names.GetNeutral() : std::string();
 }
 
 // "Attacks: Shared by the 3 numbers of Death Centurion".
@@ -82,12 +83,14 @@ void RenderSourcesMenu(int number, MonsterValueField field)
 
 State GetNumberState(int number, MonsterValueField field)
 {
-    const std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
-    if (!entry || g_MonsterEdits.ReadMonsterNumbers(number).size() < 2)
+    // Read each frame for each field shown: no copies.
+    const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
+    const MonsterDefinition* shared = g_MonsterEdits.FindSharedValues(number);
+    if (entry == nullptr || shared == nullptr)
     {
         return State::Plain;
     }
-    if (!Data::Monsters::HasSameValue(*entry, *g_MonsterEdits.ReadSharedValues(number), field))
+    if (!Data::Monsters::HasSameValue(*entry, *shared, field))
     {
         return State::Own;
     }

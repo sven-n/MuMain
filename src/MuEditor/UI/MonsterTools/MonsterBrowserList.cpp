@@ -145,18 +145,12 @@ std::string NumberLabel(const Row& row)
 
 void RenderRow(const Row& row, bool selected, MonsterBrowserList::Result& result)
 {
-    // Read each frame: an undo, a revert or a language switch changes it.
-    std::optional<MonsterDefinition> monster;
-    if (row.kind == Row::Kind::Monster)
-    {
-        monster = g_MonsterEdits.ReadSharedValues(row.number);
-    }
-    else if (const MonsterDefinition* entry = g_MonsterDatabase.Find(row.number))
-    {
-        monster = *entry;
-    }
+    // Read each frame, without copies: an undo, a revert or a language switch
+    // changes it.
+    const MonsterDefinition* monster = row.kind == Row::Kind::Monster ? g_MonsterEdits.FindSharedValues(row.number)
+                                                                      : g_MonsterDatabase.Find(row.number);
     ImGui::TableNextRow();
-    if (!monster)
+    if (monster == nullptr)
     {
         return;
     }

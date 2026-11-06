@@ -135,6 +135,9 @@ public:
     std::optional<int> FindGroupOf(int number) const;
     // The monster of the id as it is now; nullopt when there is none.
     std::optional<MonsterGroupLayout> ReadGroup(int id) const;
+    // The same without a copy, for the tools' reads each frame; valid until
+    // the next RestoreGroups, Load or revert.
+    const MonsterGroupLayout* FindGroup(int id) const;
     // Makes each id what its snapshot says, exactly: the monster, or none for
     // nullopt. The entries of its numbers are not changed.
     void RestoreGroups(std::span<const MonsterGroupSnapshot> snapshots);

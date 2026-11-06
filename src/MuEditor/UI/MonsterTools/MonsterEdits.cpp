@@ -10,6 +10,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterGroup.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
@@ -18,6 +19,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 
 #include <algorithm>
+#include <iterator>
 #include <span>
 #include <utility>
 
@@ -55,6 +57,11 @@ bool CanStoreNames(const LocalizedString& names)
 bool IsMonsterNumber(int number)
 {
     return number >= 0 && number < Data::Monsters::MonsterNumberCount;
+}
+
+bool HasEntry(int number)
+{
+    return g_MonsterDatabase.Find(number) != nullptr;
 }
 
 // Whether the model list's save would take the model: written and read back
@@ -162,33 +169,43 @@ bool MonsterEdits::RemoveMonster(std::string label, int number)
 
 std::vector<int> MonsterEdits::ReadMonsterNumbers(int number) const
 {
-    if (!g_MonsterDataHandler.ReadMonster(number))
+    if (g_MonsterDatabase.Find(number) == nullptr)
     {
         return {};
     }
-    const std::optional<int> id = g_MonsterDataHandler.FindGroupOf(number);
-    if (!id)
+    const MonsterGroupLayout* layout = FindLayoutWithNumbers(number);
+    if (layout == nullptr)
     {
         return {number};
     }
-    std::vector<int> numbers = g_MonsterDataHandler.ReadGroup(*id)->numbers;
-    std::erase_if(numbers, [](int member) { return !g_MonsterDataHandler.ReadMonster(member); });
+    std::vector<int> numbers;
+    numbers.reserve(layout->numbers.size());
+    std::ranges::copy_if(layout->numbers, std::back_inserter(numbers), HasEntry);
     return numbers;
 }
 
 std::optional<MonsterDefinition> MonsterEdits::ReadSharedValues(int number) const
 {
-    const std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
-    if (!entry)
+    if (const MonsterDefinition* shared = FindSharedValues(number))
     {
-        return std::nullopt;
+        return *shared;
     }
+    const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
+    return entry != nullptr ? std::optional(Data::Monsters::MakeSharedValues(*entry)) : std::nullopt;
+}
+
+const MonsterDefinition* MonsterEdits::FindSharedValues(int number) const
+{
+    const MonsterGroupLayout* layout = FindLayoutWithNumbers(number);
+    return layout != nullptr ? &layout->shared : nullptr;
+}
+
+const MonsterGroupLayout* MonsterEdits::FindLayoutWithNumbers(int number) const
+{
     const std::optional<int> id = g_MonsterDataHandler.FindGroupOf(number);
-    if (!id || ReadMonsterNumbers(number).size() < 2)
-    {
-        return Data::Monsters::MakeSharedValues(*entry);
-    }
-    return g_MonsterDataHandler.ReadGroup(*id)->shared;
+    const MonsterGroupLayout* layout = id ? g_MonsterDataHandler.FindGroup(*id) : nullptr;
+    const bool listed = g_MonsterDatabase.Find(number) != nullptr && layout != nullptr;
+    return listed && std::ranges::count_if(layout->numbers, HasEntry) >= 2 ? layout : nullptr;
 }
 
 bool MonsterEdits::SetSharedValues(std::string label, int number, const MonsterDefinition& values)
