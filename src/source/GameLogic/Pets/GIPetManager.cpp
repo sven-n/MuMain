@@ -582,7 +582,8 @@ static std::uint8_t g_tabBar = 0;
     {
         if (ip->Type == ITEM_DARK_HORSE_ITEM)
         {
-            const int defense = 5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2;
+            const int agility = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+            const int defense = 5 + (agility / 20) + pPetInfo->m_wLevel * 2;
             GameLogic::Items::SetOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
         }
     }

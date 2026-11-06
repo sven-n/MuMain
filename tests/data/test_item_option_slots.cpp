@@ -127,6 +127,23 @@ TEST_CASE("A Dark Horse keeps one defense slot over pet info updates [items]")
     }
 }
 
+// The Dark Horse's defense counts all of the character's agility, as OpenMU does (Pets.cs, Stats.TotalAgility): its
+// base agility and the agility its items, sets and sockets add.
+TEST_CASE("A Dark Horse's defense counts the agility from items [items]")
+{
+    HeroScope hero;
+    hero.Hero().Dexterity = 40;
+    hero.Hero().AddDexterity = 60;
+    PET_INFO pet{};
+    pet.m_wLevel = 1;
+    ITEM horse{};
+    horse.Type = ITEM_DARK_HORSE_ITEM;
+    giPetManager::SetPetItemConvert(&horse, &pet);
+
+    REQUIRE(horse.SpecialNum == 1);
+    CHECK(horse.SpecialValue[0] == 5 + (40 + 60) / 20 + 1 * 2);
+}
+
 // An option's value has more than a byte: the Dark Horse's defense passes 255 at 3020 agility with a horse at level 50,
 // and OpenMU adds all of it (Pets.cs, DefenseBase + 5 + horse level * 2 + agility / 20).
 TEST_CASE("An option keeps a value above 255 [items]")
