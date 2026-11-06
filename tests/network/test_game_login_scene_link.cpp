@@ -1,4 +1,4 @@
-// doctest unit tests for the game's side of the login screen's reconnect.
+// doctest unit tests for the game's side of the login screen's reconnect and login-window input gate.
 //
 // GameLoginSceneLink reads the login scene's windows and protocol state to tell
 // LoginSceneReconnect which server the screen waits for, and whether the server
@@ -13,9 +13,12 @@
 #include "Network/Reconnect/GameLoginSceneLink.h"
 #include "Network/Server/WSclient.h" // CurrentProtocolState and its states
 #include "Character/CharMakeWin.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
+#include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "UI/Windows/MsgWin.h"
+#include "UI/Windows/RememberPasswordPrompt.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/SysMenuWin.h"
 
@@ -65,6 +68,9 @@ TEST_SUITE("Game login scene link")
 {
     TEST_CASE("hidden and released login windows do not handle keys")
     {
+        UI::Login::ClearRememberPasswordChoice();
+        REQUIRE_FALSE(CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame());
+
         // Only change visibility flags: opening real dialogs also changes input and preview state.
         struct Modals
         {
@@ -108,23 +114,54 @@ TEST_SUITE("Game login scene link")
         window.Update();
         CHECK(window.keyUpdates == 1);
 
-        g_MsgWin.mu::ui::window::CObject::Show(true);
-        window.Update();
-        CHECK(window.keyUpdates == 1);
+        int expectedKeyUpdates = 1;
+        for (mu::ui::window::CObject* modal : modals.windows)
+        {
+            modal->mu::ui::window::CObject::Show(true);
+            // Character creation owns a different scene, where login itself must be hidden.
+            window.Show(modal != &g_CharMakeWin);
+            window.Update();
+            CHECK(window.keyUpdates == expectedKeyUpdates);
 
-        g_MsgWin.mu::ui::window::CObject::Show(false);
-        window.Update();
-        CHECK(window.keyUpdates == 2);
+            modal->mu::ui::window::CObject::Show(false);
+            window.Show(true);
+            window.Update();
+            ++expectedKeyUpdates;
+            CHECK(window.keyUpdates == expectedKeyUpdates);
+        }
 
         window.Show(false);
         window.Update();
-        CHECK(window.keyUpdates == 2);
+        CHECK(window.keyUpdates == expectedKeyUpdates);
 
         window.Show(true);
         window.Release();
         CHECK_FALSE(window.IsVisible());
         window.Update();
-        CHECK(window.keyUpdates == 2);
+        CHECK(window.keyUpdates == expectedKeyUpdates);
+    }
+
+    TEST_CASE("scene-window release clears the visible flag")
+    {
+        const bool loginMainWasVisible = g_LoginMainWin.IsVisible();
+        const bool serverListWasVisible = g_ServerSelWin.IsVisible();
+        const bool creditsWereVisible = g_CreditWin.IsVisible();
+
+        g_LoginMainWin.mu::ui::window::CObject::Show(true);
+        g_ServerSelWin.mu::ui::window::CObject::Show(true);
+        g_CreditWin.mu::ui::window::CObject::Show(true);
+
+        g_LoginMainWin.Release();
+        g_ServerSelWin.Release();
+        g_CreditWin.Release();
+
+        CHECK_FALSE(g_LoginMainWin.IsVisible());
+        CHECK_FALSE(g_ServerSelWin.IsVisible());
+        CHECK_FALSE(g_CreditWin.IsVisible());
+
+        g_LoginMainWin.mu::ui::window::CObject::Show(loginMainWasVisible);
+        g_ServerSelWin.mu::ui::window::CObject::Show(serverListWasVisible);
+        g_CreditWin.mu::ui::window::CObject::Show(creditsWereVisible);
     }
 
     TEST_CASE("an empty screen waits for the server of the step it took")

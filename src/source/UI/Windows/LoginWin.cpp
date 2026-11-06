@@ -9,7 +9,6 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/MsgWin.h"
-#include "Character/CharMakeWin.h"
 #include "Core/Globals/_enum.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -207,7 +206,8 @@ void CLoginWin::Show(bool bShow)
     if (m_RmlView.Document())
     {
         if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
-        else       m_RmlView.Document()->Hide();
+        else if (m_RmlView.Document()->IsVisible())
+            m_RmlView.Document()->Hide();
     }
 }
 
@@ -315,22 +315,28 @@ void CLoginWin::ApplySavePasswordChange()
 
 bool CLoginWin::UpdateWhileShown()
 {
+    const bool rememberPasswordPromptPending =
+        UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending;
+
+    // The remember-password prompt outlives this window, so keep polling it while login is hidden.
+    UI::Login::Tick();
+    ApplyRememberPasswordChoice();
+
+    if (!IsVisible())
+    {
+        SetActive(false);
+        return true;
+    }
+
     // Prevents Enter/Esc from double-firing past an overlaying modal: a higher-depth modal
     // claiming UpdateMouseEvent() doesn't by itself stop this window's own VK_RETURN/VK_ESCAPE
     // polling in UpdateWhileActive(). WasSysMenuToggledByEscThisFrame() is needed in addition to
     // g_SysMenuWin.IsVisible() because an Esc that just closed the menu this frame already reads
-    // back IsVisible()==false. g_CharMakeWin.IsVisible() covers the same gap: this window keeps
-    // ticking on the character-select scene too, so without it, Esc closing Character Create also
-    // fires this window's own SubmitCancel() and logs out unexpectedly.
-    SetActive(IsVisible() &&
-              !(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() ||
-                g_CharMakeWin.IsVisible() || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame() ||
+    // back IsVisible()==false.
+    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() ||
+                CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame() || rememberPasswordPromptPending ||
                 UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
 
-    // Polls the "Remember Password" dialog's own Enter/Esc while it's open.
-    UI::Login::Tick();
-
-    ApplyRememberPasswordChoice();
     RevokeSavedCredentialsIfEdited();
     return true;
 }
