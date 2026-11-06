@@ -108,7 +108,7 @@ void RenderCasesTable()
     ImGui::EndTable();
 }
 
-// "+3" for a name line shown at one level, "+3 to +5" for more.
+// "+3" for a name line shown at one level, "+3 - +5" for more.
 std::string LevelsOf(const Data::Items::ItemNameLine& line)
 {
     std::string levels = "+" + std::to_string(line.minLevel);
