@@ -18,7 +18,8 @@ It is **debug-only**:
 
 - Built only when `_EDITOR` is defined (see [Build Configurations in
   `README.md`](../README.md#build-configurations)).
-- Requires the ImGui submodule (`git submodule update --init`).
+- Requires the ImGui submodule, which CMake fetches
+  (`git submodule update --init --depth 1 -- src/ThirdParty/imgui` by hand).
 - Not present in Release builds.
 
 ---

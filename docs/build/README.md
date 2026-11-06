@@ -85,13 +85,18 @@ all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
 [nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
 the repository's submodule entry, for the SDL GPU renderer integration.
 
+CMake fetches only the pinned commits, not their history: about 30 MB instead of
+300 MB in every checkout and worktree. A checkout that already has a submodule keeps
+its history. To work on a submodule with its history, fetch it there, e.g.
+`git -C src/ThirdParty/RmlUi fetch --unshallow`.
+
 If automatic initialization fails, run from the repository root:
 
 ```sh
-git submodule update --init -- src/ThirdParty/SDL src/ThirdParty/RmlUi
+git submodule update --init --depth 1 -- src/ThirdParty/SDL src/ThirdParty/RmlUi
 
 # For editor builds:
-git submodule update --init -- src/ThirdParty/imgui
+git submodule update --init --depth 1 -- src/ThirdParty/imgui
 ```
 
 CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.

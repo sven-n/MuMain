@@ -5,6 +5,7 @@
 # Ensures a git submodule at <relative_path> (relative to the calling
 # CMakeLists.txt) is initialized.  INDICATOR is a file expected to exist
 # inside the submodule once it's populated; its absence triggers init.
+# Init fetches only the pinned commit, not the submodule's history.
 # URL allows the helper to `git submodule add` the entry if it's not yet
 # registered in the index — only useful for first-time bootstraps.
 #
@@ -32,7 +33,7 @@ function(mu_ensure_submodule rel_path)
   find_package(Git QUIET)
   if (NOT GIT_FOUND)
     message(FATAL_ERROR
-      "Git not found. Run 'git submodule update --init' manually from ${REPO_ROOT}.")
+      "Git not found. Run 'git submodule update --init --depth 1' manually from ${REPO_ROOT}.")
   endif()
 
   message(STATUS "Initializing submodule ${rel_path}...")
@@ -75,8 +76,11 @@ function(mu_ensure_submodule rel_path)
       WORKING_DIRECTORY ${REPO_ROOT}
       OUTPUT_QUIET ERROR_QUIET
     )
+    # --depth 1: the pinned commits of SDL, RmlUi and ImGui are 22 MB, their history 300 MB in every checkout and
+    # worktree. `shallow = true` in .gitmodules would not do it: git then clones the branch's newest commit alone and
+    # fetches the pinned one, which is older, with all its history.
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init -- "${submodule_repo_rel}"
+      COMMAND ${GIT_EXECUTABLE} submodule update --init --depth 1 -- "${submodule_repo_rel}"
       WORKING_DIRECTORY ${REPO_ROOT}
       RESULT_VARIABLE rc
       ERROR_VARIABLE err
