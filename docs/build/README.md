@@ -96,6 +96,13 @@ git -C src/ThirdParty/RmlUi remote set-branches origin "*"
 git -C src/ThirdParty/RmlUi fetch --unshallow
 ```
 
+A clone can bring the submodules the same way from the start; `--depth 1` also
+leaves out MuMain's own history, for a checkout that only builds:
+
+```sh
+git clone --recurse-submodules --shallow-submodules https://github.com/sven-n/MuMain.git
+```
+
 If automatic initialization fails, run from the repository root:
 
 ```sh
