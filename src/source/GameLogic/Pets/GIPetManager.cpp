@@ -582,26 +582,8 @@ static std::uint8_t g_tabBar = 0;
     {
         if (ip->Type == ITEM_DARK_HORSE_ITEM)
         {
-            int Index = 0;
-            for (int i = 0; i < ip->SpecialNum; ++i)
-            {
-                if (ip->Special[i] == AT_SET_OPTION_IMPROVE_DEFENCE)
-                {
-                    Index = i;
-                    break;
-                }
-            }
-
             const int defense = 5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2;
-            if (Index == 0)
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
-            }
-            else
-            {
-                ip->SpecialValue[Index] = static_cast<std::uint8_t>(defense & 0xFF);
-                ip->Special[Index] = AT_SET_OPTION_IMPROVE_DEFENCE;
-            }
+            GameLogic::Items::SetOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
         }
     }
 

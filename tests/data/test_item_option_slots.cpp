@@ -8,6 +8,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
+#include "GameLogic/Pets/GIPetManager.h"
 #include "I18N/All.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Inventory/ItemMng.h"
@@ -92,5 +93,36 @@ TEST_CASE("A weapon keeps its skill, luck, additional option and six excellent o
         CAPTURE(i);
         CHECK(blade.Special[i] == expected[i].option);
         CHECK(blade.SpecialValue[i] == expected[i].value);
+    }
+}
+
+// The Dark Horse's defense (5 + agility / 20 + the horse's level * 2) gets its value again on every pet info update,
+// for example while its tooltip is shown. It keeps one slot, also when that slot is the first: a horse without its
+// skill has the defense in slot 0, which the update took for "no defense slot yet" and added another one.
+TEST_CASE("A Dark Horse keeps one defense slot over pet info updates [items]")
+{
+    HeroScope hero;
+    hero.Hero().Dexterity = 40;
+    PET_INFO pet{};
+
+    for (const bool withSkill : {false, true})
+    {
+        CAPTURE(withSkill);
+        ITEM horse{};
+        horse.Type = ITEM_DARK_HORSE_ITEM;
+        if (withSkill)
+        {
+            GameLogic::Items::AddOptionSlot(horse, AT_SKILL_EARTHSHAKE);
+        }
+        const int defenseSlot = horse.SpecialNum;
+
+        for (const int level : {1, 2, 3})
+        {
+            pet.m_wLevel = static_cast<WORD>(level);
+            giPetManager::SetPetItemConvert(&horse, &pet);
+        }
+        REQUIRE(horse.SpecialNum == defenseSlot + 1);
+        CHECK(horse.Special[defenseSlot] == AT_SET_OPTION_IMPROVE_DEFENCE);
+        CHECK(horse.SpecialValue[defenseSlot] == 5 + 40 / 20 + 3 * 2);
     }
 }

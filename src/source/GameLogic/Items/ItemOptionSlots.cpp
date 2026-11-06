@@ -35,4 +35,17 @@ void AddOptionSlot(ITEM& item, std::uint16_t option, int value)
     item.SpecialValue[item.SpecialNum] = static_cast<BYTE>(value);
     ++item.SpecialNum;
 }
+
+void SetOptionSlot(ITEM& item, std::uint16_t option, int value)
+{
+    for (int i = 0; i < item.SpecialNum; ++i)
+    {
+        if (item.Special[i] == option)
+        {
+            item.SpecialValue[i] = static_cast<BYTE>(value);
+            return;
+        }
+    }
+    AddOptionSlot(item, option, value);
+}
 } // namespace GameLogic::Items
