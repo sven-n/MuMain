@@ -76,9 +76,8 @@ function(mu_ensure_submodule rel_path)
       WORKING_DIRECTORY ${REPO_ROOT}
       OUTPUT_QUIET ERROR_QUIET
     )
-    # --depth 1: the pinned commits of SDL, RmlUi and ImGui are 22 MB, their history 300 MB in every checkout and
-    # worktree. `shallow = true` in .gitmodules would not do it: git then clones the branch's newest commit alone and
-    # fetches the pinned one, which is older, with all its history.
+    # --depth 1 leaves the submodule's history out. `shallow = true` in .gitmodules would not: git then clones the
+    # default branch's newest commit alone and fetches the pinned one, which is older, with all its history.
     execute_process(
       COMMAND ${GIT_EXECUTABLE} submodule update --init --depth 1 -- "${submodule_repo_rel}"
       WORKING_DIRECTORY ${REPO_ROOT}
