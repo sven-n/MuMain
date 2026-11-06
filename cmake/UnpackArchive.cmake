@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.25)
 
 # Unpacks the one folder of the archive at URL as DESTINATION, replacing what is there. SDL3_ttf's patch step runs it
 # to put the libraries SDL_ttf vendors where its git submodules would be. The archive is kept in ARCHIVE_DIR and
-# downloaded only when it is missing or differs from SHA256. DESTINATION is unpacked again on every run, so the
-# patches after it start from the archive's sources also when the patch step runs again because its commands changed.
+# downloaded only when it is missing or differs from SHA256; the library's archives of other commits are removed
+# there. DESTINATION is unpacked again on every run, so the patches after it start from the archive's sources also
+# when the patch step runs again because its commands changed.
 
 foreach(required_variable URL SHA256 ARCHIVE_DIR DESTINATION)
     if(NOT DEFINED ${required_variable} OR "${${required_variable}}" STREQUAL "")
@@ -74,6 +75,16 @@ if(NOT EXISTS "${archive}")
     endif()
     file(RENAME "${archive}.part" "${archive}")
 endif()
+
+# Archives of the library's other commits, kept from before a version change, go: the download folder is part of
+# every build folder and of CI's library caches.
+file(GLOB library_archives "${ARCHIVE_DIR}/${library}-*.tar.gz" "${ARCHIVE_DIR}/${library}-*.tar.gz.part")
+foreach(library_archive IN LISTS library_archives)
+    get_filename_component(library_archive_name "${library_archive}" NAME)
+    if(NOT library_archive_name STREQUAL "${library}-${archive_name}")
+        file(REMOVE "${library_archive}")
+    endif()
+endforeach()
 
 set(work_dir "${DESTINATION}.unpack")
 file(REMOVE_RECURSE "${work_dir}")
