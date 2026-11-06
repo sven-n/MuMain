@@ -771,9 +771,9 @@ set_source_files_properties(
 )
 
 # stdafx.h is the precompiled header of the files that include it (as "stdafx.h" or "App/stdafx.h"): parsed once, not
-# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before. The check runs at configure time, so a
-# file that adds or drops the include after that still builds, only without or with the header until the next
-# configure. CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
+# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before. The check runs
+# at configure time, so a file that adds or drops the include after that still builds, only without or with the header
+# until the next configure. CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
 # MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
 # that uses the header, and the linker takes it from whichever object of MuClient defines it, with everything that
 # object uses. Keep such variables out of stdafx.h's headers, or a test that links MuClient without Winmain.cpp fails
