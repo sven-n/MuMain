@@ -65,6 +65,23 @@ const std::vector<MonsterTreeModel::Row>& MonsterTreeModel::GetRows(const Monste
     return m_rows;
 }
 
+bool MonsterTreeModel::ShowsSelection(const Row& row, int number, bool wholeMonster)
+{
+    switch (row.kind)
+    {
+    case Row::Kind::Single:
+        return row.number == number;
+    case Row::Kind::Number:
+        return !wholeMonster && row.number == number;
+    case Row::Kind::Monster:
+    {
+        const std::optional<int> monster = g_MonsterDataHandler.FindGroupOf(number);
+        return wholeMonster && monster && monster == g_MonsterDataHandler.FindGroupOf(row.number);
+    }
+    }
+    return false;
+}
+
 void MonsterTreeModel::SetOpen(int number, bool open)
 {
     // Only a monster with several numbers opens.

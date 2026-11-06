@@ -217,17 +217,8 @@ MonsterBrowserList::Result MonsterBrowserList::Render(const std::vector<MonsterT
     ImGui::TableSetupColumn(I18N::Editor::Maps, ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableHeadersRow();
 
-    // A whole monster is selected on its row, a number on its own row.
-    const std::vector<int> selectedMonster = g_MonsterEdits.ReadMonsterNumbers(selectedNumber);
-    const int selectedFirst = selectedMonster.empty() ? -1 : selectedMonster.front();
     const auto isSelected = [&](const Row& row)
-    {
-        if (row.kind == Row::Kind::Monster)
-        {
-            return selectedWhole && row.number == selectedFirst;
-        }
-        return row.number == selectedNumber && (!selectedWhole || row.kind == Row::Kind::Single);
-    };
+    { return MonsterTreeModel::ShowsSelection(row, selectedNumber, selectedWhole); };
     // Only the rows in view are drawn, combos included.
     ImGuiListClipper clipper;
     clipper.Begin(static_cast<int>(rows.size()));

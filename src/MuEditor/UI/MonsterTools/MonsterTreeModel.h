@@ -42,6 +42,12 @@ public:
     // or an open monster changed.
     const std::vector<Row>& GetRows(const MonsterListModel::Filter& filter);
 
+    // Whether the row shows the selection (MonsterSelection): a monster as a
+    // whole on its monster's row, a number on its own row, a monster with one
+    // number on its row either way. A monster's row does not show its first
+    // number.
+    static bool ShowsSelection(const Row& row, int number, bool wholeMonster);
+
     // Opens or closes the monster of the number.
     void SetOpen(int number, bool open);
     bool IsOpen(int number) const;

@@ -182,6 +182,36 @@ TEST_CASE("Monster Browser tree: a monster with several numbers is a row that op
     CHECK(Rows(tree) == std::vector<Row>{{2, Row::Kind::Monster, 4, false}});
 }
 
+TEST_CASE("Monster Browser tree: a number is shown on its own row, a monster as a whole on its monster's row "
+          "[editor][monsters]")
+{
+    GroupedTools tools;
+    MonsterTreeModel tree;
+    const auto shows = [](const std::vector<Row>& rows, int number, bool whole)
+    {
+        return std::ranges::any_of(rows, [&](const Row& row)
+                                   { return MonsterTreeModel::ShowsSelection(row, number, whole); });
+    };
+    // The search finds 175 only: the monster's row and 175's.
+    const std::vector<Row> found = Rows(tree, "175");
+    REQUIRE(found == std::vector<Row>{{145, Row::Kind::Monster, 3, true}, {175, Row::Kind::Number, 3, false}});
+    CHECK(shows(found, 175, false));
+    CHECK(shows(found, 145, true));
+    CHECK(shows(found, 336, true));
+    // The monster's row is not the row of its first number, so the Browser
+    // clears the search for 145 selected elsewhere.
+    CHECK_FALSE(shows(found, 145, false));
+    CHECK_FALSE(shows(found, 2, false));
+
+    // A monster with one number is on its row either way.
+    const std::vector<Row> all = Rows(tree);
+    CHECK(shows(all, 2, false));
+    CHECK(shows(all, 2, true));
+    // A closed monster shows itself as a whole, not its numbers.
+    CHECK(shows(all, 175, true));
+    CHECK_FALSE(shows(all, 175, false));
+}
+
 TEST_CASE("Monster tools: a number's shared value is locked until it is made its own, an own value goes back "
           "(Q-MN95, Q-MN96) [editor][monsters]")
 {

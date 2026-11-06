@@ -321,14 +321,8 @@ bool MuMonsterBrowserUI::RevealSelection(int selectedNumber)
     m_filter.search = m_search;
     const std::vector<MonsterTreeModel::Row>& listed = m_list.GetRows(m_filter);
     const bool whole = g_MonsterSelection.IsWholeMonster();
-    const int first = g_MonsterEdits.ReadMonsterNumbers(selectedNumber).front();
-    const bool shown = std::ranges::any_of(listed,
-                                           [&](const MonsterTreeModel::Row& row)
-                                           {
-                                               return whole && row.kind != MonsterTreeModel::Row::Kind::Number
-                                                          ? row.number == first
-                                                          : row.number == selectedNumber;
-                                           });
+    const bool shown = std::ranges::any_of(listed, [&](const MonsterTreeModel::Row& row)
+                                           { return MonsterTreeModel::ShowsSelection(row, selectedNumber, whole); });
     if (!shown)
     {
         m_filter = {};
