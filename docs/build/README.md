@@ -120,6 +120,11 @@ CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchCo
 Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
 SDL_mixer nor a separate FreeType submodule is required.
 
+The libraries that come as archives unpack with the time of unpacking, not the
+archives' own older dates, so the build after a version change compiles the new
+sources. Each `FetchContent_Declare` with a URL sets `DOWNLOAD_EXTRACT_TIMESTAMP FALSE`
+for it, which the `archive_extract_times_contract` static check keeps.
+
 SDL3_image comes as its release archive, without the libraries it can vendor (libpng,
 libjpeg, zlib, libtiff, libwebp, libjxl, libavif): PNG and JPEG load through
 stb_image, and the formats that would need one of them are off. Turning such a format
