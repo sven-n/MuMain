@@ -38,8 +38,11 @@ inline constexpr const char* kCompiler =
             "Unknown";
 #endif
 
+// arm64 first: Windows on ARM defines _WIN64 too.
 inline constexpr const char* kArchitecture =
-#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
+    "arm64";
+#elif defined(_WIN64) || defined(__x86_64__)
     "x64";
 #else
     "x86";
