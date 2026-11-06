@@ -256,7 +256,9 @@ endif()
 FetchContent_Declare(SDL3_ttf
     URL      https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
     URL_HASH SHA256=63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    # The unpacked files get the time of unpacking, as UnpackArchive.cmake's do, not the archive's older dates: with
+    # those, a build after a version change would keep objects compiled from the previous sources.
+    DOWNLOAD_EXTRACT_TIMESTAMP FALSE
     PATCH_COMMAND
         "${CMAKE_COMMAND}"
         "-DURL=https://github.com/libsdl-org/freetype/archive/9973564cfa63763a3e4ac67c09147899539b1e07.tar.gz"

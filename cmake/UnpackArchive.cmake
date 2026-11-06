@@ -31,7 +31,8 @@ if(NOT download_result EQUAL 0)
     message(FATAL_ERROR "Could not download ${URL}: ${download_status}")
 endif()
 
-file(ARCHIVE_EXTRACT INPUT "${work_dir}/archive.tar.gz" DESTINATION "${work_dir}/contents")
+# TOUCH: the files get the time of unpacking, so a build after a version change recompiles them.
+file(ARCHIVE_EXTRACT INPUT "${work_dir}/archive.tar.gz" DESTINATION "${work_dir}/contents" TOUCH)
 file(GLOB top_entries LIST_DIRECTORIES true "${work_dir}/contents/*")
 list(LENGTH top_entries top_entry_count)
 if(NOT top_entry_count EQUAL 1 OR NOT IS_DIRECTORY "${top_entries}")
