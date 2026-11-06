@@ -95,6 +95,7 @@ the rule that holds.
 | O31 | Stale bold (R9, 2026-11-06) | A fix of its own before the first snapshot variants that show rows setting no bold (9a4's ancient bonus levels, 9b5's Horn of Fenrir; the option loop sets bold itself, so 9a2's and 9a3's variants don't need it): every tooltip starts with no bold rows and no colours, for all `MaxTextListRows` rows (98: the original 50, the description's 32 and the added lines' 16, `ZzzInventory.h:91-95`; P29), with a test that draws the same Horn of Fenrir tooltip after a bold one and alone. |
 | O32 | 380 pants' PvP defense (R10, 2026-11-06) | 100 on both sides, exchanged 1:1, so OpenMU's data stays as it is and the pants leave the OpenMU issue. OpenMU halves all defense (`DefenseFinal` = 0.5 × `DefenseBase`, `CharacterClassInitialization.cs:105-107`) and adds the pants' `DefensePvp` after that (`200 / 2`, `GuardianOptions.cs:62`), so its 100 already gives Season 6's effect; O26's move to 200 would have doubled it. The client's `guardian` pants definition holds 100 where the bmd has 200, so the tooltip line (`DefensiveSkillD`, `ItemAddOptioninfo.cpp:85`) shows +100; no other client code reads that value (the character window reads only option types 1 and 3, `CharacterInfoWindow.cpp:739-757`). 9b3 names it as the one value it changes (P6). |
 | O33 | Item files saved before 9a1 (R11, 2026-11-06) | No warning and no new `formatVersion`: O24 stays as written. The shipped item files get their lists in 9a1's data commit; an item file someone saved before 9a1 has no lists, so its items have no options in the client (OpenMU still applies its own) until the editor writes them. Unlike a missing `statProfile` (`ValidateStatProfileGiven`, `ItemDataValidation.cpp:266-279`), the game gives no warning, because it never reads the rules (O34). |
+| O34 | Where the option rules build (R12, 2026-11-06) | In every build, as `StatProfileRule` and `DeriveStatProfile` (`ItemAttributeConversion.h:51`): `ItemRuleConditions`, `OptionRule` and the `OptionRules.json` reader. Only the editor loads the file (`CItemDataHandler::Load`, `#ifdef _EDITOR`) and writes lists from it (`WithDerivedFields`, P18); the game never reads it. The data test that checks every shipped item's list against its rules is outside `#ifdef _EDITOR` and reads the file itself, so upstream's pull request checks, which build with the editor off, run it. |
 
 ## Current state
 
@@ -586,8 +587,8 @@ shown but adds nothing (O6).
   saving gives the same file.
 - **Written in the file (O24):** the game reads only this list. An item
   without `options` has no options; the writer leaves the field out only for
-  an empty list. An item file saved before 9a1 gives no warning (O33). The rules (below) are read by the editor only, as
-  `statProfile`'s are (`WithDerivedFields`, `#ifdef _EDITOR`, P18), with
+  an empty list. An item file saved before 9a1 gives no warning (O33). The rules (below) are read by the editor only (and the data test; their
+  code builds in every build, O34), as `statProfile`'s are (`WithDerivedFields`, `#ifdef _EDITOR`, P18), with
   one difference: an empty list stays empty, it is never "follow the
   rules". The bmd import, Item Add and an edit that changes what a rule
   reads write the list the rules give into the item. 9a1 writes the lists
@@ -597,7 +598,8 @@ shown but adds nothing (O6).
 - A link to a definition that does not exist is an error (the link is
   dropped).
 
-**Rules (O15, O24).** `Options/OptionRules.json`, read by the editor only,
+**Rules (O15, O24, O34).** `Options/OptionRules.json`, read by the editor and
+the data test only (the code builds in every build, O34),
 has the shape of `profileRules` in `ItemStats.json`: each rule gives a list
 of definitions (`options`, which may be empty) to the items it matches; the
 first rule that matches wins; an item no rule matches gets no options.
@@ -609,7 +611,8 @@ first rule that matches wins; an item no rule matches gets no options.
   neither `numbers` nor `!tag`, and its target is one profile name. So the
   condition part moves into a struct of its own (`ItemRuleConditions`, same
   folder), which `StatProfileRule` keeps using unchanged and a new
-  `OptionRule` uses with the two new conditions. `ItemStats.json` and its
+  `OptionRule` uses with the two new conditions; all three build in every
+  build (O34). `ItemStats.json` and its
   `formatVersion` do not change (`docs/item-data.md:799`: a new condition in
   `profileRules` would need a new version).
 
@@ -1075,13 +1078,14 @@ others. The option slots fix (O23) comes first; 9a1 builds on its 16 slots.
 2. Add `ItemOptionDatabase` (section 1), the loaders, **writers** and
    validators in `ItemJsonStorage` for `Options/*.json`, `OptionRules.json`
    and `OptionTexts.json` (Save Items writes them from 9a1 on, because the
-   conversion and the bmd import write the item lists), and the call in
-   `CItemDataHandler::Load`.
+   conversion and the bmd import write the item lists), and the calls in
+   `CItemDataHandler::Load` (`OptionRules.json` in the editor build only, O34).
 3. Add `options` to `ItemDefinition` and the item JSON format (section 6,
    O24: the game reads only the list); move the conditions of
    `StatProfileRule` into `ItemRuleConditions` and add `OptionRule` with
-   `numbers` and `!tag`, in the editor build only; derive the lists where
-   `statProfile` is derived (section 6, "Kept matching").
+   `numbers` and `!tag`, in every build as `StatProfileRule` (O34); derive the
+   lists where `statProfile` is derived, in the editor build only (section 6,
+   "Kept matching").
 4. Write `Options/Luck.json` (one definition, `luck`, type `luck`, one
    option: `criticalDamageChance`, `"percent": {"values": 5}`, texts
    `["luckJewelOfSoul", "luckCriticalDamage"]`, server: random, chance
@@ -1092,8 +1096,8 @@ others. The option slots fix (O23) comes first; 9a1 builds on its 16 slots.
    section 6 with `luck` only. The pull request's data commit runs the
    editor's rules over the shipped items once and writes `"options":
    ["luck"]` into every item they give luck (O24), so the item files change
-   by one line per such item; the data test checks the lists against the
-   rules.
+   by one line per such item; the data test (outside `#ifdef _EDITOR`, so upstream's
+   pull request checks run it, O34) checks the lists against the rules.
 5. Add `ITEM::SpecialSource` and `GetItemOptionValue` (sections 4, 7). In
    `SetItemAttributes`, replace the luck block (`ZzzInfomation.cpp:523-551`)
    by reading the item's `luck` definition (section 7); the effect row
@@ -1211,7 +1215,7 @@ stay the same.
 | 0 | This design, for review | – |
 | 0b | This design after its review (R1 to R9: O23 to O31, P17 to P31) | 0 |
 | fix | An item keeps up to 16 option slots, written through one checked helper (O23, P17) | – |
-| 9a1 | The file format and loader: `Options/*.json`, `Tooltips/OptionTexts.json`, `Options/OptionRules.json` (editor only), the items' `options` lists written into the item files (bmd import, Item Add, kept matching, O15, O24), the attribute names and their client effects (O6), Data Checks and the data test. First group: luck | 0b, the slots fix |
+| 9a1 | The file format and loader: `Options/*.json`, `Tooltips/OptionTexts.json`, `Options/OptionRules.json` (read by the editor and the data test, its code in every build, O34), the items' `options` lists written into the item files (bmd import, Item Add, kept matching, O15, O24), the attribute names and their client effects (O6), Data Checks and the data test. First group: luck | 0b, the slots fix |
 | fix | Luck adds its critical damage rate of 5 % in the client (P8, O12) | 9a1 |
 | 9a2 | The additional option of the items that are no wings (weapons, shields, armour, the jewelry's regeneration, the Ring of Magic, the Pendant of Ability) | 9a1 |
 | 9a3 | Excellent options, defensive and offensive; the excellent byte read by the linked type (O9); arrows and bolts without (O26) | 9a1 |
@@ -1238,7 +1242,9 @@ Answered on 2026-11-04: Q-O1 (O5), Q-O2 (O6), Q-O3 (O7), Q-O4 (O8), Q-O5
 (O15), Q-O12 (O16), Q-O13 (O17), Q-O14 (O18), Q-O15 (O19), Q-O16 (O20),
 Q-O17 (O21) and Q-O18 (O22). The review's questions, answered on
 2026-11-05 (R1 to R3) and 2026-11-06 (R4 to R9): R1 (O23), R2 (O24), R3 (O25), R4 (O26), R5 (O27),
-R6 (O28), R7 (O29), R8 (O30) and R9 (O31). All questions are answered. New
+R6 (O28), R7 (O29), R8 (O30) and R9 (O31). The pull request's code review
+(2026-11-06) raised three more: R10 (O32), R11 (O33) and R12 (O34). All
+questions are answered. New
 questions from the pull requests are added here.
 
 Outside this design, found by the review:
