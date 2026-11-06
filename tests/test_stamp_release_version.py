@@ -88,6 +88,18 @@ class StampReleaseVersionTests(unittest.TestCase):
         self.assertIn("no client", result.stderr)
         self.assertEqual((self.folder / "moved.tar.gz").read_bytes(), before)
 
+    def test_one_archive_without_a_client_leaves_every_archive_unchanged(self):
+        # Checked before any is rewritten: a release that fails ships nothing, and a retry stamps each archive once.
+        write_archive(self.folder / "windows.tar.gz", {"./Main.exe": b"exe"})
+        write_archive(self.folder / "moved.tar.gz", {"./Main.app/Contents/MacOS/Main": b"bin"})
+        before = {name: (self.folder / name).read_bytes() for name in ("windows.tar.gz", "moved.tar.gz")}
+
+        result = self.stamp("v1.37.0", "windows.tar.gz", "moved.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("moved.tar.gz has no client", result.stderr)
+        for name, data in before.items():
+            self.assertEqual((self.folder / name).read_bytes(), data, name)
+
     def test_a_missing_archive_fails(self):
         result = self.stamp("v1.37.0", "missing.tar.gz")
         self.assertNotEqual(result.returncode, 0)
