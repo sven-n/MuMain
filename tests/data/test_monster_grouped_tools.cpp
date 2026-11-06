@@ -467,6 +467,23 @@ TEST_CASE("Monster Sounds: a monster as a whole shows the set its numbers share,
     g_MonsterSelection.Select(145);
     draw();
     CHECK(g_MuMonsterSoundsUI.GetShownSet() == "Rogue");
+
+    // Every number has a set of its own: a change of only the shared values
+    // reaches the whole monster shown, which is read again then.
+    for (const int number : {175, 336})
+    {
+        MonsterDefinition other = Entry(number);
+        other.soundSet = "Rogue";
+        REQUIRE(g_MonsterEdits.SetMonster("own set", other));
+    }
+    g_MonsterSelection.SelectMonster(145);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownSet() == "Centurion");
+    values.soundSet = "Rogue";
+    REQUIRE(g_MonsterEdits.SetSharedValues("shared set", 145, values));
+    g_MonsterSelection.SelectMonster(145);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownSet() == "Rogue");
     g_MonsterSoundSetDatabase.Build({});
 }
 

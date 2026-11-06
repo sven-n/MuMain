@@ -204,6 +204,19 @@ bool MuMonsterSoundsUI::RememberSelection()
     return changed;
 }
 
+const ShownValues::ShownMonster* MuMonsterSoundsUI::ReadSelectedMonster()
+{
+    const int key = ShownValues::GetSelectedKey();
+    const int version = ToolWindow::GetDataVersion();
+    if (key != m_selectedKey || version != m_selectedVersion)
+    {
+        m_selected = ShownValues::Load(key);
+        m_selectedKey = key;
+        m_selectedVersion = version;
+    }
+    return m_selected ? &*m_selected : nullptr;
+}
+
 void MuMonsterSoundsUI::FollowSelection(const MonsterDefinition* monster)
 {
     // A set shown that is gone (an undo of its adding or renaming, a revert)
@@ -233,11 +246,11 @@ void MuMonsterSoundsUI::Render(bool* open)
     const int number = g_MonsterSelection.GetNumber();
     // A monster as a whole shows the sound sets its numbers share (D61), and
     // the set and model of its shared look below.
-    const std::optional<ShownValues::ShownMonster> shown = ShownValues::ReadSelected();
-    const MonsterDefinition* monster = shown ? &shown->monster : nullptr;
+    const ShownValues::ShownMonster* shown = ReadSelectedMonster();
+    const MonsterDefinition* monster = shown != nullptr ? &shown->monster : nullptr;
     FollowSelection(monster);
-    ShownModel::RenderSelectedMonster(number, monster, shown && shown->wholeMonster);
-    if (shown)
+    ShownModel::RenderSelectedMonster(number, monster, shown != nullptr && shown->wholeMonster);
+    if (shown != nullptr)
     {
         RenderMonster(*shown);
     }
