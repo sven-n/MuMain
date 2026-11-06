@@ -110,15 +110,20 @@ std::optional<ItemReference> ParseItemReference(std::string_view written)
 std::vector<ItemReferenceMatch> FindItemReferences(std::string_view text)
 {
     std::vector<ItemReferenceMatch> matches;
-    for (std::size_t at = text.find(ItemReferenceOpening); at != std::string_view::npos;
-         at = text.find(ItemReferenceOpening, at + ItemReferenceOpening.size()))
+    std::size_t at = text.find(ItemReferenceOpening);
+    while (at != std::string_view::npos)
     {
+        // A malformed reference ends before the next one starts, so the matches never overlap.
+        const std::size_t next = text.find(ItemReferenceOpening, at + ItemReferenceOpening.size());
         const std::size_t close = text.find('}', at);
+        const std::size_t end =
+            close != std::string_view::npos && close < next ? close + 1 : std::min(next, text.size());
         ItemReferenceMatch match;
         match.position = at;
-        match.length = (close == std::string_view::npos ? text.size() : close + 1) - at;
+        match.length = end - at;
         match.reference = ParseItemReference(text.substr(at, match.length));
         matches.push_back(std::move(match));
+        at = next;
     }
     return matches;
 }

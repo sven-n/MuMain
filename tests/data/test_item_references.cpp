@@ -91,6 +91,15 @@ TEST_CASE("The references of a text are found in order, malformed ones too [data
     CHECK_FALSE(matches[1].reference.has_value());
     CHECK(matches[2].reference == Reference(12, 15, std::nullopt, "gen"));
     CHECK_FALSE(Data::Translation::HasItemReference("No item here {name}"));
+
+    // An unclosed reference ends where the next one starts.
+    const std::string unclosed = "a {item:1 b {item:14,13} c";
+    const auto split = Data::Translation::FindItemReferences(unclosed);
+    REQUIRE(split.size() == 2);
+    CHECK(unclosed.substr(split[0].position, split[0].length) == "{item:1 b ");
+    CHECK_FALSE(split[0].reference.has_value());
+    CHECK(unclosed.substr(split[1].position, split[1].length) == "{item:14,13}");
+    CHECK(split[1].reference == Reference(14, 13));
 }
 
 TEST_CASE("An item text's placeholders may name items, and a translation may add a case [data][items][texts]")
@@ -152,6 +161,8 @@ TEST_CASE(
     CHECK(Data::Translation::ItemTexts::ExpandText("'{item:14,25:acc}' {item:14,99}", "pl") ==
           "'Lze Elfa' {item:14,99}");
     CHECK(Data::Translation::ItemTexts::ExpandText("{item:14;25}", "en") == "{item:14;25}");
+    // An unclosed reference stays as written, once, and the next one is still expanded.
+    CHECK(Data::Translation::ItemTexts::ExpandText("a {item:1 b {item:14,25} c", "en") == "a {item:1 b Tear of Elf c");
     Data::Translation::ItemTexts::SetNameResolver(nullptr);
     CHECK(Data::Translation::ItemTexts::ExpandText("{item:14,25}", "en") == "{item:14,25}");
 }
