@@ -339,7 +339,7 @@ src/bin/Data/Items/
 | Field | Required | Meaning |
 |---|---|---|
 | `type` | no | The option's own type, for a definition whose options differ in type (the Horn of Fenrir, O28); else the definition's `type`. |
-| `number` | yes, except types with one option (`luck`, `ancientBonus`), where it is left out and read as 0, and `fixed`, whose options are numbered 1 to n in their order | OpenMU's `ItemOption.Number`; what it means depends on the type (section 3). Unique within a definition, except for options of one type that apply together (`guardian`, the four `goldFenrir` options, section 3). |
+| `number` | yes, except types with one option (`luck`, `ancientBonus`) and `fixed`, where it is left out and read as 0 | OpenMU's `ItemOption.Number`; what it means depends on the type (section 3). Unique within a definition, except for options of one type that apply together (`guardian`, the four `goldFenrir` options, `fixed`, section 3). |
 | `subOptionType` | no | OpenMU's `SubOptionType`: the socket element (`fire`, `water`, `ice`, `wind`, `lightning`, `earth`). Only for `socket`. |
 | `attribute` | yes | The attribute it raises, OpenMU's `Stats` name in camelCase (O6, section 4). |
 | `add` / `addFinal` / `percent` | exactly one | How it adds, with the value as an object (section 4): `{"values": 7}`, `{"values": [4, 8, 12, 16]}`, … A bare number is fatal, so there is one way to write a value. |
@@ -368,7 +368,7 @@ camelCase.
 | `socketBonus` | SocketBonusOption | socket header, high nibble | 0 to 5, unique across the bonus definitions | 9b4 |
 | `fenrir` (the definition), its options `blackFenrir`, `blueFenrir`, `goldFenrir` | BlackFenrir, BlueFenrir, GoldFenrir (on the options) | excellent byte, bit test `ExcellentFlags & number` (OpenMU ORs the colours, `ItemSerializerHelper.cs:302-317`; for the single values it sends this equals today's `==`); options of the one `fenrir` definition (O28) | the colour value (1, 2, 4); the four gold options share 4 | 9b5 |
 | `darkHorse` | DarkHorse | none (always on) | 1 to 2 | 9b5 |
-| `fixed` | none (OpenMU's definitions whose options have no type, O29) | none (always on) | 1 to n, in the order the options are written | 9b5 |
+| `fixed` | none (OpenMU's definitions whose options have no type, O29) | none (always on) | – (0 for every option, as OpenMU's typeless options, whose `Number` is never set, `Jewelery.cs:240-261`; the options apply together, and the exchange tells them apart by number plus attribute, P24) | 9b5 |
 
 - Two definitions of an item that read the same byte, of any type
   (`excellentPhysicalAttack` with `excellentWizardryAttack`, `excellent` with
