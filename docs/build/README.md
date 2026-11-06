@@ -441,7 +441,7 @@ lead to a server:
 
 | Address | Written as |
 | --- | --- |
-| The local machine: `127.0.0.0`–`127.255.255.255`, `localhost` and `*.localhost`, `::1`, `::ffff:127.x.x.x` | as configured, e.g. `127.127.127.127:44405` |
+| The local machine: `127.0.0.0`–`127.255.255.255`, `0.0.0.0`–`0.255.255.255`, `localhost` and `*.localhost`, `::1`, `::`, `::ffff:127.x.x.x` | as configured, e.g. `127.127.127.127:44405` |
 | A private network: `10.x`, `172.16.x`–`172.31.x`, `192.168.x`, `169.254.x`, `100.64.x`–`100.127.x`, `fc00::/7`, `fe80::/10` | as configured, with `(private network)` |
 | Any other IP address | `a public IPv4 address:44405` or `a public IPv6 address:44405` |
 | A host name, e.g. `mu.example.com` | `a host name:44405` |
