@@ -106,8 +106,10 @@ RmlUi renders through its own vendored SDL_GPU backend
 `LoadTexture`/`ReleaseTexture` so game assets (`.OZT`/`.OZJ`) route through `CGlobalBitmap`.
 The submodule points at the fork `nitoygo/RmlUi` (`integration/sdl-gpu-parity`), which carries
 the renderer work upstream doesn't have yet; renderer changes are committed there first, then the
-submodule pin is moved. CMake fetches only the pinned commit; `git -C src/ThirdParty/RmlUi fetch
---unshallow` brings the fork's history for that work.
+submodule pin is moved. CMake fetches the pinned commit without its history and tracks that
+branch, so `git submodule update --remote` moves the pin to the branch's newest commit; the
+[build guide](../build/README.md#dependencies-and-first-configuration) says how to fetch the fork's
+history and its other branches.
 
 For now the pin is an exception: `fa1b5e47`, the head of `mumain-flex-fixes` in `Mosch0512/RmlUi`,
 which merges two layout fixes onto nitoygo's branch (absolute children of a flex container get

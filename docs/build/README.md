@@ -87,9 +87,14 @@ the repository's submodule entry, for the SDL GPU renderer integration.
 
 CMake fetches the pinned commits without their history; git also brings the newest
 commit of each submodule's default branch. That is about 30 MB instead of 300 MB in
-every checkout and worktree. A checkout that already has a submodule keeps
-its history. To work on a submodule with its history, fetch it there, e.g.
-`git -C src/ThirdParty/RmlUi fetch --unshallow`.
+every checkout and worktree. A submodule that already has its history keeps it.
+To work on a submodule with its history and all its branches, fetch them there,
+e.g. for RmlUi:
+
+```sh
+git -C src/ThirdParty/RmlUi remote set-branches origin "*"
+git -C src/ThirdParty/RmlUi fetch --unshallow
+```
 
 If automatic initialization fails, run from the repository root:
 
