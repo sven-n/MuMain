@@ -263,8 +263,17 @@ TEST_CASE("Monster edits: removing a number leaves its monster, Remove monster r
           "[data][monsters][editor]")
 {
     GroupedMonsters data;
+    // Only monsters with several numbers are listed: Budge Dragon has no id.
+    CHECK(g_MonsterDataHandler.FindGroupOf(145));
+    CHECK_FALSE(g_MonsterDataHandler.FindGroupOf(2));
     REQUIRE(g_MonsterEdits.RemoveMonster("number", 175));
     CHECK(g_MonsterEdits.ReadMonsterNumbers(145) == std::vector{145, 336});
+    // A monster left with one number is not listed any more.
+    REQUIRE(g_MonsterEdits.RemoveMonster("other number", 336));
+    CHECK_FALSE(g_MonsterDataHandler.FindGroupOf(145));
+    CHECK(g_MonsterEdits.ReadSharedValues(145)->names == Entry(145).names);
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDataHandler.FindGroupOf(145));
     // A new number on the free number is a monster of its own.
     MonsterDefinition larva;
     larva.number = 175;

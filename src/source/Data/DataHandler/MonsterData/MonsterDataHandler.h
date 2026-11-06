@@ -50,10 +50,9 @@ struct MonsterSoundSetSnapshot
     bool operator==(const MonsterSoundSetSnapshot&) const = default;
 };
 
-// A monster of the monster list with its numbers as the monster editor keeps
-// it (D61): the values its numbers share (MakeSharedValues) and its numbers,
-// sorted. The entries are the table's. A monster with one number shares its
-// entry's values; `shared` is not used then.
+// A monster of the monster list with two or more numbers as the monster editor
+// keeps it (D61): the values its numbers share (MakeSharedValues) and its
+// numbers, sorted. The entries are the table's.
 struct MonsterGroupLayout
 {
     MonsterDefinition shared;
@@ -124,11 +123,13 @@ public:
     // are skipped.
     void RestoreMonsters(std::span<const MonsterSnapshot> snapshots);
 
-    // The monsters with their numbers (D61) as the monster editor changes
+    // The monsters with several numbers (D61) as the monster editor changes
     // them. Each has an id for the session; Load and the reverts give new
     // ones. A number with an entry that no monster lists is a monster of its
-    // own without an id, as is each number of a table built without the
-    // handler (the tools' tests).
+    // own without an id: one with a single number in the file, one left alone
+    // by the editor's changes (MonsterEdits stores no monster with fewer than
+    // two numbers), each number of a table built without the handler (the
+    // tools' tests).
 
     // The id of the monster that lists the number; nullopt when none does.
     std::optional<int> FindGroupOf(int number) const;

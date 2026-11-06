@@ -151,10 +151,6 @@ bool MonsterEdits::RemoveMonster(std::string label, int number)
     {
         std::optional<MonsterGroupLayout> layout = g_MonsterDataHandler.ReadGroup(*id);
         std::erase(layout->numbers, number);
-        if (layout->numbers.empty())
-        {
-            layout.reset();
-        }
         ChangeGroup(label, *id, layout, number);
     }
     if (!grouped)
@@ -283,7 +279,7 @@ bool MonsterEdits::MoveNumber(std::string label, int number, int memberNumber)
     std::ranges::sort(to.numbers);
     const bool grouped = m_group.has_value();
     BeginGroup(label);
-    ChangeGroup(label, fromId, from.numbers.empty() ? std::nullopt : std::optional<MonsterGroupLayout>(from), number);
+    ChangeGroup(label, fromId, from, number);
     ChangeGroup(label, toId, to, number);
     if (!grouped)
     {
@@ -353,17 +349,18 @@ bool MonsterEdits::ShareEqualValues(std::string label, int number, MonsterValueF
 
 std::pair<int, MonsterGroupLayout> MonsterEdits::ReadLayoutOf(int number)
 {
-    const std::optional<MonsterDefinition> entry = g_MonsterDataHandler.ReadMonster(number);
     const std::optional<int> id = g_MonsterDataHandler.FindGroupOf(number);
     std::optional<MonsterGroupLayout> layout = id ? g_MonsterDataHandler.ReadGroup(*id) : std::nullopt;
-    if (!layout)
+    if (layout)
     {
-        return {g_MonsterDataHandler.MakeGroupId(), {Data::Monsters::MakeSharedValues(*entry), {number}}};
+        std::erase_if(layout->numbers, [](int member) { return !g_MonsterDataHandler.ReadMonster(member); });
     }
-    std::erase_if(layout->numbers, [](int member) { return !g_MonsterDataHandler.ReadMonster(member); });
-    if (layout->numbers.size() == 1)
+    // A monster of its own: the number alone, sharing its entry's values.
+    if (!layout || layout->numbers.size() < 2)
     {
-        layout->shared = Data::Monsters::MakeSharedValues(*g_MonsterDataHandler.ReadMonster(layout->numbers.front()));
+        const MonsterDefinition entry = *g_MonsterDataHandler.ReadMonster(number);
+        const int ownId = id ? *id : g_MonsterDataHandler.MakeGroupId();
+        return {ownId, {Data::Monsters::MakeSharedValues(entry), {number}}};
     }
     return {*id, std::move(*layout)};
 }
@@ -525,12 +522,16 @@ void MonsterEdits::ChangeModel(std::string label, int slot, const std::optional<
 
 void MonsterEdits::ChangeGroup(std::string label, int id, const std::optional<MonsterGroupLayout>& after, int monster)
 {
+    // The handler lists monsters with two or more numbers; a number left
+    // alone is a monster of its own.
+    const bool several = after && after->numbers.size() >= 2;
+    const std::optional<MonsterGroupLayout> listed = several ? after : std::nullopt;
     std::optional<MonsterGroupLayout> before = g_MonsterDataHandler.ReadGroup(id);
-    if (after == before)
+    if (listed == before)
     {
         return;
     }
-    const MonsterGroupSnapshot snapshot{id, after};
+    const MonsterGroupSnapshot snapshot{id, listed};
     g_MonsterDataHandler.RestoreGroups(std::span<const MonsterGroupSnapshot>(&snapshot, 1));
     // What the handler stored, as the undo compares it.
     MonsterEditEntry entry{std::move(label), {}, {}, {}, {}};

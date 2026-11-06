@@ -146,13 +146,14 @@ private:
     // The same for a sound set.
     void ChangeSoundSet(std::string label, const std::string& name,
                         const std::optional<Data::Monsters::MonsterSoundSet>& after, int monster);
-    // The same for a monster with its numbers (nullopt removes it).
+    // The same for a monster with its numbers (nullopt removes it, as does a
+    // layout with fewer than two numbers).
     void ChangeGroup(std::string label, int id, const std::optional<Data::Monsters::MonsterGroupLayout>& after,
                      int monster);
-    // The id and layout of the number's monster, which must have an entry:
-    // a new id and the number alone for a monster of its own. Numbers
-    // without an entry are left out; a monster with one number shares its
-    // entry's values.
+    // The id and layout of the number's monster, which must have an entry.
+    // Numbers without an entry are left out; a monster of its own (one
+    // number left) is the number alone with its entry's values, under a new
+    // id when no monster lists it.
     std::pair<int, Data::Monsters::MonsterGroupLayout> ReadLayoutOf(int number);
     // Adds the entry, whose number is free, to the monster of `memberNumber`.
     void AddToMonsterOf(std::string label, int memberNumber, const Data::Monsters::MonsterDefinition& entry);

@@ -360,7 +360,12 @@ void MonsterDataHandler::SetGroups(std::span<const MonsterGroup> monsters)
     m_groups.clear();
     for (const MonsterGroup& monster : monsters)
     {
-        MonsterGroupLayout layout{MakeSharedValues(GetSharedValues(monster)), {}};
+        // A monster with one number is a number of no monster here.
+        if (monster.numbers.size() < 2)
+        {
+            continue;
+        }
+        MonsterGroupLayout layout{MakeSharedValues(monster.shared), {}};
         for (const MonsterDefinition& entry : monster.numbers)
         {
             layout.numbers.push_back(entry.number);
