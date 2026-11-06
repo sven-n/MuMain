@@ -65,6 +65,27 @@ bool HasEntry(int number)
     return g_MonsterDatabase.Find(number) != nullptr;
 }
 
+// Renames the sound set where the values name it: their own set and their
+// random variants'. False when they name it nowhere.
+bool RenameSetIn(MonsterDefinition& values, const std::string& from, const std::string& to)
+{
+    bool renamed = false;
+    if (values.soundSet == from)
+    {
+        values.soundSet = to;
+        renamed = true;
+    }
+    for (Data::Monsters::MonsterRandomVariant& variant : values.randomVariants)
+    {
+        if (variant.soundSet == from)
+        {
+            variant.soundSet = to;
+            renamed = true;
+        }
+    }
+    return renamed;
+}
+
 // Whether the model list's save would take the model: written and read back
 // as the save does, with the checks of its names, without fatal problems.
 bool CanStoreModel(const MonsterModelDefinition& model)
@@ -481,65 +502,35 @@ bool MonsterEdits::RenameSoundSet(std::string label, const std::string& from, co
     BeginGroup(label);
     ChangeSoundSet(label, from, std::nullopt, monster);
     ChangeSoundSet(label, to, set, monster);
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
-    {
-        std::optional<MonsterDefinition> named = g_MonsterDataHandler.ReadMonster(number);
-        if (!named)
-        {
-            continue;
-        }
-        bool changed = false;
-        if (named->soundSet == from)
-        {
-            named->soundSet = to;
-            changed = true;
-        }
-        for (Data::Monsters::MonsterRandomVariant& variant : named->randomVariants)
-        {
-            if (variant.soundSet == from)
-            {
-                variant.soundSet = to;
-                changed = true;
-            }
-        }
-        if (changed)
-        {
-            Change(label, number, named);
-        }
-    }
-    // The monsters' shared values name the set too.
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
-    {
-        const std::optional<int> id = g_MonsterDataHandler.FindGroupOf(number);
-        std::optional<MonsterGroupLayout> layout = id ? g_MonsterDataHandler.ReadGroup(*id) : std::nullopt;
-        if (!layout || layout->numbers.front() != number)
-        {
-            continue;
-        }
-        bool changed = false;
-        if (layout->shared.soundSet == from)
-        {
-            layout->shared.soundSet = to;
-            changed = true;
-        }
-        for (Data::Monsters::MonsterRandomVariant& variant : layout->shared.randomVariants)
-        {
-            if (variant.soundSet == from)
-            {
-                variant.soundSet = to;
-                changed = true;
-            }
-        }
-        if (changed)
-        {
-            ChangeGroup(label, *id, layout, monster);
-        }
-    }
+    RenameSetInMonsters(label, from, to, monster);
     if (!grouped)
     {
         EndGroup();
     }
     return true;
+}
+
+void MonsterEdits::RenameSetInMonsters(const std::string& label, const std::string& from, const std::string& to,
+                                       int monster)
+{
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        std::optional<MonsterDefinition> named = g_MonsterDataHandler.ReadMonster(number);
+        if (named && RenameSetIn(*named, from, to))
+        {
+            Change(label, number, named);
+        }
+    }
+    // The monsters' shared values name the set too, once per monster.
+    for (const std::vector<int>& numbers : ReadMonsters())
+    {
+        const std::optional<int> id = g_MonsterDataHandler.FindGroupOf(numbers.front());
+        std::optional<MonsterGroupLayout> layout = id ? g_MonsterDataHandler.ReadGroup(*id) : std::nullopt;
+        if (layout && RenameSetIn(layout->shared, from, to))
+        {
+            ChangeGroup(label, *id, layout, monster);
+        }
+    }
 }
 
 void MonsterEdits::ChangeSoundSet(std::string label, const std::string& name,

@@ -172,6 +172,9 @@ private:
     const Data::Monsters::MonsterGroupLayout* FindLayoutWithNumbers(int number) const;
     // Adds the entry, whose number is free, to the monster of `memberNumber`.
     void AddToMonsterOf(std::string label, int memberNumber, const Data::Monsters::MonsterDefinition& entry);
+    // RenameSoundSet's changes of the entries and the shared values that name
+    // the set.
+    void RenameSetInMonsters(const std::string& label, const std::string& from, const std::string& to, int monster);
     // Into the history, or into the open group.
     void Record(MonsterEditEntry entry);
     // Selects what the last Undo or Redo changed.
