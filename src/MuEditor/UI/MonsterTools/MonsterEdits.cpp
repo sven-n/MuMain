@@ -231,6 +231,27 @@ std::vector<int> MonsterEdits::ReadMonsterNumbers(int number) const
     return numbers;
 }
 
+int MonsterEdits::CountMonsterNumbers(int number) const
+{
+    if (!HasEntry(number))
+    {
+        return 0;
+    }
+    const MonsterGroupLayout* layout = FindLayoutWithNumbers(number);
+    return layout != nullptr ? static_cast<int>(std::ranges::count_if(layout->numbers, HasEntry)) : 1;
+}
+
+int MonsterEdits::FindFirstNumber(int number) const
+{
+    if (!HasEntry(number))
+    {
+        return -1;
+    }
+    const MonsterGroupLayout* layout = FindLayoutWithNumbers(number);
+    // The layout's numbers are sorted, and two or more have an entry.
+    return layout != nullptr ? *std::ranges::find_if(layout->numbers, HasEntry) : number;
+}
+
 std::vector<std::vector<int>> MonsterEdits::ReadMonsters() const
 {
     std::vector<std::vector<int>> monsters;

@@ -52,6 +52,10 @@ public:
     // The numbers of the number's monster that have an entry, sorted; empty
     // when the number has none.
     std::vector<int> ReadMonsterNumbers(int number) const;
+    // Their count and the first of them without a copy, for the tools' reads
+    // each frame; 0 and -1 when the number has no entry.
+    int CountMonsterNumbers(int number) const;
+    int FindFirstNumber(int number) const;
     // Every monster once, as ReadMonsterNumbers gives its numbers, in the
     // order of their first numbers.
     std::vector<std::vector<int>> ReadMonsters() const;

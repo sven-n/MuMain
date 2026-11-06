@@ -165,8 +165,7 @@ void MonsterNameRows::FormatId(int id, char* buffer, std::size_t size) const
     if (id >= WholeMonsterKey)
     {
         // "145 (7)": the monster's first number and how many it has.
-        std::snprintf(buffer, size, "%d (%d)", NumberOf(id),
-                      static_cast<int>(g_MonsterEdits.ReadMonsterNumbers(NumberOf(id)).size()));
+        std::snprintf(buffer, size, "%d (%d)", NumberOf(id), g_MonsterEdits.CountMonsterNumbers(NumberOf(id)));
         return;
     }
     std::snprintf(buffer, size, "%d", id);
@@ -216,16 +215,16 @@ void MonsterNameRows::CommitName(int id, const char* locale, const char* text)
 
 int MonsterNameRows::GetSelected() const
 {
+    // Read each frame: no copies.
     const int number = g_MonsterSelection.GetNumber();
-    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-    if (numbers.size() < 2)
+    if (g_MonsterEdits.CountMonsterNumbers(number) < 2)
     {
         return number;
     }
     // A number that shares its monster's names is shown in the monster's row.
     if (g_MonsterSelection.IsWholeMonster() || !HasOwnRow(number))
     {
-        return numbers.front() + WholeMonsterKey;
+        return g_MonsterEdits.FindFirstNumber(number) + WholeMonsterKey;
     }
     return number;
 }
