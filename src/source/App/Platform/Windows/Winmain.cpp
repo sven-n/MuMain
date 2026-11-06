@@ -1941,16 +1941,13 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng", fileVersion[0],
                         fileVersion[1], fileVersion[2], fileVersion[3]);
-    g_ErrorReport.WriteBuildCommit();
+    g_ErrorReport.WriteBuildInfo();
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
                           fileVersion[2], fileVersion[3]);
 
     g_ErrorReport.WriteCurrentTime();
-    ER_SystemInfo systemInfo;
-    ZeroMemory(&systemInfo, sizeof(systemInfo));
-    MuGetSystemInfo(&systemInfo);
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSystemInfo(&systemInfo);
+    g_ErrorReport.WriteSystemInfo();
     g_ErrorReport.AddSeparator();
 }
 
@@ -2221,7 +2218,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
+    g_ErrorReport.WriteGpuInfo();
     g_ErrorReport.AddSeparator();
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
