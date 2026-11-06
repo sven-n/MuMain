@@ -299,8 +299,6 @@ void CreateLogInScene()
 
     g_fMULogoAlpha = 0;
 
-    ::PlayMp3(MUSIC_LOGIN_THEME);
-
     g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
