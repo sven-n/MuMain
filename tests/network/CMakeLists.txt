@@ -157,6 +157,15 @@ if(DOTNET_EXECUTABLE)
     set_tests_properties(managed_log_callback PROPERTIES TIMEOUT 30)
 
     add_test(
+        NAME connect_failure_description
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/connect_failure_self_check/ConnectFailureSelfCheck.csproj
+            --configuration Release
+    )
+    set_tests_properties(connect_failure_description PROPERTIES TIMEOUT 30)
+
+    add_test(
         NAME outbound_flush_loop
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
             "${DOTNET_EXECUTABLE}" run
