@@ -22,4 +22,11 @@ struct OptionRule
 
 // The definitions the first rule `item` matches gives, in the rule's order; none when it matches no rule.
 std::vector<std::string> DeriveItemOptions(std::span<const OptionRule> rules, const ItemDefinition& item);
+
+// The definitions of an item after the bmd import or the item editor changed it (previous: the item before the change,
+// nullptr for a new item), as its stat profile follows the profile rules: while the item has the list its data gave it,
+// or is new, the list follows its data; a list that differs from it stays as long as it differs, an empty one too, and
+// so does a list the change itself picked. Lists are compared by their names, in any order.
+std::vector<std::string> FollowItemOptions(std::span<const OptionRule> rules, const ItemDefinition* previous,
+                                           const ItemDefinition& updated);
 } // namespace Data::Items

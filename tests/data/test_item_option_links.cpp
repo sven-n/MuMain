@@ -164,6 +164,41 @@ TEST_CASE("An item's links name definitions, one of each byte, and every definit
     CHECK(issues.empty());
 }
 
+TEST_CASE("An edited item's option list follows the option rules while it is the one they give [data][items]")
+{
+    OptionRule ammunition;
+    ammunition.conditions.tags.Set(ItemTag::Ammunition);
+    OptionRule weapons;
+    weapons.options = {"luck"};
+    weapons.conditions.groups.set(0);
+    const std::vector<OptionRule> rules{ammunition, weapons};
+
+    // A new item takes its data's list.
+    const ItemDefinition kris = MakeItem(0, 0, {});
+    CHECK(FollowItemOptions(rules, nullptr, kris) == std::vector<std::string>{"luck"});
+
+    // While it has its data's list, the list follows a change of its data.
+    const ItemDefinition lucky = MakeItem(0, 0, {"luck"});
+    ItemDefinition arrow = lucky;
+    arrow.tags.Set(ItemTag::Ammunition);
+    CHECK(FollowItemOptions(rules, &lucky, arrow).empty());
+    ItemDefinition followedArrow = arrow;
+    followedArrow.options.clear();
+    CHECK(FollowItemOptions(rules, &followedArrow, MakeItem(0, 0, {})) == std::vector<std::string>{"luck"});
+
+    // A list the change picked stays, and so does one that differs from its data's, empty too.
+    CHECK(FollowItemOptions(rules, &lucky, MakeItem(0, 0, {})).empty());
+    const ItemDefinition picked = MakeItem(0, 0, {});
+    ItemDefinition widened = picked;
+    widened.width = 2;
+    CHECK(FollowItemOptions(rules, &picked, widened).empty());
+    ItemDefinition pickedArrow = arrow;
+    pickedArrow.options = {"luck"};
+    ItemDefinition stillArrow = pickedArrow;
+    stillArrow.width = 2;
+    CHECK(FollowItemOptions(rules, &pickedArrow, stillArrow) == std::vector<std::string>{"luck"});
+}
+
 TEST_CASE("The item database resolves an item's links when the item or the options are stored [data][items]")
 {
     ItemDatabase database;

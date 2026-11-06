@@ -1899,6 +1899,35 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         spear.slot = ItemSlot::MainHand;
         REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
+        // And the options the option rules give it.
+        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck"});
+    }
+
+    SUBCASE("an item's option list follows its data, and a list an edit picked stays")
+    {
+        const std::vector<std::string> luck{"luck"};
+        REQUIRE(g_ItemDatabase.Find(KrisType)->options == luck);
+        EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+        EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition, false); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options == luck);
+
+        EditItem(KrisType, [](ItemDefinition& item) { item.options.clear(); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+        EditItem(KrisType, [](ItemDefinition& item) { item.width = 2; });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+    }
+
+    SUBCASE("a moved item's option list follows its new number")
+    {
+        // The rules give luck to the Wings of Elf (12/0), not to a number of group 12 no rule names.
+        const int emptyWingType = MakeItemType(12, 300);
+        REQUIRE(g_ItemDatabase.Find(emptyWingType) == nullptr);
+        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->options == std::vector<std::string>{"luck"});
+        std::swap(ItemAttribute[ITEM_WINGS_OF_ELF], ItemAttribute[emptyWingType]);
+        g_ItemDataHandler.OnItemsSwapped(ITEM_WINGS_OF_ELF, emptyWingType);
+        CHECK(g_ItemDatabase.Find(emptyWingType)->options.empty());
+        CHECK(g_ItemDatabase.GetOptionLinks(emptyWingType).empty());
     }
 
     SUBCASE("a copy keeps a weapon kind and a stat profile its source picked")

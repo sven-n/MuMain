@@ -17,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
 #include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/OptionRule.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -405,6 +406,8 @@ ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definit
     {
         result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, result);
     }
+    result.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), previous, result);
+    g_ItemDatabase.GetOptions().OrderLinks(result.options);
     return result;
 }
 
@@ -723,7 +726,10 @@ void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before
     ItemDefinition changed = *moved;
     changed.weaponKind = FollowGroupWeaponKind(&before, changed);
     changed.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), &before, changed);
-    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
+    changed.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), &before, changed);
+    g_ItemDatabase.GetOptions().OrderLinks(changed.options);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile ||
+        changed.options != moved->options)
     {
         g_ItemDatabase.Set(changed);
     }
@@ -905,6 +911,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                       GetItemStatsFile().generic_string(), result.validationIssues);
     ValidateGroundLabels(result.items, g_ItemDatabase.GetGroundLabels(), GetGroundLabelsFile().generic_string(),
                          result.validationIssues);
+    ValidateItemOptionLinks(result.items, g_ItemDatabase.GetOptions(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     // The entries without a name stay as they are: they are not from the bmd files, so they
@@ -978,6 +985,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
         }
         item.weaponKind = FollowGroupWeaponKind(current, item);
         item.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), current, item);
+        item.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), current, item);
+        g_ItemDatabase.GetOptions().OrderLinks(item.options);
     }
 }
 
