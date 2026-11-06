@@ -13,7 +13,7 @@ namespace MuEditor::Monsters
 // monster tools' history and reaches the monsters in the game at once. A
 // monster with several numbers is one row for the names they share (its
 // first number plus ShownValues::WholeMonsterKey), with a row for each of its
-// numbers with names of their own (D61, Q-MN50).
+// numbers with names of their own or made their own (D61, Q-MN50, Q-MN96).
 class MonsterNameRows final : public NamesGridRows
 {
 public:

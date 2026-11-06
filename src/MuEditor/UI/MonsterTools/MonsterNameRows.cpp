@@ -38,10 +38,11 @@ int NumberOf(int id)
 }
 
 // A number of a monster with several numbers has a row of its own when its
-// names are its own (Q-MN50); else they are in its monster's row.
+// names are its own (Q-MN50) or were made its own to be edited here (Q-MN96);
+// else they are in its monster's row.
 bool HasOwnRow(int number)
 {
-    return OwnValues::GetNumberState(number, Data::Monsters::MonsterValueField::Names) == OwnValues::State::Own;
+    return OwnValues::GetNumberState(number, Data::Monsters::MonsterValueField::Names) != OwnValues::State::Shared;
 }
 } // namespace
 
@@ -129,7 +130,7 @@ void MonsterNameRows::Refresh()
 
 int MonsterNameRows::GetVersion() const
 {
-    return g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion();
+    return g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion() + OwnValues::GetUnlockVersion();
 }
 
 std::vector<int> MonsterNameRows::CountMissing(std::span<const char* const> locales) const

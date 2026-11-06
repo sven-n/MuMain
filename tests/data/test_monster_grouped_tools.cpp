@@ -310,6 +310,11 @@ TEST_CASE("Monster Translations rows: a monster with several numbers is translat
     g_MonsterSelection.Select(175);
     CHECK(rows.GetSelected() == whole);
 
+    // Names made 336's own (the Browser's row menu) get a row to edit them in.
+    OwnValues::Unlock(336, MonsterValueField::Names);
+    CHECK(rows.List("", "") == std::vector{2, whole, 336});
+    OwnValues::LockAll();
+
     // 175 with a name of its own gets a row after its monster's.
     MonsterDefinition own = Entry(175);
     own.names.Set("en", "Rogue Centurion");

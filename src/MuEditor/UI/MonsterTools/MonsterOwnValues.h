@@ -68,6 +68,9 @@ bool TakeValue(int number, Data::Monsters::MonsterValueField field, const Source
 void Unlock(int number, Data::Monsters::MonsterValueField field);
 // After a revert: every shared field is locked again.
 void LockAll();
+// Counts Unlock, LockAll and the locks of TakeValue, so a list of the
+// unlocked fields can tell it is out of date.
+int GetUnlockVersion();
 } // namespace MuEditor::Monsters::OwnValues
 
 #endif // _EDITOR

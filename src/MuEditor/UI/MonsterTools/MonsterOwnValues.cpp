@@ -35,6 +35,12 @@ std::set<std::pair<int, MonsterValueField>>& Unlocked()
     return unlocked;
 }
 
+int& UnlockVersion()
+{
+    static int version = 0;
+    return version;
+}
+
 std::string MonsterName(int number)
 {
     const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(number);
@@ -229,6 +235,7 @@ bool TakeValue(int number, MonsterValueField field, const Source& source)
     if (GetNumberState(number, field) != State::Own)
     {
         Unlocked().erase({number, field});
+        ++UnlockVersion();
     }
     return true;
 }
@@ -236,11 +243,18 @@ bool TakeValue(int number, MonsterValueField field, const Source& source)
 void Unlock(int number, MonsterValueField field)
 {
     Unlocked().insert({number, field});
+    ++UnlockVersion();
 }
 
 void LockAll()
 {
     Unlocked().clear();
+    ++UnlockVersion();
+}
+
+int GetUnlockVersion()
+{
+    return UnlockVersion();
 }
 } // namespace MuEditor::Monsters::OwnValues
 
