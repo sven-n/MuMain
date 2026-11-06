@@ -217,7 +217,9 @@ FetchContent_MakeAvailable(spdlog)
 FetchContent_Declare(miniaudio
     URL https://github.com/mackron/miniaudio/archive/9634bedb5b5a2ca38c1ee7108a9358a4e233f14d.tar.gz
     URL_HASH SHA256=1a3a79b80fc6f0b0cc155e28b954a598e0ddfa2db64e2afa8466be88c476fa55
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    # The time of unpacking, as for SDL3_ttf and SDL3_image below. The build reads only the copies of miniaudio's
+    # files made below, which get the time they are written anyway, so here it only keeps every archive alike.
+    DOWNLOAD_EXTRACT_TIMESTAMP FALSE
     SOURCE_SUBDIR _fetchcontent_only
 )
 FetchContent_MakeAvailable(miniaudio)
@@ -275,7 +277,8 @@ FetchContent_Declare(SDL3_ttf
     URL      https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
     URL_HASH SHA256=63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d
     # The unpacked files get the time of unpacking, as UnpackArchive.cmake's do, not the archive's older dates: with
-    # those, a build after a version change would keep objects compiled from the previous sources.
+    # those, a build after a version change would keep objects compiled from the previous sources. Every archive here
+    # does the same; tests/test_archive_extract_times.cmake checks it.
     DOWNLOAD_EXTRACT_TIMESTAMP FALSE
     # Every patch step starts from the archives' sources: SDL_ttf's own archive, which the download step keeps, is
     # unpacked again first (external/ goes with it), so an edited patch never lands on top of its previous version.
@@ -373,7 +376,8 @@ set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(SDL3_image
     URL      https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
     URL_HASH SHA256=a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    # The time of unpacking, as for SDL3_ttf above: SDL_image compiles straight from the unpacked tree.
+    DOWNLOAD_EXTRACT_TIMESTAMP FALSE
 )
 
 add_subdirectory("src")

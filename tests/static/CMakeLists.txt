@@ -89,6 +89,11 @@ add_test(
         -P "${MU_TESTS}/test_ensure_submodule.cmake"
 )
 add_test(
+    NAME archive_extract_times_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_archive_extract_times.cmake"
+)
+add_test(
     NAME sdl_image_archive_contract
     COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
         -P "${MU_TESTS}/test_sdl_image_archive.cmake"
