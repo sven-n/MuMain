@@ -21,4 +21,8 @@ std::string DescribeRelease(const std::string& releaseTag);
 // The Data line: the installed data release against the one the client was built with ("unknown" when the
 // build had no git).
 std::string DescribeData(const std::string& installedId, const std::string& expectedId);
+
+// When the file was last written, e.g. "2026-11-06 12:03:17 UTC"; empty when that can't be read. For the client's
+// executable that is when it was linked, or in a download the time the archive keeps.
+std::string DescribeFileTime(const std::filesystem::path& file);
 } // namespace Core::Build

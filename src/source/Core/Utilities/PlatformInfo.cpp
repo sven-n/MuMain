@@ -259,4 +259,17 @@ int GetSystemMemoryMB()
     return SDL_GetSystemRAM();
 }
 
+std::filesystem::path GetExecutablePath()
+{
+    // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, _NSGetExecutablePath).
+    constexpr DWORD executablePathCapacity = 4096;
+    wchar_t executablePath[executablePathCapacity] = {};
+    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
+        return {};
+#ifdef _WIN32
+    return executablePath;
+#else
+    return mu_narrow_path(executablePath);
+#endif
+}
 }

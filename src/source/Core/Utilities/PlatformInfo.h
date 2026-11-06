@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 
 namespace Core::Platform
@@ -24,4 +25,7 @@ const std::string& GetProcessorName();
 
 // Installed system memory in MiB, or 0 if unknown.
 int GetSystemMemoryMB();
+
+// The running executable's file, e.g. "D:/MuMain/Main.exe"; empty when it can't be found.
+std::filesystem::path GetExecutablePath();
 }

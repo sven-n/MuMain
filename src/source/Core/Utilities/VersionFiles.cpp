@@ -2,8 +2,12 @@
 
 #include "VersionFiles.h"
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <algorithm>
 #include <cctype>
+#include <ctime>
 #include <fstream>
 
 namespace Core::Build
@@ -12,6 +16,7 @@ namespace
 {
 constexpr std::size_t MaxVersionLength = 64;
 constexpr const char* UnknownId = "unknown";
+constexpr const char* FileTimeFormat = "%Y-%m-%d %H:%M:%S UTC";
 
 bool IsVersionCharacter(unsigned char character)
 {
@@ -60,5 +65,31 @@ std::string DescribeData(const std::string& installedId, const std::string& expe
     if (installedId == expectedId)
         return installedId + " (matches this client)";
     return installedId + ", but this client expects " + expectedId;
+}
+
+std::string DescribeFileTime(const std::filesystem::path& file)
+{
+    // stat's whole seconds since 1970, which std::filesystem's file clock can't turn into a date on every compiler.
+    std::tm utc{};
+#ifdef _WIN32
+    struct _stat64 status{};
+    if (_wstat64(file.c_str(), &status) != 0)
+        return {};
+    const std::time_t written = status.st_mtime;
+    if (gmtime_s(&utc, &written) != 0)
+        return {};
+#else
+    struct stat status{};
+    if (stat(file.c_str(), &status) != 0)
+        return {};
+    const std::time_t written = status.st_mtime;
+    if (gmtime_r(&written, &utc) == nullptr)
+        return {};
+#endif
+
+    char text[32] = {};
+    if (std::strftime(text, sizeof(text), FileTimeFormat, &utc) == 0)
+        return {};
+    return text;
 }
 } // namespace Core::Build

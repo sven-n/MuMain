@@ -381,7 +381,7 @@ configuration, shaders, `Data/`, and `fonts/`.
 ```text
 Release       : v1.37.0
 Build commit  : <the commit the client was built from>
-Build         : Release NoEditor MSVC x64, built Nov  6 2026 14:02:11
+Build         : Release NoEditor MSVC x64, built 2026-11-06 13:02:11 UTC
 Data          : data-<id> (matches this client)
 ```
 
@@ -390,6 +390,8 @@ Data          : data-<id> (matches this client)
 - **Build commit** ends in `(with local changes)` when tracked files differed from
   the commit. `https://github.com/sven-n/MuMain/compare/<commit>...main` lists what
   main has gained since.
+- **Build** names the configuration, editor, compiler and architecture, and when the
+  executable was written (linked, or in a download the time the archive keeps), in UTC.
 - **Data** compares `Data/DataVersion.txt`, which the data workflow adds to the data
   archive, with the data release the client was built for. A different id means the
   runtime and data downloads don't belong together; data archives from before the

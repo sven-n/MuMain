@@ -2,9 +2,16 @@
 
 #include "Core/Utilities/VersionFiles.h"
 
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <string>
+
+#ifdef _WIN32
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
 
 namespace
 {
@@ -34,6 +41,18 @@ public:
 private:
     std::filesystem::path m_folder;
 };
+
+// Sets the file's write time, in whole seconds since 1970.
+void SetWriteTime(const std::filesystem::path& file, std::time_t seconds)
+{
+#ifdef _WIN32
+    __utimbuf64 times{seconds, seconds};
+    REQUIRE(_wutime64(file.c_str(), &times) == 0);
+#else
+    utimbuf times{seconds, seconds};
+    REQUIRE(utime(file.c_str(), &times) == 0);
+#endif
+}
 } // namespace
 
 TEST_CASE("Version files give their first line [core][build]")
@@ -66,4 +85,13 @@ TEST_CASE("The data line compares the installed and expected data releases [core
           "unknown (no Data/DataVersion.txt), this client expects data-aaaa");
     CHECK(Core::Build::DescribeData("", "unknown") == "unknown (no Data/DataVersion.txt)");
     CHECK(Core::Build::DescribeData("data-bbbb", "unknown") == "data-bbbb (this client's data release is unknown)");
+}
+
+TEST_CASE("A file's write time reads in UTC [core][build]")
+{
+    const TemporaryFile file("client");
+    // 1700000000 seconds after 1970 is 2023-11-14 22:13:20 UTC.
+    SetWriteTime(file.Path(), 1700000000);
+    CHECK(Core::Build::DescribeFileTime(file.Path()) == "2023-11-14 22:13:20 UTC");
+    CHECK(Core::Build::DescribeFileTime("no-such-folder/Main.exe").empty());
 }

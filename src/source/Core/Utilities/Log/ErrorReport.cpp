@@ -30,6 +30,16 @@ const char* OrUnknown(const char* text)
     return (text != nullptr && *text != '\0') ? text : "unknown";
 }
 
+// When the executable was linked. __DATE__ and __TIME__ are only when this file was compiled, which an incremental
+// build skips while the commit and its "local changes" mark stay the same; they are the fallback.
+std::string DescribeBuildTime()
+{
+    const std::string written = Core::Build::DescribeFileTime(Core::Platform::GetExecutablePath());
+    if (!written.empty())
+        return "built " + written;
+    return std::string("compiled ") + Core::Build::kDate + " " + Core::Build::kTime;
+}
+
 std::string WideToUtf8(const wchar_t* value)
 {
     if (value == nullptr)
@@ -128,8 +138,8 @@ void CErrorReport::WriteBuildInfo(void)
 
     const bool hasLocalChanges = MU_GIT_COMMIT_CHANGED != 0;
     Write(L"Build commit \t\t: %hs%ls\r\n", MU_GIT_COMMIT, hasLocalChanges ? L" (with local changes)" : L"");
-    Write(L"Build \t\t\t: %hs %hs %hs %hs, built %hs %hs\r\n", Core::Build::kConfiguration, Core::Build::kEditor,
-          Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
+    Write(L"Build \t\t\t: %hs %hs %hs %hs, %hs\r\n", Core::Build::kConfiguration, Core::Build::kEditor,
+          Core::Build::kCompiler, Core::Build::kArchitecture, DescribeBuildTime().c_str());
 
     const std::string data =
         Core::Build::DescribeData(Core::Build::ReadVersionFile(Core::Build::kDataVersionFile), MU_DATA_ASSET_ID);
