@@ -32,7 +32,6 @@ class TemporaryFile
 public:
     explicit TemporaryFile(const std::string& contents) : m_folder(UniqueTemporaryFolder())
     {
-        std::filesystem::remove_all(m_folder);
         std::filesystem::create_directories(m_folder);
         std::ofstream(Path(), std::ios::binary) << contents;
     }
