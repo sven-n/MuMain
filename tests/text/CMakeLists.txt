@@ -42,3 +42,8 @@ add_test(
         "-DMU_PATCH=${CMAKE_SOURCE_DIR}/cmake/patches/sdl_ttf-3.2.2-batch-glyph-uploads.patch"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_ttf_fetchcontent_patch.cmake"
 )
+add_test(
+    NAME sdl_ttf_vendored_versions
+    COMMAND "${CMAKE_COMMAND}" "-DSDL3_TTF_SOURCE=${SDL3_TTF_SOURCE}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_ttf_vendored_versions.cmake"
+)
