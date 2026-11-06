@@ -936,15 +936,17 @@ if (DOTNET_EXECUTABLE)
   # this fresh home (the ClientLibrary publish, ResxGen), and on Linux and macOS two first runs at once can fail
   # creating that mutex's files: "'NuGet-Migrations'. One or more system calls failed: mkdir...". One run here, before
   # the build, leaves them nothing to set up. `dotnet --version` would not do: it skips the setup.
+  # A failed setup only means the build's steps do it themselves, as before; a status line, not a warning, because CI
+  # fails a configure on any warning, and dotnet's own output stays out of it for the same reason.
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E env "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}" "${DOTNET_EXECUTABLE}" help
     RESULT_VARIABLE _dotnet_setup_rc
-    OUTPUT_VARIABLE _dotnet_setup_output
-    ERROR_VARIABLE _dotnet_setup_output
+    OUTPUT_QUIET
+    ERROR_QUIET
   )
   if (NOT _dotnet_setup_rc EQUAL 0)
-    message(WARNING "dotnet's first-time setup failed (rc=${_dotnet_setup_rc}), so the build's dotnet steps do it "
-      "themselves:\n${_dotnet_setup_output}")
+    message(STATUS "dotnet's first-time setup failed (rc=${_dotnet_setup_rc}); the build's dotnet steps do it "
+      "themselves. `dotnet help` shows why.")
   endif()
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
