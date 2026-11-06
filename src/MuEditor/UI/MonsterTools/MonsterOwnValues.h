@@ -43,6 +43,9 @@ void RenderLine(const ShownValues::ShownMonster& shown, Data::Monsters::MonsterV
 // The field's controls in its colour until EndField, disabled while shared.
 void BeginField(State state);
 void EndField(State state);
+// A value as text in its colour: grey while shared, yellow when own (the
+// Monster Browser's names).
+void RenderValueText(State state, const std::string& text);
 
 // The items of a row's context menu for the field: "Kind: Make it this
 // number's own" or "Kind: Back to...".

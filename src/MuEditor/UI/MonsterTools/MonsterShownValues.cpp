@@ -9,6 +9,7 @@
 #include "MonsterStepLabel.h"
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 
 #include <vector>
@@ -64,6 +65,23 @@ std::string LogName(const ShownMonster& shown)
     }
     return I18N::Format(I18N::Editor::MonsterLogName01,
                         {shown.monster.names.GetNeutral(), std::to_string(shown.numberCount)});
+}
+
+std::string MonsterName(int number)
+{
+    const Data::Monsters::MonsterDefinition* shared = g_MonsterEdits.FindSharedValues(number);
+    const Data::Monsters::MonsterDefinition* values = shared != nullptr ? shared : g_MonsterDatabase.Find(number);
+    return values != nullptr ? values->names.GetNeutral() : std::string();
+}
+
+std::string ListNumbers(std::span<const int> numbers)
+{
+    std::string list;
+    for (const int number : numbers)
+    {
+        list += (list.empty() ? "" : ", ") + std::to_string(number);
+    }
+    return list;
 }
 } // namespace MuEditor::Monsters::ShownValues
 

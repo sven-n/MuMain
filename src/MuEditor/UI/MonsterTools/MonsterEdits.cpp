@@ -19,6 +19,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 
 #include <algorithm>
+#include <bitset>
 #include <iterator>
 #include <span>
 #include <utility>
@@ -182,6 +183,42 @@ std::vector<int> MonsterEdits::ReadMonsterNumbers(int number) const
     numbers.reserve(layout->numbers.size());
     std::ranges::copy_if(layout->numbers, std::back_inserter(numbers), HasEntry);
     return numbers;
+}
+
+std::vector<std::vector<int>> MonsterEdits::ReadMonsters() const
+{
+    std::vector<std::vector<int>> monsters;
+    std::bitset<Data::Monsters::MonsterNumberCount> listed;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (listed[static_cast<std::size_t>(number)] || !HasEntry(number))
+        {
+            continue;
+        }
+        // A monster comes at its first number.
+        std::vector<int> numbers = ReadMonsterNumbers(number);
+        for (const int member : numbers)
+        {
+            listed.set(static_cast<std::size_t>(member));
+        }
+        monsters.push_back(std::move(numbers));
+    }
+    return monsters;
+}
+
+std::vector<Data::Maps::MapRef> MonsterEdits::ReadMaps(std::span<const int> numbers) const
+{
+    std::vector<Data::Maps::MapRef> maps;
+    for (const int number : numbers)
+    {
+        if (const MonsterDefinition* entry = g_MonsterDatabase.Find(number))
+        {
+            maps.insert(maps.end(), entry->maps.begin(), entry->maps.end());
+        }
+    }
+    std::ranges::sort(maps);
+    maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
+    return maps;
 }
 
 std::optional<MonsterDefinition> MonsterEdits::ReadSharedValues(int number) const

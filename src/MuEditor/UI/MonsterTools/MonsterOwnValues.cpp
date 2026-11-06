@@ -55,18 +55,13 @@ int& UnlockVersion()
     return version;
 }
 
-std::string MonsterName(int number)
-{
-    const MonsterDefinition* shared = g_MonsterEdits.FindSharedValues(number);
-    return shared != nullptr ? shared->names.GetNeutral() : std::string();
-}
-
 // "Attacks: Shared by the 3 numbers of Death Centurion".
 std::string SharedLine(int number, MonsterValueField field)
 {
     return std::string(GetFieldName(field)) + ": " +
-           I18N::Format(I18N::Editor::SharedByThe0NumbersOf1,
-                        {std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size()), MonsterName(number)});
+           I18N::Format(
+               I18N::Editor::SharedByThe0NumbersOf1,
+               {std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size()), ShownValues::MonsterName(number)});
 }
 
 void RenderSourcesMenu(int number, MonsterValueField field)
@@ -156,6 +151,22 @@ void BeginField(State state)
     {
         ImGui::PushStyleColor(ImGuiCol_FrameBg, OwnFrameColor);
         ImGui::PushStyleColor(ImGuiCol_Button, OwnButtonColor);
+    }
+}
+
+void RenderValueText(State state, const std::string& text)
+{
+    if (state == State::Own)
+    {
+        ImGui::TextColored(OwnTextColor, "%s", text.c_str());
+    }
+    else if (state != State::Plain)
+    {
+        ImGui::TextColored(SharedTextColor, "%s", text.c_str());
+    }
+    else
+    {
+        ImGui::TextUnformatted(text.c_str());
     }
 }
 

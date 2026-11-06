@@ -7,6 +7,7 @@
 #include "MonsterEdits.h"
 #include "MonsterListModel.h"
 #include "MonsterSelection.h"
+#include "MonsterShownValues.h"
 #include "MonsterStepLabel.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -18,7 +19,6 @@
 
 #include <algorithm>
 #include <cstdio>
-#include <optional>
 #include <vector>
 
 namespace MuEditor::Monsters
@@ -34,21 +34,11 @@ constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 
 using Data::Monsters::MonsterDefinition;
 
-std::string MonsterName(int number)
-{
-    const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(number);
-    return shared ? shared->names.GetNeutral() : std::string();
-}
-
 // "Death Centurion (145, 175, 336)": a monster with its numbers.
 std::string MonsterWithNumbers(int number)
 {
-    std::string numbers;
-    for (const int member : g_MonsterEdits.ReadMonsterNumbers(number))
-    {
-        numbers += (numbers.empty() ? "" : ", ") + std::to_string(member);
-    }
-    return MonsterName(number) + " (" + numbers + ")";
+    return ShownValues::MonsterName(number) + " (" +
+           ShownValues::ListNumbers(g_MonsterEdits.ReadMonsterNumbers(number)) + ")";
 }
 } // namespace
 
@@ -193,25 +183,15 @@ void MonsterNumberDialog::BuildTargets()
 {
     m_targets.clear();
     const std::vector<int> own = g_MonsterEdits.ReadMonsterNumbers(m_source);
-    std::vector<bool> listed(Data::Monsters::MonsterNumberCount, false);
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    for (const std::vector<int>& numbers : g_MonsterEdits.ReadMonsters())
     {
-        const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
-        if (entry == nullptr || listed[static_cast<size_t>(number)])
-        {
-            continue;
-        }
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-        bool matches = false;
-        for (const int member : numbers)
-        {
-            listed[static_cast<size_t>(member)] = true;
-            matches = matches || MatchesMonsterSearch(*g_MonsterDatabase.Find(member), m_search);
-        }
+        const bool matches = std::ranges::any_of(
+            numbers, [&](int member) { return MatchesMonsterSearch(*g_MonsterDatabase.Find(member), m_search); });
         // Not the monster the number is in.
         if (matches && numbers != own)
         {
-            m_targets.push_back({numbers.front(), MonsterWithNumbers(number) + "##" + std::to_string(number)});
+            const int first = numbers.front();
+            m_targets.push_back({first, MonsterWithNumbers(first) + "##" + std::to_string(first)});
         }
     }
 }
@@ -235,7 +215,8 @@ void MonsterNumberDialog::Confirm()
     switch (m_mode)
     {
     case Mode::AddNumber:
-        if (g_MonsterEdits.AddNumber(StepLabel::AddNumber(m_number, MonsterName(m_source)), m_source, m_number))
+        if (g_MonsterEdits.AddNumber(StepLabel::AddNumber(m_number, ShownValues::MonsterName(m_source)), m_source,
+                                     m_number))
         {
             g_MonsterSelection.Select(m_number);
         }
@@ -247,7 +228,8 @@ void MonsterNumberDialog::Confirm()
         }
         break;
     case Mode::MoveNumber:
-        if (g_MonsterEdits.MoveNumber(StepLabel::MoveNumber(*source, MonsterName(m_target)), m_source, m_target))
+        if (g_MonsterEdits.MoveNumber(StepLabel::MoveNumber(*source, ShownValues::MonsterName(m_target)), m_source,
+                                      m_target))
         {
             g_MonsterSelection.Select(m_source);
         }

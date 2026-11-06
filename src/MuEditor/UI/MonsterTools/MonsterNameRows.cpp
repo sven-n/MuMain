@@ -21,7 +21,6 @@
 #include "imgui.h"
 
 #include <algorithm>
-#include <bitset>
 #include <cstdio>
 #include <optional>
 
@@ -89,27 +88,17 @@ bool MonsterNameRows::Lists(const Row& row) const
 std::vector<MonsterNameRows::Row> MonsterNameRows::CollectRows() const
 {
     std::vector<Row> rows;
-    std::bitset<Data::Monsters::MonsterNumberCount> listed;
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    for (const std::vector<int>& numbers : g_MonsterEdits.ReadMonsters())
     {
-        const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
-        if (entry == nullptr || listed[static_cast<std::size_t>(number)])
-        {
-            continue;
-        }
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-        for (const int member : numbers)
-        {
-            listed.set(static_cast<std::size_t>(member));
-        }
+        const int number = numbers.front();
         if (numbers.size() < 2)
         {
-            rows.push_back({number, *entry, {number}});
+            rows.push_back({number, *g_MonsterDatabase.Find(number), {number}});
             continue;
         }
         // The names the numbers share, then the numbers with names of their
         // own (Q-MN50).
-        MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(number);
+        MonsterDefinition shared = *g_MonsterEdits.FindSharedValues(number);
         shared.number = numbers.front();
         rows.push_back({numbers.front() + WholeMonsterKey, shared, numbers});
         for (const int member : numbers)

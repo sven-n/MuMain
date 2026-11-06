@@ -16,7 +16,6 @@
 #include "imgui.h"
 
 #include <algorithm>
-#include <cstdio>
 #include <optional>
 #include <string>
 
@@ -36,9 +35,6 @@ constexpr float NumberIndent = 14.0f;
 constexpr int ColumnCount = 4;
 // The ids of monster rows, apart from their first number's row.
 constexpr int MonsterRowId = 1 << 16;
-
-constexpr ImVec4 SharedTextColor{0.62f, 0.62f, 0.62f, 1.0f};
-constexpr ImVec4 OwnTextColor{0.95f, 0.75f, 0.25f, 1.0f};
 
 void RenderKindCell(const Row& row, Data::Monsters::MonsterKind current, MonsterBrowserList::Result& result)
 {
@@ -71,14 +67,8 @@ void RenderMapsCell(const Row& row, const MonsterDefinition& monster, MonsterBro
     if (row.kind == Row::Kind::Monster)
     {
         // The maps of all its numbers.
-        std::vector<Data::Maps::MapRef> maps;
-        for (const int number : g_MonsterEdits.ReadMonsterNumbers(row.number))
-        {
-            const MonsterDefinition* member = g_MonsterDatabase.Find(number);
-            maps.insert(maps.end(), member->maps.begin(), member->maps.end());
-        }
-        std::ranges::sort(maps);
-        maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
+        const std::vector<Data::Maps::MapRef> maps =
+            g_MonsterEdits.ReadMaps(g_MonsterEdits.ReadMonsterNumbers(row.number));
         ImGui::TextDisabled("%s", MapPicker::Describe(maps, I18N::Editor::NoMaps).c_str());
         return;
     }
@@ -200,18 +190,7 @@ void RenderRow(const Row& row, bool selected, MonsterBrowserList::Result& result
     const OwnValues::State nameState = row.kind == Row::Kind::Number
                                            ? OwnValues::GetNumberState(row.number, MonsterValueField::Names)
                                            : OwnValues::State::Plain;
-    if (nameState == OwnValues::State::Own)
-    {
-        ImGui::TextColored(OwnTextColor, "%s", name.c_str());
-    }
-    else if (nameState != OwnValues::State::Plain)
-    {
-        ImGui::TextColored(SharedTextColor, "%s", name.c_str());
-    }
-    else
-    {
-        ImGui::TextUnformatted(name.c_str());
-    }
+    OwnValues::RenderValueText(nameState, name);
     ImGui::TableSetColumnIndex(2);
     RenderKindCell(row, monster->kind, result);
     ImGui::TableSetColumnIndex(3);

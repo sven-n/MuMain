@@ -95,6 +95,8 @@ TEST_CASE("Monster edits: a number's monster and the values its numbers share [d
     CHECK(g_MonsterEdits.ReadMonsterNumbers(175) == std::vector{145, 175, 336});
     CHECK(g_MonsterEdits.ReadMonsterNumbers(2) == std::vector{2});
     CHECK(g_MonsterEdits.ReadMonsterNumbers(3).empty());
+    CHECK(g_MonsterEdits.ReadMonsters() == std::vector<std::vector<int>>{{2}, {145, 175, 336}});
+    CHECK(g_MonsterEdits.ReadMaps(std::vector{336, 145, 3}) == std::vector<MapRef>{{24, 0}, {36, 0}});
 
     const std::optional<MonsterDefinition> shared = g_MonsterEdits.ReadSharedValues(336);
     REQUIRE(shared);

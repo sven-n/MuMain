@@ -226,12 +226,11 @@ std::vector<LanguageImport> Import(const std::filesystem::path& clientFolder, st
     }
     // The files name each number: names all numbers of a monster got alike
     // are the monster's again (D61), not an own copy in each number.
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    for (const std::vector<int>& numbers : g_MonsterEdits.ReadMonsters())
     {
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-        if (numbers.size() > 1 && numbers.front() == number)
+        if (numbers.size() > 1)
         {
-            g_MonsterEdits.ShareEqualValues(label, number, Data::Monsters::MonsterValueField::Names);
+            g_MonsterEdits.ShareEqualValues(label, numbers.front(), Data::Monsters::MonsterValueField::Names);
         }
     }
     g_MonsterEdits.EndGroup();

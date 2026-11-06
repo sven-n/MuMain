@@ -7,6 +7,7 @@
 #include "MonsterCodeReferenceIndex.h"
 #include "MonsterEdits.h"
 #include "MonsterKindField.h"
+#include "MonsterShownValues.h"
 #include "MonsterStepLabel.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -100,14 +101,9 @@ void MonsterRemoveDialog::Render()
         ImGui::EndPopup();
         return;
     }
-    std::string numbers;
-    for (const int member : m_numbers)
-    {
-        numbers += (numbers.empty() ? "" : ", ") + std::to_string(member);
-    }
+    const std::string numbers = ShownValues::ListNumbers(m_numbers);
     // A whole monster by the name its numbers share, not its first number's.
-    const std::string name =
-        m_wholeMonster ? g_MonsterEdits.ReadSharedValues(m_number)->names.GetNeutral() : monster->names.GetNeutral();
+    const std::string name = m_wholeMonster ? ShownValues::MonsterName(m_number) : monster->names.GetNeutral();
     if (m_wholeMonster)
     {
         RenderWrapped(I18N::Format(I18N::Editor::RemoveMonsterWithNumbers01, {name, numbers}).c_str(), false);

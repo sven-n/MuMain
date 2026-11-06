@@ -9,7 +9,8 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 
-#include <bitset>
+#include <algorithm>
+#include <iterator>
 #include <optional>
 
 namespace MuEditor::Monsters
@@ -32,24 +33,11 @@ const std::vector<MonsterTreeModel::Row>& MonsterTreeModel::GetRows(const Monste
 
     m_rows.clear();
     const bool filtered = IsFiltered(filter);
-    std::bitset<Data::Monsters::MonsterNumberCount> listed;
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    for (const std::vector<int>& numbers : g_MonsterEdits.ReadMonsters())
     {
-        if (listed[static_cast<std::size_t>(number)] || g_MonsterDatabase.Find(number) == nullptr)
-        {
-            continue;
-        }
-        // A monster comes at its first number.
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
         std::vector<int> passing;
-        for (const int member : numbers)
-        {
-            listed.set(static_cast<std::size_t>(member));
-            if (MatchesMonsterFilter(*g_MonsterDatabase.Find(member), filter))
-            {
-                passing.push_back(member);
-            }
-        }
+        std::ranges::copy_if(numbers, std::back_inserter(passing),
+                             [&](int member) { return MatchesMonsterFilter(*g_MonsterDatabase.Find(member), filter); });
         if (passing.empty())
         {
             continue;
@@ -57,10 +45,10 @@ const std::vector<MonsterTreeModel::Row>& MonsterTreeModel::GetRows(const Monste
         const int count = static_cast<int>(numbers.size());
         if (count == 1)
         {
-            m_rows.push_back({number, Row::Kind::Single, 1, false});
+            m_rows.push_back({numbers.front(), Row::Kind::Single, 1, false});
             continue;
         }
-        const bool open = filtered || IsOpen(number);
+        const bool open = filtered || IsOpen(numbers.front());
         m_rows.push_back({numbers.front(), Row::Kind::Monster, count, open});
         if (open)
         {

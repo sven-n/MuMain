@@ -236,7 +236,7 @@ void MuMonsterBrowserUI::StartAction(MonsterBrowserList::Action action, int numb
         break;
     case Action::SplitNumber:
     {
-        const std::string from = g_MonsterEdits.ReadSharedValues(number)->names.GetNeutral();
+        const std::string from = ShownValues::MonsterName(number);
         if (g_MonsterEdits.SplitNumber(StepLabel::SplitNumber(*monster, from), number))
         {
             g_MonsterSelection.Select(number);

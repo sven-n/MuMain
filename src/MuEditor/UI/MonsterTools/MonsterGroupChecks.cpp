@@ -12,7 +12,6 @@
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 #include <algorithm>
-#include <bitset>
 #include <optional>
 #include <string>
 
@@ -67,37 +66,14 @@ void CheckVariants(int number, const std::vector<MonsterMapVariant>& variants, c
                               " does not appear (" + MapPicker::Describe(maps, "") + ")"});
     }
 }
-
-std::vector<MapRef> MapsOfNumbers(const std::vector<int>& numbers)
-{
-    std::vector<MapRef> maps;
-    for (const int number : numbers)
-    {
-        const MonsterDefinition* entry = g_MonsterDatabase.Find(number);
-        maps.insert(maps.end(), entry->maps.begin(), entry->maps.end());
-    }
-    std::ranges::sort(maps);
-    maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
-    return maps;
-}
 } // namespace
 
 void Validate(std::vector<ItemDataIssue>& issues)
 {
     const std::string source = Data::Monsters::GetMonstersFile().generic_string();
-    std::bitset<Data::Monsters::MonsterNumberCount> checked;
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    for (const std::vector<int>& numbers : g_MonsterEdits.ReadMonsters())
     {
-        if (checked[static_cast<std::size_t>(number)] || g_MonsterDatabase.Find(number) == nullptr)
-        {
-            continue;
-        }
-        const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(number);
-        for (const int member : numbers)
-        {
-            checked.set(static_cast<std::size_t>(member));
-        }
-        const MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(number);
+        const MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(numbers.front());
         const std::string name = shared.names.GetNeutral();
         // The shared variants, once for the monster: on the maps of the
         // numbers that play them, named by the first of those, so that Data
@@ -107,7 +83,7 @@ void Validate(std::vector<ItemDataIssue>& issues)
                       [&](int member) { return g_MonsterDatabase.Find(member)->mapVariants != shared.mapVariants; });
         if (!sharing.empty())
         {
-            CheckVariants(sharing.front(), shared.mapVariants, MapsOfNumbers(sharing),
+            CheckVariants(sharing.front(), shared.mapVariants, g_MonsterEdits.ReadMaps(sharing),
                           numbers.size() > 1 ? "no number of " + name : "the monster", source, issues);
         }
         if (numbers.size() < 2)

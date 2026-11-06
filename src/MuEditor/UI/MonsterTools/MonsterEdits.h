@@ -5,9 +5,11 @@
 #include "MonsterEditHistory.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/MapData/MapRef.h"
 #include "Data/GameData/MonsterData/MonsterGroup.h"
 
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -50,6 +52,12 @@ public:
     // The numbers of the number's monster that have an entry, sorted; empty
     // when the number has none.
     std::vector<int> ReadMonsterNumbers(int number) const;
+    // Every monster once, as ReadMonsterNumbers gives its numbers, in the
+    // order of their first numbers.
+    std::vector<std::vector<int>> ReadMonsters() const;
+    // The maps the numbers appear on (MonsterDefinition::maps), sorted, each
+    // once; numbers without an entry have none.
+    std::vector<Data::Maps::MapRef> ReadMaps(std::span<const int> numbers) const;
     // The values the numbers of the number's monster share
     // (Data::Monsters::MakeSharedValues): its entry's when it is the
     // monster's only number; nullopt when it has no entry.
