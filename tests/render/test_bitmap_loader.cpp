@@ -19,6 +19,9 @@
 
 namespace
 {
+// The image-type field follows the four-byte OZT prefix and two TGA header bytes.
+constexpr std::size_t OztImageTypeOffset = 4 + 2;
+constexpr std::uint8_t UncompressedTrueColor = 2;
 struct UploadRecord
 {
     std::vector<std::uint8_t> pixels;
@@ -67,8 +70,9 @@ std::filesystem::path MakeFixtureDir(const char* name)
 // `shade` is added to every channel, so two files can be told apart by their pixels.
 void WriteTga(const std::filesystem::path& path, std::uint8_t shade = 0)
 {
-    // OZT has sixteen prefix bytes followed by width/height, depth and pixels.
+    // OZT has a four-byte prefix followed by the 18-byte TGA header and pixels.
     std::array<std::uint8_t, 22 + 16> bytes{};
+    bytes[OztImageTypeOffset] = UncompressedTrueColor;
     bytes[16] = 2;
     bytes[18] = 2;
     bytes[20] = 32;
