@@ -10,10 +10,12 @@
 
 #include "doctest.h"
 
+#include "Character/CharMakeWin.h"
+#include "Core/Input/Input.h"
 #include "Network/Reconnect/GameLoginSceneLink.h"
 #include "Network/Server/WSclient.h" // CurrentProtocolState and its states
-#include "Character/CharMakeWin.h"
 #include "UI/Core/SceneUICoordinator.h"
+#include "UI/Core/WindowCommon.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
@@ -25,6 +27,7 @@
 #include <array>
 
 extern BOOL g_bGameServerConnected;
+extern bool g_bWndActive;
 
 namespace
 {
@@ -162,6 +165,66 @@ TEST_SUITE("Game login scene link")
         g_LoginMainWin.mu::ui::window::CObject::Show(loginMainWasVisible);
         g_ServerSelWin.mu::ui::window::CObject::Show(serverListWasVisible);
         g_CreditWin.mu::ui::window::CObject::Show(creditsWereVisible);
+    }
+
+    TEST_CASE("hidden credits do not close on Escape")
+    {
+        struct CloseObserved
+        {
+        };
+
+        class CreditWindow : public CCreditWin
+        {
+        public:
+            void Show(bool show) override
+            {
+                if (!show)
+                    throw CloseObserved{};
+                CCreditWin::Show(show);
+            }
+        } window;
+
+        struct InputStateGuard
+        {
+            using KeyState = mu::ui::window::CNewKeyInput::KEY_STATE;
+
+            bool wasActive = g_bWndActive;
+            bool wasTextEditMode = false;
+            KeyState previousEscapeState = KeyState::KEY_NONE;
+
+            InputStateGuard()
+            {
+                g_bWndActive = true;
+                wasTextEditMode = CInput::Instance().IsTextEditMode();
+                CInput::Instance().SetTextEditMode(false);
+                auto* input = g_pNewKeyInput;
+                if (input->IsPress(VK_ESCAPE))
+                    previousEscapeState = KeyState::KEY_PRESS;
+                else if (input->IsRepeat(VK_ESCAPE))
+                    previousEscapeState = KeyState::KEY_REPEAT;
+                else if (input->IsRelease(VK_ESCAPE))
+                    previousEscapeState = KeyState::KEY_RELEASE;
+                input->SetKeyState(VK_ESCAPE, KeyState::KEY_PRESS);
+            }
+
+            ~InputStateGuard()
+            {
+                g_pNewKeyInput->SetKeyState(VK_ESCAPE, previousEscapeState);
+                CInput::Instance().SetTextEditMode(wasTextEditMode);
+                g_bWndActive = wasActive;
+            }
+        } inputState;
+
+        window.mu::ui::window::CObject::Show(false);
+        REQUIRE_FALSE(window.IsVisible());
+        REQUIRE(CInput::Instance().IsKeyDown(VK_ESCAPE));
+
+        // The override throws before CloseWin can reach reconnect or music-switch side effects.
+        bool updateResult = false;
+        CHECK_NOTHROW(updateResult = window.Update());
+        CHECK(updateResult);
+        CHECK_FALSE(window.IsVisible());
+        CHECK(CInput::Instance().IsKeyDown(VK_ESCAPE));
     }
 
     TEST_CASE("an empty screen waits for the server of the step it took")
