@@ -50,4 +50,17 @@ TEST_CASE("An item cut short reads no byte past its end [network][items]")
     CHECK(params.ExcellentFlags == 0);
     CHECK(params.SocketCount == 0);
     CHECK(params.SocketBonusOption == 0);
+
+    // The callers cut the item out of its packet with this length (itemData.subspan(0, length)): it stays inside the
+    // bytes there are, also when they end inside the socket bytes.
+    CHECK(CalcItemLength(itemData) == 6);
+    CHECK(CalcItemLength(std::span<const BYTE>(memory.data(), 8)) == 8);
+}
+
+// Fewer bytes than the five fixed ones, so not even the flags byte is there: the length is what there is.
+TEST_CASE("An item shorter than its five fixed bytes has the length of what there is [network][items]")
+{
+    const std::array<BYTE, 3> itemStart{0x00, 22, 9};
+    CHECK(CalcItemLength(itemStart) == 3);
+    CHECK(CalcItemLength(std::span<const BYTE>()) == 0);
 }

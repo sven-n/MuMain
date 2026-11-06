@@ -476,6 +476,7 @@ typedef struct {
 #pragma pack(pop)
 
 // The length of an item in the layout above, read from its option flags: where the next item of a packet starts.
+// Never more than the buffer holds: an item cut short (logged) gets the bytes that are there.
 int CalcItemLength(std::span<const BYTE> ReceiveBuffer);
 
 ///////////////////////////////////////////////////////////////////////////////
