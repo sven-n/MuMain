@@ -5,7 +5,9 @@
 #include "MuMonsterSoundsUI.h"
 
 #include "MonsterEdits.h"
+#include "MonsterOwnValues.h"
 #include "MonsterSelection.h"
+#include "MonsterShownValues.h"
 #include "MonsterShownModel.h"
 #include "MonsterSoundPreview.h"
 #include "MonsterStepLabel.h"
@@ -202,6 +204,19 @@ bool MuMonsterSoundsUI::RememberSelection()
     return changed;
 }
 
+const ShownValues::ShownMonster* MuMonsterSoundsUI::ReadSelectedMonster()
+{
+    const int key = ShownValues::GetSelectedKey();
+    const int version = ToolWindow::GetDataVersion();
+    if (key != m_selectedKey || version != m_selectedVersion)
+    {
+        m_selected = ShownValues::Load(key);
+        m_selectedKey = key;
+        m_selectedVersion = version;
+    }
+    return m_selected ? &*m_selected : nullptr;
+}
+
 void MuMonsterSoundsUI::FollowSelection(const MonsterDefinition* monster)
 {
     // A set shown that is gone (an undo of its adding or renaming, a revert)
@@ -229,12 +244,15 @@ void MuMonsterSoundsUI::Render(bool* open)
         return;
     }
     const int number = g_MonsterSelection.GetNumber();
-    const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+    // A monster as a whole shows the sound sets its numbers share (D61), and
+    // the set and model of its shared look below.
+    const ShownValues::ShownMonster* shown = ReadSelectedMonster();
+    const MonsterDefinition* monster = shown != nullptr ? &shown->monster : nullptr;
     FollowSelection(monster);
-    ShownModel::RenderSelectedMonster(number, monster);
-    if (monster != nullptr)
+    ShownModel::RenderSelectedMonster(number, monster, shown != nullptr && shown->wholeMonster);
+    if (shown != nullptr)
     {
-        RenderMonster(*monster);
+        RenderMonster(*shown);
     }
     ImGui::Separator();
     RenderSetList();
@@ -304,17 +322,22 @@ bool MuMonsterSoundsUI::SetCombo(const char* id, std::string& value, const char*
     return picked;
 }
 
-void MuMonsterSoundsUI::RenderMonster(const MonsterDefinition& monster)
+void MuMonsterSoundsUI::RenderMonster(const ShownValues::ShownMonster& shown)
 {
+    const MonsterDefinition& monster = shown.monster;
+    OwnValues::RenderLine(shown, Data::Monsters::MonsterValueField::SoundSet);
+    const OwnValues::State state = OwnValues::GetState(shown, Data::Monsters::MonsterValueField::SoundSet);
     ImGui::TextUnformatted(I18N::Editor::SoundSet);
     ImGui::SameLine();
     std::string name = monster.soundSet;
+    OwnValues::BeginField(state);
     if (SetCombo("##MonsterSet", name, I18N::Editor::NoSoundSet))
     {
-        MonsterDefinition changed = monster;
-        changed.soundSet = name;
-        g_MonsterEdits.SetMonster(StepLabel::SoundSetOf(changed), changed);
+        ShownValues::ShownMonster changed = shown;
+        changed.monster.soundSet = name;
+        ShownValues::Store(StepLabel::SoundSetOf(changed), changed);
     }
+    OwnValues::EndField(state);
     if (!monster.soundSet.empty())
     {
         ImGui::SameLine();
@@ -325,17 +348,20 @@ void MuMonsterSoundsUI::RenderMonster(const MonsterDefinition& monster)
     }
     if (!monster.randomVariants.empty())
     {
-        RenderVariants(monster);
+        RenderVariants(shown);
     }
 }
 
 // The looks the game draws for the monster, each with its set (Q-MN83).
-void MuMonsterSoundsUI::RenderVariants(const MonsterDefinition& monster)
+void MuMonsterSoundsUI::RenderVariants(const ShownValues::ShownMonster& shown)
 {
+    const MonsterDefinition& monster = shown.monster;
     if (!ImGui::CollapsingHeader(I18N::Editor::RandomVariants, ImGuiTreeNodeFlags_DefaultOpen))
     {
         return;
     }
+    OwnValues::RenderLine(shown, Data::Monsters::MonsterValueField::RandomVariants);
+    const OwnValues::State state = OwnValues::GetState(shown, Data::Monsters::MonsterValueField::RandomVariants);
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::RandomVariantsNote);
     ImGui::PopTextWrapPos();
@@ -367,13 +393,15 @@ void MuMonsterSoundsUI::RenderVariants(const MonsterDefinition& monster)
         ImGui::TextUnformatted(variant.model.c_str());
         ImGui::TableNextColumn();
         std::string name = variant.soundSet.value_or(std::string());
+        OwnValues::BeginField(state);
         if (SetCombo("##VariantSet", name, I18N::Editor::TheEntrySet))
         {
-            MonsterDefinition changed = monster;
-            std::optional<std::string>& value = changed.randomVariants[index].soundSet;
+            ShownValues::ShownMonster changed = shown;
+            std::optional<std::string>& value = changed.monster.randomVariants[index].soundSet;
             value = name.empty() ? std::nullopt : std::optional<std::string>(name);
-            g_MonsterEdits.SetMonster(StepLabel::SoundSetOf(changed), changed);
+            ShownValues::Store(StepLabel::SoundSetOf(changed), changed);
         }
+        OwnValues::EndField(state);
         if (variant.soundSet)
         {
             ImGui::SameLine();

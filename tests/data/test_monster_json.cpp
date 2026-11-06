@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -120,7 +121,7 @@ TEST_CASE("Monster data: a number twice is an error, the first one is kept [data
 TEST_CASE("Monster data: a bad header or list is an error, unknown fields are warnings [data][monsters]")
 {
     CHECK(HasFatal(Read("not json").issues));
-    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "monsters": [] })").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 3, "monsters": [] })").issues));
     CHECK(HasIssueAbout(Read(R"({ "formatVersion": 1, "monsters": {} })").issues, "monsters", "a list"));
     CHECK(HasIssueAbout(Read(MonsterFile("5")).issues, "monsters[0]", "an object"));
 
@@ -142,17 +143,21 @@ TEST_CASE("Monster data: the writer sorts by number and puts each name on one li
     const std::string text = Data::Monsters::WriteMonstersJson(monsters);
 
     CHECK(text == "{\n"
-                  "  \"formatVersion\": 1,\n"
+                  "  \"formatVersion\": 2,\n"
                   "  \"monsters\": [\n"
                   "    {\n"
-                  "      \"number\": 2,\n"
                   "      \"name\": {\"en\": \"Budge Dragon\", \"es\": \"Dragón Escurridizo\", \"pt\": \"Dragão Lento\"},\n"
-                  "      \"kind\": \"monster\"\n"
+                  "      \"kind\": \"monster\",\n"
+                  "      \"numbers\": [\n"
+                  "        {\"number\": 2}\n"
+                  "      ]\n"
                   "    },\n"
                   "    {\n"
-                  "      \"number\": 251,\n"
                   "      \"name\": {\"en\": \"Hanzo the Blacksmith\"},\n"
-                  "      \"kind\": \"npc\"\n"
+                  "      \"kind\": \"npc\",\n"
+                  "      \"numbers\": [\n"
+                  "        {\"number\": 251}\n"
+                  "      ]\n"
                   "    }\n"
                   "  ]\n"
                   "}\n");
@@ -277,7 +282,8 @@ TEST_CASE("Monster data: a monster names the model it appears with [data][monste
     MonsterDefinition budge = Monster(2, "Budge Dragon");
     budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
     const std::string text = Data::Monsters::WriteMonstersJson(std::array{budge});
-    CHECK(text.find("\"kind\": \"monster\",\n      \"model\": \"MONSTER_MODEL_BUDGE_DRAGON\"\n") != std::string::npos);
+    CHECK(text.find("\"kind\": \"monster\",\n      \"model\": \"MONSTER_MODEL_BUDGE_DRAGON\",\n      \"numbers\"") !=
+          std::string::npos);
     const ReadResult back = Read(text);
     REQUIRE(back.monsters.size() == 1);
     CHECK(back.monsters[0] == budge);
@@ -377,4 +383,344 @@ TEST_CASE("Monster data: a wrong sound set or random variant is an error [data][
         CHECK(read.monsters.empty());
         CHECK(HasIssueAbout(read.issues, test.field, test.message));
     }
+}
+
+namespace
+{
+using Data::Monsters::MonsterGroup;
+
+struct GroupsResult
+{
+    std::vector<MonsterGroup> monsters;
+    std::vector<ItemDataIssue> issues;
+};
+
+GroupsResult ReadGroups(const std::string& text)
+{
+    GroupsResult result;
+    Data::Monsters::ReadMonstersJson(text, "Monsters.json", result.monsters, result.issues);
+    return result;
+}
+
+// One monster of version 2 with nothing else around it.
+std::string GroupFile(const std::string& monster)
+{
+    return R"({ "formatVersion": 2, "monsters": [ )" + monster + " ] }";
+}
+
+Data::Monsters::MonsterAttacks GenericPattern()
+{
+    Data::Monsters::MonsterAttacks attacks;
+    attacks.otherwiseGeneric = true;
+    return attacks;
+}
+
+Data::Monsters::MonsterAttacks Rotation()
+{
+    Data::Monsters::MonsterAttacks attacks;
+    attacks.otherwise = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    return attacks;
+}
+
+// Death Centurion of Kalima 1 (145) and 7 (336), which has no attack data (P26).
+MonsterGroup Centurion()
+{
+    MonsterDefinition shared = Monster(145, "Death Centurion");
+    shared.names.Set("es", "Centurión de la Muerte");
+    shared.model = "MONSTER_MODEL_DEATH_CENTURION";
+    shared.attacks = Rotation();
+    MonsterDefinition first = shared;
+    MonsterDefinition seventh = shared;
+    seventh.number = 336;
+    seventh.attacks = GenericPattern();
+    return {shared, {first, seventh}};
+}
+} // namespace
+
+TEST_CASE("Monster data: a monster's numbers have its values, and their own ones instead (D61) [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(GroupFile(
+        R"({ "name": {"en": "Death Centurion", "es": "Centurión de la Muerte"}, "kind": "monster",
+             "model": "MONSTER_MODEL_DEATH_CENTURION", "attacks": {"otherwise": ["attack1", "attack2"]},
+             "numbers": [ {"number": 145},
+                          {"number": 336, "attacks": {"otherwise": "generic"}},
+                          {"number": 337, "name": "Kalima Centurion", "kind": "npc"} ] })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    const MonsterGroup& monster = read.monsters[0];
+    REQUIRE(monster.numbers.size() == 3);
+    CHECK(monster.shared.names.Get("es") == "Centurión de la Muerte");
+    CHECK(monster.shared.attacks == Rotation());
+
+    const MonsterDefinition& first = monster.numbers[0];
+    CHECK(first.number == 145);
+    CHECK(first.names == monster.shared.names);
+    CHECK(first.model == "MONSTER_MODEL_DEATH_CENTURION");
+    CHECK(first.attacks == Rotation());
+
+    const MonsterDefinition& seventh = monster.numbers[1];
+    CHECK(seventh.number == 336);
+    CHECK(seventh.model == "MONSTER_MODEL_DEATH_CENTURION");
+    CHECK(seventh.attacks == GenericPattern());
+
+    // A number's own name replaces all of the monster's, not one language.
+    const MonsterDefinition& renamed = monster.numbers[2];
+    CHECK(renamed.names.GetNeutral() == "Kalima Centurion");
+    CHECK(renamed.names.Get("es") == "Kalima Centurion");
+    CHECK(renamed.kind == MonsterKind::Npc);
+    CHECK(renamed.attacks == Rotation());
+
+    // The game's list has the entry of each number.
+    std::vector<MonsterDefinition> entries;
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ReadMonstersJson(
+        GroupFile(R"({ "name": "X", "kind": "monster", "numbers": [{"number": 9}, {"number": 3}] })"), "Monsters.json",
+        entries, issues);
+    REQUIRE(entries.size() == 2);
+    CHECK(entries[0].number == 9);
+    CHECK(entries[1].number == 3);
+}
+
+TEST_CASE("Monster data: a number's own value may be empty where its monster's is not [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(GroupFile(
+        R"({ "name": "Chaos Castle 2", "kind": "monster", "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+             "soundSet": "Chaos Castle", "attacks": {"otherwise": "attack2"},
+             "mapVariants": [{"maps": [9], "attacks": {"otherwise": "attack1"}}],
+             "randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"}],
+             "numbers": [ {"number": 163},
+                          {"number": 164, "model": "", "soundSet": "", "attacks": null, "mapVariants": [],
+                           "randomVariants": []} ] })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    REQUIRE(read.monsters[0].numbers.size() == 2);
+    const MonsterDefinition& full = read.monsters[0].numbers[0];
+    CHECK(full.soundSet == "Chaos Castle");
+    CHECK(full.attacks.has_value());
+    CHECK(full.mapVariants.size() == 1);
+    CHECK(full.randomVariants.size() == 1);
+    const MonsterDefinition& empty = read.monsters[0].numbers[1];
+    CHECK(empty.model.empty());
+    CHECK(empty.soundSet.empty());
+    CHECK_FALSE(empty.attacks.has_value());
+    CHECK(empty.mapVariants.empty());
+    CHECK(empty.randomVariants.empty());
+
+    // The writer writes them so, and they read back the same.
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(read.monsters));
+    INFO(text);
+    CHECK(text.find(R"({"number": 164, "model": "", "soundSet": "", "attacks": null, "mapVariants": [], )"
+                    R"("randomVariants": []})") != std::string::npos);
+    CHECK(ReadGroups(text).monsters == read.monsters);
+}
+
+TEST_CASE("Monster data: the writer writes the shared values once, and each number's own ones [data][monsters]")
+{
+    MonsterGroup centurion = Centurion();
+    MonsterGroup budge{Monster(2, "Budge Dragon"), {Monster(2, "Budge Dragon")}};
+    const std::array monsters = {centurion, budge};
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(monsters));
+
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 2,\n"
+                  "  \"monsters\": [\n"
+                  "    {\n"
+                  "      \"name\": {\"en\": \"Budge Dragon\"},\n"
+                  "      \"kind\": \"monster\",\n"
+                  "      \"numbers\": [\n"
+                  "        {\"number\": 2}\n"
+                  "      ]\n"
+                  "    },\n"
+                  "    {\n"
+                  "      \"name\": {\"en\": \"Death Centurion\", \"es\": \"Centurión de la Muerte\"},\n"
+                  "      \"kind\": \"monster\",\n"
+                  "      \"model\": \"MONSTER_MODEL_DEATH_CENTURION\",\n"
+                  "      \"attacks\": {\n"
+                  "        \"otherwise\": [\"attack1\", \"attack2\"],\n"
+                  "        \"clearSkill\": \"never\"\n"
+                  "      },\n"
+                  "      \"numbers\": [\n"
+                  "        {\"number\": 145},\n"
+                  "        {\"number\": 336, \"attacks\": {\"otherwise\": \"generic\", \"clearSkill\": \"never\"}}\n"
+                  "      ]\n"
+                  "    }\n"
+                  "  ]\n"
+                  "}\n");
+    const GroupsResult back = ReadGroups(text);
+    CHECK_MESSAGE(back.issues.empty(), Messages(back.issues));
+    REQUIRE(back.monsters.size() == 2);
+    CHECK(back.monsters[0] == budge);
+    CHECK(back.monsters[1] == centurion);
+}
+
+TEST_CASE("Monster data: the writer sorts the numbers, and the monsters by their first number [data][monsters]")
+{
+    MonsterGroup centurion = Centurion();
+    std::swap(centurion.numbers[0], centurion.numbers[1]);
+    MonsterGroup late{Monster(200, "Late"), {Monster(200, "Late")}};
+    const std::array monsters = {late, centurion};
+
+    const GroupsResult back = ReadGroups(Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(monsters)));
+
+    REQUIRE(back.monsters.size() == 2);
+    REQUIRE(back.monsters[0].numbers.size() == 2);
+    CHECK(back.monsters[0].numbers[0].number == 145);
+    CHECK(back.monsters[0].numbers[1].number == 336);
+    CHECK(back.monsters[1].numbers[0].number == 200);
+}
+
+TEST_CASE("Monster data: a monster with one number shares all its values with it [data][monsters]")
+{
+    // The shared values of a monster whose other numbers went no longer count.
+    MonsterGroup monster = Centurion();
+    monster.numbers.erase(monster.numbers.begin());
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(&monster, 1));
+
+    INFO(text);
+    CHECK(text.find("\"otherwise\": \"generic\"") != std::string::npos);
+    CHECK(text.find("{\"number\": 336}") != std::string::npos);
+    const GroupsResult back = ReadGroups(text);
+    REQUIRE(back.monsters.size() == 1);
+    CHECK(back.monsters[0].numbers == monster.numbers);
+    CHECK(Data::Monsters::GetSharedValues(back.monsters[0]) == monster.numbers[0]);
+
+    // A monster without numbers is not written.
+    MonsterGroup empty = Centurion();
+    empty.numbers.clear();
+    CHECK(ReadGroups(Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(&empty, 1))).monsters.empty());
+}
+
+TEST_CASE("Monster data: a monster needs numbers, and a number is in one monster once [data][monsters]")
+{
+    CHECK(HasIssueAbout(ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster" })")).issues, "monsters[0].numbers",
+                        "one or more numbers"));
+    CHECK(HasIssueAbout(ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster", "numbers": [] })")).issues,
+                        "monsters[0].numbers", "one or more numbers"));
+    CHECK(HasIssueAbout(ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster", "numbers": [5] })")).issues,
+                        "monsters[0].numbers[0]", "an object"));
+    CHECK(HasIssueAbout(ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster", "numbers": [{}] })")).issues,
+                        "monsters[0].numbers[0].number", "0 to 1023"));
+    // A version 2 entry with a number of its own is no monster.
+    CHECK(HasIssueAbout(ReadGroups(GroupFile(R"({ "number": 7, "name": "X", "kind": "monster" })")).issues,
+                        "monsters[0].numbers", "one or more numbers"));
+
+    const GroupsResult twice = ReadGroups(R"({ "formatVersion": 2, "monsters": [
+        { "name": "First", "kind": "monster", "numbers": [{"number": 7}, {"number": 8}, {"number": 7}] },
+        { "name": "Second", "kind": "monster", "numbers": [{"number": 8}, {"number": 9}] } ] })");
+    CHECK(HasIssueAbout(twice.issues, "monster 7 number", "more than once"));
+    CHECK(HasIssueAbout(twice.issues, "monster 8 number", "more than once"));
+    REQUIRE(twice.monsters.size() == 2);
+    REQUIRE(twice.monsters[0].numbers.size() == 2);
+    CHECK(twice.monsters[0].numbers[1].number == 8);
+    REQUIRE(twice.monsters[1].numbers.size() == 1);
+    CHECK(twice.monsters[1].numbers[0].number == 9);
+}
+
+TEST_CASE("Monster data: an error leaves out the number it is in, or the monster for a shared value [data][monsters]")
+{
+    const GroupsResult own = ReadGroups(GroupFile(
+        R"({ "name": "X", "kind": "monster", "numbers": [{"number": 7}, {"number": 8, "kind": "boss"}] })"));
+    CHECK(HasIssueAbout(own.issues, "monster 8 kind", "monster, npc, trap or other"));
+    REQUIRE(own.monsters.size() == 1);
+    REQUIRE(own.monsters[0].numbers.size() == 1);
+    CHECK(own.monsters[0].numbers[0].number == 7);
+
+    // A shared value names the monster by its first number.
+    const GroupsResult shared =
+        ReadGroups(GroupFile(R"({ "name": "X", "kind": "boss", "numbers": [{"number": 7}, {"number": 8}] })"));
+    CHECK(HasIssueAbout(shared.issues, "monster 7 kind", "monster, npc, trap or other"));
+    CHECK(shared.monsters.empty());
+
+    // An own model that is one of the looks the number shares.
+    const GroupsResult look = ReadGroups(GroupFile(
+        R"({ "name": "X", "kind": "monster", "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+             "randomVariants": [{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"}],
+             "numbers": [{"number": 163}, {"number": 164, "model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD"}] })"));
+    CHECK(HasIssueAbout(look.issues, "monster 164 randomVariants", "the entry's model and a variant's"));
+    REQUIRE(look.monsters.size() == 1);
+    CHECK(look.monsters[0].numbers.size() == 1);
+}
+
+TEST_CASE("Monster data: unknown fields of a monster and of a number are warnings [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(
+        GroupFile(R"({ "name": "X", "kind": "monster", "scale": 2, "numbers": [{"number": 7, "size": 3}] })"));
+
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "monster 7 scale", "unknown field"));
+    CHECK(HasIssueAbout(read.issues, "monster 7 size", "unknown field"));
+    REQUIRE(read.monsters.size() == 1);
+    CHECK(read.monsters[0].numbers.size() == 1);
+}
+
+TEST_CASE("Monster data: a file of version 1 has a monster for each entry [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(R"({ "formatVersion": 1, "monsters": [
+        { "number": 145, "name": "Death Centurion", "kind": "monster", "attacks": {"otherwise": "attack2"} },
+        { "number": 336, "name": "Death Centurion", "kind": "monster" } ] })");
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 2);
+    for (const MonsterGroup& monster : read.monsters)
+    {
+        REQUIRE(monster.numbers.size() == 1);
+        CHECK(monster.shared == monster.numbers[0]);
+    }
+    CHECK(read.monsters[0].numbers[0].attacks.has_value());
+    CHECK_FALSE(read.monsters[1].numbers[0].attacks.has_value());
+}
+
+TEST_CASE("Monster data: each number names the maps it appears on (Q-MN61) [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(GroupFile(
+        R"({ "name": "Illusion of Kundun", "kind": "monster",
+             "numbers": [ {"number": 161, "maps": [24]},
+                          {"number": 197, "maps": [{"map": 32, "stage": 6}, 27]},
+                          {"number": 338} ] })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    REQUIRE(read.monsters.size() == 1);
+    const std::vector<MonsterDefinition>& numbers = read.monsters[0].numbers;
+    REQUIRE(numbers.size() == 3);
+    CHECK(numbers[0].maps == std::vector<Data::Maps::MapRef>{{24, 0}});
+    // Sorted, a stage after its map's number.
+    CHECK(numbers[1].maps == std::vector<Data::Maps::MapRef>{{27, 0}, {32, 6}});
+    CHECK(numbers[2].maps.empty());
+    // A monster has no maps of its own; each number has its maps.
+    CHECK(read.monsters[0].shared.maps.empty());
+
+    const std::string text = Data::Monsters::WriteMonstersJson(std::span<const MonsterGroup>(read.monsters));
+    INFO(text);
+    CHECK(text.find("{\"number\": 161, \"maps\": [24]},\n") != std::string::npos);
+    CHECK(text.find("{\"number\": 197, \"maps\": [27, {\"map\": 32, \"stage\": 6}]},\n") != std::string::npos);
+    CHECK(text.find("{\"number\": 338}\n") != std::string::npos);
+    CHECK(ReadGroups(text).monsters == read.monsters);
+
+    // A monster with one number writes its maps with the number too.
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.maps = {{0, 0}, {2, 0}};
+    const std::string single = Data::Monsters::WriteMonstersJson(std::array{budge});
+    CHECK(single.find("{\"number\": 2, \"maps\": [0, 2]}") != std::string::npos);
+    CHECK(Read(single).monsters == std::vector{budge});
+}
+
+TEST_CASE("Monster data: maps that are no list of maps are an error, a monster's maps a warning [data][monsters]")
+{
+    const GroupsResult bad = ReadGroups(GroupFile(
+        R"({ "name": "X", "kind": "monster", "numbers": [{"number": 7, "maps": 24}, {"number": 8, "maps": ["x"]}] })"));
+    CHECK(HasIssueAbout(bad.issues, "monster 7 maps", ""));
+    CHECK(HasIssueAbout(bad.issues, "monster 8 maps[0]", ""));
+    CHECK(HasFatal(bad.issues));
+    CHECK(bad.monsters.empty());
+
+    const GroupsResult shared =
+        ReadGroups(GroupFile(R"({ "name": "X", "kind": "monster", "maps": [24], "numbers": [{"number": 7}] })"));
+    CHECK_FALSE(HasFatal(shared.issues));
+    CHECK(HasIssueAbout(shared.issues, "monster 7 maps", "unknown field"));
+    REQUIRE(shared.monsters.size() == 1);
+    CHECK(shared.monsters[0].numbers[0].maps.empty());
 }

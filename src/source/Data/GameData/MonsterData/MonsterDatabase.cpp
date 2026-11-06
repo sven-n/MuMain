@@ -62,6 +62,7 @@ void MonsterDatabase::Build(std::span<const MonsterDefinition> monsters, std::st
         FillNames(number);
     }
     ++m_version;
+    ++m_builds;
 }
 
 void MonsterDatabase::SetDisplayLocale(std::string_view locale)
