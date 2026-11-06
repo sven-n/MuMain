@@ -24,6 +24,22 @@
 #include <array>
 #include <cstring>
 
+#ifdef MU_TEST_COMBAT_AOT_TRANSPORT
+#include <winsock2.h>
+#include "Dotnet/Connection.h"
+#include "Render/Models/ZzzBMD.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Options/OptionWindow.h"
+#include "World/MapInfra/MapManager.h"
+#include <chrono>
+#include <filesystem>
+#include <vector>
+extern DWORD g_dwLatestMagicTick;
+extern int CurrentSkill;
+extern int MouseUpdateTime;
+extern int MouseUpdateTimeMax;
+#endif
+
 extern MovementSkill g_MovementSkill;
 extern int TargetX;
 extern int TargetY;
@@ -105,6 +121,15 @@ struct SkillFixture
         g_MovementSkill.m_iTarget = -1;
     }
 
+    ITEM& EquipCycloneSword()
+    {
+        auto& weapon = machine.Equipment[EQUIPMENT_WEAPON_RIGHT];
+        weapon.Type = ITEM_SHORT_SWORD;
+        weapon.SpecialNum = 1;
+        weapon.Special[0] = AT_SKILL_CYCLONE;
+        return weapon;
+    }
+
     ActionSkillType Select(int seconds = 0, std::size_t nearby = 0, std::size_t attacking = 0)
     {
         return rotation.Select(config, seconds, nearby, attacking);
@@ -152,6 +177,199 @@ void CheckActionsWaitForWalk()
     CHECK(TargetX == targetX);
     CHECK(TargetY == targetY);
 }
+
+void CheckCastRefused()
+{
+    CHECK_FALSE(Hero->SkillSuccess);
+    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
+    CHECK_FALSE(Hero->Movement);
+}
+
+#ifdef MU_TEST_COMBAT_AOT_TRANSPORT
+// Reuses the public Cursed Temple test's real loopback/AOT transport, without its UI fixture.
+class SkillPacketPeer
+{
+public:
+    SkillPacketPeer()
+    {
+        try
+        {
+            Open();
+        }
+        catch (...)
+        {
+            Close();
+            throw;
+        }
+    }
+
+    ~SkillPacketPeer()
+    {
+        Close();
+    }
+
+    void Accept()
+    {
+        fd_set readable;
+        FD_ZERO(&readable);
+        FD_SET(m_listener, &readable);
+        constexpr long AcceptTimeoutSeconds = 2;
+        timeval wait{AcceptTimeoutSeconds, 0};
+        REQUIRE(select(0, &readable, nullptr, nullptr, &wait) == 1);
+        m_peer = accept(m_listener, nullptr, nullptr);
+        REQUIRE(m_peer != INVALID_SOCKET);
+    }
+
+    std::vector<BYTE> Collect()
+    {
+        std::vector<BYTE> bytes;
+        constexpr auto CollectTimeout = std::chrono::milliseconds(300);
+        constexpr long PollMicroseconds = 10000;
+        constexpr std::size_t ReceiveCapacity = 256;
+        const auto until = std::chrono::steady_clock::now() + CollectTimeout;
+        while (std::chrono::steady_clock::now() < until)
+        {
+            fd_set readable;
+            FD_ZERO(&readable);
+            FD_SET(m_peer, &readable);
+            timeval wait{0, PollMicroseconds};
+            const int ready = select(0, &readable, nullptr, nullptr, &wait);
+            REQUIRE(ready != SOCKET_ERROR);
+            if (ready == 0)
+                continue;
+            char buffer[ReceiveCapacity];
+            const int count = recv(m_peer, buffer, sizeof(buffer), 0);
+            REQUIRE(count > 0);
+            REQUIRE(bytes.size() + static_cast<std::size_t>(count) <= ReceiveCapacity);
+            bytes.insert(bytes.end(), buffer, buffer + count);
+        }
+        return bytes;
+    }
+
+    int port = 0;
+
+private:
+    void Open()
+    {
+        WSADATA data{};
+        REQUIRE(WSAStartup(MAKEWORD(2, 2), &data) == 0);
+        m_started = true;
+        m_listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        REQUIRE(m_listener != INVALID_SOCKET);
+        sockaddr_in address{};
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        REQUIRE(bind(m_listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == 0);
+        REQUIRE(listen(m_listener, 1) == 0);
+        int size = sizeof(address);
+        REQUIRE(getsockname(m_listener, reinterpret_cast<sockaddr*>(&address), &size) == 0);
+        port = ntohs(address.sin_port);
+    }
+
+    void Close()
+    {
+        if (m_peer != INVALID_SOCKET)
+            closesocket(m_peer);
+        if (m_listener != INVALID_SOCKET)
+            closesocket(m_listener);
+        if (m_started)
+            WSACleanup();
+    }
+    SOCKET m_listener = INVALID_SOCKET;
+    SOCKET m_peer = INVALID_SOCKET;
+    bool m_started = false;
+};
+
+struct CombatGlobals
+{
+    std::unique_ptr<Connection>& connection;
+    BMD* models = Models;
+    CHARACTER* characters = CharactersClient;
+    Connection* socket = SocketClient;
+    int world = gMapManager.WorldActive;
+    DWORD magicTick = g_dwLatestMagicTick;
+    int currentSkill = CurrentSkill;
+    int mouseTime = MouseUpdateTime;
+    int mouseTimeMax = MouseUpdateTimeMax;
+    std::wstring language = g_strSelectedML;
+    std::filesystem::path directory = std::filesystem::current_path();
+    bool ownsUi = false;
+
+    ~CombatGlobals()
+    {
+        if (ownsUi)
+            g_pNewUISystem->Release();
+        connection.reset();
+        SocketClient = socket;
+        Models = models;
+        CharactersClient = characters;
+        gMapManager.WorldActive = world;
+        g_dwLatestMagicTick = magicTick;
+        CurrentSkill = currentSkill;
+        MouseUpdateTime = mouseTime;
+        MouseUpdateTimeMax = mouseTimeMax;
+        g_strSelectedML = language;
+        std::filesystem::current_path(directory);
+    }
+};
+
+struct AcceptedCastFixture : SkillFixture
+{
+    std::unique_ptr<CHARACTER[]> characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    std::unique_ptr<BMD[]> models = std::make_unique<BMD[]>(MODEL_PLAYER + 1);
+    SkillPacketPeer peer;
+    std::unique_ptr<Connection> connection;
+    // Tears down UI and connection before restoring globals and freeing their storage, even if setup throws.
+    CombatGlobals restore{connection};
+
+    AcceptedCastFixture()
+    {
+        REQUIRE(g_pNewUIMng == nullptr);
+        std::filesystem::current_path(MU_BIN_DIR);
+        REQUIRE(std::filesystem::is_regular_file("Data/Local/Eng/Slide_Eng.bmd"));
+        g_strSelectedML = L"Eng";
+        Models = models.get();
+        Models[MODEL_PLAYER].Actions = new Action_t[MAX_PLAYER_ACTION]{};
+        Models[MODEL_PLAYER].NumActions = MAX_PLAYER_ACTION;
+        CharactersClient = characters.get();
+        gMapManager.WorldActive = WD_0LORENCIA;
+        hero.Helper.Type = -1;
+        constexpr short HeroKey = 512;
+        hero.Key = HeroKey;
+        hero.PositionX = hero.PositionY = MovementStartTile;
+        hero.Object.Position[0] = hero.Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+        SelectedCharacter = 0;
+        // CheckTarget gets valid coordinates, while CheckAttack refuses this dead target before combat UI access.
+        characters[0].Dead = 1;
+        characters[0].Object.Position[0] = hero.Object.Position[0];
+        characters[0].Object.Position[1] = hero.Object.Position[1];
+        REQUIRE(munique_client_library_handle != nullptr);
+        connection = std::make_unique<Connection>(u"127.0.0.1", peer.port, false, nullptr);
+        SocketClient = connection.get();
+        REQUIRE(connection->IsConnected());
+        peer.Accept();
+        restore.ownsUi = true;
+        REQUIRE(g_pNewUISystem->Create());
+        g_pOption->SetAutoAttack(false);
+    }
+
+    std::vector<BYTE> ExpectSkillPacket(BYTE code, ActionSkillType skill, std::size_t size)
+    {
+        // Packet package 0.11.0: unencrypted connection preserves C3, opcode at 2, big-endian skill at 3.
+        constexpr BYTE SkillHeader = 0xC3;
+        constexpr std::size_t CodeOffset = 2;
+        constexpr std::size_t SkillOffset = 3;
+        const auto bytes = peer.Collect();
+        REQUIRE(bytes.size() == size);
+        REQUIRE(size >= SkillOffset + sizeof(WORD));
+        CHECK(bytes[0] == SkillHeader);
+        CHECK(bytes[1] == size);
+        CHECK(bytes[CodeOffset] == code);
+        CHECK(((static_cast<WORD>(bytes[SkillOffset]) << 8) | bytes[SkillOffset + 1]) == skill);
+        return bytes;
+    }
+};
+#endif
 } // namespace
 
 TEST_CASE("Helper actions finish a walk across slow frames before replanning [helper_movement]")
@@ -256,9 +474,9 @@ TEST_CASE("Automatic selection reads real cooldowns without consuming them [help
     CHECK(CharacterAttribute->SkillDelay[2] == 0);
 }
 
+// These four cases call Knight dispatch directly, without ExecuteSkill routing or accepted casts.
 TEST_CASE("Knight cooldown refusal cannot complete a cast [helper_execution]")
 {
-    constexpr int ConfiguredDelay = 500;
     constexpr int RemainingDelay = 50;
     constexpr float SkillDistance = 2.f;
     for (const auto skill : {AT_SKILL_CYCLONE, AT_SKILL_TWISTING_SLASH, AT_SKILL_RAGEFUL_BLOW})
@@ -268,32 +486,17 @@ TEST_CASE("Knight cooldown refusal cannot complete a cast [helper_execution]")
             CAPTURE(skill);
             CAPTURE(previousCast);
             SkillFixture fixture;
-            Hero->Object.Type = MODEL_PLAYER;
-            Hero->Object.CurrentAction = PLAYER_STOP_MALE;
-            Hero->Movement = false;
+            fixture.PrepareKnightCast(skill);
             Hero->SkillSuccess = previousCast;
-            Hero->CurrentSkill = 0;
-            CharacterAttribute->Skill[0] = skill;
-            SkillAttribute[skill].Delay = ConfiguredDelay;
             CharacterAttribute->SkillDelay[0] = RemainingDelay;
-            for (auto& item : fixture.machine.Equipment)
-                item.Type = -1;
-            auto& weapon = fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT];
-            weapon.Type = ITEM_SHORT_SWORD;
-            weapon.SpecialNum = 1;
-            weapon.Special[0] = AT_SKILL_CYCLONE;
-            SelectedCharacter = -1;
-            g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+            auto& weapon = fixture.EquipCycloneSword();
 
-            // A cooldown refusal in weapon dispatch falls through to AttackKnight.
+            // Exercise weapon dispatch first; ExecuteSkill itself is not called here.
             if (skill == AT_SKILL_CYCLONE)
                 CHECK_FALSE(GameLogic::Combat::SkillWarrior(Hero, &weapon));
             GameLogic::Combat::AttackKnight(Hero, skill, SkillDistance);
 
-            CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
-            CHECK_FALSE(Hero->SkillSuccess);
-            CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
-            CHECK_FALSE(Hero->Movement);
+            CheckCastRefused();
             CHECK(CharacterAttribute->SkillDelay[0] == RemainingDelay);
         }
     }
@@ -316,11 +519,7 @@ TEST_CASE("Knight range refusal cannot complete a cast [helper_execution]")
 
     GameLogic::Combat::AttackKnight(Hero, AT_SKILL_RAGEFUL_BLOW, SkillDistance);
 
-    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
-    CHECK_FALSE(Hero->SkillSuccess);
-    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
-    CHECK_FALSE(Hero->Movement);
-    CHECK(CharacterAttribute->SkillDelay[0] == KnightSkillDelay);
+    CheckCastRefused();
 }
 
 TEST_CASE("Knight weapon refusal cannot complete a cast [helper_execution]")
@@ -331,10 +530,7 @@ TEST_CASE("Knight weapon refusal cannot complete a cast [helper_execution]")
 
     GameLogic::Combat::AttackKnight(Hero, AT_SKILL_RAGEFUL_BLOW, SkillDistance);
 
-    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
-    CHECK_FALSE(Hero->SkillSuccess);
-    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
-    CHECK_FALSE(Hero->Movement);
+    CheckCastRefused();
     CHECK(CharacterAttribute->SkillDelay[0] == 0);
 }
 
@@ -342,20 +538,70 @@ TEST_CASE("Unsupported Knight dispatch cannot complete a cast [helper_execution]
 {
     SkillFixture fixture;
     fixture.PrepareKnightCast(AT_SKILL_CYCLONE);
-    auto& weapon = fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT];
-    weapon.Type = ITEM_SHORT_SWORD;
-    weapon.SpecialNum = 1;
-    weapon.Special[0] = AT_SKILL_CYCLONE;
+    fixture.EquipCycloneSword();
     constexpr float SkillDistance = 2.f;
 
     GameLogic::Combat::AttackKnight(Hero, AT_SKILL_CYCLONE, SkillDistance);
 
-    CHECK_FALSE(GameLogic::Combat::ExecuteSkillComplete(Hero));
-    CHECK_FALSE(Hero->SkillSuccess);
-    CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
-    CHECK_FALSE(Hero->Movement);
-    CHECK(CharacterAttribute->SkillDelay[0] == KnightSkillDelay);
+    CheckCastRefused();
 }
+
+#ifdef MU_TEST_COMBAT_AOT_TRANSPORT
+TEST_CASE("MG Inferno completes ExecuteSkill and emits its area packet [helper_accepted_transport]")
+{
+    AcceptedCastFixture fixture;
+    fixture.PrepareKnightCast(AT_SKILL_INFERNO_STR_MG);
+    Hero->Class = CLASS_DARK;
+    fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT].Type = ITEM_SKULL_STAFF;
+    // PrepareKnightCast resets selection; the non-attackable selected character avoids terrain rendering.
+    SelectedCharacter = 0;
+    constexpr float SkillDistance = 2.f;
+    const int result = GameLogic::Combat::ExecuteSkill(Hero, AT_SKILL_INFERNO_STR_MG, SkillDistance);
+    CHECK(result == 1);
+    CHECK(Hero->SkillSuccess);
+    CHECK(GameLogic::Combat::ExecuteSkillComplete(Hero));
+    CHECK(Hero->Object.CurrentAction == PLAYER_SKILL_INFERNO);
+    constexpr BYTE AreaSkillCode = 0x1E;
+    constexpr std::size_t AreaSkillLength = 13;
+    const auto packet = fixture.ExpectSkillPacket(AreaSkillCode, AT_SKILL_INFERNO_STR_MG, AreaSkillLength);
+    constexpr std::size_t TargetXOffset = 5;
+    constexpr std::size_t TargetYOffset = 6;
+    CHECK(packet[TargetXOffset] == MovementStartTile);
+    CHECK(packet[TargetYOffset] == MovementStartTile);
+}
+
+TEST_CASE("Shield Blocking completes after a refusal and emits its targeted packet [helper_accepted_transport]")
+{
+    AcceptedCastFixture fixture;
+    fixture.PrepareKnightCast(AT_SKILL_TWISTING_SLASH);
+    fixture.machine.Equipment[EQUIPMENT_WEAPON_RIGHT].Type = ITEM_SHORT_SWORD;
+    constexpr int RemainingDelay = 50;
+    CharacterAttribute->SkillDelay[0] = RemainingDelay;
+    constexpr float SkillDistance = 2.f;
+    GameLogic::Combat::AttackKnight(Hero, AT_SKILL_TWISTING_SLASH, SkillDistance);
+    REQUIRE_FALSE(Hero->SkillSuccess);
+    REQUIRE(CharacterAttribute->SkillDelay[0] == RemainingDelay);
+    CharacterAttribute->Skill[0] = AT_SKILL_BLOCKING;
+    CharacterAttribute->SkillDelay[0] = 0;
+    auto& shield = fixture.machine.Equipment[EQUIPMENT_WEAPON_LEFT];
+    shield.Type = ITEM_SMALL_SHIELD;
+    shield.SpecialNum = 1;
+    shield.Special[0] = AT_SKILL_BLOCKING;
+    SelectedCharacter = 0;
+    constexpr DWORD MagicThrottleMs = 300;
+    g_dwLatestMagicTick = GetTickCount() - (MagicThrottleMs + 1);
+    const int result = GameLogic::Combat::ExecuteSkill(Hero, AT_SKILL_BLOCKING, SkillDistance);
+    CHECK(result == 1);
+    CHECK(Hero->SkillSuccess);
+    CHECK(GameLogic::Combat::ExecuteSkillComplete(Hero));
+    CHECK(Hero->Object.CurrentAction == PLAYER_DEFENSE1);
+    constexpr BYTE TargetedSkillCode = 0x19;
+    constexpr std::size_t TargetedSkillLength = 7;
+    const auto packet = fixture.ExpectSkillPacket(TargetedSkillCode, AT_SKILL_BLOCKING, TargetedSkillLength);
+    constexpr std::size_t TargetOffset = 5;
+    CHECK(((static_cast<WORD>(packet[TargetOffset]) << 8) | packet[TargetOffset + 1]) == Hero->Key);
+}
+#endif
 
 TEST_CASE("Resource shortages reach execution while unlearned skills are skipped [helper_rotation]")
 {

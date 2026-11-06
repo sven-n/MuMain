@@ -228,6 +228,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 else
                     SetPlayerAttack(c);
                 SendRequestMagic(Skill, Hero->Key);
+                c->SkillSuccess = true;
                 Success = true;
                 break;
             case AT_SKILL_FALLING_SLASH:

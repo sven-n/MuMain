@@ -1220,6 +1220,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_HELL);
         c->Movement = 0;
@@ -1231,6 +1232,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_INFERNO);
         c->Movement = 0;
@@ -1375,6 +1377,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_EVIL_SPIRIT_STR_MG:
             {
                 SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
             }
             return;
@@ -1382,6 +1385,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             {
                 SendRequestMagicContinue(Skill, (c->PositionX),
                     (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetAttackSpeed();
 
                 if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
@@ -1397,6 +1401,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_FLAME_STR:
             case AT_SKILL_FLAME_STR_MG:
                 SendRequestMagicContinue(Skill, (BYTE)(c->TargetPosition[0] / TERRAIN_SCALE), (BYTE)(c->TargetPosition[1] / TERRAIN_SCALE), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
                 return;
             case AT_SKILL_DECAY:
