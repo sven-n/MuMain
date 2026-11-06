@@ -2816,6 +2816,12 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
     CHECK(nothing.tags.empty());
+    CHECK(nothing.texts.empty());
+
+    // The jewel window's text names the Jewel of Bless by its number: it stays there when the item moves.
+    const MuEditor::Items::ItemUsage bless = MuEditor::Items::FindItemUsage(MakeItemType(14, 13));
+    CHECK(std::ranges::find(bless.texts, "Game: Jewel of Bless") != bless.texts.end());
+    CHECK(bless.IsUsedAtNumber());
 }
 
 TEST_CASE("A number that is not free names what takes it [data][items][editor]")

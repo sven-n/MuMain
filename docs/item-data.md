@@ -1512,6 +1512,10 @@ shows it in the others.
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
 
+  Both list what uses the item by its number and stays there: the game data,
+  the code and the texts that name it (`{item:14,13}`), which then name
+  whatever takes the number.
+
   An entry without a name moves and is removed as an item is; there is
   nothing to duplicate.
 
