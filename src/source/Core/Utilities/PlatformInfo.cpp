@@ -259,17 +259,26 @@ int GetSystemMemoryMB()
     return SDL_GetSystemRAM();
 }
 
-std::filesystem::path GetExecutablePath()
+const std::filesystem::path& GetExecutablePath()
 {
-    // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, _NSGetExecutablePath).
-    constexpr DWORD executablePathCapacity = 4096;
-    wchar_t executablePath[executablePathCapacity] = {};
-    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
-        return {};
+    // Made absolute on the first call: macOS reports the path the client was started with, which can be relative
+    // to the folder it was started in, and that folder is gone once Winmain moves the working directory.
+    static const std::filesystem::path path = []() -> std::filesystem::path
+    {
+        // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, _NSGetExecutablePath).
+        constexpr DWORD executablePathCapacity = 4096;
+        wchar_t executablePath[executablePathCapacity] = {};
+        if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
+            return {};
 #ifdef _WIN32
-    return executablePath;
+        const std::filesystem::path found = executablePath;
 #else
-    return mu_narrow_path(executablePath);
+        const std::filesystem::path found = mu_narrow_path(executablePath);
 #endif
+        std::error_code error;
+        const std::filesystem::path absolute = std::filesystem::absolute(found, error);
+        return error ? found : absolute;
+    }();
+    return path;
 }
 }

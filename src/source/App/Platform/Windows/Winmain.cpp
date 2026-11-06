@@ -75,6 +75,7 @@
 
 #include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/PlatformInfo.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -1995,6 +1996,8 @@ static void SelectConnectServer(wchar_t* commandLine)
 
 static void InitializeWorkingDirectoryAndLog()
 {
+    // Cached before the working directory moves, while a relative macOS start path still leads to the client.
+    static_cast<void>(Core::Platform::GetExecutablePath());
     SetWorkingDirectoryToBasePath();
     mu::log::Init();
 }
