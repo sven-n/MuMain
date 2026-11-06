@@ -37,8 +37,11 @@ inline constexpr const char* kCompiler =
 #endif
 
 // By the compiler's CPU macros (_WIN64 is also defined on Windows on ARM); others say "unknown", not a wrong name.
+// ARM64EC first: MSVC defines _M_X64 for it, and not _M_ARM64.
 inline constexpr const char* kArchitecture =
-#if defined(_M_ARM64) || defined(__aarch64__)
+#if defined(_M_ARM64EC)
+    "arm64ec";
+#elif defined(_M_ARM64) || defined(__aarch64__)
     "arm64";
 #elif defined(_M_X64) || defined(__x86_64__)
     "x64";
@@ -47,7 +50,7 @@ inline constexpr const char* kArchitecture =
 #elif defined(_M_ARM) || defined(__arm__)
     "arm";
 #else
-    "unknown";
+        "unknown";
 #endif
 
 inline constexpr const char* kDate = __DATE__;
