@@ -165,6 +165,17 @@ TEST_CASE("A Polish text names the item in the case it asks for [data][texts]")
     CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Tear of Elf'!");
 }
 
+TEST_CASE("Once a test's item data is gone, the texts that name items are as written again [data][texts]")
+{
+    {
+        ItemTextScope scope;
+        REQUIRE(scope.Loaded());
+        I18N::SetLocale("de");
+        CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Juwel des Segens");
+    }
+    CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"{item:14,13}");
+}
+
 TEST_CASE("Turning translated item names off tells the locale observers once [data][texts]")
 {
     ItemTextScope scope;
