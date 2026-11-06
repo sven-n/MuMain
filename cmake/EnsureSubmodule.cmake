@@ -106,6 +106,13 @@ function(mu_ensure_submodule rel_path)
     message(FATAL_ERROR "Submodule ${rel_path} is missing, and ${REPO_ROOT} is not a git checkout.")
   endif()
 
+  # Two configures of a fresh checkout at once (two IDE profiles, say) would both init the submodule, and the
+  # second would delete the first's clone below. The lock lets one finish first.
+  file(LOCK "${git_dir}/mu-submodule-init.lock" GUARD FUNCTION)
+  if (EXISTS "${indicator_file}")
+    return()
+  endif()
+
   message(STATUS "Initializing submodule ${rel_path}...")
 
   if (EXISTS "${submodule_dir}")
