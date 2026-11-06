@@ -339,7 +339,7 @@ constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 
 #define	MAX_MASTER		   24
 
-#define MAX_ITEM_SPECIAL   8
+#define MAX_ITEM_SPECIAL 16
 #define ITEM_LEVEL_NORMAL  4
 #define MAX_QUEST_ITEM     64
 #define MAX_EVENT_ITEM     35
