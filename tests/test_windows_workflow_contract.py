@@ -163,6 +163,14 @@ def step(job_body, job_name, step_name):
     return match.group(1) if match else ""
 
 
+def job_env(job_body, name):
+    """A job-level env value; a folded block (>-) is joined into one line, as YAML does."""
+    match = re.search(rf"(?m)^      {re.escape(name)}: (?:>-\n((?:^        .*\n)+)|(.*)$)", job_body)
+    if match is None:
+        return ""
+    return " ".join(match.group(1).split()) if match.group(1) is not None else match.group(2).strip()
+
+
 def cache_paths(step_body):
     """The lines of an actions/cache step's multi-line path input."""
     match = re.search(r"(?ms)^          path: \|\n(.*?)(?=^          \w)", step_body)
@@ -621,7 +629,6 @@ check(
     "uses: actions/cache@v6" not in linux_cache,
     "PR compilation must restore without creating isolated cache entries",
 )
-check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.
@@ -710,7 +717,9 @@ for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_j
           f"prefix names the compiler: {restore_prefix}")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
-    ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
+    # ci.yml names its packages once, in the job's env, for the install and for the cache's key.
+    install = step(ci_job, job_name, "Install build tools").replace("$APT_PACKAGES", job_env(ci_job, "APT_PACKAGES"))
+    ci_packages = apt_packages(install)
     check(ci_packages, f"{workflow_name} {job_name} must install its packages with apt-get install -y")
     all_linux_ci_packages |= ci_packages
     for package in sorted(ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):

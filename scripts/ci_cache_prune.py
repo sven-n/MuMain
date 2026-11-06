@@ -32,6 +32,7 @@ SYSTEMS = ("linux", "macos", "windows")
 # The kinds of entry ci.yml saves, by the start of their key. Each keeps its newest entry; the workflow contract test
 # checks that every cache ci.yml's build jobs restore by a key prefix is one of them.
 KINDS = (
+    "apt-linux-x64-",
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
     "ccache-windows-x64-",
