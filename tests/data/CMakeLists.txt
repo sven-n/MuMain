@@ -158,6 +158,8 @@ mu_add_test(
 target_compile_definitions(monster_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).

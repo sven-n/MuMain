@@ -21,6 +21,8 @@ target_compile_definitions(map_name_tests PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
     MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(map_name_tests test_map_name.cpp)
 
 mu_add_test(
     NAME cursed_temple_skill_tests

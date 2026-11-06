@@ -276,6 +276,8 @@ mu_add_test(
 target_compile_definitions(look_profile_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(look_profile_tests test_look_tuning.cpp)
 
 # The light mood against the real terrain light buffers; they come with the
 # client globals of Winmain.cpp.

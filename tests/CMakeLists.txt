@@ -105,8 +105,6 @@ function(mu_test_use_pch target)
     target_precompile_headers(${target} REUSE_FROM mu_test_pch)
     get_target_property(sources ${target} SOURCES)
     mu_skip_pch_without_stdafx(${target} ${sources})
-    # The -Wstringop-overflow false positive GCC 13 reports with the precompiled header, as MuClient has it.
-    mu_allow_gcc13_stringop_overflow(${target} ${sources})
 endfunction()
 
 # Helper for files that more than one test compiles. Usage:
