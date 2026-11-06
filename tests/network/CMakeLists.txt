@@ -136,12 +136,17 @@ mu_add_test(
 )
 
 if(DOTNET_EXECUTABLE)
+    # Each build folder builds the self-checks into its own folder: two build folders testing at once would
+    # otherwise write the same bin/ and obj/ next to the projects.
+    set(MU_DOTNET_SELF_CHECK_ARTIFACTS "${CMAKE_CURRENT_BINARY_DIR}/dotnet-self-checks")
+
     add_test(
         NAME dotnet_binding_generator
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
             "${DOTNET_EXECUTABLE}" run
             --project ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator_self_check/BindingGeneratorSelfCheck.csproj
             --configuration Release
+            --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
             -- ${CMAKE_SOURCE_DIR}/ClientLibrary/GenerateBindingsHeader.xslt
                ${CMAKE_SOURCE_DIR}/ClientLibrary/GenerateFunctions.xslt
                ${CMAKE_SOURCE_DIR}/src/source/Dotnet
@@ -153,8 +158,19 @@ if(DOTNET_EXECUTABLE)
             "${DOTNET_EXECUTABLE}" run
             --project ${CMAKE_CURRENT_SOURCE_DIR}/managed_log_self_check/ManagedLogSelfCheck.csproj
             --configuration Release
+            --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
     )
     set_tests_properties(managed_log_callback PROPERTIES TIMEOUT 30)
+
+    add_test(
+        NAME connect_failure_description
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/connect_failure_self_check/ConnectFailureSelfCheck.csproj
+            --configuration Release
+            --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
+    )
+    set_tests_properties(connect_failure_description PROPERTIES TIMEOUT 30)
 
     add_test(
         NAME outbound_flush_loop
@@ -162,6 +178,7 @@ if(DOTNET_EXECUTABLE)
             "${DOTNET_EXECUTABLE}" run
             --project ${CMAKE_CURRENT_SOURCE_DIR}/outbound_sender_self_check/OutboundSenderSelfCheck.csproj
             --configuration Release
+            --artifacts-path ${MU_DOTNET_SELF_CHECK_ARTIFACTS}
     )
     set_tests_properties(outbound_flush_loop PROPERTIES TIMEOUT 30)
 endif()

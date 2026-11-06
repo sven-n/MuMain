@@ -261,7 +261,8 @@ int GetSystemMemoryMB()
 
 std::filesystem::path GetExecutablePath()
 {
-    // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, _NSGetExecutablePath).
+    // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, and on macOS _NSGetExecutablePath
+    // made absolute before Winmain moves the working directory).
     constexpr DWORD executablePathCapacity = 4096;
     wchar_t executablePath[executablePathCapacity] = {};
     if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)

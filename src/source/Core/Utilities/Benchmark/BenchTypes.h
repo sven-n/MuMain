@@ -117,7 +117,7 @@ struct EnvironmentInfo
     std::string buildCompiler;
     std::string buildArch;
     std::string buildTimestamp;
-    std::string gitDescribe; // empty when not baked in
+    std::string gitDescribe; // MU_GIT_COMMIT: the commit, "unknown" for a build without git; empty until captured
     bool gitDirty = false;
 
     int windowWidth = 0;

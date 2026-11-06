@@ -17,6 +17,8 @@ TEST_CASE("Local addresses are written out [network][log]")
     CHECK(DescribeEndpointForLog("0:0:0:0:0:0:0:1", 55901) == "[0:0:0:0:0:0:0:1]:55901");
     CHECK(DescribeEndpointForLog("::ffff:127.0.0.1", 55901) == "[::ffff:127.0.0.1]:55901");
     CHECK(DescribeEndpointForLog("0.0.0.0", 55901) == "0.0.0.0:55901");
+    CHECK(DescribeEndpointForLog("::", 55901) == "[::]:55901");
+    CHECK(DescribeEndpointForLog("::ffff:0.0.0.0", 55901) == "[::ffff:0.0.0.0]:55901");
 }
 
 TEST_CASE("Private network addresses are written out and marked [network][log]")

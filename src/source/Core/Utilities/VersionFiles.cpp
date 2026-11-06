@@ -17,7 +17,6 @@ namespace
 {
 constexpr std::size_t MaxVersionLength = 64;
 constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
-constexpr const char* UnknownId = "unknown";
 constexpr const char* FileTimeFormat = "%Y-%m-%d %H:%M:%S UTC";
 
 bool IsVersionCharacter(unsigned char character)
@@ -67,7 +66,7 @@ std::string DescribeRelease(const VersionFile& release)
 
 std::string DescribeData(const VersionFile& installed, const std::string& expectedId)
 {
-    const bool expectedKnown = expectedId != UnknownId;
+    const bool expectedKnown = !expectedId.empty();
     const std::string& installedId = installed.version;
     if (installedId.empty())
     {
