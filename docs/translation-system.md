@@ -459,7 +459,7 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   names**: with it off a Polish text shows `Jewel of Bless`, as the inventory
   does, while the rest of the text stays Polish. A language whose file has no
   text of its own for the key shows the English text, and names the items in
-  English like it.
+  English like it; so does an item data text without a translation of its own.
 - **When:** a text is expanded when the language switches, when the item data
   is loaded, when Translate item names changes and when the editor changes a
   name; the text's pointer then shows the expansion, so the code that shows a

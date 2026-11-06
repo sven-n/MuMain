@@ -44,7 +44,8 @@ Błogosławieństwa" in the jewel bundle window; German mixes "Jewel of Soul" an
   (`RefreshItemTextsIfNamesChanged`). A change runs the locale observers, as a language switch does.
 - **Item data texts.** A placeholder may be an item reference (`ReadPlaceholder`); a translation names the same
   items as English, its case may differ (`ToParityPlaceholders`). The tooltip compiles a text with its references
-  replaced by names in the item name language (`ItemTooltipText.cpp`, cache also reset on the name version).
+  replaced by names in the item name language, or in English for the English text of a line without a translation
+  of its own (`ItemTooltipText.cpp`, cache also reset on the name version).
 - **Forms.** `ItemNameForms` on `ItemDefinition` and `ItemNameLine`; `"nameForms"` after `"name"` and after a name
   line's `"text"`. `Tooltips/NameCases.json` gives each language's cases; `ValidateNameForms` warns about forms that
   can never show.

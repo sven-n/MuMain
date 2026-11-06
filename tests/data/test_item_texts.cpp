@@ -51,13 +51,13 @@ void CountChange(void*) noexcept
     ++observedChanges;
 }
 
-std::wstring Tooltip(const std::string& text, std::string_view language)
+std::wstring Tooltip(const std::string& text, std::string_view language, std::string_view textLanguage = {})
 {
     Engine::Items::TooltipText::Clear();
     wchar_t row[100]{};
     const ItemTooltipValues values;
-    Engine::Items::TooltipText::Write(Engine::Items::TooltipText::Compile(text, {}, nullptr, language), 0, values, row,
-                                      std::size(row));
+    Engine::Items::TooltipText::Write(Engine::Items::TooltipText::Compile(text, {}, nullptr, language, textLanguage), 0,
+                                      values, row, std::size(row));
     return row;
 }
 } // namespace
@@ -219,4 +219,16 @@ TEST_CASE("A tooltip text names an item in the item name language and the rest i
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de") == L"Combine Gold Key at level 0");
     // No item 14,511: the text stays as written from the reference on.
     CHECK(Tooltip("Combine {item:14,511} now", "en") == L"Combine {item:14,511} now");
+}
+
+TEST_CASE("A tooltip line without a translation of its own names the items in English, as the UI texts do "
+          "[data][items][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    I18N::SetLocale("de");
+
+    // The English text shown for German: English names, also with translated item names on.
+    CHECK(Tooltip("Combine {item:14,113} at level {level}", "de", "en") == L"Combine Gold Key at level 0");
+    CHECK(Tooltip("Combine {item:14,113} at level {level}", "de", "de") == L"Combine Goldschlüssel at level 0");
 }
