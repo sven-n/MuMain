@@ -374,6 +374,7 @@ target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src
 if(MSVC)
     target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
 endif()
+mu_test_use_pch(rml_text_layout_tests)
 add_test(
     NAME rml_text_layout_baseline
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/prepare_rml_text_layout.py"
