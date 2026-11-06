@@ -231,11 +231,12 @@ void MuMonsterSoundsUI::Render(bool* open)
         return;
     }
     const int number = g_MonsterSelection.GetNumber();
-    const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-    FollowSelection(monster);
-    // A monster as a whole shows the sound sets its numbers share (D61).
+    // A monster as a whole shows the sound sets its numbers share (D61), and
+    // the set and model of its shared look below.
     const std::optional<ShownValues::ShownMonster> shown = ShownValues::ReadSelected();
-    ShownModel::RenderSelectedMonster(number, shown ? &shown->monster : nullptr, shown && shown->wholeMonster);
+    const MonsterDefinition* monster = shown ? &shown->monster : nullptr;
+    FollowSelection(monster);
+    ShownModel::RenderSelectedMonster(number, monster, shown && shown->wholeMonster);
     if (shown)
     {
         RenderMonster(*shown);

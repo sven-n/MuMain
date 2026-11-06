@@ -43,6 +43,12 @@ public:
     // slot in this frame or the one before (Monster Preview draws first).
     const Data::Monsters::MonsterModelDefinition* GetShownModelDraft(int slot) const;
 
+    // The name of the set the tool shows; empty for none.
+    const std::string& GetShownSet() const
+    {
+        return m_shown;
+    }
+
 private:
     MuMonsterSoundsUI();
 

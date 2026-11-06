@@ -16,6 +16,7 @@
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/MonsterTools/MonsterEdits.h"
@@ -27,6 +28,7 @@
 #include "UI/MonsterTools/MonsterShownValues.h"
 #include "UI/MonsterTools/MonsterTreeModel.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
+#include "UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -247,6 +249,38 @@ TEST_CASE("Monster tools: a monster as a whole shows and stores the values its n
     CHECK(ShownValues::ReadSelected()->monster.attacks);
     g_MonsterSelection.SelectMonster(2);
     CHECK_FALSE(ShownValues::ReadSelected()->wholeMonster);
+}
+
+TEST_CASE("Monster Sounds: a monster as a whole shows the set its numbers share, a number its own [editor][monsters]")
+{
+    GroupedTools tools;
+    std::vector<Data::Monsters::MonsterSoundSet> sets(2);
+    sets[0].name = "Centurion";
+    sets[1].name = "Rogue";
+    g_MonsterSoundSetDatabase.Build(sets);
+    MonsterDefinition values = *g_MonsterEdits.ReadSharedValues(145);
+    values.soundSet = "Centurion";
+    REQUIRE(g_MonsterEdits.SetSharedValues("shared set", 145, values));
+    MonsterDefinition own = Entry(145);
+    own.soundSet = "Rogue";
+    REQUIRE(g_MonsterEdits.SetMonster("own set", own));
+    TestImGuiContext context;
+    const auto draw = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSoundsUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+
+    g_MonsterSelection.SelectMonster(145);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownSet() == "Centurion");
+    g_MonsterSelection.Select(145);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownSet() == "Rogue");
+    g_MonsterSoundSetDatabase.Build({});
 }
 
 TEST_CASE("Monster Browser: a monster row's kind is the shared one, a number's shared kind is locked "
