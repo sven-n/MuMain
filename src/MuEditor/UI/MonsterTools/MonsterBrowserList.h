@@ -7,6 +7,8 @@
 #include "Data/GameData/MapData/MapRef.h"
 #include "Data/GameData/MonsterData/MonsterKind.h"
 
+#include <map>
+#include <string>
 #include <vector>
 
 namespace MuEditor::Monsters
@@ -56,6 +58,25 @@ public:
     // Draws the rows that are in view. `reveal` scrolls to the selected row
     // once (it was selected elsewhere).
     Result Render(const std::vector<MonsterTreeModel::Row>& rows, int selectedNumber, bool selectedWhole, bool reveal);
+
+private:
+    // The texts of a monster row that are made, not read: its label ("3
+    // numbers") and the maps of all its numbers. Kept, not made each frame,
+    // until the data or the language changes.
+    struct MonsterRowTexts
+    {
+        std::string label;
+        std::string maps;
+    };
+
+    // Drops the kept texts when the data or the language changed.
+    void ForgetChangedTexts();
+    const MonsterRowTexts& GetMonsterRowTexts(const MonsterTreeModel::Row& row);
+
+    // By the monster row's first number.
+    std::map<int, MonsterRowTexts> m_monsterRowTexts;
+    int m_textsVersion = -1;
+    std::string m_textsLocale;
 };
 } // namespace MuEditor::Monsters
 

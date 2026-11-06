@@ -11,11 +11,13 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MapPicker.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <optional>
 #include <string>
 
@@ -62,14 +64,14 @@ void RenderKindCell(const Row& row, Data::Monsters::MonsterKind current, Monster
     }
 }
 
-void RenderMapsCell(const Row& row, const MonsterDefinition& monster, MonsterBrowserList::Result& result)
+// `monsterMaps`: the maps of all numbers of a monster row, which shows them
+// only.
+void RenderMapsCell(const Row& row, const MonsterDefinition& monster, const char* monsterMaps,
+                    MonsterBrowserList::Result& result)
 {
     if (row.kind == Row::Kind::Monster)
     {
-        // The maps of all its numbers.
-        const std::vector<Data::Maps::MapRef> maps =
-            g_MonsterEdits.ReadMaps(g_MonsterEdits.ReadMonsterNumbers(row.number));
-        ImGui::TextDisabled("%s", MapPicker::Describe(maps, I18N::Editor::NoMaps).c_str());
+        ImGui::TextDisabled("%s", monsterMaps);
         return;
     }
     // A label for the tools: the server places the monsters (Q-MN98).
@@ -122,42 +124,22 @@ void RenderContextMenu(const Row& row, MonsterBrowserList::Result& result)
     ImGui::EndPopup();
 }
 
-// The number column's text: the number, or for a monster with several the
-// count of its numbers.
-std::string NumberLabel(const Row& row)
+// The number column: the number, or for a monster row `monsterLabel`, the
+// count of its numbers, with the arrow that opens it.
+void RenderNumberCell(const Row& row, bool selected, const char* monsterLabel, MonsterBrowserList::Result& result)
 {
-    if (row.kind == Row::Kind::Monster)
-    {
-        return I18N::Format(I18N::Editor::NumberCount0, {std::to_string(row.numberCount)});
-    }
-    return std::to_string(row.number);
-}
-
-void RenderRow(const Row& row, bool selected, MonsterBrowserList::Result& result)
-{
-    // Read each frame, without copies: an undo, a revert or a language switch
-    // changes it.
-    const MonsterDefinition* monster = row.kind == Row::Kind::Monster ? g_MonsterEdits.FindSharedValues(row.number)
-                                                                      : g_MonsterDatabase.Find(row.number);
-    ImGui::TableNextRow();
-    if (monster == nullptr)
-    {
-        return;
-    }
-    ImGui::PushID(row.kind == Row::Kind::Monster ? row.number + MonsterRowId : row.number);
-    ImGui::TableSetColumnIndex(0);
     const float scale = g_MuEditorCore.GetUIScale();
     if (row.kind == Row::Kind::Number)
     {
         ImGui::Indent(NumberIndent * scale);
     }
     const float start = ImGui::GetCursorPosX();
-    // The arrow of a monster row is drawn over the label's start.
-    std::string label = row.kind == Row::Kind::Monster ? "     " + NumberLabel(row) : NumberLabel(row);
-    label += "##Row";
+    char numberLabel[24];
+    std::snprintf(numberLabel, sizeof(numberLabel), "%d##Row", row.number);
+    const char* label = row.kind == Row::Kind::Monster ? monsterLabel : numberLabel;
     // AllowOverlap: the arrow, kind combo and maps button drawn over the row
     // take their own clicks.
-    if (ImGui::Selectable(label.c_str(), selected,
+    if (ImGui::Selectable(label, selected,
                           ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap |
                               KeyboardSelection::RowFlags))
     {
@@ -184,7 +166,25 @@ void RenderRow(const Row& row, bool selected, MonsterBrowserList::Result& result
     {
         ImGui::Unindent(NumberIndent * scale);
     }
+}
 
+// `monsterLabel` and `monsterMaps`: the texts of a monster row
+// (MonsterRowTexts), nullptr for the others.
+void RenderRow(const Row& row, bool selected, const char* monsterLabel, const char* monsterMaps,
+               MonsterBrowserList::Result& result)
+{
+    // Read each frame, without copies: an undo, a revert or a language switch
+    // changes it.
+    const MonsterDefinition* monster = row.kind == Row::Kind::Monster ? g_MonsterEdits.FindSharedValues(row.number)
+                                                                      : g_MonsterDatabase.Find(row.number);
+    ImGui::TableNextRow();
+    if (monster == nullptr)
+    {
+        return;
+    }
+    ImGui::PushID(row.kind == Row::Kind::Monster ? row.number + MonsterRowId : row.number);
+    ImGui::TableSetColumnIndex(0);
+    RenderNumberCell(row, selected, monsterLabel, result);
     ImGui::TableSetColumnIndex(1);
     const std::string& name = monster->names.Get(I18N::GetCurrentLocale());
     const OwnValues::State nameState = row.kind == Row::Kind::Number
@@ -194,10 +194,37 @@ void RenderRow(const Row& row, bool selected, MonsterBrowserList::Result& result
     ImGui::TableSetColumnIndex(2);
     RenderKindCell(row, monster->kind, result);
     ImGui::TableSetColumnIndex(3);
-    RenderMapsCell(row, *monster, result);
+    RenderMapsCell(row, *monster, monsterMaps, result);
     ImGui::PopID();
 }
 } // namespace
+
+void MonsterBrowserList::ForgetChangedTexts()
+{
+    const int version = g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion();
+    const char* locale = I18N::GetCurrentLocale();
+    if (version == m_textsVersion && m_textsLocale == locale)
+    {
+        return;
+    }
+    m_monsterRowTexts.clear();
+    m_textsVersion = version;
+    m_textsLocale = locale;
+}
+
+const MonsterBrowserList::MonsterRowTexts& MonsterBrowserList::GetMonsterRowTexts(const Row& row)
+{
+    const auto [texts, added] = m_monsterRowTexts.try_emplace(row.number);
+    if (added)
+    {
+        // The arrow is drawn over the label's start.
+        texts->second.label =
+            "     " + I18N::Format(I18N::Editor::NumberCount0, {std::to_string(row.numberCount)}) + "##Row";
+        texts->second.maps = MapPicker::Describe(g_MonsterEdits.ReadMaps(g_MonsterEdits.ReadMonsterNumbers(row.number)),
+                                                 I18N::Editor::NoMaps);
+    }
+    return texts->second;
+}
 
 MonsterBrowserList::Result MonsterBrowserList::Render(const std::vector<MonsterTreeModel::Row>& rows,
                                                       int selectedNumber, bool selectedWhole, bool reveal)
@@ -209,6 +236,7 @@ MonsterBrowserList::Result MonsterBrowserList::Render(const std::vector<MonsterT
     {
         return result;
     }
+    ForgetChangedTexts();
     const float uiScale = g_MuEditorCore.GetUIScale();
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_None, NumberColumnWidth * uiScale);
@@ -237,7 +265,9 @@ MonsterBrowserList::Result MonsterBrowserList::Render(const std::vector<MonsterT
         for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
         {
             const Row& row = rows[static_cast<size_t>(index)];
-            RenderRow(row, isSelected(row), result);
+            const MonsterRowTexts* texts = row.kind == Row::Kind::Monster ? &GetMonsterRowTexts(row) : nullptr;
+            RenderRow(row, isSelected(row), texts != nullptr ? texts->label.c_str() : nullptr,
+                      texts != nullptr ? texts->maps.c_str() : nullptr, result);
             if (selectedRow == index)
             {
                 ImGui::SetScrollHereY();

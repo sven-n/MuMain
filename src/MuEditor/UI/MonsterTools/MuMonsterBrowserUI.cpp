@@ -178,9 +178,10 @@ void MuMonsterBrowserUI::RenderMonsterActions(int selectedNumber)
 {
     using Action = MonsterBrowserList::Action;
     const bool hasMonster = g_MonsterDatabase.Find(selectedNumber) != nullptr;
-    // A number of a monster with several numbers, or a monster as a whole.
+    // A number of a monster with several numbers (which has shared values),
+    // or a monster as a whole.
     const bool number = hasMonster && !g_MonsterSelection.IsWholeMonster() &&
-                        g_MonsterEdits.ReadMonsterNumbers(selectedNumber).size() > 1;
+                        g_MonsterEdits.FindSharedValues(selectedNumber) != nullptr;
     const auto button = [&](const char* label, Action action)
     {
         ImGui::SameLine();
