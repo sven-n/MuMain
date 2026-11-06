@@ -217,7 +217,10 @@ FetchContent_MakeAvailable(spdlog)
 FetchContent_Declare(miniaudio
     URL https://github.com/mackron/miniaudio/archive/9634bedb5b5a2ca38c1ee7108a9358a4e233f14d.tar.gz
     URL_HASH SHA256=1a3a79b80fc6f0b0cc155e28b954a598e0ddfa2db64e2afa8466be88c476fa55
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    # Archives unpack with the time of unpacking, not their own older dates: with those, a version change would bring
+    # sources older than the last build's objects, and ninja would keep the objects. The build reads only the copies
+    # of miniaudio's files made below, which get the time they are written anyway.
+    DOWNLOAD_EXTRACT_TIMESTAMP FALSE
     SOURCE_SUBDIR _fetchcontent_only
 )
 FetchContent_MakeAvailable(miniaudio)
@@ -373,7 +376,8 @@ set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(SDL3_image
     URL      https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
     URL_HASH SHA256=a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    # The time of unpacking, as for miniaudio above: SDL_image compiles straight from the unpacked tree.
+    DOWNLOAD_EXTRACT_TIMESTAMP FALSE
 )
 
 add_subdirectory("src")
