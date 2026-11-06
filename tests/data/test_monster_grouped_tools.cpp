@@ -307,6 +307,49 @@ TEST_CASE("Monster Attacks: a number's shared attacks are locked for edits, not 
     g_MonsterModelDatabase.Build({});
 }
 
+TEST_CASE("Monster Attacks: a monster as a whole and its first number each start on all maps [editor][monsters]")
+{
+    GroupedTools tools;
+    Data::Monsters::MonsterMapVariant variant;
+    variant.attacks.emplace();
+    variant.maps = {{24, 0}};
+    MonsterDefinition values = *g_MonsterEdits.ReadSharedValues(145);
+    values.attacks.emplace();
+    values.mapVariants = {variant, variant};
+    values.mapVariants[1].maps = {{36, 0}};
+    REQUIRE(g_MonsterEdits.SetSharedValues("shared variants", 145, values));
+    MonsterDefinition own = Entry(145);
+    own.mapVariants[1].maps = {{30, 0}};
+    REQUIRE(g_MonsterEdits.SetMonster("own variants", own));
+    OwnValues::Unlock(145, MonsterValueField::Attacks);
+    TestImGuiContext context;
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+
+    // The whole monster shows its second variant; its first number, selected
+    // next, shows its own attacks of all maps, not its own second variant.
+    g_MonsterSelection.SelectMonster(145);
+    g_MuMonsterAttacksUI.ShowMapVariant(ShownValues::GetSelectedKey(), 1);
+    render();
+    g_MonsterSelection.Select(145);
+    render();
+    constexpr int AllMaps = -1;
+    const ImGuiWindow* window = ImGui::FindWindowByName(MuEditor::WindowIds::MonsterAttacks);
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::ADraw, nullptr,
+                                                 ImGui::GetIDWithSeed(AllMaps, ImGui::GetIDWithSeed(145, window->ID))));
+    render();
+    render();
+    CHECK(Entry(145).attacks->otherwiseRandom.has_value());
+    CHECK_FALSE(Entry(145).mapVariants[1].attacks->otherwiseRandom.has_value());
+}
+
 TEST_CASE("Monster tools: a change of only the shared values is a change of the tools' data [editor][monsters]")
 {
     GroupedTools tools;

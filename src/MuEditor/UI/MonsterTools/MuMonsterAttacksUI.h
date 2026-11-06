@@ -39,9 +39,10 @@ public:
         return m_lastPlayed;
     }
 
-    // When the tool shows the monster next, it shows its attacks of all maps
-    // (nullopt) or of the map variant at `variant` (Data Checks' problems).
-    void ShowMapVariant(int monster, std::optional<int> variant);
+    // When the tool shows the selection of `key` (ShownValues::GetSelectedKey:
+    // a number, or a monster as a whole) next, it shows its attacks of all
+    // maps (nullopt) or of the map variant at `variant` (Data Checks' problems).
+    void ShowMapVariant(int key, std::optional<int> variant);
 
 private:
     using MonsterDraft = Items::ItemEditDraft<ShownValues::ShownMonster>;
@@ -90,15 +91,17 @@ private:
     // one left named no sound.
     std::string m_soundText;
     bool m_soundTextUnknown = false;
-    int m_soundMonster = -1;
+    int m_soundKey = -1;
     int m_soundVariant = AllMaps;
     int m_variant = AllMaps;
-    // The monster m_variant is about; another one shows all maps first.
-    int m_variantMonster = -1;
+    // The selection (ShownValues::GetSelectedKey) m_variant is about: a
+    // monster as a whole and its first number are two; another one shows all
+    // maps first.
+    int m_variantKey = -1;
     // Play next attack's counts, for this monster and map row choice.
     AttackPreview::Counts m_counts;
     std::optional<int> m_lastPlayed;
-    int m_countsMonster = -1;
+    int m_countsKey = -1;
     int m_countsVariant = AllMaps;
 };
 } // namespace MuEditor::Monsters

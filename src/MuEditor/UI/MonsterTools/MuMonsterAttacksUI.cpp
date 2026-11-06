@@ -222,9 +222,9 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
         ShownModel::OpenWhenShown(modelSlot);
     }
     const std::string label = AttacksLabel();
-    if (m_variantMonster != monster.number)
+    if (m_variantKey != ShownValues::GetSelectedKey())
     {
-        m_variantMonster = monster.number;
+        m_variantKey = ShownValues::GetSelectedKey();
         m_variant = AllMaps;
     }
     if (m_variant >= static_cast<int>(monster.mapVariants.size()))
@@ -298,10 +298,10 @@ std::string MuMonsterAttacksUI::AttacksLabel() const
                               : std::string();
 }
 
-void MuMonsterAttacksUI::ShowMapVariant(int monster, std::optional<int> variant)
+void MuMonsterAttacksUI::ShowMapVariant(int key, std::optional<int> variant)
 {
     // RenderAttacks shows all maps for an index the monster does not have.
-    m_variantMonster = monster;
+    m_variantKey = key;
     m_variant = variant.value_or(AllMaps);
 }
 
@@ -559,9 +559,9 @@ void MuMonsterAttacksUI::RenderRotation(MonsterDefinition& monster, int modelSlo
 
 void MuMonsterAttacksUI::RenderPlayNext(MonsterDefinition& monster)
 {
-    if (m_countsMonster != monster.number || m_countsVariant != m_variant)
+    if (m_countsKey != ShownValues::GetSelectedKey() || m_countsVariant != m_variant)
     {
-        m_countsMonster = monster.number;
+        m_countsKey = ShownValues::GetSelectedKey();
         m_countsVariant = m_variant;
         m_counts = {};
         m_lastPlayed.reset();
@@ -644,9 +644,9 @@ void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)
 void MuMonsterAttacksUI::RenderSound(MonsterDefinition& monster)
 {
     MonsterAttacks& attacks = *ShownAttacks(monster);
-    if (m_soundMonster != monster.number || m_soundVariant != m_variant)
+    if (m_soundKey != ShownValues::GetSelectedKey() || m_soundVariant != m_variant)
     {
-        m_soundMonster = monster.number;
+        m_soundKey = ShownValues::GetSelectedKey();
         m_soundVariant = m_variant;
         m_soundTextUnknown = false;
     }
