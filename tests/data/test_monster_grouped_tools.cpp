@@ -187,6 +187,13 @@ TEST_CASE("Monster tools: a number's shared value is locked until it is made its
     CHECK(OwnValues::GetNumberState(145, MonsterValueField::Attacks) == OwnValues::State::Unlocked);
     CHECK(OwnValues::GetNumberState(175, MonsterValueField::Attacks) == OwnValues::State::Shared);
 
+    // Unlocked in one monster, a number moved into another is locked there.
+    OwnValues::Unlock(175, MonsterValueField::Kind);
+    REQUIRE(g_MonsterEdits.MoveNumber("move", 175, 2));
+    CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Shared);
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(OwnValues::GetNumberState(175, MonsterValueField::Kind) == OwnValues::State::Unlocked);
+
     // "Back to..." offers the monster's value and the other numbers' own ones.
     std::vector<OwnValues::Source> sources = OwnValues::FindSources(336, MonsterValueField::Attacks);
     REQUIRE(sources.size() == 1);

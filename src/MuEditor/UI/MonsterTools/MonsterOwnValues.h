@@ -67,7 +67,8 @@ std::vector<Source> FindSources(int number, Data::Monsters::MonsterValueField fi
 // refuses it.
 bool TakeValue(int number, Data::Monsters::MonsterValueField field, const Source& source);
 
-// "Make it this number's own": the field may be changed on the number.
+// "Make it this number's own": the field may be changed on the number while
+// it is in this monster; moved into another one, it is locked there.
 void Unlock(int number, Data::Monsters::MonsterValueField field);
 // After a revert: every shared field is locked again.
 void LockAll();

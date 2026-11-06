@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <optional>
 #include <set>
+#include <tuple>
 #include <utility>
 
 namespace MuEditor::Monsters::OwnValues
@@ -29,10 +30,22 @@ constexpr ImVec4 OwnTextColor{0.95f, 0.75f, 0.25f, 1.0f};
 constexpr ImVec4 OwnFrameColor{0.55f, 0.40f, 0.08f, 0.60f};
 constexpr ImVec4 OwnButtonColor{0.60f, 0.45f, 0.10f, 0.70f};
 
-std::set<std::pair<int, MonsterValueField>>& Unlocked()
+// A field unlocked on a number, in the monster it was unlocked in: a number
+// moved into another monster or split out and back is locked there.
+using UnlockKey = std::tuple<int, int, MonsterValueField>;
+
+std::set<UnlockKey>& Unlocked()
 {
-    static std::set<std::pair<int, MonsterValueField>> unlocked;
+    static std::set<UnlockKey> unlocked;
     return unlocked;
+}
+
+// Nullopt for a number of no monster with several numbers, which has nothing
+// to unlock.
+std::optional<UnlockKey> FindUnlockKey(int number, MonsterValueField field)
+{
+    const std::optional<int> monster = g_MonsterDataHandler.FindGroupOf(number);
+    return monster ? std::optional<UnlockKey>(UnlockKey{number, *monster, field}) : std::nullopt;
 }
 
 int& UnlockVersion()
@@ -78,7 +91,8 @@ State GetNumberState(int number, MonsterValueField field)
     {
         return State::Own;
     }
-    return Unlocked().contains({number, field}) ? State::Unlocked : State::Shared;
+    const std::optional<UnlockKey> key = FindUnlockKey(number, field);
+    return key && Unlocked().contains(*key) ? State::Unlocked : State::Shared;
 }
 
 bool SharesValue(int number, MonsterValueField field)
@@ -238,9 +252,10 @@ bool TakeValue(int number, MonsterValueField field, const Source& source)
     {
         return false;
     }
-    if (GetNumberState(number, field) != State::Own)
+    const std::optional<UnlockKey> key = FindUnlockKey(number, field);
+    if (key && GetNumberState(number, field) != State::Own)
     {
-        Unlocked().erase({number, field});
+        Unlocked().erase(*key);
         ++UnlockVersion();
     }
     return true;
@@ -248,8 +263,11 @@ bool TakeValue(int number, MonsterValueField field, const Source& source)
 
 void Unlock(int number, MonsterValueField field)
 {
-    Unlocked().insert({number, field});
-    ++UnlockVersion();
+    if (const std::optional<UnlockKey> key = FindUnlockKey(number, field))
+    {
+        Unlocked().insert(*key);
+        ++UnlockVersion();
+    }
 }
 
 void LockAll()
