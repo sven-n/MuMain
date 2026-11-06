@@ -92,6 +92,10 @@ void ReleaseRetired()
 
 RenderTarget::RenderTarget(Drawer drawer) : m_drawer(std::move(drawer))
 {
+    // Global owners may outlive registries first used during rendering. Construct all
+    // support storage before this owner completes, so it is destroyed after the owner.
+    PublishedSources();
+    RetiredTextures();
     Targets().push_back(this);
 }
 
