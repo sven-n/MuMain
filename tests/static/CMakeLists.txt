@@ -48,6 +48,12 @@ add_test(
         -P "${MU_TESTS}/core/test_msvc_runtime_dll_staging.cmake"
 )
 add_test(
+    NAME dotnet_first_use_before_build_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_CMAKE_SOURCE=${MU_REPO_ROOT}/src/CMakeLists.txt"
+        -P "${MU_TESTS}/test_dotnet_first_use.cmake"
+)
+add_test(
     NAME login_diagnostics_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_LOGIN_SOURCE=${MU_REPO_ROOT}/ClientLibrary/ConnectionManager.ClientToServer.Custom.cs"
