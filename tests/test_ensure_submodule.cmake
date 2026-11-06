@@ -9,12 +9,24 @@ if(NOT DEFINED MU_WORK_DIR)
 endif()
 find_package(Git REQUIRED)
 
+# A git hook that runs this test exports GIT_DIR and the like, which would point the git calls below at the
+# developer's repository. git lists their names.
+execute_process(
+    COMMAND "${GIT_EXECUTABLE}" rev-parse --local-env-vars
+    OUTPUT_VARIABLE repository_variables
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+string(REPLACE "\n" ";" repository_variables "${repository_variables}")
+foreach(variable IN LISTS repository_variables)
+    unset(ENV{${variable}})
+endforeach()
+
 set(library "${MU_WORK_DIR}/library")
 set(superproject "${MU_WORK_DIR}/superproject")
 file(REMOVE_RECURSE "${MU_WORK_DIR}")
 file(MAKE_DIRECTORY "${library}" "${superproject}")
 
-# Without the user's git configuration. Git refuses file:// URLs for submodules unless protocol.file.allow says so.
+# Without the user's git configuration (GIT_CONFIG_GLOBAL needs git 2.32). Git refuses file:// URLs for submodules unless protocol.file.allow says so.
 file(WRITE "${MU_WORK_DIR}/gitconfig" "")
 set(ENV{GIT_CONFIG_NOSYSTEM} 1)
 set(ENV{GIT_CONFIG_GLOBAL} "${MU_WORK_DIR}/gitconfig")
