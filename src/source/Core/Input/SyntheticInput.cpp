@@ -537,8 +537,8 @@ void BeginClick()
         Fail(DeliveryFailure::TargetLost);
         return;
     }
-    // An earlier scan must see Shift before the mouse press so IsRepeat is ready.
-    g_injection.shiftDown = g_injection.shift && propagates;
+    // Physical Shift reaches the legacy scan even when a focused field consumes the key.
+    g_injection.shiftDown = g_injection.shift;
     g_injection.stage = Stage::Hovering;
     g_injection.hoverFramesLeft = ClickHoverFrames;
 }
@@ -564,8 +564,7 @@ void AdvanceClick()
             return;
         }
         g_injection.uiDown = !propagates;
-        // A consumed modifier must not turn the gesture into an unmodified world click.
-        g_injection.legacyDown = propagates && (!g_injection.shift || g_injection.shiftDown);
+        g_injection.legacyDown = propagates;
         if (!g_injection.legacyDown)
             g_injection.shiftDown = false;
         if (g_injection.legacyDown)

@@ -195,9 +195,10 @@ For a gameplay Shift-click, use
 `shift` must be boolean and defaults to false. Shift is pressed during the
 hover frames, so the legacy key scan sees it held before the mouse press,
 and stays down through the mouse release. Both inputs belong to the same
-injection. If the UI consumes Shift or the mouse press, the gesture cannot
-fall through as a plain world click. This supplies gameplay's modifier state;
-RmlUi shortcut modifiers still come from the physical keyboard.
+injection. Shift reaches gameplay even when the UI consumes the key, as a
+physical Shift does; a mouse press consumed by the UI does not reach the world.
+This supplies gameplay's modifier state; RmlUi shortcut modifiers still come
+from the physical keyboard.
 
 Focus a text field with a supported UI click or keyboard navigation before
 `type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;
@@ -215,10 +216,13 @@ release processing on rendered frames. A stalled client times out and retracts
 pending input rather than delivering it later. Cancellation is not a rollback:
 text or effects already delivered before cancellation remain. An abandoned
 held RmlUi click is cleared without activating the pressed element. Independent
-physical input continues to work; a physical press of the same button cancels
-an outstanding scripted click before that press is routed, returning a
-`failed` response naming the physical press; focus loss or a lost window/UI delivery target
-instead reports `failed` with a target-disappeared message. UI hover can remain
+physical input continues to work, but legacy gameplay also sees the injected
+Shift during a shifted click: for example, a physical left click will not walk,
+and physical number keys can select pet commands. A physical press of the same
+button cancels an outstanding scripted click before that press is routed,
+returning a `failed` response naming the physical press; windowed focus loss
+or a lost window/UI delivery target instead reports `failed` with a
+target-disappeared message. UI hover can remain
 at the injected pixel after a completed click or a cancelled click whose UI
 press did not need clearing (a non-primary click or a primary click the UI did
 not consume). A later physical or scripted motion updates it; the OS pointer

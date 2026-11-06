@@ -5,7 +5,6 @@
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Events/CursedTempleSystem.h"
-#include "Core/Input/SyntheticInput.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
@@ -46,7 +45,6 @@
 #include <string>
 
 extern int TextNum;
-extern bool g_bWndActive;
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -56,11 +54,6 @@ namespace
 bool IsTargetedTempleSkill(int skill)
 {
     return skill == AT_SKILL_CURSED_TEMPLE_RESTRAINT || skill == AT_SKILL_CURSED_TEMPLE_SUBLIMATION;
-}
-
-bool IsCursedTempleSkillRequestBlocked(bool gestureConsumed)
-{
-    return gestureConsumed || Hero->m_CursedTempleCurSkillPacket;
 }
 
     const int HolyItemNpc = 380;
@@ -629,7 +622,7 @@ bool mu::ui::window::CCursedTempleSystem::CheckDragonRender()
 
 bool mu::ui::window::CCursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
 {
-    if (IsCursedTempleSkillRequestBlocked(m_CursedTempleGestureConsumed))
+    if (Hero->m_CursedTempleCurSkillPacket)
         return false;
 
     return mu::ui::window::IsRepeat(VK_SHIFT);
@@ -724,7 +717,8 @@ void mu::ui::window::CCursedTempleSystem::UpdateTutorialStep()
 
 bool mu::ui::window::CCursedTempleSystem::Update()
 {
-    if (!MouseRButton || (!g_bWndActive && !Core::Input::Synthetic::IsKeyHeld(VK_RBUTTON)))
+    // A new right press starts a gesture; releasing both RMB and Shift ends it.
+    if (MouseRButtonPush || (!MouseRButton && !mu::ui::window::IsRepeat(VK_SHIFT)))
         m_CursedTempleGestureConsumed = false;
 
     UpdateScore();
@@ -1114,7 +1108,7 @@ bool mu::ui::window::CCursedTempleSystem::Render()
 
 void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
 {
-    if (IsCursedTempleSkillRequestBlocked(m_CursedTempleGestureConsumed))
+    if (m_CursedTempleGestureConsumed || Hero->m_CursedTempleCurSkillPacket)
     {
         MouseRButtonPush = false;
         return;
@@ -1177,8 +1171,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
         }
         SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType,
                                                                      static_cast<uint16_t>(tc->Key), Distance);
-        if (MouseRButton && (g_bWndActive || Core::Input::Synthetic::IsKeyHeld(VK_RBUTTON)))
-            m_CursedTempleGestureConsumed = true;
+        m_CursedTempleGestureConsumed = true;
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 

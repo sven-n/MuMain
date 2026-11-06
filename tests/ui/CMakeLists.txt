@@ -31,14 +31,16 @@ target_compile_definitions(cursed_temple_skill_tests PRIVATE
 if(WIN32 AND TARGET ClientLibrary)
     target_compile_definitions(cursed_temple_skill_tests PRIVATE MU_TEST_TEMPLE_AOT_TRANSPORT=1)
     target_link_libraries(cursed_temple_skill_tests PRIVATE ws2_32)
-    add_dependencies(cursed_temple_skill_tests ClientLibrary)
-    add_custom_command(TARGET cursed_temple_skill_tests PRE_LINK
+    add_custom_target(cursed_temple_skill_tests_library
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:cursed_temple_skill_tests>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_BINARY_DIR}/src/MUnique.Client.Library.dll"
             "$<TARGET_FILE_DIR:cursed_temple_skill_tests>/MUnique.Client.Library.dll"
         COMMENT "Staging ClientLibrary beside the Cursed Temple test"
         VERBATIM
     )
+    add_dependencies(cursed_temple_skill_tests_library ClientLibrary)
+    add_dependencies(cursed_temple_skill_tests cursed_temple_skill_tests_library)
 endif()
 
 mu_add_test(

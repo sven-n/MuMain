@@ -1202,7 +1202,6 @@ void HandleFocusChange(bool active)
     }
     if (!active)
     {
-        Core::Input::Synthetic::CancelDelivery();
 #ifdef ACTIVE_FOCUS_OUT
         if (g_bUseWindowMode == FALSE)
 #endif
@@ -1218,6 +1217,7 @@ void HandleFocusChange(bool active)
         }
         if (g_bUseWindowMode == TRUE)
         {
+            Core::Input::Synthetic::CancelDelivery();
             MouseLButton = false;
             MouseLButtonPop = false;
             MouseLButtonPush = false;

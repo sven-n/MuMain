@@ -54,6 +54,10 @@ constexpr int TempleSkillCount = AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_C
 constexpr DWORD MissingSelection = static_cast<DWORD>(-1);
 
 #ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+constexpr std::chrono::seconds PacketTimeout{2};
+constexpr std::chrono::milliseconds PacketQuietWindow{50};
+constexpr int SocketPollMicroseconds = 10000;
+
 class SkillPacketPeer
 {
 public:
@@ -87,22 +91,23 @@ public:
         fd_set readable;
         FD_ZERO(&readable);
         FD_SET(m_listener, &readable);
-        timeval wait{2, 0};
+        timeval wait{static_cast<long>(PacketTimeout.count()), 0};
         REQUIRE(select(0, &readable, nullptr, nullptr, &wait) == 1);
         m_peer = accept(m_listener, nullptr, nullptr);
         REQUIRE(m_peer != INVALID_SOCKET);
     }
 
-    std::vector<BYTE> Collect()
+    std::size_t Collect(std::size_t expectedCount)
     {
         std::vector<BYTE> bytes;
-        const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(300);
-        while (std::chrono::steady_clock::now() < until)
+        const auto timeout = std::chrono::steady_clock::now() + PacketTimeout;
+        auto until = expectedCount == 0 ? std::chrono::steady_clock::now() + PacketQuietWindow : timeout;
+        while (std::chrono::steady_clock::now() < std::min(until, timeout))
         {
             fd_set readable;
             FD_ZERO(&readable);
             FD_SET(m_peer, &readable);
-            timeval wait{0, 10000};
+            timeval wait{0, SocketPollMicroseconds};
             const int ready = select(0, &readable, nullptr, nullptr, &wait);
             REQUIRE(ready != SOCKET_ERROR);
             if (ready == 0)
@@ -111,13 +116,43 @@ public:
             const int count = recv(m_peer, buffer, sizeof(buffer), 0);
             REQUIRE(count > 0);
             bytes.insert(bytes.end(), buffer, buffer + count);
+            if (CountRequests(bytes, false) >= expectedCount)
+                until = std::chrono::steady_clock::now() + PacketQuietWindow;
         }
-        return bytes;
+        return CountRequests(bytes, true);
     }
 
     int port = 0;
 
 private:
+    static std::size_t CountRequests(const std::vector<BYTE>& bytes, bool requireComplete)
+    {
+        std::size_t offset = 0;
+        std::size_t count = 0;
+        while (bytes.size() - offset >= 2)
+        {
+            const std::size_t remaining = bytes.size() - offset;
+            const BYTE marker = bytes[offset];
+            REQUIRE((marker == 0xC1 || marker == 0xC2));
+            const std::size_t headerLength = marker == 0xC1 ? 2 : 3;
+            if (remaining < headerLength)
+                break;
+            const std::size_t packetLength =
+                marker == 0xC1 ? bytes[offset + 1]
+                               : (static_cast<std::size_t>(bytes[offset + 1]) << 8) | bytes[offset + 2];
+            REQUIRE(packetLength >= headerLength + 2);
+            if (packetLength > remaining)
+                break;
+            CHECK(bytes[offset + headerLength] == 0xBF);
+            CHECK(bytes[offset + headerLength + 1] == 0x02);
+            ++count;
+            offset += packetLength;
+        }
+        if (requireComplete)
+            REQUIRE(offset == bytes.size());
+        return count;
+    }
+
     SOCKET m_listener = INVALID_SOCKET;
     SOCKET m_peer = INVALID_SOCKET;
 };
@@ -229,6 +264,7 @@ public:
         TargetY = m_previousTargetY;
         MouseRButton = m_previousMouse;
         MouseRButtonPush = m_previousMousePush;
+        *g_pNewKeyInput = m_previousKeys;
         g_bWndActive = m_previousActive;
         g_strSelectedML = m_previousLanguage;
         std::filesystem::current_path(m_previousDirectory);
@@ -250,6 +286,7 @@ private:
     int m_previousTargetY;
     bool m_previousMouse;
     bool m_previousMousePush;
+    mu::ui::window::CNewKeyInput m_previousKeys = *g_pNewKeyInput;
     bool m_previousActive;
     std::wstring m_previousLanguage;
     std::filesystem::path m_previousDirectory;
@@ -286,16 +323,12 @@ public:
         Place(CharactersClient[EnemySlot], EnemyId);
         TargetX = TargetY = TestTile;
         SelectedCharacter = -1;
+        MouseRButton = MouseRButtonPush = false;
+        SetShiftHeld(false);
 
         SetUpTemple();
         // Rejected targets must return before any transport access.
         SocketClient = nullptr;
-#ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
-        m_connection = std::make_unique<Connection>(u"127.0.0.1", peer.port, false, nullptr);
-        REQUIRE(m_connection->IsConnected());
-        peer.Accept();
-        SocketClient = m_connection.get();
-#endif
     }
 
     ~TempleSkillFixture()
@@ -313,12 +346,23 @@ public:
     }
 
 #ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
+    void ConnectTransport()
+    {
+        m_peer = std::make_unique<SkillPacketPeer>();
+        m_connection = std::make_unique<Connection>(u"127.0.0.1", m_peer->port, false, nullptr);
+        REQUIRE(m_connection->IsConnected());
+        m_peer->Accept();
+        SocketClient = m_connection.get();
+    }
+
     void BeginHeldCast(int skill, DWORD selection)
     {
         Hero->m_CursedTempleCurSkill = skill;
         Hero->m_CursedTempleCurSkillPacket = false;
         MouseRButton = true;
         MouseRButtonPush = true;
+        SetShiftHeld(true);
+        m_window->Update();
         m_window->SetCursedTempleSkill(Hero, &Hero->Object, selection);
     }
 
@@ -345,46 +389,27 @@ public:
     void ReleaseRightButton()
     {
         MouseRButton = false;
+        MouseRButtonPush = false;
+        SetShiftHeld(false);
         m_window->Update();
     }
 
     void ExpectRequestCount(std::size_t expectedCount)
     {
-        const std::vector<BYTE> bytes = peer.Collect();
-        std::size_t offset = 0;
-        std::size_t requestCount = 0;
-        while (offset < bytes.size())
-        {
-            const std::size_t remaining = bytes.size() - offset;
-            REQUIRE(remaining >= 2);
-            std::size_t packetLength = 0;
-            std::size_t headerLength = 0;
-            if (bytes[offset] == 0xC1)
-            {
-                headerLength = 2;
-                packetLength = bytes[offset + 1];
-            }
-            else if (bytes[offset] == 0xC2)
-            {
-                REQUIRE(remaining >= 3);
-                headerLength = 3;
-                packetLength = (static_cast<std::size_t>(bytes[offset + 1]) << 8) | bytes[offset + 2];
-            }
-            else
-            {
-                FAIL("Unexpected MU packet header");
-            }
-
-            REQUIRE(packetLength >= headerLength + 2);
-            REQUIRE(packetLength <= remaining);
-            CHECK(bytes[offset + headerLength] == 0xBF);
-            CHECK(bytes[offset + headerLength + 1] == 0x02);
-            ++requestCount;
-            offset += packetLength;
-        }
-        CHECK(requestCount == expectedCount);
+        CHECK(m_peer->Collect(expectedCount) == expectedCount);
     }
 #endif
+
+    void SetShiftHeld(bool held)
+    {
+        using KeyInput = mu::ui::window::CNewKeyInput;
+        g_pNewKeyInput->SetKeyState(VK_SHIFT, held ? KeyInput::KEY_REPEAT : KeyInput::KEY_NONE);
+    }
+
+    bool IsTempleSkillKey()
+    {
+        return m_window->IsCursedTempleSkillKey(MissingSelection);
+    }
 
     void ExpectRejected(int skill, DWORD selection)
     {
@@ -434,10 +459,7 @@ private:
     std::unique_ptr<SKILL_ATTRIBUTE[]> m_skills;
     std::unique_ptr<mu::ui::window::CCursedTempleSystem> m_window;
 #ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
-public:
-    SkillPacketPeer peer;
-
-private:
+    std::unique_ptr<SkillPacketPeer> m_peer;
     std::unique_ptr<Connection> m_connection;
 #endif
 };
@@ -484,6 +506,7 @@ TEST_CASE("Temple hostile skills reject absent target keys and teammates [ui][te
 TEST_CASE("Temple response before RMB release does not repeat a held gesture [ui][temple-skill]")
 {
     TempleSkillFixture fixture;
+    fixture.ConnectTransport();
     const int skill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
 
     fixture.BeginHeldCast(skill, MissingSelection);
@@ -492,12 +515,50 @@ TEST_CASE("Temple response before RMB release does not repeat a held gesture [ui
 
     fixture.ResolveRejected(skill);
     CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    CHECK(fixture.IsTempleSkillKey());
     fixture.RetryHeldCast(MissingSelection);
     CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
     fixture.ExpectRequestCount(0);
 
+    // A release and another press can share a frame, leaving the button level unchanged.
+    MouseRButtonPush = true;
+    fixture.UpdateTemple();
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+    fixture.ResolveSucceeded(skill);
+    CHECK(fixture.IsTempleSkillKey());
+
     fixture.ReleaseRightButton();
     fixture.BeginHeldCast(skill, MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+}
+
+TEST_CASE("Held Shift consumes Temple auto-attack requests without a right button [ui][temple-skill]")
+{
+    TempleSkillFixture fixture;
+    fixture.ConnectTransport();
+    const int skill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
+    Hero->m_CursedTempleCurSkill = skill;
+    fixture.SetShiftHeld(true);
+    REQUIRE_FALSE(MouseRButton);
+    fixture.RetryHeldCast(MissingSelection);
+    REQUIRE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+
+    fixture.ResolveSucceeded(skill);
+    fixture.UpdateTemple();
+    CHECK(fixture.IsTempleSkillKey());
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    fixture.SetShiftHeld(false);
+    fixture.UpdateTemple();
+    CHECK_FALSE(fixture.IsTempleSkillKey());
+    fixture.SetShiftHeld(true);
+    fixture.RetryHeldCast(MissingSelection);
     CHECK(Hero->m_CursedTempleCurSkillPacket);
     fixture.ExpectRequestCount(1);
 }
@@ -508,6 +569,7 @@ TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Templ
 {
     using namespace Core::Input::Synthetic;
     TempleSkillFixture fixture;
+    fixture.ConnectTransport();
     struct InjectorGuard
     {
         ~InjectorGuard()

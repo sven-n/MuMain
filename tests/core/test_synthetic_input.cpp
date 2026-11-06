@@ -788,7 +788,7 @@ TEST_CASE("Click rejects nonboolean Shift before scheduling [core][synthetic-inp
     }
 }
 
-TEST_CASE("Consuming either part of a shifted click prevents a plain world click [core][synthetic-input]")
+TEST_CASE("Shifted clicks preserve physical modifier semantics when the UI consumes input [core][synthetic-input]")
 {
     ResetInjector guard;
     RestoreLegacyInput restore;
@@ -806,13 +806,23 @@ TEST_CASE("Consuming either part of a shifted click prevents a plain world click
     {
         BeginFrame();
         g_pNewKeyInput->ScanAsyncKeyState();
-        CHECK_FALSE(MouseRButton);
-        CHECK_FALSE(MouseRButtonPush);
-        CHECK_FALSE(g_pNewKeyInput->IsPress(VK_RBUTTON));
+        if (consumeButtonDown)
+        {
+            CHECK_FALSE(MouseRButton);
+            CHECK_FALSE(MouseRButtonPush);
+            CHECK_FALSE(g_pNewKeyInput->IsPress(VK_RBUTTON));
+        }
         if (!delivered.empty() && delivered.back() == SDL_EVENT_MOUSE_BUTTON_DOWN)
         {
             sawMousePress = true;
-            CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+            CHECK(MouseRButton == !consumeButtonDown);
+            CHECK(MouseRButtonPush == !consumeButtonDown);
+            CHECK(g_pNewKeyInput->IsPress(VK_RBUTTON) == !consumeButtonDown);
+            if (!consumeButtonDown)
+            {
+                CHECK(IsKeyHeld(VK_SHIFT));
+                CHECK(mu::ui::window::IsRepeat(VK_SHIFT));
+            }
         }
     }
     CHECK(sawMousePress);
