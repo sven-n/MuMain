@@ -423,6 +423,10 @@ How the value at a level `L` is computed:
   takes the last entry, and the exchange writes exactly these levels to
   OpenMU. `perLevel` is not allowed (fatal); **Fill levels** in Item
   Options writes a list from a start value and a step.
+- **A level below `firstLevel`** gives 0, as today: the harmony bmd holds 0
+  at every level below an option's first level, so the line shows "+0"
+  (`ZzzInventory.cpp:2094-2098`), and an ancient bonus of level 0 adds
+  nothing and shows no line (`CSItemOption.cpp:567`).
 - `firstLevel` defaults to 1, or to 0 with `"levelType": "itemLevel"`.
 
 Which level `L` is:
