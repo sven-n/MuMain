@@ -85,8 +85,9 @@ all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
 [nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
 the repository's submodule entry, for the SDL GPU renderer integration.
 
-CMake fetches only the pinned commits, not their history: about 30 MB instead of
-300 MB in every checkout and worktree. A checkout that already has a submodule keeps
+CMake fetches the pinned commits without their history; git also brings the newest
+commit of each submodule's default branch. That is about 30 MB instead of 300 MB in
+every checkout and worktree. A checkout that already has a submodule keeps
 its history. To work on a submodule with its history, fetch it there, e.g.
 `git -C src/ThirdParty/RmlUi fetch --unshallow`.
 

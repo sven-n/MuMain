@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 
-# mu_ensure_submodule fetches only the pinned commit of a submodule, not its history. The library here has three
-# commits and the superproject pins the middle one, as the real submodules pin a commit behind their branch's newest:
-# the commit before the pinned one must not arrive.
+# mu_ensure_submodule leaves a submodule's history out. The library here has three commits and the superproject pins
+# the middle one, as the real submodules pin a commit behind their branch's newest: the commit before the pinned one
+# must not arrive (the newest one does, without its history).
 
 if(NOT DEFINED MU_WORK_DIR)
     message(FATAL_ERROR "MU_WORK_DIR is required")
@@ -82,8 +82,8 @@ execute_process(
 )
 if(has_commit_1 EQUAL 0)
     message(FATAL_ERROR
-        "The submodule holds the commit before the pinned one: mu_ensure_submodule must fetch only the pinned commit "
-        "(git submodule update --init --depth 1), not the submodule's history.")
+        "The submodule holds the commit before the pinned one: mu_ensure_submodule must leave the submodule's history "
+        "out (git submodule update --init --depth 1).")
 endif()
 
 file(REMOVE_RECURSE "${MU_WORK_DIR}")

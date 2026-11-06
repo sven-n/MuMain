@@ -78,7 +78,7 @@ add_test(
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
 )
 add_test(
-    NAME ensure_submodule_fetches_only_the_pinned_commit
+    NAME ensure_submodule_leaves_history_out
     COMMAND "${CMAKE_COMMAND}" "-DMU_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/ensure-submodule"
         -P "${MU_TESTS}/test_ensure_submodule.cmake"
 )

@@ -5,7 +5,8 @@
 # Ensures a git submodule at <relative_path> (relative to the calling
 # CMakeLists.txt) is initialized.  INDICATOR is a file expected to exist
 # inside the submodule once it's populated; its absence triggers init.
-# Init fetches only the pinned commit, not the submodule's history.
+# Init leaves the submodule's history out: git fetches the pinned commit and
+# the default branch's newest commit, each without the commits before it.
 # URL allows the helper to `git submodule add` the entry if it's not yet
 # registered in the index — only useful for first-time bootstraps.
 #
