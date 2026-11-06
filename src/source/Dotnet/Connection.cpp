@@ -107,7 +107,15 @@ namespace
 {
 // The open connections by handle. The managed library calls back on thread-pool threads; see
 // HandleRegistry for how that stays away from a Connection being destroyed.
-DotNetBridge::HandleRegistry<Connection> connections;
+//
+// Never destroyed, like IncomingPacketQueue::Instance(): the game connection is still open when the
+// process exits, and a callback that arrives while the statics are torn down must still find a
+// working registry.
+DotNetBridge::HandleRegistry<Connection>& Connections()
+{
+    static auto* const registry = new DotNetBridge::HandleRegistry<Connection>();
+    return *registry;
+}
 } // anonymous namespace
 
 namespace DotNetBridge
@@ -210,12 +218,12 @@ Send GetSend()
 
 void Connection::OnPacketReceivedS(const int32_t handle, const int32_t size, BYTE* data)
 {
-    connections.Dispatch(handle, [data, size](Connection& connection) { connection.OnPacketReceived(data, size); });
+    Connections().Dispatch(handle, [data, size](Connection& connection) { connection.OnPacketReceived(data, size); });
 }
 
 void Connection::OnDisconnectedS(const int32_t handle)
 {
-    connections.Dispatch(handle, [](Connection& connection) { connection.OnDisconnected(); });
+    Connections().Dispatch(handle, [](Connection& connection) { connection.OnDisconnected(); });
 }
 
 Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
@@ -251,7 +259,7 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
         _gameServer->SetHandle(handle);
 
         // Register only once the object is complete: callbacks can reach it from here on.
-        connections.Add(handle, this);
+        Connections().Add(handle, this);
         if (const auto beginReceive = GetBeginReceive())
         {
             beginReceive(handle);
@@ -307,7 +315,7 @@ void Connection::Close()
 
 void Connection::Unregister()
 {
-    connections.Remove(this->_handle);
+    Connections().Remove(this->_handle);
 }
 
 void Connection::OnDisconnected()
