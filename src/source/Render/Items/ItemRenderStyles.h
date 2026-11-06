@@ -44,6 +44,9 @@ class PreviewLook
 {
 public:
     PreviewLook(int modelType, const Data::Looks::LookDefinition& look);
+    // The model drawn with no render style at all, as the model of an item that names none: the Style Editor's
+    // "Without a look".
+    explicit PreviewLook(int modelType);
     ~PreviewLook();
     PreviewLook(const PreviewLook&) = delete;
     PreviewLook& operator=(const PreviewLook&) = delete;

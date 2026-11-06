@@ -98,18 +98,18 @@ void CItemModelPreview::Render(int itemType)
     RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);
 }
 
-void CItemModelPreview::RenderSideBySide(int itemType, const char* left, const char* right, const DrawIn& drawIn)
+void CItemModelPreview::RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn)
 {
     RenderControls();
+    count = std::clamp(count, 1, MaxViews);
     const MuEditor::Effects::EffectPreviewRequest request = MakeRequest(itemType);
     const ImGuiStyle& style = ImGui::GetStyle();
-    const float spacing = style.ItemSpacing.x;
-    const float width = (ImGui::GetContentRegionAvail().x - spacing) / 2.0f;
-    const float widthInWindow =
-        (ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize - spacing) / 2.0f;
+    const float gaps = style.ItemSpacing.x * static_cast<float>(count - 1);
+    const float width = (ImGui::GetContentRegionAvail().x - gaps) / static_cast<float>(count);
+    const float widthInWindow = (ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize - gaps) /
+                                static_cast<float>(count);
     const float height = ViewHeight(widthInWindow);
-    const char* const labels[] = {left, right};
-    for (int view = 0; view < 2; ++view)
+    for (int view = 0; view < count; ++view)
     {
         if (view > 0)
         {
@@ -117,7 +117,10 @@ void CItemModelPreview::RenderSideBySide(int itemType, const char* left, const c
         }
         ImGui::BeginGroup();
         ImGui::PushID(view);
-        ImGui::TextDisabled("%s", labels[view]);
+        // Each header gets the height of a control, so the views stay in line under a label beside a dropdown.
+        const float top = ImGui::GetCursorPosY();
+        header(view, width);
+        ImGui::SetCursorPosY(std::max(ImGui::GetCursorPosY(), top + ImGui::GetFrameHeightWithSpacing()));
         RenderView(request, m_views[static_cast<std::size_t>(view)], "##ModelView", width, height,
                    [&drawIn, view](const std::function<void()>& draw) { drawIn(view, draw); });
         ImGui::PopID();

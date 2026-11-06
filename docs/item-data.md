@@ -1627,11 +1627,15 @@ The picked look shows:
 
   The look and the item change as one undo step. Apply is off while the look
   has a fatal problem.
-- A **preview** of the item picked in the item tools, in two views side by
-  side: **As applied**, the look as the game draws it now, for reference, and
-  **As edited**, the look as the fields have it, before Apply. Both draw the
-  picked item with the look, whatever look the item names. They share the
-  Item Model window's controls and one camera (a drag in either turns both),
+- A **preview** of the item picked in the item tools, in three views side by
+  side: **Original item**, the item as the game draws it with its own look
+  (**As in the game**) or with no look at all (**Without a look**, picked in
+  the dropdown above it); **Chosen look**, the picked look as the game draws
+  it now, for reference; and **As edited**, the look as the fields have it,
+  before Apply. The last two draw the picked item with the picked look,
+  whatever look the item names, and all three keep the item's item effect.
+  They share the Item Model window's controls and one camera (a drag in any
+  turns all),
   with **Stop time** and a time slider, an eye per effect or layer that
   leaves it out of the edited view, and **Draw as a doppelganger**. A look
   still in code shows one view. The preview stays where it is while what is

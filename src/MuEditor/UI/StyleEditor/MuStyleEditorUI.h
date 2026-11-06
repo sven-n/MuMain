@@ -25,11 +25,11 @@
 // every field of its layer). "Show the layers" shows the look as its layers in drawing order instead, with the item
 // values it leaves after drawing as the last line, and the fields of the picked line. Below them, the problems of the
 // look as it is now (Apply is off while a fatal one is left) and the items that use it. Above them, staying where it is
-// while they scroll, a preview of the item: the look as applied beside the look as the fields have it, before it is
-// applied, with one camera, the time stopped or moving, an eye per effect or layer (for the edited one) and "Draw as:
-// doppelganger". Apply asks what the change is for (L36): all the items that use the look, which it lists (D26), only
-// the picked item (as a copy of the look) or a new item. The changes are item edits (L39): one undo history with the
-// item tools, and Save Items writes the file.
+// while they scroll, a preview of the item in three views (L41): the item as the game draws it or without a look, the
+// look as applied, and the look as the fields have it, before it is applied, with one camera, the time stopped or
+// moving, an eye per effect or layer (for the edited one) and "Draw as: doppelganger". Apply asks what the change is
+// for (L36): all the items that use the look, which it lists (D26), only the picked item (as a copy of the look) or a
+// new item. The changes are item edits (L39): one undo history with the item tools, and Save Items writes the file.
 class CMuStyleEditorUI
 {
 public:
@@ -117,6 +117,8 @@ private:
     void RenderChecks();
     void RenderUsers(const std::vector<int>& users);
     void RenderPreview(const Data::Looks::LookDefinition* look);
+    // What stands above a view of the preview: the original item's dropdown, or the view's name.
+    void RenderViewHeader(int view, float width);
     // The fields follow the look (an undo, a redo) until they are changed.
     void UpdateDraft(const Data::Looks::LookDefinition& look);
     void CheckDraft();
@@ -151,6 +153,8 @@ private:
     bool m_stopTime = false;
     float m_seconds = 0.0f;
     bool m_asDoppelganger = false;
+    // The preview's first view draws the item without a look instead of as the game draws it.
+    bool m_originalWithoutLook = false;
 
     NameDialog m_nameDialog = NameDialog::None;
     std::string m_name;

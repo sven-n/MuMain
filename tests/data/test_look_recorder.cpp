@@ -4,8 +4,12 @@
 
 #include "LookRecorder.h"
 
+#include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/LookData/LookDataHandler.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Render/Items/ItemRenderStyles.h"
 
@@ -188,6 +192,44 @@ TEST_CASE("The draw recorder draws a real item the same way twice, and the draws
         CHECK(LookRecorder::FirstDifference(first, second).empty());
         CHECK(LookRecorder::Digest(first) == LookRecorder::Digest(second));
     }
+}
+
+TEST_CASE("The Style Editor's preview without a look draws an item as one that names no render style (design L41) "
+          "[looks][recorder]")
+{
+    const std::vector<int> items = LookRecorder::ItemsUsing("chromeMesh0");
+    REQUIRE_FALSE(items.empty());
+    const LookStoreScope looks({ChromeMesh0()});
+    LookRecorder::ShippedItems shipped;
+    shipped.Open(items);
+    const int item = items.front();
+    const std::vector<Situation> situations = LookRecorder::Situations();
+    std::vector<Record> withLook;
+    std::vector<Record> withoutLook;
+    for (const Situation& situation : situations)
+    {
+        withLook.push_back(LookRecorder::RecordItem(item, situation));
+        const Render::Items::Styles::PreviewLook preview(Data::Items::ToModelSlot(item));
+        withoutLook.push_back(LookRecorder::RecordItem(item, situation));
+    }
+    // The look draws more: its chrome pass on mesh 0.
+    CHECK_FALSE(LookRecorder::FirstDifference(withLook.front(), withoutLook.front()).empty());
+
+    // The same item with a model entry that names no render style, its glow colors taken from the shipped file as
+    // ShippedItems takes them.
+    Data::Effects::GlowColorList glowColors;
+    glowColors.Build(Data::Items::LoadGlowColorsFile(Data::Items::GetGlowColorsFile()).colors);
+    const Data::Items::ItemModelDefinition entry = *g_ItemModelDatabase.Find(item);
+    Data::Items::ItemModelDefinition plain = entry;
+    plain.renderStyle.clear();
+    g_ItemModelDatabase.Set(plain, glowColors);
+    for (std::size_t index = 0; index < situations.size(); ++index)
+    {
+        CAPTURE(situations[index].Describe());
+        CHECK(LookRecorder::FirstDifference(LookRecorder::RecordItem(item, situations[index]), withoutLook[index]) ==
+              "");
+    }
+    g_ItemModelDatabase.Set(entry, glowColors);
 }
 
 TEST_CASE("A number a float step from a rounding edge keeps one of the two digests [looks][recorder]")

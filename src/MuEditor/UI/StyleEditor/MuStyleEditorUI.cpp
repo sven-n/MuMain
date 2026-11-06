@@ -1135,7 +1135,7 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
         }
         Render::Items::Looks::PrepareTextures(shown);
     }
-    // Both views at the same moment.
+    // All views at the same moment.
     const WorldTimeScope time(m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt);
     if (look == nullptr)
     {
@@ -1143,21 +1143,54 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
         m_preview.Render(itemType);
         return;
     }
-    // The look as applied beside it as the fields have it, both on the picked item, whatever look it names.
+    // The item as it is (with its own look or none), then the look as applied and as the fields have it on the picked
+    // item, whatever look it names (design L41).
     const LookDefinition* applied = g_LookEdits.Find(look->name);
     const int slot = Data::Items::ToModelSlot(itemType);
-    m_preview.RenderSideBySide(itemType, I18N::Editor::AsApplied, I18N::Editor::AsEdited,
-                               [&](int view, const std::function<void()>& draw)
-                               {
-                                   const LookDefinition* drawn = view == 0 ? applied : &shown;
-                                   if (drawn == nullptr)
-                                   {
-                                       draw();
-                                       return;
-                                   }
-                                   const Render::Items::Styles::PreviewLook preview(slot, *drawn);
-                                   draw();
-                               });
+    m_preview.RenderSideBySide(
+        itemType, 3, [this](int view, float width) { RenderViewHeader(view, width); },
+        [&](int view, const std::function<void()>& draw)
+        {
+            if (view == 0)
+            {
+                if (m_originalWithoutLook)
+                {
+                    const Render::Items::Styles::PreviewLook withoutLook(slot);
+                    draw();
+                }
+                else
+                {
+                    draw();
+                }
+                return;
+            }
+            const LookDefinition* drawn = view == 1 ? applied : &shown;
+            if (drawn == nullptr)
+            {
+                draw();
+                return;
+            }
+            const Render::Items::Styles::PreviewLook preview(slot, *drawn);
+            draw();
+        });
+}
+
+void CMuStyleEditorUI::RenderViewHeader(int view, float width)
+{
+    if (view != 0)
+    {
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextDisabled("%s", view == 1 ? I18N::Editor::ChosenLook : I18N::Editor::AsEdited);
+        return;
+    }
+    // The original item: as the game draws it, or without a look, to see what a look adds.
+    const char* const shows[] = {I18N::Editor::OriginalItemAsInTheGame, I18N::Editor::OriginalItemWithoutALook};
+    int shown = m_originalWithoutLook ? 1 : 0;
+    ImGui::SetNextItemWidth(width);
+    if (ImGui::Combo("##OriginalItem", &shown, shows, IM_ARRAYSIZE(shows)))
+    {
+        m_originalWithoutLook = shown == 1;
+    }
 }
 
 void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)

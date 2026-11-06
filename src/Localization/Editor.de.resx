@@ -655,8 +655,14 @@
   <data name="The preview draws {0}" xml:space="preserve">
     <value>Die Vorschau zeichnet {0} mit dem Look, wie er übernommen ist, und daneben, wie seine Felder ihn jetzt haben.</value>
   </data>
-  <data name="As applied" xml:space="preserve">
-    <value>Wie übernommen</value>
+  <data name="Original item: as in the game" xml:space="preserve">
+    <value>Originaler Gegenstand: wie im Spiel</value>
+  </data>
+  <data name="Original item: without a look" xml:space="preserve">
+    <value>Originaler Gegenstand: ohne Look</value>
+  </data>
+  <data name="Chosen look" xml:space="preserve">
+    <value>Gewählter Look</value>
   </data>
   <data name="As edited" xml:space="preserve">
     <value>Wie bearbeitet</value>

@@ -1202,9 +1202,10 @@ void SpawnHelperNpcPlateLights(OBJECT* o)
 
 namespace
 {
-// PreviewLook's model and look; nullptr while there is none.
+// PreviewLook's model and look, while one lives; the look is nullptr for the model drawn with no render style.
 struct Preview
 {
+    bool active = false;
     int modelType = -1;
     const Data::Looks::LookDefinition* look = nullptr;
 };
@@ -1212,13 +1213,18 @@ Preview s_preview;
 
 bool IsPreviewed(int modelType)
 {
-    return s_preview.look != nullptr && s_preview.modelType == modelType;
+    return s_preview.active && s_preview.modelType == modelType;
 }
 } // namespace
 
 PreviewLook::PreviewLook(int modelType, const Data::Looks::LookDefinition& look)
 {
-    s_preview = {modelType, &look};
+    s_preview = {true, modelType, &look};
+}
+
+PreviewLook::PreviewLook(int modelType)
+{
+    s_preview = {true, modelType, nullptr};
 }
 
 PreviewLook::~PreviewLook()
@@ -1230,6 +1236,11 @@ bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha,
 {
     if (IsPreviewed(modelType))
     {
+        if (s_preview.look == nullptr)
+        {
+            // No render style: the drawing code draws the model itself.
+            return false;
+        }
         Looks::DrawRenderStyle(*s_preview.look, b, o, look, alpha, renderType);
         return true;
     }

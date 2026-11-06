@@ -676,8 +676,14 @@
   <data name="The preview draws {0}" xml:space="preserve">
     <value>The preview draws {0} with the look as applied, and beside it with the look as its fields have it now.</value>
   </data>
-  <data name="As applied" xml:space="preserve">
-    <value>As applied</value>
+  <data name="Original item: as in the game" xml:space="preserve">
+    <value>Original item: as in the game</value>
+  </data>
+  <data name="Original item: without a look" xml:space="preserve">
+    <value>Original item: without a look</value>
+  </data>
+  <data name="Chosen look" xml:space="preserve">
+    <value>Chosen look</value>
   </data>
   <data name="As edited" xml:space="preserve">
     <value>As edited</value>

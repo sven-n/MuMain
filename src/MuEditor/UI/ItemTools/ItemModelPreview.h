@@ -21,17 +21,21 @@ namespace MuEditor::Items
 // a texture. The mouse turns the camera (EffectPreviewInput: the middle button
 // moves the picture, the wheel zooms, a double click puts it back). The mesh the
 // mesh list or a mesh field shows is drawn alone, the others see-through, and a
-// click on a part keeps its mesh (g_ItemMeshFocus). The Style Editor shows two
+// click on a part keeps its mesh (g_ItemMeshFocus). The Style Editor shows three
 // views of the item side by side, with one set of controls and one camera.
 class CItemModelPreview
 {
 public:
     void Render(int itemType);
-    // Runs `draw`, the drawing of view 0 (the left one) or 1, inside what that view needs.
+    // The most views RenderSideBySide draws.
+    static constexpr int MaxViews = 3;
+    // Draws what stands above view `view` (0 is the left one), its name or a control, in the view's width; one line.
+    using Header = std::function<void(int view, float width)>;
+    // Runs `draw`, the drawing of view `view`, inside what that view needs.
     using DrawIn = std::function<void(int view, const std::function<void()>& draw)>;
-    // Two views of the item side by side, named by `left` and `right` above them: one set of controls and one camera,
-    // so a drag in either turns both; each is drawn inside `drawIn`.
-    void RenderSideBySide(int itemType, const char* left, const char* right, const DrawIn& drawIn);
+    // `count` views of the item side by side (at most MaxViews), each below its `header`: one set of controls and one
+    // camera, so a drag in any turns all; each is drawn inside `drawIn`.
+    void RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn);
 
     // The item level and looks the controls chose, for the inventory grid.
     int GetLevel() const
@@ -82,7 +86,7 @@ private:
     void TakeBackPickOnDoubleClick() const;
 
     MuEditor::Effects::EffectPreviewCamera m_camera;
-    std::array<View, 2> m_views;
+    std::array<View, MaxViews> m_views;
     int m_framedItemType = -1;
     int m_level = 0;
     bool m_excellent = false;
