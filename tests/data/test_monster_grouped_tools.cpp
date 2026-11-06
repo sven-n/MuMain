@@ -289,6 +289,11 @@ TEST_CASE("Monster Translations rows: a monster with several numbers is translat
     MuEditor::Monsters::MonsterNameRows rows;
     const int whole = 145 + ShownValues::WholeMonsterKey;
     CHECK(rows.List("", "") == std::vector{2, whole});
+    // The monster's row is found by each of its numbers, with the other
+    // filters still applied.
+    CHECK(rows.List("336", "") == std::vector{whole});
+    CHECK(rows.List("145", "") == std::vector{whole});
+    CHECK(rows.List("336", "pt").empty());
     REQUIRE(rows.FindNames(whole) != nullptr);
     CHECK(rows.FindNames(whole)->Get("pt") == "Centurião da morte");
     char id[32];

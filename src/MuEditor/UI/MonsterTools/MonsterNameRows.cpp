@@ -12,6 +12,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/TextSearch.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/Common/LocalizedString.h"
@@ -19,6 +20,7 @@
 #include "I18N/All.h"
 #include "imgui.h"
 
+#include <algorithm>
 #include <bitset>
 #include <cstdio>
 #include <optional>
@@ -54,7 +56,7 @@ const std::vector<int>& MonsterNameRows::List(std::string_view search, std::stri
     m_rows.clear();
     for (const Row& row : CollectRows())
     {
-        if (MatchesMonsterFilter(row.values, m_filter))
+        if (Lists(row))
         {
             m_rows.push_back(row.id);
         }
@@ -63,6 +65,24 @@ const std::vector<int>& MonsterNameRows::List(std::string_view search, std::stri
     m_builtVersion = GetVersion();
     m_built = true;
     return m_rows;
+}
+
+bool MonsterNameRows::Lists(const Row& row) const
+{
+    if (MatchesMonsterFilter(row.values, m_filter))
+    {
+        return true;
+    }
+    // A monster's row is found by any of its numbers too.
+    int number = 0;
+    if (!TextSearch::ReadWholeNumber(m_filter.search, number) ||
+        std::ranges::find(row.numbers, number) == row.numbers.end())
+    {
+        return false;
+    }
+    MonsterListModel::Filter withoutSearch = m_filter;
+    withoutSearch.search.clear();
+    return MatchesMonsterFilter(row.values, withoutSearch);
 }
 
 std::vector<MonsterNameRows::Row> MonsterNameRows::CollectRows() const
@@ -83,19 +103,19 @@ std::vector<MonsterNameRows::Row> MonsterNameRows::CollectRows() const
         }
         if (numbers.size() < 2)
         {
-            rows.push_back({number, *entry});
+            rows.push_back({number, *entry, {number}});
             continue;
         }
         // The names the numbers share, then the numbers with names of their
         // own (Q-MN50).
         MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(number);
         shared.number = numbers.front();
-        rows.push_back({numbers.front() + WholeMonsterKey, shared});
+        rows.push_back({numbers.front() + WholeMonsterKey, shared, numbers});
         for (const int member : numbers)
         {
             if (HasOwnRow(member))
             {
-                rows.push_back({member, *g_MonsterDatabase.Find(member)});
+                rows.push_back({member, *g_MonsterDatabase.Find(member), {member}});
             }
         }
     }

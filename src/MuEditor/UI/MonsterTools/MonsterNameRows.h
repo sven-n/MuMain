@@ -37,10 +37,15 @@ private:
         int id = 0;
         // The names and number the filter reads.
         Data::Monsters::MonsterDefinition values;
+        // The numbers a search finds the row by: all of a monster's for its
+        // row.
+        std::vector<int> numbers;
     };
 
     // Every row, in the order of the monsters' first numbers.
     std::vector<Row> CollectRows() const;
+    // Whether the row passes m_filter.
+    bool Lists(const Row& row) const;
 
     // Assigned in place, so the strings keep their memory from frame to frame.
     MonsterListModel::Filter m_filter;
