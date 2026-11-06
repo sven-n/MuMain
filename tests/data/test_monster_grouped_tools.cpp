@@ -569,6 +569,29 @@ TEST_CASE("Monster Browser: Remove monster names the monster by its shared name 
           I18N::Format(I18N::Editor::StepRemoveMonsterWithNumbers, {"Death Centurion", "3"}));
 }
 
+TEST_CASE("Monster Browser: Remove monster follows a change of the monster's numbers while it is open "
+          "[editor][monsters]")
+{
+    GroupedTools tools;
+    TestImGuiContext context;
+    g_MonsterSelection.SelectMonster(145);
+    RenderBrowser();
+    Press(MuEditor::WindowIds::MonsterBrowser, I18N::Editor::RemoveMonster);
+    RenderBrowser();
+
+    // 336 leaves the monster while the dialog is open (an undo elsewhere):
+    // the dialog lists and removes the two numbers left.
+    REQUIRE(g_MonsterEdits.MoveNumber("move", 336, 2));
+    RenderBrowser();
+    Press("###MonsterRemoveDialog", I18N::Editor::Remove);
+    RenderBrowser();
+    CHECK(g_MonsterDatabase.Find(145) == nullptr);
+    CHECK(g_MonsterDatabase.Find(175) == nullptr);
+    CHECK(g_MonsterEdits.ReadMonsterNumbers(336) == std::vector{2, 336});
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() ==
+          I18N::Format(I18N::Editor::StepRemoveMonsterWithNumbers, {"Death Centurion", "2"}));
+}
+
 TEST_CASE("Monster Translations rows: a monster with several numbers is translated once, numbers with names "
           "of their own have rows [editor][monsters]")
 {

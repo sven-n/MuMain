@@ -12,6 +12,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/CodeReferenceList.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -44,6 +45,12 @@ void RenderWrapped(const char* text, bool disabled)
     ImGui::PopTextWrapPos();
 }
 
+// Changes with the entries and the monsters' numbers.
+int ReadDataVersion()
+{
+    return g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion();
+}
+
 std::string Joined(const std::vector<std::string>& names)
 {
     std::string joined;
@@ -72,17 +79,25 @@ void MonsterRemoveDialog::Open(int number, bool wholeMonster)
         return;
     }
     m_number = number;
-    m_wholeMonster = wholeMonster && g_MonsterEdits.ReadMonsterNumbers(number).size() > 1;
-    m_numbers = m_wholeMonster ? g_MonsterEdits.ReadMonsterNumbers(number) : std::vector{number};
+    m_wholeRequested = wholeMonster;
+    ReadNumbers();
+    // Reads the sources on the first remove, not when the editor starts.
+    GetMonsterCodeReferences();
+    m_open = true;
+    ImGui::OpenPopup(PopupId);
+}
+
+void MonsterRemoveDialog::ReadNumbers()
+{
+    const std::vector<int> numbers = g_MonsterEdits.ReadMonsterNumbers(m_number);
+    m_wholeMonster = m_wholeRequested && numbers.size() > 1;
+    m_numbers = m_wholeMonster ? numbers : std::vector{m_number};
     m_dataUsers.clear();
     for (const int member : m_numbers)
     {
         m_dataUsers.push_back(FindMonsterDataUsers(member));
     }
-    // Reads the sources on the first remove, not when the editor starts.
-    GetMonsterCodeReferences();
-    m_open = true;
-    ImGui::OpenPopup(PopupId);
+    m_numbersVersion = ReadDataVersion();
 }
 
 void MonsterRemoveDialog::Render()
@@ -100,6 +115,11 @@ void MonsterRemoveDialog::Render()
         ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
         return;
+    }
+    // The numbers listed are the ones Remove removes, also after an undo.
+    if (m_numbersVersion != ReadDataVersion())
+    {
+        ReadNumbers();
     }
     const std::string numbers = ShownValues::ListNumbers(m_numbers);
     // A whole monster by the name its numbers share, not its first number's.
