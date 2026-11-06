@@ -1071,7 +1071,7 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     return  maxDurability;
 }
 
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana)
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
 {
     switch (Option)
     {

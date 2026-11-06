@@ -25,7 +25,7 @@ const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA
 struct OptionSlot
 {
     WORD option;
-    BYTE value;
+    WORD value;
 };
 } // namespace
 
@@ -125,4 +125,20 @@ TEST_CASE("A Dark Horse keeps one defense slot over pet info updates [items]")
         CHECK(horse.Special[defenseSlot] == AT_SET_OPTION_IMPROVE_DEFENCE);
         CHECK(horse.SpecialValue[defenseSlot] == 5 + 40 / 20 + 3 * 2);
     }
+}
+
+// An option's value has more than a byte: the Dark Horse's defense passes 255 at 3020 agility with a horse at level 50,
+// and OpenMU adds all of it (Pets.cs, DefenseBase + 5 + horse level * 2 + agility / 20).
+TEST_CASE("An option keeps a value above 255 [items]")
+{
+    HeroScope hero;
+    hero.Hero().Dexterity = 3020;
+    PET_INFO pet{};
+    pet.m_wLevel = 50;
+    ITEM horse{};
+    horse.Type = ITEM_DARK_HORSE_ITEM;
+    giPetManager::SetPetItemConvert(&horse, &pet);
+
+    REQUIRE(horse.SpecialNum == 1);
+    CHECK(horse.SpecialValue[0] == 256);
 }

@@ -32,7 +32,7 @@ void AddOptionSlot(ITEM& item, std::uint16_t option, int value)
         return;
     }
     item.Special[item.SpecialNum] = option;
-    item.SpecialValue[item.SpecialNum] = static_cast<BYTE>(value);
+    item.SpecialValue[item.SpecialNum] = static_cast<WORD>(value);
     ++item.SpecialNum;
 }
 
@@ -42,7 +42,7 @@ void SetOptionSlot(ITEM& item, std::uint16_t option, int value)
     {
         if (item.Special[i] == option)
         {
-            item.SpecialValue[i] = static_cast<BYTE>(value);
+            item.SpecialValue[i] = static_cast<WORD>(value);
             return;
         }
     }
