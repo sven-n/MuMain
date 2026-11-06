@@ -312,10 +312,19 @@ projects, and name the .NET SDK version (which picks the NativeAOT compiler pack
 so a new entry is stored only when one of those changes, not with every new source
 file in `src/CMakeLists.txt`.
 
-PR runs only read the library and vcpkg caches, as they do the compiler caches:
-**Restore dependencies** and **Restore vcpkg packages** read them, and
-**Save dependencies** (after the build) and **Save vcpkg packages** (after the
-configure step) store them only in main pushes, when the exact key was missing. A
+The Linux build also caches the apt packages it installs (about 45 MB): the image's
+Ubuntu mirror sometimes sends them at 35–160 kB/s, and **Install build tools** then
+took 5–24 minutes instead of about 20 seconds. **Find apt packages** updates the
+index and names the cache after the files apt would fetch (`apt-get install
+--print-uris`), so a new package version gives a new key. apt uses the restored
+files that still match the index and fetches only the others; **Save apt packages**
+stores the install's files.
+
+PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
+**Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
+them, and **Save dependencies** (after the build), **Save vcpkg packages** (after the
+configure step) and **Save apt packages** (after the install) store them only in main
+pushes, when the exact key was missing. A
 PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
 past that, GitHub deletes the least recently used entries, main's included. The
 nightly and manual release runs save nothing either: they run beside the pushes,
