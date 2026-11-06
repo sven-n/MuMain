@@ -290,6 +290,9 @@ TEST_CASE(
     frame();
     CHECK(IsIdle());
     CHECK_FALSE(input.IsLBtnHeldDn());
+    CHECK_FALSE(IsInjectingPointer());
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
 
     consume = true;
     REQUIRE(Click(500.0f, 600.0f, MouseButton::Left));
@@ -302,6 +305,21 @@ TEST_CASE(
     frame();
     frame();
     CHECK(IsIdle());
+
+    REQUIRE(PressKey(VK_HOME));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
+    frame();
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(TypeText("input", false));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
 }
 
 TEST_CASE("A click walks hover, press, hold, release through the mouse globals [core][synthetic-input]")

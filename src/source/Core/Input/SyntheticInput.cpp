@@ -463,6 +463,11 @@ bool IsIdle()
     return g_injection.kind == Kind::None;
 }
 
+bool IsInjectingPointer()
+{
+    return g_injection.kind == Kind::Click || g_injection.kind == Kind::Move;
+}
+
 std::uint64_t CurrentGeneration()
 {
     return g_generation;

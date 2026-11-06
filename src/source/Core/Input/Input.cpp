@@ -11,15 +11,13 @@
 #include "UI/Core/UIManager.h"
 
 extern CTimer* g_pTimer;
-extern float g_fWindowMouseX;
-extern float g_fWindowMouseY;
 
 namespace
 {
 void UpdateCursorPosition(HWND window, POINT& cursor)
 {
     // Scripted events update the game pointer without moving the OS cursor.
-    if (Core::Input::Synthetic::IsInjecting())
+    if (Core::Input::Synthetic::IsInjectingPointer())
     {
         cursor.x = static_cast<LONG>(g_fWindowMouseX);
         cursor.y = static_cast<LONG>(g_fWindowMouseY);
@@ -217,7 +215,7 @@ void CInput::Update()
         m_bMBtnUp = true;
     }
 
-    if (!Core::Input::Synthetic::IsInjecting() && GetActiveWindow() == NULL)
+    if (!Core::Input::Synthetic::IsInjectingPointer() && GetActiveWindow() == NULL)
     {
         m_lDX = m_lDY = 0L;
         m_bLBtnUp = m_bRBtnUp = m_bMBtnUp = false;
