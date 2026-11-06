@@ -6,13 +6,16 @@
 
 #include "EffectBrowserAssets.h"
 #include "EffectBrowserLayout.h"
+#include "EffectPreviewInput.h"
 #include "EffectPreviewItems.h"
 #include "EffectPreviewSubject.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Text/Utf8.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -343,17 +346,25 @@ void CEffectPreviewView::RenderItemList()
 }
 
 // The names come from the items as the game has them now; the list is made
-// again when the item editor changes them or the language changes. The item
-// models are all opened on the loading screen and stay, so the list does not
-// change with the map; the models of the chosen level are checked when drawn.
+// again when the item tools change the items or their models, or the item
+// names change (another UI language, translated item names turned on or off).
+// The item models are all opened on the loading screen and stay, so the list
+// does not change with the map; the models of the chosen level are checked
+// when drawn.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
-    const char* locale = I18N::GetCurrentLocale();
-    if (m_itemsVersion == version && m_itemsLocale == locale)
+    const int modelVersion = g_ItemModelDatabase.GetVersion();
+    const int namesVersion = g_ItemDatabase.GetNameVersion();
+    if (m_itemsVersion == version && m_itemModelsVersion == modelVersion && m_itemNamesVersion == namesVersion)
         return;
-    m_itemsVersion = version;
-    m_itemsLocale = locale;
+    // Whether an item can be drawn is known once its changed model is opened
+    // again, before the next frame: until then the list is built again each
+    // frame.
+    const bool modelsOpened = !g_ItemDataHandler.HasModelsToReopen();
+    m_itemsVersion = modelsOpened ? version : -1;
+    m_itemModelsVersion = modelVersion;
+    m_itemNamesVersion = namesVersion;
     m_items.Build(
         MAX_ITEM, [](int itemType) { return Core::Text::ToUtf8(ItemAttribute[itemType].Name); }, IsItemDrawable);
     m_itemMatchesValid = false;
@@ -370,41 +381,33 @@ void CEffectPreviewView::RenderView(const EffectPreviewRequest& request)
     const ImGuiStyle& style = ImGui::GetStyle();
     const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
     const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
-    ImGui::InvisibleButton("##view", ImVec2(width, height), ImGuiButtonFlags_MouseButtonLeft);
-    ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
-    HandleViewInput();
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip("%s", I18N::Editor::PreviewControls);
+    MuEditor::Effects::PreviewInput::RenderView("##view", width, height, m_camera);
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
     Frame(request);
-    if (!ImGui::IsItemVisible() || !mu::GetRenderer().IsFrameActive())
+    if (!ImGui::IsItemVisible())
         return;
-    const float framebufferScale = ImGui::GetIO().DisplayFramebufferScale.x;
-    const MuEditor::Effects::PreviewTextureSize size =
-        MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);
-    const std::uint32_t texture = m_target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
-    if (texture == 0)
-        return;
+    std::uint32_t texture = 0;
+    if (mu::GetRenderer().IsFrameActive())
     {
+        // The density of the OS window the view is in, which can be another monitor's;
+        // ImGui leaves it 0 while the editor's windows stay in the game window.
+        const float viewportScale = ImGui::GetWindowViewport()->FramebufferScale.x;
+        const float framebufferScale = viewportScale > 0.0f ? viewportScale : ImGui::GetIO().DisplayFramebufferScale.x;
+        const MuEditor::Effects::PreviewTextureSize size =
+            MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);
+        texture = m_target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
+        if (texture == 0)
+            return;
         const MuEditor::ScopedOffscreenCapture endCapture;
         m_scene.Draw(request, m_camera, width / height);
     }
-    if (void* pointer = mu::GetRenderer().GetTexturePointer(texture))
+    else
+    {
+        texture = m_target.KeepLastPicture();
+    }
+    if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
-}
-
-void CEffectPreviewView::HandleViewInput()
-{
-    const ImGuiIO& io = ImGui::GetIO();
-    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.0f))
-        m_camera.Turn(io.MouseDelta.x, io.MouseDelta.y);
-    if (!ImGui::IsItemHovered())
-        return;
-    if (io.MouseWheel != 0.0f)
-        m_camera.Zoom(io.MouseWheel);
-    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-        m_camera.Reset();
 }
 
 // Prepares the scene every frame; frames the camera again only when what it

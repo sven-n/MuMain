@@ -36,7 +36,11 @@ public:
 
     virtual void MovePet(void) = 0;
     virtual void CalcPetInformation(const PET_INFO& Petinfo) = 0;
-    virtual void RenderPet(int PetState = 0) = 0;
+    // Marks whether the frame's view shows the pet; part of the character prepare, before the draw.
+    virtual void CullPet() {}
+    virtual void RenderPet(int PetState = 0) const = 0;
+    // The effects and state changes of the pet's draw, for a pet the last frame drew.
+    virtual void UpdatePetEffects() = 0;
 
     virtual void Eff_LevelUp(void) = 0;
     virtual void Eff_LevelDown(void) = 0;
@@ -64,12 +68,14 @@ public:
     CSPetDarkSpirit(CHARACTER* c);
     virtual ~CSPetDarkSpirit(void);
 
-    virtual void MovePet(void);
-    virtual void CalcPetInformation(const PET_INFO& Petinfo);
-    virtual void RenderPet(int PetState = 0);
+    void MovePet(void) override;
+    void CalcPetInformation(const PET_INFO& Petinfo) override;
+    void CullPet() override;
+    void RenderPet(int PetState = 0) const override;
+    void UpdatePetEffects() override;
 
-    virtual void Eff_LevelUp(void);
-    virtual void Eff_LevelDown(void);
+    void Eff_LevelUp(void) override;
+    void Eff_LevelDown(void) override;
 
     void AttackEffect(CHARACTER* c, OBJECT* o);
 };

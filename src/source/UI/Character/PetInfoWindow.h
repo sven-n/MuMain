@@ -40,12 +40,12 @@ namespace mu::ui::window
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 2.3f
+        float GetLayerDepth() override; //. 2.3f
 
         void OpenningProcess();
         void ClosingProcess();

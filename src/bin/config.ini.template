@@ -1,5 +1,6 @@
 [LOGIN]
 RememberMe=0
+SavePassword=0
 Language=Eng
 EncryptedUsername=
 EncryptedPassword=
@@ -12,11 +13,29 @@ SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
 ServerIP=localhost
-ServerPort=44405
+ServerPort=44406
 [UI]
 Locale=en
+TranslateItemNames=1
 Font=
 RmlTheme=legacy
 UIScalePercent=100
+[Camera]
+Zoom=1735
 [Render]
 VSync=1
+Look=Classic
+Anisotropy=8
+Antialiasing=4
+EnhancedLighting=1
+DynamicLights=1
+LightMood=1
+PostProcessing=1
+DisableEffects=0
+DisableParticles=0
+DisableSkillEffectModels=0
+DisableBoids=0
+DisableWingShadow=0
+DisableBodyShadows=0
+FpsCap=-1
+Backend=default

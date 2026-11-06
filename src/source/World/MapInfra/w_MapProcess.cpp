@@ -146,6 +146,7 @@ BaseMap& MapProcess::FindBaseMap(ENUM_WORLD type)
     throw;
 }
 
+// cppcheck-suppress unknownMacro ; Smart_Ptr is the std::shared_ptr macro of _define.h
 void MapProcess::Register(Smart_Ptr(BaseMap) pMap)
 {
     ENUM_WORLD type = pMap->FindMapIndex();
@@ -265,7 +266,7 @@ bool MapProcess::MoveObject(OBJECT* o)
     return false;
 }
 
-bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
+bool MapProcess::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -277,7 +278,33 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                bool result = basemap.lock()->RenderObjectVisual(o, b);
+                if (basemap.lock()->UpdateObjectEffects(o, b))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            m_MapList.erase(tempiter);
+        }
+    }
+    return false;
+}
+
+bool MapProcess::RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
+{
+    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
+    {
+        auto tempiter = iter;
+        ++iter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
+
+        if (basemap.expired() == false)
+        {
+            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
+            {
+                bool result = basemap.lock()->RenderObjectVisual(o, look, b);
                 if (result)
                 {
                     return true;
@@ -292,7 +319,7 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -304,7 +331,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                bool result = basemap.lock()->RenderObjectMesh(o, b, ExtraMon);
+                bool result = basemap.lock()->RenderObjectMesh(o, look, b, ExtraMon);
                 if (result)
                 {
                     return true;
@@ -319,7 +346,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void MapProcess::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -331,7 +358,7 @@ void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                basemap.lock()->RenderAfterObjectMesh(o, b, ExtraMon);
+                basemap.lock()->RenderAfterObjectMesh(o, look, b, ExtraMon);
             }
         }
         else
@@ -437,7 +464,33 @@ void MapProcess::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool MapProcess::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool MapProcess::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
+    {
+        auto tempiter = iter;
+        ++iter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
+
+        if (basemap.expired() == false)
+        {
+            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
+            {
+                if (basemap.lock()->UpdateMonsterEffects(c, o, b))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            m_MapList.erase(tempiter);
+        }
+    }
+    return false;
+}
+
+bool MapProcess::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -504,33 +557,6 @@ bool MapProcess::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
                 bool result = basemap.lock()->SetCurrentActionMonster(c, o);
-                if (result)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            m_MapList.erase(tempiter);
-        }
-    }
-    return false;
-}
-
-bool MapProcess::PlayMonsterSound(OBJECT* o)
-{
-    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(BaseMap) basemap = *tempiter;
-
-        if (basemap.expired() == false)
-        {
-            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
-            {
-                bool result = basemap.lock()->PlayMonsterSound(o);
                 if (result)
                 {
                     return true;

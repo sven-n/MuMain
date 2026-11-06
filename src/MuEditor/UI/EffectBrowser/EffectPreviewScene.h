@@ -23,6 +23,14 @@ enum class PreviewShowOn
     Item,
 };
 
+// How the preview poses an item: as it lies on the ground (its "On the ground"
+// rotation in the Z-up scene), or upright as the inventory shows it.
+enum class PreviewItemPose
+{
+    Ground,
+    Inventory,
+};
+
 // The blends a sprite's SubType chooses (zzzeffectsprite.cpp), in its
 // order: 0 glow, 1 subtract, 2 alpha test, 3 luminance.
 enum class PreviewSpriteBlend
@@ -51,6 +59,10 @@ struct EffectPreviewRequest
     int itemLevel = 0;
     bool itemExcellent = false;
     bool itemAncient = false;
+    PreviewItemPose itemPose = PreviewItemPose::Ground;
+    // With PreviewItemPose::Ground: the ground under the item, as far below
+    // it as the game lays a dropped item above the terrain.
+    bool itemGroundPlane = false;
     PreviewSpriteBlend spriteBlend = PreviewSpriteBlend::Glow;
     bool turn = true;
 };
@@ -99,6 +111,7 @@ private:
 
     void DrawBase(const EffectPreviewRequest& request, float subjectRadius);
     void DrawItem(const EffectPreviewRequest& request);
+    void DrawGroundUnderItem(int modelType);
     void DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera);
     void DrawModel(const PreviewVector& anchor);
     void DrawSprite(const EffectPreviewRequest& request, const PreviewVector& anchor,

@@ -36,10 +36,11 @@
 		      data-style-font-size="hint_line3.text_px + 'px'">{{hint_line3.text}}</span>
 		</div>
 
-		<!-- The tabs' hit areas: the original's 56-unit columns over the top 90 units. -->
-		<div class="gi-tab-hit" id="gi_tab_hit_0" data-event-mousedown="guild_info_tab(0)"></div>
-		<div class="gi-tab-hit" id="gi_tab_hit_1" data-event-mousedown="guild_info_tab(1)"></div>
-		<div class="gi-tab-hit" id="gi_tab_hit_2" data-event-mousedown="guild_info_tab(2)"></div>
+		<!-- The tabs' hit areas: the original's 56-unit columns over the top 90 units. Without a guild
+		     they get .hidden (base.rcss hides it), as the tabs themselves are; a theme decides. -->
+		<div class="gi-tab-hit" id="gi_tab_hit_0" data-class-hidden="no_guild" data-event-mousedown="guild_info_tab(0)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_1" data-class-hidden="no_guild" data-event-mousedown="guild_info_tab(1)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_2" data-class-hidden="no_guild" data-event-mousedown="guild_info_tab(2)"></div>
 		<!-- The header every tab shares. -->
 		<div class="gi-page" data-if="!no_guild">
 		<span id="gi_title" class="sharp-text gi-line"

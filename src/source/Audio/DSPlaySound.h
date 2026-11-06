@@ -15,7 +15,7 @@ struct OBJECT;
 #define SOUND_MONSTER 210
 #define SOUND_MONSTER_END 450
 
-enum ESound
+enum ESound : int
 {
     SOUND_WIND01 = 0,
     SOUND_RAIN01 = 1,
@@ -999,9 +999,36 @@ enum ESound
     MAX_BUFFER
 };
 
+// Numbers after MAX_BUFFER belong to sounds without a SOUND_* id, which get
+// one when they are loaded (Audio/SoundNumbers.h); this many at most, so a
+// model's sound slots (BMD::Sounds, a short from SOUND_MONSTER on) reach all.
+constexpr int MAX_FILE_SOUNDS = 16384;
+
 void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
                   bool Enable3DSound = false);
+// Loads a sound of the code with the file, channels and 3D that
+// Data/Audio/SoundFiles.json gives its id (sound editor design, Q-SE1); one
+// the file has not is logged as an error and stays silent.
+void LoadGameSound(ESound Buffer);
+// Whether LoadWaveFile loaded this file into the sound, with these channels
+// and 3D setting, and it was not released since; the file without case. A
+// load of the same again would only start over (and stop it where it plays).
+bool IsSoundLoaded(ESound Buffer, const wchar_t* strFileName, int BufferChannel, bool Enable3DSound);
+// Forgets what LoadWaveFile loaded: for an audio backend that holds none of
+// it (the tests' recorders).
+void ForgetLoadedSounds();
+// The file LoadWaveFile loaded into the sound (without case); "" for none.
+std::wstring GetLoadedSoundFile(ESound Buffer);
 HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
+// Plays the sound once at `Level` (0 to 1) instead of the effect volume: the
+// editor's previews of a sound, heard also while the game's effect volume is
+// down.
+HRESULT PlayBufferAtLevel(ESound Buffer, float Level);
+// Plays the sound on the next of its channels when that channel has ended,
+// and leaves a playing one alone, as DirectSound did (maps design, D-MP3): a
+// sound asked for every frame runs as up to as many copies as it has channels.
+// A copy it starts plays at `Level` (0 to 1) of the effect volume.
+HRESULT PlayBufferOnFreeChannel(ESound Buffer, float Level = 1.0f);
 void StopBuffer(ESound Buffer, BOOL bResetPosition);
 void AllStopSound(void);
 void Set3DSoundPosition();

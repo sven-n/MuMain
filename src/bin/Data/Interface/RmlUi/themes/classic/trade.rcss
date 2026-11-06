@@ -1,0 +1,172 @@
+/* Classic (0.97) trade window (CTrade), from the 0.97 client's 004f1270: Item_Back01 over Item_Back02, the title at the top;
+   the partner -- name at (20, 45), level at (140, 45), the 8x4 grid at (15, 70), "Zen" and the bar
+   at (20, 162) / (50, 160), the accept mark (accept_box) at (140, 185); the warning lines from
+   (20, 185); then mine -- name at (20, 250), the grid at (15, 270), Zen at (20, 362) / (50, 360);
+   and Zen trade (money_01), OK (accept_box) and Cancel (exit_01), 24x24 at x 26, 97 and 137,
+   y 390, the second image while pressed. #panel's left/top/scale come from C++. */
+
+@spritesheet trade-classic-back1-sheet { src: ../../../Classic/Item_back01.jpg; trade-classic-back1: 0px 0px 190px 256px; }
+@spritesheet trade-classic-back2-sheet { src: ../../../Classic/Item_Back02.jpg; trade-classic-back2: 0px 0px 190px 177px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom { position: absolute; pointer-events: none; }
+.bg-top  { left: 0; top: 0;     width: 190px; height: 256px; decorator: image(trade-classic-back1); }
+.bg-fill { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(trade-classic-back2); }
+.bg-bottom { display: none; }
+/* "Zen" beside both bars, on their dark boxes (frame pieces 0.97 does not need). */
+.bg-left, .bg-right {
+	left: 20px;
+	width: 22px;
+	height: 13px;
+	background-color: rgba(40, 40, 40, 128);
+	font-size: 11px;
+	font-weight: bold;
+	decorator: text("Zen" #ffdc96 center center);
+}
+.bg-left  { top: 162px; }
+.bg-right { top: 362px; }
+
+#title {
+	position: absolute;
+	/* 0.97: a 120-wide box at x 35, centred. */
+	left: 35px;
+	top: 12px;
+	width: calc(120px * var(--root-scale));
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+	pointer-events: none;
+}
+
+.nick-bg, #divider { display: none; }
+
+.id-text { position: absolute; color: rgb(210, 230, 255); white-space: nowrap; pointer-events: none; font-weight: bold; }
+.id-text-your { left: 20px; top: 45px; }
+.id-text-my   { left: 20px; top: 250px; font-size: 1em; }
+
+.guild-name {
+	position: absolute;
+	left: 20px;
+	top: 30px;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.level-text {
+	position: absolute;
+	left: 140px;
+	top: 45px;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.level-text.level-bucket-10  { color: #ff0000; }
+.level-text.level-bucket-50  { color: #ff9600; }
+.level-text.level-bucket-100 { color: #00c918; }
+.level-text.level-bucket-200 { color: #d2e6ff; }
+.level-text.level-bucket-300 { color: #ff99ff; }
+.level-text.level-bucket-400 { color: #ff9999; }
+
+@spritesheet trade-classic-money-sheet { src: ../../../Classic/Item_money.jpg; trade-classic-money: 0px 0px 113px 18px; }
+.gold-bg { position: absolute; left: 50px; width: 113px; height: 18px; decorator: image(trade-classic-money); pointer-events: none; }
+.gold-bg-your { top: 160px; }
+.gold-bg-my   { top: 360px; }
+
+.gold-text {
+	position: absolute;
+	left: 60px;
+	text-align: left;
+	color: #ffdc96;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.gold-text-your { top: 162px; }
+.gold-text-my   { top: 362px; }
+.gold-text.gold-hundred-thousand { color: #00c918; }
+.gold-text.gold-million { color: #ff9600; }
+.gold-text.gold-ten-million { color: #ff0000; }
+#your_gold_text, #my_gold_text { width: auto; }
+
+@spritesheet trade-classic-accept1-sheet { src: ../../../Classic/Accept_box01.jpg; trade-classic-accept: 0px 0px 24px 24px; }
+@spritesheet trade-classic-accept2-sheet { src: ../../../Classic/Accept_box02.jpg; trade-classic-accepted: 0px 0px 24px 24px; }
+.checkbox-row { position: absolute; width: 24px; height: 24px; }
+.checkbox-box { width: 24px; height: 24px; decorator: image(trade-classic-accept); }
+.checkbox-box.checked { decorator: image(trade-classic-accepted); }
+.confirm-your { left: 140px; top: 185px; cursor: default; pointer-events: none; }
+.confirm-my { left: 97px; top: 390px; cursor: pointer; pointer-events: auto; }
+.confirm-my.waiting .checkbox-box { image-color: rgb(255, 0, 0); }
+
+@spritesheet trade-classic-exit1-sheet { src: ../../../Classic/Exit_01.jpg; trade-classic-exit: 0px 0px 24px 24px; }
+@spritesheet trade-classic-exit2-sheet { src: ../../../Classic/Exit_02.jpg; trade-classic-exit-pressed: 0px 0px 24px 24px; }
+@spritesheet trade-classic-zen1-sheet { src: ../../../Classic/Money_01.jpg; trade-classic-zen: 0px 0px 24px 24px; }
+@spritesheet trade-classic-zen2-sheet { src: ../../../Classic/Money_02.jpg; trade-classic-zen-pressed: 0px 0px 24px 24px; }
+.trade-btn {
+	position: absolute;
+	top: 390px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.trade-btn-exit { left: 137px; decorator: image(trade-classic-exit); }
+.trade-btn-exit:active { decorator: image(trade-classic-exit-pressed); }
+.trade-btn-zen  { left: 26px; decorator: image(trade-classic-zen); }
+.trade-btn-zen:active { decorator: image(trade-classic-zen-pressed); }
+
+.warning-label {
+	position: absolute;
+	left: 20px;
+	top: 185px;
+	color: #d20000;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.notice-line {
+	position: absolute;
+	left: 20px;
+	color: rgb(255, 230, 210);
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.notice-line1 { left: 45px; top: 185px; }
+.notice-line2 { top: 200px; }
+.notice-line3 { top: 215px; }
+
+.item-warning-badge {
+	position: absolute;
+	background-color: rgba(210, 0, 0, 255);
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 1em;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.native-anchor { position: absolute; pointer-events: none; }
+#partner_grid, #partner_grid_counts { left: 15px; top: 70px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+#item_grid, #item_grid_counts { left: 15px; top: 270px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+#item_view { height: 473px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rules, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

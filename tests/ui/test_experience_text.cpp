@@ -2,12 +2,18 @@
 
 #include <doctest.h>
 
+#include <clocale>
 #include <cwchar>
+#include <string>
 
+#include "Core/Platform/ProcessLocale.h"
 #include "I18N/All.h"
 
 TEST_CASE("experience text shows both 64-bit values in every locale [ui][i18n]")
 {
+    // The game's process locale: macOS formats wide text through LC_CTYPE.
+    const std::string previousProcessLocale = std::setlocale(LC_ALL, nullptr);
+    Core::Platform::ApplyProcessLocale();
     const std::string previousLocale = I18N::GetCurrentLocale();
     for (const char* locale : I18N::GetAvailableLocales())
     {
@@ -24,4 +30,5 @@ TEST_CASE("experience text shows both 64-bit values in every locale [ui][i18n]")
         CHECK(std::wcsstr(text, L"   ") == nullptr);
     }
     I18N::SetLocale(previousLocale.c_str());
+    std::setlocale(LC_ALL, previousProcessLocale.c_str());
 }

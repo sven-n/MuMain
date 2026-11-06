@@ -31,6 +31,11 @@ void CHARACTER::Initialize()
     HideShadow = false;
     m_bIsSelected = false;
     Decoy = false;
+    SoundOncePlayed = false;
+    SoundsDrawnThisFrame = false;
+    ModelTimerLastTicks.fill(0);
+    ModelTimerTicks = 0;
+    ModelTimersAsked = false;
 
     Class = CLASS_WIZARD;
     Skin = 0;
@@ -54,6 +59,7 @@ void CHARACTER::Initialize()
     Run = 0;
     Skill = 0;
     SwordCount = 0;
+    AttackRotation = 0;
     byExtensionSkill = 0;
     m_byDieType = 0;
     StormTime = 0;
@@ -160,7 +166,7 @@ unsigned int CHARACTER::PostMoveProcess_GetCurProcessCount()
     return m_pPostMoveProcess->uiProcessingCount_PostMoveEvent;
 }
 
-bool CHARACTER::PostMoveProcess_IsProcessing()
+bool CHARACTER::PostMoveProcess_IsProcessing() const
 {
     if (m_pPostMoveProcess == NULL)
     {

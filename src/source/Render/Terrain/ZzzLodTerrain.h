@@ -63,13 +63,30 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
 void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void RequestTerrainLight(float xf, float yf, vec3_t Light);
+// The static terrain light plus this frame's darkening lights, without the brightening ones.
+void RequestStaticTerrainLight(float xf, float yf, vec3_t Light);
+// A lit model's base light: RequestStaticTerrainLight when Enhanced dynamic lights apply the
+// brightening lights per pixel, RequestTerrainLight otherwise.
+void RequestModelTerrainLight(float xf, float yf, vec3_t Light);
+// For a model lit per vertex although Enhanced dynamic lights are on: adds the brightening lights
+// RequestModelTerrainLight left out of its base light. Does nothing otherwise.
+void AddVertexLitDynamicLight(float xf, float yf, vec3_t Light);
+// The static light only (BackTerrainLight), without this frame's dynamic lights.
+void RequestBackTerrainLight(float xf, float yf, vec3_t Light);
+// The light mood's bright weight of the static light at (x, y): 0 in the shade, 1 where it keeps Classic brightness.
+float RequestStaticLightBrightWeight(float xf, float yf);
+// Sample the correction computed from original static light independently at each grid cell.
+void RequestFigureStaticCorrection(float xf, float yf, vec3_t correction);
+// Adds the frame's lights from the light history (Enhanced dynamic lights in the world); call once
+// per frame before the terrain is drawn.
+void AddFrameHistoryLights();
 void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
 // Frustum creation and testing (restored original implementations)
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position);
-void CreateFrustrum2D(vec3_t Position);
-bool TestFrustrum(vec3_t Position, float Range);
+void CreateFrustrum(float xAspect, float yAspect);
+void CreateFrustrum2D();
+bool TestFrustrum(const vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 void CacheActiveFrustum();   // Call once per frame after camera update
 void UpdateFrustrumBounds();
@@ -78,6 +95,10 @@ void ResetFrustrumBoundsFullTerrain();  // Set bounds to cover entire terrain (f
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);
+// Changes whenever BackTerrainHeight or a cell's TW_HEIGHT bit may have changed.
+unsigned int TerrainHeightVersion();
+// For code that writes BackTerrainHeight or TerrainWall directly instead of through the functions here.
+void MarkTerrainHeightsChanged();
 
 // Debug visualization
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);
@@ -86,6 +107,8 @@ void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 
 void RenderTerrain(bool EditFlag);
+// Spawns the water spots on the Crywolf water the last terrain pass drew.
+void UpdateTerrainWaterSpots();
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain_After(bool EditFlag);

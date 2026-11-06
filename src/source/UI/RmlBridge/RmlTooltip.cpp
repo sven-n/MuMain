@@ -363,4 +363,13 @@ namespace UI::RmlBridge::Tooltip
             Hide(s_CurrentOwner);
         s_Refreshed = false;
     }
+
+#ifdef _EDITOR
+    Rml::ElementDocument* GetDocument()
+    {
+        if (!RmlUiRuntime::Instance().IsCreated() || !s_View.Ensure())
+            return nullptr;
+        return s_View.Document();
+    }
+#endif
 }

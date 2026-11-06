@@ -21,8 +21,31 @@ enum class ChatCommandParameterType : BYTE
     Boolean = 2,
 };
 
+// What the value of a parameter refers to, so that the client can help with it,
+// e.g. by naming the map of a map number. The server only appends new kinds, so
+// the values stay the same; a kind we don't know yet is treated as None.
+enum class ChatCommandValueReference : BYTE
+{
+    None = 0,
+    CharacterName = 1,
+    AccountName = 2,
+    GuildName = 3,
+    Map = 4,
+    MapCoordinateX = 5,
+    MapCoordinateY = 6,
+    ItemGroup = 7,
+    ItemNumber = 8,
+    MonsterNumber = 9,
+    ObjectId = 10,
+    SkillNumber = 11,
+    LanguageIsoCode = 12,
+};
+
 struct ChatCommandParameter
 {
+    // The index which GroupWithIndex has when the parameter isn't grouped.
+    static constexpr int NoGroup = -1;
+
     std::wstring Name;
     // The name used in the "shortName=value" notation. Empty when the
     // parameter can only be passed by its position.
@@ -31,6 +54,21 @@ struct ChatCommandParameter
     std::wstring ValidValues;
     bool IsRequired = false;
     ChatCommandParameterType Type = ChatCommandParameterType::Text;
+
+    // The hints below are only sent by newer servers. Without them, they keep
+    // their defaults.
+    ChatCommandValueReference ValueReference = ChatCommandValueReference::None;
+    // The parameter which identifies the referenced object together with this
+    // one, e.g. the group of an item number.
+    int GroupWithIndex = NoGroup;
+    bool HasRange = false;
+    int64_t Minimum = 0;
+    int64_t Maximum = 0;
+
+    // False for a value the server would reject because it's not a number or
+    // out of the range. An empty value is accepted - whether it may be left
+    // out depends on IsRequired.
+    bool Accepts(const std::wstring& value) const;
 };
 
 struct ChatCommand

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Rml
@@ -33,6 +35,13 @@ namespace UI::RmlBridge
     // modder-supplied folder name -- not a closed set). Reflects the live cache SetActiveThemeName()
     // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
+
+    // A token of the active theme's tokens.ini, or of the theme it inherits from ("#00BD8B" for
+    // server-load-base); nothing when none of them has it.
+    std::optional<std::string> GetActiveThemeToken(const std::string& token);
+    // Whether the active theme's font for the token ("font-body") has an italic face
+    // (ThemeFontHasItalic).
+    bool ActiveThemeFontHasItalic(const std::string& token);
 
     // Validates a saved selection; falls back to legacy, or returns empty if neither is usable.
     std::string ResolveStartupThemeName(const std::string& savedName);
@@ -104,6 +113,12 @@ namespace UI::RmlBridge
     // document loaded some other way.
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName);
 
+    class ThemeInheritance;
+    // `documentName`'s depth under `theme`: the theme's own, when its theme.ini lists the document
+    // under [Stacking] (inherited like any setting; e.g. `chat_input.rml=10.65` for an input box
+    // drawn over the HUD), else the stacking table's. None when neither knows the document.
+    std::optional<float> ThemedStackingDepth(const ThemeInheritance& theme, std::string_view documentName);
+
     // Scene gate (RmlStackingOrder.h, DocumentScene). The original drew CNewUIManager's windows
     // only while the main scene ran; the main-scene windows sync their documents from their own
     // Update(), which stops with the main scene, so a document open at logout kept rendering over
@@ -149,4 +164,9 @@ namespace UI::RmlBridge
     // one call a theme switch needs after SetActiveThemeName(). Works on a copy of the registry, so
     // an owner registering or unregistering another during the sweep is safe.
     void ReloadAllThemedDocuments();
+
+    // A [UI] Font change: records the family for the font tokens (SetSelectedFontFamily()), drops
+    // the cached stylesheets that still carry the previous family, and rebuilds every themed
+    // document. Destroys documents, so it must run outside RmlUi's event dispatch, like a theme switch.
+    void ApplySelectedFontFamily(const std::string& family);
 }

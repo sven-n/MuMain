@@ -231,7 +231,9 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 
 #include "Core/Globals/_crypt.h"
 
-inline std::wstring g_strSelectedML = L"";
+// The language folder below Data/Local (e.g. "Eng"), defined in MultiLanguage.cpp. Not an inline variable: in a Debug
+// build its constructor would make MSVC force it into every program built with the precompiled header.
+extern std::wstring g_strSelectedML;
 // Active logical-to-window transform. Screen overlays use full-window scale;
 // panel UI uses centered, capped scale plus offsets.
 inline float g_fScreenRate_x = 0;

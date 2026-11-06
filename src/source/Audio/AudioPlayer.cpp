@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "Audio/AudioPlayer.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 
 #include "App/Platform/Windows/Winmain.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Data/GameConfig/GameConfig.h"
+#ifdef _EDITOR
+#include "Audio/SoundMixer.h"
+#endif
 
 extern bool Destroy;
 
@@ -54,6 +58,7 @@ void StopMusic()
 
 void StopMp3(const char* name, BOOL enforce)
 {
+    Diagnostics::DrawSpawnCheck::Note("music");
     if (!m_MusicOnOff && !enforce)
     {
         return;
@@ -66,13 +71,26 @@ void StopMp3(const char* name, BOOL enforce)
 
 void PlayMp3(const char* name, BOOL enforce)
 {
+    Diagnostics::DrawSpawnCheck::Note("music");
     if (Destroy || (!m_MusicOnOff && !enforce))
     {
         return;
     }
     if (g_platformAudio != nullptr)
     {
+#ifdef _EDITOR
+        // The track's row in the Sound Mixer may be muted (Q-SM17).
+        Audio::Mixer::OnMusicPlay(name);
+        const std::uint32_t before = g_platformAudio->GetMusicStarts();
+#endif
         g_platformAudio->PlayMusic(name, enforce != FALSE);
+#ifdef _EDITOR
+        // The Sound Mixer's log of starts without a place (Q-SM15).
+        if (g_platformAudio->GetMusicStarts() != before)
+        {
+            Audio::Mixer::OnMusicStarted(name, Audio::Mixer::Now());
+        }
+#endif
     }
 }
 

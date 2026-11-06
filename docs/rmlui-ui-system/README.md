@@ -106,7 +106,11 @@ RmlUi renders through its own vendored SDL_GPU backend
 `LoadTexture`/`ReleaseTexture` so game assets (`.OZT`/`.OZJ`) route through `CGlobalBitmap`.
 The submodule points at the fork `nitoygo/RmlUi` (`integration/sdl-gpu-parity`), which carries
 the renderer work upstream doesn't have yet; renderer changes are committed there first, then the
-submodule pin is moved.
+submodule pin is moved. CMake fetches the pinned commit without its history and tracks that
+branch, so `git submodule update --remote` moves the pin to the branch's newest commit; the
+[build guide](../build/README.md#dependencies-and-first-configuration) says how to fetch the fork's
+history and its other branches.
+
 `transform`, gradients, `box-shadow` and `backdrop-filter: blur()` render; other filters and
 `mask-image` have limited verification — `engine-findings.md` has the current list. Test a new visual property in isolation rather
 than trusting the parser.
@@ -128,7 +132,7 @@ flowchart TD
         win{{"Each window's native Render(): state for its document,<br/>what little still draws natively"}}
     end
     rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>the item windows' items and effects, the cash shop, potions,<br/>letter portrait, character creation, item previews, the item on the cursor"}}
-    main("Pre-submit: the one RmlUi context, every document;<br/>render-target textures show here as images")
+    main("Pre-submit: the main RmlUi context, every game document;<br/>render-target textures show here as images;<br/>then the debug context ($details, $glstats)")
     post["Post-RmlUi pass: the cursor"]
     scene --> win --> rtt --> main --> post
 ```
@@ -140,6 +144,9 @@ registered once in `Winmain.cpp`.
 - **The main context renders after ordinary native drawing** (`SetPreSubmitCallback`,
   `RmlUiRuntime::RenderFrame()`). The post-RmlUi pass (`SetPostRmlUiCallback`) draws the cursor
   above the documents and also runs `CSystem::SyncMainSceneHudVisibility()` every frame.
+- **The debug overlay has a context of its own** (`RmlUiRuntime::GetDebugContext()`, chosen for
+  `diagnostics.rml` in `RmlThemedView.cpp`). It updates and draws in the `Overlay` pass, so the
+  RmlUi update and render times it shows leave the overlay out.
   Window content uses document render targets so other windows can cover it.
 - **Native drawing inside one document** goes into a `UI::RmlBridge::RenderTarget`
   (`SetOffscreenRenderCallback`, `component-catalog.md`), so it sits at its element's depth: live

@@ -7,6 +7,8 @@
 #include "EffectBrowserAssets.h"
 #include "EffectBrowserLabels.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "I18N/All.h"
 #include "Render/Effects/EffectRegistry.h"
@@ -46,14 +48,16 @@ void CMuEffectBrowserUI::Render(bool* open)
     ImGui::SetNextWindowSize(ImVec2(std::min(DefaultWidth * scale, screen.x * MaxDefaultScreenShare),
                                     std::min(DefaultHeight * scale, screen.y * MaxDefaultScreenShare)),
                              ImGuiCond_FirstUseEver);
-    // The id after ### keeps the window's place when the language changes.
-    char title[128];
-    std::snprintf(title, sizeof(title), "%s###EffectBrowser", I18N::Editor::EffectBrowser);
-    if (!ImGui::Begin(title, open, ImGuiWindowFlags_NoCollapse))
+    char title[MuEditor::WindowIds::TitleCapacity];
+    MuEditor::Layout::PrepareToolWindow();
+    if (!ImGui::Begin(
+            MuEditor::WindowIds::Title(title, I18N::Editor::EffectBrowser, MuEditor::WindowIds::EffectBrowser), open,
+            ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::EffectBrowser)))
     {
         ImGui::End();
         return;
     }
+    MuEditor::Layout::RenderToolWindowBar();
     // The lists and the combos count as the window, so clicks there do not
     // reach the game.
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))

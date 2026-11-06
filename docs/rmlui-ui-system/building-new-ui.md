@@ -115,12 +115,29 @@ document. `CObject::Show(bool)` is virtual. A window may override it to synchron
 or use `SyncDocumentVisibility()` in its update path. Synchronize only on visibility transitions:
 calling `ElementDocument::Show()` every frame can steal focus from an input field.
 
+`Update()` runs for every enabled window, shown or not, so `SyncRmlModel()` returns once the
+window is hidden, right after `SyncDocumentVisibility()`. The model then catches up in the call
+that shows the document. A window whose `Show(true)` shows the document itself calls
+`SyncRmlModel()` first. Anything the window owns outside its document (a shared tooltip) is
+released on that early return.
+
 Use RmlUi event callbacks for visible controls. Repeated rows bind data with `data-for`; use the
 catalog's [List / repeated rows](component-catalog.md#list--repeated-rows) and
 [Tab / TabBar](component-catalog.md#tab--tabbar) patterns instead of inventing a native control.
 Give interactive panels `pointer-events: auto`; `base.rcss` makes document bodies click-through
 by default. Decorations over the world should not claim the pointer unless their interaction
 requires it. Scroll-pane click-through behavior is in [Scrolling pane](component-catalog.md#scrolling-pane).
+
+A button's click sound belongs to its style, not to its callback. The theme's style sheet gives
+it a click kind, `click-sound: confirm;` (the themes use `confirm`, `cancel`, `select` and
+`menu`; `none` silences an element inside one that sounds), and the `interfaceClick` event of
+`Data/Audio/SoundEvents.json`, edited in the Sound Editor's Events tab, picks each kind's sound
+([`RmlClickSounds.h`](../../src/source/UI/RmlBridge/RmlClickSounds.h)). One listener hears each
+click before the callbacks, so a callback plays no sound of its own, and a button with the class
+`disabled` plays none. A key that stands for a button (Enter for OK) plays that button's sound
+through `PlayClickSoundOf(element)`. Every theme that styles the window names the kinds in its
+style sheet. So far the login, server list and character select windows do; the other windows
+still play their sounds from code.
 
 For managed-window mouse dispatch, `UpdateMouseEvent()` returns `false` only when it consumes
 input. A pure RmlUi panel can return `!UI::RmlBridge::IsPointerOver(document)`; native content can
@@ -229,6 +246,9 @@ Before considering a new or changed component complete:
    python tools/check_layout_transform_users.py
    ```
 
+   The syntax guard also runs in CTest (`rml_rcss_syntax`). It catches markup and values RmlUi only
+   reports in its log, such as a self-closed `data-for` element or `line-height: inherit`.
+
    Contract-checker scope and exception markers are described in
    [Theming & Modding](theming-and-modding.md#shared-markup-and-theme-specific-structure).
    A geometry exception needs a `<!-- bound-geometry: reason -->` comment; the guard rejects
@@ -254,6 +274,44 @@ event map alone does not supply its state. Use the
 [event preview reference](migration-ledger.md#event-preview-reference) for additional commands,
 and test against a running server for gameplay behavior. Scripted checks can use the
 [control socket](../control-socket.md) and [in-game tester](../in-game-tests.md).
+
+## Preview a document in a browser
+
+`tools/rml_preview.py` shows a document without building or starting the client. It turns the
+document and its theme's stylesheets into an HTML page:
+
+- it resolves files through the theme chain, as the game does;
+- it sizes `dp` and `rem` for a window size, as `UI::Scaling` does;
+- it evaluates the data bindings against a JSON model;
+- it draws the sprites from the game's own textures, with the bundled fonts.
+
+With `--png` it also screenshots each page, using Chrome, Edge or Chromium.
+
+```powershell
+python tools/rml_preview.py generic_confirm_dialog --theme modern `
+    --model tools/rml_preview_models/generic_confirm_dialog.json --png
+```
+
+The pages land in `build/rml-preview/`, one per state of the model.
+
+**The model.** It is the binding names of the document's data model. A document with several
+models takes them keyed by model name, and `{"states": {...}}` renders one page per state. Names
+the model leaves out evaluate to nothing, and the tool lists them.
+`tools/rml_preview_models/` holds example models; add one for a document you preview often.
+
+**Other options.** `--window 1920x1080` and `--ui-scale 150` show other sizes, and
+`--pixel-ratio 2` gives sharper screenshots.
+
+**Limits.** The browser lays the page out, not RmlUi, so the preview is close to the game but not
+identical. It leaves out:
+
+- live 3D content (items, render targets);
+- scrollbars and font effects;
+- placement that C++ pushes at runtime;
+- state that isn't in the model.
+
+Use it to look at a layout, a theme change or a long translation quickly, or to attach a picture
+to a pull request. Check the result in the game before you rely on details.
 
 ## Where detailed guidance lives
 

@@ -14,6 +14,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_illusion_temple_result
+    SOURCES
+        test_illusion_temple_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/IllusionTempleResult.cpp
+)
+
+mu_add_test(
     NAME test_transform_viewport_entry
     SOURCES
         test_transform_viewport_entry.cpp
@@ -22,9 +29,45 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_transform_appearance
+    SOURCES
+        test_transform_appearance.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(test_transform_appearance PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
+
+mu_add_test(
     NAME test_connection_library_load
     SOURCES
         test_connection_library_load.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_reachability_probe
+    SOURCES
+        test_reachability_probe.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_login_scene_reconnect
+    SOURCES
+        test_login_scene_reconnect.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# The game's side of that reconnect reads the login scene's windows, which need
+# the client globals of Winmain.cpp.
+mu_add_test(
+    NAME test_game_login_scene_link
+    SOURCES
+        test_game_login_scene_link.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
 )
@@ -41,10 +84,24 @@ if(ENABLE_CONTROL_SOCKET)
             MuClient
     )
 
+    # The target lookup reads the character table, which needs the client
+    # globals of Winmain.cpp.
+    mu_add_test(
+        NAME test_control_targets
+        SOURCES
+            test_control_targets.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
+    # The kind names come from the object code, which needs the client
+    # globals of Winmain.cpp.
     mu_add_test(
         NAME test_control_events
         SOURCES
             test_control_events.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
         LINK_LIBS
             MuClient
     )
@@ -71,13 +128,6 @@ mu_add_test(
 )
 
 if(DOTNET_EXECUTABLE)
-    add_test(
-        NAME login_diagnostics_contract
-        COMMAND "${CMAKE_COMMAND}"
-            "-DMU_LOGIN_SOURCE=${CMAKE_SOURCE_DIR}/ClientLibrary/ConnectionManager.ClientToServer.Custom.cs"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/test_login_diagnostics.cmake"
-    )
-
     add_test(
         NAME dotnet_binding_generator
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform

@@ -8,6 +8,7 @@
 
 #include "App/Control/ControlProtocol.h"
 #include "Network/Server/WSclient.h"
+#include "Core/Globals/_enum.h" // MESSAGE_SERVER_LOST_RECONNECT
 
 #include <cctype>
 #include <string>
@@ -83,10 +84,50 @@ TEST_CASE("Control protocol treats a blank line as no request [network][control-
 TEST_CASE("Control protocol serves the documented command vocabulary [network][control-protocol]")
 {
     const std::vector<std::string> expected = {
-        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login",    "select-char", "logout",
-        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",      "equip",       "say",
-        "whisper", "party", "halt",  "hotkey",   "click-ui", "drag-ui",  "hover-ui",   "type",     "ui",          "slot-pixel",
+        "ping",
+        "scene",
+        "state",
+        "nearby",
+        "events",
+        "wait-for",
+        "screenshot",
+        "login",
+        "select-char",
+        "logout",
+        "quit",
+        "move",
+        "warp",
+        "teleport",
+        "attack",
+        "skill",
+        "pickup",
+        "use",
+        "equip",
+        "say",
+        "whisper",
+        "party",
+        "halt",
+        "hotkey",
+        "click-ui",
+        "drag-ui",
+        "hover-ui",
+        "type",
+        "ui",
+        "slot-pixel",
         "trade",
+        "console",
+        "bench",
+        "bones",
+        "drawspawns",
+        "drawpurity",
+        "drawlater",
+        "drawparity",
+        "spawn-effect",
+        "tooltip",
+        "tooltip-snapshot",
+        "item-name",
+        "item-name-snapshot",
+        "repair-tooltip",
     };
 
     for (const std::string& command : expected)
@@ -180,6 +221,10 @@ TEST_CASE("Control protocol maps every login failure macro to a reason [network]
         CHECK_FALSE(App::Control::LoginFailureReason(code).empty());
         CHECK(App::Control::LoginFailureReason(code) != App::Control::LoginFailureReason(RECEIVE_LOG_IN_SUCCESS));
     }
+
+    // The login screen's own failure message ends a login too: its reconnect could not
+    // reach the server, and nothing else will answer.
+    CHECK(App::Control::IsLoginFailureCode(MESSAGE_SERVER_LOST_RECONNECT));
 
     // The password failure is the one the spec's wrong-password scenario shows.
     CHECK(App::Control::LoginFailureReason(RECEIVE_LOG_IN_FAIL_PASSWORD).find("password") != std::string_view::npos);

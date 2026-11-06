@@ -48,8 +48,12 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
     std::string line = WideToUtf8(lpszToWrite);
     while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
         line.pop_back();
-    if (!line.empty())
-        MU_LOG_ERROR(mu::log::Get("core"), "{}", line);
+    if (line.empty())
+        return;
+    // The report is the client's progress trail, not a list of errors; flushed per line so a crash keeps its tail.
+    const auto logger = mu::log::Get("core");
+    MU_LOG_INFO(logger, "{}", line);
+    logger->flush();
 }
 
 void CErrorReport::Write(const wchar_t* lpszFormat, ...)
@@ -690,10 +694,11 @@ void MuGetSystemInfo(ER_SystemInfo* si)
     struct utsname un {};
     if (::uname(&un) == 0)
     {
-        char kernel[MAX_LENGTH_OSINFO] = { 0 };
+        // Room for both names, so only the OS line below cuts the text to MAX_LENGTH_OSINFO.
+        char kernel[sizeof(un.sysname) + sizeof(un.release)] = {0};
         std::snprintf(kernel, sizeof(kernel), "%s %s", un.sysname, un.release);
-        wchar_t kernelW[MAX_LENGTH_OSINFO] = { 0 };
-        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, MAX_LENGTH_OSINFO);
+        wchar_t kernelW[sizeof(kernel)] = {0};
+        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, static_cast<int>(std::size(kernelW)));
 
         const std::wstring distro = Core::Platform::GetOSDistroName();
         const std::wstring osLine = distro.empty()

@@ -27,6 +27,9 @@ struct Blur
     CHARACTER* Owner = nullptr;
     int Number = 0;
     vec3_t Light{};
+    // The newest FrameSamples came in frame Frame; a later frame replaces them unless a reference frame aged them.
+    unsigned int Frame = 0;
+    int FrameSamples = 0;
     std::array<vec3_t, MAX_BLUR_TAILS> P1{};
     std::array<vec3_t, MAX_BLUR_TAILS> P2{};
     int SubType = 0;
@@ -41,6 +44,8 @@ struct ObjectBlur
     int Number = 0;
     vec3_t Light{};
     int LimitLifeTime = 0;
+    unsigned int Frame = 0;
+    int FrameSamples = 0;
     std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P1{};
     std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P2{};
     int SubType = 0;

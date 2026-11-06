@@ -145,6 +145,7 @@ void ShowPriceTypeMenu(const std::wstring& title, const std::vector<GameLogic::P
     constexpr size_t MaximumSingleColumnButtons = 6;
 
     GenericMenuConfig cfg;
+    cfg.id = "personal-shop-price-type";
     cfg.title = title;
     for (const auto& priceType : priceTypes)
     {
@@ -722,6 +723,8 @@ void mu::ui::window::CMyShopInventory::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");

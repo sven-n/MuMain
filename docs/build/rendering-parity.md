@@ -22,6 +22,17 @@ a successful build or a macOS run is not evidence for Linux or Windows.
 - GPU skinning shaders and pipelines are required. An eligible submission
   failure is counted and rejected; it does not silently switch to CPU skinning.
 
+## Bitmap upload staging and upscaled textures
+
+Bitmap uploads go through three persistent 4 MiB RGBA8 slots (12 MiB requested
+staging, before driver overhead), sized for the 1024 × 1024 limit of original
+images. Upscaled art (`Render/Textures/UpscaleMarker.h`) is accepted up to its
+marked scale times that limit, at most 4096 × 4096. A level larger than one slot
+is staged in bands of rows, one submission per slot, so the staging allocation
+stays fixed whatever the image size: a 4096 px image takes 16 bands of 256 rows.
+Smaller mip levels share a slot. Growing the slots would only cut the number of
+submissions; measure load times with the real asset pack before changing them.
+
 ## RmlUi multisampling
 
 RmlUi UI layers default to one sample (`RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=1`)
@@ -59,29 +70,32 @@ Release builds resolve every text role from files beside the executable:
 | Bold | Selected family bold file |
 | Big bold | Selected family bold file |
 | Fixed | `fonts/Cousine-Regular.ttf` |
-| Missing glyph fallbacks | `fonts/DejaVuSans*.ttf`, `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf` |
+| Missing glyph fallbacks | `fonts/DejaVuSans*.ttf`, `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf`, `fonts/NotoSansSC-*.otf` |
 
-Selectable families are DejaVu Sans, Liberation Sans and Noto Sans TC. Empty
+Selectable families are DejaVu Sans, Liberation Sans, Noto Sans TC and Noto Sans SC. Empty
 or unknown configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the
 non-Windows GDI shim use the same registry.
 
-SDL_ttf attaches three fallbacks to every role at startup, tried in this order:
+SDL_ttf attaches four fallbacks to every role at startup, tried in this order:
 
 1. DejaVu Sans: Latin, Greek and Cyrillic letters the selected family or
    Cousine lack.
 2. Noto Sans TC: Traditional Chinese (`zh-TW`), kana and CJK punctuation.
    Bold roles use its bold file.
 3. Nanum Gothic: Hangul. Bold roles use SDL_ttf's synthetic bold style.
+4. Noto Sans SC: Simplified Chinese characters missing from the earlier faces.
+   Bold roles use its bold file.
 
 A fallback that is the role's own font file is skipped. This keeps the
 selected family for the text it covers and draws the rest instead of
 missing-glyph boxes. A test checks that every character of every translation
 has a glyph with each selectable family. Japanese (`ja`) is the known
-exception: some Japanese kanji forms need Noto Sans JP, and Simplified Chinese
-would need Noto Sans SC.
+exception: some Japanese kanji forms need Noto Sans JP. Select Noto Sans SC
+for Simplified Chinese regional glyph forms; other families try Noto Sans TC
+first for shared Chinese characters.
 
 Characters from a fallback font sit on the same baseline as the rest of the
-line. With Noto Sans TC as the UI font, text is drawn at the height DejaVu
+line. With Noto Sans TC or Noto Sans SC as the UI font, text is drawn at the height DejaVu
 Sans text would have, so it does not sit lower in its boxes.
 
 Missing or corrupt packaged roles abort Release renderer startup. Windows also
@@ -95,7 +109,8 @@ documented platform-dependent font exception. Release packages may not use it.
 ## SDL_ttf patch policy
 
 SDL_ttf is pinned to revision
-`a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b` from the 3.2.2 line. Upstream
+`a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b` from the 3.2.2 line (the
+`release-3.2.2` archive, checked by its SHA-256). Upstream
 `main` was checked at `a42434b8c96daaf7650dbd0befe480c090d1c2eb`; it did
 not contain equivalent missing-glyph upload batching.
 

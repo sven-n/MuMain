@@ -44,6 +44,48 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   monotonic clock; microbenchmarks do not belong in the regression suite.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
+- Give every `TEST_CASE` an ASCII name, without `;`, a line break or `\` (a
+  comma is fine), with as many `[` as `]` and not starting with `[doctest] `.
+  CTest's discovery reads the names as a CMake list, so it would drop an empty
+  name and cut or join the others, and it skips lines that look like doctest's
+  own output; doctest's filter reads a `\` as an escape, and on Windows the test
+  binary reads its filter in the ANSI code page. Then no entry runs the case. The
+  static check `test_case_names_reach_ctest_whole` finds such names before any
+  build.
+- A CTest entry that runs no case fails (doctest reports `test cases: 0`), and
+  each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
+  entries and its cases differ in number. So a name the discovery cut, joined or
+  dropped fails in CI even where the static check cannot read it. The canary
+  binaries in `tests/fixtures/ctest_guards/` check that both guards still fail. Decide an
+  opt-in case at run time rather than with `doctest::skip(condition)`: the
+  discovery evaluates the condition when the binary is built, so a condition
+  read from the environment can differ when the tests run. Print
+  `MESSAGE("MU_TEST_SKIPPED: <why>")` and return at once; CTest then reports the
+  entry as skipped (a skip wins over a failure, so check nothing after it).
+
+## Static checks and the pre-push hook
+
+Checks that only read the repository (no compiler, dependencies or build output),
+such as the policy guards above and the RML and workflow contracts, are registered
+in `tests/static/CMakeLists.txt`. That directory is a standalone CMake project, so
+the checks run in seconds without a build:
+
+```bash
+cmake -S tests/static -B out/static-checks
+ctest --test-dir out/static-checks -C Release --output-on-failure
+```
+
+Quality Gates runs them before any native build starts. The full test tree includes
+them with the `static` label, and the native CI jobs skip that label. Register a new
+check there only if it stays fast and never reads build output.
+
+Run `scripts/install-hooks.sh` once per clone to enable `.githooks/pre-push`. Before
+each push it runs these checks and the changed-lines formatting check with the scripts
+Quality Gates uses, on Linux, macOS and Windows (Git Bash). It finds CMake on `PATH`
+or, on Windows, Visual Studio's bundled copy. It checks formatting only with the
+clang-format version CI pins (`pip install clang-format==<version from ci.yml>`) and
+diffs against `origin/main` (set `MU_PUSH_BASE` to change it). A missing tool skips
+that check with a message; CI still enforces it. `git push --no-verify` skips the hook.
 
 ## Adding a test module
 

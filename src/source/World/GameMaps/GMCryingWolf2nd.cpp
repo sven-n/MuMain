@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -37,7 +38,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         break;
     case 3:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -47,7 +48,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndObject(OBJECT* pObject)
     return true;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::UpdateCryingWolf2ndObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCyringWolf2nd())
         return false;
@@ -117,12 +118,12 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pMo
     return true;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsCyringWolf2nd())
         return false;
 
-    return RenderCryingWolf2ndMonsterObjectMesh(pObject, pModel);
+    return RenderCryingWolf2ndMonsterObjectMesh(pObject, look, pModel);
 }
 
 CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int PosY, int Key)
@@ -239,7 +240,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;
@@ -264,12 +265,12 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
     }
     return false;
 }
-bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterObjectMesh(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     return false;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(const CHARACTER* pCharacter, const OBJECT* pObject, BMD* pModel)
 {
     return false;
 }

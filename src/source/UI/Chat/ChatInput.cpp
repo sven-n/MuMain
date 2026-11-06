@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Chat/ChatInput.h"
 
 // Includes mirror ZzzInterface.cpp.
@@ -191,8 +192,8 @@ void CheckChatText(wchar_t* Text)
         {
             if (o->CurrentAction != PLAYER_SANTA_1 && o->CurrentAction != PLAYER_SANTA_2)
             {
-                int i = rand() % 3;
-                if (rand() % 2)
+                int i = Random::Rand() % 3;
+                if (Random::Rand() % 2)
                 {
                     SetAction(o, PLAYER_SANTA_1);
                     SendRequestAction(Hero->Object, AT_SANTA1_1 + i);

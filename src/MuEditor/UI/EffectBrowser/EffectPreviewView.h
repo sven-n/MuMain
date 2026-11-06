@@ -15,8 +15,8 @@
 
 // The preview in the effect browser's details: a view of what the selected
 // type's slot holds, shown on nothing, a plane, a cube or an item, and below it
-// the type created in the world. The mouse turns the camera, the wheel zooms,
-// a double click puts it back.
+// the type created in the world. The mouse turns the camera, the middle
+// button moves the picture, the wheel zooms, a double click puts it back.
 class CEffectPreviewView
 {
 public:
@@ -57,7 +57,6 @@ private:
     void RenderItemList();
     void RefreshItems();
     void RenderView(const MuEditor::Effects::EffectPreviewRequest& request);
-    void HandleViewInput();
     void Frame(const MuEditor::Effects::EffectPreviewRequest& request);
     void RenderNotes(std::uint16_t notes) const;
 
@@ -81,8 +80,8 @@ private:
 
     MuEditor::Effects::EffectPreviewItems m_items;
     int m_itemsVersion = -1;
-    // The language the item names are in (a pointer into I18N's locales).
-    const char* m_itemsLocale = nullptr;
+    int m_itemModelsVersion = -1;
+    int m_itemNamesVersion = -1;
     char m_itemSearch[64] = {};
     std::vector<int> m_itemMatches;
     bool m_itemMatchesValid = false;

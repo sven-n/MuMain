@@ -1,0 +1,286 @@
+{
+  "formatVersion": 1,
+  "default": {
+    "base": 0.45,
+    "figures": 0.7,
+    "dynamicGain": 1.7,
+    "background": 1.0,
+    "sun": 0.8,
+    "shadowKeep": 0.8,
+    "brightScale": 0.8,
+    "shadeCool": 0.1
+  },
+  "maps": [
+    {
+      "world": 1,
+      "name": "Dungeon",
+      "sun": 1.0
+    },
+    {
+      "world": 4,
+      "name": "Lost Tower",
+      "sun": 1.0
+    },
+    {
+      "world": 7,
+      "name": "Atlans",
+      "sun": 1.0,
+      "base": 0.8,
+      "brightScale": 1.0,
+      "figures": 0.8
+    },
+    {
+      "world": 9,
+      "name": "Devil Square",
+      "sun": 1.0
+    },
+    {
+      "world": 10,
+      "name": "Icarus",
+      "background": 0.7,
+      "sun": 0.8,
+      "base": 0.7,
+      "brightScale": 0.95
+    },
+    {
+      "world": 11,
+      "name": "Blood Castle 1",
+      "sun": 1.0
+    },
+    {
+      "world": 12,
+      "name": "Blood Castle 2",
+      "sun": 1.0
+    },
+    {
+      "world": 13,
+      "name": "Blood Castle 3",
+      "sun": 1.0
+    },
+    {
+      "world": 14,
+      "name": "Blood Castle 4",
+      "sun": 1.0
+    },
+    {
+      "world": 15,
+      "name": "Blood Castle 5",
+      "sun": 1.0
+    },
+    {
+      "world": 16,
+      "name": "Blood Castle 6",
+      "sun": 1.0
+    },
+    {
+      "world": 17,
+      "name": "Blood Castle 7",
+      "sun": 1.0
+    },
+    {
+      "world": 18,
+      "name": "Chaos Castle 1",
+      "sun": 1.0
+    },
+    {
+      "world": 19,
+      "name": "Chaos Castle 2",
+      "sun": 1.0
+    },
+    {
+      "world": 20,
+      "name": "Chaos Castle 3",
+      "sun": 1.0
+    },
+    {
+      "world": 21,
+      "name": "Chaos Castle 4",
+      "sun": 1.0
+    },
+    {
+      "world": 22,
+      "name": "Chaos Castle 5",
+      "sun": 1.0
+    },
+    {
+      "world": 23,
+      "name": "Chaos Castle 6",
+      "sun": 1.0
+    },
+    {
+      "world": 24,
+      "name": "Kalima 1",
+      "sun": 1.0
+    },
+    {
+      "world": 25,
+      "name": "Kalima 2",
+      "sun": 1.0
+    },
+    {
+      "world": 26,
+      "name": "Kalima 3",
+      "sun": 1.0
+    },
+    {
+      "world": 27,
+      "name": "Kalima 4",
+      "sun": 1.0
+    },
+    {
+      "world": 28,
+      "name": "Kalima 5",
+      "sun": 1.0
+    },
+    {
+      "world": 29,
+      "name": "Kalima 6",
+      "sun": 1.0
+    },
+    {
+      "world": 36,
+      "name": "Lost Kalima",
+      "sun": 1.0
+    },
+    {
+      "world": 37,
+      "name": "Kanturu Ruins",
+      "sun": 1.0
+    },
+    {
+      "world": 38,
+      "name": "Kanturu Relics",
+      "sun": 1.0
+    },
+    {
+      "world": 39,
+      "name": "Refinery Tower",
+      "sun": 1.0
+    },
+    {
+      "world": 41,
+      "name": "Barracks of Balgass",
+      "sun": 1.0
+    },
+    {
+      "world": 42,
+      "name": "Balgass Refuge",
+      "sun": 1.0
+    },
+    {
+      "world": 45,
+      "name": "Illusion Temple 1",
+      "sun": 1.0
+    },
+    {
+      "world": 46,
+      "name": "Illusion Temple 2",
+      "sun": 1.0
+    },
+    {
+      "world": 47,
+      "name": "Illusion Temple 3",
+      "sun": 1.0
+    },
+    {
+      "world": 48,
+      "name": "Illusion Temple 4",
+      "sun": 1.0
+    },
+    {
+      "world": 49,
+      "name": "Illusion Temple 5",
+      "sun": 1.0
+    },
+    {
+      "world": 50,
+      "name": "Illusion Temple 6",
+      "sun": 1.0
+    },
+    {
+      "world": 52,
+      "name": "Blood Castle 8",
+      "sun": 1.0
+    },
+    {
+      "world": 53,
+      "name": "Chaos Castle 7",
+      "sun": 1.0
+    },
+    {
+      "world": 56,
+      "name": "Swamp of Calmness",
+      "sun": 1.0
+    },
+    {
+      "world": 57,
+      "name": "Raklion",
+      "base": 0.7,
+      "brightScale": 0.95
+    },
+    {
+      "world": 58,
+      "name": "Raklion boss cave",
+      "sun": 1.0
+    },
+    {
+      "world": 63,
+      "name": "Vulcanus",
+      "sun": 1.0,
+      "base": 0.7,
+      "brightScale": 0.95
+    },
+    {
+      "world": 65,
+      "name": "Doppelganger 1",
+      "sun": 1.0
+    },
+    {
+      "world": 66,
+      "name": "Doppelganger 2",
+      "sun": 1.0
+    },
+    {
+      "world": 67,
+      "name": "Doppelganger 3",
+      "sun": 1.0
+    },
+    {
+      "world": 68,
+      "name": "Doppelganger 4",
+      "sun": 1.0
+    },
+    {
+      "world": 69,
+      "name": "Imperial Guardian 1",
+      "sun": 1.0
+    },
+    {
+      "world": 70,
+      "name": "Imperial Guardian 2",
+      "sun": 1.0
+    },
+    {
+      "world": 71,
+      "name": "Imperial Guardian 3",
+      "sun": 1.0
+    },
+    {
+      "world": 72,
+      "name": "Imperial Guardian 4",
+      "sun": 1.0
+    },
+    {
+      "world": 80,
+      "name": "Karutan 1",
+      "base": 0.62,
+      "brightScale": 0.9
+    },
+    {
+      "world": 81,
+      "name": "Karutan 2",
+      "base": 0.62,
+      "brightScale": 0.9
+    }
+  ]
+}

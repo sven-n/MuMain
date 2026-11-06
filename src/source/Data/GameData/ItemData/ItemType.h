@@ -7,6 +7,9 @@
 // the same as (Group, Number) on the server.
 namespace Data::Items
 {
+// The + levels 0 to 15 an item can have; a list with a value for each level has this many.
+constexpr int ItemLevelCount = 16;
+
 constexpr int MakeItemType(int group, int number)
 {
     return group * MAX_ITEM_INDEX + number;

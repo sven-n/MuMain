@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ShopRestrictions.h"
+#include "GameLogic/Items/ZenAmount.h"
 
 #include "GameLogic/Social/GambleSystem.h"
 
@@ -281,6 +282,8 @@ void mu::ui::window::CNPCShop::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
@@ -362,7 +365,7 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
 
     if (mu::ui::window::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->ContainsPointer() == true && m_bSellingItem == false)
     {
-        if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
+        if (CharacterMachine->Gold + ItemValue(pItem) > GameLogic::Items::kMaxInventoryZen)
         {
             g_pSystemLogBox->AddText(I18N::Game::ExceededMaximumAmountOfZenYouCanPossess, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 

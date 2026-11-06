@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 #include "Core/Text/WideFormat.h"
 
@@ -10,10 +12,100 @@
 #include "Network/Server/SocketSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+
+#include <algorithm>
+#include <iterator>
 
 using namespace SEASON3A;
 
 CMixRecipeMgr g_MixRecipeMgr;
+
+namespace
+{
+struct MixRecipeText
+{
+    int textId;
+    const wchar_t* const* text;
+};
+
+// The text numbers mix.bmd stores in its recipes' names, descriptions and advice, sorted by number.
+constexpr MixRecipeText kMixRecipeTexts[] = {
+    {588, &I18N::Game::InCaseYouFailOn},
+    {589, &I18N::Game::PleaseNoteThat},
+    {590, &I18N::Game::TheLevelOfItemsDecreases},
+    {600, &I18N::Game::ItemLevelsMustBeIdenticalToCombineItemsAreOfTheSameLevel},
+    {603, &I18N::Game::CreateATicketOfDevilSquare},
+    {604, &I18N::Game::Create10Item},
+    {605, &I18N::Game::Create11Item},
+    {606, &I18N::Game::DuringCreationOf1015Items},
+    {607, &I18N::Game::NoticeThatThereIsAPossibility},
+    {608, &I18N::Game::ThatYouMayLoseTheItems},
+    {610, &I18N::Game::NoticeThatWhenYouFailToCombineTheItems},
+    {611, &I18N::Game::YouCanLoseTheItems},
+    {612, &I18N::Game::CreateDinorant},
+    {613, &I18N::Game::CreateFruit},
+    {614, &I18N::Game::CreateWings},
+    {615, &I18N::Game::CreateCloakOfInvisibility},
+    {665, &I18N::Game::_12ItemCreation},
+    {666, &I18N::Game::_13ItemCreation},
+    {736, &I18N::Game::ChaosWeaponCombination},
+    {1172, &I18N::Game::CreateCloakItem},
+    {1187, &I18N::Game::DarkHorse},
+    {1212, &I18N::Game::Resurrection},
+    {1214, &I18N::Game::DarkRaven},
+    {1412, &I18N::Game::Create},
+    {1413, &I18N::Game::PotionOfBless},
+    {1414, &I18N::Game::PotionOfSoul},
+    {1415, &I18N::Game::LifeStone},
+    {1550, &I18N::Game::Improve},
+    {1640, &I18N::Game::Store1640},
+    {1666, &I18N::Game::CondorSFeather},
+    {1667, &I18N::Game::_3rdWing},
+    {1863, &I18N::Game::Destroy},
+    {1864, &I18N::Game::Protect},
+    {1921, &I18N::Game::FragmentOfHorn},
+    {1922, &I18N::Game::BrokenHorn},
+    {1923, &I18N::Game::FenrirSHorn},
+    {2038, &I18N::Game::SDPotion},
+    {2061, &I18N::Game::Refine},
+    {2062, &I18N::Game::Restore},
+    {2194, &I18N::Game::Add380ItemOption},
+    {2203, &I18N::Game::RefineGemstone},
+    {2222, &I18N::Game::ItemWillDisappearWhenFailed},
+    {2261, &I18N::Game::YouCanAchieveSpecialItemsWithCombinations},
+    {2263, &I18N::Game::ItemsExceptChaosCard},
+    {2265, &I18N::Game::ChaosCardCombination},
+    {2267, &I18N::Game::CanTExecuteCombination},
+    {2336, &I18N::Game::EquipmentItem},
+    {2396, &I18N::Game::ScrollOfBlood},
+    {2560, &I18N::Game::CherryBlossomsBranchesAssembly},
+    {2664, &I18N::Game::SeedExtraction},
+    {2665, &I18N::Game::SeedSphereAssembly},
+    {2669, &I18N::Game::SeedSphereApplication},
+    {2670, &I18N::Game::SeedSphereDestruction},
+    {2791, &I18N::Game::CompleteSecromicon},
+    {2881, &I18N::Game::GoldenBox},
+    {2882, &I18N::Game::SilverBox},
+    {3086, &I18N::Game::_14ItemCreation},
+    {3087, &I18N::Game::_15ItemCreation},
+};
+// GetMixRecipeText searches the table with std::lower_bound.
+static_assert(std::adjacent_find(std::begin(kMixRecipeTexts), std::end(kMixRecipeTexts),
+                                 [](const MixRecipeText& left, const MixRecipeText& right)
+                                 { return left.textId >= right.textId; }) == std::end(kMixRecipeTexts),
+              "kMixRecipeTexts is sorted by number, each number once");
+} // namespace
+
+const wchar_t* SEASON3A::GetMixRecipeText(int textId)
+{
+    const auto* const end = std::end(kMixRecipeTexts);
+    const auto* const found = std::lower_bound(std::begin(kMixRecipeTexts), end, textId,
+                                               [](const MixRecipeText& entry, int id) { return entry.textId < id; });
+    if (found == end || found->textId != textId)
+        return L"";
+    return *found->text;
+}
 
 void CMixRecipeMgr::LoadData()
 {
@@ -127,38 +219,7 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
         m_wHarmonyOptionLevel = pItem->Jewel_Of_Harmony_OptionLevel;
     }
 
-    switch (pItem->Type)
-    {
-    case ITEM_WING:
-    case ITEM_WINGS_OF_HEAVEN:
-    case ITEM_WINGS_OF_SATAN:
-    case ITEM_WING_OF_CURSE:
-        m_bIsWing = TRUE;
-        break;
-    case ITEM_WINGS_OF_SPIRITS:
-    case ITEM_WINGS_OF_SOUL:
-    case ITEM_WINGS_OF_DRAGON:
-    case ITEM_WINGS_OF_DARKNESS:
-    case ITEM_CAPE_OF_LORD:
-    case ITEM_WINGS_OF_DESPAIR:
-    case ITEM_CAPE_OF_FIGHTER:
-        m_bIsUpgradedWing = TRUE;
-        break;
-    case ITEM_WING_OF_STORM:
-    case ITEM_WING_OF_ETERNAL:
-    case ITEM_WING_OF_ILLUSION:
-    case ITEM_WING_OF_RUIN:
-    case ITEM_CAPE_OF_EMPEROR:
-    case ITEM_WING_OF_DIMENSION:
-    case ITEM_CAPE_OF_OVERRULE:
-        m_bIs3rdUpgradedWing = TRUE;
-    }
-
-    if (m_bIsWing || m_bIsUpgradedWing || m_bIs3rdUpgradedWing)
-    {
-        if (m_dwSpecialItem & RCP_SP_EXCELLENT)
-            m_dwSpecialItem ^= RCP_SP_EXCELLENT;
-    }
+    SetWingFlags(pItem->Type);
     switch (pItem->Type)
     {
     case ITEM_LARGE_HEALING_POTION:
@@ -176,6 +237,31 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
 
     if (m_bCanStack == TRUE) m_iCount = m_iDurability;
     else m_iCount = 1;
+}
+
+void CMixItem::SetWingFlags(int itemType)
+{
+    // The small wings have none of the three flags.
+    switch (g_ItemDatabase.GetWingTier(itemType))
+    {
+    case Data::Items::WingTier::First:
+        m_bIsWing = TRUE;
+        break;
+    case Data::Items::WingTier::Second:
+        m_bIsUpgradedWing = TRUE;
+        break;
+    case Data::Items::WingTier::Third:
+        m_bIs3rdUpgradedWing = TRUE;
+        break;
+    default:
+        break;
+    }
+
+    if (m_bIsWing || m_bIsUpgradedWing || m_bIs3rdUpgradedWing)
+    {
+        if (m_dwSpecialItem & RCP_SP_EXCELLENT)
+            m_dwSpecialItem ^= RCP_SP_EXCELLENT;
+    }
 }
 
 int CMixItemInventory::AddItem(ITEM* pItem)
@@ -261,7 +347,8 @@ BOOL CMixRecipes::IsMixSource(ITEM* pItem)
     CMixItem mixitem;
     mixitem.SetItem(pItem, 0);
 
-    if (Check_LuckyItem(pItem->Type) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON)	return FALSE;
+    if (GameLogic::Items::IsLuckyItemType(pItem->Type) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON)
+        return FALSE;
 
     if (IsCharmItem(mixitem))
     {
@@ -612,12 +699,13 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iN
         if (iNameLine == 1)
         {
             if (pRecipe->m_iMixName[1] == 0)
-                mu_swprintf(pszNameOut, L"%ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]));
+                mu_swprintf(pszNameOut, L"%ls", GetMixRecipeText(pRecipe->m_iMixName[0]));
             else if (pRecipe->m_iMixName[2] == 0)
-                mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]), I18N::Game::Lookup(pRecipe->m_iMixName[1]));
+                mu_swprintf(pszNameOut, L"%ls %ls", GetMixRecipeText(pRecipe->m_iMixName[0]),
+                            GetMixRecipeText(pRecipe->m_iMixName[1]));
             else
-                mu_swprintf(pszNameOut, L"%ls %ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]),
-                    I18N::Game::Lookup(pRecipe->m_iMixName[1]), I18N::Game::Lookup(pRecipe->m_iMixName[2]));
+                mu_swprintf(pszNameOut, L"%ls %ls %ls", GetMixRecipeText(pRecipe->m_iMixName[0]),
+                            GetMixRecipeText(pRecipe->m_iMixName[1]), GetMixRecipeText(pRecipe->m_iMixName[2]));
             return TRUE;
         }
         return FALSE;
@@ -629,7 +717,7 @@ BOOL CMixRecipes::GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine)
     if (iDescLine > 3 || iDescLine < 1) return FALSE;
     if (GetCurRecipe() == NULL) return FALSE;
     if (GetCurRecipe()->m_iMixDesc[iDescLine - 1] > 0)
-        wcscpy(pszDescOut, I18N::Game::Lookup(GetCurRecipe()->m_iMixDesc[iDescLine - 1]));
+        wcscpy(pszDescOut, GetMixRecipeText(GetCurRecipe()->m_iMixDesc[iDescLine - 1]));
     else
         return FALSE;
     return TRUE;
@@ -646,7 +734,7 @@ BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
     if (iAdivceLine > 3 || iAdivceLine < 1) return FALSE;
 
     if (GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1] > 0)
-        wcscpy(pszAdviceOut, I18N::Game::Lookup(GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]));
+        wcscpy(pszAdviceOut, GetMixRecipeText(GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]));
     else
         return FALSE;
     return TRUE;
@@ -976,6 +1064,13 @@ float CMixRecipes::MixrateFactor()
     case MRCP_NONJEWELITEM:
         fValue = m_dwTotalNonJewelItemValue;
         break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case MRCP_ADD:
+    case MRCP_SUB:
+    case MRCP_MUL:
+    case MRCP_DIV:
+    case MRCP_RP:
+        break;
     }
     ++m_iMixRateIter;
     return fValue;
@@ -1123,44 +1218,46 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
         m_MixRecipe[j].Reset();
     }
 
-    FILE* fp = _wfopen(szFileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", szFileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(szFileName, L"File not exist.");
         exit(0);
     }
 
     int iNumMixRecipes[MAX_MIX_TYPES];
     int iSize = sizeof(int) * MAX_MIX_TYPES;
-    fread(iNumMixRecipes, iSize, 1, fp);
-    BuxConvert((BYTE*)iNumMixRecipes, iSize);
+    if (!DataFileIO::ReadExact(fp.get(), iNumMixRecipes, iSize))
+    {
+        DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+        exit(0);
+    }
+    BuxConvert(reinterpret_cast<BYTE*>(iNumMixRecipes), iSize);
 
     iSize = sizeof(MIX_RECIPE);
     for (j = 0; j < MAX_MIX_TYPES; ++j)
     {
-        if (feof(fp) || iNumMixRecipes[j] > 1000)
+        if (feof(fp.get()) || iNumMixRecipes[j] > 1000)
         {
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-            fclose(fp);
             exit(0);
         }
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
-            auto* pMixRecipe = new MIX_RECIPE;
-            fread(pMixRecipe, iSize, 1, fp);
-            BuxConvert((BYTE*)pMixRecipe, iSize);
-            m_MixRecipe[j].AddRecipe(pMixRecipe);
+            auto pMixRecipe = std::make_unique<MIX_RECIPE>();
+            if (!DataFileIO::ReadExact(fp.get(), pMixRecipe.get(), iSize))
+            {
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                exit(0);
+            }
+            BuxConvert(reinterpret_cast<BYTE*>(pMixRecipe.get()), iSize);
+            m_MixRecipe[j].AddRecipe(pMixRecipe.release());
         }
     }
-    fclose(fp);
 }
 
 int CMixRecipeMgr::GetMixInventoryType()

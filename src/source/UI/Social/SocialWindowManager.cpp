@@ -91,7 +91,7 @@ void CUIWindowMgr::Reset()
     g_dwTopWindow = 0;
     m_iLastFriendWindowTabIndex = 0;
     m_bServerEnable = TRUE;
-    m_iFriendMainWindowTitleNumber = 990;
+    m_pFriendMainWindowTitle = &I18N::Game::MyFriend;
     SetChatReject(FALSE);
     if (GetFriendMainWindow() != NULL)
     {
@@ -596,7 +596,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     }
     if (m_iMainWindowWidth == 0)
     {
-        AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y, I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
+        AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y, *m_pFriendMainWindowTitle);
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
         RefreshMainWndChatRoomList();
         PlayBuffer(SOUND_CLICK01);
@@ -604,7 +604,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     }
     else
     {
-        AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
+        AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, *m_pFriendMainWindowTitle);
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
         CUIBaseWindow* pWindow = GetWindow(m_dwMainWindowUIID);
         if (pWindow != NULL)
@@ -712,20 +712,20 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
     m_bServerEnable = bFlag;
     if (bFlag == TRUE)
     {
-        if (m_iFriendMainWindowTitleNumber != 990)
+        if (m_pFriendMainWindowTitle != &I18N::Game::MyFriend)
         {
-            m_iFriendMainWindowTitleNumber = 990;
+            m_pFriendMainWindowTitle = &I18N::Game::MyFriend;
             if (GetFriendMainWindow() != NULL)
-                GetFriendMainWindow()->SetTitle(I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
+                GetFriendMainWindow()->SetTitle(*m_pFriendMainWindowTitle);
         }
     }
     else
     {
-        if (m_iFriendMainWindowTitleNumber != 1066)
+        if (m_pFriendMainWindowTitle != &I18N::Game::ConnectionErrorReopeningFriendWindowToReconnect)
         {
-            m_iFriendMainWindowTitleNumber = 1066;
+            m_pFriendMainWindowTitle = &I18N::Game::ConnectionErrorReopeningFriendWindowToReconnect;
             if (GetFriendMainWindow() != NULL)
-                GetFriendMainWindow()->SetTitle(I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
+                GetFriendMainWindow()->SetTitle(*m_pFriendMainWindowTitle);
         }
     }
 }

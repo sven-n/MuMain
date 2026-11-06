@@ -34,7 +34,7 @@
             "alphaEnable": true,
             "angle": {"z": 0},
             "offset": {
-              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+              "position": {"z": 100}
             }
           },
           {
@@ -61,7 +61,7 @@
         "alphaEnable": true,
         "angle": {"z": 0},
         "offset": {
-          "position": {"z": {"value": 100, "timesFrameFactor": true}}
+          "position": {"z": 100}
         }
       }
     },
@@ -491,7 +491,7 @@
         "blendMesh": 0,
         "lightEnable": false,
         "offset": {
-          "position": {"y": {"value": 200, "timesFrameFactor": true}, "z": {"value": -190, "timesFrameFactor": true}}
+          "position": {"y": 200, "z": -190}
         }
       }
     },
@@ -947,7 +947,7 @@
             "lifeTime": 20,
             "direction": [0, -60, 0],
             "offset": {
-              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+              "position": {"z": 100}
             }
           }
         ]
@@ -1398,8 +1398,8 @@
       "create": {
         "lifeTime": 25,
         "offset": {
-          "position": {"z": {"value": 15, "timesFrameFactor": true}},
-          "angle": {"z": {"value": 90, "timesFrameFactor": true}}
+          "position": {"z": 15},
+          "angle": {"z": 90}
         }
       }
     },
@@ -1528,7 +1528,7 @@
             "lifeTime": 20,
             "direction": [0, -60, 0],
             "offset": {
-              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+              "position": {"z": 100}
             }
           },
           {
@@ -1910,7 +1910,7 @@
         "blendMesh": -2,
         "direction": [0, -60, 0],
         "offset": {
-          "position": {"z": {"value": 130, "timesFrameFactor": true}}
+          "position": {"z": 130}
         },
         "copy": {
           "startPosition": "callPosition"
@@ -2268,14 +2268,14 @@
           {
             "subType": 1,
             "offset": {
-              "lifeTime": {"value": -60, "timesFrameFactor": true}
+              "lifeTime": -60
             }
           },
           {
             "subType": 2,
             "lifeTime": 8,
             "offset": {
-              "position": {"z": {"value": 150, "timesFrameFactor": true}}
+              "position": {"z": 150}
             }
           },
           {
@@ -2338,8 +2338,8 @@
         "blendMesh": -2,
         "direction": [0, -80, -10],
         "offset": {
-          "position": {"z": {"value": 280, "timesFrameFactor": true}},
-          "angle": {"x": {"value": 20, "timesFrameFactor": true}}
+          "position": {"z": 280},
+          "angle": {"x": 20}
         }
       }
     },
@@ -2548,7 +2548,7 @@
         "light": [1, 1, 1],
         "skill": 0,
         "offset": {
-          "position": {"z": {"value": 10, "timesFrameFactor": true}}
+          "position": {"z": 10}
         },
         "copy": {
           "headTargetAngle": "callLight"
@@ -2695,7 +2695,7 @@
             "scale": 0,
             "direction": [0, -10, 0],
             "offset": {
-              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+              "position": {"z": 100}
             }
           },
           {
@@ -2817,7 +2817,7 @@
         "scale": 0.05,
         "lightEnable": false,
         "offset": {
-          "position": {"z": {"value": 20, "timesFrameFactor": true}}
+          "position": {"z": 20}
         }
       }
     },
@@ -2932,7 +2932,7 @@
         "blendMeshLight": 1.5,
         "light": [1, 1, 1],
         "offset": {
-          "position": {"z": {"value": -15, "timesFrameFactor": true}}
+          "position": {"z": -15}
         }
       }
     },

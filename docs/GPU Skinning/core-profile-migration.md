@@ -56,10 +56,11 @@ wrapper.
 
 This preserves legacy ordering while avoiding per-call GPU uploads.
 
-The renderer does not copy upstream terrain texture-pair sorting. Downstream
-base and blended overlay layers are separate commands with different depth
-behavior, so global reordering can change output. Adjacent compatible commands
-still merge without changing order.
+The renderer does not copy upstream terrain texture-pair sorting. Terrain draws
+its ground first and its blended overlays after, each in order; the overlays are
+depth-tested without depth writes, so they still land on their own ground and
+behind nearer terrain. Adjacent compatible commands merge without changing
+order.
 
 ## Textures and readback
 

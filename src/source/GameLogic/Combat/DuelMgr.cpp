@@ -116,7 +116,7 @@ float CDuelMgr::GetSD(int iPlayerNum)
     return m_DuelPlayer[iPlayerNum].m_fSDRate;
 }
 
-BOOL CDuelMgr::IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon)
+BOOL CDuelMgr::IsDuelPlayer(const CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon)
 {
     if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_sIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_USERNAME_SIZE) == 0)
     {

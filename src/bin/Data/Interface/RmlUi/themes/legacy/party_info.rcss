@@ -37,7 +37,7 @@
 	font-size: 1em;
 	text-align: left;
 }
-.party-empty-msg span { display: block; line-height: inherit; }
+.party-empty-msg span { display: block; }
 .party-empty-msg span.paragraph { margin-top: calc(5px * var(--root-scale)); }
 
 .party-list { position: absolute; left: 10px; top: 40px; width: 170px; }

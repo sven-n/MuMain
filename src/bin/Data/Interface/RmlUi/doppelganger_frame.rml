@@ -25,7 +25,7 @@
 			<span class="frame-text counter-scaled" id="dg_time_label" data-style-font-size="time_label.text_px + 'px'">{{time_label.text}}</span>
 			<span class="frame-text big counter-scaled" id="dg_time" data-style-font-size="time_line.text_px + 'px'">{{time_line.text}}</span>
 			<img class="bar" data-for="b : bars" data-attr-src="b.src" data-attr-rect="b.rect"
-			     data-style-left="b.left + 'px'" data-style-width="b.width + 'px'"/>
+			     data-style-left="b.left + 'px'" data-style-width="b.width + 'px'"></img>
 			<img id="icewalker" src="../../../Double_Micon01.tga" data-if="ice_walker_visible"
 			     data-style-left="ice_walker_left + 'px'"/>
 			<div class="marker" data-for="m : markers" data-class-hero="m.hero" data-style-left="m.left + 'px'"></div>

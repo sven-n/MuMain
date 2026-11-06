@@ -63,7 +63,6 @@
 	display: block;
 	color: token(text-narrative);
 	font-size: 1em;
-	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer (quest_progress.rml) */
 	white-space: nowrap;
 }
 
@@ -127,7 +126,6 @@
 	display: block;
 	color: token(text-narrative);
 	font-size: 1em;
-	line-height: inherit; /* native QP_TEXT_GAP 15px, bound on the text layer */
 	cursor: pointer;
 	pointer-events: auto;
 }

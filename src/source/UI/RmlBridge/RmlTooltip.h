@@ -8,6 +8,13 @@
 #include <string>
 #include <vector>
 
+#ifdef _EDITOR
+namespace Rml
+{
+class ElementDocument;
+}
+#endif
+
 // The one tooltip mechanism every window should use from now on -- a single, always-on-top RmlUi
 // document shared by every caller, callable from native code (an inline hover check in a legacy
 // CButton::Render()) exactly as easily as an RmlUi data-event-mouseover callback. This replaces
@@ -166,4 +173,10 @@ namespace UI::RmlBridge::Tooltip
     // Once a frame, after the native UI has rendered: hides a `refreshEachFrame` tooltip that was not
     // shown again since the last call.
     void ExpireUnrefreshed();
+
+#ifdef _EDITOR
+    // The shared tooltip document in the active theme, built if it isn't yet; nullptr without the
+    // RmlUi runtime or when it can't be built. MuEditor's Item Tooltip reads how its lines look from it.
+    Rml::ElementDocument* GetDocument();
+#endif
 }

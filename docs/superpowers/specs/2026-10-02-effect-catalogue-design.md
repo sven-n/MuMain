@@ -202,10 +202,8 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   kind is named exactly once.
 - An unset `create` field keeps the common setup, or the slot's old value
   where the common setup sets nothing (D34). There are no new defaults.
-- A vector field can set single components (`"angle": {"y": 0}`); an offset
-  the old code multiplies by the frame factor is written
-  `{"value": -100, "timesFrameFactor": true}`. Offsets and copies are
-  groups: `"offset": {"position": {"z": 3400}}`,
+- A vector field can set single components (`"angle": {"y": 0}`).
+  Offsets and copies are groups: `"offset": {"position": {"z": 3400}}`,
   `"copy": {"startPosition": "position"}` (since FX1.4). Variants list the
   SubTypes they are for: `"variants": [{"subType": 1, "lifeTime": 20},
   {"subTypes": [2, 3], "lifeTime": 15}]` (since FX1.5).
@@ -873,8 +871,8 @@ Filed upstream (2026-10-03):
   decision.
 - sven-n/MuMain#681: 63 creation cases multiply one-time values (spawn
   offsets, start angles) by `FPS_ANIMATION_FACTOR`, so effects start in
-  other places above 25 fps (from upstream's 2023 frame rate work; D34
-  keeps them as a flag until then).
+  other places above 25 fps (from upstream's 2023 frame rate work). Fixed:
+  the cases and the catalogue no longer scale them, and the flag is gone.
 - sven-n/MuMain#682: 25 effect (5 of them only with a registry row), 6
   particle and 2 joint types are handled but never created (checked in
   FX1.1, also against computed types).

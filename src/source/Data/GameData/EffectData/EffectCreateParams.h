@@ -10,13 +10,10 @@
 namespace Data::Effects
 {
 // A vector of creation values, set component by component (x, y, z); a
-// component left out keeps its value. Components of an offset can be
-// multiplied by the frame factor (FPS_ANIMATION_FACTOR), as the old creation
-// code multiplied them (sven-n/MuMain#681).
+// component left out keeps its value.
 struct EffectCreateVector
 {
     std::array<std::optional<double>, 3> components;
-    std::array<bool, 3> timesFrameFactor{};
 
     bool IsSet() const
     {
@@ -24,16 +21,6 @@ struct EffectCreateVector
     }
 
     bool operator==(const EffectCreateVector&) const = default;
-};
-
-// A number of an offset; the effect multiplies it by the frame factor
-// (FPS_ANIMATION_FACTOR) when timesFrameFactor is set.
-struct EffectCreateNumber
-{
-    double value = 0.0;
-    bool timesFrameFactor = false;
-
-    bool operator==(const EffectCreateNumber&) const = default;
 };
 
 // The render types the creation cases set, by name: RENDER_DARK of the models
@@ -94,7 +81,7 @@ struct EffectCreateParams
     EffectCreateVector startPosition;
 
     // Added to the field after the values.
-    std::optional<EffectCreateNumber> lifeTimeOffset;
+    std::optional<double> lifeTimeOffset;
     EffectCreateVector positionOffset;
     EffectCreateVector angleOffset;
     EffectCreateVector startPositionOffset;

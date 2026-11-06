@@ -28,21 +28,19 @@ ItemAddOptioninfo* g_pItemAddOptioninfo = NULL;
 
 extern int g_iCancelSkillTarget;
 extern int TextNum;
-extern int g_iItemInfo[16][17];
 
 namespace mu::ui::window
 {
-	int& MouseY = ::MouseY;
-	int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;
-	wchar_t (&TextList)[50][100] = ::TextList;
-	int (&TextListColor)[50] = ::TextListColor;
-	int (&TextBold)[50] = ::TextBold;
-	int& TextNum = ::TextNum;
-	int (&g_iItemInfo)[16][17] = ::g_iItemInfo;
-	int& ItemHelp = ::ItemHelp;
-	JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
-	int& SelectedCharacter = ::SelectedCharacter;
-}
+int& MouseY = ::MouseY;
+int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;
+wchar_t (&TextList)[MaxTextListRows][100] = ::TextList;
+int (&TextListColor)[MaxTextListRows] = ::TextListColor;
+int (&TextBold)[MaxTextListRows] = ::TextBold;
+int& TextNum = ::TextNum;
+int& ItemHelp = ::ItemHelp;
+JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
+int& SelectedCharacter = ::SelectedCharacter;
+} // namespace mu::ui::window
 
 extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;

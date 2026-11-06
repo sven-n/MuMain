@@ -3,9 +3,6 @@
 
 #pragma once
 
-
-void SaveTextFile(wchar_t* FileName);
-
 extern wchar_t AbuseFilter[MAX_FILTERS][20];
 extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int AbuseFilterNumber;
@@ -17,20 +14,15 @@ void OpenNameFilterFile(const wchar_t* FileName);
 extern GATE_ATTRIBUTE* GateAttribute;
 
 void OpenGateScript(const wchar_t* FileName);
-void OpenMonsterSkillScript(const wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
 extern ActionSkillType GetSkillByBook(int Type);
 void SetItemAttributes(ITEM* ip);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);
-extern int64_t ItemValue(ITEM* ip, int goldType = 1);
-extern void PrintItem(wchar_t* FileName);
+extern int64_t ItemValue(const ITEM* ip, int goldType = 1);
 
-extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
-
-extern void OpenMonsterScript(wchar_t* FileName);
-extern void MonsterConvert(MONSTER* m, int Level);
+// The monster's name from the monster list; "()" for a number without an entry.
 extern const wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
@@ -122,7 +114,6 @@ inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
     return (dwResult);
 }
 
-bool IsCepterItem(int iType);
 extern CHARACTER_MACHINE* CharacterMachine;
 extern CHARACTER_ATTRIBUTE* CharacterAttribute;
 

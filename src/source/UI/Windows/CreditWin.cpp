@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Windows/CreditWin.h"
+#include "Core/Utilities/FileHandle.h"
 #include "Core/Input/Input.h"
 #include "Core/Globals/_enum.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -19,6 +20,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -129,50 +131,58 @@ void CCreditWin::BindRmlModel(Rml::DataModelConstructor& c, CreditWinRmlModel& m
 
 void CCreditWin::Release()
 {
-	// Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
-	m_RmlView.Hide();
+    // Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+    Show(false);
 }
 
 void CCreditWin::Show(bool bShow)
 {
-	mu::ui::window::CObject::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
-	if (m_RmlView.Document())
-	{
-		if (bShow) m_RmlView.Document()->Show();
-		else       m_RmlView.Document()->Hide();
-	}
+    if (m_RmlView.Document())
+    {
+        if (bShow)
+            m_RmlView.Document()->Show();
+        else if (m_RmlView.Document()->IsVisible())
+            m_RmlView.Document()->Hide();
+    }
 
-	if (bShow)
-		Init();
-	else
-		m_eIllustState = HIDE;
+    if (bShow)
+        Init();
+    else
+    {
+        m_eIllustState = HIDE;
+        m_bRmlCloseClicked = false;
+    }
 }
 
 bool CCreditWin::Update()
 {
-	// Reconstructs the per-frame delta tick directly rather than via g_pTimer (total uptime, not a delta).
-	extern float FPS_ANIMATION_FACTOR;
-	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
+    if (!IsVisible())
+        return true;
 
-	if (m_bRmlCloseClicked)
-	{
-		m_bRmlCloseClicked = false;
-		CloseWin();
-	}
-	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		CloseWin();
-	}
+    // Reconstructs the per-frame delta tick directly rather than via g_pTimer (total uptime, not a delta).
+    extern float FPS_ANIMATION_FACTOR;
+    const DurationMs deltaTime{200.0 * static_cast<double>(FPS_ANIMATION_FACTOR)};
 
-	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
-		AnimationText(i, deltaTime);
-	AnimationIllust(deltaTime);
+    if (m_bRmlCloseClicked)
+    {
+        m_bRmlCloseClicked = false;
+        CloseWin();
+    }
+    else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+    {
+        ::PlayBuffer(SOUND_CLICK01);
+        CloseWin();
+    }
 
-	SyncRmlModel();
+    for (int i = 0; i <= CRW_INDEX_NAME; ++i)
+        AnimationText(i, deltaTime);
+    AnimationIllust(deltaTime);
 
-	return true;
+    SyncRmlModel();
+
+    return true;
 }
 
 bool CCreditWin::Render()
@@ -183,12 +193,12 @@ bool CCreditWin::Render()
 
 void CCreditWin::CloseWin()
 {
-	Show(false);
+    Show(false);
 
-	SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 
-	::StopMp3(MUSIC_MUTHEME);
-	::PlayMp3(MUSIC_MAIN_THEME);
+    ::StopMp3(MUSIC_MUTHEME);
+    ::PlayMp3(MUSIC_MAIN_THEME);
 }
 
 void CCreditWin::Init()
@@ -240,17 +250,20 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 			m_byIllust = ++m_byIllust == CRW_ILLUST_MAX ? 0 : m_byIllust;
 		}
 		break;
-	}
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
+        break;
+    }
 }
 
 void CCreditWin::LoadText()
 {
 #ifdef _WIN32
-	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(kCreditDataPath.data(), "rb"), &std::fclose);
+    Core::Utilities::FileHandle file(std::fopen(kCreditDataPath.data(), "rb"));
 #else
 	// The path is Windows-spelled (backslashes, mixed case); resolve it against
 	// the case-sensitive filesystem.
-	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"), &std::fclose);
+    Core::Utilities::FileHandle file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"));
 #endif
 	if (!file)
 	{
@@ -355,7 +368,10 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 				SetTextIndex();
 		}
 		break;
-	}
+    // The other values, listed without a default: a value added later fails the build here.
+    case HIDE:
+        break;
+    }
 }
 
 void CCreditWin::SyncRmlModel()

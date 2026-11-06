@@ -9,13 +9,13 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/MsgWin.h"
-#include "Character/CharMakeWin.h"
 #include "Core/Globals/_enum.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
@@ -34,6 +34,7 @@
 #include "Data/GameConfig/GameConfigConstants.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlClickSounds.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -74,13 +75,7 @@ CLoginWin g_LoginWin;
 
 CLoginWin::CLoginWin() = default;
 
-CLoginWin::~CLoginWin()
-{
-    // Backstop join: std::thread's destructor calls std::terminate() if still joinable, and
-    // there's no guarantee ProcessPendingConnectionReconnect() ran one last time before shutdown.
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-}
+CLoginWin::~CLoginWin() = default;
 
 void CLoginWin::Create()
 {
@@ -212,14 +207,15 @@ void CLoginWin::Show(bool bShow)
     if (m_RmlView.Document())
     {
         if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
-        else       m_RmlView.Document()->Hide();
+        else if (m_RmlView.Document()->IsVisible())
+            m_RmlView.Document()->Hide();
     }
 }
 
 void CLoginWin::Release()
 {
     // Hide, not unload -- the document/model are created once and reused.
-    m_RmlView.Hide();
+    Show(false);
 }
 
 void CLoginWin::RmlClickOk() { SubmitLogin(); }
@@ -241,28 +237,32 @@ void CLoginWin::RmlToggleSavePassword()
 
 bool CLoginWin::UpdateWhileActive()
 {
-	if (CInput::Instance().IsKeyDown(VK_RETURN))
-	{
-		SubmitLogin();
-		return true;
-	}
+    // Enter and Escape sound like the OK and Cancel buttons they stand for:
+    // their theme's click kind (Q-UI1).
+    if (CInput::Instance().IsKeyDown(VK_RETURN))
+    {
+        PlayKeyClick(".btn-ok");
+        SubmitLogin();
+        return true;
+    }
 
-	if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		SubmitCancel();
-		return true;
-	}
+    if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+    {
+        PlayKeyClick(".btn-cancel");
+        SubmitCancel();
+        return true;
+    }
 
-	return true;
+    return true;
 }
 
 // Called both from the immediate RmlUi click callbacks and from UpdateWhileActive()'s keyboard
-// polling, so each re-checks the "remember password" prompt's Pending state itself.
+// polling, so each re-checks the "remember password" prompt's Pending state itself. A click's
+// sound is the button's style's (Q-UI1), a key's PlayKeyClick().
 void CLoginWin::SubmitLogin()
 {
 	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
 		return;
-	PlayBuffer(SOUND_CLICK01);
 	RequestLogin();
 }
 
@@ -270,8 +270,17 @@ void CLoginWin::SubmitCancel()
 {
 	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
 		return;
-	PlayBuffer(SOUND_CLICK01);
 	CancelLogin();
+}
+
+// The remember-password prompt takes the key while it waits, silently (it is modal, so a click
+// cannot reach the buttons then either).
+void CLoginWin::PlayKeyClick(const char* button)
+{
+    if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+        return;
+    if (Rml::ElementDocument* document = m_RmlView.Document())
+        UI::RmlBridge::PlayClickSoundOf(document->QuerySelector(button));
 }
 
 void CLoginWin::ApplyRememberMeChange()
@@ -320,22 +329,28 @@ void CLoginWin::ApplySavePasswordChange()
 
 bool CLoginWin::UpdateWhileShown()
 {
+    const bool rememberPasswordPromptPending =
+        UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending;
+
+    // The remember-password prompt outlives this window, so keep polling it while login is hidden.
+    UI::Login::Tick();
+    ApplyRememberPasswordChoice();
+
+    if (!IsVisible())
+    {
+        SetActive(false);
+        return true;
+    }
+
     // Prevents Enter/Esc from double-firing past an overlaying modal: a higher-depth modal
     // claiming UpdateMouseEvent() doesn't by itself stop this window's own VK_RETURN/VK_ESCAPE
     // polling in UpdateWhileActive(). WasSysMenuToggledByEscThisFrame() is needed in addition to
     // g_SysMenuWin.IsVisible() because an Esc that just closed the menu this frame already reads
-    // back IsVisible()==false. g_CharMakeWin.IsVisible() covers the same gap: this window keeps
-    // ticking on the character-select scene too, so without it, Esc closing Character Create also
-    // fires this window's own SubmitCancel() and logs out unexpectedly.
-    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()
-                || g_CharMakeWin.IsVisible()
-                || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame()
-                || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
+    // back IsVisible()==false.
+    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() ||
+                CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame() || rememberPasswordPromptPending ||
+                UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
 
-    // Polls the "Remember Password" dialog's own Enter/Esc while it's open.
-    UI::Login::Tick();
-
-    ApplyRememberPasswordChoice();
     RevokeSavedCredentialsIfEdited();
     return true;
 }
@@ -470,10 +485,9 @@ void CLoginWin::SyncRmlModel()
         m_RmlView.MarkDirty("save_password_checked");
     }
 
-    wchar_t szServerName[MAX_TEXT_LENGTH] = {};
-    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
-    mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverNameUtf8 =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::Login);
     if (m_RmlView.GetModel().serverName != serverNameUtf8)
     {
         m_RmlView.GetModel().serverName = serverNameUtf8;
@@ -560,8 +574,15 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // Put the login screen away before the request goes out. The manual path
     // hides it on the click; a caller that submits credentials directly must
     // not leave it up, or its text fields keep the keyboard focus and no key
-    // reaches the game afterwards. Hiding an already hidden window is a no-op.
+    // reaches the game afterwards. Show(false) guards the document visibility transition.
     Show(false);
+
+    // The game server may have dropped the idle login screen; log in once it is back.
+    const std::wstring username = pszUsername;
+    const std::wstring password = pszPassword;
+    const auto submitAgain = [username, password] { g_LoginWin.SubmitCredentials(username.c_str(), password.c_str()); };
+    if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Game, submitAgain))
+        return;
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", pszUsername);
 
@@ -588,36 +609,8 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
 
 void CLoginWin::CancelLogin()
 {
-    // Hide immediately, run the blocking reconnect on a background thread. Guard against ESC-spam
-    // stacking threads: if one is already in flight, this press is a no-op.
+    // Back to the server list over a new connection to the connect server. The reconnect
+    // checks the server in the background first, so one that is down doesn't hold the screen.
     Show(false);
-
-    if (m_bConnectionReconnectInFlight.load())
-        return;
-
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join(); // previous run already finished and was consumed
-
-    m_bConnectionReconnectInFlight.store(true);
-    m_bConnectionReconnectDone.store(false);
-    m_ConnectionReconnectThread = std::thread([this]
-    {
-        ConnectConnectionServer();
-        m_bConnectionReconnectDone.store(true);
-    });
-}
-
-void CLoginWin::ProcessPendingConnectionReconnect()
-{
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-    m_bConnectionReconnectDone.store(false);
-    m_bConnectionReconnectInFlight.store(false);
-}
-
-void CLoginWin::ConnectConnectionServer()
-{
-    LogIn = 0;
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    CreateSocket(szServerIpAddress, g_ServerPort);
+    LoginSceneReconnect::Instance().ReturnToServerList();
 }

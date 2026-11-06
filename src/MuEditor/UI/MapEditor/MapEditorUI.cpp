@@ -3,12 +3,16 @@
 #ifdef _EDITOR
 
 #include "MapEditorUI.h"
+#include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/MuEditorLayout.h"
+#include "../MuEditor/Core/MuEditorPlatformWindows.h"
 #include "MapEditorSave.h"
 #include "MapAttributeSave.h"
 #include "MapEditorFileUtil.h"
 #include "MapTextureBrowser.h"
 #include "MapObjectPlace.h"
 #include "MapObjectBrowser.h"
+#include "MapSoundsTab.h"
 #include "ObjectThumbnail.h"
 
 #include "Render/Textures/ZzzOpenglUtil.h"  // CollisionPosition (world hit point)
@@ -20,15 +24,18 @@
 #include "MapMinimapCapture.h"
 
 #include "imgui.h"
+#include "I18N/All.h"
 #include "Core/Globals/_define.h"          // EDIT_MAPPING / EDIT_NONE
 #include "Core/Globals/_TextureIndex.h"    // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"   // Bitmaps[]
 #include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
+#include "Render/RmlUi/RmlUiRuntime.h"     // a game text field being typed in
 #include "Render/Terrain/ZzzLodTerrain.h"  // CurrentLayer
 #include "World/MapInfra/MapManager.h"     // gMapManager.WorldActive
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "Core/Utilities/StringUtils.h"    // WideToNarrow (UTF-8 safe, unlike raw truncation)
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <cstring>
 
@@ -118,6 +125,19 @@ namespace
     constexpr int CELLS = TERRAIN_SIZE * TERRAIN_SIZE;
 }
 
+bool CMapEditorUI::Shortcut(ImGuiKeyChord keyChord)
+{
+    if (g_MuEditorCore.IsKeyboardWithEditor())
+    {
+        return ImGui::Shortcut(keyChord);
+    }
+    if (RmlUiRuntime::Instance().IsTextInputActive())
+    {
+        return false;
+    }
+    return ImGui::Shortcut(keyChord, ImGuiInputFlags_RouteGlobal);
+}
+
 CMapEditorUI& CMapEditorUI::GetInstance()
 {
     static CMapEditorUI instance;
@@ -149,6 +169,34 @@ void CMapEditorUI::RestoreGameMode()
     m_bEditActive = false;
 }
 
+void CMapEditorUI::EndMinimapMode()
+{
+    if (!m_bMinimapMode)
+    {
+        return;
+    }
+    m_bMinimapMode = false;
+    // As "Back to game camera": FreeFly flies again when it is next used.
+    CameraManager& cameras = CameraManager::Instance();
+    ICamera* camera = cameras.GetActiveCamera();
+    if (camera && strcmp(camera->GetName(), "FreeFly") == 0)
+        static_cast<FreeFlyCamera*>(camera)->ClearTopDown();
+    if (cameras.GetCurrentMode() == CameraMode::FreeFly)
+        cameras.SetCameraMode(CameraMode::Default);
+}
+
+void CMapEditorUI::ReleaseWorld()
+{
+    // The next frame drops the top-down flags (m_topdownWasActive in Render).
+    EndMinimapMode();
+    g_bMapEditorAttrOverlay = false;
+    g_bMapEditorBrushHighlight = false;
+    g_MapEditorSelectedObject = nullptr;
+    g_MapEditorHoveredObject = nullptr;
+    g_MapEditorPlacementPreviewActive = false;
+    RestoreGameMode();
+}
+
 void CMapEditorUI::Render(bool* p_open)
 {
     const bool show = (p_open != nullptr && *p_open);
@@ -170,11 +218,9 @@ void CMapEditorUI::Render(bool* p_open)
         // clicked "Back to game camera" -- otherwise TopViewEnable/full-terrain
         // stay stuck true and MainScene's TopViewEnable early-return permanently
         // freezes normal gameplay input/UI processing.
-        if (!show && m_bMinimapMode)
+        if (!show)
         {
-            m_bMinimapMode = false;
-            if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
-                CameraManager::Instance().SetCameraMode(CameraMode::Default);
+            EndMinimapMode();
         }
 
         const bool topdown = m_bMinimapMode &&
@@ -207,20 +253,33 @@ void CMapEditorUI::Render(bool* p_open)
 
     if (!show)
     {
-        g_bMapEditorAttrOverlay = false;     // no panel -> no overlay
-        g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
-        g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
-        g_MapEditorHoveredObject = nullptr;  // no panel -> no hover outline
-        g_MapEditorPlacementPreviewActive = false; // no panel -> no placement preview
-        RestoreGameMode();
+        ReleaseWorld();
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Map Editor", p_open))
+    MuEditor::Layout::PrepareToolWindow();
+    const bool panelDrawn = ImGui::Begin(MuEditor::WindowIds::MapEditor, p_open,
+                                         MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::MapEditor));
+    if (panelDrawn)
+    {
+        MuEditor::Layout::RenderToolWindowBar();
+    }
+    // Docked behind another tab or in a minimized editor window, the panel is
+    // out of sight as if closed; it takes the world again when it shows. Not
+    // drawn for a frame while its dock node gets its window: keep edit mode
+    // as-is.
+    const bool behindAnotherTab = !panelDrawn && ImGui::IsWindowDocked();
+    const bool inMinimizedWindow = MuEditor::PlatformWindows::IsMinimized(ImGui::GetWindowViewport());
+    if (behindAnotherTab || inMinimizedWindow)
     {
         ImGui::End();
-        // Collapsed but still open: keep edit mode as-is.
+        ReleaseWorld();
+        return;
+    }
+    if (!panelDrawn)
+    {
+        ImGui::End();
         return;
     }
 
@@ -295,7 +354,11 @@ void CMapEditorUI::Render(bool* p_open)
             }
             ImGui::EndTabItem();
         }
-        // Later phases add tabs here (Attribute / Height).
+        if (ImGui::BeginTabItem(I18N::Editor::Sounds))
+        {
+            RenderSoundsTab();
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
 
@@ -321,6 +384,24 @@ void CMapEditorUI::Render(bool* p_open)
         EnterEditMode(m_desiredEditFlag);
     else
         RestoreGameMode();
+}
+
+void CMapEditorUI::RenderSoundsTab()
+{
+    if (g_MapSoundsTab.IsPicking())
+    {
+        // The object tool's picking: the mouse is ray-cast onto the world, the
+        // hovered object outlined, and the click kept from the hero.
+        m_desiredEditFlag = EDIT_OBJECT;
+        OBJECT* hovered = g_MuEditorCore.IsHoveringUI() ? nullptr : Editor::ObjectPlace::PickUnderCursor();
+        g_MapEditorHoveredObject = hovered;
+        if (m_PaintLDown && !m_soundPickWasDown && hovered != nullptr)
+        {
+            g_MapSoundsTab.Picked(hovered->Type);
+        }
+    }
+    m_soundPickWasDown = m_PaintLDown;
+    g_MapSoundsTab.Render(gMapManager.GetServerMap(), gMapManager.GetServerStage(), ResolveWorldNumber());
 }
 
 void CMapEditorUI::RenderTextureTab()
@@ -418,7 +499,7 @@ void CMapEditorUI::RenderTextureTab()
 
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%d: %s", slot, TileSlotName(slot));
-        if (clicked)
+        if (clicked || MuEditor::KeyboardSelection::MovedOnto())
             SelectMapping = slot;
 
         ImGui::PopID();
@@ -650,7 +731,7 @@ void CMapEditorUI::RenderObjectsTab()
                     ImGui::PopStyleColor();
                 if (ImGui::IsItemHovered())
                     ImGui::SetTooltip("%d: %ls", m.type, m.file.c_str());
-                if (clicked)
+                if (clicked || MuEditor::KeyboardSelection::MovedOnto())
                     m_selectedModelType = m.type;
                 ImGui::PopID();
             }
@@ -666,7 +747,7 @@ void CMapEditorUI::RenderObjectsTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bObjHasUndo);
-    if (ImGui::Button("Undo last object edit") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+    if (ImGui::Button("Undo last object edit") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoObjects();
     ImGui::EndDisabled();
 
@@ -728,7 +809,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-    if (ImGui::Button("Delete object") || ImGui::IsKeyPressed(ImGuiKey_Delete))
+    if (ImGui::Button("Delete object") || Shortcut(ImGuiKey_Delete))
     {
         TakeObjectUndoSnapshot();
         Editor::ObjectPlace::Remove(m_pSelected);
@@ -741,7 +822,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 void CMapEditorUI::RenderAttributeTab()
 {
     const int world = ResolveWorldNumber();
-    const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.WorldActive;
+    const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.GetServerMap();
 
     // Must run before anything reads m_attrBaseline / m_attrEdited below.
     EnsureAttrBaseline(world);
@@ -808,11 +889,12 @@ void CMapEditorUI::RenderAttributeTab()
 
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.6f, 1.0f), "2) Server file (OpenMU)");
-    // The server keys maps by the world ENUM (Arena = 6); the client folder is
-    // World{enum+1} (World7). Show both so they're never confused.
+    // The server keys maps by its own number: the world ENUM (Arena = 6), but 32 for
+    // Devil Square 5-7, which loads world 9. The client folder is World{enum+1}
+    // (World7, World10). Show both so they're never confused.
     bool autoServer = (m_serverMapOverride < 0);
     if (ImGui::Checkbox("Auto server map number", &autoServer))
-        m_serverMapOverride = autoServer ? -1 : gMapManager.WorldActive;
+        m_serverMapOverride = autoServer ? -1 : gMapManager.GetServerMap();
     if (!autoServer)
     {
         ImGui::SameLine();
@@ -964,6 +1046,7 @@ void CMapEditorUI::PaintAttribute()
         }
     }
     m_attrCountDirty = true;
+    MarkTerrainHeightsChanged();
 }
 
 void CMapEditorUI::TakeAttrUndoSnapshot()
@@ -977,6 +1060,7 @@ void CMapEditorUI::UndoAttr()
     if (!m_bAttrHasUndo)
         return;
     std::memcpy(TerrainWall, m_attrUndo.data(), CELLS * sizeof(unsigned short));
+    MarkTerrainHeightsChanged();
     m_bAttrHasUndo = false;
     m_attrStatus = "Undo: reverted last attribute stroke.";
     m_attrCountDirty = true;
@@ -1092,8 +1176,7 @@ void CMapEditorUI::RenderHeightTab()
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bHeightHasUndo);
-    if (ImGui::Button("Undo last height stroke") ||
-        (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z)))
+    if (ImGui::Button("Undo last height stroke") || Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
         UndoHeight();
     ImGui::EndDisabled();
 
@@ -1198,6 +1281,7 @@ void CMapEditorUI::SculptHeight()
             float& h = BackTerrainHeight[TERRAIN_INDEX_REPEAT(ix, iy)];
             h = std::clamp(h, 0.0f, maxHeight);
         }
+    MarkTerrainHeightsChanged();
 
     // Rebuild lighting/normals so the change is visible immediately.
     CreateTerrainNormal();
@@ -1215,6 +1299,7 @@ void CMapEditorUI::UndoHeight()
     if (!m_bHeightHasUndo)
         return;
     std::memcpy(BackTerrainHeight, m_heightUndo.data(), CELLS * sizeof(float));
+    MarkTerrainHeightsChanged();
     CreateTerrainNormal();
     CreateTerrainLight();
     m_bHeightHasUndo = false;

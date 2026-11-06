@@ -1,40 +1,29 @@
-# Extra checks that sven-n/MuMain does not run automatically, to save its
-# Actions minutes: ci.yml builds Windows only on pushes to main and never
-# builds the editor. On every pull request of a fork, which uses its own
-# minutes, this workflow adds the game's Windows build:
-#
-#   Windows x64 Release   editor OFF  (Linux and macOS, editor OFF: ci.yml)
-#
-# The editor builds run only when started by hand ("Run workflow" with
-# "editor" checked): the game matters more than an always working editor,
-# and on every pull request they would double the fork's Actions usage.
+# The editor builds, which ci.yml does not run, started by hand ("Run workflow"). ci.yml
+# builds the game (editor OFF) on Windows, Linux and macOS for every pull request and
+# main push; the game matters more than an always working editor, and on every pull
+# request the editor builds would double the Actions usage.
 #
 #   Windows x64 Release   editor ON
 #   Linux x64 Release     editor ON
 #   macOS arm64 Release   editor ON
-#
-# On sven-n/MuMain the whole workflow only runs when started by hand.
 #
 # Editor ON also enables the control socket, like the *-mueditor presets.
 # The jobs only build and run the tests; they upload nothing. The workflow
 # uses GitHub's own actions only, so it runs under a repository setting that
 # allows no other actions.
 #
-# Each job gets 90 minutes (timeout-minutes; the slowest, Windows, takes
-# about 35), and each test case its own limit from tests/CMakeLists.txt. A
-# step that hangs then fails in time instead of holding the job until GitHub
-# cancels it after six hours.
+# The editor builds are not held to ci.yml's rule that no warning may come back (docs/build/README.md); the
+# Windows one lists its warnings (ci_warnings.py report). The last job still fails on a warning annotation of any job,
+# e.g. GitHub's own about a deprecated action.
+#
+# Each job gets 90 minutes (timeout-minutes; the slowest, Windows, has no compiler
+# cache and took 43-48 with its vcpkg packages cached, about 18 more without), and
+# each test case its own limit from tests/CMakeLists.txt. A step that hangs then
+# fails in time instead of holding the job until GitHub cancels it after six hours.
 name: Fork CI
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-    inputs:
-      editor:
-        description: 'Also build and test with the editor ON (Windows, Linux, macOS)'
-        type: boolean
-        default: false
 
 concurrency:
   group: fork-ci-${{ github.ref }}
@@ -43,24 +32,28 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Keeps git quiet in actions/checkout, as in ci.yml.
+  GIT_CONFIG_COUNT: 2
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  GIT_CONFIG_KEY_1: advice.detachedHead
+  GIT_CONFIG_VALUE_1: 'false'
+
 jobs:
-  windows:
-    name: Windows x64 Release, editor ${{ matrix.editor }}
-    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
-    runs-on: windows-latest
+  windows-editor:
+    name: Windows x64 Release, editor ON
+    # The images by name, as in ci.yml.
+    runs-on: windows-2025-vs2026
     timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        # Without "Run workflow" there are no inputs, so a pull request builds OFF only.
-        editor: ${{ fromJSON(inputs.editor && '["OFF", "ON"]' || '["OFF"]') }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -89,35 +82,47 @@ jobs:
             throw "vcvars64.bat failed."
           }
 
-      - name: Cache FetchContent and NuGet dependencies
-        uses: actions/cache@v4
+      - name: Cache dependencies
+        # Named as in ci.yml, after what picks the files.
+        uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-windows/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-windows/_deps/*-src
+            out/build/fork-ci-windows/_deps/*-subbuild
             .nuget
-          key: fork-windows-x64-editor-${{ matrix.editor }}-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-windows-x64-editor-${{ matrix.editor }}-deps-
+          key: fork-windows-x64-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-windows-x64-dep-sources-
+
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-x64-
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
+          python scripts/ci_warnings.py report
           cmake --preset windows-x64
           -B out/build/fork-ci-windows
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/cmake/triplets
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
-          -DENABLE_EDITOR=${{ matrix.editor }}
-          -DENABLE_CONTROL_SOCKET=${{ matrix.editor }}
+          -DENABLE_EDITOR=ON
+          -DENABLE_CONTROL_SOCKET=ON
+          -DMU_WARNINGS_AS_ERRORS=OFF
           -DMU_ENABLE_SHADER_COMPILATION=ON
           -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
@@ -126,7 +131,9 @@ jobs:
           -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build out/build/fork-ci-windows --config Release
+        run: >
+          python scripts/ci_warnings.py report
+          cmake --build out/build/fork-ci-windows --config Release
 
       - name: Run tests
         run: >
@@ -136,16 +143,16 @@ jobs:
 
   linux-editor:
     name: Linux x64 Release, editor ON
-    if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -155,22 +162,25 @@ jobs:
           sudo apt-get install -y \
             cmake ninja-build gcc g++ \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
-            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
             glslang-tools spirv-cross \
             pkg-config
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        # Named as in ci.yml.
+        uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-linux-editor/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-linux-editor/_deps/*-src
+            out/build/fork-ci-linux-editor/_deps/*-subbuild
             .nuget
-          key: fork-linux-x64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-linux-x64-editor-ON-deps-
+          key: fork-linux-x64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-linux-x64-editor-ON-dep-sources-
 
       - name: Configure CMake
         run: >
@@ -192,30 +202,33 @@ jobs:
 
   macos-editor:
     name: macOS arm64 Release, editor ON
-    if: github.event_name == 'workflow_dispatch' && inputs.editor
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 90
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        id: dotnet
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        # Named as in ci.yml.
+        uses: actions/cache@v6
         with:
           path: |
-            out/build/fork-ci-macos-editor/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders.
+            out/build/fork-ci-macos-editor/_deps/*-src
+            out/build/fork-ci-macos-editor/_deps/*-subbuild
             .nuget
-          key: fork-macos-arm64-editor-ON-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: fork-macos-arm64-editor-ON-deps-
+          key: fork-macos-arm64-editor-ON-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: fork-macos-arm64-editor-ON-dep-sources-
 
       - name: Configure CMake
         run: >
@@ -235,3 +248,26 @@ jobs:
           ctest --test-dir out/build/fork-ci-macos-editor --build-config Release
           --output-on-failure
           --no-tests=error
+
+  annotations:
+    name: Job annotations
+    needs: [windows-editor, linux-editor, macos-editor]
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+
+      # GitHub's own warnings count too, e.g. that an action targets a deprecated Node.js version.
+      - name: Check job annotations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_job_annotations.py

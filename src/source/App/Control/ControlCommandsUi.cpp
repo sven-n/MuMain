@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "App/Control/ControlCommands.h"
 
+#include "Core/Text/Utf8.h"
+#include "Core/Utilities/Log/muConsoleDebug.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -13,6 +15,7 @@
 
 #include "json.hpp"
 
+#include <exception>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -289,5 +292,33 @@ std::string SlotPixel(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::NotOpen, "the window of that grid is not open");
     }
     return SquarePixel(request, **square, slot);
+}
+
+std::string Console(const Request& request, std::unique_ptr<Act>& /*act*/)
+{
+    std::string text;
+    if (!request.GetString("text", text) || text.empty() || text.front() != '$')
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`text` is a `$` command, e.g. \"$fps 60\"");
+    }
+    bool known = false;
+    try
+    {
+        known = g_ConsoleDebug->CheckCommand(Core::Text::FromUtf8(text));
+    }
+    catch (const std::exception&)
+    {
+        // A command that parses its arguments with std::stof/substr throws on a missing or
+        // malformed one ("$fps" without a number); refuse it instead of ending the client.
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`" + text + "` is missing an argument or has a malformed one");
+    }
+    if (!known)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the client has no `$` command `" + text + "`");
+    }
+    nlohmann::json result;
+    result["text"] = text;
+    return EncodeResult(request.EncodedId(), result.dump());
 }
 } // namespace App::Control::Commands

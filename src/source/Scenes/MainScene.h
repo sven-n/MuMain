@@ -14,6 +14,7 @@ bool RenderMainScene();
 // via $effects on/off (muConsoleDebug.cpp) -- not gated behind _EDITOR since the report came from a
 // Release NoEditor build.
 void SetDisableEffects(bool disabled);
+bool IsEffectsDisabledDebug();
 
 // DXP-23 diagnostic, finer-grained bisection: `$effects off` (above) confirmed effect rendering is
 // the dominant GPU cost during a multi-caster fight, but not WHICH effect system inside it -- these
@@ -47,6 +48,10 @@ bool IsBoidsDisabledDebug();
 void SetDisableWingShadow(bool disabled);
 bool IsWingShadowDisabledDebug();
 
+// Every BMD::RenderBodyShadow() draw: characters, their wings and pets, objects and boids.
+void SetDisableBodyShadows(bool disabled);
+bool IsBodyShadowsDisabledDebug();
+
 // DXP-23 diagnostic: RenderJoints() (ZzzEffectJoint.cpp) -- the beam/tail-trail effect system Wing of
 // Ruin's growing tail-light AND Beam Knight's lightning beam both use (CreateTail(), MaxTails-capped
 // per-tail but NOT gated by g_pOption->GetRenderAllEffects() at all, so $effects off never covered
@@ -55,6 +60,10 @@ bool IsWingShadowDisabledDebug();
 // resubmitted every single render frame, not just once per tick.
 void SetDisableJoints(bool disabled);
 bool IsJointsDisabledDebug();
+
+// Joint trail segments and particles outside the view frustum are not drawn; this draws them anyway.
+void SetDisableEffectCulling(bool disabled);
+bool IsEffectCullingDisabledDebug();
 
 // DXP-23 diagnostic: MODEL_WING_OF_RUIN's own body render (RenderPartObjectBody(), ZzzObject.cpp
 // ~6997-7008) draws its mesh THREE separate times per frame -- a base texture pass, an animated-

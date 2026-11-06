@@ -65,6 +65,7 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     c.Bind("highlight_title", &model.highlightTitle);
     c.Bind("is_system_menu", &model.isSystemMenu);
     c.Bind("kind", &model.kind);
+    c.Bind("menu_id", &model.id);
     c.Bind("canvas_top", &model.canvasTop);
     c.Bind("title", &model.title);
     c.Bind("system_menu_label", &model.systemMenuLabel);
@@ -280,6 +281,7 @@ void CGenericMenuDialog::SyncRmlModel()
     syncLabel(model.systemMenuLabel, "system_menu_label", I18N::Game::SystemMenu);
     syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
     SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::kind, "kind", Rml::String(m_Active.kind));
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::id, "menu_id", Rml::String(m_Active.id));
     const std::string title = StringUtils::WideToNarrow(m_Active.title.c_str());
     if (model.title != title)
     {

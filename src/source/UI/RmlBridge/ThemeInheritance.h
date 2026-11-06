@@ -19,6 +19,16 @@ public:
         std::filesystem::path directory;
     };
 
+    // One line of a theme.ini or tokens.ini as the themes read it: a section's header (its name, lowercase), a
+    // key (lowercase) with its value, or neither (a blank or comment line, or one without '=').
+    struct IniLine
+    {
+        std::optional<std::string> section;
+        std::optional<std::string> key;
+        std::string value;
+    };
+    static IniLine ParseIniLine(std::string line);
+
     explicit ThemeInheritance(std::filesystem::path directory);
     static bool IsValidName(const std::string& name);
     bool IsValid() const { return m_Error.empty(); }

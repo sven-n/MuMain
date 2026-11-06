@@ -11,10 +11,24 @@
         "pt": "Asas do elfo"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
       "width": 3,
       "height": 2,
       "slot": "wings",
       "wingTier": "first",
+      "statProfile": "firstTierWing",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -34,10 +48,24 @@
         "pt": "Asas do paraíso"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
       "wingTier": "first",
+      "statProfile": "firstTierWing",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -58,10 +86,24 @@
         "pt": "Asas de Satã"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
       "width": 5,
       "height": 2,
       "slot": "wings",
       "wingTier": "first",
+      "statProfile": "firstTierWing",
       "level": 100,
       "durability": 200,
       "defense": 20,
@@ -82,10 +124,59 @@
         "pt": "Asas dos espíritos"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierWing",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -105,10 +196,59 @@
         "pt": "Asas da alma"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 5,
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierWing",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -128,10 +268,59 @@
         "pt": "Asas do dragão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 3,
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierWing",
       "level": 150,
       "durability": 200,
       "defense": 45,
@@ -151,10 +340,59 @@
         "pt": "Asas da escuridão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 2,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierWing",
       "level": 150,
       "durability": 200,
       "defense": 40,
@@ -196,11 +434,12 @@
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 8,
       "buyPrice": 800,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 52
       },
       "classRequirements": {
         "fairyElf": 1
@@ -209,18 +448,19 @@
     {
       "number": 9,
       "name": {
-        "en": "Orb of Greater Fortitude",
-        "de": "Kugel: Greater Fortitude",
-        "es": "Orbe de Mayor Fortaleza",
-        "pt": "Orbe da sorte maior"
+        "en": "Orb of Greater Defense",
+        "de": "Kugel: Greater Defense",
+        "es": "Orbe de Mayor Defensa",
+        "pt": "Orbe da defesa maior"
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 13,
       "buyPrice": 3000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 72
       },
       "classRequirements": {
         "fairyElf": 1
@@ -236,11 +476,12 @@
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 18,
       "buyPrice": 7000,
       "repairable": false,
       "requirements": {
-        "energy": 100
+        "energy": 92
       },
       "classRequirements": {
         "fairyElf": 1
@@ -254,11 +495,134 @@
         "es": "Orbe de Invocación",
         "pt": "Orbe da invocação"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:30"},
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:31"},
+          "levels": [1, 1]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:32"},
+          "levels": [2, 2]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:33"},
+          "levels": [3, 3]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:34"},
+          "levels": [4, 4]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:35"},
+          "levels": [5, 5]
+        },
+        {
+          "text": {
+            "en": "{skill} Jewel",
+            "de": "{skill} Juwel",
+            "es": "{skill} Joya",
+            "id": "{skill} Permata",
+            "ja": "{skill} 玉",
+            "pl": "{skill} Jewel",
+            "pt": "{skill} Jóia",
+            "ru": "{skill} Драгоценность",
+            "tl": "{skill} Jewel",
+            "uk": "{skill} Коштовність",
+            "zh-TW": "{skill} 寶石"
+          },
+          "values": {"skill": "skillName:36"},
+          "levels": [6, 6]
+        }
+      ],
+      "groundLabels": [{"style": "orbOfSummoning"}],
       "width": 1,
       "height": 1,
       "level": 3,
       "buyPrice": 150,
       "repairable": false,
+      "requirementsByLevel": {"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, 0, 0, 0, 0, 0, 0, 0]},
       "classRequirements": {
         "fairyElf": 1
       }
@@ -333,6 +697,31 @@
         "pt": "Joia do caos"
       },
       "tags": ["jewel", "valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "It is used to combine Chaos items",
+            "de": "Wird verwendet, um Chaos-Gegenstände zu kombinieren",
+            "es": "Se utiliza para combinar elementos del Caos.",
+            "id": "Digunakan untuk menggabungkan item Chaos",
+            "ja": "カオス合成時に使用",
+            "pl": "Służy do łączenia przedmiotów Chaosu",
+            "pt": "É usado para combinar itens do Caos",
+            "ru": "Используется для объединения предметов Хаоса.",
+            "tl": "Ito ay ginagamit upang pagsamahin ang Chaos item",
+            "uk": "Використовується для комбінування предметів Хаосу",
+            "zh-CN": "玛雅合成时使用",
+            "zh-TW": "它用於組合混沌物品"
+          }
+        }
+      ],
+      "nameLines": [
+        {
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 12,
@@ -355,11 +744,12 @@
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 60,
       "buyPrice": 51000,
       "repairable": false,
       "requirements": {
-        "strength": 320
+        "strength": 596
       },
       "classRequirements": {
         "magicGladiator": 1
@@ -395,11 +785,12 @@
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 81,
       "buyPrice": 195000,
       "repairable": false,
       "requirements": {
-        "dexterity": 258
+        "dexterity": 646
       },
       "classRequirements": {
         "fairyElf": 2
@@ -426,6 +817,9 @@
       }
     },
     {
+      "number": 20
+    },
+    {
       "number": 21,
       "name": {
         "en": "Scroll of FireBurst",
@@ -435,10 +829,11 @@
       },
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 74,
       "buyPrice": 115000,
       "requirements": {
-        "energy": 20
+        "energy": 79
       },
       "classRequirements": {
         "darkLord": 1
@@ -454,10 +849,11 @@
       },
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 98,
       "buyPrice": 375000,
       "requirements": {
-        "energy": 34,
+        "energy": 153,
         "leadership": 400
       },
       "classRequirements": {
@@ -474,10 +870,11 @@
       },
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 82,
       "buyPrice": 220000,
       "requirements": {
-        "energy": 25,
+        "energy": 102,
         "leadership": 300
       },
       "classRequirements": {
@@ -494,10 +891,11 @@
       },
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 92,
       "buyPrice": 295000,
       "requirements": {
-        "energy": 29,
+        "energy": 126,
         "leadership": 340
       },
       "classRequirements": {
@@ -512,6 +910,7 @@
         "es": "gema del secreto",
         "pt": "gema do segredo"
       },
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -528,10 +927,40 @@
       "name": {
         "en": "Bundle of Jewel of Bless",
         "de": "Bündel Juwelen des Segens",
-        "es": "manojo de Joyas de Bendición",
-        "pt": "feixe da Joia da bênção"
+        "es": "Fardo de Joyas de Bendición",
+        "pt": "Lote de Joias da bênção"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Bless is combined",
+            "de": "{bundleCount} Juwel des Segens kombiniert",
+            "es": "{bundleCount} Joya de bendición se combina",
+            "id": "{bundleCount} Permata Berkat digabungkan",
+            "ja": "{bundleCount}の祝福の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Bless jest połączone",
+            "pt": "{bundleCount} Jóia da Abençoação é combinado",
+            "ru": "{bundleCount} Драгоценный камень благословения комбинированный",
+            "tl": "{bundleCount} Hiyas ng Pagpapala ay pinagsama-sama",
+            "uk": "{bundleCount} Jewel of Bless комбінований",
+            "zh-TW": "{bundleCount} 祝福寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 25,
@@ -549,10 +978,40 @@
       "name": {
         "en": "Bundle of Jewel of Soul",
         "de": "Bündel Juwelen der Seele",
-        "es": "manojo de Joyas de Alma",
-        "pt": "feixe da Joia da alma"
+        "es": "Fardo de Joyas de Alma",
+        "pt": "Lote de Joias da alma"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Soul is combined",
+            "de": "{bundleCount} Juwel der Seele kombiniert",
+            "es": "{bundleCount} joya del alma se combina",
+            "id": "{bundleCount} Permata Jiwa digabungkan",
+            "ja": "{bundleCount}の霊魂の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Soul jest połączone",
+            "pt": "{bundleCount} Jóia da Alma é combinado",
+            "ru": "{bundleCount} Драгоценность души комбинированный",
+            "tl": "{bundleCount} Hiyas ng Kaluluwa ay pinagsama-sama",
+            "uk": "{bundleCount} Перлина душі комбінований",
+            "zh-TW": "{bundleCount} 靈魂寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 30,
@@ -573,6 +1032,21 @@
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
+      "description": [
+        {
+          "text": "@throwForZenOrItems",
+          "color": "red"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
+      "groundLabels": [{"style": "giftBoxRed"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -592,6 +1066,21 @@
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
+      "description": [
+        {
+          "text": "@throwForZenOrItems",
+          "color": "green"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
+      "groundLabels": [{"style": "giftBoxGreen"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -611,6 +1100,21 @@
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
+      "description": [
+        {
+          "text": "@throwForZenOrItems",
+          "color": "blue"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
+      "groundLabels": [{"style": "giftBoxBlue"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -630,12 +1134,21 @@
         "es": "Rollo de Alarido de Fuego",
         "pt": "Pergaminho de grito de fogo"
       },
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          }
+        }
+      ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 102,
       "buyPrice": 300000,
       "requirements": {
-        "energy": 32,
+        "energy": 150,
         "leadership": 70
       },
       "classRequirements": {
@@ -651,10 +1164,59 @@
         "pt": "Asa da Tempestade"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 60,
@@ -674,10 +1236,59 @@
         "pt": "Asa da eternidade"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -697,10 +1308,59 @@
         "pt": "Asa da ilusão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -720,10 +1380,59 @@
         "pt": "Asa da ruína"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 55,
@@ -743,10 +1452,59 @@
         "pt": "Capa do Imperador"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -766,10 +1524,24 @@
         "pt": "Asa da maldição"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
       "width": 4,
       "height": 2,
       "slot": "wings",
       "wingTier": "first",
+      "statProfile": "firstTierWing",
       "level": 100,
       "durability": 200,
       "defense": 10,
@@ -789,10 +1561,59 @@
         "pt": "Asa do desespero"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease2nd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb2nd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierWing",
       "level": 150,
       "durability": 200,
       "defense": 30,
@@ -812,10 +1633,59 @@
         "pt": "Asa da dimensão"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 4,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -874,11 +1744,12 @@
       },
       "width": 1,
       "height": 1,
+      "statProfile": "orb",
       "level": 100,
       "buyPrice": 250000,
       "requirements": {
         "level": 220,
-        "energy": 37
+        "energy": 168
       },
       "classRequirements": {
         "fairyElf": 2
@@ -911,13 +1782,15 @@
         "es": "Rollo de Diseier Caótico",
         "pt": "Pergaminho Diseier Caótico"
       },
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 2,
+      "statProfile": "orb",
       "level": 100,
       "buyPrice": 380000,
       "requirements": {
         "level": 220,
-        "energy": 16
+        "energy": 84
       },
       "classRequirements": {
         "darkLord": 1
@@ -928,14 +1801,60 @@
       "name": {
         "en": "Cape of Fighter",
         "de": "Kämpferumhang",
-        "es": "¹«ÀÎÀÇ¸ÁÅä",
+        "es": "Capa del Guerrero",
         "pt": "Manto do Guerreiro"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeOfFighterDamageAbsorb"}
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
       "wingTier": "second",
+      "statProfile": "secondTierCape",
       "level": 180,
       "durability": 200,
       "defense": 15,
@@ -951,14 +1870,63 @@
       "name": {
         "en": "Cape of Overrule",
         "de": "Umhang der Herrschaft",
-        "es": "±º¸²ÀÇ¸ÁÅä",
+        "es": "Capa Reinante",
         "pt": "Manto Reinante"
       },
       "tags": ["cape", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease3rd"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:capeDamageAbsorb3rd"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ],
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "white",
+          "colors": [
+            {
+              "when": ["level>=7"],
+              "color": "yellow"
+            },
+            {
+              "when": ["hasOptions"],
+              "color": "blue"
+            }
+          ]
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "wings",
       "wingTier": "third",
+      "statProfile": "thirdTierWing",
       "level": 150,
       "durability": 220,
       "defense": 45,
@@ -978,6 +1946,15 @@
         "pt": "Semente (Fogo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1001,6 +1978,15 @@
         "pt": "Semente (Água)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1024,6 +2010,15 @@
         "pt": "Semente (Gelo)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1047,6 +2042,15 @@
         "pt": "Semente (Vento)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1070,6 +2074,15 @@
         "pt": "Semente (Relâmpago)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1093,6 +2106,15 @@
         "pt": "Semente (Terra)"
       },
       "tags": ["socketSeed"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1116,6 +2138,15 @@
         "pt": "Esfera (Mono)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 102,
@@ -1139,6 +2170,15 @@
         "pt": "Esfera (Di)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 122,
@@ -1162,6 +2202,15 @@
         "pt": "Esfera (Tri)"
       },
       "tags": ["socketSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 132,
@@ -1177,6 +2226,16 @@
       }
     },
     {
+      "number": 73,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "number": 74,
+      "width": 1,
+      "height": 1
+    },
+    {
       "number": 100,
       "name": {
         "en": "Seed Sphere (Fire)",
@@ -1185,6 +2244,15 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1208,6 +2276,15 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1231,6 +2308,15 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1254,6 +2340,15 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1277,6 +2372,15 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1300,6 +2404,15 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1323,6 +2436,15 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1346,6 +2468,15 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1369,6 +2500,15 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1392,6 +2532,15 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1415,6 +2564,15 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1438,6 +2596,15 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -1461,6 +2628,15 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1484,6 +2660,15 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1507,6 +2692,15 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1530,6 +2724,15 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1553,6 +2756,15 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1576,6 +2788,15 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -1599,6 +2820,17 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1610,6 +2842,17 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1621,6 +2864,17 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1632,6 +2886,17 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1643,6 +2908,17 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1654,6 +2930,17 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1665,6 +2952,17 @@
         "pt": "Esfera de semente (Fogo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1676,6 +2974,17 @@
         "pt": "Esfera de semente (Água)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1687,6 +2996,17 @@
         "pt": "Esfera de semente (Gelo)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1698,6 +3018,17 @@
         "pt": "Esfera de semente (Vento)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1709,6 +3040,17 @@
         "pt": "Esfera Semente (Relâmpago)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1720,6 +3062,17 @@
         "pt": "Esfera de semente (Terra)"
       },
       "tags": ["socketSeedSphere"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "violet"
+        }
+      ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -1731,10 +3084,25 @@
         "pt": "Pequena capa do Lorde"
       },
       "tags": ["cape", "cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 2,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 15,
@@ -1760,10 +3128,25 @@
         "pt": "Pequenas asas da maldição"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1789,10 +3172,25 @@
         "pt": "Pequenas asas do elfo"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1818,10 +3216,25 @@
         "pt": "Pequenas asas do paraíso"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 10,
@@ -1848,10 +3261,25 @@
         "pt": "Pequenas asas de Satã"
       },
       "tags": ["cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:wingDamageIncrease1st"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:wingDamageAbsorb1st"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 20,
@@ -1878,10 +3306,25 @@
         "pt": "Manto de Pequeno Guerreiro"
       },
       "tags": ["cape", "cashShop", "valuable"],
+      "description": [
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:capeDamageIncrease"}
+        },
+        {
+          "text": "@damageAbsorb",
+          "values": {"percent": "table:smallCapeDamageAbsorb"}
+        },
+        {
+          "text": "@increaseSpeed"
+        }
+      ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 2,
       "height": 2,
       "slot": "wings",
       "wingTier": "small",
+      "statProfile": "smallWing",
       "level": 1,
       "durability": 200,
       "defense": 15,
@@ -1901,12 +3344,41 @@
     {
       "number": 136,
       "name": {
-        "en": "Jewel of Life Bundle",
+        "en": "Bundle of Jewel of Life",
         "de": "Bündel Juwelen des Lebens",
-        "es": "Fardo de Joyas de la Vida",
-        "pt": "Joia do Lote da Vida"
+        "es": "Fardo de Joyas de Vida",
+        "pt": "Lote de Joias da vida"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Life is combined",
+            "de": "{bundleCount} Juwel des Lebens kombiniert",
+            "es": "{bundleCount} joya de la vida se combina",
+            "id": "{bundleCount} Permata Kehidupan digabungkan",
+            "ja": "{bundleCount}の生命の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Life jest połączone",
+            "pt": "{bundleCount} Jóia da Vida é combinado",
+            "ru": "{bundleCount} Жемчужина жизни комбинированный",
+            "tl": "{bundleCount} Hiyas ng Buhay ay pinagsama-sama",
+            "uk": "{bundleCount} Перлина життя комбінований",
+            "zh-TW": "{bundleCount} 生命寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -1923,12 +3395,41 @@
     {
       "number": 137,
       "name": {
-        "en": "Jewel of Creation Bundle",
+        "en": "Bundle of Jewel of Creation",
         "de": "Bündel Juwelen der Schöpfung",
         "es": "Fardo de Joyas de la Creación",
-        "pt": "Joia do Lote da Criação"
+        "pt": "Lote de Joias da criação"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Creation is combined",
+            "de": "{bundleCount} Juwel der Schöpfung kombiniert",
+            "es": "{bundleCount} Joya de la creación se combina",
+            "id": "{bundleCount} Permata Penciptaan digabungkan",
+            "ja": "{bundleCount}の創造の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Creation jest połączone",
+            "pt": "{bundleCount} Jóia da Criação é combinado",
+            "ru": "{bundleCount} Драгоценность творения комбинированный",
+            "tl": "{bundleCount} Hiyas ng Paglikha ay pinagsama-sama",
+            "uk": "{bundleCount} Перлина Творіння комбінований",
+            "zh-TW": "{bundleCount} 創造寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -1945,12 +3446,41 @@
     {
       "number": 138,
       "name": {
-        "en": "Jewel of Guardian Bundle",
+        "en": "Bundle of Jewel of Guardian",
         "de": "Bündel Juwelen des Wächters",
-        "es": "Fardo de Joyas Guardián",
-        "pt": "Joia do Lote Guardião"
+        "es": "Fardo de Joyas de Guardián",
+        "pt": "Lote de Joias do guardião"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Guardian is combined",
+            "de": "{bundleCount} Juwel des Wächters kombiniert",
+            "es": "{bundleCount} Joya del guardián se combina",
+            "id": "{bundleCount} Permata Penjaga digabungkan",
+            "ja": "{bundleCount}の守護の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Guardian jest połączone",
+            "pt": "{bundleCount} Jóia do Guardião é combinado",
+            "ru": "{bundleCount} Сокровище Хранителя комбинированный",
+            "tl": "{bundleCount} Hiyas ng Tagapangalaga ay pinagsama-sama",
+            "uk": "{bundleCount} Jewel of Guardian комбінований",
+            "zh-TW": "{bundleCount} 守護者寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 75,
@@ -1967,12 +3497,41 @@
     {
       "number": 139,
       "name": {
-        "en": "Gemstone Bundle",
+        "en": "Bundle of Gemstone",
         "de": "Bündel Edelsteine",
         "es": "Fardo de Gemas",
-        "pt": "Lote de Pedra Preciosa"
+        "pt": "Lote de Pedras preciosas"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel stone is combined",
+            "de": "{bundleCount} Juwelenstein kombiniert",
+            "es": "{bundleCount} piedra joya se combina",
+            "id": "{bundleCount} Batu permata digabungkan",
+            "ja": "{bundleCount}の調和の原石が合わせられた状態",
+            "pl": "{bundleCount} Jewel stone jest połączone",
+            "pt": "{bundleCount} Pedra joia é combinado",
+            "ru": "{bundleCount} Драгоценный камень комбинированный",
+            "tl": "{bundleCount} Bato ng hiyas ay pinagsama-sama",
+            "uk": "{bundleCount} Коштовний камінь комбінований",
+            "zh-TW": "{bundleCount} 寶石石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1989,12 +3548,41 @@
     {
       "number": 140,
       "name": {
-        "en": "Jewel of Harmony Bundle",
+        "en": "Bundle of Jewel of Harmony",
         "de": "Bündel Juwelen der Harmonie",
         "es": "Fardo de Joyas de la Armonía",
-        "pt": "Joia do Lote da Harmonia"
+        "pt": "Lote de Joias da harmonia"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Harmony is combined",
+            "de": "{bundleCount} Juwel der Harmonie kombiniert",
+            "es": "{bundleCount} Joya de la armonía se combina",
+            "id": "{bundleCount} Permata Harmoni digabungkan",
+            "ja": "{bundleCount}の調和の宝石の使い方が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Harmony jest połączone",
+            "pt": "{bundleCount} Jóia da Harmonia é combinado",
+            "ru": "{bundleCount} Жемчужина гармонии комбинированный",
+            "tl": "{bundleCount} Jewel of Harmony ay pinagsama-sama",
+            "uk": "{bundleCount} Перлина гармонії комбінований",
+            "zh-TW": "{bundleCount} 和諧寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2011,12 +3599,41 @@
     {
       "number": 141,
       "name": {
-        "en": "Jewel of Chaos Bundle",
+        "en": "Bundle of Jewel of Chaos",
         "de": "Bündel Juwelen des Chaos",
-        "es": "Fardo de Joyas del Caos",
-        "pt": "Joia do Lote do Caos"
+        "es": "Fardo de Joyas de Caos",
+        "pt": "Lote de Joias do caos"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Jewel of Chaos is combined",
+            "de": "{bundleCount} Juwel des Chaos kombiniert",
+            "es": "{bundleCount} joya del caos se combina",
+            "id": "{bundleCount} Permata Kekacauan digabungkan",
+            "ja": "{bundleCount}の混沌の宝石が合わせられた状態",
+            "pl": "{bundleCount} Jewel of Chaos jest połączone",
+            "pt": "{bundleCount} Jóia do Caos é combinado",
+            "ru": "{bundleCount} Жемчужина хаоса комбинированный",
+            "tl": "{bundleCount} Hiyas ng Chaos ay pinagsama-sama",
+            "uk": "{bundleCount} Перлина Хаосу комбінований",
+            "zh-TW": "{bundleCount} 混沌寶石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -2033,12 +3650,41 @@
     {
       "number": 142,
       "name": {
-        "en": "Lower Refining Stone Bundle",
+        "en": "Bundle of Lower Refining Stone",
         "de": "Bündel niederer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Bajo Pulido",
-        "pt": "Lote de Joias de Baixo Polimento"
+        "es": "Fardo de Piedras de Más Baja Refinación",
+        "pt": "Lote de Pedras refinadas inferiores"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Lower Refining Stone is combined",
+            "de": "{bundleCount} Niederer Verfeinerungsstein kombiniert",
+            "es": "{bundleCount} Piedra de refinación inferior se combina",
+            "id": "{bundleCount} Batu Pemurnian Bawah digabungkan",
+            "ja": "{bundleCount}の下級製錬石が合わせられた状態",
+            "pl": "{bundleCount} Lower Refining Stone jest połączone",
+            "pt": "{bundleCount} Pedra de Refino Inferior é combinado",
+            "ru": "{bundleCount} Нижний очищающий камень комбинированный",
+            "tl": "{bundleCount} Lower Refining Stone ay pinagsama-sama",
+            "uk": "{bundleCount} Нижній очисний камінь комбінований",
+            "zh-TW": "{bundleCount} 下層精煉石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -2055,12 +3701,41 @@
     {
       "number": 143,
       "name": {
-        "en": "Higher Refining Stone Bundle",
+        "en": "Bundle of Higher Refining Stone",
         "de": "Bündel höherer Verfeinerungssteine",
-        "es": "Fardo de Joyas de Alto Pulido",
-        "pt": "Lote de Joias de Alto Polimento"
+        "es": "Fardo de Piedras de Más Alta Refinación",
+        "pt": "Lote de Pedras refinadas superiores"
       },
       "tags": ["valuable"],
+      "description": [
+        {
+          "text": {
+            "en": "{bundleCount} Higher Refining Stone is combined",
+            "de": "{bundleCount} Höherer Verfeinerungsstein kombiniert",
+            "es": "{bundleCount} Piedra de mayor refinamiento se combina",
+            "id": "{bundleCount} Batu Pemurnian Tinggi digabungkan",
+            "ja": "{bundleCount}の上級製錬石が合わせられた状態",
+            "pl": "{bundleCount} Higher Refining Stone jest połączone",
+            "pt": "{bundleCount} Pedra de alto refino é combinado",
+            "ru": "{bundleCount} Камень высшей очистки комбинированный",
+            "tl": "{bundleCount} Higher Refining Stone ay pinagsama-sama",
+            "uk": "{bundleCount} Вищий очисний камінь комбінований",
+            "zh-TW": "{bundleCount} 高等精煉石 組合"
+          }
+        },
+        {
+          "text": "@canBeUsedAfterDismantling"
+        }
+      ],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name} x{bundleCount}"
+          },
+          "color": "yellow"
+        }
+      ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,

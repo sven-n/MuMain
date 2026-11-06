@@ -113,7 +113,6 @@
 .opt-pane {
 	position: relative;
 	flex: 1 1 0;
-	padding: 22dp 28dp;
 	background-color: rgba(22, 26, 32, 140);
 	backdrop-filter: blur(12dp);
 	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
@@ -123,6 +122,37 @@
 	box-shadow:
 		inset 0 1dp 0 rgba(255, 255, 255, 30),
 		0 12dp 32dp rgba(0, 0, 0, 140);
+}
+
+/* A part of the row above it: indented under its label. */
+.opt-sub-row .opt-label {
+	box-sizing: border-box;
+	padding-left: 16dp;
+}
+
+/* A heading over a group of rows. */
+.opt-section {
+	display: block;
+	margin: 18dp 0 4dp;
+	font-size: 12dp;
+	font-weight: bold;
+	letter-spacing: 2dp;
+	color: token(text-secondary);
+}
+
+.opt-page-title + .opt-section {
+	margin-top: 8dp;
+}
+
+/* The active page, scrolling (base.rcss's .scroll-pane) when its rows don't fit. Absolute, so the
+   pane's width never depends on its content: a flex item that scrolls shrinks its rows to nothing. */
+.opt-scroll {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	padding: 22dp 28dp;
 }
 
 /* .hidden ties with this rule's display at equal specificity, so it is restated. */
@@ -408,7 +438,7 @@
 .opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
-.opt-row-tipped .option-dropdown-list {
+.option-opens-up .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
 	margin-top: 0;
@@ -470,7 +500,7 @@
 	.opt-close-bar { left: 5dp; top: 14dp; }
 	.opt-body { margin-top: 10dp; }
 	.opt-nav-item { height: 32dp; line-height: 32dp; margin-bottom: 2dp; }
-	.opt-pane { padding: 12dp 16dp; }
+	.opt-scroll { padding: 12dp 16dp; }
 	.opt-page-title { padding-bottom: 6dp; margin-bottom: 4dp; font-size: 14dp; }
 	.opt-row { height: 34dp; }
 	.opt-footer { height: 36dp; margin-top: 8dp; }
@@ -483,7 +513,184 @@
 	.opt-toggle-row .opt-control { width: auto; }
 	.opt-label { white-space: normal; line-height: 14dp; }
 }
-/* Smaller still, the page scrolls rather than run under the footer. */
-@media (max-height: 380dp) {
-	.opt-pane { overflow-y: auto; }
+
+/* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and
+   not clickable. */
+.opt-toggle-row.locked {
+	opacity: 0.45;
+	cursor: default;
+}
+
+/* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
+   row. The feature's label and chevron expand its sliders; only the switch switches the feature.
+   A locked feature dims its switch, not its label, which still expands the tuning. */
+.opt-tuning-group-row {
+	cursor: default;
+}
+.opt-tuning-group-row.locked {
+	opacity: 1;
+}
+.opt-tuning-group-row.locked .opt-toggle {
+	opacity: 0.45;
+}
+.opt-tuning-group-row .opt-toggle {
+	cursor: pointer;
+}
+.opt-tuning-group-label {
+	cursor: pointer;
+}
+.opt-tuning-group-label:hover {
+	color: token(accent-gold-hover);
+}
+/* An arrow before the label: pointing right while collapsed, down while expanded. */
+.opt-tuning-chevron {
+	display: inline-block;
+	width: 6dp;
+	height: 6dp;
+	margin: 0 8dp 1dp 0;
+	border-right: 2dp token(text-secondary);
+	border-bottom: 2dp token(text-secondary);
+	transform: rotate(-45deg);
+}
+.opt-tuning-chevron.expanded {
+	transform: rotate(45deg);
+	border-color: token(accent-gold-hover);
+}
+/* .hidden ties with these rules' display at equal specificity, so it is restated. */
+.opt-tuning-group,
+.opt-tuning-more,
+.opt-tuning-rows {
+	display: block;
+}
+.opt-tuning-group {
+	padding: 4dp 12dp 8dp 28dp;
+	border-bottom: 1dp rgba(255, 255, 255, 14);
+	background-color: rgba(255, 255, 255, 6);
+}
+.opt-tuning-group.hidden,
+.opt-tuning-more.hidden,
+.opt-tuning-reason.hidden,
+.opt-tuning-error.hidden {
+	display: none;
+}
+.opt-tuning-reason {
+	display: block;
+	padding: 6dp 0;
+	font-size: 11dp;
+	color: token(semantic-warning);
+}
+.opt-tuning-row {
+	position: relative;
+	display: block;
+	padding: 6dp 0 8dp;
+	border-bottom: 1dp rgba(255, 255, 255, 10);
+	pointer-events: auto;
+}
+.opt-tuning-head {
+	display: flex;
+	align-items: center;
+	height: 20dp;
+}
+.opt-tuning-label {
+	flex: 1 1 0;
+	overflow: hidden;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(text-primary);
+}
+.opt-tuning-state {
+	flex: 0 0 auto;
+	margin-left: 10dp;
+	font-size: 11dp;
+	color: token(text-muted);
+}
+.opt-tuning-state.custom {
+	color: token(accent-gold-hover);
+}
+.opt-tuning-state.unsaved {
+	color: token(semantic-warning);
+}
+.opt-tuning-value {
+	flex: 0 0 auto;
+	margin-left: 10dp;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(accent-gold-hover);
+}
+.opt-tuning-reset {
+	flex: 0 0 auto;
+	margin-left: 10dp;
+	padding: 2dp 8dp;
+	cursor: pointer;
+	pointer-events: auto;
+	font-size: 11dp;
+	color: token(text-secondary);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 3dp;
+	background-color: rgba(255, 255, 255, 14);
+}
+.opt-tuning-reset:hover {
+	color: token(accent-gold-hover);
+	border-color: token(accent-gold);
+}
+.opt-tuning-track {
+	display: flex;
+	align-items: center;
+	height: 20dp;
+}
+.opt-tuning-bound {
+	flex: 0 0 auto;
+	width: 64dp;
+	white-space: nowrap;
+	font-size: 11dp;
+	color: token(text-muted);
+}
+.opt-tuning-track .opt-tuning-bound:last-child {
+	text-align: right;
+}
+/* The volume slider's rail and fill (.opt-slider), with room for the bounds beside it. */
+.opt-tuning-slider {
+	margin: 0 12dp;
+}
+.opt-tuning-hit {
+	left: -8dp;
+	right: -8dp;
+	top: -8dp;
+	bottom: -8dp;
+	border-radius: 4dp;
+}
+.opt-tuning-hit:focus {
+	border: 1dp token(accent-gold);
+}
+.opt-tuning-group.locked .opt-tuning-track {
+	opacity: 0.45;
+}
+.opt-tuning-group.locked .opt-tuning-hit {
+	cursor: default;
+}
+.opt-tuning-more-head {
+	display: block;
+	padding: 8dp 0 4dp;
+	cursor: pointer;
+	pointer-events: auto;
+	font-size: 12dp;
+	color: token(text-secondary);
+}
+.opt-tuning-more-head:hover {
+	color: token(accent-gold-hover);
+}
+.opt-tuning-actions {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: 6dp;
+}
+.opt-tuning-all {
+	padding: 8dp 12dp;
+	border-bottom: 1dp rgba(255, 255, 255, 14);
+}
+.opt-tuning-error {
+	display: block;
+	padding: 8dp 12dp;
+	font-size: 12dp;
+	color: token(semantic-warning);
 }

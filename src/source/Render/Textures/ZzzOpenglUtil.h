@@ -12,6 +12,8 @@ extern vec3_t CollisionPosition;
 extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
+extern int REFERENCE_FRAME_STEP;
+extern unsigned int RENDERED_FRAME;
 extern double  WorldTime;
 extern bool   FogEnable;
 extern bool   TextureEnable;
@@ -40,7 +42,6 @@ extern wchar_t         GrabFileName[];
 extern bool         GrabEnable;
 
 //  etc
-bool CheckID_HistoryDay(wchar_t* Name, WORD day);
 void SetRenderViewport(int x, int y, int Width, int Height);
 void BeginSprite();
 void EndSprite();
@@ -89,6 +90,8 @@ float ConvertX(float x);
 float ConvertY(float y);
 float ConvertPositionX(float x);
 float ConvertPositionY(float y);
+// Builds g_Camera's view for the viewport BeginOpengl() is later given, in the update.
+void UpdateCameraView(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpenglPhysical(int x, int y, int width, int height);
 // BeginOpenglPhysical() without the viewport, for a render target's drawer: the capture brings its
@@ -114,7 +117,6 @@ bool EnableVSync();
 bool DisableVSync();
 int GetFPSLimit();
 
-void UpdateMousePositionn();
 inline void TEXCOORD(float* c, float u, float v)
 {
     c[0] = u;
@@ -124,7 +126,7 @@ void RenderBox(float Matrix[3][4]);
 void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);
-void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
+void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
 float RenderNumber2D(float x, float y, int Num, float Width, float Height,
     unsigned int color = 0xFFFFFFFFu);
 void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha);

@@ -275,7 +275,7 @@ internal static class QuestSteps
 
     // Marlon where the character sees him now.
     private static async Task<Npc> MarlonAsync(GameClient client)
-        => await Meeting.SeenPositionAsync(client, "Marlon") is { } seen
-            ? new Npc("Marlon", seen.X, seen.Y)
+        => await Meeting.SeenPositionAsync(client, Quests.Marlon) is { } seen
+            ? Quests.Marlon with { X = seen.X, Y = seen.Y }
             : throw new ScenarioFailedException("Marlon is not in view");
 }

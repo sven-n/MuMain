@@ -37,6 +37,8 @@ namespace CfgKeys
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
     inline constexpr wchar_t CfgKeyFont[]     = L"Font";
+    // Whether item names follow the UI language; off keeps them English.
+    inline constexpr wchar_t CfgKeyTranslateItemNames[] = L"TranslateItemNames";
     // Active RmlUi theme name ("legacy"/"modern"), Data/Interface/RmlUi/themes/<name>/. Not yet
     // a full runtime hot-swap -- read once at startup. See UI::RmlBridge::RmlTheme.
     inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
@@ -44,15 +46,31 @@ namespace CfgKeys
     // Rml::Context::SetDensityIndependentPixelRatio(). Only RCSS authored in `dp` units responds
     // to this; existing `px`-authored windows are unaffected until retrofitted.
     inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
+    // Animates characters on worker threads when many are in view. Off unless set here or
+    // started with --enable-taskpool; manual config.ini edit only.
+    inline constexpr wchar_t CfgKeyEnableAnimationTaskPool[] = L"EnableAnimationTaskPool";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
     // Render
-    // Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
-    inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+    // The look preset: Classic or Enhanced (texture filtering, Enhanced lighting,
+    // dynamic model lights, the light mood at full strength and post-processing).
+    // A missing or invalid value is the default.
+    inline constexpr wchar_t CfgKeyLook[] = L"Look";
+    // Anisotropic filtering of every texture with mip levels: world textures in the Enhanced
+    // look, upscaled textures in both looks. 1 is off.
+    inline constexpr wchar_t CfgKeyAnisotropy[] = L"Anisotropy";
+    // Multisample anti-aliasing of the Enhanced look: 0 (off), 2, 4 or 8 samples per pixel.
+    inline constexpr wchar_t CfgKeyAntialiasing[] = L"Antialiasing";
+    // The Enhanced look's features the player keeps on; Classic ignores them.
+    inline constexpr wchar_t CfgKeyEnhancedLighting[] = L"EnhancedLighting";
+    inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
+    inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
+    inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
+
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
     // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
     // SetDisableSkillEffectModels/SetDisableBoids/SetDisableWingShadow), originally console-only
@@ -63,9 +81,14 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyDisableSkillEffectModels[] = L"DisableSkillEffectModels";
     inline constexpr wchar_t CfgKeyDisableBoids[] = L"DisableBoids";
     inline constexpr wchar_t CfgKeyDisableWingShadow[] = L"DisableWingShadow";
+    // Every body shadow: characters, their wings and pets, objects and wildlife.
+    inline constexpr wchar_t CfgKeyDisableBodyShadows[] = L"DisableBodyShadows";
     // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
     // above, this time for the console-only `$fps <N>` diagnostic.
     inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
+    // Active texture pack, a folder in Data/TexturePacks; empty = the original textures. Read once
+    // at startup -- see Render::Textures::TexturePack.
+    inline constexpr wchar_t CfgKeyTexturePack[] = L"TexturePack";
 }
 
 namespace CfgDefaults
@@ -84,12 +107,13 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultEncryptedPassword[] = L"";
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
-    inline constexpr int CfgDefaultServerPort = 44405;
+    inline constexpr int CfgDefaultServerPort = 44406;
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 
     // I18N locale code; "en" is the default the resx generator falls back to.
     inline constexpr wchar_t CfgDefaultUILocale[] = L"en";
+    inline constexpr bool CfgDefaultTranslateItemNames = true;
 
     // UI font family name. Empty = each platform's built-in default (Tahoma on
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
@@ -110,19 +134,33 @@ namespace CfgDefaults
     inline constexpr int CfgMinUIScalePercent = 75;
     inline constexpr int CfgMaxUIScalePercent = 150;
 
-    // Legacy config compatibility only. SDL GPU ignores this key and default.
-    inline constexpr bool CfgDefaultCoreProfile = true;
+    inline constexpr bool CfgDefaultEnableAnimationTaskPool = false;
 
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // The look a missing or invalid [Render] Look stands for.
+    inline constexpr wchar_t CfgDefaultLook[] = L"Classic";
+    // 8x anisotropy on textures with mip levels.
+    inline constexpr int CfgDefaultAnisotropy = 8;
+
+    // The samples the Enhanced look renders with (Classic renders without); a
+    // requested count is lowered to what the GPU supports.
+    inline constexpr int CfgDefaultAntialiasing = 4;
+    inline constexpr bool CfgDefaultEnhancedLighting = true;
+    inline constexpr bool CfgDefaultDynamicLights = true;
+    inline constexpr bool CfgDefaultLightMood = true;
+    inline constexpr bool CfgDefaultPostProcessing = true;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;
     inline constexpr bool CfgDefaultDisableSkillEffectModels = false;
     inline constexpr bool CfgDefaultDisableBoids = false;
     inline constexpr bool CfgDefaultDisableWingShadow = false;
+    inline constexpr bool CfgDefaultDisableBodyShadows = false;
     inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
+    inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:

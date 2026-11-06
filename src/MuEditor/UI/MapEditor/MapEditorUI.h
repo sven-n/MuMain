@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "imgui.h"
 #include "MapObjectPlace.h"  // Editor::ObjectPlace::ModelEntry
 
 class OBJECT;
@@ -35,6 +36,14 @@ public:
     // reaching the game, so the character doesn't walk/attack while editing.
     void CaptureInputForPainting();
 
+    // The Map Editor's Ctrl+Z and Delete: while its window has the focus, and
+    // while the game window has the keyboard, as after a click into the world
+    // (it leaves no editor window focused). Not while a text field of the
+    // game's is typed in; a text field of the editor's keeps its own keys.
+    // While the game has the keyboard the item tools take no Ctrl+Z, also one
+    // that still looks focused (after Alt+Tab), so the map edit is undone.
+    static bool Shortcut(ImGuiKeyChord keyChord);
+
 private:
     CMapEditorUI() = default;
     ~CMapEditorUI() = default;
@@ -44,6 +53,9 @@ private:
     void RenderHeightTab();
     void RenderMinimapTab();
     void RenderAttributeTab();
+    // The Sounds tab (MapSoundsTab.h), and taking an object in the world for
+    // it as the Objects tab picks one.
+    void RenderSoundsTab();
     // Paints TerrainWall[] with the selected attribute under the cursor.
     void PaintAttribute();
     void TakeAttrUndoSnapshot();
@@ -78,6 +90,11 @@ private:
     void EnterEditMode(int editFlag);
     // Returns the game to normal play (EDIT_NONE) if this panel had taken it.
     void RestoreGameMode();
+    // No panel in sight: no overlay, outline or preview in the world, no
+    // top-down minimap view, and the game back to normal play.
+    void ReleaseWorld();
+    // Ends the top-down minimap view, back to the game's camera.
+    void EndMinimapMode();
 
     // Resolves which World{N}/EncTerrain{N} the live map maps to. -1 = auto from
     // the active world; a user override wins when >= 0.
@@ -93,6 +110,8 @@ private:
 
     // Mouse state captured before the game consumes it (see CaptureInputForPainting).
     bool m_PaintLDown = false;
+    // The left button as the Sounds tab's picking saw it the frame before.
+    bool m_soundPickWasDown = false;
     bool m_PaintRDown = false;
     bool m_StrokeActive = false;     // a left-drag stroke is in progress (undo edge)
 
@@ -147,7 +166,7 @@ private:
     bool m_attrStrokeActive = false;
     bool m_bAttrHasUndo = false;
     std::vector<unsigned short> m_attrUndo;   // TerrainWall snapshot before a stroke
-    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.WorldActive)
+    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.GetServerMap())
     std::string m_attrStatus;
 
     // Server export is a MERGE onto the server's current TerrainData, because the two

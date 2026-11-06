@@ -38,7 +38,12 @@ Server selection uses `.server-group-btn` (with `.checked`) and `.server-option-
 (with `.gray` / `.orange` category colors), supplied by both themes' `base.rcss`.
 Use a `.button-label` child for the pressed text offset. `server_select.rml` is the reference;
 its stylesheet owns button and gauge geometry. Legacy uses the original `cha_bt` group
-and `server_b2_all` server sprites at their native aspect ratios within the current two-column layout.
+sprite at its native size and the `server_b2_all` server frame in tiles, so every channel row grows
+as wide as the longest text any channel can have, within the current two-column layout. A row has
+`.server-name` on its top line and below it the `.server-gauge-slot` bar; a full server's
+`.server-load-line` lays its load text over the bar, and `CServerSelWin::FitLoadTexts` hides the
+segments under it. The unseen `.server-row-sizer` row holds every name and load text the rows are
+sized by.
 
 Icon buttons have a narrower contract: `.btn-icon`, `.btn-icon-primary`, `.btn-icon-label` and
 `.btn-icon-caption` are used by the login and character-selection documents. The modern base
@@ -119,6 +124,11 @@ inherited font size; the shared pass shrinks text to fit within the native minim
 only under the `NativeTextSize` capability and requires physical-pixel text geometry.
 See [`RmlNativeTextFit.h`](../../src/source/UI/RmlBridge/RmlNativeTextFit.h) and
 `generic_menu_dialog.rml`. This is distinct from marquee or wrapping.
+
+Use `.text-fit` for explicit shrink-to-fit in either theme, including the map-name banner.
+It uses the inherited font size as its maximum and reduces that size without transforming glyphs.
+Give the element a bounded width, direct text children and `white-space: nowrap`; physical-pixel
+layout keeps the fitted glyphs sharp.
 
 ## Scrolling pane
 
@@ -204,9 +214,11 @@ Primary. Esc invokes Cancel when configured, otherwise Primary; it never invokes
 Timed progress dialogs hide buttons and do not accept Esc dismissal.
 
 Callbacks can call `KeepOpen()` to veto resolution, including Cancel. Read entered text through
-`GetInputText()` and validate it before accepting. Requests can carry an `isValid` predicate;
-expired requests dismiss without callbacks. IDs support pending checks and cancellation, while
-tags support automation answers. Exact fields and contracts remain in the header.
+`GetInputText()` and validate it before accepting. A text field with a `maxValue` gets a Max
+button in the Secondary slot that fills in that value, read on each click; typing is not clamped
+to it. Requests can carry an `isValid` predicate; expired requests dismiss without callbacks. IDs
+support pending checks and cancellation, while tags support automation answers. Exact fields and
+contracts remain in the header.
 
 The current component owns one model/document view. Live item previews use `ItemCameraTarget`
 inside that document. References: `GenericConfirmDialog.cpp`, `generic_confirm_dialog.rml`,
@@ -221,7 +233,10 @@ behind one active menu. An enabled button runs its callback and closes; Esc uses
 There is no resolution veto. A callback may enqueue the next menu, as the Gem Integration flow does.
 
 Use configuration for content and supported layout variants. `kind` identifies compatibility
-presentation, while `systemMenu` selects the system-menu presentation. Column support is currently
+presentation (the original box the menu copies, `data-kind`, which also switches the document to
+the native-frame layout), while `systemMenu` selects the system-menu presentation. Every caller
+also sets `id`, which only names the menu (`data-id` on the body) so a theme can target one menu
+without new layout rules; it changes nothing by itself. Column support is currently
 limited to the implemented two-column variant; consult the header before adding another shape.
 Frame structure comes from `window_shell.rml`. References: `generic_menu_dialog.rml`, its themed
 assets, and the menu construction in `CustomMessageBox.cpp`.

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include <memory>
 
 #include "World/MapInfra/w_BaseMap.h"
@@ -25,16 +27,15 @@ public:
 
     bool CreateObject(OBJECT* object) override;
     bool MoveObject(OBJECT* object) override;
-    bool RenderObjectVisual(OBJECT* object, BMD* bmd) override;
-    bool RenderObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
-    void RenderAfterObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
+    bool UpdateObjectEffects(OBJECT* object, BMD* bmd) override;
+    bool RenderObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
+    void RenderAfterObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
 
     CHARACTER* CreateMonster(int type, int positionX, int positionY, int key) override;
     bool MoveMonsterVisual(OBJECT* object, BMD* bmd) override;
     void MoveBlurEffect(CHARACTER* character, OBJECT* object, BMD* bmd) override;
-    bool RenderMonsterVisual(CHARACTER* character, OBJECT* object, BMD* bmd) override;
+    bool UpdateMonsterEffects(CHARACTER* character, OBJECT* object, BMD* bmd) override;
 
-    bool PlayMonsterSound(OBJECT* object) override;
     void PlayObjectSound(OBJECT* object) override;
 
     void PlayBGM();
@@ -46,7 +47,7 @@ public:
 private:
     CGM_PK_Field();
 
-    bool RenderMonster(OBJECT* object, BMD* bmd, bool extraMon);
+    bool RenderMonster(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon);
 };
 
 bool IsPKField();

@@ -172,3 +172,8 @@ body {
 	width: 280rem;
 	color: token(accent-gold);
 }
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+.btn-ok { click-sound: confirm; }
+.btn-cancel { click-sound: cancel; }

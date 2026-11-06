@@ -1,0 +1,84 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct SceneLighting
+{
+    float4 sceneLightDirection;
+    float4 sceneLightColor;
+    float4 diffuseCurve;
+    float4 rimParameters;
+    float4 specularParameters;
+    float4 sceneFogColor;
+    float4 sceneFogParameters;
+    float4 cameraPosition;
+};
+
+struct FogUniforms
+{
+    uint fogEnabled;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    uint alphaToCoverage;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+    float input_eyeDepth [[user(locn3)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant SceneLighting& _24 [[buffer(0)]], constant FogUniforms& _72 [[buffer(1)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+{
+    main0_out out = {};
+    float4 _190 = tex.sample(s, in.input_uv);
+    float4 _193 = _190 * in.input_color;
+    float4 _310;
+    if (_72.alphaToCoverage != 0u)
+    {
+        float _213 = _193.w * fast::clamp(((_193.w - _72.alphaThreshold) / fast::max(fwidth(_193.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        float4 _301 = _193;
+        _301.w = _213;
+        if (_213 <= 0.0)
+        {
+            discard_fragment();
+        }
+        _310 = _301;
+    }
+    else
+    {
+        if ((_72.alphaDiscardEnabled != 0u) && (_193.w <= _72.alphaThreshold))
+        {
+            discard_fragment();
+        }
+        _310 = _193;
+    }
+    float4 _311;
+    if ((_72.fogEnabled != 0u) && (_24.sceneFogColor.w > 0.0))
+    {
+        float _270 = fast::max(in.input_eyeDepth - _24.sceneFogParameters.x, 0.0) * _24.sceneFogParameters.z;
+        float3 _250 = mix(_310.xyz, _24.sceneFogColor.xyz, float3(fast::clamp(1.0 - exp((-_270) * _270), 0.0, 1.0)));
+        float4 _305 = _310;
+        _305.x = _250.x;
+        _305.y = _250.y;
+        _305.z = _250.z;
+        _311 = _305;
+    }
+    else
+    {
+        _311 = _310;
+    }
+    out._entryPointOutput = _311;
+    return out;
+}
+

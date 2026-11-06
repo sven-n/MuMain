@@ -9,6 +9,7 @@
 #include "Render/Sprites/GlobalBitmap.h"    // Bitmaps[]
 #include "Render/Textures/ZzzTexture.h"     // LoadBitmap / DeleteBitmap
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 // Painter's current tile selection (ZzzInterface.cpp) - set it after import so the
 // freshly-added texture is ready to paint on the Texture tab.
@@ -312,7 +313,7 @@ void CMapTextureBrowser::Render(int defaultWorld)
             hoveredThisFrame = name;
             ImGui::SetTooltip("%s", name);
         }
-        if (clicked)
+        if (clicked || MuEditor::KeyboardSelection::MovedOnto())
             m_selectedIndex = idx;
         ImGui::PopID();
 

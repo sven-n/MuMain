@@ -197,9 +197,12 @@ void CSkillEditorTable::Render(
                 // so column items still receive their own clicks.
                 ImGui::TableSetColumnIndex(0);
                 const float rowCursorY = ImGui::GetCursorPosY();
+                // The arrow keys go from cell to cell, not onto this row.
+                ImGui::PushItemFlag(ImGuiItemFlags_NoNav, true);
                 ImGui::Selectable("##rowhover", false,
                     ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap,
                     ImVec2(0, ImGui::GetTextLineHeight()));
+                ImGui::PopItemFlag();
                 const bool rowHovered = ImGui::IsItemHovered();
                 ImGui::SetCursorPosY(rowCursorY);
 

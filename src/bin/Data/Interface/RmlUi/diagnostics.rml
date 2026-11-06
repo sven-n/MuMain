@@ -18,41 +18,34 @@
                 <div class="metric"><span class="label">UI</span><span class="value pair">update {{ui_update | fixed}}</span><span class="value pair">render {{ui_render | fixed}}</span></div>
                 <div class="metric"><span class="label">RmlUi</span><span class="value pair">update {{rml_update | fixed}}</span><span class="value pair">render {{rml_render | fixed}}</span></div>
                 <div class="metric"><span class="label">Renderer</span><span class="value pair">begin {{renderer_begin | fixed}}</span><span class="value pair">end {{renderer_end | fixed}}</span></div>
+                <div class="metric"><span class="label">End</span><span class="value pair">stage {{end_stage | fixed}}</span><span class="value pair">replay {{end_replay | fixed}}</span></div>
+                <div class="metric"><span class="label"></span><span class="value pair">offscr {{end_offscreen | fixed}}</span><span class="value pair">post UI {{end_post_ui | fixed}}</span></div>
                 <div class="metric"><span class="label">Submit</span><span class="value">{{submit | fixed}}</span></div>
                 <div id="graph">
                     <progress data-for="sample : history" direction="top" max="33.3"
                         data-attr-value="sample" data-class-slow="sample &gt;= 25"
-                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"/>
+                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"></progress>
                 </div>
-                <div class="note">Frame history, 0–33.3 ms</div>
-                <div class="note">Completed frame; inclusive timings overlap.</div>
+                <div class="note">Inclusive: a pass contains the passes it calls.</div>
                 <div class="info-line" data-for="line : info">{{line}}</div>
             </div>
         </div>
         <div id="counters" class="section" data-if="counters">
             <div class="section-back"></div>
             <div class="title">SDL GPU: {{driver}}</div>
-            <div class="note">Completed frame; CPU timings are inclusive.</div>
             <!-- The passes in two columns: the first half, then the rest. -->
             <div class="pass-columns">
                 <div class="pass-column">
                     <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
-                    <div data-for="pass, i : passes">
-                        <div class="pass-row" data-if="i * 2 &lt; passes.size">
-                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
-                        </div>
-                    </div>
+                    <div class="pass-row pass-lines"><span>{{passes_left.names}}</span><span>{{passes_left.ms}}</span><span>{{passes_left.draws}}</span><span>{{passes_left.merged}}</span><span>{{passes_left.vertex_kb}}</span></div>
                 </div>
                 <div class="pass-column">
                     <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
-                    <div data-for="pass, i : passes">
-                        <div class="pass-row" data-if="i * 2 &gt;= passes.size">
-                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
-                        </div>
-                    </div>
+                    <div class="pass-row pass-lines"><span>{{passes_right.names}}</span><span>{{passes_right.ms}}</span><span>{{passes_right.draws}}</span><span>{{passes_right.merged}}</span><span>{{passes_right.vertex_kb}}</span></div>
                 </div>
             </div>
-            <div class="metric"><span class="label">Draws</span><span class="value pair">requested {{requested}}</span><span class="value pair">submitted {{submitted}}</span></div>
+            <div class="metric"><span class="label">Draws</span><span class="value pair">requested {{requested}}</span><span class="value pair">submitted {{submitted}}</span><span class="value pair">commands {{commands}}</span></div>
+            <div class="metric"><span class="label">Vertices</span><span class="value pair">{{frame_vertex_kb | fixed}} KB</span></div>
             <div class="metric"><span class="label">Uploads</span><span class="value pair">textures {{textures_uploaded}}</span><span class="value pair">glyphs {{glyphs_uploaded}}</span></div>
             <div class="metric"><span class="label">Binds</span><span class="value pair">pipeline {{pipeline_binds}}</span><span class="value pair">sampler {{sampler_binds}}</span></div>
             <div class="metric"><span class="label">Uniforms</span><span class="value pair">vertex {{vertex_uniforms}}</span><span class="value pair">fragment {{fragment_uniforms}}</span></div>

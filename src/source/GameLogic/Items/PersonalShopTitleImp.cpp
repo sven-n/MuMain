@@ -285,7 +285,7 @@ void CPersonalShopTitleImp::Draw()
                 && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
                 && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
-                CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];
+                const CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];
                 if (mi->first == selectedPlayer)
                 {
                     pDrawObj->EnableHighlight();

@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "Audio/SoundSource.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Platform/BundledFonts.h"
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
 #include "RmlUiSystemInterface.h"
@@ -21,6 +23,13 @@ namespace
         const Rml::String& tag = element->GetTagName();
         return tag == "input" || tag == "textarea";
     }
+
+    // A control that handles keys itself while focused (a slider's arrows): markup marks it with
+    // data-takes-keys.
+    bool TakesKeys(const Rml::Element* element)
+    {
+        return IsTextEntry(element) || element->HasAttribute("data-takes-keys");
+    }
 }
 
 // SetDensityIndependentPixelRatio() sets an absolute ratio, so re-applying it on every resize
@@ -40,7 +49,7 @@ void RmlUiRuntime::ApplyScale(std::span<Rml::Context* const> contexts, const Rml
 
 void RmlUiRuntime::RefreshScale()
 {
-    Rml::Context* const contexts[] = {m_Context};
+    Rml::Context* const contexts[] = {m_Context, m_DebugContext};
     ApplyScale(contexts, m_Hooks);
 }
 
@@ -63,6 +72,12 @@ RmlUiRuntime::~RmlUiRuntime()
 
 namespace
 {
+void LoadChineseFont(const BundledFont& font)
+{
+    Rml::LoadFontFace(font.regular, true);
+    Rml::LoadFontFace(font.bold);
+}
+
 void LoadBundledFonts()
 {
     // Reuses the same bundled fonts this engine already ships for its portable text shim
@@ -71,6 +86,9 @@ void LoadBundledFonts()
     // family; selecting an unavailable family still needs the UI layer's font-token fallback.
     Rml::LoadFontFace("fonts/LiberationSans-Regular.ttf", true);
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
+    // Italic text (a server's load text) needs faces of its own: RmlUi draws none without them.
+    Rml::LoadFontFace("fonts/LiberationSans-Italic.ttf");
+    Rml::LoadFontFace("fonts/LiberationSans-BoldItalic.ttf");
 
     // Second, explicitly-named face (not a fallback_face) -- CCreditWin's scrolling credit text is
     // the first RmlUi content to need it, matching the font family the legacy GDI path names via
@@ -82,9 +100,9 @@ void LoadBundledFonts()
     // data still carries in Korean, such as the lucky item menu) draws from it instead of as
     // boxes, as the native text renderer drew it. Noto Sans TC goes first so Traditional Chinese
     // keeps its own glyphs and punctuation, as in the native text renderer's fallback order.
-    Rml::LoadFontFace("fonts/NotoSansTC-Regular.otf", true);
-    Rml::LoadFontFace("fonts/NotoSansTC-Bold.otf");
+    LoadChineseFont(kNotoSansTcFont);
     Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf", true);
+    LoadChineseFont(kNotoSansScFont);
 
     // Third, explicitly-named face -- already bundled for the legacy GDI text shim's own font
     // picker (BundledFonts.h) but never previously registered with RmlUi. Loaded for its Unicode
@@ -93,10 +111,20 @@ void LoadBundledFonts()
     // NanumGothic mostly don't have, but DejaVu Sans does.
     Rml::LoadFontFace("fonts/DejaVuSans.ttf");
     Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
+    Rml::LoadFontFace("fonts/DejaVuSans-Oblique.ttf");
+    Rml::LoadFontFace("fonts/DejaVuSans-BoldOblique.ttf");
+
+    // Japanese map names name this face (the themes' font-map-name-ja); as a fallback behind the
+    // Chinese faces it would mix Chinese and Japanese forms in one name.
+    Rml::LoadFontFace("fonts/NotoSansJP-Regular.otf");
 
     // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
     // with g_hFixFont -- the character list's server messages (server_msg.rcss).
     Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
+
+    // The map banner's lettering ("MU Map Name", italic only), generated from the original
+    // client's map-name images by tools/MapNameFont. The themes name it as font-map-name.
+    Rml::LoadFontFace("fonts/MuMapName-Italic.otf");
 }
 } // namespace
 
@@ -150,6 +178,9 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // Every window keeps its document loaded and hidden; only the shown ones need a per-frame update.
     if (m_Context)
         m_Context->SetSkipHiddenDocuments(true);
+    m_DebugContext = Rml::CreateContext("debug", Rml::Vector2i(windowWidth, windowHeight));
+    if (m_DebugContext)
+        m_DebugContext->SetSkipHiddenDocuments(true);
 
     RefreshScale();
 
@@ -193,6 +224,7 @@ void RmlUiRuntime::Destroy()
     // m_RenderInterface before this call.
     Rml::Shutdown();
     m_Context = nullptr;
+    m_DebugContext = nullptr;
 
     // Per RenderInterface.h/SystemInterface.h's own contract: the application must keep these
     // alive until after Rml::Shutdown() and destroy them itself afterward -- RmlUi never takes
@@ -208,7 +240,7 @@ void RmlUiRuntime::Destroy()
 void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
-    for (Rml::Context* context : {m_Context})
+    for (Rml::Context* context : {m_Context, m_DebugContext})
     {
         if (context)
             context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
@@ -219,12 +251,22 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
-    FRAME_PROFILE(RmlUiUpdate);
-    if (m_Hooks.beforeUpdate)
-        m_Hooks.beforeUpdate();
-    ReleaseStrandedFieldFocus();
-    m_Context->Update();
-    AfterUpdate(m_Context);
+    // The windows' sounds are the interface's (Q-SM13).
+    const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
+    {
+        FRAME_PROFILE(RmlUiUpdate);
+        if (m_Hooks.beforeUpdate)
+            m_Hooks.beforeUpdate();
+        ReleaseStrandedFieldFocus();
+        m_Context->Update();
+        AfterUpdate(m_Context);
+    }
+    if (m_DebugContext)
+    {
+        FRAME_PROFILE(Overlay);
+        m_DebugContext->Update();
+        AfterUpdate(m_DebugContext);
+    }
 }
 
 void RmlUiRuntime::ReleaseStrandedFieldFocus()
@@ -274,6 +316,11 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
     {
         const bool propagates =
             m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+        // RmlUi moves the focus only to an element under the pointer, so a press in the game world
+        // would leave a control that takes keys focused, and the game's keys with it.
+        Rml::Element* focused = m_Context->GetFocusElement();
+        if (propagates && focused != nullptr && !IsTextEntry(focused) && TakesKeys(focused))
+            focused->Blur();
         ReleaseStrandedFieldFocus();
         return propagates;
     }
@@ -350,6 +397,16 @@ Rml::ElementDocument* RmlUiRuntime::GetTypingDocument() const
     return field ? field->GetOwnerDocument() : nullptr;
 }
 
+Rml::ElementDocument* RmlUiRuntime::GetKeyOwningDocument() const
+{
+    if (Rml::ElementDocument* typing = GetTypingDocument())
+        return typing;
+    Rml::Element* focused = m_Context ? m_Context->GetFocusElement() : nullptr;
+    if (!focused || IsTextEntry(focused) || !TakesKeys(focused) || !focused->IsVisible(true))
+        return nullptr;
+    return focused->GetOwnerDocument();
+}
+
 void RmlUiRuntime::ProcessTextEditing(const SDL_Event& event)
 {
     if (m_TextInputMethodEditor)
@@ -371,9 +428,17 @@ void RmlUiRuntime::Render()
     const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
     if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
 
+    {
+        FRAME_PROFILE(RmlUiRender);
+        m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height, ctx.drawable);
+        m_Context->Render();
+    }
+    if (m_DebugContext)
+    {
+        FRAME_PROFILE(Overlay);
+        m_DebugContext->Render();
+    }
     FRAME_PROFILE(RmlUiRender);
-    m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height, ctx.drawable);
-    m_Context->Render();
     m_RenderInterface->EndFrame();
 }
 

@@ -18,6 +18,8 @@ enum class ItemTag : uint8_t
     DarkLordPet,
     GuardianPet,
     PandaOrSkeleton,
+    // Rings
+    TransformationRing,
     // Crafting materials
     Jewel,
     RefineStone,
@@ -28,6 +30,7 @@ enum class ItemTag : uint8_t
     HealingPotion,
     ManaPotion,
     ComplexPotion,
+    ShieldPotion,
     ElitePotion,
     Elixir,
     BuffScroll,
@@ -40,6 +43,10 @@ enum class ItemTag : uint8_t
     // Class equipment
     SummonerBook,
     DivineArchangelWeapon,
+    Sceptre,
+    MagicSword,
+    // Armour
+    LuckyItem,
     // Cash shop
     CashShop,
     GambleItem,

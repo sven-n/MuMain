@@ -9,6 +9,7 @@
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <memory>
@@ -21,6 +22,7 @@ using View = UI::RmlBridge::ThemedView<DiagnosticsModel>;
 std::unique_ptr<View> g_view;
 constexpr auto RefreshInterval = std::chrono::milliseconds(250);
 auto g_nextRefresh = std::chrono::steady_clock::time_point{};
+constexpr size_t GraphBars = 60;
 
 void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& model)
 {
@@ -32,13 +34,12 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
         std::snprintf(text, sizeof(text), "%.2f", args.front().Get<double>());
         return Rml::Variant(Rml::String(text));
     });
-    auto row = constructor.RegisterStruct<DiagnosticsModel::PassRow>();
-    row.RegisterMember("name", &DiagnosticsModel::PassRow::name);
-    row.RegisterMember("ms", &DiagnosticsModel::PassRow::milliseconds);
-    row.RegisterMember("draws", &DiagnosticsModel::PassRow::draws);
-    row.RegisterMember("merged", &DiagnosticsModel::PassRow::merged);
-    row.RegisterMember("vertex_kb", &DiagnosticsModel::PassRow::vertexKB);
-    constructor.RegisterArray<Rml::Vector<DiagnosticsModel::PassRow>>();
+    auto columns = constructor.RegisterStruct<DiagnosticsModel::PassColumns>();
+    columns.RegisterMember("names", &DiagnosticsModel::PassColumns::names);
+    columns.RegisterMember("ms", &DiagnosticsModel::PassColumns::milliseconds);
+    columns.RegisterMember("draws", &DiagnosticsModel::PassColumns::draws);
+    columns.RegisterMember("merged", &DiagnosticsModel::PassColumns::merged);
+    columns.RegisterMember("vertex_kb", &DiagnosticsModel::PassColumns::vertexKB);
     constructor.RegisterArray<Rml::Vector<float>>();
     constructor.RegisterArray<Rml::Vector<Rml::String>>();
     constructor.Bind("details", &model.details);
@@ -60,8 +61,14 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("renderer_begin", &model.rendererBegin);
     constructor.Bind("renderer_end", &model.rendererEnd);
     constructor.Bind("submit", &model.submit);
+    constructor.Bind("end_offscreen", &model.endOffscreen);
+    constructor.Bind("end_stage", &model.endStage);
+    constructor.Bind("end_replay", &model.endReplay);
+    constructor.Bind("end_post_ui", &model.endPostUi);
     constructor.Bind("requested", &model.requested);
     constructor.Bind("submitted", &model.submitted);
+    constructor.Bind("commands", &model.commands);
+    constructor.Bind("frame_vertex_kb", &model.frameVertexKB);
     constructor.Bind("textures_uploaded", &model.texturesUploaded);
     constructor.Bind("glyphs_uploaded", &model.glyphsUploaded);
     constructor.Bind("pipeline_binds", &model.pipelineBinds);
@@ -74,7 +81,8 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("skin_failed", &model.skinFailed);
     constructor.Bind("batch_draws", &model.batchDraws);
     constructor.Bind("vertices_per_batch", &model.verticesPerBatch);
-    constructor.Bind("passes", &model.passes);
+    constructor.Bind("passes_left", &model.passesLeft);
+    constructor.Bind("passes_right", &model.passesRight);
     constructor.Bind("history", &model.history);
 }
 
@@ -102,6 +110,10 @@ void UpdateTimings(DiagnosticsModel& model)
     model.rendererBegin = FrameProfiler::CompletedMs(Pass::RendererBegin);
     model.rendererEnd = FrameProfiler::CompletedMs(Pass::RendererEnd);
     model.submit = FrameProfiler::CompletedMs(Pass::RendererSubmit);
+    model.endOffscreen = FrameProfiler::CompletedMs(Pass::RendererOffscreen);
+    model.endStage = FrameProfiler::CompletedMs(Pass::RendererStage);
+    model.endReplay = FrameProfiler::CompletedMs(Pass::RendererReplay);
+    model.endPostUi = FrameProfiler::CompletedMs(Pass::RendererPostUi);
     const char* driver = mu::GetRenderer().GetGPUDriverName();
     model.driver = driver ? driver : "Unavailable";
 }
@@ -112,6 +124,8 @@ void UpdateCounters(DiagnosticsModel& model)
     const auto stats = mu::GetRenderer().GetFrameStats();
     model.requested = static_cast<int>(stats.requestedDrawCalls);
     model.submitted = static_cast<int>(stats.submittedDrawCalls);
+    model.commands = static_cast<int>(stats.commandCount);
+    model.frameVertexKB = static_cast<float>(stats.vertexBytes) / 1024.f;
     model.texturesUploaded = static_cast<int>(stats.textureUploads);
     model.glyphsUploaded = static_cast<int>(FrameProfiler::CompletedCounter(Counter::GlyphUploads));
     model.pipelineBinds = static_cast<int>(stats.pipelineBinds);
@@ -126,17 +140,31 @@ void UpdateCounters(DiagnosticsModel& model)
     const auto batchVertices = FrameProfiler::CompletedCounter(Counter::BatchVertices);
     model.batchDraws = static_cast<int>(batchDraws);
     model.verticesPerBatch = batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.f;
-    model.passes.resize(static_cast<size_t>(FrameProfiler::Pass::Count_));
-    for (size_t index = 0; index < model.passes.size(); ++index)
+    // The first half of the passes in the left columns, the rest in the right.
+    constexpr int PassCount = static_cast<int>(FrameProfiler::Pass::Count_);
+    model.passesLeft = {};
+    model.passesRight = {};
+    for (int index = 0; index < PassCount; ++index)
     {
         const auto pass = static_cast<FrameProfiler::Pass>(index);
-        auto& row = model.passes[index];
-        row.name = FrameProfiler::kPassNames[index];
-        row.milliseconds = FrameProfiler::CompletedMs(pass);
-        row.draws = static_cast<int>(FrameProfiler::CompletedCounter(pass, Counter::DrawCalls));
-        row.merged = static_cast<int>(FrameProfiler::CompletedCounter(pass, Counter::MergedDraws));
+        auto& columns = index * 2 < PassCount ? model.passesLeft : model.passesRight;
+        const auto addLine = [](Rml::String& column, const char* text)
+        {
+            if (!column.empty())
+                column += '\n';
+            column += text;
+        };
+        char text[32];
+        addLine(columns.names, FrameProfiler::kPassNames[index]);
+        std::snprintf(text, sizeof(text), "%.2f", FrameProfiler::CompletedMs(pass));
+        addLine(columns.milliseconds, text);
+        std::snprintf(text, sizeof(text), "%u", FrameProfiler::CompletedCounter(pass, Counter::DrawCalls));
+        addLine(columns.draws, text);
+        std::snprintf(text, sizeof(text), "%u", FrameProfiler::CompletedCounter(pass, Counter::MergedDraws));
+        addLine(columns.merged, text);
         constexpr float BytesPerKilobyte = 1024.f;
-        row.vertexKB = FrameProfiler::CompletedCounter(pass, Counter::VertexBytes) / BytesPerKilobyte;
+        std::snprintf(text, sizeof(text), "%.2f", FrameProfiler::CompletedCounter(pass, Counter::VertexBytes) / BytesPerKilobyte);
+        addLine(columns.vertexKB, text);
     }
 }
 
@@ -150,9 +178,15 @@ void UpdateSummary(DiagnosticsModel& model, const FrameSummary& summary)
     model.frameMs = summary.frameMs;
     model.cpu = summary.cpu;
     model.vsync = summary.vsync;
-    model.history.resize(summary.history.size());
-    for (size_t i = 0; i < summary.history.size(); ++i)
-        model.history[i] = summary.history[(summary.oldestSample + i) % summary.history.size()];
+    // Each bar is the slowest frame of its group, so a spike still shows with a fifth of the bars. The
+    // bar count never changes: a shrinking array leaves RmlUi evaluating the bars it is about to remove.
+    const size_t samples = summary.history.size();
+    model.history.assign(GraphBars, 0.f);
+    for (size_t i = 0; i < samples; ++i)
+    {
+        float& bar = model.history[samples <= GraphBars ? i : i * GraphBars / samples];
+        bar = std::max(bar, summary.history[(summary.oldestSample + i) % samples]);
+    }
 }
 }
 
@@ -185,9 +219,10 @@ void Update(const FrameSummary& summary)
         static constexpr const char* Fields[] = {
             "details", "counters", "fps_only", "fps", "average_fps", "low_fps", "slowest_fps", "frame_ms", "cpu", "vsync",
             "driver", "ui_update", "ui_render", "rml_update", "rml_render", "renderer_begin", "renderer_end",
-            "submit", "requested", "submitted", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
+            "submit", "end_offscreen", "end_stage", "end_replay", "end_post_ui", "requested", "submitted",
+            "commands", "frame_vertex_kb", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
             "sampler_binds", "vertex_uniforms", "fragment_uniforms", "merged_2d", "skin_gpu",
-            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history", "info"};
+            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes_left", "passes_right", "history", "info"};
         for (const char* field : Fields)
             g_view->MarkDirty(field);
         g_nextRefresh = now + RefreshInterval;

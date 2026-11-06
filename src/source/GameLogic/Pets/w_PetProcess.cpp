@@ -2,6 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
@@ -10,7 +12,7 @@
 #include "w_PetActionUnicorn.h"
 #include "w_PetProcess.h"
 #include "Core/Utilities/ReadScript.h"
-
+#include "GameLogic/Pets/CompanionCleanup.h"
 
 PetInfoPtr PetInfo::Make()
 {
@@ -150,28 +152,17 @@ void PetProcess::Register(Smart_Ptr(PetObject) pPet)
     m_petsList.push_back(pPet);
 }
 
+std::size_t PetProcess::CountPets(CHARACTER* owner) const
+{
+    if (owner == nullptr)
+        return 0;
+    return std::count_if(m_petsList.begin(), m_petsList.end(), [owner](const auto& pet)
+                         { return pet && pet->GetObject() != nullptr && pet->IsSameOwner(&owner->Object); });
+}
+
 void PetProcess::UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll)
 {
-    if (NULL == Owner) return;
-
-    for (auto iter = m_petsList.begin(); iter != m_petsList.end(); )
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(PetObject) basepet = *tempiter;
-
-        if (basepet.expired() == FALSE)
-        {
-            if ((-1 == itemType && basepet.lock()->IsSameOwner(&Owner->Object))
-                || basepet.lock()->IsSameObject(&Owner->Object, itemType))
-            {
-                basepet.lock()->Release();
-                m_petsList.erase(tempiter);
-
-                if (-1 == itemType || !isUnregistAll) return;
-            }
-        }
-    }
+    GameLogic::Pets::RemovePetObjects(m_petsList, Owner, itemType, isUnregistAll);
 }
 
 bool PetProcess::LoadData()
@@ -182,46 +173,44 @@ bool PetProcess::LoadData()
     int _ver;
     int _array;
 
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(FileName, L"rb"));
+    if (!fp)
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File not exist.");
 
         return FALSE;
     }
 
-    fread(&_ver, sizeof(int), 1, fp);
-    fread(&_array, sizeof(int), 1, fp);
+    int _listSize = 0;
+    if (!DataFileIO::ReadExact(fp.get(), &_ver, sizeof(int)) ||
+        !DataFileIO::ReadExact(fp.get(), &_array, sizeof(int)) ||
+        !DataFileIO::ReadExact(fp.get(), &_listSize, sizeof(DWORD)))
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return FALSE;
+    }
 
     int _type;
     int _blendMesh;
     float _scale;
     int _count;
-    int* _action = new int[_array];
-    float* _speed = new float[_array];
-
-    int _listSize = 0;
-    fread(&_listSize, sizeof(DWORD), 1, fp);
+    std::vector<int> actions(static_cast<std::size_t>(_array));
+    std::vector<float> speeds(static_cast<std::size_t>(_array));
+    int* _action = actions.data();
+    float* _speed = speeds.data();
 
     int Size = sizeof(int) + sizeof(int) + sizeof(float) + sizeof(int) + ((sizeof(int) + sizeof(float)) * _array);
-    BYTE* Buffer = new BYTE[Size * _listSize];
-
-    fread(Buffer, Size * _listSize, 1, fp);
+    std::vector<BYTE> content(static_cast<std::size_t>(Size) * _listSize);
+    BYTE* Buffer = content.data();
 
     DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+    const bool complete = DataFileIO::ReadExact(fp.get(), Buffer, Size * _listSize) &&
+                          DataFileIO::ReadExact(fp.get(), &dwCheckSum, sizeof(DWORD));
+    fp.reset();
 
-    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
+    if (!complete || dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
     {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
 
         return FALSE;
     }
@@ -274,9 +263,6 @@ bool PetProcess::LoadData()
             m_petsInfo.insert(make_pair(ITEM_HELPER + _type, petInfo));
         }
     }
-    delete[] _action;
-    delete[] _speed;
-    delete[] Buffer;
 
     return TRUE;
 }
@@ -367,6 +353,15 @@ void PetProcess::UpdatePets()
         {
             basepet.lock()->Update();
         }
+    }
+}
+
+void PetProcess::CullPets()
+{
+    for (const auto& pet : m_petsList)
+    {
+        if (pet)
+            pet->Cull();
     }
 }
 

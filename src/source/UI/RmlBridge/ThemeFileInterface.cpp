@@ -4,6 +4,7 @@
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "Core/Platform/PathResolve.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -30,7 +31,7 @@ struct FileState
 std::FILE* OpenFile(const std::string& path)
 {
 #ifdef _WIN32
-    return _wfopen(std::filesystem::u8path(path).c_str(), L"rb");
+    return _wfopen(Core::Text::PathFromUtf8(path).c_str(), L"rb");
 #else
     return std::fopen(MuResolvePath(path.c_str()).c_str(), "rb");
 #endif
@@ -53,7 +54,7 @@ std::string SubstituteTokens(const std::string& source, const std::string& theme
                              const std::string& stylesheetPath)
 {
     static const std::regex tokenPattern(R"(token\(([a-zA-Z0-9_-]+)\))");
-    const ThemeInheritance theme(std::filesystem::u8path(themeDirectory));
+    const ThemeInheritance theme(Core::Text::PathFromUtf8(themeDirectory));
     std::unordered_map<std::string, std::string> values;
     std::string result;
     result.reserve(source.size());
@@ -97,8 +98,8 @@ Rml::FileHandle ThemeFileInterface::Open(const Rml::String& path)
 
     auto file = std::make_unique<FileState>();
     file->stream = stream;
-    if (const auto theme = ThemeDirectoryForResource(path); theme &&
-        std::filesystem::u8path(path).extension() == ".rcss")
+    if (const auto theme = ThemeDirectoryForResource(path);
+        theme && Core::Text::PathFromUtf8(path).extension() == ".rcss")
     {
         const auto source = ReadAll(stream);
         if (!source)

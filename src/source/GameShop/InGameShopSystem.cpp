@@ -14,6 +14,20 @@
 
 #endif // CONSOLE_DEBUG
 
+namespace
+{
+constexpr const wchar_t* kScriptFolder = L"InGameShopScript";
+constexpr const wchar_t* kBannerFolder = L"InGameShopBanner";
+
+// The folder below Data/ which holds the script or banner files of the shop. Built as a path,
+// not as "\\data\\...": on a case-sensitive file system with '/' separators that string names
+// a folder which doesn't exist.
+std::wstring GetLocalShopFolder(const wchar_t* folder)
+{
+    return (std::filesystem::path(L"Data") / folder).wstring();
+}
+} // namespace
+
 CInGameShopSystem::CInGameShopSystem()
 {
     m_pCategoryList = NULL;
@@ -103,10 +117,7 @@ bool CInGameShopSystem::ScriptDownload()
 {
     m_bFirstScriptDownloaded = true;
 
-    ::GetCurrentDirectory(255, m_szScriptLocalPath);
-
     wchar_t szScriptRemotePathforDMZ[MAX_TEXT_LENGTH];
-    mu_swprintf(m_szScriptLocalPath, L"%ls%ls", m_szScriptLocalPath, L"\\data\\InGameShopScript");
     wcscpy(m_szScriptIPAddress, L"image.webzen.com");
     wcscpy(m_szScriptRemotePath, L"/Global/Payment/ProductTransfer");
     wcscpy(szScriptRemotePathforDMZ, L"/Global/Payment/DevScriptGB/ProductTransfer");
@@ -117,13 +128,8 @@ bool CInGameShopSystem::ScriptDownload()
         wcscpy(m_szScriptRemotePath, szScriptRemotePathforDMZ);
     }
 #endif // FOR_WORK
-    m_ShopManager.SetListManagerInfo(HTTP, m_szScriptIPAddress,
-        L"",
-        L"",
-        m_szScriptRemotePath,
-        m_szScriptLocalPath,
-        m_ScriptVerInfo,
-        10000);
+    m_ShopManager.SetListManagerInfo(HTTP, m_szScriptIPAddress, L"", L"", m_szScriptRemotePath,
+                                     GetLocalShopFolder(kScriptFolder).c_str(), m_ScriptVerInfo, 10000);
 
     WZResult res = m_ShopManager.LoadScriptList(false);
 
@@ -162,10 +168,7 @@ bool CInGameShopSystem::BannerDownload()
 {
     m_bFirstBannerDownloaded = true;
 
-    ::GetCurrentDirectory(255, m_szBannerLocalPath);
-
     wchar_t szBannerRemotePathforDMZ[MAX_TEXT_LENGTH];
-    mu_swprintf(m_szBannerLocalPath, L"%ls%ls", m_szBannerLocalPath, L"\\data\\InGameShopBanner");
 
     wcscpy(m_szBannerIPAddress, L"image.webzen.com");
     wcscpy(m_szBannerRemotePath, L"/Global/Payment/BannerTransfer");
@@ -179,20 +182,11 @@ bool CInGameShopSystem::BannerDownload()
 #endif // FOR_WORK
 
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-    m_BannerManager.SetListManagerInfo(HTTP, m_szBannerIPAddress,
-        L"",
-        L"",
-        m_szBannerRemotePath,
-        m_szBannerLocalPath,
-        m_BannerVerInfo,
-        4000);
+    m_BannerManager.SetListManagerInfo(HTTP, m_szBannerIPAddress, L"", L"", m_szBannerRemotePath,
+                                       GetLocalShopFolder(kBannerFolder).c_str(), m_BannerVerInfo, 4000);
 #else // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-    m_BannerManager.SetListManagerInfo(HTTP, m_szIPAddress,
-        "",
-        "",
-        m_szBannerRemotePath,
-        m_szBannerLocalPath,
-        m_BannerVerInfo);
+    m_BannerManager.SetListManagerInfo(HTTP, m_szIPAddress, "", "", m_szBannerRemotePath,
+                                       GetLocalShopFolder(kBannerFolder).c_str(), m_BannerVerInfo);
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
     // DownLoad & Load

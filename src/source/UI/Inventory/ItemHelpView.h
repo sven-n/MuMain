@@ -22,12 +22,18 @@ public:
     // Per frame: shown with its content, or hidden.
     void Sync(bool visible, std::vector<ItemHelpLineEntry> lines, Table table = {},
               std::vector<ItemHelpLineEntry> tailLines = {});
+    // Per frame instead of Sync() while the content stays the same: shown with the content it has.
+    void SyncShown();
 
     // The TextList / TextListColor / TextBold globals' first `count` lines, as RenderTipTextList()
     // read them.
     static std::vector<ItemHelpLineEntry> TextListLines(int count);
 
 private:
+    // Shows or hides the document and keeps the text sizes of a shown one current. False when the
+    // document isn't shown.
+    bool SyncDocument(bool visible);
+
     UI::RmlBridge::ThemedView<ItemHelpRmlModel> m_View;
 };
 } // namespace mu::ui::window

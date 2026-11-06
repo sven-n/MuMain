@@ -3,6 +3,7 @@
 #ifndef _WIN32
 
 #include "Core/Platform/WinUser.h"
+#include "Core/Platform/GameWindow.h"
 
 #include <SDL3/SDL.h>
 #include <string>
@@ -63,7 +64,7 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
 
     // Parent the dialog to the focused window so it stays in front and modal to
     // the game; a null parent can spawn behind the window on some Linux WMs.
-    SDL_Window* parent = SDL_GetKeyboardFocus();
+    SDL_Window* parent = Core::Platform::MessageBoxParent(SDL_GetKeyboardFocus());
 
     if ((type & MB_YESNO) == MB_YESNO)
     {
@@ -123,7 +124,22 @@ BOOL GetCursorPos(LPPOINT lpPoint)
 {
     if (!lpPoint) return FALSE;
     float x = 0.0f, y = 0.0f;
-    SDL_GetMouseState(&x, &y);  // already window-relative
+    SDL_GetMouseState(&x, &y); // relative to the window the mouse is in
+#ifdef _EDITOR
+    // In another window of the game (the editor's own) the position is made
+    // relative to the game window, as Win32's GetCursorPos plus
+    // ScreenToClient(g_hWnd) gives it.
+    SDL_Window* mouseWindow = SDL_GetMouseFocus();
+    SDL_Window* gameWindow = Core::Platform::GameWindow();
+    if (mouseWindow != nullptr && gameWindow != nullptr && mouseWindow != gameWindow)
+    {
+        int mouseWindowX = 0, mouseWindowY = 0, gameWindowX = 0, gameWindowY = 0;
+        SDL_GetWindowPosition(mouseWindow, &mouseWindowX, &mouseWindowY);
+        SDL_GetWindowPosition(gameWindow, &gameWindowX, &gameWindowY);
+        x += static_cast<float>(mouseWindowX - gameWindowX);
+        y += static_cast<float>(mouseWindowY - gameWindowY);
+    }
+#endif
     lpPoint->x = static_cast<LONG>(x);
     lpPoint->y = static_cast<LONG>(y);
     return TRUE;

@@ -263,9 +263,9 @@ void    CSWaterTerrain::calcBaseWave(void)
     /*
         if ( rand_fps_check(10) )
         {
-            m_iSelectWaveX = rand()%WATER_TERRAIN_SIZE;
-            m_iSelectWaveY = rand()%WATER_TERRAIN_SIZE;
-            m_iAddHeight   = rand()%20+10;
+            m_iSelectWaveX = Random::Rand()%WATER_TERRAIN_SIZE;
+            m_iSelectWaveY = Random::Rand()%WATER_TERRAIN_SIZE;
+            m_iAddHeight   = Random::Rand()%20+10;
         }
     */
     int MaxHeight;

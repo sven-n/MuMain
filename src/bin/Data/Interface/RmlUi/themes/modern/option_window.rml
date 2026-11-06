@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: a tuning slider's fill width is its value -->
 <head>
 	<title>Options</title>
 	<link type="text/rcss" href="base.rcss"/>
@@ -26,73 +27,17 @@
 
 		<div class="opt-body">
 			<div class="opt-nav">
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 0" data-event-click="option_select_tab(0)">{{tab_gameplay_label}}</div>
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 1" data-event-click="option_select_tab(1)">{{tab_audio_label}}</div>
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 2" data-event-click="option_select_tab(2)">{{tab_video_label}}</div>
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 3" data-event-click="option_select_tab(3)">{{tab_graphics_label}}</div>
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 4" data-event-click="option_select_tab(4)">{{tab_ui_label}}</div>
-				<div class="opt-nav-item" data-class-active-tab="active_tab == 5" data-event-click="option_select_tab(5)">{{tab_general_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 0" data-event-click="option_select_tab(0)">{{tab_display_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 1" data-event-click="option_select_tab(1)">{{tab_graphics_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 2" data-event-click="option_select_tab(2)">{{tab_audio_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 3" data-event-click="option_select_tab(3)">{{tab_gameplay_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 4" data-event-click="option_select_tab(4)">{{tab_interface_label}}</div>
 			</div>
 
 			<div class="opt-pane">
-				<!-- Gameplay -->
+			<div class="opt-scroll scroll-pane">
 				<div class="opt-page" data-class-hidden="active_tab != 0">
-					<div class="opt-page-title">{{tab_gameplay_label}}</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_auto_attack">
-						<span class="opt-label">{{auto_attack_label}}</span>
-						<div class="opt-control"><div class="opt-toggle" data-class-checked="auto_attack"><div class="opt-toggle-knob"></div></div></div>
-					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_whisper_sound">
-						<span class="opt-label">{{whisper_sound_label}}</span>
-						<div class="opt-control"><div class="opt-toggle" data-class-checked="whisper_sound"><div class="opt-toggle-knob"></div></div></div>
-					</div>
-				</div>
-
-				<!-- Audio -->
-				<div class="opt-page" data-class-hidden="active_tab != 1">
-					<div class="opt-page-title">{{tab_audio_label}}</div>
-					<div class="opt-row">
-						<span class="opt-label">{{sound_volume_label}}</span>
-						<div class="opt-control">
-							<div class="level-gauge opt-slider">
-								<div data-attr-class="'level-gauge-fill level-' + sound_volume"><div class="opt-slider-thumb"></div></div>
-								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(0)"
-								     data-event-drag="option_gauge(0)" data-event-mousescroll="option_gauge(0)"></div>
-							</div>
-							<span class="opt-value">{{sound_volume * 10 | format(0)}}%</span>
-						</div>
-					</div>
-					<div class="opt-row">
-						<span class="opt-label">{{music_volume_label}}</span>
-						<div class="opt-control">
-							<div class="level-gauge opt-slider">
-								<div data-attr-class="'level-gauge-fill level-' + music_volume"><div class="opt-slider-thumb"></div></div>
-								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(1)"
-								     data-event-drag="option_gauge(1)" data-event-mousescroll="option_gauge(1)"></div>
-							</div>
-							<span class="opt-value">{{music_volume * 10 | format(0)}}%</span>
-						</div>
-					</div>
-				</div>
-
-				<!-- Video -->
-				<div class="opt-page" data-class-hidden="active_tab != 2">
-					<div class="opt-page-title">{{tab_video_label}}</div>
-					<div class="opt-row">
-						<span class="opt-label">{{render_level_label}}</span>
-						<div class="opt-control">
-							<div class="level-gauge opt-slider effect-gauge">
-								<div data-attr-class="'level-gauge-fill level-' + (render_level + 1)"><div class="opt-slider-thumb"></div></div>
-								<div class="opt-slider-step opt-slider-step-1"></div>
-								<div class="opt-slider-step opt-slider-step-2"></div>
-								<div class="opt-slider-step opt-slider-step-3"></div>
-								<div class="opt-slider-step opt-slider-step-4"></div>
-								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(2)"
-								     data-event-drag="option_gauge(2)" data-event-mousescroll="option_gauge(2)"></div>
-							</div>
-							<span class="opt-value">{{render_level + 1 | format(0)}} / 5</span>
-						</div>
-					</div>
+					<div class="opt-page-title">{{tab_display_label}}</div>
 					<div class="opt-row">
 						<span class="opt-label">{{resolution_row_label}}</span>
 						<div class="opt-control">
@@ -127,11 +72,259 @@
 							</div>
 						</div>
 					</div>
+					<!-- The tip sits after the control so it paints above an open list. -->
+					<div class="opt-row opt-row-tipped option-opens-up">
+						<span class="opt-label">{{ui_scale_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 5" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 5">
+									<div class="option-dropdown-option" data-for="label : ui_scale_labels"
+									     data-class-selected="it_index == ui_scale_index"
+									     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{ui_scale_tooltip}}</span>
+					</div>
 				</div>
 
-				<!-- Graphics -->
-				<div class="opt-page" data-class-hidden="active_tab != 3">
+				<div class="opt-page" data-class-hidden="active_tab != 1">
 					<div class="opt-page-title">{{tab_graphics_label}}</div>
+					<div class="opt-section">{{section_quality_label}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_enhanced_graphics">
+						<span class="opt-label">{{enhanced_graphics_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_graphics"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<!-- The four Enhanced features, each with the player's tuning under it (OptionWindow.h's tuning
+					     rows; keep both themes in step): the label or chevron expands the sliders, only the
+					     checkbox switches the feature. Each group starts collapsed; specialist rows wait under its
+					     own "More settings". A slider previews while pressed, dragged or stepped by an arrow key
+					     and is saved on release, when it loses focus or when the window closes. -->
+					<div class="opt-row opt-toggle-row opt-sub-row opt-tuning-group-row" data-class-locked="look_features_locked">
+						<span class="opt-label opt-tuning-group-label" data-event-click="option_toggle_tuning_group(0)"><span class="opt-tuning-chevron" data-class-expanded="tuning_expanded_0"></span>{{look_lighting_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_lighting" data-event-click="option_toggle_enhanced_feature(0)"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-tuning-group" data-class-hidden="!tuning_expanded_0" data-class-locked="tuning_locked_0">
+						<div class="opt-tuning-reason" data-class-hidden="!tuning_locked_0">{{tuning_reason_0}}</div>
+						<div class="opt-tuning-rows">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_rows_0">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-more-head" data-event-click="option_toggle_tuning_more(0)">
+							<span class="opt-tuning-chevron" data-class-expanded="tuning_more_expanded_0"></span>{{tuning_more_label}}
+						</div>
+						<div class="opt-tuning-more" data-class-hidden="!tuning_more_expanded_0">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_more_rows_0">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-actions"><div class="opt-tuning-reset" data-event-click="option_reset_tuning_group(0)">{{tuning_reset_group_label}}</div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row opt-tuning-group-row" data-class-locked="look_dynamic_lights_locked">
+						<span class="opt-label opt-tuning-group-label" data-event-click="option_toggle_tuning_group(1)"><span class="opt-tuning-chevron" data-class-expanded="tuning_expanded_1"></span>{{look_dynamic_lights_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_dynamic_lights" data-event-click="option_toggle_enhanced_feature(1)"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-tuning-group" data-class-hidden="!tuning_expanded_1" data-class-locked="tuning_locked_1">
+						<div class="opt-tuning-reason" data-class-hidden="!tuning_locked_1">{{tuning_reason_1}}</div>
+						<div class="opt-tuning-rows">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_rows_1">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-more-head" data-event-click="option_toggle_tuning_more(1)">
+							<span class="opt-tuning-chevron" data-class-expanded="tuning_more_expanded_1"></span>{{tuning_more_label}}
+						</div>
+						<div class="opt-tuning-more" data-class-hidden="!tuning_more_expanded_1">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_more_rows_1">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-actions"><div class="opt-tuning-reset" data-event-click="option_reset_tuning_group(1)">{{tuning_reset_group_label}}</div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row opt-tuning-group-row" data-class-locked="look_features_locked">
+						<span class="opt-label opt-tuning-group-label" data-event-click="option_toggle_tuning_group(2)"><span class="opt-tuning-chevron" data-class-expanded="tuning_expanded_2"></span>{{look_light_mood_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_light_mood" data-event-click="option_toggle_enhanced_feature(2)"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-tuning-group" data-class-hidden="!tuning_expanded_2" data-class-locked="tuning_locked_2">
+						<div class="opt-tuning-reason" data-class-hidden="!tuning_locked_2">{{tuning_reason_2}}</div>
+						<div class="opt-tuning-rows">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_rows_2">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-actions"><div class="opt-tuning-reset" data-event-click="option_reset_tuning_group(2)">{{tuning_reset_group_label}}</div></div>
+					</div>
+					<div class="opt-row opt-toggle-row opt-sub-row opt-tuning-group-row" data-class-locked="look_features_locked">
+						<span class="opt-label opt-tuning-group-label" data-event-click="option_toggle_tuning_group(3)"><span class="opt-tuning-chevron" data-class-expanded="tuning_expanded_3"></span>{{look_post_processing_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="look_post_processing" data-event-click="option_toggle_enhanced_feature(3)"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-tuning-group" data-class-hidden="!tuning_expanded_3" data-class-locked="tuning_locked_3">
+						<div class="opt-tuning-reason" data-class-hidden="!tuning_locked_3">{{tuning_reason_3}}</div>
+						<div class="opt-tuning-rows">
+							<div class="opt-tuning-row opt-row-tipped" data-for="row : tuning_rows_3">
+								<div class="opt-tuning-head">
+									<span class="opt-tuning-label">{{row.label}}</span>
+									<span data-attr-class="'opt-tuning-state ' + row.state">{{row.state_text}}</span>
+									<span class="opt-tuning-value">{{row.value_text}}</span>
+									<div class="opt-tuning-reset" data-style-visibility="row.state == 'inherited' ? 'hidden' : 'visible'" data-event-click="option_reset_tuning(row.control)">{{tuning_reset_label}}</div>
+								</div>
+								<div class="opt-tuning-track">
+									<span class="opt-tuning-bound">{{row.min_text}}</span>
+									<div class="level-gauge opt-slider opt-tuning-slider">
+										<div class="level-gauge-fill" data-style-width="row.fill_percent + '%'"><div class="opt-slider-thumb"></div></div>
+										<div class="level-gauge-hit opt-tuning-hit"
+										     data-event-mousedown="option_tuning_pointer(row.control)" data-event-drag="option_tuning_pointer(row.control)"
+										     data-event-mouseup="option_tuning_commit" data-event-dragend="option_tuning_commit"
+										     data-takes-keys="true" data-event-keydown="option_tuning_key(row.control)" data-event-keyup="option_tuning_commit"
+										     data-event-blur="option_tuning_commit"></div>
+									</div>
+									<span class="opt-tuning-bound">{{row.max_text}}</span>
+								</div>
+								<span class="opt-row-tip">{{row.help}}</span>
+							</div>
+						</div>
+						<div class="opt-tuning-actions"><div class="opt-tuning-reset" data-event-click="option_reset_tuning_group(3)">{{tuning_reset_group_label}}</div></div>
+					</div>
+					<div class="opt-tuning-actions opt-tuning-all">
+						<div class="opt-tuning-reset" data-event-click="option_reset_all_tuning">{{tuning_reset_all_label}}</div>
+					</div>
+					<div class="opt-tuning-error" data-class-hidden="tuning_save_message == ''">{{tuning_save_message}}</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{antialiasing_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 6" data-event-click="option_toggle_dropdown(6)">{{antialiasing_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 6">
+									<div class="option-dropdown-option" data-for="label : antialiasing_labels"
+									     data-class-selected="it_index == antialiasing_index"
+									     data-event-click="option_dropdown_option_click(6, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{antialiasing_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{anisotropy_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 7" data-event-click="option_toggle_dropdown(7)">{{anisotropy_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 7">
+									<div class="option-dropdown-option" data-for="label : anisotropy_labels"
+									     data-class-selected="it_index == anisotropy_index"
+									     data-event-click="option_dropdown_option_click(7, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{anisotropy_tooltip}}</span>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{render_level_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider effect-gauge">
+								<div data-attr-class="'level-gauge-fill level-' + (render_level + 1)"><div class="opt-slider-thumb"></div></div>
+								<div class="opt-slider-step opt-slider-step-1"></div>
+								<div class="opt-slider-step opt-slider-step-2"></div>
+								<div class="opt-slider-step opt-slider-step-3"></div>
+								<div class="opt-slider-step opt-slider-step-4"></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(2)"
+								     data-event-drag="option_gauge(2)" data-event-mousescroll="option_gauge(2)"></div>
+							</div>
+							<span class="opt-value">{{render_level + 1 | format(0)}} / 5</span>
+						</div>
+					</div>
+					<div class="opt-section">{{section_effects_label}}</div>
 					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_render_all_effects">
 						<span class="opt-label">{{render_all_effects_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="render_all_effects"><div class="opt-toggle-knob"></div></div></div>
@@ -144,34 +337,98 @@
 						<span class="opt-label">{{disable_particles_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_particles"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_skill_effect_models">
+					<div class="opt-row opt-toggle-row" data-class-locked="skill_effect_models_locked" data-event-click="option_toggle_disable_skill_effect_models">
 						<span class="opt-label">{{disable_skill_effect_models_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_skill_effect_models"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_boids">
+					<div class="opt-row opt-toggle-row" data-class-locked="boids_locked" data-event-click="option_toggle_disable_boids">
 						<span class="opt-label">{{disable_boids_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_boids"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_wing_shadow">
+					<div class="opt-section">{{section_shadows_label}}</div>
+					<div class="opt-row opt-toggle-row" data-class-locked="body_shadows_locked" data-event-click="option_toggle_disable_body_shadows">
+						<span class="opt-label">{{disable_body_shadows_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_body_shadows"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-class-locked="wing_shadow_locked" data-event-click="option_toggle_disable_wing_shadow">
 						<span class="opt-label">{{disable_wing_shadow_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_wing_shadow"><div class="opt-toggle-knob"></div></div></div>
 					</div>
 				</div>
 
-				<!-- Interface -->
-				<div class="opt-page" data-class-hidden="active_tab != 4">
-					<div class="opt-page-title">{{tab_ui_label}}</div>
+				<div class="opt-page" data-class-hidden="active_tab != 2">
+					<div class="opt-page-title">{{tab_audio_label}}</div>
+					<div class="opt-row">
+						<span class="opt-label">{{sound_volume_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider">
+								<div data-attr-class="'level-gauge-fill level-' + sound_volume"><div class="opt-slider-thumb"></div></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(0)"
+								     data-event-drag="option_gauge(0)" data-event-mousescroll="option_gauge(0)"></div>
+							</div>
+							<span class="opt-value">{{sound_volume * 10 | format(0)}}%</span>
+						</div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{music_volume_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider">
+								<div data-attr-class="'level-gauge-fill level-' + music_volume"><div class="opt-slider-thumb"></div></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(1)"
+								     data-event-drag="option_gauge(1)" data-event-mousescroll="option_gauge(1)"></div>
+							</div>
+							<span class="opt-value">{{music_volume * 10 | format(0)}}%</span>
+						</div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_whisper_sound">
+						<span class="opt-label">{{whisper_sound_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="whisper_sound"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+				</div>
+
+				<div class="opt-page" data-class-hidden="active_tab != 3">
+					<div class="opt-page-title">{{tab_gameplay_label}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_auto_attack">
+						<span class="opt-label">{{auto_attack_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="auto_attack"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_slide_help">
 						<span class="opt-label">{{slide_help_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="slide_help"><div class="opt-toggle-knob"></div></div></div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_fps_counter">
-						<span class="opt-label">{{show_fps_counter_label}}</span>
-						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_fps_counter"><div class="opt-toggle-knob"></div></div></div>
+				</div>
+
+				<div class="opt-page" data-class-hidden="active_tab != 4">
+					<div class="opt-page-title">{{tab_interface_label}}</div>
+					<div class="opt-row">
+						<span class="opt-label">{{language_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 3" data-event-click="option_toggle_dropdown(3)">{{language_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 3">
+									<div class="option-dropdown-option" data-for="label : language_labels"
+									     data-class-selected="it_index == language_index"
+									     data-event-click="option_dropdown_option_click(3, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_debug_info">
-						<span class="opt-label">{{show_debug_info_label}}</span>
-						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_debug_info"><div class="opt-toggle-knob"></div></div></div>
+					<div class="opt-row opt-toggle-row opt-sub-row" data-event-click="option_toggle_translate_item_names">
+						<span class="opt-label">{{translate_item_names_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="translate_item_names"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{font_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 4" data-event-click="option_toggle_dropdown(4)">{{font_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 4">
+									<div class="option-dropdown-option" data-for="label : font_labels"
+									     data-class-selected="it_index == font_index"
+									     data-event-click="option_dropdown_option_click(4, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div class="opt-row">
 						<span class="opt-label">{{theme_row_label}}</span>
@@ -188,51 +445,29 @@
 					</div>
 					<!-- The tip sits after the control so it paints above an open list. -->
 					<div class="opt-row opt-row-tipped">
-						<span class="opt-label">{{ui_scale_row_label}}</span>
+						<span class="opt-label">{{texture_pack_row_label}}</span>
 						<div class="opt-control">
 							<div class="option-dropdown">
-								<div class="option-dropdown-value" data-class-open="open_dropdown == 5" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}<div class="opt-caret"></div></div>
-								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 5">
-									<div class="option-dropdown-option" data-for="label : ui_scale_labels"
-									     data-class-selected="it_index == ui_scale_index"
-									     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 8" data-event-click="option_toggle_dropdown(8)">{{texture_pack_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 8">
+									<div class="option-dropdown-option" data-for="label : texture_pack_labels"
+									     data-class-selected="it_index == texture_pack_index"
+									     data-event-click="option_dropdown_option_click(8, it_index)">{{label}}</div>
 								</div>
 							</div>
 						</div>
-						<span class="opt-row-tip">{{ui_scale_tooltip}}</span>
+						<span class="opt-row-tip">{{texture_pack_tooltip}}</span>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_fps_counter">
+						<span class="opt-label">{{show_fps_counter_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_fps_counter"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_debug_info">
+						<span class="opt-label">{{show_debug_info_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_debug_info"><div class="opt-toggle-knob"></div></div></div>
 					</div>
 				</div>
-
-				<!-- General -->
-				<div class="opt-page" data-class-hidden="active_tab != 5">
-					<div class="opt-page-title">{{tab_general_label}}</div>
-					<div class="opt-row">
-						<span class="opt-label">{{language_row_label}}</span>
-						<div class="opt-control">
-							<div class="option-dropdown">
-								<div class="option-dropdown-value" data-class-open="open_dropdown == 3" data-event-click="option_toggle_dropdown(3)">{{language_value_label}}<div class="opt-caret"></div></div>
-								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 3">
-									<div class="option-dropdown-option" data-for="label : language_labels"
-									     data-class-selected="it_index == language_index"
-									     data-event-click="option_dropdown_option_click(3, it_index)">{{label}}</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="opt-row">
-						<span class="opt-label">{{font_row_label}}</span>
-						<div class="opt-control">
-							<div class="option-dropdown">
-								<div class="option-dropdown-value" data-class-open="open_dropdown == 4" data-event-click="option_toggle_dropdown(4)">{{font_value_label}}<div class="opt-caret"></div></div>
-								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 4">
-									<div class="option-dropdown-option" data-for="label : font_labels"
-									     data-class-selected="it_index == font_index"
-									     data-event-click="option_dropdown_option_click(4, it_index)">{{label}}</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+			</div>
 			</div>
 		</div>
 

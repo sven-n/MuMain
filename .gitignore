@@ -38,18 +38,48 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
+# The map banner's ornament (OZT and its layout), cut out of the map-name images by
+# tools/MapNameFont/ornament.py.
+!src/bin/Data/Interface/MapNameOrnament/
+!src/bin/Data/Interface/MapNameOrnament/**
 # RmlUi UI content (RML/RCSS documents and themes) is authored source, not build output.
 !src/bin/Data/
 !src/bin/Data/Interface/
 !src/bin/Data/Interface/RmlUi/
 !src/bin/Data/Interface/RmlUi/**
+# The classic theme's original interface and login art (themes/classic).
+!src/bin/Data/Interface/Classic/
+!src/bin/Data/Interface/Classic/**
+!src/bin/Data/Logo/
+!src/bin/Data/Logo/Classic/
+!src/bin/Data/Logo/Classic/**
 # Item data (JSON, written by the item editor) is source-controlled.
 !src/bin/Data/Items/
 !src/bin/Data/Items/**
 src/bin/Data/Items/**/*.tmp
+# Monster data (JSON, written by the monster tools) is source-controlled.
+!src/bin/Data/Monsters/
+!src/bin/Data/Monsters/**
+src/bin/Data/Monsters/**/*.tmp
 # Effect data (JSON), e.g. the glow colors of the items.
 !src/bin/Data/Effects/
 !src/bin/Data/Effects/**
+# Map data (JSON), e.g. the light mood of the world maps.
+!src/bin/Data/Maps/
+!src/bin/Data/Maps/**
+# Render data (JSON), e.g. the look profile of the Enhanced features.
+!src/bin/Data/Render/
+!src/bin/Data/Render/**
+# Colour grading tables (PNG) of the Enhanced post-processing, one per world.
+!src/bin/Data/Grading/
+!src/bin/Data/Grading/**
+# Model data (JSON), e.g. the model files that replace a model's BMD.
+!src/bin/Data/Models/
+!src/bin/Data/Models/**
+# Sound data (JSON, written by the Sound Editor), e.g. the files of the code's sounds.
+!src/bin/Data/Audio/
+!src/bin/Data/Audio/**
+src/bin/Data/Audio/**/*.tmp
 **/obj/
 *.user
 *.suo
@@ -92,3 +122,4 @@ docs/reviews/
 
 # In-game test runner output (docs/in-game-tests.md)
 in-game-test-results/
+__pycache__/

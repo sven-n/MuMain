@@ -55,7 +55,8 @@ namespace Editor::AttrSave
     //   edited      - which tiles the user painted (65536 flags).
     // A tile is written only if it was painted AND actually differs from the baseline,
     // so an undone stroke correctly writes nothing. outChanged = tiles written.
-    // `serverMapNumber` is the world ENUM value.
+    // `serverMapNumber` is the server's number of the map (CMapManager::GetServerMap):
+    // the world ENUM value, but 32 for Devil Square 5-7.
     bool SaveServerAtt(int serverMapNumber,
                        const std::vector<BYTE>& serverBase,
                        const std::vector<BYTE>& baseline,

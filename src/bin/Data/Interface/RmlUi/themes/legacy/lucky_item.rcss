@@ -57,7 +57,6 @@
 /* #text_lines is a text layer (lucky_item.rml): 11px rows via its bound line height. */
 .lucky-line {
 	display: block;
-	line-height: inherit;
 	overflow: hidden;
 	white-space: nowrap;
 	color: token(text-primary);

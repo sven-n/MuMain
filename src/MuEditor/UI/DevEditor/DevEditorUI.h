@@ -4,6 +4,8 @@
 
 #include "Camera/CameraMove.h"
 
+#include <string>
+
 struct CameraConfig;
 
 // Per-camera override state used by the DevEditor Game Scene panel.
@@ -129,6 +131,7 @@ private:
 
     // RenderGraphicsTab section
     void RenderGraphicsDebugInfo();
+    void RenderLookPanel();
 
     DevEditorDefaultCameraOverride m_DefaultOverride;
     DevEditorOrbitalCameraOverride m_OrbitalOverride;
@@ -159,6 +162,12 @@ private:
     bool m_ShowItemPickBoxes = false;       // Wireframe of OBB used by SelectItem
     bool m_ShowItemCullSphere = false;      // Wireframe of frustum-cull sphere for items
     bool m_ShowTileGrid = false;
+
+    // Look panel: edits go to the current map's entry instead of the default profile.
+    int m_LookScopeMap = 0;
+    // The value a Look slider shows while it is dragged; applied when it is let go.
+    std::string m_LookEditedName;
+    float m_LookEditedValue = 0.0f;
 
     // Runtime adjustable culling radii
     float m_CullRadiusItem = 100.0f;

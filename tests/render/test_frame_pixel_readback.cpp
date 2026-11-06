@@ -1,5 +1,6 @@
 #include <array>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -221,6 +222,96 @@ TEST_CASE("SDL GPU frame capture target rejects invalid inputs [frame readback][
                     .has_value());
     CHECK_FALSE(mu::GetSdlGpuFrameCaptureTextureInfo(SDL_GPU_TEXTUREFORMAT_D16_UNORM, 1920u, 1080u)
                     .has_value());
+}
+
+TEST_CASE("sample counts map to SDL GPU sample counts [frame readback][antialiasing]")
+{
+    CHECK(mu::GetSdlGpuSampleCount(1) == SDL_GPU_SAMPLECOUNT_1);
+    CHECK(mu::GetSdlGpuSampleCount(2) == SDL_GPU_SAMPLECOUNT_2);
+    CHECK(mu::GetSdlGpuSampleCount(4) == SDL_GPU_SAMPLECOUNT_4);
+    CHECK(mu::GetSdlGpuSampleCount(8) == SDL_GPU_SAMPLECOUNT_8);
+    CHECK_FALSE(mu::GetSdlGpuSampleCount(0).has_value());
+    CHECK_FALSE(mu::GetSdlGpuSampleCount(3).has_value());
+    CHECK_FALSE(mu::GetSdlGpuSampleCount(16).has_value());
+}
+
+TEST_CASE("multisampled colour target matches the frame's destination [frame readback][antialiasing]")
+{
+    // A resolve needs the same format and size on both sides; the samples are
+    // never sampled or read back, only resolved.
+    const auto info = mu::GetSdlGpuMultisampleColorTextureInfo(SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM, {5120u, 1440u},
+                                                               SDL_GPU_SAMPLECOUNT_4);
+
+    REQUIRE(info.has_value());
+    CHECK(info->type == SDL_GPU_TEXTURETYPE_2D);
+    CHECK(info->format == SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM);
+    CHECK(info->usage == SDL_GPU_TEXTUREUSAGE_COLOR_TARGET);
+    CHECK(info->width == 5120u);
+    CHECK(info->height == 1440u);
+    CHECK(info->layer_count_or_depth == 1u);
+    CHECK(info->num_levels == 1u);
+    CHECK(info->sample_count == SDL_GPU_SAMPLECOUNT_4);
+}
+
+TEST_CASE("multisampled colour target rejects one sample and invalid inputs [frame readback][antialiasing]")
+{
+    CHECK_FALSE(mu::GetSdlGpuMultisampleColorTextureInfo(SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM, {1920u, 1080u},
+                                                         SDL_GPU_SAMPLECOUNT_1)
+                    .has_value());
+    CHECK_FALSE(mu::GetSdlGpuMultisampleColorTextureInfo(SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM, {0u, 1080u},
+                                                         SDL_GPU_SAMPLECOUNT_4)
+                    .has_value());
+    CHECK_FALSE(
+        mu::GetSdlGpuMultisampleColorTextureInfo(SDL_GPU_TEXTUREFORMAT_D16_UNORM, {1920u, 1080u}, SDL_GPU_SAMPLECOUNT_4)
+            .has_value());
+}
+
+TEST_CASE("depth buffer carries the frame's sample count [frame readback][antialiasing]")
+{
+    const auto single = mu::GetSdlGpuDepthTextureInfo({1920u, 1080u}, SDL_GPU_SAMPLECOUNT_1);
+    REQUIRE(single.has_value());
+    CHECK(single->format == mu::SdlGpuDepthFormat);
+    CHECK(single->usage == SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET);
+    CHECK(single->sample_count == SDL_GPU_SAMPLECOUNT_1);
+
+    const auto multisampled = mu::GetSdlGpuDepthTextureInfo({1920u, 1080u}, SDL_GPU_SAMPLECOUNT_8);
+    REQUIRE(multisampled.has_value());
+    CHECK(multisampled->sample_count == SDL_GPU_SAMPLECOUNT_8);
+    CHECK_FALSE(mu::GetSdlGpuDepthTextureInfo({1920u, 0u}, SDL_GPU_SAMPLECOUNT_1).has_value());
+}
+
+TEST_CASE("one-sample frame renders straight into its destination [frame readback][antialiasing]")
+{
+    std::array<std::byte, 2> fakeTextures{};
+    auto* readbackTexture = reinterpret_cast<SDL_GPUTexture*>(&fakeTextures[0]);
+    const SDL_FColor clear{0.1f, 0.2f, 0.3f, 1.0f};
+
+    const SDL_GPUColorTargetInfo target = mu::GetSdlGpuFrameColorTarget({readbackTexture, nullptr}, clear);
+
+    CHECK(target.texture == readbackTexture);
+    CHECK(target.load_op == SDL_GPU_LOADOP_CLEAR);
+    CHECK(target.store_op == SDL_GPU_STOREOP_STORE);
+    CHECK(target.resolve_texture == nullptr);
+    CHECK(target.clear_color.g == doctest::Approx(0.2f));
+}
+
+TEST_CASE("multisampled frame is resolved into the texture readback reads [frame readback][antialiasing]")
+{
+    // Frame readback and control-socket screenshots download the destination
+    // (the readback texture), never the multisampled target: the pass resolves
+    // into it, so they always get one sample per pixel.
+    std::array<std::byte, 2> fakeTextures{};
+    auto* readbackTexture = reinterpret_cast<SDL_GPUTexture*>(&fakeTextures[0]);
+    auto* multisampledTexture = reinterpret_cast<SDL_GPUTexture*>(&fakeTextures[1]);
+
+    const SDL_GPUColorTargetInfo target =
+        mu::GetSdlGpuFrameColorTarget({readbackTexture, multisampledTexture}, SDL_FColor{0.0f, 0.0f, 0.0f, 1.0f});
+
+    CHECK(target.texture == multisampledTexture);
+    CHECK(target.load_op == SDL_GPU_LOADOP_CLEAR);
+    CHECK(target.store_op == SDL_GPU_STOREOP_RESOLVE);
+    CHECK(target.resolve_texture == readbackTexture);
+    CHECK_FALSE(target.cycle_resolve_texture);
 }
 
 TEST_CASE("RGBA readback converts to tightly packed top-down RGB [frame readback][pixel readback]")

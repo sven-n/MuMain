@@ -223,8 +223,14 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
     mu::ui::window::CObject::Show(bShow);
     if (m_RmlView.Document())
     {
-        if (bShow) m_RmlView.Document()->Show();
-        else m_RmlView.Document()->Hide();
+        // A hidden window skips its sync, so it catches up before its document shows.
+        if (bShow)
+        {
+            SyncRmlModel();
+            m_RmlView.Document()->Show();
+        }
+        else
+            m_RmlView.Document()->Hide();
     }
 }
 
@@ -271,7 +277,7 @@ void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
-    const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT;
+    const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::masterLevelEnabled, "master_level_enabled",
               masterLevelEnabled);
 
@@ -319,7 +325,7 @@ void mu::ui::window::CCharacterInfoWindow::RmlClickPet()
 
 void mu::ui::window::CCharacterInfoWindow::RmlClickMasterLevel()
 {
-    if (gCharacterManager.IsMasterLevel(Hero->Class) && Hero->Class != CLASS_TEMPLENIGHT)
+    if (gCharacterManager.IsMasterLevel(Hero->Class))
         g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
 }
 
@@ -391,7 +397,7 @@ void mu::ui::window::CCharacterInfoWindow::ResetEquipmentLevel()
 
 void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 {
-    if (!m_RmlView.Document())
+    if (!m_RmlView.Document() || !IsVisible())
         return;
 
     auto& model = m_RmlView.GetModel();
@@ -420,13 +426,13 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameText, "classname_text",
               StringUtils::WideToNarrow(strClassName));
 
-    wchar_t strServerName[MAX_TEXT_LENGTH];
-    const wchar_t* apszGlobalText[4]
-        = { I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer };
-    mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
-        g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text",
-              StringUtils::WideToNarrow(strServerName));
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverTitle =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::CharacterInfo);
+    if (model.serverNameText != serverTitle)
+    {
+        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text", serverTitle);
+    }
 
     const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameOpacity, "classname_opacity",
@@ -1353,10 +1359,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iMagicDamageMax += nTemp / 4 * fTemp;
         }
 
-        if ((pWeaponRight->Type >= ITEM_STAFF && pWeaponRight->Type < (ITEM_STAFF + MAX_ITEM_INDEX)) ||
-            pWeaponRight->Type == ITEM_RUNE_BLADE || pWeaponRight->Type == ITEM_EXPLOSION_BLADE ||
-            pWeaponRight->Type == ITEM_SWORD_DANCER || pWeaponRight->Type == ITEM_DARK_REIGN_BLADE ||
-            pWeaponRight->Type == ITEM_IMPERIAL_SWORD)
+        if (GameLogic::Items::IsStaffOrBookType(pWeaponRight->Type) ||
+            GameLogic::Items::IsMagicSwordType(pWeaponRight->Type))
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 

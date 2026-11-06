@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include <cstdlib>
+#include <string_view>
+#include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include "muConsoleDebug.h"	// self
@@ -13,6 +15,12 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "WindowsConsole.h"
 
+#include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/PostProcessing/PostProcessingSetting.h"
+#include "Render/Look/LookPresetSetting.h"
+#include "Render/Renderer/Antialiasing.h"
+#include "Render/Look/LookTuning.h"
+#include "Core/Text/Utf8.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Scenes/SceneCore.h"
@@ -90,6 +98,44 @@ void CmuConsoleDebug::UpdateMainScene()
 #endif
 }
 
+namespace
+{
+#if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
+// Developer builds only: the look profile's live tuning ($look and its aliases), the per-feature
+// session overrides of the look preset, the post-processing diagnostic views and the light
+// history's counts.
+bool CheckDeveloperLookCommand(const std::wstring& command)
+{
+    if (Render::Look::HandleDeveloperCommand(command) || Render::Look::HandleFeatureOverrideCommand(command))
+    {
+        return true;
+    }
+    if (command.starts_with(L"$post view "))
+    {
+        Render::PostProcessing::SetPostProcessingView(std::wstring_view(command).substr(11));
+        return true;
+    }
+    if (command == L"$dynlights stats")
+    {
+        const Render::Lighting::DynamicLightHistory& history = Render::Lighting::FrameLightHistory();
+        mu::log::Get("render")->info("Light history: {} map, {} character, {} effect lights followed, {} dropped",
+                                     history.FollowedCount(Render::Lighting::LightSource::Map),
+                                     history.FollowedCount(Render::Lighting::LightSource::Character),
+                                     history.FollowedCount(Render::Lighting::LightSource::Effect), history.Overflow());
+        mu::log::Get("render")->flush();
+        return true;
+    }
+    if (command.starts_with(L"$lightmood ") || command.starts_with(L"$texfilter ") ||
+        command.starts_with(L"$lighting ") || command.starts_with(L"$dynlights ") || command.starts_with(L"$post "))
+    {
+        mu::log::Get("render")->warn("{}: not understood (on or off; $lightmood also takes 0 to 100)",
+                                     Core::Text::ToUtf8(command.c_str()));
+        return true;
+    }
+    return false;
+}
+#endif
+} // namespace
 
 namespace
 {
@@ -179,6 +225,11 @@ void ListDebugWindows()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    if (Core::Benchmark::Console::HandleCommand(strCommand))
+    {
+        return true;
+    }
+
     // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
     if (strCommand.compare(0, 4, L"$win") == 0 && strCommand.compare(0, 7, L"$winmsg") != 0)
     {
@@ -289,6 +340,12 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         return true;
     }
 
+#if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
+    if (CheckDeveloperLookCommand(strCommand))
+    {
+        return true;
+    }
+#endif
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
         SetShowFpsCounter(true);
@@ -334,6 +391,23 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$vsync off") == 0)
     {
         MuSetVSyncPreference(false);
+        return true;
+    }
+    else if (Render::Look::HandleLookPresetCommand(strCommand))
+    {
+        return true;
+    }
+    else if (strCommand.compare(0, 6, L"$msaa ") == 0)
+    {
+        const auto samples = Render::Antialiasing::ParseCommandArgument(std::wstring_view(strCommand).substr(6));
+        if (samples)
+        {
+            MuSetAntialiasingPreference(*samples);
+        }
+        else
+        {
+            mu::log::Get("render")->warn("$msaa expects off, 2, 4 or 8");
+        }
         return true;
     }
     else if (strCommand.compare(L"$effects off") == 0)
@@ -416,6 +490,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableWingShadow(false);
         return true;
     }
+    else if (strCommand.compare(L"$effects shadows off") == 0)
+    {
+        SetDisableBodyShadows(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects shadows on") == 0)
+    {
+        SetDisableBodyShadows(false);
+        return true;
+    }
     // RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
     // light, Beam Knight's lightning beam) was never gated by g_pOption->GetRenderAllEffects() at
     // all, so $effects off never covered it. Isolates it directly.
@@ -427,6 +511,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$effects joints on") == 0)
     {
         SetDisableJoints(false);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects culling off") == 0)
+    {
+        SetDisableEffectCulling(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects culling on") == 0)
+    {
+        SetDisableEffectCulling(false);
         return true;
     }
     // MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,

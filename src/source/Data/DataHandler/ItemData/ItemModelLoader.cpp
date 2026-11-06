@@ -7,6 +7,7 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
@@ -14,9 +15,11 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items::ModelLoader
@@ -35,12 +38,7 @@ constexpr const char* LoggerName = "data";
 // The problems of OpenModels and OpenTextures, until TakeProblemMessage.
 std::vector<ItemModelProblem> g_problems;
 
-std::wstring ToLoaderPath(const std::string& path)
-{
-    std::wstring result = Core::Text::FromUtf8(path);
-    std::replace(result.begin(), result.end(), DataSeparator, LoaderSeparator);
-    return result;
-}
+using Data::Paths::ToLoaderPath;
 
 std::string ToDataPath(const std::wstring& path)
 {
@@ -132,6 +130,13 @@ void CheckModel(int itemType, const ItemModelDefinition& model, const LookNames&
     CheckLookName(model, model.itemEffect, lookNames.itemEffect, ItemModelProblemType::ItemEffectUnknown);
 }
 
+// The material values of the item's slot: every slot keeps its own, also one
+// that uses the data of a shared model.
+void ApplyMaterial(int itemType, const ItemModelDefinition& model)
+{
+    Models[ToModelSlot(itemType)].SpecularStrength = static_cast<float>(model.material.specular);
+}
+
 // Whether the file was opened.
 bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& lookNames)
 {
@@ -146,6 +151,7 @@ bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
         return false;
     }
     MarkNoneBlendMeshes(itemType, model);
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
     return true;
 }
@@ -173,6 +179,7 @@ void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookN
         return;
     }
     gLoadData.ShareModel(ToModelSlot(itemType), ToModelSlot(opened->second));
+    ApplyMaterial(itemType, model);
     CheckModel(itemType, model, lookNames);
 }
 
@@ -255,6 +262,67 @@ void OpenTextures()
                 OpenModelTextures(itemType, model);
             }
         });
+}
+
+void SwapOpenedModels(int firstItemType, int secondItemType)
+{
+    if (Models == nullptr || !IsValidItemType(firstItemType) || !IsValidItemType(secondItemType))
+    {
+        return;
+    }
+
+    const int firstSlot = ToModelSlot(firstItemType);
+    const int secondSlot = ToModelSlot(secondItemType);
+    gLoadData.SwapModels(firstSlot, secondSlot);
+    // The material values are the model's (ApplyMaterial), so they move with it.
+    std::swap(Models[firstSlot].SpecularStrength, Models[secondSlot].SpecularStrength);
+}
+
+std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const LookNames& lookNames)
+{
+    if (Models == nullptr)
+    {
+        return {};
+    }
+
+    const size_t problemsBefore = g_problems.size();
+    std::map<std::string, int, std::less<>> sharedModelsOpenedBy;
+    for (const int itemType : itemTypes)
+    {
+        const ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+        if (model == nullptr)
+        {
+            if (IsValidItemType(itemType))
+            {
+                Models[ToModelSlot(itemType)].Release();
+            }
+            continue;
+        }
+        const bool opens = model->model.empty() || !sharedModelsOpenedBy.contains(model->model);
+        if (model->model.empty())
+        {
+            OpenModel(itemType, *model, lookNames);
+        }
+        else
+        {
+            OpenSharedModel(itemType, *model, lookNames, sharedModelsOpenedBy);
+            // A shared model whose file did not open leaves each of its items
+            // without a model, not with the one its slot had before.
+            if (sharedModelsOpenedBy.find(model->model)->second == NotOpened)
+            {
+                Models[ToModelSlot(itemType)].Release();
+            }
+        }
+        if (opens && Models[ToModelSlot(itemType)].NumMeshs > 0)
+        {
+            OpenModelTextures(itemType, *model);
+        }
+    }
+
+    std::vector<ItemModelProblem> problems(std::make_move_iterator(g_problems.begin() + problemsBefore),
+                                           std::make_move_iterator(g_problems.end()));
+    g_problems.resize(problemsBefore);
+    return problems;
 }
 
 std::string TakeProblemMessage()

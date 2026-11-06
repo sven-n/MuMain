@@ -89,6 +89,16 @@ extern void ReinitializeFonts();
 extern void UpdateResolutionDependentSystems();
 extern void MuSetVSyncPreference(bool enabled);
 extern void MuReapplyVSyncPreference();
+// VSync on or off from the next frame, not saved; MuReapplyVSyncPreference puts the saved one back.
+extern void MuSetVSyncForSession(bool enabled);
+// Switches Enhanced texture filtering from the next frame on (the look preset); nothing is saved.
+extern void MuSetTextureFilteringEnabled(bool enabled);
+// Saves [Render] Anisotropy and applies it between frames to every texture with mip levels.
+extern void MuSetAnisotropyPreference(int anisotropy);
+// Persists the anti-aliasing setting (0 off, 2, 4, 8 samples); applied between frames.
+extern void MuSetAntialiasingPreference(int samples);
+// Multisampling on (at [Render] Antialiasing) or off, as the active look asks.
+extern void MuSetAntialiasingActive(bool active);
 
 // Confines the mouse cursor to the window's client area when in fullscreen
 // and the window is active; releases clipping otherwise. Safe to call any

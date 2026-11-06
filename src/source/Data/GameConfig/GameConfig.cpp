@@ -6,6 +6,7 @@
 #endif
 
 #include <algorithm>
+#include <array>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
@@ -80,14 +81,27 @@ void GameConfig::Load()
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
+    m_translateItemNames = ReadBool(CfgSectionUI, CfgKeyTranslateItemNames, CfgDefaultTranslateItemNames);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
     m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
     m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
                                   CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+    m_enableAnimationTaskPool =
+        ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_look = ReadLookPreset(m_configPath);
+    m_anisotropy =
+        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
+        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
+    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
+    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
+    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
+    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+
     m_renderBackend = GameConfigValidation::ValidateRenderBackend(
         ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
     m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
@@ -96,7 +110,9 @@ void GameConfig::Load()
         ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
     m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
     m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
+    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -108,6 +124,7 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteKey(CfgSectionRender,   L"CoreProfile");    // OpenGL context flag, unused since SDL GPU
     RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }
@@ -137,18 +154,36 @@ void GameConfig::Save()
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
+    WriteBool(CfgSectionUI, CfgKeyTranslateItemNames, m_translateItemNames);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
     WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
     WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+    WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
+    WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
+    WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
+    WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
+    WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
+    WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
+    WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
     WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
     WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
     WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
     WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
     WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
+    WriteString(CfgSectionRender, CfgKeyTexturePack, m_texturePack);
+}
+
+LookPreset ReadLookPreset(const std::filesystem::path& configFile)
+{
+    std::array<wchar_t, 32> buffer{};
+    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyLook, L"", buffer.data(),
+                             static_cast<DWORD>(buffer.size()), configFile.wstring().c_str());
+    return GameConfigValidation::ValidateLook(buffer.data());
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -215,6 +250,21 @@ void GameConfig::SetVSyncEnabled(bool enabled)
     m_vsyncEnabled = enabled;
 }
 
+void GameConfig::SetLook(LookPreset look)
+{
+    m_look = look;
+}
+
+void GameConfig::SetAnisotropy(int anisotropy)
+{
+    m_anisotropy = GameConfigValidation::ValidateAnisotropy(anisotropy);
+}
+
+void GameConfig::SetAntialiasing(int samples)
+{
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(samples);
+}
+
 void GameConfig::SetDisableEffects(bool disabled)
 {
     m_disableEffects = disabled;
@@ -240,9 +290,19 @@ void GameConfig::SetDisableWingShadow(bool disabled)
     m_disableWingShadow = disabled;
 }
 
+void GameConfig::SetDisableBodyShadows(bool disabled)
+{
+    m_disableBodyShadows = disabled;
+}
+
 void GameConfig::SetFpsCap(int fps)
 {
     m_fpsCap = fps;
+}
+
+void GameConfig::SetTexturePack(const std::wstring& pack)
+{
+    m_texturePack = pack;
 }
 
 void GameConfig::SetRememberMe(bool remember)
@@ -271,6 +331,11 @@ void GameConfig::SetLanguageSelection(const std::wstring& lang)
 void GameConfig::SetUILocale(const std::wstring& locale)
 {
     m_uiLocale = locale;
+}
+
+void GameConfig::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
 }
 
 void GameConfig::SetFontSelection(const std::wstring& font)

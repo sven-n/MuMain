@@ -8,9 +8,6 @@
 #include "Core/Platform/BundledFonts.h"
 #include "UI/Scaling/UITransform.h"
 
-int MouseX;
-int MouseY;
-
 TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]")
 {
     CHECK(ResolveBundledFont("").family == std::string_view("DejaVu Sans"));
@@ -23,11 +20,14 @@ TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]
     CHECK(std::string_view(kBundledFixedFont.regular) == "fonts/Cousine-Regular.ttf");
     CHECK(ResolveBundledFont("Noto Sans TC").regular == std::string_view("fonts/NotoSansTC-Regular.otf"));
     CHECK(ResolveBundledFont("Noto Sans TC").bold == std::string_view("fonts/NotoSansTC-Bold.otf"));
-    REQUIRE(std::size(kBundledFallbackFonts) == 3);
+    CHECK(ResolveBundledFont("Noto Sans SC").regular == std::string_view("fonts/NotoSansSC-Regular.otf"));
+    CHECK(ResolveBundledFont("Noto Sans SC").bold == std::string_view("fonts/NotoSansSC-Bold.otf"));
+    REQUIRE(std::size(kBundledFallbackFonts) == 4);
     CHECK(std::string_view(kBundledFallbackFonts[0].family) == "DejaVu Sans");
     CHECK(std::string_view(kBundledFallbackFonts[1].family) == "Noto Sans TC");
     CHECK(std::string_view(kBundledFallbackFonts[2].family) == "Nanum Gothic");
     CHECK(std::string_view(kBundledFallbackFonts[2].regular) == "fonts/NanumGothic-Regular.ttf");
+    CHECK(std::string_view(kBundledFallbackFonts[3].family) == "Noto Sans SC");
 }
 
 TEST_CASE("bundled font paths follow the normalized runtime directory [platform][bundled_font]")

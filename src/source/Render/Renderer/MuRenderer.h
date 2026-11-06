@@ -10,11 +10,14 @@
 #pragma once
 
 #include "FramePixelReadback.h"
+#include "SceneLighting.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <span>
 #include <string_view>
+#include <vector>
 
 // Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
@@ -47,6 +50,26 @@ enum class BlendMode : std::uint8_t
     LightMap,     // GL_ZERO,               GL_SRC_COLOR
     Glow,         // GL_ONE,                GL_ONE
     Luminance,    // GL_ONE_MINUS_SRC_COLOR, GL_ONE
+};
+
+// What the post-processed frame shows in place of the 3D scene: the scene
+// itself, or for diagnosis the bloom source (the additive draws alone) or the
+// blurred bloom. The UI is drawn on top either way.
+enum class PostProcessingView : std::uint8_t
+{
+    Scene,
+    BloomSource,
+    Bloom,
+};
+
+// The look profile's post-processing values (Render::Look): the bloom strength
+// (0: no bloom), the weight each wider bloom level adds to the next narrower one,
+// and how much of the map's colour grading applies (0.1 to 1).
+struct PostProcessingLook
+{
+    float bloomStrength = 0.0f;
+    float bloomLevelFalloff = 0.5f;
+    float gradingStrength = 1.0f;
 };
 
 // ---------------------------------------------------------------------------
@@ -86,16 +109,36 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
-// Rest-pose model vertex for GPU bone skinning.
+// Rest-pose model vertex for GPU bone skinning (BMD models): it follows one bone for its
+// position and one for its normal. The colour is per draw, not per vertex.
 struct SkinnedVertex3D
 {
     float x, y, z;
     float nx, ny, nz;
     float u, v;
-    std::uint32_t color;
     std::int32_t positionBoneIndex;
     std::int32_t normalBoneIndex;
 };
+
+// SkinnedVertex3D with weights (glTF models), drawn with its own pipelines so that BMD
+// vertices stay small. A vertex with weights is in bind space and blends up to four palette
+// joints by weight (unorm, summing to 255, the largest first); one without follows its bones.
+// tangent: the bind-space tangent of a vertex under a normal map, snorm16 xyz and
+// w = +-32767 for the handedness; all 0 otherwise.
+struct SkinnedWeightedVertex3D
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+    std::int32_t positionBoneIndex;
+    std::int32_t normalBoneIndex;
+    std::uint8_t joints[4];
+    std::uint8_t weights[4];
+    std::int16_t tangent[4];
+};
+static_assert(sizeof(SkinnedVertex3D) == 40 && sizeof(SkinnedWeightedVertex3D) == 56);
+static_assert(offsetof(SkinnedWeightedVertex3D, normalBoneIndex) == offsetof(SkinnedVertex3D, normalBoneIndex),
+              "both skinned pipelines read the leading fields at the same offsets");
 
 enum class SkinningTextureCoordinates : std::uint32_t
 {
@@ -121,6 +164,9 @@ struct SkinningParameters
     float boneScale = 1.0f;
     float restPoseScale = 0.0f;
     float lightDirection[3]{};
+    // Lit colours above this roll off towards 1 instead of being cut off there (the light
+    // mood's highlight shoulder); 1 is the Classic cut-off.
+    float highlightKnee = 1.0f;
     float textureCoordinateOffset[2]{};
     float chromeWave = 0.0f;
     float chromeWave2 = 0.0f;
@@ -129,6 +175,22 @@ struct SkinningParameters
     SkinningTextureCoordinates textureCoordinates = SkinningTextureCoordinates::Mesh;
     bool translate = false;
     bool lightEnabled = false;
+    // Enhanced lighting only: Blinn-Phong strength declared by the item model; 0 = no highlight.
+    float specularStrength = 0.0f;
+    // Enhanced lighting only: the tangent-space normal map of the draw (a texture id) and its
+    // glTF scale; a scale of 0 (or no map) lights with the unperturbed normal. Classic ignores it.
+    std::uint32_t normalTextureId = 0;
+    float normalMapScale = 0.0f;
+};
+
+// Where a body shadow lands, as CalcShadowPosition() puts it there.
+struct ShadowProjection
+{
+    float origin[3]{};
+    float shearX = 0.0f;        // sx
+    float shearHeight = 0.0f;   // sy
+    float specialHeight = 0.0f; // the height of TW_HEIGHT cells
+    bool terrain = true;        // false in the scenes where RequestTerrainHeight() returns 0
 };
 
 // RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
@@ -170,6 +232,20 @@ struct RendererStats
 // IMuRenderer: Pure abstract rendering interface.
 // Game code obtains the active backend via GetRenderer() (see below).
 // ---------------------------------------------------------------------------
+// The corners of indexed triangles, in index order: out[i] = vertices[indices[i]]
+// (out holds indices.size() vertices). An indexed draw and the draw of these
+// corners rasterise the same triangles in the same order.
+template <typename Vertex>
+void ExpandIndexedCorners(std::span<const Vertex> vertices, std::span<const std::uint16_t> indices,
+                          std::vector<Vertex>& out)
+{
+    out.resize(indices.size());
+    for (std::size_t i = 0; i < indices.size(); ++i)
+    {
+        out[i] = vertices[indices[i]];
+    }
+}
+
 class IMuRenderer
 {
 public:
@@ -184,14 +260,97 @@ public:
     // Render independent world-space quads in perimeter order.
     virtual void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render rest-pose triangles using a GPU bone palette. False means an eligible draw failed
-    // submission and must not trigger CPU fallback.
-    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
+    // Render rest-pose triangles using a GPU bone palette, in one packed ABGR colour. False means an
+    // eligible draw failed submission and must not trigger CPU fallback.
+    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
                                                       std::uint32_t textureId, const SkinningParameters& parameters)
     {
         (void)vertices;
+        (void)color;
         (void)textureId;
         (void)parameters;
+        return false;
+    }
+    [[nodiscard]] virtual bool RenderWeightedSkinnedTriangles(std::span<const SkinnedWeightedVertex3D> vertices,
+                                                              std::uint32_t color, std::uint32_t textureId,
+                                                              const SkinningParameters& parameters)
+    {
+        (void)vertices;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
+
+    // RenderTriangles of the triangles `indices` makes of `vertices` (three
+    // indices per triangle, in draw order). A backend without index buffers
+    // keeps this default: the corners (ExpandIndexedCorners) through
+    // RenderTriangles.
+    virtual void RenderIndexedTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                                        std::uint32_t textureId)
+    {
+        static thread_local std::vector<Vertex3D> corners;
+        ExpandIndexedCorners(vertices, indices, corners);
+        RenderTriangles(corners, textureId);
+    }
+
+    // Rest-pose triangles kept on the GPU under `mesh`, so a draw no longer uploads them. The data
+    // must not change while cached; ReleaseSkinnedMesh before it is freed. Releasing is safe at any
+    // time, also after the renderer has shut down.
+    [[nodiscard]] virtual bool IsSkinnedMeshCached(const void* mesh) const
+    {
+        (void)mesh;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheWeightedSkinnedMesh(const void* mesh,
+                                                        std::span<const SkinnedWeightedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    // Same contract as RenderSkinnedTriangles, for a cached mesh.
+    [[nodiscard]] virtual bool RenderCachedSkinnedMesh(const void* mesh, std::uint32_t color, std::uint32_t textureId,
+                                                       const SkinningParameters& parameters)
+    {
+        (void)mesh;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
+    virtual void ReleaseSkinnedMesh(const void* mesh)
+    {
+        (void)mesh;
+    }
+
+    // A cached mesh drawn as its ground shadow, with the active texture, blend and depth test state and depth
+    // writes off. Needs SetTerrainHeights() this frame. False means the caller draws the shadow itself.
+    [[nodiscard]] virtual bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color,
+                                                         const SkinningParameters& parameters,
+                                                         const ShadowProjection& projection)
+    {
+        (void)mesh;
+        (void)color;
+        (void)parameters;
+        (void)projection;
+        return false;
+    }
+
+    // The map's heights and wall flags (TERRAIN_SIZE * TERRAIN_SIZE each) for shaders that follow the
+    // ground, copied again only when `version` changes. False means the GPU has no heights to read.
+    [[nodiscard]] virtual bool SetTerrainHeights(std::span<const float> heights, std::span<const std::uint16_t> walls,
+                                                 std::uint32_t version)
+    {
+        (void)heights;
+        (void)walls;
+        (void)version;
         return false;
     }
 
@@ -223,6 +382,23 @@ public:
     // Configure hardware fog for the current scene.
     virtual void SetFog(const FogParams& params) = 0;
 
+    // Frame-wide lighting read by every Enhanced-lit draw. The scene sets it once per frame, after
+    // its fog; the fog configured at that moment becomes the frame's scene fog. The last state set
+    // in a frame is the one all of that frame's draws use.
+    virtual void SetSceneLighting(const SceneLighting& /*lighting*/) {}
+
+    // The frame's point lights for Enhanced-lit draws (Enhanced dynamic lights). The last set in a
+    // frame is the one all of that frame's draws use; set an empty block to turn them off.
+    virtual void SetDynamicLights(const DynamicLightsUniform& /*lights*/) {}
+
+    // Select Enhanced (per-pixel lighting and fog) or Classic pipelines for the following frames.
+    // Returns false when Enhanced lighting was requested but this backend could not build it; the
+    // renderer then keeps drawing Classic.
+    [[nodiscard]] virtual bool SetEnhancedLighting(bool enabled)
+    {
+        return !enabled;
+    }
+
     // 3D scene projection setup — replaces BeginOpengl()/EndOpengl().
     // BeginScene sets viewport and projection (perspective + modelview).
     // EndScene restores matrix state.
@@ -236,6 +412,28 @@ public:
     // as a side effect. SDL_gpu backend handles depth per-pipeline; these are no-ops there.
     virtual void Begin2DPass() = 0;
     virtual void End2DPass() = 0;
+
+    // Enhanced texture filtering samples world textures through a mipmapped,
+    // anisotropic sampler. Draws between BeginScreenSpaceSampling and
+    // EndScreenSpaceSampling (3D models shown in the UI, such as inventory
+    // item previews) keep each texture's Classic sampler, as 2D quads always
+    // do. Scopes nest; use ScopedScreenSpaceSampling.
+    virtual void BeginScreenSpaceSampling() {}
+    virtual void EndScreenSpaceSampling() {}
+
+    // Draws between BeginBloomExclusion and EndBloomExclusion never feed the
+    // post-processing bloom, even when they blend additively: a model's chrome,
+    // metal or oil pass (light reflected off its surface, not emitted), and
+    // characters with everything they wear and ride, so a character looks as it
+    // does in Classic. Scopes nest; use ScopedBloomExclusion.
+    virtual void BeginBloomExclusion() {}
+    virtual void EndBloomExclusion() {}
+    // True while a bloom exclusion is open: what is queued now and drawn later
+    // (a character's glow sprites) can be drawn inside one too.
+    [[nodiscard]] virtual bool IsBloomExcluded() const
+    {
+        return false;
+    }
 
     // Clear the color and depth buffers.
     // OpenGL backend: glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT).
@@ -260,6 +458,10 @@ public:
         return false;
     }
 
+    // Waits until the window can take another frame (the GPU has finished an
+    // earlier one). The game loop calls it before reading input, so with VSync
+    // the loop waits there and not in BeginFrame, after the input was read.
+    virtual void WaitForSwapchain() {}
     // Per-frame lifecycle. Called from the MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
@@ -271,6 +473,55 @@ public:
     [[nodiscard]] virtual bool SetVSyncEnabled(bool /*enabled*/)
     {
         return false;
+    }
+    // Multisample anti-aliasing: `samples` is the `[Render] Antialiasing`
+    // value (0 or 1 off, 2, 4, 8), lowered to what the GPU supports. Before
+    // initialisation it sets the count the renderer starts with; afterwards
+    // the change applies at the next BeginFrame, between frames.
+    virtual void SetAntialiasingSamples(int /*samples*/) {}
+    // Samples per pixel the frames render with now; 1 is off.
+    [[nodiscard]] virtual int GetAntialiasingSamples() const
+    {
+        return 1;
+    }
+
+    // Post-processing (bloom and colour grading) of the 3D scene. A scene calls
+    // EndSceneGeometry once its 3D world is drawn and before its UI: what was
+    // drawn before is processed, what is drawn after is drawn on the processed
+    // image. The first call of a frame counts; a frame without one is not
+    // processed.
+    virtual void EndSceneGeometry() {}
+
+    // Opaque, depth-writing draws recorded between these two move ahead of the others and are
+    // grouped by state, to cut state changes; depth decides what shows, and the others keep
+    // their order after them. Use ScopedReorderableDraws.
+    [[nodiscard]] virtual std::size_t BeginReorderableDraws()
+    {
+        return 0u;
+    }
+    virtual void EndReorderableDraws(std::size_t /*mark*/) {}
+    // On by default; the benchmark turns it off to measure it.
+    virtual void SetDrawReorderingEnabled(bool /*enabled*/) {}
+    [[nodiscard]] virtual bool IsDrawReorderingEnabled() const
+    {
+        return false;
+    }
+    // Returns false when post-processing was requested but this backend could
+    // not build it; frames then stay unprocessed.
+    [[nodiscard]] virtual bool SetPostProcessing(bool enabled)
+    {
+        return !enabled;
+    }
+    // The look profile's bloom and grading values; a bloom strength of 0 is no bloom.
+    virtual void SetPostProcessingLook(const PostProcessingLook& /*look*/) {}
+    // Diagnosis only, not saved: what post-processed frames show (see PostProcessingView).
+    virtual void SetPostProcessingView(PostProcessingView /*view*/) {}
+    // The colour grading lookup table of the current map: a 1024x32 RGBA8
+    // strip (32 slices of 32x32, blue picks the slice), or empty for none.
+    // Returns false when the table could not be used; the scene is then not graded.
+    [[nodiscard]] virtual bool SetColorGradingTable(std::span<const std::uint8_t> rgba)
+    {
+        return rgba.empty();
     }
     [[nodiscard]] virtual bool RequestFramePixels()
     {
@@ -566,6 +817,11 @@ public:
     {
         return "unknown";
     }
+    // The adapter's name as the driver reports it; empty when unknown.
+    [[nodiscard]] virtual const char* GetGPUDeviceName() const
+    {
+        return "";
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -573,6 +829,55 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
+
+// Routes GetRenderer() to another renderer, such as a test's recorder; nullptr restores the backend.
+void SetRendererOverride(IMuRenderer* renderer);
+
+// Keeps Classic texture sampling for the draws made while it is alive.
+class ScopedScreenSpaceSampling
+{
+public:
+    ScopedScreenSpaceSampling()
+    {
+        GetRenderer().BeginScreenSpaceSampling();
+    }
+    ~ScopedScreenSpaceSampling()
+    {
+        GetRenderer().EndScreenSpaceSampling();
+    }
+    ScopedScreenSpaceSampling(const ScopedScreenSpaceSampling&) = delete;
+    ScopedScreenSpaceSampling& operator=(const ScopedScreenSpaceSampling&) = delete;
+};
+class ScopedBloomExclusion
+{
+public:
+    ScopedBloomExclusion()
+    {
+        GetRenderer().BeginBloomExclusion();
+    }
+    ~ScopedBloomExclusion()
+    {
+        GetRenderer().EndBloomExclusion();
+    }
+    ScopedBloomExclusion(const ScopedBloomExclusion&) = delete;
+    ScopedBloomExclusion& operator=(const ScopedBloomExclusion&) = delete;
+};
+// The draws recorded in its lifetime may be reordered (BeginReorderableDraws).
+class ScopedReorderableDraws
+{
+public:
+    ScopedReorderableDraws() : m_mark(GetRenderer().BeginReorderableDraws()) {}
+    ~ScopedReorderableDraws()
+    {
+        GetRenderer().EndReorderableDraws(m_mark);
+    }
+    ScopedReorderableDraws(const ScopedReorderableDraws&) = delete;
+    ScopedReorderableDraws& operator=(const ScopedReorderableDraws&) = delete;
+
+private:
+    std::size_t m_mark;
+};
+
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
                                       std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize);

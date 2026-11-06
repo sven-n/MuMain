@@ -8,8 +8,9 @@ class CHARACTER;
 // and routes it to the per-class executor. Extracted from ZzzInterface.cpp.
 namespace GameLogic::Combat
 {
-    int  ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
-    bool ExecuteSkillComplete(CHARACTER* c);
-    bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
-    bool CheckMana(CHARACTER* c, int Skill);
+bool IsSkillActionReady(const CHARACTER* c);
+int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
+bool ExecuteSkillComplete(CHARACTER* c);
+bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
+bool CheckMana(CHARACTER* c, int Skill);
 }

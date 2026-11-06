@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="chat_input.rcss"/>
 </head>
-<body data-model="chat_input">
+<body class="native-text" data-model="chat_input">
 	<!-- Bottom-left chat bar: a button row across the top and two text fields below it. The
 	     background art already contains every button's OFF state, so each button here is a
 	     transparent hit area whose "on" sprite is switched in by a class -- the hit area must exist

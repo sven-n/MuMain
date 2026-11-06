@@ -21,16 +21,23 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng);
         void Release();
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
         bool TakesTypingFrom(const Rml::ElementDocument* document) const override;
-        bool Render();
+        bool Render() override;
 
-        float GetLayerDepth();		// 6.f
+        float GetLayerDepth() override; // 6.f
 
         void Reset();
         UI::Social::FriendDialogs& Dialogs() { return m_Dialogs; }
+#ifdef _EDITOR
+        // The family's window manager; nullptr outside Create and Release.
+        const CUIWindowMgr* GetWindowMgr() const
+        {
+            return m_pFriendWindowMgr;
+        }
+#endif
 
         void SendUIMessage(int iMessage, int iParam1, int iParam2) { m_pFriendWindowMgr->SendUIMessage(iMessage, iParam1, iParam2); }
         void SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2)

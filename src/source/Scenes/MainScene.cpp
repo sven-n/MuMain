@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "App/Control/ControlTaps.h"
+#include "Audio/SoundOverlay.h"
+#include "Audio/SoundSource.h"
 #include "Engine/Object/EditObjects.h"
 #include "UI/Chat/Chat.h"
 #include "MainScene.h"
@@ -13,6 +15,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Events/CSChaosCastle.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Input/Selection.h"
@@ -37,9 +40,17 @@
 #include "UI/HUD/UIMapName.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
+#include "Scenes/SceneLightingSetup.h"
+#include "Scenes/ScenePostProcessing.h"
+#include "Render/Lighting/DynamicLightHistory.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
+#include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Render/Drawing/LegacyCalls.h"
+
+#include <optional>
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
 #include "Camera/CameraDebugLog.h"
@@ -200,7 +211,12 @@ static void InitializeMainScene()
  */
 static void InitializeSceneFrame()
 {
-    EarthQuake *= 0.2f;
+    ApplyCharacterEffectsEarthQuake();
+    // Decays per reference frame, like DefaultCamera samples it.
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        EarthQuake *= 0.2f;
+    }
     InitTerrainLight();
 
     CheckInventory = NULL;
@@ -230,8 +246,12 @@ static void UpdateUIAndInput()
     if (g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud())
         MouseOnWindow = true;
 
-    g_pPartyManager->Update();
-    g_pNewUISystem->Update();
+    {
+        // The windows' sounds are the interface's (Q-SM13).
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
+        g_pPartyManager->Update();
+        g_pNewUISystem->Update();
+    }
 
     if (MouseLButton == true &&
         false == g_pNewUISystem->CheckMouseUse() &&
@@ -251,7 +271,10 @@ static void UpdateUIAndInput()
     MoveBattleSoccerGoalEffect();
 
     if (ErrorMessage != MESSAGE_LOG_OUT)
+    {
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
         g_pUIManager->UpdateInput();
+    }
 }
 
 /**
@@ -271,7 +294,10 @@ static void UpdateUIAndInput()
  */
 static void UpdateGameEntities()
 {
-    MoveObjects();
+    {
+        Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+        MoveObjects();
+    }
 
     if (!g_Camera.TopViewEnable)
         MoveItems();
@@ -285,8 +311,11 @@ static void UpdateGameEntities()
     MoveFishs();
     UI::Chat::MoveChat();
     UpdatePersonalShopTitleImp();
-    MoveHero();
-    MoveCharactersClient();
+    {
+        Render::Lighting::LightSourceScope characterLights(Render::Lighting::LightSource::Character);
+        MoveHero();
+        MoveCharactersClient();
+    }
     MoveMounts();
     ThePetProcess().UpdatePets();
     MovePoints();
@@ -300,12 +329,40 @@ static void UpdateGameEntities()
         MoveParticles();
     }
     MovePointers();
+    {
+        FRAME_PROFILE(UpdateEffects);
+        UpdateCharacterEffects();
+        UpdateObjectEffects();
+        UpdateMountEffects();
+        UpdateEffectModelEffects();
+        UpdateTerrainEffects();
+        UpdateTerrainWaterSpots();
+    }
+    MoveWaterTerrain();
 
     g_Direction.CheckDirection();
 
 #ifdef ENABLE_EDIT
     Editor::EditObjects();
 #endif //ENABLE_EDIT
+}
+
+/**
+ * @brief Moves the camera after everything it follows, builds the view the frame draws and picks with, culls the
+ * map objects and the effects against it, and replays the frame's lights.
+ */
+static void UpdateMainSceneView()
+{
+    MoveMainCamera();
+
+    const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    CameraProjection::UpdateView(g_Camera, viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
+                   static_cast<float>(viewport.height) / WindowHeight);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+    CullWorld();
+    // The frame's lights, from every light the update added; the draw only shows them.
+    AddFrameHistoryLights();
 }
 
 /**
@@ -318,6 +375,7 @@ static void UpdateGameEntities()
  * 3. InitializeSceneFrame() - Per-frame state reset
  * 4. UpdateUIAndInput() - UI and input processing
  * 5. UpdateGameEntities() - Game world and entity updates
+ * 6. UpdateMainSceneView() - Camera and the frame's view
  *
  * @note Returns early if EnableMainRender is false (waiting for server join).
  */
@@ -338,6 +396,8 @@ void MoveMainScene()
         return;
     }
 
+    // Picks what the cursor is over in what the last frame drew, and highlights it.
+    Input::Selection::SelectObjects();
     InitializeSceneFrame();
 
     // While the reconnect dialog is up it's modal: block world clicks so they
@@ -353,6 +413,10 @@ void MoveMainScene()
     UpdateGameEntities();
 
     g_ConsoleDebug->UpdateMainScene();
+
+    // The draw keeps the loading screen up until the world is back, and the camera waits with it.
+    if (LoadingWorld <= 30)
+        UpdateMainSceneView();
 }
 
 /**
@@ -361,9 +425,8 @@ void MoveMainScene()
  * @param outWidth Output screen width
  * @param outHeight Output screen height
  * @param outByWaterMap Output water map flag (0=normal, 1=hellas water, 2=water terrain)
- * @param cameraPos Camera position for frustum
  */
-static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap, vec3_t cameraPos)
+static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap)
 {
     outByWaterMap = 0;
 
@@ -375,8 +438,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     // All background colors are now centralized in SceneManager.cpp
 
     BeginOpenglPhysical(viewport.x, viewport.y, viewport.width, viewport.height);
-    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
-                   static_cast<float>(viewport.height) / WindowHeight, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -388,8 +449,11 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         }
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
-    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+    Scenes::Lighting::SubmitSceneLighting();
     App::Control::Frames::RecordWorldCamera();
+#ifdef _EDITOR
+    Audio::Overlay::KeepCamera(g_Camera);
+#endif
 }
 
 // Diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
@@ -398,6 +462,11 @@ static bool g_bDisableEffectsDebug = false;
 void SetDisableEffects(bool disabled)
 {
     g_bDisableEffectsDebug = disabled;
+}
+
+bool IsEffectsDisabledDebug()
+{
+    return g_bDisableEffectsDebug;
 }
 
 // Diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
@@ -449,6 +518,16 @@ bool IsWingShadowDisabledDebug()
     return g_bDisableWingShadowDebug;
 }
 
+static bool g_bDisableBodyShadowsDebug = false;
+void SetDisableBodyShadows(bool disabled)
+{
+    g_bDisableBodyShadowsDebug = disabled;
+}
+bool IsBodyShadowsDisabledDebug()
+{
+    return g_bDisableBodyShadowsDebug;
+}
+
 static bool g_bDisableJointsDebug = false;
 void SetDisableJoints(bool disabled)
 {
@@ -457,6 +536,16 @@ void SetDisableJoints(bool disabled)
 bool IsJointsDisabledDebug()
 {
     return g_bDisableJointsDebug;
+}
+
+static bool g_bDisableEffectCullingDebug = false;
+void SetDisableEffectCulling(bool disabled)
+{
+    g_bDisableEffectCullingDebug = disabled;
+}
+bool IsEffectCullingDisabledDebug()
+{
+    return g_bDisableEffectCullingDebug;
 }
 
 static bool g_bDisableWingExtraLayersDebug = false;
@@ -476,7 +565,7 @@ bool IsWingExtraLayersDisabledDebug()
  * @param width Screen width for water terrain rendering
  * @param height Screen height for water terrain rendering
  */
-static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 {
 #ifdef _EDITOR
     // DevEditor render toggle checks
@@ -492,6 +581,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
+    // Described first and drawn at the end of the pass when the developer switch is on.
+    std::optional<Render::Drawing::DeferredDraws> later;
+    if (Render::Drawing::DrawsWorldLater())
+        later.emplace();
 
     if (IsWaterTerrain() == false && renderTerrain)
     {
@@ -505,14 +598,22 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             {
                 if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
-                    FRAME_PROFILE(Objects); RenderObjects();
+                    FRAME_PROFILE(Objects);
+                    Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+                    Render::Drawing::ScopedReorderableDraws reorderable;
+                    RenderObjects();
                 }
                 { FRAME_PROFILE(Terrain); RenderTerrain(false); }
             }
     }
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
-        { FRAME_PROFILE(Objects); RenderObjects(); }
+    {
+        FRAME_PROFILE(Objects);
+        Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
+        Render::Drawing::ScopedReorderableDraws reorderable;
+        RenderObjects();
+    }
 
     if (renderEffects)
     {
@@ -536,13 +637,17 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
-        ThePetProcess().RenderPets();
+        Scenes::PostProcessing::RenderPetsWithoutBloom();
 
     if (renderEffects)
         RenderBoids(true);
 
     if (renderStatic)
-        { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
+    {
+        FRAME_PROFILE(Objects);
+        Render::Drawing::ScopedReorderableDraws reorderable;
+        RenderObjects_AfterCharacter();
+    }
 
     { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 
@@ -552,7 +657,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderEffects();
         RenderBlurs();
     }
-    CheckSprites();
     BeginSprite();
 
     if (ShouldRenderLeaves())
@@ -571,6 +675,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     EndSprite();
 
     RenderAfterEffects();
+    if (later)
+        later->Flush();
 
     if (IsWaterTerrain() == true)
     {
@@ -578,10 +684,13 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
         EndOpengl();
         BeginOpenglPhysical(0, 0, width, height);
+        // The water pass changes the camera: a segment of its own.
+        std::optional<Render::Drawing::DeferredDraws> waterLater;
+        if (Render::Drawing::DrawsWorldLater())
+            waterLater.emplace();
         RenderWaterTerrain();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
-        CheckSprites();
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
@@ -592,6 +701,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderPoints(byWaterMap);
 
         EndSprite();
+        if (waterLater)
+            waterLater->Flush();
         EndOpengl();
 
         BeginOpenglPhysical(0, 0, width, height);
@@ -606,12 +717,43 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     }
 }
 
+// Draws the world pass, after drawing it at once and later into two logs when "drawparity" asked for it. The logs
+// stand in for the renderer, so the frame shows the pass once.
+static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+{
+    bool secondLater = true;
+    if (Render::Drawing::TakeDrawParityRequest(secondLater))
+    {
+        const bool drawsLater = Render::Drawing::DrawsWorldLater();
+        // Each run starts from the sprites the frame drew so far, as the frame's own pass does.
+        const SpriteDrawFlags spritesDrawn = SpritesDrawnThisFrame();
+        Render::Drawing::DrawCallLog atOnce;
+        Render::Drawing::DrawCallLog later;
+        for (Render::Drawing::DrawCallLog* log : {&atOnce, &later})
+        {
+            Render::Drawing::SetDrawsWorldLater(secondLater && log == &later);
+            mu::SetRendererOverride(log);
+            Render::Drawing::ResetLegacyState();
+            SetSpritesDrawnThisFrame(spritesDrawn);
+            BYTE waterMap = byWaterMap;
+            RenderGameWorldPass(waterMap, width, height);
+            log->NoteFinalState();
+            mu::SetRendererOverride(nullptr);
+        }
+        Render::Drawing::SetDrawsWorldLater(drawsLater);
+        // The legacy calls' caches followed the logs: tell the renderer again.
+        Render::Drawing::ResetLegacyState();
+        SetSpritesDrawnThisFrame(spritesDrawn);
+        Render::Drawing::ReportDrawParity(atOnce.calls, later.calls);
+    }
+    RenderGameWorldPass(byWaterMap, width, height);
+}
+
 /**
  * @brief Renders UI elements and overlays for the main scene.
  */
 static void RenderMainSceneUI()
 {
-    Input::Selection::SelectObjects();
     BeginBitmap();
     // Recorded into the world-label layer instead when it is available (CNameWindow).
     if (g_pNameWindow == nullptr || !g_pNameWindow->RecordsInterfaceOverlays())
@@ -623,8 +765,12 @@ static void RenderMainSceneUI()
     }
     EndBitmap();
 
-    g_pPartyManager->Render();
-    g_pNewUISystem->Render();
+    {
+        // The windows' sounds are the interface's (Q-SM13).
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
+        g_pPartyManager->Render();
+        g_pNewUISystem->Render();
+    }
 
     BeginBitmap();
     RenderInfomation();
@@ -648,10 +794,9 @@ static void RenderMainSceneUI()
  * @brief Main rendering function for the game scene.
  *
  * Orchestrates the complete rendering pipeline:
- * 1. Determines camera position based on camera mode
- * 2. Sets up viewport and clear color
- * 3. Renders 3D world (terrain, objects, characters, effects)
- * 4. Renders UI and overlays
+ * 1. Sets up viewport and clear color
+ * 2. Renders 3D world (terrain, objects, characters, effects)
+ * 3. Renders UI and overlays
  *
  * @return true if rendering succeeded, false if rendering was skipped
  */
@@ -703,26 +848,10 @@ bool RenderMainScene()
     }
 #endif
 
-    vec3_t cameraPos;
     int width, height;
     BYTE byWaterMap;
 
-    // Determine camera position
-    if (MoveMainCamera() == true)
-    {
-        VectorCopy(Hero->Object.StartPosition, cameraPos);
-    }
-    else
-    {
-        g_pCatapultWindow->GetCameraPos(cameraPos);
-
-        if (g_Direction.IsDirection() && g_Direction.m_bDownHero == false)
-        {
-            g_Direction.GetCameraPosition(cameraPos);
-        }
-    }
-
-    SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
+    SetupMainSceneViewport(width, height, byWaterMap);
     RenderGameWorld(byWaterMap, width, height);
 
 #ifdef _EDITOR
@@ -737,6 +866,8 @@ bool RenderMainScene()
             RenderFrustumWireframe(spectated->GetFrustum());
     }
 #endif
+
+    Scenes::PostProcessing::EndSceneGeometry();
 
     {
         FRAME_PROFILE(UI);

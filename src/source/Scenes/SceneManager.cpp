@@ -3,6 +3,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Audio/SoundSource.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include <cstdio>
@@ -12,12 +15,14 @@
 #include <numeric>
 #include <cmath>
 #include <iterator>
+#include <thread>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 #include "Core/Text/Utf8.h"
+#include "Core/Text/WideString.h"
 #include "Render/Text/CUIRenderText.h"
 
 //=============================================================================
@@ -39,19 +44,24 @@ FrameTimingState g_frameTiming;
 #include "LoginSceneOverlay.h"
 #include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
+#include "Core/Utilities/BuildInfo.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Core/Time/Timer.h"
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "UI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "Core/Utilities/Random.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/HUD/Notices.h"
 #include "I18N/All.h"
@@ -61,7 +71,9 @@ FrameTimingState g_frameTiming;
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
+#include "Scenes/SceneLightingSetup.h"
 #include "Scenes/SceneNames.h"
+#include "Render/Lighting/LightMoodSetting.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -132,8 +144,12 @@ bool GetShowFpsCounter()
     return g_bShowFpsCounter;
 }
 
+// The overlay has its own flag: a benchmark run counts without drawing it into its own frames.
+static bool g_bShowGLStatsOverlay = false;
+
 void SetShowGLStats(bool enabled)
 {
+    g_bShowGLStatsOverlay = enabled;
     FrameProfiler::g_CountersEnabled = enabled;
     mu::GetRenderer().SetStatsEnabled(enabled);
 }
@@ -228,8 +244,9 @@ double GetTargetFps()
  * @brief Generates a timestamped filename and message for screenshot capture.
  * @param outFileName Buffer to receive the filename
  * @param outMessage Buffer to receive the log message
+ * @param messageSize Its size, in characters
  */
-static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage)
+static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage, size_t messageSize)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
@@ -237,9 +254,10 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
         st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
     mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
-    wchar_t lpszTemp[64];
-    mu_swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-    wcscat(outMessage, lpszTemp);
+    // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
+    const std::wstring server =
+        L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
+    Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
 }
 
 /**
@@ -275,10 +293,10 @@ static int g_screenshotQuality = BestScreenshotQuality;
 // The readback is only ready on a later frame than the one that asked for it,
 // and a request may arrive either before or after this frame's consume pass
 // (Print Screen comes from the scene update, a scripted capture from the
-// control socket's poll). A frame the renderer skips (no swapchain image: a
-// minimized window, or too many frames in flight) delivers nothing and leaves
-// the request for the next one, so the wait allows for a few skipped frames:
-// about a second at 60 frames per second.
+// control socket's poll). A frame that renders delivers its readback when it
+// ends, so the attempts cover a request that arrives after this frame's
+// consume pass. A window that renders no frames (minimized, on Vulkan) skips
+// every frame, so its capture fails once the attempts run out.
 constexpr int MaxScreenshotConsumeAttempts = 60;
 static int g_screenshotConsumeAttempts = 0;
 
@@ -397,7 +415,7 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 static void RequestScreenshot()
 {
     wchar_t screenshotText[256];
-    GenerateScreenshotFilename(GrabFileName, screenshotText);
+    GenerateScreenshotFilename(GrabFileName, screenshotText, std::size(screenshotText));
 
     if (BeginScreenshotCapture(GrabFileName, screenshotText))
     {
@@ -466,6 +484,7 @@ static void HandleScreenshotCapture()
  */
 static void UpdateActiveScene()
 {
+    ClearSprites();
     switch (SceneFlag)
     {
     case LOG_IN_SCENE:
@@ -478,6 +497,11 @@ static void UpdateActiveScene()
 
     case MAIN_SCENE:
         MoveMainScene();
+        break;
+    // The other values, listed without a default: a value added later fails the build here.
+    case SERVER_LIST_SCENE:
+    case WEBZEN_SCENE:
+    case LOADING_SCENE:
         break;
     }
 }
@@ -510,6 +534,8 @@ static void UpdateLoginAndCharacterScenes()
     dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
 
     CInput::Instance().Update();
+    // The scenes' windows' sounds are the interface's (Q-SM13).
+    const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
     CSceneUICoordinator::Instance().Update(dDeltaTick);
 }
 
@@ -546,11 +572,17 @@ static void UpdateCoreSystems()
  * @brief Sets both the OpenGL clear color and the global fog color to the same RGB.
  *
  * Every world uses the fog color as its clear color, so this keeps them in sync
- * and avoids duplicating the two assignments at every call site.
+ * and avoids duplicating the two assignments at every call site. The map's
+ * light mood scales both (its background scale), so distant geometry does not
+ * fade into a background brighter than the scene.
  */
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
+    const float background = Render::Lighting::LightMood::Active().background;
+    r *= background;
+    g *= background;
+    b *= background;
     mu::GetRenderer().SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
@@ -641,41 +673,21 @@ static void RestartFrameStatsOnSceneChange()
 // Which binary runs where: one line each for the build and the OS.
 static void AddBuildLines(std::vector<std::string>& lines)
 {
-    constexpr const char* kBuildType =
-#if defined(_DEBUG) || defined(DEBUG)
-        "Debug";
-#else
-        "Release";
-#endif
-    constexpr const char* kEditor =
-#ifdef _EDITOR
-        "Editor";
-#else
-        "NoEditor";
-#endif
-    constexpr const char* kCompiler =
-#if defined(__MINGW32__) || defined(__MINGW64__)
-        "MinGW";
-#elif defined(__clang__)
-        "Clang";
-#elif defined(_MSC_VER)
-        "MSVC";
-#elif defined(__GNUC__)
-        "GCC";
-#else
-        "Unknown";
-#endif
-    constexpr const char* kArch =
-#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
-        "x64";
-#else
-        "x86";
-#endif
     char line[160];
-    std::snprintf(line, sizeof(line), "Build: %s %s %s %s  %s %s", kBuildType, kEditor, kCompiler, kArch, __DATE__,
-                  __TIME__);
+    std::snprintf(line, sizeof(line), "Build: %s %s %s %s  %s %s", Core::Build::kConfiguration, Core::Build::kEditor,
+                  Core::Build::kCompiler, Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
     lines.emplace_back(line);
     lines.push_back("OS: " + Core::Text::ToUtf8(Core::Platform::GetOSVersionString().c_str()));
+
+    const std::string& processor = Core::Platform::GetProcessorName();
+    std::snprintf(line, sizeof(line), "CPU: %s (%u threads)   RAM: %.1f GB",
+                  processor.empty() ? "unknown" : processor.c_str(), std::thread::hardware_concurrency(),
+                  Core::Platform::GetSystemMemoryMB() / 1024.0);
+    lines.emplace_back(line);
+
+    const char* gpu = mu::GetRenderer().GetGPUDeviceName();
+    std::snprintf(line, sizeof(line), "GPU: %s", (gpu && *gpu) ? gpu : "unknown");
+    lines.emplace_back(line);
 }
 
 // The active camera: mode, field of view, angle, distances and culling planes.
@@ -723,7 +735,7 @@ static void UpdateDiagnostics()
     }
     UI::Diagnostics::FrameSummary summary;
     summary.details = g_bShowDebugInfo;
-    summary.counters = FrameProfiler::g_CountersEnabled;
+    summary.counters = g_bShowGLStatsOverlay;
     summary.fpsOnly = g_bShowFpsCounter;
     summary.fps = FPS_AVG;
     summary.averageFps = s_avgFps;
@@ -741,6 +753,19 @@ static void UpdateDiagnostics()
     summary.history = std::span<const float>(s_frameTimesMs, static_cast<size_t>(s_frameCount));
     summary.oldestSample = s_frameCount < FRAME_HISTORY_SIZE ? 0 : s_frameIndex;
     UI::Diagnostics::Update(summary);
+}
+
+static void UpdateLoginSceneReconnect()
+{
+    LoginSceneReconnect& reconnect = LoginSceneReconnect::Instance();
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        reconnect.Update();
+    }
+    else
+    {
+        reconnect.Reset();
+    }
 }
 
 /**
@@ -770,6 +795,13 @@ static void CheckServerConnection()
         // the brief re-login phase shows it frozen instead of a black screen.
         UI::Reconnect::CaptureBackground();
         ReconnectManager::Instance().RequestBegin();
+        return;
+    }
+
+    // Nothing is lost before the login: the login screen reconnects when it needs the server.
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        LoginSceneReconnect::Instance().OnConnectionLost();
         return;
     }
 
@@ -1102,7 +1134,11 @@ static void ManageMainSceneAudio()
     if (SceneFlag != MAIN_SCENE)
         return;
 
-    PlayWorldAmbientSounds();
+    {
+        // The map's wind, rain and forest: ambience, with no place (Q-SM13).
+        const Audio::ScopedSoundPlace ambience(Audio::SoundKind::MapAmbience, -1, nullptr);
+        PlayWorldAmbientSounds();
+    }
     StopInactiveAmbientSounds();
     ManageBackgroundMusic();
 }
@@ -1173,12 +1209,23 @@ void MainScene(HDC hDC)
 
     UpdateCoreSystems();
     SetWorldClearColor();
+    // Every update of the frame has run, previews included: the draws record into the next frame.
+    Engine::Object::Attachments::BeginFrame();
+    BeginObjectDraws();
+    BeginSpriteDraws();
+    Random::NextDrawFrame();
 
     bool Success = false;
 
     try
     {
-        Success = RenderCurrentScene(hDC);
+        {
+            const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+            Diagnostics::DrawPurityCheck::BeforeDraw();
+            Success = RenderCurrentScene(hDC);
+            Diagnostics::DrawPurityCheck::AfterDraw();
+        }
+        Scenes::Lighting::SubmitDynamicLights();
 
         LogFrameTiming();
         {
@@ -1224,6 +1271,7 @@ void RenderScene(HDC hDC)
     // runs across all scenes because reconnect passes through the login,
     // character and loading scenes on its way back into the game.
     ReconnectManager::Instance().Update();
+    UpdateLoginSceneReconnect();
 
     g_frameTiming.MarkFrameRendered();
 
@@ -1242,6 +1290,9 @@ void RenderScene(HDC hDC)
         case CHARACTER_SCENE:
         case MAIN_SCENE:
             MainScene(hDC);
+            break;
+        // The other values, listed without a default: a value added later fails the build here.
+        case SERVER_LIST_SCENE:
             break;
         }
 

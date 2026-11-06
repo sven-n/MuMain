@@ -49,8 +49,6 @@ constexpr const char* Copy = "copy";
 constexpr const char* CopyLightToDirection = "copyLightToDirection";
 constexpr const char* Variants = "variants";
 constexpr const char* SubType = "subType";
-constexpr const char* Value = "value";
-constexpr const char* TimesFrameFactor = "timesFrameFactor";
 constexpr std::array<const char*, 3> Components = {"x", "y", "z"};
 } // namespace Keys
 
@@ -109,7 +107,7 @@ void ReadValue(ItemModelValueReader& reader, const char* key, std::optional<doub
     }
     if (!FitsFloat(number))
     {
-        reader.Error(key, TooLarge);
+        reader.Fatal(key, TooLarge);
         return;
     }
     value = number;
@@ -124,7 +122,7 @@ void ReadAlpha(ItemModelValueReader& reader, const char* key, std::optional<doub
     }
     if (alpha < 0.0 || alpha > 1.0)
     {
-        reader.Error(key, "must be from 0 to 1");
+        reader.Fatal(key, "must be from 0 to 1");
         return;
     }
     value = alpha;
@@ -145,7 +143,7 @@ void ReadRenderType(ItemModelValueReader& reader, std::optional<EffectRenderType
             return;
         }
     }
-    reader.Error(Keys::RenderType, "must be \"dark\" or \"alphaBlendMinus\"");
+    reader.Fatal(Keys::RenderType, "must be \"dark\" or \"alphaBlendMinus\"");
 }
 
 bool ReadThreeValues(ItemModelValueReader& reader, const char* key, std::array<double, 3>& values)
@@ -156,7 +154,7 @@ bool ReadThreeValues(ItemModelValueReader& reader, const char* key, std::array<d
     }
     if (!std::all_of(values.begin(), values.end(), FitsFloat))
     {
-        reader.Error(key, TooLarge);
+        reader.Fatal(key, TooLarge);
         return false;
     }
     return true;
@@ -207,7 +205,7 @@ NestedObject ReadObject(ItemModelValueReader& reader, const std::string& objectK
     }
     if (!field->is_object())
     {
-        reader.Error(key, expected);
+        reader.Fatal(key, expected);
         return {};
     }
     return {field, objectKey + "." + key};
@@ -221,55 +219,8 @@ void WarnIfEmpty(const NestedObject& object, const ReportIssue& report)
     }
 }
 
-// A number, or, in an offset, { "value": n, "timesFrameFactor": true }.
-// Values with errors stay unset.
-void ReadNumberOrFrameFactor(ItemModelValueReader& reader, const std::string& objectKey, const char* key, bool isOffset,
-                             const ReportIssue& report, std::optional<double>& value, bool& timesFrameFactor)
-{
-    const OrderedJson* field = reader.ReadJson(key);
-    if (field == nullptr)
-    {
-        return;
-    }
-    if (!field->is_object())
-    {
-        ReadValue(reader, key, value);
-        return;
-    }
-    if (!isOffset)
-    {
-        reader.Error(key, "must be a number; only offsets can be multiplied by the frame factor");
-        return;
-    }
-    ItemModelValueReader number(*field, objectKey + "." + key, report);
-    if (!number.Has(Keys::Value))
-    {
-        number.Error(Keys::Value, "missing");
-    }
-    std::optional<double> read;
-    ReadValue(number, Keys::Value, read);
-    bool flag = false;
-    const bool flagRead = !number.Has(Keys::TimesFrameFactor) || number.ReadBool(Keys::TimesFrameFactor, flag);
-    number.WarnAboutUnknownKeys();
-    if (read && flagRead)
-    {
-        value = read;
-        timesFrameFactor = flag;
-    }
-}
-
-void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, size_t index, bool isOffset,
-                   const ReportIssue& report, EffectCreateVector& vector)
-{
-    bool timesFrameFactor = false;
-    ReadNumberOrFrameFactor(reader, objectKey, Keys::Components[index], isOffset, report, vector.components[index],
-                            timesFrameFactor);
-    vector.timesFrameFactor[index] = timesFrameFactor;
-}
-
 // A vector: a list of 3 numbers, or an object with the components it sets.
-// Only the components of offsets can be multiplied by the frame factor.
-void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, const char* key, bool isOffset,
+void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, const char* key,
                 const ReportIssue& report, EffectCreateVector& vector)
 {
     if (!reader.Has(key))
@@ -295,7 +246,7 @@ void ReadVector(ItemModelValueReader& reader, const std::string& objectKey, cons
     ItemModelValueReader components(*object.json, object.objectKey, report);
     for (size_t i = 0; i < Keys::Components.size(); ++i)
     {
-        ReadComponent(components, object.objectKey, i, isOffset, report, vector);
+        ReadValue(components, Keys::Components[i], vector.components[i]);
     }
     components.WarnAboutUnknownKeys();
 }
@@ -311,17 +262,10 @@ void ReadOffsets(ItemModelValueReader& reader, const std::string& objectKey, con
     }
     WarnIfEmpty(offsets, report);
     ItemModelValueReader offsetReader(*offsets.json, offsets.objectKey, report);
-    std::optional<double> lifeTime;
-    bool lifeTimeTimesFrameFactor = false;
-    ReadNumberOrFrameFactor(offsetReader, offsets.objectKey, Keys::LifeTime, true, report, lifeTime,
-                            lifeTimeTimesFrameFactor);
-    if (lifeTime)
-    {
-        params.lifeTimeOffset = EffectCreateNumber{*lifeTime, lifeTimeTimesFrameFactor};
-    }
+    ReadValue(offsetReader, Keys::LifeTime, params.lifeTimeOffset);
     for (const OffsetField& field : OffsetFields)
     {
-        ReadVector(offsetReader, offsets.objectKey, field.key, true, report, params.*field.offset);
+        ReadVector(offsetReader, offsets.objectKey, field.key, report, params.*field.offset);
     }
     offsetReader.WarnAboutUnknownKeys();
 }
@@ -388,7 +332,7 @@ void ReadCopies(ItemModelValueReader& reader, const std::string& objectKey, cons
         }
         if (!ReadCopySource(*source, target, params))
         {
-            copyReader.Error(EffectCopyFields[i].target, "must be " + SourcesOf(target));
+            copyReader.Fatal(EffectCopyFields[i].target, "must be " + SourcesOf(target));
         }
     }
     copyReader.WarnAboutUnknownKeys();
@@ -399,7 +343,7 @@ void ReadCopies(ItemModelValueReader& reader, const std::string& objectKey, cons
         const char* target = EffectCopyFields[i].target;
         if (SetsValueOf(params, target) && CopiesInto(params, target))
         {
-            copyReader.Error(target, "is also set as a value");
+            copyReader.Fatal(target, "is also set as a value");
             for (const EffectCopyField& field : EffectCopyFields)
             {
                 if (field.target == std::string_view(target))
@@ -432,22 +376,8 @@ template <typename T> void WriteExact(OrderedJson& json, const char* key, const 
     }
 }
 
-// A number, or { "value": n, "timesFrameFactor": true }.
-OrderedJson WriteNumberOrFrameFactor(double value, bool timesFrameFactor)
-{
-    OrderedJson number = Items::ModelJson::WriteNumber(value);
-    if (!timesFrameFactor)
-    {
-        return number;
-    }
-    OrderedJson object = OrderedJson::object();
-    object[Keys::Value] = std::move(number);
-    object[Keys::TimesFrameFactor] = true;
-    return object;
-}
-
-// A list when all three components are set and none is multiplied by the
-// frame factor, else an object with the components that are set.
+// A list when all three components are set, else an object with the
+// components that are set.
 void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& vector)
 {
     if (!vector.IsSet())
@@ -455,9 +385,7 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
         return;
     }
     const bool whole = std::all_of(vector.components.begin(), vector.components.end(),
-                                   [](const std::optional<double>& component) { return component.has_value(); }) &&
-                       std::none_of(vector.timesFrameFactor.begin(), vector.timesFrameFactor.end(),
-                                    [](bool timesFrameFactor) { return timesFrameFactor; });
+                                   [](const std::optional<double>& component) { return component.has_value(); });
     if (whole)
     {
         const std::array<double, 3> values = {*vector.components[0], *vector.components[1], *vector.components[2]};
@@ -471,7 +399,7 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
         {
             continue;
         }
-        components[Keys::Components[i]] = WriteNumberOrFrameFactor(*vector.components[i], vector.timesFrameFactor[i]);
+        components[Keys::Components[i]] = Items::ModelJson::WriteNumber(*vector.components[i]);
     }
     json[key] = std::move(components);
 }
@@ -503,10 +431,10 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     ReadAlpha(reader, Keys::AlphaTarget, params.alphaTarget);
     ReadRenderType(reader, params.renderType);
     ReadInteger(reader, Keys::Animation, 0, LargestAnimation, params.animation);
-    ReadVector(reader, objectKey, Keys::Position, false, report, params.position);
-    ReadVector(reader, objectKey, Keys::Angle, false, report, params.angle);
-    ReadVector(reader, objectKey, Keys::Direction, false, report, params.direction);
-    ReadVector(reader, objectKey, Keys::StartPosition, false, report, params.startPosition);
+    ReadVector(reader, objectKey, Keys::Position, report, params.position);
+    ReadVector(reader, objectKey, Keys::Angle, report, params.angle);
+    ReadVector(reader, objectKey, Keys::Direction, report, params.direction);
+    ReadVector(reader, objectKey, Keys::StartPosition, report, params.startPosition);
     ReadOffsets(reader, objectKey, report, params);
     ReadCopies(reader, objectKey, report, params);
 
@@ -514,7 +442,7 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     // still has it would lose the copy with only a warning.
     if (reader.ReadJson(Keys::CopyLightToDirection) != nullptr)
     {
-        reader.Error(Keys::CopyLightToDirection, "was replaced by \"copy\": {\"direction\": \"light\"}");
+        reader.Fatal(Keys::CopyLightToDirection, "was replaced by \"copy\": {\"direction\": \"light\"}");
     }
 }
 
@@ -550,7 +478,7 @@ bool ReadSubTypes(ItemModelValueReader& reader, std::vector<int>& subTypes)
     const bool hasList = reader.Has(CreateSubTypesKey);
     if (hasOne == hasList)
     {
-        reader.Error(Keys::SubType, hasOne ? "and subTypes are both set; set one of them"
+        reader.Fatal(Keys::SubType, hasOne ? "and subTypes are both set; set one of them"
                                            : "missing; a variant needs subType or subTypes");
         reader.ReadJson(Keys::SubType);
         reader.ReadJson(CreateSubTypesKey);
@@ -574,7 +502,7 @@ bool ReadSubTypes(ItemModelValueReader& reader, std::vector<int>& subTypes)
     std::sort(list.begin(), list.end());
     if (std::adjacent_find(list.begin(), list.end()) != list.end())
     {
-        reader.Error(CreateSubTypesKey, "lists a SubType twice");
+        reader.Fatal(CreateSubTypesKey, "lists a SubType twice");
         return false;
     }
     subTypes = std::move(list);
@@ -599,7 +527,7 @@ const char* PartOfCopiedVector(const EffectCreateParams& row, const EffectCreate
     return nullptr;
 }
 
-// Reads variant `entry` of `row`; false when it has errors that drop it. Its
+// Reads variant `entry` of `row`; false when it has fatal problems that drop it. Its
 // SubTypes go into `taken` only when it is kept, so a dropped variant does not
 // report the later ones as duplicates.
 bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const ReportIssue& report,
@@ -607,7 +535,7 @@ bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const 
 {
     if (!entry.is_object())
     {
-        report(ItemDataIssueSeverity::Error, variantKey, "must be an object with subType or subTypes and values");
+        report(ItemDataIssueSeverity::Fatal, variantKey, "must be an object with subType or subTypes and values");
         return false;
     }
     ItemModelValueReader reader(entry, variantKey, report);
@@ -615,7 +543,7 @@ bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const 
     ReadFields(reader, variantKey, report, variant.params);
     if (reader.ReadJson(Keys::Variants) != nullptr)
     {
-        reader.Error(Keys::Variants, "a variant cannot have variants");
+        reader.Fatal(Keys::Variants, "a variant cannot have variants");
         valid = false;
     }
     reader.WarnAboutUnknownKeys();
@@ -623,14 +551,14 @@ bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const 
     {
         if (taken.contains(subType))
         {
-            report(ItemDataIssueSeverity::Error, variantKey,
+            report(ItemDataIssueSeverity::Fatal, variantKey,
                    "SubType " + std::to_string(subType) + " is in another variant too");
             valid = false;
         }
     }
     if (const char* vector = PartOfCopiedVector(row, variant.params))
     {
-        reader.Error(vector, std::string("sets part of ") + vector +
+        reader.Fatal(vector, std::string("sets part of ") + vector +
                                  ", which the row copies into; set all three "
                                  "components");
         valid = false;
@@ -661,7 +589,7 @@ void ReadVariants(ItemModelValueReader& reader, const std::string& objectKey, co
     const std::string listKey = objectKey + "." + Keys::Variants;
     if (!list->is_array())
     {
-        reader.Error(Keys::Variants, "must be a list of variants");
+        reader.Fatal(Keys::Variants, "must be a list of variants");
         return;
     }
     if (list->empty())
@@ -729,8 +657,7 @@ void WriteOffsets(OrderedJson& json, const EffectCreateParams& params)
     OrderedJson offsets = OrderedJson::object();
     if (params.lifeTimeOffset)
     {
-        offsets[Keys::LifeTime] =
-            WriteNumberOrFrameFactor(params.lifeTimeOffset->value, params.lifeTimeOffset->timesFrameFactor);
+        offsets[Keys::LifeTime] = Items::ModelJson::WriteNumber(*params.lifeTimeOffset);
     }
     for (const OffsetField& field : OffsetFields)
     {

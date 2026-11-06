@@ -77,14 +77,30 @@ void mu::ui::window::ItemHelpView::Build()
 void mu::ui::window::ItemHelpView::Sync(bool visible, std::vector<ItemHelpLineEntry> lines, Table table,
                                         std::vector<ItemHelpLineEntry> tailLines)
 {
+    if (!SyncDocument(visible))
+        return;
+
+    auto& binder = m_View.Binder();
+    SyncField(binder, &ItemHelpRmlModel::lines, "lines", std::move(lines));
+    SyncField(binder, &ItemHelpRmlModel::columns, "columns", std::move(table));
+    SyncField(binder, &ItemHelpRmlModel::tailLines, "tail_lines", std::move(tailLines));
+}
+
+void mu::ui::window::ItemHelpView::SyncShown()
+{
+    SyncDocument(true);
+}
+
+bool mu::ui::window::ItemHelpView::SyncDocument(bool visible)
+{
     Build();
     if (!m_View.Document())
-        return;
+        return false;
 
     // Layer depth 6.5 / 6.6: over the HUD and the panels.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), visible);
     if (!visible)
-        return;
+        return false;
 
     auto& binder = m_View.Binder();
     SyncField(binder, &ItemHelpRmlModel::textPx, "text_px", UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
@@ -94,9 +110,7 @@ void mu::ui::window::ItemHelpView::Sync(bool visible, std::vector<ItemHelpLineEn
               static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal)));
     SyncField(binder, &ItemHelpRmlModel::boldLineHeight, "bold_line_height",
               static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)));
-    SyncField(binder, &ItemHelpRmlModel::lines, "lines", std::move(lines));
-    SyncField(binder, &ItemHelpRmlModel::columns, "columns", std::move(table));
-    SyncField(binder, &ItemHelpRmlModel::tailLines, "tail_lines", std::move(tailLines));
+    return true;
 }
 
 std::vector<ItemHelpLineEntry> mu::ui::window::ItemHelpView::TextListLines(int count)

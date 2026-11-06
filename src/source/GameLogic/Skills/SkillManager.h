@@ -4,6 +4,11 @@
 
 #include "Core/Globals/_enum.h"
 
+#include <map>
+
+// The skill each strengthened, proficiency or mastery skill builds on.
+extern const std::map<ActionSkillType, ActionSkillType> SKILL_REPLACEMENTS;
+
 typedef struct DemendConditionInfo
 {
     WORD SkillType;
@@ -37,6 +42,7 @@ class CSkillManager
 public:
     CSkillManager();
     virtual ~CSkillManager();
+    int FindSkillIndex(int skillType) const;
     bool FindHeroSkill(ActionSkillType eSkillType);
     void GetSkillInformation(int iType, int iLevel, wchar_t* lpszName, int* piMana, int* piDistance, int* piSkillMana = NULL);
     void GetSkillInformation_Energy(int iType, int* piEnergy);

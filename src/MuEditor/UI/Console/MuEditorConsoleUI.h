@@ -49,7 +49,8 @@ public:
     void ClearEditorLog() { m_strEditorConsole.clear(); }
     void ClearGameLog() { m_strGameConsole.clear(); }
 
-    void Render();
+    // open is cleared when the console's tab or window is closed.
+    void Render(bool* open);
 
 private:
     CMuEditorConsoleUI();

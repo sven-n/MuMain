@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "event": "heroFootstep",
+      "rules": [
+        {"worlds": [2], "tiles": [0, 1, 2, 4, 5, 6, 7, 8, 9], "plays": ["SOUND_HUMAN_WALK_SNOW"]},
+        {"worlds": [0], "tiles": [0], "plays": ["SOUND_HUMAN_WALK_GRASS"]},
+        {"worlds": [3], "tiles": [0], "plays": ["SOUND_HUMAN_WALK_GRASS"]},
+        {"worlds": [7, 24, 25, 26, 27, 28, 29, 36, 67], "safeZone": false, "plays": ["SOUND_HUMAN_WALK_SWIM"]},
+        {"worlds": [57, 58, 65], "plays": ["SOUND_HUMAN_WALK_SNOW"]},
+        {"worlds": [62], "plays": ["SOUND_HUMAN_WALK_SNOW"]},
+        {"plays": ["SOUND_HUMAN_WALK_GROUND"]}
+      ]
+    },
+    {
+      "event": "playerAttackSwing",
+      "rules": [
+        {"holds": "bow", "plays": ["SOUND_BOW01"]},
+        {"holds": "crossbow", "plays": ["SOUND_CROSSBOW01"]},
+        {"holds": "magicCrossbow", "plays": ["SOUND_MAGIC"]},
+        {"holds": "saberOrSpear", "plays": ["SOUND_BRANDISH_SWORD03"]},
+        {"holds": "other", "plays": ["SOUND_BRANDISH_SWORD01", "SOUND_BRANDISH_SWORD02"]}
+      ]
+    },
+    {
+      "event": "interfaceClick",
+      "rules": [
+        {"kinds": ["confirm"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["cancel"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["select"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["menu"], "plays": ["SOUND_CLICK01"]}
+      ]
+    },
+    {
+      "event": "characterSelected",
+      "rules": [
+        {"plays": ["SOUND_CLICK01"]}
+      ]
+    }
+  ]
+}

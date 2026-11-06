@@ -1,0 +1,159 @@
+#pragma once
+
+#ifdef _EDITOR
+
+#include "ServerListEdits.h"
+
+#include "../MuEditor/UI/Common/UndoTarget.h"
+#include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/ItemData/ItemDataIssue.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
+// The Server List window: the server groups of the login screen
+// (Data/Local/ServerList.json), their names, order and channels on the Groups
+// tab; the VIP types and the texts that name a channel on the Channel names
+// tab. The login screen shows each change right away; Save writes the file.
+// The editor bar's Undo and Redo act on its changes while it is the tool
+// worked in last.
+class CMuServerListUI final : public MuEditor::UndoTarget
+{
+public:
+    // The load of each server the connect server last sent, by group ID and
+    // channel number - 1.
+    using SentChannels = std::map<int, std::map<int, int>>;
+
+    static CMuServerListUI& GetInstance();
+
+    void Render(bool* open);
+
+    // MuEditor::UndoTarget
+    bool IsOpen() const override;
+    bool CanUndo() const override;
+    bool CanRedo() const override;
+    std::string GetUndoLabel() const override;
+    std::string GetRedoLabel() const override;
+    void Undo() override;
+    void Redo() override;
+
+    // For the Colors window's Server list root (MuEditor::Colors::ServerListColorsRoot), which edits the list's own
+    // colors and their folders. The file is read the first time.
+    void EnsureLoaded();
+    MuEditor::ServerList::ServerListEdits& GetEdits()
+    {
+        return m_edits;
+    }
+    // After the root changed the list: what changed is one undo step, and the login screen shows it.
+    void AfterColorEdit();
+    // Where the list names its color `id`: the button color rules and the parts of the load, each as a label.
+    // A load bar part set to "default" takes its own token, not the button color "default", so it doesn't
+    // count for "default"; DescribeThemeBarPartUsers lists it.
+    std::vector<std::string> DescribeColorUsers(std::string_view id) const;
+    // The load bar parts drawn in the theme's own token `token` (server-load-base, ...): those set to "default".
+    std::vector<std::string> DescribeThemeBarPartUsers(std::string_view token) const;
+    // How many each would list, without making the labels: the Colors window counts them each frame.
+    int CountColorUsers(std::string_view id) const;
+    int CountThemeBarPartUsers(std::string_view token) const;
+    // The theme folders a color gets a shade for.
+    const std::vector<std::string>& GetThemes() const
+    {
+        return m_themes;
+    }
+    // Opens the window on its Channel names tab and brings it to the front.
+    void ShowChannelNames();
+
+private:
+    // Begins the window with the editor's bar; false (and ended) while hidden.
+    bool BeginWindow(bool* open);
+    // The group list and the selected group; true when the groups changed.
+    bool RenderPanes();
+    // After the widgets: the login screen shows a change, and a finished edit
+    // becomes one undo step.
+    void AfterEdits(bool changed);
+    // What changed since the last undo step becomes one: before a button, box
+    // or list changes the groups, so that what was typed before stays a step
+    // of its own.
+    void CommitPending();
+    // Right after a text field: leaving it ends its edit, which becomes one
+    // undo step.
+    void CommitWhenFieldLeft();
+    void LoadFile();
+    void Save();
+    // Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) while this window has the focus.
+    void HandleUndoKeys();
+    // After an undo or redo: the selection stays in the list, and the login
+    // screen shows the groups.
+    void AfterHistoryStep();
+    void RenderToolbar();
+    void RenderStatus();
+    // Each of these that changes the groups returns true.
+    bool RenderGroupList();
+    bool RenderListButtons();
+    bool RenderGroupsNotInList();
+    bool RenderSelectedGroup();
+    bool RenderGroupId(Data::ServerList::ServerGroup& group);
+    bool RenderGroupFields(Data::ServerList::ServerGroup& group);
+    bool RenderChannels(Data::ServerList::ServerGroup& group);
+    // The group's channel rows (sentChannels: what the connect server sent of them, or nullptr); `previewChanged`
+    // set when the offline preview changed in them.
+    bool RenderChannelTable(Data::ServerList::ServerGroup& group, const std::map<int, int>* sentChannels,
+                            bool& previewChanged);
+    // The Channel names tab: the VIP types, the texts and a preview.
+    bool RenderChannelNamesTab();
+    bool RenderVipTypeList();
+    bool RenderVipTypeButtons();
+    bool RenderSelectedVipType();
+    bool RenderTexts();
+    bool RenderButtonColorRules();
+    // The list's own colors are the Colors window's Server list root; this opens it.
+    void RenderEditColorsButton();
+    void RenderPreview();
+    // One text in the language picked on the tab, the English one as its hint.
+    bool RenderLocalizedField(const char* label, Data::LocalizedString& text, size_t maxUnits);
+    // Asks before a VIP type that channels have is removed.
+    bool RenderRemoveVipTypePopup();
+    // The game names the servers of the connect server with the list now.
+    void ShowInGame();
+    // The login screen builds its groups again with the list the game has, for a change of the offline preview: each
+    // change of the list is in the game already (ShowInGame).
+    void RebuildGroupsInGame();
+    void Select(int index);
+    void SelectVipType(int index);
+
+    MuEditor::ServerList::ServerListEdits m_edits;
+    bool m_loaded = false;
+    // The fields changed the groups since the last undo step.
+    bool m_uncommitted = false;
+    int m_selected = -1;
+    // An ID typed for the selected group that another group has, or -1.
+    int m_takenId = -1;
+    int m_selectedVipType = -1;
+    // What is typed into the selected VIP type's ID field; it changes the type
+    // only while it is a free VIP type id.
+    std::string m_vipTypeIdDraft;
+    bool m_vipTypeIdActive = false;
+    // The VIP type the remove popup asks about, or -1.
+    int m_removeVipType = -1;
+    // The rule whose last change was refused (another rule fits the same channels), or -1.
+    int m_refusedRule = -1;
+    // The theme folders a color gets a shade for (UI::RmlBridge::DiscoverAvailableThemes).
+    std::vector<std::string> m_themes;
+    // The language the Channel names tab shows and edits the texts in.
+    std::string m_textLocale = "en";
+    // ShowChannelNames asked for the Channel names tab, until the tab bar is drawn.
+    bool m_selectChannelNames = false;
+    // What the last read or save found, and what it said.
+    std::vector<Data::Items::ItemDataIssue> m_issues;
+    std::string m_status;
+    bool m_statusIsError = false;
+    // Found again when the connect server sent a new list
+    // (CServerListManager::GetReceivedServersVersion).
+    SentChannels m_sent;
+    int m_sentVersion = -1;
+};
+
+#define g_MuServerListUI CMuServerListUI::GetInstance()
+
+#endif // _EDITOR

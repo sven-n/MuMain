@@ -1,0 +1,44 @@
+<rml>
+<head>
+	<title>Character Select Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="char_sel_main.rcss"/>
+</head>
+<body class="scene-bar-scale" data-model="char_sel_main">
+	<!-- Classic (0.97) character select: the gargoyle stone frame around the screen, the NEW
+	     CHARACTER plate held by two claws at the top, and the DELETE / OK plates held by winged
+	     gargoyles at the sides, shown once a character is selected. The plates are art; only the
+	     word on each one is clickable and lights up under the mouse. The 0.97 screen has no Menu
+	     button (Esc opens the menu); it is kept, hidden, for the bindings.
+	     Keep the ids, data-model and event names in sync with ../../char_sel_main.rml
+	     (CharSelMainWin.cpp binds them by name). -->
+	<div id="classic_frame">
+		<div class="frame frame-top frame-left"></div>
+		<div class="frame frame-top frame-right"></div>
+		<div class="frame frame-column-upper frame-left"></div>
+		<div class="frame frame-column-upper frame-right"></div>
+		<div class="frame frame-column-lower frame-left"></div>
+		<div class="frame frame-column-lower frame-right"></div>
+		<div class="frame frame-base frame-left"></div>
+		<div class="frame frame-base frame-right"></div>
+	</div>
+	<div id="panel">
+		<div id="btn_create_item" class="plate plate-create" data-class-disabled="create_disabled">
+			<div id="btn_create" class="hotspot" data-class-disabled="create_disabled" data-event-click="charsel_create_click"></div>
+		</div>
+		<div id="btn_delete_item" class="plate plate-delete" data-class-hidden="delete_disabled">
+			<div id="btn_delete" class="hotspot" data-class-disabled="delete_disabled" data-event-click="charsel_delete_click"></div>
+		</div>
+		<div id="btn_connect_item" class="plate plate-connect" data-class-hidden="connect_disabled">
+			<div id="btn_connect" class="hotspot" data-class-disabled="connect_disabled" data-event-click="charsel_connect_click"></div>
+		</div>
+		<div id="btn_menu_item" class="hidden">
+			<div id="btn_menu" data-event-click="charsel_menu_click"></div>
+		</div>
+	</div>
+	<div id="account_block_message" class="native-text" data-class-hidden="account_block_hidden">
+		<div class="line-row"><span class="line">{{account_block_line1}}</span></div>
+		<div class="line-row"><span class="line">{{account_block_line2}}</span></div>
+	</div>
+</body>
+</rml>

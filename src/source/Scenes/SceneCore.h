@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Object/ZzzInfomation.h"
-#include "Core/Utilities/SpinLock.h"
 
 // Include refactored scene headers
 #ifdef USE_REFACTORED_SCENES
@@ -18,8 +17,6 @@ extern const wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
 
-inline SpinLock* g_render_lock = new SpinLock();
-
 extern bool CheckRenderNextFrame();
 extern void WaitForNextActivity(bool usePreciseSleep);
 extern void UpdateSceneState();
@@ -34,8 +31,6 @@ extern bool CheckName();
 void    StartGame();
 void SetTargetFps(double targetFps);
 double GetTargetFps();
-
-BOOL	ShowCheckBox(int num, int index, int message = MESSAGE_TRADE_CHECK);
 
 int	SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize);
 

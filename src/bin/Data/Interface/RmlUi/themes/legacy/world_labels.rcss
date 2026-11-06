@@ -1,9 +1,9 @@
 /* World labels (world_labels.rml, UI::Character::WorldLabelLayer). Every geometry, colour and text
    size comes from the native label code at physical pixels (px, no root transform); this sheet only
-   fixes what the native text renderer does implicitly: the body font, one unwrapped line starting at
-   the box's top, no clipping, no input. */
+   fixes what the native text renderer does implicitly: its font (font-native, the family the label
+   box was measured with), one unwrapped line starting at the box's top, no clipping, no input. */
 body {
-	font-family: "token(font-body)";
+	font-family: "token(font-native)";
 }
 .label {
 	position: absolute;

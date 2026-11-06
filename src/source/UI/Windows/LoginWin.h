@@ -7,9 +7,6 @@
 
 #include "UI/RmlBridge/RmlThemedView.h"
 
-#include <atomic>
-#include <thread>
-
 namespace Rml { class ElementDocument; }
 
 // The login dialog: RmlUi (login.rml) renders everything, username/password entry included -- the
@@ -38,18 +35,6 @@ public:
     void Release();
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow) override;
-
-    void ConnectConnectionServer();
-
-    // CancelLogin() runs ConnectConnectionServer() on a background thread since it blocks on a
-    // real socket connect; CSceneUICoordinator::Update() polls this each frame and calls
-    // ProcessPendingConnectionReconnect() to join once done. m_bConnectionReconnectDone (atomic)
-    // is the happens-before point that makes the worker thread's writes visible to the main thread.
-    bool HasPendingConnectionReconnect() const
-    {
-        return m_bConnectionReconnectDone.load();
-    }
-    void ProcessPendingConnectionReconnect();
 
     // Sends a login without touching the text boxes or the remembered
     // credentials in config.ini. The manual path calls it after validating
@@ -97,10 +82,8 @@ public:
     }
 
 protected:
-    // UpdateWhileShown() always runs while shown: ticks text-input state and the Remember-Password
-    // sub-dialog even when something else has taken over input, and computes IsActive() via
-    // SetActive() -- false while a higher-depth modal covers this dialog or the Remember-Password
-    // prompt is pending.
+    // Runs each enabled frame, including while hidden. Keeps the Remember-Password prompt ticking;
+    // login input is active only while this window is visible and no higher-depth modal owns it.
     bool UpdateWhileShown() override;
     // Runs only while also active -- OK/Cancel/Enter/Esc submit handling.
     bool UpdateWhileActive() override;
@@ -114,14 +97,13 @@ protected:
 
 private:
     int FirstLoad = 0;
-    std::atomic<bool> m_bConnectionReconnectInFlight{false};
-    std::atomic<bool> m_bConnectionReconnectDone{false};
-    std::thread m_ConnectionReconnectThread;
 
     // Shared by the immediate RmlUi callbacks and UpdateWhileActive()'s keyboard polling; each
     // re-checks the "remember password" prompt's live Pending state itself.
     void SubmitLogin();
     void SubmitCancel();
+    // Plays the click sound of the button a key stands for (a selector of the login document).
+    void PlayKeyClick(const char* button);
     void ApplyRememberMeChange();
     void ApplySavePasswordChange();
 

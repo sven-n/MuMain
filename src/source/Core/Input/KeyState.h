@@ -13,4 +13,12 @@ void ClearLeftMouseButtonPressEdge();
 // state. The argument is a Win32 virtual-key code (VK_*) or an ASCII letter
 // or digit, matching what the existing call sites already pass.
 bool IsKeyDown(int virtualKey);
+
+#ifdef _EDITOR
+// Whether a key or button (a virtual-key code as IsKeyDown takes) is with a
+// window that is not the game's, so that IsKeyDown leaves it out. Set by the
+// editor for its own windows; without one every key is the game's.
+using OtherWindowQuery = bool (*)(int virtualKey);
+void SetOtherWindowQuery(OtherWindowQuery query);
+#endif
 }

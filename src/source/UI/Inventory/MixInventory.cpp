@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Inventory/MixInventory.h"
 #include "UI/Inventory/HeldItemPlacement.h"
 #include "UI/Core/WindowSystem.h"
@@ -57,6 +58,13 @@ float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, flo
         probeUnitsPerLayoutUnit;
     return width <= boxWidth ? 1.f : std::max(boxWidth / width, minimumFit);
 }
+
+// The castle senior mix's description, in row order.
+const wchar_t* const* const kCastleSeniorDescription[] = {
+    &I18N::Game::BraveOne,        &I18N::Game::NowYouHaveBecome, &I18N::Game::ALordOfTheCastle,
+    &I18N::Game::MayTheBlessings, &I18N::Game::OfTheGuardian,    &I18N::Game::BeUponYou,
+};
+constexpr int kCastleSeniorDescriptionRows = static_cast<int>(std::size(kCastleSeniorDescription));
 } // namespace
 
 CMixInventory::CMixInventory()
@@ -334,6 +342,9 @@ bool CMixInventory::Update()
 
     if (IsVisible())
     {
+        // The mix sparkle runs down while it shows.
+        if (m_iMixEffectTimer > 0)
+            m_iMixEffectTimer -= REFERENCE_FRAME_STEP;
         CheckMixInventory();
         RefreshSocketOptions();
     }
@@ -353,6 +364,8 @@ void CMixInventory::SyncRmlModel()
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+        return;
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
@@ -766,9 +779,8 @@ void CMixInventory::SyncMixContentModel()
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-        for (int i = 0; i < 6; ++i)
-            describeAt(true, I18N::Game::Lookup(1644 + i), "dim", i,
-                       false);
+        for (int i = 0; i < kCastleSeniorDescriptionRows; ++i)
+            describeAt(true, *kCastleSeniorDescription[i], "dim", i, false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         describe(I18N::Game::RefineTheItemToCreate, white, 0);
@@ -959,18 +971,19 @@ bool CMixInventory::Mix()
         wchar_t strText[256];
         if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
         {
-            mu_swprintf(strText, L"%ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
+            mu_swprintf(strText, L"%ls", SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
         }
         else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
         {
-            mu_swprintf(strText, L"%ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
+            mu_swprintf(strText, L"%ls %ls", SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
         }
         else
         {
-            mu_swprintf(strText, L"%ls %ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
+            mu_swprintf(strText, L"%ls %ls %ls",
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
         }
 
         mu::ui::window::GenericDialogConfig cfg;
@@ -1075,13 +1088,7 @@ bool CMixInventory::CheckMixInventory()
 void CMixInventory::RenderMixEffect()
 {
     if (m_iMixEffectTimer <= 0)
-    {
         return;
-    }
-    else
-    {
-        --m_iMixEffectTimer;
-    }
     EnableAlphaBlend();
 
     for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -1093,16 +1100,19 @@ void CMixInventory::RenderMixEffect()
         {
             for (int w = 0; w < iWidth; ++w)
             {
-                const BYTE red = static_cast<BYTE>((rand() % 6 + 6) * 0.1f * 255.f);
-                const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
+                // Every pass of the frame draws the cell's sparkle alike.
+                const void* item = m_pNewInventoryCtrl->GetItem(i);
+                const auto salt = static_cast<std::uint32_t>((h * 16 + w) * 8);
+                const BYTE red = static_cast<BYTE>((Random::DrawRand(item, salt) % 6 + 6) * 0.1f * 255.f);
+                const BYTE green = static_cast<BYTE>((Random::DrawRand(item, salt + 1) % 4 + 4) * 0.1f * 255.f);
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
                 const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
                     m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
                 // The original's sizes, for its 20-unit cell, at the cell's drawn size.
-                float Scale = (5.f + (rand() % 10)) * cell.width / 20.f;
-                float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
-                float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
+                float Scale = (5.f + (Random::DrawRand(item, salt + 2) % 10)) * cell.width / 20.f;
+                float x = cell.x + (Random::DrawRand(item, salt + 3) % (std::max)(1, static_cast<int>(cell.width)));
+                float y = cell.y + (Random::DrawRand(item, salt + 4) % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate,

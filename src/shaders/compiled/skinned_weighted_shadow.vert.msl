@@ -1,0 +1,194 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct Skinning
+{
+    float4x4 mvp;
+    float4 bodyOriginAndScale;
+    float4 boneScaleAndRestPoseScale;
+    uint4 palette;
+    float4 lightDirection;
+    float4 fogParameters;
+    uint4 textureCoordinateMode;
+    float4 chromeParameters;
+    float4 textureCoordinateParameters;
+};
+
+struct Shadow
+{
+    float4 shadowOrigin;
+    float4 shadowProjection;
+};
+
+struct boneRows
+{
+    float4 _data[1];
+};
+
+struct terrainWords
+{
+    uint _data[1];
+};
+
+struct main0_out
+{
+    float2 _entryPointOutput_uv [[user(locn0)]];
+    float4 _entryPointOutput_color [[user(locn1)]];
+    float _entryPointOutput_fogFactor [[user(locn2)]];
+    float4 gl_Position [[position]];
+    float gl_ClipDistance [[clip_distance]] [1];
+    float gl_ClipDistance_0 [[user(clip0)]];
+};
+
+struct main0_in
+{
+    float3 input_pos [[attribute(0)]];
+    float4 input_color [[attribute(3)]];
+    int input_positionBoneIndex [[attribute(4)]];
+    uint4 input_joints [[attribute(6)]];
+    float4 input_weights [[attribute(7)]];
+};
+
+vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _76 [[buffer(0)]], constant Shadow& _88 [[buffer(1)]], const device boneRows& boneRows_1 [[buffer(2)]], const device terrainWords& terrainWords_1 [[buffer(3)]])
+{
+    main0_out out = {};
+    float3 _1189;
+    do
+    {
+        if (in.input_weights.x > 0.0)
+        {
+            float4 _699 = float4(in.input_pos, 1.0);
+            float3 _1192;
+            if ((in.input_weights.x > 0.0) && (in.input_joints.x < _76.palette.y))
+            {
+                uint _723 = _76.palette.x + (in.input_joints.x * 3u);
+                _1192 = float3(dot(boneRows_1._data[_723], _699), dot(boneRows_1._data[_723 + 1u], _699), dot(boneRows_1._data[_723 + 2u], _699)) * in.input_weights.x;
+            }
+            else
+            {
+                _1192 = float3(0.0);
+            }
+            float3 _1233;
+            if ((in.input_weights.y > 0.0) && (in.input_joints.y < _76.palette.y))
+            {
+                uint _1215 = _76.palette.x + (in.input_joints.y * 3u);
+                _1233 = _1192 + (float3(dot(boneRows_1._data[_1215], _699), dot(boneRows_1._data[_1215 + 1u], _699), dot(boneRows_1._data[_1215 + 2u], _699)) * in.input_weights.y);
+            }
+            else
+            {
+                _1233 = _1192;
+            }
+            float3 _1275;
+            if ((in.input_weights.z > 0.0) && (in.input_joints.z < _76.palette.y))
+            {
+                uint _1257 = _76.palette.x + (in.input_joints.z * 3u);
+                _1275 = _1233 + (float3(dot(boneRows_1._data[_1257], _699), dot(boneRows_1._data[_1257 + 1u], _699), dot(boneRows_1._data[_1257 + 2u], _699)) * in.input_weights.z);
+            }
+            else
+            {
+                _1275 = _1233;
+            }
+            float3 _1317;
+            if ((in.input_weights.w > 0.0) && (in.input_joints.w < _76.palette.y))
+            {
+                uint _1299 = _76.palette.x + (in.input_joints.w * 3u);
+                _1317 = _1275 + (float3(dot(boneRows_1._data[_1299], _699), dot(boneRows_1._data[_1299 + 1u], _699), dot(boneRows_1._data[_1299 + 2u], _699)) * in.input_weights.w);
+            }
+            else
+            {
+                _1317 = _1275;
+            }
+            float3 _1188;
+            if (_76.palette.z != 0u)
+            {
+                _1188 = _76.bodyOriginAndScale.xyz + (_1317 * _76.bodyOriginAndScale.w);
+            }
+            else
+            {
+                _1188 = _1317;
+            }
+            _1189 = _1188;
+            break;
+        }
+        float3 _1185;
+        do
+        {
+            if ((in.input_positionBoneIndex < 0) || (in.input_positionBoneIndex >= int(_76.palette.y)))
+            {
+                _1185 = in.input_pos;
+                break;
+            }
+            uint _810 = _76.palette.x + (uint(in.input_positionBoneIndex) * 3u);
+            float4 _782 = boneRows_1._data[_810];
+            uint _814 = _810 + 1u;
+            float4 _784 = boneRows_1._data[_814];
+            uint _817 = _810 + 2u;
+            float4 _786 = boneRows_1._data[_817];
+            float3 _1183;
+            if (_76.boneScaleAndRestPoseScale.x == 1.0)
+            {
+                float4 _835 = float4(in.input_pos * ((_76.boneScaleAndRestPoseScale.y != 0.0) ? _76.boneScaleAndRestPoseScale.y : 1.0), 1.0);
+                _1183 = float3(dot(boneRows_1._data[_810], _835), dot(boneRows_1._data[_814], _835), dot(boneRows_1._data[_817], _835));
+            }
+            else
+            {
+                _1183 = (float3(dot(boneRows_1._data[_810].xyz, in.input_pos), dot(boneRows_1._data[_814].xyz, in.input_pos), dot(boneRows_1._data[_817].xyz, in.input_pos)) * _76.boneScaleAndRestPoseScale.x) + float3(_782.w, _784.w, _786.w);
+            }
+            float3 _1184;
+            if (_76.palette.z != 0u)
+            {
+                _1184 = _76.bodyOriginAndScale.xyz + (_1183 * _76.bodyOriginAndScale.w);
+            }
+            else
+            {
+                _1184 = _1183;
+            }
+            _1185 = _1184;
+            break;
+        } while(false);
+        _1189 = _1185;
+        break;
+    } while(false);
+    float3 _904 = _1189 - _88.shadowOrigin.xyz;
+    _904.x += ((_904.z * (_904.x + _88.shadowProjection.x)) / (_904.z - _88.shadowProjection.y));
+    float3 _607 = _904 + _88.shadowOrigin.xyz;
+    float _1190;
+    do
+    {
+        if (((_88.shadowProjection.z == 0.0) || (_607.x < 0.0)) || (_607.y < 0.0))
+        {
+            _1190 = 0.0;
+            break;
+        }
+        float _972 = _607.x * 0.00999999977648258209228515625;
+        float _974 = _607.y * 0.00999999977648258209228515625;
+        int _976 = int(_972);
+        int _978 = int(_974);
+        uint _983 = uint((_978 * 256) + _976);
+        if ((_983 >= 65536u) || (((terrainWords_1._data[65536u + (_983 >> uint(5))] >> (_983 & 31u)) & 1u) != 0u))
+        {
+            _1190 = _88.shadowOrigin.w;
+            break;
+        }
+        float _1007 = _974 - float(_978);
+        float _1064 = as_type<float>(terrainWords_1._data[(uint(_978 & 255) * 256u) + uint(_976 & 255)]);
+        float _1100 = as_type<float>(terrainWords_1._data[(uint(_978 & 255) * 256u) + uint((_976 + 1) & 255)]);
+        float _1030 = _1064 + ((as_type<float>(terrainWords_1._data[(uint((_978 + 1) & 255) * 256u) + uint(_976 & 255)]) - _1064) * _1007);
+        _1190 = _1030 + (((_1100 + ((as_type<float>(terrainWords_1._data[(uint((_978 + 1) & 255) * 256u) + uint((_976 + 1) & 255)]) - _1100) * _1007)) - _1030) * (_972 - float(_976)));
+        break;
+    } while(false);
+    _607.z = _1190 + 5.0;
+    float4 _1133 = _76.mvp * float4(_607, 1.0);
+    float4 _1144 = _1133;
+    float _642 = _76.fogParameters.y - _76.fogParameters.x;
+    out.gl_Position = _1133;
+    out._entryPointOutput_uv = float2(0.0);
+    out._entryPointOutput_color = in.input_color;
+    out._entryPointOutput_fogFactor = (_642 > 0.001000000047497451305389404296875) ? fast::clamp((_76.fogParameters.y - abs(_1144.w)) / _642, 0.0, 1.0) : 1.0;
+    out.gl_ClipDistance[0] = _1144.w - 1.0;
+    out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
+    return out;
+}
+

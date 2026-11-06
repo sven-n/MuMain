@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -11,12 +12,15 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/WindowSystem.h"
 #include "Scenes/MainScene.h"
+#include "Render/Renderer/MuRenderer.h"
 
 #include <algorithm>
+#include <array>
 
 namespace
 {
@@ -39,9 +43,41 @@ float UpdateAnimationFrame(float currentFrame, bool isVisible)
 
 OBJECT Sprites[MAX_SPRITES];
 
+namespace
+{
+// Sprites created inside a bloom exclusion - a character's gem sparkles, item
+// glows and eye lights - are drawn inside one, so post-processing leaves the
+// character's Classic look alone.
+std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
+// Sprites a RenderSprites pass already drew this frame; a later pass in the same frame draws only newer ones.
+SpriteDrawFlags s_spriteDrawn{};
+} // namespace
+
+SpriteDrawFlags SpritesDrawnThisFrame()
+{
+    return s_spriteDrawn;
+}
+
+void SetSpritesDrawnThisFrame(const SpriteDrawFlags& drawn)
+{
+    s_spriteDrawn = drawn;
+}
+
+void ClearSprites()
+{
+    for (OBJECT& sprite : Sprites)
+        sprite.Live = false;
+}
+
+void BeginSpriteDraws()
+{
+    s_spriteDrawn.fill(false);
+}
+
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    Diagnostics::DrawSpawnCheck::Note("sprite");
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return false;
     }
@@ -55,7 +91,10 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
             o->Type = Type;
             o->SubType = SubType;
             o->Owner = Owner;
+            s_spriteBloomExcluded[i] = mu::GetRenderer().IsBloomExcluded();
+            s_spriteDrawn[i] = false;
             o->AnimationFrame = 1.f;
+            o->Visible = true;
             o->Scale = Scale;
             o->Angle[2] = Rotation;
             VectorCopy(Position, o->Position);
@@ -67,10 +106,33 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
     return false;
 }
 
-void RenderSprite(OBJECT* o, OBJECT* Owner)
+bool IsSpriteBloomExcluded(int sprite)
 {
-    o->AnimationFrame = UpdateAnimationFrame(o->AnimationFrame, o->Visible);
-    float Scale = o->AnimationFrame * o->Scale;
+    return s_spriteBloomExcluded[sprite];
+}
+
+Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded)
+{
+    using Render::EffectDrawing::Blend;
+    const OBJECT* o = &sprite;
+    Render::EffectDrawing::SpriteDraw draw;
+    draw.texture = o->Type;
+    VectorCopy(o->Position, draw.position);
+    VectorCopy(o->Light, draw.light);
+    draw.rotation = o->Angle[2];
+    draw.bloomExcluded = bloomExcluded;
+    if (o->Type == BITMAP_FORMATION_MARK)
+        draw.state.blend = Blend::AlphaTest;
+    else if (o->SubType == 0)
+        draw.state.blend = Blend::Glow;
+    else if (o->SubType == 1)
+        draw.state.blend = Blend::Subtract;
+    else if (o->SubType == 2)
+        draw.state.blend = Blend::AlphaTest;
+    else if (o->SubType == 3)
+        draw.state.blend = Blend::Blend2;
+
+    float Scale = UpdateAnimationFrame(o->AnimationFrame, o->Visible) * o->Scale;
 
     BITMAP_t* pBitmap = Bitmaps.GetTexture(o->Type);
     float Width = pBitmap->Width * Scale;
@@ -124,17 +186,24 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
             break;
         }
 
-        RenderSprite(o->Type, o->Position, 64, 64, o->Light, o->Angle[2], u, v, uw, vw);
+        draw.width = 64.f;
+        draw.height = 64.f;
+        draw.u = u;
+        draw.v = v;
+        draw.uWidth = uw;
+        draw.vHeight = vw;
     }
     else
     {
-        RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Angle[2]);
+        draw.width = Width;
+        draw.height = Height;
     }
+    return draw;
 }
 
 void RenderSprites(BYTE byRenderOneMore)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return;
     }
@@ -145,7 +214,7 @@ void RenderSprites(BYTE byRenderOneMore)
 
     for (int i = 0; i < MAX_SPRITES; i++)
     {
-        OBJECT* o = &Sprites[i];
+        const OBJECT* o = &Sprites[i];
         if (byRenderOneMore == 1)
         {
             if (o->Position[2] > 350.f)
@@ -157,56 +226,19 @@ void RenderSprites(BYTE byRenderOneMore)
         {
             if (o->Position[2] <= 300.f)
             {
-                o->Live = false;
+                s_spriteDrawn[i] = true;
                 continue;
             }
         }
 
-        if (o->Live)
+        if (o->Live && !s_spriteDrawn[i])
         {
-            if (o->Type == BITMAP_FORMATION_MARK)
-            {
-                EnableAlphaTest();
-            }
-            else if (o->SubType == 0)
-            {
-                EnableAlphaBlend();
-            }
-            else if (o->SubType == 1)
-            {
-                EnableAlphaBlendMinus();
-            }
-            else if (o->SubType == 2)
-            {
-                EnableAlphaTest();
-            }
-            else if (o->SubType == 3)
-            {
-                EnableAlphaBlend2();
-            }
-            RenderSprite(o, o->Owner);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(DescribeSprite(*o, s_spriteBloomExcluded[i]));
 
             if (byRenderOneMore == 0 || byRenderOneMore == 2)
             {
-                o->Live = false;
+                s_spriteDrawn[i] = true;
             }
-        }
-    }
-}
-
-void CheckSprites()
-{
-    if (!g_pOption->GetRenderAllEffects())
-    {
-        return;
-    }
-
-    for (int i = 0; i < MAX_SPRITES; i++)
-    {
-        OBJECT* o = &Sprites[i];
-        if (o->Live)
-        {
-            o->Visible = true;
         }
     }
 }

@@ -257,12 +257,12 @@ void RenderBoolean(int x, int y, CHAT* c)
         g_pRenderText->SetTextColor(GetGuildRelationShipTextColor(c->Owner->GuildRelationShip));
     }
 
-    if (c->Union && c->Union[0])
+    if (c->Union[0])
     {
         g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Union, RenderBoxSize.cx, iLineHeight, RT3_SORT_LEFT);
         RenderPos.y += iLineHeight;
     }
-    if (c->Guild && c->Guild[0])
+    if (c->Guild[0])
     {
         g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Guild, RenderBoxSize.cx, iLineHeight, RT3_SORT_LEFT);
         RenderPos.y += iLineHeight;
@@ -615,7 +615,7 @@ void RenderBooleans()
             int ScreenX, ScreenY;
             if (ci->Owner != NULL)
             {
-                OBJECT* o = &ci->Owner->Object;
+                const OBJECT* o = &ci->Owner->Object;
                 Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 60.f, Position);
 
                 if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)

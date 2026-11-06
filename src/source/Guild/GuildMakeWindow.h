@@ -65,9 +65,9 @@ namespace mu::ui::window
         void ClosingProcess();
 
     public:
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
 
     private:
         void UpdateGMInfo(GUILDMAKE_BUTTON button);
@@ -75,7 +75,7 @@ namespace mu::ui::window
         void UpdateGMResultInfo(GUILDMAKE_BUTTON button);
 
     public:
-        bool Render();
+        bool Render() override;
 
     private:
         void BuildRmlUi();
@@ -85,7 +85,7 @@ namespace mu::ui::window
         void ReadNameField(wchar_t* text, int length) const;
 
     public:
-        float GetLayerDepth();	//. 4.4f
+        float GetLayerDepth() override; //. 4.4f
 
     private:
         void ChangeWindowState(const GUILDMAKE_STATE state);
