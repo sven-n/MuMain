@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Globals/_define.h" // ITEM_AXE, MAX_CLASS, MAX_MODEL_MONSTER, MAX_ITEM, MODEL_ITEM_COMMON_NUM
-#include <map>
 
 namespace SEASON3A
 {
