@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <ostream>
 #include <span>
 #include <string_view>
 #include <vector>
