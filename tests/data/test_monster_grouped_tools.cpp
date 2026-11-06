@@ -16,6 +16,7 @@
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
@@ -29,12 +30,15 @@
 #include "UI/MonsterTools/MonsterShownValues.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MonsterTreeModel.h"
+#include "Core/MuEditorCore.h"
+#include "UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -252,6 +256,55 @@ TEST_CASE("Monster tools: a monster as a whole shows and stores the values its n
     CHECK(ShownValues::ReadSelected()->monster.attacks);
     g_MonsterSelection.SelectMonster(2);
     CHECK_FALSE(ShownValues::ReadSelected()->wholeMonster);
+}
+
+TEST_CASE("Monster Attacks: a number's shared attacks are locked for edits, not for the previews [editor][monsters]")
+{
+    GroupedTools tools;
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_DEATH_CENTURION";
+    model.load.file = "Data/Monster/Monster11.bmd";
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    MonsterDefinition values = *g_MonsterEdits.ReadSharedValues(145);
+    values.attacks.emplace();
+    values.attacks->otherwise = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    REQUIRE(g_MonsterEdits.SetSharedValues("attacks", 145, values));
+    REQUIRE(OwnValues::GetNumberState(145, MonsterValueField::Attacks) == OwnValues::State::Shared);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(145);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    // The items of the attacks of all maps of 145.
+    const auto item = [](const char* label)
+    {
+        constexpr int AllMaps = -1;
+        const ImGuiWindow* window = ImGui::FindWindowByName(MuEditor::WindowIds::MonsterAttacks);
+        REQUIRE(window != nullptr);
+        return ImGui::GetIDWithSeed(label, nullptr,
+                                    ImGui::GetIDWithSeed(AllMaps, ImGui::GetIDWithSeed(145, window->ID)));
+    };
+    const auto click = [&](const char* label)
+    {
+        ImGui::ActivateItemByID(item(label));
+        render();
+        render();
+    };
+    render();
+
+    click(I18N::Editor::PlayNextAttack);
+    CHECK(g_MuMonsterAttacksUI.GetLastPlayed().has_value());
+    click(I18N::Editor::TheGenericPattern);
+    CHECK_FALSE(Entry(145).attacks->otherwiseGeneric);
+
+    g_MuEditorCore.GetToolWindows().monsterPreview = false;
+    g_MonsterModelDatabase.Build({});
 }
 
 TEST_CASE("Monster tools: a change of only the shared values is a change of the tools' data [editor][monsters]")

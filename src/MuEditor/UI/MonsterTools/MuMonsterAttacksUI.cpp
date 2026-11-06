@@ -239,6 +239,7 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
     }
     // The attacks of all maps, or the map variant's (Q-MN96).
     const OwnValues::State state = m_variant == AllMaps ? m_attacksState : m_variantsState;
+    m_fieldState = state;
     ImGui::PushID(m_variant);
     OwnValues::BeginField(state);
     if (m_variant != AllMaps)
@@ -565,6 +566,8 @@ void MuMonsterAttacksUI::RenderPlayNext(MonsterDefinition& monster)
         m_counts = {};
         m_lastPlayed.reset();
     }
+    // Shared attacks are locked for edits, not for the previews.
+    OwnValues::EndField(m_fieldState);
     ImGui::BeginDisabled(!ShownModel::FindSlot(monster));
     if (ImGui::SmallButton(I18N::Editor::PlayNextAttack))
     {
@@ -587,10 +590,13 @@ void MuMonsterAttacksUI::RenderPlayNext(MonsterDefinition& monster)
         ImGui::SameLine();
         ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::Played0, {AnimationLabel(*m_lastPlayed)}).c_str());
     }
+    OwnValues::BeginField(m_fieldState);
 }
 
 void MuMonsterAttacksUI::RenderPlayButton(MonsterDefinition& monster, int animation)
 {
+    // Shared attacks are locked for edits, not for the previews.
+    OwnValues::EndField(m_fieldState);
     ImGui::BeginDisabled(!ShownModel::FindSlot(monster) || animation == NoAttackAnimation);
     if (ImGui::SmallButton(I18N::Editor::Play))
     {
@@ -601,6 +607,7 @@ void MuMonsterAttacksUI::RenderPlayButton(MonsterDefinition& monster, int animat
     {
         ImGui::SetTooltip("%s", I18N::Editor::PlaysItOnceInTheMonsterPreviewWithTheAttackSounds);
     }
+    OwnValues::BeginField(m_fieldState);
 }
 
 void MuMonsterAttacksUI::PlayInPreview(MonsterDefinition& monster, int animation)

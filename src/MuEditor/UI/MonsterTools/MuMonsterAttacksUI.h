@@ -81,6 +81,9 @@ private:
     const ShownValues::ShownMonster* m_shown = nullptr;
     OwnValues::State m_attacksState = OwnValues::State::Plain;
     OwnValues::State m_variantsState = OwnValues::State::Plain;
+    // The state of the field the shown attacks are in (BeginField), which the
+    // Play buttons leave for their row.
+    OwnValues::State m_fieldState = OwnValues::State::Plain;
     int m_newMonsterSkill = 0;
     int m_newSkill = 0;
     // The text of the sound field while it is edited, and whether the last
