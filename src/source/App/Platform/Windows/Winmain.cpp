@@ -2071,7 +2071,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
     wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
     g_strSelectedML = g_aszMLSelection;
-    g_ErrorReport.Write(L"> Language = %ls.\r\n", g_aszMLSelection);
+    // The legacy "Eng"/"Por"/"Spn" selection that picks the Data/Local files; the UI language comes later.
+    g_ErrorReport.Write(L"> Data language = %ls.\r\n", g_aszMLSelection);
 
     if (m_RememberMe)
     {
@@ -2302,6 +2303,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         I18N::SetLocale(uiLocale.c_str());
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
+    // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
+    g_ErrorReport.Write(L"> UI language = %hs, item names %ls.\r\n", I18N::GetCurrentLocale(),
+                        GameConfig::GetInstance().GetTranslateItemNames() ? L"translated" : L"in English");
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR

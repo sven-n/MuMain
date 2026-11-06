@@ -395,8 +395,10 @@ Data          : data-<id> (matches this client)
   runtime and data downloads don't belong together; data archives from before the
   file, and self-built clients, say `unknown`.
 
-The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the language,
-and, once the renderer is up, the GPU, its graphics API and driver version.
+The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the data language
+(`Eng`, `Por` or `Spn`, which picks the `Data/Local` files), and, once the renderer is
+up, the GPU, its graphics API and driver version, and the UI language the player reads
+(`en`, `de`, `zh-CN`, ...) with whether item names are translated.
 `ClientLibrary` names the commit the .NET library was built from and its OpenMU
 packets version. In a release download that commit is the client's, so a different
 one means a library from another download. A local build rebuilds the library only
