@@ -5,6 +5,7 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <random>
 #include <string>
 
 #ifdef _WIN32
@@ -15,12 +16,21 @@
 
 namespace
 {
+// A folder name of its own: test runs of other build folders may run at the same time and share the temp folder.
+std::filesystem::path UniqueTemporaryFolder()
+{
+    static const unsigned runId = std::random_device{}();
+    static unsigned fileNumber = 0;
+    const std::string name =
+        "mu-version-files-test-" + std::to_string(runId) + "-" + std::to_string(fileNumber++);
+    return std::filesystem::temp_directory_path() / name;
+}
+
 // A file in its own temporary folder, removed with the folder at the end of the test.
 class TemporaryFile
 {
 public:
-    explicit TemporaryFile(const std::string& contents)
-        : m_folder(std::filesystem::temp_directory_path() / "mu-version-files-test")
+    explicit TemporaryFile(const std::string& contents) : m_folder(UniqueTemporaryFolder())
     {
         std::filesystem::remove_all(m_folder);
         std::filesystem::create_directories(m_folder);
