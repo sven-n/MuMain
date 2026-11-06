@@ -9,10 +9,8 @@ endforeach()
 set(expected_revision "a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b")
 set(upload_property "MuMain.SDL_ttf.gpu_text.uploaded_glyphs")
 set(gpu_text_source "${SDL3_TTF_SOURCE}/src/SDL_gpu_textengine.c")
-# SDL_ttf's release archive names the commit it was made from.
-set(revision_file "${SDL3_TTF_SOURCE}/.git-hash")
 
-foreach(required_file "${MU_ROOT_CMAKE}" "${gpu_text_source}" "${MU_PROPERTY_HEADER}" "${MU_PATCH}" "${revision_file}")
+foreach(required_file "${MU_ROOT_CMAKE}" "${gpu_text_source}" "${MU_PROPERTY_HEADER}" "${MU_PATCH}")
     if(NOT EXISTS "${required_file}")
         message(FATAL_ERROR "required file is missing: ${required_file}")
     endif()
@@ -23,7 +21,26 @@ file(READ "${gpu_text_source}" gpu_text)
 file(READ "${MU_PROPERTY_HEADER}" property_header)
 file(READ "${MU_PATCH}" patch)
 
-file(STRINGS "${revision_file}" source_revision LIMIT_COUNT 1)
+# SDL_ttf's release archive names the commit it was made from. A git clone given as FETCHCONTENT_SOURCE_DIR_SDL3_TTF,
+# e.g. the sources of a build folder from before the archive, knows its own.
+if(EXISTS "${SDL3_TTF_SOURCE}/.git-hash")
+    file(STRINGS "${SDL3_TTF_SOURCE}/.git-hash" source_revision LIMIT_COUNT 1)
+elseif(EXISTS "${SDL3_TTF_SOURCE}/.git")
+    find_package(Git REQUIRED)
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" -C "${SDL3_TTF_SOURCE}" rev-parse HEAD
+        RESULT_VARIABLE git_result
+        OUTPUT_VARIABLE source_revision
+        ERROR_VARIABLE git_error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(NOT git_result EQUAL 0)
+        message(FATAL_ERROR "git rev-parse HEAD failed in ${SDL3_TTF_SOURCE}: ${git_error}")
+    endif()
+else()
+    message(FATAL_ERROR
+        "${SDL3_TTF_SOURCE} names its revision neither in .git-hash (SDL_ttf's release archive) nor as a git clone")
+endif()
 if(NOT source_revision STREQUAL expected_revision)
     message(FATAL_ERROR "SDL3_ttf must use exact revision ${expected_revision}; its sources are ${source_revision}")
 endif()
