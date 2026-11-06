@@ -486,12 +486,10 @@ TEST_CASE("The tooltip's values need no hero [data][items][tooltip]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    CHARACTER_ATTRIBUTE* const previous = CharacterAttribute;
-    CharacterAttribute = nullptr;
+    NoHeroScope noHero;
     ITEM kris;
     FillItemFromParameters(kris, Engine::Items::TooltipSnapshot::FullItemParameters(0, 0));
     const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(kris);
-    CharacterAttribute = previous;
     CHECK(values.strength.required == kris.RequireStrength);
     CHECK(values.strength.missing == 0);
     CHECK(values.level.missing == 0);

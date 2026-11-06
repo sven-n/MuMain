@@ -40,3 +40,25 @@ private:
     CHARACTER_ATTRIBUTE* m_previousHero;
     CHARACTER* m_previousHeroCharacter;
 };
+
+// Points the game at no hero (CharacterAttribute is null), as in an editor preview or before entering the world, and
+// puts the previous one back when it goes.
+class NoHeroScope
+{
+public:
+    NoHeroScope() : m_previousHero(CharacterAttribute)
+    {
+        CharacterAttribute = nullptr;
+    }
+
+    ~NoHeroScope()
+    {
+        CharacterAttribute = m_previousHero;
+    }
+
+    NoHeroScope(const NoHeroScope&) = delete;
+    NoHeroScope& operator=(const NoHeroScope&) = delete;
+
+private:
+    CHARACTER_ATTRIBUTE* m_previousHero;
+};
