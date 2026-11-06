@@ -17,8 +17,7 @@
 #include <sstream>
 #include "../Console/MuEditorConsoleUI.h"
 
-// The folder below Data/Local that the item and skill editors' file actions use.
-std::wstring g_strSelectedML;
+extern std::wstring g_strSelectedML;
 
 // ===== BUTTON RENDERING =====
 
