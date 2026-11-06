@@ -267,6 +267,14 @@ TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
     ItemNameCases cases;
     cases.SetCases("pl", {"gen", "acc"});
     cases.SetCases("de", {"gen"});
+    // Rena's lines 3 and 4: a text naming the item at those levels fills in the item's forms, or takes another line.
+    ItemNameLine placeholders = LiteralNameLine("Rena +{level}||pl=Rena +{level}", 4);
+    placeholders.nameForms.Set("pl", "gen", "x");
+    items[1].nameLines.push_back(placeholders);
+    ItemNameLine conditional = LiteralNameLine("Rena of the elves||pl=Rena elfow", 5);
+    conditional.when.push_back(TooltipCondition{});
+    conditional.nameForms.Set("pl", "gen", "x");
+    items[1].nameLines.push_back(conditional);
 
     std::vector<ItemDataIssue> issues;
     ValidateNameForms(items, cases, "NameCases.json", issues);
@@ -279,5 +287,9 @@ TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
     CHECK(has("nameForms.ru"));
     CHECK(has("nameForms.pl.voc"));
     CHECK_FALSE(has("nameForms.de"));
-    CHECK(issues.size() == 3);
+    CHECK(has("nameLines[3].nameForms.pl"));
+    CHECK(has("nameLines[4].nameForms"));
+    // The Stone of Friendship's literal line keeps its forms.
+    CHECK_FALSE(has("nameLines[1].nameForms.pl"));
+    CHECK(issues.size() == 5);
 }

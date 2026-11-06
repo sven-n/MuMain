@@ -954,6 +954,12 @@ void CheckNameForms(const ItemDefinition& definition, const ItemNameForms& forms
         {
             warn(localeField, "has forms, but the name has no \"" + locale + "\" text of its own to decline");
         }
+        else if (names != nullptr && names->Get(locale).find('{') != std::string::npos)
+        {
+            warn(localeField, "the name has placeholders: a text that names the item fills in the item's own forms, "
+                              "so these never show");
+            continue;
+        }
         for (const auto& [caseKey, form] : caseForms)
         {
             if (!cases.Uses(locale, caseKey))
@@ -989,6 +995,13 @@ void ValidateNameForms(std::span<const ItemDefinition> items, const ItemNameCase
                 issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
                                   "the line has no text of its own: it shows the standard name, whose forms are the "
                                   "item's nameForms"});
+                continue;
+            }
+            if (!line.when.empty())
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
+                                  "the line has conditions: a text that names the item at a level takes a line "
+                                  "without conditions, so these forms never show"});
                 continue;
             }
             CheckNameForms(definition, line.nameForms, line.textName.empty() ? &line.text : nullptr, field, cases,
