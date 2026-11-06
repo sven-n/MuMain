@@ -976,7 +976,11 @@ the Item Sync tool):
   OpenMU's side by an `ItemExchangeField` (`ItemExchangeField.cs`).
   Importing items whose links name a definition the client does not have is
   refused with a message, so the options file is imported first; the links
-  travel as OpenMU's labels too.
+  travel as OpenMU's labels too. Links to a definition the exchange leaves
+  out (the Wizard's rings' `fixed` definitions, O29) are left out of the
+  field as well: the export doesn't write them, and an import or Update
+  from server keeps the client's links to them, so the rings neither fail
+  on OpenMU nor show OpenMU's empty list as a difference.
 - **Mapping to OpenMU** (phase C does OpenMU's side): a definition is
   OpenMU's `ItemOptionDefinition`, matched through its labels (O27, P23).
   The Horn of Fenrir is one definition on both sides (O28). An option is an
@@ -1012,8 +1016,12 @@ the Item Sync tool):
   written when a user ticks **Known**; nothing is shipped. `docs/item-data.md`
   lists the option differences with their reasons: zen, boots, pants (until
   OpenMU holds 200), the socket Lightning row, the Wizard's Ring at +1 and +2, the Lethal Wizard's
-  Ring, the books' excellent options, the rounding of level / 20, and the
-  Elite Skeleton ring's vitality against max HP.
+  Ring, the books' excellent options, the rounding of level / 20, the
+  Elite Skeleton ring's vitality against max HP, the Dark Horse's base
+  dexterity against OpenMU's `TotalAgility` (`Pets.cs:298`, P30), Gold
+  Fenrir's hero level (`ZzzInventory.cpp:2203`) against `TotalLevel` (P30),
+  and OpenMU's Fenrir reader and its socket and guardian numbering (P21,
+  P31).
 
 ### 13. Proof
 
