@@ -1,0 +1,2353 @@
+{
+  "formatVersion": 1,
+  "folders": [
+    {
+      "name": "Your character",
+      "folders": [
+        {
+          "name": "Attacks",
+          "sounds": [
+            "SOUND_BRANDISH_SWORD01",
+            "SOUND_BRANDISH_SWORD02",
+            "SOUND_BRANDISH_SWORD03",
+            "SOUND_ATTACK_MELEE_HIT1",
+            "SOUND_ATTACK_MELEE_HIT2",
+            "SOUND_ATTACK_MELEE_HIT3",
+            "SOUND_ATTACK_MELEE_HIT4",
+            "SOUND_ATTACK_MISSILE_HIT1",
+            "SOUND_ATTACK_MISSILE_HIT2",
+            "SOUND_ATTACK_MISSILE_HIT3",
+            "SOUND_ATTACK_MISSILE_HIT4",
+            "SOUND_BOW01",
+            "SOUND_CROSSBOW01"
+          ]
+        }
+      ],
+      "sounds": [
+        "SOUND_HUMAN_WALK_GROUND",
+        "SOUND_HUMAN_WALK_GRASS",
+        "SOUND_HUMAN_WALK_SNOW",
+        "SOUND_HUMAN_WALK_SWIM",
+        "SOUND_GET_ITEM01",
+        "SOUND_DROP_ITEM01",
+        "SOUND_DROP_GOLD01",
+        "SOUND_DRINK01",
+        "SOUND_EAT_APPLE01",
+        "SOUND_HEART",
+        "SOUND_GET_ENERGY",
+        "SOUND_CHAOS_FALLING",
+        "SOUND_HUMAN_SCREAM01",
+        "SOUND_HUMAN_SCREAM02",
+        "SOUND_HUMAN_SCREAM03",
+        "SOUND_HUMAN_SCREAM04",
+        "SOUND_FEMALE_SCREAM01",
+        "SOUND_FEMALE_SCREAM02",
+        "SOUND_LEVEL_UP",
+        "SOUND_RUN_DARK_HORSE_1",
+        "SOUND_RUN_DARK_HORSE_2",
+        "SOUND_RUN_DARK_HORSE_3",
+        "SOUND_DARKLORD_PAIN",
+        "SOUND_DARKLORD_DEAD",
+        "SOUND_FENRIR_RUN_1",
+        "SOUND_FENRIR_RUN_2",
+        "SOUND_FENRIR_RUN_3",
+        "SOUND_FENRIR_WALK_1",
+        "SOUND_FENRIR_WALK_2",
+        "SOUND_FENRIR_DEATH",
+        "SOUND_FENRIR_IDLE_1",
+        "SOUND_FENRIR_IDLE_2",
+        "SOUND_FENRIR_DAMAGE_1",
+        "SOUND_FENRIR_DAMAGE_2",
+        "SOUND_FENRIR_SKILL",
+        "SOUND_CHANGE_UP",
+        "SOUND_SHIELDCLASH"
+      ]
+    },
+    {
+      "name": "Skills",
+      "folders": [
+        {
+          "name": "Dark Wizard",
+          "folders": [
+            {
+              "name": "Decay",
+              "sounds": [
+                "SOUND_DEATH_POISON1",
+                "SOUND_DEATH_POISON2"
+              ]
+            },
+            {
+              "name": "Expansion of Wizardry",
+              "sounds": [
+                "SOUND_SKILL_SWELL_OF_MAGICPOWER"
+              ]
+            },
+            {
+              "name": "Ice Storm",
+              "sounds": [
+                "SOUND_SUDDEN_ICE1",
+                "SOUND_SUDDEN_ICE2"
+              ]
+            },
+            {
+              "name": "Nova",
+              "sounds": [
+                "SOUND_NUKE1",
+                "SOUND_NUKE2"
+              ]
+            },
+            {
+              "name": "Soul Barrier",
+              "sounds": [
+                "SOUND_SOULBARRIER"
+              ]
+            },
+            {
+              "name": "Teleport Ally",
+              "sounds": [
+                "SOUND_TELEKINESIS"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Dark Knight",
+          "folders": [
+            {
+              "name": "Combo",
+              "sounds": [
+                "SOUND_COMBO"
+              ]
+            },
+            {
+              "name": "Rageful Blow",
+              "sounds": [
+                "SOUND_FURY_STRIKE1",
+                "SOUND_FURY_STRIKE2",
+                "SOUND_FURY_STRIKE3"
+              ]
+            },
+            {
+              "name": "Strike of Destruction",
+              "sounds": [
+                "SOUND_SKILL_BLOWOFDESTRUCTION"
+              ]
+            },
+            {
+              "name": "Swell Life",
+              "sounds": [
+                "SOUND_SWELLLIFE"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Fairy Elf",
+          "folders": [
+            {
+              "name": "Ice Arrow",
+              "sounds": [
+                "SOUND_ICEARROW"
+              ]
+            },
+            {
+              "name": "Infinity Arrow",
+              "sounds": [
+                "SOUND_INFINITYARROW"
+              ]
+            },
+            {
+              "name": "Multi-Shot",
+              "sounds": [
+                "SOUND_SKILL_MULTI_SHOT"
+              ]
+            },
+            {
+              "name": "Penetration",
+              "sounds": [
+                "SOUND_PIERCING"
+              ]
+            },
+            {
+              "name": "Recovery",
+              "sounds": [
+                "SOUND_SKILL_RECOVER"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Magic Gladiator",
+          "folders": [
+            {
+              "name": "Fire Slash",
+              "sounds": [
+                "SOUND_BLOODATTACK"
+              ]
+            },
+            {
+              "name": "Flame Strike",
+              "sounds": [
+                "SOUND_SKILL_FLAME_STRIKE"
+              ]
+            },
+            {
+              "name": "Gigantic Storm",
+              "sounds": [
+                "SOUND_SKILL_GIGANTIC_STORM"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Dark Lord",
+          "folders": [
+            {
+              "name": "Chaotic Diseier",
+              "sounds": [
+                "SOUND_SKILL_CAOTIC"
+              ]
+            },
+            {
+              "name": "Earthshake",
+              "sounds": [
+                "SOUND_EARTH_QUAKE"
+              ]
+            },
+            {
+              "name": "Electric Spike",
+              "sounds": [
+                "SOUND_ELEC_STRIKE_READY",
+                "SOUND_ELEC_STRIKE"
+              ]
+            },
+            {
+              "name": "Fire Burst",
+              "sounds": [
+                "SOUND_ATTACK_FIRE_BUST",
+                "SOUND_ATTACK_FIRE_BUST_EXP"
+              ]
+            },
+            {
+              "name": "Fire Scream",
+              "sounds": [
+                "SOUND_FIRE_SCREAM"
+              ]
+            },
+            {
+              "name": "Force",
+              "sounds": [
+                "SOUND_ATTACK_SPEAR"
+              ]
+            },
+            {
+              "name": "Increase Critical Damage",
+              "sounds": [
+                "SOUND_CRITICAL"
+              ]
+            },
+            {
+              "name": "Summon",
+              "sounds": [
+                "SOUND_PART_TELEPORT"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Summoner",
+          "folders": [
+            {
+              "name": "Berserker",
+              "sounds": [
+                "SOUND_SKILL_BERSERKER"
+              ]
+            },
+            {
+              "name": "Blind",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_BLIND"
+              ]
+            },
+            {
+              "name": "Chain Lightning",
+              "sounds": [
+                "SOUND_SKILL_CHAIN_LIGHTNING"
+              ]
+            },
+            {
+              "name": "Damage Reflection",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_THORNS"
+              ]
+            },
+            {
+              "name": "Drain Life",
+              "sounds": [
+                "SOUND_SKILL_DRAIN_LIFE"
+              ]
+            },
+            {
+              "name": "Explosion",
+              "sounds": [
+                "SOUND_SUMMON_SAHAMUTT",
+                "SOUND_SUMMON_EXPLOSION"
+              ]
+            },
+            {
+              "name": "Innovation",
+              "sounds": [
+                "SOUND_SKILL_ENERVATION"
+              ]
+            },
+            {
+              "name": "Lightning Orb",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_LIGHTORB"
+              ]
+            },
+            {
+              "name": "Lightning Shock",
+              "sounds": [
+                "SOUND_SKILL_LIGHTNING_SHOCK"
+              ]
+            },
+            {
+              "name": "Pollution",
+              "sounds": [
+                "SOUND_SUMMOM_RARGLE"
+              ]
+            },
+            {
+              "name": "Requiem",
+              "sounds": [
+                "SOUND_SUMMON_NEIL",
+                "SOUND_SUMMON_REQUIEM"
+              ]
+            },
+            {
+              "name": "Sleep",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_SLEEP"
+              ]
+            },
+            {
+              "name": "Weakness",
+              "sounds": [
+                "SOUND_SKILL_WEAKNESS"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Rage Fighter",
+          "folders": [
+            {
+              "name": "Beast Uppercut",
+              "sounds": [
+                "SOUND_RAGESKILL_STAMP",
+                "SOUND_RAGESKILL_STAMP_ATTACK"
+              ]
+            },
+            {
+              "name": "Chain Drive",
+              "sounds": [
+                "SOUND_RAGESKILL_GIANTSWING",
+                "SOUND_RAGESKILL_GIANTSWING_ATTACK"
+              ]
+            },
+            {
+              "name": "Dark Side",
+              "sounds": [
+                "SOUND_RAGESKILL_DARKSIDE",
+                "SOUND_RAGESKILL_DARKSIDE_ATTACK"
+              ]
+            },
+            {
+              "name": "Dragon Roar",
+              "sounds": [
+                "SOUND_RAGESKILL_DRAGONLOWER",
+                "SOUND_RAGESKILL_DRAGONLOWER_ATTACK"
+              ]
+            },
+            {
+              "name": "Dragon Slasher",
+              "sounds": [
+                "SOUND_RAGESKILL_DRAGONKICK",
+                "SOUND_RAGESKILL_DRAGONKICK_ATTACK"
+              ]
+            },
+            {
+              "name": "Ignore Defense / Increase Health / Increase Block",
+              "sounds": [
+                "SOUND_RAGESKILL_BUFF_1",
+                "SOUND_RAGESKILL_BUFF_2"
+              ]
+            },
+            {
+              "name": "Killing Blow",
+              "sounds": [
+                "SOUND_RAGESKILL_THRUST",
+                "SOUND_RAGESKILL_THRUST_ATTACK"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Shared",
+          "folders": [
+            {
+              "name": "Dark Wizard + Magic Gladiator",
+              "folders": [
+                {
+                  "name": "Aqua Beam",
+                  "sounds": [
+                    "SOUND_FLASH"
+                  ]
+                },
+                {
+                  "name": "Energy Ball",
+                  "sounds": [
+                    "SOUND_MAGIC"
+                  ]
+                },
+                {
+                  "name": "Evil Spirit",
+                  "sounds": [
+                    "SOUND_EVIL"
+                  ]
+                },
+                {
+                  "name": "Flame",
+                  "sounds": [
+                    "SOUND_FLAME"
+                  ]
+                },
+                {
+                  "name": "Hellfire",
+                  "sounds": [
+                    "SOUND_HELLFIRE"
+                  ]
+                },
+                {
+                  "name": "Lightning",
+                  "sounds": [
+                    "SOUND_THUNDER01"
+                  ]
+                },
+                {
+                  "name": "Twister",
+                  "sounds": [
+                    "SOUND_STORM"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator",
+              "folders": [
+                {
+                  "name": "Impale",
+                  "sounds": [
+                    "SOUND_RIDINGSPEAR"
+                  ]
+                },
+                {
+                  "name": "Twisting Slash",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD4"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Wizard + Magic Gladiator + Summoner",
+              "folders": [
+                {
+                  "name": "Ice",
+                  "sounds": [
+                    "SOUND_ICE"
+                  ]
+                },
+                {
+                  "name": "Meteorite",
+                  "sounds": [
+                    "SOUND_EXPLOTION01",
+                    "SOUND_METEORITE01"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator + Dark Lord",
+              "folders": [
+                {
+                  "name": "Defense",
+                  "sounds": [
+                    "SOUND_SKILL_DEFENSE"
+                  ]
+                },
+                {
+                  "name": "Lunge",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD2"
+                  ]
+                },
+                {
+                  "name": "Uppercut",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD3"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator + Dark Lord + Rage Fighter",
+              "folders": [
+                {
+                  "name": "Falling Slash",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD1"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Items",
+      "folders": [
+        {
+          "name": "Gemstone",
+          "sounds": [
+            "SOUND_JEWEL02"
+          ]
+        },
+        {
+          "name": "Jewels",
+          "sounds": [
+            "SOUND_JEWEL01"
+          ]
+        },
+        {
+          "name": "Lost Map",
+          "sounds": [
+            "SOUND_KUNDUN_ITEM_SOUND"
+          ]
+        },
+        {
+          "name": "Silver Medal / Gold Medal",
+          "sounds": [
+            "SOUND_MEDAL"
+          ]
+        },
+        {
+          "name": "Transfer Christmas Ring",
+          "sounds": [
+            "SOUND_XMAS_JUMP_SANTA",
+            "SOUND_XMAS_JUMP_DEER",
+            "SOUND_XMAS_JUMP_SNOWMAN",
+            "SOUND_XMAS_TURN"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "folders": [
+        {
+          "name": "Dark Raven",
+          "sounds": [
+            "SOUND_DSPIRIT_MISSILE",
+            "SOUND_DSPIRIT_SHOUT",
+            "SOUND_DSPIRIT_RUSH"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Interface",
+      "folders": [
+        {
+          "name": "Friends",
+          "sounds": [
+            "SOUND_FRIEND_CHAT_ALERT",
+            "SOUND_FRIEND_MAIL_ALERT",
+            "SOUND_FRIEND_LOGIN_ALERT"
+          ]
+        }
+      ],
+      "sounds": [
+        "SOUND_CLICK01",
+        "SOUND_INTERFACE01",
+        "SOUND_REPAIR",
+        "SOUND_WHISPER"
+      ]
+    },
+    {
+      "name": "Map ambience",
+      "sounds": [
+        "SOUND_WIND01",
+        "SOUND_RAIN01",
+        "SOUND_FOREST01",
+        "SOUND_DUNGEON01",
+        "SOUND_TOWER01",
+        "SOUND_WATER01",
+        "SOUND_BIRD01",
+        "SOUND_BIRD02",
+        "SOUND_BAT01",
+        "SOUND_RAT01",
+        "SOUND_TRAP01",
+        "SOUND_DOOR01",
+        "SOUND_DOOR02",
+        "SOUND_HEAVEN01",
+        "SOUND_THUNDERS01",
+        "SOUND_THUNDERS02",
+        "SOUND_THUNDERS03",
+        "SOUND_CHAOS_ENVIR",
+        "SOUND_CHAOS_END",
+        "SOUND_DESERT01"
+      ]
+    },
+    {
+      "name": "Monsters",
+      "folders": [
+        {
+          "name": "Aegis",
+          "sounds": [
+            "set:Aegis:Data/Sound/mEsisIdle.wav",
+            "set:Aegis:Data/Sound/mEsisAttack1.wav",
+            "set:Aegis:Data/Sound/mEsisAttack2.wav",
+            "set:Aegis:Data/Sound/mEsisDeath.wav"
+          ]
+        },
+        {
+          "name": "Agon",
+          "sounds": [
+            "set:Agon:Data/Sound/mArgon1.wav",
+            "set:Agon:Data/Sound/mArgon2.wav",
+            "set:Agon:Data/Sound/mArgonAttack1.wav",
+            "set:Agon:Data/Sound/mArgonAttack2.wav",
+            "set:Agon:Data/Sound/mArgonDie.wav"
+          ]
+        },
+        {
+          "name": "Alquamos",
+          "sounds": [
+            "set:Alquamos:Data/Sound/mAlquamosAttack1.wav",
+            "set:Alquamos:Data/Sound/mAlquamosDie.wav"
+          ]
+        },
+        {
+          "name": "Archer",
+          "sounds": [
+            "set:Archer:Data/Sound/BattleCastle/mBowMercAttack.wav",
+            "set:Archer:Data/Sound/BattleCastle/mBowMercDeath.wav"
+          ]
+        },
+        {
+          "name": "Ash Slaughterer",
+          "sounds": [
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_ATTACK",
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01",
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_DAMAGE02",
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_DEATH",
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_MOVE01",
+            "set:Ash Slaughterer:SOUND_PKFIELD_ASHESBUTCHER_MOVE02"
+          ]
+        },
+        {
+          "name": "Assassin",
+          "sounds": [
+            "set:Assassin:Data/Sound/mAssassinAttack1.wav",
+            "set:Assassin:Data/Sound/mAssassinAttack2.wav",
+            "set:Assassin:Data/Sound/mAssassinDie.wav",
+            "SOUND_ASSASSIN"
+          ]
+        },
+        {
+          "name": "Bahamut",
+          "sounds": [
+            "set:Bahamut:Data/Sound/mBahamut1.wav",
+            "set:Bahamut:Data/Sound/mYeti1.wav"
+          ]
+        },
+        {
+          "name": "Bali",
+          "sounds": [
+            "set:Bali:Data/Sound/mBali1.wav",
+            "set:Bali:Data/Sound/mBali2.wav",
+            "set:Bali:Data/Sound/mBaliAttack1.wav",
+            "set:Bali:Data/Sound/mBaliAttack2.wav"
+          ]
+        },
+        {
+          "name": "Balrog",
+          "sounds": [
+            "set:Balrog:Data/Sound/mBalrog1.wav",
+            "set:Balrog:Data/Sound/mBalrog2.wav",
+            "set:Balrog:Data/Sound/mWizardAttack2.wav",
+            "set:Balrog:Data/Sound/mGorgonAttack2.wav",
+            "set:Balrog:Data/Sound/mBalrogDie.wav"
+          ]
+        },
+        {
+          "name": "Beam Knight",
+          "sounds": [
+            "set:Beam Knight:SOUND_MONSTER_DEATH1",
+            "set:Beam Knight:Data/Sound/death_attack1.wav",
+            "set:Beam Knight:Data/Sound/death_die.wav"
+          ]
+        },
+        {
+          "name": "Beetle Monster",
+          "sounds": [
+            "set:Beetle Monster:Data/Sound/mBeetle1.wav",
+            "set:Beetle Monster:Data/Sound/mBeetleAttack1.wav",
+            "set:Beetle Monster:Data/Sound/mBeetleDie.wav"
+          ]
+        },
+        {
+          "name": "Berserker",
+          "sounds": [
+            "set:Berserker:SOUND_KANTURU_1ST_BER_MOVE1",
+            "set:Berserker:SOUND_KANTURU_1ST_BER_MOVE2",
+            "set:Berserker:SOUND_KANTURU_1ST_BER_ATTACK1",
+            "set:Berserker:SOUND_KANTURU_1ST_BER_ATTACK2",
+            "set:Berserker:SOUND_KANTURU_1ST_BER_DIE"
+          ]
+        },
+        {
+          "name": "Blade Hunter",
+          "sounds": [
+            "set:Blade Hunter:SOUND_KANTURU_1ST_BLADE_MOVE1",
+            "set:Blade Hunter:SOUND_KANTURU_1ST_BLADE_MOVE2",
+            "set:Blade Hunter:SOUND_KANTURU_1ST_BLADE_ATTACK1",
+            "set:Blade Hunter:SOUND_KANTURU_1ST_BLADE_ATTACK2",
+            "set:Blade Hunter:SOUND_KANTURU_1ST_BLADE_DIE"
+          ]
+        },
+        {
+          "name": "Blaze Napin",
+          "sounds": [
+            "set:Blaze Napin:SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01",
+            "set:Blaze Napin:SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01",
+            "set:Blaze Napin:SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"
+          ]
+        },
+        {
+          "name": "Blood Assassin",
+          "sounds": [
+            "set:Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_ATTACK",
+            "set:Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01",
+            "set:Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_DAMAGE02",
+            "set:Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_DEDTH",
+            "set:Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_MOVE01",
+            "set:Blood Assassin:Data/Sound/w64/BloodAssassin_move02.wav"
+          ]
+        },
+        {
+          "name": "Blood Soldier",
+          "sounds": [
+            "set:Blood Soldier:Data/Sound/mBSoldierIdle1.wav",
+            "set:Blood Soldier:Data/Sound/mBSoldierIdle2.wav",
+            "set:Blood Soldier:Data/Sound/mBSoldierAttack1.wav",
+            "set:Blood Soldier:Data/Sound/mBSoldierAttack2.wav",
+            "set:Blood Soldier:Data/Sound/mBSoldierDeath.wav"
+          ]
+        },
+        {
+          "name": "Bloody wolf",
+          "sounds": [
+            "set:Bloody wolf:Data/Sound/blood1.wav",
+            "set:Bloody wolf:Data/Sound/blood_attack1.wav",
+            "set:Bloody wolf:Data/Sound/blood_attack2.wav",
+            "set:Bloody wolf:Data/Sound/blood_die.wav"
+          ]
+        },
+        {
+          "name": "Blue Golem",
+          "sounds": [
+            "set:Blue Golem:SOUND_AIDA_BLUEGOLEM_MOVE1",
+            "set:Blue Golem:SOUND_AIDA_BLUEGOLEM_MOVE2",
+            "set:Blue Golem:SOUND_AIDA_BLUEGOLEM_ATTACK1",
+            "set:Blue Golem:SOUND_AIDA_BLUEGOLEM_ATTACK2",
+            "set:Blue Golem:SOUND_AIDA_BLUEGOLEM_DIE"
+          ]
+        },
+        {
+          "name": "Bone Scorpion",
+          "sounds": [
+            "set:Bone Scorpion:SOUND_KARUTAN_BONESCORPION_ATTACK",
+            "set:Bone Scorpion:SOUND_KARUTAN_BONESCORPION_DEATH",
+            "set:Bone Scorpion:SOUND_KARUTAN_BONESCORPION_HIT"
+          ]
+        },
+        {
+          "name": "Budge Dragon",
+          "sounds": [
+            "set:Budge Dragon:Data/Sound/mBudge1.wav",
+            "set:Budge Dragon:Data/Sound/mBudgeAttack1.wav",
+            "set:Budge Dragon:Data/Sound/mBudgeDie.wav"
+          ]
+        },
+        {
+          "name": "Bull Fighter",
+          "sounds": [
+            "set:Bull Fighter:Data/Sound/mBull1.wav",
+            "set:Bull Fighter:Data/Sound/mBull2.wav",
+            "set:Bull Fighter:SOUND_MONSTER_BULLATTACK1",
+            "set:Bull Fighter:Data/Sound/mBullAttack2.wav",
+            "set:Bull Fighter:Data/Sound/mBullDie.wav"
+          ]
+        },
+        {
+          "name": "Burning Lava Giant",
+          "sounds": [
+            "set:Burning Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01",
+            "set:Burning Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02",
+            "set:Burning Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01",
+            "set:Burning Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH",
+            "set:Burning Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"
+          ]
+        },
+        {
+          "name": "Captain Grizzly",
+          "sounds": [
+            "set:Captain Grizzly:SOUND_ELBELAND_BEASTWOOLEADER_MOVE01",
+            "set:Captain Grizzly:SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01",
+            "set:Captain Grizzly:SOUND_ELBELAND_BEASTWOO_DEATH01"
+          ]
+        },
+        {
+          "name": "Castle Gate",
+          "sounds": [
+            "set:Castle Gate:Data/Sound/BattleCastle/oCDoorDis.wav",
+            "SOUND_HIT_GATE",
+            "SOUND_HIT_GATE2"
+          ]
+        },
+        {
+          "name": "Cavalry Captain",
+          "sounds": [
+            "set:Cavalry Captain:SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01",
+            "set:Cavalry Captain:SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02",
+            "set:Cavalry Captain:SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01",
+            "set:Cavalry Captain:SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02",
+            "set:Cavalry Captain:SOUND_RAKLION_GIANT_MAMUD_DEATH"
+          ]
+        },
+        {
+          "name": "Chain Scorpion",
+          "sounds": [
+            "set:Chain Scorpion:Data/Sound/mScorpion1.wav",
+            "set:Chain Scorpion:Data/Sound/mScorpion2.wav",
+            "set:Chain Scorpion:Data/Sound/mScorpionAttack1.wav",
+            "set:Chain Scorpion:Data/Sound/mScorpionAttack2.wav",
+            "set:Chain Scorpion:Data/Sound/mScorpionDie.wav"
+          ]
+        },
+        {
+          "name": "Chaos Castle",
+          "sounds": [
+            "set:Chaos Castle:SOUND_MONSTER_ORCCAPATTACK1"
+          ]
+        },
+        {
+          "name": "Chaos Castle Wizard",
+          "sounds": [
+            "set:Chaos Castle Wizard:Data/Sound/mOrcArcherAttack1.wav"
+          ]
+        },
+        {
+          "name": "Chaos Goblin",
+          "sounds": [
+            "set:Chaos Goblin:SOUND_NPC_MIX",
+            "SOUND_BREAK01",
+            "SOUND_MIX01"
+          ]
+        },
+        {
+          "name": "Combat Instructor",
+          "sounds": [
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01",
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02",
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03",
+            "set:Combat Instructor:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Condra",
+          "sounds": [
+            "set:Condra:SOUND_KARUTAN_CONDRA_MOVE1",
+            "set:Condra:SOUND_KARUTAN_CONDRA_MOVE2",
+            "set:Condra:SOUND_KARUTAN_CONDRA_ATTACK",
+            "set:Condra:SOUND_KARUTAN_CONDRA_DEATH"
+          ]
+        },
+        {
+          "name": "Coolutin",
+          "sounds": [
+            "set:Coolutin:SOUND_RAKLION_COOLERTIN_ATTACK",
+            "set:Coolutin:SOUND_RAKLION_COOLERTIN_MOVE",
+            "set:Coolutin:SOUND_MONSTER_HELLSPIDERDIE"
+          ]
+        },
+        {
+          "name": "Cruel Blood Assassin",
+          "sounds": [
+            "set:Cruel Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_ATTACK",
+            "set:Cruel Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01",
+            "set:Cruel Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_DEDTH",
+            "set:Cruel Blood Assassin:SOUND_PKFIELD_BLOODASSASSIN_MOVE01"
+          ]
+        },
+        {
+          "name": "Crypos",
+          "sounds": [
+            "set:Crypos:SOUND_KARUTAN_CRYPOS_MOVE1",
+            "set:Crypos:SOUND_KARUTAN_CRYPOS_MOVE2",
+            "set:Crypos:SOUND_KARUTAN_CRYPOS_ATTACK1",
+            "set:Crypos:SOUND_KARUTAN_CRYPOS_ATTACK2",
+            "set:Crypos:SOUND_KARUTAN_CRYPTA_DEATH"
+          ]
+        },
+        {
+          "name": "Crypta",
+          "sounds": [
+            "set:Crypta:SOUND_KARUTAN_CRYPTA_MOVE1",
+            "set:Crypta:SOUND_KARUTAN_CRYPTA_MOVE2",
+            "set:Crypta:SOUND_KARUTAN_CRYPTA_ATTACK",
+            "set:Crypta:SOUND_KARUTAN_CRYPTA_DEATH"
+          ]
+        },
+        {
+          "name": "Cursed king",
+          "sounds": [
+            "set:Cursed king:Data/Sound/mCursedKing1.wav",
+            "set:Cursed king:Data/Sound/mCursedKing2.wav",
+            "set:Cursed king:Data/Sound/mCursedKingDie1.wav"
+          ]
+        },
+        {
+          "name": "Cursed Lich",
+          "sounds": [
+            "set:Cursed Lich:SOUND_ELBELAND_CURSERICH_MOVE01",
+            "set:Cursed Lich:SOUND_ELBELAND_CURSERICH_ATTACK01",
+            "set:Cursed Lich:SOUND_ELBELAND_CURSERICH_DEATH01"
+          ]
+        },
+        {
+          "name": "Cursed Santa",
+          "sounds": [
+            "set:Cursed Santa:SOUND_XMAS_SANTA_IDLE_1",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_IDLE_2",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_WALK_1",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_WALK_2",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_ATTACK_1",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_DAMAGE_1",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_DAMAGE_2",
+            "set:Cursed Santa:SOUND_XMAS_SANTA_DEATH_1"
+          ]
+        },
+        {
+          "name": "Cyclops",
+          "sounds": [
+            "set:Cyclops:Data/Sound/mOgre1.wav",
+            "set:Cyclops:Data/Sound/mOgre2.wav",
+            "set:Cyclops:Data/Sound/mOgreAttack1.wav",
+            "set:Cyclops:Data/Sound/mOgreAttack2.wav",
+            "set:Cyclops:Data/Sound/mOgreDie.wav"
+          ]
+        },
+        {
+          "name": "Dark Coolutin",
+          "sounds": [
+            "set:Dark Coolutin:SOUND_MONSTER_HELLSPIDERDIE",
+            "set:Dark Coolutin:SOUND_RAKLION_COOLERTIN_ATTACK",
+            "set:Dark Coolutin:SOUND_RAKLION_COOLERTIN_MOVE"
+          ]
+        },
+        {
+          "name": "Dark Giant",
+          "sounds": [
+            "set:Dark Giant:SOUND_RAKLION_ICEGIANT_DEATH",
+            "set:Dark Giant:SOUND_RAKLION_ICEGIANT_MOVE"
+          ]
+        },
+        {
+          "name": "Dark Iron Knight",
+          "sounds": [
+            "set:Dark Iron Knight:SOUND_MONSTER_DEATH1",
+            "set:Dark Iron Knight:SOUND_RAKLION_IRON_KNIGHT_ATTACK",
+            "set:Dark Iron Knight:SOUND_RAKLION_IRON_KNIGHT_MOVE"
+          ]
+        },
+        {
+          "name": "Dark Knight",
+          "sounds": [
+            "set:Dark Knight:Data/Sound/mDarkKnight1.wav",
+            "set:Dark Knight:Data/Sound/mDarkKnight2.wav",
+            "set:Dark Knight:Data/Sound/mDarkKnightAttack1.wav",
+            "set:Dark Knight:Data/Sound/mDarkKnightAttack2.wav",
+            "set:Dark Knight:Data/Sound/mDarkKnightDie.wav"
+          ]
+        },
+        {
+          "name": "Dark Mammoth",
+          "sounds": [
+            "set:Dark Mammoth:SOUND_RAKLION_GIANT_MAMUD_ATTACK",
+            "set:Dark Mammoth:SOUND_RAKLION_GIANT_MAMUD_DEATH",
+            "set:Dark Mammoth:SOUND_RAKLION_GIANT_MAMUD_MOVE"
+          ]
+        },
+        {
+          "name": "Dark Skull Soldier",
+          "sounds": [
+            "set:Dark Skull Soldier:Data/Sound/mBullDie.wav",
+            "set:Dark Skull Soldier:Data/Sound/mHunter2.wav",
+            "set:Dark Skull Soldier:Data/Sound/mBlackSkullDie.wav",
+            "set:Dark Skull Soldier:SOUND_MONSTER_BLACKSKULLATTACK"
+          ]
+        },
+        {
+          "name": "Death Angel",
+          "sounds": [
+            "set:Death Angel:Data/Sound/mDAngelIdle.wav",
+            "set:Death Angel:Data/Sound/mDAngelAttack.wav",
+            "set:Death Angel:Data/Sound/mDAngelDeath.wav"
+          ]
+        },
+        {
+          "name": "Death Centurion",
+          "sounds": [
+            "set:Death Centurion:SOUND_MONSTER_LSIDLE1",
+            "set:Death Centurion:SOUND_MONSTER_LSIDLE2",
+            "set:Death Centurion:SOUND_MONSTER_LSATTACK1",
+            "set:Death Centurion:SOUND_MONSTER_LSATTACK2",
+            "set:Death Centurion:SOUND_MONSTER_LSDEATH"
+          ]
+        },
+        {
+          "name": "Death Rider",
+          "sounds": [
+            "set:Death Rider:SOUND_AIDA_DEATHRAIDER_MOVE1",
+            "set:Death Rider:SOUND_AIDA_DEATHRAIDER_MOVE2",
+            "set:Death Rider:SOUND_AIDA_DEATHRAIDER_ATTACK1",
+            "set:Death Rider:SOUND_AIDA_DEATHRAIDER_ATTACK2",
+            "set:Death Rider:SOUND_AIDA_DEATHRAIDER_DIE"
+          ]
+        },
+        {
+          "name": "Death Tree",
+          "sounds": [
+            "set:Death Tree:SOUND_AIDA_DEATHTREE_MOVE1",
+            "set:Death Tree:SOUND_AIDA_DEATHTREE_MOVE2",
+            "set:Death Tree:SOUND_AIDA_DEATHTREE_ATTACK1",
+            "set:Death Tree:SOUND_AIDA_DEATHTREE_ATTACK2",
+            "set:Death Tree:SOUND_AIDA_DEATHTREE_DIE"
+          ]
+        },
+        {
+          "name": "Destler",
+          "sounds": [
+            "set:Destler:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Destler:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Destler:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01",
+            "set:Destler:SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02",
+            "set:Destler:SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03",
+            "set:Destler:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE",
+            "set:Destler:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Devil",
+          "sounds": [
+            "set:Devil:Data/Sound/mYeti1.wav",
+            "set:Devil:Data/Sound/mSatanAttack1.wav",
+            "set:Devil:Data/Sound/mYetiDie.wav"
+          ]
+        },
+        {
+          "name": "Doorkeeper Titus",
+          "sounds": [
+            "set:Doorkeeper Titus:SOUND_DUEL_NPC_IDLE_1"
+          ]
+        },
+        {
+          "name": "Doppelganger",
+          "sounds": [
+            "set:Doppelganger:SOUND_DOPPELGANGER_SLIME_ATTACK",
+            "set:Doppelganger:SOUND_DOPPELGANGER_SLIME_DEATH"
+          ]
+        },
+        {
+          "name": "Drakan",
+          "sounds": [
+            "set:Drakan:Data/Sound/mDrakan1.wav",
+            "set:Drakan:Data/Sound/mDrakanAttack1.wav",
+            "set:Drakan:Data/Sound/mDrakanDie.wav"
+          ]
+        },
+        {
+          "name": "Dreadfear",
+          "sounds": [
+            "set:Dreadfear:SOUND_KANTURU_2ND_DRED_MOVE1",
+            "set:Dreadfear:SOUND_KANTURU_2ND_DRED_MOVE2",
+            "set:Dreadfear:SOUND_KANTURU_2ND_DRED_ATTACK1",
+            "set:Dreadfear:SOUND_KANTURU_2ND_DRED_ATTACK2",
+            "set:Dreadfear:SOUND_KANTURU_2ND_DRED_DIE"
+          ]
+        },
+        {
+          "name": "Elf Lala",
+          "sounds": [
+            "set:Elf Lala:SOUND_NPC_HARP"
+          ]
+        },
+        {
+          "name": "Elite Ogre",
+          "sounds": [
+            "set:Elite Ogre:Data/Sound/mHunter2.wav",
+            "set:Elite Ogre:Data/Sound/mBullDie.wav",
+            "set:Elite Ogre:SOUND_MONSTER_ORCCAPATTACK1"
+          ]
+        },
+        {
+          "name": "Elite Yeti",
+          "sounds": [
+            "set:Elite Yeti:Data/Sound/mYeti1.wav",
+            "set:Elite Yeti:Data/Sound/mYeti2.wav",
+            "set:Elite Yeti:Data/Sound/mYetiAttack1.wav",
+            "set:Elite Yeti:Data/Sound/mYetiDie.wav"
+          ]
+        },
+        {
+          "name": "Erkanne",
+          "sounds": [
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE",
+            "set:Erkanne:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Fire Flame Ghost",
+          "sounds": [
+            "SOUND_UMBRELLA_MONSTER_WALK1",
+            "SOUND_UMBRELLA_MONSTER_WALK2",
+            "SOUND_UMBRELLA_MONSTER_DAMAGE",
+            "SOUND_UMBRELLA_MONSTER_DEAD"
+          ]
+        },
+        {
+          "name": "Forest Monster",
+          "sounds": [
+            "set:Forest Monster:Data/Sound/mWoodMon1.wav",
+            "set:Forest Monster:Data/Sound/mWoodMon2.wav",
+            "set:Forest Monster:Data/Sound/mWoodMonAttack1.wav",
+            "set:Forest Monster:Data/Sound/mWoodMonAttack2.wav",
+            "set:Forest Monster:Data/Sound/mWoodMonDie.wav"
+          ]
+        },
+        {
+          "name": "Forest Orc",
+          "sounds": [
+            "set:Forest Orc:SOUND_AIDA_FORESTORC_MOVE1",
+            "set:Forest Orc:SOUND_AIDA_FORESTORC_MOVE2",
+            "set:Forest Orc:SOUND_AIDA_FORESTORC_ATTACK1",
+            "set:Forest Orc:SOUND_AIDA_FORESTORC_ATTACK2",
+            "set:Forest Orc:SOUND_AIDA_FORESTORC_DIE"
+          ]
+        },
+        {
+          "name": "Furious Slaughterer",
+          "sounds": [
+            "set:Furious Slaughterer:SOUND_DOPPELGANGER_RED_BUGBEAR_ATTACK",
+            "set:Furious Slaughterer:SOUND_DOPPELGANGER_RED_BUGBEAR_DEATH"
+          ]
+        },
+        {
+          "name": "Gaion Kharein",
+          "sounds": [
+            "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE",
+            "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH",
+            "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE",
+            "SOUND_ATTACK_MELEE_HIT5"
+          ]
+        },
+        {
+          "name": "Galia",
+          "sounds": [
+            "set:Galia:SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE",
+            "set:Galia:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01",
+            "set:Galia:SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02",
+            "set:Galia:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE",
+            "set:Galia:SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Gatekeeper",
+          "sounds": [
+            "set:Gatekeeper:Data/Sound/BattleCastle/mSpearMercAttack.wav",
+            "set:Gatekeeper:Data/Sound/BattleCastle/mSpearMercDeath.wav"
+          ]
+        },
+        {
+          "name": "Gateway Machine",
+          "sounds": [
+            "set:Gateway Machine:SOUND_KANTURU_2ND_MAPSOUND_HOLE"
+          ]
+        },
+        {
+          "name": "Genocider",
+          "sounds": [
+            "set:Genocider:SOUND_KANTURU_1ST_GENO_MOVE1",
+            "set:Genocider:SOUND_KANTURU_1ST_GENO_MOVE2",
+            "set:Genocider:SOUND_KANTURU_1ST_GENO_ATTACK1",
+            "set:Genocider:SOUND_KANTURU_1ST_GENO_ATTACK2",
+            "set:Genocider:SOUND_KANTURU_1ST_GENO_DIE"
+          ]
+        },
+        {
+          "name": "Ghost",
+          "sounds": [
+            "set:Ghost:Data/Sound/mGhost1.wav",
+            "set:Ghost:Data/Sound/mGhost2.wav",
+            "set:Ghost:Data/Sound/mGhostAttack1.wav",
+            "set:Ghost:Data/Sound/mGhostAttack2.wav",
+            "set:Ghost:Data/Sound/mGhostDie.wav"
+          ]
+        },
+        {
+          "name": "Ghost Napin",
+          "sounds": [
+            "set:Ghost Napin:SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01",
+            "set:Ghost Napin:SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01",
+            "set:Ghost Napin:SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"
+          ]
+        },
+        {
+          "name": "Giant",
+          "sounds": [
+            "set:Giant:Data/Sound/mGiant1.wav",
+            "set:Giant:Data/Sound/mGiant2.wav",
+            "set:Giant:Data/Sound/mGiantAttack1.wav",
+            "set:Giant:Data/Sound/mGiantAttack2.wav",
+            "set:Giant:Data/Sound/mGiantDie.wav"
+          ]
+        },
+        {
+          "name": "Giant Mammoth",
+          "sounds": [
+            "set:Giant Mammoth:SOUND_RAKLION_GIANT_MAMUD_MOVE",
+            "set:Giant Mammoth:SOUND_RAKLION_GIANT_MAMUD_ATTACK",
+            "set:Giant Mammoth:SOUND_RAKLION_GIANT_MAMUD_DEATH"
+          ]
+        },
+        {
+          "name": "Giant Ogre",
+          "sounds": [
+            "set:Giant Ogre:Data/Sound/mHunter2.wav",
+            "set:Giant Ogre:Data/Sound/mGhaintOrgerDie.wav"
+          ]
+        },
+        {
+          "name": "Gigantis",
+          "sounds": [
+            "set:Gigantis:SOUND_KANTURU_1ST_GIGAN_MOVE1",
+            "set:Gigantis:SOUND_KANTURU_1ST_GIGAN_ATTACK1",
+            "set:Gigantis:SOUND_KANTURU_1ST_GIGAN_ATTACK2",
+            "set:Gigantis:SOUND_KANTURU_1ST_GIGAN_DIE"
+          ]
+        },
+        {
+          "name": "Goblin",
+          "sounds": [
+            "set:Goblin:Data/Sound/mGoblin1.wav",
+            "set:Goblin:Data/Sound/mGoblin2.wav",
+            "set:Goblin:Data/Sound/mGoblinAttack1.wav",
+            "set:Goblin:Data/Sound/mGoblinAttack2.wav",
+            "set:Goblin:Data/Sound/mGoblinDie.wav"
+          ]
+        },
+        {
+          "name": "Gollock",
+          "sounds": [
+            "set:Gollock:SOUND_KARUTAN_GOLOCH_MOVE1",
+            "set:Gollock:SOUND_KARUTAN_GOLOCH_MOVE2",
+            "set:Gollock:SOUND_KARUTAN_GOLOCH_ATTACK",
+            "set:Gollock:SOUND_KARUTAN_GOLOCH_DEATH"
+          ]
+        },
+        {
+          "name": "Gorgon",
+          "sounds": [
+            "set:Gorgon:Data/Sound/mGorgon1.wav",
+            "set:Gorgon:Data/Sound/mGorgon2.wav",
+            "set:Gorgon:Data/Sound/mGorgonAttack1.wav",
+            "set:Gorgon:Data/Sound/mGorgonAttack2.wav",
+            "set:Gorgon:Data/Sound/mGorgonDie.wav"
+          ]
+        },
+        {
+          "name": "Grand Wizard",
+          "sounds": [
+            "set:Grand Wizard:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE",
+            "set:Grand Wizard:SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH",
+            "set:Grand Wizard:SOUND_3RD_CHANGE_UP_BG_FIREPILLAR"
+          ]
+        },
+        {
+          "name": "Grizzly",
+          "sounds": [
+            "set:Grizzly:SOUND_ELBELAND_BEASTWOO_MOVE01",
+            "set:Grizzly:SOUND_ELBELAND_BEASTWOO_ATTACK01",
+            "set:Grizzly:SOUND_ELBELAND_BEASTWOO_DEATH01"
+          ]
+        },
+        {
+          "name": "Hanzo the Blacksmith",
+          "sounds": [
+            "set:Hanzo the Blacksmith:SOUND_NPC_BLACK_SMITH"
+          ]
+        },
+        {
+          "name": "Hell Maine",
+          "sounds": [
+            "set:Hell Maine:SOUND_AIDA_HELL_MOVE1",
+            "set:Hell Maine:SOUND_AIDA_HELL_MOVE2",
+            "set:Hell Maine:SOUND_AIDA_HELL_ATTACK1",
+            "set:Hell Maine:SOUND_AIDA_HELL_ATTACK2",
+            "set:Hell Maine:SOUND_AIDA_HELL_ATTACK3",
+            "set:Hell Maine:SOUND_AIDA_HELL_DIE"
+          ]
+        },
+        {
+          "name": "Hell Spider",
+          "sounds": [
+            "set:Hell Spider:Data/Sound/mHellSpider1.wav",
+            "set:Hell Spider:Data/Sound/mHellSpiderAttack1.wav",
+            "set:Hell Spider:SOUND_MONSTER_HELLSPIDERDIE"
+          ]
+        },
+        {
+          "name": "Hideous Rabbit",
+          "sounds": [
+            "set:Hideous Rabbit:SOUND_ELBELAND_RABBITUGLY_BREATH01",
+            "set:Hideous Rabbit:SOUND_ELBELAND_RABBITUGLY_ATTACK01",
+            "set:Hideous Rabbit:SOUND_ELBELAND_RABBITUGLY_DEATH01"
+          ]
+        },
+        {
+          "name": "Hommerd",
+          "sounds": [
+            "set:Hommerd:Data/Sound/mHomord1.wav",
+            "set:Hommerd:Data/Sound/mHomord2.wav",
+            "set:Hommerd:Data/Sound/mHomordAttack1.wav",
+            "set:Hommerd:Data/Sound/mHomordDie.wav"
+          ]
+        },
+        {
+          "name": "Hound",
+          "sounds": [
+            "set:Hound:Data/Sound/mHound1.wav",
+            "set:Hound:Data/Sound/mHound2.wav",
+            "set:Hound:Data/Sound/mHoundAttack1.wav",
+            "set:Hound:Data/Sound/mHoundAttack2.wav",
+            "set:Hound:Data/Sound/mHoundDie.wav"
+          ]
+        },
+        {
+          "name": "Hunter",
+          "sounds": [
+            "set:Hunter:Data/Sound/mHunter1.wav",
+            "set:Hunter:Data/Sound/mHunter2.wav",
+            "set:Hunter:Data/Sound/mHunterAttack1.wav",
+            "set:Hunter:Data/Sound/mHunterAttack2.wav",
+            "set:Hunter:Data/Sound/mHunterDie.wav"
+          ]
+        },
+        {
+          "name": "Hydra",
+          "sounds": [
+            "set:Hydra:Data/Sound/mHydra1.wav",
+            "set:Hydra:Data/Sound/mHydraAttack1.wav"
+          ]
+        },
+        {
+          "name": "Ice Giant",
+          "sounds": [
+            "set:Ice Giant:SOUND_RAKLION_ICEGIANT_MOVE",
+            "set:Ice Giant:SOUND_RAKLION_ICEGIANT_DEATH"
+          ]
+        },
+        {
+          "name": "Ice Monster",
+          "sounds": [
+            "set:Ice Monster:Data/Sound/mIceMonster1.wav",
+            "set:Ice Monster:Data/Sound/mIceMonster2.wav",
+            "set:Ice Monster:Data/Sound/mIceMonsterDie.wav"
+          ]
+        },
+        {
+          "name": "Ice Queen",
+          "sounds": [
+            "set:Ice Queen:Data/Sound/mIceQueen1.wav",
+            "set:Ice Queen:Data/Sound/mIceQueen2.wav",
+            "set:Ice Queen:Data/Sound/mIceQueenAttack1.wav",
+            "set:Ice Queen:Data/Sound/mIceQueenAttack2.wav",
+            "set:Ice Queen:Data/Sound/mIceQueenDie.wav"
+          ]
+        },
+        {
+          "name": "Ice Walker",
+          "sounds": [
+            "set:Ice Walker:SOUND_ELBELAND_WOLFHUMAN_DEATH01",
+            "set:Ice Walker:SOUND_RAKLION_ICEWALKER_ATTACK",
+            "set:Ice Walker:SOUND_RAKLION_ICEWALKER_MOVE"
+          ]
+        },
+        {
+          "name": "Illusion of Kundun",
+          "sounds": [
+            "set:Illusion of Kundun:SOUND_MONSTER_LVIDLE1",
+            "set:Illusion of Kundun:SOUND_MONSTER_LVIDLE2",
+            "set:Illusion of Kundun:SOUND_MONSTER_LVATTACK1",
+            "set:Illusion of Kundun:SOUND_MONSTER_LVATTACK2",
+            "set:Illusion of Kundun:SOUND_MONSTER_LVDEATH"
+          ]
+        },
+        {
+          "name": "Interim Reward Chest",
+          "sounds": [
+            "set:Interim Reward Chest:SOUND_DOPPELGANGER_JEWELBOX_OPEN"
+          ]
+        },
+        {
+          "name": "Iron Knight",
+          "sounds": [
+            "set:Iron Knight:SOUND_RAKLION_IRON_KNIGHT_MOVE",
+            "set:Iron Knight:SOUND_RAKLION_IRON_KNIGHT_ATTACK",
+            "set:Iron Knight:SOUND_MONSTER_DEATH1"
+          ]
+        },
+        {
+          "name": "Iron Rider",
+          "sounds": [
+            "set:Iron Rider:SOUND_KANTURU_1ST_IR_MOVE1",
+            "set:Iron Rider:SOUND_KANTURU_1ST_IR_MOVE2",
+            "set:Iron Rider:SOUND_KANTURU_1ST_IR_ATTACK1",
+            "set:Iron Rider:SOUND_KANTURU_1ST_IR_ATTACK2",
+            "set:Iron Rider:SOUND_KANTURU_1ST_IR_DIE"
+          ]
+        },
+        {
+          "name": "Iron Wheel",
+          "sounds": [
+            "set:Iron Wheel:Data/Sound/iron1.wav",
+            "set:Iron Wheel:Data/Sound/iron_attack1.wav"
+          ]
+        },
+        {
+          "name": "Jerint",
+          "sounds": [
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01",
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03",
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH",
+            "set:Jerint:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE"
+          ]
+        },
+        {
+          "name": "Kato",
+          "sounds": [
+            "set:Kato:SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE",
+            "set:Kato:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01",
+            "set:Kato:SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02",
+            "set:Kato:SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE",
+            "set:Kato:SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Kentauros",
+          "sounds": [
+            "set:Kentauros:SOUND_KANTURU_1ST_KENTA_MOVE1",
+            "set:Kentauros:SOUND_KANTURU_1ST_KENTA_MOVE2",
+            "set:Kentauros:SOUND_KANTURU_1ST_KENTA_ATTACK1",
+            "set:Kentauros:SOUND_KANTURU_1ST_KENTA_ATTACK2",
+            "set:Kentauros:SOUND_KANTURU_1ST_KENTA_DIE"
+          ]
+        },
+        {
+          "name": "Knight Commander",
+          "sounds": [
+            "set:Knight Commander:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Knight Commander:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Knight Commander:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03",
+            "set:Knight Commander:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Kundun",
+          "sounds": [
+            "set:Kundun:Data/Sound/mKundunIdle.wav",
+            "set:Kundun:Data/Sound/mKundunAttack1.wav",
+            "set:Kundun:Data/Sound/mKundunAttack2.wav"
+          ]
+        },
+        {
+          "name": "Larva",
+          "sounds": [
+            "set:Larva:Data/Sound/mLarva1.wav",
+            "set:Larva:Data/Sound/mLarva2.wav"
+          ]
+        },
+        {
+          "name": "LIch",
+          "sounds": [
+            "set:LIch:Data/Sound/mWizard1.wav",
+            "set:LIch:Data/Sound/mWizard2.wav",
+            "set:LIch:Data/Sound/mWizardAttack1.wav",
+            "set:LIch:Data/Sound/mWizardAttack2.wav",
+            "set:LIch:Data/Sound/mWizardDie.wav"
+          ]
+        },
+        {
+          "name": "Lizard King",
+          "sounds": [
+            "set:Lizard King:Data/Sound/mLizardKing1.wav",
+            "set:Lizard King:Data/Sound/mLizardKing2.wav",
+            "set:Lizard King:Data/Sound/mGorgonDie.wav"
+          ]
+        },
+        {
+          "name": "Lugard",
+          "sounds": [
+            "set:Lugard:SOUND_DOPPELGANGER_LUGARD_BREATH"
+          ]
+        },
+        {
+          "name": "Lunar Rabbit",
+          "sounds": [
+            "SOUND_MOONRABBIT_WALK",
+            "SOUND_MOONRABBIT_DAMAGE",
+            "SOUND_MOONRABBIT_DEAD",
+            "SOUND_MOONRABBIT_EXPLOSION"
+          ]
+        },
+        {
+          "name": "Magic Skeleton",
+          "sounds": [
+            "set:Magic Skeleton:SOUND_MONSTER_MAGICSKULL1",
+            "set:Magic Skeleton:SOUND_MONSTER_MAGICSKULL2"
+          ]
+        },
+        {
+          "name": "Master Assassin",
+          "sounds": [
+            "set:Master Assassin:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE",
+            "set:Master Assassin:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01",
+            "set:Master Assassin:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02",
+            "set:Master Assassin:SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH"
+          ]
+        },
+        {
+          "name": "Medic",
+          "sounds": [
+            "set:Medic:SOUND_EMPIREGUARDIAN_PRIEST_STOP",
+            "set:Medic:SOUND_RAKLION_SERUFAN_CURE"
+          ]
+        },
+        {
+          "name": "Mega Crust",
+          "sounds": [
+            "set:Mega Crust:Data/Sound/mMegaCrust1.wav",
+            "set:Mega Crust:Data/Sound/mMegaCrustAttack1.wav",
+            "set:Mega Crust:Data/Sound/mMegaCrustDie.wav"
+          ]
+        },
+        {
+          "name": "Molt",
+          "sounds": [
+            "set:Molt:Data/Sound/mMolt1.wav",
+            "set:Molt:Data/Sound/mMoltAttack1.wav",
+            "set:Molt:Data/Sound/mMoltDie.wav"
+          ]
+        },
+        {
+          "name": "Mutant",
+          "sounds": [
+            "set:Mutant:Data/Sound/mutant1.wav",
+            "set:Mutant:Data/Sound/mutant2.wav",
+            "set:Mutant:Data/Sound/mutant_attack1.wav"
+          ]
+        },
+        {
+          "name": "Narcondra",
+          "sounds": [
+            "set:Narcondra:SOUND_KARUTAN_CONDRA_MOVE1",
+            "set:Narcondra:SOUND_KARUTAN_CONDRA_MOVE2",
+            "set:Narcondra:SOUND_KARUTAN_NARCONDRA_ATTACK",
+            "set:Narcondra:SOUND_KARUTAN_CONDRA_DEATH"
+          ]
+        },
+        {
+          "name": "Necron",
+          "sounds": [
+            "set:Necron:Data/Sound/mNecronIdle1.wav",
+            "set:Necron:Data/Sound/mNecronIdle2.wav",
+            "set:Necron:Data/Sound/mNecronAttack1.wav",
+            "set:Necron:Data/Sound/mNecronAttack2.wav",
+            "set:Necron:Data/Sound/mNecronDeath.wav"
+          ]
+        },
+        {
+          "name": "Ogre archer",
+          "sounds": [
+            "set:Ogre archer:Data/Sound/mOrcArcherAttack1.wav",
+            "set:Ogre archer:Data/Sound/mBullDie.wav"
+          ]
+        },
+        {
+          "name": "Orcus",
+          "sounds": [
+            "set:Orcus:SOUND_KARUTAN_ORCUS_MOVE1",
+            "set:Orcus:SOUND_KARUTAN_ORCUS_MOVE2",
+            "set:Orcus:SOUND_KARUTAN_ORCUS_ATTACK1",
+            "set:Orcus:SOUND_KARUTAN_ORCUS_ATTACK2",
+            "set:Orcus:SOUND_KARUTAN_ORCUS_DEATH"
+          ]
+        },
+        {
+          "name": "Persona",
+          "sounds": [
+            "set:Persona:SOUND_KANTURU_2ND_PERSO_MOVE1",
+            "set:Persona:SOUND_KANTURU_2ND_PERSO_MOVE2",
+            "set:Persona:SOUND_KANTURU_2ND_PERSO_ATTACK1",
+            "set:Persona:SOUND_KANTURU_2ND_PERSO_ATTACK2",
+            "set:Persona:SOUND_KANTURU_2ND_PERSO_DIE"
+          ]
+        },
+        {
+          "name": "Phantom Knight",
+          "sounds": [
+            "set:Phantom Knight:Data/Sound/mPhantom1.wav",
+            "set:Phantom Knight:Data/Sound/mPhantomAttack1.wav",
+            "set:Phantom Knight:Data/Sound/mPhantomDie.wav"
+          ]
+        },
+        {
+          "name": "Phoenix of Darkness",
+          "sounds": [
+            "set:Phoenix of Darkness:Data/Sound/mPhoenix1.wav",
+            "set:Phoenix of Darkness:Data/Sound/mPhoenix2.wav",
+            "set:Phoenix of Darkness:Data/Sound/mPhoenixAttack1.wav"
+          ]
+        },
+        {
+          "name": "Polluted Butterfly",
+          "sounds": [
+            "set:Polluted Butterfly:SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01",
+            "set:Polluted Butterfly:SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01"
+          ]
+        },
+        {
+          "name": "Pouch of Blessing",
+          "sounds": [
+            "SOUND_NEWYEARSDAY_DIE"
+          ]
+        },
+        {
+          "name": "Quartermaster",
+          "sounds": [
+            "set:Quartermaster:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Quartermaster:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Quartermaster:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01",
+            "set:Quartermaster:SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02",
+            "set:Quartermaster:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Queen Rainier",
+          "sounds": [
+            "set:Queen Rainier:Data/Sound/mRainner1.wav",
+            "set:Queen Rainier:Data/Sound/mRainnerAttack1.wav",
+            "set:Queen Rainier:Data/Sound/mRainnerDie.wav"
+          ]
+        },
+        {
+          "name": "Raymond",
+          "sounds": [
+            "set:Raymond:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Raymond:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Raymond:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01",
+            "set:Raymond:SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02",
+            "set:Raymond:SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE",
+            "set:Raymond:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Red Dragon",
+          "sounds": [
+            "set:Red Dragon:Data/Sound/mYeti1.wav",
+            "set:Red Dragon:SOUND_MONSTER_BULLATTACK1",
+            "set:Red Dragon:Data/Sound/mYetiDie.wav"
+          ]
+        },
+        {
+          "name": "Red Skeleton Knight",
+          "sounds": [
+            "set:Red Skeleton Knight:Data/Sound/mRedSkull.wav",
+            "set:Red Skeleton Knight:Data/Sound/mRedSkullDie.wav",
+            "set:Red Skeleton Knight:Data/Sound/mRedSkullAttack.wav"
+          ]
+        },
+        {
+          "name": "Resurrected Gladiator",
+          "sounds": [
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK",
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01",
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE02",
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_DEATH",
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01",
+            "set:Resurrected Gladiator:SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02"
+          ]
+        },
+        {
+          "name": "Rogue Centurion",
+          "sounds": [
+            "set:Rogue Centurion:SOUND_MONSTER_DSIDLE1",
+            "set:Rogue Centurion:SOUND_MONSTER_DSIDLE2",
+            "set:Rogue Centurion:SOUND_MONSTER_DSATTACK1",
+            "set:Rogue Centurion:SOUND_MONSTER_DSATTACK2",
+            "set:Rogue Centurion:SOUND_MONSTER_DSDEATH"
+          ]
+        },
+        {
+          "name": "Ruthless Lava Giant",
+          "sounds": [
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE02",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01",
+            "set:Ruthless Lava Giant:SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE02"
+          ]
+        },
+        {
+          "name": "Sapi Queen",
+          "sounds": [
+            "set:Sapi Queen:SOUND_SWAMPOFQUIET_SAPI_DEATH01",
+            "set:Sapi Queen:SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"
+          ]
+        },
+        {
+          "name": "Sapi-Tres",
+          "sounds": [
+            "set:Sapi-Tres:SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01",
+            "set:Sapi-Tres:SOUND_SWAMPOFQUIET_SAPI_DEATH01"
+          ]
+        },
+        {
+          "name": "Sapi-Unus",
+          "sounds": [
+            "set:Sapi-Unus:SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01",
+            "set:Sapi-Unus:SOUND_SWAMPOFQUIET_SAPI_DEATH01"
+          ]
+        },
+        {
+          "name": "Satyros",
+          "sounds": [
+            "set:Satyros:SOUND_KANTURU_1ST_SATI_MOVE1",
+            "set:Satyros:SOUND_KANTURU_1ST_SATI_MOVE2",
+            "set:Satyros:SOUND_KANTURU_1ST_SATI_ATTACK1",
+            "set:Satyros:SOUND_KANTURU_1ST_SATI_ATTACK2",
+            "set:Satyros:SOUND_KANTURU_1ST_SATI_DIE"
+          ]
+        },
+        {
+          "name": "Schriker",
+          "sounds": [
+            "set:Schriker:SOUND_MONSTER_SVIDLE1",
+            "set:Schriker:SOUND_MONSTER_SVIDLE2",
+            "set:Schriker:SOUND_MONSTER_SVATTACK1",
+            "set:Schriker:SOUND_MONSTER_SVATTACK2",
+            "set:Schriker:SOUND_MONSTER_SVDEATH"
+          ]
+        },
+        {
+          "name": "Selupan",
+          "sounds": [
+            "set:Selupan:SOUND_RAKLION_SERUFAN_ATTACK1",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_ATTACK2",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_CURE",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_RAGE",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_WORD1",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_WORD2",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_WORD3",
+            "set:Selupan:SOUND_RAKLION_SERUFAN_WORD4"
+          ]
+        },
+        {
+          "name": "Shadow",
+          "sounds": [
+            "set:Shadow:Data/Sound/mShadow1.wav",
+            "set:Shadow:Data/Sound/mShadow2.wav",
+            "set:Shadow:Data/Sound/mShadowAttack1.wav",
+            "set:Shadow:SOUND_MONSTER_SHADOWATTACK2",
+            "set:Shadow:Data/Sound/mShadowDie.wav",
+            "SOUND_MONSTER_SHADOWATTACK2"
+          ]
+        },
+        {
+          "name": "Shadow Knight",
+          "sounds": [
+            "set:Shadow Knight:SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01",
+            "set:Shadow Knight:SOUND_SWAMPOFQUIET_SHADOW_DEATH01"
+          ]
+        },
+        {
+          "name": "Shadow Look",
+          "sounds": [
+            "set:Shadow Look:SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01",
+            "set:Shadow Look:SOUND_SWAMPOFQUIET_SHADOW_DEATH01"
+          ]
+        },
+        {
+          "name": "Shadow Master",
+          "sounds": [
+            "set:Shadow Master:SOUND_SWAMPOFQUIET_SHADOW_DEATH01",
+            "set:Shadow Master:SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01"
+          ]
+        },
+        {
+          "name": "Shadow Pawn",
+          "sounds": [
+            "set:Shadow Pawn:SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01",
+            "set:Shadow Pawn:SOUND_SWAMPOFQUIET_SHADOW_DEATH01"
+          ]
+        },
+        {
+          "name": "Shield Bearer",
+          "sounds": [
+            "set:Shield Bearer:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Shield Bearer:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Shield Bearer:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01",
+            "set:Shield Bearer:SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02",
+            "set:Shield Bearer:SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02"
+          ]
+        },
+        {
+          "name": "Skeleton",
+          "sounds": [
+            "SOUND_BONE1",
+            "SOUND_BONE2"
+          ]
+        },
+        {
+          "name": "Slaughterer",
+          "sounds": [
+            "set:Slaughterer:SOUND_DOPPELGANGER_BUGBEAR_ATTACK",
+            "set:Slaughterer:SOUND_DOPPELGANGER_BUGBEAR_DEATH"
+          ]
+        },
+        {
+          "name": "Spider",
+          "sounds": [
+            "set:Spider:Data/Sound/mSpider1.wav"
+          ]
+        },
+        {
+          "name": "Splinter Wolf",
+          "sounds": [
+            "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_MOVE1",
+            "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_MOVE2",
+            "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_ATTACK1",
+            "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_ATTACK2",
+            "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_DIE"
+          ]
+        },
+        {
+          "name": "Statue of Saint",
+          "sounds": [
+            "SOUND_HIT_CRISTAL"
+          ]
+        },
+        {
+          "name": "Stone Golem",
+          "sounds": [
+            "set:Stone Golem:Data/Sound/mGolem1.wav",
+            "set:Stone Golem:Data/Sound/mGolem2.wav",
+            "set:Stone Golem:Data/Sound/mGolemAttack1.wav",
+            "set:Stone Golem:Data/Sound/mGolemAttack2.wav",
+            "set:Stone Golem:SOUND_MONSTER_GOLEMDIE"
+          ]
+        },
+        {
+          "name": "Strange Rabbit",
+          "sounds": [
+            "set:Strange Rabbit:SOUND_ELBELAND_RABBITSTRANGE_ATTACK01",
+            "set:Strange Rabbit:SOUND_ELBELAND_RABBITSTRANGE_DEATH01"
+          ]
+        },
+        {
+          "name": "Tantalos",
+          "sounds": [
+            "set:Tantalos:Data/Sound/jaikan1.wav",
+            "set:Tantalos:Data/Sound/jaikan2.wav",
+            "set:Tantalos:Data/Sound/jaikan_attack1.wav",
+            "set:Tantalos:Data/Sound/jaikan_attack2.wav",
+            "set:Tantalos:Data/Sound/jaikan_die.wav"
+          ]
+        },
+        {
+          "name": "Thunder Napin",
+          "sounds": [
+            "set:Thunder Napin:SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01",
+            "set:Thunder Napin:SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01",
+            "set:Thunder Napin:SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"
+          ]
+        },
+        {
+          "name": "Totem Golem",
+          "sounds": [
+            "set:Totem Golem:SOUND_ELBELAND_TOTEMGOLEM_MOVE01",
+            "set:Totem Golem:SOUND_ELBELAND_TOTEMGOLEM_MOVE02",
+            "set:Totem Golem:SOUND_ELBELAND_TOTEMGOLEM_ATTACK01",
+            "set:Totem Golem:SOUND_ELBELAND_TOTEMGOLEM_ATTACK02",
+            "set:Totem Golem:SOUND_ELBELAND_TOTEMGOLEM_DEATH01"
+          ]
+        },
+        {
+          "name": "Transformed Snowman",
+          "sounds": [
+            "set:Transformed Snowman:SOUND_XMAS_SNOWMAN_WALK_1",
+            "set:Transformed Snowman:SOUND_XMAS_SNOWMAN_ATTACK_1",
+            "set:Transformed Snowman:SOUND_XMAS_SNOWMAN_ATTACK_2",
+            "set:Transformed Snowman:SOUND_XMAS_SNOWMAN_DAMAGE_1",
+            "set:Transformed Snowman:SOUND_XMAS_SNOWMAN_DEATH_1"
+          ]
+        },
+        {
+          "name": "Twin Tail",
+          "sounds": [
+            "set:Twin Tail:SOUND_KANTURU_2ND_TWIN_MOVE1",
+            "set:Twin Tail:SOUND_KANTURU_2ND_TWIN_MOVE2",
+            "set:Twin Tail:SOUND_KANTURU_2ND_TWIN_ATTACK1",
+            "set:Twin Tail:SOUND_KANTURU_2ND_TWIN_ATTACK2",
+            "set:Twin Tail:SOUND_KANTURU_2ND_TWIN_DIE"
+          ]
+        },
+        {
+          "name": "Valkyrie",
+          "sounds": [
+            "set:Valkyrie:Data/Sound/mValkyrie1.wav",
+            "set:Valkyrie:Data/Sound/mBaliAttack2.wav",
+            "set:Valkyrie:Data/Sound/mValkyrieDie.wav"
+          ]
+        },
+        {
+          "name": "Venomous Chain Scorpion",
+          "sounds": [
+            "set:Venomous Chain Scorpion:SOUND_KARUTAN_TCSCORPION_ATTACK",
+            "set:Venomous Chain Scorpion:SOUND_KARUTAN_TCSCORPION_DEATH",
+            "set:Venomous Chain Scorpion:SOUND_KARUTAN_TCSCORPION_HIT"
+          ]
+        },
+        {
+          "name": "Vepar",
+          "sounds": [
+            "set:Vepar:Data/Sound/mBepar1.wav",
+            "set:Vepar:Data/Sound/mBepar2.wav",
+            "set:Vepar:Data/Sound/mBalrog1.wav"
+          ]
+        },
+        {
+          "name": "Vermont",
+          "sounds": [
+            "set:Vermont:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01",
+            "set:Vermont:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02",
+            "set:Vermont:SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01",
+            "set:Vermont:SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02",
+            "set:Vermont:SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE",
+            "set:Vermont:SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"
+          ]
+        },
+        {
+          "name": "Werewolf",
+          "sounds": [
+            "set:Werewolf:SOUND_ELBELAND_WOLFHUMAN_MOVE02",
+            "set:Werewolf:SOUND_ELBELAND_WOLFHUMAN_ATTACK01",
+            "set:Werewolf:SOUND_ELBELAND_WOLFHUMAN_DEATH01"
+          ]
+        },
+        {
+          "name": "Witch Queen",
+          "sounds": [
+            "set:Witch Queen:SOUND_AIDA_WITCHQUEEN_MOVE1",
+            "set:Witch Queen:SOUND_AIDA_WITCHQUEEN_MOVE2",
+            "set:Witch Queen:SOUND_AIDA_WITCHQUEEN_ATTACK1",
+            "set:Witch Queen:SOUND_AIDA_WITCHQUEEN_ATTACK2",
+            "set:Witch Queen:SOUND_AIDA_WITCHQUEEN_DIE"
+          ]
+        },
+        {
+          "name": "Worm",
+          "sounds": [
+            "set:Worm:Data/Sound/mWorm1.wav",
+            "set:Worm:Data/Sound/mWorm2.wav",
+            "set:Worm:Data/Sound/mWormDie.wav"
+          ]
+        },
+        {
+          "name": "Yeti",
+          "sounds": [
+            "set:Yeti:Data/Sound/mYeti1.wav",
+            "set:Yeti:Data/Sound/mYeti2.wav",
+            "set:Yeti:Data/Sound/mYetiAttack1.wav",
+            "set:Yeti:Data/Sound/mYetiDie.wav"
+          ]
+        },
+        {
+          "name": "Zombie Fighter",
+          "sounds": [
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK",
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01",
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE02",
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH",
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01",
+            "set:Zombie Fighter:SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Maps",
+      "folders": [
+        {
+          "name": "Aida",
+          "sounds": [
+            "SOUND_AIDA_AMBIENT"
+          ]
+        },
+        {
+          "name": "Barracks of Balgass",
+          "sounds": [
+            "SOUND_3RD_CHANGE_UP_BG_CAGE1",
+            "SOUND_3RD_CHANGE_UP_BG_CAGE2",
+            "SOUND_3RD_CHANGE_UP_BG_VOLCANO",
+            "SOUND_3RD_CHANGE_UP_BG_FIREPILLAR"
+          ]
+        },
+        {
+          "name": "Blood Castle",
+          "sounds": [
+            "SOUND_BLOODCASTLE",
+            "SOUND_DOWN_GATE",
+            "SOUND_CROW"
+          ]
+        },
+        {
+          "name": "Chaos Castle",
+          "sounds": [
+            "SOUND_CHAOS_MOB_BOOM01",
+            "SOUND_CHAOS_MOB_BOOM02",
+            "SOUND_CHAOS_FALLING_STONE",
+            "SOUND_CHAOS_THUNDER01",
+            "SOUND_CHAOS_THUNDER02"
+          ]
+        },
+        {
+          "name": "Crywolf Fortress",
+          "sounds": [
+            "SOUND_CRY1ST_AMBIENT",
+            "SOUND_CRY1ST_WWOLF_MOVE1",
+            "SOUND_CRY1ST_WWOLF_MOVE2",
+            "SOUND_CRY1ST_WWOLF_ATTACK1",
+            "SOUND_CRY1ST_WWOLF_ATTACK2",
+            "SOUND_CRY1ST_WWOLF_DIE",
+            "SOUND_CRY1ST_SCOUT1_MOVE1",
+            "SOUND_CRY1ST_SCOUT1_MOVE2",
+            "SOUND_CRY1ST_SCOUT1_ATTACK1",
+            "SOUND_CRY1ST_SCOUT1_ATTACK2",
+            "SOUND_CRY1ST_SCOUT1_DIE",
+            "SOUND_CRY1ST_SCOUT2_MOVE1",
+            "SOUND_CRY1ST_SCOUT2_MOVE2",
+            "SOUND_CRY1ST_SCOUT2_ATTACK1",
+            "SOUND_CRY1ST_SCOUT2_ATTACK2",
+            "SOUND_CRY1ST_SCOUT2_DIE",
+            "SOUND_CRY1ST_SCOUT3_MOVE1",
+            "SOUND_CRY1ST_SCOUT3_MOVE2",
+            "SOUND_CRY1ST_SCOUT3_ATTACK1",
+            "SOUND_CRY1ST_SCOUT3_ATTACK2",
+            "SOUND_CRY1ST_SCOUT3_DIE",
+            "SOUND_CRY1ST_SORAM_MOVE1",
+            "SOUND_CRY1ST_SORAM_MOVE2",
+            "SOUND_CRY1ST_SORAM_ATTACK1",
+            "SOUND_CRY1ST_SORAM_ATTACK2",
+            "SOUND_CRY1ST_SORAM_DIE",
+            "SOUND_CRY1ST_BALRAM_MOVE1",
+            "SOUND_CRY1ST_BALRAM_MOVE2",
+            "SOUND_CRY1ST_BALRAM_ATTACK1",
+            "SOUND_CRY1ST_BALRAM_ATTACK2",
+            "SOUND_CRY1ST_BALRAM_DIE",
+            "SOUND_CRY1ST_BALGAS_MOVE1",
+            "SOUND_CRY1ST_BALGAS_MOVE2",
+            "SOUND_CRY1ST_BALGAS_ATTACK1",
+            "SOUND_CRY1ST_BALGAS_ATTACK2",
+            "SOUND_CRY1ST_BALGAS_DIE",
+            "SOUND_CRY1ST_BALGAS_SKILL1",
+            "SOUND_CRY1ST_BALGAS_SKILL2",
+            "SOUND_CRY1ST_DARKELF_MOVE1",
+            "SOUND_CRY1ST_DARKELF_MOVE2",
+            "SOUND_CRY1ST_DARKELF_ATTACK1",
+            "SOUND_CRY1ST_DARKELF_ATTACK2",
+            "SOUND_CRY1ST_DARKELF_DIE",
+            "SOUND_CRY1ST_DARKELF_SKILL1",
+            "SOUND_CRY1ST_DARKELF_SKILL2",
+            "SOUND_CRY1ST_DEATHSPIRIT_MOVE1",
+            "SOUND_CRY1ST_DEATHSPIRIT_MOVE2",
+            "SOUND_CRY1ST_DEATHSPIRIT_ATTACK1",
+            "SOUND_CRY1ST_DEATHSPIRIT_ATTACK2",
+            "SOUND_CRY1ST_DEATHSPIRIT_DIE",
+            "SOUND_CRY1ST_TANKER_ATTACK1",
+            "SOUND_CRY1ST_TANKER_DIE",
+            "SOUND_CRY1ST_SUMMON",
+            "SOUND_CRY1ST_SUCCESS",
+            "SOUND_CRY1ST_FAILED"
+          ]
+        },
+        {
+          "name": "Elbeland",
+          "sounds": [
+            "SOUND_ELBELAND_VILLAGEPROTECTION01",
+            "SOUND_ELBELAND_WATERFALLSMALL01",
+            "SOUND_ELBELAND_WATERWAY01",
+            "SOUND_ELBELAND_ENTERDEVIAS01",
+            "SOUND_ELBELAND_WATERSMALL01",
+            "SOUND_ELBELAND_RAVINE01",
+            "SOUND_ELBELAND_ENTERATLANCE01"
+          ]
+        },
+        {
+          "name": "Empire Guardians",
+          "sounds": [
+            "SOUND_EMPIREGUARDIAN_WEATHER_RAIN",
+            "SOUND_EMPIREGUARDIAN_WEATHER_FOG",
+            "SOUND_EMPIREGUARDIAN_WEATHER_STORM",
+            "SOUND_EMPIREGUARDIAN_INDOOR_SOUND",
+            "SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02"
+          ]
+        },
+        {
+          "name": "Illusion Temple",
+          "sounds": [
+            "SOUND_CURSEDTEMPLE_GAMESYSTEM1",
+            "SOUND_CURSEDTEMPLE_GAMESYSTEM2",
+            "SOUND_CURSEDTEMPLE_GAMESYSTEM3",
+            "SOUND_CURSEDTEMPLE_GAMESYSTEM4",
+            "SOUND_CURSEDTEMPLE_GAMESYSTEM5",
+            "SOUND_CURSEDTEMPLE_MONSTER1_IDLE",
+            "SOUND_CURSEDTEMPLE_MONSTER_MOVE",
+            "SOUND_CURSEDTEMPLE_MONSTER1_DAMAGE",
+            "SOUND_CURSEDTEMPLE_MONSTER1_DEATH",
+            "SOUND_CURSEDTEMPLE_MONSTER2_IDLE",
+            "SOUND_CURSEDTEMPLE_MONSTER2_ATTACK",
+            "SOUND_CURSEDTEMPLE_MONSTER2_DAMAGE",
+            "SOUND_CURSEDTEMPLE_MONSTER2_DEATH"
+          ]
+        },
+        {
+          "name": "Kanturu Refinery Tower",
+          "sounds": [
+            "SOUND_KANTURU_3RD_MAYA_INTRO",
+            "SOUND_KANTURU_3RD_MAYA_END",
+            "SOUND_KANTURU_3RD_MAYA_STORM",
+            "SOUND_KANTURU_3RD_NIGHTMARE_INTRO",
+            "SOUND_KANTURU_3RD_MAYAHAND_ATTACK1",
+            "SOUND_KANTURU_3RD_MAYAHAND_ATTACK2",
+            "SOUND_KANTURU_3RD_MAP_SOUND01",
+            "SOUND_KANTURU_3RD_MAP_SOUND02",
+            "SOUND_KANTURU_3RD_MAP_SOUND03",
+            "SOUND_KANTURU_3RD_MAP_SOUND04",
+            "SOUND_KANTURU_3RD_MAP_SOUND05",
+            "SOUND_KANTURU_3RD_AMBIENT",
+            "SOUND_KANTURU_3RD_NIGHTMARE_ATT1",
+            "SOUND_KANTURU_3RD_NIGHTMARE_ATT2",
+            "SOUND_KANTURU_3RD_NIGHTMARE_ATT3",
+            "SOUND_KANTURU_3RD_NIGHTMARE_ATT4",
+            "SOUND_KANTURU_3RD_NIGHTMARE_DIE",
+            "SOUND_KANTURU_3RD_NIGHTMARE_IDLE1",
+            "SOUND_KANTURU_3RD_NIGHTMARE_IDLE2",
+            "SOUND_KANTURU_3RD_NIGHTMARE_TELE"
+          ]
+        },
+        {
+          "name": "Karutan",
+          "sounds": [
+            "SOUND_CHAOSCASTLE",
+            "SOUND_KALIMA_AMBIENT",
+            "SOUND_KALIMA_AMBIENT2",
+            "SOUND_KALIMA_AMBIENT3",
+            "SOUND_KALIMA_FALLING_STONE",
+            "SOUND_DEATH_BUBBLE",
+            "SOUND_KUNDUN_AMBIENT1",
+            "SOUND_KUNDUN_AMBIENT2",
+            "SOUND_KUNDUN_ROAR",
+            "SOUND_KUNDUN_SIGHT",
+            "SOUND_KUNDUN_SHUDDER",
+            "SOUND_KUNDUN_DESTROY",
+            "SOUND_SKILL_SKULL",
+            "SOUND_GREAT_POISON",
+            "SOUND_GREAT_SHIELD",
+            "SOUND_KARUTAN_DESERT_ENV",
+            "SOUND_KARUTAN_INSECT_ENV",
+            "SOUND_KARUTAN_KARDAMAHAL_ENV"
+          ]
+        },
+        {
+          "name": "Land of Trials",
+          "sounds": [
+            "SOUND_BC_HUNTINGGROUND_AMBIENT",
+            "SOUND_BC_AXEWARRIOR_MOVE1",
+            "SOUND_BC_AXEWARRIOR_MOVE2",
+            "SOUND_BC_AXEWARRIOR_ATTACK1",
+            "SOUND_BC_AXEWARRIOR_ATTACK2",
+            "SOUND_BC_AXEWARRIOR_DIE",
+            "SOUND_BC_LIZARDWARRIOR_MOVE1",
+            "SOUND_BC_LIZARDWARRIOR_MOVE2",
+            "SOUND_BC_LIZARDWARRIOR_ATTACK1",
+            "SOUND_BC_LIZARDWARRIOR_ATTACK2",
+            "SOUND_BC_LIZARDWARRIOR_DIE",
+            "SOUND_BC_POISONGOLEM_MOVE1",
+            "SOUND_BC_POISONGOLEM_MOVE2",
+            "SOUND_BC_POISONGOLEM_ATTACK1",
+            "SOUND_BC_POISONGOLEM_ATTACK2",
+            "SOUND_BC_POISONGOLEM_ATTACK3",
+            "SOUND_BC_POISONGOLEM_DIE",
+            "SOUND_BC_QUEENBEE_MOVE1",
+            "SOUND_BC_QUEENBEE_MOVE2",
+            "SOUND_BC_QUEENBEE_ATTACK1",
+            "SOUND_BC_QUEENBEE_ATTACK2",
+            "SOUND_BC_QUEENBEE_DIE",
+            "SOUND_BC_FIREGOLEM_MOVE1",
+            "SOUND_BC_FIREGOLEM_MOVE2",
+            "SOUND_BC_FIREGOLEM_ATTACK1",
+            "SOUND_BC_FIREGOLEM_ATTACK2",
+            "SOUND_BC_FIREGOLEM_DIE",
+            "SOUND_BC_EROHIM_ENTER",
+            "SOUND_BC_EROHIM_ATTACK1",
+            "SOUND_BC_EROHIM_ATTACK2",
+            "SOUND_BC_EROHIM_ATTACK3",
+            "SOUND_BC_EROHIM_DIE"
+          ]
+        },
+        {
+          "name": "Valley of Loren",
+          "sounds": [
+            "SOUND_BC_AMBIENT",
+            "SOUND_BC_AMBIENT_BATTLE1",
+            "SOUND_BC_AMBIENT_BATTLE2",
+            "SOUND_BC_AMBIENT_BATTLE3",
+            "SOUND_BC_AMBIENT_BATTLE4",
+            "SOUND_BC_AMBIENT_BATTLE5",
+            "SOUND_BC_GUARD_STONE_DIS",
+            "SOUND_BC_SHIELD_SPACE_DIS",
+            "SOUND_BC_CATAPULT_ATTACK",
+            "SOUND_BC_CATAPULT_HIT",
+            "SOUND_BC_WALL_HIT",
+            "SOUND_BC_GATE_OPEN",
+            "SOUND_BC_GUARDIAN_ATTACK",
+            "SOUND_BMS_STUN",
+            "SOUND_BMS_STUN_REMOVAL",
+            "SOUND_BMS_MANA",
+            "SOUND_BMS_INVISIBLE",
+            "SOUND_BMS_VISIBLE",
+            "SOUND_BMS_MAGIC_REMOVAL",
+            "SOUND_BCS_RUSH",
+            "SOUND_BCS_JAVELIN",
+            "SOUND_BCS_DEEP_IMPACT",
+            "SOUND_BCS_DEATH_CANON",
+            "SOUND_BCS_ONE_FLASH",
+            "SOUND_BCS_SPACE_SPLIT",
+            "SOUND_BCS_BRAND_OF_SKILL"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Map objects",
+      "sounds": [
+        "objects:Data/Sound/aKalimaWaterFall.wav",
+        "objects:Data/Sound/w37/kan_ruin_wheel.wav",
+        "objects:Data/Sound/w37/kan_ruin_waterfall.wav",
+        "objects:Data/Sound/w37/kan_ruin_elec.wav",
+        "objects:Data/Sound/w37/kan_ruin_plant.wav",
+        "objects:Data/Sound/w37/kan_ruin_global.wav",
+        "objects:Data/Sound/w38/kan_relic_gear.wav",
+        "objects:Data/Sound/w38/kan_relic_incubator.wav",
+        "objects:Data/Sound/w38/kan_relic_global.wav"
+      ]
+    },
+    {
+      "name": "Events",
+      "folders": [
+        {
+          "name": "Battle Soccer",
+          "sounds": [
+            "SOUND_MENU01",
+            "SOUND_FIRECRACKER1",
+            "SOUND_FIRECRACKER2"
+          ]
+        },
+        {
+          "name": "Cherry Blossom",
+          "sounds": [
+            "SOUND_CHERRYBLOSSOM_EFFECT0",
+            "SOUND_CHERRYBLOSSOM_EFFECT1"
+          ]
+        },
+        {
+          "name": "Duel",
+          "sounds": [
+            "SOUND_OPEN_DUELWINDOW",
+            "SOUND_START_DUEL"
+          ]
+        },
+        {
+          "name": "Fireworks",
+          "sounds": [
+            "SOUND_XMAS_FIRECRACKER"
+          ]
+        },
+        {
+          "name": "Ring event (server announcement)",
+          "sounds": [
+            "SOUND_RING_EVENT_READY",
+            "SOUND_RING_EVENT_START",
+            "SOUND_RING_EVENT_END"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Loaded, never played",
+      "sounds": [
+        "SOUND_TITLE01",
+        "SOUND_ERROR01",
+        "SOUND_PHOENIXEXP",
+        "SOUND_RAIDSHOOT"
+      ]
+    }
+  ]
+}

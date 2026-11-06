@@ -185,3 +185,8 @@ body {
 	color: #000000;
 	background-color: rgba(0, 255, 255, 128);
 }
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+#btn_create, #btn_menu, #btn_delete { click-sound: menu; }
+#btn_connect { click-sound: confirm; }

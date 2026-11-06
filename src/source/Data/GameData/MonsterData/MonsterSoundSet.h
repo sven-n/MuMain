@@ -32,6 +32,9 @@ struct MonsterSound
     int channels = DefaultSoundChannels;
     // Played in 3D, louder near the hero.
     bool spatial = false;
+    // What the Sound Editor shows instead of the set and file (sound editor
+    // design, Q-SE1); "" for none. The game reads and ignores it.
+    std::string name;
 
     bool operator==(const MonsterSound&) const = default;
 };
@@ -79,10 +82,13 @@ enum class MonsterSoundMoment
 };
 
 // Sounds that the game plays for a monster of the set (monsters design, MN7,
-// Q-MN76, Q-MN79): while it is in one of `animations` (PlayMonsterSound, at
-// the start of an attack, a hit and the death, at each step of a walk and at
-// the end of each loop of stop1 and stop2), in one of the frames its model's
-// `cues` name, or at one of `moments`. An event names one of the three.
+// Q-MN76, Q-MN79, Q-MN84, Q-MN85): while it is in one of `animations`
+// (PlayMonsterSound, at the start of an attack, a hit and the death, at each
+// step of a walk and at the end of each loop of stop1 and stop2), in one of
+// the frames its model's `cues` name, at one of `moments`, each frame it is
+// drawn in one of `during`, once in one of `once` until it stands or walks,
+// each frame it is drawn in one of `duringCues`, or in a drawn frame where one
+// of `timers` ticks. An event names one of the seven.
 struct MonsterSoundEvent
 {
     // Sorted.
@@ -91,6 +97,21 @@ struct MonsterSoundEvent
     std::vector<MonsterSoundMoment> moments;
     // Cues of the monster's model (MonsterModelCue::name), in their order.
     std::vector<std::string> cues;
+    // Each frame the character is drawn in one of them (SoundEvents::
+    // PlayDrawn, Q-MN84); sorted.
+    std::vector<int> during;
+    // The first frame the character is drawn in one of them; then none of
+    // the set's once events plays until it is drawn in stop1, stop2 or walk
+    // (Q-MN85, Q-MN89, the map draw code's SubType flag); sorted.
+    std::vector<int> once;
+    // Each frame the character is drawn in the frames of one of these cues
+    // of its model (Q-MN90: Dreadfear's attack 2 in its frames 0 to 2), in
+    // their order. The once flag stays as it is.
+    std::vector<std::string> duringCues;
+    // Each drawn frame in which one of these timers of its model ticks
+    // (Q-MN91: Twintail's walk sound with its hair swing), in their order.
+    // The once flag stays as it is.
+    std::vector<std::string> timers;
     // Only while the character's death effect is armed (OBJECT::LifeTime 100).
     bool deathEffectArmed = false;
     // Heard at any distance from the hero and on every map; else within 500

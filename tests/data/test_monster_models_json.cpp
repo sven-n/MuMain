@@ -83,6 +83,7 @@ MonsterModelDefinition FullModel()
     model.cues = {{"step 2", MONSTER01_WALK, {7.0f, 7.5f}},
                   {"step 1", MONSTER01_WALK, {1.0f, 2.0f}},
                   {"swing", MONSTER01_ATTACK1, {3.25f, 4.0f}}};
+    model.timers = {{"hair swing", MONSTER01_WALK, 500}, {"blink", MONSTER01_STOP1, 2000}};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
     part.effect = "totemGolemPart1";
@@ -229,6 +230,25 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND", R"("headBone": 1.5)"), "model MONSTER_MODEL_HOUND headBone", "whole number"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": {"step 1": [1, 2]})"), "model MONSTER_MODEL_HOUND cues",
          "list of cues"},
+        // The model timers (Q-MN91).
+        {Model("MONSTER_MODEL_HOUND", R"("timers": {"hair swing": 500})"), "model MONSTER_MODEL_HOUND timers",
+         "4 timers or fewer"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("timers": [{"name": "a", "animation": "walk", "everyMs": 1}, {"name": "b", "animation": "walk", )"
+               R"("everyMs": 1}, {"name": "c", "animation": "walk", "everyMs": 1}, {"name": "d", "animation": )"
+               R"("walk", "everyMs": 1}, {"name": "e", "animation": "walk", "everyMs": 1}])"),
+         "model MONSTER_MODEL_HOUND timers", "4 timers or fewer"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk"}])"),
+         "model MONSTER_MODEL_HOUND timers[0]", "name, animation and everyMs"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "jump", "everyMs": 500}])"),
+         "model MONSTER_MODEL_HOUND timers[0].animation", "not an animation"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk", "everyMs": 0}])"),
+         "model MONSTER_MODEL_HOUND timers[0].everyMs", "from 1 to 60000"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk", "everyMs": 60001}])"),
+         "model MONSTER_MODEL_HOUND timers[0].everyMs", "from 1 to 60000"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "a", "animation": "walk", "everyMs": 5}, )"
+                                      R"({"name": "a", "animation": "stop1", "everyMs": 5}])"),
+         "model MONSTER_MODEL_HOUND timers[1].name", "another timer"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "frames": [1, 2]}])"),
          "model MONSTER_MODEL_HOUND cues[0]", "name, animation and frames"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "", "animation": "walk", "frames": [1, 2]}])"),
@@ -270,6 +290,32 @@ TEST_CASE("Monster models: a slot must be a model slot of the monster area and b
     read = Read(ModelsFile(Model("MONSTER_MODEL_HOUND") + ", " + Model("MONSTER_MODEL_HOUND")));
     CHECK(read.models.size() == 1);
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, "model MONSTER_MODEL_HOUND slot", "more than once"));
+}
+
+// Twintail's map code asks its model for the hair swing timer by name: a model
+// list where it is renamed or gone says so, while the game runs without it.
+TEST_CASE("Monster models: a model without the timer the game's code asks for is an error [data][monsters]")
+{
+    MonsterModelDefinition twinTail;
+    twinTail.slot = "MONSTER_MODEL_TWIN_TAIL";
+    twinTail.timers = {{std::string(Data::Monsters::TwinTailHairSwingTimer), MONSTER01_WALK, 500}};
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ValidateMonsterModelNames({&twinTail, 1}, "Models.json", issues);
+    CHECK(issues.empty());
+
+    twinTail.timers[0].name = "hair";
+    Data::Monsters::ValidateMonsterModelNames({&twinTail, 1}, "Models.json", issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].field == "model MONSTER_MODEL_TWIN_TAIL timers");
+    CHECK(issues[0].message.find("\"hair swing\"") != std::string::npos);
+
+    // Another model asks for no timer.
+    issues.clear();
+    MonsterModelDefinition hound;
+    hound.slot = "MONSTER_MODEL_HOUND";
+    Data::Monsters::ValidateMonsterModelNames({&hound, 1}, "Models.json", issues);
+    CHECK(issues.empty());
 }
 
 TEST_CASE("Monster models: both weapons may hang on one bone [data][monsters]")

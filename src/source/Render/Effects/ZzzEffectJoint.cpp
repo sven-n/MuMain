@@ -19,6 +19,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundPlaces.h"
 #include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
@@ -134,6 +135,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
         if (!o->Live)
         {
             o->Live = true;
+            Audio::RememberMaker(o);
             std::memset(o->Tails, 0, sizeof(o->Tails));
             o->TailFrames = 0.f;
             o->Type = Type;
@@ -7090,6 +7092,10 @@ void MoveJoints()
         JOINT* o = &Joints[i];
         if (o->Live)
         {
+            // The sounds a joint plays as it moves are marked at it, typed by
+            // its maker (Charon's energy sparks reaching her hand).
+            std::optional<Audio::ScopedSoundPlace> place;
+            Audio::PlaceEffect(place, o, o->Type, o->Position);
             MoveJoint(o, i);
         }
     }

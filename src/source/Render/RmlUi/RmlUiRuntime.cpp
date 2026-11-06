@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Audio/SoundSource.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/BundledFonts.h"
 #include "RmlUiRuntime.h"
@@ -250,6 +251,8 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
+    // The windows' sounds are the interface's (Q-SM13).
+    const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
     {
         FRAME_PROFILE(RmlUiUpdate);
         if (m_Hooks.beforeUpdate)

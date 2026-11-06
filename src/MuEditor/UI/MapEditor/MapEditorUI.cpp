@@ -12,6 +12,7 @@
 #include "MapTextureBrowser.h"
 #include "MapObjectPlace.h"
 #include "MapObjectBrowser.h"
+#include "MapSoundsTab.h"
 #include "ObjectThumbnail.h"
 
 #include "Render/Textures/ZzzOpenglUtil.h"  // CollisionPosition (world hit point)
@@ -23,6 +24,7 @@
 #include "MapMinimapCapture.h"
 
 #include "imgui.h"
+#include "I18N/All.h"
 #include "Core/Globals/_define.h"          // EDIT_MAPPING / EDIT_NONE
 #include "Core/Globals/_TextureIndex.h"    // BITMAP_MAPTILE
 #include "Render/Sprites/GlobalBitmap.h"   // Bitmaps[]
@@ -352,7 +354,11 @@ void CMapEditorUI::Render(bool* p_open)
             }
             ImGui::EndTabItem();
         }
-        // Later phases add tabs here (Attribute / Height).
+        if (ImGui::BeginTabItem(I18N::Editor::Sounds))
+        {
+            RenderSoundsTab();
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
 
@@ -378,6 +384,24 @@ void CMapEditorUI::Render(bool* p_open)
         EnterEditMode(m_desiredEditFlag);
     else
         RestoreGameMode();
+}
+
+void CMapEditorUI::RenderSoundsTab()
+{
+    if (g_MapSoundsTab.IsPicking())
+    {
+        // The object tool's picking: the mouse is ray-cast onto the world, the
+        // hovered object outlined, and the click kept from the hero.
+        m_desiredEditFlag = EDIT_OBJECT;
+        OBJECT* hovered = g_MuEditorCore.IsHoveringUI() ? nullptr : Editor::ObjectPlace::PickUnderCursor();
+        g_MapEditorHoveredObject = hovered;
+        if (m_PaintLDown && !m_soundPickWasDown && hovered != nullptr)
+        {
+            g_MapSoundsTab.Picked(hovered->Type);
+        }
+    }
+    m_soundPickWasDown = m_PaintLDown;
+    g_MapSoundsTab.Render(gMapManager.GetServerMap(), gMapManager.GetServerStage(), ResolveWorldNumber());
 }
 
 void CMapEditorUI::RenderTextureTab()

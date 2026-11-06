@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "SkillEffectMgr.h"
+#include "Audio/SoundPlaces.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Render/Models/ZzzBMD.h"
@@ -187,6 +188,9 @@ void CSkillEffectMgr::MoveEffects()
         OBJECT* o = &m_SkillEffects[i];
         if (o->Live)
         {
+            // Its sounds are marked at it, typed by its maker (Q-SM13).
+            std::optional<Audio::ScopedSoundPlace> place;
+            Audio::PlaceEffect(place, o, o->Type, o->Position);
             MoveEffect(o, i);
         }
     }

@@ -37,6 +37,8 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundEventPlay.h"
+#include "Audio/SoundPlaces.h"
 #include "I18N/All.h"
 
 #include "Engine/Physics/PhysicsManager.h"
@@ -1291,20 +1293,15 @@ void SetPlayerAttack(CHARACTER* c)
             }
             else
             {
-                if (gCharacterManager.GetEquipedBowType(c) == BOWTYPE_BOW)
+                // What the player holds plays which swing: the sound events
+                // (Q-SE1).
+                Data::Sounds::SoundEventContext context;
+                context.holds = Audio::HeldWeaponOf(*c);
+                if (const std::optional<ESound> sound =
+                        Audio::PickEventSound(Data::Sounds::PlayerAttackSwingEvent, context))
                 {
-                    PlayBuffer(SOUND_BOW01, o);
+                    PlayBuffer(*sound, o);
                 }
-                else if (gCharacterManager.GetEquipedBowType(c) == BOWTYPE_CROSSBOW)
-                {
-                    PlayBuffer(SOUND_CROSSBOW01, o);
-                }
-                else if (c->Weapon[0].Type >= MODEL_BLUEWING_CROSSBOW && c->Weapon[0].Type < MODEL_ARROWS)
-                    PlayBuffer(SOUND_MAGIC, o);
-                else if (c->Weapon[0].Type == MODEL_LIGHT_SABER || c->Weapon[0].Type == MODEL_SPEAR)
-                    PlayBuffer(SOUND_BRANDISH_SWORD03, o);
-                else if (c->Weapon[0].Type != -1 || c->Weapon[1].Type != -1)
-                    PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2), o);
             }
             PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Attack);
         }
@@ -3970,6 +3967,8 @@ void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 
 void MoveCharacter(CHARACTER* c, OBJECT* o)
 {
+    std::optional<Audio::ScopedSoundPlace> place;
+    Audio::PlaceCharacter(place, *c);
     if (o->Type == MODEL_WARCRAFT)
     {
         wchar_t Text[100];
@@ -5271,33 +5270,14 @@ void PlayWalkSound()
     }
     else
     {
-        if (gMapManager.WorldActive == WD_2DEVIAS && (HeroTile != 3 && HeroTile < 10))
+        // Which step plays on which ground: the sound events (Q-SE1).
+        Data::Sounds::SoundEventContext context;
+        context.world = gMapManager.WorldActive;
+        context.tile = HeroTile;
+        context.safeZone = Hero->SafeZone;
+        if (const std::optional<ESound> sound = Audio::PickEventSound(Data::Sounds::HeroFootstepEvent, context))
         {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else if (gMapManager.WorldActive == WD_0LORENCIA && HeroTile == 0)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GRASS);
-        }
-        else if (gMapManager.WorldActive == WD_3NORIA && HeroTile == 0)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GRASS);
-        }
-        else if ((gMapManager.WorldActive == WD_7ATLANSE || gMapManager.InHellas() || gMapManager.WorldActive == WD_67DOPPLEGANGER3) && !Hero->SafeZone)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SWIM);
-        }
-        else if (IsIceCity())
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else if (IsSantaTown())
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GROUND);
+            PlayBuffer(*sound);
         }
     }
 }
@@ -5516,6 +5496,9 @@ void MonsterMoveSandSmoke(OBJECT* o)
 
 void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
 {
+    // NPCs play their sounds here (Elf Lala's harp, the Chaos Goblin's mix).
+    std::optional<Audio::ScopedSoundPlace> place;
+    Audio::PlaceCharacter(place, *c);
     BMD* b = &Models[o->Type];
     if (b->NumActions == 0)
     {
@@ -12081,6 +12064,40 @@ static BMD* PlaceCharacterModel(OBJECT* o)
     return b;
 }
 
+// The effects of the character's type, or else of the first map whose monster
+// effects claim it.
+static void UpdateTypeAndMapMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (UpdateCharacterTypeEffects(c, o, b))
+        return;
+    // Same order and stop-on-claim as RenderCharacter's chain.
+    if (UpdateHellasMonsterEffects(c, o, b))
+        return;
+    if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
+        return;
+    if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
+        return;
+    if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
+        return;
+    if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
+        return;
+    if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
+        return;
+    if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
+        return;
+    if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
+        return;
+    if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
+        return;
+    if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
+        return;
+    if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
+        return;
+    if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
+        return;
+    TheMapProcess().UpdateMonsterEffects(c, o, b);
+}
+
 void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -12090,6 +12107,8 @@ void UpdateDrawnCharacterEffects()
             continue;
 
         OBJECT* o = &c->Object;
+        std::optional<Audio::ScopedSoundPlace> place;
+        Audio::PlaceCharacter(place, *c);
         BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
@@ -12124,34 +12143,10 @@ void UpdateDrawnCharacterEffects()
             SpawnProtectGuildMark(c);
         if (o->Type == MODEL_PLAYER)
             battleCastle::CreateBattleCastleCharacter_Visual(c, o);
-        if (UpdateCharacterTypeEffects(c, o, b))
-            continue;
-        // Same order and stop-on-claim as RenderCharacter's chain.
-        if (UpdateHellasMonsterEffects(c, o, b))
-            continue;
-        if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
-            continue;
-        if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
-            continue;
-        if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
-            continue;
-        if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
-            continue;
-        if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
-            continue;
-        if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
-            continue;
-        if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
-            continue;
-        if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
-            continue;
-        TheMapProcess().UpdateMonsterEffects(c, o, b);
+        UpdateTypeAndMapMonsterEffects(c, o, b);
+        // The sound events of the drawn frame, unless a map's code played
+        // them where it played its sounds (the Aida monsters).
+        GameLogic::Monsters::SoundEvents::FinishDrawnFrame(*c);
     }
 }
 } // namespace
@@ -12618,6 +12613,11 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->Kind = KIND_PLAYER;
     c->Change = false;
     o->SubType = 0;
+    c->SoundOncePlayed = false;
+    c->SoundsDrawnThisFrame = false;
+    // A new frame for its model's timers; their last ticks stay (Q-MN91).
+    c->ModelTimersAsked = false;
+    c->ModelTimerTicks = 0;
     c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;

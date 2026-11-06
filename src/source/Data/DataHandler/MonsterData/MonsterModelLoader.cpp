@@ -4,9 +4,9 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundNumbers.h"
-#include "Core/Text/Utf8.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
@@ -40,12 +40,7 @@ enum class Defaults
 constexpr size_t TextureNameSize = sizeof(Texture_t::FileName);
 
 // "Data/Monster/Monster01.bmd" -> "Data\Monster\Monster01.bmd".
-std::wstring ToLoaderPath(const std::string& path)
-{
-    std::wstring loaderPath = Core::Text::FromUtf8(path.c_str());
-    std::replace(loaderPath.begin(), loaderPath.end(), L'/', L'\\');
-    return loaderPath;
-}
+using Data::Paths::ToLoaderPath;
 
 // AccessModel's folder ("Data\Monster\") and file name without ".bmd".
 bool OpenFile(int slot, const std::string& file)

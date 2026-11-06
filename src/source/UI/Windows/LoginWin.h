@@ -104,6 +104,8 @@ private:
     // re-checks the "remember password" prompt's live Pending state itself.
     void SubmitLogin();
     void SubmitCancel();
+    // Plays the click sound of the button a key stands for (a selector of the login document).
+    void PlayKeyClick(const char* button);
     void ApplyRememberMeChange();
     void ApplySavePasswordChange();
 

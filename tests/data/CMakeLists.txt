@@ -37,6 +37,61 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
+# the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME map_data_tests
+    SOURCES
+        test_map_object_sounds.cpp
+        test_map_sounds_tab.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(map_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The code's sounds and their files (Data/Audio/SoundFiles.json): reader,
+# writer, the shipped file and LoadGameSound.
+mu_add_test(
+    NAME sound_data_tests
+    SOURCES
+        test_sound_files.cpp
+        test_sound_events.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(sound_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The editor's Sound Editor: its rows, changes, names, file picker and window.
+# The window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_editor_tests
+    SOURCES
+        test_sound_editor.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(sound_editor_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The editor's Sound Mixer: its rules, sources, heard list and window. The
+# window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_mixer_tests
+    SOURCES
+        test_sound_mixer.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # The server groups of the login screen (Data/Local/ServerList.json). The
 # window test draws the editor's Server List window, which needs the client
 # globals of Winmain.cpp.

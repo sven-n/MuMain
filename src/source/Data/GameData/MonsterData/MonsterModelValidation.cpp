@@ -90,6 +90,17 @@ void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, c
             }
         }
         ValidateParts(model, problems);
+        for (const CodeModelTimer& codeTimer : CodeModelTimers)
+        {
+            if (model.slot == codeTimer.slot &&
+                std::none_of(model.timers.begin(), model.timers.end(),
+                             [&codeTimer](const MonsterModelTimer& timer) { return timer.name == codeTimer.name; }))
+            {
+                problems.Add(ItemDataIssueSeverity::Error, "timers",
+                             "the game's code asks for the timer \"" + std::string(codeTimer.name) +
+                                 "\", which the model lacks: " + std::string(codeTimer.use));
+            }
+        }
     }
 }
 
