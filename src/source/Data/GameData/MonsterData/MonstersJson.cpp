@@ -588,6 +588,8 @@ bool HasEmptyText(const OrderedJson& json, const char* key)
 // "attacks": null, and empty lists of variants.
 bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList& issues)
 {
+    // Each field WriteOwnValue writes is read here; a new one needs both.
+    static_assert(MonsterValueFields.size() == 7, "read the new own value here and write it in WriteOwnValue");
     const int number = entry.number;
     bool valid = true;
     if (json.contains(NameKey))
@@ -811,8 +813,38 @@ OrderedJson WriteSharedValues(const MonsterDefinition& shared)
     return json;
 }
 
+// A number's own value of the field, as WriteNumber writes it: also empty
+// where the monster's is not (ReadOwnValues reads it back).
+void WriteOwnValue(OrderedJson& json, const MonsterDefinition& entry, MonsterValueField field)
+{
+    switch (field)
+    {
+    case MonsterValueField::Names:
+        json[NameKey] = Items::Json::WriteLocalizedString(entry.names);
+        break;
+    case MonsterValueField::Kind:
+        json[KindKey] = GetMonsterKindName(entry.kind);
+        break;
+    case MonsterValueField::Model:
+        json[ModelKey] = entry.model;
+        break;
+    case MonsterValueField::SoundSet:
+        json[SoundSetKey] = entry.soundSet;
+        break;
+    case MonsterValueField::Attacks:
+        json[AttacksKey] = entry.attacks ? WriteAttacks(*entry.attacks) : OrderedJson(nullptr);
+        break;
+    case MonsterValueField::MapVariants:
+        json[MapVariantsKey] = WriteMapVariants(entry.mapVariants);
+        break;
+    case MonsterValueField::RandomVariants:
+        json[RandomVariantsKey] = WriteRandomVariants(entry.randomVariants);
+        break;
+    }
+}
+
 // A number with its maps and the values its entry has differently from the
-// shared ones.
+// shared ones, in the order of MonsterValueFields.
 OrderedJson WriteNumber(const MonsterDefinition& shared, const MonsterDefinition& entry)
 {
     OrderedJson json = OrderedJson::object();
@@ -821,33 +853,12 @@ OrderedJson WriteNumber(const MonsterDefinition& shared, const MonsterDefinition
     {
         json[MapsKey] = Data::Maps::WriteMapRefs(entry.maps);
     }
-    if (entry.names != shared.names)
+    for (const MonsterValueField field : MonsterValueFields)
     {
-        json[NameKey] = Items::Json::WriteLocalizedString(entry.names);
-    }
-    if (entry.kind != shared.kind)
-    {
-        json[KindKey] = GetMonsterKindName(entry.kind);
-    }
-    if (entry.model != shared.model)
-    {
-        json[ModelKey] = entry.model;
-    }
-    if (entry.soundSet != shared.soundSet)
-    {
-        json[SoundSetKey] = entry.soundSet;
-    }
-    if (entry.attacks != shared.attacks)
-    {
-        json[AttacksKey] = entry.attacks ? WriteAttacks(*entry.attacks) : OrderedJson(nullptr);
-    }
-    if (entry.mapVariants != shared.mapVariants)
-    {
-        json[MapVariantsKey] = WriteMapVariants(entry.mapVariants);
-    }
-    if (entry.randomVariants != shared.randomVariants)
-    {
-        json[RandomVariantsKey] = WriteRandomVariants(entry.randomVariants);
+        if (!HasSameValue(entry, shared, field))
+        {
+            WriteOwnValue(json, entry, field);
+        }
     }
     return json;
 }
