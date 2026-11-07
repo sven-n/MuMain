@@ -605,10 +605,6 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
     }
 }
 
-// The removed tags the item file still has, as what replaces them (D73): the preset they leave the lines out with (for
-// both noClassLines and noDurabilityLine the one that leaves out both), and the line ids they hide among the item's
-// own changes. An item that names another layout itself keeps it, and the tag is an error: which of the two layouts
-// it means is the author's call.
 // The option definitions the item links, by name; whether they exist is checked with them (ValidateItemOptionLinks).
 void ItemReader::ReadOptionLinks(const OrderedJson& json, std::vector<std::string>& options)
 {
@@ -638,6 +634,10 @@ void ItemReader::ReadOptionLinks(const OrderedJson& json, std::vector<std::strin
     }
 }
 
+// The removed tags the item file still has, as what replaces them (D73): the preset they leave the lines out with (for
+// both noClassLines and noDurabilityLine the one that leaves out both), and the line ids they hide among the item's
+// own changes. An item that names another layout itself keeps it, and the tag is an error: which of the two layouts
+// it means is the author's call.
 void ItemReader::ApplyRemovedTooltipTags(ItemDefinition& definition)
 {
     std::string_view preset;
