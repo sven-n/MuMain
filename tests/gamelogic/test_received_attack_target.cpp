@@ -343,12 +343,15 @@ TEST_CASE("Dark Ghost target-clearing attacks retain meteor without a generic hi
             std::count_if(Effects, Effects + MAX_EFFECTS, [](const auto& e) { return e.Live && e.Type == MODEL_FIRE; });
         CHECK(effects == (target == VictimKey ? 1 : 0));
         const auto attackSounds = audio.TakePlayedSounds();
-        CHECK(attackSounds.size() == (target == VictimKey ? 1 : 0));
-        if (target == VictimKey)
-        {
-            REQUIRE(attackSounds.size() == 1);
-            CHECK(attackSounds[0].id == SOUND_METEORITE01);
-        }
+        REQUIRE(attackSounds.size() == 1);
+        CHECK(attackSounds[0].id == SOUND_METEORITE01);
+        CHECK(attackSounds[0].object == nullptr);
+        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+
+        CHECK(map->AttackEffectMonster(&attacker, &attacker.Object, &Models[MODEL_DARK_GHOST]));
+        CHECK(audio.TakePlayedSounds().empty());
+        CHECK(std::count_if(Effects, Effects + MAX_EFFECTS,
+                            [](const auto& e) { return e.Live && e.Type == MODEL_FIRE; }) == effects);
 
         attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
         MoveCharacter(&attacker, &attacker.Object);
