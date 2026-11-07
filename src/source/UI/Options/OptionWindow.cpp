@@ -1931,8 +1931,6 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
 
-    // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
-    // entry can change here.
     SyncLabel(model.s6PlayerModelsLabel, "s6_player_models_label", I18N::Game::S6PlayerModels);
     SyncLabel(model.s6PlayerModelsTooltip, "s6_player_models_tooltip", I18N::Game::S6PlayerModelsTooltip);
     const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
@@ -1941,6 +1939,9 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         model.useS6PlayerModels = useS6;
         m_RmlView.MarkDirty("use_s6_player_models");
     }
+
+    // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
+    // entry can change here.
     SyncLabel(model.texturePackRowLabel, "texture_pack_row_label", I18N::Game::TexturePack);
     SyncLabel(model.texturePackTooltip, "texture_pack_tooltip", I18N::Game::TexturePackTooltip);
     if (!model.texturePackLabels.empty())
