@@ -45,6 +45,7 @@ jobs:
       macos: ${{ steps.plan.outputs.macos }}
       windows: ${{ steps.plan.outputs.windows }}
       release: ${{ steps.plan.outputs.release }}
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       # The image has no cppcheck; it comes from an apt cache, as the Linux build's packages do.
       APT_PACKAGES: cppcheck
@@ -137,6 +138,12 @@ jobs:
           restore-keys: |
             apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
             apt-cppcheck-linux-x64-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # As in the build jobs, for the prune job; skipped with the restore.
+        if: steps.changed.outputs.count != '0'
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Fetch apt packages
         if: steps.changed.outputs.count != '0'
@@ -1108,7 +1115,8 @@ jobs:
   # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
   caches:
     name: Prune caches
-    needs: [build-windows, build-linux, build-macos]
+    # Quality Gates only for when it read its cppcheck cache: the builds wait for it anyway.
+    needs: [quality, build-windows, build-linux, build-macos]
     # PR runs save no cache.
     if: ${{ !cancelled() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
@@ -1128,9 +1136,10 @@ jobs:
       - name: Delete older cache entries
         env:
           GH_TOKEN: ${{ github.token }}
-          # When each build job's restores ended, empty for a job that did not run.
+          # When each job's restores ended, empty for a job that did not run or restore.
           CACHES_READ_AT_LINUX: ${{ needs.build-linux.outputs.caches-read-at }}
           CACHES_READ_AT_MACOS: ${{ needs.build-macos.outputs.caches-read-at }}
+          CACHES_READ_AT_QUALITY: ${{ needs.quality.outputs.caches-read-at }}
           CACHES_READ_AT_WINDOWS: ${{ needs.build-windows.outputs.caches-read-at }}
         run: python3 scripts/ci_cache_prune.py
 

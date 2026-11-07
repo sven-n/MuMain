@@ -759,7 +759,7 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
 # A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each
 # cache the build jobs restore by a key prefix.
 caches_job = job(ci, "caches")
-for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled()",
+for required in ("needs: [quality, build-windows, build-linux, build-macos]", "!cancelled()",
                  "github.event_name != 'pull_request'", "actions: write", "python3 scripts/ci_cache_prune.py",
                  "GH_TOKEN: ${{ github.token }}"):
     check(required in caches_job, f"caches job must prune after the builds of runs on main: {required}")
@@ -770,19 +770,28 @@ for required in ("sparse-checkout: scripts", "persist-credentials: false"):
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
 # The prune job leaves an entry that a job read in the last minutes, unless the last read was this run's own: each
-# build job notes when its restores ended, after the last of them, and passes that on.
+# build job, and Quality Gates for its cppcheck, notes when its restores ended, after the last of them, and passes that
+# on. The note runs exactly when that restore does: a time without a restore would count other runs' reads as its own.
 for job_name, job_body, system in (("build-windows", native_job, "WINDOWS"), ("build-linux", linux_job, "LINUX"),
-                                   ("build-macos", macos_job, "MACOS")):
+                                   ("build-macos", macos_job, "MACOS"), ("quality", quality_job, "QUALITY")):
     names = re.findall(r"(?m)^      - name: (.+)$", job_body)
     restores = [index for index, name in enumerate(names)
                 if "uses: actions/cache/restore@v6" in step(job_body, job_name, name)]
     note = names.index("Note when the caches were read") if "Note when the caches were read" in names else -1
     check(restores and note == max(restores) + 1, f"{job_name} must note when its caches were read, after every restore")
+    if restores and note == max(restores) + 1:
+        conditions = [re.findall(r"(?m)^        if: .*$", step(job_body, job_name, names[index]))
+                      for index in (note - 1, note)]
+        check(conditions[0] == conditions[1], f"{job_name} must note when its caches were read whenever it reads them")
     check("caches-read-at: ${{ steps.caches_read.outputs.at }}" in job_body,
           f"{job_name} must pass on when its caches were read")
     check(f"CACHES_READ_AT_{system}: ${{{{ needs.{job_name}.outputs.caches-read-at }}}}" in caches_job,
           f"caches job must know when {job_name} read its caches")
 sys.path.insert(0, str(ROOT / "scripts"))
+from ci_cache_prune import READERS as PRUNE_READERS  # noqa: E402
+for reader_name in PRUNE_READERS:
+    check(f"CACHES_READ_AT_{reader_name.upper()}: " in caches_job,
+          f"caches job must pass scripts/ci_cache_prune.py when {reader_name} read its caches")
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 restore_prefixes_by_kind = {}
 # Quality Gates' pip cache is not pruned: it is saved once (actions/cache@v6 under a fixed key).
