@@ -806,6 +806,8 @@ TEST_CASE("Shifted clicks preserve physical modifier semantics when the UI consu
     {
         BeginFrame();
         g_pNewKeyInput->ScanAsyncKeyState();
+        const bool shiftDown = !deliveredKeys.empty() && deliveredKeys.back().type == SDL_EVENT_KEY_DOWN;
+        CHECK(IsKeyHeld(VK_SHIFT) == shiftDown);
         if (consumeButtonDown)
         {
             CHECK_FALSE(MouseRButton);
@@ -818,11 +820,8 @@ TEST_CASE("Shifted clicks preserve physical modifier semantics when the UI consu
             CHECK(MouseRButton == !consumeButtonDown);
             CHECK(MouseRButtonPush == !consumeButtonDown);
             CHECK(g_pNewKeyInput->IsPress(VK_RBUTTON) == !consumeButtonDown);
-            if (!consumeButtonDown)
-            {
-                CHECK(IsKeyHeld(VK_SHIFT));
-                CHECK(mu::ui::window::IsRepeat(VK_SHIFT));
-            }
+            CHECK(IsKeyHeld(VK_SHIFT));
+            CHECK(mu::ui::window::IsRepeat(VK_SHIFT));
         }
     }
     CHECK(sawMousePress);

@@ -21,6 +21,7 @@
 #include "Scenes/SceneCore.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Events/CursedTempleSystem.h"
+#include "UI/HUD/ChatLogWindow.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -56,6 +57,7 @@ constexpr DWORD MissingSelection = static_cast<DWORD>(-1);
 #ifdef MU_TEST_TEMPLE_AOT_TRANSPORT
 constexpr std::chrono::seconds PacketTimeout{2};
 constexpr std::chrono::milliseconds PacketQuietWindow{50};
+constexpr std::chrono::milliseconds NoPacketWindow{300};
 constexpr int SocketPollMicroseconds = 10000;
 
 class SkillPacketPeer
@@ -101,7 +103,7 @@ public:
     {
         std::vector<BYTE> bytes;
         const auto timeout = std::chrono::steady_clock::now() + PacketTimeout;
-        auto until = expectedCount == 0 ? std::chrono::steady_clock::now() + PacketQuietWindow : timeout;
+        auto until = expectedCount == 0 ? std::chrono::steady_clock::now() + NoPacketWindow : timeout;
         while (std::chrono::steady_clock::now() < std::min(until, timeout))
         {
             fd_set readable;
@@ -116,7 +118,7 @@ public:
             const int count = recv(m_peer, buffer, sizeof(buffer), 0);
             REQUIRE(count > 0);
             bytes.insert(bytes.end(), buffer, buffer + count);
-            if (CountRequests(bytes, false) >= expectedCount)
+            if (expectedCount > 0 && CountRequests(bytes, false) >= expectedCount)
                 until = std::chrono::steady_clock::now() + PacketQuietWindow;
         }
         return CountRequests(bytes, true);
@@ -398,7 +400,28 @@ public:
     {
         CHECK(m_peer->Collect(expectedCount) == expectedCount);
     }
+
+    void ExpectErrorLogCount(std::size_t expectedCount)
+    {
+        g_pSystemLogBox->Update();
+        Refresh();
+        Rml::ElementDocument* document = nullptr;
+        for (int i = 0; i < context->GetNumDocuments(); ++i)
+            if (context->GetDocument(i)->GetSourceURL().find("system_log.rml") != Rml::String::npos)
+                document = context->GetDocument(i);
+        REQUIRE(document != nullptr);
+        Rml::ElementList lines;
+        document->QuerySelectorAll(lines, ".syslog-line--error .syslog-text");
+        const auto count =
+            std::count_if(lines.begin(), lines.end(), [](Rml::Element* line) { return !line->GetInnerRML().empty(); });
+        CHECK(static_cast<std::size_t>(count) == expectedCount);
+    }
 #endif
+
+    void SetSkillPoints(BYTE points)
+    {
+        m_window->SetSkillPoints(points);
+    }
 
     void SetShiftHeld(bool held)
     {
@@ -562,10 +585,96 @@ TEST_CASE("Held Shift consumes Temple auto-attack requests without a right butto
     CHECK(Hero->m_CursedTempleCurSkillPacket);
     fixture.ExpectRequestCount(1);
 }
+
+TEST_CASE("Pressing Shift again rearms Temple while RMB stays held [ui][temple-skill]")
+{
+    TempleSkillFixture fixture;
+    fixture.ConnectTransport();
+    const int skill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
+    Hero->m_CursedTempleCurSkill = skill;
+    MouseRButton = true;
+    fixture.UpdateTemple();
+    CHECK_FALSE(fixture.IsTempleSkillKey());
+
+    fixture.SetShiftHeld(true);
+    fixture.RetryHeldCast(MissingSelection);
+    REQUIRE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+    fixture.ResolveSucceeded(skill);
+    fixture.UpdateTemple();
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    fixture.SetShiftHeld(false);
+    fixture.UpdateTemple();
+    CHECK_FALSE(fixture.IsTempleSkillKey());
+    fixture.SetShiftHeld(true);
+    REQUIRE(MouseRButton);
+    REQUIRE_FALSE(MouseRButtonPush);
+    CHECK(fixture.IsTempleSkillKey());
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+}
+
+TEST_CASE("Insufficient Temple points log once per gesture [ui][temple-skill]")
+{
+    TempleSkillFixture fixture;
+    fixture.ConnectTransport();
+    SUBCASE("RMB stays held")
+    {
+        MouseRButton = true;
+    }
+    SUBCASE("Shift auto-attack has no RMB")
+    {
+        MouseRButton = false;
+    }
+    Hero->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
+    fixture.SetShiftHeld(true);
+    fixture.SetSkillPoints(0);
+    g_pSystemLogBox->ClearAll();
+    fixture.ExpectErrorLogCount(0);
+    fixture.RetryHeldCast(MissingSelection);
+    fixture.ExpectErrorLogCount(1);
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        fixture.UpdateTemple();
+        fixture.RetryHeldCast(MissingSelection);
+    }
+    fixture.ExpectErrorLogCount(1);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    fixture.SetSkillPoints(SkillBudget);
+    fixture.UpdateTemple();
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+    fixture.ExpectErrorLogCount(1);
+
+    fixture.SetSkillPoints(0);
+    fixture.SetShiftHeld(false);
+    fixture.UpdateTemple();
+    fixture.SetShiftHeld(true);
+    fixture.RetryHeldCast(MissingSelection);
+    fixture.ExpectErrorLogCount(2);
+    CHECK_FALSE(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(0);
+
+    fixture.SetSkillPoints(SkillBudget);
+    MouseRButton = true;
+    MouseRButtonPush = true;
+    fixture.UpdateTemple();
+    fixture.RetryHeldCast(MissingSelection);
+    CHECK(Hero->m_CursedTempleCurSkillPacket);
+    fixture.ExpectRequestCount(1);
+    fixture.ExpectErrorLogCount(2);
+}
 #endif
 
 #if defined(MU_TEST_TEMPLE_AOT_TRANSPORT) && defined(MU_ENABLE_CONTROL_SOCKET)
-TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Temple response [ui][temple-skill]")
+TEST_CASE("Scripted held RMB remains consumed after a successful Temple response [ui][temple-skill]")
 {
     using namespace Core::Input::Synthetic;
     TempleSkillFixture fixture;
@@ -586,13 +695,15 @@ TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Templ
             return true;
         },
         nullptr);
-    g_bWndActive = false;
     MouseRButton = false;
     Hero->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
 
     REQUIRE(Click(100, 200, MouseButton::Right, true));
     for (int frame = 0; frame < 12 && !IsKeyHeld(VK_RBUTTON); ++frame)
+    {
         BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+    }
     REQUIRE(IsKeyHeld(VK_RBUTTON));
     REQUIRE(MouseRButton);
     fixture.RetryHeldCast(MissingSelection);
@@ -602,6 +713,7 @@ TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Templ
     fixture.ResolveSucceeded(AT_SKILL_CURSED_TEMPLE_PRODECTION);
     REQUIRE_FALSE(Hero->m_CursedTempleCurSkillPacket);
     BeginFrame();
+    g_pNewKeyInput->ScanAsyncKeyState();
     REQUIRE(IsKeyHeld(VK_RBUTTON));
     fixture.UpdateTemple();
     fixture.RetryHeldCast(MissingSelection);
@@ -609,12 +721,18 @@ TEST_CASE("Inactive synthetic held RMB remains consumed after a successful Templ
     fixture.ExpectRequestCount(0);
 
     for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+    {
         BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+    }
     REQUIRE(IsIdle());
     fixture.UpdateTemple();
     REQUIRE(Click(100, 200, MouseButton::Right, true));
     for (int frame = 0; frame < 12 && !IsKeyHeld(VK_RBUTTON); ++frame)
+    {
         BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+    }
     REQUIRE(IsKeyHeld(VK_RBUTTON));
     fixture.RetryHeldCast(MissingSelection);
     CHECK(Hero->m_CursedTempleCurSkillPacket);
