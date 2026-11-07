@@ -1218,6 +1218,7 @@ void HandleFocusChange(bool active)
         }
         if (g_bUseWindowMode == TRUE)
         {
+            Core::Input::Synthetic::CancelDelivery();
             MouseLButton = false;
             MouseLButtonPop = false;
             MouseLButtonPush = false;

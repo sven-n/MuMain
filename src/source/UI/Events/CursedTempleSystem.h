@@ -146,6 +146,7 @@ private:
     SEASON3A::eCursedTempleTeam m_MyTeam;
     // skillpoint
     WORD m_SkillPoint;
+    bool m_CursedTempleGestureConsumed;
     // Score
     bool m_IsScoreEffect;
     DWORD m_StartScoreEffectTime;

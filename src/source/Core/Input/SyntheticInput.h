@@ -34,8 +34,9 @@ enum class MouseButton : std::uint8_t
 [[nodiscard]] bool PressKey(int virtualKey);
 
 // Schedules a press-and-release of the button at a window pixel. False when
-// another injection is still in flight.
-[[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
+// another injection is still in flight. Shift is optionally held from the
+// hover frames through the mouse release, as part of the same injection.
+[[nodiscard]] bool Click(float windowX, float windowY, MouseButton button, bool shift = false);
 
 // Schedules a pointer move to a window pixel with no button, as physical motion: the UI and the
 // game's own pointer both follow it. False when another injection is still in flight.
