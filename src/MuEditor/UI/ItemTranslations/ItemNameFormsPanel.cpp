@@ -32,16 +32,18 @@ int ResizeCellText(ImGuiInputTextCallbackData* data)
     return 0;
 }
 
-// The text that has forms: the item's names (index -1) or a name line's own text written in place without
-// placeholders (a line written as "{name}" takes the item's forms); none for other lines.
-const Data::LocalizedString* NamesOf(const ItemDefinition& definition, int index)
+// The text whose forms a text that names the item shows in `locale`: the item's names (index -1), or a name line's own
+// text written in place, without conditions and without placeholders in that language (a line written as "{name}"
+// takes the item's forms). None for other lines, whose forms never show (ValidateNameForms warns about them).
+const Data::LocalizedString* NamesOf(const ItemDefinition& definition, int index, std::string_view locale)
 {
     if (index < 0)
     {
         return &definition.names;
     }
     const Data::Items::ItemNameLine& line = definition.nameLines[static_cast<size_t>(index)];
-    if (!line.hasText || !line.textName.empty() || line.text.GetNeutral().find('{') != std::string::npos)
+    if (!line.hasText || !line.textName.empty() || !line.when.empty() ||
+        line.text.Get(locale).find('{') != std::string::npos)
     {
         return nullptr;
     }
@@ -195,6 +197,11 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
     ImGui::TableHeadersRow();
     for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
     {
+        // English names have no forms, also when the file names English (loading warns about it).
+        if (locale == Data::LocalizedString::NeutralLocale)
+        {
+            continue;
+        }
         RenderRow(definition, -1, locale);
         for (int index = 0; index < static_cast<int>(definition.nameLines.size()); ++index)
         {
@@ -206,7 +213,7 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
 
 void CItemNameFormsPanel::RenderRow(const ItemDefinition& definition, int index, const std::string& locale)
 {
-    const Data::LocalizedString* names = NamesOf(definition, index);
+    const Data::LocalizedString* names = NamesOf(definition, index, locale);
     if (names == nullptr || !names->HasOwn(locale))
     {
         return;
@@ -244,7 +251,7 @@ void CItemNameFormsPanel::RenderFormCell(const ItemDefinition& definition, int i
     m_cellText = FormsOf(definition, index).Find(locale, caseKey);
     ImGui::SetNextItemWidth(-FLT_MIN);
     // An empty form shows the name it falls back to, greyed.
-    ImGui::InputTextWithHint("##Form", NamesOf(definition, index)->GetOwn(locale).c_str(), m_cellText.data(),
+    ImGui::InputTextWithHint("##Form", NamesOf(definition, index, locale)->GetOwn(locale).c_str(), m_cellText.data(),
                              m_cellText.capacity() + 1, ImGuiInputTextFlags_CallbackResize, ResizeCellText,
                              &m_cellText);
     if (ImGui::IsItemDeactivatedAfterEdit())

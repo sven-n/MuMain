@@ -408,6 +408,19 @@ TEST_CASE("The name cases file lists each language's cases in the case order [da
     CHECK(cases.GetLanguages().size() == 1);
 }
 
+TEST_CASE("English in the name cases file is a warning and declines nothing [data][items][texts]")
+{
+    ItemNameCases cases;
+    std::vector<ItemDataIssue> issues;
+    ReadItemNameCasesJson(R"({"formatVersion": 1, "languages": {"en": ["gen"], "pl": ["gen"]}})", "NameCases.json",
+                          cases, issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues.front().severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues.front().field == "languages.en");
+    CHECK(cases.GetCases("en").empty());
+    CHECK(cases.Uses("pl", "gen"));
+}
+
 TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();

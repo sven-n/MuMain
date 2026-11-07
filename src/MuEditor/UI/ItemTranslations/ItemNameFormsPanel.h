@@ -11,8 +11,9 @@ struct ItemDefinition;
 }
 
 // The forms of the selected item's names in Item Translations ("nameForms"; docs/item-data.md, "Name forms"): one row
-// for the item's name and one for each name line with a text of its own (the name at a level), per language that
-// declines names (NameCases.json), with a field per case. A text that names the item in a case ({item:14,25:acc})
+// for the item's name and one for each name line whose forms a text can show (the name at a level: a text of its own,
+// no conditions, no placeholders), per language but English that declines names (NameCases.json), with a field per
+// case. A text that names the item in a case ({item:14,25:acc})
 // shows the form; an empty field shows the name itself, greyed. Above it, how many texts name the item.
 class CItemNameFormsPanel
 {

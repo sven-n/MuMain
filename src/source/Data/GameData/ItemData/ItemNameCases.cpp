@@ -41,6 +41,13 @@ void ReadLanguage(const std::string& locale, const OrderedJson& json, const std:
                            "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
         return;
     }
+    if (locale == LocalizedString::NeutralLocale)
+    {
+        // The editor's Cases... lists no English to take it out again.
+        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
+                          "English names have no forms: a text in English shows the name itself; leave English out"});
+        return;
+    }
     if (!json.is_array())
     {
         Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, field,
