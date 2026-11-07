@@ -1091,6 +1091,7 @@ void SetPlayerHighBowAttack(CHARACTER* c)
 
 void SetPlayerAttack(CHARACTER* c)
 {
+    c->PendingAttackHitSound = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -1310,6 +1311,7 @@ void SetPlayerAttack(CHARACTER* c)
 
 void SetPlayerMagic(CHARACTER* c)
 {
+    c->PendingAttackHitSound = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -3958,10 +3960,21 @@ namespace
 // melee hit sounds for anything else.
 void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 {
+    if (MONSTER_MOLT <= attacker->MonsterIndex && attacker->MonsterIndex <= MONSTER_GREAT_DRAKAN)
+        return;
+
     constexpr int HitSoundVariants = 4;
     const ESound firstSound = gCharacterManager.GetEquipedBowType(attacker) != BOWTYPE_NONE ? SOUND_ATTACK_MISSILE_HIT1
                                                                                             : SOUND_ATTACK_MELEE_HIT1;
     PlayBuffer(static_cast<ESound>(firstSound + Random::Rand() % HitSoundVariants), o);
+}
+
+void PlayUntargetedAttackHitSound(CHARACTER* attacker, OBJECT* object)
+{
+    if (!attacker->PendingAttackHitSound || attacker->Skill != 0)
+        return;
+
+    PlayAttackHitSound(attacker, object);
 }
 } // namespace
 
@@ -4758,6 +4771,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             {
                 CreateArrows(c, o, NULL, 0, 0);
             }
+            PlayUntargetedAttackHitSound(c, o);
         }
         else
         {
@@ -5217,17 +5231,12 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_BRAND_OF_SKILL:
                 break;
             default:
-                if (MONSTER_MOLT <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GREAT_DRAKAN)
-                {
-                }
-                else
-                {
-                    PlayAttackHitSound(c, o);
-                }
+                PlayAttackHitSound(c, o);
                 break;
             }
         }
 
+        c->PendingAttackHitSound = false;
         c->Skill = 0;
         c->Damage = 0;
         c->AttackFlag = ATTACK_FAIL;

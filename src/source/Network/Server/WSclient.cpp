@@ -3648,8 +3648,9 @@ void StartReceivedAttack(CHARACTER* character, int targetIndex)
     SetPlayerAttack(character);
     character->AttackTime = 1;
     character->Object.AnimationFrame = 0;
-    character->TargetCharacter =
-        static_cast<short>(targetIndex >= 0 && targetIndex < MAX_CHARACTERS_CLIENT ? targetIndex : -1);
+    const bool targetFound = targetIndex != MAX_CHARACTERS_CLIENT;
+    character->TargetCharacter = targetFound ? static_cast<short>(targetIndex) : -1;
+    character->PendingAttackHitSound = true;
 }
 } // namespace
 
