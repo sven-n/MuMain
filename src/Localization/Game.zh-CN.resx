@@ -1044,4 +1044,16 @@
   <data name="can only be done using zen." xml:space="preserve">
     <value>只能使用金币进行。</value>
   </data>
+  <data name="Merchant" xml:space="preserve">
+    <value>商人</value>
+  </data>
+  <data name="Would you like to purchase?" xml:space="preserve">
+    <value>确定要购买吗？</value>
+  </data>
+  <data name="Tax rate: %d%% (changed in real-time)" xml:space="preserve">
+    <value>税率：%d%%（实时变动）</value>
+  </data>
+  <data name="Reinforced item can't be sold." xml:space="preserve">
+    <value>强化物品无法出售。</value>
+  </data>
 </root>
