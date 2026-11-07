@@ -17,12 +17,6 @@ size_t GetTakeOrder(ItemOptionType type)
 {
     return static_cast<size_t>(std::find(TakeOrder.begin(), TakeOrder.end(), type) - TakeOrder.begin());
 }
-
-// Which part of the server's item data turns a type's options on; two definitions of an item may not read the same.
-ItemOptionType GetByte(ItemOptionType type)
-{
-    return type;
-}
 } // namespace
 
 ItemOptionDatabase::ItemOptionDatabase(std::vector<ItemOptionDefinition> definitions, ItemOptionTexts texts,
@@ -60,10 +54,11 @@ std::vector<ItemOptionIndex> ItemOptionDatabase::ResolveLinks(std::span<const st
         {
             continue;
         }
-        const ItemOptionType byte = GetByte(m_definitions[static_cast<size_t>(index)].type);
-        const bool byteTaken = std::any_of(links.begin(), links.end(), [&](ItemOptionIndex link)
-                                           { return GetByte(m_definitions[link].type) == byte; });
-        if (!byteTaken)
+        // The definitions of one type read the same part of the server's item data: the first counts.
+        const ItemOptionType type = m_definitions[static_cast<size_t>(index)].type;
+        const bool typeTaken = std::any_of(links.begin(), links.end(),
+                                           [&](ItemOptionIndex link) { return m_definitions[link].type == type; });
+        if (!typeTaken)
         {
             links.push_back(static_cast<ItemOptionIndex>(index));
         }
