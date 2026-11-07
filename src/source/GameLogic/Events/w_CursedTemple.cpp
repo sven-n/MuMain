@@ -281,7 +281,8 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
                 for (int i = 0; i < 5; i++)
                     CreateParticleFpsChecked(BITMAP_SMOKE, to->Position, o->Angle, Light, 1);
             }
-            PlayBuffer(SOUND_HEART);
+            if (c->TargetCharacter != -1 || c->ReceivedUnknownTargetHitSoundPending)
+                PlayBuffer(SOUND_HEART);
         }
     }
     return true;

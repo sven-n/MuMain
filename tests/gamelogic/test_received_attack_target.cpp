@@ -583,3 +583,29 @@ TEST_CASE("Received same-action startup audio restarts before animation selectio
     const auto repeatedStart = audio.TakePlayedSounds();
     CHECK(repeatedStart == firstStart);
 }
+
+TEST_CASE("Local targetless poison attacks retain signature silence [combat][received_attack]")
+{
+    MonsterRecorder::LoadScope audio(WD_45CURSEDTEMPLE_LV1);
+    AttackScope scope;
+    scope.SetMonsterAttacker(MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
+    auto& attacker = scope.characters[AttackerSlot];
+    attacker.MonsterIndex = MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON;
+    attacker.TargetCharacter = -1;
+    SetPlayerAttack(&attacker);
+    REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
+    REQUIRE_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    audio.TakePlayedSounds();
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+        Particles[i].Live = false;
+
+    for (const float frame : {0.f, InFlightAttackFrame})
+    {
+        attacker.Object.AnimationFrame = frame;
+        CHECK(g_CursedTemple->AttackEffectMonster(&attacker, &attacker.Object, &Models[attacker.Object.Type]));
+        CHECK(audio.TakePlayedSounds().empty());
+        CHECK(std::none_of(Particles, Particles + MAX_PARTICLES,
+                           [](const auto& p) { return p.Live && p.Type == BITMAP_SMOKE; }));
+        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    }
+}
