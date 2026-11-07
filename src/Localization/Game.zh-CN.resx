@@ -831,4 +831,79 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>基础属性</value>
   </data>
+  <data name="Storage" xml:space="preserve">
+    <value>仓库</value>
+  </data>
+  <data name="Storage fee" xml:space="preserve">
+    <value>仓库使用费</value>
+  </data>
+  <data name="Deposit" xml:space="preserve">
+    <value>存入</value>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>取出</value>
+  </data>
+  <data name="open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Expanded Vault" xml:space="preserve">
+    <value>扩展仓库</value>
+  </data>
+  <data name="Opening an Expanded Vault (H)" xml:space="preserve">
+    <value>打开扩展仓库（H）</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to deposit." xml:space="preserve">
+    <value>请输入要存入的金币数量。</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to withdraw." xml:space="preserve">
+    <value>请输入要取出的金币数量。</value>
+  </data>
+  <data name="You are short of Zen." xml:space="preserve">
+    <value>金币不足。</value>
+  </data>
+  <data name="Exceeded maximum amount of Zen you can possess." xml:space="preserve">
+    <value>已超过可持有的金币上限。</value>
+  </data>
+  <data name="Cannot store in vault." xml:space="preserve">
+    <value>无法存入仓库。</value>
+  </data>
+  <data name="These items cannot be stored in the inventory." xml:space="preserve">
+    <value>这些物品无法存入仓库。</value>
+  </data>
+  <data name="Warehouse Lock/Unlock" xml:space="preserve">
+    <value>仓库锁定/解锁</value>
+  </data>
+  <data name="Inventory is already locked" xml:space="preserve">
+    <value>仓库已锁定。</value>
+  </data>
+  <data name="Password Verification" xml:space="preserve">
+    <value>密码验证</value>
+  </data>
+  <data name="Choose 4 digits for password" xml:space="preserve">
+    <value>请设置 4 位数字密码。</value>
+  </data>
+  <data name="Choose new password" xml:space="preserve">
+    <value>请设置新密码。</value>
+  </data>
+  <data name="Verify new password" xml:space="preserve">
+    <value>请确认新密码。</value>
+  </data>
+  <data name="Enter password again" xml:space="preserve">
+    <value>请再次输入密码。</value>
+  </data>
+  <data name="it is not allowed to use same 4 numbers" xml:space="preserve">
+    <value>不能使用 4 个相同的数字作为密码。</value>
+  </data>
+  <data name="Enter your WEBZEN.COM password." xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码。</value>
+  </data>
+  <data name="EnterYourWEBZENCOMPassword697" xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码</value>
+  </data>
+  <data name="Incorrect password" xml:space="preserve">
+    <value>密码错误。</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
 </root>

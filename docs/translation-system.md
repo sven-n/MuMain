@@ -480,6 +480,10 @@ missing attribute amounts. These shared tooltips also appear in shops and other
 item windows. Item names still depend on **Translate item names** and the item's
 available name translations.
 
+The storage and expanded-vault windows translate their titles, fees, Zen deposit
+and withdrawal controls, vault locking and password prompts, and related error
+messages.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
