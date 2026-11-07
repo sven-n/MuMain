@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
-"""Gathers the files of an apt package cache in ci.yml (Gather apt packages):
+"""Names and gathers an apt package cache in ci.yml:
 
+    python3 scripts/ci_apt_cache.py name KIND LISTING
     python3 scripts/ci_apt_cache.py gather LISTING ARCHIVES DESTINATION
 
-LISTING is the output of `apt-get install --print-uris`, which names the files apt fetches for the packages. They are
-copied from apt's archive folder (ARCHIVES) into a new DESTINATION, the cache's folder, and complete=true goes to
-GITHUB_OUTPUT only when every one of them was there. A missing file gets a notice: the save then stores nothing, and
-the job would otherwise pass without a word while every later run fetches the files again.
+LISTING is the output of `apt-get install --print-uris`, which names the files apt fetches for the packages.
+
+name (Find apt packages) writes the runner image (image=) and the cache's key (key=KIND<image>-<hash>) to
+GITHUB_OUTPUT. The hash covers each file's name, size and hash, not where apt fetches it from, so another mirror for
+the same files keeps the key. Which files apt fetches depends on what the image has installed, so the key names the
+image: while GitHub moves the runners to a new image, jobs on each image keep their own entry.
+
+gather (Gather apt packages) copies the listed files from apt's archive folder (ARCHIVES) into a new DESTINATION, the
+cache's folder, and writes complete=true only when every one of them was there. A missing file gets a notice: the save
+then stores nothing, and the job would otherwise pass without a word while every later run fetches the files again.
 """
 
+import hashlib
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -18,15 +27,33 @@ from pathlib import Path
 NAMED_MISSING = 10
 
 
-def listed_files(text):
-    """The file names in `apt-get install --print-uris` output. Each file is a line 'URI' name size hash; other lines,
-    such as a message a newer apt prints, name no file."""
-    names = []
+def listed(text):
+    """(name, size, hash) of each file in `apt-get install --print-uris` output. Each file is a line 'URI' name size
+    hash; other lines, such as a message a newer apt prints, name no file."""
+    files = []
     for line in text.splitlines():
         fields = line.split()
         if len(fields) >= 4 and len(fields[0]) > 2 and fields[0].startswith("'") and fields[0].endswith("'"):
-            names.append(fields[1])
-    return names
+            files.append(tuple(fields[1:4]))
+    return files
+
+
+def listed_files(text):
+    """The file names in `apt-get install --print-uris` output."""
+    return [name for name, _, _ in listed(text)]
+
+
+def image(environ):
+    """The runner image (GitHub sets ImageOS and ImageVersion), without the "-" that ends the key's image part."""
+    parts = [environ.get("ImageOS", ""), environ.get("ImageVersion", "")]
+    name = "_".join(part for part in parts if part)
+    return re.sub(r"[^A-Za-z0-9._]", "_", name) or "unknown"
+
+
+def key(kind, image_name, text):
+    """The cache's key: the kind, the image, and a hash of the files' names, sizes and hashes in any order."""
+    files = "\n".join(sorted(" ".join(fields) for fields in listed(text)))
+    return f"{kind}{image_name}-{hashlib.sha256(files.encode('utf-8')).hexdigest()[:16]}"
 
 
 def gather(names, archives, destination):
@@ -63,6 +90,12 @@ def write_output(name, value):
 
 
 def main(argv):
+    if len(argv) == 3 and argv[0] == "name":
+        kind, listing = argv[1], Path(argv[2])
+        image_name = image(os.environ)
+        write_output("image", image_name)
+        write_output("key", key(kind, image_name, listing.read_text(encoding="utf-8")))
+        return
     if len(argv) != 4 or argv[0] != "gather":
         raise SystemExit(__doc__)
     listing, archives, destination = (Path(arg) for arg in argv[1:])

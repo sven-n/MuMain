@@ -44,8 +44,9 @@ KINDS = (
 # Kinds whose restore step only reads entries of its own compiler, the part of the key after the kind: while GitHub
 # moves the runners to a new image, jobs land on both images, and one with another compiler cannot use the newest
 # entry of the kind. These keep the newest entry of each compiler; GitHub drops a compiler's last entry 7 days after
-# its last use.
+# its last use. The apt cache names the runner image there instead, and reads that image's entries first.
 PER_COMPILER = (
+    "apt-linux-x64-",
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
     "ccache-windows-x64-",

@@ -315,8 +315,11 @@ file in `src/CMakeLists.txt`.
 The Linux build also caches the apt packages it installs (about 45 MB): the image's
 Ubuntu mirror sometimes sends them at 35–160 kB/s, and **Install build tools** then
 took 5–24 minutes instead of about 20 seconds. **Find apt packages** updates the
-index and names the cache after the files apt would fetch (`apt-get install
---print-uris`), so a new package version gives a new key. **Fetch apt packages**
+index and names the cache after the runner image and the names, sizes and hashes of
+the files apt would fetch (`apt-get install --print-uris`), so a new package version
+gives a new key and another mirror for the same files does not. Which files apt
+fetches depends on what the image has installed: **Restore apt packages** reads the
+image's newest entry first, then any image's. **Fetch apt packages**
 downloads them (`--download-only`): apt uses the restored files that still match the
 index and fetches only the others. In the runs that save the cache, **Gather apt
 packages** then collects the listed files for **Save apt packages**
@@ -340,7 +343,8 @@ compiler cache for each main push. After the builds of a run on main, the
 **Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
 deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
-and while GitHub moves the runners to a new image, jobs land on both images. An
+and while GitHub moves the runners to a new image, jobs land on both images. The apt
+cache keeps the newest entry of each image for the same reason. An
 entry a job read in the last 15 minutes is left for a later run, as that job may
 still be downloading it, unless the last read was the run's own: each build job
 notes when its restores ended (**Note when the caches were read**), so the entry a

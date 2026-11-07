@@ -704,22 +704,24 @@ jobs:
 
       - name: Find apt packages
         id: apt_packages
-        # The index picks the packages' versions, so the cache is named after the files apt would fetch for them
-        # (their names, sizes and hashes): a new version gives a new key.
+        # The index picks the packages' versions, so the cache is named after the runner image and the files apt would
+        # fetch for them (their names, sizes and hashes): a new version gives a new key.
         run: |
           sudo apt-get update
           apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
-          echo "key=apt-linux-x64-$(sort "$RUNNER_TEMP/apt-files.txt" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          python3 scripts/ci_apt_cache.py name apt-linux-x64- "$RUNNER_TEMP/apt-files.txt"
 
       - name: Restore apt packages
         id: apt
         # Saved by main pushes, like the compiler cache (Save apt packages). An older entry still holds the files whose
-        # versions stayed.
+        # versions stayed: this image's newest first, else another image's.
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.APT_ARCHIVES }}
           key: ${{ steps.apt_packages.outputs.key }}
-          restore-keys: apt-linux-x64-
+          restore-keys: |
+            apt-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-linux-x64-
 
       - name: Fetch apt packages
         # apt uses a file it finds in its archive folder when the file matches the index, and fetches only the others:

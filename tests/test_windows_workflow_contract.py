@@ -171,6 +171,14 @@ def job_env(job_body, name):
     return " ".join(match.group(1).split()) if match.group(1) is not None else match.group(2).strip()
 
 
+def restore_prefixes(text):
+    """The key prefixes of the restore-keys inputs in text, one-line or multi-line (|)."""
+    prefixes = re.findall(r"(?m)^          restore-keys: (?!\|)(.+)$", text)
+    for block in re.findall(r"(?m)^          restore-keys: \|\n((?:^            .*\n)+)", text):
+        prefixes += [line.strip() for line in block.splitlines() if line.strip()]
+    return prefixes
+
+
 def cache_paths(step_body):
     """The lines of an actions/cache step's multi-line path input."""
     match = re.search(r"(?ms)^          path: \|\n(.*?)(?=^          \w)", step_body)
@@ -632,13 +640,17 @@ check(
 # The apt packages come from a cache named after the files apt would fetch for them; main pushes save it on a miss,
 # with every file of the install.
 apt_list = step(linux_job, "build-linux", "Find apt packages")
-for required in ("id: apt_packages\n", "sudo apt-get update", "apt-get install --print-uris -qq $APT_PACKAGES",
-                 '"$RUNNER_TEMP/apt-files.txt"', "key=apt-linux-x64-"):
+for required in ("id: apt_packages\n", "sudo apt-get update",
+                 'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
+                 'python3 scripts/ci_apt_cache.py name apt-linux-x64- "$RUNNER_TEMP/apt-files.txt"'):
     check(required in apt_list, f"build-linux Find apt packages missing {required}")
+# This image's newest entry first (the prune keeps one of each image), then any image's.
 apt_restore = step(linux_job, "build-linux", "Restore apt packages")
 for required in ("id: apt\n", "uses: actions/cache/restore@v6", "path: ${{ env.APT_ARCHIVES }}",
-                 "key: ${{ steps.apt_packages.outputs.key }}", "restore-keys: apt-linux-x64-\n"):
+                 "key: ${{ steps.apt_packages.outputs.key }}"):
     check(required in apt_restore, f"build-linux Restore apt packages missing {required}")
+check(restore_prefixes(apt_restore) == ["apt-linux-x64-${{ steps.apt_packages.outputs.image }}-", "apt-linux-x64-"],
+      "build-linux Restore apt packages must fall back to the image's newest entry, then any image's")
 apt_fetch = step(linux_job, "build-linux", "Fetch apt packages")
 for required in ('sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/',
                  "sudo apt-get install -y --download-only $APT_PACKAGES"):
@@ -750,14 +762,16 @@ for job_name, job_body, system in (("build-windows", native_job, "WINDOWS"), ("b
           f"caches job must know when {job_name} read its caches")
 sys.path.insert(0, str(ROOT / "scripts"))
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
-for restore_prefix in re.findall(r"(?m)^          restore-keys: (.*)$", native_job + linux_job + macos_job):
-    kind = restore_prefix.split("${{")[0]
+restore_prefixes_by_kind = {}
+for restore_prefix in restore_prefixes(native_job + linux_job + macos_job):
+    restore_prefixes_by_kind.setdefault(restore_prefix.split("${{")[0], []).append(restore_prefix)
+for kind, kind_prefixes in restore_prefixes_by_kind.items():
     check(kind in PRUNED_CACHE_KINDS, f"scripts/ci_cache_prune.py must prune the cache kind {kind}")
-    # A restore prefix that goes on after the kind (the compiler) reads only entries of that part, so the prune has
-    # to keep the newest entry of each.
-    check(("${{" in restore_prefix) == (kind in PRUNED_PER_COMPILER),
-          f"scripts/ci_cache_prune.py must keep the newest {kind} entry of each compiler exactly when the restore "
-          f"prefix names the compiler: {restore_prefix}")
+    # A restore prefix that goes on after the kind (the compiler, or the apt cache's runner image) reads entries of
+    # that part, so the prune has to keep the newest entry of each.
+    check(any("${{" in prefix for prefix in kind_prefixes) == (kind in PRUNED_PER_COMPILER),
+          f"scripts/ci_cache_prune.py must keep the newest {kind} entry of each compiler exactly when a restore "
+          f"prefix names the compiler: {', '.join(kind_prefixes)}")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     # ci.yml names its packages once, in the job's env, for the install and for the cache's key.

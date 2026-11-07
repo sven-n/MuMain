@@ -13,7 +13,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import ci_apt_cache  # noqa: E402
-from ci_apt_cache import gather, listed_files  # noqa: E402
+from ci_apt_cache import gather, image, key, listed_files  # noqa: E402
 
 LISTING = (
     "'http://azure.archive.ubuntu.com/ubuntu/pool/main/c/cmake/cmake_4.2.3-2ubuntu2_amd64.deb' "
@@ -31,6 +31,49 @@ class ListedFilesTests(unittest.TestCase):
     def test_lines_that_list_no_file_are_left_out(self):
         text = "W: a message of a newer apt\n\n'' empty 1 x\n" + LISTING + "N: 2 files\n"
         self.assertEqual(len(listed_files(text)), 2)
+
+
+class KeyTests(unittest.TestCase):
+    def test_names_the_kind_the_image_and_a_hash(self):
+        self.assertRegex(key("apt-linux-x64-", "ubuntu26_20261103.298.1", LISTING),
+                         r"^apt-linux-x64-ubuntu26_20261103\.298\.1-[0-9a-f]{16}$")
+
+    def test_another_mirror_for_the_same_files_keeps_the_key(self):
+        elsewhere = LISTING.replace("http://azure.archive.ubuntu.com/ubuntu", "http://archive.ubuntu.com/ubuntu")
+        self.assertEqual(key("k-", "i", LISTING), key("k-", "i", elsewhere))
+
+    def test_the_order_of_the_files_does_not_count(self):
+        reversed_listing = "\n".join(reversed(LISTING.splitlines())) + "\n"
+        self.assertEqual(key("k-", "i", LISTING), key("k-", "i", reversed_listing))
+
+    def test_a_new_version_size_or_hash_gives_a_new_key(self):
+        for old, new in (("4.2.3-2ubuntu2_amd64.deb 1", "4.2.4-1_amd64.deb 1"), ("12345678", "12345679"),
+                         ("SHA512:aa11", "SHA512:aa12")):
+            self.assertNotEqual(key("k-", "i", LISTING), key("k-", "i", LISTING.replace(old, new)), old)
+
+    def test_lines_that_list_no_file_keep_the_key(self):
+        self.assertEqual(key("k-", "i", LISTING), key("k-", "i", "W: a message\n" + LISTING))
+
+    def test_the_image_comes_from_the_runner(self):
+        self.assertEqual(image({"ImageOS": "ubuntu26", "ImageVersion": "20261103.298.1"}), "ubuntu26_20261103.298.1")
+
+    def test_the_image_has_no_dash(self):
+        # The prune reads a key's image up to the next "-" (ci_cache_prune.group), as it reads a compiler.
+        self.assertNotIn("-", image({"ImageOS": "ubuntu-26", "ImageVersion": "2026-11-03"}))
+
+    def test_without_an_image_the_key_still_has_one(self):
+        self.assertEqual(image({}), "unknown")
+
+    def test_name_writes_the_image_and_the_key(self):
+        with tempfile.TemporaryDirectory() as folder:
+            listing = Path(folder) / "listing.txt"
+            listing.write_text(LISTING, encoding="utf-8")
+            outputs = Path(folder) / "outputs.txt"
+            environment = {"GITHUB_OUTPUT": str(outputs), "ImageOS": "ubuntu26", "ImageVersion": "1"}
+            with redirect_stdout(io.StringIO()), mock.patch.dict(os.environ, environment):
+                ci_apt_cache.main(["name", "apt-linux-x64-", str(listing)])
+            written = outputs.read_text(encoding="utf-8")
+        self.assertEqual(written, f"image=ubuntu26_1\nkey={key('apt-linux-x64-', 'ubuntu26_1', LISTING)}\n")
 
 
 class GatherTests(unittest.TestCase):
