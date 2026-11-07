@@ -125,9 +125,17 @@ TEST_CASE("Each effect of the gallery starts with a layer that reads as it [look
         const std::string name = NameOf(kind);
         CAPTURE(name);
         const Layer layer = MakeEffectLayer(kind, {2});
-        CHECK(DescribeEffect(layer) == LayerEffect{.kind = kind});
+        // A flowing texture and frames move their part's texture as its glowing mesh, as the moved looks do: they glow.
+        CHECK(DescribeEffect(layer) == LayerEffect{.kind = kind, .glows = NeedsOnePart(kind)});
         CHECK(layer.meshes.meshes == std::vector<int>{2});
+        if (NeedsOnePart(kind))
+        {
+            CHECK(layer.glowMesh == GlowMesh(2));
+        }
     }
+    CHECK(NeedsOnePart(EffectKind::Flowing));
+    CHECK(NeedsOnePart(EffectKind::Frames));
+    CHECK_FALSE(NeedsOnePart(EffectKind::Glow));
     // On every mesh, a glow makes every mesh glow.
     const Layer everywhere = MakeEffectLayer(EffectKind::Glow, {});
     CHECK(everywhere.meshes.IsAll());

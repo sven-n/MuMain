@@ -9,6 +9,7 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/LookData/LookEffects.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
@@ -449,4 +450,23 @@ TEST_CASE("A glow mesh of every mesh draws each mesh as a glowing one [looks]")
     REQUIRE(draws.size() == 1);
     // BMD::DrawMesh draws every mesh as the glowing one below -1.
     CHECK(draws[0].blendMesh == -2);
+}
+
+TEST_CASE("A flowing texture or frames of the gallery move on their part, the glowing mesh of their layer [looks]")
+{
+    // BMD::DrawMesh moves the texture of the glowing mesh or of the scrolling one only.
+    for (const EffectKind kind : {EffectKind::Flowing, EffectKind::Frames})
+    {
+        CAPTURE(static_cast<int>(kind));
+        const LookStoreScope looks({{"testLook", {MakeEffectLayer(kind, {1})}, {}}});
+        TestSword sword("testLook");
+        // A frame after TestTime, where the frames are at the first one, which moves nothing.
+        const WorldTimeScope clock(TestTime + 80.0);
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 1);
+        CHECK(draws[0].mesh == 1);
+        CHECK(draws[0].blendMesh == 1);
+        CHECK((draws[0].blendMeshU != 0.0f || draws[0].blendMeshV != 0.0f));
+    }
 }

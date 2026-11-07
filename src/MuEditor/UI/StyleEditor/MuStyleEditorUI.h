@@ -62,7 +62,8 @@ public:
     // A part shows alone in the preview, the others see-through, as a row of the mesh list keeps it; the base and every
     // part show the whole item.
     void PickPart(int part);
-    // Puts the gallery's effect on the picked part (every part for the base row) into the draft and picks it.
+    // Puts the gallery's effect on the picked part (every part for the base row) into the draft and picks it; an effect
+    // that needs one part (Data::Looks::NeedsOnePart) only on a part.
     void AddEffect(Data::Looks::EffectKind kind);
     // The picked line: a layer, or past the last one (the item values of the layers view, no effect in the parts view).
     [[nodiscard]] std::size_t GetPickedLine() const

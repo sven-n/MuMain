@@ -1773,7 +1773,10 @@ The picked look shows:
   in the list or in a preview, picks it. **Add effect** puts an effect of the
   gallery on the picked part: **Glow**, **Pulse** (a glow whose strength
   waves), **Shine** (a reflection moving over it), **Overlay texture**,
-  **Flowing texture**, **Color** and **Frames and flicker**. A click on an
+  **Flowing texture**, **Color** and **Frames and flicker**. A flowing
+  texture and frames go on one part, not on every part, and make it glow: the
+  game moves a texture only on a layer's glowing mesh (or on its scrolling
+  mesh), as the looks moved from code do. A click on an
   effect shows its settings only (a pulse's range and seconds with its curve,
   a shine's motion, an overlay's texture); **All fields** shows every field of
   its layer, and **Remove the effect** removes it. An effect is one layer of

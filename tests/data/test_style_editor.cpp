@@ -220,6 +220,14 @@ TEST_CASE("The Style Editor shows a look as parts with effects, and the gallery 
     g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Shine);
     CHECK(g_MuStyleEditorUI.GetDraft().layers.back().meshes.IsAll());
     RenderStyleEditor();
+    // A flowing texture moves on one part only.
+    g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Flowing);
+    CHECK(g_MuStyleEditorUI.GetDraft().layers.size() == 4);
+    g_MuStyleEditorUI.PickPart(1);
+    g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Flowing);
+    REQUIRE(g_MuStyleEditorUI.GetDraft().layers.size() == 5);
+    CHECK(g_MuStyleEditorUI.GetDraft().layers.back().glowMesh == Data::Looks::GlowMesh(1));
+    RenderStyleEditor();
 }
 
 TEST_CASE("The Style Editor's mesh fields offer the item's parts by name, and meshes beyond the model apart (design "

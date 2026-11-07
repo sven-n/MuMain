@@ -868,6 +868,10 @@ void CMuStyleEditorUI::PickPart(int part)
 
 void CMuStyleEditorUI::AddEffect(EffectKind kind)
 {
+    if (Data::Looks::NeedsOnePart(kind) && m_part < 0)
+    {
+        return;
+    }
     std::vector<int> meshes;
     if (m_part >= 0)
     {
@@ -1014,9 +1018,17 @@ void CMuStyleEditorUI::RenderAddEffect()
     for (const EffectKind kind : Data::Looks::GetGalleryEffects())
     {
         ImGui::PushID(static_cast<int>(kind));
+        // A flowing texture and frames move on one part.
+        const bool needsPart = Data::Looks::NeedsOnePart(kind) && m_part < 0;
+        ImGui::BeginDisabled(needsPart);
         if (ImGui::Selectable(MuEditor::Looks::Fields::EffectName(kind)))
         {
             AddEffect(kind);
+        }
+        ImGui::EndDisabled();
+        if (needsPart && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::MovesOnOnePart);
         }
         ImGui::SameLine(EffectNoteColumn * g_MuEditorCore.GetUIScale());
         ImGui::TextDisabled("%s", MuEditor::Looks::Fields::EffectNote(kind));

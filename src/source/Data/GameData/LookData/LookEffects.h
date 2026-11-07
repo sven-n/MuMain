@@ -48,8 +48,12 @@ LayerEffect DescribeEffect(const Layer& layer);
 // The effects the gallery offers, in its order (Base is no effect of it).
 std::span<const EffectKind> GetGalleryEffects();
 
+// Whether the effect goes on one part only: a flowing texture and frames move the texture of their layer's glowing
+// mesh (the drawing moves the texture of that mesh or of the scrolling mesh only), and a layer has one.
+bool NeedsOnePart(EffectKind kind);
+
 // A new layer of the effect on `meshes` (empty: every mesh), with values the moved looks use: a pulse from 0.2 to 0.8
 // in 3.14 seconds as the Viper Bow's, a texture flowing 0.5 a second as the Dark Reign Blade's, four frames of 0.08
-// seconds as the Flamberge's.
+// seconds as the Flamberge's. A flowing texture and frames make their first mesh the glowing one, which they move.
 Layer MakeEffectLayer(EffectKind kind, std::vector<int> meshes);
 } // namespace Data::Looks

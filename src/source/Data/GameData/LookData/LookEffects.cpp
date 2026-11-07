@@ -55,6 +55,13 @@ GlowMesh GlowOn(const MeshSet& meshes)
 {
     return meshes.meshes.empty() ? GlowMesh(AllGlowMeshes{}) : GlowMesh(meshes.meshes.front());
 }
+
+// The mesh a flowing texture or frames move: the layer's first mesh; on every mesh, the item's glowing mesh (every
+// mesh glowing would move none).
+GlowMesh MovedMesh(const MeshSet& meshes)
+{
+    return meshes.meshes.empty() ? GlowMesh(FromItem{}) : GlowMesh(meshes.meshes.front());
+}
 } // namespace
 
 LayerEffect DescribeEffect(const Layer& layer)
@@ -129,6 +136,11 @@ std::span<const EffectKind> GetGalleryEffects()
     return GalleryEffects;
 }
 
+bool NeedsOnePart(EffectKind kind)
+{
+    return kind == EffectKind::Flowing || kind == EffectKind::Frames;
+}
+
 Layer MakeEffectLayer(EffectKind kind, std::vector<int> meshes)
 {
     Layer layer;
@@ -155,12 +167,14 @@ Layer MakeEffectLayer(EffectKind kind, std::vector<int> meshes)
         layer.texture = "Effect/Chrome01.jpg";
         break;
     case EffectKind::Flowing:
+        layer.glowMesh = MovedMesh(layer.meshes);
         layer.scrollV = Shape{.kind = ShapeKind::Scroll, .perSecond = 0.5};
         break;
     case EffectKind::Color:
         layer.light = LayerLight{.tint = false, .color = {0.6f, 0.8f, 1.0f}};
         break;
     case EffectKind::Frames:
+        layer.glowMesh = MovedMesh(layer.meshes);
         layer.scrollU = Shape{.kind = ShapeKind::Frames, .seconds = 0.08, .step = 0.25, .count = 4};
         break;
     }

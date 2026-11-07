@@ -1010,13 +1010,16 @@
     <value>Another texture added over the part.</value>
   </data>
   <data name="Effect Flowing texture note" xml:space="preserve">
-    <value>A texture that slides across the part.</value>
+    <value>A texture that slides across the part, which glows.</value>
   </data>
   <data name="Effect Color note" xml:space="preserve">
     <value>Draws the part in a color.</value>
   </data>
   <data name="Effect Frames and flicker note" xml:space="preserve">
-    <value>The texture steps through frames.</value>
+    <value>The texture steps through frames on the part, which glows.</value>
+  </data>
+  <data name="Moves on one part" xml:space="preserve">
+    <value>Pick a part first: a flowing texture or frames move on one part, which glows.</value>
   </data>
   <data name="Also glows" xml:space="preserve">
     <value>glows</value>

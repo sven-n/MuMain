@@ -1070,13 +1070,16 @@
     <value>Eine andere Textur über dem Teil.</value>
   </data>
   <data name="Effect Flowing texture note" xml:space="preserve">
-    <value>Eine Textur, die über das Teil gleitet.</value>
+    <value>Eine Textur, die über das Teil gleitet; das Teil leuchtet.</value>
   </data>
   <data name="Effect Color note" xml:space="preserve">
     <value>Zeichnet das Teil in einer Farbe.</value>
   </data>
   <data name="Effect Frames and flicker note" xml:space="preserve">
-    <value>Die Textur schaltet Bild für Bild weiter.</value>
+    <value>Die Textur schaltet auf dem Teil Bild für Bild weiter; das Teil leuchtet.</value>
+  </data>
+  <data name="Moves on one part" xml:space="preserve">
+    <value>Wähle zuerst ein Teil: Eine fließende Textur oder Bilder bewegen sich auf einem Teil, das leuchtet.</value>
   </data>
   <data name="Also glows" xml:space="preserve">
     <value>leuchtet</value>
