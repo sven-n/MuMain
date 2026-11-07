@@ -484,6 +484,10 @@ The storage and expanded-vault windows translate their titles, fees, Zen deposit
 and withdrawal controls, vault locking and password prompts, and related error
 messages.
 
+The player-trade window translates its title, partner and item warnings, Zen
+offer prompt, incoming request, cancellation reasons and reinforced-item
+restriction.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.

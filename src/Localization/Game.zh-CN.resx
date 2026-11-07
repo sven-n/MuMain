@@ -906,4 +906,58 @@
   <data name="Error" xml:space="preserve">
     <value>错误</value>
   </data>
+  <data name="Trade" xml:space="preserve">
+    <value>交易</value>
+  </data>
+  <data name="Zen Trade" xml:space="preserve">
+    <value>交易金币</value>
+  </data>
+  <data name="About %d" xml:space="preserve">
+    <value>约 %d</value>
+  </data>
+  <data name="Warning!" xml:space="preserve">
+    <value>警告！</value>
+  </data>
+  <data name="Notice! Please check out" xml:space="preserve">
+    <value>注意！请在交易前确认</value>
+  </data>
+  <data name="the level of the player" xml:space="preserve">
+    <value>对方的等级</value>
+  </data>
+  <data name="and the items before trading." xml:space="preserve">
+    <value>以及交易物品。</value>
+  </data>
+  <data name="The levels and options of some items" xml:space="preserve">
+    <value>部分物品的等级或属性</value>
+  </data>
+  <data name="have been changed in trade." xml:space="preserve">
+    <value>已在交易过程中发生变化。</value>
+  </data>
+  <data name="Please check whether the item is" xml:space="preserve">
+    <value>请确认该物品是否仍是</value>
+  </data>
+  <data name="the same item that you want to trade." xml:space="preserve">
+    <value>你想要交易的物品。</value>
+  </data>
+  <data name="would like to trade with you." xml:space="preserve">
+    <value>想与你交易。</value>
+  </data>
+  <data name="Enter the amount of Zen you would like to trade." xml:space="preserve">
+    <value>请输入要交易的金币数量。</value>
+  </data>
+  <data name="Your trade has been canceled." xml:space="preserve">
+    <value>交易已取消。</value>
+  </data>
+  <data name="You cannot trade right now." xml:space="preserve">
+    <value>当前无法交易。</value>
+  </data>
+  <data name="Your trade has been canceled because your inventory is full." xml:space="preserve">
+    <value>背包已满，交易已取消。</value>
+  </data>
+  <data name="Trade request is canceled" xml:space="preserve">
+    <value>交易请求已取消。</value>
+  </data>
+  <data name="Reinforced item can't be traded." xml:space="preserve">
+    <value>强化物品无法交易。</value>
+  </data>
 </root>
