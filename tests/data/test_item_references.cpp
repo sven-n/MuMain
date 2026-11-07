@@ -214,6 +214,36 @@ TEST_CASE("The texts that name an item are listed from the UI texts and every it
     CHECK(Data::Translation::FindTextsNamingItem(database, 14, 21).empty());
 }
 
+TEST_CASE("The tooltip file's layout lines are checked and listed as the other item texts are [data][items][texts]")
+{
+    TooltipLayoutLine named;
+    named.text = Data::LocalizedString::Parse("Combine with {item:14,25}||pl=Polacz z {item:14,25:acc}");
+    TooltipLayout layout;
+    layout.name = "default";
+    layout.lines.push_back(named);
+    TooltipLayoutLine unknown;
+    unknown.text = Data::LocalizedString::Parse("Made of {item:14,99}");
+    TooltipLayout preset;
+    preset.name = "jewel";
+    preset.base = "default";
+    preset.add.push_back({"", {unknown}});
+    ItemTooltipFile file;
+    file.layouts = {layout, preset};
+    ItemDatabase database;
+    database.SetTooltipFile(file);
+    database.Build(NamedItems());
+
+    const std::vector<std::string> texts = Data::Translation::FindTextsNamingItem(database, 14, 25);
+    CHECK(std::ranges::find(texts, "Tooltip.json: layouts[0].lines[0]") != texts.end());
+
+    std::vector<ItemDataIssue> issues;
+    Data::Translation::CheckItemDataTexts(database, "Tooltip.json", issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].source == "Tooltip.json");
+    CHECK(issues[0].field == "layouts[1].add[0].lines[0].text");
+}
+
 TEST_CASE(
     "A text's references are expanded with the resolver's names, and without a name they stay [data][items][texts]")
 {

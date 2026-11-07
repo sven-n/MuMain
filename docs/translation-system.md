@@ -453,8 +453,8 @@ item's name at that level (its name line, [item-data.md](item-data.md#name-lines
 for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`).
 
 - **Where:** the `Game` and `Dialog` texts (`ResxGen --item-text-groups`), and
-  the item data's own texts: description lines, name lines and the shared texts
-  of `Tooltips/Tooltip.json`. Not the editor's texts.
+  the item data's own texts: description lines, name lines, and the shared texts
+  and layout lines of `Tooltips/Tooltip.json`. Not the editor's texts.
 - **Which name:** the item name language, so the names follow **Translate item
   names**: with it off a Polish text shows `Jewel of Bless`, as the inventory
   does, while the rest of the text stays Polish. A language whose file has no

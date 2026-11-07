@@ -27,6 +27,31 @@ std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
     return lines;
 }
 
+std::vector<TooltipFileLineOf> TooltipFileLinesOf(const ItemTooltipFile& file)
+{
+    constexpr const char* LayoutsKey = "layouts";
+    std::vector<TooltipFileLineOf> lines;
+    for (size_t layout = 0; layout < file.layouts.size(); ++layout)
+    {
+        const std::string field = std::string(LayoutsKey) + "[" + std::to_string(layout) + "]";
+        const std::vector<TooltipLayoutLine>& own = file.layouts[layout].lines;
+        for (size_t index = 0; index < own.size(); ++index)
+        {
+            lines.push_back({&own[index], field + ".lines[" + std::to_string(index) + "]"});
+        }
+        const std::vector<TooltipLayoutAddition>& additions = file.layouts[layout].add;
+        for (size_t addition = 0; addition < additions.size(); ++addition)
+        {
+            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
+            {
+                lines.push_back({&additions[addition].lines[index], field + ".add[" + std::to_string(addition) +
+                                                                        "].lines[" + std::to_string(index) + "]"});
+            }
+        }
+    }
+    return lines;
+}
+
 std::string LineTextField(const std::string& lineField, std::string_view locale)
 {
     std::string field = lineField + ".text";

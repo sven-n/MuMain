@@ -126,6 +126,25 @@ void CheckLine(const Items::ItemDatabase& database, const Items::ItemDefinition&
             english, issues);
     }
 }
+
+// Every language's text of a text of the tooltip file at `field` ("texts.talisman", "layouts[0].lines[3].text"), whose
+// translations are at "<field>.<locale>".
+void CheckTooltipFileText(const Items::ItemDatabase& database, const LocalizedString& text,
+                          const std::string& tooltipFile, const std::string& field, std::vector<ItemDataIssue>& issues)
+{
+    const std::string& english = text.GetNeutral();
+    CheckItemReferences(
+        database,
+        {english, LocalizedString::NeutralLocale, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field}, {},
+        issues);
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        CheckItemReferences(
+            database,
+            {translation, locale, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + locale},
+            english, issues);
+    }
+}
 } // namespace
 
 void CheckItemReferences(const Items::ItemDatabase& database, const CheckedText& text, std::string_view english,
@@ -245,6 +264,13 @@ std::vector<std::string> FindTextsNamingItem(const Items::ItemDatabase& database
             found.push_back("Tooltip.json: texts." + name);
         }
     }
+    for (const auto& [line, field] : Items::TooltipFileLinesOf(database.GetTooltipFile()))
+    {
+        if (line->textName.empty() && namesInSome(line->text))
+        {
+            found.push_back("Tooltip.json: " + field);
+        }
+    }
     return found;
 }
 
@@ -264,18 +290,14 @@ void CheckItemDataTexts(const Items::ItemDatabase& database, const std::string& 
     }
     for (const auto& [name, text] : database.GetTooltipFile().texts)
     {
-        const std::string field = "texts." + name;
-        const std::string& english = text.GetNeutral();
-        CheckItemReferences(
-            database,
-            {english, LocalizedString::NeutralLocale, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field},
-            {}, issues);
-        for (const auto& [locale, translation] : text.GetTranslations())
+        CheckTooltipFileText(database, text, tooltipFile, "texts." + name, issues);
+    }
+    for (const auto& [line, field] : Items::TooltipFileLinesOf(database.GetTooltipFile()))
+    {
+        // A shared text is checked above.
+        if (line->textName.empty())
         {
-            CheckItemReferences(
-                database,
-                {translation, locale, tooltipFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + locale},
-                english, issues);
+            CheckTooltipFileText(database, line->text, tooltipFile, field + ".text", issues);
         }
     }
 }

@@ -38,11 +38,12 @@ void CheckItemReferences(const Items::ItemDatabase& database, const CheckedText&
 void CheckUiItemTexts(const Items::ItemDatabase& database, std::vector<Items::ItemDataIssue>& issues);
 
 // The item data's texts: the items' description lines, name lines and lines added to their layouts, and the shared
-// texts of the tooltip file (`tooltipFile` names it).
+// texts and the layouts' lines of the tooltip file (`tooltipFile` names it).
 void CheckItemDataTexts(const Items::ItemDatabase& database, const std::string& tooltipFile,
                         std::vector<Items::ItemDataIssue>& issues);
 
 // The texts that name the item in some language, each once, as the editor lists them: "Game: Jewel of Bless",
-// "Dialog: Answer_65_Slot_0", "Sealed Golden Box (14,121): description[0]", "Tooltip.json: texts.talisman".
+// "Dialog: Answer_65_Slot_0", "Sealed Golden Box (14,121): description[0]", "Tooltip.json: texts.talisman",
+// "Tooltip.json: layouts[0].lines[3]".
 std::vector<std::string> FindTextsNamingItem(const Items::ItemDatabase& database, int group, int number);
 } // namespace Data::Translation
