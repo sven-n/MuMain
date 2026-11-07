@@ -10,6 +10,7 @@
 #include <execution>
 #include <algorithm>
 #include <span>
+#include <memory>
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
 #ifdef _WIN32
@@ -9408,6 +9409,27 @@ void UpdatePlayerBodyParts(CHARACTER* c)
     }
 }
 
+bool CreateMagicSkeletonCloth(OBJECT* o)
+{
+    constexpr int MeshIndex = 2;
+    constexpr int BoneIndex = 18;
+    if (!CPhysicsClothMesh::CanCreate(o->Type, MeshIndex))
+    {
+        static bool reported = false;
+        if (!reported)
+            g_ErrorReport.Write(L"Magic Skeleton cloth creation failed: model=%d\r\n", o->Type);
+        reported = true;
+        return false;
+    }
+    auto cloth = std::make_unique<CPhysicsClothMesh[]>(1);
+    cloth[0].Create(o, MeshIndex, BoneIndex, PCT_HEAVY);
+    cloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, BoneIndex);
+    cloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, BoneIndex);
+    o->m_pCloth = cloth.release();
+    o->m_byNumCloth = 1;
+    return true;
+}
+
 // Creates, simulates and drops a character's cloth, under the conditions its draw renders it.
 void UpdateCharacterCloth(CHARACTER* c)
 {
@@ -9420,18 +9442,13 @@ void UpdateCharacterCloth(CHARACTER* c)
         monster == MONSTER_MAGIC_SKELETON_5 || monster == MONSTER_MAGIC_SKELETON_6 ||
         monster == MONSTER_MAGIC_SKELETON_7)
     {
-        if (!o->m_pCloth)
+        // Cloth reads skinned vertices during update, before this model's first draw.
+        // Refresh them for this instance every tick: fixed vertices read them too.
+        SkinObjectMeshes(o, &Models[o->Type], true);
+        if (o->m_pCloth || CreateMagicSkeletonCloth(o))
         {
-            auto* pCloth = new CPhysicsClothMesh[1];
-            pCloth[0].Create(o, 2, 18, PCT_HEAVY);
-            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 18);
-            pCloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, 18);
-            o->m_pCloth = (void*)pCloth;
-            o->m_byNumCloth = 1;
-        }
-        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
-        {
-            DeleteCloth(c, o);
+            if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+                DeleteCloth(c, o);
         }
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||
