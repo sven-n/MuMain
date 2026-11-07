@@ -235,9 +235,6 @@
   <data name="Triple Shot skill (Mana:%d)" xml:space="preserve">
     <value>Umiejętność Triple Shot (Mana: %d)</value>
   </data>
-  <data name="Luck (success rate of Jewel of Soul +25%%)" xml:space="preserve">
-    <value>Szczęście (wskaźnik sukcesu Klejnotu Duszy +25%%)</value>
-  </data>
   <data name="Additional Dmg +%d" xml:space="preserve">
     <value>Dodatkowe obrażenia +%d</value>
   </data>
@@ -252,9 +249,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Automatyczne odzyskiwanie HP %d%%</value>
-  </data>
-  <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
-    <value>Szczęście (wskaźnik obrażeń krytycznych +5%%)</value>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Można używać tylko w ruchomych jednostkach</value>

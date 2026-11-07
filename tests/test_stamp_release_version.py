@@ -70,6 +70,47 @@ class StampReleaseVersionTests(unittest.TestCase):
             "Main.app/Contents/MacOS/Main": b"bin", "Main.app/Contents/Info.plist": b"plist",
             "Main.app/Contents/MacOS/release-version.txt": b"v1.37.0\n"})
 
+    def test_linux_archives_get_the_tag_next_to_main(self):
+        write_archive(self.folder / "linux.tar.gz", {"./Main": b"elf", "./libSDL3.so.0": b"so"})
+
+        result = self.stamp("v1.37.0", "linux.tar.gz")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(read_archive(self.folder / "linux.tar.gz"), {
+            "./Main": b"elf", "./libSDL3.so.0": b"so", "./release-version.txt": b"v1.37.0\n"})
+
+    def test_an_archive_without_a_client_where_the_tag_goes_fails_unchanged(self):
+        # Main.app under "./" is not the layout the macOS job writes, so the tag would land outside the bundle.
+        write_archive(self.folder / "moved.tar.gz", {"./Main.app/Contents/MacOS/Main": b"bin"})
+        before = (self.folder / "moved.tar.gz").read_bytes()
+
+        result = self.stamp("v1.37.0", "moved.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no client", result.stderr)
+        self.assertEqual((self.folder / "moved.tar.gz").read_bytes(), before)
+
+    def test_a_macos_archive_without_its_client_fails_unchanged(self):
+        # Main.app is where the macOS job puts it, but Contents/MacOS holds no Main for the tag to sit next to.
+        write_archive(self.folder / "macos.tar.gz", {"Main.app/Contents/Info.plist": b"plist",
+                                                     "Main.app/Contents/MacOS/MuMain": b"bin"})
+        before = (self.folder / "macos.tar.gz").read_bytes()
+
+        result = self.stamp("v1.37.0", "macos.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no client", result.stderr)
+        self.assertEqual((self.folder / "macos.tar.gz").read_bytes(), before)
+
+    def test_one_archive_without_a_client_leaves_every_archive_unchanged(self):
+        # Checked before any is rewritten: a release that fails ships nothing, and a retry stamps each archive once.
+        write_archive(self.folder / "windows.tar.gz", {"./Main.exe": b"exe"})
+        write_archive(self.folder / "moved.tar.gz", {"./Main.app/Contents/MacOS/Main": b"bin"})
+        before = {name: (self.folder / name).read_bytes() for name in ("windows.tar.gz", "moved.tar.gz")}
+
+        result = self.stamp("v1.37.0", "windows.tar.gz", "moved.tar.gz")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("moved.tar.gz has no client", result.stderr)
+        for name, data in before.items():
+            self.assertEqual((self.folder / name).read_bytes(), data, name)
+
     def test_a_missing_archive_fails(self):
         result = self.stamp("v1.37.0", "missing.tar.gz")
         self.assertNotEqual(result.returncode, 0)

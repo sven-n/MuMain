@@ -11,6 +11,7 @@
         "pl": "Brązowe rękawice",
         "pt": "Luvas de bronze"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -39,6 +40,7 @@
         "pl": "Smocze rękawice",
         "pt": "Luvas do dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -66,6 +68,7 @@
         "pl": "Pikowane rękawice",
         "pt": "Luvas acolchoadas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -91,6 +94,7 @@
         "pl": "Legendarne rękawice",
         "pt": "Luvas lendárias"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -116,6 +120,7 @@
         "pl": "Kościane rękawice",
         "pt": "Luvas de osso"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -141,6 +146,7 @@
         "pl": "Skórzane rękawice",
         "pt": "Luvas de couro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -168,6 +174,7 @@
         "pl": "Łuskowe rękawice",
         "pt": "Luvas de escamas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -195,6 +202,7 @@
         "pl": "Rękawice Sfinksa",
         "pt": "Luvas da esfinge"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -220,6 +228,7 @@
         "pl": "Mosiężne rękawice",
         "pt": "Luvas de latão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -247,6 +256,7 @@
         "pl": "Płytowe rękawice",
         "pt": "Luvas de placa"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -273,6 +283,7 @@
         "pl": "Rękawice z pnączy",
         "pt": "Luvas da vinha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -299,6 +310,7 @@
         "pl": "Jedwabne rękawice",
         "pt": "Luvas de seda"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -325,6 +337,7 @@
         "pl": "Rękawice Wiatru",
         "pt": "Luvas do vento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -351,6 +364,7 @@
         "pl": "Rękawice Ducha",
         "pt": "Luvas do espírito"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -377,6 +391,7 @@
         "pl": "Rękawice Strażnika",
         "pt": "Luvas do guardião"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -403,6 +418,7 @@
         "pl": "Rękawice Burzowej Wrony",
         "pt": "Luvas do corvo da tempestade"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -429,6 +445,7 @@
         "pl": "Rękawice Czarnego Smoka",
         "pt": "Luvas do dragão negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -455,6 +472,7 @@
         "pl": "Rękawice Mrocznego Feniksa",
         "pt": "Luvas da fênix negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -481,6 +499,7 @@
         "pl": "Rękawice Wielkiej Duszy",
         "pt": "Luvas da grande alma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -507,6 +526,7 @@
         "pl": "Boskie rękawice",
         "pt": "Luvas divinas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -533,6 +553,7 @@
         "pl": "Rękawice Gromowego Jastrzębia",
         "pt": "Luvas de Thunder Hawk"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -559,6 +580,7 @@
         "pl": "Rękawice Wielkiego Smoka",
         "pt": "Luvas do grande dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -585,6 +607,7 @@
         "pl": "Rękawice Mrocznej Duszy",
         "pt": "Luvas da alma negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -611,6 +634,7 @@
         "pl": "Rękawice Huraganu",
         "pt": "Luvas do furacão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -637,6 +661,7 @@
         "pl": "Rękawice Czerwonego Ducha",
         "pt": "Luvas do espírito vermelho"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -663,6 +688,7 @@
         "pl": "Lekkie rękawice płytowe",
         "pt": "Luvas de placa leve"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -689,6 +715,7 @@
         "pl": "Adamantytowe rękawice",
         "pt": "Luvas de adamantina"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -715,6 +742,7 @@
         "pl": "Rękawice z mrocznej stali",
         "pt": "Luvas de aço negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -741,6 +769,7 @@
         "pl": "Rękawice Mrocznego Mistrza",
         "pt": "Luvas do Mestre negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -767,6 +796,7 @@
         "pl": "Rękawice Smoczego Rycerza",
         "pt": "Luvas do cavaleiro dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -794,6 +824,7 @@
         "pl": "Rękawice Jadowitej Mgły",
         "pt": "Luvas da névoa de veneno"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -821,6 +852,7 @@
         "pl": "Rękawice Sylphid Ray",
         "pt": "Luvas do raio silfídico"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -848,6 +880,7 @@
         "pl": "Rękawice Wulkanu",
         "pt": "Luvas do vulcão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -875,6 +908,7 @@
         "pl": "Rękawice Słońca",
         "pt": "Luvas da luz do sol"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -902,6 +936,7 @@
         "pl": "Rękawice Ashcrow",
         "pt": "Luvas de Ashcrow"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -927,6 +962,7 @@
         "pl": "Rękawice Zaćmienia",
         "pt": "Luvas do eclipse"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -952,6 +988,7 @@
         "pl": "Rękawice Iris",
         "pt": "Luvas de Iris"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -977,6 +1014,7 @@
         "pl": "Waleczne rękawice",
         "pt": "Luvas do valor"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1002,6 +1040,7 @@
         "pl": "Chwalebne rękawice",
         "pt": "Luvas gloriosas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1027,6 +1066,7 @@
         "pl": "Rękawice Gwałtownego Wiatru",
         "pt": "Luvas do vento violento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1052,6 +1092,7 @@
         "pl": "Rękawice Czerwonego Skrzydła",
         "pt": "Luvas da asa vermelha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1078,6 +1119,7 @@
         "pl": "Pradawne rękawice",
         "pt": "Luvas antigas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1104,6 +1146,7 @@
         "pl": "Demoniczne rękawice",
         "pt": "Luvas demoníacas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1129,6 +1172,7 @@
         "pl": "Rękawice Burzowego Błysku",
         "pt": "Luvas Relâmpago de Tempest."
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1156,6 +1200,7 @@
         "pl": "Rękawice Wiecznego Skrzydła",
         "pt": "Luvas da asa eterna"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1182,6 +1227,7 @@
         "pl": "Rękawice Tytana",
         "pt": "Luvas do titã"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1208,6 +1254,7 @@
         "pl": "Rękawice Śmiałka",
         "pt": "Luvas da coragem"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1234,6 +1281,7 @@
         "pl": "Rękawice Widma",
         "pt": "Luvas do fantasma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1260,6 +1308,7 @@
         "pl": "Rękawice Zniszczenia",
         "pt": "Luvas da destruição"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1287,6 +1336,7 @@
         "pl": "Rękawice Serafina",
         "pt": "Luvas do serafim"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1313,6 +1363,7 @@
         "pl": "Rękawice Wiary",
         "pt": "Luvas da fé"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1340,6 +1391,7 @@
         "pl": "Królewskie rękawice",
         "pt": "Luvas reais"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1366,6 +1418,7 @@
         "pl": "Rękawice Hadesa",
         "pt": "Luvas de Hades"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1397,6 +1450,7 @@
         "pt": "Luvas de escamas"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1432,6 +1486,7 @@
         "pt": "Luvas de seda"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1464,6 +1519,7 @@
         "pt": "Luvas de Esfinge"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1496,6 +1552,7 @@
         "pt": "Luvas do vento violento"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1528,6 +1585,7 @@
         "pt": "Luvas de adamantina"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1560,6 +1618,7 @@
         "pt": "Luvas de Dragão"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1593,6 +1652,7 @@
         "pt": "Luvas de Guardião"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1625,6 +1685,7 @@
         "pt": "Luvas Lendárias"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1657,6 +1718,7 @@
         "pt": "Luvas da asa vermelha"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",
@@ -1689,6 +1751,7 @@
         "pt": "Luvas do corvo da tempestade"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "gloves",

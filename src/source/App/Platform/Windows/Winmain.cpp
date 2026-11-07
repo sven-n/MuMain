@@ -19,8 +19,6 @@
 
 #ifdef _WIN32
 #include <dpapi.h>
-#elif defined(__APPLE__)
-#include <mach-o/dyld.h>
 #endif
 #include <clocale>
 #include <cstring>
@@ -75,6 +73,8 @@
 
 #include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
+#include "Core/Utilities/PlatformInfo.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -1955,13 +1955,12 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
 static void SetWorkingDirectoryToBasePath()
 {
 #if defined(__APPLE__)
-    std::uint32_t pathSize = 0;
-    _NSGetExecutablePath(nullptr, &pathSize);
-    std::string executablePath(pathSize, '\0');
-    if (_NSGetExecutablePath(executablePath.data(), &pathSize) == 0)
+    // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
+    // absolute for every later caller (WinApiShims.h).
+    if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
         std::error_code error;
-        std::filesystem::current_path(std::filesystem::path(executablePath).parent_path(), error);
+        std::filesystem::current_path(executable.parent_path(), error);
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
@@ -1970,6 +1969,18 @@ static void SetWorkingDirectoryToBasePath()
         std::filesystem::current_path(basePath, error);
     }
 #endif
+}
+
+// The language the player reads: SetLocale falls back to en for a locale it doesn't know.
+static Core::Log::ReadingLanguage::State CurrentReadingLanguage()
+{
+    return {I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames()};
+}
+
+// A UI language switch after start-up (the options window, the editor), so a report shows the language it was in.
+static void LogUiLanguageChange(void* /*context*/) noexcept
+{
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
 }
 
 // The connect server: the command line's (a launcher passes one) or else config.ini's.
@@ -2304,17 +2315,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
-    // The editor still restores its own MuEditorConfig language preference
-    // later in its init, which feeds through to I18N::SetLocale as well.
+    // The options window and the editor's language box switch it later.
     {
         std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
-    // The language the player reads: SetLocale falls back to en for a locale it doesn't know.
-    g_ErrorReport.Write(L"> UI language = %hs, item names %ls.\r\n", I18N::GetCurrentLocale(),
-                        GameConfig::GetInstance().GetTranslateItemNames() ? L"translated" : L"in English");
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
+    I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR

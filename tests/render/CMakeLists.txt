@@ -2,17 +2,15 @@ mu_add_test(
     NAME bitmap_gpu_resources_tests
     SOURCES
         test_bitmap_gpu_resources.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/BitmapGpuResources.cpp
-    LINK_LIBS SDL3::SDL3
+    LINK_LIBS mu_test_bitmap_gpu_resources
 )
 
 # A standalone executable permits CTest's real skip return code when not opted in.
 # The GPU regression still links the same production owner and SDL dependency as
 # bitmap_gpu_resources_tests; unlike doctest discovery it runs as one timed case.
-add_executable(bitmap_gpu_upload_integration test_bitmap_gpu_upload_integration.cpp
-    ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/BitmapGpuResources.cpp)
+add_executable(bitmap_gpu_upload_integration test_bitmap_gpu_upload_integration.cpp)
 target_include_directories(bitmap_gpu_upload_integration PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
-target_link_libraries(bitmap_gpu_upload_integration PRIVATE SDL3::SDL3)
+target_link_libraries(bitmap_gpu_upload_integration PRIVATE mu_test_bitmap_gpu_resources)
 add_test(NAME bitmap_gpu_upload_integration COMMAND bitmap_gpu_upload_integration)
 set_tests_properties(bitmap_gpu_upload_integration PROPERTIES LABELS gpu SKIP_RETURN_CODE 77 TIMEOUT 180)
 
@@ -78,7 +76,8 @@ mu_add_test(
     SOURCES
         test_texture_filtering.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TextureFiltering.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
+    LINK_LIBS
+        mu_test_asset_path
 )
 
 mu_add_test(
@@ -159,9 +158,10 @@ mu_add_test(
         test_texture_pack.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePackFiles.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapPath.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+    LINK_LIBS
+        mu_test_asset_path
+        mu_test_path_resolve
 )
 
 mu_add_test(
@@ -276,6 +276,8 @@ mu_add_test(
 target_compile_definitions(look_profile_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(look_profile_tests test_look_tuning.cpp)
 
 # The light mood against the real terrain light buffers; they come with the
 # client globals of Winmain.cpp.
@@ -451,9 +453,6 @@ add_test(NAME texture_failure_dispatch_decline COMMAND "${Python3_EXECUTABLE}"
 
 mu_add_test(
     NAME bitmap_loader_tests
-    SOURCES
-        test_bitmap_loader.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapLoad.cpp
+    SOURCES test_bitmap_loader.cpp
     LINK_LIBS MuClient
 )

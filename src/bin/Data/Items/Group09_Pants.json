@@ -11,6 +11,7 @@
         "pl": "Brązowe spodnie",
         "pt": "Calças de bronze"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -38,6 +39,7 @@
         "pl": "Smocze spodnie",
         "pt": "Calças do dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -64,6 +66,7 @@
         "pl": "Pikowane spodnie",
         "pt": "Calças acolchoadas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -89,6 +92,7 @@
         "pl": "Legendarne spodnie",
         "pt": "Calças lendárias"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -114,6 +118,7 @@
         "pl": "Kościane spodnie",
         "pt": "Calças de osso"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -139,6 +144,7 @@
         "pl": "Skórzane spodnie",
         "pt": "Calças de couro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -166,6 +172,7 @@
         "pl": "Łuskowe spodnie",
         "pt": "Calças de escamas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -193,6 +200,7 @@
         "pl": "Spodnie Sfinksa",
         "pt": "Calças da esfinge"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -218,6 +226,7 @@
         "pl": "Mosiężne spodnie",
         "pt": "Calças de latão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -245,6 +254,7 @@
         "pl": "Płytowe spodnie",
         "pt": "Calças de placa"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -271,6 +281,7 @@
         "pl": "Spodnie z pnączy",
         "pt": "Calças da vinha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -296,6 +307,7 @@
         "pl": "Jedwabne spodnie",
         "pt": "Calças de seda"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -321,6 +333,7 @@
         "pl": "Spodnie Wiatru",
         "pt": "Calças do vento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -346,6 +359,7 @@
         "pl": "Spodnie Ducha",
         "pt": "Calças do espírito"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -371,6 +385,7 @@
         "pl": "Spodnie Strażnika",
         "pt": "Calças do guardião"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -396,6 +411,7 @@
         "pl": "Spodnie Burzowej Wrony",
         "pt": "Calças do corvo da tempestade"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -421,6 +437,7 @@
         "pl": "Spodnie Czarnego Smoka",
         "pt": "Calças do dragão negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -446,6 +463,7 @@
         "pl": "Spodnie Mrocznego Feniksa",
         "pt": "Calças da fênix negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -471,6 +489,7 @@
         "pl": "Spodnie Wielkiej Duszy",
         "pt": "Calças da grande alma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -496,6 +515,7 @@
         "pl": "Boskie spodnie",
         "pt": "Calças divinas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -521,6 +541,7 @@
         "pl": "Spodnie Gromowego Jastrzębia",
         "pt": "Calças de Thunder Hawk"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -546,6 +567,7 @@
         "pl": "Spodnie Wielkiego Smoka",
         "pt": "Calças do grande dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -571,6 +593,7 @@
         "pl": "Spodnie Mrocznej Duszy",
         "pt": "Calças da alma negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -596,6 +619,7 @@
         "pl": "Spodnie Huraganu",
         "pt": "Calças do furacão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -621,6 +645,7 @@
         "pl": "Spodnie Czerwonego Ducha",
         "pt": "Calças do espírito vermelho"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -646,6 +671,7 @@
         "pl": "Lekkie spodnie płytowe",
         "pt": "Calças de placa Leve"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -671,6 +697,7 @@
         "pl": "Adamantytowe spodnie",
         "pt": "Calças de adamantina"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -696,6 +723,7 @@
         "pl": "Spodnie z mrocznej stali",
         "pt": "Calças de aço negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -721,6 +749,7 @@
         "pl": "Spodnie Mrocznego Mistrza",
         "pt": "Calças do Mestre negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -746,6 +775,7 @@
         "pl": "Spodnie Smoczego Rycerza",
         "pt": "Calças do cavaleiro dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -772,6 +802,7 @@
         "pl": "Spodnie Jadowitej Mgły",
         "pt": "Calças da névoa de veneno"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -798,6 +829,7 @@
         "pl": "Spodnie Sylphid Ray",
         "pt": "Calças do raio silfídico"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -824,6 +856,7 @@
         "pl": "Spodnie Wulkanu",
         "pt": "Calças do vulcão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -850,6 +883,7 @@
         "pl": "Spodnie Słońca",
         "pt": "Calças da luz do sol"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -876,6 +910,7 @@
         "pl": "Spodnie Ashcrow",
         "pt": "Calças de Ashcrow"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -900,6 +935,7 @@
         "pl": "Spodnie Zaćmienia",
         "pt": "Calças do eclipse"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -924,6 +960,7 @@
         "pl": "Spodnie Iris",
         "pt": "Calças de Iris"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -948,6 +985,7 @@
         "pl": "Waleczne spodnie",
         "pt": "Calças do valor"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -972,6 +1010,7 @@
         "pl": "Chwalebne spodnie",
         "pt": "Calças gloriosas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -996,6 +1035,7 @@
         "pl": "Spodnie Gwałtownego Wiatru",
         "pt": "Calças do vento violento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1020,6 +1060,7 @@
         "pl": "Spodnie Czerwonego Skrzydła",
         "pt": "Calças da asa vermelha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1045,6 +1086,7 @@
         "pl": "Pradawne spodnie",
         "pt": "Calças antigas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1070,6 +1112,7 @@
         "pl": "Demoniczne spodnie",
         "pt": "Calças demoníacas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1094,6 +1137,7 @@
         "pl": "Spodnie Burzowego Błysku",
         "pt": "Calças Relâmpago de Tempest."
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1120,6 +1164,7 @@
         "pl": "Spodnie Wiecznego Skrzydła",
         "pt": "Calças da asa eterna"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1146,6 +1191,7 @@
         "pl": "Spodnie Tytana",
         "pt": "Calças do titã"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1171,6 +1217,7 @@
         "pl": "Spodnie Śmiałka",
         "pt": "Calças da coragem"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1196,6 +1243,7 @@
         "pl": "Spodnie Widma",
         "pt": "Calças do fantasma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1221,6 +1269,7 @@
         "pl": "Spodnie Zniszczenia",
         "pt": "Calças da destruição"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1247,6 +1296,7 @@
         "pl": "Spodnie Serafina",
         "pt": "Calças do serafim"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1272,6 +1322,7 @@
         "pl": "Spodnie Wiary",
         "pt": "Calças da fé"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1298,6 +1349,7 @@
         "pl": "Królewskie spodnie",
         "pt": "Calças reais"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1323,6 +1375,7 @@
         "pl": "Spodnie Hadesa",
         "pt": "Calças de Hades"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1352,6 +1405,7 @@
         "pl": "Spodnie Świętego Ognia",
         "pt": "Calças de Fogo Sagrado"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1377,6 +1431,7 @@
         "pl": "Spodnie Storm Jahad",
         "pt": "Calças de  Tempestade Zahard"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1401,6 +1456,7 @@
         "pl": "Spodnie Piercing Groove",
         "pt": "Calças de Entalhe Perfurante"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1426,6 +1482,7 @@
         "pt": "Calças de escamas"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1460,6 +1517,7 @@
         "pt": "Calças de seda"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1491,6 +1549,7 @@
         "pt": "Calças de Esfinge"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1523,6 +1582,7 @@
         "pt": "Calças do vento violento"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1554,6 +1614,7 @@
         "pt": "Calças de adamantina"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1585,6 +1646,7 @@
         "pt": "Calças de Dragão"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1617,6 +1679,7 @@
         "pt": "Calças de Guardião"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1648,6 +1711,7 @@
         "pt": "Calças Lendárias"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1680,6 +1744,7 @@
         "pt": "Calças da asa vermelha"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1711,6 +1776,7 @@
         "pt": "Calças do corvo da tempestade"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1742,6 +1808,7 @@
         "pt": "Calças de  Tempestade Zahard"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",
@@ -1772,6 +1839,7 @@
         "pl": "Spodnie Duszy Feniksa",
         "pt": "Calças de Alma de Fogo"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "pants",

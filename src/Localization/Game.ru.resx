@@ -235,9 +235,6 @@
   <data name="Triple Shot skill (Mana:%d)" xml:space="preserve">
     <value>Навык «Тройной выстрел» (Мана:%d)</value>
   </data>
-  <data name="Luck (success rate of Jewel of Soul +25%%)" xml:space="preserve">
-    <value>Удача (шанс успеха «Драгоценности души» +25%%)</value>
-  </data>
   <data name="Additional Dmg +%d" xml:space="preserve">
     <value>Дополнительный урон +%d</value>
   </data>
@@ -252,9 +249,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Автоматическое восстановление HP %d%%</value>
-  </data>
-  <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
-    <value>Удача (коэффициент критического урона +5%%)</value>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Может использоваться только в движущемся блоке.</value>

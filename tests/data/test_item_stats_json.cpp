@@ -124,10 +124,10 @@ TEST_CASE("The item stat file reads and writes back the same [data][items]")
           WrittenStatTerm::State::None);
     REQUIRE(result.file.profileRules.size() == 2);
     CHECK(result.file.profileRules[0].profile == "sceptre");
-    CHECK(result.file.profileRules[0].tags == ItemTagSet{ItemTag::Sceptre});
-    CHECK(result.file.profileRules[1].groups.test(6));
-    CHECK(result.file.profileRules[1].groups.count() == 1);
-    CHECK(result.file.profileRules[1].weaponKinds.test(static_cast<size_t>(WeaponKind::Shield)));
+    CHECK(result.file.profileRules[0].conditions.tags == ItemTagSet{ItemTag::Sceptre});
+    CHECK(result.file.profileRules[1].conditions.groups.test(6));
+    CHECK(result.file.profileRules[1].conditions.groups.count() == 1);
+    CHECK(result.file.profileRules[1].conditions.weaponKinds.test(static_cast<size_t>(WeaponKind::Shield)));
 }
 
 TEST_CASE("The item stat writer keeps the order of the profile rules, one rule per line [data][items]")
@@ -136,12 +136,12 @@ TEST_CASE("The item stat writer keeps the order of the profile rules, one rule p
     std::swap(file.profileRules[0], file.profileRules[1]);
     // Values are written in the order of their names, groups from the lowest.
     StatProfileRule armor{.profile = "default"};
-    armor.slots.set(static_cast<size_t>(ItemSlot::Boots));
-    armor.slots.set(static_cast<size_t>(ItemSlot::Helm));
-    armor.groups.set(11);
-    armor.groups.set(7);
-    armor.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
-    armor.requirements.set(static_cast<size_t>(ItemRequirement::Level));
+    armor.conditions.slots.set(static_cast<size_t>(ItemSlot::Boots));
+    armor.conditions.slots.set(static_cast<size_t>(ItemSlot::Helm));
+    armor.conditions.groups.set(11);
+    armor.conditions.groups.set(7);
+    armor.conditions.requirements.set(static_cast<size_t>(ItemRequirement::Energy));
+    armor.conditions.requirements.set(static_cast<size_t>(ItemRequirement::Level));
     file.profileRules.push_back(armor);
 
     const std::string text = WriteItemStatsJson(file);
@@ -250,7 +250,7 @@ TEST_CASE("Item stat profiles keep the profile rules [data][items]")
 {
     ItemStatFile file = Read(SmallFile).file;
     StatProfileRule wings{.profile = "default"};
-    wings.slots.set(static_cast<size_t>(ItemSlot::Wings));
+    wings.conditions.slots.set(static_cast<size_t>(ItemSlot::Wings));
     file.profileRules.push_back(wings);
     // The constructor does not validate: an unknown profile gives the default.
     file.profileRules.push_back(StatProfileRule{.profile = "staff"});

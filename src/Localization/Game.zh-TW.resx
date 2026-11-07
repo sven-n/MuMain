@@ -235,9 +235,6 @@
   <data name="Triple Shot skill (Mana:%d)" xml:space="preserve">
     <value>三重射擊技能（法力：%d）</value>
   </data>
-  <data name="Luck (success rate of Jewel of Soul +25%%)" xml:space="preserve">
-    <value>幸運（靈魂寶石成功率+25%%）</value>
-  </data>
   <data name="Additional Dmg +%d" xml:space="preserve">
     <value>附加傷害+%d</value>
   </data>
@@ -252,9 +249,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>HP自動恢復 %d%%</value>
-  </data>
-  <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
-    <value>幸運（暴擊傷害率+5%%）</value>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>只能用於移動裝置</value>

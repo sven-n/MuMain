@@ -49,6 +49,9 @@ std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea();
 // The look profile (Data/Render/Look.json) and the light moods
 // (Data/Maps/LightMood.json); a click opens the Dev Editor.
 std::unique_ptr<DataCheckArea> CreateLookCheckArea();
+// The item options (Data/Items/Options, the option texts and rules) with the
+// links of the items as the item tools have them; no tool edits them yet.
+std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea();
 } // namespace MuEditor::DataChecks
 
 #endif // _EDITOR

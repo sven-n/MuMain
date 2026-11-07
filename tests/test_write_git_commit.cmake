@@ -80,7 +80,7 @@ endfunction()
 
 write_header()
 expect_define(MU_GIT_COMMIT "\"unknown\"" "Outside a repository")
-expect_define(MU_DATA_ASSET_ID "\"unknown\"" "Outside a repository")
+expect_define(MU_DATA_ASSET_ID "\"\"" "Outside a repository")
 
 run_git(init -q)
 run_git(add .)

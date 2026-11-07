@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Social/FriendDialogs.h"
 

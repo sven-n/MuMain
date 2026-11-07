@@ -33,6 +33,7 @@ std::vector<std::unique_ptr<DataCheckArea>> CreateAllAreas()
 {
     std::vector<std::unique_ptr<DataCheckArea>> areas;
     areas.push_back(Items::CreateItemCheckArea());
+    areas.push_back(CreateItemOptionCheckArea());
     areas.push_back(Monsters::CreateMonsterCheckArea());
     areas.push_back(Monsters::CreateMonsterModelCheckArea());
     areas.push_back(Monsters::CreateMonsterSoundCheckArea());
