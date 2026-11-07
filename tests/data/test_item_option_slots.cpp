@@ -326,5 +326,5 @@ TEST_CASE("An option slot keeps where its option came from [items]")
     CHECK_FALSE(GameLogic::Items::GetOptionSource(item, 0).has_value());
     CHECK(GameLogic::Items::GetOptionSource(item, 1) == GameLogic::Items::OptionSource{3, 1});
     CHECK_FALSE(GameLogic::Items::GetOptionSource(item, 2).has_value());
-    CHECK(GameLogic::Items::FindSlotOption(item, 0) == nullptr);
+    CHECK_FALSE(GameLogic::Items::FindSlotOption(item, 0).has_value());
 }

@@ -2155,9 +2155,10 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             break;
         }
 
-        if (const Data::Items::ItemOption* option = GameLogic::Items::FindSlotOption(*ip, i))
+        if (const std::optional<GameLogic::Items::SlotOption> slotOption = GameLogic::Items::FindSlotOption(*ip, i))
         {
-            TextNum = WriteOptionLines(*option, GameLogic::Items::GetItemOptionValue(*ip, i), TextNum);
+            TextNum = WriteOptionLines(*slotOption->option, GameLogic::Items::GetSlotOptionValue(*ip, *slotOption),
+                                       TextNum);
             continue;
         }
 

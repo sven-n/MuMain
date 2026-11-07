@@ -2,6 +2,8 @@
 
 #include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
+#include <optional>
+
 typedef struct tagITEM ITEM;
 
 // The options of an item from the option definitions it links (Data/Items/Options): which of them its data from the
@@ -13,11 +15,20 @@ namespace GameLogic::Items
 // its next option slot with the effect the client computes for it.
 void AddLinkedOptions(ITEM& item, Data::Items::ItemOptionType type);
 
-// The option in the item's slot `slot`, from its definition; nullptr for a slot the code wrote (the skill) or past
-// the item's slots.
-const Data::Items::ItemOption* FindSlotOption(const ITEM& item, int slot);
+// The option of an option slot and the definition it is of.
+struct SlotOption
+{
+    const Data::Items::ItemOptionDefinition* definition = nullptr;
+    const Data::Items::ItemOption* option = nullptr;
+};
 
-// The value of the option in the slot at the item's level, from its definition: what its tooltip lines show. A slot
-// the code wrote gives its SpecialValue.
+// The option in the item's slot `slot` and its definition; nothing for a slot the code wrote (the skill) or past the
+// item's slots.
+std::optional<SlotOption> FindSlotOption(const ITEM& item, int slot);
+
+// The value of the slot's option at the item's level, from its definition: what its tooltip lines show.
+int GetSlotOptionValue(const ITEM& item, const SlotOption& slotOption);
+
+// The same for the item's slot `slot`; a slot the code wrote gives its SpecialValue.
 int GetItemOptionValue(const ITEM& item, int slot);
 } // namespace GameLogic::Items

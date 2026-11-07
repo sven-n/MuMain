@@ -58,30 +58,37 @@ void AddLinkedOptions(ITEM& item, ItemOptionType type)
     }
 }
 
-const ItemOption* FindSlotOption(const ITEM& item, int slot)
+std::optional<SlotOption> FindSlotOption(const ITEM& item, int slot)
 {
     const std::optional<OptionSource> source = GetOptionSource(item, slot);
     if (!source)
     {
-        return nullptr;
+        return std::nullopt;
     }
     const Data::Items::ItemOptionDatabase& options = g_ItemDatabase.GetOptions();
     if (source->definition >= options.GetDefinitions().size())
     {
-        return nullptr;
+        return std::nullopt;
     }
     const ItemOptionDefinition& definition = options.Get(source->definition);
-    return source->option < definition.options.size() ? &definition.options[source->option] : nullptr;
+    if (source->option >= definition.options.size())
+    {
+        return std::nullopt;
+    }
+    return SlotOption{&definition, &definition.options[source->option]};
+}
+
+int GetSlotOptionValue(const ITEM& item, const SlotOption& slotOption)
+{
+    return slotOption.option->value.At(GetOptionLevel(item, slotOption.definition->type));
 }
 
 int GetItemOptionValue(const ITEM& item, int slot)
 {
-    const ItemOption* option = FindSlotOption(item, slot);
-    if (option == nullptr)
+    if (const std::optional<SlotOption> slotOption = FindSlotOption(item, slot))
     {
-        return slot >= 0 && slot < item.SpecialNum ? item.SpecialValue[slot] : 0;
+        return GetSlotOptionValue(item, *slotOption);
     }
-    const ItemOptionDefinition& definition = g_ItemDatabase.GetOptions().Get(GetOptionSource(item, slot)->definition);
-    return option->value.At(GetOptionLevel(item, definition.type));
+    return slot >= 0 && slot < item.SpecialNum ? item.SpecialValue[slot] : 0;
 }
 } // namespace GameLogic::Items
