@@ -717,9 +717,35 @@ def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
 check_apt_cache(linux_job, "build-linux", "apt-linux-x64-", "Install build tools")
 # Quality Gates installs cppcheck from its own apt cache; its restore and save are checked here, as the build jobs'
 # caches are below. Only Check formatting and Static analysis use the tools, and they skip a run without C++ changes.
+QUALITY_TOOLS_WANTED = "steps.changed.outputs.count != '0'"
 check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools",
-                ("Detect changed C++ files", "steps.changed.outputs.count != '0'"))
+                ("Detect changed C++ files", QUALITY_TOOLS_WANTED))
 check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
+
+
+def apt_step_lines(job_body, job_name, step_name, kind, condition=None):
+    """A step of an apt cache without its comments, blank lines and the job's own condition, with its kind as KIND."""
+    lines = []
+    for line in step(job_body, job_name, step_name).splitlines():
+        if condition:
+            line = line.replace(f" && {condition}", "")
+        text = line.strip()
+        if text and not text.startswith("#") and text != f"if: {condition}":
+            lines.append(line.replace(kind, "KIND"))
+    return lines
+
+
+# The two apt caches run the same steps, so that a fix to one cannot miss the other: they differ only in their kind,
+# their packages (APT_PACKAGES) and Quality Gates' condition. They stay steps of their own jobs rather than a composite
+# action, whose steps the job's step list would show as one, without the time each took.
+for step_name in ("Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
+                  "Save apt packages"):
+    check(apt_step_lines(linux_job, "build-linux", step_name, "apt-linux-x64-")
+          == apt_step_lines(quality_job, "quality", step_name, "apt-cppcheck-linux-x64-", QUALITY_TOOLS_WANTED),
+          f"quality {step_name} must run what build-linux's does, apart from its kind and condition")
+apt_archives = job_env(linux_job, "APT_ARCHIVES")
+check(apt_archives != "" and job_env(quality_job, "APT_ARCHIVES") == apt_archives,
+      "quality must keep its apt packages in the folder build-linux keeps them in (APT_ARCHIVES)")
 # Each compiler cache save holds the objects its build used, not every build's since the cache began: the step before
 # the save drops the older ones, in the runs that save.
 for job_name, job_body, system in (("build-windows", native_job, "Windows"), ("build-linux", linux_job, "Linux"),
