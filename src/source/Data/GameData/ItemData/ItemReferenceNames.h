@@ -24,6 +24,9 @@ enum class ItemReferenceProblem : unsigned char
     UnfillableLine,
     // The language has no form of the name for the case: the name itself stands in.
     MissingForm,
+    // The reference asks for a case, but the level's name line has placeholders without {name}: no form can show,
+    // the line's text stands in.
+    UndeclinedLine,
 };
 
 struct ReferencedName

@@ -89,12 +89,14 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
     const int level = reference.level.value_or(0);
     const ReferencedName base = NameIn(definition.names, definition.nameForms, locale, reference.form);
     bool filled = true;
+    bool namesItem = false;
     const auto valueOf = [&](std::string_view placeholder) -> std::optional<std::string>
     {
         std::optional<std::string> value;
         if (placeholder == NamePlaceholder)
         {
             value = base.text;
+            namesItem = true;
         }
         else if (placeholder == LevelPlaceholder)
         {
@@ -124,6 +126,11 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
     if (!filled)
     {
         return {{}, ItemReferenceProblem::UnfillableLine};
+    }
+    // The case is the item's form in {name}; a line without it has nothing to decline.
+    if (!namesItem && !reference.form.empty())
+    {
+        return {std::move(name), ItemReferenceProblem::UndeclinedLine};
     }
     return {std::move(name), base.problem};
 }

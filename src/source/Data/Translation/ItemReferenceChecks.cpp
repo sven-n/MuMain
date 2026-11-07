@@ -75,6 +75,11 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
         }
         return written + ": \"" + name.text + "\" " + ItemNumber(reference) + " has no " + std::string(locale) + " " +
                reference.form + " form; the text shows the name itself";
+    case ItemReferenceProblem::UndeclinedLine:
+        severity = ItemDataIssueSeverity::Warning;
+        return written + ": the name of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
+               " is its name line \"" + name.text + "\", whose placeholders leave out {name}, so it has no " +
+               reference.form + " form; the text shows the line as it is";
     case ItemReferenceProblem::None:
         break;
     }

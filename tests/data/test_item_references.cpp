@@ -212,6 +212,14 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     // German has no text of its own for the line: the English line, with the English name.
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "de").text == "Bundle of Tear of Elf");
     CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::UnfillableLine);
+
+    // The bundle's line leaves out {name}: a case asked of it has no form, whatever forms the bundle gets.
+    const ReferencedName genitive = ResolveReferencedName(database, Reference(12, 30, 0, "gen"), "pl");
+    CHECK(genitive.text == "Paczka Lze Elfa");
+    CHECK(genitive.problem == ItemReferenceProblem::UndeclinedLine);
+    // A line written as {name} declines the item's name: its missing form is the item's.
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 0, "gen"), "pl").problem ==
+          ItemReferenceProblem::MissingForm);
 }
 
 TEST_CASE("A UI translation that names other items than English is a warning on the item it names [data][items][texts]")
