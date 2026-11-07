@@ -45,6 +45,10 @@ jobs:
       macos: ${{ steps.plan.outputs.macos }}
       windows: ${{ steps.plan.outputs.windows }}
       release: ${{ steps.plan.outputs.release }}
+    env:
+      # The image has no cppcheck; it comes from an apt cache, as the Linux build's packages do.
+      APT_PACKAGES: cppcheck
+      APT_ARCHIVES: ${{ github.workspace }}/.apt-archives
 
     steps:
       # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
@@ -95,9 +99,46 @@ jobs:
           key: quality-tools-pip-${{ runner.os }}-v1
           restore-keys: quality-tools-pip-${{ runner.os }}-
 
+      # cppcheck, cached as the Linux build caches its packages (see there).
+      - name: Find apt packages
+        id: apt_packages
+        run: |
+          sudo apt-get update
+          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
+          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
+
+      - name: Restore apt packages
+        id: apt
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt_packages.outputs.key }}
+          restore-keys: |
+            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-cppcheck-linux-x64-
+
+      - name: Fetch apt packages
+        run: |
+          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
+            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
+          fi
+          sudo apt-get install -y --download-only $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
+
+      - name: Save apt packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt.outputs.cache-primary-key }}
+
       - name: Install quality tools
         run: |
-          which cppcheck || { sudo apt-get update && sudo apt-get install -y cppcheck; }
+          sudo apt-get install -y $APT_PACKAGES
           pip install clang-format==21.1.8
 
       - name: Detect changed C++ files

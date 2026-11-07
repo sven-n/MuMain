@@ -640,55 +640,78 @@ check(
     "uses: actions/cache@v6" not in linux_cache,
     "PR compilation must restore without creating isolated cache entries",
 )
-# The apt packages come from a cache named after the files apt would fetch for them; main pushes save it on a miss,
-# with every file of the install.
-apt_list = step(linux_job, "build-linux", "Find apt packages")
-for required in ("id: apt_packages\n", "sudo apt-get update",
-                 'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
-                 'python3 scripts/ci_apt_cache.py name apt-linux-x64- "$RUNNER_TEMP/apt-files.txt"'):
-    check(required in apt_list, f"build-linux Find apt packages missing {required}")
-# This image's newest entry first (the prune keeps one of each image), then any image's.
-# The restore and save themselves are checked with the other caches below (cache_steps).
-apt_restore = step(linux_job, "build-linux", "Restore apt packages")
-for required in ("id: apt\n", "path: ${{ env.APT_ARCHIVES }}", "key: ${{ steps.apt_packages.outputs.key }}"):
-    check(required in apt_restore, f"build-linux Restore apt packages missing {required}")
-check(restore_prefixes(apt_restore) == ["apt-linux-x64-${{ steps.apt_packages.outputs.image }}-", "apt-linux-x64-"],
-      "build-linux Restore apt packages must fall back to the image's newest entry, then any image's")
-apt_fetch = step(linux_job, "build-linux", "Fetch apt packages")
-for required in ('sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/',
-                 "sudo apt-get install -y --download-only $APT_PACKAGES"):
-    check(required in apt_fetch, f"build-linux Fetch apt packages missing {required}")
-apt_install = step(linux_job, "build-linux", "Install build tools")
-check("sudo apt-get install -y $APT_PACKAGES" in apt_install, "build-linux must install APT_PACKAGES")
-# Only the runs that save gather the files, so the gather has the save's conditions. It runs before the install, which
-# could clean apt's archive folder.
-apt_gather = step(linux_job, "build-linux", "Gather apt packages")
-for required in ("id: gather\n",
-                 "if: github.event_name == 'push' && github.ref == 'refs/heads/main' "
-                 "&& steps.apt.outputs.cache-hit != 'true'\n",
-                 'python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives '
-                 '"$APT_ARCHIVES"'):
-    check(required in apt_gather, f"build-linux Gather apt packages missing {required}")
-apt_save = step(linux_job, "build-linux", "Save apt packages")
-check("steps.gather.outputs.complete == 'true'" in apt_save,
-      "build-linux Save apt packages must save only when every listed file was gathered")
-# scripts/ci_apt_cache.py says complete=true only with every listed file (tests/test_ci_apt_cache.py); a gather or save
-# that went on after an error would save an entry without them.
-check("continue-on-error" not in apt_gather + apt_save,
-      "build-linux must not save its apt packages after a failed gather")
-check("sudo apt-get update" not in apt_fetch + apt_install,
-      "build-linux must update the apt index before naming the cache")
-linux_names = re.findall(r"(?m)^      - name: (.+)$", linux_job)
-apt_order = ["Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
-             "Save apt packages", "Install build tools"]
-check(all(name in linux_names for name in apt_order)
-      and [linux_names.index(name) for name in apt_order] == sorted(linux_names.index(name) for name in apt_order),
-      "build-linux must find, restore, fetch, gather and save its apt packages, then install them, in that order")
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both
 # saving, an older commit's entry could be saved last and be the one the prune job keeps.
 CACHE_SAVER = "github.event_name == 'push' && github.ref == 'refs/heads/main'"
+
+
+def check_cache_pair(job_body, job_name, restore_name, save_name):
+    """A restore step with an id, and a save that stores the same paths on a miss, under the restored key."""
+    restore = step(job_body, job_name, restore_name)
+    save = step(job_body, job_name, save_name)
+    restore_id = re.search(r"(?m)^        id: (\w+)$", restore)
+    check(restore_id is not None and "uses: actions/cache/restore@v6" in restore,
+          f"{job_name} {restore_name} must be a restore step with an id")
+    if restore_id is None:
+        return
+    restore_id = restore_id.group(1)
+    for required in ("uses: actions/cache/save@v6", f"steps.{restore_id}.outputs.cache-hit != 'true'",
+                     f"key: ${{{{ steps.{restore_id}.outputs.cache-primary-key }}}}"):
+        check(required in save, f"{job_name} {save_name} must save on a miss, under the restored key: {required}")
+    check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
+          f"{job_name} {save_name} must save the paths {restore_name} restores")
+
+
+def check_apt_cache(job_body, job_name, kind, install_name):
+    """An apt cache: named after the image and the files apt would fetch, restored, fetched into apt's archive folder,
+    gathered and saved by main pushes (only with every file), and installed from there."""
+    find = step(job_body, job_name, "Find apt packages")
+    for required in ("id: apt_packages\n", "sudo apt-get update",
+                     'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
+                     f'python3 scripts/ci_apt_cache.py name {kind} "$RUNNER_TEMP/apt-files.txt"'):
+        check(required in find, f"{job_name} Find apt packages missing {required}")
+    # This image's newest entry first (the prune keeps one of each image), then any image's. The restore and save
+    # themselves are checked with the other caches (check_cache_pair).
+    restore = step(job_body, job_name, "Restore apt packages")
+    for required in ("id: apt\n", "path: ${{ env.APT_ARCHIVES }}", "key: ${{ steps.apt_packages.outputs.key }}"):
+        check(required in restore, f"{job_name} Restore apt packages missing {required}")
+    check(restore_prefixes(restore) == [f"{kind}${{{{ steps.apt_packages.outputs.image }}}}-", kind],
+          f"{job_name} Restore apt packages must fall back to the image's newest entry, then any image's")
+    fetch = step(job_body, job_name, "Fetch apt packages")
+    for required in ('sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/',
+                     "sudo apt-get install -y --download-only $APT_PACKAGES"):
+        check(required in fetch, f"{job_name} Fetch apt packages missing {required}")
+    install = step(job_body, job_name, install_name)
+    check("sudo apt-get install -y $APT_PACKAGES" in install, f"{job_name} {install_name} must install APT_PACKAGES")
+    # Only the runs that save gather the files, so the gather has the save's conditions. It runs before the install,
+    # which could clean apt's archive folder.
+    gather = step(job_body, job_name, "Gather apt packages")
+    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'\n",
+                     'python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives '
+                     '"$APT_ARCHIVES"'):
+        check(required in gather, f"{job_name} Gather apt packages missing {required}")
+    save = step(job_body, job_name, "Save apt packages")
+    check(f"if: {CACHE_SAVER} && steps." in save and "steps.gather.outputs.complete == 'true'" in save,
+          f"{job_name} Save apt packages must save only in main pushes, when every listed file was gathered")
+    # scripts/ci_apt_cache.py says complete=true only with every listed file (tests/test_ci_apt_cache.py); a gather or
+    # save that went on after an error would save an entry without them.
+    check("continue-on-error" not in gather + save, f"{job_name} must not save its apt packages after a failed gather")
+    check("sudo apt-get update" not in fetch + install, f"{job_name} must update the apt index before naming the cache")
+    names = re.findall(r"(?m)^      - name: (.+)$", job_body)
+    order = ["Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
+             "Save apt packages", install_name]
+    check(all(name in names for name in order)
+          and [names.index(name) for name in order] == sorted(names.index(name) for name in order),
+          f"{job_name} must find, restore, fetch, gather and save its apt packages, then install them, in that order")
+
+
+check_apt_cache(linux_job, "build-linux", "apt-linux-x64-", "Install build tools")
+# Quality Gates installs cppcheck from its own apt cache; its restore and save are checked here, as the build jobs'
+# caches are below.
+check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools")
+check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
 # Each compiler cache save holds the objects its build used, not every build's since the cache began: the step before
 # the save drops the older ones, in the runs that save.
 for job_name, job_body, system in (("build-windows", native_job, "Windows"), ("build-linux", linux_job, "Linux"),
@@ -720,19 +743,7 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
     if job_name == "build-linux":
         cache_steps.append(("Restore apt packages", "Save apt packages"))
     for restore_name, save_name in cache_steps:
-        restore = step(job_body, job_name, restore_name)
-        save = step(job_body, job_name, save_name)
-        restore_id = re.search(r"(?m)^        id: (\w+)$", restore)
-        check(restore_id is not None and "uses: actions/cache/restore@v6" in restore,
-              f"{job_name} {restore_name} must be a restore step with an id")
-        if restore_id is None:
-            continue
-        restore_id = restore_id.group(1)
-        for required in ("uses: actions/cache/save@v6", f"steps.{restore_id}.outputs.cache-hit != 'true'",
-                         f"key: ${{{{ steps.{restore_id}.outputs.cache-primary-key }}}}"):
-            check(required in save, f"{job_name} {save_name} must save on a miss, under the restored key: {required}")
-        check(cache_paths(restore) != "" and cache_paths(restore) == cache_paths(save),
-              f"{job_name} {save_name} must save the paths {restore_name} restores")
+        check_cache_pair(job_body, job_name, restore_name, save_name)
     # .nuget holds the NativeAOT compiler packages of the .NET SDK in use; a new SDK needs a new entry.
     check("id: dotnet" in step(job_body, job_name, "Setup .NET 10")
           and "steps.dotnet.outputs.dotnet-version" in step(job_body, job_name, "Restore dependencies"),
@@ -766,7 +777,9 @@ for job_name, job_body, system in (("build-windows", native_job, "WINDOWS"), ("b
 sys.path.insert(0, str(ROOT / "scripts"))
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 restore_prefixes_by_kind = {}
-for restore_prefix in restore_prefixes(native_job + linux_job + macos_job):
+# Quality Gates' pip cache is not pruned: it is saved once (actions/cache@v6 under a fixed key).
+pruned_restores = native_job + linux_job + macos_job + step(quality_job, "quality", "Restore apt packages")
+for restore_prefix in restore_prefixes(pruned_restores):
     restore_prefixes_by_kind.setdefault(restore_prefix.split("${{")[0], []).append(restore_prefix)
 for kind, kind_prefixes in restore_prefixes_by_kind.items():
     check(kind in PRUNED_CACHE_KINDS, f"scripts/ci_cache_prune.py must prune the cache kind {kind}")

@@ -325,7 +325,8 @@ index and fetches only the others. In the runs that save the cache, **Gather apt
 packages** then collects the listed files for **Save apt packages**
 ([`scripts/ci_apt_cache.py`](../../scripts/ci_apt_cache.py)), before **Install build
 tools** installs them, so no clean-up after dpkg can remove them first. When one is
-missing, the save stores nothing and a notice names it.
+missing, the save stores nothing and a notice names it. Quality Gates gets cppcheck,
+which the image lacks, from an apt cache of its own the same way.
 
 PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
 **Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
@@ -344,7 +345,7 @@ compiler cache for each main push. After the builds of a run on main, the
 deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
 and while GitHub moves the runners to a new image, jobs land on both images. The apt
-cache keeps the newest entry of each image for the same reason. An
+caches keep the newest entry of each image for the same reason. An
 entry a job read in the last 15 minutes is left for a later run, as that job may
 still be downloading it, unless the last read was the run's own: each build job
 notes when its restores ended (**Note when the caches were read**), so the entry a
