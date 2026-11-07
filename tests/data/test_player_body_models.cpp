@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "ClientFolderScope.h"
 #include "TestModelSlots.h"
 
 #include "Core/Globals/_enum.h"
@@ -9,6 +10,7 @@
 #include "Data/DataHandler/LoadData.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Sprites/GpuUploadSkip.h"
+#include "Render/Sprites/TextureScript.h"
 #include "Render/Textures/ZzzTexture.h"
 
 #include <algorithm>
@@ -19,6 +21,7 @@
 #include <filesystem>
 #include <set>
 #include <string>
+#include <vector>
 
 // The 13 selected S6 body families, read through the real model/texture loaders.
 // GPU uploads alone are skipped: these are CPU compatibility checks, not rendering evidence.
@@ -91,25 +94,6 @@ const std::array<BodyPart, 5> BodyParts{{
     {MODEL_BODY_BOOTS, L"BootClass"},
 }};
 
-// Runs the test from the client folder, where model and texture paths start with Data.
-class ClientFolderScope
-{
-public:
-    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
-    {
-        std::filesystem::current_path(folder);
-    }
-    ~ClientFolderScope()
-    {
-        std::filesystem::current_path(m_previous);
-    }
-    ClientFolderScope(const ClientFolderScope&) = delete;
-    ClientFolderScope& operator=(const ClientFolderScope&) = delete;
-
-private:
-    std::filesystem::path m_previous;
-};
-
 // Textures load without a GPU device and are unloaded afterwards.
 class TextureScope
 {
@@ -170,7 +154,7 @@ bool IsHairMesh(const BodyFamily& family, const BodyPart& part, int mesh)
 std::string ExpectedTexture(const BodyFamily& family, const BodyPart& part, int mesh, bool prepared)
 {
     if (IsHairMesh(family, part, mesh))
-        return prepared ? "hair_hq_player.jpg" : "hair_R.jpg";
+        return prepared ? "hairhq_R.jpg" : "hair_R.jpg";
     return prepared ? family.preparedTexture : family.stockTexture;
 }
 
@@ -490,7 +474,70 @@ void CheckBodyTextures(const BodyAssets& assets)
             " dependencies=", dependencies.size(), " GPU uploads skipped");
 }
 
+// The drawing flags the client reads from a mesh's texture name (TextureScriptParsing):
+// glowing, hidden, stream, unblended and shadow.
+struct MeshFlags
+{
+    bool bright = false;
+    bool hidden = false;
+    bool stream = false;
+    bool noneBlend = false;
+    BYTE shadow = SHADOW_NONE;
+
+    bool operator==(const MeshFlags&) const = default;
+};
+
+MeshFlags ReadMeshFlags(const BMD& model, int mesh)
+{
+    TextureScript* script = model.Meshs[mesh].m_csTScript;
+    if (script == nullptr)
+        return {};
+    return {script->getBright(), script->getHiddenMesh(), script->getStreamMesh(), script->getNoneBlendMesh(),
+            script->getShadowMesh()};
+}
+
+struct NamedMeshFlags
+{
+    std::string texture;
+    MeshFlags flags;
+};
+
+// Every mesh of every part with its texture name and flags, in mesh order, for one asset set.
+std::vector<NamedMeshFlags> ReadBodyMeshFlags(const BodyAssets& assets)
+{
+    TestModelSlots slots;
+    ClientFolderScope folder(ClientFolder);
+    std::vector<NamedMeshFlags> meshes;
+    for (const BodyFamily& family : Families)
+    {
+        OpenBodyParts(family, assets);
+        for (const BodyPart& part : BodyParts)
+        {
+            const BMD& model = Models[ModelSlot(family, part)];
+            for (int m = 0; m < model.NumMeshs; ++m)
+                meshes.push_back({MeshTextureName(model, m), ReadMeshFlags(model, m)});
+        }
+    }
+    return meshes;
+}
+
 } // namespace
+
+TEST_CASE("Improved body meshes keep the drawing flags of the original meshes they replace [data][player]")
+{
+    const std::vector<NamedMeshFlags> original = ReadBodyMeshFlags(AssetSets[0]);
+    const std::vector<NamedMeshFlags> improved = ReadBodyMeshFlags(AssetSets[1]);
+    REQUIRE(original.size() == improved.size());
+    int glowing = 0;
+    for (std::size_t i = 0; i < original.size(); ++i)
+    {
+        INFO("original ", original[i].texture, ", improved ", improved[i].texture);
+        CHECK(improved[i].flags == original[i].flags);
+        glowing += original[i].flags.bright;
+    }
+    // The Dark Lord and Lord Emperor hair (hair_R.jpg) is drawn as a glowing mesh.
+    CHECK(glowing == 2);
+}
 
 TEST_CASE("All 13 body families load 65 parts through native slots and fit the player rig [data][player]")
 {

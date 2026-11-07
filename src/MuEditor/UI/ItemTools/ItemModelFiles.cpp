@@ -16,6 +16,8 @@ namespace
 {
 constexpr std::string_view ModelExtension = ".bmd";
 constexpr std::string_view DataFolder = "Data/";
+// The improved player bodies (OpenPlayerBodyParts): bodies, not item models, named like the originals.
+constexpr std::string_view ImprovedBodyFolder = "Data/Player/Updated";
 
 bool IsModelFile(const std::filesystem::path& path)
 {
@@ -33,10 +35,15 @@ void AddFiles(const std::filesystem::path& clientFolder, const char* folder, std
     for (auto entry = std::filesystem::recursive_directory_iterator(root, error);
          !error && entry != std::filesystem::recursive_directory_iterator(); entry.increment(error))
     {
-        if (entry->is_regular_file(error) && IsModelFile(entry->path()))
+        // The model files write paths with '/', relative to the client folder.
+        const std::string file = entry->path().lexically_relative(clientFolder).generic_string();
+        if (entry->is_directory(error) && file == ImprovedBodyFolder)
         {
-            // The model files write paths with '/', relative to the client folder.
-            files.push_back(entry->path().lexically_relative(clientFolder).generic_string());
+            entry.disable_recursion_pending();
+        }
+        else if (entry->is_regular_file(error) && IsModelFile(entry->path()))
+        {
+            files.push_back(file);
         }
     }
 }
