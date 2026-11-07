@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <exception>
+#include "Core/Text/Utf8.h"
 #include "Guild/GuildTypes.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
@@ -2035,7 +2037,22 @@ bool CheckMacroLimit(wchar_t* Text)
 
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
-    if (g_ConsoleDebug->CheckCommand(Text) == true)
+    bool handled = false;
+    try
+    {
+        handled = g_ConsoleDebug->CheckCommand(Text);
+    }
+    catch (const std::exception& exception)
+    {
+        // A debug command that parses its arguments with std::stof/substr throws on a missing or
+        // malformed one ("$fps" without a number). Report it in the chat instead of ending the
+        // client, like the control-socket console does.
+        const std::wstring message = L"command failed: " + Core::Text::FromUtf8(exception.what());
+        g_pSystemLogBox->AddText(message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (handled)
     {
         return true;
     }

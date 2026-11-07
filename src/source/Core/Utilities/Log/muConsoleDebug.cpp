@@ -1,6 +1,9 @@
 
 #include "stdafx.h"
+#include <cerrno>
 #include <cstdlib>
+#include <cwchar>
+#include <optional>
 #include <string_view>
 #include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -221,6 +224,31 @@ void ListDebugWindows()
                              L"some windows cannot take that out of context)",
                              mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
+
+// Parses the argument of a "$<command> <number>" debug command. A missing or malformed argument
+// used to reach std::stof/substr and throw out of the chat handler, which closed the client;
+// callers print a usage hint instead. Returns nullopt unless the whole argument is a number.
+std::optional<double> ParseNumericArgument(std::wstring_view argument)
+{
+    const auto first = argument.find_first_not_of(L" \t");
+    if (first == std::wstring_view::npos)
+    {
+        return std::nullopt;
+    }
+
+    const auto last = argument.find_last_not_of(L" \t");
+    const std::wstring trimmed(argument.substr(first, last - first + 1));
+
+    wchar_t* end = nullptr;
+    errno = 0;
+    const double value = std::wcstod(trimmed.c_str(), &end);
+    if (end == trimmed.c_str() || *end != L'\0' || errno == ERANGE)
+    {
+        return std::nullopt;
+    }
+
+    return value;
+}
 } // namespace
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
@@ -376,11 +404,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetShowGLStats(false);
         return true;
     }
-    else if (strCommand.compare(0, 4, L"$fps") == 0)
+    else if (strCommand == L"$fps" || strCommand.starts_with(L"$fps "))
     {
-        auto fps_str = strCommand.substr(5);
-        auto target_fps = std::stof(fps_str);
-        SetTargetFps(target_fps);
+        const std::optional<double> targetFps = ParseNumericArgument(std::wstring_view(strCommand).substr(4));
+        if (!targetFps)
+        {
+            g_pSystemLogBox->AddText(L"usage: $fps <number>", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            return true;
+        }
+
+        SetTargetFps(*targetFps);
         return true;
     }
     else if (strCommand.compare(L"$vsync on") == 0)
@@ -536,11 +569,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableWingExtraLayers(false);
         return true;
     }
-    else if (strCommand.compare(0, 7, L"$winmsg") == 0)
+    else if (strCommand == L"$winmsg" || strCommand.starts_with(L"$winmsg "))
     {
-        auto str_limit = strCommand.substr(8);
-        auto message_limit = std::stof(str_limit);
-        SetMaxMessagePerCycle(message_limit);
+        const std::optional<double> messageLimit = ParseNumericArgument(std::wstring_view(strCommand).substr(7));
+        if (!messageLimit)
+        {
+            g_pSystemLogBox->AddText(L"usage: $winmsg <number>", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            return true;
+        }
+
+        SetMaxMessagePerCycle(static_cast<int>(*messageLimit));
         return true;
     }
     // Runtime theme selection is session-only; the Options window persists its choice.
