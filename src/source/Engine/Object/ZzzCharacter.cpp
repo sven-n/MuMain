@@ -9413,12 +9413,16 @@ bool CreateMagicSkeletonCloth(OBJECT* o)
 {
     constexpr int MeshIndex = 2;
     constexpr int BoneIndex = 18;
-    auto cloth = std::make_unique<CPhysicsClothMesh[]>(1);
-    if (!cloth[0].Create(o, MeshIndex, BoneIndex, PCT_HEAVY))
+    if (!CPhysicsClothMesh::CanCreate(o->Type, MeshIndex))
     {
-        g_ErrorReport.Write(L"Magic Skeleton cloth creation failed: model=%d\r\n", o->Type);
+        static bool reported = false;
+        if (!reported)
+            g_ErrorReport.Write(L"Magic Skeleton cloth creation failed: model=%d\r\n", o->Type);
+        reported = true;
         return false;
     }
+    auto cloth = std::make_unique<CPhysicsClothMesh[]>(1);
+    cloth[0].Create(o, MeshIndex, BoneIndex, PCT_HEAVY);
     cloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, BoneIndex);
     cloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, BoneIndex);
     o->m_pCloth = cloth.release();
@@ -9439,14 +9443,12 @@ void UpdateCharacterCloth(CHARACTER* c)
         monster == MONSTER_MAGIC_SKELETON_7)
     {
         // Cloth reads skinned vertices during update, before this model's first draw.
-        // Refresh the palette for this instance every tick: fixed vertices read it too.
-        BMD* b = &Models[o->Type];
-        b->TransformCheap(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, true);
-        if (!o->m_pCloth && !CreateMagicSkeletonCloth(o))
-            return;
-        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+        // Refresh them for this instance every tick: fixed vertices read them too.
+        SkinObjectMeshes(o, &Models[o->Type], true);
+        if (o->m_pCloth || CreateMagicSkeletonCloth(o))
         {
-            DeleteCloth(c, o);
+            if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+                DeleteCloth(c, o);
         }
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||
