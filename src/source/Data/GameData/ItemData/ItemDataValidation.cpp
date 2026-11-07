@@ -5,6 +5,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonFormat.h"
+#include "ItemTooltipLines.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -68,48 +69,6 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// A line of an item's description or name lines, and the field the item file writes it at ("description[2]").
-struct TooltipLineOf
-{
-    const ItemDescriptionLine* line;
-    std::string field;
-};
-
-// The lines ForEachItemTooltipLine walks (the description lines, the name lines, the added lines), each with its
-// field in the item file.
-std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
-{
-    std::vector<TooltipLineOf> lines;
-    for (size_t index = 0; index < definition.description.size(); ++index)
-    {
-        lines.push_back({&definition.description[index], "description[" + std::to_string(index) + "]"});
-    }
-    for (size_t index = 0; index < definition.nameLines.size(); ++index)
-    {
-        lines.push_back({&definition.nameLines[index], "nameLines[" + std::to_string(index) + "]"});
-    }
-    const std::vector<ItemTooltipLayoutAddition>& additions = definition.tooltipLayoutChanges.add;
-    for (size_t addition = 0; addition < additions.size(); ++addition)
-    {
-        for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-        {
-            lines.push_back({&additions[addition].lines[index], "tooltipLayoutChanges.add[" + std::to_string(addition) +
-                                                                    "].lines[" + std::to_string(index) + "]"});
-        }
-    }
-    return lines;
-}
-
-// The field of a line's text in one language, as the item file writes it.
-std::string TextField(const std::string& lineField, std::string_view locale)
-{
-    std::string field = lineField + ".text";
-    if (locale != LocalizedString::NeutralLocale)
-    {
-        field += "." + std::string(locale);
-    }
-    return field;
-}
 
 std::string ListPlaceholders(const std::set<std::string>& names)
 {
@@ -157,11 +116,11 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
     if (!english.error.empty())
     {
         AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, english.error,
-                 TextField(lineField, LocalizedString::NeutralLocale).c_str());
+                 LineTextField(lineField, LocalizedString::NeutralLocale).c_str());
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
-        const std::string field = TextField(lineField, locale);
+        const std::string field = LineTextField(lineField, locale);
         const PlaceholderScan scan = ScanPlaceholders(translation);
         if (!scan.error.empty())
         {
@@ -183,7 +142,7 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
 {
     for (const auto& [line, lineField] : TooltipLinesOf(definition))
     {
-        ValidateItemText(definition, line->text, TextField(lineField, LocalizedString::NeutralLocale), issues);
+        ValidateItemText(definition, line->text, LineTextField(lineField, LocalizedString::NeutralLocale), issues);
         ValidateLinePlaceholderBraces(definition, line->text, lineField, issues);
     }
     for (const ItemLevelValues& levelValues : definition.levelValues)
@@ -1119,7 +1078,7 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         };
         for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            warnAbout(line->text, TextField(field, LocalizedString::NeutralLocale));
+            warnAbout(line->text, LineTextField(field, LocalizedString::NeutralLocale));
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {

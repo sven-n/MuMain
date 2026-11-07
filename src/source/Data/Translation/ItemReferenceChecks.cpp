@@ -5,6 +5,7 @@
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemReferenceNames.h"
+#include "Data/GameData/ItemData/ItemTooltipLines.h"
 #include "Data/Translation/ItemReference.h"
 #include "I18N/All.h"
 
@@ -104,16 +105,6 @@ void CheckNamedItems(const CheckedText& text, std::string_view english, std::vec
              "names other items than the English text: \"" + std::string(english) + "\"", issues);
 }
 
-std::string TextField(const std::string& lineField, std::string_view locale)
-{
-    std::string field = lineField + ".text";
-    if (locale != LocalizedString::NeutralLocale)
-    {
-        field += "." + std::string(locale);
-    }
-    return field;
-}
-
 // Every language's text of an item's line, written in place (a shared text is checked with the tooltip file).
 void CheckLine(const Items::ItemDatabase& database, const Items::ItemDefinition& definition,
                const Items::ItemDescriptionLine& line, const std::string& lineField, std::vector<ItemDataIssue>& issues)
@@ -125,38 +116,14 @@ void CheckLine(const Items::ItemDatabase& database, const Items::ItemDefinition&
     const std::string& english = line.text.GetNeutral();
     CheckItemReferences(database,
                         {english, LocalizedString::NeutralLocale, "", definition.group, definition.number,
-                         TextField(lineField, LocalizedString::NeutralLocale)},
+                         Items::LineTextField(lineField, LocalizedString::NeutralLocale)},
                         {}, issues);
     for (const auto& [locale, translation] : line.text.GetTranslations())
     {
         CheckItemReferences(
-            database, {translation, locale, "", definition.group, definition.number, TextField(lineField, locale)},
+            database,
+            {translation, locale, "", definition.group, definition.number, Items::LineTextField(lineField, locale)},
             english, issues);
-    }
-}
-
-void CheckItemLines(const Items::ItemDatabase& database, const Items::ItemDefinition& definition,
-                    std::vector<ItemDataIssue>& issues)
-{
-    for (size_t index = 0; index < definition.description.size(); ++index)
-    {
-        CheckLine(database, definition, definition.description[index], "description[" + std::to_string(index) + "]",
-                  issues);
-    }
-    for (size_t index = 0; index < definition.nameLines.size(); ++index)
-    {
-        CheckLine(database, definition, definition.nameLines[index], "nameLines[" + std::to_string(index) + "]",
-                  issues);
-    }
-    const auto& additions = definition.tooltipLayoutChanges.add;
-    for (size_t addition = 0; addition < additions.size(); ++addition)
-    {
-        for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-        {
-            CheckLine(database, definition, additions[addition].lines[index],
-                      "tooltipLayoutChanges.add[" + std::to_string(addition) + "].lines[" + std::to_string(index) + "]",
-                      issues);
-        }
     }
 }
 } // namespace
@@ -263,30 +230,11 @@ std::vector<std::string> FindTextsNamingItem(const Items::ItemDatabase& database
             continue;
         }
         const std::string owner = database.GetLogName(Items::MakeItemType(definition.group, definition.number));
-        for (size_t index = 0; index < definition.description.size(); ++index)
+        for (const auto& [line, field] : Items::TooltipLinesOf(definition))
         {
-            if (namesInSome(definition.description[index].text))
+            if (namesInSome(line->text))
             {
-                found.push_back(owner + ": description[" + std::to_string(index) + "]");
-            }
-        }
-        for (size_t index = 0; index < definition.nameLines.size(); ++index)
-        {
-            if (namesInSome(definition.nameLines[index].text))
-            {
-                found.push_back(owner + ": nameLines[" + std::to_string(index) + "]");
-            }
-        }
-        const auto& additions = definition.tooltipLayoutChanges.add;
-        for (size_t addition = 0; addition < additions.size(); ++addition)
-        {
-            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-            {
-                if (namesInSome(additions[addition].lines[index].text))
-                {
-                    found.push_back(owner + ": tooltipLayoutChanges.add[" + std::to_string(addition) + "].lines[" +
-                                    std::to_string(index) + "]");
-                }
+                found.push_back(owner + ": " + field);
             }
         }
     }
@@ -305,9 +253,13 @@ void CheckItemDataTexts(const Items::ItemDatabase& database, const std::string& 
 {
     for (const Items::ItemDefinition& definition : database.GetAllSlots())
     {
-        if (definition.Exists())
+        if (!definition.Exists())
         {
-            CheckItemLines(database, definition, issues);
+            continue;
+        }
+        for (const auto& [line, field] : Items::TooltipLinesOf(definition))
+        {
+            CheckLine(database, definition, *line, field, issues);
         }
     }
     for (const auto& [name, text] : database.GetTooltipFile().texts)
