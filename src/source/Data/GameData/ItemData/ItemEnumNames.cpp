@@ -90,6 +90,10 @@ constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequir
     {ItemRequirement::Leadership, "leadership"},
 }};
 
+constexpr std::array<EnumName<ItemOptionType>, 1> ItemOptionTypeNames = {{
+    {ItemOptionType::Luck, "luck"},
+}};
+
 constexpr std::array<EnumName<ItemTextColor>, ItemTextColorCount> ItemTextColorNames = {{
     {ItemTextColor::White, "white"},
     {ItemTextColor::Blue, "blue"},
@@ -151,5 +155,10 @@ std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor)
 std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement)
 {
     return ItemRequirementNames;
+}
+
+std::span<const EnumName<ItemOptionType>> GetEnumNames(ItemOptionType)
+{
+    return ItemOptionTypeNames;
 }
 } // namespace Data::Items

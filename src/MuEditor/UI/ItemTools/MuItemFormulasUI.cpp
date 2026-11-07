@@ -214,7 +214,7 @@ std::string DescribeGroups(const std::bitset<MAX_ITEM_TYPE>& groups)
 }
 
 // "slot: helm, boots; group: 15", or that it matches every item.
-std::string DescribeConditions(const StatProfileRule& rule)
+std::string DescribeConditions(const Data::Items::ItemRuleConditions& conditions)
 {
     std::vector<std::string> parts;
     const auto add = [&parts](const char* label, const std::string& values)
@@ -224,12 +224,12 @@ std::string DescribeConditions(const StatProfileRule& rule)
             parts.push_back(std::string(label) + ": " + values);
         }
     };
-    add(I18N::Editor::Group, DescribeGroups(rule.groups));
-    add(I18N::Metadata::Slot, DescribeValues<Data::Items::ItemSlot>(rule.slots));
-    add(I18N::Editor::WingTier, DescribeValues<Data::Items::WingTier>(rule.wingTiers));
-    add(I18N::Editor::WeaponKind, DescribeValues<Data::Items::WeaponKind>(rule.weaponKinds));
-    add(I18N::Editor::Tags, DescribeValues<Data::Items::ItemTag>(rule.tags));
-    add(I18N::Editor::BaseRequirementAbove0, DescribeValues<Data::Items::ItemRequirement>(rule.requirements));
+    add(I18N::Editor::Group, DescribeGroups(conditions.groups));
+    add(I18N::Metadata::Slot, DescribeValues<Data::Items::ItemSlot>(conditions.slots));
+    add(I18N::Editor::WingTier, DescribeValues<Data::Items::WingTier>(conditions.wingTiers));
+    add(I18N::Editor::WeaponKind, DescribeValues<Data::Items::WeaponKind>(conditions.weaponKinds));
+    add(I18N::Editor::Tags, DescribeValues<Data::Items::ItemTag>(conditions.tags));
+    add(I18N::Editor::BaseRequirementAbove0, DescribeValues<Data::Items::ItemRequirement>(conditions.requirements));
     if (parts.empty())
     {
         return I18N::Editor::EveryItem;
@@ -814,7 +814,7 @@ void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
             }
             ImGui::TableSetColumnIndex(2);
             ImGui::PushTextWrapPos(0.0f);
-            ImGui::TextUnformatted(DescribeConditions(rule).c_str());
+            ImGui::TextUnformatted(DescribeConditions(rule.conditions).c_str());
             ImGui::PopTextWrapPos();
             ImGui::TableSetColumnIndex(3);
             ImGui::Text("%d", static_cast<int>(FindRuleItems(rules, static_cast<int>(index)).size()));
@@ -863,7 +863,7 @@ void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
     if (picked)
     {
         ImGui::SeparatorText(I18N::Format(I18N::Editor::Rule0, {std::to_string(m_pickedRule + 1)}).c_str());
-        RenderRuleConditions(rules[static_cast<size_t>(m_pickedRule)]);
+        RenderRuleConditions(rules[static_cast<size_t>(m_pickedRule)].conditions);
         const std::vector<int> items = FindRuleItems(rules, m_pickedRule);
         if (ImGui::TreeNode("##RuleItems", "%s",
                             I18N::Format(I18N::Editor::Matches0Items, {std::to_string(items.size())}).c_str()))
@@ -874,28 +874,28 @@ void CMuItemFormulasUI::RenderRules(ItemStatFile& file)
     }
 }
 
-void CMuItemFormulasUI::RenderRuleConditions(StatProfileRule& rule)
+void CMuItemFormulasUI::RenderRuleConditions(Data::Items::ItemRuleConditions& conditions)
 {
-    std::string groups = DescribeGroups(rule.groups);
+    std::string groups = DescribeGroups(conditions.groups);
     ImGui::SetNextItemWidth(Fields::ScaledWidth(Fields::NumberWidth * 3.0f));
     if (ImGui::BeginCombo(I18N::Editor::Group, groups.empty() ? I18N::Editor::Any : groups.c_str()))
     {
         for (int group = 0; group < MAX_ITEM_TYPE; ++group)
         {
-            const bool on = rule.groups.test(static_cast<size_t>(group));
+            const bool on = conditions.groups.test(static_cast<size_t>(group));
             if (ImGui::Selectable(MuEditor::Items::GetItemGroupLabel(group).c_str(), on,
                                   ImGuiSelectableFlags_NoAutoClosePopups))
             {
-                rule.groups.set(static_cast<size_t>(group), !on);
+                conditions.groups.set(static_cast<size_t>(group), !on);
             }
         }
         ImGui::EndCombo();
     }
-    ConditionCombo<Data::Items::ItemSlot>(I18N::Metadata::Slot, rule.slots);
-    ConditionCombo<Data::Items::WingTier>(I18N::Editor::WingTier, rule.wingTiers);
-    ConditionCombo<Data::Items::WeaponKind>(I18N::Editor::WeaponKind, rule.weaponKinds);
-    ConditionCombo<Data::Items::ItemTag>(I18N::Editor::Tags, rule.tags);
-    ConditionCombo<Data::Items::ItemRequirement>(I18N::Editor::BaseRequirementAbove0, rule.requirements);
+    ConditionCombo<Data::Items::ItemSlot>(I18N::Metadata::Slot, conditions.slots);
+    ConditionCombo<Data::Items::WingTier>(I18N::Editor::WingTier, conditions.wingTiers);
+    ConditionCombo<Data::Items::WeaponKind>(I18N::Editor::WeaponKind, conditions.weaponKinds);
+    ConditionCombo<Data::Items::ItemTag>(I18N::Editor::Tags, conditions.tags);
+    ConditionCombo<Data::Items::ItemRequirement>(I18N::Editor::BaseRequirementAbove0, conditions.requirements);
 }
 
 void CMuItemFormulasUI::Apply(ItemStatFile file, std::string label, std::string renamedFrom, std::string renamedTo,

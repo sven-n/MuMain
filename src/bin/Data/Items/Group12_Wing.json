@@ -12,6 +12,7 @@
         "pt": "Asas do elfo"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -50,6 +51,7 @@
         "pt": "Asas do paraíso"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -89,6 +91,7 @@
         "pt": "Asas de Satã"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -128,6 +131,7 @@
         "pt": "Asas dos espíritos"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -201,6 +205,7 @@
         "pt": "Asas da alma"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -274,6 +279,7 @@
         "pt": "Asas do dragão"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -347,6 +353,7 @@
         "pt": "Asas da escuridão"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1196,6 +1203,7 @@
         "pt": "Asa da Tempestade"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1269,6 +1277,7 @@
         "pt": "Asa da eternidade"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1342,6 +1351,7 @@
         "pt": "Asa da ilusão"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1415,6 +1425,7 @@
         "pt": "Asa da ruína"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1488,6 +1499,7 @@
         "pt": "Capa do Imperador"
       },
       "tags": ["cape", "valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1561,6 +1573,7 @@
         "pt": "Asa da maldição"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1599,6 +1612,7 @@
         "pt": "Asa do desespero"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1672,6 +1686,7 @@
         "pt": "Asa da dimensão"
       },
       "tags": ["valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1850,6 +1865,7 @@
         "pt": "Manto do Guerreiro"
       },
       "tags": ["cape", "valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",
@@ -1920,6 +1936,7 @@
         "pt": "Manto Reinante"
       },
       "tags": ["cape", "valuable"],
+      "options": ["luck"],
       "description": [
         {
           "text": "@damageIncrease",

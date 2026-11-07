@@ -15,6 +15,7 @@ project(MuMain)
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH REPO_ROOT)
 
 include("${REPO_ROOT}/cmake/EnsureSubmodule.cmake")
+include("${REPO_ROOT}/cmake/StdafxPrecompiledHeader.cmake")
 
 mu_ensure_submodule("ThirdParty/SDL"
   INDICATOR "CMakeLists.txt"
@@ -770,31 +771,19 @@ set_source_files_properties(
 )
 
 # stdafx.h is the precompiled header of the files that include it (as "stdafx.h" or "App/stdafx.h"): parsed once, not
-# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before. The check runs
-# at configure time, so a file that adds or drops the include after that still builds, only without or with the header
-# until the next configure. CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
+# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before
+# (mu_skip_pch_without_stdafx in cmake/StdafxPrecompiledHeader.cmake). CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
 # MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
 # that uses the header, and the linker takes it from whichever object of MuClient defines it, with everything that
 # object uses. Keep such variables out of stdafx.h's headers, or a test that links MuClient without Winmain.cpp fails
 # to link (unresolved g_hWnd and the like). In a Debug build a std::string or std::wstring counts too: its debug
 # iterator support allocates.
 target_precompile_headers(MuClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/App/stdafx.h")
-set(MU_SOURCES_WITHOUT_STDAFX "")
-foreach(source IN LISTS MU_CLIENT_SOURCES)
-  file(STRINGS "${source}" stdafx_include REGEX "^[ \t]*#[ \t]*include[ \t]+\"(App/)?stdafx\\.h\"" LIMIT_COUNT 1)
-  if(NOT stdafx_include)
-    list(APPEND MU_SOURCES_WITHOUT_STDAFX "${source}")
-  endif()
-endforeach()
-set_source_files_properties(${MU_SOURCES_WITHOUT_STDAFX} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-# GCC 13 reports -Wstringop-overflow for "..." + std::to_string(n) + "..." in these two files when they use the
-# precompiled header, a false positive; GCC 15 does not, 14 was not checked. It stays a warning in them, so a local
-# build with MU_WARNINGS_AS_ERRORS=ON still builds on Ubuntu 24.04.
-set_property(SOURCE
+mu_skip_pch_without_stdafx(MuClient ${MU_CLIENT_SOURCES})
+# The two files GCC 13 reports a -Wstringop-overflow false positive for when they use the precompiled header.
+mu_allow_gcc13_stringop_overflow(MuClient
   "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/MapData/MapRef.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/ModelData/ModelFiles.cpp"
-  APPEND PROPERTY COMPILE_OPTIONS
-  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,15>>:-Wno-error=stringop-overflow>")
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/ModelData/ModelFiles.cpp")
 
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)

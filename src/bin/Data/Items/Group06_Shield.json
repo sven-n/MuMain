@@ -11,6 +11,7 @@
         "pl": "Mała tarcza",
         "pt": "Escudo pequeno"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -41,6 +42,7 @@
         "pl": "Rogowa tarcza",
         "pt": "Escudo de chifre"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -69,6 +71,7 @@
         "pl": "Tarcza migdałowa",
         "pt": "Escudo ogival"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -97,6 +100,7 @@
         "pl": "Elfia tarcza",
         "pt": "Escudo élfico"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -124,6 +128,7 @@
         "pl": "Puklerz",
         "pt": "Broquel"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -155,6 +160,7 @@
         "pl": "Tarcza Pogromcy Smoków",
         "pt": "Escudo do matador de dragões"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -185,6 +191,7 @@
         "pl": "Tarcza czaszki",
         "pt": "Escudo da caveira"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -216,6 +223,7 @@
         "pl": "Kolczasta tarcza",
         "pt": "Escudo com espinhos"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -245,6 +253,7 @@
         "pl": "Tarcza wieżowa",
         "pt": "Escudo de torre"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -275,6 +284,7 @@
         "pl": "Płytowa tarcza",
         "pt": "Escudo de placa"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -304,6 +314,7 @@
         "pl": "Duża okrągła tarcza",
         "pt": "Grande escudo redondo"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -333,6 +344,7 @@
         "pl": "Wężowa tarcza",
         "pt": "Escudo da serpente"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -363,6 +375,7 @@
         "pl": "Brązowa tarcza",
         "pt": "Escudo de bronze"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -391,6 +404,7 @@
         "pl": "Smocza tarcza",
         "pt": "Escudo do dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -420,6 +434,7 @@
         "pl": "Legendarna tarcza",
         "pt": "Escudo lendário"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -449,6 +464,7 @@
         "pl": "Tarcza Wielkiej Duszy",
         "pt": "Grande escudo da alma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -476,6 +492,7 @@
         "pl": "Tarcza żywiołów",
         "pt": "Escudo elemental"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -504,6 +521,7 @@
         "pl": "Szkarłatna Chwała",
         "pt": "Glória carmesim"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -533,6 +551,7 @@
         "pl": "Tarcza Salamandry",
         "pt": "Escudo da salamandra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -562,6 +581,7 @@
         "pl": "Mroźna Bariera",
         "pt": "Barreira gelada"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -591,6 +611,7 @@
         "pl": "Tarcza Strażnika",
         "pt": "Escudo do guardião"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",
@@ -620,6 +641,7 @@
         "pl": "Tarcza z krzyżem",
         "pt": "Escudo em cruz"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "offHand",

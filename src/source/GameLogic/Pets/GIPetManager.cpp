@@ -769,11 +769,20 @@ static std::uint8_t g_tabBar = 0;
         SetPetItemConvert(&shown, &gs_PetInfo);
         for (int i = 0; i < shown.SpecialNum; ++i)
         {
-            GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            ++TextNum;
-            ++SkipNum;
+            // An option of the option definitions (an item file may give the pets luck) writes its own lines.
+            if (const std::optional<int> rows = WriteDefinitionOptionLines(shown, i, TextNum, kTooltipLineLimit))
+            {
+                TextNum += *rows;
+                SkipNum += *rows;
+            }
+            else
+            {
+                GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
+                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                TextBold[TextNum] = false;
+                ++TextNum;
+                ++SkipNum;
+            }
 
             if (TextNum >= kTooltipLineLimit)
             {

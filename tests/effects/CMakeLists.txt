@@ -24,6 +24,5 @@ mu_add_test(
         mu_test_effect_data
 )
 target_compile_definitions(test_effect_creation PRIVATE
-    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_EFFECT_CREATION_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/EffectCreation.txt"
 )

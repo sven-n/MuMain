@@ -11,6 +11,7 @@
         "pl": "Krótki łuk",
         "pt": "Arco curto"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -41,6 +42,7 @@
         "pl": "Łuk",
         "pt": "Arco"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -71,6 +73,7 @@
         "pl": "Elfi łuk",
         "pt": "Arco élfico"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -101,6 +104,7 @@
         "pl": "Łuk bojowy",
         "pt": "Arco de batalha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "offHand",
@@ -131,6 +135,7 @@
         "pl": "Tygrysi łuk",
         "pt": "Arco do tigre"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -161,6 +166,7 @@
         "pl": "Srebrny łuk",
         "pt": "Arco de prata"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -191,6 +197,7 @@
         "pl": "Łuk Natury Chaosu",
         "pt": "Arco da natureza do caos"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -257,6 +264,7 @@
         "pl": "Kusza",
         "pt": "Besta"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "mainHand",
@@ -287,6 +295,7 @@
         "pl": "Złota kusza",
         "pt": "Besta dourada"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "mainHand",
@@ -317,6 +326,7 @@
         "pl": "Arkebuz",
         "pt": "Arquebus"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "mainHand",
@@ -347,6 +357,7 @@
         "pl": "Lekka kusza",
         "pt": "Besta leve"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -377,6 +388,7 @@
         "pl": "Wężowa kusza",
         "pt": "Besta da serpente"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -407,6 +419,7 @@
         "pl": "Kusza Błękitnego Skrzydła",
         "pt": "Besta Bluewing"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -437,6 +450,7 @@
         "pl": "Kusza Wodnego Złota",
         "pt": "Besta Aquagold"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -503,6 +517,7 @@
         "pl": "Święta kusza",
         "pt": "Besta do santo"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -533,6 +548,7 @@
         "pl": "Niebiański łuk",
         "pt": "Arco celestial"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -564,6 +580,7 @@
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck"],
       "nameLines": [
         {
           "text": {
@@ -608,6 +625,7 @@
         "pl": "Kusza Wielkich Rządów",
         "pt": "Grande besta do Império"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -638,6 +656,7 @@
         "pl": "Łuk Żmii",
         "pt": "Arco víbora de flecha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -668,6 +687,7 @@
         "pl": "Łuk Wiatru Sylfy",
         "pt": "Arco vento da silfe"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -699,6 +719,7 @@
         "pl": "Łuk Albatrosa",
         "pt": "Arco do albatroz"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -728,6 +749,7 @@
         "pl": "Mroczne Żądło",
         "pt": "Golpeador negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",
@@ -759,6 +781,7 @@
         "pl": "Łuk Aileen",
         "pt": "Arco do Aileen"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "offHand",

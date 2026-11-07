@@ -8,10 +8,12 @@
 // arrow key onto a problem (not a click) opens no window.
 #ifdef _EDITOR
 
+#include "ClientDataScope.h"
 #include "TestImGuiContext.h"
 #include "ToolWindowsScope.h"
 
 #include "Core/MuEditorCore.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
@@ -22,6 +24,7 @@
 #include "UI/ItemTools/ItemSelection.h"
 #include "imgui.h"
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -110,6 +113,8 @@ TEST_CASE("Data Checks: a click on a file area's problem opens its window, the m
         {MuEditor::DataChecks::CreateEffectCheckArea(), &ToolWindows::effectBrowser, I18N::Editor::Effects},
         {MuEditor::DataChecks::CreateLookCheckArea(), &ToolWindows::devEditor, I18N::Editor::GraphicsLook},
         {MuEditor::DataChecks::CreateModelFileCheckArea(), nullptr, I18N::Editor::ModelFiles},
+        // No tool edits the item options yet.
+        {MuEditor::DataChecks::CreateItemOptionCheckArea(), nullptr, I18N::Editor::ItemOptions},
     };
     for (Case& each : cases)
     {
@@ -154,6 +159,22 @@ TEST_CASE("Data Checks: a file area appends the problems its files have [editor]
     CHECK(issues[0].field == "earlier");
     CHECK(issues[1].field == "field");
     CHECK(issues[2].field == "second");
+}
+
+// The item options area reads the option files as the game does, with the rules, and the items' links as the item
+// tools have them: the shipped files have no problems.
+TEST_CASE("Data Checks: the item options area finds no problems in the shipped option files [editor][items]")
+{
+    ClientDataScope client(std::filesystem::path(MU_TEST_DATA_DIR).parent_path());
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::vector<ItemDataIssue> issues;
+    MuEditor::DataChecks::CreateItemOptionCheckArea()->Check(issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
 }
 
 #endif // _EDITOR

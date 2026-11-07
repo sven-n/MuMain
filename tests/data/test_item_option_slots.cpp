@@ -7,8 +7,11 @@
 #include "LogCapture.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "I18N/All.h"
 #include "Network/Server/WSclient.h"
@@ -18,6 +21,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -236,4 +240,119 @@ TEST_CASE("The Wings of Despair take no option slot for an option type they have
         CAPTURE(otherType);
         CHECK(wingsWithOption(static_cast<BYTE>(otherType)).SpecialNum == 0);
     }
+}
+
+namespace
+{
+// The items the code before the option definitions gave luck (SetItemAttributes): groups 0 to 11 but arrows and bolts,
+// the first wings (12/0 to 12/6), the Wing of Curse and the Wings of Despair, the Cape of Lord and the Cape of Fighter,
+// and the third tier wings.
+bool OldCodeGivesLuck(int type)
+{
+    if (type >= ITEM_SWORD && type < ITEM_BOOTS + MAX_ITEM_INDEX)
+    {
+        return !g_ItemDatabase.HasTag(type, Data::Items::ItemTag::Ammunition);
+    }
+    if ((type >= ITEM_WING && type <= ITEM_WINGS_OF_DARKNESS) ||
+        (type >= ITEM_WING_OF_CURSE && type <= ITEM_WINGS_OF_DESPAIR))
+    {
+        return true;
+    }
+    return type == ITEM_CAPE_OF_LORD || type == ITEM_CAPE_OF_FIGHTER ||
+           g_ItemDatabase.GetWingTier(type) == Data::Items::WingTier::Third;
+}
+} // namespace
+
+// Luck comes from the definition the item links (Data/Items/Options/Luck.json): every item gets its slot where the code
+// before the definitions put it (after the skill), with the value 0 that adds no critical damage rate, and the slot
+// keeps where it came from, which gives its tooltip lines the definition's value.
+TEST_CASE("Every item's luck comes from its option links as the code before the definitions gave it [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const int luck = g_ItemDatabase.GetOptions().Find("luck");
+    REQUIRE(luck != Data::Items::ItemOptionDatabase::NoDefinition);
+    // The Dark Horse's defense reads the hero's agility.
+    HeroScope hero;
+
+    int luckyItems = 0;
+    for (int type = 0; type < MAX_ITEM; ++type)
+    {
+        if (g_ItemDatabase.Find(type) == nullptr)
+        {
+            continue;
+        }
+        CAPTURE(type);
+        ItemCreationParams params{};
+        params.Group = type / MAX_ITEM_INDEX;
+        params.Number = type % MAX_ITEM_INDEX;
+        params.WithLuck = true;
+        params.WithSkill = true;
+        ITEM item;
+        FillItemFromParameters(item, params);
+
+        std::vector<int> luckSlots;
+        for (int slot = 0; slot < item.SpecialNum; ++slot)
+        {
+            if (item.Special[slot] == AT_LUCK)
+            {
+                luckSlots.push_back(slot);
+            }
+        }
+        REQUIRE(luckSlots.size() == (OldCodeGivesLuck(type) ? 1u : 0u));
+        if (luckSlots.empty())
+        {
+            continue;
+        }
+        ++luckyItems;
+        const int slot = luckSlots.front();
+        CHECK(slot == (ItemAttribute[type].m_wSkillIndex != 0 ? 1 : 0));
+        CHECK(item.SpecialValue[slot] == 0);
+        CHECK(GameLogic::Items::GetOptionSource(item, slot) ==
+              GameLogic::Items::OptionSource{static_cast<std::uint16_t>(luck), 0});
+        CHECK(GameLogic::Items::GetItemOptionValue(item, slot) == 5);
+    }
+    CHECK(luckyItems > 400);
+}
+
+// A slot the code wrote has no source, a definition's keeps it; past the slots there is none.
+TEST_CASE("An option slot keeps where its option came from [items]")
+{
+    ITEM item{};
+    item.Type = ITEM_BLADE;
+    GameLogic::Items::AddOptionSlot(item, AT_SKILL_FALLING_SLASH);
+    GameLogic::Items::AddOptionSlot(item, AT_LUCK, 0, {3, 1});
+    CHECK_FALSE(GameLogic::Items::GetOptionSource(item, 0).has_value());
+    CHECK(GameLogic::Items::GetOptionSource(item, 1) == GameLogic::Items::OptionSource{3, 1});
+    CHECK_FALSE(GameLogic::Items::GetOptionSource(item, 2).has_value());
+    CHECK_FALSE(GameLogic::Items::FindSlotOption(item, 0).has_value());
+}
+
+// Both item tooltips, the item's and the Dark Lord pets', write a slot of an option definition as its texts, and leave
+// a slot the code wrote (the skill) to GetSpecialOptionText.
+TEST_CASE("A slot of an option definition writes its texts into the tooltip's rows [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    ItemCreationParams params{};
+    params.Group = ITEM_BLADE / MAX_ITEM_INDEX;
+    params.Number = ITEM_BLADE % MAX_ITEM_INDEX;
+    params.WithLuck = true;
+    params.WithSkill = true;
+    ITEM blade;
+    FillItemFromParameters(blade, params);
+    REQUIRE(blade.SpecialNum == 2);
+
+    CHECK_FALSE(WriteDefinitionOptionLines(blade, 0, 0, MaxTextListRows).has_value());
+    CHECK(WriteDefinitionOptionLines(blade, 1, 3, MaxTextListRows) == 2);
+    CHECK(std::wstring(TextList[3]) == L"Luck (success rate of Jewel of Soul +25%)");
+    CHECK(std::wstring(TextList[4]) == L"Luck (critical damage rate +5%)");
+    CHECK(TextListColor[4] == TEXT_COLOR_BLUE);
+    CHECK(TextBold[4] == 0);
+    // Only the rows before the limit.
+    CHECK(WriteDefinitionOptionLines(blade, 1, 3, 4) == 1);
 }
