@@ -6,6 +6,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemReferenceNames.h"
 #include "Data/GameData/ItemData/ItemTooltipLines.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Data/Translation/ItemReference.h"
 #include "I18N/All.h"
 
@@ -52,6 +53,10 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
     case ItemReferenceProblem::UnknownItem:
         severity = ItemDataIssueSeverity::Error;
         return written + " names no item: there is no item " + ItemNumber(reference) + "; the text shows it as written";
+    case ItemReferenceProblem::NoSuchLevel:
+        severity = ItemDataIssueSeverity::Error;
+        return written + ": no item has level +" + std::to_string(*reference.level) + " (the levels are +0 to +" +
+               std::to_string(Items::ItemLevelCount - 1) + "); the text shows the reference as written";
     case ItemReferenceProblem::UnfillableLine:
         severity = ItemDataIssueSeverity::Error;
         return written + ": the name of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +

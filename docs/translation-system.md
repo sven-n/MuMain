@@ -464,8 +464,8 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   is loaded, when Translate item names changes and when the editor changes a
   name; the text's pointer then shows the expansion, so the code that shows a
   text needs nothing. Before the item data is loaded a text shows `{item:...}`
-  as written (no such text is shown that early). A number no item has stays as
-  written.
+  as written (no such text is shown that early). A number no item has, or a
+  level above +15, stays as written.
 - **Grammar:** languages that decline names (German, Polish) can ask for a form
   with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
   data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item
@@ -479,10 +479,10 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
 A malformed reference in a `.resx` file (`{item:14;13}`, an unknown case) stops
 the build with the file, key and text, and so does a reference in the texts of
 another group (the editor's), which the game would show as written. In the
-editor, **Data Checks** lists the texts under **Texts**: a number no item has, a
-level whose name needs game values (a skill's or monster's name), a level
-without a name of its own, a missing form, and a translation that names other
-items than the English text. A click selects the item and opens Item
+editor, **Data Checks** lists the texts under **Texts**: a number or a level no
+item has, a level whose name needs game values (a skill's or monster's name), a
+level without a name of its own, a missing form, and a translation that names
+other items than the English text. A click selects the item and opens Item
 Translations (or the tool of an item's own text).
 
 ## Simplified Chinese (`zh-CN`)

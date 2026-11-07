@@ -15,6 +15,8 @@ enum class ItemReferenceProblem : unsigned char
     None,
     // No item has the group and number: the text keeps the reference as written.
     UnknownItem,
+    // No item has the level (above +15): the text keeps the reference as written.
+    NoSuchLevel,
     // The level has no name line of its own: the name is the item's name and " +level", as the tooltip writes it.
     StandardName,
     // The level's name line needs values only the game has (a skill's or monster's name, a bundle count), or names
@@ -26,7 +28,7 @@ enum class ItemReferenceProblem : unsigned char
 
 struct ReferencedName
 {
-    // The name, UTF-8; empty with UnknownItem and UnfillableLine.
+    // The name, UTF-8; empty with UnknownItem, NoSuchLevel and UnfillableLine.
     std::string text;
     ItemReferenceProblem problem = ItemReferenceProblem::None;
 };

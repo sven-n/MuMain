@@ -148,6 +148,24 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     CHECK(ResolveReferencedName(database, Reference(14, 21, 3), "en").problem == ItemReferenceProblem::UnfillableLine);
     CHECK(ResolveReferencedName(database, Reference(14, 99), "en").problem == ItemReferenceProblem::UnknownItem);
     CHECK(ResolveReferencedName(database, Reference(99, 25), "en").problem == ItemReferenceProblem::UnknownItem);
+    // +15 is the highest level an item has.
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 15), "en").text == "Rena +15");
+    const ReferencedName tooHigh = ResolveReferencedName(database, Reference(14, 21, 16), "en");
+    CHECK(tooHigh.text.empty());
+    CHECK(tooHigh.problem == ItemReferenceProblem::NoSuchLevel);
+}
+
+TEST_CASE("A reference to a level no item has is an error in Data Checks [data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    std::vector<ItemDataIssue> issues;
+    Data::Translation::CheckItemReferences(
+        database, {"{item:14,25+99}", "en", "Game.en.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Tear"}, {},
+        issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].message.find("no item has level +99") != std::string::npos);
 }
 
 TEST_CASE("A reference at a level takes the name line the tooltip takes [data][items][texts]")

@@ -106,9 +106,9 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
         }
         else if (const std::optional<ItemReference> other = Translation::ParseItemReferenceName(placeholder))
         {
+            // No name (no such item or level, a line that cannot be filled): the line cannot be filled either.
             const ReferencedName name = Resolve(database, *other, textLocale, depth + 1);
-            if (name.problem != ItemReferenceProblem::UnknownItem &&
-                name.problem != ItemReferenceProblem::UnfillableLine)
+            if (!name.text.empty())
             {
                 value = name.text;
             }
@@ -168,6 +168,10 @@ ReferencedName Resolve(const ItemDatabase& database, const ItemReference& refere
     if (definition == nullptr)
     {
         return {{}, ItemReferenceProblem::UnknownItem};
+    }
+    if (reference.level && *reference.level >= ItemLevelCount)
+    {
+        return {{}, ItemReferenceProblem::NoSuchLevel};
     }
     if (reference.level)
     {
