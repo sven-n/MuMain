@@ -28,6 +28,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -407,6 +408,28 @@ TEST_CASE("Data Checks: a click on a render style problem selects its item and o
     area->Open(mesh, true);
     ImGui::Render();
     CHECK(g_MuEditorCore.GetToolWindows().styleEditor);
+}
+
+TEST_CASE("Data Checks checks the looks as the Style Editor has them, before Save Items writes them [editor][looks]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    LookDefinition broken = Plain("brokenLook");
+    broken.layers[0].texture = "Item/no_such_look_texture.jpg";
+    const LookEditsScope looks({Plain("brightBlade"), broken});
+    const std::unique_ptr<MuEditor::DataChecks::DataCheckArea> area = MuEditor::Looks::CreateRenderStyleCheckArea();
+    std::vector<ItemDataIssue> issues;
+    area->Check(issues);
+
+    // The looks sorted by name, as Save Items writes them: the broken one second.
+    const auto missing = std::ranges::find_if(issues, [](const ItemDataIssue& issue)
+                                              { return issue.field == "looks[1].layers[0].texture"; });
+    REQUIRE(missing != issues.end());
+    CHECK(missing->severity == ItemDataIssueSeverity::Error);
+    ImGui::NewFrame();
+    area->Open(*missing, true);
+    ImGui::Render();
+    CHECK(g_MuStyleEditorUI.GetPickedLook() == "brokenLook");
 }
 
 #endif // _EDITOR

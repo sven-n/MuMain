@@ -1392,8 +1392,9 @@ the same drawing, the +7 glow and the excellent glow: `opacity`,
 `hiddenMesh` and `scrollingMesh` (a mesh number or `"none"`). The scrolling
 mesh stays on the model for its later drawings too.
 
-The checks run at start, in **Data Checks** (area Render styles) and in the
-Style Editor under the picked look. **Fatal**, the game stops at start with
+The checks run at start, in **Data Checks** (area Render styles, on the
+looks as the Style Editor has them before Save Items) and in the Style
+Editor under the picked look. **Fatal**, the game stops at start with
 a message: a file that can't be read, a wrong format version or kind, a name
 that isn't letters and digits or is in the file twice, an unknown kind,
 motion, blend or shape, a shape's missing or wrong number (`seconds` 0 or

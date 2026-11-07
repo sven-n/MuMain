@@ -4,13 +4,13 @@
 
 #include "RenderStyleCheckArea.h"
 
+#include "LookEdits.h"
 #include "MuStyleEditorUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
-#include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -67,20 +67,29 @@ public:
 
     void Check(std::vector<ItemDataIssue>& issues) override
     {
-        const std::filesystem::path directory = Data::Effects::GetEffectDataDirectory();
-        Data::Looks::RenderStylesLoadResult result = Data::Looks::LoadRenderStyleFile(directory);
-        const std::filesystem::path file = directory / Data::Looks::GetRenderStylesFileName();
-        const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
-        m_lookNames = text ? Data::Looks::ReadLookNames(*text) : std::vector<std::string>{};
-        if (!Data::Items::HasFatal(result.issues))
+        const std::filesystem::path file =
+            Data::Effects::GetEffectDataDirectory() / Data::Looks::GetRenderStylesFileName();
+        if (!g_LookEdits.IsComplete())
         {
-            const Data::Looks::RenderStyleCheckInput input{.models = g_ItemModelDatabase.GetAllSlots(),
-                                                           .textureExists = TextureFileExists,
-                                                           .meshCount = MeshCount};
-            Data::Looks::CheckRenderStyles(result.looks, file.generic_string(), input, result.issues);
+            // The file has a fatal problem, so the editor has the game's looks: the problems of the file as read.
+            const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
+            m_lookNames = text ? Data::Looks::ReadLookNames(*text) : std::vector<std::string>{};
+            const std::vector<ItemDataIssue>& read = g_LookEdits.GetIssues();
+            issues.insert(issues.end(), read.begin(), read.end());
+            return;
         }
-        issues.insert(issues.end(), std::make_move_iterator(result.issues.begin()),
-                      std::make_move_iterator(result.issues.end()));
+        // The looks as the Style Editor has them, as Save Items would write them and the game would read them back.
+        const MuEditor::Looks::LookEdits::State& state = g_LookEdits.GetState();
+        const std::string text = Data::Looks::WriteRenderStylesJson(state.looks, state.folders);
+        m_lookNames = Data::Looks::ReadLookNames(text);
+        Data::Looks::RenderStylesFile written;
+        std::vector<ItemDataIssue> found;
+        Data::Looks::ReadRenderStylesFile(text, file.generic_string(), written, found);
+        if (!Data::Items::HasFatal(found))
+        {
+            Data::Looks::CheckRenderStyles(written.looks, file.generic_string(), MakeEditorCheckInput(), found);
+        }
+        issues.insert(issues.end(), std::make_move_iterator(found.begin()), std::make_move_iterator(found.end()));
     }
 
     // "chromeMesh0", "chromeMesh0: Kris (0,0)" for a problem about an item, or the file.
@@ -124,7 +133,8 @@ public:
     }
 
 private:
-    // The look of a problem in "looks[3]...", as the file named it at the last check; empty for one of the file.
+    // The look of a problem in "looks[3]...", as the checked looks named it at the last check; empty for one of the
+    // file.
     std::string LookOf(const ItemDataIssue& issue) const
     {
         constexpr std::string_view Prefix = "looks[";
@@ -143,7 +153,7 @@ private:
         return m_lookNames[index];
     }
 
-    // The names of the file's looks in file order, at the last check.
+    // The names of the checked looks in their order, at the last check.
     std::vector<std::string> m_lookNames;
 };
 } // namespace

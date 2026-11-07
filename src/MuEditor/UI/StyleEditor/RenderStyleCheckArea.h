@@ -13,10 +13,11 @@ namespace MuEditor::Looks
 // loaded models' meshes and the texture files in Data.
 Data::Looks::RenderStyleCheckInput MakeEditorCheckInput();
 
-// The render styles in Data Checks (design L23): Data/Effects/RenderStyles.json read as the game reads it, then checked
-// against the item models as the tools have them now and against the texture files. A problem names its look, and the
-// item when it is about one; a click on it selects the item and opens the Style Editor on the look (on the file for a
-// problem of the whole file).
+// The render styles in Data Checks (design L23): the looks as the Style Editor has them, unsaved changes too, as Save
+// Items would write Data/Effects/RenderStyles.json and the game would read it back, then checked against the item
+// models as the tools have them now and against the texture files (after a read of the file with a fatal problem: that
+// read's problems). A problem names its look, and the item when it is about one; a click on it selects the item and
+// opens the Style Editor on the look (on the file for a problem of the whole file).
 std::unique_ptr<DataChecks::DataCheckArea> CreateRenderStyleCheckArea();
 } // namespace MuEditor::Looks
 
