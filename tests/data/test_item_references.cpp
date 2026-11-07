@@ -155,6 +155,30 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     CHECK(tooHigh.problem == ItemReferenceProblem::NoSuchLevel);
 }
 
+TEST_CASE("A name a text would read as its own format is not put into it [data][items][texts]")
+{
+    std::vector<ItemDefinition> items = NamedItems();
+    ItemDefinition elixir;
+    elixir.group = 14;
+    elixir.number = 40;
+    elixir.names = Data::LocalizedString::Parse("Elixir 10%||pl=Eliksir {x}");
+    items.push_back(elixir);
+    ItemDatabase database;
+    database.Build(items);
+
+    const ReferencedName percent = ResolveReferencedName(database, Reference(14, 40), "en");
+    CHECK(percent.text.empty());
+    CHECK(percent.problem == ItemReferenceProblem::UnshowableName);
+    CHECK(ResolveReferencedName(database, Reference(14, 40), "pl").problem == ItemReferenceProblem::UnshowableName);
+
+    std::vector<ItemDataIssue> issues;
+    Data::Translation::CheckItemReferences(
+        database, {"Drink {item:14,40}", "en", "Game.en.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Drink"},
+        {}, issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+}
+
 TEST_CASE("A reference to a level no item has is an error in Data Checks [data][items][texts]")
 {
     ItemDatabase database;

@@ -75,6 +75,11 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
         }
         return written + ": \"" + name.text + "\" " + ItemNumber(reference) + " has no " + std::string(locale) + " " +
                reference.form + " form; the text shows the name itself";
+    case ItemReferenceProblem::UnshowableName:
+        severity = ItemDataIssueSeverity::Error;
+        return written + ": the name of " + ItemNumber(reference) +
+               " has a '%', '{' or '}', which the text would read as its own (a printf format, a placeholder); the "
+               "text shows the reference as written";
     case ItemReferenceProblem::UndeclinedLine:
         severity = ItemDataIssueSeverity::Warning;
         return written + ": the name of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
