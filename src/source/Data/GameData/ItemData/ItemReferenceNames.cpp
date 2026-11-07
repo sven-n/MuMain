@@ -47,9 +47,9 @@ const LocalizedString* LineText(const ItemDatabase& database, const LocalizedStr
 }
 
 // The name in the locale, or its form for the case. A name the locale does not translate is the English name, which
-// has no forms.
-ReferencedName NameIn(const LocalizedString& names, const ItemNameForms& forms, std::string_view locale,
-                      std::string_view caseKey)
+// has no forms, and a case the locale does not decline in (NameCases.json) shows no form.
+ReferencedName NameIn(const ItemDatabase& database, const LocalizedString& names, const ItemNameForms& forms,
+                      std::string_view locale, std::string_view caseKey)
 {
     ReferencedName name{names.Get(locale), ItemReferenceProblem::None};
     if (caseKey.empty() || !names.HasOwn(locale) || locale == LocalizedString::NeutralLocale)
@@ -57,7 +57,7 @@ ReferencedName NameIn(const LocalizedString& names, const ItemNameForms& forms, 
         return name;
     }
     const std::string& form = forms.Find(locale, caseKey);
-    if (form.empty())
+    if (form.empty() || !database.GetNameCases().Uses(locale, caseKey))
     {
         name.problem = ItemReferenceProblem::MissingForm;
         return name;
@@ -90,7 +90,7 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
                             int depth)
 {
     const int level = reference.level.value_or(0);
-    const ReferencedName base = NameIn(definition.names, definition.nameForms, locale, reference.form);
+    const ReferencedName base = NameIn(database, definition.names, definition.nameForms, locale, reference.form);
     bool filled = true;
     bool namesItem = false;
     const auto valueOf = [&](std::string_view placeholder) -> std::optional<std::string>
@@ -146,7 +146,7 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
     if (line == nullptr)
     {
         // The standard name: at +0 the item's name itself, above it with its level.
-        ReferencedName name = NameIn(definition.names, definition.nameForms, locale, reference.form);
+        ReferencedName name = NameIn(database, definition.names, definition.nameForms, locale, reference.form);
         if (level > 0)
         {
             name.text += " +" + std::to_string(level);
@@ -164,7 +164,7 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
         const std::string_view textLocale = text->HasOwn(locale) ? locale : LocalizedString::NeutralLocale;
         return FillNameLine(database, definition, text->Get(locale), reference, locale, textLocale, depth);
     }
-    return NameIn(*text, line->nameForms, locale, reference.form);
+    return NameIn(database, *text, line->nameForms, locale, reference.form);
 }
 
 ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale, int depth)
@@ -187,7 +187,7 @@ ReferencedName Resolve(const ItemDatabase& database, const ItemReference& refere
     {
         return NameAtLevel(database, *definition, reference, locale, depth);
     }
-    return NameIn(definition->names, definition->nameForms, locale, reference.form);
+    return NameIn(database, definition->names, definition->nameForms, locale, reference.form);
 }
 } // namespace
 

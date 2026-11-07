@@ -22,7 +22,8 @@ enum class ItemReferenceProblem : unsigned char
     // The level's name line needs values only the game has (a skill's or monster's name, a bundle count), or names
     // its own level through name lines: the text keeps the reference as written.
     UnfillableLine,
-    // The language has no form of the name for the case: the name itself stands in.
+    // The language has no form of the name for the case, or does not decline names in it (NameCases.json): the name
+    // itself stands in.
     MissingForm,
     // The reference asks for a case, but the level's name line has placeholders without {name}: no form can show,
     // the line's text stands in.

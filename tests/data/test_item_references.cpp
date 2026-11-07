@@ -64,6 +64,14 @@ std::vector<ItemDefinition> NamedItems()
     rena.nameLines.push_back(skill);
     return {tear, rena};
 }
+
+// Polish declines names in every case, as NameCases.json has it.
+void DeclinePolish(ItemDatabase& database)
+{
+    ItemNameCases cases;
+    cases.SetCases("pl", {"gen", "dat", "acc", "ins", "loc"});
+    database.SetNameCases(cases);
+}
 } // namespace
 
 TEST_CASE("An item reference is written with its number, level and case [data][items][texts]")
@@ -120,6 +128,7 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
 {
     ItemDatabase database;
     database.Build(NamedItems());
+    DeclinePolish(database);
 
     CHECK(ResolveReferencedName(database, Reference(14, 25), "pl").text == "Lza Elfa");
     CHECK(ResolveReferencedName(database, Reference(14, 25), "en").text == "Tear of Elf");
@@ -153,6 +162,26 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     const ReferencedName tooHigh = ResolveReferencedName(database, Reference(14, 21, 16), "en");
     CHECK(tooHigh.text.empty());
     CHECK(tooHigh.problem == ItemReferenceProblem::NoSuchLevel);
+}
+
+TEST_CASE("A form shows only in a case its language declines in [data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+
+    // Without NameCases.json Polish declines in no case: the Tear of Elf's accusative does not show.
+    const ReferencedName undeclined = ResolveReferencedName(database, Reference(14, 25, std::nullopt, "acc"), "pl");
+    CHECK(undeclined.text == "Lza Elfa");
+    CHECK(undeclined.problem == ItemReferenceProblem::MissingForm);
+    std::vector<ItemDataIssue> issues;
+    Data::Translation::CheckItemReferences(
+        database, {"{item:14,25:acc}", "pl", "Game.pl.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Tear"}, {},
+        issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].message.find("does not decline names in the case acc") != std::string::npos);
+
+    DeclinePolish(database);
+    CHECK(ResolveReferencedName(database, Reference(14, 25, std::nullopt, "acc"), "pl").text == "Lze Elfa");
 }
 
 TEST_CASE("Changing the name cases is a change of the item data and of its names [data][items][texts]")
@@ -244,6 +273,7 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     items.push_back(loop);
     ItemDatabase database;
     database.Build(items);
+    DeclinePolish(database);
 
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "en").text == "Bundle of Tear of Elf");
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "pl").text == "Paczka Lze Elfa");
@@ -315,6 +345,7 @@ TEST_CASE("The tooltip file's layout lines are checked and listed as the other i
     ItemDatabase database;
     database.SetTooltipFile(file);
     database.Build(NamedItems());
+    DeclinePolish(database);
 
     const std::vector<std::string> texts = Data::Translation::FindTextsNamingItem(database, 14, 25);
     CHECK(std::ranges::find(texts, "Tooltip.json: layouts[0].lines[0]") != texts.end());
