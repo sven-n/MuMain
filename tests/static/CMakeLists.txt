@@ -30,6 +30,10 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_cache_prune.py"
 )
 add_test(
+    NAME ci_apt_cache
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_apt_cache.py"
+)
+add_test(
     NAME stamp_release_version
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_stamp_release_version.py"
 )

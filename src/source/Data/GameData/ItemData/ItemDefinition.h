@@ -353,6 +353,9 @@ struct ItemDefinition
     // stats and requirements.
     // Empty for the default. See ItemDatabase::GetStatProfile.
     std::string statProfile;
+    // The option definitions of Data/Items/Options the item can have, by name; none: the item has no options. In the
+    // order the item files write them (ItemOptionDatabase::OrderLinks). See ItemDatabase::GetOptionLinks.
+    std::vector<std::string> options;
     // Which potion of a kind the game takes first: the higher, the earlier;
     // see ItemDatabase::GetItemTypesWithTagInUseOrder.
     BYTE potionPriority = 0;

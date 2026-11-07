@@ -5,7 +5,11 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
+#include "Data/GameData/ItemData/OptionRulesJson.h"
+#include "Data/GameData/ItemData/OptionTextsJson.h"
 
 #include <algorithm>
 #include <array>
@@ -300,6 +304,102 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     }
     ReadItemTooltipJson(*text, source, result.file, result.issues);
     return result;
+}
+
+std::filesystem::path GetItemOptionsDirectory()
+{
+    return GetItemDataDirectory() / "Options";
+}
+
+ItemOptionsLoadResult LoadItemOptionsDirectory(const std::filesystem::path& directory)
+{
+    ItemOptionsLoadResult result;
+    std::vector<std::filesystem::path> files = FindJsonFiles(directory);
+    std::erase_if(files, [](const std::filesystem::path& file) { return file.filename() == OptionRulesFileName; });
+    if (files.empty())
+    {
+        AddFatal(result.issues, directory.generic_string(), "no option definition files found");
+        return result;
+    }
+    for (const std::filesystem::path& file : files)
+    {
+        const std::string fileName = file.filename().string();
+        const std::string source = "Options/" + fileName;
+        const std::optional<std::string> text = ReadTextFile(file);
+        if (!text)
+        {
+            AddFatal(result.issues, source, "could not be read");
+            continue;
+        }
+        ReadItemOptionsJson(*text, source, fileName, result.definitions, result.issues);
+    }
+    return result;
+}
+
+std::filesystem::path GetOptionTextsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / OptionTextsFileName;
+}
+
+OptionTextsLoadResult LoadOptionTextsFile(const std::filesystem::path& file)
+{
+    OptionTextsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadOptionTextsJson(*text, source, result.texts, result.issues);
+    return result;
+}
+
+std::filesystem::path GetOptionRulesFile()
+{
+    return GetItemOptionsDirectory() / OptionRulesFileName;
+}
+
+OptionRulesLoadResult LoadOptionRulesFile(const std::filesystem::path& file)
+{
+    OptionRulesLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadOptionRulesJson(*text, source, result.rules, result.issues);
+    return result;
+}
+
+ItemOptionDatabase LoadItemOptionFiles(bool withRules, std::span<const char* const> uiLocales,
+                                       std::vector<ItemDataIssue>& issues)
+{
+    ItemOptionsLoadResult definitions = LoadItemOptionsDirectory(GetItemOptionsDirectory());
+    OptionTextsLoadResult texts = LoadOptionTextsFile(GetOptionTextsFile());
+    const std::string textsSource = GetOptionTextsFile().generic_string();
+    ValidateOptionTextLocales(texts.texts, uiLocales, textsSource, texts.issues);
+    issues.insert(issues.end(), definitions.issues.begin(), definitions.issues.end());
+    issues.insert(issues.end(), texts.issues.begin(), texts.issues.end());
+    std::vector<OptionRule> rules;
+    if (withRules)
+    {
+        OptionRulesLoadResult ruleFile = LoadOptionRulesFile(GetOptionRulesFile());
+        issues.insert(issues.end(), ruleFile.issues.begin(), ruleFile.issues.end());
+        if (!HasFatal(ruleFile.issues) && !HasFatal(definitions.issues))
+        {
+            ValidateOptionRules(ruleFile.rules, definitions.definitions, GetOptionRulesFile().generic_string(), issues);
+        }
+        rules = std::move(ruleFile.rules);
+    }
+    if (HasFatal(definitions.issues) || HasFatal(texts.issues))
+    {
+        return {};
+    }
+    ValidateItemOptions(definitions.definitions, texts.texts, textsSource, issues);
+    return ItemOptionDatabase(std::move(definitions.definitions), std::move(texts.texts), std::move(rules));
 }
 
 std::filesystem::path GetGroundLabelsFile()

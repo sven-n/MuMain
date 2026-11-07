@@ -14,9 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 // The build records the commit it was built from.
-#if __has_include("MuGitCommit.h")
 #include "MuGitCommit.h"
-#endif
 
 #include <ctime>
 #include <string>
@@ -59,13 +57,8 @@ void CaptureBuild(EnvironmentInfo& info)
     info.buildCompiler = Core::Build::kCompiler;
     info.buildArch = Core::Build::kArchitecture;
     info.buildTimestamp = std::string(Core::Build::kDate) + " " + Core::Build::kTime;
-#ifdef MU_GIT_COMMIT
     info.gitDescribe = MU_GIT_COMMIT;
     info.gitDirty = MU_GIT_COMMIT_CHANGED != 0;
-#else
-    info.gitDescribe = Core::Build::kGitDescribe;
-    info.gitDirty = Core::Build::kGitDirty;
-#endif
 }
 
 void CaptureGraphics(EnvironmentInfo& info)

@@ -9,6 +9,7 @@
 #include <atomic>
 #include <coreclr_delegates.h>
 #include <filesystem>
+#include <memory>
 
 #include "Core/Platform/PlatformLibrary.h"
 
@@ -91,15 +92,17 @@ private:
     static void OnPacketReceivedS(int32_t handle, int32_t size, BYTE* data);
     static void OnDisconnectedS(int32_t handle);
 
-    PacketFunctions_ChatServer* _chatServer = {};
-    PacketFunctions_ConnectServer* _connectServer = {};
-    PacketFunctions_ClientToServer* _gameServer = {};
+    std::unique_ptr<PacketFunctions_ChatServer> _chatServer;
+    std::unique_ptr<PacketFunctions_ConnectServer> _connectServer;
+    std::unique_ptr<PacketFunctions_ClientToServer> _gameServer;
 
-    std::atomic<int32_t> _handle{0}; // a .NET thread sets it to 0 when the connection closes
+    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    std::atomic<int32_t> _handle = 0;
     int32_t _id = 0;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
     bool _firstPacketLogged = false;
 
+    void Unregister();
     void OnDisconnected();
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
@@ -107,6 +110,10 @@ public:
     Connection(const char16_t* host, int32_t port, bool isEncrypted,
                void (*packetHandler)(int32_t, const BYTE*, int32_t));
     ~Connection();
+
+    // The handle is registered for this object; a copy would unregister it when destroyed.
+    Connection(const Connection&) = delete;
+    Connection& operator=(const Connection&) = delete;
 
     bool IsConnected();
     void Send(const BYTE* data, const int32_t length);
@@ -127,14 +134,14 @@ public:
 
     PacketFunctions_ChatServer* ToChatServer() const
     {
-        return _chatServer;
+        return _chatServer.get();
     }
     PacketFunctions_ConnectServer* ToConnectServer() const
     {
-        return _connectServer;
+        return _connectServer.get();
     }
     PacketFunctions_ClientToServer* ToGameServer() const
     {
-        return _gameServer;
+        return _gameServer.get();
     }
 };

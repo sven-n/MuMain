@@ -111,10 +111,12 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 the items, the monsters and the monster models as their Save would write
 them now, and the glTF model file table, the server list, the effect
 catalogue, the render styles (area **Render styles**: their file, checked
-against the item models and the texture files) and the graphics look (the
-look profile and the light moods, area **Graphics look**) as the game reads
-their files at start, and the map object sounds as the Map Editor's Sounds tab
-has them ([map-data.md](map-data.md)).
+against the item models and the texture files), the graphics look (the look
+profile and the light moods, area **Graphics look**) and the item options
+(`Data/Items/Options` and the option texts, area **Item options**,
+[item-data.md](item-data.md#item-options)) as the game reads their files at
+start, and the map object sounds as the Map Editor's Sounds tab has them
+([map-data.md](map-data.md)).
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only

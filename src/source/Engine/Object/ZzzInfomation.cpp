@@ -26,6 +26,7 @@
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
@@ -504,29 +505,7 @@ void SetItemAttributes(ITEM* ip)
         }
     }
 
-    if (ip->HasLuck)
-    {
-        if (ip->Type >= ITEM_SWORD && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
-        {
-            if (!GameLogic::Items::IsAmmunition(ip))
-            {
-                GameLogic::Items::AddOptionSlot(*ip, AT_LUCK);
-            }
-        }
-        if ((ip->Type >= ITEM_WING && ip->Type <= ITEM_WINGS_OF_DARKNESS) || (ip->Type >= ITEM_WING_OF_CURSE && ip->Type <= ITEM_WINGS_OF_DESPAIR))
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_LUCK);
-        }
-        if (ip->Type == ITEM_CAPE_OF_LORD
-            || ip->Type == ITEM_CAPE_OF_FIGHTER)
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_LUCK);
-        }
-        if (GameLogic::Items::IsThirdTierWing(ip))
-        {
-            GameLogic::Items::AddOptionSlot(*ip, AT_LUCK);
-        }
-    }
+    GameLogic::Items::AddLinkedOptions(*ip, Data::Items::ItemOptionType::Luck);
 
     int Option3 = ip->OptionLevel;
     if (Option3)

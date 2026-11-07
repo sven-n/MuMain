@@ -3,12 +3,16 @@
 #include "UI/Social/SocialWindowBase.h"
 #include "Dotnet/Connection.h"
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
 class CUIChatWindow : public CUIBaseWindow
 {
     static void HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size);
+    // HandlePacketS reads the map on a connection's thread-pool thread while windows add and
+    // remove their entries on the main thread.
+    inline static std::mutex ConnectionHandleToWindowUuidMutex;
     inline static std::map<int32_t, DWORD> ConnectionHandleToWindowUuid = {};
     Connection* _connection;
 

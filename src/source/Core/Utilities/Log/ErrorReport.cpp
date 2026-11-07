@@ -4,10 +4,6 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#ifdef _WIN32
-#include <eh.h>
-#include <imagehlp.h>
-#endif
 #include "ErrorReport.h"
 #include "Core/Platform/Audio/AudioDeviceNames.h"
 #include "Core/Utilities/BuildInfo.h"
@@ -20,8 +16,6 @@
 #include <thread>
 
 CErrorReport g_ErrorReport;
-
-void DeleteSocket();
 
 namespace
 {

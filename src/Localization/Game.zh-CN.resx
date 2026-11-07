@@ -28,8 +28,60 @@
   <data name="Muse Elf" xml:space="preserve">
     <value>圣射手</value>
   </data>
+  <data name="Cannot be equipped by %s" xml:space="preserve">
+    <value>%s 无法装备</value>
+    <comment>legacy_id=60</comment>
+  </data>
   <data name="Can be equipped by %s" xml:space="preserve">
     <value>适用职业：%s</value>
+  </data>
+  <data name="Purchase Price: %s" xml:space="preserve">
+    <value>购买价格：%s</value>
+    <comment>legacy_id=62</comment>
+  </data>
+  <data name="Selling Price: %s" xml:space="preserve">
+    <value>出售价格：%s</value>
+    <comment>legacy_id=63</comment>
+  </data>
+  <data name="Attack speed: %d" xml:space="preserve">
+    <value>攻击速度：%d</value>
+    <comment>legacy_id=64</comment>
+  </data>
+  <data name="Defense: %d" xml:space="preserve">
+    <value>防御力：%d</value>
+    <comment>legacy_id=65,209</comment>
+  </data>
+  <data name="Defense rate: %d" xml:space="preserve">
+    <value>防御率：%d</value>
+    <comment>legacy_id=67,2045</comment>
+  </data>
+  <data name="Durability: [%d/%d]" xml:space="preserve">
+    <value>耐久：[%d/%d]</value>
+    <comment>legacy_id=71</comment>
+  </data>
+  <data name="Strength Requirement: %d" xml:space="preserve">
+    <value>需求力量：%d</value>
+    <comment>legacy_id=73</comment>
+  </data>
+  <data name="(lacking %d)" xml:space="preserve">
+    <value>（还差 %d）</value>
+    <comment>legacy_id=74</comment>
+  </data>
+  <data name="Agility Requirement: %d" xml:space="preserve">
+    <value>需求敏捷：%d</value>
+    <comment>legacy_id=75</comment>
+  </data>
+  <data name="Minimum Level Requirement: %d" xml:space="preserve">
+    <value>需求等级：%d</value>
+    <comment>legacy_id=76</comment>
+  </data>
+  <data name="Energy Requirement: %d" xml:space="preserve">
+    <value>需求智力：%d</value>
+    <comment>legacy_id=77</comment>
+  </data>
+  <data name="I,V : Inventory" xml:space="preserve">
+    <value>I、V：背包</value>
+    <comment>legacy_id=127</comment>
   </data>
   <data name="STR" xml:space="preserve">
     <value>力量</value>
@@ -43,14 +95,58 @@
   <data name="STA" xml:space="preserve">
     <value>体力</value>
   </data>
+  <data name="Inventory" xml:space="preserve">
+    <value>背包</value>
+    <comment>legacy_id=223,3425,3453</comment>
+  </data>
+  <data name="Close (I,V)" xml:space="preserve">
+    <value>关闭（I、V）</value>
+    <comment>legacy_id=225</comment>
+  </data>
   <data name="OK" xml:space="preserve">
     <value>确定</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
+  <data name="Repair (L)" xml:space="preserve">
+    <value>修理（L）</value>
+    <comment>legacy_id=233</comment>
+  </data>
+  <data name="Repair all (A)" xml:space="preserve">
+    <value>全部修理（A）</value>
+    <comment>legacy_id=237</comment>
+  </data>
+  <data name="Repairing cost: %s" xml:space="preserve">
+    <value>修理费用：%s</value>
+    <comment>legacy_id=238</comment>
+  </data>
+  <data name="Repair all" xml:space="preserve">
+    <value>全部修理</value>
+    <comment>legacy_id=239</comment>
+  </data>
   <data name="close" xml:space="preserve">
     <value>关闭</value>
+  </data>
+  <data name="You are not allowed to drop this expensive item" xml:space="preserve">
+    <value>无法丢弃此贵重物品。</value>
+    <comment>legacy_id=269</comment>
+  </data>
+  <data name="Arrows: %d (%d)" xml:space="preserve">
+    <value>箭：%d（%d）</value>
+    <comment>legacy_id=351</comment>
+  </data>
+  <data name="Bolts: %d (%d)" xml:space="preserve">
+    <value>弩箭：%d（%d）</value>
+    <comment>legacy_id=352</comment>
+  </data>
+  <data name="Inventory (I,V)" xml:space="preserve">
+    <value>背包（I、V）</value>
+    <comment>legacy_id=363</comment>
+  </data>
+  <data name="Inventory is full." xml:space="preserve">
+    <value>背包已满。</value>
+    <comment>legacy_id=375</comment>
   </data>
   <data name="Exit Game" xml:space="preserve">
     <value>退出游戏</value>
@@ -456,14 +552,70 @@
   <data name="Commoner" xml:space="preserve">
     <value>平民</value>
   </data>
+  <data name="These items cannot be traded." xml:space="preserve">
+    <value>这些物品无法交易。</value>
+    <comment>legacy_id=494,668</comment>
+  </data>
+  <data name="An expensive item!" xml:space="preserve">
+    <value>这是贵重物品！</value>
+    <comment>legacy_id=536</comment>
+  </data>
+  <data name="Check the item please" xml:space="preserve">
+    <value>请确认要出售的物品。</value>
+    <comment>legacy_id=537</comment>
+  </data>
+  <data name="Are you sure you want to sell it?" xml:space="preserve">
+    <value>确定要出售吗？</value>
+    <comment>legacy_id=538</comment>
+  </data>
+  <data name="Increase %d%% of Damage" xml:space="preserve">
+    <value>伤害提高 %d%%</value>
+    <comment>legacy_id=577</comment>
+  </data>
+  <data name="Absorb %d%% of Damage" xml:space="preserve">
+    <value>伤害吸收 %d%%</value>
+    <comment>legacy_id=578</comment>
+  </data>
+  <data name="Increase speed" xml:space="preserve">
+    <value>移动速度提高</value>
+    <comment>legacy_id=579</comment>
+  </data>
   <data name="Exit game after closing the Chaos interface." xml:space="preserve">
     <value>请先关闭合成界面，再进行此操作。</value>
+  </data>
+  <data name="Charisma Requirement: %d" xml:space="preserve">
+    <value>需求统率：%d</value>
+    <comment>legacy_id=698</comment>
+  </data>
+  <data name="Cannot be traded." xml:space="preserve">
+    <value>无法交易。</value>
+    <comment>legacy_id=732</comment>
+  </data>
+  <data name="Leave at least one empty slot in your inventory." xml:space="preserve">
+    <value>请在背包中至少留出一个空位。</value>
+    <comment>legacy_id=896</comment>
   </data>
   <data name="Slide Help" xml:space="preserve">
     <value>滚动帮助提示</value>
   </data>
+  <data name="Set option" xml:space="preserve">
+    <value>套装属性</value>
+    <comment>legacy_id=989</comment>
+  </data>
   <data name="Delete" xml:space="preserve">
     <value>删除</value>
+  </data>
+  <data name="Open personal store(S)" xml:space="preserve">
+    <value>打开个人商店（S）</value>
+    <comment>legacy_id=1125</comment>
+  </data>
+  <data name="Close personal store(S)" xml:space="preserve">
+    <value>关闭个人商店（S）</value>
+    <comment>legacy_id=1127</comment>
+  </data>
+  <data name="Can't be used in the safe zone" xml:space="preserve">
+    <value>无法在安全区内使用。</value>
+    <comment>legacy_id=1238</comment>
   </data>
   <data name="Master" xml:space="preserve">
     <value>盟主</value>
@@ -482,6 +634,10 @@
   </data>
   <data name="Create" xml:space="preserve">
     <value>创建</value>
+  </data>
+  <data name="Purchasing price: %s(%s)" xml:space="preserve">
+    <value>购买价格：%s（%s）</value>
+    <comment>legacy_id=1620</comment>
   </data>
   <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
     <value>无法删除已加入战盟的角色。</value>
@@ -561,6 +717,10 @@
   <data name="Command" xml:space="preserve">
     <value>统率</value>
   </data>
+  <data name="Inventory space is insufficient." xml:space="preserve">
+    <value>背包空间不足。</value>
+    <comment>legacy_id=1815</comment>
+  </data>
   <data name="+Effect limitation" xml:space="preserve">
     <value>+效果限制</value>
   </data>
@@ -570,8 +730,48 @@
   <data name="It can be used with item removed." xml:space="preserve">
     <value>卸下装备后方可使用。</value>
   </data>
+  <data name="This item cannot be dropped." xml:space="preserve">
+    <value>无法丢弃此物品。</value>
+    <comment>legacy_id=1915</comment>
+  </data>
   <data name="Class" xml:space="preserve">
     <value>职业</value>
+  </data>
+  <data name="Incorrect item" xml:space="preserve">
+    <value>物品不正确。</value>
+    <comment>legacy_id=2089</comment>
+  </data>
+  <data name="Reinforced item can't be dropped." xml:space="preserve">
+    <value>无法丢弃强化过的物品。</value>
+    <comment>legacy_id=2217</comment>
+  </data>
+  <data name="Can't wear item." xml:space="preserve">
+    <value>无法装备此物品。</value>
+    <comment>legacy_id=2285</comment>
+  </data>
+  <data name="You can only use this in a safe zone." xml:space="preserve">
+    <value>只能在安全区内使用。</value>
+    <comment>legacy_id=2330</comment>
+  </data>
+  <data name=" You cannot use this item while the Potion effects remain active." xml:space="preserve">
+    <value>药水效果持续期间无法使用此物品。</value>
+    <comment>legacy_id=2530</comment>
+  </data>
+  <data name="You cannot use the item at certain applicable locations." xml:space="preserve">
+    <value>无法在此地点使用该物品。</value>
+    <comment>legacy_id=2608</comment>
+  </data>
+  <data name="This item cannot be used along with an item that's already in use." xml:space="preserve">
+    <value>无法与正在使用的物品同时使用。</value>
+    <comment>legacy_id=2610</comment>
+  </data>
+  <data name="Socket option" xml:space="preserve">
+    <value>镶嵌属性</value>
+    <comment>legacy_id=2651</comment>
+  </data>
+  <data name="Open Inventory (I/V) Window" xml:space="preserve">
+    <value>打开背包（I/V）</value>
+    <comment>legacy_id=2820</comment>
   </data>
   <data name="Rage Fighter" xml:space="preserve">
     <value>格斗家</value>
@@ -582,8 +782,36 @@
   <data name="LegitimateBearersOfTheKarutanRoyal" xml:space="preserve">
     <value>卡伦特皇家骑士的正统传人，体魄强健、精通格斗，也能施展辅助技能帮助队友。</value>
   </data>
+  <data name="Open Expanded Inventory (K)" xml:space="preserve">
+    <value>打开扩展背包（K）</value>
+    <comment>legacy_id=3322</comment>
+  </data>
+  <data name="Expanded Inventory" xml:space="preserve">
+    <value>扩展背包</value>
+    <comment>legacy_id=3323,3451</comment>
+  </data>
+  <data name="Insufficient space in the expanded inventory" xml:space="preserve">
+    <value>扩展背包空间不足。</value>
+    <comment>legacy_id=3341</comment>
+  </data>
+  <data name="Please log in to game again to use the expanded inventory/vault." xml:space="preserve">
+    <value>请重新登录游戏后使用扩展背包或仓库。</value>
+    <comment>legacy_id=3349</comment>
+  </data>
+  <data name="Use this to expand your inventory." xml:space="preserve">
+    <value>用于扩展背包。</value>
+    <comment>legacy_id=3352</comment>
+  </data>
   <data name="System Menu" xml:space="preserve">
     <value>系统菜单</value>
+  </data>
+  <data name="You must purchase Expanded Inventory first." xml:space="preserve">
+    <value>请先购买扩展背包。</value>
+    <comment>legacy_id=3452</comment>
+  </data>
+  <data name="Repair Item" xml:space="preserve">
+    <value>修理物品</value>
+    <comment>legacy_id=3518</comment>
   </data>
   <data name="Loading character list" xml:space="preserve">
     <value>正在加载角色列表</value>
@@ -593,6 +821,9 @@
   </data>
   <data name="DefaultFont" xml:space="preserve">
     <value>默认</value>
+  </data>
+  <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
+    <value>在天空之城，必须保留至少一件翅膀或飞行坐骑。</value>
   </data>
   <data name="Menu" xml:space="preserve">
     <value>菜单</value>

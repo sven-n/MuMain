@@ -11,6 +11,7 @@
         "pl": "Brązowe buty",
         "pt": "Botas de bronze"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -39,6 +40,7 @@
         "pl": "Smocze buty",
         "pt": "Botas do dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -66,6 +68,7 @@
         "pl": "Pikowane buty",
         "pt": "Botas acolchoadas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -92,6 +95,7 @@
         "pl": "Legendarne buty",
         "pt": "Botas lendárias"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -117,6 +121,7 @@
         "pl": "Kościane buty",
         "pt": "Botas de osso"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -143,6 +148,7 @@
         "pl": "Skórzane buty",
         "pt": "Botas de couro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -171,6 +177,7 @@
         "pl": "Łuskowe buty",
         "pt": "Botas de escamas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -199,6 +206,7 @@
         "pl": "Buty Sfinksa",
         "pt": "Botas da esfinge"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -225,6 +233,7 @@
         "pl": "Mosiężne buty",
         "pt": "Botas de latão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -253,6 +262,7 @@
         "pl": "Płytowe buty",
         "pt": "Botas de placa"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -280,6 +290,7 @@
         "pl": "Buty z pnączy",
         "pt": "Botas da vinha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -305,6 +316,7 @@
         "pl": "Jedwabne buty",
         "pt": "Botas de seda"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -330,6 +342,7 @@
         "pl": "Buty Wiatru",
         "pt": "Botas do vento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -355,6 +368,7 @@
         "pl": "Buty Ducha",
         "pt": "Botas do espírito"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -380,6 +394,7 @@
         "pl": "Buty Strażnika",
         "pt": "Botas do guardião"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -405,6 +420,7 @@
         "pl": "Buty Burzowej Wrony",
         "pt": "Botas do corvo da tempestade"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -431,6 +447,7 @@
         "pl": "Buty Czarnego Smoka",
         "pt": "Botas do dragão negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -457,6 +474,7 @@
         "pl": "Buty Mrocznego Feniksa",
         "pt": "Botas da fênix negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -483,6 +501,7 @@
         "pl": "Buty Wielkiej Duszy",
         "pt": "Botas da grande alma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -508,6 +527,7 @@
         "pl": "Boskie buty",
         "pt": "Botas divinas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -533,6 +553,7 @@
         "pl": "Buty Gromowego Jastrzębia",
         "pt": "Botas de Thunder Hawk"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -559,6 +580,7 @@
         "pl": "Buty Wielkiego Smoka",
         "pt": "Botas do grande dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -584,6 +606,7 @@
         "pl": "Buty Mrocznej Duszy",
         "pt": "Botas da alma negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -609,6 +632,7 @@
         "pl": "Buty Huraganu",
         "pt": "Botas do furacão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -634,6 +658,7 @@
         "pl": "Buty Czerwonego Ducha",
         "pt": "Botas do espírito vermelho"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -659,6 +684,7 @@
         "pl": "Lekkie buty płytowe",
         "pt": "Botas de placa leve"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -684,6 +710,7 @@
         "pl": "Adamantytowe buty",
         "pt": "Botas de adamantina"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -709,6 +736,7 @@
         "pl": "Buty z mrocznej stali",
         "pt": "Botas de aço negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -734,6 +762,7 @@
         "pl": "Buty Mrocznego Mistrza",
         "pt": "Botas do Mestre negro"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -759,6 +788,7 @@
         "pl": "Buty Smoczego Rycerza",
         "pt": "Botas do cavaleiro dragão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -785,6 +815,7 @@
         "pl": "Buty Jadowitej Mgły",
         "pt": "Botas da névoa de veneno"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -811,6 +842,7 @@
         "pl": "Buty Sylphid Ray",
         "pt": "Botas do raio silfídico"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -837,6 +869,7 @@
         "pl": "Buty Wulkanu",
         "pt": "Botas do vulcão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -863,6 +896,7 @@
         "pl": "Buty Słońca",
         "pt": "Botas da luz do sol"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -889,6 +923,7 @@
         "pl": "Buty Ashcrow",
         "pt": "Botas de Ashcrow"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -913,6 +948,7 @@
         "pl": "Buty Zaćmienia",
         "pt": "Botas do eclipse"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -937,6 +973,7 @@
         "pl": "Buty Iris",
         "pt": "Botas de Iris"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -961,6 +998,7 @@
         "pl": "Waleczne buty",
         "pt": "Botas do valor"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -985,6 +1023,7 @@
         "pl": "Chwalebne buty",
         "pt": "Botas gloriosas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1009,6 +1048,7 @@
         "pl": "Buty Gwałtownego Wiatru",
         "pt": "Botas do vento violento"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1033,6 +1073,7 @@
         "pl": "Buty Czerwonego Skrzydła",
         "pt": "Botas da asa vermelha"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1058,6 +1099,7 @@
         "pl": "Pradawne buty",
         "pt": "Botas antigas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1083,6 +1125,7 @@
         "pl": "Demoniczne buty",
         "pt": "Botas demoníacas"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1107,6 +1150,7 @@
         "pl": "Buty Burzowego Błysku",
         "pt": "Botas Relâmpago de Tempest."
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1133,6 +1177,7 @@
         "pl": "Buty Wiecznego Skrzydła",
         "pt": "Botas da asa eterna"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1159,6 +1204,7 @@
         "pl": "Buty Tytana",
         "pt": "Botas do titã"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1184,6 +1230,7 @@
         "pl": "Buty Śmiałka",
         "pt": "Botas da coragem"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1209,6 +1256,7 @@
         "pl": "Buty Widma",
         "pt": "Botas do fantasma"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1234,6 +1282,7 @@
         "pl": "Buty Zniszczenia",
         "pt": "Botas da destruição"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1260,6 +1309,7 @@
         "pl": "Buty Serafina",
         "pt": "Botas do serafim"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1285,6 +1335,7 @@
         "pl": "Buty Wiary",
         "pt": "Botas da fé"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1311,6 +1362,7 @@
         "pl": "Królewskie buty",
         "pt": "Botas reais"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1336,6 +1388,7 @@
         "pl": "Buty Hadesa",
         "pt": "Botas de Hades"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1365,6 +1418,7 @@
         "pl": "Buty Świętego Ognia",
         "pt": "Botas de Fogo Sagrado"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1390,6 +1444,7 @@
         "pl": "Buty Storm Jahad",
         "pt": "Botas de Tempestade Zahard"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1414,6 +1469,7 @@
         "pl": "Buty Piercing Groove",
         "pt": "Botas de Entalhe Perfurante"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1439,6 +1495,7 @@
         "pt": "Botas de escamas"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1474,6 +1531,7 @@
         "pt": "Botas de seda"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1505,6 +1563,7 @@
         "pt": "Botas de Esfinge"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1538,6 +1597,7 @@
         "pt": "Botas do vento violento"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1569,6 +1629,7 @@
         "pt": "Botas de adamantina"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1600,6 +1661,7 @@
         "pt": "Botas de Dragão"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1633,6 +1695,7 @@
         "pt": "Botas de Guardião"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1664,6 +1727,7 @@
         "pt": "Botas Lendárias"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1696,6 +1760,7 @@
         "pt": "Botas da asa vermelha"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1727,6 +1792,7 @@
         "pt": "Botas do corvo da tempestade"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1759,6 +1825,7 @@
         "pt": "Botas de Tempestade Zahard"
       },
       "tags": ["luckyItem"],
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",
@@ -1789,6 +1856,7 @@
         "pl": "Buty Duszy Feniksa",
         "pt": "Botas de Alma de Fênix"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 2,
       "slot": "boots",

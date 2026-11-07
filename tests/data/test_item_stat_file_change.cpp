@@ -30,7 +30,7 @@ ItemDefinition MakeShield(int number, const std::string& profile)
 StatProfileRule ShieldRule(const std::string& profile)
 {
     StatProfileRule rule{.profile = profile};
-    rule.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    rule.conditions.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
     return rule;
 }
 

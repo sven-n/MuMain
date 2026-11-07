@@ -4789,4 +4789,7 @@
   <data name="Monster log name {0} {1}" xml:space="preserve">
     <value>{0} ({1} numbers)</value>
   </data>
+  <data name="Item options" xml:space="preserve">
+    <value>Item options</value>
+  </data>
 </root>

@@ -8,7 +8,8 @@
 
 set(commit "unknown")
 set(changed 0)
-set(data_asset_id "unknown")
+# Empty when it can't be computed; the client says the data release is unknown.
+set(data_asset_id "")
 find_program(GIT_EXECUTABLE git)
 if(GIT_EXECUTABLE)
   execute_process(

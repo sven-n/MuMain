@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -128,6 +129,23 @@ public:
         return m_tooltipFile;
     }
 
+    // The option definitions, their texts and (in the editor) the option rules (Data/Items/Options), and resolves
+    // every item's links again. A link to a definition they don't have is left out (the loader reports it).
+    void SetOptions(ItemOptionDatabase options);
+
+    const ItemOptionDatabase& GetOptions() const
+    {
+        return m_options;
+    }
+
+    // The definitions the item links, as indices of GetOptions(), in the order the game takes them; none for empty
+    // slots and invalid ids. Resolved when the item or the options are stored, so the game looks no name up.
+    std::span<const ItemOptionIndex> GetOptionLinks(int itemType) const
+    {
+        return IsValidItemType(itemType) ? std::span<const ItemOptionIndex>(m_optionLinks[itemType])
+                                         : std::span<const ItemOptionIndex>();
+    }
+
     // The ground label styles and standard rules (Data/Items/Tooltips/GroundLabels.json).
     void SetGroundLabels(GroundLabelFile file)
     {
@@ -239,6 +257,9 @@ private:
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
     ItemStatProfiles m_statProfiles;
+    ItemOptionDatabase m_options;
+    // GetOptionLinks' lists, one per item type.
+    std::vector<std::vector<ItemOptionIndex>> m_optionLinks;
     ItemTooltipFile m_tooltipFile;
     GroundLabelFile m_groundLabels;
     // GetItemTypesWithTag's lists, one per tag.

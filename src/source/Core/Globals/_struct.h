@@ -192,6 +192,8 @@ typedef struct tagITEM
     BYTE  SpecialNum;
     WORD  Special[MAX_ITEM_SPECIAL];
     WORD SpecialValue[MAX_ITEM_SPECIAL];
+    // Where each slot's option came from (GameLogic::Items::GetOptionSource): 0 for a slot the code wrote.
+    DWORD SpecialSource[MAX_ITEM_SPECIAL];
     DWORD Key;	//client olny
 
     BYTE bySelectedSlotIndex;

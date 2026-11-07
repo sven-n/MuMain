@@ -25,6 +25,7 @@
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
 #include "App/Platform/Windows/Winmain.h"
@@ -997,6 +998,7 @@ void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
     GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
     GameConfig::GetInstance().Save();
     g_ItemDataHandler.SetTranslateItemNames(m_bTranslateItemNames);
+    Core::Log::ReadingLanguage::Write({I18N::GetCurrentLocale(), m_bTranslateItemNames});
 }
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)

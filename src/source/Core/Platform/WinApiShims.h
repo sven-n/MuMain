@@ -15,6 +15,7 @@
 #include <ctime>      // tzset
 #include <cwchar>
 #include <cwctype>
+#include <string>
 #include <strings.h>  // strcasecmp
 #include <thread>     // Sleep
 #include <unistd.h>   // readlink
@@ -112,21 +113,45 @@ inline char* itoa(int value, char* buffer, int radix)
 }
 inline char* _itoa(int value, char* buffer, int radix) { return itoa(value, buffer, radix); }
 
+#ifdef __APPLE__
+namespace mu_detail
+{
+// The client's file as an absolute path; empty when macOS can't say. macOS reports the path the client was
+// started with, which can be relative to the folder it was started in (Main.app/Contents/MacOS/Main). It is
+// resolved on the first call, before Winmain moves the working directory, so every later caller (config.ini's
+// folder, the Build line's write time) still finds the client.
+inline const std::string& absoluteExecutablePath()
+{
+    static const std::string path = []() -> std::string
+    {
+        constexpr std::uint32_t pathCapacity = 4096;
+        char started[pathCapacity] = {};
+        std::uint32_t size = pathCapacity;
+        if (_NSGetExecutablePath(started, &size) != 0)
+            return {};
+        if (started[0] == '/')
+            return started;
+        char folder[pathCapacity] = {};
+        if (getcwd(folder, pathCapacity) == nullptr)
+            return started;
+        return std::string(folder) + "/" + started;
+    }();
+    return path;
+}
+} // namespace mu_detail
+#endif
+
 // Path of the running executable (Win32 GetModuleFileNameW). The engine only
 // queries its own module (hModule == null).
 inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nSize)
 {
     if (!lpFilename || nSize == 0) return 0;
-    char path[4096] = {};
 #ifdef __APPLE__
-    std::uint32_t pathSize = sizeof(path);
-    if (_NSGetExecutablePath(path, &pathSize) != 0)
-    {
-        lpFilename[0] = L'\0';
-        return 0;
-    }
-    const ssize_t n = static_cast<ssize_t>(std::strlen(path));
+    const std::string& executable = mu_detail::absoluteExecutablePath();
+    const char* path = executable.c_str();
+    const ssize_t n = static_cast<ssize_t>(executable.size());
 #else
+    char path[4096] = {};
     const ssize_t n = readlink("/proc/self/exe", path, sizeof(path) - 1);
 #endif
     if (n <= 0) { lpFilename[0] = L'\0'; return 0; }

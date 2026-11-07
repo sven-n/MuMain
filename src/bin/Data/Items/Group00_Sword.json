@@ -11,6 +11,7 @@
         "pl": "Kris",
         "pt": "Cris"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "mainHand",
@@ -45,6 +46,7 @@
         "pl": "Krótki miecz",
         "pt": "Espada curta"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -78,6 +80,7 @@
         "pl": "Rapier",
         "pt": "Rapieira"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -110,6 +113,7 @@
         "pl": "Katana",
         "pt": "Cataná"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -141,6 +145,7 @@
         "pl": "Miecz Zabójcy",
         "pt": "Espada do assassino"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -172,6 +177,7 @@
         "pl": "Ostrze",
         "pt": "Lâmina"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -205,6 +211,7 @@
         "pl": "Gladius",
         "pt": "Gládio"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -236,6 +243,7 @@
         "pl": "Falchion",
         "pt": "Cimitarra"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -266,6 +274,7 @@
         "pl": "Wężowy miecz",
         "pt": "Espada da serpente"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -296,6 +305,7 @@
         "pl": "Miecz Salamandry",
         "pt": "Espada da salamandra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -326,6 +336,7 @@
         "pl": "Miecz świetlny",
         "pt": "Sabre de luz"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -358,6 +369,7 @@
         "pl": "Legendarny miecz",
         "pt": "Espada lendária"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -388,6 +400,7 @@
         "pl": "Słoneczny miecz",
         "pt": "Espada helíaca"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -418,6 +431,7 @@
         "pl": "Podwójne ostrze",
         "pt": "Lâmina dupla"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -449,6 +463,7 @@
         "pl": "Miecz błyskawic",
         "pt": "Espada de luz"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -480,6 +495,7 @@
         "pl": "Miecz olbrzyma",
         "pt": "Espada gigante"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -510,6 +526,7 @@
         "pl": "Miecz Zniszczenia",
         "pt": "Espada da destruição"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -540,6 +557,7 @@
         "pl": "Mroczny Łamacz",
         "pt": "Destruidora Negra"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -570,6 +588,7 @@
         "pl": "Ostrze Gromu",
         "pt": "Lâmina do trovão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -601,6 +620,7 @@
         "pt": "Espada divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck"],
       "nameLines": [
         {
           "text": {
@@ -646,6 +666,7 @@
         "pl": "Ostrze Rycerza",
         "pt": "Lâmina do cavaleiro"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -676,6 +697,7 @@
         "pt": "Lâmina do Império negro"
       },
       "tags": ["magicSword"],
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -708,6 +730,7 @@
         "pl": "Kościane ostrze",
         "pt": "Lâmina de osso"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -739,6 +762,7 @@
         "pt": "Lâmina da explosão"
       },
       "tags": ["magicSword"],
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -772,6 +796,7 @@
         "pl": "Świt",
         "pt": "Aurora"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -802,6 +827,7 @@
         "pt": "Dançarino da espada"
       },
       "tags": ["magicSword"],
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -833,6 +859,7 @@
         "pl": "Flamberga",
         "pt": "Flameberge"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -862,6 +889,7 @@
         "pl": "Łamacz mieczy",
         "pt": "Destruidora de Espadas"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -892,6 +920,7 @@
         "pt": "Espada bastarda das runas"
       },
       "tags": ["magicSword"],
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -924,6 +953,7 @@
         "pt": "Lâmina das runas"
       },
       "tags": ["magicSword"],
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -956,6 +986,7 @@
         "pl": "Święta rękawica",
         "pt": "Luvas Sagradas"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "mainHand",
@@ -985,6 +1016,7 @@
         "pl": "Pazur Świętej Burzy",
         "pt": "Garra de Tempestade Sagrada"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "mainHand",
@@ -1013,6 +1045,7 @@
         "pl": "Rękawica Przeszywającego Ostrza",
         "pt": "Luvas de Lâmina Perfurante"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "mainHand",
@@ -1041,6 +1074,7 @@
         "pl": "Gwiazda Duszy Feniksa",
         "pt": "Estrela de Alma de Fênix"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "mainHand",

@@ -235,9 +235,6 @@
   <data name="Triple Shot skill (Mana:%d)" xml:space="preserve">
     <value>Triple Shot skill (Mana:%d)</value>
   </data>
-  <data name="Luck (success rate of Jewel of Soul +25%%)" xml:space="preserve">
-    <value>Suwerte (rate ng tagumpay ng Jewel of Soul +25%%)</value>
-  </data>
   <data name="Additional Dmg +%d" xml:space="preserve">
     <value>Karagdagang Dmg +%d</value>
   </data>
@@ -252,9 +249,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Awtomatikong pagbawi ng HP %d%%</value>
-  </data>
-  <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
-    <value>Swerte (critical damage rate +5%%)</value>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Maaari lamang gamitin sa paglipat ng yunit</value>
