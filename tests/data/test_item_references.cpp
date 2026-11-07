@@ -150,6 +150,25 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     CHECK(ResolveReferencedName(database, Reference(99, 25), "en").problem == ItemReferenceProblem::UnknownItem);
 }
 
+TEST_CASE("A reference at a level takes the name line the tooltip takes [data][items][texts]")
+{
+    // A color for every level, then a name of +3: the tooltip takes the first line, so +3 shows the standard name.
+    ItemDefinition ring;
+    ring.group = 13;
+    ring.number = 20;
+    ring.names = Data::LocalizedString::Parse("Wizards Ring");
+    ItemNameLine colorOnly;
+    colorOnly.hasColor = true;
+    ring.nameLines.push_back(colorOnly);
+    ring.nameLines.push_back(LiteralNameLine("Ring of glory", 3));
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{ring});
+
+    const ReferencedName name = ResolveReferencedName(database, Reference(13, 20, 3), "en");
+    CHECK(name.text == "Wizards Ring +3");
+    CHECK(name.problem == ItemReferenceProblem::StandardName);
+}
+
 TEST_CASE("A level's name line may name another item, in the language the line is written in [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();

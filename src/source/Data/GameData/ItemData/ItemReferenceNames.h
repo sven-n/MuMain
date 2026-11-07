@@ -32,10 +32,10 @@ struct ReferencedName
 };
 
 // The name a text's item reference shows in `locale` (the item name language of the text, see GetItemNameLocale):
-// the item's name, or at a level the text of the first name line shown at that level without conditions, and the
-// form of the case when the reference asks for one. Needs no game state, unlike the tooltip's name (GetItemNameText):
-// a name line may fill in {name}, {level}, {levelPlusOne}, the item's level values and other items' names
-// ({item:14,13}, in the language the line is written in).
+// the item's name, or at a level the text of the first name line shown at that level without conditions (the standard
+// name when that line has no text, as in the tooltip), and the form of the case when the reference asks for one. Needs
+// no game state, unlike the tooltip's name (GetItemNameText): a name line may fill in {name}, {level}, {levelPlusOne},
+// the item's level values and other items' names ({item:14,13}, in the language the line is written in).
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const Translation::ItemReference& reference,
                                      std::string_view locale);
 } // namespace Data::Items

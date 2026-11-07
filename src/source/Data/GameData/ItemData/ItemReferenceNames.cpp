@@ -22,15 +22,16 @@ constexpr int MaxNameDepth = 4;
 ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale,
                        int depth);
 
-// The first name line that names the item at `level` by itself: shown at that level, with a text and without
-// conditions (those need the item and the hero).
+// The name line that names the item at `level`, as the tooltip takes it: the first one shown at that level, skipping
+// lines with conditions (those need the item and the hero). None when there is none, or when that line has no text:
+// the tooltip then shows the standard name.
 const ItemNameLine* FindNameLineAt(const ItemDefinition& definition, int level)
 {
     for (const ItemNameLine& line : definition.nameLines)
     {
-        if (line.hasText && line.when.empty() && line.IsShownAt(level))
+        if (line.when.empty() && line.IsShownAt(level))
         {
-            return &line;
+            return line.hasText ? &line : nullptr;
         }
     }
     return nullptr;
