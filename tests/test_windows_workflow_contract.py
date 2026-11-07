@@ -640,20 +640,27 @@ for required in ("id: apt\n", "uses: actions/cache/restore@v6", "path: ${{ env.A
                  "key: ${{ steps.apt_packages.outputs.key }}", "restore-keys: apt-linux-x64-\n"):
     check(required in apt_restore, f"build-linux Restore apt packages missing {required}")
 apt_install = step(linux_job, "build-linux", "Install build tools")
-for required in ("id: install\n", 'sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/',
-                 "sudo apt-get install -y $APT_PACKAGES", '"$RUNNER_TEMP/apt-files.txt"', "complete=$complete"):
+for required in ('sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/', "sudo apt-get install -y $APT_PACKAGES"):
     check(required in apt_install, f"build-linux Install build tools missing {required}")
+# Only the runs that save gather the files, so the gather has the save's conditions.
+apt_gather = step(linux_job, "build-linux", "Gather apt packages")
+for required in ("id: gather\n",
+                 "if: github.event_name == 'push' && github.ref == 'refs/heads/main' "
+                 "&& steps.apt.outputs.cache-hit != 'true'\n",
+                 '"$RUNNER_TEMP/apt-files.txt"', "complete=$complete"):
+    check(required in apt_gather, f"build-linux Gather apt packages missing {required}")
 apt_save = step(linux_job, "build-linux", "Save apt packages")
 for required in ("uses: actions/cache/save@v6", "steps.apt.outputs.cache-hit != 'true'",
-                 "steps.install.outputs.complete == 'true'", "path: ${{ env.APT_ARCHIVES }}",
+                 "steps.gather.outputs.complete == 'true'", "path: ${{ env.APT_ARCHIVES }}",
                  "key: ${{ steps.apt.outputs.cache-primary-key }}"):
     check(required in apt_save, f"build-linux Save apt packages must save every file on a miss: {required}")
 check("sudo apt-get update" not in apt_install, "build-linux must update the apt index before naming the cache")
 linux_names = re.findall(r"(?m)^      - name: (.+)$", linux_job)
-apt_order = ["Find apt packages", "Restore apt packages", "Install build tools", "Save apt packages"]
+apt_order = ["Find apt packages", "Restore apt packages", "Install build tools", "Gather apt packages",
+             "Save apt packages"]
 check(all(name in linux_names for name in apt_order)
       and [linux_names.index(name) for name in apt_order] == sorted(linux_names.index(name) for name in apt_order),
-      "build-linux must find, restore, install and save its apt packages in that order")
+      "build-linux must find, restore, install, gather and save its apt packages in that order")
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 # PR runs read main's caches and store none of their own: a PR's entry would serve that PR alone and push main's
 # entries out of the repository's 10 GB. Only main pushes save them: the nightly runs beside the pushes, so with both

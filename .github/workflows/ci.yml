@@ -722,15 +722,19 @@ jobs:
           restore-keys: apt-linux-x64-
 
       - name: Install build tools
-        id: install
         # apt uses a file it finds in its archive folder when the file matches the index, and fetches only the others:
-        # the image's Ubuntu mirror sometimes sends at 35-160 kB/s, and the 45 MB then take 5-24 minutes. Then the
-        # files of this install are gathered for Save apt packages.
+        # the image's Ubuntu mirror sometimes sends at 35-160 kB/s, and the 45 MB then take 5-24 minutes.
         run: |
           if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
             sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
           fi
           sudo apt-get install -y $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        # The files Find apt packages listed, for Save apt packages, and only in the runs that save them.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
+        run: |
           rm -rf "$APT_ARCHIVES"
           mkdir -p "$APT_ARCHIVES"
           complete=true
@@ -741,7 +745,7 @@ jobs:
 
       - name: Save apt packages
         # Not without every file: an entry under this key would leave the missing ones to be fetched in every run.
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.install.outputs.complete == 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
         uses: actions/cache/save@v6
         with:
           path: ${{ env.APT_ARCHIVES }}

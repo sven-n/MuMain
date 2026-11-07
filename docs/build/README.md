@@ -317,8 +317,9 @@ Ubuntu mirror sometimes sends them at 35–160 kB/s, and **Install build tools**
 took 5–24 minutes instead of about 20 seconds. **Find apt packages** updates the
 index and names the cache after the files apt would fetch (`apt-get install
 --print-uris`), so a new package version gives a new key. apt uses the restored
-files that still match the index and fetches only the others; **Save apt packages**
-stores the install's files.
+files that still match the index and fetches only the others. In the runs that save
+it, **Gather apt packages** collects the listed files for **Save apt packages**, which
+saves nothing when one is missing.
 
 PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
 **Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
