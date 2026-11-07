@@ -960,4 +960,88 @@
   <data name="Reinforced item can't be traded." xml:space="preserve">
     <value>强化物品无法交易。</value>
   </data>
+  <data name="Personal store" xml:space="preserve">
+    <value>个人商店</value>
+  </data>
+  <data name="[Store]" xml:space="preserve">
+    <value>[商店]</value>
+  </data>
+  <data name="Open1107" xml:space="preserve">
+    <value>开店</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>关店</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Still opening" xml:space="preserve">
+    <value>营业中</value>
+  </data>
+  <data name="Zen" xml:space="preserve">
+    <value>金币</value>
+  </data>
+  <data name="W Coin(C)" xml:space="preserve">
+    <value>W币（C）</value>
+  </data>
+  <data name="W Coin(P)" xml:space="preserve">
+    <value>W币（P）</value>
+  </data>
+  <data name="Goblin Points" xml:space="preserve">
+    <value>哥布林积分</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>货币</value>
+  </data>
+  <data name="Currency: %ls" xml:space="preserve">
+    <value>货币：%ls</value>
+  </data>
+  <data name="Other items" xml:space="preserve">
+    <value>其他物品</value>
+  </data>
+  <data name="Enter selling price." xml:space="preserve">
+    <value>请输入售价。</value>
+  </data>
+  <data name="Selling price : %s zen" xml:space="preserve">
+    <value>售价：%s 金币</value>
+  </data>
+  <data name="Do you want to sell item at this price?" xml:space="preserve">
+    <value>确定以此价格出售该物品吗？</value>
+  </data>
+  <data name="Do you want to buy an item?" xml:space="preserve">
+    <value>确定要购买该物品吗？</value>
+  </data>
+  <data name="Do you want to open a store?" xml:space="preserve">
+    <value>确定要开设个人商店吗？</value>
+  </data>
+  <data name="There's no store name or item price." xml:space="preserve">
+    <value>未填写商店名称或物品价格。</value>
+  </data>
+  <data name="This item is not allowed to use the private store." xml:space="preserve">
+    <value>此物品无法在个人商店中出售。</value>
+  </data>
+  <data name="Selling price when opening the store" xml:space="preserve">
+    <value>开店时的物品售价</value>
+  </data>
+  <data name="Please verify." xml:space="preserve">
+    <value>请务必确认。</value>
+  </data>
+  <data name="Already in the personal store" xml:space="preserve">
+    <value>在个人商店中</value>
+  </data>
+  <data name="Cancel sold item" xml:space="preserve">
+    <value>已售出的物品</value>
+  </data>
+  <data name="Cancel purchased item" xml:space="preserve">
+    <value>已购买的物品</value>
+  </data>
+  <data name="Can't be returned." xml:space="preserve">
+    <value>无法取消或退回。</value>
+  </data>
+  <data name="All item trading" xml:space="preserve">
+    <value>所有物品交易</value>
+  </data>
+  <data name="can only be done using zen." xml:space="preserve">
+    <value>只能使用金币进行。</value>
+  </data>
 </root>

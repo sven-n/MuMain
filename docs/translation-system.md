@@ -488,6 +488,10 @@ The player-trade window translates its title, partner and item warnings, Zen
 offer prompt, incoming request, cancellation reasons and reinforced-item
 restriction.
 
+Personal stores translate their owner labels, opening and closing controls,
+price and currency dialogs, sale and purchase confirmations, restrictions and
+status notices.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
