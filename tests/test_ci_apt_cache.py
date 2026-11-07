@@ -66,6 +66,27 @@ class GatherTests(unittest.TestCase):
         self.assertIn("1 of 2 listed files", notice)
         self.assertIn("libpulse0_1%3a17.0-1_amd64.deb", notice)
 
+    def complete_output(self, listing_text, present):
+        """What main writes to GITHUB_OUTPUT for a listing when only the present files are in apt's folder."""
+        listing = self.archives.parent / "listing.txt"
+        listing.write_text(listing_text, encoding="utf-8")
+        for name in present:
+            (self.archives / name).write_bytes(name.encode())
+        outputs = self.archives.parent / "outputs.txt"
+        with redirect_stdout(io.StringIO()), mock.patch.dict(os.environ, {"GITHUB_OUTPUT": str(outputs)}):
+            ci_apt_cache.main(["gather", str(listing), str(self.archives), str(self.destination)])
+        return outputs.read_text(encoding="utf-8")
+
+    def test_complete_only_with_every_listed_file(self):
+        # Save apt packages stores an entry only when Gather apt packages says complete=true.
+        self.assertEqual(self.complete_output(LISTING, listed_files(LISTING)), "complete=true\n")
+
+    def test_a_missing_file_leaves_the_entry_unsaved(self):
+        self.assertEqual(self.complete_output(LISTING, listed_files(LISTING)[:1]), "complete=false\n")
+
+    def test_an_empty_listing_leaves_nothing_to_save(self):
+        self.assertEqual(self.complete_output("", []), "complete=false\n")
+
     def test_a_long_notice_counts_the_rest(self):
         missing = [f"p{index}.deb" for index in range(ci_apt_cache.NAMED_MISSING + 3)]
         notice = ci_apt_cache.missing_notice(missing, len(missing), self.archives)

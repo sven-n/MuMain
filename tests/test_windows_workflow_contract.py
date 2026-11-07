@@ -659,6 +659,10 @@ for required in ("uses: actions/cache/save@v6", "steps.apt.outputs.cache-hit != 
                  "steps.gather.outputs.complete == 'true'", "path: ${{ env.APT_ARCHIVES }}",
                  "key: ${{ steps.apt.outputs.cache-primary-key }}"):
     check(required in apt_save, f"build-linux Save apt packages must save every file on a miss: {required}")
+# scripts/ci_apt_cache.py says complete=true only with every listed file (tests/test_ci_apt_cache.py); a gather or save
+# that went on after an error would save an entry without them.
+check("continue-on-error" not in apt_gather + apt_save,
+      "build-linux must not save its apt packages after a failed gather")
 check("sudo apt-get update" not in apt_fetch + apt_install,
       "build-linux must update the apt index before naming the cache")
 linux_names = re.findall(r"(?m)^      - name: (.+)$", linux_job)
