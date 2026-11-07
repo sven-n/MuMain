@@ -70,7 +70,7 @@ internal static class Program
 
         var masterLocales = CppEmitter.ComputeMasterLocales(groups);
 
-        var itemTextErrors = ItemTextChecks.Check(groups, masterLocales);
+        var itemTextErrors = ItemTextChecks.Check(groups, masterLocales, options.ItemTextGroups);
         if (itemTextErrors.Count > 0)
         {
             foreach (var itemTextError in itemTextErrors)

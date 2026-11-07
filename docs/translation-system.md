@@ -477,12 +477,13 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   yet (Russian, Japanese, ...): a reference there would show the English name.
 
 A malformed reference in a `.resx` file (`{item:14;13}`, an unknown case) stops
-the build with the file, key and text. In the editor, **Data Checks** lists the
-texts under **Texts**: a number no item has, a level whose name needs game
-values (a skill's or monster's name), a level without a name of its own, a
-missing form, and a translation that names other items than the English text.
-A click selects the item and opens Item Translations (or the tool of an item's
-own text).
+the build with the file, key and text, and so does a reference in the texts of
+another group (the editor's), which the game would show as written. In the
+editor, **Data Checks** lists the texts under **Texts**: a number no item has, a
+level whose name needs game values (a skill's or monster's name), a level
+without a name of its own, a missing form, and a translation that names other
+items than the English text. A click selects the item and opens Item
+Translations (or the tool of an item's own text).
 
 ## Simplified Chinese (`zh-CN`)
 
