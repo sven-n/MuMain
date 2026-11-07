@@ -316,15 +316,18 @@ The Linux build also caches the apt packages it installs (about 45 MB): the imag
 Ubuntu mirror sometimes sends them at 35–160 kB/s, and **Install build tools** then
 took 5–24 minutes instead of about 20 seconds. **Find apt packages** updates the
 index and names the cache after the files apt would fetch (`apt-get install
---print-uris`), so a new package version gives a new key. apt uses the restored
-files that still match the index and fetches only the others. In the runs that save
-it, **Gather apt packages** collects the listed files for **Save apt packages**, which
-saves nothing when one is missing.
+--print-uris`), so a new package version gives a new key. **Fetch apt packages**
+downloads them (`--download-only`): apt uses the restored files that still match the
+index and fetches only the others. In the runs that save the cache, **Gather apt
+packages** then collects the listed files for **Save apt packages**
+([`scripts/ci_apt_cache.py`](../../scripts/ci_apt_cache.py)), before **Install build
+tools** installs them, so no clean-up after dpkg can remove them first. When one is
+missing, the save stores nothing and a notice names it.
 
 PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
 **Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
 them, and **Save dependencies** (after the build), **Save vcpkg packages** (after the
-configure step) and **Save apt packages** (after the install) store them only in main
+configure step) and **Save apt packages** (after the download) store them only in main
 pushes, when the exact key was missing. A
 PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
 past that, GitHub deletes the least recently used entries, main's included. The

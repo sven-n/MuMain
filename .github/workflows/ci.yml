@@ -721,27 +721,21 @@ jobs:
           key: ${{ steps.apt_packages.outputs.key }}
           restore-keys: apt-linux-x64-
 
-      - name: Install build tools
+      - name: Fetch apt packages
         # apt uses a file it finds in its archive folder when the file matches the index, and fetches only the others:
         # the image's Ubuntu mirror sometimes sends at 35-160 kB/s, and the 45 MB then take 5-24 minutes.
         run: |
           if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
             sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
           fi
-          sudo apt-get install -y $APT_PACKAGES
+          sudo apt-get install -y --download-only $APT_PACKAGES
 
       - name: Gather apt packages
         id: gather
-        # The files Find apt packages listed, for Save apt packages, and only in the runs that save them.
+        # The files Find apt packages listed, for Save apt packages, and only in the runs that save them. Before the
+        # install, so that no clean-up after dpkg can remove them; a missing file gets a notice.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
-        run: |
-          rm -rf "$APT_ARCHIVES"
-          mkdir -p "$APT_ARCHIVES"
-          complete=true
-          while read -r _ file _; do
-            cp "/var/cache/apt/archives/$file" "$APT_ARCHIVES/" || complete=false
-          done < "$RUNNER_TEMP/apt-files.txt"
-          echo "complete=$complete" >> "$GITHUB_OUTPUT"
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
 
       - name: Save apt packages
         # Not without every file: an entry under this key would leave the missing ones to be fetched in every run.
@@ -750,6 +744,10 @@ jobs:
         with:
           path: ${{ env.APT_ARCHIVES }}
           key: ${{ steps.apt.outputs.cache-primary-key }}
+
+      - name: Install build tools
+        # From the files Fetch apt packages put in apt's archive folder.
+        run: sudo apt-get install -y $APT_PACKAGES
 
       - name: Identify compiler cache
         id: compiler
