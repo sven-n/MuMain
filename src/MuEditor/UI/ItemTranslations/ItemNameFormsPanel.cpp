@@ -5,6 +5,7 @@
 #include "ItemNameFormsPanel.h"
 
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/Translation/ItemReference.h"
@@ -20,17 +21,6 @@ using Data::Items::ItemDefinition;
 constexpr int FixedColumns = 2;
 constexpr float NameColumnWidth = 180.0f;
 constexpr float FormColumnWidth = 140.0f;
-
-int ResizeCellText(ImGuiInputTextCallbackData* data)
-{
-    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
-    {
-        auto* text = static_cast<std::string*>(data->UserData);
-        text->resize(data->BufTextLen);
-        data->Buf = text->data();
-    }
-    return 0;
-}
 
 // The text whose forms a text that names the item shows in `locale`: the item's names (index -1), or a name line's own
 // text written in place, without conditions and without placeholders in that language (a line written as "{name}"
@@ -251,9 +241,8 @@ void CItemNameFormsPanel::RenderFormCell(const ItemDefinition& definition, int i
     m_cellText = FormsOf(definition, index).Find(locale, caseKey);
     ImGui::SetNextItemWidth(-FLT_MIN);
     // An empty form shows the name it falls back to, greyed.
-    ImGui::InputTextWithHint("##Form", NamesOf(definition, index, locale)->GetOwn(locale).c_str(), m_cellText.data(),
-                             m_cellText.capacity() + 1, ImGuiInputTextFlags_CallbackResize, ResizeCellText,
-                             &m_cellText);
+    MuEditor::Items::InputStringWithHint("##Form", NamesOf(definition, index, locale)->GetOwn(locale).c_str(),
+                                         m_cellText);
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
         CommitForm(definition, index, locale, caseKey, m_cellText);
