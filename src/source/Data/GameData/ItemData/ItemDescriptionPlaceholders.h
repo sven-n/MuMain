@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Data/GameData/Common/LocalizedString.h"
+
 #include <functional>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items
@@ -107,6 +110,11 @@ struct PlaceholderScan
     std::string error; // empty when the text is fine
 };
 PlaceholderScan ScanPlaceholders(std::string_view text);
+
+// The problems of a text's placeholders, each a field and its message: braces that are no placeholders, in English
+// (`field`) or a translation (`field` and its language), and a translation without the English text's placeholders.
+std::vector<std::pair<std::string, std::string>> CheckTextPlaceholders(const LocalizedString& text,
+                                                                       const std::string& field);
 
 // The placeholders of a text with where each is (from its "{" to past its "}"), up to the first problem of its braces:
 // `stop` is where that problem starts, or npos when the whole text was read. FillPlaceholders leaves the text as

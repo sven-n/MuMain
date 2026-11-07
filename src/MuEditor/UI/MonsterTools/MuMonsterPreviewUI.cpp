@@ -167,7 +167,7 @@ void MuMonsterPreviewUI::Render(bool* open)
     {
         const int number = g_MonsterSelection.GetNumber();
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        ShownModel::RenderSelectedMonster(number, monster);
+        ShownModel::RenderSelectedMonster(number, monster, false);
         if (monster != nullptr && !monster->randomVariants.empty())
         {
             RenderVariants(*monster);

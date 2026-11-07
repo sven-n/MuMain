@@ -23,7 +23,14 @@ void MonsterSelection::Select(int number)
         ShownModel::SetShownVariant(NoMonster, -1);
     }
     m_number = number;
+    m_wholeMonster = false;
     ++m_serial;
+}
+
+void MonsterSelection::SelectMonster(int number)
+{
+    Select(number);
+    m_wholeMonster = true;
 }
 } // namespace MuEditor::Monsters
 

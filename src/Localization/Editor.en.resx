@@ -4168,4 +4168,106 @@
   <data name="Sound kind everything else" xml:space="preserve">
     <value>Everything else</value>
   </data>
+  <data name="Add number" xml:space="preserve">
+    <value>Add number</value>
+  </data>
+  <data name="Copy number" xml:space="preserve">
+    <value>Copy number</value>
+  </data>
+  <data name="Move number to" xml:space="preserve">
+    <value>Move number to...</value>
+  </data>
+  <data name="Split number out" xml:space="preserve">
+    <value>Split number out</value>
+  </data>
+  <data name="Remove number" xml:space="preserve">
+    <value>Remove number</value>
+  </data>
+  <data name="Maps" xml:space="preserve">
+    <value>Maps</value>
+  </data>
+  <data name="No maps" xml:space="preserve">
+    <value>no maps</value>
+  </data>
+  <data name="Attacks" xml:space="preserve">
+    <value>Attacks</value>
+  </data>
+  <data name="Map variants" xml:space="preserve">
+    <value>Map variants</value>
+  </data>
+  <data name="Number count {0}" xml:space="preserve">
+    <value>{0} numbers</value>
+  </data>
+  <data name="Shared by the {0} numbers of {1}" xml:space="preserve">
+    <value>Shared by the {0} numbers of {1}</value>
+  </data>
+  <data name="Make it this number's own" xml:space="preserve">
+    <value>Make it this number's own</value>
+  </data>
+  <data name="Own value of {0}" xml:space="preserve">
+    <value>{0}'s own value</value>
+  </data>
+  <data name="Back to" xml:space="preserve">
+    <value>Back to...</value>
+  </data>
+  <data name="The monster's value" xml:space="preserve">
+    <value>The monster's value</value>
+  </data>
+  <data name="Like number {0}" xml:space="preserve">
+    <value>Like {0}</value>
+  </data>
+  <data name="The values the {0} numbers of {1} share" xml:space="preserve">
+    <value>The values the {0} numbers of {1} share</value>
+  </data>
+  <data name="Shared value locked" xml:space="preserve">
+    <value>Shared by the monster's numbers: change it on the monster's row, or make it this number's own (right click).</value>
+  </data>
+  <data name="Monster row note" xml:space="preserve">
+    <value>A monster with several numbers: its row changes the values they share.</value>
+  </data>
+  <data name="Add a number to {0}" xml:space="preserve">
+    <value>Add a number to {0}</value>
+  </data>
+  <data name="Add number note" xml:space="preserve">
+    <value>The new number gets the values the monster's numbers share, and no maps.</value>
+  </data>
+  <data name="Copy number note {0}" xml:space="preserve">
+    <value>A copy of {0} in the same monster, with its values but no maps.</value>
+  </data>
+  <data name="Move {0} into" xml:space="preserve">
+    <value>Move {0} into:</value>
+  </data>
+  <data name="Move number note" xml:space="preserve">
+    <value>Its values stay: those the monster has too become shared, the others its own.</value>
+  </data>
+  <data name="Remove monster with numbers {0} {1}" xml:space="preserve">
+    <value>Removes {0} and its numbers {1}.</value>
+  </data>
+  <data name="Step add number" xml:space="preserve">
+    <value>Add number {0} to {1}</value>
+  </data>
+  <data name="Step copy number" xml:space="preserve">
+    <value>Copy {0} as {1}</value>
+  </data>
+  <data name="Step move number" xml:space="preserve">
+    <value>Move {0} to {1}</value>
+  </data>
+  <data name="Step split number" xml:space="preserve">
+    <value>Split {0} out of {1}</value>
+  </data>
+  <data name="Step remove monster with numbers" xml:space="preserve">
+    <value>Remove {0} with {1} numbers</value>
+  </data>
+  <data name="Step back to" xml:space="preserve">
+    <value>{0}: {1} back to {2}</value>
+  </data>
+  <data name="Step maps" xml:space="preserve">
+    <value>{0}: maps</value>
+  </data>
+  <data name="Monster log name {0} {1}" xml:space="preserve">
+    <value>{0} ({1} numbers)</value>
+  </data>
+  <data name="Item options" xml:space="preserve">
+    <value>Item options</value>
+  </data>
 </root>

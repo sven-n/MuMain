@@ -822,6 +822,11 @@ public:
     {
         return "";
     }
+    // The graphics driver's version, e.g. "581.57"; empty when the API doesn't report one (Metal).
+    [[nodiscard]] virtual const char* GetGPUDriverVersion() const
+    {
+        return "";
+    }
 };
 
 // ---------------------------------------------------------------------------

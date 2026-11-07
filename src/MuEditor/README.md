@@ -70,17 +70,20 @@ stores it when a field is left.
 - **GroundLabelWidgets.h/cpp** - A label style's fields, a label drawn in a style, its swatch and the style combo, for the Ground labels root and Item Tooltip
 
 ### Monster Tools (UI/MonsterTools)
-One selected monster (**MonsterSelection**) is shown by every monster tool.
+One selected monster (**MonsterSelection**), a number or a monster with
+several numbers as a whole, is shown by every monster tool; **MonsterShownValues**
+gives the tools its values, the shared ones of a whole monster, and
+**MonsterOwnValues** the grey shared and yellow own fields of a number.
 Changes go through **MonsterEdits** (the monster data handler plus the
 session's undo history, **MonsterEditHistory**); **MonsterStepLabel** names
 each step ("Budge Dragon (2): kind").
-- **MuMonsterBrowserUI** - The monster list with search and filters (MonsterBrowserList, MonsterListModel), Save and Revert (MonsterFileActions), the kind combo of each row (MonsterKindField), and the add, copy and remove dialogs (MonsterAddDialog, MonsterRemoveDialog) with what uses a number: the quest data (MonsterDataUsers) and the source lines (MonsterCodeReferences, MonsterCodeLine, MonsterCodeReferenceIndex)
+- **MuMonsterBrowserUI** - The monsters with their numbers as a tree, with search and filters (MonsterBrowserList, MonsterTreeModel, MonsterListModel), Save and Revert (MonsterFileActions), the kind combo and maps of each row (MonsterKindField, MapPicker), and the add, copy, number and remove dialogs (MonsterAddDialog, MonsterNumberDialog, MonsterRemoveDialog) with what uses a number: the quest data (MonsterDataUsers) and the source lines (MonsterCodeReferences, MonsterCodeLine, MonsterCodeReferenceIndex)
 - **MuMonsterModelUI** - The model entry of the selected monster's model (or of the look Monster Preview shows): file (MonsterModelFiles), texture folders, animation speeds and held last frames (MonsterModelValues), cues, the set the monster plays, and what the game's code adds (MonsterAnimationFacts); the model is opened for the tools when shown (MonsterShownModel)
 - **MuMonsterPreviewUI** - The selected monster's model in a preview with the item preview's camera: any animation with play, pause and a frame slider, the sound events of its set (MonsterSoundPreview), the hit frame and the cues as tags, Add a sound at this frame, a look of each random variant, and the game's speed factors (MonsterPreviewScene, with the effect preview's pose, PreviewModelPose)
 - **MuMonsterSoundsUI** - The sound set the selected monster and its random variants play, and the sound sets: add, copy, rename and remove them, their sound files and sound events (MonsterSoundEventsEditor, with the frames of the cues of the shown model) and maps
 - **MuMonsterAttacksUI** - The attacks of the selected monster, on all maps or in one of its map variants: the animation each monster skill and player skill plays, what any other attack plays (an animation, a rotation, the generic pattern or a draw), when the monster skill is cleared, their sound, and the handlers that read them (MonsterAttackReaders)
 - **MuMonsterTranslationsUI** - Monster names as a grid of numbers and languages (the shared names grid, with MonsterNameRows as its rows), and the import and export of the old NpcName txt files (MonsterNpcNameFiles)
-- **MonsterCheckArea** - The monsters, the monster models and the sound sets in Data Checks: the checks of a save and of the attacks, each leading to its monster and field (MonsterChecks, MonsterAttackChecks, MonsterCheckTargets)
+- **MonsterCheckArea** - The monsters, the monster models and the sound sets in Data Checks: the checks of a save, of the attacks and of the monsters with their numbers, each leading to its monster and field (MonsterChecks, MonsterAttackChecks, MonsterGroupChecks, MonsterCheckTargets)
 - **MonsterToolWindow** - What every monster tool window shares: the monster tools' frame, and the monster edit history as the editor bar's undo target while a monster tool is open
 
 ### Data Checks (UI/DataChecks)

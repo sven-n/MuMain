@@ -17,6 +17,21 @@
 >
 > This document is temporary. Its last task deletes it, after what stays true
 > has moved into `docs/item-data.md` and the code (see "Tasks").
+>
+> **Changed 2026-11-06.** sven-n/MuMain#1007 made the Dark Horse's defense count
+> the hero's total agility, as OpenMU's `TotalAgility`; P30, section 4, section
+> 12 and 9b5 say so.
+>
+> **9a1 as built (2026-11-07, sven-n/MuMain#1013).** The format reads what luck
+> uses: the type `luck`, and a value's `values`. Each group's pull request adds
+> its type and the fields it uses (`per` with 9a3; `firstLevel`, `levelType`,
+> `requiresItemLevel`, an option's `type`, `bits`, `itemLevels`,
+> `subOptionType` and `server.weight` with 9b). Save Items writes the option
+> files from 9a5 on, when Item Options changes them; 9a1 has their writers and
+> a test that the shipped files are written back as they are read. An item
+> file saved before 9a1 keeps its items without lists in the editor too, since
+> an empty list differs from the rules' (O33): Item Basics' "Use the rules"
+> (9a5) writes them.
 
 ## Goal
 
@@ -140,7 +155,7 @@ the rule that holds.
 | Wizard's rings | Code: fixed 10 % / 10 % / speed 10 (Lethal 15 / 15 / 10) at levels 0 and 3, without any byte | Two items | none | As excellent |
 | Wing options | Code, `CalcWingOptions` (`:291-373`), in the **excellent byte**: second tier HP and MP `50 + 5 * level`, ignore defense 3, AG +50, speed +5; capes the first three and the Cape of Lord's command `10 + 5 * level`; third tier ignore defense, reflect, full life and full mana recovery 5 each | `wingTier`, `cape` | excellent byte | Blue lines, first in the list |
 | Horn of Fenrir | Code (`ZzzInventory.cpp:2178-2245`): the excellent byte is 1, 2 or 4 (black, blue, gold) | One item | excellent byte | Code lines after the options; name lines already data (`Group13_Helper.json`) |
-| Dark Horse | Code (`GIPetManager.cpp:580-605`): defense `5 + dex / 20 + pet level * 2` | One item | none | Blue line |
+| Dark Horse | Code (`GIPetManager.cpp:580-605`): defense `5 + agility / 20 + pet level * 2` (the base agility; the total agility since sven-n/MuMain#1007) | One item | none | Blue line |
 | Jewel of Harmony | `JewelOfHarmonyOption_<lang>.bmd` (`UIJewelHarmony.cpp:15-88`): 3 kinds (weapon 10, staff 8, defense 8 options), a name, a first level, a value and a Zen cost per harmony level 0-13 | Groups 0-4, 5, 6-11 by code | harmony byte | Yellow bold when the item level reaches the harmony level, else gray |
 | Guardian (380) | `ItemAddOption.bmd` (`ItemAddOptioninfo.cpp`): two options and values per item, in the same file as the buff values | A record in the file | flag 0x40, no byte | Red-purple bold, both slots always written |
 | Sockets | `socketitem_<lang>.bmd` (`SocketSystem.cpp:605`): seed options with a value per sphere level 1-5 and a value kind (flat, %, per level, per max HP, per max MP), the bonus options, the set bonus | `IsSocketItem` list | socket bytes, `sphere level * 50 + element offset + number` | Purple header, blue per socket, after all layout markers |
@@ -233,7 +248,7 @@ Item Requirements has an option level selector for
 | P27 | The client's excellent range "groups 0 to 5" includes arrows and bolts; Season 3 to 6 item files mark them "no options", and OpenMU links none (`Weapons.cs:364-377`) | `CalcExcellentOptions` | 9a3 (O26) |
 | P28 | Books' excellent level / 20 and +2 % raise curse damage in the client (`ZzzInfomation.cpp:2383-2386`, Webzen's own 2008 fix `KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM`), wizardry in OpenMU and in the decompiled Season 6 server | `ZzzInfomation.cpp` | 9a3 (O26, known difference) |
 | P29 | Tooltips never reset `TextBold[]`, and of the `MaxTextListRows` rows (98, `ZzzInventory.h:91-95`) clear only the first 30 texts and 20 colours (`ZzzInventory.cpp:1768-1772`), so a long tooltip (a 32-row description with set or socket lines) also keeps the colours of the tooltip before from row 20 on; the ancient bonus lines (`RenderDefaultOptionText`, `CSItemOption.cpp:641-658`) and the Horn of Fenrir's colour lines (`ZzzInventory.cpp:2183-2200`) set no bold, so they are bold when the tooltip before had a bold row there | `BuildItemTooltipText` | before 9a4 (O31) |
-| P30 | Smaller exchange details: the Cape of Fighter links OpenMU's shared "2nd Wing Options" (`Wings.cs:88`); Dinorant's absorb and Blue Fenrir's are factors below 1 (`DamageReceiveDecrement` 0.95, 0.90) where the tooltip shows "absorb 5 %"; the Dark Horse is −0.15 plus `HorseLevel × −0.005` in OpenMU and uses the hero's base `Dexterity` in the client (`GIPetManager.cpp:596`); socket Fire #0 divides `TotalLevel` by 20, 19, 18, 17, 14 by sphere level; a `divisor` read back from a float (1/0.05f = 19.9999997) needs rounding; Gold Fenrir uses `TotalLevel` | OpenMU `Pets.cs`, `SocketSystem.cs:331` | 9a6, 9b1, 9b4, 9b5 |
+| P30 | Smaller exchange details: the Cape of Fighter links OpenMU's shared "2nd Wing Options" (`Wings.cs:88`); Dinorant's absorb and Blue Fenrir's are factors below 1 (`DamageReceiveDecrement` 0.95, 0.90) where the tooltip shows "absorb 5 %"; the Dark Horse is −0.15 plus `HorseLevel × −0.005` in OpenMU (its defense counts the total agility on both sides since sven-n/MuMain#1007, `Pets.cs:298`); socket Fire #0 divides `TotalLevel` by 20, 19, 18, 17, 14 by sphere level; a `divisor` read back from a float (1/0.05f = 19.9999997) needs rounding; Gold Fenrir uses `TotalLevel` | OpenMU `Pets.cs`, `SocketSystem.cs:331` | 9a6, 9b1, 9b4, 9b5 |
 | P31 | OpenMU's numbering differs from Webzen's in two places: its Earth socket offset is 36 where Webzen's ids start at 34, and its guardian option 1 is Webzen's slot 2 (the slots are swapped); the guardian `number` is the item group, which Webzen doesn't have | `ItemSerializerHelper.cs:68`, `GuardianOptions.cs` | 9b3, 9b4 (OpenMU issue) |
 
 ## Target design
@@ -448,7 +463,7 @@ value of 0 still shows a line (the level / 20 option of a level 15 hero).
 
 ```json
 {"values": 0, "per": [{"attribute": "level", "divisor": 20}]}                           // excellent level / 20 (P16; totalLevel after the fix, O26)
-{"values": 5, "per": [{"attribute": "dexterity", "divisor": 20}, {"attribute": "horseLevel", "times": 2}]}  // Dark Horse (base dexterity, P30)
+{"values": 5, "per": [{"attribute": "totalAgility", "divisor": 20}, {"attribute": "horseLevel", "times": 2}]}  // Dark Horse (total agility, as OpenMU)
 {"values": 0, "per": [{"attribute": "totalLevel", "divisor": [20, 19, 18, 17, 14]}]}    // socket Fire #0, a divisor per sphere level (P30)
 ```
 
@@ -466,8 +481,8 @@ OpenMU has the attribute:
 | `level` | `CharacterAttribute->Level` | `Level` |
 | `totalLevel` | `Level + MasterLevel` | `TotalLevel` (`Stats.cs:143`) |
 | `masterLevel` | `Master_Level_Data.nMLevel` | `MasterLevel` |
-| `totalStrength`, `totalAgility`, `totalVitality`, `totalEnergy`, `totalLeadership` | the hero's stats with their additions (`CharacterAttribute->Strength + AddStrength`, …) | the same names |
-| `strength`, `dexterity`, `vitality`, `energy`, `leadership` | the hero's base stats (`CharacterAttribute->Dexterity`, …; the Dark Horse, `GIPetManager.cpp:596`) | `BaseStrength`, `BaseAgility`, … |
+| `totalStrength`, `totalAgility`, `totalVitality`, `totalEnergy`, `totalLeadership` | the hero's stats with their additions (`CharacterAttribute->Strength + AddStrength`, …; the Dark Horse's agility, `SetPetItemConvert`) | the same names |
+| `strength`, `dexterity`, `vitality`, `energy`, `leadership` | the hero's base stats (`CharacterAttribute->Dexterity`, …) | `BaseStrength`, `BaseAgility`, … |
 | `maximumHealth`, `maximumMana` | `CharacterAttribute->LifeMax`, `ManaMax` | the same names |
 | `horseLevel`, `ravenLevel` | the Dark Lord pets' levels (`giPetManager`) | `HorseLevel`, `RavenLevel` |
 | `itemLevel` | the item's + level | none: client-only; the exchange writes it as OpenMU's item level related value where OpenMU has one, else as a known difference |
@@ -1027,8 +1042,7 @@ the Item Sync tool):
   written when a user ticks **Known**; nothing is shipped. `docs/item-data.md`
   lists the option differences with their reasons: zen, boots, the socket Lightning row, the Wizard's Ring at +1 and +2, the Lethal Wizard's
   Ring, the books' excellent options, the rounding of level / 20, the
-  Elite Skeleton ring's vitality against max HP, the Dark Horse's base
-  dexterity against OpenMU's `TotalAgility` (`Pets.cs:298`, P30), Gold
+  Elite Skeleton ring's vitality against max HP, Gold
   Fenrir's hero level (`ZzzInventory.cpp:2203`) against `TotalLevel` (P30),
   and OpenMU's Fenrir reader and its socket and guardian numbering (P21,
   P31).
@@ -1077,9 +1091,10 @@ others. The option slots fix (O23) comes first; 9a1 builds on its 16 slots.
    and 10, and `docs/CODING_RULES.md`.
 2. Add `ItemOptionDatabase` (section 1), the loaders, **writers** and
    validators in `ItemJsonStorage` for `Options/*.json`, `OptionRules.json`
-   and `OptionTexts.json` (Save Items writes them from 9a1 on, because the
-   conversion and the bmd import write the item lists), and the calls in
-   `CItemDataHandler::Load` (`OptionRules.json` in the editor build only, O34).
+   and `OptionTexts.json` (Save Items writes them from 9a5 on, when Item
+   Options changes them; the item lists that the conversion and the bmd import
+   write are in the item files), and the calls in `CItemDataHandler::Load`
+   (`OptionRules.json` in the editor build only, O34).
 3. Add `options` to `ItemDefinition` and the item JSON format (section 6,
    O24: the game reads only the list); move the conditions of
    `StatProfileRule` into `ItemRuleConditions` and add `OptionRule` with
@@ -1197,7 +1212,7 @@ where they are until then.
 | 9b2 | `JewelOfHarmonyOption_<lang>.bmd` (`UIJewelHarmony.cpp:15-88`) | `harmonyPhysicalAttack`, `harmonyWizardryAttack` (also books, P7), `harmonyDefense` (Webzen's types 1, 2, 3, O27); values `{"firstLevel": <Minlevel>, "values": [...]}` with `requiresItemLevel`; Zen costs per level stay with the definition as `"zen": [...]` (client-only); names into `OptionTexts.json`; OpenMU weights under `server` | `GetStrengthenCapability` reads the definitions; P11 is reported, not fixed |
 | 9b3 | `ItemAddOption.bmd`, its 380 records (`ItemAddOptioninfo.cpp`) | one `guardian` definition per item kind (weapon, helm, armor, pants, gloves, boots), values as the bmd (boots 700, O26) except the pants' defensive skill, 100 where the bmd has 200, the one tooltip line 9b3 changes (O32) | needs #966; the buff records stay in the bmd (O13); OpenMU's slot order differs (P31) |
 | 9b4 | `socketitem_<lang>.bmd` (`SocketSystem.cpp:605`) | one `socket` definition per element, values per sphere level (Lightning critical damage 30 / 32 / 35 / 40 / 50, P26); `socketBonus` definitions; the set bonus as `"combinations"` in `Socket.json` (OpenMU's `ItemOptionCombinationBonus`); value kinds 3 to 5 as `per` terms (O7), with a divisor per sphere level (P30) | `IsSocketItem`'s list becomes the links; P13; OpenMU's Earth offset (P31) |
-| 9b5 | Fenrir (`ZzzInventory.cpp:2178-2245`), Dark Horse (`GIPetManager.cpp:580-605`), Dinorant (`ZzzInfomation.cpp:557-574`), Wizard's rings (`:453-483`), the skeleton rings' descriptions | one `fenrir` definition (O28), `darkHorse` (base dexterity, P30), `hornOfDinorant` (`bits`), `wizardsRing` and `lethalWizardsRing` and the two skeleton rings (`fixed`, O29) | section 3; the Wizard's Ring fix (+0 only, P25) is a pull request right after it; the skeleton rings' `fixed` options take no `Special[]` slot (section 7) |
+| 9b5 | Fenrir (`ZzzInventory.cpp:2178-2245`), Dark Horse (`GIPetManager.cpp:580-605`), Dinorant (`ZzzInfomation.cpp:557-574`), Wizard's rings (`:453-483`), the skeleton rings' descriptions | one `fenrir` definition (O28), `darkHorse` (total agility, as OpenMU), `hornOfDinorant` (`bits`), `wizardsRing` and `lethalWizardsRing` and the two skeleton rings (`fixed`, O29) | section 3; the Wizard's Ring fix (+0 only, P25) is a pull request right after it; the skeleton rings' `fixed` options take no `Special[]` slot (section 7) |
 | 9b6 | the option loop of `BuildItemTooltipText` | – | section 9 |
 
 `zen` on harmony options and `combinations` in `Socket.json` are named here

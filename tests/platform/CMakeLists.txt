@@ -26,7 +26,8 @@ mu_add_test(
         test_win_ini.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinIni.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/WinNls.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+    LINK_LIBS
+        mu_test_path_resolve
 )
 
 # Font sizing uses the real UI scaling layer. Supply its application-owned globals and

@@ -68,9 +68,10 @@ const std::wstring& GetOSVersionString()
         if (pRtlGetVersion(&info) != 0)  // 0 == STATUS_SUCCESS
             return L"Windows (unknown)";
 
+        // The build tells Windows 11 (22000 and up) from Windows 10; both report 10.0.
         wchar_t buf[64];
-        swprintf(buf, std::size(buf), L"Windows %lu.%lu",
-                 info.dwMajorVersion, info.dwMinorVersion);
+        swprintf(buf, std::size(buf), L"Windows %lu.%lu build %lu", info.dwMajorVersion, info.dwMinorVersion,
+                 info.dwBuildNumber);
         return buf;
     }();
     return osVersion;
@@ -189,7 +190,32 @@ const std::wstring& GetOSVersionString()
     }();
     return osVersion;
 }
+
+const std::wstring& GetOSVersionDetails()
+{
+    static const std::wstring details = []() -> std::wstring
+    {
+        utsname uts{};
+        if (uname(&uts) != 0)
+            return GetOSVersionString();
+
+        // The full release keeps what the overlay's major.minor drops, such as a WSL kernel's suffix.
+        const std::string kernel = std::string(uts.sysname) + " " + uts.release;
+        const std::wstring kernelW(kernel.begin(), kernel.end());
+        const std::wstring distro = GetOSDistroName();
+        return distro.empty() ? kernelW : distro + L" (" + kernelW + L")";
+    }();
+    return details;
+}
 #endif // _WIN32
+
+#if defined(_WIN32) || defined(__ANDROID__) || defined(__APPLE__)
+// These names already carry every detail.
+const std::wstring& GetOSVersionDetails()
+{
+    return GetOSVersionString();
+}
+#endif
 
 const std::string& GetProcessorName()
 {
@@ -233,4 +259,18 @@ int GetSystemMemoryMB()
     return SDL_GetSystemRAM();
 }
 
+std::filesystem::path GetExecutablePath()
+{
+    // GetModuleFileNameW is Win32's, and WinApiShims.h's elsewhere (/proc/self/exe, and on macOS _NSGetExecutablePath
+    // made absolute before Winmain moves the working directory).
+    constexpr DWORD executablePathCapacity = 4096;
+    wchar_t executablePath[executablePathCapacity] = {};
+    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
+        return {};
+#ifdef _WIN32
+    return executablePath;
+#else
+    return mu_narrow_path(executablePath);
+#endif
+}
 }

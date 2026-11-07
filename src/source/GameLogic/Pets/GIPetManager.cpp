@@ -21,6 +21,7 @@
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
@@ -581,27 +582,9 @@ static std::uint8_t g_tabBar = 0;
     {
         if (ip->Type == ITEM_DARK_HORSE_ITEM)
         {
-            int Index = 0;
-            for (int i = 0; i < ip->SpecialNum; ++i)
-            {
-                if (ip->Special[i] == AT_SET_OPTION_IMPROVE_DEFENCE)
-                {
-                    Index = i;
-                    break;
-                }
-            }
-
-            if (Index == 0)
-            {
-                ip->SpecialValue[ip->SpecialNum] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
-                ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE;
-                ip->SpecialNum++;
-            }
-            else
-            {
-                ip->SpecialValue[Index] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
-                ip->Special[Index] = AT_SET_OPTION_IMPROVE_DEFENCE;
-            }
+            const int agility = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+            const int defense = 5 + (agility / 20) + pPetInfo->m_wLevel * 2;
+            GameLogic::Items::SetOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
         }
     }
 
@@ -786,11 +769,20 @@ static std::uint8_t g_tabBar = 0;
         SetPetItemConvert(&shown, &gs_PetInfo);
         for (int i = 0; i < shown.SpecialNum; ++i)
         {
-            GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            ++TextNum;
-            ++SkipNum;
+            // An option of the option definitions (an item file may give the pets luck) writes its own lines.
+            if (const std::optional<int> rows = WriteDefinitionOptionLines(shown, i, TextNum, kTooltipLineLimit))
+            {
+                TextNum += *rows;
+                SkipNum += *rows;
+            }
+            else
+            {
+                GetSpecialOptionText(shown.Type, TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
+                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                TextBold[TextNum] = false;
+                ++TextNum;
+                ++SkipNum;
+            }
 
             if (TextNum >= kTooltipLineLimit)
             {

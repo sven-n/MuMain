@@ -28,6 +28,9 @@
         ]
       }
     }],
+    ["@semantic-release/exec", {
+      "prepareCmd": "bash scripts/stamp_release_version.sh ${nextRelease.gitTag} MuMain-windows-native-x64-release-editor-off-no-data.tar.gz MuMain-linux-native-x64-release-editor-off-no-data.tar.gz MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz"
+    }],
     ["@semantic-release/github", {
       "successCommentCondition": false,
       "assets": [

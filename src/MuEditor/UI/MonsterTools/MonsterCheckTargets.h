@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "../MuEditor/UI/Common/ToolGroups.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 
 #include <optional>
 #include <string_view>
@@ -40,6 +41,11 @@ std::optional<int> GetMapVariantOfField(std::string_view field);
 // The set a problem of a sound set names: "Raymond" of "sound set Raymond
 // soundEvents[0].cues"; nullopt for any other field.
 std::optional<std::string_view> GetSoundSetOfField(std::string_view field);
+
+// The value a monster's numbers may share that the field is in (D61):
+// MapVariants for "monster 145 mapVariants[0].attacks", Names for "name.de";
+// nullopt for the number, its maps and any other field.
+std::optional<Data::Monsters::MonsterValueField> GetValueOfField(std::string_view field);
 
 // The window of a monster tool: its "###" id and its flag among the editor's
 // open tool windows.

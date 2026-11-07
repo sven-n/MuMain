@@ -7,7 +7,9 @@
 #include "MonsterEdits.h"
 #include "MonsterFileActions.h"
 #include "MonsterKindField.h"
+#include "MonsterOwnValues.h"
 #include "MonsterSelection.h"
+#include "MonsterShownValues.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
 
@@ -20,6 +22,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -60,17 +63,30 @@ void MuMonsterBrowserUI::Render(bool* open)
 
         const bool reveal = RevealSelection(selected);
         m_filter.search = m_search;
-        const MonsterBrowserList::Result rows = m_rows.Render(m_list.GetNumbers(m_filter), selected, reveal);
+        const MonsterBrowserList::Result rows =
+            m_rows.Render(m_list.GetRows(m_filter), selected, g_MonsterSelection.IsWholeMonster(), reveal);
         if (rows.clicked >= 0)
         {
-            g_MonsterSelection.Select(rows.clicked);
-            m_shownSerial = g_MonsterSelection.GetSerial();
+            SelectFromList(rows.clicked, rows.clickedMonster);
+        }
+        if (rows.toggled >= 0)
+        {
+            m_list.SetOpen(rows.toggled, rows.open);
         }
         if (rows.kindChanged >= 0)
         {
-            SetKind(rows.kindChanged, rows.kind);
+            SetKind(rows.kindChanged, rows.kindOfMonster, rows.kind);
+        }
+        if (rows.mapsChanged >= 0)
+        {
+            SetMaps(rows.mapsChanged, rows.maps);
+        }
+        if (rows.action != MonsterBrowserList::Action::None)
+        {
+            StartAction(rows.action, rows.actionNumber);
         }
         m_addDialog.Render();
+        m_numberDialog.Render();
         m_removeDialog.Render();
     }
     ToolWindow::End();
@@ -83,6 +99,7 @@ void MuMonsterBrowserUI::RenderFileActions()
     if (g_MonsterFileActions.RenderRevertButton())
     {
         m_list.Refresh();
+        OwnValues::LockAll();
     }
     if (g_MonsterEdits.GetHistory().IsModifiedSinceSave())
     {
@@ -159,26 +176,102 @@ void MuMonsterBrowserUI::RenderMissingFilter()
 
 void MuMonsterBrowserUI::RenderMonsterActions(int selectedNumber)
 {
+    using Action = MonsterBrowserList::Action;
     const bool hasMonster = g_MonsterDatabase.Find(selectedNumber) != nullptr;
+    // A number of a monster with several numbers (which has shared values),
+    // or a monster as a whole.
+    const bool number = hasMonster && !g_MonsterSelection.IsWholeMonster() &&
+                        g_MonsterEdits.FindSharedValues(selectedNumber) != nullptr;
+    const auto button = [&](const char* label, Action action)
+    {
+        ImGui::SameLine();
+        if (ImGui::Button(label))
+        {
+            StartAction(action, selectedNumber);
+        }
+    };
     if (ImGui::Button(I18N::Editor::AddMonster))
     {
         m_addDialog.OpenAdd();
     }
-    ImGui::SameLine();
     ImGui::BeginDisabled(!hasMonster);
-    if (ImGui::Button(I18N::Editor::CopyMonster))
+    button(I18N::Editor::AddNumber, Action::AddNumber);
+    if (number)
     {
-        m_addDialog.OpenCopy(selectedNumber);
+        button(I18N::Editor::CopyNumber, Action::CopyNumber);
+        button(I18N::Editor::MoveNumberTo, Action::MoveNumber);
+        button(I18N::Editor::SplitNumberOut, Action::SplitNumber);
+        button(I18N::Editor::RemoveNumber, Action::RemoveNumber);
     }
-    ImGui::SameLine();
-    if (ImGui::Button(I18N::Editor::RemoveMonster))
+    else
     {
-        m_removeDialog.Open(selectedNumber);
+        button(I18N::Editor::CopyMonster, Action::CopyMonster);
+        button(I18N::Editor::RemoveMonster, Action::RemoveMonster);
     }
     ImGui::EndDisabled();
 }
 
-void MuMonsterBrowserUI::SetKind(int number, MonsterKind kind)
+void MuMonsterBrowserUI::StartAction(MonsterBrowserList::Action action, int number)
+{
+    using Action = MonsterBrowserList::Action;
+    const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+    if (monster == nullptr)
+    {
+        return;
+    }
+    switch (action)
+    {
+    case Action::None:
+        break;
+    case Action::AddNumber:
+        m_numberDialog.OpenAddNumber(number);
+        break;
+    case Action::CopyMonster:
+        m_addDialog.OpenCopy(number);
+        break;
+    case Action::CopyNumber:
+        m_numberDialog.OpenCopyNumber(number);
+        break;
+    case Action::MoveNumber:
+        m_numberDialog.OpenMoveNumber(number);
+        break;
+    case Action::SplitNumber:
+    {
+        const std::string from = ShownValues::MonsterName(number);
+        if (g_MonsterEdits.SplitNumber(StepLabel::SplitNumber(*monster, from), number))
+        {
+            g_MonsterSelection.Select(number);
+        }
+        break;
+    }
+    case Action::RemoveNumber:
+        m_removeDialog.Open(number);
+        break;
+    case Action::RemoveMonster:
+        m_removeDialog.OpenWholeMonster(number);
+        break;
+    }
+}
+
+void MuMonsterBrowserUI::SetKind(int number, bool wholeMonster, MonsterKind kind)
+{
+    const std::optional<ShownValues::ShownMonster> shown =
+        ShownValues::Load(wholeMonster ? number + ShownValues::WholeMonsterKey : number);
+    if (!shown)
+    {
+        return;
+    }
+    ShownValues::ShownMonster changed = *shown;
+    changed.monster.kind = kind;
+    // "Death Centurion (3 numbers): kind" for a monster as a whole.
+    const std::string label = StepLabel::Kind(changed);
+    if (ShownValues::Store(label, changed))
+    {
+        SelectFromList(number, wholeMonster);
+    }
+}
+
+void MuMonsterBrowserUI::SetMaps(int number, const std::vector<Data::Maps::MapRef>& maps)
 {
     const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
     if (monster == nullptr)
@@ -186,15 +279,26 @@ void MuMonsterBrowserUI::SetKind(int number, MonsterKind kind)
         return;
     }
     MonsterDefinition changed = *monster;
-    changed.kind = kind;
-    if (g_MonsterEdits.SetMonster(StepLabel::Kind(changed), changed))
+    changed.maps = maps;
+    if (g_MonsterEdits.SetMonster(StepLabel::Maps(changed), changed))
     {
-        // The row stays while a kind filter would hide it now.
-        m_list.KeepRowsAfterOwnEdit();
-        // The monster whose kind changed is the one the tools show.
-        g_MonsterSelection.Select(number);
-        m_shownSerial = g_MonsterSelection.GetSerial();
+        SelectFromList(number, false);
     }
+}
+
+void MuMonsterBrowserUI::SelectFromList(int number, bool wholeMonster)
+{
+    if (wholeMonster)
+    {
+        g_MonsterSelection.SelectMonster(number);
+    }
+    else
+    {
+        g_MonsterSelection.Select(number);
+    }
+    // The row stays while a filter would hide it now.
+    m_list.KeepRowsAfterOwnEdit();
+    m_shownSerial = g_MonsterSelection.GetSerial();
 }
 
 bool MuMonsterBrowserUI::RevealSelection(int selectedNumber)
@@ -210,9 +314,17 @@ bool MuMonsterBrowserUI::RevealSelection(int selectedNumber)
     {
         return false;
     }
+    // A number shows in its monster's rows.
+    if (!g_MonsterSelection.IsWholeMonster())
+    {
+        m_list.SetOpen(selectedNumber, true);
+    }
     m_filter.search = m_search;
-    const std::vector<int>& listed = m_list.GetNumbers(m_filter);
-    if (std::ranges::find(listed, selectedNumber) == listed.end())
+    const std::vector<MonsterTreeModel::Row>& listed = m_list.GetRows(m_filter);
+    const bool whole = g_MonsterSelection.IsWholeMonster();
+    const bool shown = std::ranges::any_of(listed, [&](const MonsterTreeModel::Row& row)
+                                           { return MonsterTreeModel::ShowsSelection(row, selectedNumber, whole); });
+    if (!shown)
     {
         m_filter = {};
         m_search.clear();

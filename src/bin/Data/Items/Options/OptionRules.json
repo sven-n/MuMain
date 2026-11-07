@@ -1,0 +1,10 @@
+{
+  "formatVersion": 1,
+  "rules": [
+    {"options": [], "tags": ["ammunition"]},
+    {"options": ["luck"], "group": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},
+    {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
+    {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
+    {"options": ["luck"], "group": [13], "numbers": [30]}
+  ]
+}

@@ -43,7 +43,7 @@
     <value>Jeśli potrzebujesz szczegółowego przewodnika po kontynencie MU, zajrzyj na http://muonline.webzen.net</value>
   </data>
   <data name="Text_50" xml:space="preserve">
-    <value>Podobno 'Scroll of the Emperor', który opowiada o Murenie, pierwszym cesarzu MU, widywano w okolicach Lost Tower, Atlans i Dungeonu.</value>
+    <value>Podobno 'Zwój Cesarza', który opowiada o Murenie, pierwszym cesarzu MU, widywano w okolicach Lost Tower, Atlans i Dungeonu.</value>
   </data>
   <data name="Answer_50_Slot_0" xml:space="preserve">
     <value>Nie wiedziałem, że coś takiego istnieje...</value>
@@ -55,13 +55,13 @@
     <value>Wrócę z 1 000 000 Zen.</value>
   </data>
   <data name="Text_52" xml:space="preserve">
-    <value>Podobno 'Scroll of the Emperor', który opowiada o Murenie, pierwszym cesarzu, jaki zjednoczył MU, widywano w okolicach Lost Tower, Atlans i Dungeonu.</value>
+    <value>Podobno 'Zwój Cesarza', który opowiada o Murenie, pierwszym cesarzu, jaki zjednoczył MU, widywano w okolicach Lost Tower, Atlans i Dungeonu.</value>
   </data>
   <data name="Answer_52_Slot_0" xml:space="preserve">
     <value>Opowiedz więcej.</value>
   </data>
   <data name="Text_53" xml:space="preserve">
-    <value>'Scroll of the Emperor' spowija potężna moc. Każdy, kto go przeczyta, zostanie pobłogosławiony tą potężną mocą.</value>
+    <value>'Zwój Cesarza' spowija potężna moc. Każdy, kto go przeczyta, zostanie pobłogosławiony tą potężną mocą.</value>
   </data>
   <data name="Answer_53_Slot_0" xml:space="preserve">
     <value>Powtórz, proszę, tę historię.</value>
@@ -73,13 +73,13 @@
     <value>Nie obchodzi mnie to.</value>
   </data>
   <data name="Text_54" xml:space="preserve">
-    <value>Odnajdź 'Scroll of the Emperor'. Po przeczytaniu zostaniesz obdarzony wielką mocą.</value>
+    <value>Odnajdź 'Zwój Cesarza'. Po przeczytaniu zostaniesz obdarzony wielką mocą.</value>
   </data>
   <data name="Answer_54_Slot_0" xml:space="preserve">
     <value>Pójdę go odnaleźć.</value>
   </data>
   <data name="Text_55" xml:space="preserve">
-    <value>Odnalazłeś 'Scroll of the Emperor'! Upamiętnienie zjednoczenia dokonanego przez Murena, pierwszego cesarza Imperium MU, zostało zapisane tu mocą magii. Ten, kto posiada 'Scroll of the Emperor', zostaje obdarzony wielką mocą.</value>
+    <value>Odnalazłeś 'Zwój Cesarza'! Upamiętnienie zjednoczenia dokonanego przez Murena, pierwszego cesarza Imperium MU, zostało zapisane tu mocą magii. Ten, kto posiada 'Zwój Cesarza', zostaje obdarzony wielką mocą.</value>
   </data>
   <data name="Answer_55_Slot_0" xml:space="preserve">
     <value>Opowiedz mi o tym zapisie.</value>
@@ -100,7 +100,7 @@
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_58" xml:space="preserve">
-    <value>Można odnaleźć magiczne artefakty zwane 'Broken Sword', 'Tear of Elf' i 'Soul of Wizard'. 'Broken Sword' został ofiarowany przez Dark Knightów jako symbol ich odwagi, lojalności i pragnienia pomyślności.</value>
+    <value>Można odnaleźć magiczne artefakty zwane 'Złamany Miecz', 'Łza Elfa' i 'Odłamek Duszy Czarodzieja'. 'Złamany Miecz' został ofiarowany przez Dark Knightów jako symbol ich odwagi, lojalności i pragnienia pomyślności.</value>
   </data>
   <data name="Answer_58_Slot_0" xml:space="preserve">
     <value>Opowiedz poprzednią historię.</value>
@@ -109,7 +109,7 @@
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_59" xml:space="preserve">
-    <value>'Soul of Wizard' została ofiarowana przez Dark Wizardów jako symbol ich przysięgi, że użyją swej mocy dla pokoju i wolności imperium. Rok 10 ery MU, fragment zapisu upamiętniającego pokój...</value>
+    <value>'Odłamek Duszy Czarodzieja' został ofiarowany przez Dark Wizardów jako symbol ich przysięgi, że użyją swej mocy dla pokoju i wolności imperium. Rok 10 ery MU, fragment zapisu upamiętniającego pokój...</value>
   </data>
   <data name="Answer_59_Slot_0" xml:space="preserve">
     <value>Opowiedz poprzednią historię.</value>
@@ -118,7 +118,7 @@
     <value>Więc tak to było...</value>
   </data>
   <data name="Text_60" xml:space="preserve">
-    <value>Jeśli przeczytałeś 'Scroll of the Emperor', odszukaj 'Broken Sword', którego starożytni Dark Knightowie użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Dark Knightów znalazło go w Atlans, Lost Tower i Tarkanie.</value>
+    <value>Jeśli przeczytałeś 'Zwój Cesarza', odszukaj 'Złamany Miecz', którego starożytni Dark Knightowie użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Dark Knightów znalazło go w Atlans, Lost Tower i Tarkanie.</value>
   </data>
   <data name="Answer_60_Slot_0" xml:space="preserve">
     <value>Odnajdę go.</value>
@@ -127,55 +127,55 @@
     <value>Poddaję się.</value>
   </data>
   <data name="Text_61" xml:space="preserve">
-    <value>W tych miejscach niebezpieczeństwo czyha za każdym rogiem, a 'Broken Sword' niełatwo dostrzec. Lecz jeśli go znajdziesz, zostanie ci dana nowa moc! Wróć do mnie, gdy odnajdziesz 'Broken Sword'.</value>
+    <value>W tych miejscach niebezpieczeństwo czyha za każdym rogiem, a 'Złamany Miecz' niełatwo dostrzec. Lecz jeśli go znajdziesz, zostanie ci dana nowa moc! Wróć do mnie, gdy odnajdziesz 'Złamany Miecz'.</value>
   </data>
   <data name="Answer_61_Slot_0" xml:space="preserve">
     <value>Odnajdę go i wrócę z nim.</value>
   </data>
   <data name="Text_62" xml:space="preserve">
-    <value>Dzielny Dark Knight, odnalazłeś 'Broken Sword'! Po zjednoczeniu kontynentu MU Muren, pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
+    <value>Dzielny Dark Knight, odnalazłeś 'Złamany Miecz'! Po zjednoczeniu kontynentu MU Muren, pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
   </data>
   <data name="Answer_62_Slot_0" xml:space="preserve">
     <value>Opowiedz więcej.</value>
   </data>
   <data name="Text_63" xml:space="preserve">
-    <value>Po wojnie Dark Knightowie pragnący zostać Blade Knightami zaczęli szukać starożytnego 'Broken Sword', by dowieść swej odwagi.</value>
+    <value>Po wojnie Dark Knightowie pragnący zostać Blade Knightami zaczęli szukać starożytnego 'Złamanego Miecza', by dowieść swej odwagi.</value>
   </data>
   <data name="Answer_63_Slot_0" xml:space="preserve">
     <value>Więc tak to się stało!</value>
   </data>
   <data name="Text_64" xml:space="preserve">
-    <value>Przeczytałeś 'Scroll of the Emperor', prawda? Zatem musisz wiedzieć o 3 skarbach w nim zapisanych. Odnajdź kryształową 'Tear of Elf', stworzoną przez starożytne elfy z mocy ducha.</value>
+    <value>Przeczytałeś 'Zwój Cesarza', prawda? Zatem musisz wiedzieć o 3 skarbach w nim zapisanych. Odnajdź kryształową 'Łzę Elfa', stworzoną przez starożytne elfy z mocy ducha.</value>
   </data>
   <data name="Answer_64_Slot_0" xml:space="preserve">
     <value>Opowiedz mi więcej, proszę.</value>
   </data>
   <data name="Text_65" xml:space="preserve">
-    <value>To bardzo niebezpieczne miejsce, a 'Tear of Elf' niezwykle trudno odnaleźć. Lecz jeśli ją znajdziesz, zostanie ci dana nowa moc. Idź więc, odnajdź 'Tear of Elf' i wróć do mnie.</value>
+    <value>To bardzo niebezpieczne miejsce, a 'Łzę Elfa' niezwykle trudno odnaleźć. Lecz jeśli ją znajdziesz, zostanie ci dana nowa moc. Idź więc, odnajdź 'Łzę Elfa' i wróć do mnie.</value>
   </data>
   <data name="Answer_65_Slot_0" xml:space="preserve">
-    <value>Pójdę odnaleźć 'Tear of Elf'!</value>
+    <value>Pójdę odnaleźć 'Łzę Elfa'!</value>
   </data>
   <data name="Text_66" xml:space="preserve">
-    <value>Odnalazłeś 'Tear of Elf'! Po wojnie Lunedil, królowa elfów, stworzyła kamień łzy, rzucając magię na kamień ducha, by elfy mogły przywoływać moc bogini i budować swą potęgę.</value>
+    <value>Odnalazłeś 'Łzę Elfa'! Po wojnie Lunedil, królowa elfów, stworzyła kamień łzy, rzucając magię na kamień ducha, by elfy mogły przywoływać moc bogini i budować swą potęgę.</value>
   </data>
   <data name="Answer_66_Slot_0" xml:space="preserve">
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_67" xml:space="preserve">
-    <value>Przeczytałeś 'Scroll of the Emperor', prawda? Zatem musisz wiedzieć o 3 skarbach w nim zapisanych.</value>
+    <value>Przeczytałeś 'Zwój Cesarza', prawda? Zatem musisz wiedzieć o 3 skarbach w nim zapisanych.</value>
   </data>
   <data name="Answer_67_Slot_0" xml:space="preserve">
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_68" xml:space="preserve">
-    <value>Z twoją mocą jestem pewien, że odnajdziesz 'Soul of Wizard'. Idź więc, odnajdź ją i wróć do mnie, gdy ją zdobędziesz.</value>
+    <value>Z twoją mocą jestem pewien, że odnajdziesz 'Odłamek Duszy Czarodzieja'. Idź więc, odnajdź go i wróć do mnie, gdy go zdobędziesz.</value>
   </data>
   <data name="Answer_68_Slot_0" xml:space="preserve">
-    <value>Pójdę odnaleźć 'Soul of Wizard'.</value>
+    <value>Pójdę odnaleźć 'Odłamek Duszy Czarodzieja'.</value>
   </data>
   <data name="Text_69" xml:space="preserve">
-    <value>Wiedziałem, że odnajdziesz 'Soul of Wizard'! Etramu, największy Czarodziej z Arki, stworzył magiczny kamień chroniący duszę, w obawie, że słabi Dark Knightowie mogą ulec atakowi Kunduna.</value>
+    <value>Wiedziałem, że odnajdziesz 'Odłamek Duszy Czarodzieja'! Etramu, największy Czarodziej z Arki, stworzył magiczny kamień chroniący duszę, w obawie, że słabi Dark Knightowie mogą ulec atakowi Kunduna.</value>
   </data>
   <data name="Answer_69_Slot_0" xml:space="preserve">
     <value>Opowiedz mi więcej, proszę.</value>
@@ -232,13 +232,13 @@
     <value>Nie chcę iść w takie miejsce.</value>
   </data>
   <data name="Text_78" xml:space="preserve">
-    <value>To 'Tear of Elf', a elf, który odnajdzie ten kamień, staje się Muse Elfem, zdolnym przywoływać moc elfich Bogiń.</value>
+    <value>To 'Łza Elfa', a elf, który odnajdzie ten kamień, staje się Muse Elfem, zdolnym przywoływać moc elfich Bogiń.</value>
   </data>
   <data name="Answer_78_Slot_0" xml:space="preserve">
     <value>Zostałem Muse Elfem!</value>
   </data>
   <data name="Text_79" xml:space="preserve">
-    <value>Skoro odnalazłeś zarówno 'Scroll of the Emperor', jak i 'Broken Sword', od teraz będą cię zwać Blade Knightem.</value>
+    <value>Skoro odnalazłeś zarówno 'Zwój Cesarza', jak i 'Złamany Miecz', od teraz będą cię zwać Blade Knightem.</value>
   </data>
   <data name="Answer_79_Slot_0" xml:space="preserve">
     <value>Zostałem Blade Knightem!</value>
@@ -253,7 +253,7 @@
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_81" xml:space="preserve">
-    <value>'Tear of Elf' została ofiarowana przez elfy jako znak ich przysięgi, że wzmocnią potęgę elfów i ludzi.</value>
+    <value>'Łza Elfa' została ofiarowana przez elfy jako znak ich przysięgi, że wzmocnią potęgę elfów i ludzi.</value>
   </data>
   <data name="Answer_81_Slot_0" xml:space="preserve">
     <value>Opowiedz poprzednią historię.</value>
@@ -262,7 +262,7 @@
     <value>Mów dalej, proszę.</value>
   </data>
   <data name="Text_82" xml:space="preserve">
-    <value>Odnajdź 'Soul of Wizard'. Wedle starożytnych Dark Wizardów ostatnio widziano ją w okolicach Lost Tower, Atlans i Tarkanu.</value>
+    <value>Odnajdź 'Odłamek Duszy Czarodzieja'. Wedle starożytnych Dark Wizardów ostatnio widziano go w okolicach Lost Tower, Atlans i Tarkanu.</value>
   </data>
   <data name="Answer_82_Slot_0" xml:space="preserve">
     <value>Pójdę ją odnaleźć.</value>
@@ -271,13 +271,13 @@
     <value>Wrócę później.</value>
   </data>
   <data name="Text_90" xml:space="preserve">
-    <value>Skończyłeś czytać 'Scroll of the Emperor'. Lecz czy wiesz o tajnym układzie między Murenem a Semedenem, przywódcą Summonerów? Murenowi obiecano pewną rzecz w zamian za oddanie Elveland pod władzę imperium.</value>
+    <value>Skończyłeś czytać 'Zwój Cesarza'. Lecz czy wiesz o tajnym układzie między Murenem a Semedenem, przywódcą Summonerów? Murenowi obiecano pewną rzecz w zamian za oddanie Elveland pod władzę imperium.</value>
   </data>
   <data name="Answer_90_Slot_0" xml:space="preserve">
     <value>Słuchaj dalej.</value>
   </data>
   <data name="Text_91" xml:space="preserve">
-    <value>Na kontynencie MU znajdowała się brama do wymiaru świata, nadzorowana przez Summonerów. Semeden ofiarował 'Abyss of Eye' jako znak obietnicy. Proszę, idź i przynieś 'Abyss of Eye'.</value>
+    <value>Na kontynencie MU znajdowała się brama do wymiaru świata, nadzorowana przez Summonerów. Semeden ofiarował 'Oko Otchłani' jako znak obietnicy. Proszę, idź i przynieś 'Oko Otchłani'.</value>
   </data>
   <data name="Answer_91_Slot_0" xml:space="preserve">
     <value>Przyjmij zadanie</value>
@@ -286,25 +286,25 @@
     <value>Odrzuć zadanie</value>
   </data>
   <data name="Text_92" xml:space="preserve">
-    <value>Słyszałem, że 'Abyss of Eye' odnaleziono w okolicach Atlans, Lost Tower i Tarkanu. Wróć z 'Abyss of Eye', gdy tylko je znajdziesz.</value>
+    <value>Słyszałem, że 'Oko Otchłani' odnaleziono w okolicach Atlans, Lost Tower i Tarkanu. Wróć z 'Okiem Otchłani', gdy tylko je znajdziesz.</value>
   </data>
   <data name="Answer_92_Slot_0" xml:space="preserve">
     <value>Zakończ opowieść</value>
   </data>
   <data name="Text_93" xml:space="preserve">
-    <value>Odnalazłeś 'Abyss of Eye'. Znane jest jako przedmiot z substancji, która nie istnieje w realnym świecie. Pochodzi ze świata sprzed obecnego, a wraz z nim powraca pamięć.</value>
+    <value>Odnalazłeś 'Oko Otchłani'. Znane jest jako przedmiot z substancji, która nie istnieje w realnym świecie. Pochodzi ze świata sprzed obecnego, a wraz z nim powraca pamięć.</value>
   </data>
   <data name="Answer_93_Slot_0" xml:space="preserve">
     <value>Słuchaj dalej.</value>
   </data>
   <data name="Text_94" xml:space="preserve">
-    <value>'Abyss of Eye' ma dla mnie szczególne znaczenie, gdyż nadzoruję wymiary tego świata i porozumiewam się przez nie. Jeśli przyniesiesz 'Abyss of Eye', nadam ci tytuł Bloody Summonera od Semedena, opiekuna twojego wymiaru.</value>
+    <value>'Oko Otchłani' ma dla mnie szczególne znaczenie, gdyż nadzoruję wymiary tego świata i porozumiewam się przez nie. Jeśli przyniesiesz 'Oko Otchłani', nadam ci tytuł Bloody Summonera od Semedena, opiekuna twojego wymiaru.</value>
   </data>
   <data name="Answer_94_Slot_0" xml:space="preserve">
     <value>Przyjmij tytuł Bloody Summonera</value>
   </data>
   <data name="Text_100" xml:space="preserve">
-    <value>Legendarny skarb zwany 'Ring of Glory' jest potrzebny, by zyskać błogosławieństwo i siłę Murena. Znów objawił swą obecność w naszych ziemiach. Lecz nie jesteś gotów. Poczekaj, aż zdobędziesz więcej doświadczenia.</value>
+    <value>Legendarny skarb zwany 'Pierścień Chwały' jest potrzebny, by zyskać błogosławieństwo i siłę Murena. Znów objawił swą obecność w naszych ziemiach. Lecz nie jesteś gotów. Poczekaj, aż zdobędziesz więcej doświadczenia.</value>
   </data>
   <data name="Answer_100_Slot_0" xml:space="preserve">
     <value>Co więc mam zrobić?</value>
@@ -316,13 +316,13 @@
     <value>Wrócę, gdy nadejdzie mój czas.</value>
   </data>
   <data name="Text_102" xml:space="preserve">
-    <value>Legendarny skarb zwany 'Ring of Glory' jest potrzebny, by zyskać błogosławieństwo i siłę Murena. Znów objawił swą obecność w naszych ziemiach.</value>
+    <value>Legendarny skarb zwany 'Pierścień Chwały' jest potrzebny, by zyskać błogosławieństwo i siłę Murena. Znów objawił swą obecność w naszych ziemiach.</value>
   </data>
   <data name="Answer_102_Slot_0" xml:space="preserve">
     <value>Chcę usłyszeć więcej.</value>
   </data>
   <data name="Text_103" xml:space="preserve">
-    <value>Ktokolwiek posiądzie 'Ring of Glory', zyska błogosławieństwo Murena. Podobno można go znaleźć na pustyniach za morzem.</value>
+    <value>Ktokolwiek posiądzie 'Pierścień Chwały', zyska błogosławieństwo Murena. Podobno można go znaleźć na pustyniach za morzem.</value>
   </data>
   <data name="Answer_103_Slot_0" xml:space="preserve">
     <value>Dlaczego tak?</value>
@@ -340,13 +340,13 @@
     <value>Nie jestem jeszcze gotów.</value>
   </data>
   <data name="Text_105" xml:space="preserve">
-    <value>'Ring of Glory' może być bliżej, niż myślisz. Gdy go zdobędziesz, z pewnością poczujesz zmianę w swej mocy. Lecz nie będzie to łatwe zadanie.</value>
+    <value>'Pierścień Chwały' może być bliżej, niż myślisz. Gdy go zdobędziesz, z pewnością poczujesz zmianę w swej mocy. Lecz nie będzie to łatwe zadanie.</value>
   </data>
   <data name="Answer_105_Slot_0" xml:space="preserve">
     <value>Wrócę z nim.</value>
   </data>
   <data name="Text_108" xml:space="preserve">
-    <value>To zaiste 'Ring of Glory'. Lśni mistyczną aurą, bardziej, niż sobie wyobrażałem. Z tym pierścieniem wiąże się legenda, której nie zdołasz pojąć. To prawdziwe błogosławieństwo w twych dłoniach.</value>
+    <value>To zaiste 'Pierścień Chwały'. Lśni mistyczną aurą, bardziej, niż sobie wyobrażałem. Z tym pierścieniem wiąże się legenda, której nie zdołasz pojąć. To prawdziwe błogosławieństwo w twych dłoniach.</value>
   </data>
   <data name="Answer_108_Slot_0" xml:space="preserve">
     <value>Rozumiem.</value>
@@ -364,13 +364,13 @@
     <value>Czyżby?</value>
   </data>
   <data name="Text_111" xml:space="preserve">
-    <value>'Ring of Glory' powstał, gdy proroctwo Secromicon stworzono z niezniszczalnego metalu. Oba uważano za święte, lecz ich los stał się nieznany, gdy zostały zabrane podczas buntu zastępcy dowódcy, Gaiona.</value>
+    <value>'Pierścień Chwały' powstał, gdy proroctwo Secromicon stworzono z niezniszczalnego metalu. Oba uważano za święte, lecz ich los stał się nieznany, gdy zostały zabrane podczas buntu zastępcy dowódcy, Gaiona.</value>
   </data>
   <data name="Answer_111_Slot_0" xml:space="preserve">
     <value>Czyżby?!</value>
   </data>
   <data name="Text_112" xml:space="preserve">
-    <value>Teraz, gdy odnaleziono 'Ring of Glory', zdołasz wyrosnąć na jeszcze potężniejszego wojownika.</value>
+    <value>Teraz, gdy odnaleziono 'Pierścień Chwały', zdołasz wyrosnąć na jeszcze potężniejszego wojownika.</value>
   </data>
   <data name="Answer_112_Slot_0" xml:space="preserve">
     <value>Czuję, jak rośnie moja moc!</value>
@@ -388,19 +388,19 @@
     <value>Wrócę później.</value>
   </data>
   <data name="Text_115" xml:space="preserve">
-    <value>'Dark Stone', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU. Lecz nie jesteś gotów, by użyć tej mocy. Poczekaj, aż będziesz gotów.</value>
+    <value>'Ciemny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU. Lecz nie jesteś gotów, by użyć tej mocy. Poczekaj, aż będziesz gotów.</value>
   </data>
   <data name="Answer_115_Slot_0" xml:space="preserve">
     <value>Wrócę, gdy będę gotów.</value>
   </data>
   <data name="Text_116" xml:space="preserve">
-    <value>By zyskać pełnię mocy, musisz przygotować się ze 'Scroll of the Emperor', który zapisuje historyczne fakty o cesarzu Murenie. Udaj się do 'Seviny' w Devias.</value>
+    <value>By zyskać pełnię mocy, musisz przygotować się ze 'Zwojem Cesarza', który zapisuje historyczne fakty o cesarzu Murenie. Udaj się do 'Seviny' w Devias.</value>
   </data>
   <data name="Answer_116_Slot_0" xml:space="preserve">
     <value>Wrócę, gdy będę gotów.</value>
   </data>
   <data name="Text_117" xml:space="preserve">
-    <value>Nie udało ci się zostać Blade Knightem. Wróć, gdy zdobędziesz nową moc dzięki 'Ring of Glory'.</value>
+    <value>Nie udało ci się zostać Blade Knightem. Wróć, gdy zdobędziesz nową moc dzięki 'Pierścieniowi Chwały'.</value>
   </data>
   <data name="Answer_117_Slot_0" xml:space="preserve">
     <value>Wrócę, gdy będę gotów.</value>
@@ -418,7 +418,7 @@
     <value>Wrócę z 2 000 000 Zen.</value>
   </data>
   <data name="Text_130" xml:space="preserve">
-    <value>To zaiste 'Ring of Glory'. Spójrz, jak lśni. Ten pierścień skrywa czas i legendę, których nie zdołasz nawet zacząć pojmować. To błogosławieństwo, że go odnalazłeś!</value>
+    <value>To zaiste 'Pierścień Chwały'. Spójrz, jak lśni. Ten pierścień skrywa czas i legendę, których nie zdołasz nawet zacząć pojmować. To błogosławieństwo, że go odnalazłeś!</value>
   </data>
   <data name="Answer_130_Slot_0" xml:space="preserve">
     <value>Zaskakują mnie te słowa!</value>
@@ -436,25 +436,25 @@
     <value>Czyżby!</value>
   </data>
   <data name="Text_133" xml:space="preserve">
-    <value>'Ring of Glory' powstał, gdy proroctwo Secromicon stworzono z niezniszczalnego metalu. Oba uważano za święte, lecz ich los stał się nieznany, gdy zostały zabrane podczas buntu zastępcy dowódcy, Gaiona.</value>
+    <value>'Pierścień Chwały' powstał, gdy proroctwo Secromicon stworzono z niezniszczalnego metalu. Oba uważano za święte, lecz ich los stał się nieznany, gdy zostały zabrane podczas buntu zastępcy dowódcy, Gaiona.</value>
   </data>
   <data name="Answer_133_Slot_0" xml:space="preserve">
     <value>Czyżby!</value>
   </data>
   <data name="Text_134" xml:space="preserve">
-    <value>Teraz, gdy odnaleziono 'Ring of Glory', zdołasz wyrosnąć na jeszcze potężniejszego wojownika.</value>
+    <value>Teraz, gdy odnaleziono 'Pierścień Chwały', zdołasz wyrosnąć na jeszcze potężniejszego wojownika.</value>
   </data>
   <data name="Answer_134_Slot_0" xml:space="preserve">
     <value>Czuję, jak rośnie moja moc!</value>
   </data>
   <data name="Text_135" xml:space="preserve">
-    <value>Jeśli pragniesz zyskać nową moc, słuchaj mnie uważnie. 'Dark Stone', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU.</value>
+    <value>Jeśli pragniesz zyskać nową moc, słuchaj mnie uważnie. 'Ciemny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU.</value>
   </data>
   <data name="Answer_135_Slot_0" xml:space="preserve">
     <value>Chciałbym usłyszeć więcej.</value>
   </data>
   <data name="Text_136" xml:space="preserve">
-    <value>Dzięki 'Dark Stone' możesz opanować nową umiejętność. Nie będzie to łatwe, lecz skoro zdołałeś zdobyć 'Ring of Glory', może i to jest dla ciebie możliwe.</value>
+    <value>Dzięki 'Ciemnemu Kamieniowi' możesz opanować nową umiejętność. Nie będzie to łatwe, lecz skoro zdołałeś zdobyć 'Pierścień Chwały', może i to jest dla ciebie możliwe.</value>
   </data>
   <data name="Answer_136_Slot_0" xml:space="preserve">
     <value>Co mam zrobić?</value>
@@ -472,13 +472,13 @@
     <value>Nie czuję się jeszcze pewnie.</value>
   </data>
   <data name="Text_138" xml:space="preserve">
-    <value>'Dark Stone' wzywa cię właśnie teraz. Z nim w dłoni z pewnością zyskasz moc, jakiej nigdy wcześniej nie czułeś, lecz wielu innych wojowników również rozpaczliwie go szuka.</value>
+    <value>'Ciemny Kamień' wzywa cię właśnie teraz. Z nim w dłoni z pewnością zyskasz moc, jakiej nigdy wcześniej nie czułeś, lecz wielu innych wojowników również rozpaczliwie go szuka.</value>
   </data>
   <data name="Answer_138_Slot_0" xml:space="preserve">
-    <value>Wrócę z 'Dark Stone'.</value>
+    <value>Wrócę z 'Ciemnym Kamieniem'.</value>
   </data>
   <data name="Text_139" xml:space="preserve">
-    <value>A więc odnalazłeś 'Dark Stone'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w wojnie Bogów z Szatanem.</value>
+    <value>A więc odnalazłeś 'Ciemny Kamień'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w wojnie Bogów z Szatanem.</value>
   </data>
   <data name="Answer_139_Slot_0" xml:space="preserve">
     <value>Opowiedz więcej.</value>
@@ -490,19 +490,19 @@
     <value>Więc...</value>
   </data>
   <data name="Text_141" xml:space="preserve">
-    <value>Tak, płynie w tobie krew wojownika. Dlatego moc Benelope zostanie ci dana poprzez 'Dark Stone'.</value>
+    <value>Tak, płynie w tobie krew wojownika. Dlatego moc Benelope zostanie ci dana poprzez 'Ciemny Kamień'.</value>
   </data>
   <data name="Answer_141_Slot_0" xml:space="preserve">
     <value>Otrzymałem nową moc!</value>
   </data>
   <data name="Text_142" xml:space="preserve">
-    <value>Zdobyłeś nową moc dzięki 'Ring of Glory'. Lecz jest coś, czego nie wiesz.</value>
+    <value>Zdobyłeś nową moc dzięki 'Pierścieniowi Chwały'. Lecz jest coś, czego nie wiesz.</value>
   </data>
   <data name="Answer_142_Slot_0" xml:space="preserve">
     <value>Cóż takiego?</value>
   </data>
   <data name="Text_143" xml:space="preserve">
-    <value>Możliwe, że zdołasz zdobyć nową moc. Legendarny skarb zwany 'Dark Stone', uważany za święty wraz z 'Ring of Glory', wzywa cię.</value>
+    <value>Możliwe, że zdołasz zdobyć nową moc. Legendarny skarb zwany 'Ciemny Kamień', uważany za święty wraz z 'Pierścieniem Chwały', wzywa cię.</value>
   </data>
   <data name="Answer_143_Slot_0" xml:space="preserve">
     <value>Trudno w to uwierzyć!</value>

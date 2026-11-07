@@ -3949,4 +3949,106 @@
   <data name="Sound kind everything else" xml:space="preserve">
     <value>Alles andere</value>
   </data>
+  <data name="Add number" xml:space="preserve">
+    <value>Nummer hinzufügen</value>
+  </data>
+  <data name="Copy number" xml:space="preserve">
+    <value>Nummer kopieren</value>
+  </data>
+  <data name="Move number to" xml:space="preserve">
+    <value>Nummer verschieben nach...</value>
+  </data>
+  <data name="Split number out" xml:space="preserve">
+    <value>Nummer herauslösen</value>
+  </data>
+  <data name="Remove number" xml:space="preserve">
+    <value>Nummer entfernen</value>
+  </data>
+  <data name="Maps" xml:space="preserve">
+    <value>Karten</value>
+  </data>
+  <data name="No maps" xml:space="preserve">
+    <value>keine Karten</value>
+  </data>
+  <data name="Attacks" xml:space="preserve">
+    <value>Angriffe</value>
+  </data>
+  <data name="Map variants" xml:space="preserve">
+    <value>Kartenvarianten</value>
+  </data>
+  <data name="Number count {0}" xml:space="preserve">
+    <value>{0} Nummern</value>
+  </data>
+  <data name="Shared by the {0} numbers of {1}" xml:space="preserve">
+    <value>Geteilt von den {0} Nummern von {1}</value>
+  </data>
+  <data name="Make it this number's own" xml:space="preserve">
+    <value>Zum eigenen Wert dieser Nummer machen</value>
+  </data>
+  <data name="Own value of {0}" xml:space="preserve">
+    <value>Eigener Wert von {0}</value>
+  </data>
+  <data name="Back to" xml:space="preserve">
+    <value>Zurück zu...</value>
+  </data>
+  <data name="The monster's value" xml:space="preserve">
+    <value>Der Wert des Monsters</value>
+  </data>
+  <data name="Like number {0}" xml:space="preserve">
+    <value>Wie {0}</value>
+  </data>
+  <data name="The values the {0} numbers of {1} share" xml:space="preserve">
+    <value>Die Werte, die die {0} Nummern von {1} teilen</value>
+  </data>
+  <data name="Shared value locked" xml:space="preserve">
+    <value>Von den Nummern des Monsters geteilt: auf der Zeile des Monsters ändern oder zum eigenen Wert dieser Nummer machen (Rechtsklick).</value>
+  </data>
+  <data name="Monster row note" xml:space="preserve">
+    <value>Ein Monster mit mehreren Nummern: seine Zeile ändert die Werte, die sie teilen.</value>
+  </data>
+  <data name="Add a number to {0}" xml:space="preserve">
+    <value>Eine Nummer zu {0} hinzufügen</value>
+  </data>
+  <data name="Add number note" xml:space="preserve">
+    <value>Die neue Nummer bekommt die Werte, die die Nummern des Monsters teilen, und keine Karten.</value>
+  </data>
+  <data name="Copy number note {0}" xml:space="preserve">
+    <value>Eine Kopie von {0} im selben Monster, mit seinen Werten, aber ohne Karten.</value>
+  </data>
+  <data name="Move {0} into" xml:space="preserve">
+    <value>{0} verschieben in:</value>
+  </data>
+  <data name="Move number note" xml:space="preserve">
+    <value>Seine Werte bleiben: die, die das Monster auch hat, werden geteilt, die anderen sind seine eigenen.</value>
+  </data>
+  <data name="Remove monster with numbers {0} {1}" xml:space="preserve">
+    <value>Entfernt {0} und seine Nummern {1}.</value>
+  </data>
+  <data name="Step add number" xml:space="preserve">
+    <value>Nummer {0} zu {1} hinzufügen</value>
+  </data>
+  <data name="Step copy number" xml:space="preserve">
+    <value>{0} als {1} kopieren</value>
+  </data>
+  <data name="Step move number" xml:space="preserve">
+    <value>{0} nach {1} verschieben</value>
+  </data>
+  <data name="Step split number" xml:space="preserve">
+    <value>{0} aus {1} herauslösen</value>
+  </data>
+  <data name="Step remove monster with numbers" xml:space="preserve">
+    <value>{0} mit {1} Nummern entfernen</value>
+  </data>
+  <data name="Step back to" xml:space="preserve">
+    <value>{0}: {1} zurück zu {2}</value>
+  </data>
+  <data name="Step maps" xml:space="preserve">
+    <value>{0}: Karten</value>
+  </data>
+  <data name="Monster log name {0} {1}" xml:space="preserve">
+    <value>{0} ({1} Nummern)</value>
+  </data>
+  <data name="Item options" xml:space="preserve">
+    <value>Item-Optionen</value>
+  </data>
 </root>

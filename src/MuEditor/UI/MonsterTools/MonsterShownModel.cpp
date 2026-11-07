@@ -4,6 +4,7 @@
 
 #include "MonsterShownModel.h"
 
+#include "MonsterEdits.h"
 #include "MonsterSelection.h"
 
 #include "Core/Globals/_enum.h"
@@ -16,6 +17,7 @@
 #include "imgui.h"
 
 #include <set>
+#include <string>
 #include <string_view>
 
 namespace MuEditor::Monsters::ShownModel
@@ -96,12 +98,20 @@ void OpenWhenShown(int slot)
     g_MonsterDataHandler.OpenModelForTools(slot);
 }
 
-void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster)
+void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster, bool wholeMonster)
 {
     if (monster == nullptr)
     {
         ImGui::TextDisabled("%s", number == MonsterSelection::NoMonster ? I18N::Editor::NoMonsterIsSelected
                                                                         : I18N::Editor::NoMonsterAtThisNumber);
+        return;
+    }
+    if (wholeMonster)
+    {
+        const std::string count = std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size());
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheValuesThe0NumbersOf1Share,
+                                            {count, monster->names.Get(I18N::GetCurrentLocale())})
+                                   .c_str());
         return;
     }
     // The name is an argument, never the format: names may hold a "%".

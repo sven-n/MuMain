@@ -36,8 +36,10 @@ void OpenWhenShown(int slot);
 // Whether the game has the slot's model open now.
 bool IsOpen(int slot);
 
-// "2 Budge Dragon", or that no monster is selected.
-void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster);
+// "2 Budge Dragon", or that no monster is selected. A tool that shows the
+// values a monster's numbers share passes `wholeMonster`: "The values the 3
+// numbers of Death Centurion share" (D61).
+void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster, bool wholeMonster);
 
 // Why the monster's model is not shown: it names none, or one outside the
 // model list.

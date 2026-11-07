@@ -17,6 +17,8 @@ mu_add_test(
         test_item_model_problems.cpp
         test_item_model_tool.cpp
         test_item_names.cpp
+        test_item_option_links.cpp
+        test_item_options_json.cpp
         test_item_stat_file_change.cpp
         test_item_stats_json.cpp
         test_item_users.cpp
@@ -135,6 +137,8 @@ mu_add_test(
         test_monster_data_users.cpp
         test_monster_database.cpp
         test_monster_edit_history.cpp
+        test_monster_grouped_edits.cpp
+        test_monster_grouped_tools.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
@@ -186,6 +190,7 @@ mu_add_test(
         test_item_exchange_file.cpp
         test_item_mesh_list.cpp
         test_item_model_files.cpp
+        test_item_option_slots.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_set_chrome.cpp
@@ -196,11 +201,11 @@ mu_add_test(
         test_item_tooltip_text.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
-        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
-        ${CMAKE_SOURCE_DIR}/tests/ui/RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
+        mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
         MuCryptopp
 )
@@ -257,10 +262,10 @@ mu_add_test(
         test_effect_call_sites.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
-        ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        mu_test_effect_data
 )
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"

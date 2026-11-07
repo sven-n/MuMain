@@ -83,6 +83,22 @@ TEST_CASE("Monster checks: a problem of a map variant's attacks names the varian
     CHECK_FALSE(GetMapVariantOfField("monster 291 name").has_value());
 }
 
+TEST_CASE("Monster checks: a problem names the value a monster's numbers may share (D61) [editor][monsters]")
+{
+    using Data::Monsters::MonsterValueField;
+    using MuEditor::Monsters::GetValueOfField;
+    CHECK(GetValueOfField("monster 145 mapVariants[0].attacks") == MonsterValueField::MapVariants);
+    CHECK(GetValueOfField("monster 336 attacks.otherwise") == MonsterValueField::Attacks);
+    CHECK(GetValueOfField("monster 2 name.de") == MonsterValueField::Names);
+    CHECK(GetValueOfField("kind") == MonsterValueField::Kind);
+    CHECK(GetValueOfField("monster 2 model") == MonsterValueField::Model);
+    CHECK(GetValueOfField("monster 2 soundSet") == MonsterValueField::SoundSet);
+    CHECK(GetValueOfField("monster 2 randomVariants[1].soundSet") == MonsterValueField::RandomVariants);
+    CHECK_FALSE(GetValueOfField("monster 2 maps").has_value());
+    CHECK_FALSE(GetValueOfField("monster 2 number").has_value());
+    CHECK_FALSE(GetValueOfField("monsters[3].numbers").has_value());
+}
+
 TEST_CASE("Monster checks: a name opens Monster Translations, every other field the browser [editor][monsters]")
 {
     CHECK(GetToolForField("name") == MonsterTool::Translations);

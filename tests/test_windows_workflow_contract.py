@@ -41,6 +41,14 @@ MINGW_TOOLCHAINS = (
     ROOT / "cmake/toolchains/mingw-w64-i686.cmake",
     ROOT / "cmake/toolchains/mingw-w64-x86_64.cmake",
 )
+# The data release id, computed alike by data-assets.yml and the release job. cmake/WriteGitCommit.cmake computes it
+# once more for MuError.log, and tests/test_write_git_commit.cmake checks that against this formula's result: a
+# change here needs both.
+DATA_ASSET_ID_FORMULA = (
+    "data_tree=$(git rev-parse HEAD:src/bin/Data)",
+    "fonts_tree=$(git rev-parse HEAD:src/bin/fonts)",
+    "asset_id=$(printf '%s\\n%s\\n' \"$data_tree\" \"$fonts_tree\" | sha256sum | cut -c1-16)",
+)
 
 EXPECTED_WINDOWS_OS_DLLS = {
     "advapi32.dll",
@@ -773,9 +781,7 @@ check("tar -czf " not in release_job, "Release must consume runner-created archi
 
 data_release = step(release_job, "release", "Resolve compatible data release")
 for required in (
-    "git rev-parse HEAD:src/bin/Data",
-    "git rev-parse HEAD:src/bin/fonts",
-    "sha256sum",
+    *DATA_ASSET_ID_FORMULA,
     'data_tag="data-${asset_id}"',
     'gh release view "$data_tag" --json url --jq .url',
     'echo "DATA_ASSET_ID=${asset_id}"',
@@ -788,6 +794,10 @@ check(
     "Release must use Semantic Release",
 )
 check("id: semantic" in release_semantic, "Semantic Release must expose action outputs")
+check(
+    "@semantic-release/exec@" in release_semantic,
+    "Semantic Release must install the exec plugin that stamps the release version",
+)
 unpublished_check = step(release_job, "release", "Check unpublished release revision")
 for required in ("if: steps.semantic.outputs.new_release_published != 'true'",
                  "python3 scripts/ci_build_plan.py check-release"):
@@ -826,19 +836,46 @@ check(
     "Semantic Release must skip fork-incompatible success comments",
 )
 
+# The release tag goes into every archive before the GitHub plugin uploads them (MuError.log's Release line).
+plugin_names = [plugin[0] if isinstance(plugin, list) and plugin else plugin
+                for plugin in release_config.get("plugins", [])]
+exec_plugins = [
+    plugin
+    for plugin in release_config.get("plugins", [])
+    if isinstance(plugin, list) and plugin and plugin[0] == "@semantic-release/exec"
+]
+check(len(exec_plugins) == 1, "Release config must contain one exec plugin")
+prepare_command = ""
+if len(exec_plugins) == 1 and len(exec_plugins[0]) == 2 and isinstance(exec_plugins[0][1], dict):
+    prepare_command = exec_plugins[0][1].get("prepareCmd", "")
+check(
+    prepare_command.startswith("bash scripts/stamp_release_version.sh ${nextRelease.gitTag} "),
+    "The exec plugin must stamp the release tag",
+)
+check(
+    prepare_command.split()[3:] == [asset["path"] for asset in EXPECTED_RELEASE_ASSETS],
+    "The exec plugin must stamp every published archive",
+)
+if "@semantic-release/exec" in plugin_names and "@semantic-release/github" in plugin_names:
+    check(
+        plugin_names.index("@semantic-release/exec") < plugin_names.index("@semantic-release/github"),
+        "The release version must be stamped before the GitHub plugin",
+    )
+
 for required in (
     "workflow_dispatch:",
     "src/bin/Data/**",
     "src/bin/fonts/**",
     ".github/workflows/data-assets.yml",
     "contents: write",
-    "git rev-parse HEAD:src/bin/Data",
-    "git rev-parse HEAD:src/bin/fonts",
+    *DATA_ASSET_ID_FORMULA,
     "sha256sum",
     "MuMain-data-${asset_id}.tar.gz",
     "data-${asset_id}",
     "tar -czf",
     "-C src/bin Data fonts",
+    'printf \'%s\\n\' "$tag" > "${version_folder}/Data/DataVersion.txt"',
+    '-C "${version_folder}" Data/DataVersion.txt',
     "gh release view",
     "gh release create",
     "--latest=false",
