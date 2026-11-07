@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 #include "TestImGuiContext.h"
@@ -1243,6 +1244,23 @@ TEST_CASE("Item data errors stop loading [data][items]")
     std::string errorMessage;
     CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
+}
+
+// A broken option file stops the start with its own problem: without its definitions, every item's link would be an
+// error of its own and bury it.
+TEST_CASE("A fatal option file stops loading without an error for each item's link [data][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    std::ofstream(folder.Directory() / GetItemOptionsDirectory() / "Luck.json", std::ios::binary) << "{";
+    ClientDataScope client(folder.Directory());
+    LogCapture log("data");
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("Luck.json") != std::string::npos);
+    CHECK_FALSE(log.LineWith("Luck.json").empty());
+    CHECK(log.LineWith("is no option definition").empty());
 }
 
 TEST_CASE("An empty item name stops loading [data][items]")

@@ -62,7 +62,14 @@ ItemOptionDatabase LoadItemOptions(std::vector<ItemDefinition>& items, std::vect
 #else
     constexpr bool WithRules = false;
 #endif
-    ItemOptionDatabase options = LoadItemOptionFiles(WithRules, I18N::GetAvailableLocales(), issues);
+    std::vector<ItemDataIssue> optionIssues;
+    ItemOptionDatabase options = LoadItemOptionFiles(WithRules, I18N::GetAvailableLocales(), optionIssues);
+    issues.insert(issues.end(), optionIssues.begin(), optionIssues.end());
+    // Without the definitions every link would be an error of its own; the files' fatal problems stop the start.
+    if (HasFatal(optionIssues))
+    {
+        return options;
+    }
     ValidateItemOptionLinks(items, options, issues);
     ValidateOptionDefinitionUse(items, options, issues);
     for (ItemDefinition& item : items)
