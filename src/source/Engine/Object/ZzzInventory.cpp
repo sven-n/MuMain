@@ -1073,21 +1073,26 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     return  maxDurability;
 }
 
-// The tooltip lines of an option of the option definitions, its texts with `value`, blue and not bold, from row
-// `textNum` on; returns the row after them. A text the option texts lack has no line.
-static int WriteOptionLines(const Data::Items::ItemOption& option, int value, int textNum)
+std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int textNum, int rowLimit)
 {
-    for (const std::string& name : option.texts)
+    const std::optional<GameLogic::Items::SlotOption> slotOption = GameLogic::Items::FindSlotOption(item, slot);
+    if (!slotOption)
     {
-        if (textNum < MaxTextListRows &&
-            Engine::Items::OptionLines::Write(name, value, TextList[textNum], std::size(TextList[textNum])))
+        return std::nullopt;
+    }
+    const int value = GameLogic::Items::GetSlotOptionValue(item, *slotOption);
+    const int lastRow = std::min(rowLimit, MaxTextListRows);
+    int row = textNum;
+    for (const std::string& name : slotOption->option->texts)
+    {
+        if (row < lastRow && Engine::Items::OptionLines::Write(name, value, TextList[row], std::size(TextList[row])))
         {
-            TextListColor[textNum] = TEXT_COLOR_BLUE;
-            TextBold[textNum] = false;
-            ++textNum;
+            TextListColor[row] = TEXT_COLOR_BLUE;
+            TextBold[row] = false;
+            ++row;
         }
     }
-    return textNum;
+    return row - textNum;
 }
 
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
@@ -2155,10 +2160,9 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             break;
         }
 
-        if (const std::optional<GameLogic::Items::SlotOption> slotOption = GameLogic::Items::FindSlotOption(*ip, i))
+        if (const std::optional<int> rows = WriteDefinitionOptionLines(*ip, i, TextNum, MaxTextListRows))
         {
-            TextNum = WriteOptionLines(*slotOption->option, GameLogic::Items::GetSlotOptionValue(*ip, *slotOption),
-                                       TextNum);
+            TextNum += *rows;
             continue;
         }
 

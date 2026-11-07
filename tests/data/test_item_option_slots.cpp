@@ -9,6 +9,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Pets/GIPetManager.h"
@@ -327,4 +328,31 @@ TEST_CASE("An option slot keeps where its option came from [items]")
     CHECK(GameLogic::Items::GetOptionSource(item, 1) == GameLogic::Items::OptionSource{3, 1});
     CHECK_FALSE(GameLogic::Items::GetOptionSource(item, 2).has_value());
     CHECK_FALSE(GameLogic::Items::FindSlotOption(item, 0).has_value());
+}
+
+// Both item tooltips, the item's and the Dark Lord pets', write a slot of an option definition as its texts, and leave
+// a slot the code wrote (the skill) to GetSpecialOptionText.
+TEST_CASE("A slot of an option definition writes its texts into the tooltip's rows [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    ItemCreationParams params{};
+    params.Group = ITEM_BLADE / MAX_ITEM_INDEX;
+    params.Number = ITEM_BLADE % MAX_ITEM_INDEX;
+    params.WithLuck = true;
+    params.WithSkill = true;
+    ITEM blade;
+    FillItemFromParameters(blade, params);
+    REQUIRE(blade.SpecialNum == 2);
+
+    CHECK_FALSE(WriteDefinitionOptionLines(blade, 0, 0, MaxTextListRows).has_value());
+    CHECK(WriteDefinitionOptionLines(blade, 1, 3, MaxTextListRows) == 2);
+    CHECK(std::wstring(TextList[3]) == L"Luck (success rate of Jewel of Soul +25%)");
+    CHECK(std::wstring(TextList[4]) == L"Luck (critical damage rate +5%)");
+    CHECK(TextListColor[4] == TEXT_COLOR_BLUE);
+    CHECK(TextBold[4] == 0);
+    // Only the rows before the limit.
+    CHECK(WriteDefinitionOptionLines(blade, 1, 3, 4) == 1);
 }
