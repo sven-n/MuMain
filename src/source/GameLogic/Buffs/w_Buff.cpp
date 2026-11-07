@@ -5,10 +5,17 @@
 #include "stdafx.h"
 #include "w_Buff.h"
 #include "w_BuffScriptLoader.h"
+#include "w_BuffTimeControl.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 
 namespace
 {
+// The effect timers only drive the hero's HUD, so only his buff map feeds them.
+bool IsHeroBuffMap(const Buff* map)
+{
+    return Hero != nullptr && map == &Hero->Object.m_BuffMap;
+}
 void GetTokenBufflist(std::list<eBuffState>& outtokenbufflist, const eBuffState curbufftype)
 {
     if (curbufftype >= eBuff_CastleRegimentDefense && curbufftype <= eBuff_CastleRegimentAttack3)
@@ -206,6 +213,16 @@ void Buff::RegisterBuff(eBuffState buffstate)
     {
         m_Buff.insert(std::make_pair(buffstate, 1));
     }
+
+    if (IsHeroBuffMap(this))
+    {
+        const DWORD seconds = BuffDurationSeconds(buffstate);
+        if (seconds > 0)
+        {
+            // Re-application refreshes the effect on the server, so it restarts the countdown.
+            TheBuffTimeControl().RegisterEstimatedBuffTime(buffstate, seconds);
+        }
+    }
 }
 
 void Buff::RegisterBuff(std::list<eBuffState> buffstate)
@@ -222,6 +239,9 @@ void Buff::RegisterBuff(std::list<eBuffState> buffstate)
 
 void Buff::UnRegisterBuff(eBuffState buffstate)
 {
+    if (IsHeroBuffMap(this))
+        TheBuffTimeControl().UnRegisterEstimatedBuffTime(buffstate);
+
     if (!isBuff())
     {
         return;
@@ -255,5 +275,10 @@ void Buff::UnRegisterBuff(std::list<eBuffState> buffstate)
 
 void Buff::ClearBuff()
 {
+    if (IsHeroBuffMap(this))
+    {
+        for (const auto& entry : m_Buff)
+            TheBuffTimeControl().UnRegisterEstimatedBuffTime(entry.first);
+    }
     m_Buff.clear();
 }

@@ -31,6 +31,7 @@ BuffTimeControl::~BuffTimeControl()
     }
 
     m_BuffTimeList.clear();
+    m_EstimatedBuffTimeList.clear();
 }
 
 eBuffTimeType BuffTimeControl::CheckBuffTimeType(eBuffState bufftype)
@@ -98,14 +99,15 @@ void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
         return;
     }
 
-    if (IsBuffTime(bufftimetype)) return;
-
     BuffTimeInfo  buffinfo;
     buffinfo.s_BuffType = bufftype;
     buffinfo.s_CurBuffTime = curbufftime * 1000;
+    buffinfo.s_MaxBuffTime = buffinfo.s_CurBuffTime;
     buffinfo.s_EventBuffTime = GetTickCount();
 
-    m_BuffTimeList.insert(std::make_pair(bufftimetype, buffinfo));
+    // A re-application refreshes the effect on the server, so it restarts the countdown here too.
+    // The repeating timer below is reused, or re-armed after an earlier expiry.
+    m_BuffTimeList[bufftimetype] = buffinfo;
 
     // Tick the buff's remaining time every 900ms; the timer removes itself once
     // the buff expires (replaces the per-buff SetTimer/WM_TIMER).
@@ -172,6 +174,187 @@ const DWORD BuffTimeControl::GetBuffTime(DWORD type)
         return bufftimeinfo.s_CurBuffTime;
     }
     return 0;
+}
+
+bool BuffTimeControl::GetBuffRemainingFraction(eBuffState bufftype, float& fraction)
+{
+    for (BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter)
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+
+        if (bufftimeinfo.s_BuffType != bufftype)
+            continue;
+
+        if (bufftimeinfo.s_MaxBuffTime == 0)
+            return false;
+
+        // s_CurBuffTime only moves on the 900ms scheduler tick; subtract the live delta from the
+        // tick's anchor so the bar shrinks smoothly between ticks instead of in 0.9s steps.
+        DWORD elapsed = GetTickCount() - bufftimeinfo.s_EventBuffTime;
+        DWORD remaining = elapsed < bufftimeinfo.s_CurBuffTime ? bufftimeinfo.s_CurBuffTime - elapsed : 0;
+
+        fraction = remaining / static_cast<float>(bufftimeinfo.s_MaxBuffTime);
+        return true;
+    }
+
+    return false;
+}
+
+void BuffTimeControl::RegisterEstimatedBuffTime(eBuffState bufftype, DWORD seconds)
+{
+    if (seconds == 0)
+        return;
+
+    BuffTimeInfo bufftimeinfo;
+    bufftimeinfo.s_BuffType = bufftype;
+    bufftimeinfo.s_CurBuffTime = seconds * 1000;
+    bufftimeinfo.s_MaxBuffTime = bufftimeinfo.s_CurBuffTime;
+    bufftimeinfo.s_EventBuffTime = GetTickCount();
+
+    // A re-application refreshes the effect on the server, so it restarts the countdown here too.
+    m_EstimatedBuffTimeList[bufftype] = bufftimeinfo;
+}
+
+bool BuffTimeControl::UnRegisterEstimatedBuffTime(eBuffState bufftype)
+{
+    return m_EstimatedBuffTimeList.erase(bufftype) != 0;
+}
+
+bool BuffTimeControl::GetEstimatedBuffRemainingFraction(eBuffState bufftype, float& fraction)
+{
+    auto iter = m_EstimatedBuffTimeList.find(bufftype);
+
+    if (iter == m_EstimatedBuffTimeList.end() || (*iter).second.s_MaxBuffTime == 0)
+        return false;
+
+    BuffTimeInfo& bufftimeinfo = (*iter).second;
+    DWORD elapsed = GetTickCount() - bufftimeinfo.s_EventBuffTime;
+    DWORD remaining = elapsed < bufftimeinfo.s_CurBuffTime ? bufftimeinfo.s_CurBuffTime - elapsed : 0;
+
+    fraction = remaining / static_cast<float>(bufftimeinfo.s_MaxBuffTime);
+    return true;
+}
+
+DWORD BuffTimeControl::GetEstimatedBuffRemainingMilliseconds(eBuffState bufftype)
+{
+    auto iter = m_EstimatedBuffTimeList.find(bufftype);
+
+    if (iter == m_EstimatedBuffTimeList.end())
+        return 0;
+
+    BuffTimeInfo& bufftimeinfo = (*iter).second;
+    DWORD elapsed = GetTickCount() - bufftimeinfo.s_EventBuffTime;
+
+    return elapsed < bufftimeinfo.s_CurBuffTime ? bufftimeinfo.s_CurBuffTime - elapsed : 0;
+}
+
+namespace
+{
+DWORD ScaledSeconds(int base, int divisor, int cap, int energy)
+{
+    int seconds = base + energy / divisor;
+
+    if (cap > 0)
+        seconds = std::min(seconds, cap);
+
+    return static_cast<DWORD>(std::max(seconds, 1));
+}
+} // namespace
+
+DWORD BuffDurationSeconds(eBuffState bufftype)
+{
+    // TotalEnergy is the base plus the added stat, as the server's attribute system sees it.
+    const int energy = CharacterAttribute != nullptr ? CharacterAttribute->Energy + CharacterAttribute->AddEnergy : 0;
+
+    switch (bufftype)
+    {
+    // Skill effects: base + TotalEnergy / divisor, capped. The server sends only the effect id for
+    // these, so the duration has to come from its catalogue. Master skills that extend a duration
+    // are not modelled: the client carries no ExtendsDuration value.
+    case eBuff_Attack: return 60;
+    case eBuff_Defense: return 60;
+    case eBuff_HelpNpc: return 3600;
+    case eBuff_WizDefense: return ScaledSeconds(60, 40, 0, energy);
+    case eBuff_AddCriticalDamage: return ScaledSeconds(60, 10, 180, energy);
+    case eBuff_InfinityArrow: return 600;
+    case eBuff_Life: return ScaledSeconds(60, 180, 180, energy);
+    case eBuff_BlessPotion: return 120;
+    case eBuff_SoulPotion: return 60;
+    case eBuff_Cloaking: return 86400;
+
+    case eDeBuff_Poison: return 20;
+    case eDeBuff_Freeze: return 5;
+    case eDeBuff_Harden: return 5;
+    case eDeBuff_Defense: return 10;
+    case eDeBuff_Stun: return 2;
+
+    case eBuff_Thorns: return ScaledSeconds(30, 24, 180, energy);
+    // The hero is a player, so the PvP variants apply; the server's +/- Level terms cancel there.
+    case eDeBuff_Sleep: return ScaledSeconds(4, 250, 10, energy);
+    case eDeBuff_NeilDOT: return 5;
+    case eDeBuff_SahamuttDOT: return 5;
+    case eDeBuff_AttackDown: return 10;
+    case eDeBuff_DefenseDown: return ScaledSeconds(5, 300, 18, energy);
+    case eBuff_Berserker: return ScaledSeconds(30, 20, 180, energy);
+    case eBuff_SwellOfMagicPower: return 1800;
+    case eDeBuff_BlowOfDestruction: return 10;
+    case eBuff_Att_up_Ourforces: return ScaledSeconds(60, 5, 180, energy);
+    case eBuff_Hp_up_Ourforces: return ScaledSeconds(60, 5, 180, energy);
+    case eBuff_Def_up_Ourforces: return ScaledSeconds(60, 5, 180, energy);
+
+    case EFFECT_GREATER_LIFE_ENHANCED:
+    case EFFECT_GREATER_LIFE_MASTERED:
+        return ScaledSeconds(60, 180, 180, energy);
+    case EFFECT_MAGIC_CIRCLE_IMPROVED:
+    case EFFECT_MAGIC_CIRCLE_ENHANCED:
+        return 1800;
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
+        return ScaledSeconds(60, 10, 180, energy);
+    case EFFECT_GREATER_DEFENSE_SUCCESS_RATE_IMPROVED:
+    case EFFECT_GREATER_DEFENSE_SUCCESS_RATE_ENHANCED:
+        return ScaledSeconds(60, 5, 180, energy);
+    case EFFECT_FITNESS_IMPROVED:
+        return ScaledSeconds(60, 5, 180, energy);
+
+    // Item effects the server may send with 0 seconds (no mapped attribute) or not at all.
+    case eBuff_PcRoomSeal1:
+    case eBuff_PcRoomSeal2:
+    case eBuff_PcRoomSeal3:
+    case eBuff_Seal1:
+    case eBuff_Seal2:
+    case eBuff_Seal3:
+    case eBuff_Seal4:
+    case eBuff_EliteScroll1:
+    case eBuff_EliteScroll2:
+    case eBuff_EliteScroll3:
+    case eBuff_EliteScroll4:
+    case eBuff_EliteScroll5:
+    case eBuff_EliteScroll6:
+    case eBuff_CherryBlossom_Liguor:
+    case eBuff_CherryBlossom_RiceCake:
+    case eBuff_CherryBlossom_Petal:
+    case eBuff_Seal_HpRecovery:
+    case eBuff_Seal_MpRecovery:
+    case eBuff_Scroll_Battle:
+    case eBuff_Scroll_Strengthen:
+    case eBuff_Scroll_Healing:
+    case eBuff_AscensionSealMaster:
+    case eBuff_WealthSealMaster:
+    case eBuff_AG_Addition:
+    case eBuff_SD_Addition:
+        return 1800;
+
+    case eBuff_SecretPotion1:
+    case eBuff_SecretPotion2:
+    case eBuff_SecretPotion3:
+    case eBuff_SecretPotion4:
+    case eBuff_SecretPotion5:
+        return 10 * 24 * 60 * 60;
+
+    default:
+        return 0;
+    }
 }
 
 void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isSecond)

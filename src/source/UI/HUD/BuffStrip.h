@@ -52,6 +52,13 @@ namespace mu::ui::window
             // before ClosePositionedElements() places such children) -- don't retry a clipped-atlas
             // approach; named @spritesheet rects are the working mechanism.
             Rml::String decorator;
+
+            // Remaining share of the buff's registered duration, 1.0 down to 0.0, drawn as a thin
+            // bar along the icon's bottom edge (buff_strip.rml/.rcss). hasTimer stays false for
+            // buffs the client has no duration for -- most skill buffs -- so the bar is hidden
+            // rather than implying a countdown that cannot be known.
+            float progress = 0.f;
+            bool hasTimer = false;
         };
         struct BuffStripRmlModel
         {
