@@ -235,9 +235,6 @@
   <data name="Triple Shot skill (Mana:%d)" xml:space="preserve">
     <value>Keterampilan Tembakan Tiga Kali (Mana: %d)</value>
   </data>
-  <data name="Luck (success rate of Jewel of Soul +25%%)" xml:space="preserve">
-    <value>Keberuntungan (tingkat keberhasilan Permata Jiwa +25%%)</value>
-  </data>
   <data name="Additional Dmg +%d" xml:space="preserve">
     <value>Dmg Tambahan +%d</value>
   </data>
@@ -252,9 +249,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Pemulihan HP otomatis %d%%</value>
-  </data>
-  <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
-    <value>Keberuntungan (tingkat kerusakan kritis +5%%)</value>
   </data>
   <data name="Can only be used in moving unit" xml:space="preserve">
     <value>Hanya dapat digunakan pada unit yang bergerak</value>

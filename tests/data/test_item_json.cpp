@@ -983,7 +983,7 @@ TEST_CASE("Item validation warns about an item without the stat profile the prof
     ItemStatFile file;
     file.profiles.push_back({"shield", {}});
     StatProfileRule shields{.profile = "shield"};
-    shields.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
+    shields.conditions.weaponKinds.set(static_cast<size_t>(WeaponKind::Shield));
     file.profileRules.push_back(shields);
     const ItemStatProfiles profiles(file);
 

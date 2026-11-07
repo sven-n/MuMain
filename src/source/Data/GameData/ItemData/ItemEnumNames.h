@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 
 #include <span>
 #include <string>
@@ -22,6 +23,8 @@ std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag);
 std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor);
 // The keys of "requirements" in the item files.
 std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement);
+// The types of the option definitions (Data/Items/Options).
+std::span<const EnumName<ItemOptionType>> GetEnumNames(ItemOptionType);
 
 // nullptr when the value has no name.
 template <typename TEnum> const char* FindEnumName(TEnum value)

@@ -1,0 +1,27 @@
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "luck",
+      "type": "luck",
+      "displayName": {
+        "en": "Luck",
+        "de": "Glück",
+        "es": "Suerte",
+        "id": "Keberuntungan",
+        "ja": "幸運",
+        "pl": "Szczęście",
+        "pt": "Sorte",
+        "ru": "Удача",
+        "tl": "Suwerte",
+        "uk": "Удача",
+        "zh-TW": "幸運"
+      },
+      "openMu": {"id": "00000083-0001-0000-0000-000000000000", "name": "Luck"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"attribute": "criticalDamageChance", "percent": {"values": 5}, "text": ["luckJewelOfSoul", "luckCriticalDamage"]}
+      ]
+    }
+  ]
+}

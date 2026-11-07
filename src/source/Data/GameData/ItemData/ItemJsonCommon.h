@@ -79,6 +79,38 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
 // Names in the data (e.g. glow colors) have only letters and digits.
 bool IsName(std::string_view text);
 
+// Reads a whole number from `minimum` to `maximum` into `value`. Anything else is a problem, added with
+// addFatal(field, message); then false is returned.
+template <typename TAddFatal>
+bool ReadWholeNumberInRange(const OrderedJson& json, const std::string& field, int minimum, int maximum, int& value,
+                            TAddFatal&& addFatal)
+{
+    long long number = 0;
+    if (!json.is_number_integer() || !ReadWholeNumber(json, number) || number < minimum || number > maximum)
+    {
+        addFatal(field, "must be a whole number from " + std::to_string(minimum) + " to " + std::to_string(maximum));
+        return false;
+    }
+    value = static_cast<int>(number);
+    return true;
+}
+
+// Reads the field `key` of an object, a name of letters and digits (IsName), into `name`. A missing one or anything
+// else is a problem, added with addFatal(field + "." + key, message); then false is returned.
+template <typename TAddFatal>
+bool ReadNameField(const OrderedJson& json, const char* key, const std::string& field, std::string& name,
+                   TAddFatal&& addFatal)
+{
+    const auto value = json.find(key);
+    if (value == json.end() || !value->is_string() || !IsName(value->get_ref<const std::string&>()))
+    {
+        addFatal(field + "." + key, "missing or not a name of letters and digits");
+        return false;
+    }
+    name = value->get<std::string>();
+    return true;
+}
+
 // The changes a tooltip layout preset and an item make to a layout (D73), read alike: "hide", a list of line ids, and
 // each entry of "add", {"after": "<line id>", "lines": [...]}; the messages for what is neither.
 constexpr const char* LineIdsMessage = "must be a list of line ids";

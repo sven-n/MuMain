@@ -5,8 +5,11 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
+#include "Data/GameData/ItemData/OptionRule.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <bitset>
@@ -78,6 +81,50 @@ struct ItemTooltipLoadResult
 std::filesystem::path GetItemTooltipFile();
 
 ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
+
+struct ItemOptionsLoadResult
+{
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Options, relative to the client folder: the option definitions, one *.json file per option group (see
+// ItemOptionsJson.h), and the option rules (OptionRules.json, see OptionRulesJson.h). In a folder of its own like the
+// stat file.
+std::filesystem::path GetItemOptionsDirectory();
+
+// Reads every *.json file of the folder but the option rules. The problems name each file as "Options/<file>".
+ItemOptionsLoadResult LoadItemOptionsDirectory(const std::filesystem::path& directory);
+
+struct OptionTextsLoadResult
+{
+    ItemOptionTexts texts;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/OptionTexts.json, relative to the client folder: the texts of the options' tooltip lines, see
+// OptionTextsJson.h. Next to the tooltip file.
+std::filesystem::path GetOptionTextsFile();
+
+OptionTextsLoadResult LoadOptionTextsFile(const std::filesystem::path& file);
+
+struct OptionRulesLoadResult
+{
+    std::vector<OptionRule> rules;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Options/OptionRules.json, relative to the client folder: which definitions an item's data gives it. Only
+// the editor and the data test read it.
+std::filesystem::path GetOptionRulesFile();
+
+OptionRulesLoadResult LoadOptionRulesFile(const std::filesystem::path& file);
+
+// The option files as the game reads them at start, with the option rules when `withRules` (only the editor reads
+// them), and the checks across them; `uiLocales` are the languages the game has texts in. Empty with fatal problems.
+// Which definitions the items link is checked with the items (ValidateItemOptionLinks, ValidateOptionDefinitionUse).
+ItemOptionDatabase LoadItemOptionFiles(bool withRules, std::span<const char* const> uiLocales,
+                                       std::vector<ItemDataIssue>& issues);
 
 struct GroundLabelsLoadResult
 {
