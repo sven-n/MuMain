@@ -775,6 +775,45 @@ TEST_CASE("An item's luck lines are its option texts in the UI's language [data]
     CHECK(Engine::Items::TooltipSnapshot::TooltipOfParameters(kris).size() == english.size());
 }
 
+// The tooltip rows are shared by all tooltips, and each tooltip starts with every row empty, white and not bold. The
+// Horn of Fenrir's colour lines set their colour but no bold, so they were bold after a tooltip that had a bold row
+// there (O31): a tooltip drawn after one that left every row bold and red is the one drawn alone.
+TEST_CASE("A tooltip keeps no bold and no colour of the tooltip drawn before [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    // The black Horn of Fenrir.
+    ItemCreationParams fenrir = Engine::Items::TooltipSnapshot::FullItemParameters(13, 37);
+    fenrir.HasExcellentOption = true;
+    fenrir.ExcellentFlags = 1;
+    const auto drawnAfter = [&](bool bold, int color)
+    {
+        for (int row = 0; row < MaxTextListRows; ++row)
+        {
+            TextBold[row] = bold;
+            TextListColor[row] = color;
+        }
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(fenrir);
+    };
+
+    const std::vector<ItemTooltipLine> alone = drawnAfter(false, TEXT_COLOR_WHITE);
+    const std::vector<ItemTooltipLine> afterBold = drawnAfter(true, TEXT_COLOR_RED);
+    REQUIRE(afterBold.size() == alone.size());
+    for (size_t line = 0; line < alone.size(); ++line)
+    {
+        CAPTURE(line);
+        CHECK(afterBold[line].text == alone[line].text);
+        CHECK(afterBold[line].color == alone[line].color);
+        CHECK(afterBold[line].bold == alone[line].bold);
+    }
+    const auto finalDamage = std::find_if(alone.begin(), alone.end(), [](const ItemTooltipLine& line)
+                                          { return line.text == Formatted(I18N::Game::IncreaseFinalDamageD, 10); });
+    REQUIRE(finalDamage != alone.end());
+    CHECK_FALSE(finalDamage->bold);
+}
+
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
