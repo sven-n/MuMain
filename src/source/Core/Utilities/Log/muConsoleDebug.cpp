@@ -249,13 +249,28 @@ std::optional<double> ParseNumericArgument(std::wstring_view argument)
 
     return value;
 }
+
+ConsoleCommandResult Handled()
+{
+    return {ConsoleCommandStatus::Handled, {}};
+}
+
+ConsoleCommandResult NotHandled()
+{
+    return {};
+}
+
+ConsoleCommandResult BadArgument(std::wstring message)
+{
+    return {ConsoleCommandStatus::BadArgument, std::move(message)};
+}
 } // namespace
 
-bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
+ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
     if (Core::Benchmark::Console::HandleCommand(strCommand))
     {
-        return true;
+        return Handled();
     }
 
     // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
@@ -265,7 +280,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         if (argument.empty() || argument == L"list")
         {
             ListDebugWindows();
-            return true;
+            return Handled();
         }
 
         // "$win <name> full" goes through CSystem::Show(), which runs the window's
@@ -292,30 +307,30 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
             {
                 manager->ShowInterface(entry.key, !manager->IsInterfaceVisible(entry.key));
             }
-            return true;
+            return Handled();
         }
         g_pSystemLogBox->AddText((L"no such window: " + argument).c_str(),
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
-        return true;
+        return Handled();
     }
 
     // "$preview <event>" fills an event window with sample data off its map; see EventPreview.h.
     if (strCommand.compare(0, 8, L"$preview") == 0)
     {
         UI::EventPreview::HandleCommand(strCommand.size() > 9 ? strCommand.substr(9) : std::wstring());
-        return true;
+        return Handled();
     }
 
     // A test confirmation, to check the generic dialog (dragging, layout) without a game action.
     if (strCommand.compare(L"$dialog") == 0)
     {
         mu::ui::window::CreateOkMessageBox(L"Test dialog: drag it by any part that is not a button.");
-        return true;
+        return Handled();
     }
     if (strCommand.compare(L"$dialog title") == 0)
     {
         mu::ui::window::CreateOkMessageBoxWithTitle(L"Test dialog", L"Drag it by any part that is not a button.");
-        return true;
+        return Handled();
     }
     // "$dialog menu <name>": an NPC's menu without the NPC, to check its layout. Its buttons act.
     if (strCommand.compare(0, 13, L"$dialog menu ") == 0)
@@ -342,14 +357,14 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
             if (name == menuName)
             {
                 show();
-                return true;
+                return Handled();
             }
         }
         std::wstring names;
         for (const auto& menu : menus)
             names += std::wstring(L" ") + menu.first;
         g_pSystemLogBox->AddText((L"$dialog menu <name>:" + names).c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        return true;
+        return Handled();
     }
     // "$dialog item [group index [level]]": a test confirmation with a live item preview.
     if (strCommand.compare(0, 12, L"$dialog item") == 0 && mu::ui::window::g_pGenericConfirmDialog)
@@ -365,70 +380,69 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         cfg.showCancel = true;
         cfg.lines = {{L"Test dialog with a live item preview.", false}};
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-        return true;
+        return Handled();
     }
 
 #if defined(MU_ENABLE_CONTROL_SOCKET) || defined(_EDITOR)
     if (CheckDeveloperLookCommand(strCommand))
     {
-        return true;
+        return Handled();
     }
 #endif
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
         SetShowFpsCounter(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$fpscounter off") == 0)
     {
         SetShowFpsCounter(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$details on") == 0)
     {
         SetShowDebugInfo(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$details off") == 0)
     {
         SetShowDebugInfo(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$glstats on") == 0)
     {
         SetShowGLStats(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$glstats off") == 0)
     {
         SetShowGLStats(false);
-        return true;
+        return Handled();
     }
     else if (strCommand == L"$fps" || strCommand.starts_with(L"$fps "))
     {
         const std::optional<double> targetFps = ParseNumericArgument(std::wstring_view(strCommand).substr(4));
         if (!targetFps)
         {
-            g_pSystemLogBox->AddText(L"usage: $fps <number>", mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            return true;
+            return BadArgument(L"usage: $fps <number>");
         }
 
         SetTargetFps(*targetFps);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
         MuSetVSyncPreference(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
         MuSetVSyncPreference(false);
-        return true;
+        return Handled();
     }
     else if (Render::Look::HandleLookPresetCommand(strCommand))
     {
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(0, 6, L"$msaa ") == 0)
     {
@@ -441,7 +455,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         {
             mu::log::Get("render")->warn("$msaa expects off, 2, 4 or 8");
         }
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects off") == 0)
     {
@@ -457,14 +471,14 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableEffects(true);
         if (g_pOption)
             g_pOption->SetRenderAllEffects(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects on") == 0)
     {
         SetDisableEffects(false);
         if (g_pOption)
             g_pOption->SetRenderAllEffects(true);
-        return true;
+        return Handled();
     }
     // Finer-grained bisection of the effect-rendering GPU cost `$effects off`
     // already confirmed. Each isolates one of the distinct object systems that can be populated
@@ -472,42 +486,42 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$effects sprites off") == 0)
     {
         SetDisableSprites(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects sprites on") == 0)
     {
         SetDisableSprites(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects particles off") == 0)
     {
         SetDisableParticles(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects particles on") == 0)
     {
         SetDisableParticles(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects skillmodels off") == 0)
     {
         SetDisableSkillEffectModels(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects skillmodels on") == 0)
     {
         SetDisableSkillEffectModels(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects boids off") == 0)
     {
         SetDisableBoids(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects boids on") == 0)
     {
         SetDisableBoids(false);
-        return true;
+        return Handled();
     }
     // Owner found unequipping Wings of Ruin alone took FPS 120->180. This skips
     // just the EXTRA b->RenderBodyShadow() call RenderLinkObject() (ZzzCharacter.cpp) makes for every
@@ -516,22 +530,22 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$effects wingshadow off") == 0)
     {
         SetDisableWingShadow(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects wingshadow on") == 0)
     {
         SetDisableWingShadow(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects shadows off") == 0)
     {
         SetDisableBodyShadows(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects shadows on") == 0)
     {
         SetDisableBodyShadows(false);
-        return true;
+        return Handled();
     }
     // RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
     // light, Beam Knight's lightning beam) was never gated by g_pOption->GetRenderAllEffects() at
@@ -539,22 +553,22 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$effects joints off") == 0)
     {
         SetDisableJoints(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects joints on") == 0)
     {
         SetDisableJoints(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects culling off") == 0)
     {
         SetDisableEffectCulling(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects culling on") == 0)
     {
         SetDisableEffectCulling(false);
-        return true;
+        return Handled();
     }
     // MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,
     // ZzzObject.cpp ~7001-7007). Skips the 2 extra passes to test if triple mesh-draw is the cost.
@@ -562,24 +576,23 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$effects wingextralayers off") == 0)
     {
         SetDisableWingExtraLayers(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$effects wingextralayers on") == 0)
     {
         SetDisableWingExtraLayers(false);
-        return true;
+        return Handled();
     }
     else if (strCommand == L"$winmsg" || strCommand.starts_with(L"$winmsg "))
     {
         const std::optional<double> messageLimit = ParseNumericArgument(std::wstring_view(strCommand).substr(7));
         if (!messageLimit)
         {
-            g_pSystemLogBox->AddText(L"usage: $winmsg <number>", mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            return true;
+            return BadArgument(L"usage: $winmsg <number>");
         }
 
         SetMaxMessagePerCycle(static_cast<int>(*messageLimit));
-        return true;
+        return Handled();
     }
     // Runtime theme selection is session-only; the Options window persists its choice.
     else if (strCommand.compare(0, 6, L"$theme") == 0)
@@ -590,39 +603,39 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
             const std::string themeName = StringUtils::WideToNarrow(themeNameW.c_str());
             UI::Theme::Select(themeName, UI::Theme::Persistence::Session);
         }
-        return true;
+        return Handled();
     }
 
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (!m_bInit)
-        return false;
+        return NotHandled();
 
     if (strCommand.compare(L"$open") == NULL)
     {
         leaf::ShowConsole(true);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$close") == NULL)
     {
         leaf::ShowConsole(false);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$clear") == NULL)
     {
         leaf::SetConsoleTextColor();
         leaf::ClearConsoleScreen();
-        return true;
+        return Handled();
     }
 #ifdef CSK_DEBUG_MAP_ATTRIBUTE
     else if (strCommand.compare(L"$mapatt on") == NULL)
     {
         EditFlag = EDIT_WALL;
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$mapatt off") == NULL)
     {
         EditFlag = EDIT_NONE;
-        return true;
+        return Handled();
     }
 #endif // CSK_DEBUG_MAP_ATTRIBUTE
 #ifdef CSK_DEBUG_MAP_PATHFINDING
@@ -651,13 +664,13 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         Write(MCD_RECEIVE, L"MCD_RECEIVE");
         Write(MCD_ERROR, L"MCD_ERROR");
         Write(MCD_NORMAL, L"MCD_NORMAL");
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$texture_info") == NULL)
     {
         Write(MCD_NORMAL, L"Texture Number : %d", Bitmaps.GetNumberOfTexture());
         Write(MCD_NORMAL, L"Texture Memory : %dKB", Bitmaps.GetUsedTextureMemory() / 1024);
-        return true;
+        return Handled();
     }
     else if (strCommand.compare(L"$color_test") == NULL)
     {
@@ -689,10 +702,10 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         std::cout << "color test: yellow" << std::endl;
         leaf::SetConsoleTextColor(leaf::COLOR_WHITE);
         std::cout << "color test: white" << std::endl;
-        return true;
+        return Handled();
     }
 #endif
-    return false;
+    return NotHandled();
 }
 
 void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)

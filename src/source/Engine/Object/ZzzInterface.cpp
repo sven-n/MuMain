@@ -2037,10 +2037,10 @@ bool CheckMacroLimit(wchar_t* Text)
 
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
-    bool handled = false;
+    ConsoleCommandResult result;
     try
     {
-        handled = g_ConsoleDebug->CheckCommand(Text);
+        result = g_ConsoleDebug->CheckCommand(Text);
     }
     catch (const std::exception& exception)
     {
@@ -2052,7 +2052,13 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         return true;
     }
 
-    if (handled)
+    if (result.status == ConsoleCommandStatus::BadArgument)
+    {
+        g_pSystemLogBox->AddText(result.message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (result.status == ConsoleCommandStatus::Handled)
     {
         return true;
     }
