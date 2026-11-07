@@ -180,8 +180,11 @@ def restore_prefixes(text):
 
 
 def cache_paths(step_body):
-    """The lines of an actions/cache step's multi-line path input."""
+    """The lines of an actions/cache step's multi-line path input, or its one-line path."""
     match = re.search(r"(?ms)^          path: \|\n(.*?)(?=^          \w)", step_body)
+    if match:
+        return match.group(1)
+    match = re.search(r"(?m)^          path: (?!\|)(.+)$", step_body)
     return match.group(1) if match else ""
 
 
@@ -645,9 +648,9 @@ for required in ("id: apt_packages\n", "sudo apt-get update",
                  'python3 scripts/ci_apt_cache.py name apt-linux-x64- "$RUNNER_TEMP/apt-files.txt"'):
     check(required in apt_list, f"build-linux Find apt packages missing {required}")
 # This image's newest entry first (the prune keeps one of each image), then any image's.
+# The restore and save themselves are checked with the other caches below (cache_steps).
 apt_restore = step(linux_job, "build-linux", "Restore apt packages")
-for required in ("id: apt\n", "uses: actions/cache/restore@v6", "path: ${{ env.APT_ARCHIVES }}",
-                 "key: ${{ steps.apt_packages.outputs.key }}"):
+for required in ("id: apt\n", "path: ${{ env.APT_ARCHIVES }}", "key: ${{ steps.apt_packages.outputs.key }}"):
     check(required in apt_restore, f"build-linux Restore apt packages missing {required}")
 check(restore_prefixes(apt_restore) == ["apt-linux-x64-${{ steps.apt_packages.outputs.image }}-", "apt-linux-x64-"],
       "build-linux Restore apt packages must fall back to the image's newest entry, then any image's")
@@ -667,10 +670,8 @@ for required in ("id: gather\n",
                  '"$APT_ARCHIVES"'):
     check(required in apt_gather, f"build-linux Gather apt packages missing {required}")
 apt_save = step(linux_job, "build-linux", "Save apt packages")
-for required in ("uses: actions/cache/save@v6", "steps.apt.outputs.cache-hit != 'true'",
-                 "steps.gather.outputs.complete == 'true'", "path: ${{ env.APT_ARCHIVES }}",
-                 "key: ${{ steps.apt.outputs.cache-primary-key }}"):
-    check(required in apt_save, f"build-linux Save apt packages must save every file on a miss: {required}")
+check("steps.gather.outputs.complete == 'true'" in apt_save,
+      "build-linux Save apt packages must save only when every listed file was gathered")
 # scripts/ci_apt_cache.py says complete=true only with every listed file (tests/test_ci_apt_cache.py); a gather or save
 # that went on after an error would save an entry without them.
 check("continue-on-error" not in apt_gather + apt_save,
@@ -716,6 +717,8 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
     cache_steps = [("Restore dependencies", "Save dependencies")]
     if job_name == "build-windows":
         cache_steps.append(("Restore vcpkg packages", "Save vcpkg packages"))
+    if job_name == "build-linux":
+        cache_steps.append(("Restore apt packages", "Save apt packages"))
     for restore_name, save_name in cache_steps:
         restore = step(job_body, job_name, restore_name)
         save = step(job_body, job_name, save_name)
