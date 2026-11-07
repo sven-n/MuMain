@@ -13,7 +13,13 @@ already running game. An explicit saved value takes precedence over the default.
 
 Both sets ship together. The original 65 files remain unchanged in `Data/Player/`.
 The improved 65 files are in `Data/Player/Updated/`, with their 14 textures in `Data/Player/`.
-Do not omit the Updated folder or its textures when packaging the client.
+
+With the improved models chosen, the game opens each body part from `Data/Player/Updated/` when
+that folder has the file and from `Data/Player/` otherwise. The improved set is therefore the
+files the folder holds: a client packaged without it, or without some of its files, shows the
+original bodies for the missing parts. Adding a file with the name of an original body part
+(for example `HelmClass06.bmd` for the Summoner) puts it into the improved set, without a code
+change. Its textures must be in `Data/Player/`.
 
 Each selected family contains `HelmClass`, `ArmorClass`, `PantClass`, `GloveClass` and
 `BootClass` BMDs with the following suffixes:
