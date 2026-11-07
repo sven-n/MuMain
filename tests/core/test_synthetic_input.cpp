@@ -771,3 +771,24 @@ TEST_CASE("Type handler rejects invalid arguments before scheduling and refuses 
     CHECK(response.find(R"("error":"busy")") != std::string::npos);
     CHECK(act == nullptr);
 }
+
+// PrintScreen is event-driven because Windows delivers it as a key-up; the event path queues one
+// capture per press, not per repeated down event.
+TEST_CASE("PrintScreen queues one capture per press [core][synthetic-input]")
+{
+    Core::Input::SetPrintScreenDown(false);
+    CHECK_FALSE(Core::Input::ConsumePrintScreenPress());
+
+    Core::Input::SetPrintScreenDown(true);
+    CHECK(Core::Input::ConsumePrintScreenPress());
+    CHECK_FALSE(Core::Input::ConsumePrintScreenPress());
+
+    // A held key or a duplicate down event must not queue another capture.
+    Core::Input::SetPrintScreenDown(true);
+    CHECK_FALSE(Core::Input::ConsumePrintScreenPress());
+
+    Core::Input::SetPrintScreenDown(false);
+    Core::Input::SetPrintScreenDown(true);
+    CHECK(Core::Input::ConsumePrintScreenPress());
+    Core::Input::SetPrintScreenDown(false);
+}

@@ -14,6 +14,12 @@ void ClearLeftMouseButtonPressEdge();
 // or digit, matching what the existing call sites already pass.
 bool IsKeyDown(int virtualKey);
 
+// PrintScreen reaches us as a synthesized key-down followed by a key-up in the same SDL event
+// batch on Windows, so a polled IsKeyDown(VK_SNAPSHOT) never sees it. The event path records the
+// press here (once per physical press) and the screenshot handler consumes it.
+void SetPrintScreenDown(bool down);
+bool ConsumePrintScreenPress();
+
 #ifdef _EDITOR
 // Whether a key or button (a virtual-key code as IsKeyDown takes) is with a
 // window that is not the game's, so that IsKeyDown leaves it out. Set by the
