@@ -419,9 +419,11 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetShowGLStats(false);
         return Handled();
     }
-    else if (strCommand == L"$fps" || strCommand.starts_with(L"$fps "))
+    else if (strCommand.starts_with(L"$fps"))
     {
-        const std::optional<double> targetFps = ParseNumericArgument(std::wstring_view(strCommand).substr(4));
+        const bool hasArgument = strCommand.size() > 4 && strCommand[4] == L' ';
+        const std::optional<double> targetFps =
+            hasArgument ? ParseNumericArgument(std::wstring_view(strCommand).substr(4)) : std::nullopt;
         if (!targetFps)
         {
             return BadArgument(L"usage: $fps <number>");
@@ -583,9 +585,11 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetDisableWingExtraLayers(false);
         return Handled();
     }
-    else if (strCommand == L"$winmsg" || strCommand.starts_with(L"$winmsg "))
+    else if (strCommand.starts_with(L"$winmsg"))
     {
-        const std::optional<double> messageLimit = ParseNumericArgument(std::wstring_view(strCommand).substr(7));
+        const bool hasArgument = strCommand.size() > 7 && strCommand[7] == L' ';
+        const std::optional<double> messageLimit =
+            hasArgument ? ParseNumericArgument(std::wstring_view(strCommand).substr(7)) : std::nullopt;
         if (!messageLimit)
         {
             return BadArgument(L"usage: $winmsg <number>");
