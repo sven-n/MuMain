@@ -1056,4 +1056,58 @@
   <data name="Reinforced item can't be sold." xml:space="preserve">
     <value>强化物品无法出售。</value>
   </data>
+  <data name="Life: %d/%d" xml:space="preserve">
+    <value>生命值：%d/%d</value>
+  </data>
+  <data name="ManaDD359" xml:space="preserve">
+    <value>魔法值：%d/%d</value>
+  </data>
+  <data name="A G: %d / %d" xml:space="preserve">
+    <value>AG：%d / %d</value>
+  </data>
+  <data name=" S D : %d / %d" xml:space="preserve">
+    <value>SD：%d / %d</value>
+  </data>
+  <data name="EXP:%I64d / %I64d" xml:space="preserve">
+    <value>经验值：%llu / %llu</value>
+  </data>
+  <data name="Character (C)" xml:space="preserve">
+    <value>角色（C）</value>
+  </data>
+  <data name="Friend (F)" xml:space="preserve">
+    <value>好友（F）</value>
+  </data>
+  <data name="Menu (U)" xml:space="preserve">
+    <value>菜单（U）</value>
+  </data>
+  <data name="Party (P)" xml:space="preserve">
+    <value>队伍（P）</value>
+  </data>
+  <data name="Guild (G)" xml:space="preserve">
+    <value>战盟（G）</value>
+  </data>
+  <data name="Command (D)" xml:space="preserve">
+    <value>命令（D）</value>
+  </data>
+  <data name="MU Item Shop(X)" xml:space="preserve">
+    <value>游戏商城（X）</value>
+  </data>
+  <data name="You must be at least level 6 to use the 'My Friend' function." xml:space="preserve">
+    <value>使用好友功能需要达到 6 级。</value>
+  </data>
+  <data name="Official MU Helper Setting" xml:space="preserve">
+    <value>奇迹助手设置</value>
+  </data>
+  <data name="Start Official MU Helper" xml:space="preserve">
+    <value>启动奇迹助手</value>
+  </data>
+  <data name="Stop Official MU Helper" xml:space="preserve">
+    <value>停止奇迹助手</value>
+  </data>
+  <data name="Duration period: %s" xml:space="preserve">
+    <value>持续时间：%s</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>确定要取消 %ls 吗？</value>
+  </data>
 </root>
