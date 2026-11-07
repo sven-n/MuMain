@@ -562,26 +562,25 @@ TEST_CASE("Cursed Temple poison signatures keep target-independent audio cadence
     }
 }
 
-TEST_CASE("Received same-action startup audio restarts before animation selection [combat][received_attack]")
+TEST_CASE("ReceiveAction preserves the prior walking pose when starting an attack [combat][received_attack]")
 {
+    constexpr float WalkingAnimationFrame = 5.3f;
     MonsterRecorder::LoadScope audio(WD_70EMPIREGUARDIAN2);
-    AttackScope scope;
-    scope.SetMonsterAttacker(MODEL_DARK_GHOST);
-    auto& attacker = scope.characters[AttackerSlot];
-    attacker.MonsterIndex = MONSTER_DARK_GHOST;
-    scope.Receive(VictimKey, AT_ATTACK1);
-    REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
-    const auto firstStart = audio.TakePlayedSounds();
-    REQUIRE(firstStart.size() == 2);
-    CHECK(firstStart[0].id == SOUND_METEORITE01);
-    CHECK(firstStart[1].id == SOUND_EXPLOTION01);
-
-    attacker.Object.AnimationFrame = InFlightAttackFrame;
-    scope.Receive(VictimKey, AT_ATTACK1);
-    CHECK(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
-    CHECK(attacker.Object.AnimationFrame == 0);
-    const auto repeatedStart = audio.TakePlayedSounds();
-    CHECK(repeatedStart == firstStart);
+    for (const int target : {VictimKey, MissingKey})
+    {
+        CAPTURE(target);
+        AttackScope scope;
+        scope.SetMonsterAttacker(MODEL_DARK_GHOST);
+        auto& attacker = scope.characters[AttackerSlot];
+        attacker.MonsterIndex = MONSTER_DARK_GHOST;
+        attacker.Object.CurrentAction = MONSTER01_WALK;
+        attacker.Object.AnimationFrame = WalkingAnimationFrame;
+        scope.Receive(target, AT_ATTACK1);
+        REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
+        CHECK(attacker.Object.PriorAction == MONSTER01_WALK);
+        CHECK(attacker.Object.PriorAnimationFrame == WalkingAnimationFrame);
+        scope.CheckAttack(target == VictimKey ? VictimSlot : -1);
+    }
 }
 
 TEST_CASE("Local targetless poison attacks retain signature silence [combat][received_attack]")
