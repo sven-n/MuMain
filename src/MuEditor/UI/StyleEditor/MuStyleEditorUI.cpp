@@ -490,6 +490,8 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
     ImGui::TextUnformatted(name.c_str());
     RenderApply(look);
     RenderPreview(&m_draft);
+    // The curves of the fields mark the preview's time (design L43).
+    MuEditor::Looks::Fields::SetCurveTime(m_stopTime ? static_cast<double>(m_seconds) : WorldTime / 1000.0);
     // The look's problems, parts or layers and fields scroll below the preview, which stays where it is.
     if (ImGui::BeginChild("##Look"))
     {

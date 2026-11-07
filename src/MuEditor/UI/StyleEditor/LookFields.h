@@ -53,6 +53,24 @@ std::string DescribeItemValues(const Data::Looks::ItemValues& values);
 // A shape's value at `seconds` (the clock in the editor's terms), as the curve draws it; a random shape gives its
 // middle.
 double ShapeValueAt(const Data::Looks::Shape& shape, double seconds);
+
+// The curve under a shape's fields (design L43) shows this many seconds of the preview's clock.
+inline constexpr double CurveSpan = 10.0;
+// The preview's clock in seconds, which the curves mark; the Style Editor sets it each frame before the fields.
+void SetCurveTime(double seconds);
+// What a curve shows at the clock `now`: the ten seconds from the last whole ten before it, its values from `low`
+// (at most 0) to `high` (at least 1), and where `now` is in it.
+struct CurveWindow
+{
+    double start = 0.0;
+    double low = 0.0;
+    double high = 1.0;
+    double now = 0.0;
+};
+CurveWindow CurveWindowOf(const Data::Looks::Shape& shape, double now);
+// The shape's value `seconds` into the window; a scroll from where the window starts, as a texture looks the same
+// whatever whole steps it moved before.
+double CurveValueAt(const Data::Looks::Shape& shape, const CurveWindow& window, double seconds);
 } // namespace MuEditor::Looks::Fields
 
 #endif // _EDITOR

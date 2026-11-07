@@ -1663,7 +1663,11 @@ The picked look shows:
   list. Below it are the fields of the picked line: kind, motion, blend,
   meshes, texture, light, opacity, glow mesh and strength, scroll and the
   scrolling mesh. A value is the item's, the drawing's (opacity), a number or
-  a shape; a shape's curve over time is drawn below its fields.
+  a shape. A shape's curve is drawn below its fields: ten seconds of the
+  preview's clock, its values from 0 to 1 or as far as the shape goes, with
+  the numbers at its edges and a mark at the preview's time (or the time
+  slider's while Stop time is on), so a change of From, To or Seconds shows
+  in it.
 - The **fields**, of an effect and of a layer: a number is a drag field
   (dragged sideways it changes, a double click types an exact number), and
   pointing at a field or its name shows what it does; the choices of a

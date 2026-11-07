@@ -2,8 +2,8 @@
 
 #include "doctest.h"
 
-// The Style Editor (design L18 to L20, L31, L42): its edits of the render style file, which reach the game at once and
-// are undo steps, the window on a look of the file or one still in code, and Data Checks opening it.
+// The Style Editor (design L18 to L20, L31, L42, L43): its edits of the render style file, which reach the game at once
+// and are undo steps, the window on a look of the file or one still in code, and Data Checks opening it.
 #ifdef _EDITOR
 
 #include "TestImGuiContext.h"
@@ -341,6 +341,43 @@ TEST_CASE("A field of a look says what it does while the mouse rests on it (desi
         shown = frame();
     }
     CHECK(shown);
+}
+
+TEST_CASE("A shape's curve shows ten seconds of the preview's clock with fixed axes and marks the time (design L43) "
+          "[editor][looks]")
+{
+    using Data::Looks::Shape;
+    using Data::Looks::ShapeKind;
+    using MuEditor::Looks::Fields::CurveValueAt;
+    using MuEditor::Looks::Fields::CurveWindowOf;
+    const Shape wave{.kind = ShapeKind::Wave, .from = -0.2, .to = 1.0, .seconds = 6.283185};
+    const MuEditor::Looks::Fields::CurveWindow window = CurveWindowOf(wave, 2.5);
+    CHECK(window.start == 0.0);
+    CHECK(window.now == doctest::Approx(2.5));
+    CHECK(window.low == doctest::Approx(-0.2).epsilon(0.001));
+    CHECK(window.high == 1.0);
+
+    // A lower To keeps the axes, so the curve gets flatter instead of filling its box again, and half the seconds
+    // put twice the rounds into the same ten seconds.
+    const Shape changed{.kind = ShapeKind::Wave, .from = -0.2, .to = 0.5, .seconds = 3.14159};
+    const MuEditor::Looks::Fields::CurveWindow flatter = CurveWindowOf(changed, 2.5);
+    CHECK(flatter.low == doctest::Approx(-0.2).epsilon(0.001));
+    CHECK(flatter.high == 1.0);
+    CHECK(CurveValueAt(changed, flatter, 3.14159 / 4.0) == doctest::Approx(0.5));
+    CHECK(CurveValueAt(changed, flatter, 3.14159 * 5.0 / 4.0) == doctest::Approx(0.5));
+
+    // Later on the clock the window moves on by whole ten seconds, and draws the values the look has then.
+    const MuEditor::Looks::Fields::CurveWindow later = CurveWindowOf(wave, 1234.5);
+    CHECK(later.start == 1230.0);
+    CHECK(later.now == doctest::Approx(4.5));
+    CHECK(CurveValueAt(wave, later, 4.5) == doctest::Approx(MuEditor::Looks::Fields::ShapeValueAt(wave, 1234.5)));
+
+    // A scroll starts where the window starts and grows over its ten seconds.
+    const Shape scroll{.kind = ShapeKind::Scroll, .perSecond = 0.8};
+    const MuEditor::Looks::Fields::CurveWindow flowing = CurveWindowOf(scroll, 1234.5);
+    CHECK(CurveValueAt(scroll, flowing, 0.0) == 0.0);
+    CHECK(flowing.low == 0.0);
+    CHECK(flowing.high == doctest::Approx(8.0));
 }
 
 TEST_CASE("Data Checks: a click on a render style problem selects its item and opens the Style Editor [editor]")

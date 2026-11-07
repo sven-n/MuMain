@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cfloat>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -34,8 +33,8 @@ constexpr double Pi = 3.14159265358979323846;
 constexpr float ComboWidth = 190.0f;
 constexpr float NumberWidth = 110.0f;
 constexpr float GraphWidth = 300.0f;
-constexpr float GraphHeight = 44.0f;
-constexpr int GraphSamples = 160;
+constexpr float GraphHeight = 60.0f;
+constexpr int GraphSamples = 300;
 // The meshes a look names, as the file reads them.
 constexpr int LastMesh = 49;
 constexpr int MaxFrames = 1000;
@@ -48,6 +47,9 @@ constexpr double MinSeconds = 0.001;
 constexpr double MaxSeconds = 100000.0;
 // A tooltip's lines wrap at this many font heights.
 constexpr float TipWidth = 28.0f;
+
+// The preview's clock, in seconds, which the curves mark (design L43).
+double s_curveTime = 0.0;
 
 float Scaled(float width)
 {
@@ -250,26 +252,8 @@ bool SecondsField(const char* label, double& seconds, const char* tip)
     return DragNumber(label, seconds, SecondsSpeed, tip, MinSeconds);
 }
 
-// The span of the curve: two cycles, or ten seconds of a scroll.
-double CurveSeconds(const Shape& shape)
-{
-    double seconds = 10.0;
-    switch (shape.kind)
-    {
-    case ShapeKind::Wave:
-    case ShapeKind::Bounce:
-    case ShapeKind::Ramp:
-        seconds = 2.0 * shape.seconds;
-        break;
-    case ShapeKind::Frames:
-        seconds = 2.0 * shape.seconds * shape.count;
-        break;
-    default:
-        break;
-    }
-    return std::clamp(seconds, 0.001, 600.0);
-}
-
+// The curve of a shape (design L43): ten seconds of the preview's clock with fixed axes, so a change of its numbers
+// changes the curve, the numbers at its edges, a line at 0 and a mark at the preview's time.
 void RenderCurve(const Shape& shape)
 {
     if (shape.kind == ShapeKind::Random)
@@ -277,17 +261,37 @@ void RenderCurve(const Shape& shape)
         ImGui::TextDisabled("%s", I18N::Editor::ANewValueEachFrame);
         return;
     }
-    const double span = CurveSeconds(shape);
+    const CurveWindow window = CurveWindowOf(shape, s_curveTime);
     std::array<float, GraphSamples> values{};
     for (int sample = 0; sample < GraphSamples; ++sample)
     {
         values[static_cast<std::size_t>(sample)] =
-            static_cast<float>(ShapeValueAt(shape, span * sample / (GraphSamples - 1)));
+            static_cast<float>(CurveValueAt(shape, window, CurveSpan * sample / (GraphSamples - 1)));
     }
-    char overlay[64];
-    std::snprintf(overlay, sizeof(overlay), "0 - %.3g s", span);
-    ImGui::PlotLines("##Curve", values.data(), GraphSamples, 0, overlay, FLT_MAX, FLT_MAX,
-                     ImVec2(Scaled(GraphWidth), Scaled(GraphHeight)));
+    ImGui::PlotLines("##Curve", values.data(), GraphSamples, 0, nullptr, static_cast<float>(window.low),
+                     static_cast<float>(window.high), ImVec2(Scaled(GraphWidth), Scaled(GraphHeight)));
+    // Inside the plot's frame, as PlotLines draws the line.
+    const ImVec2 padding = ImGui::GetStyle().FramePadding;
+    const ImVec2 min(ImGui::GetItemRectMin().x + padding.x, ImGui::GetItemRectMin().y + padding.y);
+    const ImVec2 max(ImGui::GetItemRectMax().x - padding.x, ImGui::GetItemRectMax().y - padding.y);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const auto yOf = [&](double value)
+    { return max.y - (max.y - min.y) * static_cast<float>((value - window.low) / (window.high - window.low)); };
+    if (window.low < 0.0 && window.high > 0.0)
+    {
+        draw->AddLine(ImVec2(min.x, yOf(0.0)), ImVec2(max.x, yOf(0.0)), ImGui::GetColorU32(ImGuiCol_Separator));
+    }
+    const float x = min.x + (max.x - min.x) * static_cast<float>(window.now / CurveSpan);
+    draw->AddLine(ImVec2(x, min.y), ImVec2(x, max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 1.5f);
+    const ImU32 color = ImGui::GetColorU32(ImGuiCol_TextDisabled);
+    const float lineHeight = ImGui::GetFontSize();
+    char text[64];
+    std::snprintf(text, sizeof(text), "%.3g", window.high);
+    draw->AddText(ImVec2(min.x + 2.0f, min.y), color, text);
+    std::snprintf(text, sizeof(text), "%.3g", window.low);
+    draw->AddText(ImVec2(min.x + 2.0f, max.y - lineHeight), color, text);
+    std::snprintf(text, sizeof(text), "%.4g - %.4g s", window.start, window.start + CurveSpan);
+    draw->AddText(ImVec2(max.x - ImGui::CalcTextSize(text).x - 2.0f, max.y - lineHeight), color, text);
 }
 
 bool ShapeFields(Shape& shape)
@@ -930,6 +934,31 @@ std::vector<MeshOption> MeshOptions(const std::vector<LookPart>& parts, const st
         options.push_back({mesh, I18N::Format(I18N::Editor::MeshNotInTheModel, {std::to_string(mesh)})});
     }
     return options;
+}
+
+void SetCurveTime(double seconds)
+{
+    s_curveTime = seconds;
+}
+
+double CurveValueAt(const Shape& shape, const CurveWindow& window, double seconds)
+{
+    return shape.kind == ShapeKind::Scroll ? ShapeValueAt(shape, seconds) : ShapeValueAt(shape, window.start + seconds);
+}
+
+CurveWindow CurveWindowOf(const Shape& shape, double now)
+{
+    CurveWindow window;
+    const double clock = std::max(0.0, now);
+    window.start = std::floor(clock / CurveSpan) * CurveSpan;
+    window.now = clock - window.start;
+    for (int sample = 0; sample < GraphSamples; ++sample)
+    {
+        const double value = CurveValueAt(shape, window, CurveSpan * sample / (GraphSamples - 1));
+        window.low = std::min(window.low, value);
+        window.high = std::max(window.high, value);
+    }
+    return window;
 }
 
 std::vector<int> WithMesh(std::vector<int> meshes, int mesh, bool in)
