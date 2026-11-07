@@ -499,6 +499,16 @@ bool IsCanTrade()
 int TextNum = 0;
 int SkipNum = 0;
 
+void ClearTooltipRows()
+{
+    for (int row = 0; row < MaxTextListRows; ++row)
+    {
+        TextList[row][0] = L'\0';
+        TextListColor[row] = TEXT_COLOR_WHITE;
+        TextBold[row] = false;
+    }
+}
+
 void RequireClass(ITEM_ATTRIBUTE* pItem)
 {
     if (pItem == NULL)
@@ -1785,12 +1795,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
 
     TextNum = 0;
     SkipNum = 0;
-
-    ZeroMemory(TextListColor, 20 * sizeof(int));
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = 0;
-    }
+    ClearTooltipRows();
 
     if (!Sell && (GameLogic::Items::IsDarkLordPet(ip)))
     {
@@ -2510,10 +2515,7 @@ RepairInfoText BuildRepairInfoText(const ITEM* ip)
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
     TextNum = 0;
     SkipNum = 0;
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = 0;
-    }
+    ClearTooltipRows();
 
     int Level = ip->Level;
     // The name and its color as the item's tooltip has them.

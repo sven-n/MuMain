@@ -98,6 +98,10 @@ extern wchar_t TextList[MaxTextListRows][100];
 extern int TextListColor[MaxTextListRows];
 extern int TextBold[MaxTextListRows];
 extern SIZE Size[MaxTextListRows];
+// Starts a list of tooltip rows: every one of the MaxTextListRows rows empty, white and not bold. The rows are shared
+// by all tooltips, and a row that sets only its text (the Horn of Fenrir's colour lines) or its text and colour would
+// otherwise keep the bold or colour of the tooltip drawn before.
+void ClearTooltipRows();
 
 namespace Data::Items
 {
