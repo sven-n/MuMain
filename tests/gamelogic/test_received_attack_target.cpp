@@ -7,6 +7,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/GameMaps/GMEmpireGuardian2.h"
+#include "World/GameMaps/GM_Kanturu_2nd.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 #include "../monsters/MonsterModelRecorder.h"
@@ -465,4 +466,43 @@ TEST_CASE("CreateCharacterPointer clears received attack feedback on slot reuse 
     MoveCharacter(&attacker, &attacker.Object);
     CHECK(attacker.AttackTime == 0);
     CHECK(audio.TakePlayedSounds().empty());
+}
+
+TEST_CASE("Received cannon attacks restart consumed effect steps [combat][received_attack]")
+{
+    MonsterRecorder::LoadScope audio(WD_38KANTURU_2ND);
+    AttackScope scope;
+    scope.SetMonsterAttacker(MODEL_TRAP_CANON);
+    auto& attacker = scope.characters[AttackerSlot];
+    auto* o = &attacker.Object;
+    auto* b = &Models[MODEL_TRAP_CANON];
+    auto* victimObject = &scope.characters[VictimSlot].Object;
+    for (int i = 0; i < MAX_JOINTS; ++i)
+        Joints[i].Live = false;
+    const auto countVictimJoints = [victimObject]
+    {
+        return std::count_if(
+            Joints, Joints + MAX_JOINTS, [victimObject](const auto& joint)
+            { return joint.Live && joint.Type == BITMAP_JOINT_ENERGY && joint.Target == victimObject; });
+    };
+
+    attacker.AttackFlag = ATTACK_DIE;
+    scope.Receive(MissingKey, AT_ATTACK1);
+    scope.CheckAttack(-1);
+    CHECK(attacker.AttackFlag == ATTACK_DIE);
+    CHECK(M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(&attacker, o, b));
+    CHECK(attacker.LastAttackEffectTime == 1);
+    CHECK(std::none_of(Joints, Joints + MAX_JOINTS, [](const auto& joint) { return joint.Live; }));
+
+    scope.Receive(VictimKey, AT_ATTACK2);
+    scope.CheckAttack(VictimSlot);
+    CHECK(attacker.AttackFlag == ATTACK_DIE);
+    CHECK(attacker.LastAttackEffectTime == -1);
+    CHECK(M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(&attacker, o, b));
+    CHECK(attacker.LastAttackEffectTime == 1);
+    CHECK(countVictimJoints() == 1);
+    CHECK(M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(&attacker, o, b));
+    CHECK(countVictimJoints() == 1);
+    for (int i = 0; i < MAX_JOINTS; ++i)
+        Joints[i].Live = false;
 }

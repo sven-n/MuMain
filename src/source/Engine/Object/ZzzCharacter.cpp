@@ -3956,8 +3956,8 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
 
 namespace
 {
-// A hit sounds like the attacker's weapon: the missile hit sounds for a bow or crossbow, the
-// melee hit sounds for anything else.
+// Molt through Great Drakan have no hit sound. Other attackers use missile hit sounds for a bow
+// or crossbow, melee hit sounds otherwise.
 void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 {
     if (MONSTER_MOLT <= attacker->MonsterIndex && attacker->MonsterIndex <= MONSTER_GREAT_DRAKAN)
