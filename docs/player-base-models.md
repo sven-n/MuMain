@@ -44,6 +44,13 @@ Summoner/Rage Fighter bodies, masks, animations, class IDs and attachment rules 
 Fully armored characters still use their existing armor art. The setting is independent of
 Classic/Enhanced graphics and texture packs.
 
+Player-shaped monsters and NPCs (guards, transformations, the Doppelganger) use the same body
+models, so they follow the setting too, in the game and in the editor's Monster Preview. Compare
+monster setups before and after a change with the same setting on both runs.
+
+The editor's Item Model file picker does not list `Data/Player/Updated/`: those files are bodies,
+not item models, and have the same names as the originals.
+
 ## Attribution
 
 Original and improved models and textures belong to **Webzen**. Attribution does not transfer
