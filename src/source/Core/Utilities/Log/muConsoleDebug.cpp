@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include <cerrno>
+#include <cmath>
 #include <cstdlib>
 #include <cwchar>
 #include <optional>
@@ -264,6 +265,43 @@ ConsoleCommandResult BadArgument(std::wstring message)
 {
     return {ConsoleCommandStatus::BadArgument, std::move(message)};
 }
+
+// A frame cap has to leave the client able to react: below one frame per second the picture
+// stops responding and reads as a crash, and above any panel the extra frames are wasted, as
+// the loop still sleeps per frame. Both ends are wide enough for real hardware and monitors.
+constexpr int MinTargetFps = 1;
+constexpr int MaxTargetFps = 1000;
+
+// Built from the limits so the hint cannot drift from what ParseTargetFps accepts.
+std::wstring TargetFpsUsage()
+{
+    return L"usage: $fps <fps>, " + std::to_wstring(MinTargetFps) + L" to " + std::to_wstring(MaxTargetFps) +
+           L", or -1 for uncapped";
+}
+
+// Parses the argument of "$fps": -1 (or any negative value) for uncapped, a frame cap otherwise.
+// Non-finite and out-of-range values are rejected here rather than reaching SetTargetFps, which
+// ignores zero without a word and divides by whatever it is given.
+std::optional<double> ParseTargetFps(std::wstring_view argument)
+{
+    const std::optional<double> fps = ParseNumericArgument(argument);
+    if (!fps || !std::isfinite(*fps))
+    {
+        return std::nullopt;
+    }
+
+    if (*fps > 0.0 && (*fps < MinTargetFps || *fps > MaxTargetFps))
+    {
+        return std::nullopt;
+    }
+
+    if (*fps == 0.0)
+    {
+        return std::nullopt;
+    }
+
+    return fps;
+}
 } // namespace
 
 ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
@@ -423,10 +461,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     {
         const bool hasArgument = strCommand.size() > 4 && strCommand[4] == L' ';
         const std::optional<double> targetFps =
-            hasArgument ? ParseNumericArgument(std::wstring_view(strCommand).substr(4)) : std::nullopt;
+            hasArgument ? ParseTargetFps(std::wstring_view(strCommand).substr(4)) : std::nullopt;
         if (!targetFps)
         {
-            return BadArgument(L"usage: $fps <number>");
+            return BadArgument(TargetFpsUsage());
         }
 
         SetTargetFps(*targetFps);
