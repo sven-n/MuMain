@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cwchar>
+#include <cwctype>
 #include <optional>
 #include <string_view>
 #include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
@@ -226,19 +227,33 @@ void ListDebugWindows()
                              mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
+// Everything std::iswspace calls whitespace, because the argument reaches here from two places:
+// the chat box, where a stray tab shows up, and the control socket, where the text can end in
+// "\r\n". std::wcstod skips leading whitespace on its own but not trailing.
+std::wstring TrimWhitespace(std::wstring_view text)
+{
+    const auto isWhitespace = [](wchar_t character) { return std::iswspace(static_cast<wint_t>(character)) != 0; };
+    while (!text.empty() && isWhitespace(text.front()))
+    {
+        text.remove_prefix(1);
+    }
+    while (!text.empty() && isWhitespace(text.back()))
+    {
+        text.remove_suffix(1);
+    }
+    return std::wstring(text);
+}
+
 // Parses the argument of a "$<command> <number>" debug command. A missing or malformed argument
 // used to reach std::stof/substr and throw out of the chat handler, which closed the client;
 // callers print a usage hint instead. Returns nullopt unless the whole argument is a number.
 std::optional<double> ParseNumericArgument(std::wstring_view argument)
 {
-    const auto first = argument.find_first_not_of(L" \t");
-    if (first == std::wstring_view::npos)
+    const std::wstring trimmed = TrimWhitespace(argument);
+    if (trimmed.empty())
     {
         return std::nullopt;
     }
-
-    const auto last = argument.find_last_not_of(L" \t");
-    const std::wstring trimmed(argument.substr(first, last - first + 1));
 
     wchar_t* end = nullptr;
     errno = 0;
