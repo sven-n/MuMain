@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -1422,20 +1423,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame > 4.5f && o->AnimationFrame < 5.0f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
-                vec3_t Angle = { 0.f, 0.f, o->Angle[2] };
-                vec3_t Pos = { 0.f, 0.f, (to->BoundingBoxMax[2] / 1.f) };
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle = {0.f, 0.f, o->Angle[2]};
+                    vec3_t Pos = {0.f, 0.f, (to->BoundingBoxMax[2] / 1.f)};
 
-                Vector(80.f, 0.f, 20.f, p);
-                b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                Position[2] += 50.0f;
-                Angle[2] = o->Angle[2] + 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
-                Angle[2] = o->Angle[2] - 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Vector(80.f, 0.f, 20.f, p);
+                    b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                    Position[2] += 50.0f;
+                    Angle[2] = o->Angle[2] + 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Angle[2] = o->Angle[2] - 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                }
             }
         }
     }

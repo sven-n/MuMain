@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 
 #ifdef ASG_ADD_MAP_KARUTAN
@@ -717,18 +718,19 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f) &&
             rand_fps_check(1))
         {
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
-            vec3_t vLight;
-            int i;
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+            {
+                vec3_t vLight;
+                int i;
 
-            Vector(0.4f, 0.9f, 0.6f, vLight);
-            for (i = 0; i < 5; ++i)
-                CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
+                Vector(0.4f, 0.9f, 0.6f, vLight);
+                for (i = 0; i < 5; ++i)
+                    CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 
-            Vector(0.4f, 1.0f, 0.6f, vLight);
-            for (i = 0; i < 2; ++i)
-                CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+                Vector(0.4f, 1.0f, 0.6f, vLight);
+                for (i = 0; i < 2; ++i)
+                    CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+            }
         }
         return true;
     }

@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -321,12 +322,14 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.3f)
             {
-                CHARACTER* chT = &CharactersClient[c->TargetCharacter];
-                vec3_t& v3TargetPos = chT->Object.Position;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t& v3TargetPos = to->Position;
 
-                Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
-                CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0,
-                             0, 1.0f);
+                    Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
+                    CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0,
+                                 0, 0, 1.0f);
+                }
             }
 
             if (6.0f <= o->AnimationFrame && o->AnimationFrame < 12.0f)
@@ -1069,6 +1072,9 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
+            if (c->TargetCharacter == -1 && c->ReceivedUnknownTargetHitSoundPending)
+                PlayBuffer(SOUND_METEORITE01);
+            c->ReceivedUnknownTargetHitSoundPending = false;
             if (c->TargetCharacter != -1)
             {
                 CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];

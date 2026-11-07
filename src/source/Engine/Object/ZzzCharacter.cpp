@@ -1091,6 +1091,7 @@ void SetPlayerHighBowAttack(CHARACTER* c)
 
 void SetPlayerAttack(CHARACTER* c)
 {
+    c->ReceivedUnknownTargetHitSoundPending = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -1310,6 +1311,7 @@ void SetPlayerAttack(CHARACTER* c)
 
 void SetPlayerMagic(CHARACTER* c)
 {
+    c->ReceivedUnknownTargetHitSoundPending = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -3954,14 +3956,25 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
 
 namespace
 {
-// A hit sounds like the attacker's weapon: the missile hit sounds for a bow or crossbow, the
-// melee hit sounds for anything else.
+// Molt through Great Drakan have no hit sound. Other attackers use missile hit sounds for a bow
+// or crossbow, melee hit sounds otherwise.
 void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 {
+    if (MONSTER_MOLT <= attacker->MonsterIndex && attacker->MonsterIndex <= MONSTER_GREAT_DRAKAN)
+        return;
+
     constexpr int HitSoundVariants = 4;
     const ESound firstSound = gCharacterManager.GetEquipedBowType(attacker) != BOWTYPE_NONE ? SOUND_ATTACK_MISSILE_HIT1
                                                                                             : SOUND_ATTACK_MELEE_HIT1;
     PlayBuffer(static_cast<ESound>(firstSound + Random::Rand() % HitSoundVariants), o);
+}
+
+void PlayUntargetedAttackHitSound(CHARACTER* attacker, OBJECT* object)
+{
+    if (!attacker->ReceivedUnknownTargetHitSoundPending || attacker->Skill != 0)
+        return;
+
+    PlayAttackHitSound(attacker, object);
 }
 } // namespace
 
@@ -4758,6 +4771,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             {
                 CreateArrows(c, o, NULL, 0, 0);
             }
+            PlayUntargetedAttackHitSound(c, o);
         }
         else
         {
@@ -5217,17 +5231,12 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_BRAND_OF_SKILL:
                 break;
             default:
-                if (MONSTER_MOLT <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GREAT_DRAKAN)
-                {
-                }
-                else
-                {
-                    PlayAttackHitSound(c, o);
-                }
+                PlayAttackHitSound(c, o);
                 break;
             }
         }
 
+        c->ReceivedUnknownTargetHitSoundPending = false;
         c->Skill = 0;
         c->Damage = 0;
         c->AttackFlag = ATTACK_FAIL;
@@ -12513,6 +12522,19 @@ void DeleteCharacterCompanions(CHARACTER* c)
         g_petProcess->DeletePet(c, -1, true);
 }
 
+namespace
+{
+void ResetCharacterAttackState(CHARACTER* character)
+{
+    character->Skill = 0;
+    character->AttackTime = 0;
+    character->LastAttackEffectTime = -1;
+    character->TargetCharacter = -1;
+    character->AttackFlag = ATTACK_FAIL;
+    character->ReceivedUnknownTargetHitSoundPending = false;
+}
+} // namespace
+
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
 {
     OBJECT* o = &c->Object;
@@ -12621,11 +12643,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
-    c->Skill = 0;
-    c->AttackTime = 0;
-    c->LastAttackEffectTime = -1;
-    c->TargetCharacter = -1;
-    c->AttackFlag = ATTACK_FAIL;
+    ResetCharacterAttackState(c);
     c->Weapon[0].Type = -1;
     c->Weapon[0].Level = 0;
     c->Weapon[1].Type = -1;
