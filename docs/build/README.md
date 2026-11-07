@@ -436,7 +436,10 @@ Data          : data-<id> (matches this client)
 The log goes on with the OS, CPU and RAM, the `ClientLibrary` line, the data language
 (`Eng`, `Por` or `Spn`, which picks the `Data/Local` files), and, once the renderer is
 up, the GPU, its graphics API and driver version, and the UI language the player reads
-(`en`, `de`, `zh-CN`, ...) with whether item names are translated.
+(`en`, `de`, `zh-CN`, ...) with whether item names are translated. A change later adds
+a line: `> UI language changed to ...` for a switch in the options window or the editor,
+`> Item names now translated.` or `> Item names now in English.` for the options window's
+item name setting.
 `ClientLibrary` names the commit the .NET library was built from and its OpenMU
 packets version. In a release download that commit is the client's, so a different
 one means a library from another download. A local build rebuilds the library only
@@ -449,10 +452,12 @@ lead to a server:
 
 | Address | Written as |
 | --- | --- |
-| The local machine: `127.0.0.0`–`127.255.255.255`, `localhost` and `*.localhost`, `::1`, `::ffff:127.x.x.x` | as configured, e.g. `127.127.127.127:44405` |
+| The local machine: `127.0.0.0`–`127.255.255.255`, `0.0.0.0`–`0.255.255.255`, `localhost` and `*.localhost`, `::1`, `::` | as configured, e.g. `127.127.127.127:44405` |
 | A private network: `10.x`, `172.16.x`–`172.31.x`, `192.168.x`, `169.254.x`, `100.64.x`–`100.127.x`, `fc00::/7`, `fe80::/10` | as configured, with `(private network)` |
 | Any other IP address | `a public IPv4 address:44405` or `a public IPv6 address:44405` |
 | A host name, e.g. `mu.example.com` | `a host name:44405` |
+
+An IPv4 address in IPv6 form, e.g. `::ffff:192.168.1.20`, counts as that IPv4 address.
 
 A failed connection logs the socket error (`SocketException ConnectionRefused (10061)`)
 instead of the exception text, which would name the address.

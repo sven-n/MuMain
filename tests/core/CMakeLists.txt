@@ -39,6 +39,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_reading_language_log
+    SOURCES
+        test_reading_language_log.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_narrow_path
     SOURCES
         test_narrow_path.cpp
