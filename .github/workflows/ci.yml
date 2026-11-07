@@ -91,56 +91,7 @@ jobs:
           test -f src/bin/Data/Dec2.dat
           test -f src/bin/fonts/DejaVuSans.ttf
 
-      - name: Cache quality tools
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cache/pip
-          key: quality-tools-pip-${{ runner.os }}-v1
-          restore-keys: quality-tools-pip-${{ runner.os }}-
-
-      # cppcheck, cached as the Linux build caches its packages (see there).
-      - name: Find apt packages
-        id: apt_packages
-        run: |
-          sudo apt-get update
-          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
-          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
-
-      - name: Restore apt packages
-        id: apt
-        uses: actions/cache/restore@v6
-        with:
-          path: ${{ env.APT_ARCHIVES }}
-          key: ${{ steps.apt_packages.outputs.key }}
-          restore-keys: |
-            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
-            apt-cppcheck-linux-x64-
-
-      - name: Fetch apt packages
-        run: |
-          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
-            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
-          fi
-          sudo apt-get install -y --download-only $APT_PACKAGES
-
-      - name: Gather apt packages
-        id: gather
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
-        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
-
-      - name: Save apt packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: ${{ env.APT_ARCHIVES }}
-          key: ${{ steps.apt.outputs.cache-primary-key }}
-
-      - name: Install quality tools
-        run: |
-          sudo apt-get install -y $APT_PACKAGES
-          pip install clang-format==21.1.8
-
+      # Before the tools: only Check formatting and Static analysis use them, and they skip a run without C++ changes.
       - name: Detect changed C++ files
         id: changed
         env:
@@ -157,6 +108,61 @@ jobs:
             echo "$CHANGED" > /tmp/changed-cpp-files.txt
             echo "$COUNT C++ files changed"
           fi
+
+      - name: Cache quality tools
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/pip
+          key: quality-tools-pip-${{ runner.os }}-v1
+          restore-keys: quality-tools-pip-${{ runner.os }}-
+
+      # cppcheck, cached as the Linux build caches its packages (see there).
+      - name: Find apt packages
+        id: apt_packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get update
+          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
+          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
+
+      - name: Restore apt packages
+        id: apt
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt_packages.outputs.key }}
+          restore-keys: |
+            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-cppcheck-linux-x64-
+
+      - name: Fetch apt packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
+            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
+          fi
+          sudo apt-get install -y --download-only $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.changed.outputs.count != '0'
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
+
+      - name: Save apt packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt.outputs.cache-primary-key }}
+
+      - name: Install quality tools
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get install -y $APT_PACKAGES
+          pip install clang-format==21.1.8
 
       - name: Check formatting
         if: steps.changed.outputs.count != '0'

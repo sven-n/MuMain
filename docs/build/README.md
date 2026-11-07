@@ -326,7 +326,9 @@ packages** then collects the listed files for **Save apt packages**
 ([`scripts/ci_apt_cache.py`](../../scripts/ci_apt_cache.py)), before **Install build
 tools** installs them, so no clean-up after dpkg can remove them first. When one is
 missing, the save stores nothing and a notice names it. Quality Gates gets cppcheck,
-which the image lacks, from an apt cache of its own the same way.
+which the image lacks, from an apt cache of its own the same way, and only in runs
+that change C++ files: only its formatting check and static analysis use cppcheck
+and clang-format, and they skip the other runs.
 
 PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
 **Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read

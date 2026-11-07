@@ -664,9 +664,11 @@ def check_cache_pair(job_body, job_name, restore_name, save_name):
           f"{job_name} {save_name} must save the paths {restore_name} restores")
 
 
-def check_apt_cache(job_body, job_name, kind, install_name):
+def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
     """An apt cache: named after the image and the files apt would fetch, restored, fetched into apt's archive folder,
-    gathered and saved by main pushes (only with every file), and installed from there."""
+    gathered and saved by main pushes (only with every file), and installed from there. `condition` is (step, if) for
+    a job whose apt steps and install run only when an earlier step says so."""
+    when = f" && {condition[1]}" if condition else ""
     find = step(job_body, job_name, "Find apt packages")
     for required in ("id: apt_packages\n", "sudo apt-get update",
                      'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
@@ -688,7 +690,7 @@ def check_apt_cache(job_body, job_name, kind, install_name):
     # Only the runs that save gather the files, so the gather has the save's conditions. It runs before the install,
     # which could clean apt's archive folder.
     gather = step(job_body, job_name, "Gather apt packages")
-    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'\n",
+    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'{when}\n",
                      'python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives '
                      '"$APT_ARCHIVES"'):
         check(required in gather, f"{job_name} Gather apt packages missing {required}")
@@ -699,9 +701,14 @@ def check_apt_cache(job_body, job_name, kind, install_name):
     # save that went on after an error would save an entry without them.
     check("continue-on-error" not in gather + save, f"{job_name} must not save its apt packages after a failed gather")
     check("sudo apt-get update" not in fetch + install, f"{job_name} must update the apt index before naming the cache")
+    if condition:
+        # The save needs no condition of its own: without the gather, it has no complete.
+        for name, body in (("Find apt packages", find), ("Restore apt packages", restore),
+                           ("Fetch apt packages", fetch), (install_name, install)):
+            check(f"if: {condition[1]}\n" in body, f"{job_name} {name} must run only when {condition[0]} says so")
     names = re.findall(r"(?m)^      - name: (.+)$", job_body)
-    order = ["Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
-             "Save apt packages", install_name]
+    order = ([condition[0]] if condition else []) + ["Find apt packages", "Restore apt packages", "Fetch apt packages",
+                                                     "Gather apt packages", "Save apt packages", install_name]
     check(all(name in names for name in order)
           and [names.index(name) for name in order] == sorted(names.index(name) for name in order),
           f"{job_name} must find, restore, fetch, gather and save its apt packages, then install them, in that order")
@@ -709,8 +716,9 @@ def check_apt_cache(job_body, job_name, kind, install_name):
 
 check_apt_cache(linux_job, "build-linux", "apt-linux-x64-", "Install build tools")
 # Quality Gates installs cppcheck from its own apt cache; its restore and save are checked here, as the build jobs'
-# caches are below.
-check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools")
+# caches are below. Only Check formatting and Static analysis use the tools, and they skip a run without C++ changes.
+check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools",
+                ("Detect changed C++ files", "steps.changed.outputs.count != '0'"))
 check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
 # Each compiler cache save holds the objects its build used, not every build's since the cache began: the step before
 # the save drops the older ones, in the runs that save.
