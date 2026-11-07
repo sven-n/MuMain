@@ -21,6 +21,17 @@
 > **Changed 2026-11-06.** sven-n/MuMain#1007 made the Dark Horse's defense count
 > the hero's total agility, as OpenMU's `TotalAgility`; P30, section 4, section
 > 12 and 9b5 say so.
+>
+> **9a1 as built (2026-11-07, sven-n/MuMain#1013).** The format reads what luck
+> uses: the type `luck`, and a value's `values`. Each group's pull request adds
+> its type and the fields it uses (`per` with 9a3; `firstLevel`, `levelType`,
+> `requiresItemLevel`, an option's `type`, `bits`, `itemLevels`,
+> `subOptionType` and `server.weight` with 9b). Save Items writes the option
+> files from 9a5 on, when Item Options changes them; 9a1 has their writers and
+> a test that the shipped files are written back as they are read. An item
+> file saved before 9a1 keeps its items without lists in the editor too, since
+> an empty list differs from the rules' (O33): Item Basics' "Use the rules"
+> (9a5) writes them.
 
 ## Goal
 
@@ -1080,9 +1091,10 @@ others. The option slots fix (O23) comes first; 9a1 builds on its 16 slots.
    and 10, and `docs/CODING_RULES.md`.
 2. Add `ItemOptionDatabase` (section 1), the loaders, **writers** and
    validators in `ItemJsonStorage` for `Options/*.json`, `OptionRules.json`
-   and `OptionTexts.json` (Save Items writes them from 9a1 on, because the
-   conversion and the bmd import write the item lists), and the calls in
-   `CItemDataHandler::Load` (`OptionRules.json` in the editor build only, O34).
+   and `OptionTexts.json` (Save Items writes them from 9a5 on, when Item
+   Options changes them; the item lists that the conversion and the bmd import
+   write are in the item files), and the calls in `CItemDataHandler::Load`
+   (`OptionRules.json` in the editor build only, O34).
 3. Add `options` to `ItemDefinition` and the item JSON format (section 6,
    O24: the game reads only the list); move the conditions of
    `StatProfileRule` into `ItemRuleConditions` and add `OptionRule` with
