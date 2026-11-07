@@ -82,6 +82,17 @@ TEST_CASE("An item's option links are written after its tags and read back [data
         R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": "Kris", "options": "luck"}]})",
         "Group00_Sword.json", items, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "options"));
+
+    // A name twice is read once: the save writes it once, and the list compares with the rules' as one name.
+    items.clear();
+    issues.clear();
+    ReadItemGroupJson(
+        R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": "Kris", "options": ["luck", "luck"]}]})",
+        "Group00_Sword.json", items, issues);
+    REQUIRE(items.size() == 1);
+    CHECK(items[0].options == std::vector<std::string>{"luck"});
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "options"));
+    CHECK_FALSE(HasFatal(issues));
 }
 
 TEST_CASE(

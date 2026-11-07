@@ -627,7 +627,14 @@ void ItemReader::ReadOptionLinks(const OrderedJson& json, std::vector<std::strin
     }
     for (const OrderedJson& entry : *list)
     {
-        options.push_back(entry.get<std::string>());
+        std::string name = entry.get<std::string>();
+        if (std::find(options.begin(), options.end(), name) != options.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, Keys::Options,
+                     "\"" + name + "\" is in the list more than once; it is read once");
+            continue;
+        }
+        options.push_back(std::move(name));
     }
 }
 
