@@ -1072,6 +1072,7 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
+            c->ReceivedUnknownTargetHitSoundPending = false;
             if (c->TargetCharacter != -1)
             {
                 CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];

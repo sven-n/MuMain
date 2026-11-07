@@ -6,10 +6,12 @@
 #include "Network/Server/WSclient.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "World/GameMaps/GMEmpireGuardian2.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 #include "../monsters/MonsterModelRecorder.h"
 
+#include <algorithm>
 #include <array>
 #include <memory>
 
@@ -88,13 +90,13 @@ struct AttackScope
         characters[VictimSlot].Hit = PreviousVictimHit;
     }
 
-    void SetMonsterAttacker()
+    void SetMonsterAttacker(int type = MODEL_TWIN_TAIL)
     {
         auto& attacker = characters[AttackerSlot];
         attacker.Object.Kind = KIND_MONSTER;
-        attacker.Object.Type = MODEL_TWIN_TAIL;
+        attacker.Object.Type = static_cast<short>(type);
         attacker.Object.BoneTransform = bones.get();
-        auto& model = Models[MODEL_TWIN_TAIL];
+        auto& model = Models[type];
         model.Actions = new Action_t[MAX_PLAYER_ACTION]{};
         model.NumActions = MAX_PLAYER_ACTION;
         for (int i = 0; i < MAX_PLAYER_ACTION; ++i)
@@ -139,7 +141,7 @@ struct AttackScope
         CHECK(attacker.TargetCharacter == targetSlot);
         CHECK(attacker.AttackTime == 1);
         CHECK(attacker.Object.AnimationFrame == 0);
-        CHECK(attacker.PendingAttackHitSound);
+        CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (targetSlot == -1));
         CHECK(AttackPlayer == AttackerSlot);
         CHECK(Hero->Hit == PreviousHeroHit);
         CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
@@ -226,7 +228,7 @@ TEST_CASE("MoveCharacter keeps received hit sounds without a target [combat][rec
         }
         CHECK(hits == 1);
         CHECK(attacker.AttackTime == 0);
-        CHECK_FALSE(attacker.PendingAttackHitSound);
+        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
         MoveCharacter(&attacker, &attacker.Object);
         CHECK(audio.TakePlayedSounds().empty());
     }
@@ -294,7 +296,7 @@ TEST_CASE("A replacement local attack clears a pending received hit sound [comba
     auto& attacker = scope.characters[AttackerSlot];
     scope.Receive(MissingKey, AT_ATTACK1);
     SetPlayerAttack(&attacker);
-    CHECK_FALSE(attacker.PendingAttackHitSound);
+    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
     attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
     audio.TakePlayedSounds();
     MoveCharacter(&attacker, &attacker.Object);
@@ -309,9 +311,84 @@ TEST_CASE("A replacement magic action clears a pending received hit sound [comba
     scope.Receive(MissingKey, AT_ATTACK1);
     attacker.Skill = AT_SKILL_DEFENSE;
     SetPlayerMagic(&attacker);
-    CHECK_FALSE(attacker.PendingAttackHitSound);
+    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
     attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
     audio.TakePlayedSounds();
     MoveCharacter(&attacker, &attacker.Object);
     CHECK(audio.TakePlayedSounds().empty());
+}
+
+TEST_CASE("Dark Ghost target-clearing attacks retain meteor without a generic hit [combat][received_attack]")
+{
+    for (const int target : {VictimKey, MissingKey})
+    {
+        CAPTURE(target);
+        MonsterRecorder::LoadScope audio(WD_70EMPIREGUARDIAN2);
+        AttackScope scope;
+        scope.SetMonsterAttacker(MODEL_DARK_GHOST);
+        auto& attacker = scope.characters[AttackerSlot];
+        attacker.MonsterIndex = MONSTER_DARK_GHOST;
+        auto map = GMEmpireGuardian2::Make();
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+        scope.Receive(target, AT_ATTACK1);
+        REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
+        CHECK(attacker.TargetCharacter == (target == VictimKey ? VictimSlot : -1));
+        CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (target == MissingKey));
+        audio.TakePlayedSounds();
+
+        CHECK(map->AttackEffectMonster(&attacker, &attacker.Object, &Models[MODEL_DARK_GHOST]));
+        CHECK(attacker.TargetCharacter == -1);
+        const auto effects =
+            std::count_if(Effects, Effects + MAX_EFFECTS, [](const auto& e) { return e.Live && e.Type == MODEL_FIRE; });
+        CHECK(effects == (target == VictimKey ? 1 : 0));
+        const auto attackSounds = audio.TakePlayedSounds();
+        CHECK(attackSounds.size() == (target == VictimKey ? 1 : 0));
+        if (target == VictimKey)
+        {
+            REQUIRE(attackSounds.size() == 1);
+            CHECK(attackSounds[0].id == SOUND_METEORITE01);
+        }
+
+        attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+        MoveCharacter(&attacker, &attacker.Object);
+        CHECK(attacker.AttackTime == 0);
+        CHECK(audio.TakePlayedSounds().empty());
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+    }
+}
+
+TEST_CASE("Received basic attacks replace interrupted skill feedback [combat][received_attack]")
+{
+    for (const int target : {VictimKey, MissingKey})
+    {
+        CAPTURE(target);
+        MonsterRecorder::LoadScope audio(WD_0LORENCIA);
+        AttackScope scope;
+        auto& attacker = scope.characters[AttackerSlot];
+        attacker.Skill = AT_SKILL_ICE;
+        attacker.AttackTime = 1.f;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+        scope.Receive(target, AT_ATTACK2);
+        CHECK(attacker.Skill == 0);
+        audio.TakePlayedSounds();
+        attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+        MoveCharacter(&attacker, &attacker.Object);
+        const auto sounds = audio.TakePlayedSounds();
+        const auto hits =
+            std::count_if(sounds.begin(), sounds.end(), [](const auto& sound)
+                          { return sound.id >= SOUND_ATTACK_MELEE_HIT1 && sound.id <= SOUND_ATTACK_MELEE_HIT4; });
+        CHECK(hits == 1);
+        for (const auto& sound : sounds)
+        {
+            CHECK(sound.id != SOUND_ICE);
+            CHECK(sound.object == &attacker.Object);
+        }
+        CHECK(std::none_of(Effects, Effects + MAX_EFFECTS,
+                           [](const auto& e) { return e.Live && (e.Type == MODEL_ICE || e.Type == MODEL_ICE_SMALL); }));
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+    }
 }

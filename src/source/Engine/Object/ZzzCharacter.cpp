@@ -1091,7 +1091,7 @@ void SetPlayerHighBowAttack(CHARACTER* c)
 
 void SetPlayerAttack(CHARACTER* c)
 {
-    c->PendingAttackHitSound = false;
+    c->ReceivedUnknownTargetHitSoundPending = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -1311,7 +1311,7 @@ void SetPlayerAttack(CHARACTER* c)
 
 void SetPlayerMagic(CHARACTER* c)
 {
-    c->PendingAttackHitSound = false;
+    c->ReceivedUnknownTargetHitSoundPending = false;
     OBJECT* o = &c->Object;
     if (o->Type == MODEL_PLAYER)
     {
@@ -3971,7 +3971,7 @@ void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 
 void PlayUntargetedAttackHitSound(CHARACTER* attacker, OBJECT* object)
 {
-    if (!attacker->PendingAttackHitSound || attacker->Skill != 0)
+    if (!attacker->ReceivedUnknownTargetHitSoundPending || attacker->Skill != 0)
         return;
 
     PlayAttackHitSound(attacker, object);
@@ -5236,7 +5236,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             }
         }
 
-        c->PendingAttackHitSound = false;
+        c->ReceivedUnknownTargetHitSoundPending = false;
         c->Skill = 0;
         c->Damage = 0;
         c->AttackFlag = ATTACK_FAIL;

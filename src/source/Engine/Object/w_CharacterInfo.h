@@ -167,8 +167,7 @@ public:
     char		PKPartyLevel;
 #endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
     BYTE        AttackFlag;
-    // Received basic attacks still sound at completion when their target is outside view.
-    bool PendingAttackHitSound;
+    bool ReceivedUnknownTargetHitSoundPending;
 
     BYTE        TargetAngle;
     float        Dead; // Number of reference frames after death
