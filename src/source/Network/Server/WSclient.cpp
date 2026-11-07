@@ -3648,10 +3648,10 @@ constexpr int NoActionTargetKey = 0;
 void StartReceivedAttack(CHARACTER* character, int targetIndex)
 {
     character->Skill = 0;
+    character->Object.AnimationFrame = 0;
     SetPlayerAttack(character);
     character->AttackTime = 1;
     character->LastAttackEffectTime = -1;
-    character->Object.AnimationFrame = 0;
     const bool targetFound = targetIndex != MAX_CHARACTERS_CLIENT;
     character->TargetCharacter = targetFound ? static_cast<short>(targetIndex) : -1;
     character->ReceivedUnknownTargetHitSoundPending = !targetFound;

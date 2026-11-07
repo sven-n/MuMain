@@ -3,6 +3,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/WSclient.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -37,6 +38,7 @@ constexpr int PreviousVictimHit = 3;
 constexpr int HeroLife = 200;
 constexpr int HeroShield = 100;
 constexpr int SyntheticAnimationKeys = 100;
+constexpr float InFlightAttackFrame = 3.f;
 
 struct AttackScope
 {
@@ -505,4 +507,79 @@ TEST_CASE("Received cannon attacks restart consumed effect steps [combat][receiv
     CHECK(countVictimJoints() == 1);
     for (int i = 0; i < MAX_JOINTS; ++i)
         Joints[i].Live = false;
+}
+
+TEST_CASE("Cursed Temple poison signatures keep target-independent audio cadence [combat][received_attack]")
+{
+    constexpr int SmokePerCall = 5;
+    for (const int target : {VictimKey, MissingKey})
+    {
+        CAPTURE(target);
+        MonsterRecorder::LoadScope audio(WD_45CURSEDTEMPLE_LV1);
+        AttackScope scope;
+        scope.SetMonsterAttacker(MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
+        auto& attacker = scope.characters[AttackerSlot];
+        attacker.MonsterIndex = MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON;
+        auto* o = &attacker.Object;
+        auto* b = &Models[o->Type];
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+        scope.Receive(target, AT_ATTACK1);
+        REQUIRE(o->CurrentAction == MONSTER01_ATTACK1);
+        scope.CheckAttack(target == VictimKey ? VictimSlot : -1);
+        audio.TakePlayedSounds();
+
+        int expectedSmoke = 0;
+        for (const float frame : {0.f, InFlightAttackFrame})
+        {
+            o->AnimationFrame = frame;
+            CHECK(g_CursedTemple->AttackEffectMonster(&attacker, o, b));
+            const auto sounds = audio.TakePlayedSounds();
+            REQUIRE(sounds.size() == 1);
+            CHECK(sounds[0].id == SOUND_HEART);
+            CHECK(sounds[0].object == nullptr);
+            if (target == VictimKey)
+                expectedSmoke += SmokePerCall;
+            CHECK(std::count_if(Particles, Particles + MAX_PARTICLES,
+                                [](const auto& p) { return p.Live && p.Type == BITMAP_SMOKE; }) == expectedSmoke);
+            CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (target == MissingKey));
+        }
+
+        attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+        MoveCharacter(&attacker, o);
+        const auto completion = audio.TakePlayedSounds();
+        CHECK(std::count_if(completion.begin(), completion.end(),
+                            [](const auto& sound) { return sound.id == SOUND_HEART && sound.object == nullptr; }) == 1);
+        CHECK(std::count_if(completion.begin(), completion.end(),
+                            [o](const auto& sound)
+                            {
+                                return sound.id >= SOUND_ATTACK_MELEE_HIT1 && sound.id <= SOUND_ATTACK_MELEE_HIT4 &&
+                                       sound.object == o;
+                            }) == 1);
+        CHECK(attacker.AttackTime == 0);
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+    }
+}
+
+TEST_CASE("Received same-action startup audio restarts before animation selection [combat][received_attack]")
+{
+    MonsterRecorder::LoadScope audio(WD_70EMPIREGUARDIAN2);
+    AttackScope scope;
+    scope.SetMonsterAttacker(MODEL_DARK_GHOST);
+    auto& attacker = scope.characters[AttackerSlot];
+    attacker.MonsterIndex = MONSTER_DARK_GHOST;
+    scope.Receive(VictimKey, AT_ATTACK1);
+    REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
+    const auto firstStart = audio.TakePlayedSounds();
+    REQUIRE(firstStart.size() == 2);
+    CHECK(firstStart[0].id == SOUND_METEORITE01);
+    CHECK(firstStart[1].id == SOUND_EXPLOTION01);
+
+    attacker.Object.AnimationFrame = InFlightAttackFrame;
+    scope.Receive(VictimKey, AT_ATTACK1);
+    CHECK(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
+    CHECK(attacker.Object.AnimationFrame == 0);
+    const auto repeatedStart = audio.TakePlayedSounds();
+    CHECK(repeatedStart == firstStart);
 }
