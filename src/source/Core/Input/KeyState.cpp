@@ -9,6 +9,8 @@ namespace Core::Input
     namespace
     {
         bool g_leftMouseButtonPressEdge = false;
+        bool g_printScreenPressEdge = false;
+        bool g_printScreenDown = false;
 
 #ifdef _EDITOR
         OtherWindowQuery g_otherWindowQuery = nullptr;
@@ -72,6 +74,24 @@ namespace Core::Input
         g_leftMouseButtonPressEdge = false;
     }
 
+    void SetPrintScreenDown(bool down)
+    {
+        // Only the release-to-press edge counts: a repeat or a duplicated event must not queue
+        // another screenshot.
+        if (down && !g_printScreenDown)
+        {
+            g_printScreenPressEdge = true;
+        }
+        g_printScreenDown = down;
+    }
+
+    bool ConsumePrintScreenPress()
+    {
+        const bool pressed = g_printScreenPressEdge;
+        g_printScreenPressEdge = false;
+        return pressed;
+    }
+
     bool IsKeyDown(int virtualKey)
     {
         // A scripted press (control socket) counts as down for the frame it
@@ -110,7 +130,16 @@ namespace Core::Input
         if (sc == SDL_SCANCODE_UNKNOWN) return false;
 
         const bool* state = SDL_GetKeyboardState(nullptr);
-        return state != nullptr && state[sc];
+        if (state == nullptr) return false;
+
+        // Windows reports the numpad Enter as VK_RETURN too; SDL gives it its own scancode, so
+        // every VK_RETURN check has to accept both.
+        if (virtualKey == VK_RETURN)
+        {
+            return state[SDL_SCANCODE_RETURN] || state[SDL_SCANCODE_KP_ENTER];
+        }
+
+        return state[sc];
     }
 
 #ifdef _EDITOR

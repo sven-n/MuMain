@@ -5,6 +5,7 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Buffs/w_BuffTimeControl.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -187,6 +188,15 @@ namespace
 
         std::wstring bufftime;
         g_BuffStringTime(buff, bufftime);
+        if (bufftime.empty())
+        {
+            // Skill buffs have no server timer; show the estimate's remaining time.
+            const DWORD remainingMs = TheBuffTimeControl().GetEstimatedBuffRemainingMilliseconds(buff);
+            if (remainingMs > 0)
+            {
+                TheBuffTimeControl().GetStringTime(remainingMs / 1000, bufftime, true);
+            }
+        }
         if (!bufftime.empty())
         {
             wchar_t durLine[128] = {};
@@ -237,6 +247,8 @@ void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& m
     // call, including on a theme switch -- no guard here.
     auto buff = c.RegisterStruct<BuffEntry>();
     buff.RegisterMember("decorator", &BuffEntry::decorator);
+    buff.RegisterMember("progress", &BuffEntry::progress);
+    buff.RegisterMember("has_timer", &BuffEntry::hasTimer);
     c.RegisterArray<std::vector<BuffEntry>>();
 
     c.BindEventCallback("buff_cancel",
@@ -323,6 +335,17 @@ void CBuffStrip::SyncRmlModel()
         BuffEntry entry;
 
         entry.decorator = BuildIconDecorator(buff);
+        entry.hasTimer = TheBuffTimeControl().GetBuffRemainingFraction(buff, entry.progress);
+        if (!entry.hasTimer)
+        {
+            entry.hasTimer = TheBuffTimeControl().GetEstimatedBuffRemainingFraction(buff, entry.progress);
+        }
+        // At zero the bar is gone: the icon may outlive an estimate (master duration extensions),
+        // but an empty dark strip would only look like a broken bar.
+        if (entry.progress <= 0.f)
+        {
+            entry.hasTimer = false;
+        }
         model.buffs.push_back(entry);
     }
 

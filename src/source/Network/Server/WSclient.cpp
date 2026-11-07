@@ -15240,7 +15240,15 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         }
         break;
         default:
-            break;
+        {
+            // Buffs outside the item families the tooltip timer was written for: some still arrive
+            // with a duration (the server's effect time), which is enough to drive the strip's bar.
+            if (bufftime > 0)
+            {
+                g_RegisterBuffTime(buff, bufftime);
+            }
+        }
+        break;
         }
     }
 }

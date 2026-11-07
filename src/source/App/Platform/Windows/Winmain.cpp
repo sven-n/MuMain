@@ -1440,9 +1440,15 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
     case SDL_EVENT_KEY_UP:
         // RmlUi needs the release even though legacy has no key-up reader.
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (event.key.scancode == SDL_SCANCODE_PRINTSCREEN)
+            Core::Input::SetPrintScreenDown(false);
         return true;
     case SDL_EVENT_KEY_DOWN:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        // Windows delivers PrintScreen as a key-up; SDL synthesizes its key-down and key-up in the
+        // same batch, so the polled key state never shows it. Record the event itself.
+        if (event.key.scancode == SDL_SCANCODE_PRINTSCREEN)
+            Core::Input::SetPrintScreenDown(true);
 #if !defined(_WIN32)
         // Physical Windows messages already handle these keys; SDL-only paths
         // (and Windows synthetic events below) must handle them here instead.

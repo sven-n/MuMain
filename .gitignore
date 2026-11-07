@@ -3,7 +3,7 @@
 .nuget/
 
 graphify-out
-
+vcpkg_installed/
 
 src/source/Global Debug/
 src/Global Debug/

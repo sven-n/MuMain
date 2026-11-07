@@ -15,7 +15,16 @@
 			     its name, description and duration in the shared tooltip (CBuffStrip). -->
 			<div class="buff-slot" data-for="buff : buffs" data-event-mouseup="buff_cancel(it_index)"
 			     data-event-mouseover="buff_hover(it_index)" data-event-mouseout="buff_leave">
-				<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
+				<div class="buff-icon-art" data-style-decorator="buff.decorator">
+					<!-- Remaining duration as a thin bar along the icon's bottom edge, shrinking as the
+					     buff runs out (buff_strip.rcss). Hidden for buffs whose duration the client
+					     does not track. -->
+					<!-- bound-geometry: buff.progress is the remaining-duration gauge value itself,
+					     not layout a theme could state. -->
+					<div class="buff-time-track" data-class-hidden="!buff.has_timer">
+						<div class="buff-time-fill" data-style-width="buff.progress * 100 + '%'"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
