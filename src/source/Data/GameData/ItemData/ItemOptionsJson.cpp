@@ -139,14 +139,8 @@ void ItemOptionsReader::WarnAboutUnknownKeys(const OrderedJson& json, const KeyS
 
 bool ItemOptionsReader::ReadName(const OrderedJson& json, const char* key, const std::string& field, std::string& name)
 {
-    const auto value = json.find(key);
-    if (value == json.end() || !value->is_string() || !Json::IsName(value->get_ref<const std::string&>()))
-    {
-        AddFatal(field + "." + key, "missing or not a name of letters and digits");
-        return false;
-    }
-    name = value->get<std::string>();
-    return true;
+    return Json::ReadNameField(json, key, field, name, [this](const std::string& errorField, const std::string& message)
+                               { AddFatal(errorField, message); });
 }
 
 void ItemOptionsReader::ReadType(const OrderedJson& json, const std::string& field, ItemOptionType& type)
@@ -273,14 +267,9 @@ void ItemOptionsReader::ReadServer(const OrderedJson& json, const std::string& f
 bool ItemOptionsReader::ReadWholeNumber(const OrderedJson& json, const std::string& field, int minimum, int maximum,
                                         int& value)
 {
-    long long number = 0;
-    if (!json.is_number_integer() || !Json::ReadWholeNumber(json, number) || number < minimum || number > maximum)
-    {
-        AddFatal(field, "must be a whole number from " + std::to_string(minimum) + " to " + std::to_string(maximum));
-        return false;
-    }
-    value = static_cast<int>(number);
-    return true;
+    return Json::ReadWholeNumberInRange(json, field, minimum, maximum, value,
+                                        [this](const std::string& errorField, const std::string& message)
+                                        { AddFatal(errorField, message); });
 }
 
 void ItemOptionsReader::ReadValue(const OrderedJson& json, const std::string& field, ItemOptionValue& value)

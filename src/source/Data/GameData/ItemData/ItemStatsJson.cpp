@@ -135,26 +135,16 @@ void ItemStatsReader::WarnAboutUnknownKeys(const OrderedJson& json, const KeySet
 bool ItemStatsReader::ReadNumber(const OrderedJson& json, const std::string& field, int minimum, int maximum,
                                  int& value)
 {
-    long long number = 0;
-    if (!json.is_number_integer() || !Json::ReadWholeNumber(json, number) || number < minimum || number > maximum)
-    {
-        AddFatal(field, "must be a whole number from " + std::to_string(minimum) + " to " + std::to_string(maximum));
-        return false;
-    }
-    value = static_cast<int>(number);
-    return true;
+    return Json::ReadWholeNumberInRange(json, field, minimum, maximum, value,
+                                        [this](const std::string& errorField, const std::string& message)
+                                        { AddFatal(errorField, message); });
 }
 
 bool ItemStatsReader::ReadName(const OrderedJson& json, const std::string& field, std::string& name)
 {
-    const auto value = json.find(Keys::Name);
-    if (value == json.end() || !value->is_string() || !Json::IsName(value->get_ref<const std::string&>()))
-    {
-        AddFatal(field + "." + Keys::Name, "missing or not a name of letters and digits");
-        return false;
-    }
-    name = value->get<std::string>();
-    return true;
+    return Json::ReadNameField(json, Keys::Name, field, name,
+                               [this](const std::string& errorField, const std::string& message)
+                               { AddFatal(errorField, message); });
 }
 
 void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
