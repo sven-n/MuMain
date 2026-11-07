@@ -263,6 +263,14 @@ std::vector<std::string> FindTextsNamingItem(const Items::ItemDatabase& database
         {
             continue;
         }
+        // The names and fields only for an item whose lines name it: most name none.
+        bool namesIt = false;
+        Items::ForEachItemTooltipLine(definition, [&](const Items::ItemDescriptionLine& line)
+                                      { namesIt = namesIt || namesInSome(line.text); });
+        if (!namesIt)
+        {
+            continue;
+        }
         const std::string owner = database.GetLogName(Items::MakeItemType(definition.group, definition.number));
         for (const auto& [line, field] : Items::TooltipLinesOf(definition))
         {
