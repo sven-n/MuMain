@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-// The Style Editor (design L18 to L20, L31): its edits of the render style file, which reach the game at once and
+// The Style Editor (design L18 to L20, L31, L42): its edits of the render style file, which reach the game at once and
 // are undo steps, the window on a look of the file or one still in code, and Data Checks opening it.
 #ifdef _EDITOR
 
@@ -21,6 +21,7 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSelection.h"
 #include "UI/StyleEditor/LookEdits.h"
+#include "UI/StyleEditor/LookFields.h"
 #include "UI/StyleEditor/LookParts.h"
 #include "UI/StyleEditor/MuStyleEditorUI.h"
 #include "UI/StyleEditor/RenderStyleCheckArea.h"
@@ -219,6 +220,127 @@ TEST_CASE("The Style Editor shows a look as parts with effects, and the gallery 
     g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Shine);
     CHECK(g_MuStyleEditorUI.GetDraft().layers.back().meshes.IsAll());
     RenderStyleEditor();
+}
+
+TEST_CASE("The Style Editor's mesh fields offer the item's parts by name, and meshes beyond the model apart (design "
+          "L42) [editor][looks]")
+{
+    using MuEditor::Looks::Fields::MeshOption;
+    using MuEditor::Looks::Fields::MeshOptions;
+    using MuEditor::Looks::Fields::WithMesh;
+    const std::vector<MuEditor::Looks::LookPart> parts{{0, "Crystal", "wand44_R.jpg"}, {1, "", "wand44_R.jpg"}};
+    CHECK(MeshOptions(parts, {5, 1, 5, 3}) == std::vector<MeshOption>{{0, "0 \xc2\xb7 Crystal"},
+                                                                      {1, "1 \xc2\xb7 wand44_R.jpg"},
+                                                                      {3, "3 (not in the model)"},
+                                                                      {5, "5 (not in the model)"}});
+    CHECK(MeshOptions({}, {2}) == std::vector<MeshOption>{{2, "2 (not in the model)"}});
+
+    // A tick adds the mesh at the end and the others keep their order, the order the layer draws them in.
+    CHECK(WithMesh({2, 0}, 1, true) == std::vector<int>{2, 0, 1});
+    CHECK(WithMesh({2, 0, 1}, 0, false) == std::vector<int>{2, 1});
+    CHECK(WithMesh({2}, 2, true) == std::vector<int>{2});
+    // The last mesh taken out leaves none, which the checkboxes refuse: a layer without meshes draws on every one.
+    CHECK(WithMesh({2}, 2, false).empty());
+}
+
+TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and dropdowns and a color picker, without "
+          "changing it (design L42) [editor][looks]")
+{
+    using Data::Looks::ItemValues;
+    using Data::Looks::LayerLight;
+    using Data::Looks::Shape;
+    using Data::Looks::ShapeKind;
+    TestImGuiContext context;
+    Layer shaped;
+    shaped.kind = Data::Looks::LayerKind::Reflection;
+    shaped.meshes.meshes = {2, 0};
+    shaped.light = LayerLight{
+        .color = {0.4f, Shape{.kind = ShapeKind::Wave, .from = 0.27, .to = 0.33, .seconds = 4.1887902}, 0.8f}};
+    shaped.opacity = Shape{.kind = ShapeKind::Bounce, .from = 0.1, .to = 1.1, .seconds = 3.14159265};
+    shaped.glowMesh = 1;
+    shaped.glowStrength = Shape{.kind = ShapeKind::Wave, .from = -0.2, .to = 1.0, .seconds = 6.283185};
+    shaped.scrollU = Shape{.kind = ShapeKind::Scroll, .perSecond = 0.8};
+    shaped.scrollV = Shape{.kind = ShapeKind::Frames, .seconds = 0.1, .step = 0.25, .count = 4};
+    shaped.scrollingMesh = 1;
+    Layer numbers;
+    numbers.meshes = {{1, 7}, true, false};
+    numbers.texture = "Item/Deye_R.jpg";
+    numbers.light = LayerLight{.tint = true, .color = {0.4f, 0.4f, 0.8f}};
+    numbers.opacity = Shape{.kind = ShapeKind::Random, .from = 0.5, .to = 1.0, .step = 0.1};
+    numbers.glowStrength = Shape{.kind = ShapeKind::Ramp, .from = 0.0, .to = 1.0, .seconds = 2.0};
+    numbers.scrollU = 0.25f;
+    const ItemValues values{.opacity = 0.5f,
+                            .glowMesh = 0,
+                            .glowStrength = Shape{.kind = ShapeKind::Wave, .from = 0.4, .to = 1.0, .seconds = 6.283185},
+                            .scrollU = 0.0f,
+                            .scrollV = 0.0f,
+                            .hiddenMesh = 1,
+                            .scrollingMesh = 1};
+    const std::vector<MuEditor::Looks::LookPart> parts{{0, "Crystal", ""}, {1, "", "wand44_R.jpg"}};
+    for (const std::vector<MuEditor::Looks::LookPart>& offered : {parts, std::vector<MuEditor::Looks::LookPart>{}})
+    {
+        for (const Layer& original : {shaped, numbers, Layer{}})
+        {
+            CAPTURE(offered.size());
+            CAPTURE(MuEditor::Looks::Fields::DescribeLayer(original));
+            Layer asLayer = original;
+            Layer asEffect = original;
+            ItemValues left = values;
+            for (int frame = 0; frame < 3; ++frame)
+            {
+                ImGui::NewFrame();
+                ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+                ImGui::SetNextWindowSize(ImVec2(900.0f, 980.0f));
+                ImGui::Begin("Fields");
+                ImGui::PushID("Layer");
+                CHECK_FALSE(MuEditor::Looks::Fields::Layer(asLayer, offered));
+                ImGui::PopID();
+                ImGui::PushID("Effect");
+                CHECK_FALSE(MuEditor::Looks::Fields::Effect(asEffect, Data::Looks::DescribeEffect(asEffect), offered));
+                ImGui::PopID();
+                ImGui::PushID("Values");
+                CHECK_FALSE(MuEditor::Looks::Fields::ItemValues(left, offered));
+                ImGui::PopID();
+                ImGui::End();
+                ImGui::Render();
+                CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+            }
+            // Drawn, a field changes nothing: the numbers keep every digit they were written with.
+            CHECK(asLayer == original);
+            CHECK(asEffect == original);
+            CHECK(left == values);
+        }
+    }
+}
+
+TEST_CASE("A field of a look says what it does while the mouse rests on it (design L42) [editor][looks]")
+{
+    TestImGuiContext context;
+    ImGuiIO& io = ImGui::GetIO();
+    Layer layer;
+    const auto frame = [&layer]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 600.0f));
+        ImGui::Begin("Fields", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+        MuEditor::Looks::Fields::Layer(layer);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+        const ImGuiWindow* tip = ImGui::FindWindowByName("##Tooltip_00");
+        return tip != nullptr && tip->Active;
+    };
+    CHECK_FALSE(frame());
+    // The mouse rests on the first field, the layer's kind.
+    io.AddMousePosEvent(ImGui::GetStyle().WindowPadding.x + 20.0f,
+                        ImGui::GetStyle().WindowPadding.y + ImGui::GetFrameHeight() * 0.5f);
+    bool shown = false;
+    for (int count = 0; count < 60 && !shown; ++count)
+    {
+        shown = frame();
+    }
+    CHECK(shown);
 }
 
 TEST_CASE("Data Checks: a click on a render style problem selects its item and opens the Style Editor [editor]")

@@ -16,7 +16,9 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -37,39 +39,98 @@ constexpr int GraphSamples = 160;
 // The meshes a look names, as the file reads them.
 constexpr int LastMesh = 49;
 constexpr int MaxFrames = 1000;
+// How far a drag field moves per pixel (design L42): a value of 0 to 1 by 1 in 200 pixels, seconds and counts faster.
+constexpr float ValueSpeed = 0.005f;
+constexpr float SecondsSpeed = 0.02f;
+constexpr float CountSpeed = 0.1f;
+// Seconds stay above 0: a shape divides by them.
+constexpr double MinSeconds = 0.001;
+constexpr double MaxSeconds = 100000.0;
+// A tooltip's lines wrap at this many font heights.
+constexpr float TipWidth = 28.0f;
 
 float Scaled(float width)
 {
     return width * g_MuEditorCore.GetUIScale();
 }
 
+// What the item just drawn does (design L42), shown while the mouse rests on its name or on it; `drag` adds how a drag
+// field is dragged and typed into.
+void Tip(const char* text, bool drag = false)
+{
+    if (!ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip) || !ImGui::BeginTooltip())
+    {
+        return;
+    }
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * TipWidth);
+    ImGui::TextUnformatted(text);
+    if (drag)
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::DragFieldTooltip);
+    }
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+}
+
 template <typename T> using Names = std::vector<std::pair<T, const char* const*>>;
 
-// A combo of named choices, translated when drawn.
-template <typename T> bool Choice(const char* label, T& value, const Names<T>& names)
+// The name, or the tip, a list gives the value; nullptr without one.
+template <typename T> const char* const* Find(const Names<T>* names, T value)
 {
-    const char* shown = "";
-    for (const auto& [choice, name] : names)
+    if (names != nullptr)
     {
-        if (choice == value)
+        for (const auto& [choice, name] : *names)
         {
-            shown = *name;
-        }
-    }
-    bool changed = false;
-    ImGui::SetNextItemWidth(Scaled(ComboWidth));
-    if (ImGui::BeginCombo(label, shown))
-    {
-        for (const auto& [choice, name] : names)
-        {
-            if (ImGui::Selectable(*name, choice == value) && choice != value)
+            if (choice == value)
             {
-                value = choice;
-                changed = true;
+                return name;
             }
         }
-        ImGui::EndCombo();
     }
+    return nullptr;
+}
+
+// A combo of named choices, translated when drawn, with what it does as its tooltip and, in `tips`, what each choice
+// does.
+template <typename T>
+bool Choice(const char* label, T& value, const Names<T>& names, const char* tip, const Names<T>* tips = nullptr)
+{
+    const char* const* name = Find(&names, value);
+    bool changed = false;
+    ImGui::SetNextItemWidth(Scaled(ComboWidth));
+    const bool open = ImGui::BeginCombo(label, name != nullptr ? *name : "");
+    if (!open)
+    {
+        Tip(tip);
+        return false;
+    }
+    for (const auto& [choice, choiceName] : names)
+    {
+        if (ImGui::Selectable(*choiceName, choice == value) && choice != value)
+        {
+            value = choice;
+            changed = true;
+        }
+        if (const char* const* choiceTip = Find(tips, choice))
+        {
+            Tip(*choiceTip);
+        }
+    }
+    ImGui::EndCombo();
+    return changed;
+}
+
+// A number dragged sideways or typed (design L42); `atLeast` keeps it above a bound.
+bool DragNumber(const char* label, double& value, float speed, const char* tip, std::optional<double> atLeast = {})
+{
+    ImGui::SetNextItemWidth(Scaled(NumberWidth));
+    const double low = atLeast.value_or(0.0);
+    const double high = MaxSeconds;
+    const bool changed = atLeast
+                             ? ImGui::DragScalar(label, ImGuiDataType_Double, &value, speed, &low, &high, "%.7g",
+                                                 ImGuiSliderFlags_AlwaysClamp)
+                             : ImGui::DragScalar(label, ImGuiDataType_Double, &value, speed, nullptr, nullptr, "%.7g");
+    Tip(tip, true);
     return changed;
 }
 
@@ -99,6 +160,14 @@ const Names<Blend>& BlendNames()
     return names;
 }
 
+const Names<Blend>& BlendTips()
+{
+    static const Names<Blend> tips{{Blend::Normal, &I18N::Editor::BlendNormalTooltip},
+                                   {Blend::Glow, &I18N::Editor::BlendGlowTooltip},
+                                   {Blend::AsDrawing, &I18N::Editor::BlendAsTheDrawingAsksTooltip}};
+    return tips;
+}
+
 // Where a value comes from, as its combo offers it.
 enum class Source
 {
@@ -122,6 +191,17 @@ const Names<Source>& SourceNames()
         {Source::Ramp, &I18N::Editor::Ramp},         {Source::Frames, &I18N::Editor::Frames},
         {Source::Random, &I18N::Editor::RandomValue}};
     return names;
+}
+
+const Names<Source>& SourceTips()
+{
+    static const Names<Source> tips{
+        {Source::Item, &I18N::Editor::FromTheItemTooltip},  {Source::Drawing, &I18N::Editor::FromTheDrawingTooltip},
+        {Source::Number, &I18N::Editor::ANumberTooltip},    {Source::Wave, &I18N::Editor::WaveTooltip},
+        {Source::Bounce, &I18N::Editor::BounceTooltip},     {Source::Scroll, &I18N::Editor::ScrollTooltip},
+        {Source::Ramp, &I18N::Editor::RampTooltip},         {Source::Frames, &I18N::Editor::FramesTooltip},
+        {Source::Random, &I18N::Editor::RandomValueTooltip}};
+    return tips;
 }
 
 Source SourceOf(ShapeKind kind)
@@ -165,10 +245,9 @@ Shape NewShape(Source source, double from, double to)
     }
 }
 
-bool InputNumber(const char* label, double& value)
+bool SecondsField(const char* label, double& seconds, const char* tip)
 {
-    ImGui::SetNextItemWidth(Scaled(NumberWidth));
-    return ImGui::InputDouble(label, &value, 0.0, 0.0, "%.7g");
+    return DragNumber(label, seconds, SecondsSpeed, tip, MinSeconds);
 }
 
 // The span of the curve: two cycles, or ten seconds of a scroll.
@@ -220,33 +299,32 @@ bool ShapeFields(Shape& shape)
     case ShapeKind::Wave:
     case ShapeKind::Bounce:
     case ShapeKind::Ramp:
-        changed |= InputNumber(I18N::Editor::From, shape.from);
+        changed |= DragNumber(I18N::Editor::From, shape.from, ValueSpeed, I18N::Editor::ShapeFromTooltip);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::To, shape.to);
+        changed |= DragNumber(I18N::Editor::To, shape.to, ValueSpeed, I18N::Editor::ShapeToTooltip);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::Seconds, shape.seconds);
+        changed |= SecondsField(I18N::Editor::Seconds, shape.seconds, I18N::Editor::ShapeSecondsTooltip);
         break;
     case ShapeKind::Scroll:
-        changed |= InputNumber(I18N::Editor::PerSecond, shape.perSecond);
+        changed |=
+            DragNumber(I18N::Editor::PerSecond, shape.perSecond, ValueSpeed, I18N::Editor::ShapePerSecondTooltip);
         break;
     case ShapeKind::Frames:
         ImGui::SetNextItemWidth(Scaled(NumberWidth));
-        if (ImGui::InputInt(I18N::Editor::Count, &shape.count))
-        {
-            shape.count = std::clamp(shape.count, 1, MaxFrames);
-            changed = true;
-        }
+        changed |= ImGui::DragInt(I18N::Editor::Count, &shape.count, CountSpeed, 1, MaxFrames, "%d",
+                                  ImGuiSliderFlags_AlwaysClamp);
+        Tip(I18N::Editor::ShapeCountTooltip, true);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::Step, shape.step);
+        changed |= DragNumber(I18N::Editor::Step, shape.step, ValueSpeed, I18N::Editor::ShapeStepTooltip);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::SecondsEach, shape.seconds);
+        changed |= SecondsField(I18N::Editor::SecondsEach, shape.seconds, I18N::Editor::ShapeSecondsEachTooltip);
         break;
     case ShapeKind::Random:
-        changed |= InputNumber(I18N::Editor::From, shape.from);
+        changed |= DragNumber(I18N::Editor::From, shape.from, ValueSpeed, I18N::Editor::ShapeFromTooltip);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::To, shape.to);
+        changed |= DragNumber(I18N::Editor::To, shape.to, ValueSpeed, I18N::Editor::ShapeToTooltip);
         ImGui::SameLine();
-        changed |= InputNumber(I18N::Editor::Step, shape.step);
+        changed |= DragNumber(I18N::Editor::Step, shape.step, ValueSpeed, I18N::Editor::ShapeStepTooltip);
         break;
     }
     RenderCurve(shape);
@@ -301,8 +379,9 @@ Value MakeValue(Source source, const Value& old)
     }
 }
 
-// An opacity, glow strength or scroll: the item's, the drawing's (`drawing`: only an opacity), a number or a shape.
-bool ValueField(const char* label, Value& value, bool drawing, bool item = true)
+// An opacity, glow strength or scroll: the item's, the drawing's (`drawing`: only an opacity), a number or a shape;
+// `tip` says what it does.
+bool ValueField(const char* label, Value& value, const char* tip, bool drawing, bool item = true)
 {
     ImGui::PushID(label);
     bool changed = false;
@@ -315,7 +394,7 @@ bool ValueField(const char* label, Value& value, bool drawing, bool item = true)
         }
     }
     Source source = SourceOf(value);
-    if (Choice(label, source, sources))
+    if (Choice(label, source, sources, tip, &SourceTips()))
     {
         value = MakeValue(source, value);
         changed = true;
@@ -324,7 +403,8 @@ bool ValueField(const char* label, Value& value, bool drawing, bool item = true)
     {
         ImGui::SameLine();
         ImGui::SetNextItemWidth(Scaled(NumberWidth));
-        changed |= ImGui::InputFloat("##Number", number, 0.0f, 0.0f, "%.7g");
+        changed |= ImGui::DragFloat("##Number", number, ValueSpeed, 0.0f, 0.0f, "%.7g");
+        Tip(tip, true);
     }
     else if (Shape* shape = std::get_if<Shape>(&value))
     {
@@ -357,10 +437,10 @@ Number ToNumber(const Value& value)
 }
 
 // A number or a shape: a light's channel, an item value.
-bool NumberField(const char* label, Number& number)
+bool NumberField(const char* label, Number& number, const char* tip)
 {
     Value value = ToValue(number);
-    if (!ValueField(label, value, false, false))
+    if (!ValueField(label, value, tip, false, false))
     {
         return false;
     }
@@ -411,6 +491,7 @@ bool MeshListField(const char* label, std::vector<int>& meshes)
     }
     ImGui::SetNextItemWidth(Scaled(ComboWidth));
     Items::InputStringWithHint(label, I18N::Editor::MeshNumbersHint, text);
+    Tip(I18N::Editor::LayerMeshNumbersTooltip);
     bool changed = false;
     if (ImGui::IsItemActive())
     {
@@ -432,16 +513,73 @@ bool MeshListField(const char* label, std::vector<int>& meshes)
     return changed;
 }
 
-bool MeshField(const char* label, int& mesh)
+// The picked item's parts by name, a checkbox each (design L42); one stays ticked, since a layer without meshes would
+// draw on every one. Without parts, the list of numbers.
+bool MeshChecks(std::vector<int>& meshes, const std::vector<LookPart>& parts)
+{
+    if (parts.empty())
+    {
+        return MeshListField("##List", meshes);
+    }
+    bool changed = false;
+    for (const MeshOption& option : MeshOptions(parts, meshes))
+    {
+        bool ticked = std::ranges::find(meshes, option.mesh) != meshes.end();
+        ImGui::PushID(option.mesh);
+        if (ImGui::Checkbox(option.label.c_str(), &ticked))
+        {
+            std::vector<int> next = WithMesh(meshes, option.mesh, ticked);
+            if (!next.empty())
+            {
+                meshes = std::move(next);
+                changed = true;
+            }
+        }
+        Tip(I18N::Editor::LayerPartTooltip);
+        ImGui::PopID();
+    }
+    return changed;
+}
+
+// A mesh picked from the item's parts by name (design L42), or without parts dragged as a number.
+bool MeshField(const char* label, int& mesh, const std::vector<LookPart>& parts, const char* tip)
 {
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(Scaled(NumberWidth));
-    if (!ImGui::InputInt(label, &mesh))
+    ImGui::SetNextItemWidth(Scaled(ComboWidth));
+    if (parts.empty())
     {
-        return false;
+        const bool changed = ImGui::DragInt(label, &mesh, CountSpeed, 0, LastMesh, "%d", ImGuiSliderFlags_AlwaysClamp);
+        Tip(tip, true);
+        return changed;
     }
-    mesh = std::clamp(mesh, 0, LastMesh);
-    return true;
+    const std::vector<MeshOption> options = MeshOptions(parts, {mesh});
+    const auto shown = std::ranges::find(options, mesh, &MeshOption::mesh);
+    bool changed = false;
+    if (ImGui::BeginCombo(label, shown != options.end() ? shown->label.c_str() : ""))
+    {
+        for (const MeshOption& option : options)
+        {
+            if (ImGui::Selectable(option.label.c_str(), option.mesh == mesh) && option.mesh != mesh)
+            {
+                mesh = option.mesh;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    else
+    {
+        Tip(tip);
+    }
+    return changed;
+}
+
+bool TextureField(std::string& texture)
+{
+    ImGui::SetNextItemWidth(Scaled(GraphWidth));
+    const bool changed = Items::InputStringWithHint(I18N::Editor::Texture, I18N::Editor::TextureHint, texture);
+    Tip(I18N::Editor::LayerTextureTooltip);
+    return changed;
 }
 
 enum class MeshChoice
@@ -451,7 +589,7 @@ enum class MeshChoice
     AllBut,
 };
 
-bool MeshesField(MeshSet& meshes)
+bool MeshesField(MeshSet& meshes, const std::vector<LookPart>& parts)
 {
     ImGui::PushID("Meshes");
     bool changed = false;
@@ -459,7 +597,7 @@ bool MeshesField(MeshSet& meshes)
     static const Names<MeshChoice> names{{MeshChoice::All, &I18N::Editor::EveryMesh},
                                          {MeshChoice::These, &I18N::Editor::TheseMeshes},
                                          {MeshChoice::AllBut, &I18N::Editor::EveryMeshBut}};
-    if (Choice(I18N::Editor::Meshes, choice, names))
+    if (Choice(I18N::Editor::Meshes, choice, names, I18N::Editor::LayerMeshesTooltip))
     {
         if (choice == MeshChoice::All)
         {
@@ -476,10 +614,11 @@ bool MeshesField(MeshSet& meshes)
     if (choice == MeshChoice::All)
     {
         changed |= ImGui::Checkbox(I18N::Editor::AlsoTheHiddenMesh, &meshes.evenHidden);
+        Tip(I18N::Editor::LayerHiddenMeshTooltip);
     }
     else
     {
-        changed |= MeshListField("##List", meshes.meshes);
+        changed |= MeshChecks(meshes.meshes, parts);
     }
     ImGui::Unindent();
     ImGui::PopID();
@@ -494,7 +633,7 @@ enum class GlowMeshChoice
     Mesh,
 };
 
-bool GlowMeshField(GlowMesh& mesh)
+bool GlowMeshField(GlowMesh& mesh, const std::vector<LookPart>& parts)
 {
     ImGui::PushID("GlowMesh");
     GlowMeshChoice choice = std::holds_alternative<int>(mesh)             ? GlowMeshChoice::Mesh
@@ -506,7 +645,7 @@ bool GlowMeshField(GlowMesh& mesh)
                                              {GlowMeshChoice::All, &I18N::Editor::EveryMesh},
                                              {GlowMeshChoice::Mesh, &I18N::Editor::AMesh}};
     bool changed = false;
-    if (Choice(I18N::Editor::GlowMesh, choice, names))
+    if (Choice(I18N::Editor::GlowMesh, choice, names, I18N::Editor::LayerGlowMeshTooltip))
     {
         switch (choice)
         {
@@ -520,36 +659,78 @@ bool GlowMeshField(GlowMesh& mesh)
             mesh = AllGlowMeshes{};
             break;
         case GlowMeshChoice::Mesh:
-            mesh = 0;
+            mesh = parts.empty() ? 0 : parts.front().mesh;
             break;
         }
         changed = true;
     }
     if (int* number = std::get_if<int>(&mesh))
     {
-        changed |= MeshField("##Mesh", *number);
+        changed |= MeshField("##Mesh", *number, parts, I18N::Editor::LayerGlowMeshTooltip);
     }
     ImGui::PopID();
     return changed;
 }
 
-// A mesh, or nothing: `empty` names what nothing is (the model's mesh, none).
-bool OptionalMeshField(const char* label, std::optional<int>& mesh, const char* const* empty)
+// A mesh, or nothing: `empty` names what nothing is (the model's mesh, none); `tip` says what the mesh is for.
+bool OptionalMeshField(const char* label, std::optional<int>& mesh, const char* const* empty,
+                       const std::vector<LookPart>& parts, const char* tip)
 {
     ImGui::PushID(label);
     bool set = mesh.has_value();
     const Names<bool> names{{false, empty}, {true, &I18N::Editor::AMesh}};
     bool changed = false;
-    if (Choice(label, set, names))
+    if (Choice(label, set, names, tip))
     {
-        mesh = set ? std::optional<int>(0) : std::nullopt;
+        mesh = set ? std::optional<int>(parts.empty() ? 0 : parts.front().mesh) : std::nullopt;
         changed = true;
     }
     if (mesh)
     {
-        changed |= MeshField("##Mesh", *mesh);
+        changed |= MeshField("##Mesh", *mesh, parts, tip);
     }
     ImGui::PopID();
+    return changed;
+}
+
+// A light's red, green and blue: a swatch with a color picker while all three are numbers (design L42), and with Each
+// channel apart a field each, so one can change over time; it stays on while one does.
+bool ColorField(std::array<Number, 3>& color)
+{
+    const bool numbers =
+        std::ranges::all_of(color, [](const Number& channel) { return std::holds_alternative<float>(channel); });
+    bool changed = false;
+    if (numbers)
+    {
+        std::array<float, 3> rgb{std::get<float>(color[0]), std::get<float>(color[1]), std::get<float>(color[2])};
+        ImGui::SetNextItemWidth(Scaled(GraphWidth));
+        if (ImGui::ColorEdit3(I18N::Editor::Color, rgb.data(), ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR))
+        {
+            for (std::size_t channel = 0; channel < rgb.size(); ++channel)
+            {
+                color[channel] = rgb[channel];
+            }
+            changed = true;
+        }
+        Tip(I18N::Editor::LayerColorTooltip, true);
+    }
+    bool& apart = *ImGui::GetStateStorage()->GetBoolRef(ImGui::GetID("##ChannelsApart"), false);
+    bool shown = apart || !numbers;
+    ImGui::BeginDisabled(!numbers);
+    if (ImGui::Checkbox(I18N::Editor::EachChannelApart, &shown) && numbers)
+    {
+        apart = shown;
+    }
+    ImGui::EndDisabled();
+    Tip(I18N::Editor::EachChannelApartTooltip);
+    if (shown)
+    {
+        const char* const* channels[] = {&I18N::Editor::Red, &I18N::Editor::Green, &I18N::Editor::Blue};
+        for (std::size_t channel = 0; channel < color.size(); ++channel)
+        {
+            changed |= NumberField(*channels[channel], color[channel], I18N::Editor::LayerLightChannelTooltip);
+        }
+    }
     return changed;
 }
 
@@ -568,7 +749,7 @@ bool LightField(std::optional<LayerLight>& light)
                                           {LightChoice::Color, &I18N::Editor::AColor},
                                           {LightChoice::Tint, &I18N::Editor::TintOfTheItemLight}};
     bool changed = false;
-    if (Choice(I18N::Editor::Light, choice, names))
+    if (Choice(I18N::Editor::Light, choice, names, I18N::Editor::LayerLightTooltip))
     {
         if (choice == LightChoice::Before)
         {
@@ -584,11 +765,7 @@ bool LightField(std::optional<LayerLight>& light)
     if (light)
     {
         ImGui::Indent();
-        const char* const* channels[] = {&I18N::Editor::Red, &I18N::Editor::Green, &I18N::Editor::Blue};
-        for (std::size_t channel = 0; channel < 3; ++channel)
-        {
-            changed |= NumberField(*channels[channel], light->color[channel]);
-        }
+        changed |= ColorField(light->color);
         ImGui::Unindent();
     }
     ImGui::PopID();
@@ -625,10 +802,10 @@ bool LeftValue(const char* label, std::optional<T>& value, const T& fresh, Field
 }
 
 // A mesh of the item values, or none (-1).
-bool MeshOrNone(const char* label, int& mesh)
+bool MeshOrNone(const char* label, int& mesh, const std::vector<LookPart>& parts, const char* tip)
 {
     std::optional<int> set = mesh >= 0 ? std::optional<int>(mesh) : std::nullopt;
-    if (!OptionalMeshField(label, set, &I18N::Editor::None))
+    if (!OptionalMeshField(label, set, &I18N::Editor::None, parts, tip))
     {
         return false;
     }
@@ -730,6 +907,45 @@ unsigned FieldsOf(const Data::Looks::Layer& layer, const LayerEffect& effect)
 }
 } // namespace
 
+std::vector<MeshOption> MeshOptions(const std::vector<LookPart>& parts, const std::vector<int>& listed)
+{
+    std::vector<MeshOption> options;
+    for (const LookPart& part : parts)
+    {
+        options.push_back(
+            {part.mesh, part.name.empty() ? PartLabel(part) : std::to_string(part.mesh) + " \xc2\xb7 " + part.name});
+    }
+    std::vector<int> others;
+    for (const int mesh : listed)
+    {
+        if (std::ranges::find(options, mesh, &MeshOption::mesh) == options.end() &&
+            std::ranges::find(others, mesh) == others.end())
+        {
+            others.push_back(mesh);
+        }
+    }
+    std::ranges::sort(others);
+    for (const int mesh : others)
+    {
+        options.push_back({mesh, I18N::Format(I18N::Editor::MeshNotInTheModel, {std::to_string(mesh)})});
+    }
+    return options;
+}
+
+std::vector<int> WithMesh(std::vector<int> meshes, int mesh, bool in)
+{
+    const auto found = std::ranges::find(meshes, mesh);
+    if (in && found == meshes.end())
+    {
+        meshes.push_back(mesh);
+    }
+    else if (!in && found != meshes.end())
+    {
+        meshes.erase(found);
+    }
+    return meshes;
+}
+
 double ShapeValueAt(const Shape& shape, double seconds)
 {
     switch (shape.kind)
@@ -763,10 +979,11 @@ double ShapeValueAt(const Shape& shape, double seconds)
     return shape.from;
 }
 
-bool Layer(Data::Looks::Layer& layer)
+bool Layer(Data::Looks::Layer& layer, const std::vector<LookPart>& parts)
 {
+    namespace Text = I18N::Editor;
     bool changed = false;
-    if (Choice(I18N::Editor::Kind, layer.kind, KindNames()))
+    if (Choice(Text::Kind, layer.kind, KindNames(), Text::LayerKindTooltip))
     {
         // A texture layer has no motion; the file leaves it out.
         layer.motion = Motion::SlowDrift;
@@ -774,38 +991,38 @@ bool Layer(Data::Looks::Layer& layer)
     }
     if (layer.kind == LayerKind::Reflection)
     {
-        changed |= Choice(I18N::Editor::Motion, layer.motion, MotionNames());
+        changed |= Choice(Text::Motion, layer.motion, MotionNames(), Text::LayerMotionTooltip);
     }
-    changed |= Choice(I18N::Editor::Blend, layer.blend, BlendNames());
-    changed |= MeshesField(layer.meshes);
-    ImGui::SetNextItemWidth(Scaled(GraphWidth));
-    changed |= Items::InputStringWithHint(I18N::Editor::Texture, I18N::Editor::TextureHint, layer.texture);
+    changed |= Choice(Text::Blend, layer.blend, BlendNames(), Text::LayerBlendTooltip, &BlendTips());
+    changed |= MeshesField(layer.meshes, parts);
+    changed |= TextureField(layer.texture);
     changed |= LightField(layer.light);
-    changed |= ValueField(I18N::Editor::Opacity, layer.opacity, true);
-    changed |= GlowMeshField(layer.glowMesh);
-    changed |= ValueField(I18N::Editor::GlowStrength, layer.glowStrength, false);
-    changed |= ValueField(I18N::Editor::ScrollU, layer.scrollU, false);
-    changed |= ValueField(I18N::Editor::ScrollV, layer.scrollV, false);
-    changed |= OptionalMeshField(I18N::Editor::ScrollingMesh, layer.scrollingMesh, &I18N::Editor::KeptFromTheModel);
+    changed |= ValueField(Text::Opacity, layer.opacity, Text::LayerOpacityTooltip, true);
+    changed |= GlowMeshField(layer.glowMesh, parts);
+    changed |= ValueField(Text::GlowStrength, layer.glowStrength, Text::LayerGlowStrengthTooltip, false);
+    changed |= ValueField(Text::ScrollU, layer.scrollU, Text::LayerScrollTooltip, false);
+    changed |= ValueField(Text::ScrollV, layer.scrollV, Text::LayerScrollTooltip, false);
+    changed |= OptionalMeshField(Text::ScrollingMesh, layer.scrollingMesh, &Text::KeptFromTheModel, parts,
+                                 Text::LayerScrollingMeshTooltip);
     return changed;
 }
 
-bool Effect(Data::Looks::Layer& layer, const LayerEffect& effect)
+bool Effect(Data::Looks::Layer& layer, const LayerEffect& effect, const std::vector<LookPart>& parts)
 {
+    namespace Text = I18N::Editor;
     const unsigned fields = FieldsOf(layer, effect);
-    bool changed = MeshesField(layer.meshes);
+    bool changed = MeshesField(layer.meshes, parts);
     if ((fields & EffectField::Motion) != 0 && layer.kind == LayerKind::Reflection)
     {
-        changed |= Choice(I18N::Editor::Motion, layer.motion, MotionNames());
+        changed |= Choice(Text::Motion, layer.motion, MotionNames(), Text::LayerMotionTooltip);
     }
     if ((fields & EffectField::Blend) != 0)
     {
-        changed |= Choice(I18N::Editor::Blend, layer.blend, BlendNames());
+        changed |= Choice(Text::Blend, layer.blend, BlendNames(), Text::LayerBlendTooltip, &BlendTips());
     }
     if ((fields & EffectField::Texture) != 0)
     {
-        ImGui::SetNextItemWidth(Scaled(GraphWidth));
-        changed |= Items::InputStringWithHint(I18N::Editor::Texture, I18N::Editor::TextureHint, layer.texture);
+        changed |= TextureField(layer.texture);
     }
     if ((fields & EffectField::Light) != 0)
     {
@@ -813,20 +1030,20 @@ bool Effect(Data::Looks::Layer& layer, const LayerEffect& effect)
     }
     if ((fields & EffectField::Opacity) != 0)
     {
-        changed |= ValueField(I18N::Editor::Opacity, layer.opacity, true);
+        changed |= ValueField(Text::Opacity, layer.opacity, Text::LayerOpacityTooltip, true);
     }
     if ((fields & EffectField::GlowMesh) != 0)
     {
-        changed |= GlowMeshField(layer.glowMesh);
+        changed |= GlowMeshField(layer.glowMesh, parts);
     }
     if ((fields & EffectField::GlowStrength) != 0)
     {
-        changed |= ValueField(I18N::Editor::GlowStrength, layer.glowStrength, false);
+        changed |= ValueField(Text::GlowStrength, layer.glowStrength, Text::LayerGlowStrengthTooltip, false);
     }
     if ((fields & EffectField::Scroll) != 0)
     {
-        changed |= ValueField(I18N::Editor::ScrollU, layer.scrollU, false);
-        changed |= ValueField(I18N::Editor::ScrollV, layer.scrollV, false);
+        changed |= ValueField(Text::ScrollU, layer.scrollU, Text::LayerScrollTooltip, false);
+        changed |= ValueField(Text::ScrollV, layer.scrollV, Text::LayerScrollTooltip, false);
     }
     return changed;
 }
@@ -912,19 +1129,24 @@ std::string DescribeMeshes(const MeshSet& meshes)
     return std::string(I18N::Editor::Meshes) + " " + JoinMeshes(meshes.meshes);
 }
 
-bool ItemValues(Data::Looks::ItemValues& values)
+bool ItemValues(Data::Looks::ItemValues& values, const std::vector<LookPart>& parts)
 {
+    namespace Text = I18N::Editor;
     bool changed = false;
-    const auto number = [](const char* label) { return [label](Number& value) { return NumberField(label, value); }; };
-    const auto mesh = [](const char* label) { return [label](int& value) { return MeshOrNone(label, value); }; };
-    changed |= LeftValue<Number>(I18N::Editor::Opacity, values.opacity, 1.0f, number(I18N::Editor::Opacity));
-    changed |= LeftValue<int>(I18N::Editor::GlowMesh, values.glowMesh, 0, mesh(I18N::Editor::GlowMesh));
+    const auto number = [](const char* label, const char* tip)
+    { return [label, tip](Number& value) { return NumberField(label, value, tip); }; };
+    const auto mesh = [&parts](const char* label, const char* tip)
+    { return [label, tip, &parts](int& value) { return MeshOrNone(label, value, parts, tip); }; };
+    changed |= LeftValue<Number>(Text::Opacity, values.opacity, 1.0f, number(Text::Opacity, Text::LayerOpacityTooltip));
+    changed |= LeftValue<int>(Text::GlowMesh, values.glowMesh, 0, mesh(Text::GlowMesh, Text::LayerGlowMeshTooltip));
+    changed |= LeftValue<Number>(Text::GlowStrength, values.glowStrength, 1.0f,
+                                 number(Text::GlowStrength, Text::LayerGlowStrengthTooltip));
+    changed |= LeftValue<Number>(Text::ScrollU, values.scrollU, 0.0f, number(Text::ScrollU, Text::LayerScrollTooltip));
+    changed |= LeftValue<Number>(Text::ScrollV, values.scrollV, 0.0f, number(Text::ScrollV, Text::LayerScrollTooltip));
     changed |=
-        LeftValue<Number>(I18N::Editor::GlowStrength, values.glowStrength, 1.0f, number(I18N::Editor::GlowStrength));
-    changed |= LeftValue<Number>(I18N::Editor::ScrollU, values.scrollU, 0.0f, number(I18N::Editor::ScrollU));
-    changed |= LeftValue<Number>(I18N::Editor::ScrollV, values.scrollV, 0.0f, number(I18N::Editor::ScrollV));
-    changed |= LeftValue<int>(I18N::Editor::HiddenMesh, values.hiddenMesh, 0, mesh(I18N::Editor::HiddenMesh));
-    changed |= LeftValue<int>(I18N::Editor::ScrollingMesh, values.scrollingMesh, 0, mesh(I18N::Editor::ScrollingMesh));
+        LeftValue<int>(Text::HiddenMesh, values.hiddenMesh, 0, mesh(Text::HiddenMesh, Text::ItemHiddenMeshTooltip));
+    changed |= LeftValue<int>(Text::ScrollingMesh, values.scrollingMesh, 0,
+                              mesh(Text::ScrollingMesh, Text::LayerScrollingMeshTooltip));
     return changed;
 }
 

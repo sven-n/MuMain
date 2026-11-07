@@ -640,6 +640,129 @@
   <data name="Leaves it" xml:space="preserve">
     <value>Der Look hinterlässt diesen Wert für das, was danach gezeichnet wird, etwa das Stufenleuchten.</value>
   </data>
+  <data name="Drag field tooltip" xml:space="preserve">
+    <value>Seitlich ziehen ändert den Wert, ein Doppelklick tippt eine Zahl.</value>
+  </data>
+  <data name="Layer kind tooltip" xml:space="preserve">
+    <value>Was die Ebene zeichnet: eine Textur auf den Teilen oder eine Spiegelung, die wie Licht auf Metall darüber wandert.</value>
+  </data>
+  <data name="Layer motion tooltip" xml:space="preserve">
+    <value>Wie die Spiegelung über die Teile wandert: treibend, wischend, wirbelnd, in Streifen oder still.</value>
+  </data>
+  <data name="Layer blend tooltip" xml:space="preserve">
+    <value>Wie sich die Ebene mit dem mischt, was vor ihr gezeichnet wurde.</value>
+  </data>
+  <data name="Blend normal tooltip" xml:space="preserve">
+    <value>Deckt ab, was vor ihr gezeichnet wurde.</value>
+  </data>
+  <data name="Blend glow tooltip" xml:space="preserve">
+    <value>Addiert ihr Licht zu dem, was vor ihr gezeichnet wurde: Helles leuchtet, Dunkles bleibt durchsichtig.</value>
+  </data>
+  <data name="Blend as the drawing asks tooltip" xml:space="preserve">
+    <value>Überblendet, wie die Zeichnung des Gegenstands es wählt, wie seine eigene Textur.</value>
+  </data>
+  <data name="Layer meshes tooltip" xml:space="preserve">
+    <value>Auf welchen Teilen des Modells die Ebene zeichnet: auf jedem Teil, nur auf den angehakten oder auf jedem außer den angehakten.</value>
+  </data>
+  <data name="Layer hidden mesh tooltip" xml:space="preserve">
+    <value>Zeichnet auch auf dem Teil, den der Gegenstand verbirgt und den seine eigene Zeichnung auslässt.</value>
+  </data>
+  <data name="Layer part tooltip" xml:space="preserve">
+    <value>Angehakt: Die Ebene zeichnet auf diesem Teil. Ein Teil bleibt angehakt.</value>
+  </data>
+  <data name="Layer mesh numbers tooltip" xml:space="preserve">
+    <value>Die Nummern der Meshes, auf denen die Ebene zeichnet, etwa 0, 2. Wähle einen Gegenstand, um seine Teile stattdessen nach Namen anzuhaken.</value>
+  </data>
+  <data name="Mesh not in the model" xml:space="preserve">
+    <value>{0} (nicht im Modell)</value>
+  </data>
+  <data name="Layer texture tooltip" xml:space="preserve">
+    <value>Das Bild, das die Ebene zeichnet, eine .jpg oder .tga unter Data, etwa Item/Deye_R.jpg. Leer: die eigene Textur jedes Teils.</value>
+  </data>
+  <data name="Layer light tooltip" xml:space="preserve">
+    <value>Die Farbe, in der die Ebene gezeichnet wird: das Licht davor (wie der Gegenstand beleuchtet ist), eine eigene Farbe oder eine Tönung des Lichts des Gegenstands.</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Layer color tooltip" xml:space="preserve">
+    <value>Klicke auf das Farbfeld, um eine Farbe zu wählen, oder ziehe die Zahl von Rot, Grün oder Blau: 0 ist nichts davon, 1 ist alles.</value>
+  </data>
+  <data name="Each channel apart" xml:space="preserve">
+    <value>Jeder Kanal einzeln</value>
+  </data>
+  <data name="Each channel apart tooltip" xml:space="preserve">
+    <value>Gibt Rot, Grün und Blau je ein Feld, damit sich einer mit der Zeit ändern kann, etwa als Welle. Bleibt an, solange einer das tut.</value>
+  </data>
+  <data name="Layer light channel tooltip" xml:space="preserve">
+    <value>Wie viel von dieser Farbe das Licht hat: 0 ist nichts, 1 ist alles.</value>
+  </data>
+  <data name="Layer opacity tooltip" xml:space="preserve">
+    <value>Wie deckend die Ebene ist: 0 ist unsichtbar, 1 ist voll gezeichnet.</value>
+  </data>
+  <data name="Layer glow mesh tooltip" xml:space="preserve">
+    <value>Welches Teil mit der Leuchtstärke leuchtet: das Leucht-Mesh des Gegenstands, keines, jedes Teil oder das hier gewählte.</value>
+  </data>
+  <data name="Layer glow strength tooltip" xml:space="preserve">
+    <value>Wie hell das Leucht-Mesh leuchtet: 0 ist kein Leuchten, 1 ist voll, mehr leuchtet noch heller.</value>
+  </data>
+  <data name="Layer scroll tooltip" xml:space="preserve">
+    <value>Verschiebt die Textur über das Teil, seitlich (U) oder auf und ab (V); Laufen lässt sie immer weiter fließen.</value>
+  </data>
+  <data name="Layer scrolling mesh tooltip" xml:space="preserve">
+    <value>Das Teil, dessen Textur die Verschiebung bewegt; „Die des Modells“ nimmt das, welches das Modell nennt.</value>
+  </data>
+  <data name="Item hidden mesh tooltip" xml:space="preserve">
+    <value>Das Teil, das beim Zeichnen nach dem Look ausgelassen wird, etwa beim Stufenleuchten.</value>
+  </data>
+  <data name="From the item tooltip" xml:space="preserve">
+    <value>Der Wert, den das Spiel dem Gegenstand gibt, wie ohne diesen Look.</value>
+  </data>
+  <data name="From the drawing tooltip" xml:space="preserve">
+    <value>Der Wert, den die Zeichnung verlangt, etwa während ein Gegenstand ein- oder ausblendet.</value>
+  </data>
+  <data name="A number tooltip" xml:space="preserve">
+    <value>Eine Zahl, die gleich bleibt.</value>
+  </data>
+  <data name="Wave tooltip" xml:space="preserve">
+    <value>Steigt und fällt sanft zwischen Von und Bis; ein Auf und Ab dauert Sekunden.</value>
+  </data>
+  <data name="Bounce tooltip" xml:space="preserve">
+    <value>Geht von Von hinauf zu Bis und zurück wie ein hüpfender Ball; ein Sprung dauert Sekunden.</value>
+  </data>
+  <data name="Scroll tooltip" xml:space="preserve">
+    <value>Wächst gleichmäßig um Pro Sekunde, für eine Textur, die immer weiter läuft.</value>
+  </data>
+  <data name="Ramp tooltip" xml:space="preserve">
+    <value>Steigt in Sekunden von Von bis Bis und beginnt dann von vorn.</value>
+  </data>
+  <data name="Frames tooltip" xml:space="preserve">
+    <value>Springt alle Sekunden je Bild um Schritt weiter, Anzahl Mal, und beginnt dann von vorn: eine Textur aus Bildern.</value>
+  </data>
+  <data name="Random value tooltip" xml:space="preserve">
+    <value>Ein neuer Wert zwischen Von und Bis in jedem Bild, in Schritten von Schritt: ein Flackern.</value>
+  </data>
+  <data name="Shape from tooltip" xml:space="preserve">
+    <value>Wo der Wert beginnt: der tiefste einer Welle oder eines Hüpfens.</value>
+  </data>
+  <data name="Shape to tooltip" xml:space="preserve">
+    <value>Wohin der Wert geht: der höchste einer Welle oder eines Hüpfens.</value>
+  </data>
+  <data name="Shape seconds tooltip" xml:space="preserve">
+    <value>Wie lange eine Runde dauert, in Sekunden.</value>
+  </data>
+  <data name="Shape per second tooltip" xml:space="preserve">
+    <value>Um wie viel der Wert jede Sekunde wächst; unter 0 läuft er andersherum.</value>
+  </data>
+  <data name="Shape count tooltip" xml:space="preserve">
+    <value>Wie viele Bilder es gibt, bevor es von vorn beginnt.</value>
+  </data>
+  <data name="Shape step tooltip" xml:space="preserve">
+    <value>Um wie viel sich der Wert von einem Bild zum nächsten ändert.</value>
+  </data>
+  <data name="Shape seconds each tooltip" xml:space="preserve">
+    <value>Wie lange jedes Bild zu sehen ist, in Sekunden.</value>
+  </data>
   <data name="Stop time" xml:space="preserve">
     <value>Zeit anhalten</value>
   </data>

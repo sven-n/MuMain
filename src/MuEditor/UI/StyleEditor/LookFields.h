@@ -4,19 +4,37 @@
 
 #include "Data/GameData/LookData/LookDefinition.h"
 #include "Data/GameData/LookData/LookEffects.h"
+#include "LookParts.h"
 
 #include <string>
+#include <vector>
 
 // The fields of a look in the Style Editor (design L19), in designer terms (L8, L9, L10): a layer's kind, motion,
 // blend, meshes, texture, light and values, and the item values a look leaves after drawing. A value that changes over
 // time names a shape and draws its curve below its fields. Each returns true in the frame the user changed something.
+// The numbers are drag fields, every field says in a tooltip what it does, the meshes are the picked item's `parts` by
+// name (checkboxes, a dropdown) and a light's color has a picker (design L42); without parts a mesh is a number.
 namespace MuEditor::Looks::Fields
 {
-bool Layer(Data::Looks::Layer& layer);
-bool ItemValues(Data::Looks::ItemValues& values);
+bool Layer(Data::Looks::Layer& layer, const std::vector<LookPart>& parts = {});
+bool ItemValues(Data::Looks::ItemValues& values, const std::vector<LookPart>& parts = {});
 // A layer as its effect (design L35, L40): its meshes, then only the fields of its main effect and of what else it
 // does, as `effect` describes it (a pulse's strength with its curve, a shine's motion, an overlay's texture).
-bool Effect(Data::Looks::Layer& layer, const Data::Looks::LayerEffect& effect);
+bool Effect(Data::Looks::Layer& layer, const Data::Looks::LayerEffect& effect, const std::vector<LookPart>& parts = {});
+
+// A mesh the mesh fields offer: its number and its label.
+struct MeshOption
+{
+    int mesh = 0;
+    std::string label;
+
+    bool operator==(const MeshOption&) const = default;
+};
+// The parts in their order ("0 · Crystal", "1 · wand44_R.jpg" without a name), then the listed meshes the parts
+// don't have, sorted ("5 (not in the model)").
+std::vector<MeshOption> MeshOptions(const std::vector<LookPart>& parts, const std::vector<int>& listed);
+// `meshes` with `mesh` added at its end or taken out; the others keep their order.
+std::vector<int> WithMesh(std::vector<int> meshes, int mesh, bool in);
 
 // "Pulse", and the gallery's line about it ("" for the base).
 const char* EffectName(Data::Looks::EffectKind kind);

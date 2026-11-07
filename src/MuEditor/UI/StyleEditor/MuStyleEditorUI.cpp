@@ -770,13 +770,15 @@ void CMuStyleEditorUI::RenderLayers()
     ImGui::EndChild();
 
     ImGui::PushID("Line");
+    // The mesh fields offer the picked item's parts by name (design L42).
+    const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
     if (m_line < m_draft.layers.size())
     {
-        MuEditor::Looks::Fields::Layer(m_draft.layers[m_line]);
+        MuEditor::Looks::Fields::Layer(m_draft.layers[m_line], parts);
     }
     else
     {
-        MuEditor::Looks::Fields::ItemValues(m_draft.itemValuesAfter);
+        MuEditor::Looks::Fields::ItemValues(m_draft.itemValuesAfter, parts);
     }
     ImGui::PopID();
 }
@@ -1042,13 +1044,14 @@ void CMuStyleEditorUI::RenderEffectSettings()
         return;
     }
     ImGui::PushID("Effect");
+    const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
     if (m_allFields)
     {
-        MuEditor::Looks::Fields::Layer(layer);
+        MuEditor::Looks::Fields::Layer(layer, parts);
     }
     else
     {
-        MuEditor::Looks::Fields::Effect(layer, effect);
+        MuEditor::Looks::Fields::Effect(layer, effect, parts);
     }
     ImGui::PopID();
 }

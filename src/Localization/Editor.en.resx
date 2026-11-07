@@ -661,6 +661,48 @@
   <data name="Leaves it" xml:space="preserve">
     <value>The look leaves this value for what is drawn after it, such as the level glow.</value>
   </data>
+  <data name="Drag field tooltip" xml:space="preserve">
+    <value>Drag sideways to change it; double-click to type a number.</value>
+  </data>
+  <data name="Layer kind tooltip" xml:space="preserve">
+    <value>What the layer draws: a texture on the parts, or a reflection that moves over them like light on metal.</value>
+  </data>
+  <data name="Layer motion tooltip" xml:space="preserve">
+    <value>How the reflection moves over the parts: drifting, sweeping, swirling, in stripes, or still.</value>
+  </data>
+  <data name="Layer blend tooltip" xml:space="preserve">
+    <value>How the layer mixes with what is drawn before it.</value>
+  </data>
+  <data name="Blend normal tooltip" xml:space="preserve">
+    <value>Covers what is drawn before it.</value>
+  </data>
+  <data name="Blend glow tooltip" xml:space="preserve">
+    <value>Adds its light to what is drawn before it: bright places glow, dark ones stay see-through.</value>
+  </data>
+  <data name="Blend as the drawing asks tooltip" xml:space="preserve">
+    <value>Blends as the item's drawing chooses, as the item's own texture does.</value>
+  </data>
+  <data name="Layer meshes tooltip" xml:space="preserve">
+    <value>Which parts of the model the layer draws on: every part, only the ticked ones, or every part but the ticked ones.</value>
+  </data>
+  <data name="Layer hidden mesh tooltip" xml:space="preserve">
+    <value>Also draws on the part the item keeps hidden, which the item's own drawing leaves out.</value>
+  </data>
+  <data name="Layer part tooltip" xml:space="preserve">
+    <value>Ticked: the layer draws on this part. One part stays ticked.</value>
+  </data>
+  <data name="Layer mesh numbers tooltip" xml:space="preserve">
+    <value>The numbers of the meshes the layer draws on, such as 0, 2. Pick an item to tick its parts by name instead.</value>
+  </data>
+  <data name="Mesh not in the model" xml:space="preserve">
+    <value>{0} (not in the model)</value>
+  </data>
+  <data name="Layer texture tooltip" xml:space="preserve">
+    <value>The picture the layer draws, a .jpg or .tga under Data, such as Item/Deye_R.jpg. Empty: each part's own texture.</value>
+  </data>
+  <data name="Layer light tooltip" xml:space="preserve">
+    <value>The color the layer is drawn in: the light before it (as the item is lit), a color of its own, or a tint of the item's light.</value>
+  </data>
   <data name="Stop time" xml:space="preserve">
     <value>Stop time</value>
   </data>
@@ -2748,6 +2790,84 @@
   </data>
   <data name="Color" xml:space="preserve">
     <value>Color</value>
+  </data>
+  <data name="Layer color tooltip" xml:space="preserve">
+    <value>Click the swatch to pick a color, or drag the number of red, green or blue: 0 is none of it, 1 is all of it.</value>
+  </data>
+  <data name="Each channel apart" xml:space="preserve">
+    <value>Each channel apart</value>
+  </data>
+  <data name="Each channel apart tooltip" xml:space="preserve">
+    <value>Gives red, green and blue a field each, so one can change over time, such as a wave. Stays on while one does.</value>
+  </data>
+  <data name="Layer light channel tooltip" xml:space="preserve">
+    <value>How much of this color the light has: 0 is none, 1 is all of it.</value>
+  </data>
+  <data name="Layer opacity tooltip" xml:space="preserve">
+    <value>How solid the layer is: 0 is invisible, 1 is fully drawn.</value>
+  </data>
+  <data name="Layer glow mesh tooltip" xml:space="preserve">
+    <value>Which part glows at the glow strength: the item's own glow mesh, none, every part, or the part picked here.</value>
+  </data>
+  <data name="Layer glow strength tooltip" xml:space="preserve">
+    <value>How brightly the glow mesh shines: 0 is no glow, 1 is full, more shines brighter still.</value>
+  </data>
+  <data name="Layer scroll tooltip" xml:space="preserve">
+    <value>Moves the texture across the part, sideways (U) or up and down (V); a Scroll keeps it flowing.</value>
+  </data>
+  <data name="Layer scrolling mesh tooltip" xml:space="preserve">
+    <value>The part whose texture the scroll moves; Kept from the model takes the one the model names.</value>
+  </data>
+  <data name="Item hidden mesh tooltip" xml:space="preserve">
+    <value>The part left out of what is drawn after the look, such as the level glow.</value>
+  </data>
+  <data name="From the item tooltip" xml:space="preserve">
+    <value>The value the game gives the item, as without this look.</value>
+  </data>
+  <data name="From the drawing tooltip" xml:space="preserve">
+    <value>The value the drawing asks for, such as while an item fades in or out.</value>
+  </data>
+  <data name="A number tooltip" xml:space="preserve">
+    <value>A number that stays the same.</value>
+  </data>
+  <data name="Wave tooltip" xml:space="preserve">
+    <value>Rises and falls smoothly between From and To; one rise and fall takes Seconds.</value>
+  </data>
+  <data name="Bounce tooltip" xml:space="preserve">
+    <value>Goes from From up to To and back like a bouncing ball; one bounce takes Seconds.</value>
+  </data>
+  <data name="Scroll tooltip" xml:space="preserve">
+    <value>Grows steadily by Per second, for a texture that keeps flowing.</value>
+  </data>
+  <data name="Ramp tooltip" xml:space="preserve">
+    <value>Climbs from From to To in Seconds, then starts again.</value>
+  </data>
+  <data name="Frames tooltip" xml:space="preserve">
+    <value>Steps by Step every Seconds each, Count times, then starts again: a texture of frames.</value>
+  </data>
+  <data name="Random value tooltip" xml:space="preserve">
+    <value>A new value between From and To every frame, in steps of Step: a flicker.</value>
+  </data>
+  <data name="Shape from tooltip" xml:space="preserve">
+    <value>Where the value starts: the lowest of a wave or a bounce.</value>
+  </data>
+  <data name="Shape to tooltip" xml:space="preserve">
+    <value>Where the value goes: the highest of a wave or a bounce.</value>
+  </data>
+  <data name="Shape seconds tooltip" xml:space="preserve">
+    <value>How long one round takes, in seconds.</value>
+  </data>
+  <data name="Shape per second tooltip" xml:space="preserve">
+    <value>How much the value grows each second; below 0 it runs the other way.</value>
+  </data>
+  <data name="Shape count tooltip" xml:space="preserve">
+    <value>How many frames there are before it starts again.</value>
+  </data>
+  <data name="Shape step tooltip" xml:space="preserve">
+    <value>How much the value changes from one frame to the next.</value>
+  </data>
+  <data name="Shape seconds each tooltip" xml:space="preserve">
+    <value>How long each frame shows, in seconds.</value>
   </data>
   <data name="Add rule" xml:space="preserve">
     <value>Add rule</value>

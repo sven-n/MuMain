@@ -1664,6 +1664,16 @@ The picked look shows:
   meshes, texture, light, opacity, glow mesh and strength, scroll and the
   scrolling mesh. A value is the item's, the drawing's (opacity), a number or
   a shape; a shape's curve over time is drawn below its fields.
+- The **fields**, of an effect and of a layer: a number is a drag field
+  (dragged sideways it changes, a double click types an exact number), and
+  pointing at a field or its name shows what it does; the choices of a
+  dropdown say what each does. The meshes are the picked item's parts by
+  name, a checkbox each (one stays ticked), with meshes the look names beyond
+  the model listed after them; a single mesh (the glow mesh, the scrolling
+  mesh) is picked from the same parts. Without a picked item they are mesh
+  numbers. A light's color has a swatch that opens a color picker;
+  **Each channel apart** gives red, green and blue a field each, so one can
+  change over time.
 - The items that use the look; a click selects one.
 
 Each change of the looks or their folders is a step of the item undo history
