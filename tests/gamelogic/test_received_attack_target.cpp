@@ -392,3 +392,43 @@ TEST_CASE("Received basic attacks replace interrupted skill feedback [combat][re
             Effects[i].Live = false;
     }
 }
+
+TEST_CASE("ReceiveAction keeps zero target absent beside a live key-zero character [combat][received_attack]")
+{
+    for (const BYTE action : {static_cast<BYTE>(AT_ATTACK1), static_cast<BYTE>(AT_ATTACK2)})
+    {
+        CAPTURE(action);
+        MonsterRecorder::LoadScope audio(WD_0LORENCIA);
+        AttackScope scope;
+        auto& decorative = scope.characters[VictimSlot];
+        decorative.Key = 0;
+        REQUIRE(decorative.Object.Live);
+        auto& attacker = scope.characters[AttackerSlot];
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+        for (int i = 0; i < MAX_JOINTS; ++i)
+            Joints[i].Live = false;
+
+        scope.Receive(0, action);
+        scope.CheckAttack(-1);
+        audio.TakePlayedSounds();
+        attacker.AttackFlag = ATTACK_DIE;
+        attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+        MoveCharacter(&attacker, &attacker.Object);
+        const auto sounds = audio.TakePlayedSounds();
+        REQUIRE(sounds.size() == 1);
+        CHECK((sounds[0].id >= SOUND_ATTACK_MELEE_HIT1 && sounds[0].id <= SOUND_ATTACK_MELEE_HIT4));
+        CHECK(sounds[0].object == &attacker.Object);
+        CHECK(decorative.Key == 0);
+        CHECK(decorative.Hit == PreviousVictimHit);
+        CHECK(Hero->Hit == PreviousHeroHit);
+        CHECK(std::none_of(Particles, Particles + MAX_PARTICLES,
+                           [](const auto& p) { return p.Live && p.Type == BITMAP_BLOOD + 1; }));
+        CHECK(std::none_of(Joints, Joints + MAX_JOINTS,
+                           [](const auto& j) { return j.Live && j.Type == BITMAP_JOINT_ENERGY; }));
+        for (int i = 0; i < MAX_PARTICLES; ++i)
+            Particles[i].Live = false;
+        for (int i = 0; i < MAX_JOINTS; ++i)
+            Joints[i].Live = false;
+    }
+}
