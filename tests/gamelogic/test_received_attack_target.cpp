@@ -432,3 +432,34 @@ TEST_CASE("ReceiveAction keeps zero target absent beside a live key-zero charact
             Joints[i].Live = false;
     }
 }
+
+TEST_CASE("CreateCharacterPointer clears received attack feedback on slot reuse [combat][received_attack]")
+{
+    MonsterRecorder::LoadScope audio(WD_0LORENCIA);
+    AttackScope scope;
+    auto& attacker = scope.characters[AttackerSlot];
+    scope.Receive(MissingKey, AT_ATTACK1);
+    REQUIRE(attacker.ReceivedUnknownTargetHitSoundPending);
+    attacker.Skill = AT_SKILL_ICE;
+    attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+    attacker.LastAttackEffectTime = 1;
+    attacker.TargetCharacter = VictimSlot;
+    attacker.AttackFlag = ATTACK_DIE;
+
+    CreateCharacterPointer(&attacker, MODEL_PLAYER, 0, 0, 0.f);
+    const std::unique_ptr<vec34_t[]> reusedBones(attacker.Object.BoneTransform);
+    CHECK(attacker.Skill == 0);
+    CHECK(attacker.AttackTime == 0);
+    CHECK(attacker.LastAttackEffectTime == -1);
+    CHECK(attacker.TargetCharacter == -1);
+    CHECK(attacker.AttackFlag == ATTACK_FAIL);
+    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+
+    // A timer-only animation start must not inherit the previous occupant's receipt.
+    attacker.Object.CurrentAction = PLAYER_ATTACK_FIST;
+    attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
+    audio.TakePlayedSounds();
+    MoveCharacter(&attacker, &attacker.Object);
+    CHECK(attacker.AttackTime == 0);
+    CHECK(audio.TakePlayedSounds().empty());
+}

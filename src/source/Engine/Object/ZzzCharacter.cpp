@@ -12522,6 +12522,19 @@ void DeleteCharacterCompanions(CHARACTER* c)
         g_petProcess->DeletePet(c, -1, true);
 }
 
+namespace
+{
+void ResetCharacterAttackState(CHARACTER* character)
+{
+    character->Skill = 0;
+    character->AttackTime = 0;
+    character->LastAttackEffectTime = -1;
+    character->TargetCharacter = -1;
+    character->AttackFlag = ATTACK_FAIL;
+    character->ReceivedUnknownTargetHitSoundPending = false;
+}
+} // namespace
+
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
 {
     OBJECT* o = &c->Object;
@@ -12630,11 +12643,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
-    c->Skill = 0;
-    c->AttackTime = 0;
-    c->LastAttackEffectTime = -1;
-    c->TargetCharacter = -1;
-    c->AttackFlag = ATTACK_FAIL;
+    ResetCharacterAttackState(c);
     c->Weapon[0].Type = -1;
     c->Weapon[0].Level = 0;
     c->Weapon[1].Type = -1;
