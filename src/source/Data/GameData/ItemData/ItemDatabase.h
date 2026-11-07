@@ -159,10 +159,12 @@ public:
         return m_groundLabels;
     }
 
-    // The cases each language declines item names in (Data/Items/Tooltips/NameCases.json). A name version change: the
-    // texts that name items look at which forms a language has.
+    // The cases each language declines item names in (Data/Items/Tooltips/NameCases.json). A version change, as the
+    // ground labels' (what checks the data checks again), and a name version change: the texts that name items look
+    // at which forms a language has.
     void SetNameCases(ItemNameCases cases)
     {
+        ++m_version;
         ++m_nameVersion;
         m_nameCases = std::move(cases);
     }
@@ -210,9 +212,10 @@ public:
 
     int GetExistingItemCount() const { return m_existingItemCount; }
 
-    // Counts the changes of the items, the stat file and the tooltip file;
-    // views taken from them (e.g. the item names the editor lists, the
-    // tooltips' compiled texts) take them again when it changes.
+    // Counts the changes of the items, the stat file, the tooltip file, the
+    // ground labels and the name cases; views taken from them (e.g. the item
+    // names the editor lists, the tooltips' compiled texts) take them again
+    // when it changes.
     int GetVersion() const
     {
         return m_version;

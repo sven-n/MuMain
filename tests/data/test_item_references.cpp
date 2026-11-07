@@ -155,6 +155,20 @@ TEST_CASE("A reference names the item in the text's language, its form, or its l
     CHECK(tooHigh.problem == ItemReferenceProblem::NoSuchLevel);
 }
 
+TEST_CASE("Changing the name cases is a change of the item data and of its names [data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    const int version = database.GetVersion();
+    const int nameVersion = database.GetNameVersion();
+    ItemNameCases cases;
+    cases.SetCases("pl", {"gen"});
+    database.SetNameCases(cases);
+    // Data Checks sees a change of the data by the version, the texts that name items by the name version.
+    CHECK(database.GetVersion() != version);
+    CHECK(database.GetNameVersion() != nameVersion);
+}
+
 TEST_CASE("A name a text would read as its own format is not put into it [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();
