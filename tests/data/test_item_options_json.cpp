@@ -163,6 +163,9 @@ TEST_CASE("Option definition file errors stop the start [data][items]")
     // A value per level is a list, never a step per level.
     fatal(LuckOptionWith(R"({"attribute": "a", "add": {"values": 0, "perLevel": 4}, "text": "t"})"),
           "definitions[0].options[0].add.perLevel");
+    // Its one problem, not also an unknown field.
+    CHECK(ReadDefinition(LuckOptionWith(R"({"attribute": "a", "add": {"values": 0, "perLevel": 4}, "text": "t"})"))
+              .size() == 1);
     fatal(LuckOptionWith(R"({"attribute": "a", "add": {"values": 1}})"), "definitions[0].options[0].text");
     fatal(LuckOptionWith(R"({"attribute": "a", "add": {"values": 1}, "text": ["t", 1]})"),
           "definitions[0].options[0].text");

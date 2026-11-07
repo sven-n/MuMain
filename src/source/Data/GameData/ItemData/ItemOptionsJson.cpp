@@ -50,7 +50,8 @@ const KeySet DefinitionKeys = {Keys::Name, Keys::Type, Keys::DisplayName, Keys::
 const KeySet OpenMuKeys = {Keys::Id, Keys::Name};
 const KeySet ServerKeys = {Keys::AddsRandomly, Keys::AddChance, Keys::MaximumOptionsPerItem};
 const KeySet OptionKeys = {Keys::Number, Keys::Attribute, AddKeys[0], AddKeys[1], AddKeys[2], Keys::Text};
-const KeySet ValueKeys = {Keys::Values};
+// perLevel has an error of its own, so it is no unknown field.
+const KeySet ValueKeys = {Keys::Values, Keys::PerLevel};
 
 // Whether the options of a type have a number (OpenMU's ItemOption.Number), and whether a definition of it has one
 // option only.
