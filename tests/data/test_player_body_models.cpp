@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "ClientFolderScope.h"
 #include "TestModelSlots.h"
 
 #include "Core/Globals/_enum.h"
@@ -90,25 +91,6 @@ const std::array<BodyPart, 5> BodyParts{{
     {MODEL_BODY_GLOVES, L"GloveClass"},
     {MODEL_BODY_BOOTS, L"BootClass"},
 }};
-
-// Runs the test from the client folder, where model and texture paths start with Data.
-class ClientFolderScope
-{
-public:
-    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
-    {
-        std::filesystem::current_path(folder);
-    }
-    ~ClientFolderScope()
-    {
-        std::filesystem::current_path(m_previous);
-    }
-    ClientFolderScope(const ClientFolderScope&) = delete;
-    ClientFolderScope& operator=(const ClientFolderScope&) = delete;
-
-private:
-    std::filesystem::path m_previous;
-};
 
 // Textures load without a GPU device and are unloaded afterwards.
 class TextureScope

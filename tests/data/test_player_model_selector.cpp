@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <doctest.h>
+#include "ClientFolderScope.h"
+#include "ExecutableConfigFile.h"
 #include "TestModelSlots.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Engine/Object/PlayerBodyModels.h"
@@ -8,47 +10,20 @@
 #include <fstream>
 #include <iterator>
 
-namespace
-{
-// The selector test executable has its own config, never the game runtime's config.
-struct ConfigScope
-{
-    GameConfig& config = GameConfig::GetInstance();
-    std::filesystem::path path = config.GetConfigPath();
-    bool existed = std::filesystem::exists(path);
-    std::string saved;
-    ConfigScope()
-    {
-        if (existed)
-        {
-            std::ifstream in(path, std::ios::binary);
-            saved.assign(std::istreambuf_iterator<char>(in), {});
-        }
-    }
-    ~ConfigScope()
-    {
-        if (existed)
-            std::ofstream(path, std::ios::binary) << saved;
-        else
-            std::filesystem::remove(path);
-        config.Load();
-    }
-};
-} // namespace
-
 TEST_CASE("S6 selector defaults and explicit choices survive save and restart [player-selector]")
 {
-    ConfigScope scope;
-    std::ofstream(scope.path) << "[Render]\n";
-    scope.config.Load();
-    CHECK(scope.config.GetUseS6PlayerModels() == true);
+    const ExecutableConfigFile file;
+    GameConfig& config = GameConfig::GetInstance();
+    file.Write("[Render]\n");
+    config.Load();
+    CHECK(config.GetUseS6PlayerModels() == true);
     for (bool useOriginal : {false, true})
     {
-        scope.config.SetUseS6PlayerModels(useOriginal);
-        scope.config.Save();
-        scope.config.SetUseS6PlayerModels(!useOriginal);
-        scope.config.Load();
-        CHECK(scope.config.GetUseS6PlayerModels() == useOriginal);
+        config.SetUseS6PlayerModels(useOriginal);
+        config.Save();
+        config.SetUseS6PlayerModels(!useOriginal);
+        config.Load();
+        CHECK(config.GetUseS6PlayerModels() == useOriginal);
     }
 }
 
@@ -75,16 +50,7 @@ TEST_CASE("both packaged player model choices open through native loader [player
 {
     // This case needs only the selector argument, not config.ini. CTest can run it
     // alongside the save/reload case, which is the sole writer of that file.
-    const auto previous = std::filesystem::current_path();
-    struct RestoreFolder
-    {
-        std::filesystem::path path;
-        ~RestoreFolder()
-        {
-            std::filesystem::current_path(path);
-        }
-    } restore{previous};
-    std::filesystem::current_path(std::filesystem::path(MU_TEST_DATA_DIR).parent_path());
+    ClientFolderScope folder(std::filesystem::path(MU_TEST_DATA_DIR).parent_path());
     for (bool useOriginal : {true, false})
     {
         TestModelSlots slots;
