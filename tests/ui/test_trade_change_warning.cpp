@@ -28,6 +28,7 @@ TEST_CASE("the trade warning remembers the items its list names")
     CHECK(Tracked(ITEM_WING_OF_STORM));
     CHECK(Tracked(ITEM_WING_OF_DIMENSION));
     CHECK(Tracked(ITEM_CAPE_OF_LORD));
+    CHECK(Tracked(ITEM_HORN_OF_FENRIR));         // its durability matters, as for the Uniria and Dinorant
     CHECK(Tracked(ITEM_CAPE_OF_FIGHTER));
     CHECK(Tracked(ITEM_CAPE_OF_OVERRULE));
     CHECK(Tracked(INDEX_COMPILED_SOUL, 0, 0, true)); // a packed jewel
@@ -51,6 +52,5 @@ TEST_CASE("the trade warning doesn't remember potions, boxes and the other items
     CHECK_FALSE(Tracked(ITEM_DEVILS_KEY, 2));
     CHECK_FALSE(Tracked(ITEM_SCROLL_OF_BLOOD, 3));
     CHECK_FALSE(Tracked(ITEM_SPIRIT));                // the item right after the Cape of Lord
-    CHECK_FALSE(Tracked(ITEM_HORN_OF_FENRIR));
     CHECK_FALSE(Tracked(ITEM_JEWEL_OF_CREATION));
 }

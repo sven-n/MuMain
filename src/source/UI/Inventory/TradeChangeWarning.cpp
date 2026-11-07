@@ -13,6 +13,7 @@ bool IsTrackedForChangeWarning(int itemType, int level, int excellentFlags, bool
            || compiledGem
            || (itemType >= ITEM_WING && itemType <= ITEM_WINGS_OF_DARKNESS)
            || itemType == ITEM_CAPE_OF_LORD
+           || itemType == ITEM_HORN_OF_FENRIR // a lower durability is a real downgrade, as for the Uniria and Dinorant
            || (itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_WING_OF_DIMENSION)
            || itemType == ITEM_JEWEL_OF_CHAOS
            || (itemType >= ITEM_CAPE_OF_FIGHTER && itemType <= ITEM_CAPE_OF_OVERRULE)
