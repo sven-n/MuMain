@@ -1,7 +1,8 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 #include "RmlLayoutFixture.h"
 
-#include "stdafx.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"

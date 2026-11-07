@@ -1,5 +1,6 @@
-#include <doctest.h>
 #include "stdafx.h"
+
+#include <doctest.h>
 #include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/RmlBridge/RmlStackingOrder.h"
 #include "UI/RmlBridge/RmlTheme.h"

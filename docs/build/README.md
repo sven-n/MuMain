@@ -158,7 +158,7 @@ CI's restored library caches, and applies to the unpatched sources.
 | `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` and `-in-game-tests` presets turn it `ON`, and so does `ENABLE_IN_GAME_TESTS`. |
 | `ENABLE_IN_GAME_TESTS` | `ON` / `OFF` | Publishes the in-game tester next to `Main` and adds the `InGameTests` / `InGameTestsGui` targets (see [`in-game-tests.md`](../in-game-tests.md)); both need the .NET SDK, like the client's network library. Default `OFF`; while `ON`, it turns `ENABLE_CONTROL_SOCKET` on too, which the tester drives the client through. The `-mueditor` and `-in-game-tests` presets turn it `ON`, the player presets `OFF`. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
-| `CMAKE_DISABLE_PRECOMPILE_HEADERS` | `ON` / `OFF` | `ON` compiles without precompiled headers: the game's `stdafx.h`, SDL's and RmlUi's. Default `OFF`: the game's files that include `stdafx.h` share one precompiled copy of it, so a cold build of the game library takes about half the time on Windows and 30% less on Linux. Which files include it is checked at configure time: a file that adds or drops the include follows after the next configure. CI's PR and main push builds turn it `ON`, so their compiler cache covers every file (see [Hosted releases](#hosted-releases)). |
+| `CMAKE_DISABLE_PRECOMPILE_HEADERS` | `ON` / `OFF` | `ON` compiles without precompiled headers: the game's `stdafx.h` (also in the tests), SDL's and RmlUi's. Default `OFF`: the game's files that include `stdafx.h` share one precompiled copy of it, so a cold build of the game library takes about half the time on Windows and 30% less on Linux. The test files that include it, in tests that link `MuClient`, share another, so a cold build of the tests takes about 28% less time on Windows and 19% less on Linux. Which files include it is checked at configure time: a file that adds or drops the include follows after the next configure. CI's PR and main push builds turn it `ON`, so their compiler cache covers every file (see [Hosted releases](#hosted-releases)). |
 | `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
 | `MU_WARNINGS_AS_ERRORS` | `ON` / `OFF` | Turns compiler, linker and DXC shader warnings into errors in the game's own code and its tests; the third-party libraries keep their own settings. Linker warnings need CMake 4.0 or newer (an older CMake says so and keeps them warnings). Default `OFF`; CI's player builds turn it `ON` (see [No warnings](#no-warnings)). |
@@ -312,10 +312,27 @@ projects, and name the .NET SDK version (which picks the NativeAOT compiler pack
 so a new entry is stored only when one of those changes, not with every new source
 file in `src/CMakeLists.txt`.
 
-PR runs only read the library and vcpkg caches, as they do the compiler caches:
-**Restore dependencies** and **Restore vcpkg packages** read them, and
-**Save dependencies** (after the build) and **Save vcpkg packages** (after the
-configure step) store them only in main pushes, when the exact key was missing. A
+The Linux build also caches the apt packages it installs (about 45 MB): the image's
+Ubuntu mirror sometimes sends them at 35–160 kB/s, and **Install build tools** then
+took 5–24 minutes instead of about 20 seconds. **Find apt packages** updates the
+index and names the cache after the runner image and the names, sizes and hashes of
+the files apt would fetch (`apt-get install --print-uris`), so a new package version
+gives a new key and another mirror for the same files does not. Which files apt
+fetches depends on what the image has installed: **Restore apt packages** reads the
+image's newest entry first, then any image's. **Fetch apt packages**
+downloads them (`--download-only`): apt uses the restored files that still match the
+index and fetches only the others. In the runs that save the cache, **Gather apt
+packages** then collects the listed files for **Save apt packages**
+([`scripts/ci_apt_cache.py`](../../scripts/ci_apt_cache.py)), before **Install build
+tools** installs them, so no clean-up after dpkg can remove them first. When one is
+missing, the save stores nothing and a notice names it. Quality Gates gets cppcheck,
+which the image lacks, from an apt cache of its own the same way.
+
+PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
+**Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
+them, and **Save dependencies** (after the build), **Save vcpkg packages** (after the
+configure step) and **Save apt packages** (after the download) store them only in main
+pushes, when the exact key was missing. A
 PR's own entry would serve that PR alone, and the repository's caches share 10 GB:
 past that, GitHub deletes the least recently used entries, main's included. The
 nightly and manual release runs save nothing either: they run beside the pushes,
@@ -327,7 +344,8 @@ compiler cache for each main push. After the builds of a run on main, the
 **Prune caches** job ([`scripts/ci_cache_prune.py`](../../scripts/ci_cache_prune.py))
 deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
-and while GitHub moves the runners to a new image, jobs land on both images. An
+and while GitHub moves the runners to a new image, jobs land on both images. The apt
+caches keep the newest entry of each image for the same reason. An
 entry a job read in the last 15 minutes is left for a later run, as that job may
 still be downloading it, unless the last read was the run's own: each build job
 notes when its restores ended (**Note when the caches were read**), so the entry a

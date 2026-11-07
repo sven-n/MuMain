@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Scaling/UITransform.h"
 
