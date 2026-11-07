@@ -63,6 +63,10 @@ const SpecRow Spec[] = {
      TuningUnit::Seconds, TuningZero::Immediate},
     {TuningControlId::EffectCap, TuningGroup::DynamicLights, false, LookValue::DynamicEffectCap, 0, 8, 0.1,
      TuningUnit::None, TuningZero::NoCap},
+    {TuningControlId::ShadowOpacity, TuningGroup::DynamicLights, false, LookValue::GroundShadowOpacity, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::ShadowLights, TuningGroup::DynamicLights, false, LookValue::GroundShadowLights, 0, 4, 1,
+     TuningUnit::None, TuningZero::Plain},
     {TuningControlId::Wrap, TuningGroup::DynamicLights, true, LookValue::DynamicWrap, 0, 0.5, 0.05, TuningUnit::None,
      TuningZero::Plain},
     {TuningControlId::MapSmoothing, TuningGroup::DynamicLights, true, LookValue::DynamicMapSmoothing, 0, 2, 0.05,
@@ -76,6 +80,30 @@ const SpecRow Spec[] = {
     {TuningControlId::BloomLevelFalloff, TuningGroup::PostProcessing, false, LookValue::BloomLevelFalloff, 0.25, 1,
      0.05, TuningUnit::None, TuningZero::Plain},
     {TuningControlId::GradingStrength, TuningGroup::PostProcessing, false, LookValue::GradingStrength, 0, 1, 0.01,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionStrength, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionStrength,
+     0, 2, 0.05, TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::AmbientOcclusionRadius, TuningGroup::PostProcessing, false, LookValue::AmbientOcclusionRadius, 10,
+     300, 5, TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::SunShadowStrength, TuningGroup::Sunlight, false, LookValue::SunShadowStrength, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::SunShadowSoftness, TuningGroup::Sunlight, true, LookValue::SunShadowSoftness, 0, 2, 0.1,
+     TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::SunShadowResolution, TuningGroup::Sunlight, true, LookValue::SunShadowResolution, 1024, 4096,
+     1024, TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::FlatSunShadow, TuningGroup::Sunlight, true, LookValue::FlatSunShadow, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::CloudStrength, TuningGroup::Sunlight, false, LookValue::CloudStrength, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::CloudScale, TuningGroup::Sunlight, true, LookValue::CloudScale, 500, 10000, 250,
+     TuningUnit::None, TuningZero::Plain},
+    {TuningControlId::CloudSpeed, TuningGroup::Sunlight, true, LookValue::CloudSpeed, 0, 300, 5, TuningUnit::None,
+     TuningZero::Plain},
+    {TuningControlId::CloudCover, TuningGroup::Sunlight, true, LookValue::CloudCover, 0, 1, 0.05,
+     TuningUnit::Percent, TuningZero::Plain},
+    {TuningControlId::SkyFill, TuningGroup::Sunlight, false, LookValue::SkyFill, 0, 1, 0.05, TuningUnit::Percent,
+     TuningZero::Plain},
+    {TuningControlId::RimSunFollow, TuningGroup::Sunlight, true, LookValue::RimSunFollow, 0, 1, 0.05,
      TuningUnit::Percent, TuningZero::Plain},
 };
 
@@ -92,9 +120,9 @@ Data::Maps::LookProfileData ShippedLikeProfile()
 }
 } // namespace
 
-TEST_CASE("the 19 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
+TEST_CASE("the 33 tuning controls have the specified bounds, steps, units and placement [render][look][tuning]")
 {
-    REQUIRE(Render::Look::TuningControlCount == 19);
+    REQUIRE(Render::Look::TuningControlCount == 33);
     REQUIRE(std::size(Spec) == Render::Look::TuningControlCount);
     std::set<LookValue> covered;
     for (const SpecRow& row : Spec)
@@ -123,8 +151,9 @@ TEST_CASE("the 19 tuning controls have the specified bounds, steps, units and pl
         const double steps = (control.max - control.min) / control.step;
         CHECK(std::abs(steps - std::round(steps)) < 1e-9);
     }
-    // Every look value has exactly one control.
-    CHECK(covered.size() == Data::Maps::LookValueCount);
+    // Every look value has exactly one control, but the sun's direction: painted shadows cannot follow a player's.
+    CHECK(covered.size() == Data::Maps::LookValueCount - 1);
+    CHECK_FALSE(Render::Look::FindTuningControl(LookValue::GroundShadowAngle));
     // Colour grading may now be off entirely.
     CHECK(Data::Maps::Info(LookValue::GradingStrength).min == 0.0);
 }
@@ -262,13 +291,13 @@ TEST_CASE("a developer's edit covers only the scope it was made in [render][look
 TEST_CASE("player values apply only while their feature is in effect [render][look][tuning]")
 {
     Render::Look::LookFeatures enhanced = Render::Look::PresetFeatures(LookPreset::Enhanced);
-    CHECK(Render::Look::TuningGroupsApplying(enhanced) == Render::Look::TuningGroupSet{true, true, true, true});
+    CHECK(Render::Look::TuningGroupsApplying(enhanced) == Render::Look::TuningGroupSet{true, true, true, true, true});
     CHECK(Render::Look::TuningGroupsApplying(Render::Look::PresetFeatures(LookPreset::Classic)) ==
           Render::Look::TuningGroupSet{});
     // Dynamic lights act only with Enhanced lighting.
     Render::Look::LookFeatures noLighting = enhanced;
     noLighting.enhancedLighting = false;
-    CHECK(Render::Look::TuningGroupsApplying(noLighting) == Render::Look::TuningGroupSet{false, false, true, true});
+    CHECK(Render::Look::TuningGroupsApplying(noLighting) == Render::Look::TuningGroupSet{false, false, true, true, false});
 
     const Data::Maps::LookProfileData profile = ShippedLikeProfile();
     Data::Maps::LookOverrides personal;

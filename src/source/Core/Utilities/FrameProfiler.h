@@ -46,14 +46,21 @@ enum class Pass : int
     ObjectsDraw,
     // The update's effect spawns and poses for the drawn characters and map objects.
     UpdateEffects,
+    // Inside RendererReplay: the sun shadow map, and the scene's depth for ambient occlusion while
+    // anti-aliasing is on.
+    SunShadow,
+    // Inside the terrain's frame start: the static terrain light built again for a moved sun.
+    TerrainBake,
+    SceneDepth,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
-    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
-    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx",
+    "Terrain",  "Objects",  "Chars",    "Items",     "Effects",     "Other",      "CharWait",
+    "MoveFx",   "MovePart", "Skinning", "UI",        "RenderBegin", "RenderEnd",  "Submit",
+    "UIUpdate", "RmlInput", "UILayout", "Flush",     "Sprites",     "Particles",  "Joints",
+    "Overlay",  "RmlUpd",   "RmlRend",  "EndOffscr", "EndStage",    "EndReplay",  "EndPostUI",
+    "ObjAnim",  "ObjDraw",  "UpdateFx", "SunShadow", "TerrainBake", "SceneDepth",
 };
 
 enum class Counter : int

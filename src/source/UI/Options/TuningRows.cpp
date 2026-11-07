@@ -54,6 +54,30 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningSkillFade, I18N::Game::TuningSkillFadeHelp};
     case TuningControlId::EffectCap:
         return {I18N::Game::TuningOverlappingLightCap, I18N::Game::TuningOverlappingLightCapHelp};
+    case TuningControlId::ShadowOpacity:
+        return {I18N::Game::TuningShadowOpacity, I18N::Game::TuningShadowOpacityHelp};
+    case TuningControlId::ShadowLights:
+        return {I18N::Game::TuningLightShadows, I18N::Game::TuningLightShadowsHelp};
+    case TuningControlId::SunShadowStrength:
+        return {I18N::Game::TuningSunShadows, I18N::Game::TuningSunShadowsHelp};
+    case TuningControlId::CloudStrength:
+        return {I18N::Game::TuningCloudStrength, I18N::Game::TuningCloudStrengthHelp};
+    case TuningControlId::CloudScale:
+        return {I18N::Game::TuningCloudScale, I18N::Game::TuningCloudScaleHelp};
+    case TuningControlId::CloudSpeed:
+        return {I18N::Game::TuningCloudSpeed, I18N::Game::TuningCloudSpeedHelp};
+    case TuningControlId::CloudCover:
+        return {I18N::Game::TuningCloudCover, I18N::Game::TuningCloudCoverHelp};
+    case TuningControlId::SkyFill:
+        return {I18N::Game::TuningSkyFill, I18N::Game::TuningSkyFillHelp};
+    case TuningControlId::RimSunFollow:
+        return {I18N::Game::TuningRimSunFollow, I18N::Game::TuningRimSunFollowHelp};
+    case TuningControlId::FlatSunShadow:
+        return {I18N::Game::TuningFlatSunShadow, I18N::Game::TuningFlatSunShadowHelp};
+    case TuningControlId::SunShadowSoftness:
+        return {I18N::Game::TuningSunShadowSoftness, I18N::Game::TuningSunShadowSoftnessHelp};
+    case TuningControlId::SunShadowResolution:
+        return {I18N::Game::TuningSunShadowResolution, I18N::Game::TuningSunShadowResolutionHelp};
     case TuningControlId::Wrap:
         return {I18N::Game::TuningLightWrap, I18N::Game::TuningLightWrapHelp};
     case TuningControlId::MapSmoothing:
@@ -68,6 +92,10 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningBloomSpread, I18N::Game::TuningBloomSpreadHelp};
     case TuningControlId::GradingStrength:
         return {I18N::Game::TuningColourGradingStrength, I18N::Game::TuningColourGradingStrengthHelp};
+    case TuningControlId::AmbientOcclusionStrength:
+        return {I18N::Game::TuningContactShadows, I18N::Game::TuningContactShadowsHelp};
+    case TuningControlId::AmbientOcclusionRadius:
+        return {I18N::Game::TuningContactShadowReach, I18N::Game::TuningContactShadowReachHelp};
     case TuningControlId::Count:
         break;
     }
@@ -89,15 +117,20 @@ std::string StateText(TuningRowState state)
 }
 } // namespace
 
-TuningLock TuningGroupLock(TuningGroup group, bool enhanced, bool lightingChosen, const TuningFeatureState& feature)
+TuningLock TuningGroupLock(TuningGroup group, bool enhanced, bool lightingChosen, bool dynamicLightsChosen,
+                           const TuningFeatureState& feature)
 {
     if (!enhanced)
     {
         return TuningLock::ClassicLook;
     }
-    if (group == TuningGroup::DynamicLights && !lightingChosen)
+    if ((group == TuningGroup::DynamicLights || group == TuningGroup::Sunlight) && !lightingChosen)
     {
         return TuningLock::NeedsLighting;
+    }
+    if (group == TuningGroup::Sunlight && !dynamicLightsChosen)
+    {
+        return TuningLock::NeedsDynamicLights;
     }
     if (!feature.chosen)
     {
@@ -128,6 +161,8 @@ std::string TuningLockReason(TuningLock lock)
         return Text(I18N::Game::TuningLockedOff);
     case TuningLock::NeedsLighting:
         return Text(I18N::Game::TuningLockedNeedsLighting);
+    case TuningLock::NeedsDynamicLights:
+        return Text(I18N::Game::TuningLockedNeedsDynamicLights);
     case TuningLock::Unavailable:
         return Text(I18N::Game::TuningLockedUnavailable);
     case TuningLock::SessionOff:
@@ -163,6 +198,9 @@ std::string FormatTuningText(const TuningControl& control, double value)
     case TuningUnit::Percent:
         // The spacing of the UI Scale row ("100 %").
         return number + " %";
+    case TuningUnit::Degrees:
+        // U+00B0 DEGREE SIGN in UTF-8, the text encoding of the rows.
+        return number + "\xC2\xB0";
     case TuningUnit::None:
         break;
     }

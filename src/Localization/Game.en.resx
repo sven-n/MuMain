@@ -1063,6 +1063,12 @@
   <data name="Enhanced Lighting" xml:space="preserve">
     <value>Enhanced lighting</value>
   </data>
+  <data name="Sunlight" xml:space="preserve">
+    <value>Sunlight</value>
+  </data>
+  <data name="Tuning Locked Needs Dynamic Lights" xml:space="preserve">
+    <value>Sunlight needs Dynamic lights: its ground shadows are drawn in the same pass.</value>
+  </data>
   <data name="Dynamic Lights" xml:space="preserve">
     <value>Dynamic lights</value>
   </data>
@@ -1144,6 +1150,18 @@
   <data name="Tuning Overlapping Light Cap Help" xml:space="preserve">
     <value>The most light several overlapping skills may add up to. No cap lets them add up freely; it does not switch skill lights off.</value>
   </data>
+  <data name="Tuning Shadow Opacity" xml:space="preserve">
+    <value>Shadow darkness</value>
+  </data>
+  <data name="Tuning Shadow Opacity Help" xml:space="preserve">
+    <value>How dark characters' shadows make the ground. Candle, fire and skill light still lights shadowed ground.</value>
+  </data>
+  <data name="Tuning Light Shadows" xml:space="preserve">
+    <value>Light shadows</value>
+  </data>
+  <data name="Tuning Light Shadows Help" xml:space="preserve">
+    <value>How many of the nearest candle, fire and skill lights cast a character's shadow away from them. 0 leaves only the sun's shadow.</value>
+  </data>
   <data name="Tuning Light Wrap" xml:space="preserve">
     <value>Light wrap</value>
   </data>
@@ -1182,6 +1200,78 @@
   </data>
   <data name="Tuning Colour Grading Strength" xml:space="preserve">
     <value>Colour grading strength</value>
+  </data>
+  <data name="Tuning Contact Shadows" xml:space="preserve">
+    <value>Contact shadows</value>
+  </data>
+  <data name="Tuning Contact Shadows Help" xml:space="preserve">
+    <value>Soft darkening where things meet: corners, wall bases, under objects (ambient occlusion). 0 turns it off. Not drawn while anti-aliasing is on.</value>
+  </data>
+  <data name="Tuning Contact Shadow Reach" xml:space="preserve">
+    <value>Contact shadow reach</value>
+  </data>
+  <data name="Tuning Contact Shadow Reach Help" xml:space="preserve">
+    <value>How far from a surface nearby geometry still darkens it, in world units (a terrain cell is 100).</value>
+  </data>
+  <data name="Tuning Cloud Strength" xml:space="preserve">
+    <value>Cloud shadows</value>
+  </data>
+  <data name="Tuning Cloud Strength Help" xml:space="preserve">
+    <value>How much a passing cloud dims the sunlight on the ground and characters. 0 for a clear sky. Needs sun shadows.</value>
+  </data>
+  <data name="Tuning Cloud Scale" xml:space="preserve">
+    <value>Cloud size</value>
+  </data>
+  <data name="Tuning Cloud Scale Help" xml:space="preserve">
+    <value>How large the clouds are, in world units (a terrain cell is 100).</value>
+  </data>
+  <data name="Tuning Cloud Speed" xml:space="preserve">
+    <value>Cloud speed</value>
+  </data>
+  <data name="Tuning Cloud Speed Help" xml:space="preserve">
+    <value>How fast the clouds drift, in world units per second. 0 holds them still.</value>
+  </data>
+  <data name="Tuning Cloud Cover" xml:space="preserve">
+    <value>Cloud cover</value>
+  </data>
+  <data name="Tuning Cloud Cover Help" xml:space="preserve">
+    <value>How much of the sky the clouds cover, from clear to overcast.</value>
+  </data>
+  <data name="Tuning Sky Fill" xml:space="preserve">
+    <value>Sky-blue shade</value>
+  </data>
+  <data name="Tuning Sky Fill Help" xml:space="preserve">
+    <value>How blue the shade turns, lit by the sky instead of the sun; sunlit places keep the sun's colour. Needs sun shadows.</value>
+  </data>
+  <data name="Tuning Rim Sun Follow" xml:space="preserve">
+    <value>Rim light follows the sun</value>
+  </data>
+  <data name="Tuning Rim Sun Follow Help" xml:space="preserve">
+    <value>How much the edge light on characters comes from the sun: brighter and sun-coloured on its side, gone in shade. 0 keeps the even edge light.</value>
+  </data>
+  <data name="Tuning Flat Sun Shadow" xml:space="preserve">
+    <value>Flat sun shadow</value>
+  </data>
+  <data name="Tuning Flat Sun Shadow Help" xml:space="preserve">
+    <value>How dark the flat shadow under characters is when sun shadows are off. Indoor and underground maps set it to 0, leaving only the shadows of torches and spells.</value>
+  </data>
+  <data name="Tuning Sun Shadows" xml:space="preserve">
+    <value>Sun shadows</value>
+  </data>
+  <data name="Tuning Sun Shadows Help" xml:space="preserve">
+    <value>How dark the sun's shadows are. Everything solid casts them onto the ground, walls and characters, in the shadow direction. 0 turns them off and draws the flat character shadows instead.</value>
+  </data>
+  <data name="Tuning Sun Shadow Softness" xml:space="preserve">
+    <value>Sun shadow softness</value>
+  </data>
+  <data name="Tuning Sun Shadow Softness Help" xml:space="preserve">
+    <value>How soft the edges of the sun's shadows are.</value>
+  </data>
+  <data name="Tuning Sun Shadow Resolution" xml:space="preserve">
+    <value>Sun shadow resolution</value>
+  </data>
+  <data name="Tuning Sun Shadow Resolution Help" xml:space="preserve">
+    <value>How sharp the sun's shadows are: 1024, 2048 or 4096. Higher costs more graphics memory and time.</value>
   </data>
   <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
     <value>How much of the map's colour grading applies. 0 % applies none, while bloom stays on.</value>
