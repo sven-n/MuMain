@@ -27,8 +27,11 @@ Each selected family contains `HelmClass`, `ArmorClass`, `PantClass`, `GloveClas
 | Dark Lord | Dark Lord `05`, Lord Emperor `305` |
 
 Textures are `skin_hq_class01`–`05`, `skin_hq_class201`–`203`,
-`body_hq_class301`–`305` and shared `hair_hq_player`, all with `.OZJ` extensions.
+`body_hq_class301`–`305` and shared `hairhq_R`, all with `.OZJ` extensions.
 The `hq` names are internal compatibility aliases, not a promise of HD texture resolution.
+As for every model texture, the part of a name after its first `_` carries drawing flags:
+`hairhq_R` keeps the `R` (glowing) flag of the original `hair_R`, so the Dark Lord's hair glows
+in both sets.
 
 This is a body/face mesh and appearance improvement, not an armor-set upgrade. Equipped armor,
 Summoner/Rage Fighter bodies, masks, animations, class IDs and attachment rules are unchanged.
