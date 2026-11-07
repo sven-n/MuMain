@@ -5,9 +5,6 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "I18N/All.h"
 
-#include <algorithm>
-#include <iterator>
-
 int CSItemOption::BuildOptionHelperTextList()
 {
     if (m_byRenderOptionList == 0)
@@ -27,11 +24,7 @@ int CSItemOption::BuildOptionHelperTextList()
 int CSItemOption::BuildSetOptionTextList(const ITEM_SET_OPTION& setOption)
 {
     int TextNum = 0;
-    std::fill(std::begin(TextListColor), std::end(TextListColor), 0);
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = L'\0';
-    }
+    ClearTooltipRows();
 
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;

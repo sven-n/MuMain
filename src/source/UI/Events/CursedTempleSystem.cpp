@@ -851,11 +851,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
     {
         anyTooltipHovered = true;
         TextNum = 0;
-        ZeroMemory(TextListColor, 20 * sizeof(int));
-        for (int i = 0; i < 30; i++)
-        {
-            TextList[i][0] = 0;
-        }
+        ClearTooltipRows();
 
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
         mu_swprintf(TextList[TextNum], L"%ls", p->Name);
@@ -876,11 +872,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
     {
         anyTooltipHovered = true;
         TextNum = 0;
-        ZeroMemory(TextListColor, 20 * sizeof(int));
-        for (int i = 0; i < 30; i++)
-        {
-            TextList[i][0] = 0;
-        }
+        ClearTooltipRows();
 
         mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::RequiredKillPoint);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -893,11 +885,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
     {
         anyTooltipHovered = true;
         TextNum = 0;
-        ZeroMemory(TextListColor, 20 * sizeof(int));
-        for (int i = 0; i < 30; i++)
-        {
-            TextList[i][0] = 0;
-        }
+        ClearTooltipRows();
 
         mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::AchievedKillPoint);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
