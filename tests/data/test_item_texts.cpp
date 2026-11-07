@@ -5,6 +5,8 @@
 #include "ClientDataScope.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/Translation/ItemReferenceChecks.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "I18N/All.h"
@@ -217,6 +219,91 @@ TEST_CASE("An earlier expansion of a text stays readable after the names change 
     // The same expansion again is the same text.
     g_ItemDataHandler.SetTranslateItemNames(true);
     CHECK(I18N::Game::JewelOfBless == german);
+}
+
+TEST_CASE("The texts that name items follow the editor's name and form edits and their undo [data][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    const Data::Items::ItemDefinition* bless = g_ItemDatabase.Find(14, 13);
+    const Data::Items::ItemDefinition* tear = g_ItemDatabase.Find(14, 25);
+    REQUIRE(bless != nullptr);
+    REQUIRE(tear != nullptr);
+    const Data::Items::ItemDefinition originalBless = *bless;
+    const Data::Items::ItemDefinition originalTear = *tear;
+
+    // A name edit shows in the texts at the editor's next frame, which refreshes them.
+    I18N::SetLocale("de");
+    Data::Items::ItemDefinition renamed = originalBless;
+    renamed.names.Set("de", "Segensjuwel");
+    g_ItemDatabase.Set(renamed);
+    CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Juwel des Segens");
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Segensjuwel");
+
+    // So does a form, in the case the text asks for.
+    I18N::SetLocale("pl");
+    Data::Items::ItemDefinition reformed = originalTear;
+    reformed.nameForms.Set("pl", "acc", "Lze Elfki");
+    g_ItemDatabase.Set(reformed);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Lze Elfki'!");
+
+    // Undo puts the items back, and the texts with them.
+    g_ItemDatabase.Set(originalBless);
+    g_ItemDatabase.Set(originalTear);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Łzę Elfa'!");
+
+    // Without the accusative in Polish's cases (Cases...), the text shows the name itself.
+    const Data::Items::ItemNameCases cases = g_ItemDatabase.GetNameCases();
+    Data::Items::ItemNameCases withoutAccusative = cases;
+    withoutAccusative.SetCases("pl", {"gen", "dat", "ins", "loc"});
+    g_ItemDataHandler.SetNameCases(withoutAccusative);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Łza Elfa'!");
+    g_ItemDataHandler.SetNameCases(cases);
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+    CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Łzę Elfa'!");
+
+    I18N::SetLocale("de");
+    CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Juwel des Segens");
+}
+
+TEST_CASE("Data Checks finds no problem in the shipped texts that name items [data][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    std::vector<Data::Items::ItemDataIssue> issues;
+    Data::Translation::CheckUiItemTexts(g_ItemDatabase, issues);
+    Data::Translation::CheckItemDataTexts(g_ItemDatabase, "Tooltip.json", issues);
+    std::string found;
+    for (const Data::Items::ItemDataIssue& issue : issues)
+    {
+        found += issue.ToString() + "\n";
+    }
+    INFO(found);
+    CHECK(issues.empty());
+}
+
+TEST_CASE("Data Checks names a UI text whose item the item data lacks by its file and key [data][texts]")
+{
+    // No items: every UI text names an item no one has.
+    Data::Items::ItemDatabase empty;
+    empty.Build(std::vector<Data::Items::ItemDefinition>{});
+    std::vector<Data::Items::ItemDataIssue> issues;
+    Data::Translation::CheckUiItemTexts(empty, issues);
+    const auto polishBless = std::find_if(issues.begin(), issues.end(),
+                                          [](const Data::Items::ItemDataIssue& issue)
+                                          { return issue.source == "Game.pl.resx" && issue.field == "Jewel of Bless"; });
+    REQUIRE(polishBless != issues.end());
+    CHECK(polishBless->severity == Data::Items::ItemDataIssueSeverity::Error);
+    // A click selects the item the text names.
+    CHECK(polishBless->group == 14);
+    CHECK(polishBless->number == 13);
+    // Dialog has no Russian file: Russian shows the English text, which is checked once, as English.
+    CHECK(std::none_of(issues.begin(), issues.end(),
+                       [](const Data::Items::ItemDataIssue& issue) { return issue.source == "Dialog.ru.resx"; }));
 }
 
 TEST_CASE("A tooltip text names an item in the item name language and the rest in the UI language [data][items][texts]")
