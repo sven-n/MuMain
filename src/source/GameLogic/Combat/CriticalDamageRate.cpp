@@ -5,7 +5,9 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "Network/Server/SocketSystem.h"
+#include "UI/Core/UIManager.h"
 
 #include <array>
 #include <cmath>
@@ -27,9 +29,6 @@ constexpr std::array<CriticalRateBuff, 2> CriticalRateBuffs{{
     {EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED, AT_SKILL_ADD_CRITICAL_STR3},
 }};
 
-// The Scroll of Battle (14/97) adds 20 % while its buff is on (OpenMU's BuffItems: CriticalDamageChance +0.2). The
-// hero reads it from the inventory, so the buff is always the hero's own.
-constexpr int ScrollOfBattleCriticalRate = 20;
 
 void AddWornLuck(CriticalDamageRate& rate)
 {
@@ -66,11 +65,14 @@ void AddOwnBuff(CriticalDamageRate& rate)
     }
 }
 
+// The Scroll of Battle (14/97) adds its value of the item option table (ItemAddOption.bmd: 20, OpenMU's BuffItems:
+// CriticalDamageChance +0.2) while its buff is on, as the other scrolls add theirs. The hero reads it from the
+// inventory, so the buff is always the hero's own.
 void AddScrollOfBattle(CriticalDamageRate& rate)
 {
-    if (Hero != nullptr && g_isCharacterBuff((&Hero->Object), eBuff_Scroll_Battle))
+    if (Hero != nullptr && g_pItemAddOptioninfo != nullptr && g_isCharacterBuff((&Hero->Object), eBuff_Scroll_Battle))
     {
-        rate.scrollOfBattle = ScrollOfBattleCriticalRate;
+        rate.scrollOfBattle = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_SCROLL_OF_BATTLE).m_byValue1;
     }
 }
 } // namespace

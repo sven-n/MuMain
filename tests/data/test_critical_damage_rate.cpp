@@ -226,6 +226,9 @@ TEST_CASE("An item's luck counts while it is not broken and the hero can wear it
 // member has a value the client doesn't know.
 TEST_CASE("The hero's own mastered buff adds its master skill's value to the critical damage rate [data][items]")
 {
+    // The Scroll of Battle's value is in the item option table (ItemAddOption.bmd).
+    ClientDataScope client(ClientDirectory);
+    TooltipDataScope data;
     HeroScope hero;
     EquipmentScope equipment;
 
