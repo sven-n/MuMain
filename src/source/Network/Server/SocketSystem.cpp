@@ -573,6 +573,9 @@ void CSocketItemMgr::CalcSocketStatusBonus()
                 case SOPT_ENERGY_BONUS:
                     m_StatusBonus.m_iEnergyBonus += iBonus;
                     break;
+                case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageRateBonus += iBonus;
+                    break;
                 }
             }
         }

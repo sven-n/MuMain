@@ -2047,19 +2047,6 @@ void CHARACTER_MACHINE::CalculateDamage()
     }
 }
 
-void CHARACTER_MACHINE::CalculateCriticalDamage()
-{
-    Character.CriticalDamage = 0;
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WEAPON_RIGHT]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WEAPON_LEFT]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_HELM]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_ARMOR]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_PANTS]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_GLOVES]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_BOOTS]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WING]);
-}
-
 void CHARACTER_MACHINE::CalculateMagicDamage()
 {
     WORD Energy;

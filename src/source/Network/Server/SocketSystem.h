@@ -125,6 +125,8 @@ namespace SEASON4A
         int m_iDexterityBonus;
         int m_iVitalityBonus;
         int m_iEnergyBonus;
+        // The seed spheres' "Critical damage rate", in percent (the character window's critical damage rate).
+        int m_iCriticalDamageRateBonus;
     } SOCKET_OPTION_STATUS_BONUS;
 
     class CSocketItemMgr

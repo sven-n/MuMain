@@ -37,6 +37,9 @@ BOOL IsCorrectSkillType_CommonAttack(INT iSkillSeq);
 extern CLASS_ATTRIBUTE ClassAttribute[MAX_CLASS];
 
 bool IsRequireEquipItem(ITEM* pItem);
+// Adds the values of the item's option slots of effect `Special` to `Value` when the item counts: it is there, the
+// hero meets its requirements and its durability is above 0.
+void PlusSpecial(WORD* Value, int Special, ITEM* Item);
 
 class CHARACTER_MACHINE
 {
@@ -50,7 +53,6 @@ public:
     // output
     WORD AttackDamageRight;
     WORD AttackDamageLeft;
-    WORD CriticalDamage;
     // final output
     WORD FinalAttackDamageRight;
     WORD FinalAttackDamageLeft;
@@ -69,7 +71,6 @@ public:
     void InputEnemyAttribute(MONSTER* Enemy);
     bool IsZeroDurability();
     void CalculateDamage();
-    void CalculateCriticalDamage();
     void CalculateMagicDamage();
     void CalculateCurseDamage();
     void CalculateAttackRating();
