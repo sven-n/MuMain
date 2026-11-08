@@ -839,13 +839,17 @@ void ItemReader::ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine
         ItemNameLine line;
         line.hasText = entry.contains(Keys::Text);
         line.hasColor = entry.contains(Keys::Color);
-        OrderedJson lineFields = entry;
+        // The line's fields without its forms, which ReadLine doesn't know; copied only for a line that has them.
+        const OrderedJson* lineFields = &entry;
+        OrderedJson withoutForms;
         if (const auto forms = entry.find(Keys::NameForms); forms != entry.end())
         {
             ReadNameForms(*forms, field + "." + Keys::NameForms, line.nameForms);
-            lineFields.erase(Keys::NameForms);
+            withoutForms = entry;
+            withoutForms.erase(Keys::NameForms);
+            lineFields = &withoutForms;
         }
-        if (ReadLine(lineFields, field, MaxNameLineLength, line))
+        if (ReadLine(*lineFields, field, MaxNameLineLength, line))
         {
             nameLines.push_back(std::move(line));
         }
