@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "../MuEditor/UI/Common/NamedTree.h"
+#include "../MuEditor/UI/Common/NamedTreeRoot.h"
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 
 #include <cstddef>

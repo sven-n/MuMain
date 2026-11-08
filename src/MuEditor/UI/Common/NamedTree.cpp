@@ -52,19 +52,6 @@ void RenderNote(const char* text)
 }
 } // namespace
 
-void NamedTreeRoot::RenderSwatch(const std::string&) const {}
-
-std::vector<std::string> GetNames(const NamedTreeRoot& root)
-{
-    std::vector<std::string> names;
-    names.reserve(root.GetCount());
-    for (std::size_t index = 0; index < root.GetCount(); ++index)
-    {
-        names.push_back(root.GetName(index));
-    }
-    return names;
-}
-
 NamedTree::NamedTree(std::vector<NamedTreeRoot*> roots, const char* dragType, const char* folderPopupId)
     : m_roots(std::move(roots)), m_dragType(dragType), m_folderPopupId(folderPopupId)
 {

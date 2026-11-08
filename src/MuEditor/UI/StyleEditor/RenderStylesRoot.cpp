@@ -2,12 +2,11 @@
 
 #ifdef _EDITOR
 
-#include "StyleEditorRoots.h"
+#include "RenderStylesRoot.h"
 
 #include "LookEdits.h"
 
 #include "I18N/All.h"
-#include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 
 #include <algorithm>
@@ -16,9 +15,7 @@
 
 namespace MuEditor::Looks
 {
-namespace
-{
-std::string RowLabel(const std::string& name, int users, bool code)
+std::string LookRowLabel(const std::string& name, int users, bool code)
 {
     std::string label = name + " (" + std::to_string(users) + ")";
     if (code)
@@ -27,7 +24,6 @@ std::string RowLabel(const std::string& name, int users, bool code)
     }
     return label;
 }
-} // namespace
 
 const char* RenderStylesRoot::GetRootName() const
 {
@@ -59,7 +55,7 @@ bool RenderStylesRoot::Has(const std::string& name) const
 
 std::string RenderStylesRoot::GetRowLabel(const std::string& name)
 {
-    std::string label = RowLabel(name, CountUsers(name), IsCode(name));
+    std::string label = LookRowLabel(name, CountUsers(name), IsCode(name));
     if (m_unapplied && m_unapplied(name))
     {
         label += " *";
@@ -119,65 +115,6 @@ void RenderStylesRoot::Update() const
         }
     }
     m_names.assign(names.begin(), names.end());
-}
-
-const char* ItemEffectsRoot::GetRootName() const
-{
-    return I18N::Editor::ItemEffects;
-}
-
-std::size_t ItemEffectsRoot::GetCount() const
-{
-    return Names().size();
-}
-
-const std::string& ItemEffectsRoot::GetName(std::size_t index) const
-{
-    return Names()[index];
-}
-
-bool ItemEffectsRoot::Has(const std::string& name) const
-{
-    return std::ranges::binary_search(Names(), name);
-}
-
-std::string ItemEffectsRoot::GetRowLabel(const std::string& name)
-{
-    return RowLabel(name, CountUsers(name), true);
-}
-
-const std::vector<Data::Colors::ColorFolder>& ItemEffectsRoot::GetFolders() const
-{
-    static const std::vector<Data::Colors::ColorFolder> none;
-    return none;
-}
-
-void ItemEffectsRoot::SetFolders(const char*, std::vector<Data::Colors::ColorFolder>) {}
-
-void ItemEffectsRoot::SetOrder(const char*, std::span<const std::string>) {}
-
-bool ItemEffectsRoot::CanMoveEntry(const std::string&) const
-{
-    return false;
-}
-
-int ItemEffectsRoot::CountUsers(const std::string& name)
-{
-    return m_counts.ItemEffect(name);
-}
-
-const std::vector<std::string>& ItemEffectsRoot::Names() const
-{
-    static const std::vector<std::string> names = []
-    {
-        std::set<std::string, std::less<>> sorted;
-        for (const std::string_view name : Render::Items::ItemEffects::GetNames())
-        {
-            sorted.emplace(name);
-        }
-        return std::vector<std::string>(sorted.begin(), sorted.end());
-    }();
-    return names;
 }
 } // namespace MuEditor::Looks
 

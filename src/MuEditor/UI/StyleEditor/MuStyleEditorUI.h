@@ -2,8 +2,9 @@
 
 #ifdef _EDITOR
 
+#include "ItemEffectsRoot.h"
 #include "LookParts.h"
-#include "StyleEditorRoots.h"
+#include "RenderStylesRoot.h"
 
 #include "../MuEditor/UI/Common/NamedTree.h"
 #include "../MuEditor/UI/ItemTools/ItemModelPreview.h"
