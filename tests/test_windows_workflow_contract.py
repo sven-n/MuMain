@@ -805,7 +805,7 @@ for required in ("sparse-checkout: scripts", "persist-credentials: false"):
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_cache_prune import READERS as PRUNE_READERS  # noqa: E402
+from ci_cache_prune import READERS as PRUNE_READERS, reader as prune_reader  # noqa: E402
 # The prune job leaves an entry that a job read in the last minutes, unless the last read was this run's own: each
 # build job, and Quality Gates for its cppcheck, notes when its restores ended, after the last of them, and passes that
 # on. The note runs exactly when that restore does: a time without a restore would count other runs' reads as its own.
@@ -829,6 +829,14 @@ for reader_name, (job_name, job_body) in READER_JOBS.items():
           f"{job_name} must pass on when its caches were read")
     check(f"CACHES_READ_AT_{reader_name.upper()}: ${{{{ needs.{job_name}.outputs.caches-read-at }}}}" in caches_job,
           f"caches job must know when {job_name} read its caches")
+    # The prune counts a read up to the note as this run's own, so it times each kind by the job that restores it
+    # (READ_BY, else the build job of the system the key names): a later note would count other runs' reads too.
+    for name in names:
+        restore = step(job_body, job_name, name)
+        if "uses: actions/cache/restore@v6" in restore:
+            for kind in sorted({prefix.split("${{")[0] for prefix in restore_prefixes(restore)}):
+                check(prune_reader(kind) == reader_name,
+                      f"scripts/ci_cache_prune.py must time {kind} by {job_name}, which restores it (READ_BY)")
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 restore_prefixes_by_kind = {}
 # Quality Gates' pip cache is not pruned: it is saved once (actions/cache@v6 under a fixed key).
