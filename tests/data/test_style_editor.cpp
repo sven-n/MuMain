@@ -104,6 +104,27 @@ TEST_CASE("The Style Editor's changes of a look reach the game at once and are i
     CHECK(GameLook("brightBladeGold") == nullptr);
 }
 
+TEST_CASE("A change of the looks that leaves the file as it is records no step and leaves the file alone [editor]"
+          "[looks]")
+{
+    const LookEditsScope looks({Plain("brightBlade"), Plain("darkBlade")}, {{"Blades", {}, {"brightBlade"}}});
+    const int version = g_ItemDataHandler.GetRenderStylesVersion();
+
+    // The same folders, and the same looks in another order: nothing to undo, and no change for Save or the drafts.
+    g_LookEdits.SetFolders("Same folders", g_LookEdits.GetState().folders);
+    Data::Looks::RenderStylesFile reversed = g_LookEdits.GetState();
+    std::ranges::reverse(reversed.looks);
+    g_ItemEdits.SetRenderStyles("Same looks", reversed);
+    CHECK(g_ItemDataHandler.GetRenderStylesVersion() == version);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // Other folders are a change.
+    g_LookEdits.SetFolders("No folders", {});
+    CHECK(g_ItemDataHandler.GetRenderStylesVersion() != version);
+    CHECK(g_LookEdits.GetState().folders.empty());
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "No folders");
+}
+
 TEST_CASE("A look added, renamed or removed in the Style Editor takes its place in the folders along [editor][looks]")
 {
     const LookEditsScope looks({Plain("a")}, {{"Blades", {}, {"a"}}});

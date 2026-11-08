@@ -410,13 +410,16 @@ void ItemEdits::SetColorFolders(std::string label, std::string_view root,
 
 void ItemEdits::SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file)
 {
+    // Compared as the item data keeps the file, its looks sorted by name: a file as it is changes nothing, so it
+    // neither marks the file for Save nor counts as a change of the looks.
+    std::ranges::sort(file.looks, {}, &Data::Looks::LookDefinition::name);
     auto before = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
-    RestoreRenderStyles(file);
-    auto after = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
-    if (*before == *after)
+    if (*before == file)
     {
         return;
     }
+    RestoreRenderStyles(file);
+    auto after = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
     ItemEditStep step{ItemEditStep::Kind::RenderStyles};
     step.renderStylesBefore = std::move(before);
     step.renderStylesAfter = std::move(after);
