@@ -178,14 +178,15 @@ bool Close(const std::string& a, const std::string& b, int steps)
 }
 
 // The grids the digest's numbers are cut on: a number becomes floor(number / step + offset), so a grid's edges are at
-// whole steps minus its offset, a quarter step from the other grids' edges and from the whole steps (an exact number
-// such as 1 or 0.5).
-constexpr double GridStep = 0.00001;
-constexpr std::array<double, 3> GridOffsets{0.5, 0.75, 0.25};
+// whole steps minus its offset, a fifth of a step or more from the other grids' edges and a tenth of a step or more
+// from the whole steps (an exact number such as 1 or 0.5). The steps are 0.0001, finer than any change a look shows:
+// a number a float step off near 1 crosses a given grid's edge about once in a thousand.
+constexpr double GridStep = 0.0001;
+constexpr std::array<double, 5> GridOffsets{0.5, 0.7, 0.9, 0.1, 0.3};
 
 // Every number of the text as a whole number of steps on the grid. Another platform's sine, or a multiply and add the
 // compiler fuses (ARM64), moves a number by a last float step of the sine (about 1e-7 near 1, also for a small number
-// the sine was scaled to), far below a quarter step: a number near one grid's edge is far from the others'.
+// the sine was scaled to), far below a fifth of a step: a number near one grid's edge is far from the others'.
 std::string Rounded(const std::string& text, double offset)
 {
     std::string result;

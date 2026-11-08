@@ -71,8 +71,8 @@ const std::filesystem::path Baseline = MU_RENDER_STYLE_BASELINE;
 
 constexpr const char* BaselineHeader =
     "# How the render styles moved from code into Data/Effects/RenderStyles.json draw: one line per item and\n"
-    "# situation, the look, the item and the situation, then the number of mesh draws and two digests of them and of\n"
-    "# what the drawing left on the model, rounded on two grids (tests/data/LookRecorder.h). Written when each look\n"
+    "# situation, the look, the item and the situation, then the number of mesh draws and five digests of them and of\n"
+    "# what the drawing left on the model, rounded on five grids (tests/data/LookRecorder.h). Written when each look\n"
     "# moved, once its data drew as its old code (MU_LOOK_RECORDER_WRITE=<names>), so a moved look still draws as\n"
     "# its code did.\n";
 
@@ -232,24 +232,24 @@ TEST_CASE("The Style Editor's preview without a look draws an item as one that n
     g_ItemModelDatabase.Set(entry, glowColors);
 }
 
-TEST_CASE("A number a float step from a rounding edge keeps one of the two digests [looks][recorder]")
+TEST_CASE("A number a float step from a rounding edge keeps one of the digests [looks][recorder]")
 {
-    // 0.123455 is at an edge of the grid that rounds to steps of 0.00001 (12345 or 12346 by its last float step) and a
-    // quarter step from the other grids' edges.
+    // 0.12345 is at an edge of the grid that rounds to steps of 0.0001 from half a step (1234 or 1235 by its last float
+    // step) and a fifth of a step or more from the other grids' edges.
     Record below;
     Record above;
-    below.modelAfter = {{"x", "0.12345499999"}};
-    above.modelAfter = {{"x", "0.12345500001"}};
+    below.modelAfter = {{"x", "0.12344999999"}};
+    above.modelAfter = {{"x", "0.12345000001"}};
     const std::string first = LookRecorder::Digest(below);
     const std::string second = LookRecorder::Digest(above);
     CHECK(first != second);
     CHECK(LookRecorder::SameDigest(first, second));
 
-    // A number near another grid's edge (a quarter step below a whole one) keeps the other hashes.
+    // A number near another grid's edge keeps the other hashes.
     Record lower;
     Record upper;
-    lower.modelAfter = {{"x", "-0.09348749999"}};
-    upper.modelAfter = {{"x", "-0.09348750001"}};
+    lower.modelAfter = {{"x", "-0.09348999999"}};
+    upper.modelAfter = {{"x", "-0.09349000001"}};
     CHECK(LookRecorder::Digest(lower) != LookRecorder::Digest(upper));
     CHECK(LookRecorder::SameDigest(LookRecorder::Digest(lower), LookRecorder::Digest(upper)));
 
@@ -260,6 +260,27 @@ TEST_CASE("A number a float step from a rounding edge keeps one of the two diges
     Record drawn = below;
     drawn.meshDraws.push_back({{"x", "1"}});
     CHECK_FALSE(LookRecorder::SameDigest(LookRecorder::Digest(drawn), first));
+}
+
+TEST_CASE("Numbers a float step moves across the edges of several grids keep the digest of a grid none is at "
+          "[looks][recorder]")
+{
+    // A drawing has many numbers, and those a platform moves (a sine's light channels, its opacity) can each sit at
+    // an edge of another grid: one at each of four grids' edges, and three more at the edges of steps of 0.00001 from
+    // half, a quarter and three quarters of a step.
+    const double edges[] = {0.12345, 0.12343, 0.12341, 0.12349, 0.123455, 0.1234525, 0.1234575};
+    constexpr double FloatStep = 1.0e-11;
+    Record below;
+    Record above;
+    for (const double edge : edges)
+    {
+        char text[32];
+        std::snprintf(text, sizeof(text), "%.13f", edge - FloatStep);
+        below.modelAfter.push_back({"x", text});
+        std::snprintf(text, sizeof(text), "%.13f", edge + FloatStep);
+        above.modelAfter.push_back({"x", text});
+    }
+    CHECK(LookRecorder::SameDigest(LookRecorder::Digest(below), LookRecorder::Digest(above)));
 }
 
 TEST_CASE("The draw recorder names the first difference between two drawings [looks][recorder]")

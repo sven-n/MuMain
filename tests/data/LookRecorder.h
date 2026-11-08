@@ -94,10 +94,11 @@ constexpr int AllowedFloatSteps = 8;
 std::string FirstDifference(const Record& code, const Record& data);
 
 // A digest of the mesh draws and of what the drawing left on the model, for the baseline: GPU calls carry vertex hashes
-// that differ between compilers, and the drawing of one mesh draw is the same code for every look. "7 <hash> <hash>
-// <hash>": the number of mesh draws, then a hash of the numbers in steps of 0.00001 on each of three grids whose edges
-// are a quarter step apart, so a number a float step of a sine away (macOS's sine, a fused multiply and add) changes
-// one at most.
+// that differ between compilers, and the drawing of one mesh draw is the same code for every look.
+// "7 <hash> ... <hash>": the number of mesh draws, then a hash of the numbers in steps of 0.0001 on each of five grids
+// whose edges are a fifth of a step apart. A number a float step of a sine away (macOS's sine, a fused multiply and
+// add) crosses the edge of one grid at most, so a drawing keeps a hash unless five of its numbers each sit at another
+// grid's edge.
 std::string Digest(const Record& record);
 // Whether a drawing's Digest is the baseline's: the same number of mesh draws, and one of the hashes the same.
 bool SameDigest(const std::string& digest, const std::string& baseline);
