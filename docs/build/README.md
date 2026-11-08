@@ -347,13 +347,12 @@ compiler cache for each main push. After the builds of a run on main, the
 deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
 and while GitHub moves the runners to a new image, jobs land on both images. The apt
-caches keep the newest entry of each image for the same reason. An
-entry a job read in the last 15 minutes is left for a later run, as that job may
-still be downloading it, unless the last read was the run's own: each build job,
-and Quality Gates for its cppcheck, notes when its restores ended (**Note when the
-caches were read**), so the entry a build started from goes in the same run. It is
-the only job with a token that can
-delete caches.
+caches keep the newest entry of each image for the same reason. An entry a job read
+in the last 15 minutes is left for a later run, as that job may still be downloading
+it, unless the last read was the run's own: each build job, and Quality Gates for its
+cppcheck, notes when its restores ended (**Note when the caches were read**), so the
+entry a job started from goes in the same run. Prune caches is the only job with a
+token that can delete caches.
 CI Required waits for it: a prune that fails or warns fails the run like a build,
 since without it the caches fill up again. A new cache that is restored by a
 key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that
