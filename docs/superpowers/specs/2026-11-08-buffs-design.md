@@ -5,8 +5,8 @@
 > Written from the code of MuMain `upstream/main` @ `f381344cc` and OpenMU
 > `master` @ `00f737374`. Line numbers are those of these commits.
 >
-> **Agreed with the owner on 2026-11-08** (Q-BF1 to Q-BF9, decisions B1 to
-> B11). Q-BF10 to Q-BF13 under "Open questions" are not answered yet.
+> **Agreed with the owner on 2026-11-08** (Q-BF1 to Q-BF13, decisions B1 to
+> B15). All questions are answered.
 >
 > This document is temporary. Its last task deletes it, after what stays true
 > has moved into `docs/buff-data.md` and the code (see "Tasks").
@@ -48,12 +48,16 @@ time left and the value of each buff on the hero.
 | B3 | A buff someone else cast (Q-BF3) | The server sends each power-up's finished value next to the time (B2), only at activation or restart, in the same OpenMU pull request. Only the server knows the caster's stats and master skills. The client's formulas stay for the skill tooltip, for the hero's own casts on servers without the change, and as fallback; formulas that differ from a server's are fixed by the later sync. |
 | B4 | The time bar (Q-BF4) | As wide as the icon (20 dp), 2 dp tall, 1 dp under it, inside the strip's 5 dp row gap, so rows keep their places. It empties from right to left. Buffs green, debuffs red; the colors are theme tokens. |
 | B5 | An unknown time (Q-BF4b) | No bar and no time line: a bar always means "this much time left". |
-| B6 | The last seconds (Q-BF4c) | Under 10 s the icon darkens a little and shows the whole seconds left (8, 7, 6 …). No blinking. The 10 s is a named value (Q-BF12). |
+| B6 | The last seconds (Q-BF4c) | Under 10 s the icon darkens a little and shows the whole seconds left (8, 7, 6 …). No blinking. The limit is a player option (B14). |
 | B7 | The buff tooltip (Q-BF5) | Name (blue, bold), then one white value line per power-up ("Critical damage +126"), then a purple "Time left: 2 min 41 s" ("12 s" under a minute). An effect without values (Poison) shows its description instead of value lines. |
 | B8 | No value from the server (Q-BF5b) | On a server without B3, a buff someone else cast shows its value lines with "?" ("Critical damage +?") and a gray "The value depends on its caster". |
 | B9 | The skill tooltip (Q-BF6) | A buff skill (one whose skill data names a buff) shows its buff's value lines with the hero's stats and master skills. Each total gets gray part lines, one per part above 0, each naming its rule: "energy 2000: +66 (1 per 30)". The duration gets the base, its terms, the cap and the master skill parts. This replaces the hand-written Elf and Soul Barrier lines. |
 | B10 | Names, descriptions, kind and item links (Q-BF7) | All 158 entries of `BuffEffect_<lang>.bmd` move into `Buffs.json`: names and descriptions in every client language, buff or debuff, group, the item that gives it. The bmd is no longer read. Broken English, `%%` and `%d` are fixed on the way. |
 | B11 | Roadmap (Q-BF8) | A new area "BF Buffs as data" before SK1, with this document. The roadmap's "later" row keeps only buff visuals. SK1 names buffs from `Buffs.json`. |
+| B12 | The strip's rules (Q-BF10) | They move into `Buffs.json` too: a buff's `family` and `tier` (only the highest tier of a family shows, today `NormalizeBuffState` and `BuffTier`), `hidden` (no icon, today `SetDisableRenderBuff`) and `cancelSkill` (a right-click asks to cancel it and sends that skill, today `CancellableSkill`). The Buffs tool notes that the server must accept a cancel too (OpenMU: skills 77, 441, 233, 380, 383). |
+| B13 | Item buffs' values and durations (Q-BF11) | `Buffs.json` is the one place (D26), as in OpenMU, where an item's `ConsumeEffect` points at the magic effect that holds the duration and the boosts. The item tooltip's `{addOptionValue1}`, `{addOptionValue2}` and `{addOptionDuration}` read the item's buff (the buff whose `item` is that item); the buff part of `ItemAddOption.bmd` goes. The item options design (O13) and the items design (phase 11) get a note that this part moved here. |
+| B14 | Where the countdown limit lives (Q-BF12) | A player option in the options window's Interface tab, "Buff countdown", 0 to 30 s (0 turns it off), saved in `config.ini`, default 10. |
+| B15 | Who brings the value terms (Q-BF13) | Item options 9a3, as its design plans it (O7, O20). Buffs PR 1 and the OpenMU pull request can come any time; buffs PR 2 and PR 3 follow 9a3. |
 
 ## Current state
 
@@ -177,8 +181,14 @@ Both have `formatVersion` and follow the format rules of items phase 2.
  "displayName": {"en": "Poison", ...},
  "description": {"en": "Loses HP over time", ...}}
 
-{"number": 29, "name": "sealOfAscension", "kind": "buff", "group": 24,
- "item": {"group": 13, "number": 43}, ...}
+{"number": 44, "name": "scrollOfQuickness", "kind": "buff", "group": 67,
+ "item": {"group": 14, "number": 72}, "valuesFrom": "owner",
+ "duration": {"values": 1800},
+ "powerUps": [{"attribute": "attackSpeedAny", "add": {"values": 15}, "text": "attackSpeed"}]}
+
+{"number": 136, "name": "swellLifeMastery", "family": "swellLife", "tier": 2, ...}
+{"number": 83, "name": "flameStrikeDamage", "hidden": true, ...}
+{"number": 6, "name": "infinityArrow", "cancelSkill": 77, ...}
 ```
 
 - `number`: the buff number the server sends (`eBuffState`, OpenMU's effect
@@ -196,12 +206,15 @@ Both have `formatVersion` and follow the format rules of items phase 2.
   duration; their values come from the server's master skill list
   (`CharacterAttribute->MasterSkillInfo`), as the critical damage line already
   uses them.
+- `family`, `tier`, `hidden`, `cancelSkill`: the strip's rules (B12).
+- An item buff's numbers are here too (B13); the item's tooltip reads them.
 
 ### 3. Values
 
 The value of a term is the attribute times or divided by its number, as OpenMU
 computes it; the shown number is rounded down, like the character window. The
-evaluator is the one of the item options' `per` terms (Q-BF13). The hero's
+evaluator is the one of the item options' `per` terms, which item options 9a3
+brings (B15). The hero's
 attributes are those the character window shows (total energy, total command,
 …). Swell Life also counts the party members near the caster; how the client
 counts them like the server is settled in pull request 2.
@@ -243,8 +256,9 @@ A pull request to MUnique/OpenMU, proposed separately:
 - Both themes (classic inherits legacy) draw the bar at 20 × 2 dp, 1 dp under
   the icon, inside the row gap (B4). Colors as tokens in each theme's
   `tokens.ini`: the buff bar, the debuff bar, the empty track.
-- Under the countdown limit (10 s, B6) the icon gets a dark overlay and the whole
-  seconds left.
+- Under the countdown limit (the player's option, 10 s by default, B6 and B14)
+  the icon gets a dark overlay and the whole seconds left; with 0 there is none.
+- The families, hidden buffs and right-click cancels come from the data (B12).
 - The model is rebuilt every frame today; the new values change it only when the
   shown percent or second changes (coding rules, section 12).
 
@@ -300,23 +314,31 @@ AG use: 75
   skill, or a number used twice, is reported when loading (D26).
 - It replaces `BuffScriptLoader`; the buff class, the names (strip, quest
   rewards), the group (cash shop) and the item links read the new data.
-- `ItemAddOption.bmd`'s buff part (`m_Time`, the values) overlaps the item
-  buffs' durations and values (Q-BF11).
+- The buff part of `ItemAddOption.bmd` (`m_Time`, the values) is no longer read
+  for buffs and item tooltips (B13); a comparison test checks that the item
+  tooltips show the same numbers as before, and lists where OpenMU stores a
+  number another way (the Scroll of Defense shows +60 base defense; OpenMU adds
+  half of it to the final defense, `BuffItems.cs:50-57`).
 
 ## Pull requests
 
 A proposal; each one says what it changes in game.
 
 1. **Buff data.** `Buffs.json`, `BuffTexts.json`, the loader and its checks; all
-   158 buffs with names, descriptions, kind, group and item link in every
-   language; the bmd is no longer read. A comparison test: kind, group and item
-   link equal the bmd's for every buff. Visible change: the texts (P4, P5).
-2. **Values and durations.** The OpenMU numbers for the skill and item effects,
-   the evaluator, and the skill tooltip lines (B9) that replace the hand-written
+   158 buffs with names, descriptions, kind, group, item link and the strip's
+   rules (B12) in every language; the bmd is no longer read. A comparison test:
+   kind, group, item link, family, tier, hidden and cancel equal today's for
+   every buff. Visible change: the texts (P4, P5). Needs no value terms, so it
+   can come any time.
+2. **Values and durations**, after item options 9a3 (B15). The OpenMU numbers
+   for the skill and item effects; the item tooltips' add option values read
+   the item's buff (B13); the skill tooltip lines (B9) replace the hand-written
    ones.
 3. **Time and the strip.** Time tracking (B2, section 4), the bars and countdown
-   (B4 to B6), the buff tooltip (B7, B8); fixes P1 to P3.
-4. **OpenMU** (MUnique/OpenMU): time and values for the owner (section 5).
+   (B4 to B6) with the player option (B14), the buff tooltip (B7, B8); fixes P1
+   to P3.
+4. **OpenMU** (MUnique/OpenMU): time and values for the owner (section 5); any
+   time.
 5. **The client reads it** (B3): sent times and values win.
 
 Later: the Buffs tool in MuEditor ("used by": the skills whose data names the
@@ -340,24 +362,25 @@ buff, the items that give it); the OpenMU sync.
 
 ## Open questions
 
-- **Q-BF10** The strip's rules in code: which tier of a family shows
-  (`NormalizeBuffState`), the hidden damage debuffs (`SetDisableRenderBuff`) and
-  the right-click cancel (`CancellableSkill`). Into `Buffs.json` too?
-- **Q-BF11** Item buff durations and values: `Buffs.json` (from OpenMU's
-  `BuffItems.cs` and `Potions.cs`) or `ItemAddOption.bmd`'s buff part, which the
-  item options design (O13) leaves to items phase 11. Proposal: `Buffs.json` is
-  the one place (D26), and the item tooltip's `{addOptionValue1}` and
-  `{addOptionDuration}` read the item's buff.
-- **Q-BF12** Where the countdown limit (10 s) lives: the theme, or an option in
-  the options window.
-- **Q-BF13** Which pull request brings the `per` evaluator: item options 9a3/9b
-  or pull request 2 here, whichever comes first.
+Answered on 2026-11-08: Q-BF1 (B1), Q-BF2 (B2), Q-BF3 (B3), Q-BF4 (B4),
+Q-BF4b (B5), Q-BF4c (B6), Q-BF5 (B7), Q-BF5b (B8), Q-BF6 (B9), Q-BF7 (B10),
+Q-BF8 (B11), Q-BF10 (B12), Q-BF11 (B13), Q-BF12 (B14) and Q-BF13 (B15); Q-BF9
+placed this document on its own branch. New questions from the pull requests
+are added here.
+
+Left to the pull requests:
+
+- The OpenMU packet's shape (section 5).
+- How the client counts Swell Life's nearby party members like the server
+  (section 3).
 
 ## Tasks
 
 1. [x] Answer Q-BF1 to Q-BF9 (B1 to B11).
-2. [ ] Answer Q-BF10 to Q-BF13.
-3. [ ] The pull requests of "Pull requests".
-4. [ ] Move what stays true into `docs/buff-data.md`, and point the roadmap's row
+2. [x] Answer Q-BF10 to Q-BF13 (B12 to B15).
+3. [x] Add the note of B13 to the item options design (O13) and the items design
+   (phase 11).
+4. [ ] The pull requests of "Pull requests".
+5. [ ] Move what stays true into `docs/buff-data.md`, and point the roadmap's row
    BF at it.
-5. [ ] Delete this document.
+6. [ ] Delete this document.
