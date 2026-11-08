@@ -91,6 +91,18 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
         return written + ": the name of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
                " needs values only the game has (a skill's or monster's name, a bundle count); the text shows the "
                "reference as written";
+    case ItemReferenceProblem::LineNamesItself:
+        severity = ItemDataIssueSeverity::Error;
+        return written + ": the name line of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
+               " names its own level through name lines; the text shows the reference as written";
+    case ItemReferenceProblem::MissingLineText:
+        severity = ItemDataIssueSeverity::Error;
+        return written + ": the name line of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
+               " has a shared text that Tooltip.json doesn't have; the text shows the reference as written";
+    case ItemReferenceProblem::LineNamesNoItem:
+        severity = ItemDataIssueSeverity::Error;
+        return written + ": the name line of " + ItemNumber(reference) + " at +" + std::to_string(*reference.level) +
+               " names an item or a level no item has; the text shows the reference as written";
     case ItemReferenceProblem::StandardName:
         severity = ItemDataIssueSeverity::Warning;
         return DescribeStandardName(database, reference, locale, name.text);

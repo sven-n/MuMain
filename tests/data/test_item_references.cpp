@@ -351,7 +351,7 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "pl").text == "Paczka Lze Elfa");
     // German has no text of its own for the line: the English line, with the English name.
     CHECK(ResolveReferencedName(database, Reference(12, 30, 0), "de").text == "Bundle of Tear of Elf");
-    CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::UnfillableLine);
+    CHECK(ResolveReferencedName(database, Reference(12, 31, 0), "en").problem == ItemReferenceProblem::LineNamesItself);
 
     // The bundle's line leaves out {name}: a case asked of it has no form, whatever forms the bundle gets.
     const ReferencedName genitive = ResolveReferencedName(database, Reference(12, 30, 0, "gen"), "pl");
@@ -360,6 +360,39 @@ TEST_CASE("A level's name line may name another item, in the language the line i
     // A line written as {name} declines the item's name: its missing form is the item's.
     CHECK(ResolveReferencedName(database, Reference(14, 21, 0, "gen"), "pl").problem ==
           ItemReferenceProblem::MissingForm);
+}
+
+TEST_CASE("A name line that cannot be filled says why [data][items][texts]")
+{
+    std::vector<ItemDefinition> items = NamedItems();
+    // Rena's lines at +6 and +7: a shared text the tooltip file lacks, and a line naming an item no one has.
+    ItemNameLine missing;
+    missing.hasText = true;
+    missing.textName = "noSuchText";
+    missing.minLevel = 6;
+    missing.maxLevel = 6;
+    items[1].nameLines.push_back(missing);
+    items[1].nameLines.push_back(LiteralNameLine("Bundle of {item:14,500}", 7));
+    ItemDatabase database;
+    database.Build(items);
+
+    // A skill's name only the game has.
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 3), "en").problem == ItemReferenceProblem::UnfillableLine);
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 6), "en").problem == ItemReferenceProblem::MissingLineText);
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 7), "en").problem == ItemReferenceProblem::LineNamesNoItem);
+    for (const int level : {3, 6, 7})
+    {
+        INFO("+" << level);
+        CHECK(ResolveReferencedName(database, Reference(14, 21, level), "en").text.empty());
+        std::vector<ItemDataIssue> issues;
+        const std::string text = "{item:14,21+" + std::to_string(level) + "}";
+        Data::Translation::CheckItemReferences(
+            database, {text, "en", "Game.en.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Rena"}, {}, issues);
+        REQUIRE(issues.size() == 1);
+        CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+        // Each says its own reason.
+        CHECK((issues[0].message.find("only the game has") != std::string::npos) == (level == 3));
+    }
 }
 
 TEST_CASE("A UI translation that names other items than English is a warning on the item it names [data][items][texts]")

@@ -20,9 +20,15 @@ enum class ItemReferenceProblem : unsigned char
     // The level has no name line of its own, or its line's text is empty: the name is the item's name and " +level",
     // as the tooltip writes it.
     StandardName,
-    // The level's name line needs values only the game has (a skill's or monster's name, a bundle count), or names
-    // its own level through name lines: the text keeps the reference as written.
+    // The level's name line needs values only the game has (a skill's or monster's name, a bundle count): the text
+    // keeps the reference as written. So do the three below.
     UnfillableLine,
+    // The level's name line names its own level through name lines ("{item:12,31+0}" in 12,31's line at +0).
+    LineNamesItself,
+    // The level's name line has a shared text ("@x") the tooltip file doesn't have.
+    MissingLineText,
+    // The level's name line names an item, or a level, no item has.
+    LineNamesNoItem,
     // The language has no form of the name for the case, or does not decline names in it (NameCases.json): the name
     // itself stands in.
     MissingForm,
@@ -34,9 +40,12 @@ enum class ItemReferenceProblem : unsigned char
     UnshowableName,
 };
 
+// Whether the problem leaves the reference without a name, so the text keeps it as written.
+bool KeepsReferenceAsWritten(ItemReferenceProblem problem);
+
 struct ReferencedName
 {
-    // The name, UTF-8; empty with UnknownItem, NoSuchLevel, UnfillableLine and UnshowableName.
+    // The name, UTF-8; empty with the problems that keep the reference as written (KeepsReferenceAsWritten).
     std::string text;
     ItemReferenceProblem problem = ItemReferenceProblem::None;
 };

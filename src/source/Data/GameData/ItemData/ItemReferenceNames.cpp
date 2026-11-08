@@ -78,6 +78,13 @@ std::optional<std::string> LevelValueOf(const ItemDatabase& database, const Item
     return std::nullopt;
 }
 
+// What a line that names another item gets from that item's problem: no such item or level, or the inner line's own.
+ItemReferenceProblem InnerProblem(ItemReferenceProblem inner)
+{
+    const bool noItem = inner == ItemReferenceProblem::UnknownItem || inner == ItemReferenceProblem::NoSuchLevel;
+    return noItem ? ItemReferenceProblem::LineNamesNoItem : inner;
+}
+
 // A name line's text with {name} (in the case's form), {level}, {levelPlusOne}, the level values and other items' names
 // ({item:14,13}, in `textLocale`, the language the line is written in) filled in.
 ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& definition, std::string_view text,
@@ -86,7 +93,8 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
 {
     const int level = reference.level.value_or(0);
     const ReferencedName base = NameIn(database, definition.names, definition.nameForms, locale, reference.form);
-    bool filled = true;
+    // Why the line cannot be filled: a value only the game has, unless an item name in it says otherwise.
+    ItemReferenceProblem unfilled = ItemReferenceProblem::None;
     bool namesItem = false;
     const auto valueOf = [&](std::string_view placeholder) -> std::optional<std::string>
     {
@@ -108,22 +116,29 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
         {
             // No name (no such item or level, a line that cannot be filled): the line cannot be filled either.
             const ReferencedName name = Resolve(database, *other, textLocale, depth + 1);
-            if (!name.text.empty())
+            if (!KeepsReferenceAsWritten(name.problem))
             {
                 value = name.text;
+            }
+            else if (unfilled == ItemReferenceProblem::None)
+            {
+                unfilled = InnerProblem(name.problem);
             }
         }
         else
         {
             value = LevelValueOf(database, definition, placeholder, level, locale);
         }
-        filled = filled && value.has_value();
+        if (!value && unfilled == ItemReferenceProblem::None)
+        {
+            unfilled = ItemReferenceProblem::UnfillableLine;
+        }
         return value;
     };
     std::string name = FillPlaceholders(text, valueOf);
-    if (!filled)
+    if (unfilled != ItemReferenceProblem::None)
     {
-        return {{}, ItemReferenceProblem::UnfillableLine};
+        return {{}, unfilled};
     }
     // The case is the item's form in {name}; a line without it has nothing to decline.
     if (!namesItem && !reference.form.empty())
@@ -155,7 +170,7 @@ ReferencedName NameOfLine(const ItemDatabase& database, const ItemDefinition& de
     const LocalizedString* text = FindLineText(database.GetTooltipFile(), line);
     if (text == nullptr)
     {
-        return {{}, ItemReferenceProblem::UnfillableLine};
+        return {{}, ItemReferenceProblem::MissingLineText};
     }
     if (text->Get(locale).find('{') != std::string::npos)
     {
@@ -175,7 +190,7 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
     }
     ReferencedName name = NameOfLine(database, definition, *line, reference, locale, depth);
     // A line whose text is empty, or fills in to nothing, leaves the standard name, as in the tooltip.
-    if (name.text.empty() && name.problem != ItemReferenceProblem::UnfillableLine)
+    if (name.text.empty() && !KeepsReferenceAsWritten(name.problem))
     {
         return StandardNameAt(database, definition, reference, locale);
     }
@@ -186,7 +201,7 @@ ReferencedName Resolve(const ItemDatabase& database, const ItemReference& refere
 {
     if (depth > MaxNameDepth)
     {
-        return {{}, ItemReferenceProblem::UnfillableLine};
+        return {{}, ItemReferenceProblem::LineNamesItself};
     }
     const ItemDefinition* definition =
         IsValidItemId(reference.group, reference.number) ? database.Find(reference.group, reference.number) : nullptr;
@@ -205,6 +220,27 @@ ReferencedName Resolve(const ItemDatabase& database, const ItemReference& refere
     return NameIn(database, definition->names, definition->nameForms, locale, reference.form);
 }
 } // namespace
+
+bool KeepsReferenceAsWritten(ItemReferenceProblem problem)
+{
+    switch (problem)
+    {
+    case ItemReferenceProblem::UnknownItem:
+    case ItemReferenceProblem::NoSuchLevel:
+    case ItemReferenceProblem::UnfillableLine:
+    case ItemReferenceProblem::LineNamesItself:
+    case ItemReferenceProblem::MissingLineText:
+    case ItemReferenceProblem::LineNamesNoItem:
+    case ItemReferenceProblem::UnshowableName:
+        return true;
+    case ItemReferenceProblem::None:
+    case ItemReferenceProblem::StandardName:
+    case ItemReferenceProblem::MissingForm:
+    case ItemReferenceProblem::UndeclinedLine:
+        break;
+    }
+    return false;
+}
 
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const ItemReference& reference,
                                      std::string_view locale)
