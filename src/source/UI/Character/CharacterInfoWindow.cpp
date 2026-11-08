@@ -26,6 +26,7 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -160,6 +161,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     auto statLine = c.RegisterStruct<StatLine>();
     statLine.RegisterMember("text", &StatLine::text);
     statLine.RegisterMember("source", &StatLine::source);
+    statLine.RegisterMember("hint", &StatLine::hint);
     c.RegisterArray<std::vector<StatLine>>();
     c.Bind("str_lines", &model.strLines);
     c.Bind("agi_lines", &model.agiLines);
@@ -187,12 +189,14 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPet(); });
     c.BindEventCallback("chainfo_click_masterlevel",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMasterLevel(); });
-    c.BindEventCallback("chainfo_critical_rate_hover",
-                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
-                        { m_CriticalDamageRateHint.Enter(event); });
-    c.BindEventCallback("chainfo_critical_rate_leave",
-                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
-                        { m_CriticalDamageRateHint.Leave(event); });
+    c.BindEventCallback("chainfo_line_hover",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_LineHint.Enter(event, arguments[0].Get<int>(NoLineHint));
+                        });
+    c.BindEventCallback("chainfo_line_leave", [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        { m_LineHint.Leave(event); });
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -217,7 +221,7 @@ void mu::ui::window::CCharacterInfoWindow::Release()
 {
     UnloadImages();
 
-    m_CriticalDamageRateHint.Hide();
+    m_LineHint.Hide();
     m_RmlView.Release();
 
     if (m_pNewUIMng)
@@ -241,7 +245,7 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
         }
         else
         {
-            m_CriticalDamageRateHint.Hide();
+            m_LineHint.Hide();
             m_RmlView.Document()->Hide();
         }
     }
@@ -424,25 +428,38 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildSubjectTexts();
     BuildTableTexts();
     BuildAttributeLines();
-    BuildCriticalDamageRate();
+    BuildCriticalHits();
 }
 
-void mu::ui::window::CCharacterInfoWindow::BuildCriticalDamageRate()
+void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
     const GameLogic::Combat::CriticalDamageRate rate = GameLogic::Combat::GetHeroCriticalDamageRate();
+    const GameLogic::Combat::CriticalDamageBonus bonus = GameLogic::Combat::GetHeroCriticalDamageBonus();
     const UI::Character::CriticalDamageRateLine line = UI::Character::BuildCriticalDamageRateLine(rate);
     auto& model = m_RmlView.GetModel();
     if (model.criticalDamageRateLine.text != line.text || model.criticalDamageRateLine.source != line.source)
     {
-        model.criticalDamageRateLine = {line.text, line.source};
+        model.criticalDamageRateLine = {line.text, line.source, CriticalDamageRateHint};
         m_RmlView.MarkDirty("critical_damage_rate_line");
     }
-    if (m_CriticalDamageRateHint.Hovered() < 0)
+    if (bonus.Buff() > 0 && !model.strLines.empty())
     {
-        m_CriticalDamageRateHint.Hide();
-        return;
+        model.strLines.front().source = "buffed";
     }
-    m_CriticalDamageRateHint.Show(UI::Character::BuildCriticalDamageRateHint(rate));
+
+    switch (m_LineHint.Hovered())
+    {
+    case DamageHint:
+        m_LineHint.Show(
+            UI::Character::BuildDamageHint(m_DamageRange, bonus, GameLogic::Combat::GetHeroExcellentDamageBonus()));
+        break;
+    case CriticalDamageRateHint:
+        m_LineHint.Show(UI::Character::BuildCriticalDamageRateHint(rate));
+        break;
+    default:
+        m_LineHint.Hide();
+        break;
+    }
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
@@ -899,8 +916,11 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         attackDamageSource = "buffed";
     }
 
+    // The damage the line shows (only the maximum when the minimum reaches it), for its hint.
+    const int shownMaximum = iAttackDamageMax + iMaxIndex;
+    m_DamageRange = {std::min(iAttackDamageMin + iMinIndex, shownMaximum), shownMaximum};
     model.strLines.clear();
-    model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageSource });
+    model.strLines.push_back({StringUtils::WideToNarrow(strAttakMamage), attackDamageSource, DamageHint});
 
     if (iAttackRatingPK > 0)
     {

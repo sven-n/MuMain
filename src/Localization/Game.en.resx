@@ -9480,4 +9480,37 @@
   <data name="Total: %d%%" xml:space="preserve">
     <value>Total: %d%%</value>
   </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Normal hit: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Critical hit: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Excellent hit: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>before the target's defense</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Critical damage</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Set options: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Harmony options: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Socket options: +%d</value>
+  </data>
+  <data name="Critical damage from a buff: %ls +%d" xml:space="preserve">
+    <value>%ls: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Total: +%d</value>
+  </data>
 </root>

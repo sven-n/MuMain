@@ -153,5 +153,5 @@
 .attr-lines span { color: token(text-primary); }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
 .attr-lines span.buffed { color: token(accent-gold); }
-/* The critical damage rate's line shows its parts while the pointer is over it. */
-.attr-lines span.critical-damage-rate { pointer-events: auto; }
+/* A line with a hint (the damage, the critical damage rate) shows it while the pointer is over it. */
+.attr-lines span.hinted { pointer-events: auto; }

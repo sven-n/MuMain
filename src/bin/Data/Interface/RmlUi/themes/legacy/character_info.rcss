@@ -220,8 +220,8 @@
 .attr-lines span { color: #ffffff; }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
 .attr-lines span.buffed { color: rgb(255, 0, 240); }
-/* The critical damage rate's line shows its parts while the pointer is over it. */
-.attr-lines span.critical-damage-rate { pointer-events: auto; }
+/* A line with a hint (the damage, the critical damage rate) shows it while the pointer is over it. */
+.attr-lines span.hinted { pointer-events: auto; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #name { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }

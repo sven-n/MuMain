@@ -4,6 +4,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Character/DamageHint.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
@@ -98,12 +99,22 @@ namespace mu::ui::window
         // attack-speed, mana, magic/curse damage, class-specific bonus lines, etc.) -- count and
         // order vary per class, so these stack via normal block flow rather than fixed per-line
         // offsets (see character_info.rcss's header comment).
+        // The hint a line shows while the pointer is over it, by its key in m_LineHint.
+        enum LineHint : int
+        {
+            NoLineHint = -1,
+            DamageHint = 0,
+            CriticalDamageRateHint = 1,
+        };
+
         struct StatLine
         {
             Rml::String text;
             // Why the row reads the way it does: "base", "boosted" by an item or set, or
             // "buffed" by a consumable. Each theme's character_info.rcss owns the colours.
             Rml::String source;
+            // Its LineHint.
+            int hint = NoLineHint;
         };
 
         void BuildRmlUi();
@@ -111,8 +122,9 @@ namespace mu::ui::window
         void BuildSubjectTexts();
         void BuildTableTexts();
         void BuildAttributeLines();
-        // The critical damage rate's line under the strength's lines, and its parts while the pointer is over it.
-        void BuildCriticalDamageRate();
+        // The critical damage rate's line under the strength's lines, the damage line's colour while the hero's own
+        // Increase Critical Damage is on, and the hint of the line the pointer is over.
+        void BuildCriticalHits();
 
         struct CharacterInfoRmlModel
         {
@@ -162,7 +174,9 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        // The critical damage rate's parts while the pointer is over its line, in the shared tooltip.
-        UI::RmlBridge::ElementTooltip m_CriticalDamageRateHint;
+        // The hint of the line the pointer is over (StatLine::hint), in the shared tooltip.
+        UI::RmlBridge::ElementTooltip m_LineHint;
+        // The damage the damage line shows, for its hint.
+        UI::Character::DamageRange m_DamageRange;
     };
 }

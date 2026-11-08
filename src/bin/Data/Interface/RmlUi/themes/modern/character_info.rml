@@ -45,8 +45,8 @@
 		<span class="attr-label attr-label-str">{{str_label}}</span>
 		<span class="attr-value attr-value-str" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'">{{str_value_text}}</span>
 		<div class="attr-lines attr-lines-str">
-			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
-			<span class="critical-damage-rate" data-class-boosted="critical_damage_rate_line.source == 'boosted'" data-class-buffed="critical_damage_rate_line.source == 'buffed'" data-event-mouseover="chainfo_critical_rate_hover" data-event-mouseout="chainfo_critical_rate_leave">{{critical_damage_rate_line.text}}</span>
+			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-class-hinted="line.hint >= 0" data-event-mouseover="chainfo_line_hover(line.hint)" data-event-mouseout="chainfo_line_leave">{{line.text}}</span>
+			<span class="hinted" data-class-boosted="critical_damage_rate_line.source == 'boosted'" data-class-buffed="critical_damage_rate_line.source == 'buffed'" data-event-mouseover="chainfo_line_hover(critical_damage_rate_line.hint)" data-event-mouseout="chainfo_line_leave">{{critical_damage_rate_line.text}}</span>
 		</div>
 		<div id="btn_stat_str" class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)">+</div>
