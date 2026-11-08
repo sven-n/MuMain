@@ -4,6 +4,7 @@
 
 #include "ItemNameFormsPanel.h"
 
+#include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -20,7 +21,7 @@ namespace
 {
 using Data::Items::ItemDefinition;
 
-// The name and case columns of the table.
+// The name and case columns of the table, at UI scale 1.
 constexpr int FixedColumns = 2;
 constexpr float NameColumnWidth = 180.0f;
 constexpr float FormColumnWidth = 140.0f;
@@ -230,11 +231,12 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
         return;
     }
     ImGui::TableSetupScrollFreeze(0, 1);
-    ImGui::TableSetupColumn(I18N::Editor::Name, ImGuiTableColumnFlags_None, NameColumnWidth);
+    const float uiScale = g_MuEditorCore.GetUIScale();
+    ImGui::TableSetupColumn(I18N::Editor::Name, ImGuiTableColumnFlags_None, NameColumnWidth * uiScale);
     ImGui::TableSetupColumn(I18N::Editor::Language);
     for (const std::string_view caseKey : Data::Translation::ItemCaseKeys)
     {
-        ImGui::TableSetupColumn(std::string(caseKey).c_str(), ImGuiTableColumnFlags_None, FormColumnWidth);
+        ImGui::TableSetupColumn(std::string(caseKey).c_str(), ImGuiTableColumnFlags_None, FormColumnWidth * uiScale);
     }
     ImGui::TableHeadersRow();
     for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
