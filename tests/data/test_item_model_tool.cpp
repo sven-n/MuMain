@@ -21,7 +21,7 @@ using namespace MuEditor::Items;
 
 namespace
 {
-// A client folder with a few model files and one that is not a model.
+// A client folder with a few model files, one that is not a model and an improved player body.
 class TemporaryModelFolder
 {
 public:
@@ -30,7 +30,7 @@ public:
                       ("mu_test_item_model_tool_" + std::to_string(std::random_device{}())))
     {
         for (const char* file : {"Data/Item/Sword01.bmd", "Data/Item/partCharge1/RING01.BMD", "Data/Player/Armor01.bmd",
-                                 "Data/Item/readme.txt"})
+                                 "Data/Player/Updated/HelmClass02.bmd", "Data/Player/updated/HelmClass03.bmd", "Data/Item/readme.txt"})
         {
             const std::filesystem::path path = m_directory / file;
             std::filesystem::create_directories(path.parent_path());
@@ -54,7 +54,7 @@ private:
 };
 } // namespace
 
-TEST_CASE("The model tool lists the model files of Data/Item and Data/Player [editor][items]")
+TEST_CASE("The model tool lists the model files of Data/Item and Data/Player, not the improved bodies [editor][items]")
 {
     TemporaryModelFolder folder;
     ItemModelFiles files(folder.Directory());

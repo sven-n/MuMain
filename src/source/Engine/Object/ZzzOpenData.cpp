@@ -134,29 +134,7 @@ void OpenPlayers()
     const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
     for (int i = 0; i < MAX_CLASS; ++i)
     {
-        const wchar_t* bodyDirectory = Engine::Object::PlayerBodyModelDirectory(i, useS6);
-        gLoadData.AccessModel(MODEL_BODY_HELM + i, bodyDirectory, L"HelmClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + i, bodyDirectory, L"ArmorClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + i, bodyDirectory, L"PantClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + i, bodyDirectory, L"GloveClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + i, bodyDirectory, L"BootClass", i + 1);
-
-        if (CLASS_DARK != i && CLASS_DARK_LORD != i && CLASS_RAGEFIGHTER != i)
-        {
-            bodyDirectory = Engine::Object::PlayerBodyModelDirectory(MAX_CLASS + i, useS6);
-            gLoadData.AccessModel(MODEL_BODY_HELM + MAX_CLASS + i, bodyDirectory, L"HelmClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_ARMOR + MAX_CLASS + i, bodyDirectory, L"ArmorClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_PANTS + MAX_CLASS + i, bodyDirectory, L"PantClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_GLOVES + MAX_CLASS + i, bodyDirectory, L"GloveClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_BOOTS + MAX_CLASS + i, bodyDirectory, L"BootClass2", i + 1);
-        }
-
-        bodyDirectory = Engine::Object::PlayerBodyModelDirectory((MAX_CLASS * 2) + i, useS6);
-        gLoadData.AccessModel(MODEL_BODY_HELM + (MAX_CLASS * 2) + i, bodyDirectory, L"HelmClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + (MAX_CLASS * 2) + i, bodyDirectory, L"ArmorClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + (MAX_CLASS * 2) + i, bodyDirectory, L"PantClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + (MAX_CLASS * 2) + i, bodyDirectory, L"GloveClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + (MAX_CLASS * 2) + i, bodyDirectory, L"BootClass3", i + 1);
+        Engine::Object::OpenPlayerClassBodyParts(i, useS6);
     }
 
     gLoadData.AccessModel(MODEL_MASK_HELM + 0, L"Data\\Player\\", L"MaskHelmMale", 1);
@@ -322,21 +300,12 @@ void OpenPlayerTextures()
     LoadBitmap(L"Item\\dl_redwings02.tga", BITMAP_ROBE + 9);
     LoadBitmap(L"Item\\dl_redwings03.tga", BITMAP_ROBE + 10);
 
-    int nIndex;
-
     for (int j = 0; j < MAX_CLASS_STAGES; ++j)
     {
         for (int i = 0; i < MAX_CLASS; ++i)
         {
-            nIndex = MAX_CLASS * j + i;
-            if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i || CLASS_RAGEFIGHTER == i))
-                continue;
-
-            gLoadData.OpenTexture(MODEL_BODY_HELM + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_ARMOR + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_PANTS + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_GLOVES + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_BOOTS + nIndex, L"Player\\");
+            if (Engine::Object::HasPlayerBodyForm(j, i))
+                Engine::Object::OpenPlayerBodyTextures(j, i);
         }
     }
 
