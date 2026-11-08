@@ -162,8 +162,13 @@ private:
     void RenderExportPopup();
     void RenderMessages();
     bool WriteExport();
-    void SetKnown(int group, int number, const std::string& field, bool known);
-    void SetKnownFormula(const std::string& entry, bool known);
+    // Marks the wrong side of a field (an empty one: a New or Removed item as a whole) in the
+    // known differences and the diff, and saves them.
+    void SetWrongSide(int group, int number, const std::string& field, MuEditor::Items::WrongSide side);
+    // A New or Removed item as a whole, every field of a Changed one.
+    void SetRowWrongSide(const MuEditor::Items::SyncItem& row, MuEditor::Items::WrongSide side);
+    void SetFormulaWrongSide(const std::string& entry, MuEditor::Items::WrongSide side);
+    void MarkWrongSide(int group, int number, const std::string& field, MuEditor::Items::WrongSide side);
     void SaveKnownDifferences();
 
     // The path field, and the file the diff is of: Apply uses that one. From the server, the

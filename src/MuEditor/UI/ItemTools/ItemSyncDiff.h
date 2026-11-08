@@ -33,7 +33,7 @@ struct SyncField
     // As JSON; nothing when that side has the field's default (it leaves the field out).
     std::optional<std::string> current;
     std::optional<std::string> incoming;
-    bool known = false;
+    WrongSide wrongSide = WrongSide::None;
     // Why it cannot be checked (the game holds the item), or empty.
     std::string locked;
     // Why the value is not exact on the other side, or empty.
@@ -59,7 +59,8 @@ struct SyncItem
     std::vector<SyncField> fields;
     // New and Removed rows. Changed rows apply their checked fields.
     bool checked = false;
-    bool known = false;
+    // New and Removed rows; the fields of a Changed row have their own.
+    WrongSide wrongSide = WrongSide::None;
     std::string locked;
 };
 
@@ -68,7 +69,7 @@ struct SyncFormula
     std::string entry;
     std::optional<std::string> current;
     std::optional<std::string> incoming;
-    bool known = false;
+    WrongSide wrongSide = WrongSide::None;
     bool checked = false;
 };
 
@@ -105,7 +106,8 @@ struct SyncOptions
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
 // by default: what the file changes; unchecked: removals (items and formula entries the file
-// lacks), known differences, inexact and locked fields. A language one side lacks stays as it is
+// lacks), inexact and locked fields. A difference marked wrong in the client is checked, one
+// wrong in the server unchecked (locked ones stay unchecked). A language one side lacks stays as it is
 // on the other (unless comparingFiles). An item a side has more than once (its repeatedItems) is a
 // locked row without fields. The formulas are compared while both sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
@@ -121,10 +123,17 @@ void SetRowChecked(SyncItem& row, bool checked);
 // Check all and Check none: every row and formula entry, also the items only the client has
 // (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
+// Marks which side of a difference is wrong (WrongSide::None: not decided) and checks or unchecks
+// it as a comparison starts with that mark. An empty `field` names a New or Removed item as a whole.
+void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
+void SetWrongSide(SyncFormula& row, WrongSide side);
+// The side marked on a New or Removed item, or on every field of a Changed one; None when nothing
+// or not every field is marked, or the fields name different sides.
+WrongSide GetRowWrongSide(const SyncItem& row);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
-// editor's language: `title`, an empty line, then a table of each item's group, number and name.
-// With a `changeColumn` (its head, e.g. "In the client"), the table also has each row's change
-// first and its number of differing fields last.
+// editor's language: `title`, an empty line, then a table of each item's group, number and name,
+// and the side marked wrong (GetRowWrongSide). With a `changeColumn` (its head, e.g. "In the
+// client"), the table also has each row's change first and its number of differing fields.
 std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
                                   std::string_view changeColumn);
 // How many formula entries differ between two item stat files: the formula rows a diff lists.

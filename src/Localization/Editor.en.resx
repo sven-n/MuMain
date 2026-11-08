@@ -3091,11 +3091,17 @@
   <data name="Entry" xml:space="preserve">
     <value>Entry</value>
   </data>
-  <data name="Known" xml:space="preserve">
-    <value>Known</value>
+  <data name="Wrong in client" xml:space="preserve">
+    <value>Wrong in client</value>
   </data>
-  <data name="What a known difference is" xml:space="preserve">
-    <value>A known difference: meant to differ between the client and the server, so it stays unchecked. Kept in Data/Items/Sync/KnownDifferences.json.</value>
+  <data name="Wrong in server" xml:space="preserve">
+    <value>Wrong in server</value>
+  </data>
+  <data name="What wrong in client means" xml:space="preserve">
+    <value>The client's value is wrong: the server's is taken, so the difference is checked. Click again to undo. Kept in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="What wrong in server means" xml:space="preserve">
+    <value>The server's value is wrong: the client keeps its own, so the difference stays unchecked (grey). Click again to undo. Kept in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
   <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
     <value>OpenMU keeps the drop level in a byte (at most 255)</value>

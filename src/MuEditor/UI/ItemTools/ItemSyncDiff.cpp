@@ -160,10 +160,26 @@ bool IsHeld(const SyncOptions& options, const ItemKey& key)
     return options.isHeld && options.isHeld(Data::Items::MakeItemType(key.first, key.second));
 }
 
+// Whether a field, an item or a formula entry starts checked: a marked wrong side decides (the
+// client's: take the file's value), otherwise `byDefault`; a locked one never.
+bool StartsChecked(WrongSide side, bool byDefault, bool locked)
+{
+    if (locked)
+    {
+        return false;
+    }
+    return side == WrongSide::None ? byDefault : side == WrongSide::Client;
+}
+
+WrongSide MarkedSide(const SyncOptions& options, const ItemKey& key, const std::string& field)
+{
+    return options.known != nullptr ? options.known->Find(key.first, key.second, field) : WrongSide::None;
+}
+
 void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& incoming, const Fields& current,
                const Fields& incomingFields, const SyncOptions& options)
 {
-    field.known = options.known != nullptr && options.known->Contains(key.first, key.second, field.field);
+    field.wrongSide = MarkedSide(options, key, field.field);
     if (IsHeld(options, key) && std::ranges::find(HeldFields, field.field) != std::end(HeldFields))
     {
         field.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre;
@@ -178,7 +194,7 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
             field.inexact = I18N::Editor::OpenMUKeepsTheDropLevelInAByteAtMost255;
         }
     }
-    field.checked = !field.known && field.locked.empty() && field.inexact.empty();
+    field.checked = StartsChecked(field.wrongSide, field.inexact.empty(), !field.locked.empty());
 }
 
 SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const ItemDefinition* incoming,
@@ -189,7 +205,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     row.group = key.first;
     row.number = key.second;
     row.name = RowName(current, incoming);
-    row.known = options.known != nullptr && options.known->Contains(key.first, key.second, "");
+    row.wrongSide = MarkedSide(options, key, "");
     const Fields currentFields = current != nullptr ? FlattenItem(*current) : Fields{};
     const Fields incomingFields = incoming != nullptr ? FlattenItem(*incoming) : Fields{};
 
@@ -214,7 +230,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
         {
             row.locked = I18N::Editor::TheFileDoesNotCarryAllFieldsOfAnItemItIsNotAdded;
         }
-        row.checked = !row.known && row.locked.empty();
+        row.checked = StartsChecked(row.wrongSide, true, !row.locked.empty());
         return row;
     }
     if (incoming == nullptr)
@@ -232,6 +248,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
         {
             row.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItIsNotMovedOrRemoved;
         }
+        row.checked = StartsChecked(row.wrongSide, false, !row.locked.empty());
         return row;
     }
 
@@ -463,10 +480,10 @@ void CompareFormulas(const Data::Items::ItemStatFile& current, const Data::Items
                 continue;
             }
         }
-        row.known = options.known != nullptr && options.known->Contains(row.entry);
+        row.wrongSide = options.known != nullptr ? options.known->Find(row.entry) : WrongSide::None;
         // An entry the file lacks starts unchecked, as a removed item does: taking it away would
         // leave the items that name a profile or table without it.
-        row.checked = !row.known && row.incoming.has_value();
+        row.checked = StartsChecked(row.wrongSide, row.incoming.has_value(), false);
         diff.formulas.push_back(std::move(row));
     }
 }
@@ -522,9 +539,11 @@ void ApplyFormulas(const ItemExchangeFile& source, ItemExchangeFile& target, con
 // The columns of WriteSyncRowsMarkdown's table; the change column's head is the caller's.
 constexpr const char* MarkdownItemColumns = "Group | Number | Item";
 constexpr const char* MarkdownFieldsColumn = "Fields";
+constexpr const char* MarkdownWrongInColumn = "Wrong in";
 constexpr const char* MarkdownCellSeparator = " | ";
 constexpr const char* MarkdownSeparatorCell = "---|";
-constexpr int MarkdownItemColumnCount = 3;
+// The item's group, number and name, and the side marked wrong.
+constexpr int MarkdownItemColumnCount = 4;
 // The change and the field count.
 constexpr int MarkdownChangeColumnCount = 2;
 
@@ -558,6 +577,39 @@ const char* MarkdownChange(SyncChange change)
     default:
         return "Changed";
     }
+}
+
+// The side marked wrong, in the English of the Markdown table; empty when none is.
+const char* MarkdownWrongIn(WrongSide side)
+{
+    switch (side)
+    {
+    case WrongSide::Client:
+        return "Client";
+    case WrongSide::Server:
+        return "Server";
+    default:
+        return "";
+    }
+}
+
+std::string WriteMarkdownRow(const SyncItem& row, bool withChange)
+{
+    std::string text = "| ";
+    if (withChange)
+    {
+        text += MarkdownChange(row.change);
+        text += MarkdownCellSeparator;
+    }
+    text += std::to_string(row.group) + MarkdownCellSeparator + std::to_string(row.number) + MarkdownCellSeparator +
+            MarkdownCell(row.name);
+    if (withChange)
+    {
+        text += MarkdownCellSeparator + std::to_string(row.fields.size());
+    }
+    text += MarkdownCellSeparator;
+    text += MarkdownWrongIn(GetRowWrongSide(row));
+    return text + " |\n";
 }
 } // namespace
 
@@ -660,6 +712,46 @@ void SetAllRowsChecked(ItemSyncDiff& diff, bool checked)
     }
 }
 
+void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
+{
+    if (field.empty())
+    {
+        row.wrongSide = side;
+        row.checked = StartsChecked(side, row.change == SyncChange::New, !row.locked.empty());
+        return;
+    }
+    for (SyncField& entry : row.fields)
+    {
+        if (entry.field == field)
+        {
+            entry.wrongSide = side;
+            entry.checked = StartsChecked(side, entry.inexact.empty(), !entry.locked.empty());
+        }
+    }
+}
+
+void SetWrongSide(SyncFormula& row, WrongSide side)
+{
+    row.wrongSide = side;
+    row.checked = StartsChecked(side, row.incoming.has_value(), false);
+}
+
+WrongSide GetRowWrongSide(const SyncItem& row)
+{
+    if (row.change != SyncChange::Changed)
+    {
+        return row.wrongSide;
+    }
+    if (row.fields.empty())
+    {
+        return WrongSide::None;
+    }
+    const WrongSide side = row.fields.front().wrongSide;
+    const bool same =
+        std::ranges::all_of(row.fields, [side](const SyncField& field) { return field.wrongSide == side; });
+    return same ? side : WrongSide::None;
+}
+
 std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
                                   std::string_view changeColumn)
 {
@@ -675,7 +767,7 @@ std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::st
     {
         text += std::string(MarkdownCellSeparator) + MarkdownFieldsColumn;
     }
-    text += " |\n|";
+    text += std::string(MarkdownCellSeparator) + MarkdownWrongInColumn + " |\n|";
     const int columns = MarkdownItemColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
     for (int column = 0; column < columns; ++column)
     {
@@ -684,19 +776,7 @@ std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::st
     text += "\n";
     for (const SyncItem* row : rows)
     {
-        text += "| ";
-        if (withChange)
-        {
-            text += MarkdownChange(row->change);
-            text += MarkdownCellSeparator;
-        }
-        text += std::to_string(row->group) + MarkdownCellSeparator + std::to_string(row->number) +
-                MarkdownCellSeparator + MarkdownCell(row->name);
-        if (withChange)
-        {
-            text += MarkdownCellSeparator + std::to_string(row->fields.size());
-        }
-        text += " |\n";
+        text += WriteMarkdownRow(*row, withChange);
     }
     return text;
 }

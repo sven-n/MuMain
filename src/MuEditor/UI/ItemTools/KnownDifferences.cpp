@@ -7,7 +7,6 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
-#include <map>
 #include <optional>
 #include <utility>
 
@@ -20,17 +19,180 @@ using Data::Items::ItemDataIssueSeverity;
 using Data::Items::Json::OrderedJson;
 using ItemKey = std::pair<int, int>;
 
-constexpr int KnownDifferencesFormatVersion = 1;
-} // namespace
+// Version 2 names the wrong side of each entry; version 1 listed "known" differences, which kept
+// the client's value.
+constexpr int KnownDifferencesFormatVersion = 2;
+constexpr int KnownListFormatVersion = 1;
+constexpr const char* FormatVersionKey = "formatVersion";
+constexpr const char* ItemsKey = "items";
+constexpr const char* FormulasKey = "formulas";
+constexpr const char* GroupKey = "group";
+constexpr const char* NumberKey = "number";
+// Version 1's list of an item's known fields.
+constexpr const char* KnownFieldsKey = "fields";
 
-bool KnownDifferences::Contains(int group, int number, const std::string& field) const
+struct SideKey
 {
-    return fields.contains({group, number, field});
+    WrongSide side;
+    const char* key;
+};
+
+constexpr SideKey SideKeys[] = {
+    {WrongSide::Client, "wrongInClient"},
+    {WrongSide::Server, "wrongInServer"},
+};
+
+const char* KeyOf(WrongSide side)
+{
+    return side == WrongSide::Client ? SideKeys[0].key : SideKeys[1].key;
 }
 
-bool KnownDifferences::Contains(const std::string& formula) const
+// The strings of a list; other entries are skipped.
+std::vector<std::string> ReadStrings(const OrderedJson& list)
 {
-    return formulas.contains(formula);
+    std::vector<std::string> strings;
+    if (!list.is_array())
+    {
+        return strings;
+    }
+    for (const OrderedJson& entry : list)
+    {
+        if (entry.is_string())
+        {
+            strings.push_back(entry.get<std::string>());
+        }
+    }
+    return strings;
+}
+
+bool HasItemKey(const OrderedJson& item, bool knownList)
+{
+    const bool numbered = item.is_object() && item.contains(GroupKey) && item.contains(NumberKey) &&
+                          item[GroupKey].is_number_integer() && item[NumberKey].is_number_integer();
+    return numbered && (!knownList || (item.contains(KnownFieldsKey) && item[KnownFieldsKey].is_array()));
+}
+
+void ReadItem(const OrderedJson& item, bool knownList, KnownDifferences& known)
+{
+    const int group = item[GroupKey].get<int>();
+    const int number = item[NumberKey].get<int>();
+    if (knownList)
+    {
+        for (const std::string& field : ReadStrings(item[KnownFieldsKey]))
+        {
+            known.Set(group, number, field, WrongSide::Server);
+        }
+        return;
+    }
+    for (const auto& [side, key] : SideKeys)
+    {
+        if (const auto fields = item.find(key); fields != item.end())
+        {
+            for (const std::string& field : ReadStrings(*fields))
+            {
+                known.Set(group, number, field, side);
+            }
+        }
+    }
+}
+
+void ReadFormulas(const OrderedJson& formulas, bool knownList, KnownDifferences& known)
+{
+    if (knownList)
+    {
+        for (const std::string& formula : ReadStrings(formulas))
+        {
+            known.Set(formula, WrongSide::Server);
+        }
+        return;
+    }
+    if (!formulas.is_object())
+    {
+        return;
+    }
+    for (const auto& [side, key] : SideKeys)
+    {
+        if (const auto entries = formulas.find(key); entries != formulas.end())
+        {
+            for (const std::string& formula : ReadStrings(*entries))
+            {
+                known.Set(formula, side);
+            }
+        }
+    }
+}
+
+OrderedJson WriteItems(const KnownDifferences& known)
+{
+    std::map<ItemKey, std::map<WrongSide, std::vector<std::string>>> byItem;
+    for (const auto& [entry, side] : known.fields)
+    {
+        const auto& [group, number, field] = entry;
+        byItem[{group, number}][side].push_back(field);
+    }
+    OrderedJson items = OrderedJson::array();
+    for (const auto& [key, sides] : byItem)
+    {
+        OrderedJson item;
+        item[GroupKey] = key.first;
+        item[NumberKey] = key.second;
+        for (const auto& [side, sideKey] : SideKeys)
+        {
+            if (const auto fields = sides.find(side); fields != sides.end())
+            {
+                item[sideKey] = fields->second;
+            }
+        }
+        items.push_back(std::move(item));
+    }
+    return items;
+}
+
+OrderedJson WriteFormulas(const KnownDifferences& known)
+{
+    OrderedJson formulas = OrderedJson::object();
+    for (const auto& [side, key] : SideKeys)
+    {
+        formulas[key] = OrderedJson::array();
+    }
+    for (const auto& [formula, side] : known.formulas)
+    {
+        formulas[KeyOf(side)].push_back(formula);
+    }
+    return formulas;
+}
+} // namespace
+
+WrongSide KnownDifferences::Find(int group, int number, const std::string& field) const
+{
+    const auto entry = fields.find({group, number, field});
+    return entry != fields.end() ? entry->second : WrongSide::None;
+}
+
+WrongSide KnownDifferences::Find(const std::string& formula) const
+{
+    const auto entry = formulas.find(formula);
+    return entry != formulas.end() ? entry->second : WrongSide::None;
+}
+
+void KnownDifferences::Set(int group, int number, const std::string& field, WrongSide side)
+{
+    if (side == WrongSide::None)
+    {
+        fields.erase({group, number, field});
+        return;
+    }
+    fields[{group, number, field}] = side;
+}
+
+void KnownDifferences::Set(const std::string& formula, WrongSide side)
+{
+    if (side == WrongSide::None)
+    {
+        formulas.erase(formula);
+        return;
+    }
+    formulas[formula] = side;
 }
 
 std::filesystem::path GetKnownDifferencesFile()
@@ -52,41 +214,25 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
     {
         return known;
     }
-    const auto addError = [&](const std::string& field, const std::string& message)
-    {
-        issues.push_back(
-            {ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
-    };
-    if (const auto items = root.find("items"); items != root.end() && items->is_array())
+    const bool knownList = root[FormatVersionKey].get<int>() == KnownListFormatVersion;
+    if (const auto items = root.find(ItemsKey); items != root.end() && items->is_array())
     {
         for (const OrderedJson& item : *items)
         {
-            if (!item.is_object() || !item.contains("group") || !item.contains("number") ||
-                !item["group"].is_number_integer() || !item["number"].is_number_integer() || !item.contains("fields") ||
-                !item["fields"].is_array())
+            if (!HasItemKey(item, knownList))
             {
-                addError("items", "an entry needs a group, a number and a list of fields");
+                issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                                  ItemsKey,
+                                  knownList ? "an entry needs a group, a number and a list of fields"
+                                            : "an entry needs a group and a number"});
                 continue;
             }
-            for (const OrderedJson& field : item["fields"])
-            {
-                if (field.is_string())
-                {
-                    known.fields.insert(
-                        {item["group"].get<int>(), item["number"].get<int>(), field.get<std::string>()});
-                }
-            }
+            ReadItem(item, knownList, known);
         }
     }
-    if (const auto formulas = root.find("formulas"); formulas != root.end() && formulas->is_array())
+    if (const auto formulas = root.find(FormulasKey); formulas != root.end())
     {
-        for (const OrderedJson& formula : *formulas)
-        {
-            if (formula.is_string())
-            {
-                known.formulas.insert(formula.get<std::string>());
-            }
-        }
+        ReadFormulas(*formulas, knownList, known);
     }
     return known;
 }
@@ -94,28 +240,11 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
 std::string WriteKnownDifferencesJson(const KnownDifferences& known)
 {
     OrderedJson root;
-    root["formatVersion"] = KnownDifferencesFormatVersion;
-    root["items"] = OrderedJson::array();
-    std::map<ItemKey, std::vector<std::string>> byItem;
-    for (const auto& [group, number, field] : known.fields)
-    {
-        byItem[{group, number}].push_back(field);
-    }
-    for (const auto& [key, fields] : byItem)
-    {
-        OrderedJson item;
-        item["group"] = key.first;
-        item["number"] = key.second;
-        item["fields"] = fields;
-        root["items"].push_back(std::move(item));
-    }
-    root["formulas"] = OrderedJson::array();
-    for (const std::string& formula : known.formulas)
-    {
-        root["formulas"].push_back(formula);
-    }
+    root[FormatVersionKey] = KnownDifferencesFormatVersion;
+    root[ItemsKey] = WriteItems(known);
+    root[FormulasKey] = WriteFormulas(known);
     const std::string text = root.dump(Data::Items::Json::Indent);
-    return Data::Items::Json::PutListEntriesOnOneLine(text, "items") + "\n";
+    return Data::Items::Json::PutListEntriesOnOneLine(text, ItemsKey) + "\n";
 }
 } // namespace MuEditor::Items
 
