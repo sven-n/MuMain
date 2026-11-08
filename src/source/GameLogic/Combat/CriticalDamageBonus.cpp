@@ -38,15 +38,9 @@ constexpr std::array<eBuffState, 3> CriticalDamageBuffs{
 constexpr std::array<ActionSkillType, 4> CriticalDamageSkills{AT_SKILL_ADD_CRITICAL, AT_SKILL_ADD_CRITICAL_STR1,
                                                               AT_SKILL_ADD_CRITICAL_STR2, AT_SKILL_ADD_CRITICAL_STR3};
 
-// Whether the item's options count: it is there, the hero meets its requirements and it is not broken (as PlusSpecial).
-bool OptionsCount(ITEM& item)
-{
-    return item.Type != -1 && item.Durability != 0 && IsRequireEquipItem(&item);
-}
-
 int HarmonyCriticalDamage(ITEM& item)
 {
-    if (item.Jewel_Of_Harmony_Option == 0 || g_pUIJewelHarmonyinfo == nullptr || !OptionsCount(item) ||
+    if (item.Jewel_Of_Harmony_Option == 0 || g_pUIJewelHarmonyinfo == nullptr || !ItemOptionsCount(&item) ||
         item.Level < item.Jewel_Of_Harmony_OptionLevel)
     {
         return 0;

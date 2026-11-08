@@ -1574,19 +1574,22 @@ bool IsRequireEquipItem(ITEM* pItem)
     return bEquipable;
 }
 
+bool ItemOptionsCount(ITEM* Item)
+{
+    return Item->Type != -1 && Item->Durability != 0 && IsRequireEquipItem(Item);
+}
+
 void PlusSpecial(WORD* Value, int Special, ITEM* Item)
 {
-    if (Item->Type == -1) {
+    if (!ItemOptionsCount(Item))
+    {
         return;
     }
 
-    if (IsRequireEquipItem(Item))
+    for (int i = 0; i < Item->SpecialNum; i++)
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += Item->SpecialValue[i];
-        }
+        if (Item->Special[i] == Special)
+            *Value += Item->SpecialValue[i];
     }
 }
 
