@@ -10,13 +10,19 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "UI/Character/DamageHint.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Inventory/UIJewelHarmony.h"
 #include "UI/Inventory/ItemMng.h"
 
+#include <algorithm>
+#include <cwctype>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -26,12 +32,19 @@ namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 
+using GameLogic::Combat::CriticalDamageBonus;
 using GameLogic::Combat::CriticalDamageRate;
+using GameLogic::Combat::GetHeroCriticalDamageBonus;
 using GameLogic::Combat::GetHeroCriticalDamageRate;
 
 // The Lightning seed sphere option "Critical damage rate": its seed id in the item's socket byte (OpenMU: the
 // Lightning option 3, CriticalDamageChance +8 % to +12 % by sphere level).
 constexpr BYTE CriticalRateSeed = 32;
+// The Lightning options "Critical damage" and "Excellent damage" (OpenMU's options 2 and 0).
+constexpr BYTE CriticalDamageSeed = 31;
+constexpr BYTE ExcellentDamageSeed = 29;
+// The weapons' harmony option "Increase critical damage".
+constexpr BYTE WeaponCriticalDamageHarmony = 6;
 
 // A Blade Knight who meets every item's requirements.
 void MakeStrongKnight(HeroScope& hero)
@@ -269,4 +282,123 @@ TEST_CASE("The character window's critical damage rate line and its hint [data][
     I18N::SetLocale("de");
     CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Kritische Schadensrate: 33% (+9%)");
     I18N::SetLocale("en");
+}
+
+// The Cloud set (the Brass Helm's set 1 and the Brass Pants' set 2) adds 50 and 20 %, a weapon's harmony option
+// "Increase critical damage" its value while the item's level reaches the option's, and the Lightning seed sphere
+// "Critical damage" its value (the client's 30 at level 1; OpenMU has 15, a known difference). The excellent damage
+// bonus has its own seed sphere option.
+TEST_CASE("The critical damage bonus adds up the worn items' set, harmony and socket options [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    MakeStrongKnight(hero);
+    EquipmentScope equipment;
+
+    CHECK(GetHeroCriticalDamageBonus().Total() == 0);
+    CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == 0);
+
+    ItemCreationParams helm = Item(7, 8);
+    helm.AncientDiscriminator = 1;
+    ItemCreationParams pants = Item(9, 8);
+    pants.AncientDiscriminator = 2;
+    equipment.Wear(EQUIPMENT_HELM, helm);
+    equipment.Wear(EQUIPMENT_PANTS, pants);
+    EquipmentScope::AddUpBonuses();
+    CHECK(GetHeroCriticalDamageBonus().setOptions == 50);
+    CHECK(GetHeroCriticalDamageRate().setOptions == 20);
+
+    // A Kris +13 with the harmony option at its top level (the option has values from a higher level on).
+    ItemCreationParams kris = Item(0, 0);
+    kris.Level = 13;
+    kris.HasHarmonyOption = true;
+    kris.HarmonyOptionType = WeaponCriticalDamageHarmony;
+    kris.HarmonyOptionLevel = 13;
+    const HARMONYJEWELOPTION& harmony =
+        g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(SI_Weapon, WeaponCriticalDamageHarmony);
+    std::wstring name = harmony.Name;
+    std::transform(name.begin(), name.end(), name.begin(), [](wchar_t c) { return std::towlower(c); });
+    CHECK(name.find(L"critical") != std::wstring::npos);
+    REQUIRE(harmony.HarmonyJewelLevel[13] > 0);
+    ITEM& weapon = equipment.Wear(EQUIPMENT_WEAPON_RIGHT, kris);
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == harmony.HarmonyJewelLevel[13]);
+    weapon.Level = 12;
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == 0);
+
+    ItemCreationParams flamberge = Item(0, 26);
+    flamberge.SocketCount = 2;
+    flamberge.SocketOptions[0] = CriticalDamageSeed;
+    flamberge.SocketOptions[1] = ExcellentDamageSeed;
+    ITEM& sockets = equipment.Wear(EQUIPMENT_WEAPON_LEFT, flamberge);
+    EquipmentScope::AddUpBonuses();
+    CHECK(GetHeroCriticalDamageBonus().socketOptions == 30);
+    CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == g_SocketItemMgr.GetSocketOptionValue(&sockets, 1));
+    CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() > 0);
+}
+
+// Increase Critical Damage adds 1 per 30 energy and 1 per 25 command of the one who cast it, and its first power-up's
+// value. Only the hero's own buff counts: a party member's adds what that member's stats give.
+TEST_CASE("The hero's own Increase Critical Damage adds to every critical hit [data][items]")
+{
+    HeroScope hero;
+    EquipmentScope equipment;
+    hero.Hero().Class = CLASS_DARK_LORD;
+    hero.HeroCharacter().Class = CLASS_DARK_LORD;
+    hero.Hero().Energy = 2000;
+    hero.Hero().Charisma = 2000;
+    hero.HeroCharacter().Object.m_BuffMap.RegisterBuff(eBuff_AddCriticalDamage);
+    CHECK(GetHeroCriticalDamageBonus().Buff() == 0);
+
+    hero.Hero().Skill[0] = AT_SKILL_ADD_CRITICAL;
+    hero.Hero().SkillNumber = 1;
+    CriticalDamageBonus bonus = GetHeroCriticalDamageBonus();
+    CHECK(bonus.buffSkill == AT_SKILL_ADD_CRITICAL);
+    CHECK(bonus.Buff() == 146);
+    CHECK(bonus.Total() == 146);
+
+    hero.Hero().MasterSkillInfo[AT_SKILL_ADD_CRITICAL_STR1] = CSkillTreeInfo(1, 5.5f, 6.f);
+    CHECK(GetHeroCriticalDamageBonus().Buff() == 152);
+
+    hero.HeroCharacter().Object.m_BuffMap.UnRegisterBuff(eBuff_AddCriticalDamage);
+    CHECK(GetHeroCriticalDamageBonus().Buff() == 0);
+}
+
+// The damage line's hint: the hits before the target's defense, then the critical damage's parts.
+TEST_CASE("The character window's damage line hint [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    TooltipDataScope data;
+    const UI::Character::DamageRange range{1909, 2575};
+
+    CriticalDamageBonus bonus;
+    CHECK(Texts(UI::Character::BuildDamageHint(range, bonus, 0)) ==
+          std::vector<std::string>{"Damage", "Normal hit: 1909~2575", "Critical hit: 2575", "Excellent hit: 3090",
+                                   "before the target's defense"});
+
+    bonus.buffSkill = AT_SKILL_ADD_CRITICAL;
+    bonus.buff = 146.67f;
+    const std::string buffName = StringUtils::WideToNarrow(SkillAttribute[AT_SKILL_ADD_CRITICAL].Name);
+    REQUIRE_FALSE(buffName.empty());
+    std::vector<UI::RmlBridge::Tooltip::Line> hint = UI::Character::BuildDamageHint(range, bonus, 0);
+    CHECK(Texts(hint) == std::vector<std::string>{"Damage", "Normal hit: 1909~2575", "Critical hit: 2721",
+                                                  "Excellent hit: 3236", "before the target's defense", "",
+                                                  "Critical damage", buffName + ": +146", "Total: +146"});
+    CHECK(hint[2].color == UI::RmlBridge::Tooltip::LineColor::Purple);
+    CHECK(hint[5].kind == UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer);
+
+    bonus = {};
+    bonus.setOptions = 50;
+    bonus.harmonyOptions = 12;
+    bonus.socketOptions = 30;
+    hint = UI::Character::BuildDamageHint(range, bonus, 20);
+    CHECK(Texts(hint) == std::vector<std::string>{"Damage", "Normal hit: 1909~2575", "Critical hit: 2667",
+                                                  "Excellent hit: 3202", "before the target's defense", "",
+                                                  "Critical damage", "Set options: +50", "Harmony options: +12",
+                                                  "Socket options: +30", "Total: +92"});
+    CHECK(hint[2].color == UI::RmlBridge::Tooltip::LineColor::White);
 }
