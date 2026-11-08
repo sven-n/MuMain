@@ -50,9 +50,9 @@ A differently named skin texture may load, but will not be hidden with skin and 
 specular lighting unlike skin-marked meshes.
 
 This is a body/face mesh and appearance improvement, not an armor-set upgrade. Equipped armor,
-Summoner/Rage Fighter bodies, masks, animations, class IDs and attachment rules are unchanged.
-Fully armored characters still use their existing armor art. The setting is independent of
-Classic/Enhanced graphics and texture packs.
+masks, animations, class IDs and attachment rules are unchanged. The shipped Summoner/Rage Fighter
+bodies retain their original assets. Fully armored characters still use their existing armor art.
+The setting is independent of Classic/Enhanced graphics and texture packs.
 
 Player-shaped monsters and NPCs (guards, transformations, the Doppelganger) use the same body
 models, so they follow the setting too, in the game and in the editor's Monster Preview. Compare
