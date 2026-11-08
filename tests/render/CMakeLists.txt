@@ -85,6 +85,7 @@ mu_add_test(
     SOURCES
         test_antialiasing.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/Antialiasing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
 )
 
 mu_add_test(
