@@ -853,16 +853,16 @@
     <value>打开扩展仓库（H）</value>
   </data>
   <data name="Enter the amount of Zen you would like to deposit." xml:space="preserve">
-    <value>请输入要存入的奇迹币数量。</value>
+    <value>请输入要存入的金币数量。</value>
   </data>
   <data name="Enter the amount of Zen you would like to withdraw." xml:space="preserve">
-    <value>请输入要取出的奇迹币数量。</value>
+    <value>请输入要取出的金币数量。</value>
   </data>
   <data name="You are short of Zen." xml:space="preserve">
-    <value>奇迹币不足。</value>
+    <value>金币不足。</value>
   </data>
   <data name="Exceeded maximum amount of Zen you can possess." xml:space="preserve">
-    <value>已超过可持有的奇迹币上限。</value>
+    <value>已超过可持有的金币上限。</value>
   </data>
   <data name="Cannot store in vault." xml:space="preserve">
     <value>无法存入仓库。</value>
@@ -910,7 +910,7 @@
     <value>交易</value>
   </data>
   <data name="Zen Trade" xml:space="preserve">
-    <value>交易奇迹币</value>
+    <value>交易金币</value>
   </data>
   <data name="About %d" xml:space="preserve">
     <value>约 %d</value>
@@ -943,7 +943,7 @@
     <value>想与你交易。</value>
   </data>
   <data name="Enter the amount of Zen you would like to trade." xml:space="preserve">
-    <value>请输入要交易的奇迹币数量。</value>
+    <value>请输入要交易的金币数量。</value>
   </data>
   <data name="Your trade has been canceled." xml:space="preserve">
     <value>交易已取消。</value>
@@ -979,7 +979,7 @@
     <value>营业中</value>
   </data>
   <data name="Zen" xml:space="preserve">
-    <value>奇迹币</value>
+    <value>金币</value>
   </data>
   <data name="W Coin(C)" xml:space="preserve">
     <value>W币（C）</value>
@@ -1003,7 +1003,7 @@
     <value>请输入售价。</value>
   </data>
   <data name="Selling price : %s zen" xml:space="preserve">
-    <value>售价：%s 奇迹币</value>
+    <value>售价：%s金</value>
   </data>
   <data name="Do you want to sell item at this price?" xml:space="preserve">
     <value>确定以此价格出售该物品吗？</value>
@@ -1042,7 +1042,7 @@
     <value>所有物品交易</value>
   </data>
   <data name="can only be done using zen." xml:space="preserve">
-    <value>只能使用奇迹币进行。</value>
+    <value>只能使用金币进行。</value>
   </data>
   <data name="Merchant" xml:space="preserve">
     <value>商人</value>
