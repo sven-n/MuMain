@@ -962,16 +962,27 @@ the same way to show it:
 |---|---|
 | Luck | The luck option's value (`Options/Luck.json`: 5 %) for each worn item with luck, while the item is not broken and the hero meets its requirements |
 | Set options | The active ancient set options "Increase critical damage rate" (the full Warrior set: 5 %) |
-| Socket options | The seed spheres' option "Critical damage rate" (Lightning: 8 % to 12 % by sphere level) |
+| Socket options | The seed spheres' option "Critical damage rate" (Lightning: 8 % to 12 % by sphere level), while the item is not broken |
 | Own buff | While it is on: the Wizard's Expansion of Wizardry Mastery or the Dark Lord's Critical Damage Increase with its third power-up. It adds the value of that master skill, as the server sends it with the master skill tree |
+| Scroll of Battle | While its buff is on: 20 % (OpenMU's buff items) |
 
 No stat changes the rate; stats only change how much a critical hit adds
 (the Dark Lord's Critical Damage Increase). The line shows what the worn
 items add, in the window's colour for items once it is above 0, and what the
 buff adds in brackets, in the colour for buffs: `Critical damage rate: 33%
 (+9%)`. With the pointer over it, the window lists each part above 0 and the
-total. A buff from a party member is not counted: its value comes from that
-member's master skill, which the client doesn't know.
+total; the Scroll of Battle counts with the buffs.
+
+The client can't tell who cast a buff. A buff counts as the hero's own when
+the hero has its skill (for the rate, its master skill), and then with the
+hero's own values; a buff from a party member who has other values is shown
+with the hero's, and a buff the hero can't cast isn't counted, since its
+value comes from the caster's master skill.
+
+Luck and the other options count while the hero meets the item's
+requirements, as everywhere in the client. OpenMU counts every worn item that
+is not broken, so the two differ while the hero wears an item whose
+requirements a lost stat bonus (a set's, a buff's) no longer meets.
 
 The original client had a sum of the luck slots' values, but nothing called
 it, nothing showed it, and luck's value in the slot was 0.
@@ -987,12 +998,13 @@ and their total:
 |---|---|
 | Set options | The active ancient set options "Increase critical damage" (the Cloud set: 50) |
 | Harmony options | A weapon's or staff's harmony option "Increase critical damage", while the item's level reaches the option's level |
-| Socket options | The seed spheres' option "Critical damage" (Lightning: 30 to 50 by sphere level in the client's data; OpenMU has 15 to 40, a known difference) |
+| Socket options | The seed spheres' option "Critical damage" (Lightning: 30 to 50 by sphere level in the client's data; OpenMU has 15 to 40, a known difference), while the item is not broken |
 | Own buff | While it is on: the Dark Lord's Increase Critical Damage, 1 per 30 energy and 1 per 25 command, plus its first power-up's value. The damage line takes the colour for buffs meanwhile |
 
 The excellent damage bonus comes from ancient set options and seed spheres.
-As with the rate, a buff from a party member is not counted: its value comes
-from that member's energy and command.
+As with the rate, the buff counts when the hero has the skill, with the
+hero's energy and command; a buff from a party member is counted only that
+way, since its value comes from that member's energy and command.
 
 ### Option rules
 

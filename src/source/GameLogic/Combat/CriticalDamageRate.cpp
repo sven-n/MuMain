@@ -45,8 +45,9 @@ void AddWornLuck(CriticalDamageRate& rate)
     }
 }
 
-// The hero's own buff: one whose master skill the hero has. The value of a party member's buff depends on that
-// member's master skill, which the client doesn't know, so it isn't counted.
+// The hero's own buff: one whose master skill the hero has, with the hero's value. The client can't tell who cast a
+// buff: one the hero can't cast has its caster's master skill value and isn't counted, and one from a party member
+// who has the same master skill counts with the hero's value.
 void AddOwnBuff(CriticalDamageRate& rate)
 {
     if (Hero == nullptr || CharacterAttribute == nullptr)

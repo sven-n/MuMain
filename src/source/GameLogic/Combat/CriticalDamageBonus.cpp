@@ -86,8 +86,9 @@ bool KnowsCriticalDamageSkill()
     return false;
 }
 
-// The hero's own buff: one the hero can cast. A party member's buff adds what that member's energy and command give,
-// which the client doesn't know, so it isn't counted.
+// The hero's own buff: one the hero can cast, with the hero's energy and command. The client can't tell who cast a
+// buff: one the hero can't cast adds what its caster's stats give and isn't counted, and one from a party member who
+// can cast it too counts with the hero's values.
 void AddOwnBuff(CriticalDamageBonus& bonus)
 {
     if (Hero == nullptr || CharacterAttribute == nullptr || !HasCriticalDamageBuff() || !KnowsCriticalDamageSkill())
