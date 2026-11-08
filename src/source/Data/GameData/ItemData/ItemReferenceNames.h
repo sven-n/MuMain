@@ -35,8 +35,8 @@ enum class ItemReferenceProblem : unsigned char
     // The reference asks for a case, but the level's name line has placeholders without {name}: no form can show,
     // the line's text stands in.
     UndeclinedLine,
-    // The name has a '%', '{' or '}', which a text would read as its own (the UI texts are printf formats, the item
-    // data's texts have placeholders): the text keeps the reference as written.
+    // A UI text's name has a '%', which the text, a printf format, would read as a conversion (ResolveUiTextName): the
+    // text keeps the reference as written.
     UnshowableName,
 };
 
@@ -54,8 +54,12 @@ struct ReferencedName
 // the item's name, or at a level the text of the first name line shown at that level without conditions (the standard
 // name when that line has no text, as in the tooltip), and the form of the case when the reference asks for one. Needs
 // no game state, unlike the tooltip's name (GetItemNameText): a name line may fill in {name}, {level}, {levelPlusOne},
-// the item's level values and other items' names ({item:14,13}, in the language the line is written in). A name with
-// '%', '{' or '}' gives none (UnshowableName).
+// the item's level values and other items' names ({item:14,13}, in the language the line is written in).
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const Translation::ItemReference& reference,
                                      std::string_view locale);
+
+// The same for a UI text (the Game and Dialog texts), which is a printf format: a name with a '%' gives none
+// (UnshowableName).
+ReferencedName ResolveUiTextName(const ItemDatabase& database, const Translation::ItemReference& reference,
+                                 std::string_view locale);
 } // namespace Data::Items

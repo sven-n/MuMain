@@ -465,8 +465,9 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
   name; the text's pointer then shows the expansion, so the code that shows a
   text needs nothing. Before the item data is loaded a text shows `{item:...}`
   as written (no such text is shown that early). A number no item has, or a
-  level above +15, stays as written; so does a name with `%`, `{` or `}`,
-  which the text would read as its own (a printf format, a placeholder).
+  level above +15, stays as written, and the rest of the text is still filled
+  in; so does a name with `%` in a Game or Dialog text, a printf format that
+  would read it as a conversion.
 - **Grammar:** languages that decline names (German, Polish) can ask for a form
   with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
   data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item

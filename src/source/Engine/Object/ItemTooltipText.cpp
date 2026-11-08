@@ -124,53 +124,56 @@ bool Resolve(std::string_view name, std::span<const std::pair<std::string, std::
     return false;
 }
 
-// The text with its item references ({item:14,25}) replaced by the items' names in the item name language, so the item
-// names follow "Translate item names" while the rest of the text stays in the UI language; an English text shown for a
-// language without a translation of its own names them in English, as the UI texts do. A reference to no item stays as
-// written, and so then does the rest of the text (FindPlaceholders refuses it).
-std::string WithItemNames(std::string_view text, bool englishNames)
+// The name an item reference of the text shows ("item:14,25", written `written`): in the item name language, so the
+// names follow "Translate item names" while the rest of the text stays in the UI language, or in English for an English
+// text shown for a language without a translation of its own, as the UI texts do. The reference as written when it
+// names nothing; the rest of the text goes on.
+std::string ItemNameOf(std::string_view name, std::string_view written, std::string_view nameLocale)
+{
+    const std::optional<Data::Translation::ItemReference> reference = Data::Translation::ParseItemReferenceName(name);
+    if (!reference)
+    {
+        return std::string(written);
+    }
+    std::string named = Data::Items::ResolveReferencedName(g_ItemDatabase, *reference, nameLocale).text;
+    return named.empty() ? std::string(written) : named;
+}
+
+Compiled CompileText(std::string_view text, std::span<const std::pair<std::string, std::string>> bound,
+                     const Data::Items::ItemDefinition* definition, std::string_view language, bool englishNames)
 {
     const std::string_view nameLocale =
         englishNames ? Data::LocalizedString::NeutralLocale : std::string_view(g_ItemDatabase.GetDisplayLocale());
-    std::string named;
-    size_t position = 0;
-    for (const Data::Translation::ItemReferenceMatch& match : Data::Translation::FindItemReferences(text))
-    {
-        named.append(text.substr(position, match.position - position));
-        const Data::Items::ReferencedName name =
-            match.reference ? Data::Items::ResolveReferencedName(g_ItemDatabase, *match.reference, nameLocale)
-                            : Data::Items::ReferencedName{};
-        named.append(name.text.empty() ? text.substr(match.position, match.length) : std::string_view(name.text));
-        position = match.position + match.length;
-    }
-    named.append(text.substr(position));
-    return named;
-}
-
-Compiled CompileText(std::string_view written, std::span<const std::pair<std::string, std::string>> bound,
-                     const Data::Items::ItemDefinition* definition, std::string_view language, bool englishNames)
-{
     Compiled compiled;
-    const std::string named = WithItemNames(written, englishNames);
-    const std::string_view text = named;
     const Data::Items::PlaceholderSpans found = Data::Items::FindPlaceholders(text);
+    // The text since the last value, with the items' names put in.
+    std::string literal;
     size_t position = 0;
     for (const Data::Items::PlaceholderSpan& span : found.spans)
     {
+        literal.append(text.substr(position, span.begin - position));
+        if (Data::Items::IsItemReferencePlaceholder(span.name))
+        {
+            // Put in now: the names change only with the name version, which compiles the texts again.
+            literal.append(ItemNameOf(span.name, text.substr(span.begin, span.end - span.begin), nameLocale));
+            position = span.end;
+            continue;
+        }
         Piece piece;
-        piece.literal = Wide(text.substr(position, span.begin - position));
         if (!Resolve(span.name, bound, definition, language, piece))
         {
-            // As FillPlaceholders: a placeholder without a value stays as written, and so does the rest (the last
-            // piece, from the end of the placeholder before).
+            // As FillPlaceholders: a placeholder without a value stays as written, and so does the rest.
+            position = span.begin;
             break;
         }
+        piece.literal = Wide(literal);
+        literal.clear();
         piece.rest = Wide(text.substr(span.begin));
         compiled.pieces.push_back(std::move(piece));
         position = span.end;
     }
     Piece last;
-    last.literal = Wide(text.substr(std::min(position, text.size())));
+    last.literal = Wide(literal + std::string(text.substr(std::min(position, text.size()))));
     compiled.pieces.push_back(std::move(last));
     return compiled;
 }

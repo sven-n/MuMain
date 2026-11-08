@@ -53,7 +53,8 @@ struct Compiled
 
 // A line's text (already in its language), with its placeholders bound by the line's "values" (`bound`) and resolved
 // for the item of `definition` (its level values, in `language`; nullptr where a line has none): a placeholder that
-// names nothing, or a text whose braces are wrong, stays as written from there on. Compiled on first use and kept
+// names nothing, or a text whose braces are wrong, stays as written from there on; an item reference ({item:14,25})
+// that names nothing stays as written alone. Compiled on first use and kept
 // until the item data, the item stat file or the tooltip file changes (ItemDatabase::GetVersion). The compiled text is
 // found by where `text` and `bound` are, without comparing them: they are the item data's own (or the tooltip file's),
 // which stay where they are and as they are until the version changes. Another text needs Clear() first.

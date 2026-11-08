@@ -404,7 +404,7 @@ void CItemDataHandler::ConnectItemTexts()
         [this](const Data::Translation::ItemReference& reference,
                std::string_view textLocale) -> std::optional<std::string>
         {
-            const Data::Items::ReferencedName name = Data::Items::ResolveReferencedName(
+            const Data::Items::ReferencedName name = Data::Items::ResolveUiTextName(
                 g_ItemDatabase, reference, Data::Items::GetItemNameLocale(textLocale, m_translateItemNames));
             return name.text.empty() ? std::nullopt : std::optional<std::string>(name.text);
         });

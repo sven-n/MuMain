@@ -27,6 +27,8 @@ struct CheckedText
     int group = Items::ItemDataIssue::NoItem; // the item whose text it is, or none
     int number = Items::ItemDataIssue::NoItem;
     std::string field; // the key, or the item file's field ("description[0].text.pl")
+    // A UI text (Game, Dialog), a printf format: a name with a '%' cannot be put in (ResolveUiTextName).
+    bool uiText = false;
 };
 
 // The problems of one text. `english` is the English text of the same key or line (empty for the English text

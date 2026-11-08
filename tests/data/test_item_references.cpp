@@ -198,7 +198,7 @@ TEST_CASE("Changing the name cases is a change of the item data and of its names
     CHECK(database.GetNameVersion() != nameVersion);
 }
 
-TEST_CASE("A name a text would read as its own format is not put into it [data][items][texts]")
+TEST_CASE("A name with a '%' is kept out of a UI text, a printf format, and not out of other texts [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();
     ItemDefinition elixir;
@@ -209,17 +209,25 @@ TEST_CASE("A name a text would read as its own format is not put into it [data][
     ItemDatabase database;
     database.Build(items);
 
-    const ReferencedName percent = ResolveReferencedName(database, Reference(14, 40), "en");
+    const ReferencedName percent = Data::Items::ResolveUiTextName(database, Reference(14, 40), "en");
     CHECK(percent.text.empty());
     CHECK(percent.problem == ItemReferenceProblem::UnshowableName);
-    CHECK(ResolveReferencedName(database, Reference(14, 40), "pl").problem == ItemReferenceProblem::UnshowableName);
+    // Braces are no printf conversion; the item data's texts (the tooltip) take the '%' too.
+    CHECK(Data::Items::ResolveUiTextName(database, Reference(14, 40), "pl").text == "Eliksir {x}");
+    CHECK(ResolveReferencedName(database, Reference(14, 40), "en").text == "Elixir 10%");
 
-    std::vector<ItemDataIssue> issues;
-    Data::Translation::CheckItemReferences(
-        database, {"Drink {item:14,40}", "en", "Game.en.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Drink"},
-        {}, issues);
-    REQUIRE(issues.size() == 1);
-    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    const auto check = [&](bool uiText)
+    {
+        std::vector<ItemDataIssue> issues;
+        Data::Translation::CheckedText text{"Drink {item:14,40}", "en", "x", ItemDataIssue::NoItem,
+                                            ItemDataIssue::NoItem, "Drink", uiText};
+        Data::Translation::CheckItemReferences(database, text, {}, issues);
+        return issues;
+    };
+    const std::vector<ItemDataIssue> uiIssues = check(true);
+    REQUIRE(uiIssues.size() == 1);
+    CHECK(uiIssues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(check(false).empty());
 }
 
 TEST_CASE("A UI translation that spells names English writes by number is a warning where items have names "

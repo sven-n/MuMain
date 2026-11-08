@@ -325,8 +325,8 @@ TEST_CASE("A tooltip text names an item in the item name language and the rest i
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de") == L"Combine Goldschlüssel at level 0");
     g_ItemDataHandler.SetTranslateItemNames(false);
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de") == L"Combine Gold Key at level 0");
-    // No item 14,511: the text stays as written from the reference on.
-    CHECK(Tooltip("Combine {item:14,511} now", "en") == L"Combine {item:14,511} now");
+    // No item 14,511: the reference stays as written, and the rest of the line is filled in.
+    CHECK(Tooltip("Combine {item:14,511} at level {level}", "en") == L"Combine {item:14,511} at level 0");
 }
 
 TEST_CASE("A tooltip line without a translation of its own names the items in English, as the UI texts do "

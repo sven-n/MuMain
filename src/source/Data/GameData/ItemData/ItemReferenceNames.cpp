@@ -19,9 +19,8 @@ constexpr std::string_view LevelPlusOnePlaceholder = "levelPlusOne";
 // How many name lines deep a name may come from name lines that name other items; deeper (a line that names its own
 // level) cannot be filled.
 constexpr int MaxNameDepth = 4;
-// What a text would read as its own in a name put into it: a printf conversion of the UI texts, a placeholder of the
-// item data's texts.
-constexpr std::string_view UnshowableNameCharacters = "%{}";
+// What a UI text, a printf format, would read as a conversion in a name put into it.
+constexpr char PrintfConversion = '%';
 
 ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale,
                        int depth);
@@ -245,8 +244,13 @@ bool KeepsReferenceAsWritten(ItemReferenceProblem problem)
 ReferencedName ResolveReferencedName(const ItemDatabase& database, const ItemReference& reference,
                                      std::string_view locale)
 {
-    ReferencedName name = Resolve(database, reference, locale, 0);
-    if (name.text.find_first_of(UnshowableNameCharacters) != std::string::npos)
+    return Resolve(database, reference, locale, 0);
+}
+
+ReferencedName ResolveUiTextName(const ItemDatabase& database, const ItemReference& reference, std::string_view locale)
+{
+    ReferencedName name = ResolveReferencedName(database, reference, locale);
+    if (name.text.find(PrintfConversion) != std::string::npos)
     {
         return {{}, ItemReferenceProblem::UnshowableName};
     }
