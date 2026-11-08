@@ -29,7 +29,6 @@ constexpr std::array<CriticalRateBuff, 2> CriticalRateBuffs{{
     {EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED, AT_SKILL_ADD_CRITICAL_STR3},
 }};
 
-
 void AddWornLuck(CriticalDamageRate& rate)
 {
     for (ITEM& item : CharacterMachine->Equipment)

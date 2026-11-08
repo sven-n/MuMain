@@ -434,10 +434,12 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const CriticalHitParts parts{
-        GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
-        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale(),
-        g_ItemDataHandler.GetTranslateItemNames()};
+    const CriticalHitParts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
+                                 GameLogic::Combat::GetHeroCriticalDamageBonus(),
+                                 GameLogic::Combat::GetHeroExcellentDamageBonus(),
+                                 m_DamageRange,
+                                 I18N::GetCurrentLocale(),
+                                 g_ItemDataHandler.GetTranslateItemNames()};
     // The texts are formatted again only when what they show changes.
     if (m_BuiltParts != parts)
     {
