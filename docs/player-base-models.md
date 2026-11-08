@@ -44,6 +44,12 @@ As for every model texture, the part of a name after its first `_` carries drawi
 `hairhq_R` keeps the `R` (glowing) flag of the original `hair_R`, so the Dark Lord's hair glows
 in both sets.
 
+When updating a texture pack that overrides the previous `Player/hair_hq_player.OZJ`, rename
+or copy that override to `Player/hairhq_R.OZJ` inside the pack. The updated Dark Lord and Lord
+Emperor heads no longer request the old name. Update the two improved head BMDs and the base
+hair texture together; an incremental install may retain the old base alias, but the updated
+heads do not use it.
+
 Texture names also determine mesh roles: a lower-case `ski` prefix, or `level` in any case,
 marks skin; lower-case `hair` marks hair. Preserve those roles and the original mesh order.
 A differently named skin texture may load, but will not be hidden with skin and will receive
