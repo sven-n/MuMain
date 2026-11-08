@@ -702,7 +702,8 @@ bool OptionalMeshField(const char* label, std::optional<int>& mesh, const char* 
 }
 
 // A light's red, green and blue: a swatch with a color picker while all three are numbers (design L42), and with Each
-// channel apart a field each, so one can change over time; it stays on while one does.
+// channel apart a field each, so one can change over time; it stays on while one does. Its state is kept in the ID
+// scope the field is drawn in: the Style Editor gives each layer of each look its own.
 bool ColorField(std::array<Number, 3>& color)
 {
     const bool numbers =

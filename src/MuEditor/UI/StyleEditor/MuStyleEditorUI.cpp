@@ -771,6 +771,9 @@ void CMuStyleEditorUI::RenderLayers()
     ImGui::EndChild();
 
     ImGui::PushID("Line");
+    // Each line of each look keeps its own field state, such as "Each channel apart".
+    ImGui::PushID(m_draftOf.c_str());
+    ImGui::PushID(static_cast<int>(m_line));
     // The mesh fields offer the picked item's parts by name (design L42).
     const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
     if (m_line < m_draft.layers.size())
@@ -781,6 +784,8 @@ void CMuStyleEditorUI::RenderLayers()
     {
         MuEditor::Looks::Fields::ItemValues(m_draft.itemValuesAfter, parts);
     }
+    ImGui::PopID();
+    ImGui::PopID();
     ImGui::PopID();
 }
 
@@ -1043,6 +1048,9 @@ void CMuStyleEditorUI::RenderEffectSettings()
         return;
     }
     ImGui::PushID("Effect");
+    // Each effect of each look keeps its own field state, such as "Each channel apart".
+    ImGui::PushID(m_draftOf.c_str());
+    ImGui::PushID(static_cast<int>(m_line));
     const std::vector<LookPart> parts = MuEditor::Looks::PartsOf(g_ItemSelection.GetItemType());
     if (m_allFields)
     {
@@ -1052,6 +1060,8 @@ void CMuStyleEditorUI::RenderEffectSettings()
     {
         MuEditor::Looks::Fields::Effect(layer, effect, parts);
     }
+    ImGui::PopID();
+    ImGui::PopID();
     ImGui::PopID();
 }
 
