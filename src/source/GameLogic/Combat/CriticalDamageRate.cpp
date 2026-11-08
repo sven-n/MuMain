@@ -27,6 +27,10 @@ constexpr std::array<CriticalRateBuff, 2> CriticalRateBuffs{{
     {EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED, AT_SKILL_ADD_CRITICAL_STR3},
 }};
 
+// The Scroll of Battle (14/97) adds 20 % while its buff is on (OpenMU's BuffItems: CriticalDamageChance +0.2). The
+// hero reads it from the inventory, so the buff is always the hero's own.
+constexpr int ScrollOfBattleCriticalRate = 20;
+
 void AddWornLuck(CriticalDamageRate& rate)
 {
     for (ITEM& item : CharacterMachine->Equipment)
@@ -60,9 +64,17 @@ void AddOwnBuff(CriticalDamageRate& rate)
         }
     }
 }
+
+void AddScrollOfBattle(CriticalDamageRate& rate)
+{
+    if (Hero != nullptr && g_isCharacterBuff((&Hero->Object), eBuff_Scroll_Battle))
+    {
+        rate.scrollOfBattle = ScrollOfBattleCriticalRate;
+    }
+}
 } // namespace
 
-int CriticalDamageRate::Buff() const
+int CriticalDamageRate::MasterSkillBuff() const
 {
     return static_cast<int>(std::lround(buff));
 }
@@ -80,6 +92,7 @@ CriticalDamageRate GetHeroCriticalDamageRate()
     rate.setOptions = setOptions;
     rate.socketOptions = g_SocketItemMgr.m_StatusBonus.m_iCriticalDamageRateBonus;
     AddOwnBuff(rate);
+    AddScrollOfBattle(rate);
     return rate;
 }
 } // namespace GameLogic::Combat

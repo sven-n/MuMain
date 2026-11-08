@@ -238,6 +238,15 @@ TEST_CASE("The hero's own mastered buff adds its master skill's value to the cri
     CHECK(rate.buffSkill == AT_SKILL_ADD_CRITICAL_STR3);
     CHECK(rate.Buff() == 2);
     hero.HeroCharacter().Object.m_BuffMap.UnRegisterBuff(EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED);
+
+    // The Scroll of Battle adds its 20 % to the buffs' part; the hero reads it, so it is always the hero's own.
+    hero.HeroCharacter().Object.m_BuffMap.RegisterBuff(eBuff_Scroll_Battle);
+    rate = GetHeroCriticalDamageRate();
+    CHECK(rate.scrollOfBattle == 20);
+    CHECK(rate.MasterSkillBuff() == 0);
+    CHECK(rate.Buff() == 20);
+    CHECK(rate.Total() == 20);
+    hero.HeroCharacter().Object.m_BuffMap.UnRegisterBuff(eBuff_Scroll_Battle);
 }
 
 // The line shows what the worn items add, and what the own buff adds in brackets; its hint lists every part above 0.
@@ -245,6 +254,8 @@ TEST_CASE("The character window's critical damage rate line and its hint [data][
 {
     ClientDataScope client(ClientDirectory);
     I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
 
     CriticalDamageRate rate;
@@ -279,8 +290,14 @@ TEST_CASE("The character window's critical damage rate line and its hint [data][
     CHECK(hint.front().bold);
     CHECK(hint.back().bold);
 
+    rate.scrollOfBattle = 20;
+    CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Critical damage rate: 33% (+29%)");
+    CHECK(Texts(UI::Character::BuildCriticalDamageRateHint(rate)) ==
+          std::vector<std::string>{"Critical damage rate", "Luck (\xC3\x97" "3): 15%", "Set options: 10%",
+                                   "Socket options: 8%", buffName + ": +9%", "Scroll of Battle: +20%", "Total: 62%"});
+
     I18N::SetLocale("de");
-    CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Kritische Schadensrate: 33% (+9%)");
+    CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Kritische Schadensrate: 33% (+29%)");
     I18N::SetLocale("en");
 }
 

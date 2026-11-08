@@ -49,10 +49,15 @@ std::vector<Line> BuildCriticalDamageRateHint(const GameLogic::Combat::CriticalD
     {
         lines.push_back(MakeHintLine(FormatHintText(I18N::Game::SocketOptionsD, rate.socketOptions)));
     }
-    if (rate.Buff() > 0)
+    if (rate.MasterSkillBuff() > 0)
     {
-        lines.push_back(
-            MakeHintLine(FormatHintText(I18N::Game::LsD, BuffName(rate.buffSkill), rate.Buff()), LineColor::Purple));
+        lines.push_back(MakeHintLine(
+            FormatHintText(I18N::Game::LsD, BuffName(rate.buffSkill), rate.MasterSkillBuff()), LineColor::Purple));
+    }
+    if (rate.scrollOfBattle > 0 && ItemAttribute != nullptr)
+    {
+        lines.push_back(MakeHintLine(
+            FormatHintText(I18N::Game::LsD, ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name, rate.scrollOfBattle), LineColor::Purple));
     }
     lines.push_back(MakeHintLine(FormatHintText(I18N::Game::TotalD, rate.Total()), LineColor::White, true));
     return lines;

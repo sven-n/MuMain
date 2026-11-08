@@ -21,7 +21,8 @@ struct CriticalDamageRateLine
 
 CriticalDamageRateLine BuildCriticalDamageRateLine(const GameLogic::Combat::CriticalDamageRate& rate);
 
-// The title, each part above 0 (the luck, the set options, the socket options, the buff) and the total.
+// The title, each part above 0 (the luck, the set options, the socket options, the master skill's buff, the Scroll of
+// Battle) and the total.
 std::vector<UI::RmlBridge::Tooltip::Line>
 BuildCriticalDamageRateHint(const GameLogic::Combat::CriticalDamageRate& rate);
 } // namespace UI::Character

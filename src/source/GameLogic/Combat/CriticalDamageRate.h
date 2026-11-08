@@ -4,8 +4,8 @@
 
 // The hero's critical damage rate in percent, by where it comes from, added up the way the server adds up its
 // critical damage chance (OpenMU's CriticalDamageChance): the luck of the worn items, the active ancient set options,
-// the socket options and the hero's own mastered buff while it is on. No stat changes it. A critical hit deals the
-// maximum damage.
+// the socket options, the hero's own mastered buff and the Scroll of Battle while they are on. No stat changes it. A
+// critical hit deals the maximum damage.
 namespace GameLogic::Combat
 {
 struct CriticalDamageRate
@@ -21,14 +21,21 @@ struct CriticalDamageRate
     // sent it, in percent.
     ActionSkillType buffSkill = AT_SKILL_UNDEFINED;
     float buff = 0.f;
+    // The Scroll of Battle's part while its buff is on.
+    int scrollOfBattle = 0;
 
     // What the worn items add.
     int Items() const
     {
         return luck + setOptions + socketOptions;
     }
-    // What the buff adds, in whole percent.
-    int Buff() const;
+    // What the master skill's buff adds, in whole percent.
+    int MasterSkillBuff() const;
+    // What the buffs add: the master skill's and the Scroll of Battle.
+    int Buff() const
+    {
+        return MasterSkillBuff() + scrollOfBattle;
+    }
     int Total() const
     {
         return Items() + Buff();
