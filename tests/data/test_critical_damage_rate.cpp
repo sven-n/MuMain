@@ -420,8 +420,21 @@ TEST_CASE("A staff's harmony option adds critical damage like a weapon's [data][
     staff.HasHarmonyOption = true;
     staff.HarmonyOptionType = StaffCriticalDamageHarmony;
     staff.HarmonyOptionLevel = 13;
-    equipment.Wear(EQUIPMENT_WEAPON_RIGHT, staff);
+    ITEM& worn = equipment.Wear(EQUIPMENT_WEAPON_RIGHT, staff);
     CHECK(GetHeroCriticalDamageBonus().harmonyOptions == harmony.HarmonyJewelLevel[13]);
+
+    // The item's kind picks the table: a staff's option 6 and a weapon's option 5 are other options.
+    worn.Jewel_Of_Harmony_Option = WeaponCriticalDamageHarmony;
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == 0);
+    hero.Hero().Class = CLASS_BLADEKNIGHT;
+    hero.HeroCharacter().Class = CLASS_BLADEKNIGHT;
+    ItemCreationParams kris = Item(0, 0);
+    kris.Level = 13;
+    kris.HasHarmonyOption = true;
+    kris.HarmonyOptionType = StaffCriticalDamageHarmony;
+    kris.HarmonyOptionLevel = 13;
+    equipment.Wear(EQUIPMENT_WEAPON_RIGHT, kris);
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == 0);
 }
 
 // Increase Critical Damage adds 1 per 30 energy and 1 per 25 command of the one who cast it, and its first power-up's
