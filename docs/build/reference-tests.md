@@ -121,6 +121,6 @@ that check with a message; CI still enforces it. `git push --no-verify` skips th
    error. CI builds with GCC 15, which does not report it, and with the
    precompiled header only in its release runs. So add a file that gets it to
    `mu_allow_gcc13_stringop_overflow(<test> <file>...)` in the module's
-   `CMakeLists.txt`
+   `CMakeLists.txt`, below the test's `mu_add_test` (`<test>` is its `NAME`)
    ([`cmake/StdafxPrecompiledHeader.cmake`](../../cmake/StdafxPrecompiledHeader.cmake)):
    there it stays a warning with GCC older than 15.
