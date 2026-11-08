@@ -434,28 +434,20 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const CriticalHitParts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
-                                 GameLogic::Combat::GetHeroCriticalDamageBonus(),
-                                 GameLogic::Combat::GetHeroExcellentDamageBonus(),
-                                 m_DamageRange,
-                                 I18N::GetCurrentLocale(),
-                                 g_ItemDataHandler.GetTranslateItemNames()};
-    // The texts are formatted again only when what they show changes.
-    if (m_BuiltParts != parts)
-    {
-        m_BuiltParts = parts;
-        m_CriticalDamageRateLine = UI::Character::BuildCriticalDamageRateLine(parts.rate);
-        m_DamageHintLines = UI::Character::BuildDamageHint(parts.damageRange, parts.bonus, parts.excellentBonus);
-        m_CriticalDamageRateHintLines = UI::Character::BuildCriticalDamageRateHint(parts.rate);
-    }
+    const UI::Character::CriticalHitTexts::Parts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
+                                                       GameLogic::Combat::GetHeroCriticalDamageBonus(),
+                                                       GameLogic::Combat::GetHeroExcellentDamageBonus(),
+                                                       m_DamageRange,
+                                                       I18N::GetCurrentLocale(),
+                                                       g_ItemDataHandler.GetTranslateItemNames()};
+    m_CriticalHitTexts.Update(parts);
+    const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
 
     auto& model = m_RmlView.GetModel();
     // A theme reload makes a new model, so the line is compared with the model's, not with what was built.
-    if (model.criticalDamageRateLine.text != m_CriticalDamageRateLine.text ||
-        model.criticalDamageRateLine.source != m_CriticalDamageRateLine.source)
+    if (model.criticalDamageRateLine.text != line.text || model.criticalDamageRateLine.source != line.source)
     {
-        model.criticalDamageRateLine = {m_CriticalDamageRateLine.text, m_CriticalDamageRateLine.source,
-                                        CriticalDamageRateHint};
+        model.criticalDamageRateLine = {line.text, line.source, CriticalDamageRateHint};
         m_RmlView.MarkDirty("critical_damage_rate_line");
     }
     // BuildAttributeLines writes the damage line every frame; it takes the buffs' colour here.
@@ -467,10 +459,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     switch (m_LineHint.Hovered())
     {
     case DamageHint:
-        m_LineHint.Show(m_DamageHintLines);
+        m_LineHint.Show(m_CriticalHitTexts.DamageHintLines());
         break;
     case CriticalDamageRateHint:
-        m_LineHint.Show(m_CriticalDamageRateHintLines);
+        m_LineHint.Show(m_CriticalHitTexts.RateHintLines());
         break;
     default:
         m_LineHint.Hide();

@@ -16,6 +16,7 @@
 #include "I18N/All.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "UI/Character/CriticalHitTexts.h"
 #include "UI/Character/DamageHint.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -498,4 +499,49 @@ TEST_CASE("The character window's damage line hint [data][items]")
                                                   "Critical damage", "Set options: +50", "Harmony options: +12",
                                                   "Socket options: +30", "Total: +92"});
     CHECK(hint[2].color == UI::RmlBridge::Tooltip::LineColor::White);
+}
+
+// The window's critical hit texts are formatted again only when what they show changes: the rate, the critical and
+// excellent damage bonus, the damage range, the language or the item names.
+TEST_CASE("The critical hit texts are built again only when what they show changes [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    TooltipDataScope data;
+    UI::Character::CriticalHitTexts texts;
+    UI::Character::CriticalHitTexts::Parts parts;
+    parts.damageRange = {1909, 2575};
+    parts.locale = "en";
+
+    CHECK(texts.Update(parts));
+    CHECK(texts.RateLine().text == "Critical damage rate: 0%");
+    CHECK_FALSE(texts.Update(parts));
+
+    parts.rate.luckItems = 1;
+    parts.rate.luck = 5;
+    CHECK(texts.Update(parts));
+    CHECK(texts.RateLine().text == "Critical damage rate: 5%");
+    CHECK(Texts(texts.RateHintLines()).back() == "Total: 5%");
+
+    parts.bonus.setOptions = 50;
+    CHECK(texts.Update(parts));
+    CHECK(Texts(texts.DamageHintLines())[2] == "Critical hit: 2625");
+    parts.excellentBonus = 20;
+    CHECK(texts.Update(parts));
+    CHECK(Texts(texts.DamageHintLines())[3] == "Excellent hit: 3160");
+    parts.damageRange.maximum = 2600;
+    CHECK(texts.Update(parts));
+    CHECK(Texts(texts.DamageHintLines())[1] == "Normal hit: 1909~2600");
+
+    I18N::SetLocale("de");
+    parts.locale = "de";
+    CHECK(texts.Update(parts));
+    CHECK(texts.RateLine().text == "Kritische Schadensrate: 5%");
+    I18N::SetLocale("en");
+    parts.locale = "en";
+    CHECK(texts.Update(parts));
+
+    parts.translatedItemNames = true;
+    CHECK(texts.Update(parts));
+    CHECK_FALSE(texts.Update(parts));
 }
