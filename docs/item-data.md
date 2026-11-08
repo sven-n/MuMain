@@ -1002,6 +1002,12 @@ and their total:
 | Own buff | While it is on: the Dark Lord's Increase Critical Damage, 1 per 30 energy and 1 per 25 command, plus its first power-up's value. The damage line takes the colour for buffs meanwhile |
 
 The excellent damage bonus comes from ancient set options and seed spheres.
+
+A broken socket item adds none of its seed spheres, as on the server: not
+these parts, and not its other socket options and socket set bonus either
+(damage, defense, attack speed, skill damage, the stat bonuses). A stat bonus
+lost that way can also leave another worn item's requirements unmet, and then
+that item's options stop counting too.
 As with the rate, the buff counts when the hero has the skill, with the
 hero's energy and command; a buff from a party member is counted only that
 way, since its value comes from that member's energy and command.
