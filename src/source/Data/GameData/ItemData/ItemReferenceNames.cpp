@@ -173,8 +173,8 @@ ReferencedName NameOfLine(const ItemDatabase& database, const ItemDefinition& de
     }
     if (text->Get(locale).find('{') != std::string::npos)
     {
-        const std::string_view textLocale = text->HasOwn(locale) ? locale : LocalizedString::NeutralLocale;
-        return FillNameLine(database, definition, text->Get(locale), reference, locale, textLocale, depth);
+        return FillNameLine(database, definition, text->Get(locale), reference, locale, GetTextLanguage(*text, locale),
+                            depth);
     }
     return NameIn(database, *text, line.nameForms, locale, reference.form);
 }

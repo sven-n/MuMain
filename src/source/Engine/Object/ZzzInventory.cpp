@@ -49,6 +49,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ItemNameParts.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemTooltipLines.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/TextLineWrap.h"
 #include "Core/Text/Utf8.h"
@@ -1368,13 +1369,6 @@ std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, 
                : std::nullopt;
 }
 
-// The language a line's text is written in: `locale`, or English where the line has no text of its own in it, whose
-// item references then name the items in English.
-static std::string_view TextLanguage(const Data::LocalizedString& text, std::string_view locale)
-{
-    return text.HasOwn(locale) ? locale : Data::LocalizedString::NeutralLocale;
-}
-
 // Writes one line of the item's own (of its description, or one it adds to its layout) as WriteItemDescriptionLines
 // does, when it is shown at `level` and its conditions hold: wrapped, at most `rowsLeft` rows, which it lowers by the
 // rows it wrote.
@@ -1397,11 +1391,12 @@ static void WriteItemDescriptionLine(const Data::Items::ItemDefinition& definiti
     const std::string_view locale = I18N::GetCurrentLocale();
     // A longer text is cut here; reading the item warns about one (Data::Items::MaxDescriptionLineLength).
     wchar_t filled[Data::Items::MaxDescriptionLineLength + 1];
-    const size_t length = lineText == nullptr
-                              ? 0
-                              : TooltipText::Write(TooltipText::Compile(lineText->Get(locale), line.values, &definition,
-                                                                        locale, TextLanguage(*lineText, locale)),
-                                                   level, values, filled, std::size(filled));
+    const size_t length =
+        lineText == nullptr
+            ? 0
+            : TooltipText::Write(TooltipText::Compile(lineText->Get(locale), line.values, &definition, locale,
+                                                      Data::Items::GetTextLanguage(*lineText, locale)),
+                                 level, values, filled, std::size(filled));
     const std::wstring text(filled, length);
     // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
     // `\n`): a row left empty would end the tooltip there.
@@ -1501,9 +1496,9 @@ void WriteItemTooltipLayoutRow(const Data::Items::TooltipLayoutLine& line, const
     // the row, as the tooltip's own lines are.
     const std::string_view locale = I18N::GetCurrentLocale();
     if (text == nullptr || text->IsEmpty() ||
-        TooltipText::Write(
-            TooltipText::Compile(text->Get(locale), line.values, nullptr, locale, TextLanguage(*text, locale)), level,
-            values, TextList[TextNum], std::size(TextList[TextNum])) == 0)
+        TooltipText::Write(TooltipText::Compile(text->Get(locale), line.values, nullptr, locale,
+                                                Data::Items::GetTextLanguage(*text, locale)),
+                           level, values, TextList[TextNum], std::size(TextList[TextNum])) == 0)
     {
         // A blank line, as the tooltip writes its own; so is a text without one in the UI's language: a row left
         // empty would end the tooltip there.
@@ -1698,9 +1693,9 @@ static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameL
     const std::string& locale = g_ItemDatabase.GetDisplayLocale();
     // A longer text is cut here; reading the item warns about one (Data::Items::MaxNameLineLength).
     wchar_t filled[Data::Items::MaxNameLineLength + 1];
-    const size_t length = TooltipText::Write(
-        TooltipText::Compile(text->Get(locale), line.values, &definition, locale, TextLanguage(*text, locale)), level,
-        values, filled, std::size(filled));
+    const size_t length = TooltipText::Write(TooltipText::Compile(text->Get(locale), line.values, &definition, locale,
+                                                                  Data::Items::GetTextLanguage(*text, locale)),
+                                             level, values, filled, std::size(filled));
     if (length == 0)
         return std::nullopt;
     return std::wstring(filled, length);

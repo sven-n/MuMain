@@ -63,6 +63,11 @@ const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const ItemD
     return FindLineText(tooltips, line.text, line.textName);
 }
 
+std::string_view GetTextLanguage(const LocalizedString& text, std::string_view locale)
+{
+    return text.HasOwn(locale) ? locale : LocalizedString::NeutralLocale;
+}
+
 std::string LineTextField(const std::string& lineField, std::string_view locale)
 {
     std::string field = lineField + ".text";

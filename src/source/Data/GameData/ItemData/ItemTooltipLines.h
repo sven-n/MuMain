@@ -38,6 +38,10 @@ const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const Local
                                     const std::string& textName);
 const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const ItemDescriptionLine& line);
 
+// The language `text` is shown in for `locale`: `locale` where it has a text of its own there, else English, which
+// LocalizedString::Get falls back to. Its item references name the items in that language.
+std::string_view GetTextLanguage(const LocalizedString& text, std::string_view locale);
+
 // The field of a line's text in one language, as the item file writes it: "description[2].text" for English,
 // "description[2].text.de" for a translation.
 std::string LineTextField(const std::string& lineField, std::string_view locale);
