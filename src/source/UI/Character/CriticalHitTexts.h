@@ -17,7 +17,8 @@ namespace UI::Character
 class CriticalHitTexts
 {
 public:
-    // What the texts show, in which language and with which item names (the Scroll of Battle's line names the item).
+    // What the texts show, in which language, and the name the Scroll of Battle's line shows (it changes with
+    // "Translate item names", a rename in the item editor and a reload of the items).
     struct Parts
     {
         GameLogic::Combat::CriticalDamageRate rate;
@@ -25,7 +26,7 @@ public:
         int excellentBonus = 0;
         DamageRange damageRange;
         std::string locale;
-        bool translatedItemNames = false;
+        std::wstring scrollOfBattleName;
 
         bool operator==(const Parts&) const = default;
     };

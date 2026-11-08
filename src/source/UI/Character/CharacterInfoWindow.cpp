@@ -26,7 +26,7 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
-#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "UI/Character/HintLines.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
@@ -439,7 +439,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
                                                        GameLogic::Combat::GetHeroExcellentDamageBonus(),
                                                        m_DamageRange,
                                                        I18N::GetCurrentLocale(),
-                                                       g_ItemDataHandler.GetTranslateItemNames()};
+                                                       UI::Character::ItemName(ITEM_SCROLL_OF_BATTLE)};
     m_CriticalHitTexts.Update(parts);
     const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
 

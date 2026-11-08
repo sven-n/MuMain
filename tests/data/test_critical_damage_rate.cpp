@@ -513,7 +513,7 @@ TEST_CASE("The character window's damage line hint [data][items]")
 }
 
 // The window's critical hit texts are formatted again only when what they show changes: the rate, the critical and
-// excellent damage bonus, the damage range, the language or the item names.
+// excellent damage bonus, the damage range, the language or the Scroll of Battle's name.
 TEST_CASE("The critical hit texts are built again only when what they show changes [data][items]")
 {
     ClientDataScope client(ClientDirectory);
@@ -552,7 +552,8 @@ TEST_CASE("The critical hit texts are built again only when what they show chang
     parts.locale = "en";
     CHECK(texts.Update(parts));
 
-    parts.translatedItemNames = true;
+    // The Scroll of Battle renamed ("Translate item names", the item editor).
+    parts.scrollOfBattleName = L"Schriftrolle des Kampfes";
     CHECK(texts.Update(parts));
     CHECK_FALSE(texts.Update(parts));
 }
