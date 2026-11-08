@@ -17,7 +17,8 @@ enum class ItemReferenceProblem : unsigned char
     UnknownItem,
     // No item has the level (above +15): the text keeps the reference as written.
     NoSuchLevel,
-    // The level has no name line of its own: the name is the item's name and " +level", as the tooltip writes it.
+    // The level has no name line of its own, or its line's text is empty: the name is the item's name and " +level",
+    // as the tooltip writes it.
     StandardName,
     // The level's name line needs values only the game has (a skill's or monster's name, a bundle count), or names
     // its own level through name lines: the text keeps the reference as written.

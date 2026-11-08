@@ -254,6 +254,31 @@ TEST_CASE("A reference at a level takes the name line the tooltip takes [data][i
     CHECK(name.problem == ItemReferenceProblem::StandardName);
 }
 
+TEST_CASE("A level's name line with an empty text gives the standard name, as the tooltip does [data][items][texts]")
+{
+    ItemDefinition ring;
+    ring.group = 13;
+    ring.number = 20;
+    ring.names = Data::LocalizedString::Parse("Wizards Ring");
+    // "text": "" at +3, and a line at +4 whose placeholder fills in to nothing.
+    ring.nameLines.push_back(LiteralNameLine("", 3));
+    ring.nameLines.push_back(LiteralNameLine("{shine}", 4));
+    ItemLevelValues shine;
+    shine.name = "shine";
+    shine.values.resize(ItemLevelCount);
+    ring.levelValues.push_back(shine);
+    ItemDatabase database;
+    database.Build(std::vector<ItemDefinition>{ring});
+
+    for (const int level : {3, 4})
+    {
+        INFO("+" << level);
+        const ReferencedName name = ResolveReferencedName(database, Reference(13, 20, level), "en");
+        CHECK(name.text == "Wizards Ring +" + std::to_string(level));
+        CHECK(name.problem == ItemReferenceProblem::StandardName);
+    }
+}
+
 TEST_CASE("A level's name line may name another item, in the language the line is written in [data][items][texts]")
 {
     std::vector<ItemDefinition> items = NamedItems();

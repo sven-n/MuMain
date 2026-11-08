@@ -138,23 +138,26 @@ ReferencedName FillNameLine(const ItemDatabase& database, const ItemDefinition& 
     return {std::move(name), base.problem};
 }
 
-ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& definition,
-                           const ItemReference& reference, std::string_view locale, int depth)
+// The standard name at the reference's level, as the tooltip writes it without a name line: at +0 the item's name
+// itself, above it with its level.
+ReferencedName StandardNameAt(const ItemDatabase& database, const ItemDefinition& definition,
+                              const ItemReference& reference, std::string_view locale)
 {
     const int level = *reference.level;
-    const ItemNameLine* line = FindNameLineAt(definition, level);
-    if (line == nullptr)
+    ReferencedName name = NameIn(database, definition.names, definition.nameForms, locale, reference.form);
+    if (level > 0)
     {
-        // The standard name: at +0 the item's name itself, above it with its level.
-        ReferencedName name = NameIn(database, definition.names, definition.nameForms, locale, reference.form);
-        if (level > 0)
-        {
-            name.text += " +" + std::to_string(level);
-            name.problem = ItemReferenceProblem::StandardName;
-        }
-        return name;
+        name.text += " +" + std::to_string(level);
+        name.problem = ItemReferenceProblem::StandardName;
     }
-    const LocalizedString* text = LineText(database, line->text, line->textName);
+    return name;
+}
+
+// The name a level's name line gives: its text with its placeholders filled in, or in the case's form.
+ReferencedName NameOfLine(const ItemDatabase& database, const ItemDefinition& definition, const ItemNameLine& line,
+                          const ItemReference& reference, std::string_view locale, int depth)
+{
+    const LocalizedString* text = LineText(database, line.text, line.textName);
     if (text == nullptr)
     {
         return {{}, ItemReferenceProblem::UnfillableLine};
@@ -164,7 +167,24 @@ ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& d
         const std::string_view textLocale = text->HasOwn(locale) ? locale : LocalizedString::NeutralLocale;
         return FillNameLine(database, definition, text->Get(locale), reference, locale, textLocale, depth);
     }
-    return NameIn(database, *text, line->nameForms, locale, reference.form);
+    return NameIn(database, *text, line.nameForms, locale, reference.form);
+}
+
+ReferencedName NameAtLevel(const ItemDatabase& database, const ItemDefinition& definition,
+                           const ItemReference& reference, std::string_view locale, int depth)
+{
+    const ItemNameLine* line = FindNameLineAt(definition, *reference.level);
+    if (line == nullptr)
+    {
+        return StandardNameAt(database, definition, reference, locale);
+    }
+    ReferencedName name = NameOfLine(database, definition, *line, reference, locale, depth);
+    // A line whose text is empty, or fills in to nothing, leaves the standard name, as in the tooltip.
+    if (name.text.empty() && name.problem != ItemReferenceProblem::UnfillableLine)
+    {
+        return StandardNameAt(database, definition, reference, locale);
+    }
+    return name;
 }
 
 ReferencedName Resolve(const ItemDatabase& database, const ItemReference& reference, std::string_view locale, int depth)

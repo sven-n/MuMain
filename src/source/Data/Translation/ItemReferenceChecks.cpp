@@ -64,8 +64,9 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
                "reference as written";
     case ItemReferenceProblem::StandardName:
         severity = ItemDataIssueSeverity::Warning;
-        return written + ": " + ItemNumber(reference) + " has no name line of its own at +" +
-               std::to_string(*reference.level) + "; the text shows \"" + name.text + "\"";
+        return written + ": " + ItemNumber(reference) + " has no name of its own at +" +
+               std::to_string(*reference.level) + " (no name line, or one with an empty text); the text shows \"" +
+               name.text + "\"";
     case ItemReferenceProblem::MissingForm:
         severity = ItemDataIssueSeverity::Warning;
         if (!database.GetNameCases().Uses(locale, reference.form))
