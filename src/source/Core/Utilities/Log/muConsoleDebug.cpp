@@ -600,14 +600,14 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     else if (strCommand.starts_with(L"$winmsg"))
     {
         const bool hasArgument = strCommand.size() > 7 && strCommand[7] == L' ';
-        const std::optional<double> messageLimit =
-            hasArgument ? Core::Text::TryParseDouble(std::wstring_view(strCommand).substr(7)) : std::nullopt;
-        if (!messageLimit)
+        const std::optional<int> messageLimit =
+            hasArgument ? Core::Text::TryParseInt(std::wstring_view(strCommand).substr(7)) : std::nullopt;
+        if (!messageLimit || *messageLimit == 0)
         {
-            return BadArgument(L"usage: $winmsg <number>");
+            return BadArgument(L"usage: $winmsg <count>, 1 or more, or -1 for unlimited");
         }
 
-        SetMaxMessagePerCycle(static_cast<int>(*messageLimit));
+        SetMaxMessagePerCycle(*messageLimit);
         return Handled();
     }
     // Runtime theme selection is session-only; the Options window persists its choice.
