@@ -7,6 +7,7 @@
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemTooltipLines.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/Translation/ItemReference.h"
 #include "Data/Translation/ItemReferenceChecks.h"
@@ -26,9 +27,10 @@ constexpr float FormColumnWidth = 140.0f;
 // The rows the table shows at once; more scroll, so the names grid below keeps its room.
 constexpr int MaxVisibleRows = 8;
 
-// The text whose forms a text that names the item shows in `locale`: the item's names (index -1), or a name line's own
-// text written in place, without conditions and without placeholders in that language (a line written as "{name}"
-// takes the item's forms). None for other lines, whose forms never show (ValidateNameForms warns about them).
+// The text whose forms a text that names the item shows in `locale`: the item's names (index -1), or a name line's
+// text (written in place or shared, "@x"), without conditions and without placeholders in that language (a line
+// written as "{name}" takes the item's forms). None for other lines, whose forms never show (ValidateNameForms warns
+// about them).
 const Data::LocalizedString* NamesOf(const ItemDefinition& definition, int index, std::string_view locale)
 {
     if (index < 0)
@@ -36,12 +38,12 @@ const Data::LocalizedString* NamesOf(const ItemDefinition& definition, int index
         return &definition.names;
     }
     const Data::Items::ItemNameLine& line = definition.nameLines[static_cast<size_t>(index)];
-    if (!line.hasText || !line.textName.empty() || !line.when.empty() ||
-        line.text.Get(locale).find('{') != std::string::npos)
+    const Data::LocalizedString* text = Data::Items::FindLineText(g_ItemDatabase.GetTooltipFile(), line);
+    if (!line.hasText || text == nullptr || !line.when.empty() || text->Get(locale).find('{') != std::string::npos)
     {
         return nullptr;
     }
-    return &line.text;
+    return text;
 }
 
 const Data::Items::ItemNameForms& FormsOf(const ItemDefinition& definition, int index)

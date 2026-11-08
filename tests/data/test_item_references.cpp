@@ -497,7 +497,7 @@ TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
     items[1].nameLines.push_back(conditional);
 
     std::vector<ItemDataIssue> issues;
-    ValidateNameForms(items, cases, "NameCases.json", issues);
+    ValidateNameForms(items, ItemTooltipFile{}, cases, "NameCases.json", issues);
     const auto has = [&](const std::string& field)
     {
         return std::any_of(issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
@@ -512,4 +512,41 @@ TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
     // The Stone of Friendship's literal line keeps its forms.
     CHECK_FALSE(has("nameLines[1].nameForms.pl"));
     CHECK(issues.size() == 5);
+}
+
+TEST_CASE("A name line's shared text gives its forms, and its placeholders are a warning [data][items][texts]")
+{
+    ItemTooltipFile tooltips;
+    tooltips.texts.emplace("stone", Data::LocalizedString::Parse("Stone of Friendship||pl=Kamien Przyjazni"));
+    tooltips.texts.emplace("namedStone", Data::LocalizedString::Parse("{name} stone||pl={name} kamien"));
+    std::vector<ItemDefinition> items = NamedItems();
+    // Rena's lines 3 and 4, at +6 and +7: "@stone" and "@namedStone", both with a Polish genitive.
+    ItemNameLine shared;
+    shared.hasText = true;
+    shared.textName = "stone";
+    shared.minLevel = 6;
+    shared.maxLevel = 6;
+    shared.nameForms.Set("pl", "gen", "Kamienia Przyjazni");
+    ItemNameLine placeholders = shared;
+    placeholders.textName = "namedStone";
+    placeholders.minLevel = 7;
+    placeholders.maxLevel = 7;
+    items[1].nameLines.push_back(shared);
+    items[1].nameLines.push_back(placeholders);
+    ItemNameCases cases;
+    cases.SetCases("pl", {"gen", "acc"});
+
+    std::vector<ItemDataIssue> issues;
+    ValidateNameForms(items, tooltips, cases, "NameCases.json", issues);
+    const auto has = [&](const std::string& field)
+    { return std::any_of(issues.begin(), issues.end(), [&](const ItemDataIssue& issue) { return issue.field == field; }); };
+    CHECK_FALSE(has("nameLines[3].nameForms.pl"));
+    // A text that names Rena at +7 fills in Rena's own forms.
+    CHECK(has("nameLines[4].nameForms.pl"));
+
+    ItemDatabase database;
+    database.SetTooltipFile(tooltips);
+    database.Build(items);
+    database.SetNameCases(cases);
+    CHECK(ResolveReferencedName(database, Reference(14, 21, 6, "gen"), "pl").text == "Kamienia Przyjazni");
 }

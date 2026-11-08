@@ -52,6 +52,17 @@ std::vector<TooltipFileLineOf> TooltipFileLinesOf(const ItemTooltipFile& file)
     return lines;
 }
 
+const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const LocalizedString& text,
+                                    const std::string& textName)
+{
+    return textName.empty() ? &text : tooltips.FindText(textName);
+}
+
+const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const ItemDescriptionLine& line)
+{
+    return FindLineText(tooltips, line.text, line.textName);
+}
+
 std::string LineTextField(const std::string& lineField, std::string_view locale)
 {
     std::string field = lineField + ".text";

@@ -276,7 +276,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     }
     ItemNameCasesLoadResult nameCases = LoadItemNameCasesFile(GetItemNameCasesFile());
     result.issues.insert(result.issues.end(), nameCases.issues.begin(), nameCases.issues.end());
-    ValidateNameForms(result.items, nameCases.cases, GetItemNameCasesFile().generic_string(), result.issues);
+    ValidateNameForms(result.items, tooltips.file, nameCases.cases, GetItemNameCasesFile().generic_string(),
+                      result.issues);
     GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
     result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
     if (!HasFatal(groundLabels.issues))
@@ -905,7 +906,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
                          GetGroundLabelsFile().generic_string(), issues);
     ValidateItemOptionLinks(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetOptions(), issues);
-    ValidateNameForms(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetNameCases(),
+    ValidateNameForms(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetNameCases(),
                       GetItemNameCasesFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;

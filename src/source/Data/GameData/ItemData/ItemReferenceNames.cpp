@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
+#include "Data/GameData/ItemData/ItemTooltipLines.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 namespace Data::Items
@@ -40,12 +41,6 @@ const ItemNameLine* FindNameLineAt(const ItemDefinition& definition, int level)
     return nullptr;
 }
 
-// A text with translations, or the shared text of the tooltip file it names.
-const LocalizedString* LineText(const ItemDatabase& database, const LocalizedString& text, const std::string& textName)
-{
-    return textName.empty() ? &text : database.GetTooltipFile().FindText(textName);
-}
-
 // The name in the locale, or its form for the case. A name the locale does not translate is the English name, which
 // has no forms, and a case the locale does not decline in (NameCases.json) shows no form.
 ReferencedName NameIn(const ItemDatabase& database, const LocalizedString& names, const ItemNameForms& forms,
@@ -77,7 +72,7 @@ std::optional<std::string> LevelValueOf(const ItemDatabase& database, const Item
             continue;
         }
         const ItemLevelValue& value = values.values[static_cast<size_t>(level)];
-        const LocalizedString* text = LineText(database, value.text, value.textName);
+        const LocalizedString* text = FindLineText(database.GetTooltipFile(), value.text, value.textName);
         return text != nullptr ? std::optional<std::string>(text->Get(locale)) : std::nullopt;
     }
     return std::nullopt;
@@ -157,7 +152,7 @@ ReferencedName StandardNameAt(const ItemDatabase& database, const ItemDefinition
 ReferencedName NameOfLine(const ItemDatabase& database, const ItemDefinition& definition, const ItemNameLine& line,
                           const ItemReference& reference, std::string_view locale, int depth)
 {
-    const LocalizedString* text = LineText(database, line.text, line.textName);
+    const LocalizedString* text = FindLineText(database.GetTooltipFile(), line);
     if (text == nullptr)
     {
         return {{}, ItemReferenceProblem::UnfillableLine};

@@ -108,8 +108,9 @@ and the item gives it in `nameForms`, after `name`:
 "nameForms": { "pl": { "gen": "Łzy Elfa", "acc": "Łzę Elfa" } },
 ```
 
-A name line with a text of its own (a name at a level) has its forms after its
-`text`; a line written as `{name}` uses the item's. The cases are `gen`, `dat`,
+A name line with a text (a name at a level, written in place or a shared text,
+`"@x"`) has its forms after its `text`; a line written as `{name}` uses the
+item's. The cases are `gen`, `dat`,
 `acc`, `ins` and `loc`; `Tooltips/NameCases.json` gives the ones each language
 uses:
 

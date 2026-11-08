@@ -888,8 +888,8 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
 
 namespace
 {
-// The problems of one name's forms; `names` is the text they are forms of (none for a shared text, whose languages
-// the tooltip file has).
+// The problems of one name's forms; `names` is the text they are forms of (none for a shared text the tooltip file
+// doesn't have, which is reported with the shared texts).
 void CheckNameForms(const ItemDefinition& definition, const ItemNameForms& forms, const LocalizedString* names,
                     const std::string& field, const ItemNameCases& cases, const std::string& casesFile,
                     std::vector<ItemDataIssue>& issues)
@@ -931,8 +931,8 @@ void CheckNameForms(const ItemDefinition& definition, const ItemNameForms& forms
 }
 } // namespace
 
-void ValidateNameForms(std::span<const ItemDefinition> items, const ItemNameCases& cases, const std::string& casesFile,
-                       std::vector<ItemDataIssue>& issues)
+void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                       const ItemNameCases& cases, const std::string& casesFile, std::vector<ItemDataIssue>& issues)
 {
     for (const ItemDefinition& definition : items)
     {
@@ -963,8 +963,8 @@ void ValidateNameForms(std::span<const ItemDefinition> items, const ItemNameCase
                                   "without conditions, so these forms never show"});
                 continue;
             }
-            CheckNameForms(definition, line.nameForms, line.textName.empty() ? &line.text : nullptr, field, cases,
-                           casesFile, issues);
+            // A shared text ("@x") has its languages and placeholders in the tooltip file.
+            CheckNameForms(definition, line.nameForms, FindLineText(tooltips, line), field, cases, casesFile, issues);
         }
     }
 }

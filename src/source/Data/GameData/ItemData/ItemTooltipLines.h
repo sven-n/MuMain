@@ -32,6 +32,12 @@ struct TooltipFileLineOf
 // The lines of the tooltip file's layouts: each layout's own lines and the lines a preset adds.
 std::vector<TooltipFileLineOf> TooltipFileLinesOf(const ItemTooltipFile& file);
 
+// A text of an item: written in place (`text`), or the shared text of the tooltip file that `textName` names ("text":
+// "@talisman"); nullptr when the file doesn't have that text.
+const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const LocalizedString& text,
+                                    const std::string& textName);
+const LocalizedString* FindLineText(const ItemTooltipFile& tooltips, const ItemDescriptionLine& line);
+
 // The field of a line's text in one language, as the item file writes it: "description[2].text" for English,
 // "description[2].text.de" for a translation.
 std::string LineTextField(const std::string& lineField, std::string_view locale);
