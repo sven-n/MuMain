@@ -37,9 +37,10 @@ std::span<const std::string_view> GetNames();
 // the drawing code then draws the model itself.
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType);
 
+#ifdef _EDITOR
 // While it lives, the model `modelType` is drawn with `look` instead of its own render style, without the glow pass or
 // the shine below +3 of a style in code: the Style Editor's preview of a look before it is applied. The look must
-// outlive it; one at a time.
+// outlive it; one at a time. Editor builds only: the game's drawing has no preview.
 class PreviewLook
 {
 public:
@@ -51,6 +52,7 @@ public:
     PreviewLook(const PreviewLook&) = delete;
     PreviewLook& operator=(const PreviewLook&) = delete;
 };
+#endif
 
 // Whether the item's style spawns lights or animates where it is drawn.
 bool Spawns(int modelType);

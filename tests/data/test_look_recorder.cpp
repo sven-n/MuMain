@@ -194,6 +194,7 @@ TEST_CASE("The draw recorder draws a real item the same way twice, and the draws
     }
 }
 
+#ifdef _EDITOR
 TEST_CASE("The Style Editor's preview without a look draws an item as one that names no render style (design L41) "
           "[looks][recorder]")
 {
@@ -231,6 +232,7 @@ TEST_CASE("The Style Editor's preview without a look draws an item as one that n
     }
     g_ItemModelDatabase.Set(entry, glowColors);
 }
+#endif
 
 TEST_CASE("A number a float step from a rounding edge keeps one of the digests [looks][recorder]")
 {

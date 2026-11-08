@@ -1202,6 +1202,7 @@ void SpawnHelperNpcPlateLights(OBJECT* o)
 
 namespace
 {
+#ifdef _EDITOR
 // PreviewLook's model and look, while one lives; the look is nullptr for the model drawn with no render style.
 struct Preview
 {
@@ -1210,13 +1211,25 @@ struct Preview
     const Data::Looks::LookDefinition* look = nullptr;
 };
 Preview s_preview;
+#endif
 
-bool IsPreviewed(int modelType)
+// The look the Style Editor's preview draws the model with (PreviewLook): nullopt while it shows no preview of the
+// model, nullptr for the model drawn with no render style. Only the editor previews looks.
+std::optional<const Data::Looks::LookDefinition*> PreviewOf(int modelType)
 {
-    return s_preview.active && s_preview.modelType == modelType;
+#ifdef _EDITOR
+    if (s_preview.active && s_preview.modelType == modelType)
+    {
+        return s_preview.look;
+    }
+#else
+    static_cast<void>(modelType);
+#endif
+    return std::nullopt;
 }
 } // namespace
 
+#ifdef _EDITOR
 PreviewLook::PreviewLook(int modelType, const Data::Looks::LookDefinition& look)
 {
     s_preview = {true, modelType, &look};
@@ -1231,17 +1244,18 @@ PreviewLook::~PreviewLook()
 {
     s_preview = {};
 }
+#endif
 
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType)
 {
-    if (IsPreviewed(modelType))
+    if (const std::optional<const Data::Looks::LookDefinition*> preview = PreviewOf(modelType))
     {
-        if (s_preview.look == nullptr)
+        if (*preview == nullptr)
         {
             // No render style: the drawing code draws the model itself.
             return false;
         }
-        Looks::DrawRenderStyle(*s_preview.look, b, o, look, alpha, renderType);
+        Looks::DrawRenderStyle(**preview, b, o, look, alpha, renderType);
         return true;
     }
     const RenderStyle* style = g_itemStyles.Find(modelType);
@@ -1261,7 +1275,7 @@ void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
 
 const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
 {
-    if (IsPreviewed(modelType))
+    if (PreviewOf(modelType))
     {
         return nullptr;
     }
@@ -1271,7 +1285,7 @@ const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
 
 bool RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
-    if (IsPreviewed(modelType))
+    if (PreviewOf(modelType))
     {
         return false;
     }
