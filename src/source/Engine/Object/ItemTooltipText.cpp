@@ -15,7 +15,10 @@
 #include <algorithm>
 #include <array>
 #include <cwchar>
+#include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Engine::Items::TooltipText
 {
@@ -124,19 +127,48 @@ bool Resolve(std::string_view name, std::span<const std::pair<std::string, std::
     return false;
 }
 
-// The name an item reference of the text shows ("item:14,25", written `written`): in the item name language, so the
-// names follow "Translate item names" while the rest of the text stays in the UI language, or in English for an English
-// text shown for a language without a translation of its own, as the UI texts do. The reference as written when it
-// names nothing; the rest of the text goes on.
-std::string ItemNameOf(std::string_view name, std::string_view written, std::string_view nameLocale)
+// The names the item references among the placeholders show, one per span (none for another placeholder): in the item
+// name language, so the names follow "Translate item names" while the rest of the text stays in the UI language, or in
+// English for an English text shown for a language without a translation of its own, as the UI texts do. A reference
+// that names nothing shows as written; the rest of the text goes on.
+std::vector<std::optional<std::string>>
+ItemNamesOf(std::string_view text, std::span<const Data::Items::PlaceholderSpan> spans, std::string_view nameLocale)
 {
-    const std::optional<Data::Translation::ItemReference> reference = Data::Translation::ParseItemReferenceName(name);
-    if (!reference)
+    std::vector<std::optional<std::string>> names(spans.size());
+    for (size_t index = 0; index < spans.size(); ++index)
     {
-        return std::string(written);
+        const std::optional<Data::Translation::ItemReference> reference =
+            Data::Translation::ParseItemReferenceName(spans[index].name);
+        if (!reference)
+        {
+            continue;
+        }
+        std::string name = Data::Items::ResolveReferencedName(g_ItemDatabase, *reference, nameLocale).text;
+        names[index] = name.empty()
+                           ? std::string(text.substr(spans[index].begin, spans[index].end - spans[index].begin))
+                           : std::move(name);
     }
-    std::string named = Data::Items::ResolveReferencedName(g_ItemDatabase, *reference, nameLocale).text;
-    return named.empty() ? std::string(written) : named;
+    return names;
+}
+
+// The text from the span `first` on, with the items' names put in: what the rest of the line shows from a placeholder
+// without a value on.
+std::string NamedRest(std::string_view text, std::span<const Data::Items::PlaceholderSpan> spans,
+                      const std::vector<std::optional<std::string>>& names, size_t first)
+{
+    std::string rest;
+    size_t position = spans[first].begin;
+    for (size_t index = first; index < spans.size(); ++index)
+    {
+        if (names[index])
+        {
+            rest.append(text.substr(position, spans[index].begin - position));
+            rest.append(*names[index]);
+            position = spans[index].end;
+        }
+    }
+    rest.append(text.substr(position));
+    return rest;
 }
 
 Compiled CompileText(std::string_view text, std::span<const std::pair<std::string, std::string>> bound,
@@ -146,31 +178,35 @@ Compiled CompileText(std::string_view text, std::span<const std::pair<std::strin
         englishNames ? Data::LocalizedString::NeutralLocale : std::string_view(g_ItemDatabase.GetDisplayLocale());
     Compiled compiled;
     const Data::Items::PlaceholderSpans found = Data::Items::FindPlaceholders(text);
+    const std::span<const Data::Items::PlaceholderSpan> spans = found.spans;
+    // Put in now: the names change only with the name version, which compiles the texts again.
+    const std::vector<std::optional<std::string>> names = ItemNamesOf(text, spans, nameLocale);
     // The text since the last value, with the items' names put in.
     std::string literal;
     size_t position = 0;
-    for (const Data::Items::PlaceholderSpan& span : found.spans)
+    for (size_t index = 0; index < spans.size(); ++index)
     {
+        const Data::Items::PlaceholderSpan& span = spans[index];
         literal.append(text.substr(position, span.begin - position));
-        if (Data::Items::IsItemReferencePlaceholder(span.name))
+        position = span.end;
+        if (names[index])
         {
-            // Put in now: the names change only with the name version, which compiles the texts again.
-            literal.append(ItemNameOf(span.name, text.substr(span.begin, span.end - span.begin), nameLocale));
-            position = span.end;
+            literal.append(*names[index]);
             continue;
         }
         Piece piece;
         if (!Resolve(span.name, bound, definition, language, piece))
         {
             // As FillPlaceholders: a placeholder without a value stays as written, and so does the rest.
-            position = span.begin;
-            break;
+            Piece last;
+            last.literal = Wide(literal + NamedRest(text, spans, names, index));
+            compiled.pieces.push_back(std::move(last));
+            return compiled;
         }
         piece.literal = Wide(literal);
         literal.clear();
-        piece.rest = Wide(text.substr(span.begin));
+        piece.rest = Wide(NamedRest(text, spans, names, index));
         compiled.pieces.push_back(std::move(piece));
-        position = span.end;
     }
     Piece last;
     last.literal = Wide(literal + std::string(text.substr(std::min(position, text.size()))));

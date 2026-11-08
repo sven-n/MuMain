@@ -327,6 +327,8 @@ TEST_CASE("A tooltip text names an item in the item name language and the rest i
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de") == L"Combine Gold Key at level 0");
     // No item 14,511: the reference stays as written, and the rest of the line is filled in.
     CHECK(Tooltip("Combine {item:14,511} at level {level}", "en") == L"Combine {item:14,511} at level 0");
+    // A placeholder without a value stays as written, and so does the rest, with the items' names put in.
+    CHECK(Tooltip("{noSuchValue} with {item:14,13}", "en") == L"{noSuchValue} with Jewel of Bless");
 }
 
 TEST_CASE("A tooltip line without a translation of its own names the items in English, as the UI texts do "
