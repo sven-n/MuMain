@@ -11,6 +11,12 @@
 #include "Engine/Object/ItemTooltipValues.h"
 #include "I18N/All.h"
 
+#ifdef _EDITOR
+#include "TestImGuiContext.h"
+#include "UI/ItemTranslations/ItemNameFormsPanel.h"
+#include "imgui.h"
+#endif
+
 #include <algorithm>
 #include <filesystem>
 #include <string>
@@ -330,3 +336,31 @@ TEST_CASE("A tooltip line without a translation of its own names the items in En
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de", "en") == L"Combine Gold Key at level 0");
     CHECK(Tooltip("Combine {item:14,113} at level {level}", "de", "de") == L"Combine Goldschlüssel at level 0");
 }
+
+#ifdef _EDITOR
+TEST_CASE("Name forms leaves the rest of Item Translations to the names grid [editor][items][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    TestImGuiContext context;
+    CItemNameFormsPanel panel;
+    constexpr float WindowHeight = 700.0f;
+    // The names grid needs room for some rows below the panel.
+    constexpr float RoomForTheGrid = 300.0f;
+
+    // The Tear of Elf has German and Polish names, and both languages decline names: the table has rows.
+    float left = 0.0f;
+    for (int frame = 0; frame < 2; ++frame)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(900.0f, WindowHeight));
+        ImGui::Begin("Name forms###NameFormsTest");
+        ImGui::SetNextItemOpen(true);
+        panel.Render(Data::Items::MakeItemType(14, 25));
+        left = ImGui::GetContentRegionAvail().y;
+        ImGui::End();
+        ImGui::Render();
+    }
+    CHECK(left > RoomForTheGrid);
+}
+#endif // _EDITOR

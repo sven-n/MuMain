@@ -13,6 +13,8 @@
 #include "I18N/All.h"
 #include "imgui.h"
 
+#include <algorithm>
+
 namespace
 {
 using Data::Items::ItemDefinition;
@@ -21,6 +23,8 @@ using Data::Items::ItemDefinition;
 constexpr int FixedColumns = 2;
 constexpr float NameColumnWidth = 180.0f;
 constexpr float FormColumnWidth = 140.0f;
+// The rows the table shows at once; more scroll, so the names grid below keeps its room.
+constexpr int MaxVisibleRows = 8;
 
 // The text whose forms a text that names the item shows in `locale`: the item's names (index -1), or a name line's own
 // text written in place, without conditions and without placeholders in that language (a line written as "{name}"
@@ -43,6 +47,45 @@ const Data::LocalizedString* NamesOf(const ItemDefinition& definition, int index
 const Data::Items::ItemNameForms& FormsOf(const ItemDefinition& definition, int index)
 {
     return index < 0 ? definition.nameForms : definition.nameLines[static_cast<size_t>(index)].nameForms;
+}
+
+// English names have no forms, also when NameCases.json names English (loading warns about it).
+bool DeclinesNames(std::string_view locale)
+{
+    return locale != Data::LocalizedString::NeutralLocale;
+}
+
+// Whether the table has a row for the name `index` (-1: the item's name, else the name line) in the language.
+bool HasRow(const ItemDefinition& definition, int index, std::string_view locale)
+{
+    const Data::LocalizedString* names = NamesOf(definition, index, locale);
+    return names != nullptr && names->HasOwn(locale);
+}
+
+int CountRows(const ItemDefinition& definition)
+{
+    int rows = 0;
+    for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
+    {
+        if (!DeclinesNames(locale))
+        {
+            continue;
+        }
+        for (int index = -1; index < static_cast<int>(definition.nameLines.size()); ++index)
+        {
+            rows += HasRow(definition, index, locale) ? 1 : 0;
+        }
+    }
+    return rows;
+}
+
+// The table's height for `rows` rows of fields, the header row and the horizontal scroll bar; at most MaxVisibleRows
+// rows, the rest scroll. A scrolling table without a height would take the whole rest of the window.
+float TableHeight(int rows)
+{
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float rowHeight = ImGui::GetFrameHeight() + 2.0f * style.CellPadding.y;
+    return static_cast<float>(std::min(rows, MaxVisibleRows) + 1) * rowHeight + style.ScrollbarSize;
 }
 
 // The languages that may decline names: the UI languages but English.
@@ -171,13 +214,20 @@ void CItemNameFormsPanel::RenderCasesButton() const
 
 void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
 {
-    constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
-                                      ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollX;
-    const int columns = FixedColumns + static_cast<int>(Data::Translation::ItemCaseKeys.size());
-    if (!ImGui::BeginTable("##NameForms", columns, flags))
+    const int rows = CountRows(definition);
+    if (rows == 0)
     {
         return;
     }
+    constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
+                                      ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollX |
+                                      ImGuiTableFlags_ScrollY;
+    const int columns = FixedColumns + static_cast<int>(Data::Translation::ItemCaseKeys.size());
+    if (!ImGui::BeginTable("##NameForms", columns, flags, ImVec2(0.0f, TableHeight(rows))))
+    {
+        return;
+    }
+    ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn(I18N::Editor::Name, ImGuiTableColumnFlags_None, NameColumnWidth);
     ImGui::TableSetupColumn(I18N::Editor::Language);
     for (const std::string_view caseKey : Data::Translation::ItemCaseKeys)
@@ -187,13 +237,11 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
     ImGui::TableHeadersRow();
     for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
     {
-        // English names have no forms, also when the file names English (loading warns about it).
-        if (locale == Data::LocalizedString::NeutralLocale)
+        if (!DeclinesNames(locale))
         {
             continue;
         }
-        RenderRow(definition, -1, locale);
-        for (int index = 0; index < static_cast<int>(definition.nameLines.size()); ++index)
+        for (int index = -1; index < static_cast<int>(definition.nameLines.size()); ++index)
         {
             RenderRow(definition, index, locale);
         }
@@ -203,11 +251,11 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
 
 void CItemNameFormsPanel::RenderRow(const ItemDefinition& definition, int index, const std::string& locale)
 {
-    const Data::LocalizedString* names = NamesOf(definition, index, locale);
-    if (names == nullptr || !names->HasOwn(locale))
+    if (!HasRow(definition, index, locale))
     {
         return;
     }
+    const Data::LocalizedString* names = NamesOf(definition, index, locale);
     ImGui::PushID(index);
     ImGui::PushID(locale.c_str());
     ImGui::TableNextRow();
