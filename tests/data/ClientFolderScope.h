@@ -7,15 +7,8 @@
 class ClientFolderScope
 {
 public:
-    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
-    {
-        std::filesystem::current_path(folder);
-    }
-    ~ClientFolderScope()
-    {
-        std::error_code ignored;
-        std::filesystem::current_path(m_previous, ignored);
-    }
+    explicit ClientFolderScope(const std::filesystem::path& folder);
+    ~ClientFolderScope();
     ClientFolderScope(const ClientFolderScope&) = delete;
     ClientFolderScope& operator=(const ClientFolderScope&) = delete;
 

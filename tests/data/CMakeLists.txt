@@ -225,6 +225,8 @@ mu_add_test(
     SOURCES
         test_character_bones.cpp
         test_player_body_models.cpp
+        ClientFolderScope.cpp
+        PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -303,7 +305,9 @@ target_compile_definitions(model_files_data_tests PRIVATE
 mu_add_test(
     NAME player_model_selector_tests
     SOURCES test_player_model_selector.cpp
+        ClientFolderScope.cpp
         ExecutableConfigFile.cpp
+        PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
