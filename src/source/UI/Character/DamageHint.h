@@ -14,6 +14,8 @@ struct DamageRange
 {
     int minimum = 0;
     int maximum = 0;
+
+    bool operator==(const DamageRange&) const = default;
 };
 
 // A normal hit (the range), a critical hit (the maximum plus the critical damage bonus) and an excellent hit (the

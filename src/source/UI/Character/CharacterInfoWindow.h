@@ -1,9 +1,13 @@
 #pragma once
 
+#include <optional>
+#include <string>
 #include <vector>
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "GameLogic/Combat/CriticalDamageRate.h"
+#include "UI/Character/CriticalDamageRateLine.h"
 #include "UI/Character/DamageHint.h"
 #include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
@@ -178,5 +182,21 @@ namespace mu::ui::window
         UI::RmlBridge::ElementTooltip m_LineHint;
         // The damage the damage line shows, for its hint.
         UI::Character::DamageRange m_DamageRange;
+
+        // What the critical damage rate line and the hints were last built from, in which language.
+        struct CriticalHitParts
+        {
+            GameLogic::Combat::CriticalDamageRate rate;
+            GameLogic::Combat::CriticalDamageBonus bonus;
+            int excellentBonus = 0;
+            UI::Character::DamageRange damageRange;
+            std::string locale;
+
+            bool operator==(const CriticalHitParts&) const = default;
+        };
+        std::optional<CriticalHitParts> m_BuiltParts;
+        UI::Character::CriticalDamageRateLine m_CriticalDamageRateLine;
+        std::vector<UI::RmlBridge::Tooltip::Line> m_DamageHintLines;
+        std::vector<UI::RmlBridge::Tooltip::Line> m_CriticalDamageRateHintLines;
     };
 }

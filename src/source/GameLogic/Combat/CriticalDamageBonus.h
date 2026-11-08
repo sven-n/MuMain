@@ -25,6 +25,8 @@ struct CriticalDamageBonus
     {
         return setOptions + harmonyOptions + socketOptions + Buff();
     }
+
+    bool operator==(const CriticalDamageBonus&) const = default;
 };
 
 // The bonus of the hero (CharacterMachine's equipment, CharacterAttribute's stats and skills, Hero's buffs), with the

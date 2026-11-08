@@ -40,6 +40,8 @@ struct CriticalDamageRate
     {
         return Items() + Buff();
     }
+
+    bool operator==(const CriticalDamageRate&) const = default;
 };
 
 // The rate of the hero (CharacterMachine's equipment, CharacterAttribute's master skills, Hero's buffs), with the

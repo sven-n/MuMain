@@ -433,16 +433,30 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const GameLogic::Combat::CriticalDamageRate rate = GameLogic::Combat::GetHeroCriticalDamageRate();
-    const GameLogic::Combat::CriticalDamageBonus bonus = GameLogic::Combat::GetHeroCriticalDamageBonus();
-    const UI::Character::CriticalDamageRateLine line = UI::Character::BuildCriticalDamageRateLine(rate);
-    auto& model = m_RmlView.GetModel();
-    if (model.criticalDamageRateLine.text != line.text || model.criticalDamageRateLine.source != line.source)
+    const CriticalHitParts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
+                                 GameLogic::Combat::GetHeroCriticalDamageBonus(),
+                                 GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange,
+                                 I18N::GetCurrentLocale()};
+    // The texts are formatted again only when what they show changes.
+    if (m_BuiltParts != parts)
     {
-        model.criticalDamageRateLine = {line.text, line.source, CriticalDamageRateHint};
+        m_BuiltParts = parts;
+        m_CriticalDamageRateLine = UI::Character::BuildCriticalDamageRateLine(parts.rate);
+        m_DamageHintLines = UI::Character::BuildDamageHint(parts.damageRange, parts.bonus, parts.excellentBonus);
+        m_CriticalDamageRateHintLines = UI::Character::BuildCriticalDamageRateHint(parts.rate);
+    }
+
+    auto& model = m_RmlView.GetModel();
+    // A theme reload makes a new model, so the line is compared with the model's, not with what was built.
+    if (model.criticalDamageRateLine.text != m_CriticalDamageRateLine.text ||
+        model.criticalDamageRateLine.source != m_CriticalDamageRateLine.source)
+    {
+        model.criticalDamageRateLine = {m_CriticalDamageRateLine.text, m_CriticalDamageRateLine.source,
+                                        CriticalDamageRateHint};
         m_RmlView.MarkDirty("critical_damage_rate_line");
     }
-    if (bonus.Buff() > 0 && !model.strLines.empty())
+    // BuildAttributeLines writes the damage line every frame; it takes the buffs' colour here.
+    if (parts.bonus.Buff() > 0 && !model.strLines.empty())
     {
         model.strLines.front().source = "buffed";
     }
@@ -450,11 +464,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     switch (m_LineHint.Hovered())
     {
     case DamageHint:
-        m_LineHint.Show(
-            UI::Character::BuildDamageHint(m_DamageRange, bonus, GameLogic::Combat::GetHeroExcellentDamageBonus()));
+        m_LineHint.Show(m_DamageHintLines);
         break;
     case CriticalDamageRateHint:
-        m_LineHint.Show(UI::Character::BuildCriticalDamageRateHint(rate));
+        m_LineHint.Show(m_CriticalDamageRateHintLines);
         break;
     default:
         m_LineHint.Hide();
