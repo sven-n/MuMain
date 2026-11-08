@@ -133,9 +133,36 @@ void AddIssue(const CheckedText& text, ItemDataIssueSeverity severity, int group
     issues.push_back({severity, text.source, group, number, text.field, std::move(message)});
 }
 
-// A translation that spells the names its English text writes by number: a warning when the item data has those
-// items' names in the translation's language, so references would show the same names and follow the item data.
-// Languages without item names yet (Russian, Japanese, ...) spell them on purpose.
+// The name of the reference that `text` spells: the name it shows in the text's language, or one of the item's forms
+// in it (a case the reference would ask for); empty when the text has none of them.
+std::string SpelledName(const Items::ItemDatabase& database, const Items::ItemDefinition& definition,
+                        const ItemReference& reference, const CheckedText& text)
+{
+    const std::string name = Items::ResolveReferencedName(database, reference, text.locale).text;
+    if (!name.empty() && text.text.find(name) != std::string_view::npos)
+    {
+        return name;
+    }
+    const auto& forms = definition.nameForms.GetAll();
+    const auto language = forms.find(text.locale);
+    if (language == forms.end())
+    {
+        return {};
+    }
+    for (const auto& [caseKey, form] : language->second)
+    {
+        if (text.text.find(form) != std::string_view::npos)
+        {
+            return form;
+        }
+    }
+    return {};
+}
+
+// A translation that spells the names its English text writes by number: a warning when the translation has the
+// names the references would show (the items' names, or a level's name line, in its language), so references would
+// show the same and follow the item data. Languages without item names yet (Russian, Japanese, ...) spell them on
+// purpose, and a translation worded without the names has nothing to name.
 void CheckSpelledNames(const Items::ItemDatabase& database, const CheckedText& text, std::string_view english,
                        std::vector<ItemDataIssue>& issues)
 {
@@ -144,6 +171,7 @@ void CheckSpelledNames(const Items::ItemDatabase& database, const CheckedText& t
     {
         return;
     }
+    std::string spelled;
     for (const auto& [group, number, level] : named)
     {
         const Items::ItemDefinition* definition = database.Find(group, number);
@@ -151,15 +179,21 @@ void CheckSpelledNames(const Items::ItemDatabase& database, const CheckedText& t
         {
             return;
         }
+        const ItemReference reference{group, number, level < 0 ? std::nullopt : std::optional<int>(level), {}};
+        const std::string name = SpelledName(database, *definition, reference, text);
+        if (name.empty())
+        {
+            return;
+        }
+        spelled += (spelled.empty() ? "\"" : ", \"") + name + "\"";
     }
     // A UI text has no item of its own: the problem names the first item, so a click selects it.
     const bool ownItem = text.group != ItemDataIssue::NoItem;
     const NamedItem& first = *named.begin();
     AddIssue(text, ItemDataIssueSeverity::Warning, ownItem ? text.group : std::get<0>(first),
              ownItem ? text.number : std::get<1>(first),
-             "spells the names of the items the English text names by number (\"" + std::string(english) +
-                 "\"), which the item data has in " + std::string(text.locale) +
-                 ": write the same references, so the names follow the item data and Translate item names",
+             "spells " + spelled + ", which the English text names by number (\"" + std::string(english) +
+                 "\"): write the same references, so the names follow the item data and Translate item names",
              issues);
 }
 

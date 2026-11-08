@@ -253,6 +253,11 @@ TEST_CASE("A UI translation that spells names English writes by number is a warn
     // No Spanish or Russian name: those texts spell it on purpose.
     CHECK(check("Busca la 'Lagrima'", "es").empty());
     CHECK(check("Naidi 'Slezu'", "ru").empty());
+    // A Polish text worded without the name has nothing to name; nor one that spells it otherwise.
+    CHECK(check("Pojde jej szukac!", "pl").empty());
+    CHECK(check("Znajdz 'LZA ELFA'", "pl").empty());
+    // The name itself, not a form, is found too.
+    CHECK(check("Znajdz 'Lza Elfa'", "pl").size() == 1);
 }
 
 TEST_CASE("At a level without a name of its own, a missing form is reported too [data][items][texts]")
