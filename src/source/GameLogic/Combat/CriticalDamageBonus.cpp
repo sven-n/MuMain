@@ -28,6 +28,9 @@ constexpr int StaffCriticalDamageHarmony = 5;
 constexpr float EnergyPerDamage = 30.f;
 constexpr float CommandPerDamage = 25.f;
 
+// An excellent hit deals the maximum damage times this (OpenMU's AttackableExtensions).
+constexpr double ExcellentDamageFactor = 1.2;
+
 // Its buff states (OpenMU's magic effects 5 and 148; 149 is the client's extended one) and its skills: the hero casts
 // one of them when the buff is its own.
 constexpr std::array<eBuffState, 3> CriticalDamageBuffs{
@@ -146,5 +149,15 @@ int GetHeroExcellentDamageBonus()
     }
     return SetOptionValue(AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE) +
            g_SocketItemMgr.m_StatusBonus.m_iExcellentDamageBonus;
+}
+
+int GetCriticalHitDamage(int maximumDamage, const CriticalDamageBonus& criticalBonus)
+{
+    return maximumDamage + criticalBonus.Total();
+}
+
+int GetExcellentHitDamage(int maximumDamage, int excellentBonus, const CriticalDamageBonus& criticalBonus)
+{
+    return static_cast<int>(maximumDamage * ExcellentDamageFactor + excellentBonus) + criticalBonus.Total();
 }
 } // namespace GameLogic::Combat

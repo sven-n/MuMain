@@ -34,4 +34,10 @@ CriticalDamageBonus GetHeroCriticalDamageBonus();
 // What an excellent hit adds to the maximum damage times 1.2 (OpenMU's ExcellentDamageBonus): the active ancient set
 // options and the worn items' socket options.
 int GetHeroExcellentDamageBonus();
+
+// What a critical hit deals before the target's defense: the maximum damage plus the critical damage bonus.
+int GetCriticalHitDamage(int maximumDamage, const CriticalDamageBonus& criticalBonus);
+// What an excellent hit deals before the target's defense: the maximum damage times 1.2, plus the excellent damage
+// bonus and the critical damage bonus (OpenMU's AttackableExtensions, for physical damage).
+int GetExcellentHitDamage(int maximumDamage, int excellentBonus, const CriticalDamageBonus& criticalBonus);
 } // namespace GameLogic::Combat

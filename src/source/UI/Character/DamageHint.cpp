@@ -13,9 +13,6 @@ namespace
 using UI::RmlBridge::Tooltip::Line;
 using UI::RmlBridge::Tooltip::LineColor;
 
-// An excellent hit deals the maximum damage times this (OpenMU's AttackableExtensions).
-constexpr double ExcellentDamageFactor = 1.2;
-
 // The buff's skill by its name, or the part's title when the skill table has none.
 const wchar_t* BuffName(ActionSkillType skill)
 {
@@ -60,9 +57,8 @@ void AddCriticalDamageParts(std::vector<Line>& lines, const GameLogic::Combat::C
 std::vector<Line> BuildDamageHint(DamageRange range, const GameLogic::Combat::CriticalDamageBonus& criticalBonus,
                                   int excellentBonus)
 {
-    const int criticalHit = range.maximum + criticalBonus.Total();
-    const int excellentHit =
-        static_cast<int>(range.maximum * ExcellentDamageFactor + excellentBonus) + criticalBonus.Total();
+    const int criticalHit = GameLogic::Combat::GetCriticalHitDamage(range.maximum, criticalBonus);
+    const int excellentHit = GameLogic::Combat::GetExcellentHitDamage(range.maximum, excellentBonus, criticalBonus);
     // The hits that the buff makes stronger take its colour.
     const LineColor buffed = criticalBonus.Buff() > 0 ? LineColor::Purple : LineColor::White;
 
