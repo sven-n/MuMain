@@ -6,6 +6,7 @@
 
 #include "../MuEditor/UI/Common/TextSearch.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Engine/Object/PlayerBodyModels.h"
 
 #include <algorithm>
@@ -29,7 +30,7 @@ bool IsImprovedBodyFolder(std::string_view file)
             path.pop_back();
         return path;
     }();
-    return file.size() == folder.size() && TextSearch::ContainsIgnoringCase(file, folder);
+    return Data::Items::EqualsIgnoringCase(file, folder);
 }
 
 bool IsModelFile(const std::filesystem::path& path)
