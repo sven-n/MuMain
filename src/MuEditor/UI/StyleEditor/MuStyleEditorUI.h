@@ -122,6 +122,8 @@ private:
     // The part rows: the meshes of the item's model, and the others the look names.
     [[nodiscard]] std::vector<MuEditor::Looks::LookPart> PartRows() const;
     void RenderChecks();
+    // The items that use the look (an item effect's with `itemEffect`), looked for again when the item models change.
+    [[nodiscard]] const std::vector<int>& UsersOf(const std::string& name, bool itemEffect);
     void RenderUsers(const std::vector<int>& users);
     void RenderPreview(const Data::Looks::LookDefinition* look);
     // What stands above a view of the preview: the original item's dropdown, or the view's name.
@@ -163,6 +165,15 @@ private:
         std::size_t line = 0;
     };
     std::map<std::string, KeptDraft, std::less<>> m_keptDrafts;
+    // The users UsersOf found last, of which look, as of which version of the item models.
+    struct LookUsers
+    {
+        std::string name;
+        bool itemEffect = false;
+        int modelsVersion = -1;
+        std::vector<int> items;
+    };
+    LookUsers m_users;
     // The picked line: a layer, or the item values (the number of layers).
     std::size_t m_line = 0;
     // The layers the preview leaves out (the eyes), by layer: 1 for one left out. As many as the draft's layers: they

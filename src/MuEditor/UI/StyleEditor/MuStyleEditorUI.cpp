@@ -480,8 +480,7 @@ void CMuStyleEditorUI::RenderCodeLook(const std::string& name, bool itemEffect)
     if (ImGui::BeginChild("##Look"))
     {
         RenderNote(itemEffect ? I18N::Editor::ItemEffectsRootNote : I18N::Editor::CodeLookNote);
-        RenderUsers(itemEffect ? MuEditor::Items::FindItemEffectUsers(name)
-                               : MuEditor::Items::FindRenderStyleUsers(name));
+        RenderUsers(UsersOf(name, itemEffect));
     }
     ImGui::EndChild();
 }
@@ -510,7 +509,7 @@ void CMuStyleEditorUI::RenderLook(const LookDefinition& look)
             RenderParts();
         }
         ImGui::Separator();
-        RenderUsers(MuEditor::Items::FindRenderStyleUsers(name));
+        RenderUsers(UsersOf(name, false));
     }
     ImGui::EndChild();
     RenderConfirm();
@@ -544,7 +543,7 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
 void CMuStyleEditorUI::OpenApply(const LookDefinition& look)
 {
     // D26: a change to a look reaches all its items; they are listed before it is applied.
-    m_confirmUsers = MuEditor::Items::FindRenderStyleUsers(look.name);
+    m_confirmUsers = UsersOf(look.name, false);
     const int itemType = g_ItemSelection.GetItemType();
     m_applyItem =
         g_ItemDatabase.Find(itemType) != nullptr && g_ItemModelDatabase.Find(itemType) != nullptr ? itemType : -1;
@@ -1071,6 +1070,18 @@ void CMuStyleEditorUI::RenderChecks()
         }
         ImGui::TreePop();
     }
+}
+
+const std::vector<int>& CMuStyleEditorUI::UsersOf(const std::string& name, bool itemEffect)
+{
+    const int modelsVersion = g_ItemModelDatabase.GetVersion();
+    if (m_users.name != name || m_users.itemEffect != itemEffect || m_users.modelsVersion != modelsVersion)
+    {
+        m_users = {name, itemEffect, modelsVersion,
+                   itemEffect ? MuEditor::Items::FindItemEffectUsers(name)
+                              : MuEditor::Items::FindRenderStyleUsers(name)};
+    }
+    return m_users.items;
 }
 
 void CMuStyleEditorUI::RenderUsers(const std::vector<int>& users)
