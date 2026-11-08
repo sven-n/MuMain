@@ -41,16 +41,16 @@ void ReleaseRejectedBody(BMD& model, std::span<const TextureProblem> problems)
 
 void OpenBodyTextures(int slot, const std::wstring& fileName)
 {
+    const std::wstring textureSubfolder = L"Player\\";
     const std::wstring improvedFile = std::wstring(Engine::Object::ImprovedPlayerModelFolder) + fileName + L".bmd";
     if (gLoadData.GetModelFile(slot) != improvedFile)
     {
-        gLoadData.OpenTexture(slot, L"Player\\");
+        gLoadData.OpenTexture(slot, textureSubfolder.c_str());
         return;
     }
 
-    const std::wstring textureFolder = L"Player\\";
     std::vector<TextureProblem> problems;
-    gLoadData.OpenTexture(slot, std::span<const std::wstring>(&textureFolder, 1), problems);
+    gLoadData.OpenTexture(slot, std::span<const std::wstring>(&textureSubfolder, 1), problems);
     // A cached texture from another folder is a legitimate fallback. Hidden and unsupported names
     // keep the normal loader's semantics; only a texture it tried but could not load rejects a part.
     const auto missing = std::ranges::find_if(problems, [](const TextureProblem& problem)
@@ -62,7 +62,7 @@ void OpenBodyTextures(int slot, const std::wstring& fileName)
                  mu_wchar_to_utf8(improvedFile.c_str()), mu_wchar_to_utf8(missing->fileName.c_str()));
     ReleaseRejectedBody(Models[slot], problems);
     gLoadData.AccessModel(slot, Engine::Object::OriginalPlayerModelFolder, fileName.c_str());
-    gLoadData.OpenTexture(slot, L"Player\\");
+    gLoadData.OpenTexture(slot, textureSubfolder.c_str());
 }
 } // namespace
 
