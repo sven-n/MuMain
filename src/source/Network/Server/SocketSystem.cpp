@@ -521,7 +521,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
         pItem = &CharacterMachine->Equipment[i];
 
         // A broken item adds nothing, as on the server (OpenMU's ItemPowerUpFactory) and for the other options.
-        if (!IsSocketItem(pItem) || pItem->Durability == 0) continue;
+        if (!IsSocketItem(pItem) || pItem->Durability == 0)
+            continue;
 
         for (int j = 0; j < pItem->SocketCount; ++j)
         {

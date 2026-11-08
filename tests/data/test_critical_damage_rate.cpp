@@ -304,8 +304,11 @@ TEST_CASE("The character window's critical damage rate line and its hint [data][
     rate.scrollOfBattle = 20;
     CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Critical damage rate: 33% (+29%)");
     CHECK(Texts(UI::Character::BuildCriticalDamageRateHint(rate)) ==
-          std::vector<std::string>{"Critical damage rate", "Luck (\xC3\x97" "3): 15%", "Set options: 10%",
-                                   "Socket options: 8%", buffName + ": +9%", "Scroll of Battle: +20%", "Total: 62%"});
+          std::vector<std::string>{"Critical damage rate",
+                                   "Luck (\xC3\x97"
+                                   "3): 15%",
+                                   "Set options: 10%", "Socket options: 8%", buffName + ": +9%",
+                                   "Scroll of Battle: +20%", "Total: 62%"});
 
     I18N::SetLocale("de");
     CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Kritische Schadensrate: 33% (+29%)");
