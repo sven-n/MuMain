@@ -949,7 +949,7 @@ bool NodsOrBows(CHARACTER& c, float seconds)
 }
 } // namespace
 
-TEST_CASE("Only a character standing on foot greets the hero; walking, fighting, flying or riding it doesn't "
+TEST_CASE("Only a character standing on foot greets the hero, not one walking, fighting, flying or riding "
           "[gamelogic][nod]")
 {
     struct Case
