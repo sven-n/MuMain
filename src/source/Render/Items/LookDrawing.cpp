@@ -273,19 +273,39 @@ void LeaveItemValues(const ItemValues& values, BMD* b, DrawLook& look, Moment& m
     look.hiddenMesh = values.hiddenMesh.value_or(look.hiddenMesh);
     b->StreamMesh = values.scrollingMesh.value_or(b->StreamMesh);
 }
-// Finds the texture's index, loading it when no code loaded it; a missing one is logged.
-void PrepareTexture(const std::string& look, const std::string& texture)
+// Finds the texture's index, loading it when no code loaded it. A missing one is logged when `logMissing` and it wasn't
+// missing before.
+void PrepareTexture(const std::string& look, const std::string& texture, bool logMissing)
 {
+    const auto known = s_textures.find(texture);
+    const bool missingBefore = known != s_textures.end() && known->second == BITMAP_UNKNOWN;
     // A texture the game loaded already (an item effect texture) keeps its index.
     const std::wstring file = BitmapFileName(texture);
     const BITMAP_t* loaded = Bitmaps.FindTexture(file);
     const GLuint index = loaded != nullptr ? loaded->BitmapIndex : Bitmaps.LoadImage(file, GL_LINEAR, GL_REPEAT);
-    if (index == BITMAP_UNKNOWN)
+    if (index == BITMAP_UNKNOWN && logMissing && !missingBefore)
     {
         MU_LOG_ERROR(mu::log::Get("data"),
                      "Render style data error: {}: texture \"{}\" is not found; the layer is skipped", look, texture);
     }
     s_textures[texture] = index;
+}
+
+// The textures of one look that are not found yet: new names, and names missing before, whose file may have come since.
+void PrepareMissingTextures(const LookDefinition& style, bool logMissing)
+{
+    for (const Layer& layer : style.layers)
+    {
+        if (layer.texture.empty())
+        {
+            continue;
+        }
+        const auto known = s_textures.find(layer.texture);
+        if (known == s_textures.end() || known->second == BITMAP_UNKNOWN)
+        {
+            PrepareTexture(style.name, layer.texture, logMissing);
+        }
+    }
 }
 } // namespace
 
@@ -314,7 +334,7 @@ void PrepareTextures()
         {
             if (!layer.texture.empty())
             {
-                PrepareTexture(style.name, layer.texture);
+                PrepareTexture(style.name, layer.texture, true);
             }
         }
     }
@@ -322,12 +342,11 @@ void PrepareTextures()
 
 void PrepareTextures(const LookDefinition& style)
 {
-    for (const Layer& layer : style.layers)
-    {
-        if (!layer.texture.empty() && !s_textures.contains(layer.texture))
-        {
-            PrepareTexture(style.name, layer.texture);
-        }
-    }
+    PrepareMissingTextures(style, true);
+}
+
+void PrepareDraftTextures(const LookDefinition& style)
+{
+    PrepareMissingTextures(style, false);
 }
 } // namespace Render::Items::Looks

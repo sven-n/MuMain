@@ -486,35 +486,21 @@ std::vector<int> ParseMeshes(const std::string& text)
 // The mesh numbers as text; the list changes when the field is left after typing.
 bool MeshListField(const char* label, std::vector<int>& meshes)
 {
-    static ImGuiID editing = 0;
-    static std::string text;
-    const ImGuiID id = ImGui::GetID(label);
-    if (editing != id)
-    {
-        text = JoinMeshes(meshes);
-    }
     ImGui::SetNextItemWidth(Scaled(ComboWidth));
-    Items::InputStringWithHint(label, I18N::Editor::MeshNumbersHint, text);
+    std::string typed;
+    const bool left = Items::InputStringOnLeave(label, I18N::Editor::MeshNumbersHint, JoinMeshes(meshes), typed);
     Tip(I18N::Editor::LayerMeshNumbersTooltip);
-    bool changed = false;
-    if (ImGui::IsItemActive())
+    if (!left)
     {
-        editing = id;
+        return false;
     }
-    if (ImGui::IsItemDeactivatedAfterEdit())
+    std::vector<int> parsed = ParseMeshes(typed);
+    if (parsed.empty() || parsed == meshes)
     {
-        std::vector<int> parsed = ParseMeshes(text);
-        if (!parsed.empty() && parsed != meshes)
-        {
-            meshes = std::move(parsed);
-            changed = true;
-        }
+        return false;
     }
-    if (!ImGui::IsItemActive() && editing == id)
-    {
-        editing = 0;
-    }
-    return changed;
+    meshes = std::move(parsed);
+    return true;
 }
 
 // The picked item's parts by name, a checkbox each (design L42); one stays ticked, since a layer without meshes would
@@ -578,12 +564,19 @@ bool MeshField(const char* label, int& mesh, const std::vector<LookPart>& parts,
     return changed;
 }
 
+// The texture changes when the field is left after typing: each key would be another file to look for.
 bool TextureField(std::string& texture)
 {
     ImGui::SetNextItemWidth(Scaled(GraphWidth));
-    const bool changed = Items::InputStringWithHint(I18N::Editor::Texture, I18N::Editor::TextureHint, texture);
+    std::string typed;
+    const bool left = Items::InputStringOnLeave(I18N::Editor::Texture, I18N::Editor::TextureHint, texture, typed);
     Tip(I18N::Editor::LayerTextureTooltip);
-    return changed;
+    if (!left || typed == texture)
+    {
+        return false;
+    }
+    texture = typed;
+    return true;
 }
 
 enum class MeshChoice

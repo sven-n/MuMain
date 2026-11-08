@@ -122,6 +122,7 @@ private:
     void RenderViewHeader(int view, float width);
     // The fields follow the look (an undo, a redo) until they are changed.
     void UpdateDraft(const Data::Looks::LookDefinition& look);
+    // When the draft or the item models changed: its problems, and the textures it names.
     void CheckDraft();
     void Apply();
     void ApplyCopy(ApplyTo to, const std::string& copyName, int itemType, int newItemType, const std::string& itemName);

@@ -1150,7 +1150,6 @@ void CMuStyleEditorUI::RenderPreview(const LookDefinition* look)
                 shown.layers.push_back(look->layers[index]);
             }
         }
-        Render::Items::Looks::PrepareTextures(shown);
     }
     // All views at the same moment.
     const WorldTimeScope time(m_stopTime ? std::optional<double>(m_seconds * 1000.0) : std::nullopt);
@@ -1237,6 +1236,8 @@ void CMuStyleEditorUI::CheckDraft()
     m_checked = true;
     m_checkedDraft = m_draft;
     m_checkedModels = g_ItemModelDatabase.GetVersion();
+    // The textures the edited look names, for its preview: looked for when it changes, not each frame.
+    Render::Items::Looks::PrepareDraftTextures(m_draft);
     m_draftIssues.clear();
     // The look as the file would have it, read back: what a save would refuse is fatal.
     const std::string source(Data::Looks::GetRenderStylesFileName());

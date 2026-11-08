@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ItemModelDatabaseScope.h"
+#include "LogCapture.h"
 
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/Random.h"
@@ -469,4 +470,41 @@ TEST_CASE("A flowing texture or frames of the gallery move on their part, the gl
         CHECK(draws[0].blendMesh == 1);
         CHECK((draws[0].blendMeshU != 0.0f || draws[0].blendMeshV != 0.0f));
     }
+}
+
+TEST_CASE("A texture missing when its look was prepared is found when the look is prepared again after its file came "
+          "[looks]")
+{
+    Render::Sprites::SetGpuUploadsSkipped(true);
+    const LookDefinition later{"testLook", {Layer{.meshes = {{0}}, .texture = "Item/test_look_later.jpg"}}, {}};
+    const LookStoreScope looks({later});
+    TestSword sword("testLook");
+    {
+        const LogCapture log("data");
+        Render::Items::Looks::PrepareTextures(later);
+        CHECK_FALSE(log.LineWith("test_look_later.jpg").empty());
+        DrawLook look;
+        CHECK(sword.Draw(look).empty());
+    }
+    {
+        // Still missing at the next change: looked for again, logged once.
+        const LogCapture log("data");
+        Render::Items::Looks::PrepareTextures(later);
+        CHECK(log.LineWith("test_look_later.jpg").empty());
+    }
+    // The file is copied into Data while the game runs; the look is prepared again when it changes.
+    std::vector<std::uint8_t> rgba(static_cast<std::size_t>(ImageSize) * ImageSize * 4, 255);
+    const GLuint texture =
+        Bitmaps.LoadImagePixels(L"Data\\Item\\test_look_later.jpg", rgba, ImageSize, ImageSize, true);
+    {
+        const LogCapture log("data");
+        Render::Items::Looks::PrepareTextures(later);
+        CHECK(log.LineWith("test_look_later.jpg").empty());
+        DrawLook look;
+        const std::vector<MeshDraw> draws = sword.Draw(look);
+        REQUIRE(draws.size() == 1);
+        CHECK(draws[0].texture == static_cast<int>(texture));
+    }
+    Bitmaps.UnloadImage(texture, true);
+    Render::Sprites::SetGpuUploadsSkipped(false);
 }

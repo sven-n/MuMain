@@ -20,10 +20,13 @@ namespace Render::Items::Looks
 void DrawRenderStyle(const Data::Looks::LookDefinition& style, BMD* b, const OBJECT* o, DrawLook& look, float alpha,
                      int renderType);
 
-// Finds the texture each layer names, loading the ones no code loaded; done after the item textures are loaded, and
-// again when the looks change. A layer whose texture is missing is skipped, and that is logged as an error.
+// Finds the texture each layer names, loading the ones no code loaded; done after the item textures are loaded. A layer
+// whose texture is missing is skipped, and that is logged as an error.
 void PrepareTextures();
-// The same for one look, such as one the Style Editor shows before it is applied; a missing texture is not logged
-// again.
+// The same for one look when the looks change (an edit, an undo): the textures not found yet, also those missing
+// before, as their file may have come since. A missing texture is logged once.
 void PrepareTextures(const Data::Looks::LookDefinition& style);
+// The same for a look the Style Editor shows before it is applied, when it changes; a missing texture is not logged
+// (the look's problems name it).
+void PrepareDraftTextures(const Data::Looks::LookDefinition& style);
 } // namespace Render::Items::Looks

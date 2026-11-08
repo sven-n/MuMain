@@ -432,4 +432,36 @@ TEST_CASE("Data Checks checks the looks as the Style Editor has them, before Sav
     CHECK(g_MuStyleEditorUI.GetPickedLook() == "brokenLook");
 }
 
+TEST_CASE("A layer's texture changes when its field is left after typing, not with each key [editor][looks]")
+{
+    TestImGuiContext context;
+    Layer layer;
+    bool changed = false;
+    const auto frame = [&layer, &changed]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 900.0f));
+        ImGui::Begin("Fields");
+        changed = MuEditor::Looks::Fields::Layer(layer);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName("Fields");
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::Texture, nullptr, window->ID));
+    frame();
+    ImGui::GetIO().AddInputCharactersUTF8("Effect/Chrome01.jpg");
+    frame();
+    frame();
+    CHECK(layer.texture.empty());
+    CHECK_FALSE(changed);
+    ImGui::ClearActiveID();
+    frame();
+    CHECK(changed);
+    CHECK(layer.texture == "Effect/Chrome01.jpg");
+}
+
 #endif // _EDITOR
