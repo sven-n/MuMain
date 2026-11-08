@@ -26,7 +26,6 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
-#include "UI/Character/HintLines.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
@@ -434,12 +433,9 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
-    const UI::Character::CriticalHitTexts::Parts parts{GameLogic::Combat::GetHeroCriticalDamageRate(),
-                                                       GameLogic::Combat::GetHeroCriticalDamageBonus(),
-                                                       GameLogic::Combat::GetHeroExcellentDamageBonus(),
-                                                       m_DamageRange,
-                                                       I18N::GetCurrentLocale(),
-                                                       UI::Character::ItemName(ITEM_SCROLL_OF_BATTLE)};
+    const UI::Character::CriticalHitTexts::Parts parts{
+        GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
+        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale()};
     m_CriticalHitTexts.Update(parts);
     const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
 

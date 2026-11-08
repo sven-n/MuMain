@@ -516,11 +516,13 @@ TEST_CASE("The character window's damage line hint [data][items]")
 }
 
 // The window's critical hit texts are formatted again only when what they show changes: the rate, the critical and
-// excellent damage bonus, the damage range, the language or the Scroll of Battle's name.
+// excellent damage bonus, the damage range, the language or a name they show.
 TEST_CASE("The critical hit texts are built again only when what they show changes [data][items]")
 {
     ClientDataScope client(ClientDirectory);
     I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     UI::Character::CriticalHitTexts texts;
     UI::Character::CriticalHitTexts::Parts parts;
@@ -555,8 +557,22 @@ TEST_CASE("The critical hit texts are built again only when what they show chang
     parts.locale = "en";
     CHECK(texts.Update(parts));
 
-    // The Scroll of Battle renamed ("Translate item names", the item editor).
-    parts.scrollOfBattleName = L"Schriftrolle des Kampfes";
+    // A buff's skill renamed (the skill editor) and the Scroll of Battle renamed ("Translate item names", the item
+    // editor): the tables change, not the parts.
+    parts.rate.buffSkill = AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY;
+    parts.rate.buff = 9.f;
+    CHECK(texts.Update(parts));
+    wchar_t& skillName = SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY].Name[0];
+    const wchar_t skillLetter = skillName;
+    skillName = L'X';
     CHECK(texts.Update(parts));
     CHECK_FALSE(texts.Update(parts));
+    skillName = skillLetter;
+    CHECK(texts.Update(parts));
+    wchar_t& scrollName = ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name[0];
+    const wchar_t scrollLetter = scrollName;
+    scrollName = L'X';
+    CHECK(texts.Update(parts));
+    CHECK_FALSE(texts.Update(parts));
+    scrollName = scrollLetter;
 }

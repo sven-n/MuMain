@@ -20,6 +20,18 @@ template <typename... Args> std::string FormatHintText(const wchar_t* format, Ar
     return StringUtils::WideToNarrow(text);
 }
 
+// The skill table's name of the skill, empty when there is none; no copy.
+inline const wchar_t* TableSkillName(ActionSkillType skill)
+{
+    return SkillAttribute != nullptr ? SkillAttribute[skill].Name : L"";
+}
+
+// The item table's name of the item, empty when there is none; no copy.
+inline const wchar_t* TableItemName(int itemType)
+{
+    return ItemAttribute != nullptr ? ItemAttribute[itemType].Name : L"";
+}
+
 // The skill's name, or its number ("#383") when the skill table has none, so two missing names stay apart.
 inline std::wstring SkillName(ActionSkillType skill)
 {
