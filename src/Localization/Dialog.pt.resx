@@ -151,7 +151,7 @@
     <value>Aquele lugar é muito perigoso e a 'Lágrima do Elfo' é extremamente difícil de encontrar. Mas se encontrar a 'Lágrima do Elfo', novo poder será derramado sobre você. Agora, vá encontrar a 'Lágrima do Elfo' e volte aqui.</value>
   </data>
   <data name="Answer_65_Slot_0" xml:space="preserve">
-    <value>Vou encontrar a 'Lágrima do Elfo'!</value>
+    <value>Vou encontrar a '{item:14,25}'!</value>
   </data>
   <data name="Text_66" xml:space="preserve">
     <value>Você encontrou a 'Lágrima do Elfo'! Depois da Guerra, Lunedil, a rainha dos elfos, criou a pedra da lágrima lançando magia sobre a pedra do espírito, para que os elfos pudessem invocar o poder da deusa e aumentar seu poder.</value>
