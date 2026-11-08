@@ -929,9 +929,9 @@ at a time.
   list in their order.
 
 What an option does in the client is code, by its type, attribute and way
-of adding: luck's option fills the item's luck slot, which the price and
-the mixes count as before, with the value 0, so the client adds no
-critical damage rate for luck (the server adds the 5 %). An attribute the
+of adding: luck's option fills the item's luck slot with its value, which
+the price and the mixes count as before and the character window adds up
+into the [critical damage rate](#critical-damage-rate). An attribute the
 client does not compute still shows its lines and adds nothing.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
@@ -950,6 +950,49 @@ client does not compute still shows its lines and adds nothing.
 
 `{value}` is the option's value at the item's level (luck's is 5). The
 lines are in the UI's language, English where a text has no translation.
+
+### Critical damage rate
+
+The character window shows the critical damage rate under the strength's
+lines: the chance that a hit is critical, which deals the maximum damage. The
+server rolls it (OpenMU's `CriticalDamageChance`), and the client adds it up
+the same way to show it:
+
+| Part | Adds |
+|---|---|
+| Luck | The luck option's value (`Options/Luck.json`: 5 %) for each worn item with luck, while the item is not broken and the hero meets its requirements |
+| Set options | The active ancient set options "Increase critical damage rate" (the full Warrior set: 5 %) |
+| Socket options | The seed spheres' option "Critical damage rate" (Lightning: 8 % to 12 % by sphere level) |
+| Own buff | While it is on: the Wizard's Expansion of Wizardry Mastery or the Dark Lord's Critical Damage Increase with its third power-up. It adds the value of that master skill, as the server sends it with the master skill tree |
+
+No stat changes the rate; stats only change how much a critical hit adds
+(the Dark Lord's Critical Damage Increase). The line shows what the worn
+items add, in the window's colour for items once it is above 0, and what the
+buff adds in brackets, in the colour for buffs: `Critical damage rate: 33%
+(+9%)`. With the pointer over it, the window lists each part above 0 and the
+total. A buff from a party member is not counted: its value comes from that
+member's master skill, which the client doesn't know.
+
+The original client had a sum of the luck slots' values, but nothing called
+it, nothing showed it, and luck's value in the slot was 0.
+
+The damage line above it has a hint too, with what a hit deals before the
+target's defense: a normal hit (the line's range), a critical hit (the
+maximum plus the critical damage bonus) and an excellent hit (the maximum
+× 1.2, plus the excellent damage bonus and the critical damage bonus). When
+something adds to the critical damage bonus, the hint lists each part above 0
+and their total:
+
+| Part | Adds to every critical hit |
+|---|---|
+| Set options | The active ancient set options "Increase critical damage" (the Cloud set: 50) |
+| Harmony options | A weapon's or staff's harmony option "Increase critical damage", while the item's level reaches the option's level |
+| Socket options | The seed spheres' option "Critical damage" (Lightning: 30 to 50 by sphere level in the client's data; OpenMU has 15 to 40, a known difference) |
+| Own buff | While it is on: the Dark Lord's Increase Critical Damage, 1 per 30 energy and 1 per 25 command, plus its first power-up's value. The damage line takes the colour for buffs meanwhile |
+
+The excellent damage bonus comes from ancient set options and seed spheres.
+As with the rate, a buff from a party member is not counted: its value comes
+from that member's energy and command.
 
 ### Option rules
 
