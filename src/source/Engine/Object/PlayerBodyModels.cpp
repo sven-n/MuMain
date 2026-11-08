@@ -23,12 +23,15 @@ void OpenBodyPart(int slot, const std::wstring& fileName, bool useS6PlayerModels
 
 // Body parts are opened individually, not shared. OpenTexture acquires one reference per index,
 // including preloaded skin bitmaps, whereas BMD::Release follows each mesh's texture mapping.
-void ReleaseRejectedBody(BMD& model)
+void ReleaseRejectedBody(BMD& model, std::span<const TextureProblem> problems)
 {
     for (int i = 0; i < model.NumMeshs; ++i)
     {
+        const bool unsupported = std::ranges::any_of(problems, [i](const TextureProblem& problem)
+                                                     { return problem.mesh == i && problem.unsupportedType; });
         const GLuint texture = model.IndexTexture[i];
-        if (texture != BITMAP_UNKNOWN && texture != BITMAP_HIDE)
+        // Unsupported entries were skipped without acquiring even the zero ID Open2 left in them.
+        if (!unsupported && texture != BITMAP_UNKNOWN && texture != BITMAP_HIDE)
             DeleteBitmap(texture);
         // Prevent Release from unloading those references again through the mesh mapping.
         model.IndexTexture[i] = BITMAP_UNKNOWN;
@@ -57,7 +60,7 @@ void OpenBodyTextures(int slot, const std::wstring& fileName)
 
     MU_LOG_ERROR(mu::log::Get("data"), "Improved player body {} has no loadable texture {}; using original body",
                  mu_wchar_to_utf8(improvedFile.c_str()), mu_wchar_to_utf8(missing->fileName.c_str()));
-    ReleaseRejectedBody(Models[slot]);
+    ReleaseRejectedBody(Models[slot], problems);
     gLoadData.AccessModel(slot, Engine::Object::OriginalPlayerModelFolder, fileName.c_str());
     gLoadData.OpenTexture(slot, L"Player\\");
 }

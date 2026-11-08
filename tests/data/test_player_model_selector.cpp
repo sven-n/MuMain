@@ -365,3 +365,39 @@ TEST_CASE("Rejected bodies with shared texture slots release only their acquired
         }
     }
 }
+
+TEST_CASE("Rejected bodies distinguish acquired bitmap zero from unsupported texture slots "
+          "[player-selector][texture-fallback]")
+{
+    constexpr GLuint ExternalBitmap = 0;
+    for (const bool supported : {true, false})
+    {
+        INFO("first texture supported=", supported);
+        const BodyClientFolder client(CLASS_DARK_LORD);
+        const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+        client.AddImproved(helm);
+        std::filesystem::remove(client.path / "Data" / "Player" / "hairhq_R.OZJ");
+        ClientFolderScope folder(client.path);
+        PlayerTextureScope textures;
+        TestModelSlots slots;
+        // Zero is a valid bitmap-map key, distinct from BITMAP_UNKNOWN. This reference is external.
+        REQUIRE(Bitmaps.LoadImage(ExternalBitmap, L"Data\\Player\\skin_hq_class02.jpg", GL_NEAREST, GL_REPEAT));
+        REQUIRE(Bitmaps.FindTexture(ExternalBitmap) != nullptr);
+        REQUIRE(Bitmaps.FindTexture(ExternalBitmap)->Ref == 1);
+        Engine::Object::OpenPlayerBodyParts(0, CLASS_DARK_LORD, false);
+        const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+        BMD& head = Models[slot];
+        REQUIRE(head.NumMeshs == 2);
+        REQUIRE(head.IndexTexture[0] == 0);
+        std::strcpy(head.Textures[0].FileName, supported ? "skin_hq_class02.jpg" : "unsupported.bmp");
+        // The other texture is missing, so either an acquired zero ID or an untouched zero is rejected.
+        Engine::Object::OpenPlayerBodyTextures(0, CLASS_DARK_LORD);
+        CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
+        const BITMAP_t* surviving = Bitmaps.FindTexture(ExternalBitmap);
+        CHECK(surviving != nullptr);
+        if (surviving != nullptr)
+            CHECK(surviving->Ref == 1);
+        DeleteBitmap(ExternalBitmap);
+        CHECK(Bitmaps.FindTextureByName(L"skin_hq_class02.jpg") == nullptr);
+    }
+}
