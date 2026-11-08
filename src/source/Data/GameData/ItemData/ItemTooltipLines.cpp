@@ -29,11 +29,10 @@ std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
 
 std::vector<TooltipFileLineOf> TooltipFileLinesOf(const ItemTooltipFile& file)
 {
-    constexpr const char* LayoutsKey = "layouts";
     std::vector<TooltipFileLineOf> lines;
     for (size_t layout = 0; layout < file.layouts.size(); ++layout)
     {
-        const std::string field = std::string(LayoutsKey) + "[" + std::to_string(layout) + "]";
+        const std::string field = std::string(TooltipLayoutsKey) + "[" + std::to_string(layout) + "]";
         const std::vector<TooltipLayoutLine>& own = file.layouts[layout].lines;
         for (size_t index = 0; index < own.size(); ++index)
         {

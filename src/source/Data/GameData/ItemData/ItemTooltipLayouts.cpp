@@ -22,7 +22,7 @@ namespace Keys
 {
 constexpr const char* FormatVersion = "formatVersion";
 constexpr const char* Texts = "texts";
-constexpr const char* Layouts = "layouts";
+constexpr const char* Layouts = TooltipLayoutsKey;
 constexpr const char* Name = "name";
 constexpr const char* Lines = "lines";
 constexpr const char* Section = "section";
