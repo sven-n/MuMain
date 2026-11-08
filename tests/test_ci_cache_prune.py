@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_cache_prune import KINDS, PER_COMPILER, READ_BY, SYSTEMS, delete_entry, prune, reader
+from ci_cache_prune import KINDS, PER_COMPILER, READ_BY, SYSTEMS, delete_entry, prune, reader, timestamp
 
 NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
 
@@ -92,6 +92,18 @@ class PruneTests(unittest.TestCase):
         # The Linux build's restores say nothing about it: another run's Quality Gates may have read it since.
         entries[kind][0]["last_accessed_at"] = "2026-11-06T11:53:00Z"
         self.assertEqual(self.run_prune(entries, (kind,), {"linux": NOW, "quality": restores_ended}), ([], 0))
+
+    def test_a_read_in_the_second_the_restores_ended_is_the_runs_own(self):
+        # Quality Gates' one small restore can end within the second its read began: its note keeps the fraction
+        # (ci.yml), so the read still comes before it.
+        kind = "apt-cppcheck-linux-x64-"
+        entries = {kind: [entry(1, f"{kind}image-hash1", "2026-11-05T10:00:00Z",
+                                last_accessed_at="2026-11-06T11:52:00.3Z"),
+                          entry(2, f"{kind}image-hash2", "2026-11-06T11:58:00Z")]}
+        restores_ended = timestamp("2026-11-06T11:52:00.812345Z")
+        self.assertEqual(self.run_prune(entries, (kind,), {"quality": restores_ended}), ([1], 100))
+        # Cut to the second, the note would come before the read.
+        self.assertEqual(self.run_prune(entries, (kind,), {"quality": timestamp("2026-11-06T11:52:00Z")}), ([], 0))
 
     def test_only_keys_of_the_kind_count(self):
         # GitHub matches the key as a prefix, but an entry outside the kind must never be deleted for it.

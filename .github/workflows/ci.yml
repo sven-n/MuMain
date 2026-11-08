@@ -141,9 +141,10 @@ jobs:
 
       - name: Note when the caches were read
         id: caches_read
-        # As in the build jobs, for the prune job; skipped with the restore.
+        # As in the build jobs, for the prune job; skipped with the restore. To the microsecond, as GitHub notes the
+        # read: the one small restore before it can end within the second it began.
         if: steps.changed.outputs.count != '0'
-        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%S.%6NZ)" >> "$GITHUB_OUTPUT"
 
       - name: Fetch apt packages
         if: steps.changed.outputs.count != '0'

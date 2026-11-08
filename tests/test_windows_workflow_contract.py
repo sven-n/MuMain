@@ -837,6 +837,10 @@ for reader_name, (job_name, job_body) in READER_JOBS.items():
             for kind in sorted({prefix.split("${{")[0] for prefix in restore_prefixes(restore)}):
                 check(prune_reader(kind) == reader_name,
                       f"scripts/ci_cache_prune.py must time {kind} by {job_name}, which restores it (READ_BY)")
+# Quality Gates' one restore (2 MB) can end within the second its read began, and GitHub notes the read with its
+# fraction of a second: a note cut to the second would come before the run's own read, which then stays a run longer.
+check("date -u +%Y-%m-%dT%H:%M:%S.%6NZ" in step(quality_job, "quality", "Note when the caches were read"),
+      "quality must note when it read its cppcheck cache to the microsecond")
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 restore_prefixes_by_kind = {}
 # Quality Gates' pip cache is not pruned: it is saved once (actions/cache@v6 under a fixed key).
