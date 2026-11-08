@@ -87,9 +87,7 @@ CriticalDamageRate GetHeroCriticalDamageRate()
         return rate;
     }
     AddWornLuck(rate);
-    std::uint16_t setOptions = 0;
-    g_csItemOption.PlusSpecial(&setOptions, AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT);
-    rate.setOptions = setOptions;
+    rate.setOptions = g_csItemOption.GetSetOptionValue(AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT);
     rate.socketOptions = g_SocketItemMgr.m_StatusBonus.m_iCriticalDamageRateBonus;
     AddOwnBuff(rate);
     AddScrollOfBattle(rate);

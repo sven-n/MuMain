@@ -104,13 +104,6 @@ void AddOwnBuff(CriticalDamageBonus& bonus)
         bonus.buff += powerUp.GetSkillValue();
     }
 }
-
-int SetOptionValue(int option)
-{
-    std::uint16_t value = 0;
-    g_csItemOption.PlusSpecial(&value, option);
-    return value;
-}
 } // namespace
 
 int CriticalDamageBonus::Buff() const
@@ -125,7 +118,7 @@ CriticalDamageBonus GetHeroCriticalDamageBonus()
     {
         return bonus;
     }
-    bonus.setOptions = SetOptionValue(AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE);
+    bonus.setOptions = g_csItemOption.GetSetOptionValue(AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE);
     for (ITEM& item : CharacterMachine->Equipment)
     {
         bonus.harmonyOptions += HarmonyCriticalDamage(item);
@@ -141,7 +134,7 @@ int GetHeroExcellentDamageBonus()
     {
         return 0;
     }
-    return SetOptionValue(AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE) +
+    return g_csItemOption.GetSetOptionValue(AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE) +
            g_SocketItemMgr.m_StatusBonus.m_iExcellentDamageBonus;
 }
 
