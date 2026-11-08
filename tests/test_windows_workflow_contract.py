@@ -721,6 +721,15 @@ QUALITY_TOOLS_WANTED = "steps.changed.outputs.count != '0'"
 check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools",
                 ("Detect changed C++ files", QUALITY_TOOLS_WANTED))
 check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
+# The pip cache holds clang-format, so it runs when the install does. A step that read Detect changed C++ files' count
+# before that step ran would get none, and run or skip without an error.
+check(f"if: {QUALITY_TOOLS_WANTED}\n" in step(quality_job, "quality", "Cache quality tools"),
+      "quality Cache quality tools must run only when Detect changed C++ files counts a file")
+quality_names = re.findall(r"(?m)^      - name: (.+)$", quality_job)
+for index, name in enumerate(quality_names):
+    if "steps.changed.outputs." in step(quality_job, "quality", name):
+        check("Detect changed C++ files" in quality_names[:index],
+              f"quality {name} reads what Detect changed C++ files counted, so it must come after it")
 
 
 def apt_step_lines(job_body, job_name, step_name, kind, condition=None):
