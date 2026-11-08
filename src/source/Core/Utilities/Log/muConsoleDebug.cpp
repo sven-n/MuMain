@@ -240,6 +240,47 @@ ConsoleCommandResult BadArgument(std::wstring message)
     return {ConsoleCommandStatus::BadArgument, std::move(message)};
 }
 
+// The names of the commands handled below. The argument offset comes from the literal, so a
+// renamed command cannot leave a stale length behind.
+constexpr std::wstring_view FpsCommand = L"$fps";
+constexpr std::wstring_view WinMsgCommand = L"$winmsg";
+
+// How a command text relates to one command name.
+enum class CommandForm
+{
+    NotThisCommand,
+    WithoutArgument,
+    WithArgument,
+    // Starts with the name, but the next character is neither the end nor a space: "$fps30",
+    // "$fpscounter", "$winmsgx". A typo of the command, not a chat line; the caller shows the
+    // usage hint.
+    MalformedArgument,
+};
+
+CommandForm FormOfCommand(std::wstring_view command, std::wstring_view name)
+{
+    if (!command.starts_with(name))
+    {
+        return CommandForm::NotThisCommand;
+    }
+    if (command.size() == name.size())
+    {
+        return CommandForm::WithoutArgument;
+    }
+    return command[name.size()] == L' ' ? CommandForm::WithArgument : CommandForm::MalformedArgument;
+}
+
+// The argument slice when the text has one, nullopt for a command that has none or a malformed
+// suffix; the branch reports the usage line in both cases.
+std::optional<std::wstring_view> CommandArgument(CommandForm form, std::wstring_view command, std::wstring_view name)
+{
+    if (form != CommandForm::WithArgument)
+    {
+        return std::nullopt;
+    }
+    return command.substr(name.size());
+}
+
 // A frame cap has to leave the client able to react: below one frame per second the picture
 // stops responding and reads as a crash, and above any panel the extra frames are wasted, as
 // the loop still sleeps per frame. Both ends are wide enough for real hardware and monitors.
@@ -431,11 +472,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetShowGLStats(false);
         return Handled();
     }
-    else if (strCommand.starts_with(L"$fps"))
+    else if (const CommandForm form = FormOfCommand(strCommand, FpsCommand); form != CommandForm::NotThisCommand)
     {
-        const bool hasArgument = strCommand.size() > 4 && strCommand[4] == L' ';
-        const std::optional<double> targetFps =
-            hasArgument ? ParseTargetFps(std::wstring_view(strCommand).substr(4)) : std::nullopt;
+        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, FpsCommand);
+        const std::optional<double> targetFps = argument ? ParseTargetFps(*argument) : std::nullopt;
         if (!targetFps)
         {
             return BadArgument(TargetFpsUsage());
@@ -597,11 +637,10 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetDisableWingExtraLayers(false);
         return Handled();
     }
-    else if (strCommand.starts_with(L"$winmsg"))
+    else if (const CommandForm form = FormOfCommand(strCommand, WinMsgCommand); form != CommandForm::NotThisCommand)
     {
-        const bool hasArgument = strCommand.size() > 7 && strCommand[7] == L' ';
-        const std::optional<int> messageLimit =
-            hasArgument ? Core::Text::TryParseInt(std::wstring_view(strCommand).substr(7)) : std::nullopt;
+        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, WinMsgCommand);
+        const std::optional<int> messageLimit = argument ? Core::Text::TryParseInt(*argument) : std::nullopt;
         if (!messageLimit || *messageLimit == 0)
         {
             return BadArgument(L"usage: $winmsg <count>, 1 or more, or -1 for unlimited");
