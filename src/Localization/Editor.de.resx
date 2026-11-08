@@ -670,6 +670,9 @@
   <data name="Layer part tooltip" xml:space="preserve">
     <value>Angehakt: Die Ebene zeichnet auf diesem Teil. Ein Teil bleibt angehakt.</value>
   </data>
+  <data name="Layer part left out tooltip" xml:space="preserve">
+    <value>Angehakt: Die Ebene lässt dieses Teil aus und zeichnet auf jedem anderen. Ein Teil bleibt angehakt.</value>
+  </data>
   <data name="Layer mesh numbers tooltip" xml:space="preserve">
     <value>Die Nummern der Meshes, auf denen die Ebene zeichnet, etwa 0, 2. Wähle einen Gegenstand, um seine Teile stattdessen nach Namen anzuhaken.</value>
   </data>

@@ -691,6 +691,9 @@
   <data name="Layer part tooltip" xml:space="preserve">
     <value>Ticked: the layer draws on this part. One part stays ticked.</value>
   </data>
+  <data name="Layer part left out tooltip" xml:space="preserve">
+    <value>Ticked: the layer leaves this part out and draws on every other one. One part stays ticked.</value>
+  </data>
   <data name="Layer mesh numbers tooltip" xml:space="preserve">
     <value>The numbers of the meshes the layer draws on, such as 0, 2. Pick an item to tick its parts by name instead.</value>
   </data>

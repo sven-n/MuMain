@@ -515,7 +515,7 @@ bool MeshListField(const char* label, std::vector<int>& meshes)
 
 // The picked item's parts by name, a checkbox each (design L42); one stays ticked, since a layer without meshes would
 // draw on every one. Without parts, the list of numbers.
-bool MeshChecks(std::vector<int>& meshes, const std::vector<LookPart>& parts)
+bool MeshChecks(std::vector<int>& meshes, const std::vector<LookPart>& parts, bool allBut)
 {
     if (parts.empty())
     {
@@ -535,7 +535,8 @@ bool MeshChecks(std::vector<int>& meshes, const std::vector<LookPart>& parts)
                 changed = true;
             }
         }
-        Tip(I18N::Editor::LayerPartTooltip);
+        // For every mesh but the ticked ones, a tick leaves the part out.
+        Tip(allBut ? I18N::Editor::LayerPartLeftOutTooltip : I18N::Editor::LayerPartTooltip);
         ImGui::PopID();
     }
     return changed;
@@ -625,7 +626,7 @@ bool MeshesField(MeshSet& meshes, const std::vector<LookPart>& parts)
     }
     else
     {
-        changed |= MeshChecks(meshes.meshes, parts);
+        changed |= MeshChecks(meshes.meshes, parts, meshes.allBut);
     }
     ImGui::Unindent();
     ImGui::PopID();
