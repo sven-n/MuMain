@@ -85,8 +85,10 @@ class PruneTests(unittest.TestCase):
         kind = "apt-cppcheck-linux-x64-"
         self.assertEqual(reader(kind), "quality")
         self.assertTrue(set(READ_BY) <= set(KINDS))
-        entries = {kind: [entry(1, f"{kind}image-a", "2026-11-05T10:00:00Z", last_accessed_at="2026-11-06T11:51:30Z"),
-                          entry(2, f"{kind}image-b", "2026-11-06T11:58:00Z")]}
+        # Two entries of one image (the part up to the next "-"), as the prune keeps the newest of each.
+        entries = {kind: [entry(1, f"{kind}image-hash1", "2026-11-05T10:00:00Z",
+                                last_accessed_at="2026-11-06T11:51:30Z"),
+                          entry(2, f"{kind}image-hash2", "2026-11-06T11:58:00Z")]}
         restores_ended = datetime(2026, 11, 6, 11, 52, tzinfo=timezone.utc)
         self.assertEqual(self.run_prune(entries, (kind,), {"quality": restores_ended}), ([1], 100))
         # The Linux build's restores say nothing about it: another run's Quality Gates may have read it since.
