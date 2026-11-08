@@ -25,6 +25,7 @@
 #include <cwctype>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -84,19 +85,20 @@ ItemCreationParams WarriorPiece(int group, int number, bool luck)
     return params;
 }
 
-// The hero wears only what the test puts on, in a character machine of its own. The set and socket bonuses the client
-// adds up for it are added up again for what is worn after the scope; make it after the hero's HeroScope.
+// A hero of the test's own (Hero()) who wears only what the test puts on, in a character machine of its own. When the
+// scope goes, the previous hero and machine are back, and the set and socket bonuses are added up again for them.
 class EquipmentScope
 {
 public:
     EquipmentScope() : m_previous(CharacterMachine), m_machine(std::make_unique<CHARACTER_MACHINE>())
     {
+        m_hero.emplace();
         TakeOffAll();
         CharacterMachine = m_machine.get();
     }
 
-    // The set and socket bonuses are added up again for the equipment worn after the scope: the previous character
-    // machine's, or nothing when there was none.
+    // Without a previous machine the bonuses are added up for nothing worn, with the test's hero; otherwise for the
+    // previous machine with the previous hero (set options check the hero's class and stats).
     ~EquipmentScope()
     {
         if (m_previous == nullptr)
@@ -105,7 +107,8 @@ public:
             AddUpBonuses();
         }
         CharacterMachine = m_previous;
-        if (m_previous != nullptr)
+        m_hero.reset();
+        if (m_previous != nullptr && CharacterAttribute != nullptr && ::Hero != nullptr)
         {
             AddUpBonuses();
         }
@@ -113,6 +116,11 @@ public:
 
     EquipmentScope(const EquipmentScope&) = delete;
     EquipmentScope& operator=(const EquipmentScope&) = delete;
+
+    HeroScope& Hero()
+    {
+        return *m_hero;
+    }
 
     ITEM& Wear(int slot, const ItemCreationParams& params)
     {
@@ -139,6 +147,7 @@ private:
 
     CHARACTER_MACHINE* m_previous;
     std::unique_ptr<CHARACTER_MACHINE> m_machine;
+    std::optional<HeroScope> m_hero;
 };
 
 std::vector<std::string> Texts(const std::vector<UI::RmlBridge::Tooltip::Line>& lines)
@@ -161,9 +170,9 @@ TEST_CASE("The critical damage rate adds up the worn items' luck, set options an
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    HeroScope hero;
-    MakeStrongKnight(hero);
     EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
+    MakeStrongKnight(hero);
 
     CHECK(GetHeroCriticalDamageRate().Total() == 0);
 
@@ -206,9 +215,9 @@ TEST_CASE("An item's luck counts while it is not broken and the hero can wear it
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    HeroScope hero;
-    MakeStrongKnight(hero);
     EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
+    MakeStrongKnight(hero);
 
     ITEM& helm = equipment.Wear(EQUIPMENT_HELM, Item(7, 5, true));
     equipment.Wear(EQUIPMENT_BOOTS, Item(11, 5, true));
@@ -229,8 +238,8 @@ TEST_CASE("The hero's own mastered buff adds its master skill's value to the cri
     // The Scroll of Battle's value is in the item option table (ItemAddOption.bmd).
     ClientDataScope client(ClientDirectory);
     TooltipDataScope data;
-    HeroScope hero;
     EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
 
     hero.HeroCharacter().Object.m_BuffMap.RegisterBuff(EFFECT_MAGIC_CIRCLE_ENHANCED);
     CHECK(GetHeroCriticalDamageRate().buffSkill == AT_SKILL_UNDEFINED);
@@ -329,9 +338,9 @@ TEST_CASE("The critical damage bonus adds up the worn items' set, harmony and so
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    HeroScope hero;
-    MakeStrongKnight(hero);
     EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
+    MakeStrongKnight(hero);
 
     CHECK(GetHeroCriticalDamageBonus().Total() == 0);
     CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == 0);
@@ -392,11 +401,11 @@ TEST_CASE("A staff's harmony option adds critical damage like a weapon's [data][
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    HeroScope hero;
+    EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
     MakeStrongKnight(hero);
     hero.Hero().Class = CLASS_SOULMASTER;
     hero.HeroCharacter().Class = CLASS_SOULMASTER;
-    EquipmentScope equipment;
 
     const HARMONYJEWELOPTION& harmony =
         g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(SI_Staff, StaffCriticalDamageHarmony);
@@ -419,8 +428,8 @@ TEST_CASE("A staff's harmony option adds critical damage like a weapon's [data][
 // value. Only the hero's own buff counts: a party member's adds what that member's stats give.
 TEST_CASE("The hero's own Increase Critical Damage adds to every critical hit [data][items]")
 {
-    HeroScope hero;
     EquipmentScope equipment;
+    HeroScope& hero = equipment.Hero();
     hero.Hero().Class = CLASS_DARK_LORD;
     hero.HeroCharacter().Class = CLASS_DARK_LORD;
     hero.Hero().Energy = 2000;
