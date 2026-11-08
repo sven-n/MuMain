@@ -45,6 +45,10 @@ struct LayerEffect
 
 LayerEffect DescribeEffect(const Layer& layer);
 
+// Whether a glow mesh draws a mesh of the layer glowing: one, or all ("none" and the item's are none of the layer's
+// own). The effect fields show a glow's fields for it, as DescribeEffect calls the layer glowing.
+bool DrawsGlowing(const GlowMesh& mesh);
+
 // The effects the gallery offers, in its order (Base is no effect of it).
 std::span<const EffectKind> GetGalleryEffects();
 

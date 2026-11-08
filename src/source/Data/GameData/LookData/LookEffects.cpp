@@ -37,12 +37,6 @@ bool Steps(const Value& value)
     return shape != nullptr && (shape->kind == ShapeKind::Frames || shape->kind == ShapeKind::Random);
 }
 
-// A glow mesh that draws a mesh glowing: one, or all ("none" and the item's are none of the layer's own).
-bool DrawsGlowing(const GlowMesh& mesh)
-{
-    return std::holds_alternative<int>(mesh) || std::holds_alternative<AllGlowMeshes>(mesh);
-}
-
 MeshSet MeshesOf(std::vector<int> meshes)
 {
     MeshSet set;
@@ -63,6 +57,11 @@ GlowMesh MovedMesh(const MeshSet& meshes)
     return meshes.meshes.empty() ? GlowMesh(FromItem{}) : GlowMesh(meshes.meshes.front());
 }
 } // namespace
+
+bool DrawsGlowing(const GlowMesh& mesh)
+{
+    return std::holds_alternative<int>(mesh) || std::holds_alternative<AllGlowMeshes>(mesh);
+}
 
 LayerEffect DescribeEffect(const Layer& layer)
 {

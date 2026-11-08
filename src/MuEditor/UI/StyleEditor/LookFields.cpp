@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <numbers>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -29,7 +30,7 @@ namespace
 {
 using namespace Data::Looks;
 
-constexpr double Pi = 3.14159265358979323846;
+constexpr double Pi = std::numbers::pi;
 // Pixel widths before the editor UI scale.
 constexpr float ComboWidth = 190.0f;
 constexpr float NumberWidth = 110.0f;
@@ -854,11 +855,6 @@ enum : unsigned
     Scroll = 1u << 7,
 };
 } // namespace EffectField
-
-bool DrawsGlowing(const GlowMesh& mesh)
-{
-    return std::holds_alternative<int>(mesh) || std::holds_alternative<AllGlowMeshes>(mesh);
-}
 
 // A glow is its glow mesh's strength, or the opacity of a layer added over the rest.
 unsigned GlowFields(const Data::Looks::Layer& layer)
