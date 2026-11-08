@@ -43,9 +43,15 @@ std::unique_ptr<DataCheckArea> CreateEffectCheckArea();
 // The glTF model file table (Data/Models/ModelFiles.json, the developer
 // overlay MU_DATA_OVERLAY first); it has no tool to open.
 std::unique_ptr<DataCheckArea> CreateModelFileCheckArea();
+// The sounds of map objects (Data/Maps/ObjectSounds.json) as the Map Editor
+// has them; a click opens the Map Editor.
+std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea();
 // The look profile (Data/Render/Look.json) and the light moods
 // (Data/Maps/LightMood.json); a click opens the Dev Editor.
 std::unique_ptr<DataCheckArea> CreateLookCheckArea();
+// The item options (Data/Items/Options, the option texts and rules) with the
+// links of the items as the item tools have them; no tool edits them yet.
+std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea();
 } // namespace MuEditor::DataChecks
 
 #endif // _EDITOR

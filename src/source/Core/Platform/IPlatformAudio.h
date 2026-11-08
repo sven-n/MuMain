@@ -10,6 +10,8 @@
 
 #include "Audio/DSPlaySound.h" // ESound enum, MAX_CHANNEL, MAX_BUFFER
 
+#include <cstdint>
+
 namespace mu
 {
 
@@ -36,6 +38,17 @@ public:
         static_cast<void>(level);
         return PlaySound(buffer, nullptr, false);
     }
+    // Plays a sound effect on the next of its channels when that channel has
+    // ended, and leaves it alone while it plays, as DirectSound's Play did on
+    // a playing buffer (maps design, D-MP3): a sound asked for every frame
+    // runs as up to as many copies as it has channels, each to its end. A
+    // copy it starts plays at `level` (0 to 1) of the effect volume. A
+    // backend without it plays the sound as PlaySound does.
+    [[nodiscard]] virtual bool PlaySoundOnFreeChannel(ESound buffer, float level)
+    {
+        static_cast<void>(level);
+        return PlaySound(buffer, nullptr, false);
+    }
     virtual void StopSound(ESound buffer, bool resetPosition) = 0;
     virtual void AllStopSound() = 0;
     virtual void ReleaseSound(ESound buffer) = 0;
@@ -50,6 +63,50 @@ public:
     [[nodiscard]] virtual int GetMusicPosition() = 0;
 
     // Volume controls — linear 0.0 (mute) to 1.0 (full). Story 5.4.1.
+    // The editor's Sound Mixer (Audio/SoundMixer.h): a gain per sound number
+    // and group (the mixer's number of a play's type), and one for the music,
+    // on top of the volumes. A start of the sound plays at the gain last set
+    // for it and is of that group; the group's playing copies follow at once,
+    // the copies of other groups keep theirs (a sound two types play). 1 and
+    // group 0 unless the editor sets them; a backend without them ignores
+    // them.
+    virtual void SetSoundMixGain(ESound buffer, int group, float gain)
+    {
+        static_cast<void>(buffer);
+        static_cast<void>(group);
+        static_cast<void>(gain);
+    }
+    virtual void SetMusicMixGain(float gain)
+    {
+        static_cast<void>(gain);
+    }
+    // For the Sound Mixer's list: how often the sound started on a channel its
+    // mix gain reaches (a call while it plays and is not restarted is none,
+    // nor is a preview's PlaySoundAtLevel), whether such a channel plays, and
+    // its length in seconds (0 when it is not loaded). A backend without them
+    // gives 0, false and 0.
+    [[nodiscard]] virtual std::uint32_t GetSoundStarts(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return 0;
+    }
+    [[nodiscard]] virtual bool IsSoundPlaying(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return false;
+    }
+    [[nodiscard]] virtual float GetSoundLength(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return 0.0f;
+    }
+    // How many music tracks started (a call for the track that plays is
+    // none), for the Sound Mixer's log; 0 for a backend without it.
+    [[nodiscard]] virtual std::uint32_t GetMusicStarts() const
+    {
+        return 0;
+    }
+
     virtual void SetBGMVolume(float level) = 0;
     virtual void SetSFXVolume(float level) = 0;
     [[nodiscard]] virtual float GetBGMVolume() const = 0;

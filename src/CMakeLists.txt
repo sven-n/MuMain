@@ -15,6 +15,7 @@ project(MuMain)
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH REPO_ROOT)
 
 include("${REPO_ROOT}/cmake/EnsureSubmodule.cmake")
+include("${REPO_ROOT}/cmake/StdafxPrecompiledHeader.cmake")
 
 mu_ensure_submodule("ThirdParty/SDL"
   INDICATOR "CMakeLists.txt"
@@ -300,20 +301,19 @@ set(CMAKE_LINK_WARNING_AS_ERROR ${MU_WARNINGS_AS_ERRORS})
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 
-# The control socket's `ping` names the git commit the client was built from,
-# so a test report says which client it tested (cmake/WriteGitCommit.cmake).
-# Checked on every build; the header only changes with the commit.
-if(ENABLE_CONTROL_SOCKET)
-  set(MU_GIT_COMMIT_HEADER "${CMAKE_BINARY_DIR}/Generated/MuGitCommit.h")
-  add_custom_target(GitCommitHeader
-    COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}" "-DOUTPUT=${MU_GIT_COMMIT_HEADER}"
-            -P "${CMAKE_SOURCE_DIR}/cmake/WriteGitCommit.cmake"
-    BYPRODUCTS "${MU_GIT_COMMIT_HEADER}"
-    COMMENT "Recording the git commit for the control socket"
-    VERBATIM)
-  add_dependencies(MuClient GitCommitHeader)
-  target_include_directories(MuClient PRIVATE "${CMAKE_BINARY_DIR}/Generated")
-endif()
+# The git commit the client was built from (cmake/WriteGitCommit.cmake): MuError.log names it at
+# start-up, so a bug report says which client it came from, and the control socket's `ping` names
+# it, so a test report says which client it tested. Checked on every build; the header only
+# changes with the commit.
+set(MU_GIT_COMMIT_HEADER "${CMAKE_BINARY_DIR}/Generated/MuGitCommit.h")
+add_custom_target(GitCommitHeader
+  COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}" "-DOUTPUT=${MU_GIT_COMMIT_HEADER}"
+          -P "${CMAKE_SOURCE_DIR}/cmake/WriteGitCommit.cmake"
+  BYPRODUCTS "${MU_GIT_COMMIT_HEADER}"
+  COMMENT "Recording the git commit of the build"
+  VERBATIM)
+add_dependencies(MuClient GitCommitHeader)
+target_include_directories(MuClient PRIVATE "${CMAKE_BINARY_DIR}/Generated")
 target_compile_features(MuClient PUBLIC cxx_std_20)
 if(MSVC)
   target_compile_options(MuClient PRIVATE /utf-8 /we4828)
@@ -770,6 +770,21 @@ set_source_files_properties(
     COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang,GNU>:-Wno-error=tautological-compare>"
 )
 
+# stdafx.h is the precompiled header of the files that include it (as "stdafx.h" or "App/stdafx.h"): parsed once, not
+# in each of them (issue #971, step 4). A file that does not include it compiles without it, as before
+# (mu_skip_pch_without_stdafx in cmake/StdafxPrecompiledHeader.cmake). CMAKE_DISABLE_PRECOMPILE_HEADERS=ON turns it off.
+# MSVC makes an inline variable with a constructor in one of these headers a forced symbol (/include) of every file
+# that uses the header, and the linker takes it from whichever object of MuClient defines it, with everything that
+# object uses. Keep such variables out of stdafx.h's headers, or a test that links MuClient without Winmain.cpp fails
+# to link (unresolved g_hWnd and the like). In a Debug build a std::string or std::wstring counts too: its debug
+# iterator support allocates.
+target_precompile_headers(MuClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/App/stdafx.h")
+mu_skip_pch_without_stdafx(MuClient ${MU_CLIENT_SOURCES})
+# The two files GCC 13 reports a -Wstringop-overflow false positive for when they use the precompiled header.
+mu_allow_gcc13_stringop_overflow(MuClient
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/MapData/MapRef.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Data/GameData/ModelData/ModelFiles.cpp")
+
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)
 target_compile_definitions(MuClient PUBLIC
@@ -930,6 +945,24 @@ if (DOTNET_EXECUTABLE)
   mu_native_path("${DOTNET_TEMP_OUTPUT}" DOTNET_TEMP_OUTPUT_NATIVE)
   mu_native_path("${DOTNET_NUGET_DIR}" DOTNET_NUGET_DIR_NATIVE)
   mu_native_path("${DOTNET_TEMP_DIR}" DOTNET_TEMP_DIR_NATIVE)
+
+  # dotnet sets itself up on its first SDK command for a DOTNET_CLI_HOME, and on a machine that never ran dotnet,
+  # NuGet's part of that setup takes a machine-wide named mutex. The build starts several dotnet commands at once with
+  # this fresh home (the ClientLibrary publish, ResxGen), and on Linux and macOS two first runs at once can fail
+  # creating that mutex's files: "'NuGet-Migrations'. One or more system calls failed: mkdir...". One run here, before
+  # the build, leaves them nothing to set up. `dotnet --version` would not do: it skips the setup.
+  # A failed setup only means the build's steps do it themselves, as before; a status line, not a warning, because CI
+  # fails a configure on any warning, and dotnet's own output stays out of it for the same reason.
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}" "${DOTNET_EXECUTABLE}" help
+    RESULT_VARIABLE _dotnet_setup_rc
+    OUTPUT_QUIET
+    ERROR_QUIET
+  )
+  if (NOT _dotnet_setup_rc EQUAL 0)
+    message(STATUS "dotnet's first-time setup failed (rc=${_dotnet_setup_rc}); the build's dotnet steps do it "
+      "themselves. `dotnet help` shows why.")
+  endif()
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
@@ -1116,6 +1149,8 @@ if (DOTNET_EXECUTABLE)
     add_custom_target(ResxGen DEPENDS ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES})
     add_dependencies(MuClient ResxGen)
     target_sources(MuClient PRIVATE ${RESX_GEN_SOURCES})
+    # The generated accessors do not include stdafx.h, so they compile without the precompiled header.
+    set_source_files_properties(${RESX_GEN_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
     target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
   endif()
 

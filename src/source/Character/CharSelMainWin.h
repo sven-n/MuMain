@@ -223,6 +223,10 @@ public:
     void RmlClickConnect() { if (m_bConnectEnabled) m_bRmlConnectClicked = true; }
     void RmlClickDelete() { if (m_bDeleteEnabled) m_bRmlDeleteClicked = true; }
 
+    // Plays the click sound of a button (its element id, "btn_connect") for a key that stands
+    // for it (Q-UI1).
+    void PlayButtonClick(const char* id);
+
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;

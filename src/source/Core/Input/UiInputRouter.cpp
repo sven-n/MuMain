@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "UiInputRouter.h"
 
+#include "Audio/SoundSource.h"
+
 namespace Core::Input
 {
     namespace
@@ -15,6 +17,8 @@ namespace Core::Input
 
     bool RouteToUi(SDL_Event& event, SDL_Window* window)
     {
+        // The sounds of the windows' clicks and keys are the interface's (Q-SM13).
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
         return g_pUiInputConsumer ? g_pUiInputConsumer->ProcessSdlEvent(event, window) : true;
     }
 

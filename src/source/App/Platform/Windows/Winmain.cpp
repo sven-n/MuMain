@@ -19,8 +19,6 @@
 
 #ifdef _WIN32
 #include <dpapi.h>
-#elif defined(__APPLE__)
-#include <mach-o/dyld.h>
 #endif
 #include <clocale>
 #include <cstring>
@@ -48,6 +46,7 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Network/EndpointForLog.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
@@ -74,6 +73,8 @@
 
 #include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
+#include "Core/Utilities/PlatformInfo.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -1941,28 +1942,25 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng", fileVersion[0],
                         fileVersion[1], fileVersion[2], fileVersion[3]);
+    g_ErrorReport.WriteBuildInfo();
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
                           fileVersion[2], fileVersion[3]);
 
     g_ErrorReport.WriteCurrentTime();
-    ER_SystemInfo systemInfo;
-    ZeroMemory(&systemInfo, sizeof(systemInfo));
-    MuGetSystemInfo(&systemInfo);
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSystemInfo(&systemInfo);
+    g_ErrorReport.WriteSystemInfo();
     g_ErrorReport.AddSeparator();
 }
 
 static void SetWorkingDirectoryToBasePath()
 {
 #if defined(__APPLE__)
-    std::uint32_t pathSize = 0;
-    _NSGetExecutablePath(nullptr, &pathSize);
-    std::string executablePath(pathSize, '\0');
-    if (_NSGetExecutablePath(executablePath.data(), &pathSize) == 0)
+    // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
+    // absolute for every later caller (WinApiShims.h).
+    if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
         std::error_code error;
-        std::filesystem::current_path(std::filesystem::path(executablePath).parent_path(), error);
+        std::filesystem::current_path(executable.parent_path(), error);
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
@@ -1971,6 +1969,39 @@ static void SetWorkingDirectoryToBasePath()
         std::filesystem::current_path(basePath, error);
     }
 #endif
+}
+
+// The language the player reads: SetLocale falls back to en for a locale it doesn't know.
+static Core::Log::ReadingLanguage::State CurrentReadingLanguage()
+{
+    return {I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames()};
+}
+
+// A UI language switch after start-up (the options window, the editor), so a report shows the language it was in.
+static void LogUiLanguageChange(void* /*context*/) noexcept
+{
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
+}
+
+// The connect server: the command line's (a launcher passes one) or else config.ini's.
+static void SelectConnectServer(wchar_t* commandLine)
+{
+    WORD port;
+    const bool fromCommandLine = GetConnectServerInfo(commandLine, g_lpszCmdURL, &port) != FALSE;
+    if (fromCommandLine)
+    {
+        szServerIpAddress = g_lpszCmdURL;
+        g_ServerPort = port;
+    }
+    else
+    {
+        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
+        szServerIpAddress = serverIPFromConfig.c_str();
+        g_ServerPort = GameConfig::GetInstance().GetServerPort();
+    }
+    g_ErrorReport.Write(L"> Server = %hs, from %ls.\r\n",
+                        Network::DescribeEndpointForLog(mu_wchar_to_utf8(szServerIpAddress), g_ServerPort).c_str(),
+                        fromCommandLine ? L"the command line" : L"config.ini");
 }
 
 static void InitializeWorkingDirectoryAndLog()
@@ -2032,20 +2063,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_bDisableAnimationTaskPool = false;
     }
 
-    // Check for command line server override
-    WORD wPortNumber;
-    if (GetConnectServerInfo(lpszCommandLine, g_lpszCmdURL, &wPortNumber))
-    {
-        szServerIpAddress = g_lpszCmdURL;
-        g_ServerPort = wPortNumber;
-    }
-    else
-    {
-        // Use config.ini settings if no command line override
-        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
-        szServerIpAddress = serverIPFromConfig.c_str();
-        g_ServerPort = GameConfig::GetInstance().GetServerPort();
-    }
+    SelectConnectServer(lpszCommandLine);
 
     // #ifdef _DEBUG
 
@@ -2073,6 +2091,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
     wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
     g_strSelectedML = g_aszMLSelection;
+    // The legacy "Eng"/"Por"/"Spn" selection that picks the Data/Local files; the UI language comes later.
+    g_ErrorReport.Write(L"> Data language = %ls.\r\n", g_aszMLSelection);
 
     if (m_RememberMe)
     {
@@ -2220,7 +2240,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
+    g_ErrorReport.WriteGpuInfo();
     g_ErrorReport.AddSeparator();
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
@@ -2295,14 +2315,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
-    // The editor still restores its own MuEditorConfig language preference
-    // later in its init, which feeds through to I18N::SetLocale as well.
+    // The options window and the editor's language box switch it later.
     {
         std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
+    I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR

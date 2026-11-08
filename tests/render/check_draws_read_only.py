@@ -21,6 +21,10 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from cpp_text import code_only, source_files  # noqa: E402
+
+SKIPPED_DIRS = {"ThirdParty"}
 TYPE_NAMES = ("OBJECT", "CHARACTER", "PART_t", "JOINT", "PARTICLE", "ITEM", "ITEM_t")
 TYPES = "(?:" + "|".join(TYPE_NAMES) + ")"
 NAME = re.compile(r"\b((?:\w+::)*(?:Render|Draw|Describe)\w*)\s*\(")
@@ -36,70 +40,6 @@ AUTO = re.compile(r"(?<![\w:])auto\b\s*((?:[\*&]\s*(?:const\b\s*)?)*)(\w+)\s*=\s
 OTHER = re.compile(r"(?:^|[;{}(,])\s*(?:(?:const|static|constexpr|volatile)\s+)*([A-Za-z_][\w:]*(?:<[^;{}()]*>)?)"
                    r"\s*[\*&]*\s*(\w+)\s*(?:=|;|\{|\[|\()", re.M)
 PARAMETER = re.compile(r"(const\s+)?(" + TYPES + r")\b(\s+const\b)?\s*((?:[\*&]\s*(?:const\b\s*)?)*)(\w+)")
-
-
-def blank(text, start, stop):
-    return "".join(c if c == "\n" else " " for c in text[start:stop])
-
-
-def is_digit_separator(text, at):
-    """An apostrophe inside a number (1'000, 0xFF'FF), not the start of a character literal (L'}')."""
-    start = at
-    while start > 0 and (text[start - 1].isalnum() or text[start - 1] in "_.'"):
-        start -= 1
-    return start < at and text[start].isdigit() and at + 1 < len(text) and text[at + 1].isalnum()
-
-
-def line_end(text, at):
-    """Where a line ends, a line continued by a backslash going on to the next."""
-    while at < len(text) and not (text[at] == "\n" and text[at - 1] != "\\"):
-        at += 1
-    return at
-
-
-def code_only(text):
-    """The text as the compiler reads it, with comments, literals and preprocessor lines turned into spaces; line
-    breaks stay, so diagnostics keep their lines."""
-    out = []
-    at, end = 0, len(text)
-    line_start = True
-    while at < end:
-        c = text[at]
-        two = text[at : at + 2]
-        stop = None
-        if line_start and c == "#":
-            stop = line_end(text, at)
-        elif two == "//":
-            stop = line_end(text, at)
-        elif two == "/*":
-            stop = text.find("*/", at + 2)
-            stop = end if stop < 0 else stop + 2
-        elif c == '"':
-            stop = at + 1
-            if at > 0 and text[at - 1] == "R":
-                delimiter = text[at + 1 : text.find("(", at)]
-                stop = text.find(")" + delimiter + '"', at)
-                stop = end if stop < 0 else stop + len(delimiter) + 2
-            else:
-                while stop < end and text[stop] != '"' and text[stop] != "\n":
-                    stop += 2 if text[stop] == "\\" else 1
-                stop = min(stop + 1, end)
-        elif c == "'" and not is_digit_separator(text, at):
-            stop = at + 1
-            while stop < end and text[stop] != "'" and text[stop] != "\n":
-                stop += 2 if text[stop] == "\\" else 1
-            stop = min(stop + 1, end)
-        if stop is None:
-            out.append(c)
-            if c == "\n":
-                line_start = True
-            elif not c.isspace():
-                line_start = False
-            at += 1
-            continue
-        out.append(blank(text, at, stop))
-        at = stop
-    return "".join(out)
 
 
 def closing(text, open_at, opener, closer):
@@ -402,11 +342,11 @@ def offences(path, text, kinds):
 
 def main():
     root = Path(sys.argv[1])
-    paths = [p for p in sorted(root.rglob("*")) if p.suffix in (".cpp", ".h") and "ThirdParty" not in p.parts]
-    texts = {p: code_only(p.read_text(encoding="utf-8", errors="replace")) for p in paths}
+    paths = source_files(root, SKIPPED_DIRS)
+    texts = {p: code_only(p.read_text(encoding="utf-8-sig", errors="replace")) for p in paths}
     game = Path(__file__).resolve().parents[2] / "src" / "source"
-    headers = [code_only(p.read_text(encoding="utf-8", errors="replace"))
-               for p in sorted(game.rglob("*.h")) if "ThirdParty" not in p.parts]
+    headers = [code_only(p.read_text(encoding="utf-8-sig", errors="replace"))
+               for p in source_files(game, SKIPPED_DIRS, suffixes=(".h",))]
     kinds = Kinds([text for path, text in texts.items() if path.suffix == ".h"] + headers)
     found = []
     for path, text in texts.items():

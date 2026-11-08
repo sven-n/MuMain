@@ -18,7 +18,8 @@ It is **debug-only**:
 
 - Built only when `_EDITOR` is defined (see [Build Configurations in
   `README.md`](../README.md#build-configurations)).
-- Requires the ImGui submodule (`git submodule update --init`).
+- Requires the ImGui submodule, which CMake fetches
+  (`git submodule update --init --depth 1 -- src/ThirdParty/imgui` by hand).
 - Not present in Release builds.
 
 ---
@@ -39,7 +40,8 @@ The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
 ([monster-data.md](monster-data.md)), Colors ([item-data.md](item-data.md#colors)),
-Data Checks ([below](#data-checks)), Server List
+Data Checks ([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
+the Sound Editor ([below](#sound-editor)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
@@ -106,8 +108,12 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 **Windows > Data Checks** lists the problems of all game data in one table:
 the items, the monsters and the monster models as their Save would write
 them now, and the glTF model file table, the server list, the effect
-catalogue and the graphics look (the look profile and the light moods, area
-**Graphics look**) as the game reads their files at start.
+catalogue, the graphics look (the look profile and the light moods, area
+**Graphics look**) and the item options (`Data/Items/Options` and the option
+texts, area **Item options**, [item-data.md](item-data.md#item-options)) as
+the game reads their files at start, and the map
+object sounds as the Map Editor's Sounds tab has them
+([map-data.md](map-data.md)).
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
@@ -122,8 +128,164 @@ since the last check.
 
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
-Server List, the Effect Browser, or the Dev Editor for the graphics look. An arrow
+Server List, the Effect Browser, the Map Editor for the map sounds, or the
+Dev Editor for the graphics look. An arrow
 key onto a problem only selects it.
+
+### Sound Mixer
+
+**Windows > Sound Mixer** is for listening: it mutes, solos and turns down
+types of sounds and single sounds while the game runs, in editor builds
+only.
+
+- **Types**: music, map ambience (wind, rain, water, forest), map object
+  sounds ([map-data.md](map-data.md)), monsters (the sound sets' events,
+  the attacks' sounds, [monster-data.md](monster-data.md), and their code's
+  sounds), NPCs, your character, other players, effects, items, creatures
+  (birds, bats, mice, fish), the interface and everything else. A sound's
+  type is where it comes from: the data's players name it
+  (`Audio::ScopedSoundSource`); else the place the game's code runs for
+  (`Audio::ScopedSoundPlace`, `Audio/SoundPlaces.h`): a map object, a
+  character by its kind (the hero is your character), the caster of a
+  skill the server sends, an effect as its maker (your fireball is your
+  character's, Charon's sparks the NPCs'), the windows and the interface's
+  input, the map's ambience; else the object `PlayBuffer` is given (a
+  character, a ground item, a bird or fish, a mount by its rider); else a
+  loop is ambience and the rest is everything else. Each type has **Hear**
+  (off mutes it), **Show** (off: Show in world draws nothing of it, but it
+  is still heard), a volume slider and **Solo**. A sound two types play (a
+  swing of yours and of another player) keeps each copy at the volume of
+  the type it started as: muting other players leaves your own swing
+  heard, also while one of theirs still plays.
+- **Sounds heard**: one row per sound, in the order they were first heard,
+  so that a row stays where it is (a music track too, with its file below
+  `Data/Music`: its Mute, Solo and volume act on the music while that track
+  plays): its file below `Data/Sound` (or its number), its kind and source (the set and monster, the map object type),
+  how often it started (a loop or a map object's sound that is asked for each
+  frame counts once per start), its length ("loop" for a loop) and when it
+  last started ("playing" while it plays; the row is green then). **Clear
+  all** empties the list, counts again from 0 and puts every sound's own
+  Mute, Solo and volume back; the types' controls stay. A click on a column header sorts by it, a second
+  one reverses, a third goes back to the order of first hearing. The filter
+  bar above the table leaves the rows whose file or source contains a text,
+  of one type, playing now or changed only, loops or one-shots, or played at
+  least so often ("3 of 41 shown"). **Mute all** and **Unmute all** act on
+  the rows shown, so a filter and Mute all silence, say, every Death Rider
+  sound; sounds heard later come as new rows and play.
+
+**Show in world** draws the sound sources over the game (for the session;
+the menu bar reminder says "overlay on"). A map object with a sound
+([map-data.md](map-data.md)) gets a square, its file and two rings on the
+ground: full volume within 3 tiles (solid) and its quietest from 15 tiles
+(dashed). A monster with a sound set gets a dot, the set's name and its
+5-tile hearing ring, solid green while the hero is inside it (its sounds are
+heard) and dashed grey outside; a set whose sounds are all heard anywhere
+(Kanturu's, Aida's) has no ring and says "heard anywhere". A source flashes a growing ring for a second
+when one of its sounds starts. The sounds that the game's own code plays have no data and so no
+range (most maps; Elf Lala's harp, the Chaos Goblin's mix and Hanzo's smithing; your footsteps,
+swings and skills, other players', effects, drops, birds): a hollow violet square (a map object)
+or circle (anything else) with the files, on the line below a set's name at the same place, marks
+where such a sound last started, while it plays and for a second after.
+The sounds without a place (the interface, the map's ambience, music, some of the server's
+messages) are logged at the top left of the game: the last 10 starts, newest on top, each with
+how long ago it started, its file and type ("0.2 s  iButtonClick.wav (Interface)"); a new line is
+yellow and turns white within a second.
+Only the types whose Show box is ticked are drawn, and while a filter is set
+only the sources and log lines of the rows shown (none set: everything in
+view); the sources and log lines of the row under the mouse are drawn
+yellow.
+
+Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
+type's volume times its own; mute wins; while anything is solo, only what is
+solo plays, the music too. Changes reach playing sounds at once, and a muted
+loop keeps running silently, so it is back where it is when unmuted.
+**Reset all** puts everything back (unmuted, not solo, full volume).
+Nothing is kept: each start plays everything as normal, and while anything
+is changed the editor's menu bar says so ("Sound Mixer: 2 muted, 1 solo"); a click opens the window.
+
+The game's own volumes stay as they are, and the editor's previews (the Play
+buttons of Monster Sounds and the Map Editor, Monster Preview, the effect
+preview) play at their own volume, whatever the mixer says. The effect
+preview's **Mute** still silences the game's one-shot sounds while it runs.
+
+A sound selected in the Sound Mixer (a click on its Sound cell) is selected in
+the Sound Editor too, and the other way round; a window that is closed or
+behind another tab is not opened or raised, it shows the sound when you look
+at it.
+
+### Sound Editor
+
+**Windows > Sound Editor** shows every sound the game loads and edits what
+it is: its name, its file, its channels and 3D, its type, the folder it is
+in, and which sound the game's code plays when. Every change reaches the game
+at once; **Save** writes the files that changed, **Revert** reads them again,
+**Undo** and **Redo** step through the changes. A monster set's sounds
+changed here are written into the set in `Data/Monsters/Sounds.json`, under
+the name the file has (a set renamed in Monster Sounds and not saved there
+keeps its old name in the file): what the monster tools changed and did not
+save, also in the same set, is not saved with them, and they say **Not saved
+yet** until their own **Save**. A sound changed in both windows is left to
+the monster tools' **Save**, and the status line says so.
+
+- **Where sounds live.** The code's sounds, which C++ loads by their `SOUND_`
+  id (`LoadGameSound`), take their file, channels and 3D from
+  `Data/Audio/SoundFiles.json`; the monster sound sets' from
+  `Data/Monsters/Sounds.json`, the map object sounds' from
+  `Data/Maps/ObjectSounds.json`. `Data/Audio` and not `Data/Sound`: a build
+  folder's `Data/Sound` links the shared client folder, which is not in git.
+- **The Sounds tab** is a tree of folders with one row per sound: its name
+  (edited in the cell; without one the id, or the set and file), the id or
+  set in grey, the file, channels, 3D, the type if no place, the types it
+  was heard as this session, when it loaded this session (at start, the map
+  entered, with its monster, not loaded yet) and the file it lives in. A
+  click on the file's **...** picks another file of `Data/Sound` (a search,
+  and a play button to listen first); the files on disk are never changed.
+  The play arrow at the start of each row (it stays with the names when the
+  table scrolls sideways) plays the file once at full volume, past the Sound
+  Mixer. Each column keeps its own width: dragging a border moves only that
+  column.
+  Search finds names, ids, sets and files; **Only problems** leaves the files
+  that are not in the client folder, a file two code sounds load and the
+  sounds the game played that nothing loads. The editor lists `Data/Sound`
+  once, when it first needs it: **Read Data/Sound again** counts a file
+  copied in since, in the picker and in the problems.
+- **Names.** The `SOUND_` id stays a sound's identity, which C++ and the
+  data point at; its name is only what the editor shows (the Sound Mixer,
+  its overlay and log, the Monster Sounds event combo too), so a rename
+  never breaks anything. Names are optional `"name"` fields in the three
+  files; the game reads and ignores them.
+- **Type if no place.** A code sound's `"type"` in `SoundFiles.json` is what
+  the Sound Mixer counts it as when nothing names its source or place (a
+  sound of the server's messages); who plays a sound still decides first.
+- **Folders** (`Data/Audio/SoundFolders.json`, read only by the editor):
+  folders in folders, each sound in one, else under **Not sorted**. **New
+  folder**, **Rename**, **Remove** (its folders and sounds move up), **Move
+  up** and **Move down** act on the folder clicked; drag a sound by its id
+  onto a folder. A filter opens the folders that hold what it shows, a
+  selection the ones that hold the sound. A folder names a set's sound by
+  its set and its id or file, and a map object sound by its file: when one
+  of those changes, here or in another window (a set renamed in Monster
+  Sounds, a file picked in the Map Editor's Sounds tab), the sound keeps its
+  folder. `SoundFolders.json` names the sounds as the saved files do: a
+  rename another window has not saved stays out of it, and once a file is
+  saved with new names (here, or that window's **Save**) the Sound Editor
+  says **Not saved yet** until its **Save** writes them. An entry of a sound
+  that is gone (removed in another window, or by hand in the file) stays, so
+  the sound finds its folder when it comes back; the folder bar counts them,
+  and **Drop them** takes them out as a step that **Undo** puts back.
+- **The Events tab** (`Data/Audio/SoundEvents.json`) decides which sound the
+  code plays when: for each event the first rule that matches plays one of
+  its sounds (at random when it has more). Your footsteps (`heroFootstep`)
+  match the world (`WD_*` numbers, "7, 24-29, 36"), the hero's ground tile
+  and the safe zone; a player's swing at an attack's start
+  (`playerAttackSwing`) matches what the player holds (a bow, a crossbow,
+  the bow group's items 13 and 14, a Light Saber or Spear, another weapon,
+  nothing). A click on a button (`interfaceClick`) matches its click kind,
+  which the button's theme gives it (`click-sound: confirm`,
+  [building-new-ui.md](rmlui-ui-system/building-new-ui.md)); a click on a
+  character in the character select scene is `characterSelected`. An empty
+  field matches anything; each event shows only the fields its code fills
+  in.
 
 ---
 
@@ -219,7 +381,8 @@ Read-only diagnostics:
 
 A tool window of its own (**Windows > Map Editor**, not one of the DevEditor's
 own tabs) that opens an in-client editor for a map's terrain textures, terrain height,
-walkability attributes, and world objects, plus a top-down minimap capture -
+walkability attributes, world objects and their sounds
+([map-data.md](map-data.md)), plus a top-down minimap capture -
 saving back to the game's own on-disk formats. See
 [`src/MuEditor/UI/MapEditor/MAP_EDITOR.md`](../src/MuEditor/UI/MapEditor/MAP_EDITOR.md)
 for the full usage guide (tabs, save targets, and the client/server attribute

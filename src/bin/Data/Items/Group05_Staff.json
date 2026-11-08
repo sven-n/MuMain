@@ -8,8 +8,10 @@
         "en": "Skull Staff",
         "de": "Schädelstab",
         "es": "Báculo Calavera",
+        "pl": "Kostur czaszki",
         "pt": "Bastão da caveira"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -37,8 +39,10 @@
         "en": "Angelic Staff",
         "de": "Engelsstab",
         "es": "Báculo Angelical",
+        "pl": "Anielski kostur",
         "pt": "Bastão angelical"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -66,8 +70,10 @@
         "en": "Serpent Staff",
         "de": "Schlangenstab",
         "es": "Báculo Serpiente",
+        "pl": "Wężowy kostur",
         "pt": "Bastão da serpente"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -95,8 +101,10 @@
         "en": "Thunder Staff",
         "de": "Donnerstab",
         "es": "Báculo Trueno",
+        "pl": "Kostur gromu",
         "pt": "Bastão do trovão"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -125,8 +133,10 @@
         "en": "Gorgon Staff",
         "de": "Gorgonenstab",
         "es": "Báculo Gorgon",
+        "pl": "Kostur Gorgony",
         "pt": "Bastão da górgone"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -154,8 +164,10 @@
         "en": "Legendary Staff",
         "de": "Legendärer Stab",
         "es": "Báculo Legendario",
+        "pl": "Legendarny kostur",
         "pt": "Bastão lendário"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -182,8 +194,10 @@
         "en": "Staff of Resurrection",
         "de": "Stab der Auferstehung",
         "es": "Báculo de la Resurrección",
+        "pl": "Kostur Wskrzeszenia",
         "pt": "Bastão da ressurreição"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -211,8 +225,10 @@
         "en": "Chaos Lighting Staff",
         "de": "Chaos-Blitzstab",
         "es": "Báculo Relámpago de Caos",
+        "pl": "Kostur Błyskawic Chaosu",
         "pt": "Bastão do relâmpago do caos"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -241,8 +257,10 @@
         "en": "Staff of Destruction",
         "de": "Stab der Zerstörung",
         "es": "Báculo de la Destrucción",
+        "pl": "Kostur Zniszczenia",
         "pt": "Bastão da destruição"
       },
+      "options": ["luck"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -271,8 +289,10 @@
         "en": "Dragon Soul Staff",
         "de": "Drachenseelenstab",
         "es": "Báculo Alma de Dragón",
+        "pl": "Kostur Smoczej Duszy",
         "pt": "Bastão da alma do dragão"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -299,9 +319,11 @@
         "en": "Divine Staff of Archangel",
         "de": "Göttlicher Stab des Erzengels",
         "es": "Báculo Divino de Arcángel",
+        "pl": "Boski Kostur Archanioła",
         "pt": "Bastão divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck"],
       "nameLines": [
         {
           "text": {
@@ -343,8 +365,10 @@
         "en": "Staff of Kundun",
         "de": "Stab von Kundun",
         "es": "Báculo de Kundun",
+        "pl": "Kostur Kunduna",
         "pt": "Bastão de Kundun"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -371,8 +395,10 @@
         "en": "Grand Viper Staff",
         "de": "Großvipernstab",
         "es": "Gran Báculo Víbora",
+        "pl": "Kostur Wielkiej Żmii",
         "pt": "Grande bastão da víbora"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -400,8 +426,10 @@
         "en": "Platina Staff",
         "de": "Platinstab",
         "es": "Báculo Platina",
+        "pl": "Platynowy kostur",
         "pt": "Bastão de platina"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -427,8 +455,10 @@
         "en": "Mystery Stick",
         "de": "Mysterienstock",
         "es": "Vara del Misterio",
+        "pl": "Różdżka tajemnic",
         "pt": "Cajado misterioso"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -454,8 +484,10 @@
         "en": "Violent Wind Stick",
         "de": "Sturmwindstock",
         "es": "Vara Viento Violento",
+        "pl": "Różdżka Gwałtownego Wiatru",
         "pt": "Cajado do vento violento"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -481,8 +513,10 @@
         "en": "Red Wing Stick",
         "de": "Rotschwingenstock",
         "es": "Vara Ala Roja",
+        "pl": "Różdżka Czerwonego Skrzydła",
         "pt": "Cajado da asa vermelha"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -508,8 +542,10 @@
         "en": "Ancient Stick",
         "de": "Uralter Stock",
         "es": "Vara Antigua",
+        "pl": "Pradawna różdżka",
         "pt": "Cajado ancestral"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -535,8 +571,10 @@
         "en": "Demonic Stick",
         "de": "Dämonischer Stock",
         "es": "Vara Demoníaca",
+        "pl": "Demoniczna różdżka",
         "pt": "Cajado demoníaco"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -562,8 +600,10 @@
         "en": "Storm Blitz Stick",
         "de": "Sturmblitzstock",
         "es": "Vara Ráfaga Tormentosa",
+        "pl": "Różdżka Burzowego Błysku",
         "pt": "Caj. Relâmpago de Tempestade"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -591,8 +631,10 @@
         "en": "Eternal Wing Stick",
         "de": "Ewigschwingenstock",
         "es": "Vara Ala Eterna",
+        "pl": "Różdżka Wiecznego Skrzydła",
         "pt": "Cajado da asa eterna"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -619,9 +661,11 @@
         "en": "Book of Samut",
         "de": "Buch von Samut",
         "es": "Libro de Samut",
+        "pl": "Księga Samuta",
         "pt": "Livro de Samut"
       },
       "tags": ["summonerBook"],
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -646,9 +690,11 @@
         "en": "Book of Neil",
         "de": "Buch von Neil",
         "es": "Libro de Neil",
+        "pl": "Księga Neila",
         "pt": "Livro de Neil"
       },
       "tags": ["summonerBook"],
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -673,9 +719,11 @@
         "en": "Book of Lagle",
         "de": "Buch von Lagle",
         "es": "Libro de Lagle",
+        "pl": "Księga Lagle’a",
         "pt": "Livro de Lagle"
       },
       "tags": ["summonerBook"],
+      "options": ["luck"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -700,8 +748,10 @@
         "en": "Deadly Staff",
         "de": "Todesstab",
         "es": "Báculo Mortal",
+        "pl": "Śmiercionośny kostur",
         "pt": "Bastão letal"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -729,8 +779,10 @@
         "en": "Inberial Staff",
         "de": "Kaiserlicher Stab",
         "es": "Báculo Inberial",
+        "pl": "Imperialny kostur",
         "pt": "Bastão inberial"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -760,8 +812,10 @@
         "en": "Chromatic Staff",
         "de": "Chromatischer Stab",
         "es": "Báculo Cromático",
+        "pl": "Chromatyczny kostur",
         "pt": "Bastão cromático"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -788,8 +842,10 @@
         "en": "Raven Stick",
         "de": "Rabenstock",
         "es": "Vara Cuervo",
+        "pl": "Różdżka Kruka",
         "pt": "Cajado do corvo"
       },
+      "options": ["luck"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -815,9 +871,11 @@
         "en": "Divine Stick of the Archangel",
         "de": "Göttlicher Stock des Erzengels",
         "es": "Bastón Divino de Arcángel",
+        "pl": "Boska Różdżka Archanioła",
         "pt": "Bastão Divino do Arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck"],
       "nameLines": [
         {
           "text": {

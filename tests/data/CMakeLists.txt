@@ -17,6 +17,8 @@ mu_add_test(
         test_item_model_problems.cpp
         test_item_model_tool.cpp
         test_item_names.cpp
+        test_item_option_links.cpp
+        test_item_options_json.cpp
         test_item_stat_file_change.cpp
         test_item_stats_json.cpp
         test_item_users.cpp
@@ -35,6 +37,61 @@ mu_add_test(
 )
 target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
+# the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME map_data_tests
+    SOURCES
+        test_map_object_sounds.cpp
+        test_map_sounds_tab.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(map_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The code's sounds and their files (Data/Audio/SoundFiles.json): reader,
+# writer, the shipped file and LoadGameSound.
+mu_add_test(
+    NAME sound_data_tests
+    SOURCES
+        test_sound_files.cpp
+        test_sound_events.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(sound_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The editor's Sound Editor: its rows, changes, names, file picker and window.
+# The window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_editor_tests
+    SOURCES
+        test_sound_editor.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(sound_editor_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The editor's Sound Mixer: its rules, sources, heard list and window. The
+# window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_mixer_tests
+    SOURCES
+        test_sound_mixer.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 # The server groups of the login screen (Data/Local/ServerList.json). The
@@ -80,6 +137,8 @@ mu_add_test(
         test_monster_data_users.cpp
         test_monster_database.cpp
         test_monster_edit_history.cpp
+        test_monster_grouped_edits.cpp
+        test_monster_grouped_tools.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
@@ -101,6 +160,8 @@ mu_add_test(
 target_compile_definitions(monster_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
@@ -125,11 +186,13 @@ mu_add_test(
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
         test_dark_lord_pet_tooltip.cpp
+        test_item_bytes.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_exchange_file.cpp
         test_item_mesh_list.cpp
         test_item_model_files.cpp
+        test_item_option_slots.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_set_chrome.cpp
@@ -140,11 +203,11 @@ mu_add_test(
         test_item_tooltip_text.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
-        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
-        ${CMAKE_SOURCE_DIR}/tests/ui/RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
+        mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
         MuCryptopp
 )
@@ -152,15 +215,16 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_TOOLTIP_SNAPSHOT="${CMAKE_CURRENT_SOURCE_DIR}/item_tooltip_snapshot.txt"
     MU_TEST_CHAIN_TEXTS_BEFORE="${CMAKE_CURRENT_SOURCE_DIR}/item_chain_texts_before.json"
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
-# Animates the shipped player model the way the character pre-pass does.
+# Animates the shipped player model the way the character pre-pass does, and
+# reads the shipped player body parts and their textures through the game's
+# loaders.
 mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_player_body_models.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -198,10 +262,10 @@ mu_add_test(
         test_effect_call_sites.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
-        ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        mu_test_effect_data
 )
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
@@ -234,4 +298,14 @@ mu_add_test(
 target_compile_definitions(model_files_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_ENUM_HEADER="${CMAKE_SOURCE_DIR}/src/source/Core/Globals/_enum.h"
+)
+
+mu_add_test(
+    NAME player_model_selector_tests
+    SOURCES test_player_model_selector.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(player_model_selector_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )

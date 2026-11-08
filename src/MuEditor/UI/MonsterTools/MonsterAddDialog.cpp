@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <optional>
 
 namespace MuEditor::Monsters
 {
@@ -48,11 +49,12 @@ void MonsterAddDialog::OpenCopy(int sourceNumber)
     {
         return;
     }
+    const Data::Monsters::MonsterDefinition shared = *g_MonsterEdits.ReadSharedValues(sourceNumber);
     m_mode = Mode::Copy;
     m_sourceNumber = sourceNumber;
     m_number = GetNextFreeMonsterNumber(sourceNumber);
-    m_name = source->names.GetNeutral();
-    m_kind = source->kind;
+    m_name = shared.names.GetNeutral();
+    m_kind = shared.kind;
     m_kindPicked = true;
     m_open = true;
     ImGui::OpenPopup(PopupId);
@@ -137,7 +139,8 @@ void MonsterAddDialog::Confirm()
     MonsterDefinition monster;
     if (m_mode == Mode::Copy)
     {
-        if (const MonsterDefinition* source = g_MonsterDatabase.Find(m_sourceNumber))
+        // The values the source's numbers share, without maps (Q-MN99).
+        if (const std::optional<MonsterDefinition> source = g_MonsterEdits.ReadSharedValues(m_sourceNumber))
         {
             monster = *source;
         }

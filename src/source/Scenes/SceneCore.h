@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Object/ZzzInfomation.h"
-#include "Core/Utilities/SpinLock.h"
 
 // Include refactored scene headers
 #ifdef USE_REFACTORED_SCENES
@@ -17,8 +16,6 @@ extern bool InitServerList;
 extern const wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
-
-inline SpinLock* g_render_lock = new SpinLock();
 
 extern bool CheckRenderNextFrame();
 extern void WaitForNextActivity(bool usePreciseSleep);

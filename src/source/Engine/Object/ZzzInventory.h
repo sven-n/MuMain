@@ -98,6 +98,10 @@ extern wchar_t TextList[MaxTextListRows][100];
 extern int TextListColor[MaxTextListRows];
 extern int TextBold[MaxTextListRows];
 extern SIZE Size[MaxTextListRows];
+// Starts a list of tooltip rows: every one of the MaxTextListRows rows empty, white and not bold. The rows are shared
+// by all tooltips, and a row that sets only its text (the Horn of Fenrir's colour lines) or its text and colour would
+// otherwise keep the bold or colour of the tooltip drawn before.
+void ClearTooltipRows();
 
 namespace Data::Items
 {
@@ -238,7 +242,11 @@ template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
 }
 std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana);
+// The tooltip lines of the item's option slot `slot` when its option comes from an option definition: its texts with
+// its value, blue and not bold, from row `textNum` on and before row `rowLimit`. The rows written (a text the option
+// texts lack has none), or nothing for a slot the code wrote, whose line the caller writes (GetSpecialOptionText).
+std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int textNum, int rowLimit);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype = 0,

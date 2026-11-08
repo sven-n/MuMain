@@ -3,6 +3,7 @@
 # CMakeLists.txt files own their own sources, link, and call mu_add_test().
 
 include(third_party/doctest/doctest.cmake)
+include("${CMAKE_SOURCE_DIR}/cmake/StdafxPrecompiledHeader.cmake")
 
 # When cross-compiling Windows binaries on a non-Windows host (CI's Linux
 # runner, WSL/MinGW), wine has to launch the .exe. Setting this once makes
@@ -40,10 +41,23 @@ endif()
 # hangs holds its CI job until the runner gives up hours later.
 set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 
+# What doctest prints when an entry's filter matches no case: it runs nothing and still exits 0. Such an entry fails,
+# so a name the discovery cut or joined (see tests/check_test_case_names.py) cannot pass unseen. The '.' stands for
+# doctest's '|': on Windows the discovery's post-build command line would read a '|' as a pipe.
+set(MU_TEST_RAN_NO_CASE "test cases: +0 . +0 passed")
+# What a case prints, with MESSAGE, before it returns because it should not run here (an opt-in case whose variable is
+# unset): CTest then reports its entry as skipped, as SKIP_RETURN_CODE does for a whole test program. A skip wins over
+# a failure, so the case must return right after printing it.
+set(MU_TEST_SKIPPED "MU_TEST_SKIPPED:")
+# A dropped name leaves no entry that could fail: every test binary also gets an entry that compares its CTest
+# entries with its test cases.
+set(MU_CHECK_CTEST_ENTRIES "${CMAKE_CURRENT_LIST_DIR}/check_ctest_entries.cmake")
+
 # Helper for module CMakeLists. Usage:
-#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>])
+#   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2 [RESOURCE_LOCK <lock>] [WILL_FAIL])
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
-# failures point at the specific case in CI logs.
+# failures point at the specific case in CI logs. WILL_FAIL makes every entry of
+# the binary pass only by failing; only the canaries below use it.
 set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
 # Most tests need the client globals of Winmain.cpp; compile it once for all of them, not per test.
 add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}")
@@ -53,8 +67,84 @@ if(MSVC)
     target_compile_options(mu_test_winmain PRIVATE /utf-8)
 endif()
 
+# Precompiles stdafx.h for the tests that link MuClient (mu_test_use_pch below), as MuClient does for the game's files
+# (issue #971). MuClient's own precompiled header cannot serve them: it is built with MuClient's private definitions
+# (MU_HAS_DOTNET_AOT and others), and a compile without them gets warning C4651 from MSVC, while GCC does not use the
+# header. This one has MuClient's public definitions only, which every such test has; definitions a test adds are fine
+# with MSVC, GCC and Clang. Its only file is empty, and no target links it: with MSVC, CMake links the precompiled
+# header's object into every test that reuses it, and into every test that links an object library which has or reuses
+# it, so a test that got it both ways would fail with LNK4042 (object specified more than once) and warnings as errors.
+# With CMAKE_DISABLE_PRECOMPILE_HEADERS=ON (CI's PR and main-push builds) there is no such library.
+if(NOT CMAKE_DISABLE_PRECOMPILE_HEADERS)
+    file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp"
+        CONTENT "// Compiled only to precompile stdafx.h for the tests (tests/CMakeLists.txt, mu_test_use_pch).\n")
+    add_library(mu_test_pch OBJECT "${CMAKE_CURRENT_BINARY_DIR}/mu_test_pch.cpp")
+    target_link_libraries(mu_test_pch PRIVATE MuClient)
+    target_include_directories(mu_test_pch PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+    if(MSVC)
+        target_compile_options(mu_test_pch PRIVATE /utf-8)
+    endif()
+    target_precompile_headers(mu_test_pch PRIVATE "${CMAKE_SOURCE_DIR}/src/source/App/stdafx.h")
+    # GCC and Clang take a precompiled header only into compiles with the same position-independent setting. With
+    # CMAKE_POSITION_INDEPENDENT_CODE an object library compiles with -fPIC and an executable with -fPIE (GCC then
+    # ignores the header with a warning, Clang stops), so this library compiles as the test executables do.
+    if(CMAKE_POSITION_INDEPENDENT_CODE)
+        set_target_properties(mu_test_pch PROPERTIES POSITION_INDEPENDENT_CODE OFF)
+        target_compile_options(mu_test_pch PRIVATE ${CMAKE_CXX_COMPILE_OPTIONS_PIE})
+    endif()
+endif()
+
+# Usage: mu_test_use_pch(<target>), for a test executable that links MuClient. Its files that include stdafx.h use the
+# precompiled stdafx.h of mu_test_pch; the others compile without it, as before (cmake/StdafxPrecompiledHeader.cmake,
+# as for MuClient). Without mu_test_pch it does nothing: CMake would warn about
+# every test that reuses a precompiled header while precompiled headers are off, and CI fails on a warning.
+function(mu_test_use_pch target)
+    # On an object library it would build everywhere but in the nightly: there, with MSVC, a test that links the
+    # library gets the header's object twice (LNK4042, see mu_test_pch above). So only test programs may use it.
+    get_target_property(type ${target} TYPE)
+    if(NOT type STREQUAL "EXECUTABLE")
+        message(FATAL_ERROR "mu_test_use_pch(${target}): ${target} has type ${type}; only a test executable may reuse "
+            "the tests' precompiled header.")
+    endif()
+    if(NOT TARGET mu_test_pch)
+        return()
+    endif()
+    target_precompile_headers(${target} REUSE_FROM mu_test_pch)
+    get_target_property(sources ${target} SOURCES)
+    mu_skip_pch_without_stdafx(${target} ${sources})
+endfunction()
+
+# Helper for files that more than one test compiles. Usage:
+#   mu_add_test_objects(NAME <name> SOURCES a.cpp b.cpp [LINK_LIBS lib1 lib2])
+# Compiles the files once, as an object library with the include folder and options mu_add_test gives a test's own
+# files; LINK_LIBS are linked PUBLIC, so the objects and the tests that use them see the same usage requirements. A
+# test lists <name> in its LINK_LIBS instead of the files.
+function(mu_add_test_objects)
+    cmake_parse_arguments(MAO "" "NAME" "SOURCES;LINK_LIBS" ${ARGN})
+    add_library(${MAO_NAME} OBJECT ${MAO_SOURCES})
+    target_link_libraries(${MAO_NAME} PUBLIC ${MAO_LINK_LIBS})
+    target_compile_features(${MAO_NAME} PRIVATE cxx_std_20)
+    target_include_directories(${MAO_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+    if(MSVC)
+        target_compile_options(${MAO_NAME} PRIVATE /utf-8)
+    endif()
+endfunction()
+
+# Game files that more than one standalone test (one without MuClient) compiles: each is compiled once here.
+set(MU_GAME_SOURCE "${CMAKE_SOURCE_DIR}/src/source")
+mu_add_test_objects(NAME mu_test_bench_stats SOURCES
+    ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchStats.cpp
+    ${MU_GAME_SOURCE}/Core/Utilities/Benchmark/BenchTypes.cpp)
+mu_add_test_objects(NAME mu_test_asset_path SOURCES ${MU_GAME_SOURCE}/Render/Textures/AssetPath.cpp)
+mu_add_test_objects(NAME mu_test_path_resolve SOURCES ${MU_GAME_SOURCE}/Core/Platform/PathResolve.cpp)
+mu_add_test_objects(NAME mu_test_master_skill_tree_layout SOURCES
+    ${MU_GAME_SOURCE}/UI/HUD/Skills/MasterSkillTreeLayout.cpp)
+mu_add_test_objects(NAME mu_test_bitmap_gpu_resources SOURCES
+    ${MU_GAME_SOURCE}/Render/Renderer/BitmapGpuResources.cpp
+    LINK_LIBS SDL3::SDL3)
+
 function(mu_add_test)
-    cmake_parse_arguments(MAT "" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
+    cmake_parse_arguments(MAT "WILL_FAIL" "NAME;RESOURCE_LOCK" "SOURCES;LINK_LIBS" ${ARGN})
     list(FIND MAT_SOURCES "${MU_TEST_WINMAIN}" winmain_index)
     if(NOT winmain_index EQUAL -1)
         list(REMOVE_AT MAT_SOURCES ${winmain_index})
@@ -69,13 +159,39 @@ function(mu_add_test)
     if(MSVC)
         target_compile_options(${MAT_NAME} PRIVATE /utf-8)
     endif()
+    if("MuClient" IN_LIST MAT_LINK_LIBS OR "mu_test_winmain" IN_LIST MAT_LINK_LIBS)
+        mu_test_use_pch(${MAT_NAME})
+    endif()
     # Cases of one binary share fixed temp paths, so `ctest --parallel` runs them one at a time; binaries overlap,
     # except binaries that name the same RESOURCE_LOCK because they write the same file.
     if(NOT MAT_RESOURCE_LOCK)
         set(MAT_RESOURCE_LOCK ${MAT_NAME})
     endif()
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
+    set(entry_properties TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_RESOURCE_LOCK})
+    if(MAT_WILL_FAIL)
+        list(APPEND entry_properties WILL_FAIL TRUE)
+    endif()
+    doctest_discover_tests(${MAT_NAME} PROPERTIES ${entry_properties}
+        FAIL_REGULAR_EXPRESSION "${MU_TEST_RAN_NO_CASE}"
+        SKIP_REGULAR_EXPRESSION "${MU_TEST_SKIPPED}")
+    # doctest_discover_tests adds a file to the directory's TEST_INCLUDE_FILES that includes the entries it writes.
+    get_property(test_include_files DIRECTORY PROPERTY TEST_INCLUDE_FILES)
+    list(GET test_include_files -1 discovery_include_file)
+    get_property(emulator TARGET ${MAT_NAME} PROPERTY CROSSCOMPILING_EMULATOR)
+    add_test(NAME ${MAT_NAME}_has_one_ctest_entry_per_case
+        COMMAND "${CMAKE_COMMAND}"
+            "-DTEST_EXECUTABLE=$<TARGET_FILE:${MAT_NAME}>"
+            "-DTEST_EXECUTOR=${emulator}"
+            "-DDISCOVERY_INCLUDE_FILE=${discovery_include_file}"
+            -P "${MU_CHECK_CTEST_ENTRIES}")
+    set_tests_properties(${MAT_NAME}_has_one_ctest_entry_per_case PROPERTIES ${entry_properties})
 endfunction()
+
+# Canaries of the two guards above, with names the discovery cuts and drops (their sources sit under fixtures/, which
+# the static name check skips). Every entry they get must fail, so a guard that stopped working, after a doctest
+# update that changes its summary line, say, fails CI here.
+mu_add_test(NAME ctest_guard_cut_name SOURCES fixtures/ctest_guards/cut_name.cpp WILL_FAIL)
+mu_add_test(NAME ctest_guard_dropped_name SOURCES fixtures/ctest_guards/dropped_name.cpp WILL_FAIL)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_subdirectory(static)

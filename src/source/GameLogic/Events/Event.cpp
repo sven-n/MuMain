@@ -138,10 +138,10 @@ void CXmasEvent::LoadXmasEventEffect()
 
 void CXmasEvent::LoadXmasEventSound()
 {
-    LoadWaveFile(SOUND_XMAS_JUMP_SNOWMAN, L"Data\\Sound\\xmasjumpsnowman.wav", 1);
-    LoadWaveFile(SOUND_XMAS_JUMP_DEER, L"Data\\Sound\\xmasjumpsasum.wav", 1);
-    LoadWaveFile(SOUND_XMAS_JUMP_SANTA, L"Data\\Sound\\xmasjumpsanta.wav", 1);
-    LoadWaveFile(SOUND_XMAS_TURN, L"Data\\Sound\\xmasturn.wav", 1);
+    LoadGameSound(SOUND_XMAS_JUMP_SNOWMAN);
+    LoadGameSound(SOUND_XMAS_JUMP_DEER);
+    LoadGameSound(SOUND_XMAS_JUMP_SANTA);
+    LoadGameSound(SOUND_XMAS_TURN);
 }
 
 void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
@@ -248,7 +248,7 @@ void CNewYearsDayEvent::LoadModel()
 
 void CNewYearsDayEvent::LoadSound()
 {
-    LoadWaveFile(SOUND_NEWYEARSDAY_DIE, L"Data\\Sound\\newyeardie.wav", 1);
+    LoadGameSound(SOUND_NEWYEARSDAY_DIE);
 }
 
 CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
@@ -421,10 +421,10 @@ void C09SummerEvent::LoadModel() {}
 
 void C09SummerEvent::LoadSound()
 {
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK1, L"Data\\Sound\\UmbMon_Walk01.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK2, L"Data\\Sound\\UmbMon_Walk02.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DAMAGE, L"Data\\Sound\\UmbMon_Damage01.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DEAD, L"Data\\Sound\\UmbMon_Dead.wav", 1);
+    LoadGameSound(SOUND_UMBRELLA_MONSTER_WALK1);
+    LoadGameSound(SOUND_UMBRELLA_MONSTER_WALK2);
+    LoadGameSound(SOUND_UMBRELLA_MONSTER_DAMAGE);
+    LoadGameSound(SOUND_UMBRELLA_MONSTER_DEAD);
 }
 
 CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)

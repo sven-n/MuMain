@@ -25,6 +25,7 @@
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
 #include "App/Platform/Windows/Winmain.h"
@@ -503,6 +504,12 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("texture_pack_row_label", &model.texturePackRowLabel);
     c.Bind("texture_pack_value_label", &model.texturePackValueLabel);
     c.Bind("texture_pack_tooltip", &model.texturePackTooltip);
+    c.Bind("use_s6_player_models", &model.useS6PlayerModels);
+    c.Bind("s6_player_models_label", &model.s6PlayerModelsLabel);
+    c.Bind("s6_player_models_tooltip", &model.s6PlayerModelsTooltip);
+    c.BindEventCallback("option_toggle_s6_player_models",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleS6PlayerModels(); });
 
     c.BindEventCallback("option_click_close",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
@@ -991,6 +998,7 @@ void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
     GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
     GameConfig::GetInstance().Save();
     g_ItemDataHandler.SetTranslateItemNames(m_bTranslateItemNames);
+    Core::Log::ReadingLanguage::Write({I18N::GetCurrentLocale(), m_bTranslateItemNames});
 }
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)
@@ -1303,6 +1311,13 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     if (index < 0 || index >= static_cast<int>(std::size(s_AnisotropyValues)))
         return;
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlToggleS6PlayerModels()
+{
+    auto& config = GameConfig::GetInstance();
+    config.SetUseS6PlayerModels(!config.GetUseS6PlayerModels());
+    config.Save(); // Body model slots are loaded once at startup, not hot-swapped here.
 }
 
 void mu::ui::window::COptionWindow::RmlTexturePackChanged(int index)
@@ -1918,6 +1933,14 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
 
     // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
     // entry can change here.
+    SyncLabel(model.s6PlayerModelsLabel, "s6_player_models_label", I18N::Game::S6PlayerModels);
+    SyncLabel(model.s6PlayerModelsTooltip, "s6_player_models_tooltip", I18N::Game::S6PlayerModelsTooltip);
+    const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
+    if (model.useS6PlayerModels != useS6)
+    {
+        model.useS6PlayerModels = useS6;
+        m_RmlView.MarkDirty("use_s6_player_models");
+    }
     SyncLabel(model.texturePackRowLabel, "texture_pack_row_label", I18N::Game::TexturePack);
     SyncLabel(model.texturePackTooltip, "texture_pack_tooltip", I18N::Game::TexturePackTooltip);
     if (!model.texturePackLabels.empty())

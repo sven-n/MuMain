@@ -26,6 +26,7 @@
 #include "Scenes/SceneCommon.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlClickSounds.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -171,6 +172,12 @@ void CCharSelMainWin::BindRmlModel(Rml::DataModelConstructor& c, CharSelMainRmlM
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
     c.BindEventCallback("charsel_delete_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
+}
+
+void CCharSelMainWin::PlayButtonClick(const char* id)
+{
+    if (Rml::ElementDocument* document = m_RmlView.Document())
+        UI::RmlBridge::PlayClickSoundOf(document->GetElementById(id));
 }
 
 void CCharSelMainWin::OnRmlReloaded()

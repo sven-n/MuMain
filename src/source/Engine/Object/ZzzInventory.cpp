@@ -14,6 +14,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ItemOptionLines.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/AI/ZzzAI.h"
@@ -38,6 +39,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
@@ -496,6 +498,16 @@ bool IsCanTrade()
 
 int TextNum = 0;
 int SkipNum = 0;
+
+void ClearTooltipRows()
+{
+    for (int row = 0; row < MaxTextListRows; ++row)
+    {
+        TextList[row][0] = L'\0';
+        TextListColor[row] = TEXT_COLOR_WHITE;
+        TextBold[row] = false;
+    }
+}
 
 void RequireClass(ITEM_ATTRIBUTE* pItem)
 {
@@ -1071,7 +1083,29 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     return  maxDurability;
 }
 
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana)
+std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int textNum, int rowLimit)
+{
+    const std::optional<GameLogic::Items::SlotOption> slotOption = GameLogic::Items::FindSlotOption(item, slot);
+    if (!slotOption)
+    {
+        return std::nullopt;
+    }
+    const int value = GameLogic::Items::GetSlotOptionValue(item, *slotOption);
+    const int lastRow = std::min(rowLimit, MaxTextListRows);
+    int row = textNum;
+    for (const std::string& name : slotOption->option->texts)
+    {
+        if (row < lastRow && Engine::Items::OptionLines::Write(name, value, TextList[row], std::size(TextList[row])))
+        {
+            TextListColor[row] = TEXT_COLOR_BLUE;
+            TextBold[row] = false;
+            ++row;
+        }
+    }
+    return row - textNum;
+}
+
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
 {
     switch (Option)
     {
@@ -1126,9 +1160,6 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
     case AT_SKILL_POWER_SLASH_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         mu_swprintf(Text, I18N::Game::PowerSlashSkillManaD, iMana);
-        break;
-    case AT_LUCK:
-        mu_swprintf(Text, I18N::Game::LuckSuccessRateOfJewelOfSoul25);
         break;
     case AT_IMPROVE_DAMAGE:
         mu_swprintf(Text, I18N::Game::AdditionalDmgD, Value);
@@ -1764,12 +1795,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
 
     TextNum = 0;
     SkipNum = 0;
-
-    ZeroMemory(TextListColor, 20 * sizeof(int));
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = 0;
-    }
+    ClearTooltipRows();
 
     if (!Sell && (GameLogic::Items::IsDarkLordPet(ip)))
     {
@@ -2139,18 +2165,19 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             break;
         }
 
+        if (const std::optional<int> rows = WriteDefinitionOptionLines(*ip, i, TextNum, MaxTextListRows))
+        {
+            TextNum += *rows;
+            continue;
+        }
+
         gSkillManager.GetSkillInformation(ip->Special[i], 1, NULL, &iMana, NULL);
         GetSpecialOptionText(ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++;
 
-        if (ip->Special[i] == AT_LUCK)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::LuckCriticalDamageRate5, ip->SpecialValue[i]);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        }
-        else if (ip->Special[i] == AT_SKILL_RIDER)
+        if (ip->Special[i] == AT_SKILL_RIDER)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::KnightSpecificSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
@@ -2488,10 +2515,7 @@ RepairInfoText BuildRepairInfoText(const ITEM* ip)
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
     TextNum = 0;
     SkipNum = 0;
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = 0;
-    }
+    ClearTooltipRows();
 
     int Level = ip->Level;
     // The name and its color as the item's tooltip has them.

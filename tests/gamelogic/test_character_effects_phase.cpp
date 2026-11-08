@@ -712,7 +712,7 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
     CHECK(skulls() == 0);
 }
 
-TEST_CASE("Every spawn while drawing is a violation; outside a draw it is none [effects]")
+TEST_CASE("Every spawn while drawing is a violation, outside a draw it is none [effects]")
 {
     using namespace Diagnostics::DrawSpawnCheck;
     ResetViolations();
@@ -763,7 +763,7 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
 
 extern OBJECT g_ItemObject[];
 
-TEST_CASE("The draw's full-set check sets nothing; the update's sets the set level and defense [effects]")
+TEST_CASE("The draw's full-set check sets nothing, the update's sets the set level and defense [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);
     CHARACTER* c = &scope.character();
@@ -1181,7 +1181,7 @@ TEST_CASE("Drawing an object whose pose the update has not built leaves its pose
     CHECK(rock.BoneTransform[0][0][3] == before);
 }
 
-TEST_CASE("A character drawn before the update posed it is posed into draw bones its parts use; its own stay [effects]")
+TEST_CASE("A character drawn before the update posed it is posed into draw bones its parts use, its own stay [effects]")
 {
     FenrirScope scope;
     OBJECT body;
@@ -1366,7 +1366,7 @@ TEST_CASE("A Guardian Statue's dark aurora pulse is set on its light by its upda
     gMapManager.WorldActive = world;
 }
 
-TEST_CASE("Character passes leave a standing siege gate's collision; the update finishes the siege census [effects]")
+TEST_CASE("Character passes leave a standing siege gate's collision, the update finishes the siege census [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);
     const int world = gMapManager.WorldActive;

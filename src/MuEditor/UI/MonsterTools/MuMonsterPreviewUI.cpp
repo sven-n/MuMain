@@ -4,6 +4,7 @@
 #ifdef _EDITOR
 
 #include "MuMonsterPreviewUI.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
 
 #include "MonsterAnimationFacts.h"
 #include "MonsterEdits.h"
@@ -166,7 +167,7 @@ void MuMonsterPreviewUI::Render(bool* open)
     {
         const int number = g_MonsterSelection.GetNumber();
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        ShownModel::RenderSelectedMonster(number, monster);
+        ShownModel::RenderSelectedMonster(number, monster, false);
         if (monster != nullptr && !monster->randomVariants.empty())
         {
             RenderVariants(*monster);
@@ -253,6 +254,21 @@ void MuMonsterPreviewUI::PlaySounds(int slot, int animation, float frame,
     {
         SoundPreview::PlayMoment(*set, *moment);
     }
+}
+
+void MuMonsterPreviewUI::PlayDrawnSounds(int slot)
+{
+    const MonsterSoundSet* set = ShownSet(slot);
+    if (set == nullptr || ValuesOf(slot) == nullptr)
+    {
+        return;
+    }
+    // The model's timers tick on the preview's own clock (Q-MN91).
+    const std::vector<Data::Monsters::MonsterModelTimer>& timers = ValuesOf(slot)->timers;
+    const std::uint32_t ticks = GameLogic::Monsters::ModelTimers::Advance(
+        timers, m_animation, static_cast<std::uint32_t>(timeGetTime()), m_timerLastTicks);
+    SoundPreview::PlayDrawn(*set, GetCues(slot), m_animation, m_frame, m_soundOncePlayed,
+                            GameLogic::Monsters::ModelTimers::NamesOf(timers, ticks));
 }
 
 void MuMonsterPreviewUI::RenderPreview(int slot)
@@ -562,6 +578,11 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     {
         return;
     }
+    // The events of each drawn frame (Q-MN84, Q-MN85).
+    if (m_sounds)
+    {
+        PlayDrawnSounds(slot);
+    }
     // SetPlayerWalk plays a walk's sound events every frame, then those of
     // the walk moment.
     if (m_sounds && m_animation == MONSTER01_WALK)
@@ -626,6 +647,8 @@ void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> 
 void MuMonsterPreviewUI::Restart(int slot)
 {
     m_frame = 0.0f;
+    // Once events play again after each start in the preview (Q-MN88).
+    m_soundOncePlayed = false;
     if (!m_sounds)
     {
         return;

@@ -1,5 +1,5 @@
 {
-  "_comment": "The translations the tooltip showed for the second item chain's fixed texts before they moved into the item data (#820), from the .resx of the commit before; by the English text.",
+  "_comment": "The translations the tooltip showed for the second item chain's fixed texts before they moved into the item data (#820), from the .resx of the commit before; by the English text. A translation changed on purpose since then is recorded with its new text (#877: the Polish texts name the items by their Polish names).",
   "texts": {
     "+10~+15 When upgrading level item please put it in combination window.": {
       "de": "Legen Sie Gegenstände für die Verbesserung auf +10~+15 in das Kombinationsfenster.",
@@ -43,7 +43,7 @@
       "es": "Reúne el Pergamino de Sangre con los pergaminos antiguos.",
       "id": "Rakit Gulungan Darah dengan gulungan lama.",
       "ja": "古い巻物と一緒に血の巻物を合成することが出来ます。",
-      "pl": "Złóż Scroll of Blood ze starymi zwojami.",
+      "pl": "Złóż Zwój Krwi ze starymi zwojami.",
       "pt": "Monte o Pergaminho de Sangue com os pergaminhos antigos.",
       "ru": "Соберите Свиток Крови из старых свитков.",
       "tl": "Ipunin ang Scroll of Blood gamit ang mga lumang scroll.",
@@ -643,7 +643,7 @@
       "es": "Puedes hacer una combinación de Duende con una Llave Dorada para crear una Caja Dorada.",
       "id": "Kalian bisa melakukan kombinasi Goblin dengan Gold Key untuk membuat Golden Box.",
       "ja": "ゴールドキーとのカオス合成で金箱を生成できます。",
-      "pl": "Połącz Gold Key u Chaos Goblina, aby stworzyć Golden Box.",
+      "pl": "Połącz Złoty klucz u Chaos Goblina, aby stworzyć Złotą szkatułę.",
       "pt": "Você pode fazer uma combinação de Goblin com uma Chave Dourada para criar uma Caixa Dourada.",
       "ru": "Вы можете создать комбинацию Гоблина с Золотым ключом, чтобы создать Золотую шкатулку.",
       "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin gamit ang isang Gold Key upang lumikha ng isang Golden Box.",
@@ -657,7 +657,7 @@
       "es": "Puedes hacer una combinación de Duende con una Llave plateada para crear una Caja plateada.",
       "id": "Kalian bisa melakukan kombinasi Goblin dengan Silver Key untuk membuat Silver Box.",
       "ja": "シルバーキーとのカオス合成で銀箱を生成できます。",
-      "pl": "Połącz Silver Key u Chaos Goblina, aby stworzyć Silver Box.",
+      "pl": "Połącz Srebrny klucz u Chaos Goblina, aby stworzyć Srebrną szkatułę.",
       "pt": "Você pode fazer uma combinação de Goblin com uma Silver Key para criar uma Silver Box.",
       "ru": "Вы можете создать комбинацию гоблина с серебряным ключом, чтобы создать серебряную шкатулку.",
       "tl": "Maaari kang gumawa ng kumbinasyon ng Goblin na may Silver Key para gumawa ng Silver Box.",

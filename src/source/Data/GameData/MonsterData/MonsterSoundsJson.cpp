@@ -33,6 +33,10 @@ constexpr const char* Maps = "maps";
 constexpr const char* Animations = "animations";
 constexpr const char* On = "on";
 constexpr const char* Cues = "cues";
+constexpr const char* During = "during";
+constexpr const char* Once = "once";
+constexpr const char* DuringCues = "duringCues";
+constexpr const char* Timers = "timers";
 constexpr const char* DeathEffectArmed = "deathEffectArmed";
 constexpr const char* HeardAnywhere = "heardAnywhere";
 constexpr const char* AtMonster = "atMonster";
@@ -47,11 +51,12 @@ constexpr const char* OldNotSubType = "notSubType";
 } // namespace Keys
 
 const KeySet SetKeys{Keys::Name, Keys::Sounds, Keys::SoundEvents, Keys::Maps};
-const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
+const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial, Keys::Name};
 // With the old keys: the reader refuses them, they are not unknown.
-const KeySet SoundEventKeys{Keys::Animations,    Keys::On,        Keys::Cues,       Keys::DeathEffectArmed,
-                            Keys::HeardAnywhere, Keys::AtMonster, Keys::Chance,     Keys::Pick,
-                            Keys::Sounds,        Keys::OldFrames, Keys::OldSubType, Keys::OldNotSubType};
+const KeySet SoundEventKeys{Keys::Animations,    Keys::On,         Keys::Cues,       Keys::During,
+                            Keys::Once,          Keys::DuringCues, Keys::Timers,     Keys::DeathEffectArmed,
+                            Keys::HeardAnywhere, Keys::AtMonster,  Keys::Chance,     Keys::Pick,
+                            Keys::Sounds,        Keys::OldFrames,  Keys::OldSubType, Keys::OldNotSubType};
 const KeySet ChanceKeys{Keys::OneIn, Keys::Draw};
 
 constexpr const char* RandFpsDraw = "randFps";
@@ -164,6 +169,11 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterSound>& sounds, Entr
                 return;
             }
             sound.spatial = spatial->get<bool>();
+        }
+        if (const auto name = entry.find(Keys::Name);
+            name != entry.end() && !Json::ReadText(*name, key + "." + Keys::Name, sound.name, issues))
+        {
+            return;
         }
         issues.WarnAboutUnknownKeys(entry, SoundKeys, key + ".");
         sounds.push_back(std::move(sound));
@@ -278,32 +288,76 @@ bool RefuseOldEventKeys(const OrderedJson& entry, const std::string& prefix, Ent
     return !refused;
 }
 
-// When the event plays: in animations, at moments (Q-MN76) or on cues
-// (Q-MN79).
+// A list of one animation or more.
+bool ReadEventAnimations(const OrderedJson& entry, const char* key, const std::string& prefix,
+                         std::vector<int>& animations, EntryIssues& issues)
+{
+    if (!Json::ReadAnimationList(entry[key], prefix + key, animations, issues))
+    {
+        return false;
+    }
+    if (animations.empty())
+    {
+        issues.Fatal(prefix + key, "must name one animation or more");
+        return false;
+    }
+    return true;
+}
+
+// A once event in stop1, stop2 or walk plays each frame: they clear the flag
+// after the frame's events (Q-MN89).
+void WarnAboutOnceWhileStanding(const MonsterSoundEvent& event, const std::string& prefix, EntryIssues& issues)
+{
+    const bool standing = std::any_of(
+        event.once.begin(), event.once.end(), [](int animation)
+        { return animation == MONSTER01_STOP1 || animation == MONSTER01_STOP2 || animation == MONSTER01_WALK; });
+    if (standing)
+    {
+        issues.Warning(prefix + Keys::Once,
+                       "names stop1, stop2 or walk, which clear the flag: the event plays each frame there");
+    }
+}
+
+// When the event plays: in animations, at moments (Q-MN76), on cues
+// (Q-MN79), each drawn frame in animations (Q-MN84), once in them until the
+// monster stands or walks (Q-MN85), each drawn frame in cues (Q-MN90) or on
+// timers of the model (Q-MN91).
 bool ReadEventWhen(const OrderedJson& entry, const std::string& prefix, MonsterSoundEvent& event, EntryIssues& issues)
 {
     if (entry.contains(Keys::Animations))
     {
-        if (!Json::ReadAnimationList(entry[Keys::Animations], prefix + Keys::Animations, event.animations, issues))
+        return ReadEventAnimations(entry, Keys::Animations, prefix, event.animations, issues);
+    }
+    if (entry.contains(Keys::During))
+    {
+        return ReadEventAnimations(entry, Keys::During, prefix, event.during, issues);
+    }
+    if (entry.contains(Keys::Once))
+    {
+        if (!ReadEventAnimations(entry, Keys::Once, prefix, event.once, issues))
         {
             return false;
         }
-        if (event.animations.empty())
-        {
-            issues.Fatal(prefix + Keys::Animations, "must name one animation or more");
-            return false;
-        }
+        WarnAboutOnceWhileStanding(event, prefix, issues);
         return true;
     }
-    if (entry.contains(Keys::Cues))
+    // The kinds that name cues or timers of the model.
+    for (const auto& [key, names, what] :
+         {std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::Cues, &event.cues, "cue"},
+          std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::DuringCues, &event.duringCues, "cue"},
+          std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::Timers, &event.timers, "timer"}})
     {
-        if (!ReadCueList(entry[Keys::Cues], prefix + Keys::Cues, event.cues, issues))
+        if (!entry.contains(key))
+        {
+            continue;
+        }
+        if (!ReadCueList(entry[key], prefix + key, *names, issues))
         {
             return false;
         }
-        if (event.cues.empty())
+        if (names->empty())
         {
-            issues.Fatal(prefix + Keys::Cues, "must name one cue or more");
+            issues.Fatal(prefix + key, std::string("must name one ") + what + " or more");
             return false;
         }
         return true;
@@ -322,13 +376,17 @@ bool ReadEventWhen(const OrderedJson& entry, const std::string& prefix, MonsterS
 
 bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSoundEvent& event, EntryIssues& issues)
 {
-    const int whens = entry.is_object() ? static_cast<int>(entry.contains(Keys::Animations)) +
-                                              static_cast<int>(entry.contains(Keys::On)) +
-                                              static_cast<int>(entry.contains(Keys::Cues))
-                                        : 0;
+    const int whens =
+        entry.is_object()
+            ? static_cast<int>(entry.contains(Keys::Animations)) + static_cast<int>(entry.contains(Keys::On)) +
+                  static_cast<int>(entry.contains(Keys::Cues)) + static_cast<int>(entry.contains(Keys::During)) +
+                  static_cast<int>(entry.contains(Keys::Once)) + static_cast<int>(entry.contains(Keys::DuringCues)) +
+                  static_cast<int>(entry.contains(Keys::Timers))
+            : 0;
     if (!entry.is_object() || whens != 1 || !entry.contains(Keys::Sounds))
     {
-        issues.Fatal(key, "must be an object with one of animations, on and cues, and sounds");
+        issues.Fatal(key, "must be an object with one of animations, on, cues, during, once, duringCues and "
+                          "timers, and sounds");
         return false;
     }
     const std::string prefix = key + ".";
@@ -447,6 +505,10 @@ OrderedJson WriteSound(const MonsterSound& sound)
     }
     json[Keys::Channels] = sound.channels;
     json[Keys::Spatial] = sound.spatial;
+    if (!sound.name.empty())
+    {
+        json[Keys::Name] = sound.name;
+    }
     return json;
 }
 
@@ -465,6 +527,22 @@ OrderedJson WriteSoundEvent(const MonsterSoundEvent& event)
     else if (!event.cues.empty())
     {
         json[Keys::Cues] = event.cues;
+    }
+    else if (!event.during.empty())
+    {
+        json[Keys::During] = Json::WriteAnimationList(event.during);
+    }
+    else if (!event.once.empty())
+    {
+        json[Keys::Once] = Json::WriteAnimationList(event.once);
+    }
+    else if (!event.duringCues.empty())
+    {
+        json[Keys::DuringCues] = event.duringCues;
+    }
+    else if (!event.timers.empty())
+    {
+        json[Keys::Timers] = event.timers;
     }
     else
     {

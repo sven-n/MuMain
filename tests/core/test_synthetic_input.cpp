@@ -3,10 +3,13 @@
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "synthetic"
 
+#include "App/stdafx.h"
+
 #include "doctest.h"
 
 #include "App/Control/ControlCommands.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/Input.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
 #include "Core/Platform/WinCompat.h"
@@ -232,6 +235,91 @@ TEST_CASE("A second injection is refused while one is in flight [core][synthetic
     BeginFrame();
     CHECK(IsIdle());
     CHECK(Click(1.0f, 1.0f, MouseButton::Left));
+}
+
+TEST_CASE(
+    "The legacy scene input follows injected pointer and buttons without an active window [core][synthetic-input]")
+{
+    ResetInjector guard;
+    struct SceneInput : CInput
+    {
+        mu::ui::window::CNewKeyInput savedKeys = *g_pNewKeyInput;
+        ~SceneInput()
+        {
+            *g_pNewKeyInput = savedKeys;
+        }
+    };
+    SceneInput input{};
+    input.SetScreenSize(1280, 960);
+    WindowWidth = 1280;
+    WindowHeight = 960;
+    const auto frame = [&]
+    {
+        Core::Input::ClearLeftMouseButtonPressEdge();
+        BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+        input.Update();
+    };
+
+    REQUIRE(Move(1000.75f, 725.25f));
+    frame();
+    CHECK(input.GetCursorX() == 1000);
+    CHECK(input.GetCursorY() == 725);
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(Move(-10.0f, 5000.0f));
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 959);
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(Click(1000.0f, 725.0f, MouseButton::Left));
+    frame();
+    frame();
+    frame();
+    CHECK(input.IsLBtnDn());
+    CHECK(input.IsLBtnHeldDn());
+    CHECK(input.GetCursorX() == 1000);
+    CHECK(input.GetCursorY() == 725);
+    frame();
+    CHECK_FALSE(input.IsLBtnDn());
+    CHECK(input.IsLBtnHeldDn());
+    frame();
+    frame();
+    CHECK(IsIdle());
+    CHECK_FALSE(input.IsLBtnHeldDn());
+    CHECK_FALSE(IsInjectingPointer());
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
+
+    consume = true;
+    REQUIRE(Click(500.0f, 600.0f, MouseButton::Left));
+    frame();
+    frame();
+    frame();
+    CHECK_FALSE(input.IsLBtnDn());
+    CHECK_FALSE(input.IsLBtnHeldDn());
+    frame();
+    frame();
+    frame();
+    CHECK(IsIdle());
+
+    REQUIRE(PressKey(VK_HOME));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
+    frame();
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(TypeText("input", false));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
 }
 
 TEST_CASE("A click walks hover, press, hold, release through the mouse globals [core][synthetic-input]")

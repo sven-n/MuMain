@@ -473,6 +473,13 @@ Character names require at least four characters. Fruit names, attribute names
 and descriptions are translated; enable **Translate item names** to display the
 translated item names.
 
+The inventory and expanded inventory controls, common item-use restrictions,
+selling confirmations and repair prices are translated. Equipment tooltips show
+Chinese damage, defense, durability, resistance and requirement labels, including
+missing attribute amounts. These shared tooltips also appear in shops and other
+item windows. Item names still depend on **Translate item names** and the item's
+available name translations.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
@@ -525,7 +532,10 @@ Each monster's `name` lists its names by language code, as an item's does
 
 The **Monster Translations** window (editor builds, **Windows → Monsters →
 Monster Translations**) shows the monster names as a grid: one row per
-monster number, one column per UI language, English first. It works like
+monster, one column per UI language, English first. A monster with several
+numbers has one row for the names they share ("145 (3)": its first number
+and how many it has), and a row for each of its numbers with names of its
+own or made its own in the Monster Browser. It works like
 [Item Translations](#in-the-item-editor):
 
 - Each language's column header says how many monsters have no name of
@@ -535,11 +545,13 @@ monster number, one column per UI language, English first. It works like
   name. An empty cell shows the English name it falls back to, greyed.
 - Right-click a cell: **Same as English** writes the English name for a name
   that is the same in that language; **Remove translation** removes it.
-- The search finds a monster by its number or by any of its names (A to Z in
-  either case). Clicking the number selects the monster in the other monster
-  tools and shows the **Monster Browser**. The monster the tools show is
-  marked, and a monster selected in another tool is scrolled to (the search
-  and filter are cleared when they hide it).
+- The search finds a monster by any of its numbers or by any of its names (A
+  to Z in either case). Clicking the number selects the monster in the other
+  monster tools (a monster's row: the monster as a whole) and shows the
+  **Monster Browser**. The monster the tools show is marked, a number that
+  shares its monster's names on the monster's row, and a monster selected in
+  another tool is scrolled to (the search and filter are cleared when they
+  hide it).
 - A name cannot contain `||`, and the English name cannot be emptied (252,
   whose English name is empty, stays so). Names are stored whole, also when
   they are longer than the 64 characters the game shows.

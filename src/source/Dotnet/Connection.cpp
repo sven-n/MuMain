@@ -7,14 +7,14 @@
 //   "Login failed. Check credentials."
 
 #include "stdafx.h"
-#include <map>
-#include <mutex>
 
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
+#include "HandleRegistry.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Network/EndpointForLog.h"
 
-// Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
+// Full definitions required: Connection.cpp allocates and frees these types (unique_ptr members).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs
 // that pull it in transitively through WSclient.h.
 #include "PacketFunctions_ChatServer.h"
@@ -68,6 +68,20 @@ void CORECLR_DELEGATE_CALLTYPE WriteManagedLog(BYTE level, const char* message)
 
 using ManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(BYTE, const char*);
 using SetManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(ManagedLogCallback);
+using GetManagedLibraryVersion = const char*(CORECLR_DELEGATE_CALLTYPE*)();
+
+// In a release download the library's commit is the client's, so a different one means a library from another
+// download. (A local build rebuilds the library only when its sources change, so there it can be older.)
+// Looked up with FindSymbol, not LoadManagedSymbol: a library from before this function is no error worth a dialog
+// or an error line in the log.
+void WriteLibraryVersion()
+{
+    const auto getLibraryVersion = reinterpret_cast<GetManagedLibraryVersion>(
+        mu::platform::FindSymbol(munique_client_library_handle, "ConnectionManager_GetLibraryVersion"));
+    const char* version = getLibraryVersion != nullptr ? getLibraryVersion() : nullptr;
+    g_ErrorReport.Write(L"ClientLibrary \t\t: %hs\r\n",
+                        version != nullptr ? version : "version unknown (older library)");
+}
 
 } // anonymous namespace
 
@@ -76,9 +90,11 @@ void InitializeDotNetBridge()
     if (!munique_client_library_handle)
     {
         mu::log::Get("dotnet")->error("NET: InitializeDotNetBridge -- library not loaded, skipping");
+        g_ErrorReport.Write(L"ClientLibrary \t\t: not loaded\r\n");
         return;
     }
 
+    WriteLibraryVersion();
     const auto setManagedLogCallback =
         LoadManagedSymbol<SetManagedLogCallback>("ConnectionManager_SetLogCallback");
     if (setManagedLogCallback != nullptr)
@@ -87,14 +103,20 @@ void InitializeDotNetBridge()
     }
 }
 
-std::map<int32_t, Connection*> connections;
-
 namespace
 {
-// The .NET threads report packets and closes through `connections` while the main thread opens
-// and deletes connections.
-std::mutex connectionsMutex;
-} // namespace
+// The open connections by handle. The managed library calls back on thread-pool threads; see
+// HandleRegistry for how that stays away from a Connection being destroyed.
+//
+// Never destroyed, like IncomingPacketQueue::Instance(): the game connection is still open when the
+// process exits, and a callback that arrives while the statics are torn down must still find a
+// working registry.
+DotNetBridge::HandleRegistry<Connection>& Connections()
+{
+    static auto* const registry = new DotNetBridge::HandleRegistry<Connection>();
+    return *registry;
+}
+} // anonymous namespace
 
 namespace DotNetBridge
 {
@@ -196,33 +218,12 @@ Send GetSend()
 
 void Connection::OnPacketReceivedS(const int32_t handle, const int32_t size, BYTE* data)
 {
-    // Held while the packet is queued, so the connection can't be deleted meanwhile.
-    const std::lock_guard<std::mutex> lock(connectionsMutex);
-    const auto it = connections.find(handle);
-    if (it == connections.end())
-    {
-        return;
-    }
-
-    if (Connection* connection = it->second)
-    {
-        connection->OnPacketReceived(data, size);
-    }
+    Connections().Dispatch(handle, [data, size](Connection& connection) { connection.OnPacketReceived(data, size); });
 }
 
 void Connection::OnDisconnectedS(const int32_t handle)
 {
-    const std::lock_guard<std::mutex> lock(connectionsMutex);
-    const auto it = connections.find(handle);
-    if (it == connections.end())
-    {
-        return;
-    }
-
-    if (Connection* connection = it->second)
-    {
-        connection->OnDisconnected();
-    }
+    Connections().Dispatch(handle, [](Connection& connection) { connection.OnDisconnected(); });
 }
 
 Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
@@ -236,64 +237,54 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
         return;
     }
 
-    this->_handle = connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
-
-    mu::log::Get("dotnet")->info("NET: dotnet_connect returned handle={} (encrypted={})", GetHandle(),
+    // Before connecting, so a failure the library logs follows the address it was for.
+    mu::log::Get("dotnet")->info("NET: connecting to {} (encrypted={})",
+                                 Network::DescribeEndpointForLog(std::u16string_view(host ? host : u""), port),
                                  isEncrypted ? 1 : 0);
+    const int32_t handle = connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
+    this->_handle = handle;
+
+    mu::log::Get("dotnet")->info("NET: dotnet_connect returned handle={} (encrypted={})", handle, isEncrypted ? 1 : 0);
 
     if (IsConnected())
     {
-        this->_id = GetHandle();
-        {
-            const std::lock_guard<std::mutex> lock(connectionsMutex);
-            connections[GetHandle()] = this;
-        }
+        this->_id = handle;
+
+        _chatServer = std::make_unique<PacketFunctions_ChatServer>();
+        _connectServer = std::make_unique<PacketFunctions_ConnectServer>();
+        _gameServer = std::make_unique<PacketFunctions_ClientToServer>();
+
+        _chatServer->SetHandle(handle);
+        _connectServer->SetHandle(handle);
+        _gameServer->SetHandle(handle);
+
+        // Register only once the object is complete: callbacks can reach it from here on.
+        Connections().Add(handle, this);
         if (const auto beginReceive = GetBeginReceive())
         {
-            beginReceive(GetHandle());
-            mu::log::Get("dotnet")->info("NET: BeginReceive started for handle={}", GetHandle());
+            beginReceive(handle);
+            mu::log::Get("dotnet")->info("NET: BeginReceive started for handle={}", handle);
         }
-
-        // cppcheck-suppress [noCopyConstructor, noOperatorEq]
-        _chatServer = new PacketFunctions_ChatServer();
-        _connectServer = new PacketFunctions_ConnectServer();
-        _gameServer = new PacketFunctions_ClientToServer();
-
-        _chatServer->SetHandle(GetHandle());
-        _connectServer->SetHandle(GetHandle());
-        _gameServer->SetHandle(GetHandle());
     }
 }
 
 Connection::~Connection()
 {
-    if (IsConnected())
-    {
-        {
-            // Nothing may reach a deleted connection; its close is reported later.
-            const std::lock_guard<std::mutex> lock(connectionsMutex);
-            connections.erase(GetHandle());
-        }
-        if (const auto disconnect = GetDisconnect())
-        {
-            disconnect(GetHandle());
-        }
-    }
-
-    // A connection the server closed made these too, when it connected.
-    SAFE_DELETE(_chatServer);
-    SAFE_DELETE(_connectServer);
-    SAFE_DELETE(_gameServer);
+    // Unregister before disconnecting: this waits for a callback running on this connection, and
+    // the disconnect callback the managed side sends later finds no connection.
+    Unregister();
+    Close();
 }
 
 bool Connection::IsConnected()
 {
-    return GetHandle() > 0;
+    return this->_handle > 0;
 }
 
 void Connection::Send(const BYTE* data, const int32_t size)
 {
-    if (!IsConnected())
+    const int32_t handle = this->_handle;
+    if (handle <= 0)
     {
         return;
     }
@@ -304,26 +295,31 @@ void Connection::Send(const BYTE* data, const int32_t size)
         return;
     }
 
-    send(GetHandle(), data, size);
+    send(handle, data, size);
 }
 
 void Connection::Close()
 {
     this->_id = 0;
-    if (!IsConnected())
+    const int32_t handle = this->_handle;
+    if (handle <= 0)
     {
         return;
     }
 
     if (const auto disconnect = GetDisconnect())
     {
-        disconnect(GetHandle());
+        disconnect(handle);
     }
+}
+
+void Connection::Unregister()
+{
+    Connections().Remove(this->_handle);
 }
 
 void Connection::OnDisconnected()
 {
-    // Runs under connectionsMutex (OnDisconnectedS).
     if (!IsConnected())
     {
         mu::log::Get("dotnet")->info("NET: OnDisconnected called but already disconnected");
@@ -331,17 +327,18 @@ void Connection::OnDisconnected()
     }
 
     mu::log::Get("dotnet")->info("NET: OnDisconnected -- handle={}, erasing from connection map", GetHandle());
-    connections.erase(GetHandle());
+    Unregister();
     this->_handle = 0;
 }
 
 void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
 {
+    const int32_t handle = this->_handle;
     if (!this->_firstPacketLogged)
     {
-        mu::log::Get("dotnet")->info("NET: First packet received -- handle={} size={} (callback path working)",
-                                     GetHandle(), size);
+        mu::log::Get("dotnet")->info("NET: First packet received -- handle={} size={} (callback path working)", handle,
+                                     size);
         this->_firstPacketLogged = true;
     }
-    this->_packetHandler(GetHandle(), data, size);
+    this->_packetHandler(handle, data, size);
 }

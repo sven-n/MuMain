@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "App/Control/ControlTaps.h"
+#include "Audio/SoundOverlay.h"
+#include "Audio/SoundSource.h"
 #include "Engine/Object/EditObjects.h"
 #include "UI/Chat/Chat.h"
 #include "MainScene.h"
@@ -244,8 +246,12 @@ static void UpdateUIAndInput()
     if (g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud())
         MouseOnWindow = true;
 
-    g_pPartyManager->Update();
-    g_pNewUISystem->Update();
+    {
+        // The windows' sounds are the interface's (Q-SM13).
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
+        g_pPartyManager->Update();
+        g_pNewUISystem->Update();
+    }
 
     if (MouseLButton == true &&
         false == g_pNewUISystem->CheckMouseUse() &&
@@ -265,7 +271,10 @@ static void UpdateUIAndInput()
     MoveBattleSoccerGoalEffect();
 
     if (ErrorMessage != MESSAGE_LOG_OUT)
+    {
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
         g_pUIManager->UpdateInput();
+    }
 }
 
 /**
@@ -442,6 +451,9 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     }
     Scenes::Lighting::SubmitSceneLighting();
     App::Control::Frames::RecordWorldCamera();
+#ifdef _EDITOR
+    Audio::Overlay::KeepCamera(g_Camera);
+#endif
 }
 
 // Diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
@@ -753,8 +765,12 @@ static void RenderMainSceneUI()
     }
     EndBitmap();
 
-    g_pPartyManager->Render();
-    g_pNewUISystem->Render();
+    {
+        // The windows' sounds are the interface's (Q-SM13).
+        const Audio::ScopedSoundPlace ui(Audio::SoundKind::Interface, -1, nullptr);
+        g_pPartyManager->Render();
+        g_pNewUISystem->Render();
+    }
 
     BeginBitmap();
     RenderInfomation();

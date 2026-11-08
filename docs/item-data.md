@@ -19,6 +19,9 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
+| `Options/*.json` | The option definitions, one file per option group (luck so far); see [Item options](#item-options) |
+| `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
+| `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
@@ -140,6 +143,7 @@ variants or option words. An online keyword need not select the same items offli
 | `weaponKind` | Only for weapons and shields: `sword`, `glove`, `axe`, `mace`, `spear`, `bow`, `crossbow`, `staff`, `book`, `shield`, as OpenMU's item groups 0 to 6: swords and the Rage Fighter's gloves (group 0; gloves are the items only the Rage Fighter may use), axes (1), maces and sceptres (2), spears (3), bows and crossbows (4: bows have the slot `offHand`, crossbows `mainHand`; arrows and bolts have no weapon kind), staffs, sticks and books (5: books have the slot `offHand`) and shields (6). While an item has the weapon kind its group gives, the bmd import and the item editor (also when it moves an item to another number) keep it matching the group, the slot and, in group 0, the class requirements (a group gives its kind only on that kind's slot, and in group 4 only to two-handed items), so a new weapon gets one too; a kind written in the file that differs from the group's stays as long as it differs. Which bow or crossbow a character holds (its animations, arrows and damage), the elf's arrows-only rule, a spear's reach and Impale, the shield defense set option, the bonus of leveled arrows and bolts, a staff's damage (it counts for the left hand), which right-hand weapons a summoner may hold in the left hand (not staffs or books), the character window's wizardry line, the tooltip's magic power line, the knight skills that need a weapon without a staff or book, Death Stab, Death Cannon and Spiral Slash, the weapon in the left hand that adds its magic options, the dual wield of Dark Knights, Magic Gladiators and Rage Fighters, and the weapon that moves into an empty right hand depend on it |
 | `potionPriority` | Only for potions with the `healingPotion`, `manaPotion`, `complexPotion` or `shieldPotion` tag: which one of a kind the game takes first, the higher the earlier (0 or left out = last; equal ones take the higher group and number first). The shipped potions count up with their size, so the largest is taken first. A client-only field (OpenMU has none); the bmd import keeps it |
 | `statProfile` | The item's profile in the [item stat file](#item-stats-by-level): what its + level, excellent options, ancient set and option level add to its stats and requirements. `"default"` names the default. The [profile rules](#item-stats-by-level) of the item stat file say which profile an item's data gives it: in the shipped file `sceptre` for the items with the `sceptre` tag, `book` for summoner books, `shield` for shields, `weapon` for the other items with a weapon kind (not arrows and bolts), `armor` for helms, armour, pants, gloves and boots, `scroll` for the items of group 15 with requirements, `orb` for the items of group 12 with stat requirements (the orbs, crystals and the Dark Lord's scrolls), `helper` for the items of groups 13 and 14 with a base level requirement (`requirements.level`; the Transformation Ring's comes from `requirementsByLevel`, so it has the default), and a wing tier's profile for wings (`firstTierWing`, `secondTierWing`, `secondTierCape` for the second tier capes, `thirdTierWing`, `smallWing`). While an item has the profile its data gives, the bmd import and the item editor keep it matching (also when it moves an item to another number); a profile written in the file that differs from it stays as long as it differs: the Horn of Fenrir's data gives `helper`, and it names `"default"`. A left-out profile always follows the data; while the data gives one, the item has the default and loading warns about it, as for item files saved before the field. An item whose data stops giving its profile loses the profile's terms: a bow made one-handed, which is then no bow, loses the `weapon` profile's strength per option level |
+| `options` | The [option definitions](#item-options) the item can have, by name: `["luck"]`. The game reads only this list: an item without it has no options. An item file saved before the field has no lists, and the item editor keeps an empty list as it keeps any list that differs from the rules, so such a file needs its lists written into it (the shipped files have them). The [option rules](#option-rules) say which list an item's data gives it; while an item has that list, the bmd import and the item editor keep it matching (also when they move an item to another number), and a list written in the file that differs from it stays as long as it differs, an empty one too. Saving writes it in the order the game takes the definitions in (by type, then by name) |
 | `twoHanded` | Weapon needs both hands |
 | `skill` | Skill the item gives |
 | `level` | Item level (the drop level); also used in price and damage calculations |
@@ -876,6 +880,124 @@ value that is not one of its names (for `group`, a whole number from 0 to
 wings' tables too), and a caption without English. An item whose `statProfile` the file does not have is an error, and
 a profile no item names is a warning.
 
+## Item options
+
+The option groups an item can have are data, as OpenMU's item option
+definitions: the files of `Data/Items/Options` hold the definitions, one
+file per option group, and each item names the ones it can have in its
+`options` list. Which of them an item has comes from the server: its item
+data turns them on (luck by the luck flag). Luck is in data so far; the
+additional option, the excellent, wing, harmony, guardian, socket and pet
+options and the ancient bonus are still code and move into data one group
+at a time.
+
+```json
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "luck",
+      "type": "luck",
+      "displayName": {"en": "Luck", "de": "Glück"},
+      "openMu": {"id": "00000083-0001-0000-0000-000000000000", "name": "Luck"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"attribute": "criticalDamageChance", "percent": {"values": 5}, "text": ["luckJewelOfSoul", "luckCriticalDamage"]}
+      ]
+    }
+  ]
+}
+```
+
+- `name`: what items link, unique across the files. Which file a
+  definition is in is a convention: its type says what it is.
+- `type`: which part of the server's item data turns its options on, as
+  OpenMU's option types: `luck` is the luck flag, with one option without
+  a number. Each option group brings its type when it moves into data. An
+  item links at most one definition of a type.
+- `displayName`: the definition's name by language, English first.
+- `openMu` and `server`: OpenMU's labels of the same definition (its GUID
+  and its English name, which the exchange with the server will match by)
+  and its values only the server reads (whether and how often a dropped
+  item gets the options). The game reads neither.
+- `options`: each names the attribute it raises (OpenMU's `Stats` name)
+  and adds its value as it is (`add`), after the other additions
+  (`addFinal`) or in per cent (`percent`). The value is an object:
+  `{"values": 5}` is 5 at every level, `{"values": [4, 8, 12, 16]}` one
+  value per level from level 1, the last one also above the list. `text`
+  names its tooltip lines in `Tooltips/OptionTexts.json`, one name or a
+  list in their order.
+
+What an option does in the client is code, by its type, attribute and way
+of adding: luck's option fills the item's luck slot, which the price and
+the mixes count as before, with the value 0, so the client adds no
+critical damage rate for luck (the server adds the 5 %). An attribute the
+client does not compute still shows its lines and adds nothing.
+
+`Tooltips/OptionTexts.json` holds the lines' texts:
+
+```json
+{
+  "formatVersion": 1,
+  "texts": {
+    "luckCriticalDamage": {
+      "en": "Luck (critical damage rate +{value}%)",
+      "de": "Glück (kritische Schadensrate +{value}%)"
+    }
+  }
+}
+```
+
+`{value}` is the option's value at the item's level (luck's is 5). The
+lines are in the UI's language, English where a text has no translation.
+
+### Option rules
+
+`Options/OptionRules.json` says which definitions an item's data gives it.
+The game does not read it: the editor writes the items' lists from it.
+
+```json
+{
+  "formatVersion": 1,
+  "rules": [
+    {"options": [], "tags": ["ammunition"]},
+    {"options": ["luck"], "group": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},
+    {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
+    {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
+    {"options": ["luck"], "group": [13], "numbers": [30]}
+  ]
+}
+```
+
+The first rule an item matches gives its list, and an item no rule matches
+gets none. A rule has the conditions of the [profile rules](#item-stats-by-level)
+(`group`, `slot`, `wingTier`, `weaponKind`, `tags`, `requirements`) and two
+more: `numbers`, item numbers (with `group`), and a tag with `!` before it
+(`"!ammunition"`), which an item meets when it does not have the tag. The
+shipped rules give luck to the items the client gave it before: groups 0
+to 11 but arrows and bolts, the wings 12/0 to 12/6, 12/41 and 12/42, the
+Cape of Fighter (12/49), the Cape of Lord (13/30) and the third tier
+wings. A test checks that every shipped item's list is the one its rules
+give.
+
+**Problems** (see [Loading and errors](#loading-and-errors)). Fatal: a
+file that cannot be read or is no JSON, a missing or newer
+`formatVersion`, a definition without `name`, `type`, `displayName` (with
+English) or `options`, a type the game does not know, a name used twice,
+an option without `attribute` or with none or more than one of `add`,
+`addFinal` and `percent`, a value that is no object of whole numbers from
+0 to 65535 or that has `perLevel`, a number used twice in a definition, a
+luck definition with more than one option or a numbered one, OpenMU
+labels or server values of the wrong kind, and a rule naming a
+definition that does not exist or a condition it does not have. Errors:
+an item linking a definition that does not exist (the link is left out)
+or two of one type (the later one is left out), an option naming a text
+the texts do not have, and a text without English or with a placeholder
+other than `{value}` (the lines that name it are left out). Warnings:
+unknown fields, an attribute the client does not compute, a definition no
+item and no rule links, a text no option names and a text in a language
+the game has no texts in.
+
 ---
 
 ## Ancient set options
@@ -915,8 +1037,8 @@ text. The original client needed the exact name.
 
 ## Loading and errors
 
-At startup all `*.json` files in `Data/Items` and `Stats/ItemStats.json` are
-read and checked. Problems have three levels, the same in every data area
+At startup all `*.json` files in `Data/Items`, `Stats/ItemStats.json` and the
+[option files](#item-options) are read and checked. Problems have three levels, the same in every data area
 and editor tool: **fatal** ones make the data unusable, **errors** name
 something that is missing (the game runs without it), **warnings** are worth
 knowing.
@@ -938,6 +1060,7 @@ item and the field (**Copy text** copies it). All problems are also written to
 - a `slot`, `wingTier`, `weaponKind` or tag name that does not exist
 - a `statProfile` that is not a name of letters and digits, or that the
   item stat file does not have
+- an `options` field that is not a list of names
 - a `requirementsByLevel` entry that is not a requirement or not one number
   or 16 numbers from 0 to 65535
 
@@ -1371,9 +1494,10 @@ How changes work:
   saves. A step is not undone when the item changed in a way the history
   did not record. Import from bmd clears the history. The browser's title
   has a `*` while there are changes that are not saved.
-- The weapon kind and the stat profile follow the item's data while they
-  are what it gives: the weapon kind its group, slot and classes, the stat
-  profile the profile rules of the item stat file; a value you pick stays.
+- The weapon kind, the stat profile and the option list follow the item's
+  data while they are what it gives: the weapon kind its group, slot and
+  classes, the stat profile the profile rules of the item stat file, the
+  option list the [option rules](#option-rules); a value you pick stays.
 - **Save Items** runs the checks and writes `Data/Items` next to the game,
   with the model files of the groups whose models changed,
   `SharedModels.json` when a shared model changed,
@@ -1817,7 +1941,8 @@ only item data. The import is there to bring in your own old item files.
   `excellentRaisesLevel`, `requirementsByLevel`) and rule flags (the bmd
   format has none). A weapon kind that its group gives follows the imported
   slot (in group 0 also the class requirements), so a new weapon gets one
-  too; a stat profile that the profile rules give follows the same way. The values
+  too; a stat profile that the profile rules give follows the same way, and
+  so does an option list the option rules give. The values
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
   The imported items are at their bmd numbers, so the models of items you

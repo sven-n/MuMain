@@ -44,6 +44,24 @@ source under `src/MuEditor/` was compiled into the non-editor client.
   monotonic clock; microbenchmarks do not belong in the regression suite.
 - Every automated test file must be registered with CTest. Delete obsolete or
   superseded tests instead of leaving inactive files under `tests/`.
+- Give every `TEST_CASE` an ASCII name, without `;`, a line break or `\` (a
+  comma is fine), with as many `[` as `]` and not starting with `[doctest] `.
+  CTest's discovery reads the names as a CMake list, so it would drop an empty
+  name and cut or join the others, and it skips lines that look like doctest's
+  own output; doctest's filter reads a `\` as an escape, and on Windows the test
+  binary reads its filter in the ANSI code page. Then no entry runs the case. The
+  static check `test_case_names_reach_ctest_whole` finds such names before any
+  build.
+- A CTest entry that runs no case fails (doctest reports `test cases: 0`), and
+  each test binary's `<binary>_has_one_ctest_entry_per_case` entry fails when its
+  entries and its cases differ in number. So a name the discovery cut, joined or
+  dropped fails in CI even where the static check cannot read it. The canary
+  binaries in `tests/fixtures/ctest_guards/` check that both guards still fail. Decide an
+  opt-in case at run time rather than with `doctest::skip(condition)`: the
+  discovery evaluates the condition when the binary is built, so a condition
+  read from the environment can differ when the tests run. Print
+  `MESSAGE("MU_TEST_SKIPPED: <why>")` and return at once; CTest then reports the
+  entry as skipped (a skip wins over a failure, so check nothing after it).
 
 ## Static checks and the pre-push hook
 
@@ -89,3 +107,12 @@ that check with a message; CI still enforces it. `git push --no-verify` skips th
    rest of the game (no `stdafx.h`, no scene globals). If a function isn't
    isolated, extract it to its own `.cpp` first (see
    `src/source/Core/Text/TextLineWrap.cpp` for the pattern).
+5. A file that another test compiles already is compiled once, in an object
+   library: `mu_add_test_objects(NAME mu_test_<unit> SOURCES <files> [LINK_LIBS <libs>])`
+   in the module's `CMakeLists.txt`, and each test lists `mu_test_<unit>` in
+   `LINK_LIBS` instead of the files. A test that links `MuClient` takes the
+   game's files from it and compiles only its own.
+6. In a test that links `MuClient`, the test files that include `stdafx.h`
+   use a precompiled copy of it, as the game's files do; include it first.
+   `mu_add_test` sets this up, and `CMAKE_DISABLE_PRECOMPILE_HEADERS=ON` turns
+   it off.

@@ -56,7 +56,7 @@ private:
     void RenderTable(Data::Items::ItemStatFile& file);
     // The profile rules in order, the picked one's conditions below.
     void RenderRules(Data::Items::ItemStatFile& file);
-    void RenderRuleConditions(Data::Items::StatProfileRule& rule);
+    void RenderRuleConditions(Data::Items::ItemRuleConditions& conditions);
     void RenderApplyButtons();
     // The picked entry has changes that are not applied: a change made from
     // the stored file (New, Copy, Rename, Remove them) would drop them.

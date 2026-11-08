@@ -48,13 +48,18 @@ jobs:
         shell: bash
         run: |
           data_timestamp=$(git log -1 --format=%ct -- src/bin/Data src/bin/fonts)
+          # The release's id inside the data, so MuError.log can tell data that doesn't belong to the client.
+          version_folder="${RUNNER_TEMP}/data-version"
+          mkdir -p "${version_folder}/Data"
+          printf '%s\n' "$tag" > "${version_folder}/Data/DataVersion.txt"
           tar -czf "$archive" \
             --sort=name \
             --mtime="@${data_timestamp}" \
             --owner=0 \
             --group=0 \
             --numeric-owner \
-            -C src/bin Data fonts
+            -C src/bin Data fonts \
+            -C "${version_folder}" Data/DataVersion.txt
           sha256sum "$archive" > "${archive}.sha256"
           sha256sum --check "${archive}.sha256"
 

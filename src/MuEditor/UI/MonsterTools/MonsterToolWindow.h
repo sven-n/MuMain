@@ -21,7 +21,8 @@ void End();
 // (UndoTargets).
 UndoTarget& GetUndoTarget();
 
-// The data the tools show changed: the monster table or the model table.
+// The data the tools show changed: the monster table, the monsters with their
+// numbers (their shared values, D61), the model table or the sound sets.
 int GetDataVersion();
 } // namespace MuEditor::Monsters::ToolWindow
 

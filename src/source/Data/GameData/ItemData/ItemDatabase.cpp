@@ -25,7 +25,7 @@ ItemDatabase& ItemDatabase::GetInstance()
     return instance;
 }
 
-ItemDatabase::ItemDatabase() : m_definitions(MAX_ITEM), m_ruleData(MAX_ITEM) {}
+ItemDatabase::ItemDatabase() : m_definitions(MAX_ITEM), m_ruleData(MAX_ITEM), m_optionLinks(MAX_ITEM) {}
 
 void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 {
@@ -149,6 +149,18 @@ void ItemDatabase::SetStatProfiles(ItemStatProfiles profiles)
     }
 }
 
+void ItemDatabase::SetOptions(ItemOptionDatabase options)
+{
+    ++m_version;
+    m_options = std::move(options);
+    for (size_t itemType = 0; itemType < m_definitions.size(); ++itemType)
+    {
+        m_optionLinks[itemType] = m_definitions[itemType].Exists()
+                                      ? m_options.ResolveLinks(m_definitions[itemType].options)
+                                      : std::vector<ItemOptionIndex>();
+    }
+}
+
 int ItemDatabase::ResolveStatProfile(const std::string& name) const
 {
     const int profile = m_statProfiles.Find(name);
@@ -221,6 +233,8 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
         }
     }
 
+    m_optionLinks[itemType] =
+        definition.Exists() ? m_options.ResolveLinks(definition.options) : std::vector<ItemOptionIndex>();
     m_definitions[itemType] = std::move(definition);
     m_ruleData[itemType] = ruleData;
 }

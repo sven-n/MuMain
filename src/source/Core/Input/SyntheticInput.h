@@ -77,6 +77,9 @@ void CancelForPhysicalButton(unsigned char button);
     return !IsIdle();
 }
 
+// Only clicks, hovers and drags replace the OS pointer during their delivery.
+[[nodiscard]] bool IsInjectingPointer();
+
 // Identifies the injection most recently accepted: every key, click or text
 // schedule that returns true gets a value of its own. A command reads it when
 // its injection is scheduled and compares later, so it can tell its own
@@ -107,6 +110,11 @@ void Reset();
 }
 
 [[nodiscard]] inline bool IsInjecting()
+{
+    return false;
+}
+
+[[nodiscard]] inline bool IsInjectingPointer()
 {
     return false;
 }

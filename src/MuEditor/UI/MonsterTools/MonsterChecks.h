@@ -12,8 +12,9 @@
 // game has no texts for; and the checks of the model list's load
 // (MonsterDataHandler::ValidateModels), among them the model files that are
 // not in the client folder (a monster without a body, P1); and the checks of
-// the monsters' attacks (MonsterAttackChecks). The checks of later monster
-// fields go here too.
+// the monsters' attacks (MonsterAttackChecks) and of the monsters with their
+// numbers (MonsterGroupChecks). The checks of later monster fields go here
+// too.
 namespace MuEditor::Monsters::MonsterChecks
 {
 // Appends the problems of the monster table and the monsters' attacks as they

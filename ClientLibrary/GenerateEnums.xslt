@@ -26,9 +26,24 @@
 
 </xsl:text>
 
+    <!-- The transformation writes a byte order mark, and GCC ignores #pragma once in a file that starts with one after
+         a precompiled header included it (GCC bug 56549): the game precompiles stdafx.h, which includes two of these
+         headers. The guard keeps their second include empty. -->
+    <xsl:variable name="guard" select="concat('MU_PACKET_ENUMS_', translate($subNamespace, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))" />
+    <xsl:text>#ifndef </xsl:text>
+    <xsl:value-of select="$guard"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>#define </xsl:text>
+    <xsl:value-of select="$guard"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:value-of select="$newline"/>
+
     <xsl:apply-templates select="pd:Enums/pd:Enum" mode="cppenum"/>
     <xsl:apply-templates select="pd:Packets/pd:Packet/pd:Enums/pd:Enum" mode="cppenum"/>
 
+    <xsl:text>#endif // </xsl:text>
+    <xsl:value-of select="$guard"/>
+    <xsl:value-of select="$newline"/>
   </xsl:template>
 
   <xsl:template match="pd:Enum" mode="cppenum">

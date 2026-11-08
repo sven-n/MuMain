@@ -53,6 +53,9 @@ private:
     void RenderHeightTab();
     void RenderMinimapTab();
     void RenderAttributeTab();
+    // The Sounds tab (MapSoundsTab.h), and taking an object in the world for
+    // it as the Objects tab picks one.
+    void RenderSoundsTab();
     // Paints TerrainWall[] with the selected attribute under the cursor.
     void PaintAttribute();
     void TakeAttrUndoSnapshot();
@@ -107,6 +110,8 @@ private:
 
     // Mouse state captured before the game consumes it (see CaptureInputForPainting).
     bool m_PaintLDown = false;
+    // The left button as the Sounds tab's picking saw it the frame before.
+    bool m_soundPickWasDown = false;
     bool m_PaintRDown = false;
     bool m_StrokeActive = false;     // a left-drag stroke is in progress (undo edge)
 
