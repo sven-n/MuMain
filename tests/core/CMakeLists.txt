@@ -173,3 +173,10 @@ mu_add_test(
     SOURCES
         test_zen_amount.cpp
 )
+
+mu_add_test(
+    NAME number_parse_tests
+    SOURCES
+        test_number_parse.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
+)

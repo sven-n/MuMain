@@ -1,5 +1,7 @@
 #include "Antialiasing.h"
 
+#include "Core/Text/NumberParse.h"
+
 #include <cwctype>
 #include <string>
 
@@ -25,13 +27,11 @@ int RequestedSampleCount(int configured)
 
 std::optional<int> ParseCommandArgument(std::wstring_view argument)
 {
-    const auto first = argument.find_first_not_of(L" \t");
-    if (first == std::wstring_view::npos)
+    std::wstring word(Core::Text::TrimWhitespace(argument));
+    if (word.empty())
     {
         return std::nullopt;
     }
-    const auto last = argument.find_last_not_of(L" \t");
-    std::wstring word(argument.substr(first, last - first + 1));
     for (wchar_t& character : word)
     {
         character = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(character)));

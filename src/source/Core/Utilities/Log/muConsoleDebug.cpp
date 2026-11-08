@@ -1,10 +1,7 @@
 
 #include "stdafx.h"
-#include <cerrno>
 #include <cmath>
 #include <cstdlib>
-#include <cwchar>
-#include <cwctype>
 #include <optional>
 #include <string_view>
 #include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
@@ -26,6 +23,7 @@
 #include "Render/Renderer/Antialiasing.h"
 #include "Render/Look/LookTuning.h"
 #include "Core/Text/Utf8.h"
+#include "Core/Text/NumberParse.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Scenes/SceneCore.h"
@@ -227,45 +225,6 @@ void ListDebugWindows()
                              mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
-// Everything std::iswspace calls whitespace, because the argument reaches here from two places:
-// the chat box, where a stray tab shows up, and the control socket, where the text can end in
-// "\r\n". std::wcstod skips leading whitespace on its own but not trailing.
-std::wstring TrimWhitespace(std::wstring_view text)
-{
-    const auto isWhitespace = [](wchar_t character) { return std::iswspace(static_cast<wint_t>(character)) != 0; };
-    while (!text.empty() && isWhitespace(text.front()))
-    {
-        text.remove_prefix(1);
-    }
-    while (!text.empty() && isWhitespace(text.back()))
-    {
-        text.remove_suffix(1);
-    }
-    return std::wstring(text);
-}
-
-// Parses the argument of a "$<command> <number>" debug command. A missing or malformed argument
-// used to reach std::stof/substr and throw out of the chat handler, which closed the client;
-// callers print a usage hint instead. Returns nullopt unless the whole argument is a number.
-std::optional<double> ParseNumericArgument(std::wstring_view argument)
-{
-    const std::wstring trimmed = TrimWhitespace(argument);
-    if (trimmed.empty())
-    {
-        return std::nullopt;
-    }
-
-    wchar_t* end = nullptr;
-    errno = 0;
-    const double value = std::wcstod(trimmed.c_str(), &end);
-    if (end == trimmed.c_str() || *end != L'\0' || errno == ERANGE)
-    {
-        return std::nullopt;
-    }
-
-    return value;
-}
-
 ConsoleCommandResult Handled()
 {
     return {ConsoleCommandStatus::Handled, {}};
@@ -299,7 +258,7 @@ std::wstring TargetFpsUsage()
 // ignores zero without a word and divides by whatever it is given.
 std::optional<double> ParseTargetFps(std::wstring_view argument)
 {
-    const std::optional<double> fps = ParseNumericArgument(argument);
+    const std::optional<double> fps = Core::Text::TryParseDouble(argument);
     if (!fps || !std::isfinite(*fps))
     {
         return std::nullopt;
@@ -642,7 +601,7 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     {
         const bool hasArgument = strCommand.size() > 7 && strCommand[7] == L' ';
         const std::optional<double> messageLimit =
-            hasArgument ? ParseNumericArgument(std::wstring_view(strCommand).substr(7)) : std::nullopt;
+            hasArgument ? Core::Text::TryParseDouble(std::wstring_view(strCommand).substr(7)) : std::nullopt;
         if (!messageLimit)
         {
             return BadArgument(L"usage: $winmsg <number>");
