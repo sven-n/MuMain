@@ -222,6 +222,28 @@ TEST_CASE("A name a text would read as its own format is not put into it [data][
     CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
 }
 
+TEST_CASE("At a level without a name of its own, a missing form is reported too [data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    DeclinePolish(database);
+    const auto describe = [&](const std::string& text)
+    {
+        std::vector<ItemDataIssue> issues;
+        Data::Translation::CheckItemReferences(
+            database, {text, "pl", "Game.pl.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Tear"}, {}, issues);
+        REQUIRE(issues.size() == 1);
+        return issues[0].message;
+    };
+
+    // The Tear of Elf has no name line at +3, and no Polish genitive.
+    const std::string genitive = describe("{item:14,25+3:gen}");
+    CHECK(genitive.find("no name of its own at +3") != std::string::npos);
+    CHECK(genitive.find("(14,25) has no pl gen form") != std::string::npos);
+    // Its accusative is there: only the standard name is a warning.
+    CHECK(describe("{item:14,25+3:acc}").find("form") == std::string::npos);
+}
+
 TEST_CASE("A reference to a level no item has is an error in Data Checks [data][items][texts]")
 {
     ItemDatabase database;

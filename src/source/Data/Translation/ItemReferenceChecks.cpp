@@ -42,6 +42,35 @@ std::string ItemNumber(const ItemReference& reference)
     return "(" + std::to_string(reference.group) + "," + std::to_string(reference.number) + ")";
 }
 
+// Why the reference's case has no form: the language doesn't decline names in it, or the item has no form for it.
+std::string MissingFormReason(const Items::ItemDatabase& database, const ItemReference& reference,
+                              std::string_view locale)
+{
+    if (!database.GetNameCases().Uses(locale, reference.form))
+    {
+        return "\"" + std::string(locale) + "\" does not decline names in the case " + reference.form +
+               " (NameCases.json)";
+    }
+    return ItemNumber(reference) + " has no " + std::string(locale) + " " + reference.form + " form";
+}
+
+// A level without a name of its own shows the standard name, with the item's form when the reference asks for a case:
+// both can be missing.
+std::string DescribeStandardName(const Items::ItemDatabase& database, const ItemReference& reference,
+                                 std::string_view locale, const std::string& shown)
+{
+    std::string message = FormatItemReference(reference) + ": " + ItemNumber(reference) +
+                          " has no name of its own at +" + std::to_string(*reference.level) +
+                          " (no name line, or one with an empty text); the text shows \"" + shown + "\"";
+    const ItemReference itemName{reference.group, reference.number, std::nullopt, reference.form};
+    if (!reference.form.empty() &&
+        Items::ResolveReferencedName(database, itemName, locale).problem == ItemReferenceProblem::MissingForm)
+    {
+        message += ", and " + MissingFormReason(database, reference, locale) + ", so the name itself stands in";
+    }
+    return message;
+}
+
 // The message of a resolved reference's problem, or empty when the name shows as the text wants it.
 std::string DescribeProblem(const Items::ItemDatabase& database, const ItemReference& reference,
                             std::string_view locale, ItemDataIssueSeverity& severity)
@@ -64,18 +93,11 @@ std::string DescribeProblem(const Items::ItemDatabase& database, const ItemRefer
                "reference as written";
     case ItemReferenceProblem::StandardName:
         severity = ItemDataIssueSeverity::Warning;
-        return written + ": " + ItemNumber(reference) + " has no name of its own at +" +
-               std::to_string(*reference.level) + " (no name line, or one with an empty text); the text shows \"" +
-               name.text + "\"";
+        return DescribeStandardName(database, reference, locale, name.text);
     case ItemReferenceProblem::MissingForm:
         severity = ItemDataIssueSeverity::Warning;
-        if (!database.GetNameCases().Uses(locale, reference.form))
-        {
-            return written + ": \"" + std::string(locale) + "\" does not decline names in the case " + reference.form +
-                   " (NameCases.json); the text shows \"" + name.text + "\"";
-        }
-        return written + ": \"" + name.text + "\" " + ItemNumber(reference) + " has no " + std::string(locale) + " " +
-               reference.form + " form; the text shows the name itself";
+        return written + ": " + MissingFormReason(database, reference, locale) + "; the text shows \"" + name.text +
+               "\", the name itself";
     case ItemReferenceProblem::UnshowableName:
         severity = ItemDataIssueSeverity::Error;
         return written + ": the name of " + ItemNumber(reference) +
