@@ -355,6 +355,12 @@ TEST_CASE("The critical damage bonus adds up the worn items' set, harmony and so
     CHECK(GetHeroCriticalDamageBonus().socketOptions == 30);
     CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == g_SocketItemMgr.GetSocketOptionValue(&sockets, 1));
     CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() > 0);
+
+    // A broken item adds no socket options, as on the server.
+    sockets.Durability = 0;
+    EquipmentScope::AddUpBonuses();
+    CHECK(GetHeroCriticalDamageBonus().socketOptions == 0);
+    CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == 0);
 }
 
 // Increase Critical Damage adds 1 per 30 energy and 1 per 25 command of the one who cast it, and its first power-up's
