@@ -30,7 +30,7 @@ public:
                       ("mu_test_item_model_tool_" + std::to_string(std::random_device{}())))
     {
         for (const char* file : {"Data/Item/Sword01.bmd", "Data/Item/partCharge1/RING01.BMD", "Data/Player/Armor01.bmd",
-                                 "Data/Player/Updated/HelmClass02.bmd", "Data/Item/readme.txt"})
+                                 "Data/Player/Updated/HelmClass02.bmd", "Data/Player/updated/HelmClass03.bmd", "Data/Item/readme.txt"})
         {
             const std::filesystem::path path = m_directory / file;
             std::filesystem::create_directories(path.parent_path());
