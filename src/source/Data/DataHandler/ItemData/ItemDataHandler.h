@@ -126,6 +126,8 @@ public:
     }
     // A test's render styles, as if read from the file, unchanged since.
     void ResetRenderStylesForTest(Data::Looks::RenderStylesFile file);
+    // As before the first read, after a test: the file is read again when next asked for.
+    void ForgetRenderStylesForTest();
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>

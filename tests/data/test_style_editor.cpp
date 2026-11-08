@@ -6,6 +6,7 @@
 // and are undo steps, the window on a look of the file or one still in code, and Data Checks opening it.
 #ifdef _EDITOR
 
+#include "LookEditsScope.h"
 #include "TestImGuiContext.h"
 #include "ToolWindowsScope.h"
 
@@ -42,32 +43,6 @@ using Data::Looks::LookDefinition;
 
 namespace
 {
-// The looks of the editor and of the game for one test, with nothing to undo and nothing to save, and the ones before
-// it again after it.
-class LookEditsScope
-{
-public:
-    explicit LookEditsScope(std::vector<LookDefinition> looks, std::vector<ColorFolder> folders = {})
-        : m_previous(Data::Looks::g_LookStore.GetRenderStyles().begin(),
-                     Data::Looks::g_LookStore.GetRenderStyles().end())
-    {
-        g_LookEdits.ResetForTest({std::move(looks), std::move(folders)});
-        g_ItemEdits.GetHistory().Clear();
-        g_ItemEdits.GetHistory().MarkSaved();
-    }
-    ~LookEditsScope()
-    {
-        g_ItemEdits.GetHistory().Clear();
-        g_ItemEdits.GetHistory().MarkSaved();
-        g_LookEdits.ResetForTest({m_previous, {}});
-    }
-    LookEditsScope(const LookEditsScope&) = delete;
-    LookEditsScope& operator=(const LookEditsScope&) = delete;
-
-private:
-    std::vector<LookDefinition> m_previous;
-};
-
 LookDefinition Plain(const char* name)
 {
     return {name, {Layer{}}, {}};

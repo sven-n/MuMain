@@ -722,6 +722,16 @@ void CItemDataHandler::ResetRenderStylesForTest(Data::Looks::RenderStylesFile fi
     ++m_renderStylesVersion;
 }
 
+void CItemDataHandler::ForgetRenderStylesForTest()
+{
+    m_renderStyles = {};
+    m_renderStylesRead = false;
+    m_renderStylesComplete = true;
+    m_renderStyleIssues.clear();
+    m_renderStylesChanged = false;
+    ++m_renderStylesVersion;
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
     std::vector<int> itemTypes;

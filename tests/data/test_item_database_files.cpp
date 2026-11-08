@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "LookEditsScope.h"
 #include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
@@ -2898,10 +2899,7 @@ TEST_CASE("Apply for only this item or a new item makes a copy of the look, whic
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
-    g_ItemEdits.GetHistory().Clear();
-    const std::vector<LookDefinition> gameLooks(Data::Looks::g_LookStore.GetRenderStyles().begin(),
-                                                Data::Looks::g_LookStore.GetRenderStyles().end());
-    g_LookEdits.ResetForTest({{{"brightBlade", {Layer{}}, {}}}, {{"Blades", {}, {"brightBlade"}}}});
+    const LookEditsScope looks({{"brightBlade", {Layer{}}, {}}}, {{"Blades", {}, {"brightBlade"}}});
     REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
     const ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
     REQUIRE(kris.model.empty());
@@ -2942,9 +2940,6 @@ TEST_CASE("Apply for only this item or a new item makes a copy of the look, whic
     // A name a look has already is no copy.
     g_LookEdits.ApplyToItemOnly("Only this item", "brightBlade", {"brightBlade", {}, {}}, KrisType);
     CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
-
-    g_ItemEdits.GetHistory().Clear();
-    g_LookEdits.ResetForTest({gameLooks, {}});
 }
 
 namespace
