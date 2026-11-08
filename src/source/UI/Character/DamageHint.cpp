@@ -35,10 +35,9 @@ void AddCriticalDamageParts(std::vector<Line>& lines, const GameLogic::Combat::C
     }
     if (bonus.Buff() > 0)
     {
-        lines.push_back(
-            MakeHintLine(FormatHintText(I18N::Game::CriticalDamageFromABuffLsD,
-                                        SkillName(bonus.buffSkill).c_str(), bonus.Buff()),
-                         LineColor::Purple));
+        lines.push_back(MakeHintLine(
+            FormatHintText(I18N::Game::CriticalDamageFromABuffLsD, SkillName(bonus.buffSkill).c_str(), bonus.Buff()),
+            LineColor::Purple));
     }
     lines.push_back(
         MakeHintLine(FormatHintText(I18N::Game::CriticalDamageTotalD, bonus.Total()), LineColor::White, true));
