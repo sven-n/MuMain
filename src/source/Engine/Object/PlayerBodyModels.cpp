@@ -51,6 +51,12 @@ void OpenBodyTextures(int slot, const std::wstring& fileName)
 
     std::vector<TextureProblem> problems;
     gLoadData.OpenTexture(slot, std::span<const std::wstring>(&textureSubfolder, 1), problems);
+    // Skipped textures own no reference, including the zero index left by Open2.
+    for (const TextureProblem& problem : problems)
+    {
+        if (problem.unsupportedType)
+            Models[slot].IndexTexture[problem.mesh] = BITMAP_UNKNOWN;
+    }
     // A cached texture from another folder is a legitimate fallback. Hidden and unsupported names
     // keep the normal loader's semantics; only a texture it tried but could not load rejects a part.
     const auto missing = std::ranges::find_if(problems, [](const TextureProblem& problem)

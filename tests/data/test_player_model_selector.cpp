@@ -273,7 +273,7 @@ TEST_CASE("Improved bodies keep legitimate cached texture fallback [player-selec
 }
 
 TEST_CASE(
-    "Hidden and unsupported improved texture names keep native loader semantics [player-selector][texture-fallback]")
+    "Hidden improved textures stay hidden and unsupported entries own no bitmap [player-selector][texture-fallback]")
 {
     const BodyClientFolder client;
     const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
@@ -286,10 +286,10 @@ TEST_CASE(
         Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
         const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
         std::strcpy(Models[slot].Textures[0].FileName, name);
-        const GLuint before = Models[slot].IndexTexture[0];
         Engine::Object::OpenPlayerBodyTextures(0, CLASS_KNIGHT);
         CHECK(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
-        CHECK(Models[slot].IndexTexture[0] == (Data::Items::IsHiddenTexture(name) ? BITMAP_HIDE : before));
+        // Unsupported entries own no bitmap; hidden entries retain the native hidden sentinel.
+        CHECK(Models[slot].IndexTexture[0] == (Data::Items::IsHiddenTexture(name) ? BITMAP_HIDE : BITMAP_UNKNOWN));
     }
 }
 
@@ -393,6 +393,45 @@ TEST_CASE("Rejected bodies distinguish acquired bitmap zero from unsupported tex
         // The other texture is missing, so either an acquired zero ID or an untouched zero is rejected.
         Engine::Object::OpenPlayerBodyTextures(0, CLASS_DARK_LORD);
         CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
+        const BITMAP_t* surviving = Bitmaps.FindTexture(ExternalBitmap);
+        CHECK(surviving != nullptr);
+        if (surviving != nullptr)
+            CHECK(surviving->Ref == 1);
+        DeleteBitmap(ExternalBitmap);
+        CHECK(Bitmaps.FindTextureByName(L"skin_hq_class02.jpg") == nullptr);
+    }
+}
+
+TEST_CASE("Accepted improved bodies release only acquired textures through normal model cleanup "
+          "[player-selector][texture-fallback]")
+{
+    constexpr GLuint ExternalBitmap = 0;
+    for (const bool supported : {true, false})
+    {
+        INFO("first texture supported=", supported);
+        const BodyClientFolder client(CLASS_DARK_LORD);
+        const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+        client.AddImproved(helm);
+        ClientFolderScope folder(client.path);
+        PlayerTextureScope textures;
+        TestModelSlots slots;
+        REQUIRE(Bitmaps.LoadImage(ExternalBitmap, L"Data\\Player\\skin_hq_class02.jpg", GL_NEAREST, GL_REPEAT));
+        Engine::Object::OpenPlayerBodyParts(0, CLASS_DARK_LORD, false);
+        const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+        BMD& head = Models[slot];
+        REQUIRE(head.NumMeshs == 2);
+        REQUIRE(head.Meshs[0].Texture == 0);
+        REQUIRE(head.Meshs[1].Texture == 1);
+        std::strcpy(head.Textures[0].FileName, supported ? "skin_hq_class02.jpg" : "unsupported.bmp");
+        // Hair remains loadable: this part is accepted, so later cleanup is ordinary BMD::Release.
+        Engine::Object::OpenPlayerBodyTextures(0, CLASS_DARK_LORD);
+        CHECK(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
+        CHECK(head.IndexTexture[0] == (supported ? ExternalBitmap : BITMAP_UNKNOWN));
+        REQUIRE(Bitmaps.FindTexture(head.IndexTexture[1]) != nullptr);
+        REQUIRE(Bitmaps.FindTexture(ExternalBitmap) != nullptr);
+        CHECK(Bitmaps.FindTexture(ExternalBitmap)->Ref == (supported ? 2 : 1));
+        head.Release();
+        CHECK(head.NumMeshs == 0);
         const BITMAP_t* surviving = Bitmaps.FindTexture(ExternalBitmap);
         CHECK(surviving != nullptr);
         if (surviving != nullptr)
