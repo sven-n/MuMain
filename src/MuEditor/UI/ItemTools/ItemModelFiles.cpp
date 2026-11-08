@@ -5,7 +5,7 @@
 #include "ItemModelFiles.h"
 
 #include "../MuEditor/UI/Common/TextSearch.h"
-#include "Core/Text/Utf8.h"
+#include "Core/Platform/WinCompat.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Engine/Object/PlayerBodyModels.h"
 
@@ -24,8 +24,7 @@ bool IsImprovedBodyFolder(std::string_view file)
 {
     static const std::string folder = []
     {
-        std::string path = Core::Text::ToUtf8(Engine::Object::ImprovedPlayerModelFolder);
-        std::replace(path.begin(), path.end(), '\\', '/');
+        std::string path = mu_narrow_path(Engine::Object::ImprovedPlayerModelFolder);
         if (path.ends_with('/'))
             path.pop_back();
         return path;

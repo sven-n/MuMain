@@ -113,7 +113,7 @@ TEST_CASE("Without the S6 models each body part comes from the Updated folder wh
     PlayerTextureScope textures;
     for (bool useS6 : {true, false})
     {
-        // A slot that holds a model is not opened again, so each choice starts from empty slots.
+        // Isolate each setting run; release its models and texture references before the next choice.
         TestModelSlots slots;
         for (int baseClass = 0; baseClass < MAX_CLASS; ++baseClass)
         {
