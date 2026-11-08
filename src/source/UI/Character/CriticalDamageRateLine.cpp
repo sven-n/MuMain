@@ -46,11 +46,11 @@ std::vector<Line> BuildCriticalDamageRateHint(const GameLogic::Combat::CriticalD
                                         rate.MasterSkillBuff()),
                          LineColor::Purple));
     }
-    if (rate.scrollOfBattle > 0 && ItemAttribute != nullptr)
+    if (rate.scrollOfBattle > 0)
     {
-        lines.push_back(MakeHintLine(
-            FormatHintText(I18N::Game::LsD, ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name, rate.scrollOfBattle),
-            LineColor::Purple));
+        const wchar_t* scroll = ItemNameOr(ITEM_SCROLL_OF_BATTLE, I18N::Game::CriticalDamageRate);
+        lines.push_back(
+            MakeHintLine(FormatHintText(I18N::Game::LsD, scroll, rate.scrollOfBattle), LineColor::Purple));
     }
     lines.push_back(MakeHintLine(FormatHintText(I18N::Game::TotalD, rate.Total()), LineColor::White, true));
     return lines;

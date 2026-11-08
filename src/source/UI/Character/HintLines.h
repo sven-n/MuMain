@@ -30,6 +30,16 @@ inline const wchar_t* SkillNameOr(ActionSkillType skill, const wchar_t* fallback
     return SkillAttribute[skill].Name;
 }
 
+// The item's name, or `fallback` when the item table has none.
+inline const wchar_t* ItemNameOr(int itemType, const wchar_t* fallback)
+{
+    if (ItemAttribute == nullptr || ItemAttribute[itemType].Name[0] == L'\0')
+    {
+        return fallback;
+    }
+    return ItemAttribute[itemType].Name;
+}
+
 inline UI::RmlBridge::Tooltip::Line
 MakeHintLine(std::string text, UI::RmlBridge::Tooltip::LineColor color = UI::RmlBridge::Tooltip::LineColor::White,
              bool bold = false)
