@@ -12,16 +12,6 @@ namespace
 {
 using UI::RmlBridge::Tooltip::Line;
 using UI::RmlBridge::Tooltip::LineColor;
-
-// The buff's master skill by its name, or the title's words when the skill table has none.
-const wchar_t* BuffName(ActionSkillType skill)
-{
-    if (SkillAttribute == nullptr || SkillAttribute[skill].Name[0] == L'\0')
-    {
-        return I18N::Game::CriticalDamageRate;
-    }
-    return SkillAttribute[skill].Name;
-}
 } // namespace
 
 CriticalDamageRateLine BuildCriticalDamageRateLine(const GameLogic::Combat::CriticalDamageRate& rate)
@@ -52,7 +42,7 @@ std::vector<Line> BuildCriticalDamageRateHint(const GameLogic::Combat::CriticalD
     if (rate.MasterSkillBuff() > 0)
     {
         lines.push_back(MakeHintLine(
-            FormatHintText(I18N::Game::LsD, BuffName(rate.buffSkill), rate.MasterSkillBuff()), LineColor::Purple));
+            FormatHintText(I18N::Game::LsD, SkillNameOr(rate.buffSkill, I18N::Game::CriticalDamageRate), rate.MasterSkillBuff()), LineColor::Purple));
     }
     if (rate.scrollOfBattle > 0 && ItemAttribute != nullptr)
     {

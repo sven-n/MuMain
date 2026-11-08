@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Utilities/StringUtils.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 
 #include <string>
@@ -17,6 +18,16 @@ template <typename... Args> std::string FormatHintText(const wchar_t* format, Ar
     wchar_t text[MaxHintLineLength] = {};
     mu_swprintf_s(text, format, args...);
     return StringUtils::WideToNarrow(text);
+}
+
+// The skill's name, or `fallback` when the skill table has none.
+inline const wchar_t* SkillNameOr(ActionSkillType skill, const wchar_t* fallback)
+{
+    if (SkillAttribute == nullptr || SkillAttribute[skill].Name[0] == L'\0')
+    {
+        return fallback;
+    }
+    return SkillAttribute[skill].Name;
 }
 
 inline UI::RmlBridge::Tooltip::Line

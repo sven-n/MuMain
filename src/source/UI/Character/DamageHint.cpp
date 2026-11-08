@@ -13,16 +13,6 @@ namespace
 using UI::RmlBridge::Tooltip::Line;
 using UI::RmlBridge::Tooltip::LineColor;
 
-// The buff's skill by its name, or the part's title when the skill table has none.
-const wchar_t* BuffName(ActionSkillType skill)
-{
-    if (SkillAttribute == nullptr || SkillAttribute[skill].Name[0] == L'\0')
-    {
-        return I18N::Game::CriticalDamage;
-    }
-    return SkillAttribute[skill].Name;
-}
-
 void AddCriticalDamageParts(std::vector<Line>& lines, const GameLogic::Combat::CriticalDamageBonus& bonus)
 {
     Line spacer;
@@ -46,7 +36,7 @@ void AddCriticalDamageParts(std::vector<Line>& lines, const GameLogic::Combat::C
     if (bonus.Buff() > 0)
     {
         lines.push_back(MakeHintLine(
-            FormatHintText(I18N::Game::CriticalDamageFromABuffLsD, BuffName(bonus.buffSkill), bonus.Buff()),
+            FormatHintText(I18N::Game::CriticalDamageFromABuffLsD, SkillNameOr(bonus.buffSkill, I18N::Game::CriticalDamage), bonus.Buff()),
             LineColor::Purple));
     }
     lines.push_back(
