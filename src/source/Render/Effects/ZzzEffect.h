@@ -138,7 +138,8 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType = -1);
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur = false);
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
 
-void MoveJoint(JOINT* o, int iIndex);
+// The most moves a spear flare (Impale, Death Stab) makes in one frame of MoveJoints.
+constexpr int MAX_SPEAR_FLARE_MOVES = 256;
 void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
 // Hands the state changes, trail quads and ground mark a live joint draws with to `out`.
