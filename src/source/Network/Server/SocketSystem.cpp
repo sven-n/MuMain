@@ -63,6 +63,11 @@ BOOL CSocketItemMgr::IsSocketItem(const OBJECT* pObject)
     return IsSocketItem(Data::Items::ToItemType(pObject->Type));
 }
 
+bool CSocketItemMgr::AreSocketOptionsActive(const ITEM* pItem)
+{
+    return IsSocketItem(pItem) && pItem->Durability != 0;
+}
+
 BOOL CSocketItemMgr::IsSocketItem(int iItemType)
 {
     switch (iItemType)
@@ -468,6 +473,9 @@ void CSocketItemMgr::CheckSocketSetOption()
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
         pItem = &CharacterMachine->Equipment[i];
+        if (!AreSocketOptionsActive(pItem))
+            continue;
+
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
             if (pItem->SocketSeedID[j] != SOCKET_EMPTY)
@@ -520,8 +528,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
     {
         pItem = &CharacterMachine->Equipment[i];
 
-        // A broken item adds nothing, as on the server (OpenMU's ItemPowerUpFactory) and for the other options.
-        if (!IsSocketItem(pItem) || pItem->Durability == 0)
+        if (!AreSocketOptionsActive(pItem))
             continue;
 
         for (int j = 0; j < pItem->SocketCount; ++j)

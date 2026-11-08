@@ -168,6 +168,9 @@ namespace SEASON4A
 
     protected:
         BOOL IsSocketItem(int iItemType);
+        // Whether the worn item's seed spheres count: it is a socket item and not broken, as on the server (OpenMU's
+        // ItemPowerUpFactory) and for the item's other options.
+        bool AreSocketOptionsActive(const ITEM* pItem);
 
         void CalcSocketOptionValueText(wchar_t* pszOptionValueText, int iOptionType, float fOptionValue);
         int CalcSocketOptionValue(int iOptionType, float fOptionValue);
