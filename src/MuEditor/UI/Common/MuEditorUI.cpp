@@ -20,6 +20,7 @@
 #include "MuEditorToolWindows.h"
 #include "ToolGroups.h"
 #include "UndoTarget.h"
+#include "UI/SoundMixer/MuSoundMixerUI.h"
 
 // Layout of the Open Editor strip over the game while the editor is closed. The
 // pixel sizes are multiplied by the editor UI scale so the strip grows with it
@@ -205,6 +206,7 @@ void CMuEditorUI::RenderToolWindowBar()
 void CMuEditorUI::RenderBar(MuEditor::ToolWindows& windows)
 {
     RenderWindowsMenu(windows, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
+    MuEditor::SoundMixer::RenderReminder(windows);
     MuEditor::UndoTargets::RenderBarButtons(MuEditor::Items::ToolWindow::GetUndoTarget());
     RenderUIScale();
     RenderLanguageSelector();
@@ -222,6 +224,8 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     // The named colors, a root per use; the group entries (Items > Glow Colors) open it on their root.
     ImGui::MenuItem(I18N::Editor::Colors, nullptr, &windows.colors);
     ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
+    ImGui::MenuItem(I18N::Editor::SoundMixerTitle, nullptr, &windows.soundMixer);
+    ImGui::MenuItem(I18N::Editor::SoundEditorTitle, nullptr, &windows.soundEditor);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);

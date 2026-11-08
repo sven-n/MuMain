@@ -1,3 +1,5 @@
+HarfBuzz: no message(WARN) asking to build HarfBuzz with Meson in every configure; SDL_ttf builds it with CMake.
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt

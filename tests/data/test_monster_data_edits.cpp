@@ -9,6 +9,7 @@
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 #include <algorithm>
@@ -248,6 +249,45 @@ TEST_CASE("Monster data: a save of the three lists that one refuses lists the pr
     REQUIRE(lost != issues.end());
     CHECK(lost->severity == ItemDataIssueSeverity::Error);
     g_MonsterDatabase.Build({}, "en");
+}
+
+TEST_CASE("Monster data: the editor's save keeps the monsters with their numbers (D61) [data][monsters][editor]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    folder.WriteMonsters(R"({ "formatVersion": 2, "monsters": [
+        { "name": "Budge Dragon", "kind": "monster", "numbers": [{"number": 2}] },
+        { "name": {"en": "Death Centurion", "pt": "Centurião da morte"}, "kind": "monster",
+          "numbers": [{"number": 145}, {"number": 175}, {"number": 336}] } ] })");
+    std::vector<ItemDataIssue> issues;
+    REQUIRE(g_MonsterDataHandler.Revert(issues));
+
+    // A tool's change of a number becomes its own value, a new number is a
+    // monster of its own, and a removed one leaves its monster.
+    MonsterDefinition changed = *g_MonsterDatabase.Find(175);
+    changed.kind = MonsterKind::Npc;
+    const std::array snapshots = {MonsterSnapshot{175, changed}, MonsterSnapshot{3, Monster(3, "Larva")},
+                                  MonsterSnapshot{336, std::nullopt}};
+    g_MonsterDataHandler.RestoreMonsters(snapshots);
+
+    REQUIRE(g_MonsterDataHandler.Save(issues));
+    CHECK(issues.empty());
+    const Data::Monsters::MonsterDataLoadResult saved = Data::Monsters::LoadMonstersFile(folder.MonstersFile());
+    REQUIRE(saved.groups.size() == 3);
+    CHECK(saved.groups[0].numbers.front().number == 2);
+    REQUIRE(saved.groups[1].numbers.size() == 1);
+    CHECK(saved.groups[1].numbers.front() == Monster(3, "Larva"));
+    const Data::Monsters::MonsterGroup& centurion = saved.groups[2];
+    REQUIRE(centurion.numbers.size() == 2);
+    CHECK(centurion.numbers[0].number == 145);
+    CHECK(centurion.numbers[0].kind == MonsterKind::Monster);
+    CHECK(centurion.numbers[1] == changed);
+    CHECK(centurion.shared.names.Get("pt") == "Centurião da morte");
+
+    // Saving again writes the same file.
+    const auto text = Data::ReadTextFile(folder.MonstersFile());
+    REQUIRE(g_MonsterDataHandler.Save(issues));
+    CHECK(Data::ReadTextFile(folder.MonstersFile()) == text);
 }
 
 #endif // _EDITOR

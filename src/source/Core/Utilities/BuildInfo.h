@@ -5,9 +5,7 @@
 // need to state what was measured -- a frame time without a build configuration next to it is
 // not a result anybody can act on.
 //
-// The git fields are optional: the build system does not compute them, so a build script that
-// wants them in the exports defines MU_GIT_DESCRIBE (and MU_GIT_DIRTY when the tree was not
-// clean). Absent, the exports say "unknown" rather than inventing a commit.
+// The commit comes from MuGitCommit.h, which cmake/WriteGitCommit.cmake writes for every build.
 
 namespace Core::Build
 {
@@ -38,25 +36,23 @@ inline constexpr const char* kCompiler =
             "Unknown";
 #endif
 
+// By the compiler's CPU macros (_WIN64 is also defined on Windows on ARM); others say "unknown", not a wrong name.
+// ARM64EC first: MSVC defines _M_X64 for it, and not _M_ARM64.
 inline constexpr const char* kArchitecture =
-#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+#if defined(_M_ARM64EC)
+    "arm64ec";
+#elif defined(_M_ARM64) || defined(__aarch64__)
+    "arm64";
+#elif defined(_M_X64) || defined(__x86_64__)
     "x64";
-#else
+#elif defined(_M_IX86) || defined(__i386__)
     "x86";
+#elif defined(_M_ARM) || defined(__arm__)
+    "arm";
+#else
+        "unknown";
 #endif
 
 inline constexpr const char* kDate = __DATE__;
 inline constexpr const char* kTime = __TIME__;
-
-#ifdef MU_GIT_DESCRIBE
-inline constexpr const char* kGitDescribe = MU_GIT_DESCRIBE;
-#else
-inline constexpr const char* kGitDescribe = "";
-#endif
-
-#ifdef MU_GIT_DIRTY
-inline constexpr bool kGitDirty = true;
-#else
-inline constexpr bool kGitDirty = false;
-#endif
 } // namespace Core::Build

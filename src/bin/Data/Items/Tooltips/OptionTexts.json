@@ -1,0 +1,31 @@
+{
+  "formatVersion": 1,
+  "texts": {
+    "luckCriticalDamage": {
+      "en": "Luck (critical damage rate +{value}%)",
+      "de": "Glück (kritische Schadensrate +{value}%)",
+      "es": "Suerte (tasa de daño crítico +{value}%)",
+      "id": "Keberuntungan (tingkat kerusakan kritis +{value}%)",
+      "ja": "幸運 (クリティカルダメージ確率 +{value}%)",
+      "pl": "Szczęście (wskaźnik obrażeń krytycznych +{value}%)",
+      "pt": "Sorte (taxa de dano crítico +{value}%)",
+      "ru": "Удача (коэффициент критического урона +{value}%)",
+      "tl": "Swerte (critical damage rate +{value}%)",
+      "uk": "Удача (рівень критичної шкоди +{value}%)",
+      "zh-TW": "幸運（暴擊傷害率+{value}%）"
+    },
+    "luckJewelOfSoul": {
+      "en": "Luck (success rate of Jewel of Soul +25%)",
+      "de": "Glück (Erfolgsrate von Juwel der Seele +25%)",
+      "es": "Suerte (tasa de éxito de Jewel of Soul +25%)",
+      "id": "Keberuntungan (tingkat keberhasilan Permata Jiwa +25%)",
+      "ja": "幸運 (霊魂の宝石　成功確率 +25%)",
+      "pl": "Szczęście (wskaźnik sukcesu Klejnotu Duszy +25%)",
+      "pt": "Sorte (taxa de sucesso da Jóia da Alma +25%)",
+      "ru": "Удача (шанс успеха «Драгоценности души» +25%)",
+      "tl": "Suwerte (rate ng tagumpay ng Jewel of Soul +25%)",
+      "uk": "Удача (швидкість успіху Jewel of Soul +25%)",
+      "zh-TW": "幸運（靈魂寶石成功率+25%）"
+    }
+  }
+}

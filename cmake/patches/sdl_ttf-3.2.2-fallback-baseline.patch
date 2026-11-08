@@ -1,3 +1,5 @@
+SDL_ttf: glyphs from a fallback font sit on the baseline of the font they back.
+
 diff --git a/src/SDL_ttf.c b/src/SDL_ttf.c
 index be517a1..08442ed 100644
 --- a/src/SDL_ttf.c

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Combat/SkillCast.h"
+#include "Audio/SoundPlaces.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "GameLogic/Social/MonkSystem.h" // g_CMonkSystem
 
@@ -229,6 +230,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 else
                     SetPlayerAttack(c);
                 SendRequestMagic(Skill, Hero->Key);
+                c->SkillSuccess = true;
                 Success = true;
                 break;
             case AT_SKILL_FALLING_SLASH:
@@ -287,6 +289,9 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
 
 void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 {
+    // The skill's sounds play for the caster (Q-SM13).
+    std::optional<Audio::ScopedSoundPlace> casterPlace;
+    Audio::PlaceCharacter(casterPlace, *c);
     auto Skill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : static_cast<ActionSkillType>(g_MovementSkill.m_iSkill);
     LetHeroStop();
     c->Movement = false;
@@ -753,6 +758,9 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 {
+    // The skill's sounds play for the caster (Q-SM13).
+    std::optional<Audio::ScopedSoundPlace> casterPlace;
+    Audio::PlaceCharacter(casterPlace, *pCha);
     int iSkill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
 
     ITEM* pLeftRing = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];

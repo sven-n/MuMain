@@ -66,6 +66,16 @@ void* GetSymbol(LibraryHandle handle, const char* name)
     return reinterpret_cast<void*>(proc);
 }
 
+void* FindSymbol(LibraryHandle handle, const char* name)
+{
+    if (handle == nullptr || name == nullptr)
+    {
+        return nullptr;
+    }
+
+    return reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(handle), name));
+}
+
 void Unload(LibraryHandle handle)
 {
     if (handle == nullptr)

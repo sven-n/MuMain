@@ -7,8 +7,8 @@
 #include <span>
 
 // The shipped effect catalogue (src/bin/Data/Effects) and the effect registry
-// as the game builds it from it, for the effect tests. The test target defines
-// MU_TEST_DATA_DIR.
+// as the game builds it from it, for the effect tests. Compiled once for them
+// as mu_test_effect_data, which defines MU_TEST_DATA_DIR.
 namespace EffectTestData
 {
 // src/bin/Data/Effects.

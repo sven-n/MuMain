@@ -114,6 +114,7 @@ void GameConfig::Load()
     m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
     m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
+    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -178,6 +179,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
     WriteString(CfgSectionRender, CfgKeyTexturePack, m_texturePack);
+    WriteBool(CfgSectionRender, CfgKeyUseS6PlayerModels, m_useS6PlayerModels);
 }
 
 LookPreset ReadLookPreset(const std::filesystem::path& configFile)
@@ -582,4 +584,9 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     }
 
     Save(); // Actually write to the .ini file
+}
+
+void GameConfig::SetUseS6PlayerModels(bool useOriginal)
+{
+    m_useS6PlayerModels = useOriginal;
 }

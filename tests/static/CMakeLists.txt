@@ -26,14 +26,40 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_warning_scripts.py"
 )
 add_test(
+    NAME ci_cache_prune
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_cache_prune.py"
+)
+add_test(
+    NAME ci_apt_cache
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_apt_cache.py"
+)
+add_test(
+    NAME stamp_release_version
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_stamp_release_version.py"
+)
+add_test(
     NAME static_check_scripts
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
 )
+
+# doctest_discover_tests reads case names as a CMake list: a name it cuts or joins registers entries that run no case.
+add_test(NAME test_case_names_reach_ctest_whole
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/check_test_case_names.py" "${MU_TESTS}")
+# The check on its fixtures: it reports each offence and exits 1, and passes the clean names.
+add_test(NAME test_case_names_check_fixtures
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_check_test_case_names.py")
+
 add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_CMAKE_SOURCE=${MU_REPO_ROOT}/src/CMakeLists.txt"
         -P "${MU_TESTS}/core/test_msvc_runtime_dll_staging.cmake"
+)
+add_test(
+    NAME dotnet_first_use_before_build_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_CMAKE_SOURCE=${MU_REPO_ROOT}/src/CMakeLists.txt"
+        -P "${MU_TESTS}/test_dotnet_first_use.cmake"
 )
 add_test(
     NAME login_diagnostics_contract
@@ -64,6 +90,32 @@ add_test(
 add_test(
     NAME copy_runtime_assets
     COMMAND "${CMAKE_COMMAND}" -P "${MU_TESTS}/test_copy_runtime_assets.cmake"
+)
+add_test(
+    NAME write_git_commit
+    COMMAND "${CMAKE_COMMAND}" "-DMU_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/write-git-commit"
+        "-DMU_SCRIPT=${MU_REPO_ROOT}/cmake/WriteGitCommit.cmake"
+        -P "${MU_TESTS}/test_write_git_commit.cmake"
+)
+add_test(
+    NAME ensure_submodule_leaves_history_out
+    COMMAND "${CMAKE_COMMAND}" "-DMU_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/ensure-submodule"
+        -P "${MU_TESTS}/test_ensure_submodule.cmake"
+)
+add_test(
+    NAME archive_extract_times_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_archive_extract_times.cmake"
+)
+add_test(
+    NAME sdl_image_archive_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_sdl_image_archive.cmake"
+)
+add_test(
+    NAME sdl_ttf_archives_contract
+    COMMAND "${CMAKE_COMMAND}" "-DMU_ROOT_CMAKE=${MU_REPO_ROOT}/CMakeLists.txt"
+        -P "${MU_TESTS}/test_sdl_ttf_archives.cmake"
 )
 
 # Render and effects contracts.

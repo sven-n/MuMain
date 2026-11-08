@@ -17,6 +17,8 @@
 #include "UI/Widgets/UIBaseDef.h"
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Data/DataHandler/LoadData.h"
@@ -170,30 +172,10 @@ bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD
     return false;
 }
 
-void M38Kanturu2nd::Sound_Kanturu2nd_Object(OBJECT* o)
-{
-    PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL);
-
-    switch (o->Type)
-    {
-    case 9:
-        PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GEAR);
-        break;
-    case 31:
-    case 35:
-    case 36:
-    case 37:
-        PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_INCUBATOR);
-        break;
-    }
-}
-
 bool M38Kanturu2nd::Move_Kanturu2nd_Object(OBJECT* o)
 {
     if (!Is_Kanturu2nd())
         return false;
-
-    Sound_Kanturu2nd_Object(o);
 
     switch (o->Type)
     {
@@ -775,40 +757,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
     {
     case MODEL_PERSONA:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-            {
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_PERSO_MOVE1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_2ND_PERSO_ATTACK1);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_2ND_PERSO_ATTACK2);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            o->SubType = TRUE;
-            PlayBuffer(SOUND_KANTURU_2ND_PERSO_DIE);
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
-            o->CurrentAction == MONSTER01_WALK)
-        {
-            o->SubType = FALSE;
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         vec3_t vPos;
         vec3_t vLight = {1.0f, 1.0f, 1.0f};
@@ -890,41 +839,17 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
                 o->Distance = 0.1f;
         }
 
-        if (o->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_2ND_TWIN_ATTACK1);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_2ND_TWIN_ATTACK2);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            o->SubType = TRUE;
-            PlayBuffer(SOUND_KANTURU_2ND_TWIN_DIE);
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
-            o->CurrentAction == MONSTER01_WALK)
-        {
-            o->SubType = FALSE;
-        }
+        // Its attacks and death; its walk sound comes with its hair below.
+        if (o->CurrentAction != MONSTER01_WALK)
+            GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         vec3_t vRelative, vPos;
         vec3_t vLight = {0.6f, 1.0f, 0.4f};
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            DWORD dwTime = timeGetTime() - o->m_dwTime;
-            if (dwTime > 500)
+            // Its hair swings on its model's timer, with its walk sound (Q-MN91).
+            if (GameLogic::Monsters::ModelTimers::Ticked(*c, Data::Monsters::TwinTailHairSwingTimer))
             {
                 if (o->m_iAnimation % 2 == 1)
                 {
@@ -947,9 +872,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
                 {
                     o->m_iAnimation = 0;
                 }
-                o->m_dwTime = timeGetTime();
-
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_TWIN_MOVE1 + Random::Rand() % 2));
+                GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -989,37 +912,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
                 o->Distance = 0.1f;
         }
 
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-            {
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_DRED_MOVE1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_2ND_DRED_ATTACK1);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 0 && o->AnimationFrame <= 2))
-        {
-            o->SubType = TRUE;
-            PlayBuffer(SOUND_KANTURU_2ND_DRED_ATTACK2);
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            o->SubType = TRUE;
-            PlayBuffer(SOUND_KANTURU_2ND_DRED_DIE);
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
-            o->CurrentAction == MONSTER01_WALK)
-        {
-            o->SubType = FALSE;
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         vec3_t vPos, vLight;
         float fScale;
@@ -1071,7 +964,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
     {
         if (o->CurrentAction == KANTURU2ND_NPC_ANI_ROT)
         {
-            PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_HOLE);
+            GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
             int iAnimationFrame = (int)o->AnimationFrame;
 

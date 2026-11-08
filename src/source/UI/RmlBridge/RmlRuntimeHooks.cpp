@@ -5,6 +5,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
+#include "UI/RmlBridge/RmlClickSounds.h"
 #include "UI/RmlBridge/RmlDocumentHints.h"
 #include "UI/RmlBridge/RmlMarquee.h"
 #include "UI/RmlBridge/RmlNativeText.h"
@@ -36,6 +37,9 @@ void InstallRuntimeHooks()
     };
     hooks.afterCreate = []
     {
+        // Before any style sheet loads: the themes name click kinds (Q-UI1).
+        if (Rml::Context* context = RmlUiRuntime::Instance().GetContext())
+            ListenForClickSounds(*context);
         SetSelectedFontFamily(StringUtils::WideToNarrow(GameConfig::GetInstance().GetFontSelection().c_str()));
         LoadActiveThemeFonts();
         UI::Diagnostics::Initialize();

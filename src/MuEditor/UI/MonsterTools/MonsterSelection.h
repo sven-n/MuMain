@@ -22,6 +22,16 @@ public:
     // Selects the monster; selecting it again counts too, so the tools show it
     // again (scroll to it, clear a filter that hides it).
     void Select(int number);
+    // Selects the number's monster as a whole (D61): the tools show and
+    // change the values its numbers share. The number stays the one a tool
+    // shows where it needs one (the preview, the model).
+    void SelectMonster(int number);
+
+    // Whether the monster of the number was selected as a whole.
+    bool IsWholeMonster() const
+    {
+        return m_wholeMonster;
+    }
 
     // Counts the Select calls. A tool remembers the serial it last showed and
     // shows the selected monster once when it changes.
@@ -33,6 +43,7 @@ public:
 private:
     int m_number = NoMonster;
     int m_serial = 0;
+    bool m_wholeMonster = false;
 };
 } // namespace MuEditor::Monsters
 

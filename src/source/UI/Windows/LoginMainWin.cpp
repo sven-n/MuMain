@@ -10,7 +10,6 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Network/Reconnect/LoginSceneReconnect.h"
-#include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlNativeText.h"
@@ -102,7 +101,7 @@ void CLoginMainWin::Release()
 {
     // Called explicitly at each scene transition; without it this bar's icons stay visible and
     // overlap the next scene's own UI. Hide, not unload -- the document is created once and reused.
-    m_RmlView.Hide();
+    Show(false);
 }
 
 void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
@@ -131,7 +130,8 @@ void CLoginMainWin::Show(bool bShow)
     if (m_RmlView.Document())
     {
         if (bShow) m_RmlView.Document()->Show();
-        else       m_RmlView.Document()->Hide();
+        else if (m_RmlView.Document()->IsVisible())
+            m_RmlView.Document()->Hide();
     }
 }
 
@@ -157,8 +157,6 @@ void CLoginMainWin::OpenCredits()
 {
     LoginSceneReconnect::Instance().RequestServerList();
 
+    // The login scene switches to the credits' theme (PlayLogInSceneMusic).
     g_CreditWin.Show(true);
-
-    ::StopMp3(MUSIC_MAIN_THEME);
-    ::PlayMp3(MUSIC_MUTHEME);
 }

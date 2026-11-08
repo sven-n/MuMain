@@ -6,6 +6,8 @@
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <span>
+#include <string>
+#include <vector>
 
 // The monster tools' previews of sounds (the Play buttons of Monster Sounds,
 // the animation sounds of Monster Preview) at a volume of their own, so they
@@ -26,6 +28,13 @@ void Play(int number);
 // the shown model can play (Q-MN74, Q-MN79).
 void PlayEvents(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
                 int animation, float frame);
+
+// The set's events of a drawn frame (Q-MN84, Q-MN85, Q-MN88) at the preview
+// volume, on any map and at any distance: those during `animation`, and
+// those once in it unless `oncePlayed`, which a once event that plays sets,
+// and those on the model's timers in `tickedTimers` (Q-MN91).
+void PlayDrawn(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
+               int animation, float frame, bool& oncePlayed, std::vector<std::string> tickedTimers = {});
 
 // The set's sound events at `moment` at the preview volume, as the game
 // plays them, on any map and at any distance (Q-MN76).

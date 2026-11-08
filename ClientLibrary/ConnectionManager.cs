@@ -85,7 +85,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Error establishing connection: {ex}");
-            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Connection failed: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Connection failed: {ConnectFailure.Describe(ex)}");
             return -1;
         }
     }

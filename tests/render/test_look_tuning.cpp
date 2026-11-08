@@ -330,7 +330,7 @@ TEST_CASE("a failed save leaves both files as they were [render][look][tuning]")
 }
 
 TEST_CASE(
-    "a missing look profile is edited from the built-in values; an invalid one is not edited [render][look][tuning]")
+    "a missing look profile is edited from the built-in values, an invalid one is not edited [render][look][tuning]")
 {
     FakeFileSystem fileSystem;
     fileSystem.files[MoodFile] = ShippedMood;

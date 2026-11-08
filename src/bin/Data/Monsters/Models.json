@@ -833,13 +833,19 @@
       "slot": "MONSTER_MODEL_TWIN_TAIL",
       "file": "Data/Monster/Monster116.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "attack1": 0.23, "attack2": 0.23, "die": 0.23}
+      "animations": {"stop2": 0.25, "attack1": 0.23, "attack2": 0.23, "die": 0.23},
+      "timers": [
+        {"name": "hair swing", "animation": "walk", "everyMs": 500}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DREADFEAR",
       "file": "Data/Monster/Monster117.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.25}
+      "animations": {"stop2": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.25},
+      "cues": [
+        {"name": "attack2 sound", "animation": "attack2", "frames": [0, 2.001]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_RED_SKELETON_KNIGHT_4",

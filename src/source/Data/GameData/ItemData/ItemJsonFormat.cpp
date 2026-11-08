@@ -28,6 +28,7 @@ using namespace Json::Keys;
 constexpr const char* Items = "items";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
+constexpr const char* Options = "options";
 constexpr const char* Description = "description";
 constexpr const char* Text = "text";
 constexpr const char* Color = "color";
@@ -324,6 +325,10 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
     {
         item[Keys::Tags] = WriteTags(definition.tags);
     }
+    if (!definition.options.empty())
+    {
+        item[Keys::Options] = definition.options;
+    }
     if (!definition.description.empty())
     {
         item[Keys::Description] = WriteDescription(definition.description);
@@ -408,6 +413,7 @@ private:
     bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
+    void ReadOptionLinks(const OrderedJson& json, std::vector<std::string>& options);
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines);
     void ReadGroundLabels(const OrderedJson& json, std::vector<ItemGroundLabel>& groundLabels);
@@ -596,6 +602,35 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
             continue;
         }
         tags.Set(tag);
+    }
+}
+
+// The option definitions the item links, by name; whether they exist is checked with them (ValidateItemOptionLinks).
+void ItemReader::ReadOptionLinks(const OrderedJson& json, std::vector<std::string>& options)
+{
+    const auto list = json.find(Keys::Options);
+    if (list == json.end())
+    {
+        return;
+    }
+    const bool names =
+        list->is_array() && std::all_of(list->begin(), list->end(), [](const OrderedJson& entry)
+                                        { return entry.is_string() && Json::IsName(entry.get<std::string>()); });
+    if (!names)
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, Keys::Options, "must be a list of option definition names");
+        return;
+    }
+    for (const OrderedJson& entry : *list)
+    {
+        std::string name = entry.get<std::string>();
+        if (std::find(options.begin(), options.end(), name) != options.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, Keys::Options,
+                     "\"" + name + "\" is in the list more than once; it is read once");
+            continue;
+        }
+        options.push_back(std::move(name));
     }
 }
 
@@ -1198,6 +1233,7 @@ std::set<std::string, std::less<>> GetKnownItemKeys()
     std::set<std::string, std::less<>> keys{Keys::Number,
                                             Keys::Name,
                                             Keys::Tags,
+                                            Keys::Options,
                                             Keys::Description,
                                             Keys::LevelValues,
                                             Keys::NameLines,
@@ -1226,6 +1262,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     }
 
     ReadTags(json, definition.tags);
+    ReadOptionLinks(json, definition.options);
     ReadDescription(json, definition.description);
     ReadLevelValues(json, definition.levelValues);
     ReadNameLines(json, definition.nameLines);
@@ -1365,6 +1402,7 @@ bool ReadItemJson(const OrderedJson& json, const std::string& source, int group,
 std::string LayOutItemJsonText(const std::string& text)
 {
     std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::Options);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::GroundLabels);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Hide);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);

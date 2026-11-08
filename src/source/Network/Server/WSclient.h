@@ -439,33 +439,33 @@ typedef struct {
 } PRECEIVE_INVENTORY_EXTENDED, * LPPRECEIVE_INVENTORY_EXTENDED;
 
 /// <summary>
-    /// Layout:
-    ///   Group:  4 bit
-    ///   Number: 12 bit
-    ///   Level:  8 bit
-    ///   Dura:   8 bit
-    ///   OptFlags: 8 bit
-    ///     HasOpt
-    ///     HasLuck
-    ///     HasSkill
-    ///     HasExc
-    ///     HasAnc
-    ///     HasGuardian
-    ///     HasHarmony
-    ///     HasSockets
-    ///   Optional, depending on Flags:
-    ///     Opt_Lvl 4 bit
-    ///     Opt_Typ 4 bit
-    ///     Exc:    8 bit
-    ///     Anc_Dis 4 bit
-    ///     Anc_Bon 4 bit
-    ///     Harmony 8 bit
-    ///     Soc_Bon 4 bit
-    ///     Soc_Cnt 4 bit
-    ///     Sockets n * 8 bit
-    ///   
-    ///  Total: 5 ~ 15 bytes.
-    /// </summary>
+/// Layout:
+///   Group:  4 bit
+///   Number: 12 bit
+///   Level:  8 bit
+///   Dura:   8 bit
+///   OptFlags: 8 bit
+///     HasOpt
+///     HasLuck
+///     HasSkill
+///     HasExc
+///     HasAnc
+///     HasHarmony
+///     HasGuardian (no byte of its own)
+///     HasSockets
+///   Optional, depending on Flags:
+///     Opt_Lvl 4 bit
+///     Opt_Typ 4 bit
+///     Exc:    8 bit
+///     Anc_Dis 4 bit
+///     Anc_Bon 4 bit
+///     Harmony 8 bit
+///     Soc_Bon 4 bit
+///     Soc_Cnt 4 bit
+///     Sockets n * 8 bit
+///
+///  Total: 5 ~ 15 bytes.
+/// </summary>
 #pragma pack(push, 1)
 typedef struct {
     WORD            GroupAndNumber;
@@ -474,6 +474,10 @@ typedef struct {
     ItemOptionFlags OptionFlags;
 } PITEM_EXTENDED_BASE, * LPPITEM_EXTENDED_BASE;
 #pragma pack(pop)
+
+// The length of an item in the layout above, read from its option flags: where the next item of a packet starts.
+// Never more than the buffer holds: an item cut short (logged) gets the bytes that are there.
+int CalcItemLength(std::span<const BYTE> ReceiveBuffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // trade
@@ -2810,7 +2814,7 @@ typedef struct
     char		GameId[MAX_USERNAME_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
-    SERVER_CLASS_TYPE		btClass;
+    BYTE btClass; // OpenMU evolution:line nibbles; see DecodeIllusionTempleClass.
     int			nAddExp;
 } PMSG_CURSED_TEMPLE_USER_ADD_EXP, * LPPMSG_CURSED_TEMPLE_USER_ADD_EXP;
 

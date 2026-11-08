@@ -7,9 +7,14 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
 #include "Data/GameData/MapData/LightMood.h"
 #include "Data/GameData/MapData/LookProfile.h"
+#include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Render/Look/LookFileSystem.h"
@@ -81,6 +86,21 @@ std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
         &I18N::Editor::ModelFiles, [] { return Data::Models::ReadGameModelFileTable().issues; }, nullptr, nullptr);
 }
 
+std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::MapSounds,
+        []
+        {
+            // The table as the Map Editor has it, read back as the file would be.
+            std::vector<Data::Items::ItemDataIssue> issues;
+            Data::Maps::MakeMapObjectSoundsFileText(Data::Maps::GetMapObjectSoundsFile(),
+                                                    g_MapObjectSoundDatabase.GetAll(), issues);
+            return issues;
+        },
+        &ToolWindows::mapEditor, WindowIds::MapEditor);
+}
+
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()
 {
     return std::make_unique<FileCheckArea>(
@@ -91,6 +111,24 @@ std::unique_ptr<DataCheckArea> CreateLookCheckArea()
             return Render::Look::LoadLookFiles(files, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile).issues;
         },
         &ToolWindows::devEditor, WindowIds::DevEditor);
+}
+
+std::unique_ptr<DataCheckArea> CreateItemOptionCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::ItemOptions,
+        []
+        {
+            std::vector<ItemDataIssue> issues;
+            const Data::Items::ItemOptionDatabase options =
+                Data::Items::LoadItemOptionFiles(true, I18N::GetAvailableLocales(), issues);
+            if (!Data::Items::HasFatal(issues))
+            {
+                Data::Items::ValidateOptionDefinitionUse(g_ItemDatabase.GetAllSlots(), options, issues);
+            }
+            return issues;
+        },
+        nullptr, nullptr);
 }
 } // namespace MuEditor::DataChecks
 

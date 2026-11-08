@@ -7,6 +7,7 @@
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
@@ -37,12 +38,7 @@ constexpr const char* LoggerName = "data";
 // The problems of OpenModels and OpenTextures, until TakeProblemMessage.
 std::vector<ItemModelProblem> g_problems;
 
-std::wstring ToLoaderPath(const std::string& path)
-{
-    std::wstring result = Core::Text::FromUtf8(path);
-    std::replace(result.begin(), result.end(), DataSeparator, LoaderSeparator);
-    return result;
-}
+using Data::Paths::ToLoaderPath;
 
 std::string ToDataPath(const std::wstring& path)
 {

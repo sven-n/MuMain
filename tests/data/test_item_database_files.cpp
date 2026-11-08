@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
 #include "TestImGuiContext.h"
@@ -23,6 +24,11 @@
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemNames.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
+#include "Data/GameData/ItemData/OptionRulesJson.h"
+#include "Data/GameData/ItemData/OptionTextsJson.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
@@ -286,6 +292,74 @@ TEST_CASE("The shipped ground labels load without problems and are written as th
         CHECK(false);
     }
     CHECK(WriteGroundLabelsJson(labels.file) == TestFiles::ReadWholeFile(file));
+}
+
+// The option files as the game and the editor read them, with the items' links. Outside the editor's tests, so the
+// pull request checks (with the editor off) run it too.
+TEST_CASE("The shipped option files load without problems and are written as they are read [data][items]")
+{
+    const std::filesystem::path optionsDirectory = DataDirectory / "Items" / "Options";
+    const std::filesystem::path textsFile = DataDirectory / "Items" / "Tooltips" / OptionTextsFileName;
+    const std::filesystem::path rulesFile = optionsDirectory / OptionRulesFileName;
+    const ItemOptionsLoadResult definitions = LoadItemOptionsDirectory(optionsDirectory);
+    const OptionTextsLoadResult texts = LoadOptionTextsFile(textsFile);
+    const OptionRulesLoadResult rules = LoadOptionRulesFile(rulesFile);
+    std::vector<ItemDataIssue> issues = definitions.issues;
+    issues.insert(issues.end(), texts.issues.begin(), texts.issues.end());
+    issues.insert(issues.end(), rules.issues.begin(), rules.issues.end());
+    ValidateOptionTextLocales(texts.texts, I18N::GetAvailableLocales(), OptionTextsFileName, issues);
+    ValidateItemOptions(definitions.definitions, texts.texts, OptionTextsFileName, issues);
+    ValidateOptionRules(rules.rules, definitions.definitions, OptionRulesFileName, issues);
+    const std::vector<ItemDefinition> items = LoadItemDataDirectory(DataDirectory / "Items").items;
+    const ItemOptionDatabase options(definitions.definitions, texts.texts, rules.rules);
+    ValidateItemOptionLinks(items, options, issues);
+    ValidateOptionDefinitionUse(items, options, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+    REQUIRE_FALSE(definitions.definitions.empty());
+
+    std::vector<std::string> files;
+    for (const ItemOptionDefinition& definition : definitions.definitions)
+    {
+        if (std::ranges::find(files, definition.file) == files.end())
+        {
+            files.push_back(definition.file);
+        }
+    }
+    for (const std::string& file : files)
+    {
+        CAPTURE(file);
+        std::vector<ItemOptionDefinition> inFile;
+        std::ranges::copy_if(definitions.definitions, std::back_inserter(inFile),
+                             [&](const ItemOptionDefinition& definition) { return definition.file == file; });
+        CHECK(WriteItemOptionsJson(inFile) == TestFiles::ReadWholeFile(optionsDirectory / file));
+    }
+    CHECK(WriteOptionTextsJson(texts.texts) == TestFiles::ReadWholeFile(textsFile));
+    CHECK(WriteOptionRulesJson(rules.rules) == TestFiles::ReadWholeFile(rulesFile));
+}
+
+// The game reads the items' lists; the editor writes them from the option rules. The shipped lists are the ones the
+// rules give (no item differs on purpose yet). Outside the editor's tests, as the test above.
+TEST_CASE("Every shipped item's option list is the one the option rules give [data][items]")
+{
+    const OptionRulesLoadResult rules = LoadOptionRulesFile(DataDirectory / "Items" / "Options" / OptionRulesFileName);
+    REQUIRE(rules.issues.empty());
+    int withOptions = 0;
+    for (const ItemDefinition& item : LoadItemDataDirectory(DataDirectory / "Items").items)
+    {
+        if (!item.Exists())
+        {
+            continue;
+        }
+        CAPTURE(item.group);
+        CAPTURE(item.number);
+        CHECK(item.options == DeriveItemOptions(rules.rules, item));
+        withOptions += item.options.empty() ? 0 : 1;
+    }
+    CHECK(withOptions > 400);
 }
 
 // The shipped tooltip file, read once.
@@ -1172,6 +1246,23 @@ TEST_CASE("Item data errors stop loading [data][items]")
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
 }
 
+// A broken option file stops the start with its own problem: without its definitions, every item's link would be an
+// error of its own and bury it.
+TEST_CASE("A fatal option file stops loading without an error for each item's link [data][items]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    std::ofstream(folder.Directory() / GetItemOptionsDirectory() / "Luck.json", std::ios::binary) << "{";
+    ClientDataScope client(folder.Directory());
+    LogCapture log("data");
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("Luck.json") != std::string::npos);
+    CHECK_FALSE(log.LineWith("Luck.json").empty());
+    CHECK(log.LineWith("is no option definition").empty());
+}
+
 TEST_CASE("An empty item name stops loading [data][items]")
 {
     // Unlike an entry without a name, which has no name key at all.
@@ -1826,6 +1917,35 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         spear.slot = ItemSlot::MainHand;
         REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
+        // And the options the option rules give it.
+        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck"});
+    }
+
+    SUBCASE("an item's option list follows its data, and a list an edit picked stays")
+    {
+        const std::vector<std::string> luck{"luck"};
+        REQUIRE(g_ItemDatabase.Find(KrisType)->options == luck);
+        EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+        EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition, false); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options == luck);
+
+        EditItem(KrisType, [](ItemDefinition& item) { item.options.clear(); });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+        EditItem(KrisType, [](ItemDefinition& item) { item.width = 2; });
+        CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
+    }
+
+    SUBCASE("a moved item's option list follows its new number")
+    {
+        // The rules give luck to the Wings of Elf (12/0), not to a number of group 12 no rule names.
+        const int emptyWingType = MakeItemType(12, 300);
+        REQUIRE(g_ItemDatabase.Find(emptyWingType) == nullptr);
+        REQUIRE(g_ItemDatabase.Find(ITEM_WINGS_OF_ELF)->options == std::vector<std::string>{"luck"});
+        std::swap(ItemAttribute[ITEM_WINGS_OF_ELF], ItemAttribute[emptyWingType]);
+        g_ItemDataHandler.OnItemsSwapped(ITEM_WINGS_OF_ELF, emptyWingType);
+        CHECK(g_ItemDatabase.Find(emptyWingType)->options.empty());
+        CHECK(g_ItemDatabase.GetOptionLinks(emptyWingType).empty());
     }
 
     SUBCASE("a copy keeps a weapon kind and a stat profile its source picked")
@@ -4160,7 +4280,7 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
         const auto armor = std::ranges::find_if(changed.profileRules,
                                                 [](const StatProfileRule& rule) { return rule.profile == "armor"; });
         REQUIRE(armor != changed.profileRules.end());
-        armor->slots.reset(static_cast<size_t>(ItemSlot::Boots));
+        armor->conditions.slots.reset(static_cast<size_t>(ItemSlot::Boots));
         const std::vector<MuEditor::Items::StatProfileChange> changes = MuEditor::Items::FindStatProfileChanges(
             g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), ItemStatProfiles(changed));
         REQUIRE(changes.size() == boots.size());

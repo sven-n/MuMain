@@ -18,6 +18,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Render/Models/BoneManager.h"
 #include "Audio/DSPlaySound.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Effects/EffectDraw.h"
 
 bool M40GMArea::IsGmArea()
@@ -66,7 +67,6 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         pObject->Velocity = 0.01f;
         pObject->BlendMeshLight
             = (float)sinf(WorldTime * 0.0015f) * 0.8f + 1.0f;
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_WHEEL);
         break;
     case 60:
         Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
@@ -94,13 +94,9 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         break;
     case 77:
         pObject->BlendMeshTexCoordV = -(int)WorldTime % 10000 * 0.0002f;
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_WATERFALL);
         break;
     case 90:
         pObject->Velocity = 0.04f;
-        break;
-    case 92:
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_ELEC);
         break;
     case 96:
         pObject->Alpha = 0.5f;
@@ -113,15 +109,10 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         if (pObject->Timer > 5.f)
             CreateParticleFpsChecked(BITMAP_BUBBLE, pObject->Position, pObject->Angle, pObject->Light, 5);
         break;
-    case 98:
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_PLANT);
-        break;
     case 102:
         pObject->BlendMeshLight = (float)sinf(WorldTime * 0.0010f) + 1.0f;
         break;
     }
-
-    ::PlayBuffer(SOUND_KANTURU_1ST_BG_GLOBAL);
 
     return true;
 }
@@ -1014,30 +1005,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     {
     case MODEL_BERSERK:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BER_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_DIE
             || o->CurrentAction == MONSTER01_ATTACK1
@@ -1056,30 +1024,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
 
     case MODEL_GIGANTIS:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_MOVE1);
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_DIE)
             return true;
@@ -1105,30 +1050,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
 
     case MODEL_GENOCIDER:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_WALK && rand_fps_check(1))
         {
@@ -1147,27 +1069,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     {
         MoveEye(o, b, 16, 17);
 
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_SWOLF_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
         return true;
     }
     break;
@@ -1186,19 +1088,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_16", vRelative, vPos);
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
 
-            if (o->CurrentAction == MONSTER01_WALK)
-            {
-                if (rand_fps_check(15))
-                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_MOVE1 + Random::Rand() % 2));
-            }
-            else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-            {
-                if (o->SubType == FALSE)
-                {
-                    o->SubType = TRUE;
-                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_ATTACK1 + Random::Rand() % 2));
-                }
-            }
+            GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
         }
         else
         {
@@ -1208,38 +1098,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BIP01", vRelative, vPos);
             CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 2.0f);
             CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 4, 1.0f);
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_IR_DIE);
-            }
+            GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
         }
         return true;
     }
     break;
     case MODEL_SATYROS:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_SATI_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
     }
     break;
     case MODEL_BLADE_HUNTER:
@@ -1250,57 +1116,16 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             if (o->Distance >= 3.0f)
                 o->Distance = 0.1f;
         }
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(10))
-            {
-                if (gMapManager.WorldActive != WD_39KANTURU_3RD)
-                    CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
-
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_MOVE1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BLADE_DIE);
-            }
-        }
+        bool played = false;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c, &played);
+        // The walk's smoke comes with its step sound (Q-MN92).
+        if (o->CurrentAction == MONSTER01_WALK && played && gMapManager.WorldActive != WD_39KANTURU_3RD)
+            CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
     }
     break;
     case MODEL_KENTAUROS:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
         if (o->CurrentAction == MONSTER01_DIE && rand_fps_check(1))
@@ -1330,30 +1155,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     break;
     case MODEL_BERSERKER_WARRIOR:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BER_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_DIE
             || o->CurrentAction == MONSTER01_ATTACK1
@@ -1369,27 +1171,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return true;
     case MODEL_KENTAUROS_WARRIOR:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
         if (o->CurrentAction == MONSTER01_DIE && rand_fps_check(1))
@@ -1421,30 +1203,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return true;
     case MODEL_GIGANTIS_WARRIOR:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_MOVE1);
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_DIE)
             return true;
@@ -1467,30 +1226,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return true;
     case MODEL_SOCCERBALL:
     {
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + Random::Rand() % 2));
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + Random::Rand() % 2));
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->SubType == FALSE)
-            {
-                o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_DIE);
-            }
-        }
-
-        if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
-            o->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*c);
 
         if (o->CurrentAction == MONSTER01_WALK && rand_fps_check(1))
         {

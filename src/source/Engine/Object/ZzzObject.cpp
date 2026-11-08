@@ -30,6 +30,7 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundSource.h"
 #include "Camera/ICamera.h"
 
 #include "Render/Models/SideHair.h"
@@ -40,6 +41,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapObjectSounds.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/CComGem.h"
@@ -3549,6 +3551,11 @@ void RenderObjectVisual(const OBJECT* o)
 
 void UpdateObjectVisual(OBJECT* o)
 {
+    // The sounds its map's code plays meanwhile are marked here (Q-SM11).
+    const Audio::ScopedSoundPlace place(Audio::SoundKind::MapObject, o->Type, o->Position);
+    // The sound of its type, while it is drawn (Data/Maps/ObjectSounds.json).
+    World::MapObjectSounds::OnObjectDrawn(*o);
+
     BMD* b = &Models[o->Type];
     const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     vec3_t p, Position;
@@ -4115,6 +4122,8 @@ void UpdateObjectEffects()
             UpdateObjectVisual(o);
         }
     }
+    // The sounds of the objects drawn, each at its nearest object's level.
+    World::MapObjectSounds::PlayDrawnSounds();
 }
 
 #ifdef _EDITOR
@@ -4618,6 +4627,8 @@ int GetLoginCameraWalkCut();
 
 void MoveObject(OBJECT* o)
 {
+    // The sounds its map's code plays meanwhile are marked here (Q-SM11).
+    const Audio::ScopedSoundPlace place(Audio::SoundKind::MapObject, o->Type, o->Position);
     if (gMapManager.WorldActive == 9)
     {
         if ((int)WorldTime % 4000 < 1000)
@@ -6343,6 +6354,8 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop)
     n->AncientDiscriminator = 0;
     if (isFreshDrop)
     {
+        // The coins' sound is the item's, where it lands (Q-SM13).
+        const Audio::ScopedSoundPlace place(Audio::SoundKind::Item, Type, position);
         PlayBuffer(SOUND_DROP_GOLD01);
     }
 

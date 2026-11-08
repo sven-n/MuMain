@@ -48,6 +48,11 @@ using Data::Monsters::MonsterModelDefinition;
 constexpr float SearchWidth = 220.0f;
 constexpr float FileListHeight = 160.0f;
 constexpr float SpeedWidth = 90.0f;
+// The timer row's fields (Q-MN91), and a new timer's interval.
+constexpr float TimerNameWidth = 120.0f;
+constexpr float TimerAnimationWidth = 90.0f;
+constexpr float TimerEveryWidth = 110.0f;
+constexpr int NewTimerMs = 500;
 // How many users the slot line lists before "and N more".
 constexpr int ShownUsers = 12;
 constexpr float SpeedStep = 0.005f;
@@ -115,7 +120,7 @@ void MuMonsterModelUI::Render(bool* open)
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
         const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
         MonsterModelDefinition* model = m_draft.Begin(slot.value_or(-1), ToolWindow::GetDataVersion());
-        ShownModel::RenderSelectedMonster(number, monster);
+        ShownModel::RenderSelectedMonster(number, monster, false);
         if (monster != nullptr && (!slot || model == nullptr))
         {
             ShownModel::RenderWhyNoModel(*monster);
@@ -162,6 +167,10 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     if (ImGui::CollapsingHeader(I18N::Editor::Cues, ImGuiTreeNodeFlags_DefaultOpen))
     {
         RenderCues(model, slot);
+    }
+    if (ImGui::CollapsingHeader(I18N::Editor::ModelTimers, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        RenderTimers(model, slot);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::MoreOfTheModelEntry))
     {
@@ -451,6 +460,90 @@ void MuMonsterModelUI::RenderCues(MonsterModelDefinition& model, int slot)
         model.cues.erase(model.cues.begin() + static_cast<std::ptrdiff_t>(*removed));
         m_draft.AfterChange(true, StepLabelOf(model, I18N::Format(I18N::Editor::StepWhatCue0, {name})));
     }
+}
+
+// The timers of the model's animations (Q-MN91), which its map's code and sound
+// events share: name, animation and interval, added and removed here.
+void MuMonsterModelUI::RenderTimers(MonsterModelDefinition& model, int slot)
+{
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::ModelTimersNote);
+    ImGui::PopTextWrapPos();
+    if (model.timers.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheModelHasNoTimers);
+    }
+    const float scale = g_MuEditorCore.GetUIScale();
+    std::optional<size_t> removed;
+    for (size_t index = 0; index < model.timers.size(); ++index)
+    {
+        Data::Monsters::MonsterModelTimer& timer = model.timers[index];
+        const std::string step = StepLabelOf(model, I18N::Format(I18N::Editor::StepWhatTimer0, {timer.name}));
+        ImGui::PushID(static_cast<int>(index));
+        char name[64];
+        std::snprintf(name, sizeof(name), "%s", timer.name.c_str());
+        ImGui::SetNextItemWidth(TimerNameWidth * scale);
+        if (ImGui::InputText("##Name", name, sizeof(name), ImGuiInputTextFlags_EnterReturnsTrue) && name[0] != 0 &&
+            std::none_of(model.timers.begin(), model.timers.end(),
+                         [&](const Data::Monsters::MonsterModelTimer& other) { return other.name == name; }))
+        {
+            timer.name = name;
+            m_draft.AfterChange(true, step);
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(TimerAnimationWidth * scale);
+        if (ImGui::BeginCombo("##Animation", Data::Monsters::GetMonsterAnimationName(timer.animation).c_str()))
+        {
+            const int count = Models != nullptr && slot >= 0 && Models[slot].NumActions > 0 ? Models[slot].NumActions
+                                                                                            : MONSTER01_APEAR + 1;
+            for (int animation = 0; animation < count; ++animation)
+            {
+                if (ImGui::Selectable(Data::Monsters::GetMonsterAnimationName(animation).c_str(),
+                                      animation == timer.animation))
+                {
+                    timer.animation = animation;
+                    m_draft.AfterChange(true, step);
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(TimerEveryWidth * scale);
+        int everyMs = timer.everyMs;
+        if (ImGui::InputInt(I18N::Editor::TimerEveryMs, &everyMs, 50))
+        {
+            timer.everyMs = std::clamp(everyMs, 1, Data::Monsters::MaxModelTimerMs);
+            m_draft.AfterChange(true, step);
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::Remove))
+        {
+            removed = index;
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::RemoveTimerNote);
+        }
+        ImGui::PopID();
+    }
+    if (removed)
+    {
+        const std::string name = model.timers[*removed].name;
+        model.timers.erase(model.timers.begin() + static_cast<std::ptrdiff_t>(*removed));
+        m_draft.AfterChange(true, StepLabelOf(model, I18N::Format(I18N::Editor::StepWhatTimer0, {name})));
+        return;
+    }
+    ImGui::BeginDisabled(model.timers.size() >= Data::Monsters::MaxModelTimers);
+    if (ImGui::SmallButton(I18N::Editor::AddATimer))
+    {
+        Data::Monsters::MonsterModelTimer timer;
+        timer.name = "timer " + std::to_string(model.timers.size() + 1);
+        timer.animation = MONSTER01_WALK;
+        timer.everyMs = NewTimerMs;
+        model.timers.push_back(timer);
+        m_draft.AfterChange(true, StepLabelOf(model, I18N::Format(I18N::Editor::StepWhatTimer0, {timer.name})));
+    }
+    ImGui::EndDisabled();
 }
 
 void MuMonsterModelUI::RenderMore(const MonsterModelDefinition& model)

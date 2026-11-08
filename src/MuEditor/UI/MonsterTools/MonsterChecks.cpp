@@ -5,6 +5,7 @@
 #include "MonsterChecks.h"
 
 #include "MonsterAttackChecks.h"
+#include "MonsterGroupChecks.h"
 
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 
@@ -16,6 +17,7 @@ void RunMonsters(std::vector<Data::Items::ItemDataIssue>& issues)
     // that differs from them is a choice (566 and 567 are NPCs), not a problem.
     g_MonsterDataHandler.Validate(issues);
     AttackChecks::Validate(issues);
+    GroupChecks::Validate(issues);
 }
 
 void RunModels(std::vector<Data::Items::ItemDataIssue>& issues)

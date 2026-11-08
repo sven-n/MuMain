@@ -113,3 +113,8 @@
 	white-space: nowrap;
 	padding: 0 2rem;
 }
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+#btn_create, #btn_menu, #btn_delete { click-sound: menu; }
+#btn_connect { click-sound: confirm; }

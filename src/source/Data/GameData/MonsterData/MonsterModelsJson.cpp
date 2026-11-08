@@ -47,6 +47,8 @@ constexpr const char* Cues = "cues";
 constexpr const char* Name = "name";
 constexpr const char* Animation = "animation";
 constexpr const char* Frames = "frames";
+constexpr const char* Timers = "timers";
+constexpr const char* EveryMs = "everyMs";
 constexpr const char* Bitmaps = "bitmaps";
 constexpr const char* Filter = "filter";
 constexpr const char* Wrap = "wrap";
@@ -86,6 +88,7 @@ const KeySet ModelKeys{Keys::Slot,
                        Keys::StreamMesh,
                        Keys::NoneBlendMeshes,
                        Keys::Cues,
+                       Keys::Timers,
                        Keys::Bitmaps,
                        Keys::Parts,
                        Keys::BoundingBox,
@@ -102,6 +105,7 @@ const KeySet BitmapKeys{Keys::File, Keys::Slot, Keys::Filter, Keys::Wrap};
 const KeySet MapFolderKeys{Keys::Maps, Keys::Folders};
 const KeySet BoxKeys{Keys::Min, Keys::Max};
 const KeySet CueKeys{Keys::Name, Keys::Animation, Keys::Frames};
+const KeySet TimerKeys{Keys::Name, Keys::Animation, Keys::EveryMs};
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 // A texture name fits Texture_t::FileName with its terminating zero.
@@ -537,6 +541,57 @@ void ReadCues(const OrderedJson& json, std::vector<MonsterModelCue>& cues, Model
     }
 }
 
+// The timers of the model's animations, which its map's code and sound events
+// share (Q-MN91).
+void ReadTimers(const OrderedJson& json, std::vector<MonsterModelTimer>& timers, ModelIssues& issues)
+{
+    if (!json.is_array() || json.size() > MaxModelTimers)
+    {
+        issues.Fatal(Keys::Timers, "must be a list of " + std::to_string(MaxModelTimers) + " timers or fewer");
+        return;
+    }
+    for (size_t i = 0; i < json.size(); ++i)
+    {
+        const std::string key = std::string(Keys::Timers) + "[" + std::to_string(i) + "]";
+        const OrderedJson& entry = json[i];
+        if (!entry.is_object() || !entry.contains(Keys::Name) || !entry.contains(Keys::Animation) ||
+            !entry.contains(Keys::EveryMs))
+        {
+            issues.Fatal(key, "must be an object with name, animation and everyMs");
+            return;
+        }
+        MonsterModelTimer timer;
+        if (!ReadText(entry[Keys::Name], key + "." + Keys::Name, timer.name, issues))
+        {
+            return;
+        }
+        const OrderedJson& animation = entry[Keys::Animation];
+        const std::optional<int> found =
+            animation.is_string() ? FindMonsterAnimation(animation.get<std::string>()) : std::nullopt;
+        if (!found)
+        {
+            issues.Fatal(key + "." + Keys::Animation, "is not an animation");
+            return;
+        }
+        timer.animation = *found;
+        const std::optional<int> everyMs = ReadWholeIn(entry[Keys::EveryMs], 1, MaxModelTimerMs);
+        if (!everyMs)
+        {
+            issues.Fatal(key + "." + Keys::EveryMs, RangeText(1, MaxModelTimerMs));
+            return;
+        }
+        timer.everyMs = *everyMs;
+        if (std::any_of(timers.begin(), timers.end(),
+                        [&](const MonsterModelTimer& other) { return other.name == timer.name; }))
+        {
+            issues.Fatal(key + "." + Keys::Name, "\"" + timer.name + "\" is the name of another timer of the model");
+            return;
+        }
+        issues.WarnAboutUnknownKeys(entry, TimerKeys, key + ".");
+        timers.push_back(std::move(timer));
+    }
+}
+
 void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, ModelIssues& issues)
 {
     ReadLoad(json, model.load, issues);
@@ -560,6 +615,10 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     if (const auto cues = json.find(Keys::Cues); cues != json.end())
     {
         ReadCues(*cues, model.cues, issues);
+    }
+    if (const auto timers = json.find(Keys::Timers); timers != json.end())
+    {
+        ReadTimers(*timers, model.timers, issues);
     }
     if (const auto bitmaps = json.find(Keys::Bitmaps); bitmaps != json.end())
     {
@@ -715,6 +774,20 @@ OrderedJson WriteCues(const std::vector<MonsterModelCue>& cues)
     return json;
 }
 
+OrderedJson WriteTimers(const std::vector<MonsterModelTimer>& timers)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const MonsterModelTimer& timer : timers)
+    {
+        OrderedJson entry = OrderedJson::object();
+        entry[Keys::Name] = timer.name;
+        entry[Keys::Animation] = GetMonsterAnimationName(timer.animation);
+        entry[Keys::EveryMs] = timer.everyMs;
+        json.push_back(std::move(entry));
+    }
+    return json;
+}
+
 OrderedJson WriteModel(const MonsterModelDefinition& model)
 {
     OrderedJson json = OrderedJson::object();
@@ -758,6 +831,10 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
     {
         json[Keys::Cues] = WriteCues(model.cues);
     }
+    if (!model.timers.empty())
+    {
+        json[Keys::Timers] = WriteTimers(model.timers);
+    }
     if (!model.bitmaps.empty())
     {
         OrderedJson bitmaps = OrderedJson::array();
@@ -793,7 +870,7 @@ std::string FormatText(std::string text)
     {
         text = PutObjectsOnOneLine(text, key);
     }
-    for (const char* key : {Keys::Cues, Keys::Bitmaps, Keys::MapTextureFolders})
+    for (const char* key : {Keys::Cues, Keys::Timers, Keys::Bitmaps, Keys::MapTextureFolders})
     {
         text = PutListEntriesOnOneLine(text, key);
     }

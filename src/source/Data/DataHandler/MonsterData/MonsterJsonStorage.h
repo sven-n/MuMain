@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 
 #include <cstddef>
 #include <filesystem>
@@ -19,6 +20,9 @@ std::filesystem::path GetMonstersFile();
 
 struct MonsterDataLoadResult
 {
+    // The monsters with their numbers, as the file has them.
+    std::vector<MonsterGroup> groups;
+    // The entry of each number.
     std::vector<MonsterDefinition> monsters;
     std::vector<Items::ItemDataIssue> issues;
 };
@@ -29,7 +33,7 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file);
 // Writes the monsters to the file when they read back without fatal problems; the
 // problems found are added to `issues`. The old file stays when the new one
 // cannot be written whole.
-bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterDefinition> monsters,
+bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterGroup> monsters,
                       std::vector<Items::ItemDataIssue>& issues);
 
 // The text SaveMonstersFile writes, so that a caller can check more files
@@ -37,7 +41,7 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
 // monsters read back without fatal problems, nullopt otherwise; the problems found are
 // added to `issues`.
 std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
-                                                std::span<const MonsterDefinition> monsters,
+                                                std::span<const MonsterGroup> monsters,
                                                 std::vector<Items::ItemDataIssue>& issues);
 
 // Makes `file` the source of the problems from `first` on: the checks of the

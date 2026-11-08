@@ -1,0 +1,14 @@
+{
+  "formatVersion": 1,
+  "objectSounds": [
+    {"maps": [24, 25, 26, 27, 28, 29, 36], "objects": [37, 38], "sound": {"file": "Data/Sound/aKalimaWaterFall.wav", "channels": 3}, "plays": "whileInView"},
+    {"maps": [37], "objects": [46], "sound": {"file": "Data/Sound/w37/kan_ruin_wheel.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [37], "objects": [77], "sound": {"file": "Data/Sound/w37/kan_ruin_waterfall.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [37], "objects": [92], "sound": {"file": "Data/Sound/w37/kan_ruin_elec.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [37], "objects": [98], "sound": {"file": "Data/Sound/w37/kan_ruin_plant.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [37], "sound": {"file": "Data/Sound/w37/kan_ruin_global.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [38], "objects": [9], "sound": {"file": "Data/Sound/w38/kan_relic_gear.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [38], "objects": [31, 35, 36, 37], "sound": {"file": "Data/Sound/w38/kan_relic_incubator.wav", "channels": 1}, "plays": "whileInView"},
+    {"maps": [38], "sound": {"file": "Data/Sound/w38/kan_relic_global.wav", "channels": 1}, "plays": "whileInView"}
+  ]
+}

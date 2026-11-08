@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 
 #include <span>
 #include <string>
@@ -10,26 +11,46 @@
 
 // The monster list of the client (Data/Monsters/Monsters.json):
 //
-//   { "formatVersion": 1,
+//   { "formatVersion": 2,
 //     "monsters": [
 //       {
-//         "number": 2,
-//         "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
-//         "kind": "monster"
+//         "name": {"en": "Death Centurion", "es": "Centurión de la Muerte"},
+//         "kind": "monster",
+//         "model": "MONSTER_MODEL_DEATH_CENTURION",
+//         "numbers": [
+//           {"number": 145, "maps": [24]},
+//           {"number": 336, "maps": [36], "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+//         ]
 //       } ] }
 //
-// "number" is the monster's number as the server sends it (0-1023), "name" its
-// names by language (a plain text is the English name), "kind" what the game
-// does with it: monster, npc, trap or other.
+// A monster holds the values its numbers share; "numbers" lists each of its
+// numbers as the server sends them (0-1023) with the maps it appears on and
+// the values that number has as its own (monsters design, D61, Q-MN61).
+// "name" are the names by language (a plain text is the English name), "kind"
+// what the game does with it: monster, npc, trap or other. A number's own
+// value may be empty where the monster's is not: "model": "", "soundSet": "",
+// "attacks": null, "mapVariants": [] and "randomVariants": [].
+//
+// Version 1 listed each number with its values ("number" next to "name");
+// such a file is read as a monster for each entry.
 namespace Data::Monsters
 {
-constexpr int MonstersFormatVersion = 1;
+constexpr int MonstersFormatVersion = 2;
 
 // Reads the monsters of the text into `monsters`, in their order. A monster
-// with an error is left out; a number that is there twice is an error.
-void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterDefinition>& monsters,
+// with an error in its shared values is left out, a number with an error in
+// its own values; a number that is there twice is an error.
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
                       std::vector<Items::ItemDataIssue>& issues);
 
-// The text of the file with these monsters, sorted by number.
-std::string WriteMonstersJson(std::span<const MonsterDefinition> monsters);
+// The entries of the numbers the text has, as ReadMonstersJson reads them.
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterDefinition>& numbers,
+                      std::vector<Items::ItemDataIssue>& issues);
+
+// The text of the file with these monsters, sorted by their first number, and
+// their numbers sorted.
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters);
+
+// The text of the file with a monster for each entry.
+std::string WriteMonstersJson(std::span<const MonsterDefinition> numbers);
 } // namespace Data::Monsters

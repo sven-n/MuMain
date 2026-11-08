@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "HeroScope.h"
 
 #include "Core/Platform/ProcessLocale.h"
 #include "Core/Text/Utf8.h"
@@ -24,6 +25,7 @@
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
+#include "Network/Server/WSclient.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -53,34 +55,6 @@
 namespace
 {
 const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
-
-// Points the tooltip at a test-owned hero, as ItemHelpScope does for the item help window.
-class TooltipHeroScope
-{
-public:
-    TooltipHeroScope() : m_previousHero(CharacterAttribute), m_previousHeroCharacter(::Hero)
-    {
-        CharacterAttribute = &m_hero;
-        ::Hero = &m_heroCharacter;
-    }
-
-    ~TooltipHeroScope()
-    {
-        CharacterAttribute = m_previousHero;
-        ::Hero = m_previousHeroCharacter;
-    }
-
-    CHARACTER_ATTRIBUTE& Hero()
-    {
-        return m_hero;
-    }
-
-private:
-    CHARACTER_ATTRIBUTE m_hero{};
-    CHARACTER m_heroCharacter;
-    CHARACTER_ATTRIBUTE* m_previousHero;
-    CHARACTER* m_previousHeroCharacter;
-};
 
 // The game data a tooltip reads besides the items, loaded as the game loads it (ZzzOpenData.cpp, CUIManager): the
 // skills (the orbs' and scrolls' names and damage), the socket items, the item sets, the monster list (the
@@ -298,7 +272,7 @@ TEST_CASE("Every item's tooltip is as recorded [data][items][tooltip]")
                                                                              {"bladeMaster", &MakeBladeMaster}};
     for (const auto& [name, make] : heroes)
     {
-        TooltipHeroScope hero;
+        HeroScope hero;
         make(hero.Hero());
         ::Hero->Class = hero.Hero().Class;
         ::Hero->Level = hero.Hero().Level;
@@ -363,7 +337,7 @@ TEST_CASE("A tooltip's durability, count and expiry lines follow the item [data]
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -450,7 +424,7 @@ TEST_CASE("The tooltip's values of an item follow the item and the hero [data][i
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
 
     using namespace Engine::Items::TooltipValues;
@@ -512,12 +486,10 @@ TEST_CASE("The tooltip's values need no hero [data][items][tooltip]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    CHARACTER_ATTRIBUTE* const previous = CharacterAttribute;
-    CharacterAttribute = nullptr;
+    NoHeroScope noHero;
     ITEM kris;
     FillItemFromParameters(kris, Engine::Items::TooltipSnapshot::FullItemParameters(0, 0));
     const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(kris);
-    CharacterAttribute = previous;
     CHECK(values.strength.required == kris.RequireStrength);
     CHECK(values.strength.missing == 0);
     CHECK(values.level.missing == 0);
@@ -532,7 +504,7 @@ TEST_CASE("A requirement reduced to 0 still shows [data][items][tooltip]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -557,7 +529,7 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
 
     // The Seal of Healing (13/62): its experience rate and life recovery, and how long it lasts.
@@ -577,6 +549,73 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK_FALSE(duration->empty());
 }
 
+// The server marks an item's guardian (380) option with one bit of its option flags and no byte of its own; such an
+// item shows its 380 lines.
+TEST_CASE("An item from the server with a guardian option shows its 380 lines [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    TextMeasureScope measure(&FixedWidthMeasure);
+
+    // Bone Blade (0/22) +9 as the server writes it: group and number, level, durability, the option flags, then the
+    // additional option's byte (level 2) and the excellent options' byte.
+    const auto fromServer = [](ItemOptionFlags flags)
+    {
+        const std::array<BYTE, 7> itemData{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x01};
+        return ParseItemData(itemData);
+    };
+    const ItemOptionFlags optionAndExcellent = ItemOptionFlags::HasOption | ItemOptionFlags::HasExcellent;
+    const ItemCreationParams guarded = fromServer(optionAndExcellent | ItemOptionFlags::HasGuardian);
+    const ItemCreationParams plain = fromServer(optionAndExcellent);
+    CHECK(guarded.HasGuardianOption);
+    CHECK_FALSE(plain.HasGuardianOption);
+    CHECK(guarded.OptionLevel == 2);
+    CHECK(guarded.ExcellentFlags == 0x01);
+
+    // The flag takes no byte. The sockets are the only bytes read after it: they read the same with it, and the item
+    // is as long (CalcItemLength finds where the next item of a packet starts). Their first byte is the bonus option
+    // (high half) and the socket count (low half), then comes one byte per socket.
+    const auto socketed = [](ItemOptionFlags flags)
+    { return std::array<BYTE, 9>{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x32, 0x0A, 0x0B}; };
+    const ItemOptionFlags optionAndSockets = ItemOptionFlags::HasOption | ItemOptionFlags::HasSockets;
+    for (const ItemOptionFlags flags : {optionAndSockets, optionAndSockets | ItemOptionFlags::HasGuardian})
+    {
+        CAPTURE(static_cast<int>(flags));
+        const std::array<BYTE, 9> itemData = socketed(flags);
+        CHECK(CalcItemLength(itemData) == static_cast<int>(itemData.size()));
+        const ItemCreationParams params = ParseItemData(itemData);
+        CHECK(params.HasGuardianOption == ((flags & ItemOptionFlags::HasGuardian) != 0));
+        CHECK(params.SocketBonusOption == 3);
+        CHECK(params.SocketCount == 2);
+        CHECK(params.SocketOptions[0] == 0x0A);
+        CHECK(params.SocketOptions[1] == 0x0B);
+    }
+
+    ITEM withGuardian;
+    FillItemFromParameters(withGuardian, guarded);
+    ITEM without;
+    FillItemFromParameters(without, plain);
+    // The Bone Blade's row in ItemAddOption.bmd has both its 380 options. Checked on the row: GetItemAddOtioninfoText
+    // writes two lines even for a row that has none.
+    const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(withGuardian.Type);
+    REQUIRE(addOption.m_byOption1 != 0);
+    REQUIRE(addOption.m_byOption2 != 0);
+    std::vector<std::wstring> lines380;
+    g_pItemAddOptioninfo->GetItemAddOtioninfoText(lines380, withGuardian.Type);
+    const std::vector<ItemTooltipLine> guardedLines = BuildItemTooltipLines(&withGuardian, false);
+    const std::vector<ItemTooltipLine> plainLines = BuildItemTooltipLines(&without, false);
+    for (const std::wstring& line : lines380)
+    {
+        CHECK(HasLine(guardedLines, line, TEXT_COLOR_REDPURPLE));
+        CHECK_FALSE(HasLine(plainLines, line));
+    }
+}
+
 // A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
 TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
 {
@@ -584,7 +623,7 @@ TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
 
     const auto bundleCount = [](int group, int number, int level)
@@ -608,7 +647,7 @@ TEST_CASE("The basic tooltip values are the full ones but for the stat lines' [d
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
 
     using namespace Engine::Items::TooltipValues;
@@ -713,13 +752,75 @@ TEST_CASE("An item's duration text follows the UI's language [data][items][toolt
     CHECK(GetItemTooltipText(values, TooltipValue::AddOptionDuration) == english);
 }
 
+// Luck's two lines are its option texts (Data/Items/Tooltips/OptionTexts.json) in the UI's language, the critical
+// damage rate with the value of its definition (Data/Items/Options/Luck.json).
+TEST_CASE("An item's luck lines are its option texts in the UI's language [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    ItemCreationParams kris = Engine::Items::TooltipSnapshot::FullItemParameters(0, 0);
+    kris.WithLuck = true;
+
+    const std::vector<ItemTooltipLine> english = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
+    CHECK(HasLine(english, L"Luck (success rate of Jewel of Soul +25%)", TEXT_COLOR_BLUE));
+    CHECK(HasLine(english, L"Luck (critical damage rate +5%)", TEXT_COLOR_BLUE));
+    {
+        UiLocaleScope german("de");
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(kris);
+        CHECK(HasLine(lines, L"Glück (Erfolgsrate von Juwel der Seele +25%)", TEXT_COLOR_BLUE));
+        CHECK(HasLine(lines, L"Glück (kritische Schadensrate +5%)", TEXT_COLOR_BLUE));
+    }
+    CHECK(Engine::Items::TooltipSnapshot::TooltipOfParameters(kris).size() == english.size());
+}
+
+// The tooltip rows are shared by all tooltips, and each tooltip starts with every row empty, white and not bold. The
+// Horn of Fenrir's colour lines set their colour but no bold, so they were bold after a tooltip that had a bold row
+// there (O31): a tooltip drawn after one that left every row bold and red is the one drawn alone.
+TEST_CASE("A tooltip keeps no bold and no colour of the tooltip drawn before [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    // The black Horn of Fenrir.
+    ItemCreationParams fenrir = Engine::Items::TooltipSnapshot::FullItemParameters(13, 37);
+    fenrir.HasExcellentOption = true;
+    fenrir.ExcellentFlags = 1;
+    const auto drawnAfter = [&](bool bold, int color)
+    {
+        for (int row = 0; row < MaxTextListRows; ++row)
+        {
+            TextBold[row] = bold;
+            TextListColor[row] = color;
+        }
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(fenrir);
+    };
+
+    const std::vector<ItemTooltipLine> alone = drawnAfter(false, TEXT_COLOR_WHITE);
+    const std::vector<ItemTooltipLine> afterBold = drawnAfter(true, TEXT_COLOR_RED);
+    REQUIRE(afterBold.size() == alone.size());
+    for (size_t line = 0; line < alone.size(); ++line)
+    {
+        CAPTURE(line);
+        CHECK(afterBold[line].text == alone[line].text);
+        CHECK(afterBold[line].color == alone[line].color);
+        CHECK(afterBold[line].bold == alone[line].bold);
+    }
+    const auto finalDamage = std::find_if(alone.begin(), alone.end(), [](const ItemTooltipLine& line)
+                                          { return line.text == Formatted(I18N::Game::IncreaseFinalDamageD, 10); });
+    REQUIRE(finalDamage != alone.end());
+    CHECK_FALSE(finalDamage->bold);
+}
+
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeNewDarkWizard(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -740,7 +841,7 @@ TEST_CASE("An item's lines drawn after its options follow them [data][items][too
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
     const auto indexOf = [](const std::vector<ItemTooltipLine>& lines, std::wstring_view start)
@@ -775,7 +876,7 @@ TEST_CASE("The item names of windows and ground labels come from the name lines 
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
 
     // Without name lines: the name, " +level" above +0, and no "Excellent" or set name.
@@ -818,7 +919,7 @@ TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     TextMeasureScope measure(&FixedWidthMeasure);
     UiLocaleScope german("de");
@@ -862,7 +963,7 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
 
     // The item at `level`, dropped and drawn with `modelType` (its own model when left out), as CreateItemDrop does.
@@ -984,7 +1085,7 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -1035,7 +1136,7 @@ TEST_CASE("A transformation ring's restriction comes after its option lines [dat
 
 TEST_CASE("A class condition holds for a hero of that class [data][items][tooltip]")
 {
-    TooltipHeroScope hero;
+    HeroScope hero;
     Data::Items::TooltipCondition darkLord;
     std::string error;
     REQUIRE(Data::Items::ReadTooltipCondition("class:darkLord", darkLord, error));
@@ -1064,7 +1165,7 @@ TEST_CASE("The Command Fruit's class line and the Wizard's Ring's lines follow t
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -1106,7 +1207,7 @@ TEST_CASE("A tooltip's name color goes by the item's kind, level and options in 
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
     const auto name = [](int level, bool luck, bool excellent, bool ancient)
@@ -1156,7 +1257,7 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -1243,7 +1344,7 @@ TEST_CASE("With translated item names off, the names are English and the rest of
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
     const std::string uiLocale = I18N::GetCurrentLocale();
@@ -1282,7 +1383,7 @@ TEST_CASE("An item's full durability follows its level, options and magic durabi
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
 
     const auto full = [](int group, int number, int level, BYTE excellent, BYTE ancient)
@@ -1328,7 +1429,7 @@ TEST_CASE("The item commands make a full item when the durability is left out [d
     std::string errorMessage;
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     SetItemTooltipTextMeasure(&FixedWidthMeasure);
 
@@ -1374,7 +1475,7 @@ TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from 
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     TextMeasureScope measure(&FixedWidthMeasure);
-    TooltipHeroScope hero;
+    HeroScope hero;
     const auto lines = [](int group, int number, int level)
     {
         ItemCreationParams parameters = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
@@ -1492,7 +1593,7 @@ TEST_CASE("A line an item adds to its tooltip layout shows after its line [data]
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     TextMeasureScope measure(&FixedWidthMeasure);
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     ::Hero->Class = hero.Hero().Class;
 
@@ -1548,7 +1649,7 @@ TEST_CASE("The lines an item adds to its tooltip layout have rows of their own [
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     TextMeasureScope measure(&FixedWidthMeasure);
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     ::Hero->Class = hero.Hero().Class;
     const auto tooltipOfJewel = []()
@@ -1598,7 +1699,7 @@ TEST_CASE("A tooltip's layout follows a change of its item [data][items][tooltip
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     TextMeasureScope measure(&FixedWidthMeasure);
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     ::Hero->Class = hero.Hero().Class;
     const auto hasOwnLine = []()
@@ -1634,7 +1735,7 @@ TEST_CASE("The name row Item Tooltip shows is the tooltip's [data][items][toolti
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
     TooltipDataScope data;
     TextMeasureScope measure(&FixedWidthMeasure);
-    TooltipHeroScope hero;
+    HeroScope hero;
     MakeBladeMaster(hero.Hero());
     ::Hero->Class = hero.Hero().Class;
     int compared = 0;
