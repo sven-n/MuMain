@@ -224,9 +224,6 @@ internal static class CppEmitter
             // item names in texts after "Translate item names" changed.
             void NotifyLocaleObservers() noexcept;
 
-            // The position of the current locale in GetAvailableLocales.
-            int GetCurrentLocaleIndex() noexcept;
-
             // A text of an item text group (ResxGen --item-text-groups) that names
             // an item with {item:group,number} in at least one locale
             // (docs/translation-system.md, "Texts that name items").
@@ -358,11 +355,6 @@ internal static class CppEmitter
                 {
                     if (entry.cb != nullptr) entry.cb(entry.ctx);
                 }
-            }
-
-            int GetCurrentLocaleIndex() noexcept
-            {
-                return g_currentLocaleIndex;
             }
 
             std::span<const ItemText> GetItemTexts() noexcept
