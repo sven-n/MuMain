@@ -69,6 +69,19 @@ struct RendererOverride
     RendererOverride& operator=(const RendererOverride&) = delete;
 };
 
+// Removes only the fake retirement owned by a test, even when a REQUIRE exits the scope early.
+struct RetirementScope
+{
+    std::uint32_t id;
+    Rml::String source;
+
+    ~RetirementScope()
+    {
+        std::erase_if(RetiredTextures(),
+                      [this](const Retired& entry) { return entry.id == id && entry.source == source; });
+    }
+};
+
 bool IsRetired(std::uint32_t id)
 {
     const auto& retired = RetiredTextures();
@@ -79,21 +92,40 @@ bool IsRetired(std::uint32_t id)
 TEST_CASE("global preview retirement storage outlives its owner [ui][render_target]")
 {
     const std::size_t before = RetiredTextures().size();
-    Retire(1, "rtt:global-preview-lifetime-regression-first");
-    CHECK(RetiredTextures().size() == before + 1);
+    constexpr std::uint32_t RetainedTextureId = 3;
+    {
+        const RetirementScope retained{RetainedTextureId, "rtt:retained-retirement-regression"};
+        Retire(retained.id, retained.source);
+        {
+            const RetirementScope cleanup{1, "rtt:global-preview-lifetime-regression-first"};
+            Retire(cleanup.id, cleanup.source);
+            CHECK(RetiredTextures().size() == before + 2);
+        }
+        CHECK(RetiredTextures().size() == before + 1);
+        CHECK(IsRetired(retained.id));
+    }
+    CHECK_FALSE(IsRetired(RetainedTextureId));
+    CHECK(RetiredTextures().size() == before);
 }
 
 TEST_CASE("a destroyed target retires its undrawn texture instead of using the renderer [ui][render_target]")
 {
-    RenderTargetRecorder renderer;
-    RendererOverride route(renderer);
+    const std::uint32_t textureId = RenderTargetRecorder::FirstTextureId + 1;
+    const std::size_t before = RetiredTextures().size();
     {
-        RenderTarget target{nullptr};
-        target.Resize(64, 32);
-        REQUIRE(renderer.created == RenderTargetRecorder::FirstTextureId + 1);
+        RenderTargetRecorder renderer;
+        RendererOverride route(renderer);
+        const RetirementScope cleanup{textureId, {}};
+        {
+            RenderTarget target{nullptr};
+            target.Resize(64, 32);
+            REQUIRE(renderer.created == textureId);
+        }
+        // The renderer may already be gone when a global owner is destroyed at exit.
+        CHECK(renderer.released == 0);
+        CHECK(IsRetired(renderer.created));
     }
-    // The renderer may already be gone when a global owner is destroyed at exit.
-    CHECK(renderer.released == 0);
-    CHECK(IsRetired(renderer.created));
+    CHECK_FALSE(IsRetired(textureId));
+    CHECK(RetiredTextures().size() == before);
 }
 } // namespace UI::RmlBridge
