@@ -59,7 +59,8 @@ TurnRun Turn(float from, float to, double fps)
 }
 } // namespace
 
-TEST_CASE("An eased turn lands on its target, without passing it, in the same time at any frame rate [gamelogic][turning]")
+TEST_CASE(
+    "An eased turn lands on its target, without passing it, in the same time at any frame rate [gamelogic][turning]")
 {
     // From rest to rest over 180 degrees it speeds up for half the way and slows down for the other half (it never
     // reaches the top speed): 2 * sqrt(180 / acceleration) seconds.
@@ -83,8 +84,7 @@ TEST_CASE("An eased turn speeds up gradually and never goes past its top speed [
 
     // The first frame from rest moves only a little: the speed starts at one frame's acceleration.
     float speed = 0.f;
-    const float first =
-        StepEasedTurn(0.f, 179.f, speed, 1.f / 60.f, WalkTurnDegreesPerSecond, WalkTurnAcceleration);
+    const float first = StepEasedTurn(0.f, 179.f, speed, 1.f / 60.f, WalkTurnDegreesPerSecond, WalkTurnAcceleration);
     CHECK(speed == doctest::Approx(WalkTurnAcceleration / 60.f));
     CHECK(first == doctest::Approx(WalkTurnAcceleration / 3600.f));
 }
@@ -102,7 +102,8 @@ TEST_CASE("An eased turn takes the shortest way across zero [gamelogic][turning]
     CHECK(angle == 10.f);
 }
 
-TEST_CASE("A target that moves behind the turn slows the turn down and reverses it, without a jump [gamelogic][turning]")
+TEST_CASE(
+    "A target that moves behind the turn slows the turn down and reverses it, without a jump [gamelogic][turning]")
 {
     constexpr float Seconds = 1.f / 60.f;
     float angle = 0.f;
@@ -125,7 +126,8 @@ TEST_CASE("A target that moves behind the turn slows the turn down and reverses 
     CHECK(angle == 270.f);
 }
 
-TEST_CASE("The head's turn reaches the shoulders, and a skeleton without them leaves it to the head [gamelogic][turning]")
+TEST_CASE(
+    "The head's turn reaches the shoulders, and a skeleton without them leaves it to the head [gamelogic][turning]")
 {
     namespace HeadTurn = Render::Models::HeadTurn;
     CHECK(HeadTurn::SignedYaw(300.f) == doctest::Approx(-60.f));
@@ -287,7 +289,8 @@ TEST_CASE("A gentle walking turn eases while the walker already travels the new 
     CHECK(walker.Object.Position[0] == doctest::Approx(x).epsilon(0.001));
 }
 
-TEST_CASE("A standing turn starts only for a real change and gives way to anything else that turns the character [gamelogic][turning]")
+TEST_CASE("A standing turn starts only for a real change and gives way to anything else that turns the character "
+          "[gamelogic][turning]")
 {
     static CHARACTER standing;
     standing.Initialize();
