@@ -134,11 +134,7 @@ void OpenPlayers()
     const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
     for (int i = 0; i < MAX_CLASS; ++i)
     {
-        Engine::Object::OpenPlayerBodyParts(0, i, useS6);
-        // The Magic Gladiator, Dark Lord and Rage Fighter have no second form.
-        if (CLASS_DARK != i && CLASS_DARK_LORD != i && CLASS_RAGEFIGHTER != i)
-            Engine::Object::OpenPlayerBodyParts(1, i, useS6);
-        Engine::Object::OpenPlayerBodyParts(2, i, useS6);
+        Engine::Object::OpenPlayerClassBodyParts(i, useS6);
     }
 
     gLoadData.AccessModel(MODEL_MASK_HELM + 0, L"Data\\Player\\", L"MaskHelmMale", 1);
@@ -304,21 +300,12 @@ void OpenPlayerTextures()
     LoadBitmap(L"Item\\dl_redwings02.tga", BITMAP_ROBE + 9);
     LoadBitmap(L"Item\\dl_redwings03.tga", BITMAP_ROBE + 10);
 
-    int nIndex;
-
     for (int j = 0; j < MAX_CLASS_STAGES; ++j)
     {
         for (int i = 0; i < MAX_CLASS; ++i)
         {
-            nIndex = MAX_CLASS * j + i;
-            if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i || CLASS_RAGEFIGHTER == i))
-                continue;
-
-            gLoadData.OpenTexture(MODEL_BODY_HELM + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_ARMOR + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_PANTS + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_GLOVES + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_BOOTS + nIndex, L"Player\\");
+            if (Engine::Object::HasPlayerBodyForm(j, i))
+                Engine::Object::OpenPlayerBodyTextures(j, i);
         }
     }
 

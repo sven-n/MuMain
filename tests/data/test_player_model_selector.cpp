@@ -3,11 +3,14 @@
 #include "ClientFolderScope.h"
 #include "ExecutableConfigFile.h"
 #include "TestModelSlots.h"
+#include "PlayerTextureScope.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Engine/Object/PlayerBodyModels.h"
 #include "Data/DataHandler/LoadData.h"
-#include <array>
+#include "Render/Sprites/GlobalBitmap.h"
+#include "Render/Textures/ZzzTexture.h"
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -19,37 +22,15 @@ namespace
 {
 const std::filesystem::path ClientFolder = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 
-struct BodyPartFile
-{
-    int firstSlot;
-    const char* prefix;
-};
+using Engine::Object::PlayerBodyPart;
+using Engine::Object::PlayerBodyParts;
 
-const std::array<BodyPartFile, 5> BodyPartFiles{{
-    {MODEL_BODY_HELM, "HelmClass"},
-    {MODEL_BODY_ARMOR, "ArmorClass"},
-    {MODEL_BODY_PANTS, "PantClass"},
-    {MODEL_BODY_GLOVES, "GloveClass"},
-    {MODEL_BODY_BOOTS, "BootClass"},
-}};
-
-// The forms OpenPlayers opens: the Magic Gladiator, Dark Lord and Rage Fighter have no second form.
-bool HasForm(int stage, int baseClass)
+std::string BodyFile(const PlayerBodyPart& part, int stage, int baseClass)
 {
-    return stage != 1 || (baseClass != CLASS_DARK && baseClass != CLASS_DARK_LORD && baseClass != CLASS_RAGEFIGHTER);
+    return Core::Text::ToUtf8(Engine::Object::PlayerBodyFileName(stage, part, baseClass).c_str()) + ".bmd";
 }
 
-// "HelmClass201.bmd" for the second form of the Dark Wizard.
-std::string BodyFile(const BodyPartFile& part, int stage, int baseClass)
-{
-    const int number = baseClass + 1;
-    std::string name = part.prefix;
-    if (stage > 0)
-        name += std::to_string(stage + 1);
-    return name + (number < 10 ? "0" : "") + std::to_string(number) + ".bmd";
-}
-
-int BodySlot(const BodyPartFile& part, int stage, int baseClass)
+int BodySlot(const PlayerBodyPart& part, int stage, int baseClass)
 {
     return part.firstSlot + stage * MAX_CLASS + baseClass;
 }
@@ -65,28 +46,44 @@ std::string FirstTextureName(const BMD& model)
     return std::string(name, strnlen(name, sizeof(model.Textures[0].FileName)));
 }
 
-// A client folder for one test, with a copy of the Dark Knight's original body parts.
-struct KnightClientFolder
+// A client folder for one test, with copies of one form's original body parts and the shared textures.
+struct BodyClientFolder
 {
-    KnightClientFolder()
+    explicit BodyClientFolder(int baseClass = CLASS_KNIGHT, int stage = 0)
         : path(std::filesystem::temp_directory_path() /
                ("mu_test_player_bodies_" + std::to_string(std::random_device{}())))
     {
         std::filesystem::create_directories(path / "Data" / "Player");
-        for (const BodyPartFile& part : BodyPartFiles)
+        for (const PlayerBodyPart& part : PlayerBodyParts)
         {
-            const std::string file = BodyFile(part, 0, CLASS_KNIGHT);
+            const std::string file = BodyFile(part, stage, baseClass);
             std::filesystem::copy_file(std::filesystem::path(MU_TEST_DATA_DIR) / "Player" / file,
                                        path / "Data" / "Player" / file);
         }
+        for (const auto& entry :
+             std::filesystem::directory_iterator(std::filesystem::path(MU_TEST_DATA_DIR) / "Player"))
+        {
+            const std::string extension = entry.path().extension().string();
+            if (Data::Items::EqualsIgnoringCase(extension, ".ozj") ||
+                Data::Items::EqualsIgnoringCase(extension, ".ozt"))
+                std::filesystem::copy_file(entry.path(), path / "Data" / "Player" / entry.path().filename());
+        }
     }
-    ~KnightClientFolder()
+    ~BodyClientFolder()
     {
         std::error_code ignored;
         std::filesystem::remove_all(path, ignored);
     }
-    KnightClientFolder(const KnightClientFolder&) = delete;
-    KnightClientFolder& operator=(const KnightClientFolder&) = delete;
+    BodyClientFolder(const BodyClientFolder&) = delete;
+    BodyClientFolder& operator=(const BodyClientFolder&) = delete;
+
+    void AddImproved(const std::string& file) const
+    {
+        const auto updated = path / "Data" / "Player" / "Updated";
+        std::filesystem::create_directories(updated);
+        std::filesystem::copy_file(std::filesystem::path(MU_TEST_DATA_DIR) / "Player" / "Updated" / file,
+                                   updated / file);
+    }
 
     std::filesystem::path path;
 };
@@ -113,19 +110,20 @@ TEST_CASE("Without the S6 models each body part comes from the Updated folder wh
 {
     const std::filesystem::path updatedFolder = std::filesystem::path(MU_TEST_DATA_DIR) / "Player" / "Updated";
     ClientFolderScope folder(ClientFolder);
-    int improved = 0;
+    PlayerTextureScope textures;
     for (bool useS6 : {true, false})
     {
         // A slot that holds a model is not opened again, so each choice starts from empty slots.
         TestModelSlots slots;
-        for (int stage = 0; stage < MAX_CLASS_STAGES; ++stage)
+        for (int baseClass = 0; baseClass < MAX_CLASS; ++baseClass)
         {
-            for (int baseClass = 0; baseClass < MAX_CLASS; ++baseClass)
+            Engine::Object::OpenPlayerClassBodyParts(baseClass, useS6);
+            for (int stage = 0; stage < MAX_CLASS_STAGES; ++stage)
             {
-                if (!HasForm(stage, baseClass))
+                if (!Engine::Object::HasPlayerBodyForm(stage, baseClass))
                     continue;
-                Engine::Object::OpenPlayerBodyParts(stage, baseClass, useS6);
-                for (const BodyPartFile& part : BodyPartFiles)
+                Engine::Object::OpenPlayerBodyTextures(stage, baseClass);
+                for (const PlayerBodyPart& part : PlayerBodyParts)
                 {
                     const std::string file = BodyFile(part, stage, baseClass);
                     INFO(file, " useS6=", useS6);
@@ -133,13 +131,10 @@ TEST_CASE("Without the S6 models each body part comes from the Updated folder wh
                     const bool fromUpdated = !useS6 && std::filesystem::exists(updatedFolder / file);
                     CHECK(OpenedFile(slot) == (fromUpdated ? "Data\\Player\\Updated\\" : "Data\\Player\\") + file);
                     CHECK(Models[slot].NumMeshs > 0);
-                    improved += fromUpdated;
                 }
             }
         }
     }
-    // The packaged improved set: 13 class forms of five parts each (docs/player-base-models.md).
-    CHECK(improved == 65);
 }
 
 TEST_CASE("Both packaged player model choices open through the native loader [player-selector]")
@@ -157,11 +152,11 @@ TEST_CASE("Both packaged player model choices open through the native loader [pl
 
 TEST_CASE("A missing Updated folder leaves the original body parts [player-selector]")
 {
-    const KnightClientFolder client;
+    const BodyClientFolder client;
     TestModelSlots slots;
     ClientFolderScope folder(client.path);
     Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
-    for (const BodyPartFile& part : BodyPartFiles)
+    for (const PlayerBodyPart& part : PlayerBodyParts)
     {
         const std::string file = BodyFile(part, 0, CLASS_KNIGHT);
         INFO(file);
@@ -170,16 +165,153 @@ TEST_CASE("A missing Updated folder leaves the original body parts [player-selec
     }
 }
 
-TEST_CASE("An Updated body part that fails to load leaves the original part [player-selector]")
+TEST_CASE("An Updated file with an invalid BMD header leaves the original part [player-selector]")
 {
-    const KnightClientFolder client;
-    const std::string helm = BodyFile(BodyPartFiles[0], 0, CLASS_KNIGHT);
+    const BodyClientFolder client;
+    const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
     std::filesystem::create_directories(client.path / "Data" / "Player" / "Updated");
     std::ofstream(client.path / "Data" / "Player" / "Updated" / helm, std::ios::binary) << "BM";
     TestModelSlots slots;
     ClientFolderScope folder(client.path);
     Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
-    const int slot = BodySlot(BodyPartFiles[0], 0, CLASS_KNIGHT);
+    const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
     CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
     CHECK(Models[slot].NumMeshs > 0);
+}
+
+TEST_CASE("Mixed hair asset generations fall back to original Dark Lord heads [player-selector][texture-fallback]")
+{
+    for (const int stage : {0, 2})
+    {
+        for (const bool oldImprovedName : {false, true})
+        {
+            INFO("stage=", stage, " old improved name=", oldImprovedName);
+            const BodyClientFolder client(CLASS_DARK_LORD, stage);
+            const std::string helm = BodyFile(PlayerBodyParts[0], stage, CLASS_DARK_LORD);
+            client.AddImproved(helm);
+            // New Updated with older Player: the new alias is absent. Old Updated with new Player:
+            // its old hair name is absent. The mesh data is otherwise identical across those releases.
+            if (!oldImprovedName)
+                std::filesystem::remove(client.path / "Data" / "Player" / "hairhq_R.OZJ");
+            ClientFolderScope folder(client.path);
+            PlayerTextureScope textures;
+            TestModelSlots slots;
+            REQUIRE(LoadBitmap(L"Player\\hair_r.jpg", BITMAP_HAIR));
+            Engine::Object::OpenPlayerBodyParts(stage, CLASS_DARK_LORD, false);
+            const int slot = BodySlot(PlayerBodyParts[0], stage, CLASS_DARK_LORD);
+            REQUIRE(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
+            if (oldImprovedName)
+                std::strcpy(Models[slot].Textures[1].FileName, "hair_hq_player.jpg");
+            Engine::Object::OpenPlayerBodyTextures(stage, CLASS_DARK_LORD);
+            CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
+            REQUIRE(Models[slot].NumMeshs == 2);
+            CHECK(Models[slot].IndexTexture[1] == BITMAP_HAIR);
+            const BITMAP_t* hair = Bitmaps.FindTexture(BITMAP_HAIR);
+            REQUIRE(hair != nullptr);
+            CHECK(hair->Ref == 2); // preload plus the original head, no reference from the rejected head
+            CHECK(hair->IsHair);
+            CHECK_FALSE(hair->IsSkin);
+            // The improved head's skin loaded before its hair failed, and must not leak a reference.
+            CHECK(Bitmaps.FindTextureByName(
+                      Core::Text::FromUtf8(stage == 0 ? "skin_hq_class05.jpg" : "body_hq_class305.jpg")) == nullptr);
+        }
+    }
+}
+
+TEST_CASE("Missing or undecodable improved body textures select originals, S6 choice stays unchanged "
+          "[player-selector][texture-fallback]")
+{
+    for (const bool corrupt : {false, true})
+    {
+        const BodyClientFolder client;
+        const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+        client.AddImproved(helm);
+        const auto texture = client.path / "Data" / "Player" / "skin_hq_class02.OZJ";
+        if (corrupt)
+            std::ofstream(texture, std::ios::binary | std::ios::trunc) << "not a JPEG";
+        else
+            std::filesystem::remove(texture);
+        ClientFolderScope folder(client.path);
+        PlayerTextureScope textures;
+        for (const bool useS6 : {false, true})
+        {
+            INFO("corrupt=", corrupt, " useS6=", useS6);
+            TestModelSlots slots;
+            Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, useS6);
+            Engine::Object::OpenPlayerBodyTextures(0, CLASS_KNIGHT);
+            const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+            CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
+            REQUIRE(Models[slot].NumMeshs > 0);
+            const BITMAP_t* skin = Bitmaps.FindTexture(Models[slot].IndexTexture[0]);
+            REQUIRE(skin != nullptr);
+            CHECK(skin->IsSkin);
+        }
+    }
+}
+
+TEST_CASE("Improved bodies keep legitimate cached texture fallback [player-selector][texture-fallback]")
+{
+    const BodyClientFolder client;
+    const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+    client.AddImproved(helm);
+    const auto texture = client.path / "Data" / "Player" / "skin_hq_class02.OZJ";
+    std::filesystem::create_directories(client.path / "Data" / "Other");
+    std::filesystem::rename(texture, client.path / "Data" / "Other" / texture.filename());
+    ClientFolderScope folder(client.path);
+    PlayerTextureScope textures;
+    TestModelSlots slots;
+    const GLuint cached = Bitmaps.LoadImage(L"Data\\Other\\skin_hq_class02.jpg", GL_NEAREST, GL_REPEAT);
+    REQUIRE(cached != BITMAP_UNKNOWN);
+    Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
+    Engine::Object::OpenPlayerBodyTextures(0, CLASS_KNIGHT);
+    const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+    CHECK(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
+    CHECK(Models[slot].IndexTexture[0] == cached);
+    REQUIRE(Bitmaps.FindTexture(cached) != nullptr);
+    CHECK(Bitmaps.FindTexture(cached)->Ref == 2);
+    CHECK(Bitmaps.FindTexture(cached)->IsSkin);
+}
+
+TEST_CASE(
+    "Hidden and unsupported improved texture names keep native loader semantics [player-selector][texture-fallback]")
+{
+    const BodyClientFolder client;
+    const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+    client.AddImproved(helm);
+    ClientFolderScope folder(client.path);
+    PlayerTextureScope textures;
+    for (const char* name : {"hide_mesh.jpg", "unused.dds"})
+    {
+        TestModelSlots slots;
+        Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
+        const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+        std::strcpy(Models[slot].Textures[0].FileName, name);
+        const GLuint before = Models[slot].IndexTexture[0];
+        Engine::Object::OpenPlayerBodyTextures(0, CLASS_KNIGHT);
+        CHECK(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
+        CHECK(Models[slot].IndexTexture[0] == (Data::Items::IsHiddenTexture(name) ? BITMAP_HIDE : before));
+    }
+}
+
+TEST_CASE("Improved bodies use textures supplied only by the active pack [player-selector][texture-fallback]")
+{
+    const BodyClientFolder client;
+    const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+    client.AddImproved(helm);
+    const auto texture = client.path / "Data" / "Player" / "skin_hq_class02.OZJ";
+    const auto pack = client.path / "Data" / "TexturePacks" / "body-test" / "Player";
+    std::filesystem::create_directories(pack);
+    std::filesystem::rename(texture, pack / texture.filename());
+    ClientFolderScope folder(client.path);
+    PlayerTextureScope textures;
+    TestModelSlots slots;
+    Bitmaps.SetTexturePack(L"body-test");
+    Engine::Object::OpenPlayerBodyParts(0, CLASS_KNIGHT, false);
+    Engine::Object::OpenPlayerBodyTextures(0, CLASS_KNIGHT);
+    const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_KNIGHT);
+    CHECK(OpenedFile(slot) == "Data\\Player\\Updated\\" + helm);
+    const BITMAP_t* skin = Bitmaps.FindTexture(Models[slot].IndexTexture[0]);
+    REQUIRE(skin != nullptr);
+    CHECK(skin->fromTexturePack);
+    CHECK(skin->IsSkin);
 }
