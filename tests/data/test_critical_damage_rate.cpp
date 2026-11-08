@@ -45,6 +45,8 @@ constexpr BYTE CriticalDamageSeed = 31;
 constexpr BYTE ExcellentDamageSeed = 29;
 // The weapons' harmony option "Increase critical damage".
 constexpr BYTE WeaponCriticalDamageHarmony = 6;
+// The staffs' harmony option "Increase critical damage".
+constexpr BYTE StaffCriticalDamageHarmony = 5;
 
 // A Blade Knight who meets every item's requirements.
 void MakeStrongKnight(HeroScope& hero)
@@ -374,6 +376,37 @@ TEST_CASE("The critical damage bonus adds up the worn items' set, harmony and so
     EquipmentScope::AddUpBonuses();
     CHECK(GetHeroCriticalDamageBonus().socketOptions == 0);
     CHECK(GameLogic::Combat::GetHeroExcellentDamageBonus() == 0);
+}
+
+// A staff's harmony option "Increase critical damage" is the staffs' option 5, not the weapons' 6.
+TEST_CASE("A staff's harmony option adds critical damage like a weapon's [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    HeroScope hero;
+    MakeStrongKnight(hero);
+    hero.Hero().Class = CLASS_SOULMASTER;
+    hero.HeroCharacter().Class = CLASS_SOULMASTER;
+    EquipmentScope equipment;
+
+    const HARMONYJEWELOPTION& harmony =
+        g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(SI_Staff, StaffCriticalDamageHarmony);
+    std::wstring name = harmony.Name;
+    std::transform(name.begin(), name.end(), name.begin(), [](wchar_t c) { return std::towlower(c); });
+    CHECK(name.find(L"critical") != std::wstring::npos);
+    REQUIRE(harmony.HarmonyJewelLevel[13] > 0);
+
+    // A Skull Staff +13 with the option at its top level.
+    ItemCreationParams staff = Item(5, 0);
+    staff.Level = 13;
+    staff.HasHarmonyOption = true;
+    staff.HarmonyOptionType = StaffCriticalDamageHarmony;
+    staff.HarmonyOptionLevel = 13;
+    equipment.Wear(EQUIPMENT_WEAPON_RIGHT, staff);
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == harmony.HarmonyJewelLevel[13]);
 }
 
 // Increase Critical Damage adds 1 per 30 energy and 1 per 25 command of the one who cast it, and its first power-up's
