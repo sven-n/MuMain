@@ -664,11 +664,11 @@ def check_cache_pair(job_body, job_name, restore_name, save_name):
           f"{job_name} {save_name} must save the paths {restore_name} restores")
 
 
-def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
+def check_apt_cache(job_body, job_name, kind, install_name, after=None, when=None):
     """An apt cache: named after the image and the files apt would fetch, restored, fetched into apt's archive folder,
-    gathered and saved by main pushes (only with every file), and installed from there. `condition` is (step, if) for
-    a job whose apt steps and install run only when an earlier step says so."""
-    when = f" && {condition[1]}" if condition else ""
+    gathered and saved by main pushes (only with every file), and installed from there. `when` is the condition of a
+    job whose apt steps and install run only when its step `after` says so."""
+    and_when = f" && {when}" if when else ""
     find = step(job_body, job_name, "Find apt packages")
     for required in ("id: apt_packages\n", "sudo apt-get update",
                      'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
@@ -690,7 +690,7 @@ def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
     # Only the runs that save gather the files, so the gather has the save's conditions. It runs before the install,
     # which could clean apt's archive folder.
     gather = step(job_body, job_name, "Gather apt packages")
-    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'{when}\n",
+    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'{and_when}\n",
                      'python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives '
                      '"$APT_ARCHIVES"'):
         check(required in gather, f"{job_name} Gather apt packages missing {required}")
@@ -701,14 +701,14 @@ def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
     # save that went on after an error would save an entry without them.
     check("continue-on-error" not in gather + save, f"{job_name} must not save its apt packages after a failed gather")
     check("sudo apt-get update" not in fetch + install, f"{job_name} must update the apt index before naming the cache")
-    if condition:
+    if when:
         # The save needs no condition of its own: without the gather, it has no complete.
         for name, body in (("Find apt packages", find), ("Restore apt packages", restore),
                            ("Fetch apt packages", fetch), (install_name, install)):
-            check(f"if: {condition[1]}\n" in body, f"{job_name} {name} must run only when {condition[0]} says so")
+            check(f"if: {when}\n" in body, f"{job_name} {name} must run only when {after} says so")
     names = re.findall(r"(?m)^      - name: (.+)$", job_body)
-    order = ([condition[0]] if condition else []) + ["Find apt packages", "Restore apt packages", "Fetch apt packages",
-                                                     "Gather apt packages", "Save apt packages", install_name]
+    order = ([after] if after else []) + ["Find apt packages", "Restore apt packages", "Fetch apt packages",
+                                          "Gather apt packages", "Save apt packages", install_name]
     check(all(name in names for name in order)
           and [names.index(name) for name in order] == sorted(names.index(name) for name in order),
           f"{job_name} must find, restore, fetch, gather and save its apt packages, then install them, in that order")
@@ -717,29 +717,31 @@ def check_apt_cache(job_body, job_name, kind, install_name, condition=None):
 check_apt_cache(linux_job, "build-linux", "apt-linux-x64-", "Install build tools")
 # Quality Gates installs cppcheck from its own apt cache; its restore and save are checked here, as the build jobs'
 # caches are below. Only Check formatting and Static analysis use the tools, and they skip a run without C++ changes.
+QUALITY_COUNT = "Detect changed C++ files"
 QUALITY_TOOLS_WANTED = "steps.changed.outputs.count != '0'"
 check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools",
-                ("Detect changed C++ files", QUALITY_TOOLS_WANTED))
+                after=QUALITY_COUNT, when=QUALITY_TOOLS_WANTED)
 check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
 # The pip cache holds clang-format, so it runs when the install does. A step that read Detect changed C++ files' count
 # before that step ran would get none, and run or skip without an error.
 check(f"if: {QUALITY_TOOLS_WANTED}\n" in step(quality_job, "quality", "Cache quality tools"),
-      "quality Cache quality tools must run only when Detect changed C++ files counts a file")
+      f"quality Cache quality tools must run only when {QUALITY_COUNT} counts a file")
 quality_names = re.findall(r"(?m)^      - name: (.+)$", quality_job)
 for index, name in enumerate(quality_names):
     if "steps.changed.outputs." in step(quality_job, "quality", name):
-        check("Detect changed C++ files" in quality_names[:index],
-              f"quality {name} reads what Detect changed C++ files counted, so it must come after it")
+        check(QUALITY_COUNT in quality_names[:index],
+              f"quality {name} reads what {QUALITY_COUNT} counted, so it must come after it")
 
 
-def apt_step_lines(job_body, job_name, step_name, kind, condition=None):
-    """A step of an apt cache without its comments, blank lines and the job's own condition, with its kind as KIND."""
+def apt_step_lines(job_body, job_name, step_name, kind, when=None):
+    """A step of an apt cache without its comments, blank lines and the job's own condition (`when`, as for
+    check_apt_cache), with its kind as KIND."""
     lines = []
     for line in step(job_body, job_name, step_name).splitlines():
-        if condition:
-            line = line.replace(f" && {condition}", "")
+        if when:
+            line = line.replace(f" && {when}", "")
         text = line.strip()
-        if text and not text.startswith("#") and text != f"if: {condition}":
+        if text and not text.startswith("#") and not (when and text == f"if: {when}"):
             lines.append(line.replace(kind, "KIND"))
     return lines
 
@@ -750,7 +752,7 @@ def apt_step_lines(job_body, job_name, step_name, kind, condition=None):
 for step_name in ("Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
                   "Save apt packages"):
     check(apt_step_lines(linux_job, "build-linux", step_name, "apt-linux-x64-")
-          == apt_step_lines(quality_job, "quality", step_name, "apt-cppcheck-linux-x64-", QUALITY_TOOLS_WANTED),
+          == apt_step_lines(quality_job, "quality", step_name, "apt-cppcheck-linux-x64-", when=QUALITY_TOOLS_WANTED),
           f"quality {step_name} must run what build-linux's does, apart from its kind and condition")
 apt_archives = job_env(linux_job, "APT_ARCHIVES")
 check(apt_archives != "" and job_env(quality_job, "APT_ARCHIVES") == apt_archives,
