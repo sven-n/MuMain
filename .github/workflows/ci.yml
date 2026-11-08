@@ -45,6 +45,7 @@ jobs:
       macos: ${{ steps.plan.outputs.macos }}
       windows: ${{ steps.plan.outputs.windows }}
       release: ${{ steps.plan.outputs.release }}
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       # The image has no cppcheck; it comes from an apt cache, as the Linux build's packages do.
       APT_PACKAGES: cppcheck
@@ -91,56 +92,7 @@ jobs:
           test -f src/bin/Data/Dec2.dat
           test -f src/bin/fonts/DejaVuSans.ttf
 
-      - name: Cache quality tools
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cache/pip
-          key: quality-tools-pip-${{ runner.os }}-v1
-          restore-keys: quality-tools-pip-${{ runner.os }}-
-
-      # cppcheck, cached as the Linux build caches its packages (see there).
-      - name: Find apt packages
-        id: apt_packages
-        run: |
-          sudo apt-get update
-          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
-          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
-
-      - name: Restore apt packages
-        id: apt
-        uses: actions/cache/restore@v6
-        with:
-          path: ${{ env.APT_ARCHIVES }}
-          key: ${{ steps.apt_packages.outputs.key }}
-          restore-keys: |
-            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
-            apt-cppcheck-linux-x64-
-
-      - name: Fetch apt packages
-        run: |
-          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
-            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
-          fi
-          sudo apt-get install -y --download-only $APT_PACKAGES
-
-      - name: Gather apt packages
-        id: gather
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
-        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
-
-      - name: Save apt packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: ${{ env.APT_ARCHIVES }}
-          key: ${{ steps.apt.outputs.cache-primary-key }}
-
-      - name: Install quality tools
-        run: |
-          sudo apt-get install -y $APT_PACKAGES
-          pip install clang-format==21.1.8
-
+      # Before the tools: only Check formatting and Static analysis use them, and they skip a run without C++ changes.
       - name: Detect changed C++ files
         id: changed
         env:
@@ -157,6 +109,68 @@ jobs:
             echo "$CHANGED" > /tmp/changed-cpp-files.txt
             echo "$COUNT C++ files changed"
           fi
+
+      - name: Cache quality tools
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/pip
+          key: quality-tools-pip-${{ runner.os }}-v1
+          restore-keys: quality-tools-pip-${{ runner.os }}-
+
+      # cppcheck, cached as the Linux build caches its packages (see there).
+      - name: Find apt packages
+        id: apt_packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get update
+          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
+          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
+
+      - name: Restore apt packages
+        id: apt
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt_packages.outputs.key }}
+          restore-keys: |
+            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-cppcheck-linux-x64-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # As in the build jobs, for the prune job; skipped with the restore. To the microsecond, as GitHub notes the
+        # read: the one small restore before it can end within the second it began.
+        if: steps.changed.outputs.count != '0'
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%S.%6NZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch apt packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
+            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
+          fi
+          sudo apt-get install -y --download-only $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.changed.outputs.count != '0'
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
+
+      - name: Save apt packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt.outputs.cache-primary-key }}
+
+      - name: Install quality tools
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get install -y $APT_PACKAGES
+          pip install clang-format==21.1.8
 
       - name: Check formatting
         if: steps.changed.outputs.count != '0'
@@ -1102,7 +1116,8 @@ jobs:
   # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
   caches:
     name: Prune caches
-    needs: [build-windows, build-linux, build-macos]
+    # Quality Gates only for when it read its cppcheck cache: the builds wait for it anyway.
+    needs: [quality, build-windows, build-linux, build-macos]
     # PR runs save no cache.
     if: ${{ !cancelled() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
@@ -1122,9 +1137,10 @@ jobs:
       - name: Delete older cache entries
         env:
           GH_TOKEN: ${{ github.token }}
-          # When each build job's restores ended, empty for a job that did not run.
+          # When each job's restores ended, empty for a job that did not run or restore.
           CACHES_READ_AT_LINUX: ${{ needs.build-linux.outputs.caches-read-at }}
           CACHES_READ_AT_MACOS: ${{ needs.build-macos.outputs.caches-read-at }}
+          CACHES_READ_AT_QUALITY: ${{ needs.quality.outputs.caches-read-at }}
           CACHES_READ_AT_WINDOWS: ${{ needs.build-windows.outputs.caches-read-at }}
         run: python3 scripts/ci_cache_prune.py
 
