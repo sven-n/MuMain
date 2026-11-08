@@ -2044,9 +2044,9 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
     }
     catch (const std::exception& exception)
     {
-        // A debug command that parses its arguments with std::stof/substr throws on a missing or
-        // malformed one ("$fps" without a number). Report it in the chat instead of ending the
-        // client, like the control-socket console does.
+        // A command that throws must not close the client; report the failure in the chat
+        // instead, like the control-socket console does. The commands report a bad argument
+        // themselves, so this only catches an unforeseen failure.
         const std::wstring message = L"command failed: " + Core::Text::FromUtf8(exception.what());
         g_pSystemLogBox->AddText(message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return true;

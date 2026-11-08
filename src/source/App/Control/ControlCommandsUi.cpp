@@ -308,8 +308,8 @@ std::string Console(const Request& request, std::unique_ptr<Act>& /*act*/)
     }
     catch (const std::exception&)
     {
-        // A command that parses its arguments with std::stof/substr throws on a missing or
-        // malformed one ("$fps" without a number); refuse it instead of ending the client.
+        // A command that throws must be refused instead of ending the client. The commands
+        // report a bad argument themselves, so this only catches an unforeseen failure.
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`" + text + "` is missing an argument or has a malformed one");
     }
