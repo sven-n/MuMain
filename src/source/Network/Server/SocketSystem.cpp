@@ -576,6 +576,12 @@ void CSocketItemMgr::CalcSocketStatusBonus()
                 case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
                     m_StatusBonus.m_iCriticalDamageRateBonus += iBonus;
                     break;
+                case SOPT_CRITICAL_DAMAGE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageBonus += iBonus;
+                    break;
+                case SOPT_EXCELLENT_DAMAGE_BONUS:
+                    m_StatusBonus.m_iExcellentDamageBonus += iBonus;
+                    break;
                 }
             }
         }
