@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cmath>
+#include <iterator>
 
 namespace GameLogic::Combat
 {
@@ -54,8 +55,14 @@ int HarmonyCriticalDamage(ITEM& item)
     {
         return 0;
     }
-    return g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(type, item.Jewel_Of_Harmony_Option)
-        .HarmonyJewelLevel[item.Jewel_Of_Harmony_OptionLevel];
+    // The option's level has 4 bits (0 to 15), the table values for the levels 0 to 13 only.
+    const HARMONYJEWELOPTION& option =
+        g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(type, item.Jewel_Of_Harmony_Option);
+    if (static_cast<size_t>(item.Jewel_Of_Harmony_OptionLevel) >= std::size(option.HarmonyJewelLevel))
+    {
+        return 0;
+    }
+    return option.HarmonyJewelLevel[item.Jewel_Of_Harmony_OptionLevel];
 }
 
 bool HasCriticalDamageBuff()

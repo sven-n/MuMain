@@ -345,6 +345,10 @@ TEST_CASE("The critical damage bonus adds up the worn items' set, harmony and so
     CHECK(GetHeroCriticalDamageBonus().harmonyOptions == harmony.HarmonyJewelLevel[13]);
     weapon.Level = 12;
     CHECK(GetHeroCriticalDamageBonus().harmonyOptions == 0);
+    // An item +15 with the option at level 15, past the table's levels 0 to 13.
+    weapon.Level = 15;
+    weapon.Jewel_Of_Harmony_OptionLevel = 15;
+    CHECK(GetHeroCriticalDamageBonus().harmonyOptions == 0);
 
     ItemCreationParams flamberge = Item(0, 26);
     flamberge.SocketCount = 2;
