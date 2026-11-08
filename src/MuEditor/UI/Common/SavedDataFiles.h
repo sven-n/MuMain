@@ -9,7 +9,7 @@
 // (Render::Look::SaveCount), as `$look save` writes them too.
 namespace MuEditor::SavedDataFiles
 {
-// The Server List or the Style Editor wrote its file.
+// The Server List wrote its file.
 void NoteSaved();
 
 // How many such saves there were in this session.
