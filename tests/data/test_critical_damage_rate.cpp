@@ -323,6 +323,17 @@ TEST_CASE("The character window's critical damage rate line and its hint [data][
                                    "Set options: 10%", "Socket options: 8%", buffName + ": +9%",
                                    "Scroll of Battle: +20%", "Total: 62%"});
 
+    // A missing name shows the skill's number or the item's group and number, so the parts stay apart.
+    const wchar_t skillName = SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY].Name[0];
+    const wchar_t scrollName = ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name[0];
+    SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY].Name[0] = L'\0';
+    ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name[0] = L'\0';
+    const std::vector<std::string> unnamed = Texts(UI::Character::BuildCriticalDamageRateHint(rate));
+    SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY].Name[0] = skillName;
+    ItemAttribute[ITEM_SCROLL_OF_BATTLE].Name[0] = scrollName;
+    CHECK(unnamed[4] == "#383: +9%");
+    CHECK(unnamed[5] == "14/97: +20%");
+
     I18N::SetLocale("de");
     CHECK(UI::Character::BuildCriticalDamageRateLine(rate).text == "Kritische Schadensrate: 33% (+29%)");
     I18N::SetLocale("en");

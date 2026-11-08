@@ -20,24 +20,24 @@ template <typename... Args> std::string FormatHintText(const wchar_t* format, Ar
     return StringUtils::WideToNarrow(text);
 }
 
-// The skill's name, or `fallback` when the skill table has none.
-inline const wchar_t* SkillNameOr(ActionSkillType skill, const wchar_t* fallback)
+// The skill's name, or its number ("#383") when the skill table has none, so two missing names stay apart.
+inline std::wstring SkillName(ActionSkillType skill)
 {
-    if (SkillAttribute == nullptr || SkillAttribute[skill].Name[0] == L'\0')
+    if (SkillAttribute != nullptr && SkillAttribute[skill].Name[0] != L'\0')
     {
-        return fallback;
+        return SkillAttribute[skill].Name;
     }
-    return SkillAttribute[skill].Name;
+    return L"#" + std::to_wstring(static_cast<int>(skill));
 }
 
-// The item's name, or `fallback` when the item table has none.
-inline const wchar_t* ItemNameOr(int itemType, const wchar_t* fallback)
+// The item's name, or its group and number ("14/97") when the item table has none.
+inline std::wstring ItemName(int itemType)
 {
-    if (ItemAttribute == nullptr || ItemAttribute[itemType].Name[0] == L'\0')
+    if (ItemAttribute != nullptr && ItemAttribute[itemType].Name[0] != L'\0')
     {
-        return fallback;
+        return ItemAttribute[itemType].Name;
     }
-    return ItemAttribute[itemType].Name;
+    return std::to_wstring(itemType / MAX_ITEM_INDEX) + L"/" + std::to_wstring(itemType % MAX_ITEM_INDEX);
 }
 
 inline UI::RmlBridge::Tooltip::Line
