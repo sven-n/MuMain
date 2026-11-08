@@ -138,10 +138,13 @@ public:
     }
 
 private:
+    // Empty slots as the game has them: no item, no durability, no requirements. A slot keeping a worn item's
+    // durability and requirements passed the set options' checks and read ItemAttribute[-1].
     void TakeOffAll()
     {
         for (ITEM& item : m_machine->Equipment)
         {
+            item = ITEM{};
             item.Type = -1;
         }
     }
