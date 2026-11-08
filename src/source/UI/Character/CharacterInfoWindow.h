@@ -184,7 +184,8 @@ namespace mu::ui::window
         // The damage the damage line shows, for its hint.
         UI::Character::DamageRange m_DamageRange;
 
-        // What the critical damage rate line and the hints were last built from, in which language.
+        // What the critical damage rate line and the hints were last built from, in which language and with which item
+        // names (the Scroll of Battle's line names the item).
         struct CriticalHitParts
         {
             GameLogic::Combat::CriticalDamageRate rate;
@@ -192,6 +193,7 @@ namespace mu::ui::window
             int excellentBonus = 0;
             UI::Character::DamageRange damageRange;
             std::string locale;
+            bool translatedItemNames = false;
 
             bool operator==(const CriticalHitParts&) const = default;
         };

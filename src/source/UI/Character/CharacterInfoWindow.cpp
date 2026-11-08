@@ -26,6 +26,7 @@
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Character/CriticalDamageRateLine.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "GameLogic/Combat/CriticalDamageBonus.h"
 #include "GameLogic/Combat/CriticalDamageRate.h"
 
@@ -435,7 +436,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
 {
     const CriticalHitParts parts{
         GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
-        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale()};
+        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale(),
+        g_ItemDataHandler.GetTranslateItemNames()};
     // The texts are formatted again only when what they show changes.
     if (m_BuiltParts != parts)
     {
