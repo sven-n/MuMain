@@ -1008,6 +1008,7 @@ these parts, and not its other socket options and socket set bonus either
 (damage, defense, attack speed, skill damage, the stat bonuses). A stat bonus
 lost that way can also leave another worn item's requirements unmet, and then
 that item's options stop counting too.
+
 As with the rate, the buff counts when the hero has the skill, with the
 hero's energy and command; a buff from a party member is counted only that
 way, since its value comes from that member's energy and command.
