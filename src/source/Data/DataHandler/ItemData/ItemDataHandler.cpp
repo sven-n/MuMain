@@ -672,6 +672,11 @@ void CItemDataHandler::ReadRenderStylesOnce()
     {
         SortLooks(read.looks);
         m_renderStyles = std::move(read);
+        // The file may have changed since the game read it at start: the game draws what the editor shows.
+        if (!std::ranges::equal(m_renderStyles.looks, Data::Looks::g_LookStore.GetRenderStyles()))
+        {
+            Data::Looks::g_LookStore.SetRenderStyles(m_renderStyles.looks);
+        }
     }
     else
     {

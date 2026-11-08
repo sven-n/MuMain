@@ -35,7 +35,16 @@ LookEdits& LookEdits::GetInstance()
 
 const LookEdits::State& LookEdits::GetState() const
 {
-    return g_ItemDataHandler.GetRenderStyles();
+    const State& state = g_ItemDataHandler.GetRenderStyles();
+    if (m_texturesVersion != g_ItemDataHandler.GetRenderStylesVersion())
+    {
+        m_texturesVersion = g_ItemDataHandler.GetRenderStylesVersion();
+        for (const LookDefinition& look : state.looks)
+        {
+            Render::Items::Looks::PrepareTextures(look);
+        }
+    }
+    return state;
 }
 
 const LookDefinition* LookEdits::Find(std::string_view name) const
@@ -153,10 +162,8 @@ Data::Colors::ColorFolderPath LookEdits::FolderOf(const std::string& name) const
 void LookEdits::ResetForTest(State state)
 {
     g_ItemDataHandler.ResetRenderStylesForTest(std::move(state));
-    for (const LookDefinition& look : GetState().looks)
-    {
-        Render::Items::Looks::PrepareTextures(look);
-    }
+    // The textures its looks name.
+    static_cast<void>(GetState());
 }
 
 void LookEdits::Change(const char* step, State next)

@@ -11,9 +11,12 @@
 #include "ToolWindowsScope.h"
 
 #include "Core/MuEditorCore.h"
+#include "Core/Utilities/Log/MuLogger.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/LookData/LookEffects.h"
+#include "Data/GameData/LookData/LookJson.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -30,7 +33,10 @@
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -437,6 +443,53 @@ TEST_CASE("A layer's texture changes when its field is left after typing, not wi
     frame();
     CHECK(changed);
     CHECK(layer.texture == "Effect/Chrome01.jpg");
+}
+
+namespace
+{
+// A client folder whose look file holds `text`; the working directory while it lives.
+class LookFileFolder
+{
+public:
+    explicit LookFileFolder(const std::string& text)
+        // CTest runs the test cases as parallel processes; each needs its own folder.
+        : m_directory(std::filesystem::temp_directory_path() /
+                      ("mu_test_style_editor_" + std::to_string(std::random_device{}()))),
+          m_previousDirectory(std::filesystem::current_path())
+    {
+        // Set up the log file before switching directories, so none is written there.
+        mu::log::Init();
+        std::filesystem::create_directories(m_directory / "Data" / "Effects");
+        std::ofstream(m_directory / "Data" / "Effects" / "RenderStyles.json", std::ios::binary) << text;
+        std::filesystem::current_path(m_directory);
+    }
+
+    ~LookFileFolder()
+    {
+        std::error_code ignored;
+        std::filesystem::current_path(m_previousDirectory, ignored);
+        std::filesystem::remove_all(m_directory, ignored);
+    }
+
+    LookFileFolder(const LookFileFolder&) = delete;
+    LookFileFolder& operator=(const LookFileFolder&) = delete;
+
+private:
+    std::filesystem::path m_directory;
+    std::filesystem::path m_previousDirectory;
+};
+} // namespace
+
+TEST_CASE("The editor's first read of the look file gives the game the file's looks [editor][looks]")
+{
+    const LookEditsScope looks({Plain("brightBlade")});
+    // The file changed since the game read it: it holds another look now.
+    const LookFileFolder folder(Data::Looks::WriteRenderStylesJson({Plain("fromDisk")}));
+    g_ItemDataHandler.ForgetRenderStylesForTest();
+
+    REQUIRE(g_LookEdits.Find("fromDisk") != nullptr);
+    CHECK(GameLook("fromDisk") != nullptr);
+    CHECK(GameLook("brightBlade") == nullptr);
 }
 
 #endif // _EDITOR

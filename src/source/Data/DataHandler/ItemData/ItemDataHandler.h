@@ -110,7 +110,9 @@ public:
     void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The render style file as the editor has it (Data/Effects/RenderStyles.json, design L39): its looks, sorted by
     // name, which the game draws (g_LookStore), and the Style Editor's folders. Read from the file when first asked
-    // for; a read with a fatal problem keeps the game's looks and no folders, and Save leaves the file alone then.
+    // for, and the game draws the file's looks from then on (the file may have changed since the game started; the
+    // caller loads their textures); a read with a fatal problem keeps the game's looks and no folders, and Save leaves
+    // the file alone then.
     const Data::Looks::RenderStylesFile& GetRenderStyles();
     // The looks and folders; the game draws the looks at once, and Save writes the file. The caller loads the
     // textures a look names (Render::Items::Looks::PrepareTextures).

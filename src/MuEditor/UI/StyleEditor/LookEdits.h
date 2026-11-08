@@ -57,6 +57,10 @@ private:
     void Change(const char* step, State next);
     // The folder the look is in; the empty path for the root.
     [[nodiscard]] Data::Colors::ColorFolderPath FolderOf(const std::string& name) const;
+
+    // The change count of the looks whose textures were loaded last: the first read can give the game looks it did
+    // not have (the file changed since the game started).
+    mutable int m_texturesVersion = -1;
 };
 } // namespace MuEditor::Looks
 
