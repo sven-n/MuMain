@@ -315,3 +315,53 @@ TEST_CASE("Improved bodies use textures supplied only by the active pack [player
     CHECK(skin->fromTexturePack);
     CHECK(skin->IsSkin);
 }
+
+TEST_CASE("Rejected bodies with shared texture slots release only their acquired references "
+          "[player-selector][texture-fallback]")
+{
+    for (const int sharedTextureSlot : {0, 1})
+    {
+        for (const bool preloadedSkin : {false, true})
+        {
+            INFO("shared texture slot=", sharedTextureSlot, " preloaded skin=", preloadedSkin);
+            const BodyClientFolder client(CLASS_DARK_LORD);
+            const std::string helm = BodyFile(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+            client.AddImproved(helm);
+            const auto skin = client.path / "Data" / "Player" / "skin_hq_class05.OZJ";
+            std::filesystem::create_directories(client.path / "Data" / "Other");
+            std::filesystem::rename(skin, client.path / "Data" / "Other" / skin.filename());
+            std::filesystem::remove(client.path / "Data" / "Player" / "hairhq_R.OZJ");
+            ClientFolderScope folder(client.path);
+            PlayerTextureScope textures;
+            TestModelSlots slots;
+            GLuint cached = BITMAP_SKIN_BEGIN;
+            if (preloadedSkin)
+            {
+                REQUIRE(LoadBitmap(L"Other\\skin_hq_class05.jpg", cached));
+            }
+            else
+            {
+                cached = Bitmaps.LoadImage(L"Data\\Other\\skin_hq_class05.jpg", GL_NEAREST, GL_REPEAT);
+            }
+            REQUIRE(cached != BITMAP_UNKNOWN);
+            REQUIRE(Bitmaps.FindTexture(cached) != nullptr);
+            REQUIRE(Bitmaps.FindTexture(cached)->Ref == 1);
+            Engine::Object::OpenPlayerBodyParts(0, CLASS_DARK_LORD, false);
+            const int slot = BodySlot(PlayerBodyParts[0], 0, CLASS_DARK_LORD);
+            BMD& head = Models[slot];
+            REQUIRE(head.NumMeshs == 2);
+            REQUIRE(head.GetDataUserCount() == 1);
+            // Both native-loaded meshes use one material; the loader still acquires by texture index.
+            head.Meshs[0].Texture = static_cast<short>(sharedTextureSlot);
+            head.Meshs[1].Texture = static_cast<short>(sharedTextureSlot);
+            Engine::Object::OpenPlayerBodyTextures(0, CLASS_DARK_LORD);
+            CHECK(OpenedFile(slot) == "Data\\Player\\" + helm);
+            const BITMAP_t* surviving = Bitmaps.FindTexture(cached);
+            CHECK(surviving != nullptr);
+            if (surviving != nullptr)
+                CHECK(surviving->Ref == 1); // external owner only, not leaked or released by the rejected head
+            DeleteBitmap(cached);
+            CHECK(Bitmaps.FindTextureByName(L"skin_hq_class05.jpg") == nullptr);
+        }
+    }
+}
