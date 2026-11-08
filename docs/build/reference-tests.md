@@ -118,8 +118,9 @@ that check with a message; CI still enforces it. `git push --no-verify` skips th
    it off. With the precompiled header, GCC 13 (Ubuntu 24.04) reports a false
    `-Wstringop-overflow` for some string concatenations, such as
    `"..." + std::to_string(n)`, and `MU_WARNINGS_AS_ERRORS=ON` turns it into an
-   error. CI does not see it (GCC 15, no precompiled header), so add a file
-   that gets it to `mu_allow_gcc13_stringop_overflow(<test> <file>...)` in the
-   module's `CMakeLists.txt`
+   error. CI builds with GCC 15, which does not report it, and with the
+   precompiled header only in its release runs. So add a file that gets it to
+   `mu_allow_gcc13_stringop_overflow(<test> <file>...)` in the module's
+   `CMakeLists.txt`
    ([`cmake/StdafxPrecompiledHeader.cmake`](../../cmake/StdafxPrecompiledHeader.cmake)):
    there it stays a warning with GCC older than 15.
