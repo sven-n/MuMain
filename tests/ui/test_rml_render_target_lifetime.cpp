@@ -49,7 +49,8 @@ public:
         ++released;
     }
 
-    std::uint32_t created = 0;
+    static constexpr std::uint32_t FirstTextureId = 1000;
+    std::uint32_t created = FirstTextureId;
     int released = 0;
 };
 
@@ -89,7 +90,7 @@ TEST_CASE("a destroyed target retires its undrawn texture instead of using the r
     {
         RenderTarget target{nullptr};
         target.Resize(64, 32);
-        REQUIRE(renderer.created == 1);
+        REQUIRE(renderer.created == RenderTargetRecorder::FirstTextureId + 1);
     }
     // The renderer may already be gone when a global owner is destroyed at exit.
     CHECK(renderer.released == 0);
