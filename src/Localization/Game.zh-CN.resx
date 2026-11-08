@@ -1110,4 +1110,85 @@
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>确定要取消 %ls 吗？</value>
   </data>
+  <data name="Dmg(rate): %d~%d (%d)" xml:space="preserve">
+    <value>攻击力（成功率）：%d~%d（%d）</value>
+  </data>
+  <data name="Dmg: %d~%d" xml:space="preserve">
+    <value>攻击力：%d~%d</value>
+  </data>
+  <data name="Defense (rate):%d (%d +%d)" xml:space="preserve">
+    <value>防御力（成功率）：%d（%d +%d）</value>
+  </data>
+  <data name="Defense: %d (+%d)" xml:space="preserve">
+    <value>防御力：%d（+%d）</value>
+  </data>
+  <data name="Defense (rate):%d (%d)" xml:space="preserve">
+    <value>防御力（成功率）：%d（%d）</value>
+  </data>
+  <data name="HP: %d / %d" xml:space="preserve">
+    <value>生命值：%d / %d</value>
+  </data>
+  <data name="Mana: %d / %d" xml:space="preserve">
+    <value>魔法值：%d / %d</value>
+  </data>
+  <data name="Wizardry Dmg: %d~%d (+%d)" xml:space="preserve">
+    <value>魔力：%d~%d（+%d）</value>
+  </data>
+  <data name="WizardryDmgDD216" xml:space="preserve">
+    <value>魔力：%d~%d</value>
+  </data>
+  <data name="Point: %d" xml:space="preserve">
+    <value>点数：%d</value>
+  </data>
+  <data name="Close (%s)" xml:space="preserve">
+    <value>关闭（%s）</value>
+  </data>
+  <data name="Quest" xml:space="preserve">
+    <value>任务</value>
+  </data>
+  <data name="Pet" xml:space="preserve">
+    <value>宠物</value>
+  </data>
+  <data name="Skill Damage: %d%%" xml:space="preserve">
+    <value>技能伤害：%d%%</value>
+  </data>
+  <data name=" Curse Spell: %d ~ %d(+%d)" xml:space="preserve">
+    <value>诅咒力：%d ~ %d（+%d）</value>
+  </data>
+  <data name="CurseSpellDD1694" xml:space="preserve">
+    <value>诅咒力：%d ~ %d</value>
+  </data>
+  <data name="Master skill tree (A)" xml:space="preserve">
+    <value>大师技能树（A）</value>
+  </data>
+  <data name="DD1907" xml:space="preserve">
+    <value>[+]：%d%%|[-]：%d%%</value>
+  </data>
+  <data name="Attack rate: %d" xml:space="preserve">
+    <value>攻击成功率：%d</value>
+  </data>
+  <data name="Attack rate: %d (+%d)" xml:space="preserve">
+    <value>攻击成功率：%d（+%d）</value>
+  </data>
+  <data name="DefenseRateDD2110" xml:space="preserve">
+    <value>防御成功率：%d（+%d）</value>
+  </data>
+  <data name="Melee Damage: %d%%" xml:space="preserve">
+    <value>近战伤害：%d%%</value>
+  </data>
+  <data name="Divine Damage (Roar, Slasher): %d%%" xml:space="preserve">
+    <value>神圣伤害（咆哮、斩击）：%d%%</value>
+  </data>
+  <data name="AOE Damage (Dark Side): %d%%" xml:space="preserve">
+    <value>范围伤害（黑暗面）：%d%%</value>
+  </data>
+  <data name="Level: %u | Resets: %u" xml:space="preserve">
+    <value>等级：%u | 转生：%u</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>增加</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>减少</value>
+  </data>
 </root>

@@ -500,6 +500,10 @@ The main HUD translates life, mana, AG, SD and experience tooltips, its characte
 friends, party, guild, command, menu and item-shop buttons, the MU Helper controls,
 and buff duration and cancellation prompts.
 
+The character information window translates level and reset counts, available
+points, combat, defense, magic and curse statistics, HP and MP, and its quest,
+pet and master-skill controls.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
