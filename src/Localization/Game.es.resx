@@ -9049,4 +9049,25 @@
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Piedra mágica de %ls</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Tasa de daño crítico: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Tasa de daño crítico: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Tasa de daño crítico</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Suerte (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Opciones de set: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Opciones de socket: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Total: %d%%</value>
+  </data>
 </root>

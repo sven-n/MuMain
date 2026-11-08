@@ -9156,4 +9156,25 @@
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Zauberstein von %ls</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Kritische Schadensrate: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Kritische Schadensrate: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Kritische Schadensrate</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Glück (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Set-Optionen: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Sockeloptionen: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Gesamt: %d%%</value>
+  </data>
 </root>

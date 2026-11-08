@@ -25,6 +25,8 @@
 #include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Character/CriticalDamageRateLine.h"
+#include "GameLogic/Combat/CriticalDamageRate.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -163,6 +165,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     c.Bind("agi_lines", &model.agiLines);
     c.Bind("vit_lines", &model.vitLines);
     c.Bind("ene_lines", &model.eneLines);
+    c.Bind("critical_damage_rate_line", &model.criticalDamageRateLine);
 
     c.Bind("master_level_enabled", &model.masterLevelEnabled);
 
@@ -184,6 +187,12 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPet(); });
     c.BindEventCallback("chainfo_click_masterlevel",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMasterLevel(); });
+    c.BindEventCallback("chainfo_critical_rate_hover",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        { m_CriticalDamageRateHint.Enter(event); });
+    c.BindEventCallback("chainfo_critical_rate_leave",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        { m_CriticalDamageRateHint.Leave(event); });
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -208,6 +217,7 @@ void mu::ui::window::CCharacterInfoWindow::Release()
 {
     UnloadImages();
 
+    m_CriticalDamageRateHint.Hide();
     m_RmlView.Release();
 
     if (m_pNewUIMng)
@@ -230,7 +240,10 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
             m_RmlView.Document()->Show();
         }
         else
+        {
+            m_CriticalDamageRateHint.Hide();
             m_RmlView.Document()->Hide();
+        }
     }
 }
 
@@ -411,6 +424,25 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildSubjectTexts();
     BuildTableTexts();
     BuildAttributeLines();
+    BuildCriticalDamageRate();
+}
+
+void mu::ui::window::CCharacterInfoWindow::BuildCriticalDamageRate()
+{
+    const GameLogic::Combat::CriticalDamageRate rate = GameLogic::Combat::GetHeroCriticalDamageRate();
+    const UI::Character::CriticalDamageRateLine line = UI::Character::BuildCriticalDamageRateLine(rate);
+    auto& model = m_RmlView.GetModel();
+    if (model.criticalDamageRateLine.text != line.text || model.criticalDamageRateLine.source != line.source)
+    {
+        model.criticalDamageRateLine = {line.text, line.source};
+        m_RmlView.MarkDirty("critical_damage_rate_line");
+    }
+    if (m_CriticalDamageRateHint.Hovered() < 0)
+    {
+        m_CriticalDamageRateHint.Hide();
+        return;
+    }
+    m_CriticalDamageRateHint.Show(UI::Character::BuildCriticalDamageRateHint(rate));
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()

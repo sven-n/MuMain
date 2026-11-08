@@ -9456,4 +9456,28 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>Base Attributes</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Critical damage rate: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Critical damage rate: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Critical damage rate</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Luck (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Set options: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Socket options: %d%%</value>
+  </data>
+  <data name="%ls: +%d%%" xml:space="preserve">
+    <value>%ls: +%d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Total: %d%%</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
@@ -110,6 +111,8 @@ namespace mu::ui::window
         void BuildSubjectTexts();
         void BuildTableTexts();
         void BuildAttributeLines();
+        // The critical damage rate's line under the strength's lines, and its parts while the pointer is over it.
+        void BuildCriticalDamageRate();
 
         struct CharacterInfoRmlModel
         {
@@ -144,6 +147,7 @@ namespace mu::ui::window
             std::vector<StatLine> agiLines;
             std::vector<StatLine> vitLines;
             std::vector<StatLine> eneLines;
+            StatLine criticalDamageRateLine;
 
             bool masterLevelEnabled = false;
 
@@ -158,6 +162,7 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-
+        // The critical damage rate's parts while the pointer is over its line, in the shared tooltip.
+        UI::RmlBridge::ElementTooltip m_CriticalDamageRateHint;
     };
 }

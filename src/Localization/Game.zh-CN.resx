@@ -831,4 +831,25 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>基础属性</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>暴击伤害率：%d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>暴击伤害率：%d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>暴击伤害率</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>幸运 (×%d)：%d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>套装属性：%d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>镶嵌属性：%d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>合计：%d%%</value>
+  </data>
 </root>

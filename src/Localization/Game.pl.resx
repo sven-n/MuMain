@@ -9447,4 +9447,25 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>Statystyki bazowe</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Szczęście (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Opcje zestawu: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Opcje gniazd: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Łącznie: %d%%</value>
+  </data>
 </root>
