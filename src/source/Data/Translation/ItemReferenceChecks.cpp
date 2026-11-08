@@ -120,10 +120,46 @@ void AddIssue(const CheckedText& text, ItemDataIssueSeverity severity, int group
     issues.push_back({severity, text.source, group, number, text.field, std::move(message)});
 }
 
-void CheckNamedItems(const CheckedText& text, std::string_view english, std::vector<ItemDataIssue>& issues)
+// A translation that spells the names its English text writes by number: a warning when the item data has those
+// items' names in the translation's language, so references would show the same names and follow the item data.
+// Languages without item names yet (Russian, Japanese, ...) spell them on purpose.
+void CheckSpelledNames(const Items::ItemDatabase& database, const CheckedText& text, std::string_view english,
+                       std::vector<ItemDataIssue>& issues)
 {
-    if (english.empty() || !HasItemReference(text.text))
+    const std::set<NamedItem> named = NamedItems(english);
+    if (named.empty())
     {
+        return;
+    }
+    for (const auto& [group, number, level] : named)
+    {
+        const Items::ItemDefinition* definition = database.Find(group, number);
+        if (definition == nullptr || !definition->names.HasOwn(text.locale))
+        {
+            return;
+        }
+    }
+    // A UI text has no item of its own: the problem names the first item, so a click selects it.
+    const bool ownItem = text.group != ItemDataIssue::NoItem;
+    const NamedItem& first = *named.begin();
+    AddIssue(text, ItemDataIssueSeverity::Warning, ownItem ? text.group : std::get<0>(first),
+             ownItem ? text.number : std::get<1>(first),
+             "spells the names of the items the English text names by number (\"" + std::string(english) +
+                 "\"), which the item data has in " + std::string(text.locale) +
+                 ": write the same references, so the names follow the item data and Translate item names",
+             issues);
+}
+
+void CheckNamedItems(const Items::ItemDatabase& database, const CheckedText& text, std::string_view english,
+                     std::vector<ItemDataIssue>& issues)
+{
+    if (english.empty())
+    {
+        return;
+    }
+    if (!HasItemReference(text.text))
+    {
+        CheckSpelledNames(database, text, english, issues);
         return;
     }
     const std::set<NamedItem> named = NamedItems(text.text);
@@ -210,7 +246,7 @@ void CheckItemReferences(const Items::ItemDatabase& database, const CheckedText&
         AddIssue(text, severity, ownItem ? text.group : match.reference->group,
                  ownItem ? text.number : match.reference->number, std::move(message), issues);
     }
-    CheckNamedItems(text, english, issues);
+    CheckNamedItems(database, text, english, issues);
 }
 
 void CheckUiItemTexts(const Items::ItemDatabase& database, std::vector<ItemDataIssue>& issues)

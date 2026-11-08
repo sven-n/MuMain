@@ -222,6 +222,31 @@ TEST_CASE("A name a text would read as its own format is not put into it [data][
     CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
 }
 
+TEST_CASE("A UI translation that spells names English writes by number is a warning where items have names "
+          "[data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    const auto check = [&](const std::string& translation, std::string_view locale)
+    {
+        std::vector<ItemDataIssue> issues;
+        Data::Translation::CheckItemReferences(
+            database, {translation, locale, "Dialog.x.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Find"},
+            "Find the '{item:14,25}'", issues);
+        return issues;
+    };
+
+    // The Tear of Elf has a Polish name: the Polish text could name it by number.
+    const std::vector<ItemDataIssue> polish = check("Znajdz 'Lze Elfa'", "pl");
+    REQUIRE(polish.size() == 1);
+    CHECK(polish[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(polish[0].group == 14);
+    CHECK(polish[0].number == 25);
+    // No Spanish or Russian name: those texts spell it on purpose.
+    CHECK(check("Busca la 'Lagrima'", "es").empty());
+    CHECK(check("Naidi 'Slezu'", "ru").empty());
+}
+
 TEST_CASE("At a level without a name of its own, a missing form is reported too [data][items][texts]")
 {
     ItemDatabase database;

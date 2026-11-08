@@ -482,8 +482,9 @@ the build with the file, key and text, and so does a reference in the texts of
 another group (the editor's), which the game would show as written. In the
 editor, **Data Checks** lists the texts under **Texts**: a number or a level no
 item has, a level whose name needs game values (a skill's or monster's name), a
-level without a name of its own, a missing form, and a translation that names
-other items than the English text. A click selects the item and opens Item
+level without a name of its own, a missing form, a translation that names other
+items than the English text, and one that still spells the names the English
+text writes by number, in a language the item data has those names in. A click selects the item and opens Item
 Translations (or the tool of an item's own text).
 
 ## Simplified Chinese (`zh-CN`)
