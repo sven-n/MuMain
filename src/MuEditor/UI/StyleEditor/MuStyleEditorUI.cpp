@@ -196,7 +196,10 @@ CMuStyleEditorUI& CMuStyleEditorUI::GetInstance()
     return instance;
 }
 
-CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_itemEffects}, DragPayloadType, FolderPopupId) {}
+CMuStyleEditorUI::CMuStyleEditorUI() : m_tree({&m_renderStyles, &m_itemEffects}, DragPayloadType, FolderPopupId)
+{
+    m_renderStyles.SetUnappliedCheck([this](const std::string& name) { return HasUnappliedChanges(name); });
+}
 
 void CMuStyleEditorUI::Render(bool* open)
 {
@@ -403,6 +406,7 @@ void CMuStyleEditorUI::RenderNameDialog()
                     LookDefinition renamed = *source;
                     renamed.name = name;
                     g_LookEdits.SetLook(I18N::Editor::RenameALook, from, std::move(renamed));
+                    RenameDraft(from, name);
                 }
                 if (g_LookEdits.Find(name) != nullptr)
                 {
@@ -1193,16 +1197,78 @@ void CMuStyleEditorUI::RenderViewHeader(int view, float width)
 
 void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)
 {
-    const bool unchanged = m_draft == m_draftLoaded;
-    if (m_draftOf != look.name || (m_draftVersion != g_LookEdits.GetVersion() && unchanged))
+    if (m_draftOf != look.name)
     {
-        if (m_draftOf != look.name)
+        // The changes not applied stay with their look while another one is picked.
+        KeepDraft();
+        if (!TakeKeptDraft(look.name))
         {
             m_line = 0;
+            LoadDraft(look);
         }
+    }
+    else if (m_draftVersion != g_LookEdits.GetVersion() && m_draft == m_draftLoaded)
+    {
         LoadDraft(look);
     }
     m_draftVersion = g_LookEdits.GetVersion();
+}
+
+bool CMuStyleEditorUI::HasUnappliedChanges(const std::string& name) const
+{
+    return (name == m_draftOf && m_draft != m_draftLoaded) || m_keptDrafts.contains(name);
+}
+
+void CMuStyleEditorUI::ForgetDraftsForTest()
+{
+    m_draft = {};
+    m_draftLoaded = {};
+    m_draftOf.clear();
+    m_draftVersion = -1;
+    m_keptDrafts.clear();
+    m_hiddenLayers.clear();
+    m_line = 0;
+}
+
+void CMuStyleEditorUI::KeepDraft()
+{
+    if (!m_draftOf.empty() && m_draft != m_draftLoaded)
+    {
+        m_keptDrafts[m_draftOf] = {m_draft, m_draftLoaded, m_hiddenLayers, m_line};
+    }
+}
+
+bool CMuStyleEditorUI::TakeKeptDraft(const std::string& name)
+{
+    const auto kept = m_keptDrafts.find(name);
+    if (kept == m_keptDrafts.end())
+    {
+        return false;
+    }
+    m_draft = std::move(kept->second.draft);
+    m_draftLoaded = std::move(kept->second.loaded);
+    m_hiddenLayers = std::move(kept->second.hiddenLayers);
+    m_line = kept->second.line;
+    m_draftOf = name;
+    m_keptDrafts.erase(kept);
+    return true;
+}
+
+void CMuStyleEditorUI::RenameDraft(const std::string& from, const std::string& to)
+{
+    if (m_draftOf == from)
+    {
+        m_draftOf = to;
+        m_draft.name = to;
+        m_draftLoaded.name = to;
+    }
+    if (auto kept = m_keptDrafts.extract(from))
+    {
+        kept.key() = to;
+        kept.mapped().draft.name = to;
+        kept.mapped().loaded.name = to;
+        m_keptDrafts.insert(std::move(kept));
+    }
 }
 
 void CMuStyleEditorUI::LoadDraft(const LookDefinition& look)

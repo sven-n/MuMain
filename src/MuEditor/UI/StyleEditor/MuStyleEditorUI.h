@@ -12,6 +12,7 @@
 #include "Data/GameData/LookData/LookEffects.h"
 
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -54,6 +55,11 @@ public:
     {
         return m_draft;
     }
+    // Whether the look has changes not applied yet, which stay with it while another look is picked; the tree marks
+    // its row.
+    [[nodiscard]] bool HasUnappliedChanges(const std::string& name) const;
+    // No draft, picked or kept, as before a look was first picked: for a test that brings looks of its own.
+    void ForgetDraftsForTest();
     // The picked row of the parts list: a mesh, MuEditor::Looks::EveryPart or BasePart.
     [[nodiscard]] int GetPickedPart() const
     {
@@ -124,6 +130,11 @@ private:
     void UpdateDraft(const Data::Looks::LookDefinition& look);
     // The draft is the look again, every layer shown.
     void LoadDraft(const Data::Looks::LookDefinition& look);
+    // The draft of the look picked before, when it has changes not applied; its draft again when it had them.
+    void KeepDraft();
+    [[nodiscard]] bool TakeKeptDraft(const std::string& name);
+    // A look renamed: its draft, picked or kept, goes with it.
+    void RenameDraft(const std::string& from, const std::string& to);
     // The draft's layers change with their eyes: a layer in at `at` (picked), one out, two swapped.
     void InsertLayer(std::size_t at, Data::Looks::Layer layer);
     void RemoveLayer(std::size_t at);
@@ -143,6 +154,15 @@ private:
     Data::Looks::LookDefinition m_draftLoaded;
     std::string m_draftOf;
     int m_draftVersion = -1;
+    // The drafts with changes not applied of the looks picked before, by name.
+    struct KeptDraft
+    {
+        Data::Looks::LookDefinition draft;
+        Data::Looks::LookDefinition loaded;
+        std::vector<std::uint8_t> hiddenLayers;
+        std::size_t line = 0;
+    };
+    std::map<std::string, KeptDraft, std::less<>> m_keptDrafts;
     // The picked line: a layer, or the item values (the number of layers).
     std::size_t m_line = 0;
     // The layers the preview leaves out (the eyes), by layer: 1 for one left out. As many as the draft's layers: they

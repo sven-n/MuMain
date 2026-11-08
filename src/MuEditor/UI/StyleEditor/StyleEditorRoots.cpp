@@ -59,7 +59,12 @@ bool RenderStylesRoot::Has(const std::string& name) const
 
 std::string RenderStylesRoot::GetRowLabel(const std::string& name)
 {
-    return RowLabel(name, CountUsers(name), IsCode(name));
+    std::string label = RowLabel(name, CountUsers(name), IsCode(name));
+    if (m_unapplied && m_unapplied(name))
+    {
+        label += " *";
+    }
+    return label;
 }
 
 const std::vector<Data::Colors::ColorFolder>& RenderStylesRoot::GetFolders() const

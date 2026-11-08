@@ -5,6 +5,7 @@
 #include "../MuEditor/UI/Common/NamedTree.h"
 #include "../MuEditor/UI/ItemTools/ItemLookUseCounts.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,7 @@ public:
     std::size_t GetCount() const override;
     const std::string& GetName(std::size_t index) const override;
     bool Has(const std::string& name) const override;
-    // "chromeMesh0 (12)", "characterCard (4) (code)".
+    // "chromeMesh0 (12)", "characterCard (4) (code)", "knightBlade (3) *" with changes not applied.
     std::string GetRowLabel(const std::string& name) override;
     const std::vector<Data::Colors::ColorFolder>& GetFolders() const override;
     void SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders) override;
@@ -37,6 +38,11 @@ public:
     // Whether the look is still code (Render/Items/ItemRenderStyles.cpp): no look of the file has its name.
     [[nodiscard]] bool IsCode(const std::string& name) const;
     int CountUsers(const std::string& name);
+    // Whether a look has changes the Style Editor has not applied yet; its row is marked "*".
+    void SetUnappliedCheck(std::function<bool(const std::string&)> check)
+    {
+        m_unapplied = std::move(check);
+    }
 
 private:
     void Update() const;
@@ -44,6 +50,7 @@ private:
     mutable std::vector<std::string> m_names;
     mutable int m_version = -1;
     Items::ItemLookUseCounts m_counts;
+    std::function<bool(const std::string&)> m_unapplied;
 };
 
 // The root of the item effects: all are still code (Render/Items/ItemEffects.cpp) until their file comes with them, so

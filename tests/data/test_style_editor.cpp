@@ -413,6 +413,35 @@ TEST_CASE("Data Checks checks the looks as the Style Editor has them, before Sav
     CHECK(g_MuStyleEditorUI.GetPickedLook() == "brokenLook");
 }
 
+TEST_CASE("A look's changes that are not applied stay while another look is picked [editor][looks]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    g_ItemSelection.Select(MuEditor::Items::ItemSelection::NoItem);
+    const LookEditsScope looks({Plain("brightBlade"), Plain("darkBlade")});
+
+    g_MuStyleEditorUI.ShowRenderStyle("brightBlade");
+    RenderStyleEditor();
+    RenderStyleEditor();
+    g_MuStyleEditorUI.PickPart(MuEditor::Looks::EveryPart);
+    g_MuStyleEditorUI.AddEffect(Data::Looks::EffectKind::Glow);
+    REQUIRE(g_MuStyleEditorUI.GetDraft().layers.size() == 2);
+
+    g_MuStyleEditorUI.ShowRenderStyle("darkBlade");
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetPickedLook() == "darkBlade");
+    CHECK(g_MuStyleEditorUI.GetDraft() == Plain("darkBlade"));
+    // The tree marks the look with changes not applied.
+    CHECK(g_MuStyleEditorUI.HasUnappliedChanges("brightBlade"));
+    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("darkBlade"));
+
+    g_MuStyleEditorUI.ShowRenderStyle("brightBlade");
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetDraft().layers.size() == 2);
+    // The game draws the look as applied until Apply.
+    CHECK(GameLook("brightBlade")->layers.size() == 1);
+}
+
 TEST_CASE("A layer's texture changes when its field is left after typing, not with each key [editor][looks]")
 {
     TestImGuiContext context;

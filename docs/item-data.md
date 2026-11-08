@@ -1737,8 +1737,10 @@ digits only, and no other render style has it, in the file or in code.
 
 The picked look shows:
 
-- **Apply** and **Revert**: the fields change a copy of the look; Revert
-  takes it back, Apply asks what the change is for:
+- **Apply** and **Revert**: the fields change a copy of the look, which stays
+  with the look while another one is picked (the tree marks a look with
+  changes not applied with `*`); Revert takes it back, Apply asks what the
+  change is for:
   - **For all its items**: the look itself changes, so every item that uses
     it does; the items are listed, and Ctrl+Z undoes it.
   - **Only** the item picked in the item tools: the change becomes a copy of
