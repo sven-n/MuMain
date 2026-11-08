@@ -43,9 +43,11 @@ constexpr int MaxFrames = 1000;
 constexpr float ValueSpeed = 0.005f;
 constexpr float SecondsSpeed = 0.02f;
 constexpr float CountSpeed = 0.1f;
-// Seconds stay above 0: a shape divides by them.
+// Seconds stay above 0: a shape divides by them. A random value's step too, which the file refuses at 0 or less.
 constexpr double MinSeconds = 0.001;
-constexpr double MaxSeconds = 100000.0;
+constexpr double MinRandomStep = 0.001;
+// The top of a drag field kept above a bound: as good as none.
+constexpr double MaxNumber = 1.0e9;
 // A tooltip's lines wrap at this many font heights.
 constexpr float TipWidth = 28.0f;
 
@@ -128,7 +130,7 @@ bool DragNumber(const char* label, double& value, float speed, const char* tip, 
 {
     ImGui::SetNextItemWidth(Scaled(NumberWidth));
     const double low = atLeast.value_or(0.0);
-    const double high = MaxSeconds;
+    const double high = MaxNumber;
     const bool changed = atLeast
                              ? ImGui::DragScalar(label, ImGuiDataType_Double, &value, speed, &low, &high, "%.7g",
                                                  ImGuiSliderFlags_AlwaysClamp)
@@ -325,11 +327,18 @@ bool ShapeFields(Shape& shape)
         changed |= SecondsField(I18N::Editor::SecondsEach, shape.seconds, I18N::Editor::ShapeSecondsEachTooltip);
         break;
     case ShapeKind::Random:
-        changed |= DragNumber(I18N::Editor::From, shape.from, ValueSpeed, I18N::Editor::ShapeFromTooltip);
+        // The file refuses a step of 0 or less and To below From, so the fields keep them: From dragged past To
+        // takes To along.
+        if (DragNumber(I18N::Editor::From, shape.from, ValueSpeed, I18N::Editor::ShapeFromTooltip))
+        {
+            shape.to = std::max(shape.to, shape.from);
+            changed = true;
+        }
         ImGui::SameLine();
-        changed |= DragNumber(I18N::Editor::To, shape.to, ValueSpeed, I18N::Editor::ShapeToTooltip);
+        changed |= DragNumber(I18N::Editor::To, shape.to, ValueSpeed, I18N::Editor::ShapeToTooltip, shape.from);
         ImGui::SameLine();
-        changed |= DragNumber(I18N::Editor::Step, shape.step, ValueSpeed, I18N::Editor::ShapeStepTooltip);
+        changed |=
+            DragNumber(I18N::Editor::Step, shape.step, ValueSpeed, I18N::Editor::ShapeStepTooltip, MinRandomStep);
         break;
     }
     RenderCurve(shape);
