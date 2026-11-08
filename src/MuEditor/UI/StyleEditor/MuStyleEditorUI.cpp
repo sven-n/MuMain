@@ -526,10 +526,7 @@ void CMuStyleEditorUI::RenderApply(const LookDefinition& look)
     ImGui::BeginDisabled(!edited);
     if (ImGui::Button(I18N::Editor::Revert))
     {
-        m_draft = look;
-        m_draftLoaded = look;
-        m_hiddenLayers.assign(m_draft.layers.size(), 0);
-        m_line = std::min(m_line, m_draft.layers.size());
+        LoadDraft(look);
     }
     ImGui::EndDisabled();
     if (edited && fatal)
@@ -736,7 +733,6 @@ void CMuStyleEditorUI::RenderLayers()
     ImGui::TextUnformatted(I18N::Editor::Layers);
     ImGui::SameLine();
     RenderLayerToolbar();
-    m_hiddenLayers.resize(m_draft.layers.size(), 0);
     const float height = LayerListLines * ImGui::GetFrameHeightWithSpacing();
     if (ImGui::BeginChild("##Layers", ImVec2(0.0f, height), ImGuiChildFlags_Borders))
     {
@@ -787,49 +783,40 @@ void CMuStyleEditorUI::RenderLayers()
 
 void CMuStyleEditorUI::RenderLayerToolbar()
 {
-    std::vector<Layer>& layers = m_draft.layers;
-    const bool layerPicked = m_line < layers.size();
+    const std::size_t count = m_draft.layers.size();
+    const bool layerPicked = m_line < count;
     if (ImGui::SmallButton(I18N::Editor::Add))
     {
         // After the picked layer, as a plain texture layer.
-        const std::size_t at = layerPicked ? m_line + 1 : layers.size();
-        layers.insert(layers.begin() + static_cast<std::ptrdiff_t>(at), Layer{});
-        m_hiddenLayers.insert(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(at), std::uint8_t{0});
-        m_line = at;
+        InsertLayer(layerPicked ? m_line + 1 : count, Layer{});
     }
     ImGui::SameLine();
     ImGui::BeginDisabled(!layerPicked);
     if (ImGui::SmallButton(I18N::Editor::Copy))
     {
-        const Layer copy = layers[m_line];
-        layers.insert(layers.begin() + static_cast<std::ptrdiff_t>(m_line + 1), copy);
-        m_hiddenLayers.insert(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(m_line + 1), std::uint8_t{0});
-        ++m_line;
+        InsertLayer(m_line + 1, m_draft.layers[m_line]);
     }
     ImGui::SameLine();
     ImGui::BeginDisabled(!layerPicked || m_line == 0);
     if (ImGui::SmallButton(I18N::Editor::MoveUp))
     {
-        std::swap(layers[m_line], layers[m_line - 1]);
-        std::swap(m_hiddenLayers[m_line], m_hiddenLayers[m_line - 1]);
+        SwapLayers(m_line, m_line - 1);
         --m_line;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::BeginDisabled(!layerPicked || m_line + 1 >= layers.size());
+    ImGui::BeginDisabled(!layerPicked || m_line + 1 >= count);
     if (ImGui::SmallButton(I18N::Editor::MoveDown))
     {
-        std::swap(layers[m_line], layers[m_line + 1]);
-        std::swap(m_hiddenLayers[m_line], m_hiddenLayers[m_line + 1]);
+        SwapLayers(m_line, m_line + 1);
         ++m_line;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::SmallButton(I18N::Editor::Remove))
     {
-        layers.erase(layers.begin() + static_cast<std::ptrdiff_t>(m_line));
-        m_hiddenLayers.erase(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(m_line));
-        m_line = std::min(m_line, layers.size());
+        RemoveLayer(m_line);
+        m_line = std::min(m_line, m_draft.layers.size());
     }
     ImGui::EndDisabled();
 }
@@ -877,10 +864,7 @@ void CMuStyleEditorUI::AddEffect(EffectKind kind)
     {
         meshes.push_back(m_part);
     }
-    m_draft.layers.push_back(Data::Looks::MakeEffectLayer(kind, std::move(meshes)));
-    m_hiddenLayers.resize(m_draft.layers.size() - 1, 0);
-    m_hiddenLayers.push_back(0);
-    m_line = m_draft.layers.size() - 1;
+    InsertLayer(m_draft.layers.size(), Data::Looks::MakeEffectLayer(kind, std::move(meshes)));
 }
 
 void CMuStyleEditorUI::RenderParts()
@@ -900,7 +884,6 @@ void CMuStyleEditorUI::RenderParts()
     {
         m_part = EveryPart;
     }
-    m_hiddenLayers.resize(m_draft.layers.size(), 0);
 
     ImGui::TextUnformatted(I18N::Editor::PartsAndTheirEffects);
     RenderNote(I18N::Editor::PartsNote);
@@ -1052,8 +1035,7 @@ void CMuStyleEditorUI::RenderEffectSettings()
     ImGui::SameLine();
     if (ImGui::SmallButton(I18N::Editor::RemoveTheEffect))
     {
-        layers.erase(layers.begin() + static_cast<std::ptrdiff_t>(m_line));
-        m_hiddenLayers.erase(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(m_line));
+        RemoveLayer(m_line);
         m_line = layers.size();
         return;
     }
@@ -1217,14 +1199,38 @@ void CMuStyleEditorUI::UpdateDraft(const LookDefinition& look)
         if (m_draftOf != look.name)
         {
             m_line = 0;
-            m_hiddenLayers.assign(look.layers.size(), 0);
         }
-        m_draft = look;
-        m_draftLoaded = look;
-        m_draftOf = look.name;
-        m_line = std::min(m_line, m_draft.layers.size());
+        LoadDraft(look);
     }
     m_draftVersion = g_LookEdits.GetVersion();
+}
+
+void CMuStyleEditorUI::LoadDraft(const LookDefinition& look)
+{
+    m_draft = look;
+    m_draftLoaded = look;
+    m_draftOf = look.name;
+    m_hiddenLayers.assign(m_draft.layers.size(), 0);
+    m_line = std::min(m_line, m_draft.layers.size());
+}
+
+void CMuStyleEditorUI::InsertLayer(std::size_t at, Layer layer)
+{
+    m_draft.layers.insert(m_draft.layers.begin() + static_cast<std::ptrdiff_t>(at), std::move(layer));
+    m_hiddenLayers.insert(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(at), std::uint8_t{0});
+    m_line = at;
+}
+
+void CMuStyleEditorUI::RemoveLayer(std::size_t at)
+{
+    m_draft.layers.erase(m_draft.layers.begin() + static_cast<std::ptrdiff_t>(at));
+    m_hiddenLayers.erase(m_hiddenLayers.begin() + static_cast<std::ptrdiff_t>(at));
+}
+
+void CMuStyleEditorUI::SwapLayers(std::size_t first, std::size_t second)
+{
+    std::swap(m_draft.layers[first], m_draft.layers[second]);
+    std::swap(m_hiddenLayers[first], m_hiddenLayers[second]);
 }
 
 void CMuStyleEditorUI::CheckDraft()

@@ -122,6 +122,12 @@ private:
     void RenderViewHeader(int view, float width);
     // The fields follow the look (an undo, a redo) until they are changed.
     void UpdateDraft(const Data::Looks::LookDefinition& look);
+    // The draft is the look again, every layer shown.
+    void LoadDraft(const Data::Looks::LookDefinition& look);
+    // The draft's layers change with their eyes: a layer in at `at` (picked), one out, two swapped.
+    void InsertLayer(std::size_t at, Data::Looks::Layer layer);
+    void RemoveLayer(std::size_t at);
+    void SwapLayers(std::size_t first, std::size_t second);
     // When the draft or the item models changed: its problems, and the textures it names.
     void CheckDraft();
     void Apply();
@@ -139,7 +145,8 @@ private:
     int m_draftVersion = -1;
     // The picked line: a layer, or the item values (the number of layers).
     std::size_t m_line = 0;
-    // The layers the preview leaves out (the eyes), by layer: 1 for one left out.
+    // The layers the preview leaves out (the eyes), by layer: 1 for one left out. As many as the draft's layers: they
+    // change together (LoadDraft, InsertLayer, RemoveLayer, SwapLayers).
     std::vector<std::uint8_t> m_hiddenLayers;
     bool m_showLayers = false;
     bool m_allFields = false;
