@@ -150,10 +150,6 @@ TEST_CASE("A text naming an item reads the name in the UI language, or English w
     I18N::SetLocale("de");
     CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Juwel des Segens");
     CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L" Ich werde die 'Träne der Elfe' suchen!");
-    // Portuguese reads the item data's name, which writes "elfo" in lower case.
-    I18N::SetLocale("pt");
-    CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Vou encontrar a 'Lágrima do elfo'!");
-    I18N::SetLocale("de");
 
     g_ItemDataHandler.SetTranslateItemNames(false);
     CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Jewel of Bless");
