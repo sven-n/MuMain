@@ -9,6 +9,7 @@
 
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/Common/DataPaths.h"
+#include "Data/GameData/Common/MeshLimits.h"
 
 #include <algorithm>
 #include <limits>
@@ -50,9 +51,6 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        Keys::ItemEffect};
 const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
                                                          Keys::NoneBlendMeshes, Keys::MeshNames};
-
-// A model has at most this many meshes (MAX_MESH).
-constexpr long long MeshCount = 50;
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 using Data::Paths::FindPathProblem;
@@ -275,10 +273,10 @@ void ItemModelReader::ReadMeshNames(const OrderedJson& json, std::map<int, std::
         {
             mesh = std::stoll(key);
         }
-        if (!number || mesh >= MeshCount)
+        if (!number || mesh >= MaxModelMeshes)
         {
             AddIssue(ItemDataIssueSeverity::Warning, field,
-                     "is not a mesh number (0 to " + std::to_string(MeshCount - 1) + "); left out");
+                     "is not a mesh number (0 to " + std::to_string(MaxModelMeshes - 1) + "); left out");
             continue;
         }
         if (!value.is_string() || !Colors::IsColorFolderName(value.get_ref<const std::string&>()))

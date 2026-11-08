@@ -4,6 +4,7 @@
 
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/Random.h"
+#include "Data/GameData/Common/MeshLimits.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GlobalBitmap.h"
@@ -22,6 +23,8 @@ namespace
 using namespace Data::Looks;
 
 constexpr double Pi = 3.14159265358979323846;
+
+static_assert(Data::MaxModelMeshes == MAX_MESH, "the data names the meshes a model can have");
 
 // The texture index of each texture file a layer names; BITMAP_UNKNOWN for a file that is missing.
 std::unordered_map<std::string, GLuint> s_textures;

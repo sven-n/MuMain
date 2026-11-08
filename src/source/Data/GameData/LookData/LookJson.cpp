@@ -3,6 +3,7 @@
 #include "LookJson.h"
 
 #include "Data/GameData/ColorFolders/ColorFolders.h"
+#include "Data/GameData/Common/MeshLimits.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterJsonCommon.h"
 
@@ -60,9 +61,6 @@ constexpr const char* RenderStyleKind = "renderStyle";
 constexpr const char* Drawing = "drawing";
 constexpr const char* None = "none";
 constexpr const char* All = "all";
-
-// A model has at most this many meshes (MAX_MESH).
-constexpr long long MeshCount = 50;
 
 constexpr std::array<std::pair<LayerKind, const char*>, 2> LayerKindNames{{
     {LayerKind::Texture, "texture"},
@@ -406,9 +404,9 @@ bool LookReader::ReadMeshList(const OrderedJson& json, const std::string& field,
 bool LookReader::ReadMesh(const OrderedJson& json, const std::string& field, int& mesh)
 {
     long long number = 0;
-    if (!Items::Json::ReadWholeNumber(json, number) || number < 0 || number >= MeshCount)
+    if (!Items::Json::ReadWholeNumber(json, number) || number < 0 || number >= MaxModelMeshes)
     {
-        AddFatal(field, json.dump() + " is not a mesh number (0 to " + std::to_string(MeshCount - 1) + ")");
+        AddFatal(field, json.dump() + " is not a mesh number (0 to " + std::to_string(MaxModelMeshes - 1) + ")");
         return false;
     }
     mesh = static_cast<int>(number);

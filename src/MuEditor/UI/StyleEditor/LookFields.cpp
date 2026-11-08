@@ -6,6 +6,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "Data/GameData/Common/MeshLimits.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -36,7 +37,7 @@ constexpr float GraphWidth = 300.0f;
 constexpr float GraphHeight = 60.0f;
 constexpr int GraphSamples = 300;
 // The meshes a look names, as the file reads them.
-constexpr int LastMesh = 49;
+constexpr int LastMesh = Data::MaxModelMeshes - 1;
 constexpr int MaxFrames = 1000;
 // How far a drag field moves per pixel (design L42): a value of 0 to 1 by 1 in 200 pixels, seconds and counts faster.
 constexpr float ValueSpeed = 0.005f;
