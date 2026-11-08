@@ -1326,6 +1326,12 @@ void CMuStyleEditorUI::CheckDraft()
     {
         return;
     }
+    // While a field is dragged or typed into, the draft changes each frame: it is checked once the field is let go,
+    // and Apply, which needs the click, keeps the last check until then. Another look is checked at once.
+    if (m_checked && m_checkedDraft.name == m_draft.name && ImGui::IsAnyItemActive())
+    {
+        return;
+    }
     m_checked = true;
     m_checkedDraft = m_draft;
     m_checkedModels = g_ItemModelDatabase.GetVersion();
