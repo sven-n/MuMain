@@ -99,10 +99,6 @@ namespace mu::ui::window
         void UnloadImages();
         void ResetEquipmentLevel();
 
-        // One derived-stat display line below an attribute's label/value row (attack, defense,
-        // attack-speed, mana, magic/curse damage, class-specific bonus lines, etc.) -- count and
-        // order vary per class, so these stack via normal block flow rather than fixed per-line
-        // offsets (see character_info.rcss's header comment).
         // The hint a line shows while the pointer is over it, by its key in m_LineHint.
         enum LineHint : int
         {
@@ -111,11 +107,16 @@ namespace mu::ui::window
             CriticalDamageRateHint = 1,
         };
 
+        // One derived-stat display line below an attribute's label/value row (attack, defense,
+        // attack-speed, mana, magic/curse damage, class-specific bonus lines, etc.) -- count and
+        // order vary per class, so these stack via normal block flow rather than fixed per-line
+        // offsets (see character_info.rcss's header comment).
         struct StatLine
         {
             Rml::String text;
-            // Why the row reads the way it does: "base", "boosted" by an item or set, or
-            // "buffed" by a consumable. Each theme's character_info.rcss owns the colours.
+            // Why the row reads the way it does: "base", "boosted" by an item or set, or "buffed" by
+            // a consumable or (the damage and critical damage rate lines) the hero's own skill buff.
+            // Each theme's character_info.rcss owns the colours.
             Rml::String source;
             // Its LineHint.
             int hint = NoLineHint;
