@@ -40,7 +40,7 @@ constexpr std::array<ActionSkillType, 4> CriticalDamageSkills{AT_SKILL_ADD_CRITI
 
 int HarmonyCriticalDamage(ITEM& item)
 {
-    if (item.Jewel_Of_Harmony_Option == 0 || g_pUIJewelHarmonyinfo == nullptr || !ItemOptionsCount(&item) ||
+    if (item.Jewel_Of_Harmony_Option == 0 || g_pUIJewelHarmonyinfo == nullptr || !AreItemOptionsActive(&item) ||
         item.Level < item.Jewel_Of_Harmony_OptionLevel)
     {
         return 0;

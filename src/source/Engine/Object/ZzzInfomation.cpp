@@ -1574,14 +1574,14 @@ bool IsRequireEquipItem(ITEM* pItem)
     return bEquipable;
 }
 
-bool ItemOptionsCount(ITEM* Item)
+bool AreItemOptionsActive(ITEM* Item)
 {
     return Item->Type != -1 && Item->Durability != 0 && IsRequireEquipItem(Item);
 }
 
 void PlusSpecial(WORD* Value, int Special, ITEM* Item)
 {
-    if (!ItemOptionsCount(Item))
+    if (!AreItemOptionsActive(Item))
     {
         return;
     }
