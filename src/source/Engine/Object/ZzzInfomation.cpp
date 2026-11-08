@@ -1595,29 +1595,29 @@ void PlusSpecial(WORD* Value, int Special, ITEM* Item)
 
 void PlusSpecialPercent(WORD* Value, int Special, ITEM* Item, WORD Percent)
 {
-    if (Item->Type == -1) return;
-
-    if (IsRequireEquipItem(Item))
+    if (!AreItemOptionsActive(Item))
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += *Value * Percent / 100;
-        }
+        return;
+    }
+
+    for (int i = 0; i < Item->SpecialNum; i++)
+    {
+        if (Item->Special[i] == Special)
+            *Value += *Value * Percent / 100;
     }
 }
 
 void PlusSpecialPercent2(WORD* Value, int Special, ITEM* Item)
 {
-    if (Item->Type == -1) return;
-
-    if (IsRequireEquipItem(Item))
+    if (!AreItemOptionsActive(Item))
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += (unsigned short)(*Value * (Item->SpecialValue[i] / 100.f));
-        }
+        return;
+    }
+
+    for (int i = 0; i < Item->SpecialNum; i++)
+    {
+        if (Item->Special[i] == Special)
+            *Value += (unsigned short)(*Value * (Item->SpecialValue[i] / 100.f));
     }
 }
 

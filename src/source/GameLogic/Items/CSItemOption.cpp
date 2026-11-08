@@ -499,9 +499,7 @@ void CSItemOption::PlusSpecial(std::uint16_t* Value, int Special) const
 
 void CSItemOption::PlusSpecialPercent(std::uint16_t* Value, int Special) const
 {
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-
-    if (const int optionValue = AggregateOptionValue(Special))
+    if (const int optionValue = GetSetOptionValue(Special))
     {
         *Value += ((*Value) * optionValue) / 100;
     }
