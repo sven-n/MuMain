@@ -11,8 +11,8 @@
 namespace MuEditor::DataChecks
 {
 // Data Checks: the problems of all game data in one table (items, monsters,
-// monster models, model files, server list, effects, looks), with a box per area and per
-// level that shows or hides them. A click on a problem selects what it is
+// monster models, model files, server list, effects, map sounds, render styles, graphics look), with a box per area
+// and per level that shows or hides them. A click on a problem selects what it is
 // about and opens its tool. The checks run when the window is first shown and
 // on Check all.
 class MuDataChecksUI

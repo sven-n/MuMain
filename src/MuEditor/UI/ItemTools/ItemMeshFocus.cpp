@@ -12,14 +12,20 @@ CItemMeshFocus& CItemMeshFocus::GetInstance()
     return instance;
 }
 
-void CItemMeshFocus::BeginFrame(int itemType)
+void CItemMeshFocus::BeginFrame(int itemType, std::optional<int> frame)
 {
     if (itemType != m_itemType)
     {
         *this = CItemMeshFocus();
         m_itemType = itemType;
+        m_frame = frame;
         return;
     }
+    if (frame && frame == m_frame)
+    {
+        return;
+    }
+    m_frame = frame;
     m_pointedBefore = m_pointedNow;
     m_pointedNow.reset();
 }

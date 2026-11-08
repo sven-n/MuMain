@@ -223,6 +223,8 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
     // The named colors, a root per use; the group entries (Items > Glow Colors) open it on their root.
     ImGui::MenuItem(I18N::Editor::Colors, nullptr, &windows.colors);
+    // The looks of items: the render styles and the item effects.
+    ImGui::MenuItem(I18N::Editor::StyleEditor, nullptr, &windows.styleEditor);
     ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
     ImGui::MenuItem(I18N::Editor::SoundMixerTitle, nullptr, &windows.soundMixer);
     ImGui::MenuItem(I18N::Editor::SoundEditorTitle, nullptr, &windows.soundEditor);

@@ -13,6 +13,7 @@
 #include "ItemTextInput.h"
 #include "ItemUsers.h"
 
+#include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "I18N/All.h"
@@ -145,10 +146,11 @@ void RenderUsers(const char* label, int count, std::vector<int> (*findUsers)(std
     ImGui::TreePop();
 }
 
-// A look picked from its names, each with how many models use it; "" is none.
-template <typename TCount>
+// A look picked from its names, each with how many models use it and "(code)" when `isCode` says it is still code;
+// "" is none.
+template <typename TCount, typename TIsCode>
 void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::span<const std::string_view> names,
-               TCount&& count)
+               TCount&& count, TIsCode&& isCode)
 {
     ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
     const std::string shown = value.empty() ? I18N::Editor::None : value;
@@ -163,7 +165,11 @@ void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::sp
     }
     for (const std::string_view name : names)
     {
-        const std::string entry = std::string(name) + " (" + std::to_string(count(name)) + ")";
+        std::string entry = std::string(name) + " (" + std::to_string(count(name)) + ")";
+        if (isCode(name))
+        {
+            entry += std::string(" ") + I18N::Editor::CodeMark;
+        }
         if (ImGui::Selectable(entry.c_str(), name == value) && name != value)
         {
             value = std::string(name);
@@ -357,19 +363,31 @@ void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts
 
 void RenderLooks(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts)
 {
-    LookCombo(draft, I18N::Editor::RenderStyle, model.renderStyle, Render::Items::Styles::GetNames(),
-              [&](std::string_view name) { return counts.RenderStyle(name); });
+    LookCombo(
+        draft, I18N::Editor::RenderStyle, model.renderStyle, Render::Items::Styles::GetNames(),
+        [&](std::string_view name) { return counts.RenderStyle(name); }, &Render::Items::Styles::ExistsInCode);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(model.renderStyle.empty() || !Render::Items::Styles::Exists(model.renderStyle));
+    if (ImGui::SmallButton(I18N::Editor::OpenInStyleEditor))
+    {
+        g_MuStyleEditorUI.ShowRenderStyle(model.renderStyle);
+    }
+    ImGui::EndDisabled();
     if (!model.renderStyle.empty())
     {
         RenderUsers("##StyleUsers", counts.RenderStyle(model.renderStyle), &FindRenderStyleUsers, model.renderStyle);
     }
-    LookCombo(draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
-              [&](std::string_view name) { return counts.ItemEffect(name); });
+    // The item effects are all still code.
+    LookCombo(
+        draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
+        [&](std::string_view name) { return counts.ItemEffect(name); }, [](std::string_view) { return true; });
     if (!model.itemEffect.empty())
     {
         RenderUsers("##EffectUsers", counts.ItemEffect(model.itemEffect), &FindItemEffectUsers, model.itemEffect);
     }
-    ImGui::TextDisabled("%s", I18N::Editor::TheLooksAreDrawingCodeThisPicksWhichOneTheItemUses);
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::ItemLooksNote);
+    ImGui::PopTextWrapPos();
 }
 } // namespace MuEditor::Items::ModelForms
 

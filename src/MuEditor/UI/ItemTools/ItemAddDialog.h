@@ -5,11 +5,20 @@
 #include "ItemNumberHolderView.h"
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemModelDefinition.h"
 
+#include <functional>
 #include <string>
 
 namespace MuEditor::Items
 {
+// Duplicate item: a copy of the item `sourceItemType` at the free item type `itemType`, with the English name `name`,
+// and its model: a model file of its own becomes a shared model that both items name (`shareModel`; otherwise the new
+// item has no model), a shared model is named by both. `changeModel` changes the new item's model entry before it is
+// added (the Style Editor's new look, design L36). One undo step `step`, or part of the group the caller began.
+void DuplicateItem(const char* step, int sourceItemType, int itemType, const std::string& name, bool shareModel,
+                   const std::function<void(Data::Items::ItemModelDefinition&)>& changeModel = {});
+
 // The dialog that adds an item (section 7): a group, a free number (one with
 // neither an entry in the item files nor a model entry), the English name,
 // and either a copy of the selected item's values or a size and slot of its

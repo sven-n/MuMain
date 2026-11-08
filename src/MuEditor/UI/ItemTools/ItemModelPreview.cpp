@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 
 namespace MuEditor::Items
 {
@@ -88,6 +89,47 @@ bool CItemModelPreview::ShowsListedModel(int itemType) const
 void CItemModelPreview::Render(int itemType)
 {
     RenderControls();
+    const MuEditor::Effects::EffectPreviewRequest request = MakeRequest(itemType);
+    const float width = ImGui::GetContentRegionAvail().x;
+    // The width without the vertical scrollbar, so the height does not make
+    // the scrollbar show and hide by turns (as the effect browser's view).
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float widthInWindow = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
+    RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);
+}
+
+void CItemModelPreview::RenderSideBySide(int itemType, int count, const Header& header, const DrawIn& drawIn)
+{
+    RenderControls();
+    count = std::clamp(count, 1, MaxViews);
+    const MuEditor::Effects::EffectPreviewRequest request = MakeRequest(itemType);
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float gaps = style.ItemSpacing.x * static_cast<float>(count - 1);
+    const float width = (ImGui::GetContentRegionAvail().x - gaps) / static_cast<float>(count);
+    const float widthInWindow = (ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize - gaps) /
+                                static_cast<float>(count);
+    const float height = ViewHeight(widthInWindow);
+    for (int view = 0; view < count; ++view)
+    {
+        if (view > 0)
+        {
+            ImGui::SameLine();
+        }
+        ImGui::BeginGroup();
+        ImGui::PushID(view);
+        // Each header gets the height of a control, so the views stay in line under a label beside a dropdown.
+        const float top = ImGui::GetCursorPosY();
+        header(view, width);
+        ImGui::SetCursorPosY(std::max(ImGui::GetCursorPosY(), top + ImGui::GetFrameHeightWithSpacing()));
+        RenderView(request, m_views[static_cast<std::size_t>(view)], "##ModelView", width, height,
+                   [&drawIn, view](const std::function<void()>& draw) { drawIn(view, draw); });
+        ImGui::PopID();
+        ImGui::EndGroup();
+    }
+}
+
+MuEditor::Effects::EffectPreviewRequest CItemModelPreview::MakeRequest(int itemType) const
+{
     MuEditor::Effects::EffectPreviewRequest request;
     // Not an effect: the scene draws the item alone.
     request.kind = Data::Effects::EffectKind::Particle;
@@ -101,7 +143,8 @@ void CItemModelPreview::Render(int itemType)
     request.turn = m_turn;
     request.itemPose = m_pose;
     request.itemGroundPlane = true;
-    RenderView(request);
+    request.itemAsDoppelganger = m_asDoppelganger;
+    return request;
 }
 
 void CItemModelPreview::RenderControls()
@@ -130,20 +173,21 @@ void CItemModelPreview::RenderControls()
     ImGui::PopID();
 }
 
-void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest& request)
+float CItemModelPreview::ViewHeight(float widthInWindow) const
 {
-    const float width = ImGui::GetContentRegionAvail().x;
+    const float scale = g_MuEditorCore.GetUIScale();
+    return std::clamp(widthInWindow * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
+}
+
+void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest& request, View& view, const char* id,
+                                   float width, float height,
+                                   const std::function<void(const std::function<void()>&)>& drawIn)
+{
     if (width < 1.0f)
     {
         return;
     }
-    const float scale = g_MuEditorCore.GetUIScale();
-    // The width without the vertical scrollbar, so the height does not make
-    // the scrollbar show and hide by turns (as the effect browser's view).
-    const ImGuiStyle& style = ImGui::GetStyle();
-    const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
-    const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
-    MuEditor::Effects::PreviewInput::RenderView("##ModelView", width, height, m_camera);
+    MuEditor::Effects::PreviewInput::RenderView(id, width, height, m_camera);
     TakeBackPickOnDoubleClick();
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
@@ -153,7 +197,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
         // Over the effect browser's controls text, which RenderView set.
         ImGui::SetTooltip("%s %s", I18N::Editor::PreviewControls, I18N::Editor::PreviewPickNote);
     }
-    const MuEditor::Effects::PreviewFraming framing = m_scene.Prepare(request);
+    const MuEditor::Effects::PreviewFraming framing = view.scene.Prepare(request);
     if (m_framedItemType != request.itemType)
     {
         m_framedItemType = request.itemType;
@@ -172,18 +216,26 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
         const float framebufferScale = viewportScale > 0.0f ? viewportScale : ImGui::GetIO().DisplayFramebufferScale.x;
         const MuEditor::Effects::PreviewTextureSize size =
             MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);
-        texture = m_target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
+        texture = view.target.Begin(size.width, size.height, !ImGui::IsMouseDown(ImGuiMouseButton_Left));
         if (texture == 0)
         {
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        DrawScene(request, width / height, pickRay);
+        const auto draw = [&] { DrawScene(request, view, width / height, pickRay); };
+        if (drawIn)
+        {
+            drawIn(draw);
+        }
+        else
+        {
+            draw();
+        }
     }
     else
     {
         // The game skipped this frame; the editor's windows may still be drawn.
-        texture = m_target.KeepLastPicture();
+        texture = view.target.KeepLastPicture();
     }
     if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
     {
@@ -191,7 +243,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     }
 }
 
-void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
+void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, View& view, float aspect,
                                   const std::optional<MeshPicking::Ray>& pickRay)
 {
     const BMD* model = ListedModelInView(request.itemType, request.itemLevel);
@@ -199,7 +251,7 @@ void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest&
     {
         // Without the listed model the drawer leaves every draw alone.
         CItemMeshPreviewDrawer drawer(model, g_ItemMeshFocus.Shown(), pickRay);
-        m_scene.Draw(request, m_camera, aspect);
+        view.scene.Draw(request, m_camera, aspect);
         hitMesh = drawer.HitMesh();
     }
     // A click on another model finds none of the listed meshes, so it keeps the kept one.

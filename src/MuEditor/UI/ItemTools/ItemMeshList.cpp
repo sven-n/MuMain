@@ -4,17 +4,25 @@
 
 #include "ItemMeshList.h"
 
+#include "ItemEdits.h"
 #include "ItemMeshFocus.h"
+#include "ItemTextInput.h"
 #include "ItemToolWindow.h"
 
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/SourceText.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
 #include "imgui.h"
 
 #include <algorithm>
+#include <cfloat>
 #include <cstdio>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -24,7 +32,9 @@ namespace
 {
 using Data::Items::ItemModelDefinition;
 
-constexpr int ColumnCount = 4;
+constexpr int ColumnCount = 5;
+// Pixel width of the name column before the editor UI scale.
+constexpr float NameWidth = 110.0f;
 constexpr float MaxVisibleRows = 8.0f;
 // The header row and a little room below the last row.
 constexpr float ExtraRows = 1.5f;
@@ -97,7 +107,8 @@ void RenderTooltip(const ItemMeshRow& row)
 }
 } // namespace
 
-void CItemMeshList::Render(int itemType, const ItemModelDefinition& entry, bool inPreview)
+void CItemMeshList::Render(int itemType, ItemModelDefinition& entry, ItemEditDraft<ItemModelDefinition>& draft,
+                           bool inPreview)
 {
     Refresh(itemType, Models[Data::Items::ToModelSlot(itemType)]);
     // Also while the list is folded: a kept mesh the model lost would leave every mesh see-through.
@@ -112,7 +123,7 @@ void CItemMeshList::Render(int itemType, const ItemModelDefinition& entry, bool 
         return;
     }
     RenderNote(inPreview ? I18N::Editor::MeshListNote : I18N::Editor::MeshesNotInPreviewNote);
-    RenderTable(entry);
+    RenderTable(entry, draft);
     if (!entry.renderStyle.empty() || !entry.itemEffect.empty())
     {
         RenderNote(I18N::Editor::MeshCodeLooksNote);
@@ -141,7 +152,7 @@ void CItemMeshList::Refresh(int itemType, const BMD& model)
     }
 }
 
-void CItemMeshList::RenderTable(const ItemModelDefinition& entry)
+void CItemMeshList::RenderTable(ItemModelDefinition& entry, ItemEditDraft<ItemModelDefinition>& draft)
 {
     const float visibleRows = std::min(static_cast<float>(m_rows.size()), MaxVisibleRows) + ExtraRows;
     const ImVec2 size(0.0f, visibleRows * ImGui::GetTextLineHeightWithSpacing());
@@ -153,6 +164,8 @@ void CItemMeshList::RenderTable(const ItemModelDefinition& entry)
     }
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn(NumberColumn);
+    ImGui::TableSetupColumn(I18N::Editor::Name, ImGuiTableColumnFlags_WidthFixed,
+                            NameWidth * g_MuEditorCore.GetUIScale());
     ImGui::TableSetupColumn(I18N::Editor::MeshTexture);
     ImGui::TableSetupColumn(I18N::Editor::MeshMarks);
     ImGui::TableSetupColumn(I18N::Editor::MeshUsedBy, ImGuiTableColumnFlags_WidthStretch);
@@ -160,12 +173,13 @@ void CItemMeshList::RenderTable(const ItemModelDefinition& entry)
     const bool scrollToKept = g_ItemMeshFocus.TakePicked();
     for (std::size_t index = 0; index < m_rows.size(); ++index)
     {
-        RenderRow(index, FindMeshUses(entry, m_rows[index].mesh), scrollToKept);
+        RenderRow(index, FindMeshUses(entry, m_rows[index].mesh), scrollToKept, entry, draft);
     }
     ImGui::EndTable();
 }
 
-void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKept)
+void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKept, ItemModelDefinition& entry,
+                              ItemEditDraft<ItemModelDefinition>& draft)
 {
     const ItemMeshRow& row = m_rows[index];
     ImGui::TableNextRow();
@@ -174,7 +188,8 @@ void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKep
     char number[16];
     std::snprintf(number, sizeof(number), "%d", row.mesh);
     const bool kept = g_ItemMeshFocus.Kept() == row.mesh;
-    if (ImGui::Selectable(number, kept, ImGuiSelectableFlags_SpanAllColumns))
+    // The name field in the row takes its own clicks.
+    if (ImGui::Selectable(number, kept, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
     {
         g_ItemMeshFocus.ToggleKept(row.mesh);
     }
@@ -187,6 +202,8 @@ void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKep
     {
         ImGui::SetScrollHereY();
     }
+    ImGui::TableNextColumn();
+    RenderName(row.mesh, entry, draft);
     ImGui::PopID();
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(row.texture.c_str());
@@ -195,6 +212,52 @@ void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKep
     ImGui::TextUnformatted(m_marksText.c_str());
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(UsesText(uses).c_str());
+}
+
+void CItemMeshList::RenderName(int mesh, ItemModelDefinition& entry, ItemEditDraft<ItemModelDefinition>& draft)
+{
+    const auto named = entry.meshNames.find(mesh);
+    if (m_nameMesh != mesh)
+    {
+        m_nameText = named != entry.meshNames.end() ? named->second : std::string();
+    }
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    InputStringWithHint("##Name", I18N::Editor::NameThisPart, m_nameText);
+    if (ImGui::IsItemActive())
+    {
+        m_nameMesh = mesh;
+    }
+    if (!ImGui::IsItemDeactivated())
+    {
+        return;
+    }
+    m_nameMesh = -1;
+    const std::string name = SourceText::Trimmed(m_nameText);
+    const std::string current = named != entry.meshNames.end() ? named->second : std::string();
+    // A name that can't be one is not stored; the field shows the stored one again.
+    if (name == current || (!name.empty() && !Data::Colors::IsColorFolderName(name)))
+    {
+        return;
+    }
+    std::map<int, std::string> names = entry.meshNames;
+    if (name.empty())
+    {
+        names.erase(mesh);
+    }
+    else
+    {
+        names[mesh] = name;
+    }
+    if (const Data::Items::SharedItemModel* shared = g_ItemModelDatabase.FindSharedModel(entry.model))
+    {
+        // The file's names are the shared model's, as the file is.
+        Data::Items::SharedItemModel copy = *shared;
+        copy.meshNames = std::move(names);
+        g_ItemEdits.SetSharedModel(I18N::Editor::NameAPart, copy);
+        return;
+    }
+    entry.meshNames = std::move(names);
+    draft.AfterChange(true, I18N::Editor::NameAPart);
 }
 
 // The labels of the mesh fields, as in the Model file and Glow sections; built into one reused string.

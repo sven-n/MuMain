@@ -13,6 +13,9 @@ namespace MuEditor::Items
 bool InputString(const char* label, std::string& text, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 bool InputStringWithHint(const char* label, const char* hint, std::string& text,
                          ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+// A text field that shows `value` and changes it only when it is left after typing: true then, with what was typed in
+// `typed`, so the caller sees one change instead of one per key. The text being typed is kept here meanwhile.
+bool InputStringOnLeave(const char* label, const char* hint, const std::string& value, std::string& typed);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

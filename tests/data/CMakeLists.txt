@@ -185,6 +185,7 @@ mu_add_test(
     SOURCES
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
+        test_style_editor.cpp
         test_dark_lord_pet_tooltip.cpp
         test_item_bytes.cpp
         test_item_database_files.cpp
@@ -313,4 +314,24 @@ mu_add_test(
 )
 target_compile_definitions(player_model_selector_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# Render styles as data (docs/item-data.md, "Render styles and item effects"): the look file, the layers' drawing
+# and the comparison of each moved look with its old code, on the item models of the test data.
+mu_add_test(
+    NAME render_style_tests
+    SOURCES
+        test_look_files.cpp
+        test_look_checks.cpp
+        test_look_effects.cpp
+        test_look_drawing.cpp
+        test_look_recorder.cpp
+        LookRecorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(render_style_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )

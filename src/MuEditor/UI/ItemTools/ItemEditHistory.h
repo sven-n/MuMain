@@ -8,6 +8,7 @@
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
+#include "Data/GameData/LookData/LookJson.h"
 
 #include <cstddef>
 #include <functional>
@@ -57,6 +58,9 @@ struct ItemEditStep
         // The folders of the Colors window's root `folderRoot` (ItemEdits::GlowFolders, ...) went from
         // `foldersBefore` to `foldersAfter`.
         ColorFolders,
+        // The render style file (its looks and folders, design L39) went from `renderStylesBefore` to
+        // `renderStylesAfter`.
+        RenderStyles,
     };
 
     Kind kind = Kind::Slot;
@@ -76,6 +80,9 @@ struct ItemEditStep
     std::string folderRoot;
     std::vector<Data::Colors::ColorFolder> foldersBefore;
     std::vector<Data::Colors::ColorFolder> foldersAfter;
+    // Shared, as the stat file.
+    std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesBefore;
+    std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -129,6 +136,9 @@ public:
         std::function<std::vector<Data::Colors::ColorFolder>(std::string_view root)> readColorFolders;
         std::function<void(std::string_view root, std::span<const Data::Colors::ColorFolder> folders)>
             restoreColorFolders;
+        // The render style file, and putting one back (the game draws its looks). Optional.
+        std::function<Data::Looks::RenderStylesFile()> readRenderStyles;
+        std::function<void(const Data::Looks::RenderStylesFile& file)> restoreRenderStyles;
     };
 
     // Why the last Undo or Redo did nothing.

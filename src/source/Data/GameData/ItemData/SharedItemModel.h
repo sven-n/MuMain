@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,8 @@ struct SharedItemModel
     std::vector<std::string> textureFolders;
     // Indexes of the meshes that are drawn without blending.
     std::vector<int> noneBlendMeshes;
+    // A name for each mesh by its number, for the editor's lists (ItemModelDefinition::meshNames).
+    std::map<int, std::string> meshNames;
 
     bool operator==(const SharedItemModel&) const = default;
 };
