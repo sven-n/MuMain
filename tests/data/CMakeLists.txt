@@ -303,6 +303,7 @@ target_compile_definitions(model_files_data_tests PRIVATE
 mu_add_test(
     NAME player_model_selector_tests
     SOURCES test_player_model_selector.cpp
+        ExecutableConfigFile.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )

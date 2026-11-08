@@ -196,6 +196,7 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/ExecutableConfigFile.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
     # Saves the config.ini beside the executable, as theme_file_interface_tests does.
