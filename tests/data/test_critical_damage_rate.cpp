@@ -83,7 +83,7 @@ ItemCreationParams WarriorPiece(int group, int number, bool luck)
 }
 
 // The hero wears only what the test puts on, in a character machine of its own. The set and socket bonuses the client
-// adds up for it are added up again for nothing worn when the scope goes; make it after the hero's HeroScope.
+// adds up for it are added up again for what is worn after the scope; make it after the hero's HeroScope.
 class EquipmentScope
 {
 public:
@@ -93,11 +93,20 @@ public:
         CharacterMachine = m_machine.get();
     }
 
+    // The set and socket bonuses are added up again for the equipment worn after the scope: the previous character
+    // machine's, or nothing when there was none.
     ~EquipmentScope()
     {
-        TakeOffAll();
-        AddUpBonuses();
+        if (m_previous == nullptr)
+        {
+            TakeOffAll();
+            AddUpBonuses();
+        }
         CharacterMachine = m_previous;
+        if (m_previous != nullptr)
+        {
+            AddUpBonuses();
+        }
     }
 
     EquipmentScope(const EquipmentScope&) = delete;
