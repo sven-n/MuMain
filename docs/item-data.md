@@ -2104,7 +2104,9 @@ Apply takes the server's value; *Wrong in server* unchecks it and shows it
 grey, so the client keeps its value. A locked field or item, and a drop
 level OpenMU cannot keep, stay unchecked either way (the drop level's box
 still takes it). The marks count in every comparison, also after a
-new download. They are kept in `Data/Items/Sync/KnownDifferences.json`
+new download. Apply takes out the *Wrong in client* marks of what it
+applied (on a changed item marked as a whole, once all its fields were
+applied): the client has the server's value then. They are kept in `Data/Items/Sync/KnownDifferences.json`
 next to the game, written on every click; copy it to
 `src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
 the whole item:

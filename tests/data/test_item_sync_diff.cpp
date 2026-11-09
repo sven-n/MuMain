@@ -1231,6 +1231,46 @@ TEST_CASE("An item the file has twice is a locked row of the import [data][items
     g_ItemEdits.GetHistory().Clear();
 }
 
+TEST_CASE("Applying a difference wrong in the client takes out its mark [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    kris.repairable = !kris.repairable;
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+    sides.file.formulas->excellentDropLevelBonus = sides.client.formulas->excellentDropLevelBonus + 1;
+    KnownDifferences known;
+    known.Set(0, 0, "width", WrongSide::Client);
+    known.Set(0, 0, "repairable", WrongSide::Server);
+    known.Set(0, 1, "", WrongSide::Client);
+    known.Set("dropLevelBonus.excellent", WrongSide::Client);
+    // A mark of an item that does not differ stays.
+    known.Set(0, 2, "", WrongSide::Client);
+    ItemSyncDiff diff = sides.Diff(&known);
+    // The excellent drop level bonus is not applied.
+    std::ranges::find(diff.formulas, "dropLevelBonus.excellent", &SyncFormula::entry)->checked = false;
+
+    CHECK(ForgetAppliedClientMarks(diff, known));
+    CHECK(known.Find(0, 0, "width") == WrongSide::None);
+    CHECK(known.Find(0, 0, "repairable") == WrongSide::Server);
+    CHECK(known.Find(0, 1, "") == WrongSide::None);
+    CHECK(known.Find("dropLevelBonus.excellent") == WrongSide::Client);
+    CHECK(known.Find(0, 2, "") == WrongSide::Client);
+    CHECK_FALSE(ForgetAppliedClientMarks(diff, known));
+
+    // A changed item's whole-item mark goes once all its fields were applied.
+    known.Set(0, 0, "", WrongSide::Client);
+    ItemSyncDiff partly = sides.Diff(&known);
+    SyncItem& row = partly.items[static_cast<size_t>(FindRow(partly, KrisType) - partly.items.data())];
+    row.fields.front().checked = false;
+    ForgetAppliedClientMarks(partly, known);
+    CHECK(known.Find(0, 0, "") == WrongSide::Client);
+    SetRowChecked(row, true);
+    CHECK(ForgetAppliedClientMarks(partly, known));
+    CHECK(known.Find(0, 0, "") == WrongSide::None);
+}
+
 TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
 {
     Sides sides;

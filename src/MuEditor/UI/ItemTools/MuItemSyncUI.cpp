@@ -889,6 +889,10 @@ bool CMuItemSyncUI::Apply()
         {std::to_string(changes.added + changes.changed + changes.removed), std::to_string(changes.formulaEntries)});
     const std::string path = m_comparedPath;
     g_MuEditorConsoleUI.LogEditor(path + ": " + done);
+    if (ForgetAppliedClientMarks(*m_diff, m_known))
+    {
+        SaveKnownDifferences();
+    }
     // The differences that are left; what was not checked stays unchecked, so a second click
     // does not take it after all.
     const UncheckedRows unchecked = FindUnchecked(*m_diff);
