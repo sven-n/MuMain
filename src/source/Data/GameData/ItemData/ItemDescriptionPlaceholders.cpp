@@ -50,7 +50,7 @@ Placeholder ReadPlaceholder(std::string_view text, size_t open)
     {
         return {{}, std::string_view::npos, "has an empty placeholder \"{}\""};
     }
-    if (name.starts_with("item:"))
+    if (name.starts_with(Data::Translation::ItemReferencePrefix))
     {
         if (IsItemReferencePlaceholder(name))
         {

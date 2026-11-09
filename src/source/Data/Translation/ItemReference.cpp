@@ -10,7 +10,6 @@ namespace
 {
 // A group, number or level has at most this many digits, as ResxGen's check allows.
 constexpr std::size_t MaxDigits = 4;
-constexpr std::string_view NamePrefix = "item:";
 
 bool IsDigit(char c)
 {
@@ -53,11 +52,11 @@ bool IsItemCaseKey(std::string_view key)
 
 std::optional<ItemReference> ParseItemReferenceName(std::string_view name)
 {
-    if (!name.starts_with(NamePrefix))
+    if (!name.starts_with(ItemReferencePrefix))
     {
         return std::nullopt;
     }
-    std::size_t at = NamePrefix.size();
+    std::size_t at = ItemReferencePrefix.size();
     ItemReference reference;
     const std::optional<int> group = ReadNumber(name, at);
     if (!group || at >= name.size() || name[at] != ',')

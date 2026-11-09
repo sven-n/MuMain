@@ -18,8 +18,11 @@
 // The grammar and the case keys are the same as ResxGen's check (tools/ResxGen/ItemReferenceSyntax.cs).
 namespace Data::Translation
 {
+// The name of an item reference placeholder starts with this ("item:14,25" in "{item:14,25}").
+constexpr std::string_view ItemReferencePrefix = "item:";
 // Every reference starts with this; a text that has it must continue with a valid reference.
 constexpr std::string_view ItemReferenceOpening = "{item:";
+static_assert(ItemReferenceOpening.substr(1) == ItemReferencePrefix);
 
 // The grammatical cases a reference may ask for: genitive, dative, accusative, instrumental, locative.
 constexpr std::array<std::string_view, 5> ItemCaseKeys = {"gen", "dat", "acc", "ins", "loc"};
