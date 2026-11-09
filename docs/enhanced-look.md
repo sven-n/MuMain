@@ -288,16 +288,24 @@ If an optional pass cannot be drawn, the game falls back without losing geometry
 
 ## Limits
 
-These are accepted limits of the current look, with the phase of the [rollout plan](https://github.com/sven-n/MuMain/issues/990)
+These are accepted limits of the current look, with the stage of the [lighting plan](https://github.com/sven-n/MuMain/issues/990)
 that takes them up. They are not claims of full 3D local-light occlusion.
 
+- **Lighting is in gamma space.** Textures are not decoded from sRGB, and the HDR scene is headroom for bright effects,
+  not linear light. The colour pipeline is decision D1, and the look values are tuned for gamma space until then.
 - **Point-light shadows are terrain-projected.** A character's shadow from a nearby light is flattened onto the ground.
-  It does not fall on walls or other characters, and world objects cast none. Better projection is Phase 2, and
-  occlusion by world objects is Phase 9.
-- **Lighting clamps remain.** The ground clips at full brightness while models use a soft roll-off. Deciding where
-  brightness is compressed belongs to the colour and HDR conventions in Phase 3.
+  It does not fall on walls or other characters, and world objects cast none. Per-light visibility is Stage 2, and
+  occlusion by world objects is Stage 6.
+- **Ambient occlusion darkens direct light too.** The composite darkens the whole scene except additive effects, so
+  sunlit contact areas darken as well as shaded ones. Limiting it to ambient light is Stage 2.
+- **Lighting clamps remain.** The ground clips at full brightness while models use a soft roll-off. One roll-off for
+  both belongs to the light model in Stage 1, after the colour pipeline decision.
 - **Ambient occlusion is tied to the bloom switch.** Turning off "Bloom and colour grading" removes ambient occlusion
-  too, until Phase 4 separates them.
+  too, until Stage 4 separates them.
+- **Direct3D 12 can crash or hang the GPU.** With Enhanced on, a frame can need more sampler descriptors than one
+  heap of SDL's D3D12 backend holds (2048), and SDL's switch to a new heap mid-frame is faulty: the client may exit, or
+  Windows may reset the GPU. Vulkan is not affected. Use `[Render] Backend=vulkan` until this is resolved: `default`
+  picks Vulkan where it works, but falls back to Direct3D 12 on systems without a working Vulkan driver.
 
 ## Developer commands
 
