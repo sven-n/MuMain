@@ -324,7 +324,8 @@ void CInGameShopSystem::PrePage()
 
 int CInGameShopSystem::GetTotalPages()
 {
-    return (m_plistSelectPackage->size() / INGAMESHOP_DISPLAY_ITEMLIST_SIZE) + 1;
+    const int packages = static_cast<int>(m_plistSelectPackage->size());
+    return packages == 0 ? 1 : (packages + INGAMESHOP_DISPLAY_ITEMLIST_SIZE - 1) / INGAMESHOP_DISPLAY_ITEMLIST_SIZE;
 }
 
 int CInGameShopSystem::GetSelectPage()

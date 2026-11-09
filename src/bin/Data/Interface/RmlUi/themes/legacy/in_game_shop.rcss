@@ -91,7 +91,7 @@
 /* The player: the name in bold centred over 122 from (498, 23), then three balance rows from
    (498, 50) 15 apart, each value right-aligned to 622. */
 #igs_character { position: absolute; left: 498px; top: 23px; width: 122px; height: 1px; color: #ffffff; font-weight: bold; }
-#igs_wallet { position: absolute; left: 0; top: 50px; width: 640px; }
+#igs_wallet { position: absolute; left: 0; top: 50px; width: 640px; pointer-events: none; }
 .igs-wallet-row { position: relative; display: block; height: 15px; color: #ffeea1; }
 .igs-wallet-label { left: 498px; }
 .igs-wallet-value { right: 18px; transform-origin: right top; }
