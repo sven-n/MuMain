@@ -2566,6 +2566,9 @@
   <data name="What wrong in server means" xml:space="preserve">
     <value>Wartość serwera jest błędna: klient zachowuje swoją, więc różnica zostaje odznaczona (szara). Kliknij ponownie, aby cofnąć. Zapisane w Data/Items/Sync/KnownDifferences.json.</value>
   </data>
+  <data name="What a mark of the item means" xml:space="preserve">
+    <value>Oznaczone wraz z całym przedmiotem. Zmień to w wierszu przedmiotu albo wybierz drugą stronę tylko dla tego pola. Zapisane w Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
   <data name="The marks are not saved while {0} cannot be read" xml:space="preserve">
     <value>Oznaczenia nie są zapisywane, dopóki nie można odczytać {0} (zobacz konsolę). Popraw lub usuń plik, a następnie otwórz edytor ponownie.</value>
   </data>

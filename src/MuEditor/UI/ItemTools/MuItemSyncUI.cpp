@@ -1453,7 +1453,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
         }
         if (markable)
         {
-            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(field.wrongSide))
+            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(field.wrongSide, field.markOfItem))
             {
                 SetWrongSide(row, field.field, *picked);
             }

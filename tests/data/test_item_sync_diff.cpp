@@ -406,13 +406,19 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK_FALSE(FindField(changed, "repairable")->checked);
     CHECK(FindField(changed, "height")->checked);
 
-    // A field's mark gives the item's mark to the other fields as their own.
+    // A field's own mark counts for it instead; the item's mark stays for the others.
     MarkWrongSide(known, changed, "width", WrongSide::Server);
-    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::None);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
     CHECK(known.Find(0, 0, "width") == WrongSide::Server);
-    CHECK(known.Find(0, 0, "height") == WrongSide::Client);
-    CHECK(known.Find(0, 0, "repairable") == WrongSide::Client);
-    CHECK(GetRowWrongSide(changed) == WrongSide::None);
+    CHECK(known.Find(0, 0, "height") == WrongSide::None);
+    CHECK_FALSE(FindField(changed, "width")->markOfItem);
+    CHECK(FindField(changed, "height")->markOfItem);
+    CHECK(GetRowWrongSide(changed) == WrongSide::Client);
+    // Without its own mark, the field has the item's again.
+    MarkWrongSide(known, changed, "width", WrongSide::None);
+    CHECK(FindField(changed, "width")->wrongSide == WrongSide::Client);
+    CHECK(FindField(changed, "width")->markOfItem);
+    MarkWrongSide(known, changed, "width", WrongSide::Server);
 
     // Clearing the whole item clears its fields; the one wrong in the server gets its box back.
     MarkWrongSide(known, changed, "", WrongSide::None);
@@ -420,6 +426,31 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK(
         std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.wrongSide == WrongSide::None; }));
     CHECK(FindField(changed, "width")->checked);
+}
+
+TEST_CASE("A field's mark leaves the other fields' own marks and its item's mark [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    ++kris.height;
+    KnownDifferences known;
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    known.Set(0, 0, "height", WrongSide::Client);
+    ItemSyncDiff diff = sides.Diff(&known);
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    MarkWrongSide(known, row, "width", WrongSide::Client);
+    CHECK(known.Find(0, 0, "height") == WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Server);
+    CHECK(FindField(row, "height")->wrongSide == WrongSide::Client);
+
+    // A field that differs later has the item's mark.
+    kris.repairable = !kris.repairable;
+    const ItemSyncDiff later = sides.Diff(&known);
+    const SyncField* repairable = FindField(*FindRow(later, KrisType), "repairable");
+    REQUIRE(repairable != nullptr);
+    CHECK(repairable->wrongSide == WrongSide::Server);
+    CHECK(repairable->markOfItem);
 }
 
 TEST_CASE("The mark of an item only one side had does not mark its fields once both have it "

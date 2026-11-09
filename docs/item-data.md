@@ -2096,8 +2096,9 @@ difference is wrong. Every list of an import has the two buttons: the item lists
 item as a whole (on a changed item: every field without a mark of its own,
 also one that differs only later), the fields of a changed item for one
 field, and the Formulas list for an entry. Marking the whole item takes
-out its fields' own marks; marking one field of an item marked as a whole
-gives the item's mark to its other fields. At most one of
+out its fields' own marks; a field's own mark counts for that field
+instead of the item's, which stays for the others. A field shows its
+item's mark faint; it is changed on the item's row. At most one of
 them is selected; clicking the selected one again clears it, and the row
 starts as without a mark. *Wrong in client* only marks the difference: it
 leaves its box as it is, so whether Apply takes the server's value stays

@@ -15,8 +15,10 @@ constexpr int ColumnCount = 2;
 // The two columns of a table.
 void SetupColumns();
 // The two buttons in the table's next two columns, showing `side`; the side a click picks
-// (WrongSide::None when it clears the selected one), or nothing.
-std::optional<WrongSide> Render(WrongSide side);
+// (WrongSide::None when it clears the selected one), or nothing. `ofItem`: `side` is the mark of
+// the field's item as a whole, shown faint; it is cleared on the item's row, so a click on it
+// picks nothing.
+std::optional<WrongSide> Render(WrongSide side, bool ofItem = false);
 } // namespace MuEditor::Items::WrongSideButtons
 
 #endif // _EDITOR

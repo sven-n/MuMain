@@ -208,6 +208,7 @@ void MarkField(SyncField& field, const ItemKey& key, WrongSide itemSide, const I
     if (field.wrongSide == WrongSide::None)
     {
         field.wrongSide = itemSide;
+        field.markOfItem = itemSide != WrongSide::None;
     }
     if (IsHeld(options, key) && std::ranges::find(HeldFields, field.field) != std::end(HeldFields))
     {
@@ -763,17 +764,21 @@ void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
         {
             const WrongSide oldField = entry.wrongSide;
             entry.wrongSide = side;
+            entry.markOfItem = side != WrongSide::None;
             UpdateBoxForMark(entry.checked, oldField, side, FieldStartsChecked(entry));
         }
         return;
     }
+    // Without a mark of its own, the field has its item's.
+    const WrongSide itemSide = row.change == SyncChange::Changed ? row.wrongSide : WrongSide::None;
     for (SyncField& entry : row.fields)
     {
         if (entry.field == field)
         {
             const WrongSide old = entry.wrongSide;
-            entry.wrongSide = side;
-            UpdateBoxForMark(entry.checked, old, side, FieldStartsChecked(entry));
+            entry.wrongSide = side != WrongSide::None ? side : itemSide;
+            entry.markOfItem = side == WrongSide::None && itemSide != WrongSide::None;
+            UpdateBoxForMark(entry.checked, old, entry.wrongSide, FieldStartsChecked(entry));
         }
     }
 }
@@ -794,16 +799,6 @@ void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& fi
         known.Set(row.group, row.number, WholeItemField(row.change), side);
         SetWrongSide(row, "", side);
         return;
-    }
-    if (row.change == SyncChange::Changed && row.wrongSide != WrongSide::None)
-    {
-        // A field of an item marked as a whole: the item's mark becomes its other fields' own.
-        known.Set(row.group, row.number, EveryFieldOfItem, WrongSide::None);
-        for (const SyncField& entry : row.fields)
-        {
-            known.Set(row.group, row.number, entry.field, row.wrongSide);
-        }
-        row.wrongSide = WrongSide::None;
     }
     known.Set(row.group, row.number, field, side);
     SetWrongSide(row, field, side);

@@ -33,7 +33,10 @@ struct SyncField
     // As JSON; nothing when that side has the field's default (it leaves the field out).
     std::optional<std::string> current;
     std::optional<std::string> incoming;
+    // Its own mark, else the mark of its item as a whole.
     WrongSide wrongSide = WrongSide::None;
+    // wrongSide is the item's mark: the field has none of its own.
+    bool markOfItem = false;
     // Why it cannot be checked (the game holds the item), or empty.
     std::string locked;
     // Why the value is not exact on the other side, or empty.
@@ -131,8 +134,8 @@ void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);
 // SetWrongSide, and the mark kept in `known` for the next comparisons. A mark of the whole item
-// takes out its fields' own marks; a field's mark on an item marked as a whole gives the item's
-// mark to the item's other fields as their own.
+// takes out its fields' own marks; a field's own mark counts for that field instead of the
+// item's, which stays for the others (also ones that differ only later).
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
 void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
 // After the diff's checked rows were applied: takes out of `known` the marks wrong in the client

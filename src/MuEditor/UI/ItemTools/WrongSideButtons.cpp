@@ -18,11 +18,24 @@ void SetupColumn(const char* head)
     ImGui::TableSetupColumn(head, ImGuiTableColumnFlags_WidthFixed, width);
 }
 
+// The alpha of a field's button that shows its item's mark.
+constexpr float ItemMarkAlpha = 0.5f;
+
 // Whether the button was clicked.
-bool RenderButton(const char* id, bool selected, const char* tooltip)
+bool RenderButton(const char* id, bool selected, bool ofItem, const char* tooltip)
 {
     ImGui::TableNextColumn();
+    const bool faint = selected && ofItem;
+    if (faint)
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * ItemMarkAlpha);
+        tooltip = I18N::Editor::WhatAMarkOfTheItemMeans;
+    }
     const bool clicked = ImGui::RadioButton(id, selected);
+    if (faint)
+    {
+        ImGui::PopStyleVar();
+    }
     // Also on a disabled button.
     ImGui::SetItemTooltip("%s", tooltip);
     return clicked;
@@ -41,16 +54,21 @@ void SetupColumns()
     SetupColumn(I18N::Editor::WrongInServer);
 }
 
-std::optional<WrongSide> Render(WrongSide side)
+std::optional<WrongSide> Render(WrongSide side, bool ofItem)
 {
     std::optional<WrongSide> picked;
-    if (RenderButton("##WrongInClient", side == WrongSide::Client, I18N::Editor::WhatWrongInClientMeans))
+    if (RenderButton("##WrongInClient", side == WrongSide::Client, ofItem, I18N::Editor::WhatWrongInClientMeans))
     {
         picked = Toggle(side, WrongSide::Client);
     }
-    if (RenderButton("##WrongInServer", side == WrongSide::Server, I18N::Editor::WhatWrongInServerMeans))
+    if (RenderButton("##WrongInServer", side == WrongSide::Server, ofItem, I18N::Editor::WhatWrongInServerMeans))
     {
         picked = Toggle(side, WrongSide::Server);
+    }
+    // The item's mark is not the field's to clear.
+    if (ofItem && picked == WrongSide::None)
+    {
+        return std::nullopt;
     }
     return picked;
 }
