@@ -7,6 +7,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/Translation/ItemReferenceChecks.h"
+#include "Data/Translation/ItemTextExpansion.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "I18N/All.h"
@@ -53,10 +54,16 @@ private:
 };
 
 int observedChanges = 0;
+int observedLocaleChanges = 0;
 
 void CountChange(void*) noexcept
 {
     ++observedChanges;
+}
+
+void CountLocaleChange(void*) noexcept
+{
+    ++observedLocaleChanges;
 }
 
 std::wstring Tooltip(const std::string& text, std::string_view language, std::string_view textLanguage = {})
@@ -184,21 +191,27 @@ TEST_CASE("Once a test's item data is gone, the texts that name items are as wri
     CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"{item:14,13}");
 }
 
-TEST_CASE("Turning translated item names off tells the locale observers once [data][texts]")
+TEST_CASE("Turning translated item names off tells the texts-changed observers once, and no locale observer "
+          "[data][texts]")
 {
     ItemTextScope scope;
     REQUIRE(scope.Loaded());
     I18N::SetLocale("de");
-    I18N::RegisterLocaleObserver(&CountChange, nullptr);
+    Data::Translation::ItemTexts::RegisterTextsChangedObserver(&CountChange, nullptr);
+    I18N::RegisterLocaleObserver(&CountLocaleChange, nullptr);
     observedChanges = 0;
+    observedLocaleChanges = 0;
 
     g_ItemDataHandler.SetTranslateItemNames(false);
     CHECK(observedChanges == 1);
     // Nothing changes when it is set to what it is.
     g_ItemDataHandler.SetTranslateItemNames(false);
     CHECK(observedChanges == 1);
+    // The locale stayed: monster names, the map name and the other locale observers are left alone.
+    CHECK(observedLocaleChanges == 0);
 
-    I18N::UnregisterLocaleObserver(&CountChange, nullptr);
+    I18N::UnregisterLocaleObserver(&CountLocaleChange, nullptr);
+    Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&CountChange, nullptr);
 }
 
 TEST_CASE("A language without a text of its own names the items as the English text does [data][texts]")

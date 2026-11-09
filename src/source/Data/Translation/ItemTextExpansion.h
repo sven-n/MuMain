@@ -25,7 +25,14 @@ void SetNameResolver(NameResolver resolver);
 // The UTF-8 text of the locale with each reference it can resolve replaced by the name.
 std::string ExpandText(std::string_view text, std::string_view textLocale);
 
-// Expands the UI texts again for the current locale and, when one changed, calls the locale observers so the copies
-// of texts refresh as on a language switch. Returns whether a text changed.
+// Called when Refresh changed a text, for code that keeps copies of texts (an NPC dialog's lines). A locale switch
+// tells the locale observers instead (I18N::RegisterLocaleObserver).
+using TextsChangedObserver = void (*)(void* context) noexcept;
+void RegisterTextsChangedObserver(TextsChangedObserver observer, void* context);
+void UnregisterTextsChangedObserver(TextsChangedObserver observer, void* context);
+
+// Expands the UI texts again for the current locale and, when one changed, calls the texts-changed observers so the
+// copies of texts refresh. The locale observers are not called: the locale did not change. Returns whether a text
+// changed.
 bool Refresh();
 } // namespace Data::Translation::ItemTexts

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "I18N/All.h"
 #include "Core/Platform/PathResolve.h"
+#include "Data/Translation/ItemTextExpansion.h"
 
 #include <algorithm>
 #include <array>
@@ -157,11 +158,15 @@ CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestInd
 m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST)
 {
     I18N::RegisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
+    // The dialog's lines are copies, so they also follow the item names its texts show (Translate item names, the
+    // editor's name edits).
+    Data::Translation::ItemTexts::RegisterTextsChangedObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 CSQuest::~CSQuest(void)
 {
     I18N::UnregisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
+    Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 bool CSQuest::IsInit(void)

@@ -463,7 +463,10 @@ for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`
 - **When:** a text is expanded when the language switches, when the item data
   is loaded, when Translate item names changes and when the editor changes a
   name; the text's pointer then shows the expansion, so the code that shows a
-  text needs nothing. Before the item data is loaded a text shows `{item:...}`
+  text needs nothing. Code that keeps a copy of a text (an NPC dialog's lines)
+  registers with `ItemTexts::RegisterTextsChangedObserver` as well as with
+  `RegisterLocaleObserver`: a change of names calls only the first, since the
+  language stayed. Before the item data is loaded a text shows `{item:...}`
   as written (no such text is shown that early). A number no item has, or a
   level above +15, stays as written, and the rest of the text is still filled
   in; so does a name with `%` in a Game or Dialog text, a printf format that

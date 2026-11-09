@@ -5,7 +5,10 @@
 #include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace Data::Translation::ItemTexts
 {
@@ -25,6 +28,14 @@ std::unordered_set<std::wstring>& Expansions()
 {
     static std::unordered_set<std::wstring> expansions;
     return expansions;
+}
+
+using TextsChangedObservers = std::vector<std::pair<TextsChangedObserver, void*>>;
+
+TextsChangedObservers& Observers()
+{
+    static TextsChangedObservers observers;
+    return observers;
 }
 
 const wchar_t* ExpandWide(const wchar_t* text, int textLocaleIndex) noexcept
@@ -78,12 +89,27 @@ std::string ExpandText(std::string_view text, std::string_view textLocale)
     return expanded;
 }
 
+void RegisterTextsChangedObserver(TextsChangedObserver observer, void* context)
+{
+    Observers().emplace_back(observer, context);
+}
+
+void UnregisterTextsChangedObserver(TextsChangedObserver observer, void* context)
+{
+    std::erase(Observers(), std::pair(observer, context));
+}
+
 bool Refresh()
 {
     const bool changed = I18N::ExpandItemTexts();
     if (changed)
     {
-        I18N::NotifyLocaleObservers();
+        // A copy, so an observer may unregister itself.
+        const TextsChangedObservers observers = Observers();
+        for (const auto& [observer, context] : observers)
+        {
+            observer(context);
+        }
     }
     return changed;
 }
