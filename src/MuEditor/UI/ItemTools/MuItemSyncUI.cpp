@@ -799,7 +799,6 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
         return;
     }
     SyncOptions options;
-    options.known = &m_known;
     options.comparingFiles = true;
     m_diff = BuildItemSyncDiff(m_fileA, m_file, options);
 }
@@ -1242,7 +1241,9 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
     const float rowHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2.0f;
     const float height =
         std::min(Scaled(ItemListHeight), rowHeight * static_cast<float>(rows.size() + 1) + Scaled(ItemListBorders));
-    const int columns = (checkable ? 1 : 0) + ItemListColumns + WrongSideButtons::ColumnCount;
+    // An import has the check box and the wrong side buttons: the marks are about the client and a
+    // server, not two files.
+    const int columns = (checkable ? 1 + WrongSideButtons::ColumnCount : 0) + ItemListColumns;
     if (ImGui::BeginTable(id, columns, Flags, ImVec2(0.0f, height)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
@@ -1254,7 +1255,10 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                                 ImGuiTableColumnFlags_WidthFixed, ChangeColumnWidth());
         ImGui::TableSetupColumn(I18N::Editor::Item);
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldsColumnWidth));
-        WrongSideButtons::SetupColumns();
+        if (checkable)
+        {
+            WrongSideButtons::SetupColumns();
+        }
         ImGui::TableHeadersRow();
         ImGuiListClipper clipper;
         clipper.Begin(static_cast<int>(rows.size()));
@@ -1307,9 +1311,12 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 }
                 ImGui::TableNextColumn();
                 ImGui::Text("%d", static_cast<int>(row.fields.size()));
-                if (const std::optional<WrongSide> picked = WrongSideButtons::Render(side))
+                if (checkable)
                 {
-                    SetWrongSide(row, "", *picked);
+                    if (const std::optional<WrongSide> picked = WrongSideButtons::Render(side))
+                    {
+                        SetWrongSide(row, "", *picked);
+                    }
                 }
                 ImGui::PopID();
             }
@@ -1365,8 +1372,9 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     // file A has lists file A's values.
     const bool checkable = !m_comparingFiles;
     const bool removed = row.change == SyncChange::Removed;
-    const int columns =
-        (checkable ? 1 : 0) + (changed ? ChangedFieldColumns + WrongSideButtons::ColumnCount : WholeItemFieldColumns);
+    const bool markable = checkable && changed;
+    const int columns = (checkable ? 1 : 0) + (changed ? ChangedFieldColumns : WholeItemFieldColumns) +
+                        (markable ? WrongSideButtons::ColumnCount : 0);
     if (!ImGui::BeginTable("##SyncFields", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
@@ -1385,6 +1393,9 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
+    }
+    if (markable)
+    {
         WrongSideButtons::SetupColumns();
     }
     ImGui::TableHeadersRow();
@@ -1422,6 +1433,9 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
                 ImGui::TextColored(WarningColor, "%s", note.c_str());
                 ImGui::PopTextWrapPos();
             }
+        }
+        if (markable)
+        {
             if (const std::optional<WrongSide> picked = WrongSideButtons::Render(field.wrongSide))
             {
                 SetWrongSide(row, field.field, *picked);
@@ -1465,7 +1479,7 @@ void CMuItemSyncUI::RenderFormulas()
     }
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
-    const int columns = (checkable ? 1 : 0) + FormulaColumns + WrongSideButtons::ColumnCount;
+    const int columns = (checkable ? 1 + WrongSideButtons::ColumnCount : 0) + FormulaColumns;
     if (!ImGui::BeginTable("##SyncFormulas", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
@@ -1478,7 +1492,10 @@ void CMuItemSyncUI::RenderFormulas()
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
     ImGui::TableSetupColumn(checkable ? FromTheSource() : I18N::Editor::FileB);
-    WrongSideButtons::SetupColumns();
+    if (checkable)
+    {
+        WrongSideButtons::SetupColumns();
+    }
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < m_diff->formulas.size(); ++index)
     {
@@ -1496,9 +1513,12 @@ void CMuItemSyncUI::RenderFormulas()
         RenderValue(row.current);
         ImGui::TableNextColumn();
         RenderValue(row.incoming);
-        if (const std::optional<WrongSide> picked = WrongSideButtons::Render(row.wrongSide))
+        if (checkable)
         {
-            SetFormulaWrongSide(row, *picked);
+            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(row.wrongSide))
+            {
+                SetFormulaWrongSide(row, *picked);
+            }
         }
         ImGui::PopID();
     }

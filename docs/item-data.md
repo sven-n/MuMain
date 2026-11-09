@@ -1952,8 +1952,8 @@ phase 7; see the
   Changed, Removed under "From A to B", the values under "File A" and
   "File B"; an item only file A has lists file A's values), in every
   language, also one only one file has. An item a file has twice is a
-  locked row that names that file. Nothing can be applied, but a row can be
-  marked as wrong in the client or the server. An import or a comparison of two files
+  locked row that names that file. Nothing can be applied or marked (the
+  marks are about the client and the server). An import or a comparison of two files
   replaces the other in the window.
 - An import lists only what differs. The lists say how much of what was
   compared differs ("Items that differ (3 of 911)"), and when nothing does,
@@ -2092,7 +2092,7 @@ number, fields with their default value left out, LF line endings.
   of their items are unchecked.
 
 **Wrong in client** and **Wrong in server** say which side of a
-difference is wrong. Every list has the two buttons: the item lists for an
+difference is wrong. Every list of an import has the two buttons: the item lists for an
 item as a whole (on a changed item: every field without a mark of its own,
 also one that differs only later), the fields of a changed item for one
 field, and the Formulas list for an entry. Marking the whole item takes
