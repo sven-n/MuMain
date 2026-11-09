@@ -10,6 +10,8 @@
 // two table columns, at most one of them selected; clicking the selected one again clears it.
 namespace MuEditor::Items::WrongSideButtons
 {
+// The columns SetupColumns adds.
+constexpr int ColumnCount = 2;
 // The two columns of a table.
 void SetupColumns();
 // The two buttons in the table's next two columns, showing `side`; the side a click picks

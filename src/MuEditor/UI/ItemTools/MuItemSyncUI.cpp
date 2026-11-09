@@ -58,6 +58,13 @@ constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
 // it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
 constexpr const char* CheckColumn = "##CheckColumn";
+// The tables' columns besides the check box (of an import) and the wrong side buttons: an item
+// list's change, item and field count; a changed item's field, both values and note (a new or
+// removed item's field and value); a formula entry and both values.
+constexpr int ItemListColumns = 3;
+constexpr int ChangedFieldColumns = 4;
+constexpr int WholeItemFieldColumns = 2;
+constexpr int FormulaColumns = 3;
 // The titles and change columns of Copy as Markdown: English whatever the editor's language, as
 // the copied table is meant for issues and chats.
 constexpr const char* MarkdownDifferFromServer = "Items that differ between the client and the server";
@@ -1235,8 +1242,7 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
     const float rowHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2.0f;
     const float height =
         std::min(Scaled(ItemListHeight), rowHeight * static_cast<float>(rows.size() + 1) + Scaled(ItemListBorders));
-    // The check box, the change, the item, its field count and the two wrong side buttons.
-    const int columns = checkable ? 6 : 5;
+    const int columns = (checkable ? 1 : 0) + ItemListColumns + WrongSideButtons::ColumnCount;
     if (ImGui::BeginTable(id, columns, Flags, ImVec2(0.0f, height)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
@@ -1359,8 +1365,8 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     // file A has lists file A's values.
     const bool checkable = !m_comparingFiles;
     const bool removed = row.change == SyncChange::Removed;
-    // A Changed item's fields: the field, both values, the note and the two wrong side buttons.
-    const int columns = (changed ? 6 : 2) + (checkable ? 1 : 0);
+    const int columns =
+        (checkable ? 1 : 0) + (changed ? ChangedFieldColumns + WrongSideButtons::ColumnCount : WholeItemFieldColumns);
     if (!ImGui::BeginTable("##SyncFields", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
@@ -1459,8 +1465,7 @@ void CMuItemSyncUI::RenderFormulas()
     }
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
-    // The check box, the entry, both values and the two wrong side buttons.
-    const int columns = checkable ? 6 : 5;
+    const int columns = (checkable ? 1 : 0) + FormulaColumns + WrongSideButtons::ColumnCount;
     if (!ImGui::BeginTable("##SyncFormulas", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
