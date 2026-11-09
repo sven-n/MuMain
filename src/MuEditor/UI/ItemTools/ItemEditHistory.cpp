@@ -198,6 +198,13 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::RenderStyles:
+            if (m_hooks.readRenderStyles &&
+                m_hooks.readRenderStyles() != *(undoing ? step.renderStylesAfter : step.renderStylesBefore))
+            {
+                return false;
+            }
+            break;
         }
     }
     return true;
@@ -235,6 +242,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::StatFile:
         case ItemEditStep::Kind::GroundLabelStyles:
         case ItemEditStep::Kind::ColorFolders:
+        case ItemEditStep::Kind::RenderStyles:
             break;
         }
     }
@@ -308,6 +316,12 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         if (m_hooks.restoreColorFolders)
         {
             m_hooks.restoreColorFolders(step.folderRoot, undoing ? step.foldersBefore : step.foldersAfter);
+        }
+        break;
+    case ItemEditStep::Kind::RenderStyles:
+        if (m_hooks.restoreRenderStyles)
+        {
+            m_hooks.restoreRenderStyles(*(undoing ? step.renderStylesBefore : step.renderStylesAfter));
         }
         break;
     }

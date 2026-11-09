@@ -311,9 +311,11 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
     const EffectPoolGuard removeItemEffects;
+    // As the first Doppelganger map draws its monsters' items (RenderCharacter).
+    const int renderType = request.itemAsDoppelganger ? RENDER_DOPPELGANGER | RENDER_TEXTURE : RENDER_TEXTURE;
     RenderPartObject(o, models.model, nullptr, light, o->Alpha, models.drawLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
-                     true, true);
+                     true, true, 0, renderType);
 }
 
 // The ground a dropped item lies above (HandleItemOnGround): the item is at

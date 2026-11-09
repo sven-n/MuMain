@@ -160,6 +160,8 @@ mu_add_test(
 target_compile_definitions(monster_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
@@ -183,6 +185,7 @@ mu_add_test(
     SOURCES
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
+        test_style_editor.cpp
         test_dark_lord_pet_tooltip.cpp
         test_item_bytes.cpp
         test_item_database_files.cpp
@@ -213,8 +216,6 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_TOOLTIP_SNAPSHOT="${CMAKE_CURRENT_SOURCE_DIR}/item_tooltip_snapshot.txt"
     MU_TEST_CHAIN_TEXTS_BEFORE="${CMAKE_CURRENT_SOURCE_DIR}/item_chain_texts_before.json"
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
 # Animates the shipped player model the way the character pre-pass does, and
@@ -225,6 +226,8 @@ mu_add_test(
     SOURCES
         test_character_bones.cpp
         test_player_body_models.cpp
+        ClientFolderScope.cpp
+        PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -303,9 +306,32 @@ target_compile_definitions(model_files_data_tests PRIVATE
 mu_add_test(
     NAME player_model_selector_tests
     SOURCES test_player_model_selector.cpp
+        ClientFolderScope.cpp
+        ExecutableConfigFile.cpp
+        PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 target_compile_definitions(player_model_selector_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# Render styles as data (docs/item-data.md, "Render styles and item effects"): the look file, the layers' drawing
+# and the comparison of each moved look with its old code, on the item models of the test data.
+mu_add_test(
+    NAME render_style_tests
+    SOURCES
+        test_look_files.cpp
+        test_look_checks.cpp
+        test_look_effects.cpp
+        test_look_drawing.cpp
+        test_look_recorder.cpp
+        LookRecorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(render_style_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )

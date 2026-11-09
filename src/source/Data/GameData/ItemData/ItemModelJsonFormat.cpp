@@ -7,7 +7,9 @@
 #include "ItemModelMaterialJson.h"
 #include "ItemTextureFiles.h"
 
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/Common/DataPaths.h"
+#include "Data/GameData/Common/MeshLimits.h"
 
 #include <algorithm>
 #include <limits>
@@ -28,6 +30,7 @@ constexpr const char* Name = "name";
 constexpr const char* File = "file";
 constexpr const char* TextureFolders = "textureFolders";
 constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
+constexpr const char* MeshNames = "meshNames";
 constexpr const char* RenderStyle = "renderStyle";
 constexpr const char* ItemEffect = "itemEffect";
 } // namespace Keys
@@ -38,6 +41,7 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        Keys::File,
                                                        Keys::TextureFolders,
                                                        Keys::NoneBlendMeshes,
+                                                       Keys::MeshNames,
                                                        DisplayJson::InventoryKey,
                                                        DisplayJson::GroundKey,
                                                        DisplayJson::ClothKey,
@@ -46,17 +50,17 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        Keys::RenderStyle,
                                                        Keys::ItemEffect};
 const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
-                                                         Keys::NoneBlendMeshes};
+                                                         Keys::NoneBlendMeshes, Keys::MeshNames};
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 using Data::Paths::FindPathProblem;
 
 // ---------------------------------------------------------------- writing
 
-// The file, texture folders and none-blend meshes of a model entry or a
-// shared model.
+// The file, texture folders, none-blend meshes and mesh names of a model entry or a shared model.
 void WriteModelFile(const std::string& file, const std::vector<std::string>& textureFolders,
-                    const std::vector<int>& noneBlendMeshes, OrderedJson& json)
+                    const std::vector<int>& noneBlendMeshes, const std::map<int, std::string>& meshNames,
+                    OrderedJson& json)
 {
     json[Keys::File] = file;
     if (!textureFolders.empty())
@@ -66,6 +70,15 @@ void WriteModelFile(const std::string& file, const std::vector<std::string>& tex
     if (!noneBlendMeshes.empty())
     {
         json[Keys::NoneBlendMeshes] = noneBlendMeshes;
+    }
+    if (!meshNames.empty())
+    {
+        OrderedJson names = OrderedJson::object();
+        for (const auto& [mesh, name] : meshNames)
+        {
+            names[std::to_string(mesh)] = name;
+        }
+        json[Keys::MeshNames] = std::move(names);
     }
 }
 
@@ -80,7 +93,7 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     }
     else
     {
-        WriteModelFile(model.file, model.textureFolders, model.noneBlendMeshes, json);
+        WriteModelFile(model.file, model.textureFolders, model.noneBlendMeshes, model.meshNames, json);
     }
     DisplayJson::Write(model, json);
     GlowJson::Write(model, json);
@@ -106,6 +119,7 @@ std::string DumpModelFile(const OrderedJson& root)
     {
         text = Json::PutListsOnOneLine(text, key);
     }
+    text = Json::PutObjectsOnOneLine(text, Keys::MeshNames);
     return text + "\n";
 }
 
@@ -134,6 +148,7 @@ private:
     bool ReadFile(const OrderedJson& json, std::string& file);
     void ReadTextureFolders(const OrderedJson& json, std::vector<std::string>& folders);
     void ReadNoneBlendMeshes(const OrderedJson& json, std::vector<int>& meshes);
+    void ReadMeshNames(const OrderedJson& json, std::map<int, std::string>& names);
     void ReadLookName(const OrderedJson& json, const char* key, std::string& name);
     void WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys);
 
@@ -234,6 +249,47 @@ void ItemModelReader::ReadNoneBlendMeshes(const OrderedJson& json, std::vector<i
     }
 }
 
+// The names are only shown, so a problem leaves the name out and is a warning.
+void ItemModelReader::ReadMeshNames(const OrderedJson& json, std::map<int, std::string>& names)
+{
+    const auto list = json.find(Keys::MeshNames);
+    if (list == json.end())
+    {
+        return;
+    }
+    if (!list->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Warning, Keys::MeshNames,
+                 "must be an object of mesh numbers and names, e.g. {\"0\": \"Shaft\"}; left out");
+        return;
+    }
+    for (const auto& [key, value] : list->items())
+    {
+        const std::string field = std::string(Keys::MeshNames) + "." + key;
+        long long mesh = -1;
+        const bool number = !key.empty() && key.size() <= 2 &&
+                            std::all_of(key.begin(), key.end(), [](char c) { return c >= '0' && c <= '9'; });
+        if (number)
+        {
+            mesh = std::stoll(key);
+        }
+        if (!number || mesh >= MaxModelMeshes)
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, field,
+                     "is not a mesh number (0 to " + std::to_string(MaxModelMeshes - 1) + "); left out");
+            continue;
+        }
+        if (!value.is_string() || !Colors::IsColorFolderName(value.get_ref<const std::string&>()))
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, field,
+                     "must be a name of 1 to " + std::to_string(Colors::MaxColorFolderNameLength) +
+                         " characters, without a space at either end or a control character; left out");
+            continue;
+        }
+        names[static_cast<int>(mesh)] = value.get<std::string>();
+    }
+}
+
 // A shared model, a render style or an item effect; whether it exists is
 // checked when the models are loaded (the shared models) or opened.
 void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std::string& name)
@@ -277,7 +333,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     {
         // The file, texture folders and none-blend meshes are the shared model's.
         ReadLookName(json, Keys::Model, model.model);
-        for (const char* key : {Keys::File, Keys::TextureFolders, Keys::NoneBlendMeshes})
+        for (const char* key : {Keys::File, Keys::TextureFolders, Keys::NoneBlendMeshes, Keys::MeshNames})
         {
             if (json.contains(key))
             {
@@ -289,6 +345,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     {
         ReadTextureFolders(json, model.textureFolders);
         ReadNoneBlendMeshes(json, model.noneBlendMeshes);
+        ReadMeshNames(json, model.meshNames);
     }
     else
     {
@@ -328,6 +385,7 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedIt
     }
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
+    ReadMeshNames(json, model.meshNames);
     WarnAboutUnknownKeys(json, SharedModelKeys);
     return !m_hasFatal;
 }
@@ -436,7 +494,7 @@ std::string WriteSharedItemModelsJson(std::span<const SharedItemModel> models)
     {
         OrderedJson json;
         json[Keys::Name] = model->name;
-        WriteModelFile(model->file, model->textureFolders, model->noneBlendMeshes, json);
+        WriteModelFile(model->file, model->textureFolders, model->noneBlendMeshes, model->meshNames, json);
         root[Keys::Models].push_back(std::move(json));
     }
     return DumpModelFile(root);

@@ -3453,7 +3453,7 @@ namespace Render::Effects::Behaviors
             }
             if ((int)o->LifeTime % 15 == 0)
                 if (o->Owner == &Hero->Object)
-                    AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
+                    SpinMonstersInTornado(o->Position, 150.f);
             break;
 
         case 1:

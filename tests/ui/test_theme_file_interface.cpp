@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "UI/RmlBridge/ThemeInheritance.h"

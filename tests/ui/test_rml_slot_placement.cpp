@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlPointer.h"

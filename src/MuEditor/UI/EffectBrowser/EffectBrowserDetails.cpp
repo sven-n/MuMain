@@ -170,12 +170,18 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserMo
     RenderIdentity(*row, selected->kind);
     if (BeginSection("preview", I18N::Editor::Preview))
         m_preview.Render(*row, selected->kind, m_details, world);
-    std::optional<EffectTypeRef> clicked = RenderSameNumber(model);
-    RenderAsset(*row);
-    if (const std::optional<EffectTypeRef> sharing = RenderStages(model, *row, selected->kind))
-        clicked = sharing;
-    RenderCreationValues(selected->kind);
-    RenderUsedBy(selected->kind);
+    // The sections scroll below the preview, which stays where it is.
+    std::optional<EffectTypeRef> clicked;
+    if (ImGui::BeginChild("##Sections"))
+    {
+        clicked = RenderSameNumber(model);
+        RenderAsset(*row);
+        if (const std::optional<EffectTypeRef> sharing = RenderStages(model, *row, selected->kind))
+            clicked = sharing;
+        RenderCreationValues(selected->kind);
+        RenderUsedBy(selected->kind);
+    }
+    ImGui::EndChild();
     return clicked;
 }
 

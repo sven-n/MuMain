@@ -13,8 +13,10 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Render/Items/LookDrawing.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -111,6 +113,21 @@ void RestoreColorFolders(std::string_view root, std::span<const Data::Colors::Co
     }
 }
 
+Data::Looks::RenderStylesFile ReadRenderStyles()
+{
+    return g_ItemDataHandler.GetRenderStyles();
+}
+
+// The game draws the looks at once, with the textures they name.
+void RestoreRenderStyles(const Data::Looks::RenderStylesFile& file)
+{
+    g_ItemDataHandler.SetRenderStyles(file);
+    for (const Data::Looks::LookDefinition& look : g_ItemDataHandler.GetRenderStyles().looks)
+    {
+        Render::Items::Looks::PrepareTextures(look);
+    }
+}
+
 Data::Items::ItemStatFile ReadStatFile()
 {
     return g_ItemDataHandler.GetStatFile();
@@ -146,7 +163,7 @@ ItemEdits::ItemEdits()
                  [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
                  &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
                  &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
-                 &RestoreColorFolders})
+                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles})
 {
 }
 
@@ -391,6 +408,24 @@ void ItemEdits::SetColorFolders(std::string label, std::string_view root,
     Record(std::move(entry));
 }
 
+void ItemEdits::SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file)
+{
+    // Compared as the item data keeps the file, its looks sorted by name: a file as it is changes nothing, so it
+    // neither marks the file for Save nor counts as a change of the looks.
+    std::ranges::sort(file.looks, {}, &Data::Looks::LookDefinition::name);
+    auto before = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
+    if (*before == file)
+    {
+        return;
+    }
+    RestoreRenderStyles(file);
+    auto after = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
+    ItemEditStep step{ItemEditStep::Kind::RenderStyles};
+    step.renderStylesBefore = std::move(before);
+    step.renderStylesAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+}
+
 void ItemEdits::SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors)
 {
     std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
@@ -521,7 +556,7 @@ void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& 
 
 void ItemEdits::BeginGroup(std::string label)
 {
-    if (!m_group)
+    if (m_groupDepth++ == 0)
     {
         m_group = ItemEditEntry{std::move(label), {}};
     }
@@ -529,6 +564,10 @@ void ItemEdits::BeginGroup(std::string label)
 
 void ItemEdits::EndGroup()
 {
+    if (m_groupDepth == 0 || --m_groupDepth > 0)
+    {
+        return;
+    }
     if (m_group)
     {
         ItemEditEntry entry = std::move(*m_group);
@@ -557,6 +596,7 @@ void ItemEdits::Record(ItemEditEntry entry)
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
                         step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
                         step.kind == ItemEditStep::Kind::GroundLabelStyles ||
+                        step.kind == ItemEditStep::Kind::RenderStyles ||
                         (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
@@ -578,6 +618,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::StatFile)
         {
             same->statFileAfter = std::move(step.statFileAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::RenderStyles)
+        {
+            same->renderStylesAfter = std::move(step.renderStylesAfter);
         }
         else
         {

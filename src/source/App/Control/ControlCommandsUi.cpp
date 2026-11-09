@@ -301,24 +301,28 @@ std::string Console(const Request& request, std::unique_ptr<Act>& /*act*/)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`text` is a `$` command, e.g. \"$fps 60\"");
     }
-    bool known = false;
+    ConsoleCommandResult result;
     try
     {
-        known = g_ConsoleDebug->CheckCommand(Core::Text::FromUtf8(text));
+        result = g_ConsoleDebug->CheckCommand(Core::Text::FromUtf8(text));
     }
     catch (const std::exception&)
     {
-        // A command that parses its arguments with std::stof/substr throws on a missing or
-        // malformed one ("$fps" without a number); refuse it instead of ending the client.
+        // A command that throws must be refused instead of ending the client. The commands
+        // report a bad argument themselves, so this only catches an unforeseen failure.
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`" + text + "` is missing an argument or has a malformed one");
     }
-    if (!known)
+    if (result.status == ConsoleCommandStatus::BadArgument)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, Core::Text::ToUtf8(result.message.c_str()));
+    }
+    if (result.status == ConsoleCommandStatus::NotHandled)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the client has no `$` command `" + text + "`");
     }
-    nlohmann::json result;
-    result["text"] = text;
-    return EncodeResult(request.EncodedId(), result.dump());
+    nlohmann::json result_ok;
+    result_ok["text"] = text;
+    return EncodeResult(request.EncodedId(), result_ok.dump());
 }
 } // namespace App::Control::Commands

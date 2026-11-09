@@ -41,6 +41,49 @@ BYTE    g_byUpperBoneLocation[7] = { 25, 26, 27, 20, 34, 35, 36 };
 
 OBJECT Effects[MAX_EFFECTS];
 
+namespace
+{
+// A live, visible character that isn't dying, within range of the position on the ground plane.
+// The distances are compared squared, so no square root per character (coding rule 12).
+bool IsLiveCharacterInRange(const CHARACTER& c, const vec3_t position, float range)
+{
+    const OBJECT& o = c.Object;
+    if (!o.Live || !o.Visible || c.Dead != 0)
+        return false;
+
+    const float dx = position[0] - o.Position[0];
+    const float dy = position[1] - o.Position[1];
+    return dx * dx + dy * dy <= range * range;
+}
+
+// Frames a monster spins after a tornado touched it; the spin slows down while it counts down.
+constexpr float TornadoSpinTime = 10.f;
+
+// Gates, statues and other immobile monsters keep their orientation.
+bool CanSpinInTornado(const CHARACTER& c)
+{
+    if (c.NotRotateOnMagicHit)
+        return false;
+
+    // The original also kept Selupan, its spider eggs and the Imperial Guardian gates and statue still.
+    switch (c.MonsterIndex)
+    {
+    case MONSTER_SELUPAN:
+    case MONSTER_SPIDER_EGGS_1:
+    case MONSTER_SPIDER_EGGS_2:
+    case MONSTER_SPIDER_EGGS_3:
+    case MONSTER_EVIL_GATE:
+    case MONSTER_LION_GATE:
+    case MONSTER_STATUE:
+    case MONSTER_STAR_GATE:
+    case MONSTER_RUSH_GATE:
+        return false;
+    default:
+        return true;
+    }
+}
+} // namespace
+
 bool CheckCharacterRange(OBJECT* so, float Range, short PKKey, BYTE Kind = 0)
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -48,21 +91,27 @@ bool CheckCharacterRange(OBJECT* so, float Range, short PKKey, BYTE Kind = 0)
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
 
-        if (!o->Live || (Kind != 0 && Kind == o->Kind)) continue;
+        if ((Kind != 0 && Kind == o->Kind) || so->Owner == o)
+            continue;
 
-        if (so->Owner != o)
+        if ((c != Hero || Kind == KIND_MONSTER) && IsLiveCharacterInRange(*c, so->Position, Range))
         {
-            float dx = so->Position[0] - o->Position[0];
-            float dy = so->Position[1] - o->Position[1];
-            float Distance = sqrtf(dx * dx + dy * dy);
-
-            if (o->Live && o->Visible && (c != Hero || (Kind == KIND_MONSTER)) && c->Dead == 0 && Distance <= Range)
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
+}
+
+void SpinMonstersInTornado(const vec3_t position, float range)
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER& c = CharactersClient[i];
+        if (c.Object.Kind == KIND_MONSTER && IsLiveCharacterInRange(c, position, range) && CanSpinInTornado(c))
+        {
+            c.StormTime = TornadoSpinTime;
+        }
+    }
 }
 
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey, WORD SkillSerialNum)

@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "UI/Character/WorldLabelLayer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 

@@ -63,6 +63,9 @@ public:
     static constexpr std::string_view GroundLabelFolders = "groundLabels";
     // The folders of the root (CItemDataHandler::SetGlowColorFolders, SetGroundLabelFolders), as one step.
     void SetColorFolders(std::string label, std::string_view root, std::vector<Data::Colors::ColorFolder> folders);
+    // The render style file (CItemDataHandler::SetRenderStyles) and the textures its looks name, as one step (design
+    // L39); nothing when it is as it was.
+    void SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file);
     // Puts the glow colors or the label styles in this order (the same names), as one step.
     void SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors);
     void SetGroundLabelStyleOrder(std::string label, std::span<const Data::Items::GroundLabelStyle> styles);
@@ -72,7 +75,8 @@ public:
                      std::span<const Data::Items::ItemDefinition> repointed = {});
 
     // The changes until EndGroup are one undo step under `label` (an item
-    // duplicated with its model made shared).
+    // duplicated with its model made shared). A group begun inside one is
+    // part of it: its label is the outer one's.
     void BeginGroup(std::string label);
     void EndGroup();
 
@@ -106,6 +110,7 @@ private:
 
     ItemEditHistory m_history;
     std::optional<ItemEditEntry> m_group;
+    int m_groupDepth = 0;
 };
 } // namespace MuEditor::Items
 

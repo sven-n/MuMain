@@ -76,7 +76,7 @@ private:
     // The blend the texture of a type of another kind than sprites is shown
     // with.
     MuEditor::Effects::PreviewSpriteBlend m_spriteBlend = MuEditor::Effects::PreviewSpriteBlend::Glow;
-    bool m_turn = true;
+    bool m_turn = false;
 
     MuEditor::Effects::EffectPreviewItems m_items;
     int m_itemsVersion = -1;

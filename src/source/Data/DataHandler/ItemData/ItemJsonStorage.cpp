@@ -206,6 +206,10 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
     }
+    if (models.renderStylesChanged)
+    {
+        files.push_back({models.renderStylesFile, models.renderStylesText});
+    }
 #endif
 }
 } // namespace

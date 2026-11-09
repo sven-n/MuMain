@@ -1,6 +1,7 @@
 #include "Render/Look/LookTuningCommand.h"
 
-#include <cwchar>
+#include "Core/Text/NumberParse.h"
+
 #include <initializer_list>
 #include <vector>
 
@@ -31,22 +32,6 @@ const CommandForm CommandForms[] = {
     {L"$bloom ", {LookValue::BloomStrength}},
 };
 
-// One number, the whole word.
-std::optional<double> ParseNumber(std::wstring_view word)
-{
-    if (word.empty())
-    {
-        return std::nullopt;
-    }
-    const std::wstring copy(word);
-    wchar_t* end = nullptr;
-    const double number = std::wcstod(copy.c_str(), &end);
-    if (end != copy.c_str() + copy.size())
-    {
-        return std::nullopt;
-    }
-    return number;
-}
 
 std::vector<std::wstring_view> Words(std::wstring_view text)
 {
@@ -116,7 +101,7 @@ std::optional<LookTuningCommand> ParseNumbers(std::wstring_view text, std::initi
     LookTuningCommand command;
     for (const LookValue value : values)
     {
-        const std::optional<double> number = ParseNumber(words[command.count]);
+        const std::optional<double> number = Core::Text::TryParseDouble(words[command.count]);
         if (!number)
         {
             return std::nullopt;
@@ -191,7 +176,7 @@ std::optional<LookCommand> ParseLookCommand(std::wstring_view command)
             return std::nullopt;
         }
         const std::optional<std::string> name = Ascii(words[next]);
-        const std::optional<double> value = ParseNumber(words[next + 1]);
+        const std::optional<double> value = Core::Text::TryParseDouble(words[next + 1]);
         if (!name || !value)
         {
             return std::nullopt;

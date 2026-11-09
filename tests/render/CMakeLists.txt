@@ -85,6 +85,7 @@ mu_add_test(
     SOURCES
         test_antialiasing.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/Antialiasing.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
 )
 
 mu_add_test(
@@ -276,6 +277,8 @@ mu_add_test(
 target_compile_definitions(look_profile_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(look_profile_tests test_look_tuning.cpp)
 
 # The light mood against the real terrain light buffers; they come with the
 # client globals of Winmain.cpp.
@@ -452,5 +455,6 @@ add_test(NAME texture_failure_dispatch_decline COMMAND "${Python3_EXECUTABLE}"
 mu_add_test(
     NAME bitmap_loader_tests
     SOURCES test_bitmap_loader.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/ClientFolderScope.cpp
     LINK_LIBS MuClient
 )

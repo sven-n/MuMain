@@ -180,13 +180,32 @@ TEST_CASE("An object blur keeps every sample submitted within a frame [render][t
     CheckBatchesWithinFrames(Render::Effects::g_objectBlurs, &owner);
 }
 
+namespace
+{
+// Puts FPS_ANIMATION_FACTOR back when the case ends, also when a REQUIRE throws, so later cases run at the real rate.
+class FrameFactorScope
+{
+public:
+    FrameFactorScope() : m_saved(FPS_ANIMATION_FACTOR) {}
+    ~FrameFactorScope()
+    {
+        FPS_ANIMATION_FACTOR = m_saved;
+    }
+    FrameFactorScope(const FrameFactorScope&) = delete;
+    FrameFactorScope& operator=(const FrameFactorScope&) = delete;
+
+private:
+    float m_saved;
+};
+} // namespace
+
 TEST_CASE("A trail laid once per reference frame keeps its authored length at high FPS [render][timing]")
 {
     for (int i = 0; i < MAX_JOINTS; ++i)
     {
         Joints[i].Live = false;
     }
-    const float savedFactor = FPS_ANIMATION_FACTOR;
+    const FrameFactorScope frameFactor;
     FPS_ANIMATION_FACTOR = 0.1f;
     vec3_t position = {1000.f, 1000.f, 100.f};
     vec3_t angle = {0.f, 0.f, 0.f};
@@ -203,7 +222,6 @@ TEST_CASE("A trail laid once per reference frame keeps its authored length at hi
         CHECK(joint->NumTails <= 1);
     }
     joint->Live = false;
-    FPS_ANIMATION_FACTOR = savedFactor;
 }
 
 namespace
@@ -236,7 +254,7 @@ std::array<float, 3> BoltEnd(float frameFactor)
 
 TEST_CASE("A lightning bolt reaches its target within one move at every frame rate [render][timing]")
 {
-    const float savedFactor = FPS_ANIMATION_FACTOR;
+    const FrameFactorScope frameFactor;
     for (const float factor : {1.f, 0.1f})
     {
         CAPTURE(factor);
@@ -245,12 +263,11 @@ TEST_CASE("A lightning bolt reaches its target within one move at every frame ra
         const float dx = end[0] - 1600.f, dy = end[1] - 1000.f, dz = end[2] - 80.f;
         CHECK(std::sqrt(dx * dx + dy * dy + dz * dz) <= 80.f);
     }
-    FPS_ANIMATION_FACTOR = savedFactor;
 }
 
 TEST_CASE("A lightning bolt built in one move keeps its authored segment count at high FPS [render][timing]")
 {
-    const float savedFactor = FPS_ANIMATION_FACTOR;
+    const FrameFactorScope frameFactor;
     int referenceTails = -1;
     for (const float factor : {1.f, 0.1f})
     {
@@ -274,7 +291,105 @@ TEST_CASE("A lightning bolt built in one move keeps its authored segment count a
         CHECK(joint->NumTails == referenceTails);
         joint->Live = false;
     }
-    FPS_ANIMATION_FACTOR = savedFactor;
+}
+
+namespace
+{
+// The spear flares' sub-types: Impale's (starts at life time 110) and Death Stab's (70).
+constexpr int ImpaleFlare = 4;
+constexpr int DeathStabFlare = 12;
+// Power-of-two frame factors, so every life time step is exact and the moves can be counted exactly.
+// 1/16384 and 1/1024 are far above the rate where the cap binds (12 / factor > MAX_SPEAR_FLARE_MOVES); 1/8 is below.
+constexpr float CappedFactor = 1.f / 16384.f;
+
+// A new spear flare of that sub-type, the only live joint.
+JOINT* CreateSpearFlare(int subType)
+{
+    for (int i = 0; i < MAX_JOINTS; ++i)
+    {
+        Joints[i].Live = false;
+    }
+    static OBJECT owner;
+    owner.Live = true;
+    Vector(1000.f, 1000.f, 100.f, owner.Position);
+    vec3_t angle = {0.f, 0.f, 0.f};
+    CreateJoint(BITMAP_FLARE, owner.Position, owner.Position, angle, subType, &owner, 100.f);
+    JOINT* joint = std::find_if(Joints, Joints + MAX_JOINTS, [](const JOINT& j) { return j.Live; });
+    REQUIRE(joint != Joints + MAX_JOINTS);
+    return joint;
+}
+} // namespace
+
+TEST_CASE("A spear flare moves until its life time is a multiple of 12, without recursing [render][timing]")
+{
+    const FrameFactorScope frameFactor;
+    for (const int subType : {ImpaleFlare, DeathStabFlare})
+    {
+        for (const float factor : {1.f, 0.125f, CappedFactor})
+        {
+            CAPTURE(subType);
+            CAPTURE(factor);
+            FPS_ANIMATION_FACTOR = factor;
+            // Before, a frame this short nested tens of thousands of calls of MoveJoint and overflowed the stack.
+            JOINT* joint = CreateSpearFlare(subType);
+            const float lifeTime = joint->LifeTime;
+            REQUIRE(static_cast<int>(lifeTime) % 12 != 0);
+            MoveJoints();
+            CHECK(joint->Live);
+            if (factor == CappedFactor)
+            {
+                CHECK((lifeTime - joint->LifeTime) / factor == static_cast<float>(MAX_SPEAR_FLARE_MOVES));
+            }
+            else
+            {
+                CHECK(static_cast<int>(joint->LifeTime) % 12 == 0);
+            }
+            joint->Live = false;
+        }
+    }
+}
+
+TEST_CASE("At a very high frame rate a spear flare moves on frame after frame until it dies [render][timing]")
+{
+    const FrameFactorScope frameFactor;
+    // ~25000 FPS, where the cap binds (12 x 1024 moves), and 200 FPS, where it doesn't (at most 96 moves).
+    for (const float factor : {1.f / 1024.f, 0.125f})
+    {
+        CAPTURE(factor);
+        FPS_ANIMATION_FACTOR = factor;
+        JOINT* joint = CreateSpearFlare(DeathStabFlare);
+        const float lifeTime = joint->LifeTime;
+
+        // Every frame moves it at least once and at most MAX_SPEAR_FLARE_MOVES times, so it never stalls.
+        const int mostFrames = static_cast<int>(std::ceil(lifeTime / factor)) + 1;
+        int frames = 0;
+        float before = joint->LifeTime;
+        while (joint->Live && frames <= mostFrames)
+        {
+            MoveJoints();
+            ++frames;
+            const float moves = (before - joint->LifeTime) / factor;
+            CHECK(moves >= 1.f);
+            CHECK(moves <= static_cast<float>(MAX_SPEAR_FLARE_MOVES));
+            // Between frames the life time stops only at a multiple of 12 or at the cap, never short of either.
+            if (joint->Live && moves < static_cast<float>(MAX_SPEAR_FLARE_MOVES))
+            {
+                CHECK(static_cast<int>(joint->LifeTime) % 12 == 0);
+            }
+            before = joint->LifeTime;
+        }
+        CHECK_FALSE(joint->Live);
+        CHECK(frames >= static_cast<int>(lifeTime / (MAX_SPEAR_FLARE_MOVES * factor)));
+    }
+
+    // A flare that dies in its frame's first move is not moved again. At 25 FPS its life time goes from 0 to -1, which
+    // isn't a multiple of 12, so without the Live check it would move 11 more times, down to -12.
+    FPS_ANIMATION_FACTOR = 1.f;
+    JOINT* dying = CreateSpearFlare(DeathStabFlare);
+    dying->LifeTime = 0.f;
+    MoveJoints();
+    CHECK_FALSE(dying->Live);
+    CHECK(dying->LifeTime == -1.f);
 }
 
 TEST_CASE("Monster lightning collects at most one target per TargetIndex entry [render]")

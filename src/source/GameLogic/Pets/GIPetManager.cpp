@@ -622,6 +622,7 @@ static std::uint8_t g_tabBar = 0;
 
         int TextNum = 0;
         int SkipNum = 0;
+        ClearTooltipRows();
         int RequireLevel = 0;
         int RequireCharisma = 0;
         const std::wstring priceFormat = SanitizeWideStringFormat(I18N::Game::SellingPriceS);

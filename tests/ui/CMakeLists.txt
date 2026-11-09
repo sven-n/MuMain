@@ -21,6 +21,8 @@ target_compile_definitions(map_name_tests PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
     MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(map_name_tests test_map_name.cpp)
 
 mu_add_test(
     NAME cursed_temple_skill_tests
@@ -31,8 +33,6 @@ mu_add_test(
 )
 target_compile_definitions(cursed_temple_skill_tests PRIVATE
     MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
 mu_add_test(
@@ -196,6 +196,7 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/ExecutableConfigFile.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
     # Saves the config.ini beside the executable, as theme_file_interface_tests does.
@@ -299,8 +300,6 @@ mu_add_test(
     LINK_LIBS MuClient mu_test_rml_layout_fixture
 )
 target_compile_definitions(rml_party_trade_layout_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
     MU_LOCALIZATION_DIR="${CMAKE_SOURCE_DIR}/src/Localization"
 )
 
@@ -383,10 +382,6 @@ add_test(
         --executable "$<TARGET_FILE:rml_text_layout_tests>"
         --output "${CMAKE_BINARY_DIR}/text-layout-baseline"
 )
-target_compile_definitions(rml_text_layout_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
-)
 
 mu_add_test(
     NAME rml_styling_regression_tests
@@ -406,8 +401,4 @@ mu_add_test(
         test_rml_click_sounds.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient mu_test_rml_layout_fixture
-)
-target_compile_definitions(rml_click_sound_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )

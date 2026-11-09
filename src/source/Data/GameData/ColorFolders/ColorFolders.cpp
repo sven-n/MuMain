@@ -18,7 +18,6 @@ using Items::Json::OrderedJson;
 
 constexpr const char* NameKey = "name";
 constexpr const char* FoldersKey = "folders";
-constexpr const char* ColorsKey = "colors";
 
 // U+0000 to U+001F and U+007F, which a name can't show.
 bool IsControlCharacter(char character)
@@ -40,8 +39,8 @@ class FolderReader
 {
 public:
     FolderReader(const std::string& source, const std::function<bool(std::string_view)>& isColor,
-                 std::vector<ItemDataIssue>& issues)
-        : m_source(source), m_isColor(isColor), m_issues(issues)
+                 std::vector<ItemDataIssue>& issues, const FolderKeys& keys)
+        : m_source(source), m_isColor(isColor), m_issues(issues), m_keys(keys)
     {
     }
 
@@ -97,7 +96,7 @@ private:
 
     ColorFolder ReadContent(const OrderedJson& json, const std::string& field, std::size_t depth, std::string name)
     {
-        Items::Json::WarnAboutUnknownKeys(json, {NameKey, FoldersKey, ColorsKey}, field + ".",
+        Items::Json::WarnAboutUnknownKeys(json, {NameKey, FoldersKey, m_keys.entries}, field + ".",
                                           [this](const std::string& unknown, const std::string& message)
                                           { Warn(unknown, message); });
         ColorFolder folder;
@@ -106,9 +105,9 @@ private:
         {
             folder.folders = ReadList(*folders, field + "." + FoldersKey, depth + 1);
         }
-        if (const auto colors = json.find(ColorsKey); colors != json.end())
+        if (const auto colors = json.find(m_keys.entries); colors != json.end())
         {
-            ReadColors(*colors, field + "." + ColorsKey, folder.colors);
+            ReadColors(*colors, field + "." + m_keys.entries, folder.colors);
         }
         return folder;
     }
@@ -117,7 +116,7 @@ private:
     {
         if (!list.is_array())
         {
-            Warn(field, "must be a list of color names; left out");
+            Warn(field, std::string("must be a list of ") + m_keys.entry + " names; left out");
             return;
         }
         for (std::size_t index = 0; index < list.size(); ++index)
@@ -125,13 +124,13 @@ private:
             const std::string entryField = field + "[" + std::to_string(index) + "]";
             if (!list[index].is_string())
             {
-                Warn(entryField, "must be a color's name; left out");
+                Warn(entryField, std::string("must be a ") + m_keys.entry + "'s name; left out");
                 continue;
             }
             std::string color = list[index].get<std::string>();
             if (!m_isColor(color))
             {
-                Warn(entryField, "\"" + color + "\" is not a color of the file; left out");
+                Warn(entryField, "\"" + color + "\" is not a " + m_keys.entry + " of the file; left out");
                 continue;
             }
             if (!m_placed.insert(color).second)
@@ -152,23 +151,25 @@ private:
     const std::string& m_source;
     const std::function<bool(std::string_view)>& m_isColor;
     std::vector<ItemDataIssue>& m_issues;
+    const FolderKeys& m_keys;
     std::set<std::string, std::less<>> m_placed;
 };
 
-OrderedJson WriteFolder(const ColorFolder& folder, const std::function<bool(std::string_view)>& isColor)
+OrderedJson WriteFolder(const ColorFolder& folder, const std::function<bool(std::string_view)>& isColor,
+                        const FolderKeys& keys)
 {
     OrderedJson json = OrderedJson::object();
     json[NameKey] = folder.name;
     if (!folder.folders.empty())
     {
-        json[FoldersKey] = WriteColorFolders(folder.folders, isColor);
+        json[FoldersKey] = WriteColorFolders(folder.folders, isColor, keys);
     }
     std::vector<std::string> colors;
     std::copy_if(folder.colors.begin(), folder.colors.end(), std::back_inserter(colors),
                  [&isColor](const std::string& color) { return isColor(color); });
     if (!colors.empty())
     {
-        json[ColorsKey] = std::move(colors);
+        json[keys.entries] = std::move(colors);
     }
     return json;
 }
@@ -270,31 +271,31 @@ bool IsColorFolderName(std::string_view name)
 
 std::vector<ColorFolder> ReadColorFolders(const OrderedJson& root, const std::string& source,
                                           const std::function<bool(std::string_view)>& isColor,
-                                          std::vector<ItemDataIssue>& issues)
+                                          std::vector<ItemDataIssue>& issues, const FolderKeys& keys)
 {
-    const auto list = root.find(ColorFoldersKey);
+    const auto list = root.find(keys.list);
     if (list == root.end())
     {
         return {};
     }
-    FolderReader reader(source, isColor, issues);
-    return reader.ReadList(*list, ColorFoldersKey, 1);
+    FolderReader reader(source, isColor, issues, keys);
+    return reader.ReadList(*list, keys.list, 1);
 }
 
 OrderedJson WriteColorFolders(std::span<const ColorFolder> folders,
-                              const std::function<bool(std::string_view)>& isColor)
+                              const std::function<bool(std::string_view)>& isColor, const FolderKeys& keys)
 {
     OrderedJson list = OrderedJson::array();
     for (const ColorFolder& folder : folders)
     {
-        list.push_back(WriteFolder(folder, isColor));
+        list.push_back(WriteFolder(folder, isColor, keys));
     }
     return list;
 }
 
-std::string PutColorFoldersOnLines(const std::string& text)
+std::string PutColorFoldersOnLines(const std::string& text, const FolderKeys& keys)
 {
-    return Items::Json::PutListEntriesOnOneLine(text, ColorFoldersKey);
+    return Items::Json::PutListEntriesOnOneLine(text, keys.list);
 }
 
 ColorFolder* FindColorFolder(std::vector<ColorFolder>& folders, std::span<const std::size_t> path)

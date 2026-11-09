@@ -2,6 +2,7 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/BitmapUpload.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "../data/ClientFolderScope.h"
 
 #include <doctest.h>
 #include <turbojpeg.h>
@@ -112,26 +113,6 @@ void WriteJpeg(const std::filesystem::path& path)
     tjFree(compressed);
     tjDestroy(handle);
 }
-
-// Runs a test from inside its fixture folder, as the game runs from the client
-// folder: texture paths start with Data.
-class ClientFolderScope
-{
-public:
-    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
-    {
-        std::filesystem::current_path(folder);
-    }
-    ~ClientFolderScope()
-    {
-        std::filesystem::current_path(m_previous);
-    }
-    ClientFolderScope(const ClientFolderScope&) = delete;
-    ClientFolderScope& operator=(const ClientFolderScope&) = delete;
-
-private:
-    std::filesystem::path m_previous;
-};
 
 // A fixture folder for one test, emptied first and removed afterwards.
 struct FixtureFolder

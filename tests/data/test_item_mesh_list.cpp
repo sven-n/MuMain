@@ -4,13 +4,20 @@
 
 #ifdef _EDITOR
 
+#include "TestImGuiContext.h"
+#include "TestModelSlots.h"
+
+#include "UI/ItemTools/ItemEditDraft.h"
 #include "UI/ItemTools/ItemMeshFields.h"
 #include "UI/ItemTools/ItemMeshFocus.h"
+#include "UI/ItemTools/ItemMeshList.h"
 #include "UI/ItemTools/ItemMeshPicking.h"
 #include "UI/ItemTools/ItemMeshPreviewDrawer.h"
 #include "UI/ItemTools/ItemMeshRows.h"
 
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GlobalBitmap.h"
@@ -18,11 +25,16 @@
 #include "Render/Sprites/TextureScript.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include "imgui.h"
+#include "imgui_internal.h"
+
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <map>
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 using namespace MuEditor::Items;
@@ -277,6 +289,21 @@ TEST_CASE("The preview shows the mesh pointed at in the frame before, else the k
     CHECK_FALSE(focus.Kept());
 }
 
+TEST_CASE("Two windows that show the item begin the same frame once [editor][items][mesh_list]")
+{
+    CItemMeshFocus focus;
+    focus.BeginFrame(100, 1);
+    // The Style Editor's part row is pointed at after the Item Model window began frame 2.
+    focus.BeginFrame(100, 2);
+    focus.BeginFrame(100, 2);
+    focus.Point(3);
+    focus.BeginFrame(100, 3);
+    focus.BeginFrame(100, 3);
+    CHECK(focus.Shown() == 3);
+    focus.BeginFrame(100, 4);
+    CHECK_FALSE(focus.Shown());
+}
+
 TEST_CASE("A click on the preview keeps the mesh it hit, or lets go [editor][items][mesh_list]")
 {
     CItemMeshFocus focus;
@@ -499,6 +526,117 @@ TEST_CASE("Without a shown mesh the preview's drawer draws the item as it is [ed
     REQUIRE(recorder.draws.size() == 2);
     CHECK(recorder.draws[0].flags == RENDER_TEXTURE);
     CHECK(recorder.draws[1].flags == (RENDER_TEXTURE | RENDER_CHROME));
+}
+
+namespace
+{
+constexpr int NamedItem = Data::Items::MakeItemType(0, 1);
+constexpr const char* MeshListWindow = "Mesh list";
+
+// The game's model slot of the item points at a test model's meshes while it lives (the mesh list reads the slot).
+class ModelInSlot
+{
+public:
+    ModelInSlot(int itemType, TestModel& model) : m_slot(Models[Data::Items::ToModelSlot(itemType)])
+    {
+        m_slot.NumMeshs = model.Model().NumMeshs;
+        m_slot.Meshs = model.Model().Meshs;
+        m_slot.Textures = model.Model().Textures;
+        m_slot.IndexTexture = model.Model().IndexTexture;
+    }
+    ~ModelInSlot()
+    {
+        m_slot.Meshs = nullptr;
+        m_slot.Textures = nullptr;
+        m_slot.IndexTexture = nullptr;
+        m_slot.NumMeshs = 0;
+    }
+    ModelInSlot(const ModelInSlot&) = delete;
+    ModelInSlot& operator=(const ModelInSlot&) = delete;
+
+private:
+    BMD& m_slot;
+};
+
+// The model entry the mesh list's name fields store into, and how often they did.
+struct StoredEntry
+{
+    Data::Items::ItemModelDefinition entry;
+    int stores = 0;
+};
+
+void RenderMeshList(CItemMeshList& list, ItemEditDraft<Data::Items::ItemModelDefinition>& draft)
+{
+    ImGui::NewFrame();
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowSize(ImVec2(900.0f, 600.0f));
+    ImGui::Begin(MeshListWindow);
+    if (Data::Items::ItemModelDefinition* entry = draft.Begin(NamedItem, 0))
+    {
+        list.Render(NamedItem, *entry, draft, true);
+    }
+    draft.End();
+    ImGui::End();
+    ImGui::Render();
+    CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// The name field of a mesh's row: in the table's scope, under the mesh's number.
+ImGuiID NameFieldId(int mesh)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(MeshListWindow);
+    REQUIRE(window != nullptr);
+    const ImGuiID table = ImGui::GetIDWithSeed("##Meshes", nullptr, window->ID);
+    return ImGui::GetIDWithSeed("##Name", nullptr, ImGui::GetIDWithSeed(mesh, table));
+}
+} // namespace
+
+TEST_CASE("A part's name field left without typing keeps every name, and a typed name goes to its part [editor][items]"
+          "[mesh_list]")
+{
+    TestImGuiContext context;
+    TestModelSlots slots;
+    TestModel model(2);
+    const ModelInSlot inSlot(NamedItem, model);
+    StoredEntry stored;
+    stored.entry.group = Data::Items::GetItemGroup(NamedItem);
+    stored.entry.number = Data::Items::GetItemNumber(NamedItem);
+    stored.entry.meshNames = {{0, "Shaft"}};
+    ItemEditDraft<Data::Items::ItemModelDefinition> draft(
+        [&stored](int) { return std::optional<Data::Items::ItemModelDefinition>(stored.entry); },
+        [&stored](const std::string&, const Data::Items::ItemModelDefinition& value)
+        {
+            stored.entry = value;
+            ++stored.stores;
+        });
+    CItemMeshList list;
+    RenderMeshList(list, draft);
+
+    // Into each name field and out again, without a key: the other row's name is drawn in between.
+    for (const int mesh : {0, 1})
+    {
+        CAPTURE(mesh);
+        ImGui::ActivateItemByID(NameFieldId(mesh));
+        RenderMeshList(list, draft);
+        RenderMeshList(list, draft);
+        CHECK(ImGui::GetActiveID() == NameFieldId(mesh));
+        ImGui::ClearActiveID();
+        RenderMeshList(list, draft);
+        RenderMeshList(list, draft);
+        CHECK(stored.entry.meshNames == std::map<int, std::string>{{0, "Shaft"}});
+        CHECK(stored.stores == 0);
+    }
+
+    // A name typed into mesh 1's field is its name once the field is left.
+    ImGui::ActivateItemByID(NameFieldId(1));
+    RenderMeshList(list, draft);
+    ImGui::GetIO().AddInputCharactersUTF8("Gem");
+    RenderMeshList(list, draft);
+    RenderMeshList(list, draft);
+    ImGui::ClearActiveID();
+    RenderMeshList(list, draft);
+    CHECK(stored.entry.meshNames == std::map<int, std::string>{{0, "Shaft"}, {1, "Gem"}});
+    CHECK(stored.stores == 1);
 }
 
 #endif // _EDITOR
