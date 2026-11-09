@@ -127,6 +127,9 @@ void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 // it as a comparison starts with that mark. An empty `field` names a New or Removed item as a whole.
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);
+// SetWrongSide, and the mark kept in `known` for the next comparisons.
+void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
+void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
 // The side marked on a New or Removed item, or on every field of a Changed one; None when nothing
 // or not every field is marked, or the fields name different sides.
 WrongSide GetRowWrongSide(const SyncItem& row);

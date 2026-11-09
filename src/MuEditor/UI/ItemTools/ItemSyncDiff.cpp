@@ -744,6 +744,18 @@ void SetWrongSide(SyncFormula& row, WrongSide side)
     row.checked = StartsChecked(side, row.incoming.has_value(), false);
 }
 
+void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side)
+{
+    known.Set(row.group, row.number, field, side);
+    SetWrongSide(row, field, side);
+}
+
+void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side)
+{
+    known.Set(row.entry, side);
+    SetWrongSide(row, side);
+}
+
 WrongSide GetRowWrongSide(const SyncItem& row)
 {
     if (row.change != SyncChange::Changed)

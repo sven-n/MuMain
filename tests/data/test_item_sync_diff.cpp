@@ -352,6 +352,15 @@ TEST_CASE("A difference wrong in the client starts checked, one wrong in the ser
     SyncFormula& formula = marked.formulas[static_cast<size_t>(bonus - diff.formulas.data())];
     SetWrongSide(formula, WrongSide::Client);
     CHECK(formula.checked);
+
+    // A click keeps the mark for the next comparisons too.
+    KnownDifferences clicked;
+    MarkWrongSide(clicked, formula, WrongSide::Server);
+    CHECK_FALSE(formula.checked);
+    CHECK(clicked.Find("dropLevelBonus.excellent") == WrongSide::Server);
+    MarkWrongSide(clicked, kept, "width", WrongSide::Server);
+    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(clicked.Find(0, 0, "width") == WrongSide::Server);
 }
 
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")

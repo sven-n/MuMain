@@ -1417,7 +1417,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
             }
             if (const std::optional<WrongSide> picked = WrongSideButtons::Render(field.wrongSide))
             {
-                SetWrongSide(row.group, row.number, field.field, *picked);
+                SetWrongSide(row, field.field, *picked);
             }
         }
         ImGui::PopID();
@@ -1492,7 +1492,7 @@ void CMuItemSyncUI::RenderFormulas()
         RenderValue(row.incoming);
         if (const std::optional<WrongSide> picked = WrongSideButtons::Render(row.wrongSide))
         {
-            SetFormulaWrongSide(row.entry, *picked);
+            SetFormulaWrongSide(row, *picked);
         }
         ImGui::PopID();
     }
@@ -1645,49 +1645,30 @@ void CMuItemSyncUI::RenderMessages()
     }
 }
 
-void CMuItemSyncUI::SetWrongSide(int group, int number, const std::string& field, WrongSide side)
+void CMuItemSyncUI::SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
 {
-    MarkWrongSide(group, number, field, side);
+    MarkWrongSide(m_known, row, field, side);
     SaveKnownDifferences();
 }
 
-void CMuItemSyncUI::SetRowWrongSide(const SyncItem& row, WrongSide side)
+void CMuItemSyncUI::SetRowWrongSide(SyncItem& row, WrongSide side)
 {
     if (IsWhole(row))
     {
-        SetWrongSide(row.group, row.number, "", side);
+        SetWrongSide(row, "", side);
         return;
     }
     for (const SyncField& field : row.fields)
     {
-        MarkWrongSide(row.group, row.number, field.field, side);
+        MarkWrongSide(m_known, row, field.field, side);
     }
     SaveKnownDifferences();
 }
 
-void CMuItemSyncUI::SetFormulaWrongSide(const std::string& entry, WrongSide side)
+void CMuItemSyncUI::SetFormulaWrongSide(SyncFormula& row, WrongSide side)
 {
-    m_known.Set(entry, side);
-    for (SyncFormula& row : m_diff->formulas)
-    {
-        if (row.entry == entry)
-        {
-            MuEditor::Items::SetWrongSide(row, side);
-        }
-    }
+    MarkWrongSide(m_known, row, side);
     SaveKnownDifferences();
-}
-
-void CMuItemSyncUI::MarkWrongSide(int group, int number, const std::string& field, WrongSide side)
-{
-    m_known.Set(group, number, field, side);
-    for (SyncItem& row : m_diff->items)
-    {
-        if (row.group == group && row.number == number)
-        {
-            MuEditor::Items::SetWrongSide(row, field, side);
-        }
-    }
 }
 
 void CMuItemSyncUI::SaveKnownDifferences()
