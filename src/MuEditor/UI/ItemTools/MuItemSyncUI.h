@@ -189,7 +189,10 @@ private:
     Data::Items::ItemExchangeFile m_fileA;
     std::optional<MuEditor::Items::ItemSyncDiff> m_diff;
     MuEditor::Items::KnownDifferences m_known;
+    // Read when the window opens: a file fixed while it was closed is read again.
     bool m_knownLoaded = false;
+    // ImGui's frame count when the window was last shown; -1 before.
+    int m_lastShownFrame = -1;
     // False while the file has something that could not be read: the marks are not saved then.
     bool m_knownSavable = true;
     // g_ItemDatabase.GetVersion() when the diff was made (a formula change counts there too).

@@ -2888,7 +2888,7 @@
     <value>Mit dem ganzen Item markiert. Auf der Zeile des Items ändern oder für dieses Feld allein die andere Seite wählen. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
   <data name="The marks are not saved while {0} cannot be read" xml:space="preserve">
-    <value>Die Markierungen werden nicht gespeichert, solange {0} nicht gelesen werden kann (siehe Konsole). Datei korrigieren oder entfernen und den Editor neu öffnen.</value>
+    <value>Die Markierungen werden nicht gespeichert, solange {0} nicht gelesen werden kann (siehe Konsole). Datei korrigieren oder entfernen und dieses Fenster schließen und wieder öffnen.</value>
   </data>
   <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
     <value>OpenMU speichert die Drop-Stufe in einem Byte (höchstens 255)</value>

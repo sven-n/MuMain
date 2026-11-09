@@ -370,6 +370,13 @@ void CMuItemSyncUI::Render(bool* open)
     {
         title += " *";
     }
+    // The window was closed in between (it is not rendered then).
+    const int frame = ImGui::GetFrameCount();
+    if (m_lastShownFrame != frame - 1)
+    {
+        m_knownLoaded = false;
+    }
+    m_lastShownFrame = frame;
     if (ToolWindow::Begin(title.c_str(), MuEditor::WindowIds::ItemSync, open))
     {
         if (!m_knownLoaded)

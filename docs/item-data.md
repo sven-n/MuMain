@@ -2110,7 +2110,9 @@ keep, start unchecked either way (the drop level's box still takes it). The mark
 new download. Apply takes out the marks of what it applied, either side's
 (on a changed item marked as a whole, once all its fields were applied):
 the client has the server's value then. They are kept in `Data/Items/Sync/KnownDifferences.json`
-next to the game, written on every click; copy it to
+next to the game, read when the Item Sync window opens and written on
+every click (not while it has an entry that cannot be read: fix or remove
+the file, then close the window and open it again); copy it to
 `src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
 a new or removed item as a whole, `"*"` for a changed one (every field
 without a mark of its own). They are kept apart: a mark of an item only
