@@ -56,25 +56,25 @@ const char* KeyOf(WrongSide side)
     return nullptr;
 }
 
-// The strings of a list; other entries are skipped.
+// Whether `list` is a list of names. A list with something else in it is not read at all, so it
+// is reported rather than written back without that entry.
+bool IsNameList(const OrderedJson& list)
+{
+    return list.is_array() && std::ranges::all_of(list, [](const OrderedJson& entry) { return entry.is_string(); });
+}
+
+// The names of a list IsNameList accepted.
 std::vector<std::string> ReadStrings(const OrderedJson& list)
 {
     std::vector<std::string> strings;
-    if (!list.is_array())
-    {
-        return strings;
-    }
     for (const OrderedJson& entry : list)
     {
-        if (entry.is_string())
-        {
-            strings.push_back(entry.get<std::string>());
-        }
+        strings.push_back(entry.get<std::string>());
     }
     return strings;
 }
 
-// Whether `entry` has a side's list (and every side it has is a list).
+// Whether `entry` has a side's list (and every side it has is a list of names).
 bool HasSideLists(const OrderedJson& entry)
 {
     bool any = false;
@@ -82,7 +82,7 @@ bool HasSideLists(const OrderedJson& entry)
     {
         if (const auto list = entry.find(key); list != entry.end())
         {
-            if (!list->is_array())
+            if (!IsNameList(*list))
             {
                 return false;
             }
@@ -100,7 +100,7 @@ bool IsValidItem(const OrderedJson& item, bool knownList)
     {
         return false;
     }
-    return knownList ? item.contains(KnownFieldsKey) && item[KnownFieldsKey].is_array() : HasSideLists(item);
+    return knownList ? item.contains(KnownFieldsKey) && IsNameList(item[KnownFieldsKey]) : HasSideLists(item);
 }
 
 // Version 1: a list; version 2: an object with the sides' lists (an empty one is fine).
@@ -108,11 +108,11 @@ bool IsValidFormulas(const OrderedJson& formulas, bool knownList)
 {
     if (knownList)
     {
-        return formulas.is_array();
+        return IsNameList(formulas);
     }
     return formulas.is_object() &&
            std::ranges::all_of(SideKeys, [&](const SideKey& side)
-                               { return !formulas.contains(side.key) || formulas[side.key].is_array(); });
+                               { return !formulas.contains(side.key) || IsNameList(formulas[side.key]); });
 }
 
 void ReadItem(const OrderedJson& item, bool knownList, KnownDifferences& known)
@@ -289,9 +289,9 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
             {
                 if (!IsValidItem(item, knownList))
                 {
-                    addError(ItemsKey, knownList ? "an entry needs a group, a number and a list of fields"
+                    addError(ItemsKey, knownList ? "an entry needs a group, a number and a list of field names"
                                                  : "an entry needs a group, a number and a wrongInClient or "
-                                                   "wrongInServer list");
+                                                   "wrongInServer list of field names");
                     continue;
                 }
                 ReadItem(item, knownList, known);
