@@ -36,7 +36,6 @@ bool RenderButton(const char* id, bool selected, bool ofItem, const char* toolti
     {
         ImGui::PopStyleVar();
     }
-    // Also on a disabled button.
     ImGui::SetItemTooltip("%s", tooltip);
     return clicked;
 }
