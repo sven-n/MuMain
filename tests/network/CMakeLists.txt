@@ -191,3 +191,11 @@ if(DOTNET_EXECUTABLE)
     )
     set_tests_properties(outbound_flush_loop PROPERTIES TIMEOUT 30)
 endif()
+
+mu_add_test(
+    NAME test_position_glide
+    SOURCES
+        test_position_glide.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
