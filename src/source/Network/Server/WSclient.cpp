@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Audio/SoundPlaces.h"
@@ -15653,8 +15654,12 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
 
     case eBuff_Defense:
     {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
+        // The other aura buff keeps the aura; deleting it here would restart it next frame.
+        if (!Render::Effects::ShouldKeepAuraJointAlive(false, g_isCharacterBuff(o, eBuff_HelpNpc)))
+        {
+            DeleteJoint(MODEL_SPEARSKILL, o, 4);
+            DeleteJoint(MODEL_SPEARSKILL, o, 9);
+        }
     }
     break;
 
@@ -15681,8 +15686,12 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
 
     case eBuff_HelpNpc:
     {
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
+        // The other aura buff keeps the aura; deleting it here would restart it next frame.
+        if (!Render::Effects::ShouldKeepAuraJointAlive(g_isCharacterBuff(o, eBuff_Defense), false))
+        {
+            DeleteJoint(MODEL_SPEARSKILL, o, 4);
+            DeleteJoint(MODEL_SPEARSKILL, o, 9);
+        }
     }
     break;
 

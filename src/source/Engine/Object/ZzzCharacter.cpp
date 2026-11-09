@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Core/Utilities/Random.h"
 #include <execution>
 #include <optional>
@@ -10715,6 +10716,42 @@ void UpdateEventCharacterEffects(OBJECT* o)
 }
 } // namespace
 
+void UpdateBuffAuraEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        return;
+    }
+
+    if (g_isCharacterBuff(o, eBuff_Attack) || g_isCharacterBuff(o, eBuff_HelpNpc))
+    {
+        vec3_t p, Position, Light;
+        Vector(0.f, 0.f, 0.f, p);
+        for (int i = 0; i < 2; i++)
+        {
+            const float Luminosity = (float)(Random::Rand() % 30 + 70) * 0.01f;
+            Vector(Luminosity * 1.f, Luminosity * 0.3f, Luminosity * 0.2f, Light);
+            b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+            b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+            b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+        }
+    }
+
+    if (Render::Effects::HasDefenseAura(o) && !SearchJoint(MODEL_SPEARSKILL, o, 4) &&
+        !SearchJoint(MODEL_SPEARSKILL, o, 9))
+    {
+        // The aura's own character: MoveJoint reads its Helper and SafeZone to choose subtype 4 or 9.
+        const int self = static_cast<int>(c - CharactersClient);
+        for (int i = 0; i < 5; ++i)
+        {
+            CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, self);
+        }
+    }
+}
+
 namespace
 {
 void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
@@ -10983,45 +11020,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
     }
 
-    if (g_isCharacterBuff(o, eBuff_Attack) || g_isCharacterBuff(o, eBuff_HelpNpc))
-    {
-        if (!g_isCharacterBuff(o, eBuff_Cloaking))
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                Luminosity = (float)(Random::Rand() % 30 + 70) * 0.01f;
-                Vector(Luminosity * 1.f, Luminosity * 0.3f, Luminosity * 0.2f, Light);
-                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
-                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
-                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
-                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-            }
-            if (!SearchJoint(MODEL_SPEARSKILL, o, 4) && !SearchJoint(MODEL_SPEARSKILL, o, 9))
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0,
-                                c->TargetCharacter);
-                }
-            }
-        }
-    }
-    else if (g_isCharacterBuff(o, eBuff_Defense))
-    {
-        if (!g_isCharacterBuff(o, eBuff_Cloaking))
-        {
-            if (SearchJoint(MODEL_SPEARSKILL, o, 4) == false && SearchJoint(MODEL_SPEARSKILL, o, 9) == false)
-            {
-                for (int i = 0; i < 5; ++i)
-                {
-                    CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0,
-                                c->TargetCharacter);
-                }
-            }
-        }
-    }
+    UpdateBuffAuraEffects(c, o, b);
 
     if (g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1) || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal2) ||
         g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal3) || g_isCharacterBuff((&c->Object), eBuff_Seal1) ||

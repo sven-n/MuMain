@@ -68,10 +68,12 @@ changed.
 
 ### Aura lifecycle
 
-Aura creation accepts Attack, Defense, and HelpNpc buffs. Movement currently
-keeps aura joint subtypes 4 and 9 alive only for Defense and HelpNpc. Add Attack
-to the shared continuation condition so attack auras are not repeatedly expired
-and recreated while the buff remains active.
+Update (#1032): the aura belongs to Greater Defense and the Elf Soldier buff
+(HelpNpc) only; Greater Damage (Attack) shows just its red weapon sparkles. One
+shared rule, `Render::Effects::HasDefenseAura`, decides where the aura is created
+(`UpdateBuffAuraEffects`) and where joint subtypes 4 and 9 are kept alive
+(`MoveJoint`), and `ClearBuffPhysicalEffect` keeps the aura while the other buff
+remains. Do not add Attack back to either side.
 
 Aura creation count, tails, faces, blend mode, texture, and duplicate search
 remain unchanged.
@@ -103,8 +105,8 @@ Use red-green-refactor for each behavior:
 1. Renderer contract and topology: verify `RenderQuad3D()` exists, is classified
    as 3D, rejects malformed counts, uses the static quad index pattern, and
    merges adjacent draws without exceeding static index capacity.
-2. Aura lifecycle: verify Attack, Defense, and HelpNpc each keep the joint alive;
-   no relevant buff expires it.
+2. Aura lifecycle: verify Defense and HelpNpc each keep the joint alive; Attack
+   alone or no relevant buff expires it.
 3. SDL flags: verify high-pixel-density is always present and fullscreen and
    resizable inputs are retained.
 4. macOS bundle: configure and build, then inspect the generated `Info.plist`
