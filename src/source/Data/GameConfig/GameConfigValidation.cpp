@@ -1,6 +1,7 @@
 #include "GameConfigValidation.h"
 
 #include "GameConfigConstants.h"
+#include "Core/Text/Utf8Path.h"
 
 #include <algorithm>
 #include <cwctype>
@@ -102,5 +103,14 @@ std::wstring ValidateRenderBackend(const std::wstring& value, const std::wstring
         return L"direct3d12";
     }
     return trimmed;
+}
+
+std::filesystem::path ResolveConfigPath(const std::filesystem::path& executableDirectory, const char* overridePath)
+{
+    if (overridePath != nullptr && overridePath[0] != '\0')
+    {
+        return Core::Text::PathFromUtf8(overridePath);
+    }
+    return executableDirectory / CfgFiles::CfgFileName;
 }
 }

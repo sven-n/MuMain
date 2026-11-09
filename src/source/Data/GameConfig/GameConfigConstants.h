@@ -172,3 +172,11 @@ namespace CfgDefaults
     // platform, falling back to auto-pick with a warning log if it's unavailable.
     inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
 }
+
+namespace CfgFiles
+{
+inline constexpr wchar_t CfgFileName[] = L"config.ini";
+// Developer builds (the control socket): the config file to use instead of the one beside the
+// executable, so a scripted client runs with settings of its own and leaves the player's alone.
+inline constexpr char CfgEnvConfigPath[] = "MU_CONFIG_PATH";
+} // namespace CfgFiles

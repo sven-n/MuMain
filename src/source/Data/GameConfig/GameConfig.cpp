@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
@@ -47,8 +48,12 @@ GameConfig::GameConfig()
         *(lastSlash + 1) = L'\0';  // Keep the trailing separator
     }
 
-    m_configPath = exePath;
-    m_configPath += L"config.ini";
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const char* overridePath = std::getenv(CfgFiles::CfgEnvConfigPath);
+#else
+    const char* overridePath = nullptr;
+#endif
+    m_configPath = GameConfigValidation::ResolveConfigPath(exePath, overridePath);
 
     Load();
 }
