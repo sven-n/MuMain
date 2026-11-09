@@ -377,7 +377,7 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     Sides sides;
     ++sides.FileItem(KrisType).width;
     KnownDifferences known;
-    known.Set(0, 0, "", WrongSide::Server);
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
     known.Set(0, 0, "height", WrongSide::Client);
     const ItemSyncDiff before = sides.Diff(&known);
     const SyncItem* row = FindRow(before, KrisType);
@@ -402,13 +402,13 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     // Marking the whole item takes out the fields' own marks; wrong in client leaves the boxes.
     MarkWrongSide(known, changed, "", WrongSide::Client);
     CHECK(known.fields.size() == 1);
-    CHECK(known.Find(0, 0, "") == WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
     CHECK_FALSE(FindField(changed, "repairable")->checked);
     CHECK(FindField(changed, "height")->checked);
 
     // A field's mark gives the item's mark to the other fields as their own.
     MarkWrongSide(known, changed, "width", WrongSide::Server);
-    CHECK(known.Find(0, 0, "") == WrongSide::None);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::None);
     CHECK(known.Find(0, 0, "width") == WrongSide::Server);
     CHECK(known.Find(0, 0, "height") == WrongSide::Client);
     CHECK(known.Find(0, 0, "repairable") == WrongSide::Client);
@@ -420,6 +420,29 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK(
         std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.wrongSide == WrongSide::None; }));
     CHECK(FindField(changed, "width")->checked);
+}
+
+TEST_CASE("The mark of an item only one side had does not mark its fields once both have it "
+          "[data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    KnownDifferences known;
+    // E.g. a version 1 Known of an item the server lacked, which the server has now.
+    known.Set(0, 0, AddedOrRemovedItemField, WrongSide::Server);
+    const ItemSyncDiff diff = sides.Diff(&known);
+    const SyncItem* row = FindRow(diff, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(row->change == SyncChange::Changed);
+    CHECK(GetRowWrongSide(*row) == WrongSide::None);
+    CHECK(FindField(*row, "width")->wrongSide == WrongSide::None);
+    CHECK(FindField(*row, "width")->checked);
+
+    // Marking the changed item as a whole keeps the other mark apart.
+    SyncItem changed = *row;
+    MarkWrongSide(known, changed, "", WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    CHECK(known.Find(0, 0, AddedOrRemovedItemField) == WrongSide::None);
 }
 
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")
@@ -1271,15 +1294,15 @@ TEST_CASE("Applying a difference wrong in the client takes out its mark [data][i
     CHECK_FALSE(ForgetAppliedClientMarks(diff, known));
 
     // A changed item's whole-item mark goes once all its fields were applied.
-    known.Set(0, 0, "", WrongSide::Client);
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Client);
     ItemSyncDiff partly = sides.Diff(&known);
     SyncItem& row = partly.items[static_cast<size_t>(FindRow(partly, KrisType) - partly.items.data())];
     row.fields.front().checked = false;
     ForgetAppliedClientMarks(partly, known);
-    CHECK(known.Find(0, 0, "") == WrongSide::Client);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
     SetRowChecked(row, true);
     CHECK(ForgetAppliedClientMarks(partly, known));
-    CHECK(known.Find(0, 0, "") == WrongSide::None);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::None);
 }
 
 TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
@@ -1290,7 +1313,8 @@ TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
     std::erase_if(sides.file.items,
                   [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
     KnownDifferences known;
-    known.Set(0, 0, "", WrongSide::Server);
+    // Both sides have it: the mark of a changed item.
+    known.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
     ItemSyncDiff diff = sides.Diff(&known);
     SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
     CHECK_FALSE(row.locked.empty());

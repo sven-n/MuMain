@@ -233,7 +233,7 @@ void KnownDifferences::Set(int group, int number, const std::string& field, Wron
 
 void KnownDifferences::ClearItem(int group, int number)
 {
-    // The item's entries are in a row, the whole item's ("") first.
+    // The item's entries are in a row, from the empty field on.
     auto entry = fields.lower_bound({group, number, std::string()});
     while (entry != fields.end() && std::get<0>(entry->first) == group && std::get<1>(entry->first) == number)
     {

@@ -25,12 +25,19 @@ enum class WrongSide : uint8_t
     Server,
 };
 
+// The field of a mark on a new or removed item as a whole.
+inline const std::string AddedOrRemovedItemField;
+// The field of a mark on a changed item as a whole: every field without a mark of its own, also
+// one that differs only later. Kept apart from the new or removed item's mark, which says nothing
+// about the values once both sides have the item.
+inline const std::string EveryFieldOfItem = "*";
+
 // The items' fields and formula entries whose wrong side was marked
 // (Data/Items/Sync/KnownDifferences.json), so every comparison starts with that choice.
 struct KnownDifferences
 {
-    // (group, number, field); an empty field names the item as a whole: a new or removed one, or
-    // every field of a changed one that has no mark of its own.
+    // (group, number, field); AddedOrRemovedItemField and EveryFieldOfItem name the item as a
+    // whole.
     std::map<std::tuple<int, int, std::string>, WrongSide> fields;
     std::map<std::string, WrongSide, std::less<>> formulas;
 

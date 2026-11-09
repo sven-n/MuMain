@@ -2111,13 +2111,16 @@ applied (on a changed item marked as a whole, once all its fields were
 applied): the client has the server's value then. They are kept in `Data/Items/Sync/KnownDifferences.json`
 next to the game, written on every click; copy it to
 `src/bin/Data/Items/Sync` with the item files to share it. `""` stands for
-the whole item:
+a new or removed item as a whole, `"*"` for a changed one (every field
+without a mark of its own). They are kept apart: a mark of an item only
+one side has says nothing about its values once both sides have it.
 
 ```json
 {
   "formatVersion": 2,
   "items": [
-    {"group": 13, "number": 4, "wrongInServer": ["", "repairable"]},
+    {"group": 13, "number": 4, "wrongInServer": [""]},
+    {"group": 13, "number": 39, "wrongInServer": ["*"], "wrongInClient": ["repairable"]},
     {"group": 13, "number": 50, "wrongInClient": ["height"], "wrongInServer": ["width"]}
   ],
   "formulas": {

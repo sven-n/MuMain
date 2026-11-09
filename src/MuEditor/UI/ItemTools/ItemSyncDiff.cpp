@@ -194,6 +194,12 @@ WrongSide MarkedSide(const SyncOptions& options, const ItemKey& key, const std::
     return options.known != nullptr ? options.known->Find(key.first, key.second, field) : WrongSide::None;
 }
 
+// The field of the mark of a row's item as a whole.
+const std::string& WholeItemField(SyncChange change)
+{
+    return change == SyncChange::Changed ? EveryFieldOfItem : AddedOrRemovedItemField;
+}
+
 // A field's own mark, else the item's (`itemSide`).
 void MarkField(SyncField& field, const ItemKey& key, WrongSide itemSide, const ItemExchangeFile& incoming,
                const Fields& current, const Fields& incomingFields, const SyncOptions& options)
@@ -228,13 +234,13 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     row.group = key.first;
     row.number = key.second;
     row.name = RowName(current, incoming);
-    row.wrongSide = MarkedSide(options, key, "");
     const Fields currentFields = current != nullptr ? FlattenItem(*current) : Fields{};
     const Fields incomingFields = incoming != nullptr ? FlattenItem(*incoming) : Fields{};
 
     if (current == nullptr)
     {
         row.change = SyncChange::New;
+        row.wrongSide = MarkedSide(options, key, AddedOrRemovedItemField);
         for (const auto& [path, value] : incomingFields)
         {
             if (TakesPart(path, true, options) && BothCarry(path, currentFile, incomingFile))
@@ -259,6 +265,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     if (incoming == nullptr)
     {
         row.change = SyncChange::Removed;
+        row.wrongSide = MarkedSide(options, key, AddedOrRemovedItemField);
         // A comparison of two files shows what file A has (nothing applies them).
         if (options.comparingFiles)
         {
@@ -276,6 +283,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
     }
 
     row.change = SyncChange::Changed;
+    row.wrongSide = MarkedSide(options, key, EveryFieldOfItem);
     std::set<std::string, std::less<>> paths;
     for (const auto& [path, value] : currentFields)
     {
@@ -677,7 +685,7 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
             row.name = RowName(was != currentItems.end() ? was->second : nullptr,
                                becomes != incomingItems.end() ? becomes->second : nullptr);
             // Its mark shows (and can be cleared); a locked row stays unchecked.
-            row.wrongSide = MarkedSide(options, key, "");
+            row.wrongSide = MarkedSide(options, key, WholeItemField(row.change));
             if (!options.comparingFiles)
             {
                 row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;
@@ -783,14 +791,14 @@ void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& fi
     {
         // The whole item: its fields' own marks go.
         known.ClearItem(row.group, row.number);
-        known.Set(row.group, row.number, "", side);
+        known.Set(row.group, row.number, WholeItemField(row.change), side);
         SetWrongSide(row, "", side);
         return;
     }
     if (row.change == SyncChange::Changed && row.wrongSide != WrongSide::None)
     {
         // A field of an item marked as a whole: the item's mark becomes its other fields' own.
-        known.Set(row.group, row.number, "", WrongSide::None);
+        known.Set(row.group, row.number, EveryFieldOfItem, WrongSide::None);
         for (const SyncField& entry : row.fields)
         {
             known.Set(row.group, row.number, entry.field, row.wrongSide);
@@ -823,7 +831,7 @@ bool ForgetAppliedClientMarks(const ItemSyncDiff& diff, KnownDifferences& known)
         {
             if (row.checked && row.locked.empty())
             {
-                forget(row, "");
+                forget(row, AddedOrRemovedItemField);
             }
             continue;
         }
@@ -839,7 +847,7 @@ bool ForgetAppliedClientMarks(const ItemSyncDiff& diff, KnownDifferences& known)
         }
         if (allApplied)
         {
-            forget(row, "");
+            forget(row, EveryFieldOfItem);
         }
     }
     for (const SyncFormula& row : diff.formulas)
