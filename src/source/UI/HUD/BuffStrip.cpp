@@ -5,6 +5,7 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Buffs/w_BuffTimeControl.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -237,6 +238,8 @@ void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& m
     // call, including on a theme switch -- no guard here.
     auto buff = c.RegisterStruct<BuffEntry>();
     buff.RegisterMember("decorator", &BuffEntry::decorator);
+    buff.RegisterMember("progress", &BuffEntry::progress);
+    buff.RegisterMember("has_timer", &BuffEntry::hasTimer);
     c.RegisterArray<std::vector<BuffEntry>>();
 
     c.BindEventCallback("buff_cancel",
@@ -323,6 +326,12 @@ void CBuffStrip::SyncRmlModel()
         BuffEntry entry;
 
         entry.decorator = BuildIconDecorator(buff);
+        entry.hasTimer = TheBuffTimeControl().GetBuffRemainingFraction(buff, entry.progress);
+        // At zero the server timer is done: hide the bar rather than leave an empty dark strip.
+        if (entry.progress <= 0.f)
+        {
+            entry.hasTimer = false;
+        }
         model.buffs.push_back(entry);
     }
 
