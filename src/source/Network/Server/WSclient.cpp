@@ -3641,6 +3641,24 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     App::Control::Events::RecordAttackDamage(AttackPlayer, Key, Damage, ShieldDamage, DamageType);
 }
 
+namespace
+{
+constexpr int NoActionTargetKey = 0;
+
+void StartReceivedAttack(CHARACTER* character, int targetIndex)
+{
+    // A monster's attack data may pick the animation from the stored player skill.
+    SetPlayerAttack(character);
+    character->Skill = 0;
+    character->AttackTime = 1;
+    character->LastAttackEffectTime = -1;
+    character->Object.AnimationFrame = 0;
+    const bool targetFound = targetIndex != MAX_CHARACTERS_CLIENT;
+    character->TargetCharacter = targetFound ? static_cast<short>(targetIndex) : -1;
+    character->ReceivedAttackTargetUnknown = !targetFound;
+}
+} // namespace
+
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPRECEIVE_ACTION)ReceiveBuffer;
@@ -3653,7 +3671,8 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     int iTargetKey, iTargetIndex;
 
     iTargetKey = ((int)(Data->TargetKeyH) << 8) + Data->TargetKeyL;
-    iTargetIndex = FindCharacterIndex(iTargetKey);
+    // OpenMU sends 0 for an animation without a target; local characters can use key 0 too.
+    iTargetIndex = iTargetKey != NoActionTargetKey ? FindCharacterIndex(iTargetKey) : MAX_CHARACTERS_CLIENT;
 
     if (!c->SafeZone && c->Helper.Type == MODEL_DARK_HORSE_ITEM)
     {
@@ -3676,11 +3695,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         break;
     case AT_ATTACK1:
     case AT_ATTACK2:
-        SetPlayerAttack(c);
-        c->AttackTime = 1;
-        c->Object.AnimationFrame = 0;
-
-        c->TargetCharacter = HeroIndex;
+        StartReceivedAttack(c, iTargetIndex);
         if (IsMonster(c))
         {
             MUHelper::g_MuHelper.AddTarget(Key, iTargetKey == HeroKey);
