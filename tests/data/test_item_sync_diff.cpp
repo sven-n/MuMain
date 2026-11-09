@@ -1231,6 +1231,31 @@ TEST_CASE("An item the file has twice is a locked row of the import [data][items
     g_ItemEdits.GetHistory().Clear();
 }
 
+TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
+{
+    Sides sides;
+    // A file read with an item twice lists it among its repeated items, not its items.
+    sides.file.repeatedItems.emplace_back(0, 0);
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
+    KnownDifferences known;
+    known.Set(0, 0, "", WrongSide::Server);
+    ItemSyncDiff diff = sides.Diff(&known);
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    CHECK_FALSE(row.locked.empty());
+    CHECK(GetRowWrongSide(row) == WrongSide::Server);
+    const std::vector<const SyncItem*> rows = {&row};
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "").find("| Server |") != std::string::npos);
+
+    // Clicking it again clears it; a locked row stays unchecked whatever its mark.
+    MarkWrongSide(known, row, "", WrongSide::None);
+    CHECK(known.fields.empty());
+    MarkWrongSide(known, row, "", WrongSide::Client);
+    CHECK_FALSE(row.checked);
+    const ItemSyncDiff again = sides.Diff(&known);
+    CHECK(GetRowWrongSide(*FindRow(again, KrisType)) == WrongSide::Client);
+}
+
 TEST_CASE("The wrong sides of the differences are written and read back [data][items][editor]")
 {
     KnownDifferences known;

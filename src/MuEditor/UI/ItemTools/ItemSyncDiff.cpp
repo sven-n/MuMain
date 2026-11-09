@@ -664,6 +664,8 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
             row.change = !inCurrent ? SyncChange::New : !inIncoming ? SyncChange::Removed : SyncChange::Changed;
             row.name = RowName(was != currentItems.end() ? was->second : nullptr,
                                becomes != incomingItems.end() ? becomes->second : nullptr);
+            // Its mark shows (and can be cleared); a locked row stays unchecked.
+            row.wrongSide = MarkedSide(options, key, "");
             if (!options.comparingFiles)
             {
                 row.locked = I18N::Editor::ItIsInTheFileMoreThanOnce;

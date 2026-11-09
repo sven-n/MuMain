@@ -1297,13 +1297,10 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 }
                 ImGui::TableNextColumn();
                 ImGui::Text("%d", static_cast<int>(row.fields.size()));
-                // A Changed row without fields (an item a side has twice) has nothing to mark.
-                ImGui::BeginDisabled(!IsWhole(row) && row.fields.empty());
                 if (const std::optional<WrongSide> picked = WrongSideButtons::Render(side))
                 {
                     SetWrongSide(row, "", *picked);
                 }
-                ImGui::EndDisabled();
                 ImGui::PopID();
             }
         }
