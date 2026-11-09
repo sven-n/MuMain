@@ -302,8 +302,9 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
     {
         if (!IsValidFormulas(*formulas, knownList))
         {
-            addError(FormulasKey, knownList ? "the formulas need to be a list"
-                                            : "the formulas need wrongInClient and wrongInServer lists");
+            addError(FormulasKey, knownList ? "the formulas need to be a list of names"
+                                            : "the formulas need to be an object whose wrongInClient and "
+                                              "wrongInServer, where given, are lists of names");
         }
         else
         {
