@@ -35,9 +35,9 @@ inline const wchar_t* TableItemName(int itemType)
 // The skill's name, or its number ("#383") when the skill table has none, so two missing names stay apart.
 inline std::wstring SkillName(ActionSkillType skill)
 {
-    if (SkillAttribute != nullptr && SkillAttribute[skill].Name[0] != L'\0')
+    if (const wchar_t* name = TableSkillName(skill); name[0] != L'\0')
     {
-        return SkillAttribute[skill].Name;
+        return name;
     }
     return L"#" + std::to_wstring(static_cast<int>(skill));
 }
@@ -45,9 +45,9 @@ inline std::wstring SkillName(ActionSkillType skill)
 // The item's name, or its group and number ("14/97") when the item table has none.
 inline std::wstring ItemName(int itemType)
 {
-    if (ItemAttribute != nullptr && ItemAttribute[itemType].Name[0] != L'\0')
+    if (const wchar_t* name = TableItemName(itemType); name[0] != L'\0')
     {
-        return ItemAttribute[itemType].Name;
+        return name;
     }
     return std::to_wstring(itemType / MAX_ITEM_INDEX) + L"/" + std::to_wstring(itemType % MAX_ITEM_INDEX);
 }
