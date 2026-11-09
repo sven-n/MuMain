@@ -1301,7 +1301,7 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 ImGui::BeginDisabled(!IsWhole(row) && row.fields.empty());
                 if (const std::optional<WrongSide> picked = WrongSideButtons::Render(side))
                 {
-                    SetRowWrongSide(row, *picked);
+                    SetWrongSide(row, "", *picked);
                 }
                 ImGui::EndDisabled();
                 ImGui::PopID();
@@ -1648,20 +1648,6 @@ void CMuItemSyncUI::RenderMessages()
 void CMuItemSyncUI::SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
 {
     MarkWrongSide(m_known, row, field, side);
-    SaveKnownDifferences();
-}
-
-void CMuItemSyncUI::SetRowWrongSide(SyncItem& row, WrongSide side)
-{
-    if (IsWhole(row))
-    {
-        SetWrongSide(row, "", side);
-        return;
-    }
-    for (const SyncField& field : row.fields)
-    {
-        MarkWrongSide(m_known, row, field.field, side);
-    }
     SaveKnownDifferences();
 }
 

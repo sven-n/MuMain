@@ -184,10 +184,15 @@ WrongSide MarkedSide(const SyncOptions& options, const ItemKey& key, const std::
     return options.known != nullptr ? options.known->Find(key.first, key.second, field) : WrongSide::None;
 }
 
-void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& incoming, const Fields& current,
-               const Fields& incomingFields, const SyncOptions& options)
+// A field's own mark, else the item's (`itemSide`).
+void MarkField(SyncField& field, const ItemKey& key, WrongSide itemSide, const ItemExchangeFile& incoming,
+               const Fields& current, const Fields& incomingFields, const SyncOptions& options)
 {
     field.wrongSide = MarkedSide(options, key, field.field);
+    if (field.wrongSide == WrongSide::None)
+    {
+        field.wrongSide = itemSide;
+    }
     if (IsHeld(options, key) && std::ranges::find(HeldFields, field.field) != std::end(HeldFields))
     {
         field.locked = I18N::Editor::TheItemIsWornOrInAnItemWindowItsSizeAndSlotStayAsTheyAre;
@@ -280,7 +285,7 @@ SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const It
             continue;
         }
         SyncField field{path, was, becomes};
-        MarkField(field, key, incomingFile, currentFields, incomingFields, options);
+        MarkField(field, key, row.wrongSide, incomingFile, currentFields, incomingFields, options);
         row.fields.push_back(std::move(field));
     }
     return row;
@@ -725,7 +730,16 @@ void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
     if (field.empty())
     {
         row.wrongSide = side;
-        row.checked = StartsChecked(side, row.change == SyncChange::New, !row.locked.empty());
+        if (row.change != SyncChange::Changed)
+        {
+            row.checked = StartsChecked(side, row.change == SyncChange::New, !row.locked.empty());
+            return;
+        }
+        for (SyncField& entry : row.fields)
+        {
+            entry.wrongSide = side;
+            entry.checked = FieldStartsChecked(entry);
+        }
         return;
     }
     for (SyncField& entry : row.fields)
@@ -746,6 +760,24 @@ void SetWrongSide(SyncFormula& row, WrongSide side)
 
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side)
 {
+    if (field.empty())
+    {
+        // The whole item: its fields' own marks go.
+        known.ClearItem(row.group, row.number);
+        known.Set(row.group, row.number, "", side);
+        SetWrongSide(row, "", side);
+        return;
+    }
+    if (row.change == SyncChange::Changed && row.wrongSide != WrongSide::None)
+    {
+        // A field of an item marked as a whole: the item's mark becomes its other fields' own.
+        known.Set(row.group, row.number, "", WrongSide::None);
+        for (const SyncField& entry : row.fields)
+        {
+            known.Set(row.group, row.number, entry.field, row.wrongSide);
+        }
+        row.wrongSide = WrongSide::None;
+    }
     known.Set(row.group, row.number, field, side);
     SetWrongSide(row, field, side);
 }
@@ -758,7 +790,7 @@ void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side)
 
 WrongSide GetRowWrongSide(const SyncItem& row)
 {
-    if (row.change != SyncChange::Changed)
+    if (row.change != SyncChange::Changed || row.wrongSide != WrongSide::None)
     {
         return row.wrongSide;
     }

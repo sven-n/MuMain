@@ -363,6 +363,55 @@ TEST_CASE("A difference wrong in the client starts checked, one wrong in the ser
     CHECK(clicked.Find(0, 0, "width") == WrongSide::Server);
 }
 
+TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones that differ later "
+          "[data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    KnownDifferences known;
+    known.Set(0, 0, "", WrongSide::Server);
+    known.Set(0, 0, "height", WrongSide::Client);
+    const ItemSyncDiff before = sides.Diff(&known);
+    const SyncItem* row = FindRow(before, KrisType);
+    REQUIRE(row != nullptr);
+    CHECK(GetRowWrongSide(*row) == WrongSide::Server);
+    CHECK(FindField(*row, "width")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindField(*row, "width")->checked);
+
+    // A field that differs later has the item's mark, unless it has its own.
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    kris.repairable = !kris.repairable;
+    ++kris.height;
+    ItemSyncDiff after = sides.Diff(&known);
+    SyncItem& changed = after.items[static_cast<size_t>(FindRow(after, KrisType) - after.items.data())];
+    CHECK(FindField(changed, "repairable")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindField(changed, "repairable")->checked);
+    CHECK(FindField(changed, "height")->wrongSide == WrongSide::Client);
+    CHECK(FindField(changed, "height")->checked);
+    const std::vector<const SyncItem*> rows = {&changed};
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "").find("| Server |") != std::string::npos);
+
+    // Marking the whole item takes out the fields' own marks.
+    MarkWrongSide(known, changed, "", WrongSide::Client);
+    CHECK(known.fields.size() == 1);
+    CHECK(known.Find(0, 0, "") == WrongSide::Client);
+    CHECK(std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.checked; }));
+
+    // A field's mark gives the item's mark to the other fields as their own.
+    MarkWrongSide(known, changed, "width", WrongSide::Server);
+    CHECK(known.Find(0, 0, "") == WrongSide::None);
+    CHECK(known.Find(0, 0, "width") == WrongSide::Server);
+    CHECK(known.Find(0, 0, "height") == WrongSide::Client);
+    CHECK(known.Find(0, 0, "repairable") == WrongSide::Client);
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
+
+    // Clearing the whole item clears its fields.
+    MarkWrongSide(known, changed, "", WrongSide::None);
+    CHECK(known.fields.empty());
+    CHECK(std::ranges::all_of(changed.fields, [](const SyncField& field)
+                              { return field.wrongSide == WrongSide::None && field.checked; }));
+}
+
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")
 {
     Sides sides;

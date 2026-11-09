@@ -59,7 +59,8 @@ struct SyncItem
     std::vector<SyncField> fields;
     // New and Removed rows. Changed rows apply their checked fields.
     bool checked = false;
-    // New and Removed rows; the fields of a Changed row have their own.
+    // The item's mark as a whole: a New or Removed item, or the fields of a Changed one that have
+    // no mark of their own (also one that differs only later).
     WrongSide wrongSide = WrongSide::None;
     std::string locked;
 };
@@ -124,14 +125,17 @@ void SetRowChecked(SyncItem& row, bool checked);
 // (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 // Marks which side of a difference is wrong (WrongSide::None: not decided) and checks or unchecks
-// it as a comparison starts with that mark. An empty `field` names a New or Removed item as a whole.
+// it as a comparison starts with that mark. An empty `field` names the item as a whole: a New or
+// Removed one, or every field of a Changed one.
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);
-// SetWrongSide, and the mark kept in `known` for the next comparisons.
+// SetWrongSide, and the mark kept in `known` for the next comparisons. A mark of the whole item
+// takes out its fields' own marks; a field's mark on an item marked as a whole gives the item's
+// mark to the item's other fields as their own.
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
 void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
-// The side marked on a New or Removed item, or on every field of a Changed one; None when nothing
-// or not every field is marked, or the fields name different sides.
+// The side marked on the item as a whole, or on every field of a Changed one; None when nothing or
+// not every field is marked, or the fields name different sides.
 WrongSide GetRowWrongSide(const SyncItem& row);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
 // editor's language: `title`, an empty line, then a table of each item's group, number and name,

@@ -2060,8 +2060,8 @@ number, fields with their default value left out, LF line endings.
 - **Copy as Markdown** on a list's header copies the list (also a folded
   one) as a Markdown table in English: each item's group, number and name,
   for the items that differ also the change and the number of fields, and
-  the side marked wrong (*Client* or *Server*; empty when nothing, or not
-  every field of the item, is marked, or its fields name different sides). Paste
+  the side marked wrong (*Client* or *Server*: the whole item's mark, or the
+  one all its fields have; empty otherwise). Paste
   it into an issue, e.g. one asking OpenMU for the items it lacks or to fix
   the items marked wrong in the server.
 - **Names**: only the client's UI languages are taken from the file; a
@@ -2093,8 +2093,11 @@ number, fields with their default value left out, LF line endings.
 
 **Wrong in client** and **Wrong in server** say which side of a
 difference is wrong. Every list has the two buttons: the item lists for an
-item (on a changed item they mark all its fields), the fields of a changed
-item for one field, and the Formulas list for an entry. At most one of
+item as a whole (on a changed item: every field without a mark of its own,
+also one that differs only later), the fields of a changed item for one
+field, and the Formulas list for an entry. Marking the whole item takes
+out its fields' own marks; marking one field of an item marked as a whole
+gives the item's mark to its other fields. At most one of
 them is selected; clicking the selected one again clears it, and the row
 starts as without a mark. *Wrong in client* checks the difference, so
 Apply takes the server's value; *Wrong in server* unchecks it and shows it

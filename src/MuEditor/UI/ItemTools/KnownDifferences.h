@@ -29,7 +29,8 @@ enum class WrongSide : uint8_t
 // (Data/Items/Sync/KnownDifferences.json), so every comparison starts with that choice.
 struct KnownDifferences
 {
-    // (group, number, field); an empty field names the item as a whole (new or removed).
+    // (group, number, field); an empty field names the item as a whole: a new or removed one, or
+    // every field of a changed one that has no mark of its own.
     std::map<std::tuple<int, int, std::string>, WrongSide> fields;
     std::map<std::string, WrongSide, std::less<>> formulas;
 
@@ -38,6 +39,8 @@ struct KnownDifferences
     // WrongSide::None takes the entry out.
     void Set(int group, int number, const std::string& field, WrongSide side);
     void Set(const std::string& formula, WrongSide side);
+    // Takes out the item's marks, the whole item's and its fields'.
+    void ClearItem(int group, int number);
     bool operator==(const KnownDifferences& other) const = default;
 };
 

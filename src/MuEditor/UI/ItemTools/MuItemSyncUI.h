@@ -162,11 +162,9 @@ private:
     void RenderExportPopup();
     void RenderMessages();
     bool WriteExport();
-    // Marks the wrong side of a row's field (an empty one: a New or Removed item as a whole) in
-    // the known differences and the diff, and saves them.
+    // Marks the wrong side of a row's field (an empty one: the item as a whole) in the known
+    // differences and the diff, and saves them.
     void SetWrongSide(MuEditor::Items::SyncItem& row, const std::string& field, MuEditor::Items::WrongSide side);
-    // A New or Removed item as a whole, every field of a Changed one.
-    void SetRowWrongSide(MuEditor::Items::SyncItem& row, MuEditor::Items::WrongSide side);
     void SetFormulaWrongSide(MuEditor::Items::SyncFormula& row, MuEditor::Items::WrongSide side);
     void SaveKnownDifferences();
 

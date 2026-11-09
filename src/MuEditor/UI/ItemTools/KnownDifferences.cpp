@@ -231,6 +231,16 @@ void KnownDifferences::Set(int group, int number, const std::string& field, Wron
     fields[{group, number, field}] = side;
 }
 
+void KnownDifferences::ClearItem(int group, int number)
+{
+    // The item's entries are in a row, the whole item's ("") first.
+    auto entry = fields.lower_bound({group, number, std::string()});
+    while (entry != fields.end() && std::get<0>(entry->first) == group && std::get<1>(entry->first) == number)
+    {
+        entry = fields.erase(entry);
+    }
+}
+
 void KnownDifferences::Set(const std::string& formula, WrongSide side)
 {
     if (side == WrongSide::None)
