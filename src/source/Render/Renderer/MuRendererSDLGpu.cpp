@@ -64,6 +64,7 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -91,6 +92,8 @@ constexpr int k_MaxQuads = 4096;
 // Initial vertex capacity. CPU staging grows so stress frames keep late UI draws.
 constexpr Uint32 k_InitialVertexBufferSize = 64u * 1024u * 1024u;
 constexpr Uint32 k_InitialBoneBufferSize = 64u * 1024u;
+// Never read by a shader; only its handle matters (see CreateStorageRebindDummyBuffer).
+constexpr Uint32 k_StorageRebindDummyBufferSize = 16u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -736,6 +739,8 @@ static std::uint64_t s_submittedFrames = 0u;
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
 static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
+// Metal only: bound just before the real storage buffers so SDL sees a changed handle (see ReplayDrawCommand).
+static SDL_GPUBuffer* s_storageRebindDummyBuf = nullptr;
 static Uint32 s_boneCapacity = 0u;
 static std::vector<float> s_boneRowScratch;
 static const float* s_lastBonePalette = nullptr;
@@ -1122,7 +1127,16 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
         SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
         const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
         if (state.SelectVertexStorageBuffers(bound))
+        {
+            // SDL 3.4.8's Metal backend binds vertex storage buffers at draw time only while
+            // needVertexStorageBufferBind is set, and a draw whose pipeline has no storage buffers clears that
+            // flag without binding anything. A skinned draw after such a plain draw keeps the same bone buffer
+            // handle, so SDL never sets the flag again and Metal reads the bones from whatever sits in that slot,
+            // stretching monsters across the void. Binding a different buffer first marks the slot as changed.
+            if (s_storageRebindDummyBuf)
+                SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &s_storageRebindDummyBuf, 1);
             SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
+        }
     }
 
     Uint32 firstIndex = 0u;
@@ -1960,6 +1974,8 @@ public:
             return false;
         }
 
+        CreateStorageRebindDummyBuffer(driverName);
+
         // Create initial depth texture at window size.
         // BeginFrame() will recreate it if the swapchain dimensions differ.
         {
@@ -2101,6 +2117,7 @@ public:
         }
 
         DestroyQuadIndexBuffer();
+        DestroyStorageRebindDummyBuffer();
         DestroyVertexBuffers();
         DestroyBoneBuffers();
         DestroyTerrainHeightBuffers();
@@ -7216,6 +7233,32 @@ private:
 
         SDL_ReleaseGPUTransferBuffer(s_device, idxTransfer);
         return true;
+    }
+
+    // Only the Metal backend needs the storage-buffer rebind (see ReplayDrawCommand). Without the buffer, skinned
+    // draws still work everywhere else; on Metal they may read stale bones after a plain draw.
+    static void CreateStorageRebindDummyBuffer(const char* driverName)
+    {
+        if (!driverName || std::string_view(driverName) != "metal")
+            return;
+
+        SDL_GPUBufferCreateInfo info{};
+        info.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+        info.size = k_StorageRebindDummyBufferSize;
+        s_storageRebindDummyBuf = SDL_CreateGPUBuffer(s_device, &info);
+        if (!s_storageRebindDummyBuf)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- storage rebind buffer creation failed: {}", SDL_GetError());
+        }
+    }
+
+    static void DestroyStorageRebindDummyBuffer()
+    {
+        if (s_storageRebindDummyBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_storageRebindDummyBuf);
+            s_storageRebindDummyBuf = nullptr;
+        }
     }
 
     static void DestroyQuadIndexBuffer()
