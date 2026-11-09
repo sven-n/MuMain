@@ -23,10 +23,8 @@ bool RenderButton(const char* id, bool selected, const char* tooltip)
 {
     ImGui::TableNextColumn();
     const bool clicked = ImGui::RadioButton(id, selected);
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("%s", tooltip);
-    }
+    // Also on a disabled button.
+    ImGui::SetItemTooltip("%s", tooltip);
     return clicked;
 }
 
