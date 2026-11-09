@@ -133,25 +133,82 @@ void AddIssue(const CheckedText& text, ItemDataIssueSeverity severity, int group
     issues.push_back({severity, text.source, group, number, text.field, std::move(message)});
 }
 
-// The name of the reference that `text` spells: the name it shows in the text's language, or one of the item's forms
-// in it (a case the reference would ask for); empty when the text has none of them.
-std::string SpelledName(const Items::ItemDatabase& database, const Items::ItemDefinition& definition,
-                        const ItemReference& reference, const CheckedText& text)
+// The character of UTF-8 `text` that starts at `at` (a lead byte), or that ends right before it when `before`; 0 at the
+// text's ends.
+char32_t CharacterAt(std::string_view text, size_t at, bool before)
+{
+    if (before)
+    {
+        if (at == 0)
+        {
+            return 0;
+        }
+        // Back over the continuation bytes to the character's lead byte.
+        do
+        {
+            --at;
+        } while (at > 0 && (static_cast<unsigned char>(text[at]) & 0xC0) == 0x80);
+    }
+    if (at >= text.size())
+    {
+        return 0;
+    }
+    const auto lead = static_cast<unsigned char>(text[at]);
+    const int length = lead < 0x80 ? 1 : lead < 0xE0 ? 2 : lead < 0xF0 ? 3 : 4;
+    char32_t character = length == 1 ? lead : lead & (0x7F >> length);
+    for (int i = 1; i < length && at + i < text.size(); ++i)
+    {
+        character = (character << 6) | (static_cast<unsigned char>(text[at + i]) & 0x3F);
+    }
+    return character;
+}
+
+// Whether a word goes on through the character: an ASCII letter or digit, or a letter of the Latin, Greek or Cyrillic
+// scripts. Other characters (spaces, punctuation, quotes such as "„" or "«", Chinese and Japanese, which write no
+// spaces) end a word.
+bool ContinuesWord(char32_t character)
+{
+    if (character < 0x80)
+    {
+        return (character >= U'0' && character <= U'9') || (character >= U'A' && character <= U'Z') ||
+               (character >= U'a' && character <= U'z');
+    }
+    return (character >= 0xC0 && character <= 0x24F && character != 0xD7 && character != 0xF7) ||
+           (character >= 0x370 && character <= 0x52F) || (character >= 0x1E00 && character <= 0x1EFF);
+}
+
+// Whether `text` has `name` as words of its own, not inside a longer word ("Rena" in "Arena").
+bool HasWords(std::string_view text, std::string_view name)
+{
+    if (name.empty())
+    {
+        return false;
+    }
+    for (size_t at = text.find(name); at != std::string_view::npos; at = text.find(name, at + 1))
+    {
+        if (!ContinuesWord(CharacterAt(text, at, true)) && !ContinuesWord(CharacterAt(text, at + name.size(), false)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// The name of the reference that `text` spells: the name it shows in the text's language, or its form in a case the
+// language declines names in (the item's form, or at a level the name line's); empty when the text has none of them.
+std::string SpelledName(const Items::ItemDatabase& database, const ItemReference& reference, const CheckedText& text)
 {
     const std::string name = Items::ResolveReferencedName(database, reference, text.locale).text;
-    if (!name.empty() && text.text.find(name) != std::string_view::npos)
+    if (HasWords(text.text, name))
     {
         return name;
     }
-    const auto& forms = definition.nameForms.GetAll();
-    const auto language = forms.find(text.locale);
-    if (language == forms.end())
+    for (const std::string& caseKey : database.GetNameCases().GetCases(text.locale))
     {
-        return {};
-    }
-    for (const auto& [caseKey, form] : language->second)
-    {
-        if (text.text.find(form) != std::string_view::npos)
+        ItemReference inCase = reference;
+        inCase.form = caseKey;
+        const std::string form = Items::ResolveReferencedName(database, inCase, text.locale).text;
+        if (HasWords(text.text, form))
         {
             return form;
         }
@@ -180,7 +237,7 @@ void CheckSpelledNames(const Items::ItemDatabase& database, const CheckedText& t
             return;
         }
         const ItemReference reference{group, number, level < 0 ? std::nullopt : std::optional<int>(level), {}};
-        const std::string name = SpelledName(database, *definition, reference, text);
+        const std::string name = SpelledName(database, reference, text);
         if (name.empty())
         {
             return;

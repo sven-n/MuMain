@@ -235,6 +235,7 @@ TEST_CASE("A UI translation that spells names English writes by number is a warn
 {
     ItemDatabase database;
     database.Build(NamedItems());
+    DeclinePolish(database);
     const auto check = [&](const std::string& translation, std::string_view locale)
     {
         std::vector<ItemDataIssue> issues;
@@ -258,6 +259,31 @@ TEST_CASE("A UI translation that spells names English writes by number is a warn
     CHECK(check("Znajdz 'LZA ELFA'", "pl").empty());
     // The name itself, not a form, is found too.
     CHECK(check("Znajdz 'Lza Elfa'", "pl").size() == 1);
+}
+
+TEST_CASE("A spelled name counts only as words of its own, and at a level in the name line's forms "
+          "[data][items][texts]")
+{
+    ItemDatabase database;
+    database.Build(NamedItems());
+    DeclinePolish(database);
+    const auto check = [&](const std::string& translation, const std::string& english)
+    {
+        std::vector<ItemDataIssue> issues;
+        Data::Translation::CheckItemReferences(
+            database, {translation, "pl", "Dialog.x.resx", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "Find"},
+            english, issues);
+        return issues;
+    };
+
+    // "Rena" inside "Arena" or "Renaty" is another word.
+    CHECK(check("Idz na Arena", "Go to {item:14,21}").empty());
+    CHECK(check("Zapytaj Renaty", "Ask for {item:14,21}").empty());
+    CHECK(check("Daj mi Rena!", "Give me {item:14,21}!").size() == 1);
+    // Quotes and other punctuation end a word, also outside ASCII.
+    CHECK(check("Znajdz „Lze Elfa”", "Find '{item:14,25}'").size() == 1);
+    // At a level, the name line's forms.
+    CHECK(check("Bez Kamienia Przyjazni", "Without {item:14,21+2}").size() == 1);
 }
 
 TEST_CASE("At a level without a name of its own, a missing form is reported too [data][items][texts]")
