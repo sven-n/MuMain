@@ -1919,6 +1919,48 @@
         "rotation": [90, 0, -45],
         "scale": 0.2
       }
+    },
+    {
+      "number": 162,
+      "file": "Data/Item/Mbag.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.5],
+        "rotation": [270, 0, 0],
+        "scale": 0.006
+      },
+      "ground": {
+        "rotation": [90, 0, -45],
+        "scale": 0.5
+      }
+    },
+    {
+      "number": 163,
+      "file": "Data/Item/Ingameshop/lock.bmd",
+      "textureFolders": ["Item/Ingameshop"],
+      "inventory": {
+        "anchor": [0.5, 0.5],
+        "rotation": [270, 0, 0],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [90, 0, -45],
+        "scale": 0.5
+      }
+    },
+    {
+      "number": 169,
+      "model": "characterCard",
+      "inventory": {
+        "anchor": [0.5, 0.7],
+        "offset": [0.002, -0.04],
+        "rotation": [270, 0, 0],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "scale": 1
+      }
     }
   ]
 }
