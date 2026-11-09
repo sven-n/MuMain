@@ -216,7 +216,8 @@ bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTarg
         const POINT pointer = pDest->PointerPos();
         const POINT itemTopLeft = TopLeftIn(pDest, pointer.x, pointer.y);
 
-        return pDest->GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iTargetColumnX, iTargetRowY);
+        return pDest->Geometry().ItemCellAt(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y),
+                                            iTargetColumnX, iTargetRowY);
     }
     return false;
 }
@@ -1144,7 +1145,7 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
     int iColumnX = 0, iRowY = 0;
     int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-    m_Geometry.CellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), iColumnX, iRowY);
+    m_Geometry.ItemCellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), iColumnX, iRowY);
 
     bool bWarning = false;
     if (iColumnX < 0 && iColumnX >= -nItemColumn)

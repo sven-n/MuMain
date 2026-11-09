@@ -96,3 +96,43 @@ TEST_CASE("a dragged item keeps its hold across grid pitches")
         CHECK(top == 1000 - offset);
     }
 }
+
+TEST_CASE("a dropped item lands on the cell under the centre of its first cell")
+{
+    // A scaled theme: a fractional left edge and pitch.
+    const GridGeometry grid{100.4f, 200.4f, 23.6f, 23.6f, 8, 4};
+    int column = -1;
+    int row = -1;
+
+    // Column 3, row 2 start at 171.2 and 247.6; the rounded box starts a fraction before.
+    const auto cell = grid.CellsRect(3, 2, 1, 1);
+    REQUIRE(grid.CellAt(171.f, 247.f, column, row));
+    CHECK(column == 2);
+    CHECK(row == 1);
+    REQUIRE(grid.ItemCellAt(171.f, 247.f, column, row));
+    CHECK(column == 3);
+    CHECK(row == 2);
+
+    // Up to just under half a cell off either way still lands there.
+    const float halfPitch = grid.PitchX() / 2.f;
+    REQUIRE(grid.ItemCellAt(cell.x - halfPitch + 0.1f, cell.y + halfPitch - 0.1f, column, row));
+    CHECK(column == 3);
+    CHECK(row == 2);
+}
+
+TEST_CASE("a dropped item a few pixels off the grid's edge lands on its first cell")
+{
+    const GridGeometry grid{100.f, 200.f, 20.f, 20.f, 8, 4};
+    int column = -1;
+    int row = -1;
+
+    REQUIRE(grid.ItemCellAt(97.f, 196.f, column, row));
+    CHECK(column == 0);
+    CHECK(row == 0);
+
+    // More than half a cell off is outside, and counted one further out as the original did.
+    CHECK_FALSE(grid.ItemCellAt(89.f, 200.f, column, row));
+    grid.ItemCellOf(89.f, 200.f, column, row);
+    CHECK(column == -1);
+    CHECK(row == 0);
+}
