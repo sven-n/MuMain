@@ -810,16 +810,11 @@ void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side)
     SetWrongSide(row, side);
 }
 
-bool ForgetAppliedClientMarks(const ItemSyncDiff& diff, KnownDifferences& known)
+bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known)
 {
     const KnownDifferences before = known;
     const auto forget = [&](const SyncItem& row, const std::string& field)
-    {
-        if (known.Find(row.group, row.number, field) == WrongSide::Client)
-        {
-            known.Set(row.group, row.number, field, WrongSide::None);
-        }
-    };
+    { known.Set(row.group, row.number, field, WrongSide::None); };
     for (const SyncItem& row : diff.items)
     {
         if (row.change != SyncChange::Changed)
@@ -847,7 +842,7 @@ bool ForgetAppliedClientMarks(const ItemSyncDiff& diff, KnownDifferences& known)
     }
     for (const SyncFormula& row : diff.formulas)
     {
-        if (row.checked && known.Find(row.entry) == WrongSide::Client)
+        if (row.checked)
         {
             known.Set(row.entry, WrongSide::None);
         }

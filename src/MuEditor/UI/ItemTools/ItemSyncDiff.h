@@ -138,11 +138,11 @@ void SetWrongSide(SyncFormula& row, WrongSide side);
 // item's, which stays for the others (also ones that differ only later).
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
 void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
-// After the diff's checked rows were applied: takes out of `known` the marks wrong in the client
-// of what was applied, as the client has the file's value now (an item number used again later
-// starts without one). A changed item's whole-item mark goes when all its fields were applied.
+// After the diff's checked rows were applied: takes out of `known` the marks of what was applied,
+// either side's, as the client has the file's value now (an item number used again later starts
+// without one). A changed item's whole-item mark goes when all its fields were applied.
 // Whether `known` changed.
-bool ForgetAppliedClientMarks(const ItemSyncDiff& diff, KnownDifferences& known);
+bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known);
 // The side marked on the item as a whole, or on every field of a Changed one; None when nothing or
 // not every field is marked, or the fields name different sides.
 WrongSide GetRowWrongSide(const SyncItem& row);

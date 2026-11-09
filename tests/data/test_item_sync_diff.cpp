@@ -1295,7 +1295,7 @@ TEST_CASE("An item the file has twice is a locked row of the import [data][items
     g_ItemEdits.GetHistory().Clear();
 }
 
-TEST_CASE("Applying a difference wrong in the client takes out its mark [data][items][editor]")
+TEST_CASE("Applying a marked difference takes out its mark [data][items][editor]")
 {
     Sides sides;
     ItemDefinition& kris = sides.FileItem(KrisType);
@@ -1316,24 +1316,26 @@ TEST_CASE("Applying a difference wrong in the client takes out its mark [data][i
     diff.items[static_cast<size_t>(FindRow(diff, ShortSwordType) - diff.items.data())].checked = true;
     std::ranges::find(diff.formulas, "dropLevelBonus.excellent", &SyncFormula::entry)->checked = false;
 
-    CHECK(ForgetAppliedClientMarks(diff, known));
+    CHECK(ForgetAppliedMarks(diff, known));
     CHECK(known.Find(0, 0, "width") == WrongSide::None);
     CHECK(known.Find(0, 0, "repairable") == WrongSide::Server);
     CHECK(known.Find(0, 1, "") == WrongSide::None);
     CHECK(known.Find("dropLevelBonus.excellent") == WrongSide::Client);
     CHECK(known.Find(0, 2, "") == WrongSide::Client);
-    CHECK_FALSE(ForgetAppliedClientMarks(diff, known));
+    CHECK_FALSE(ForgetAppliedMarks(diff, known));
 
     // A changed item's whole-item mark goes once all its fields were applied.
     known.Set(0, 0, EveryFieldOfItem, WrongSide::Client);
     ItemSyncDiff partly = sides.Diff(&known);
     SyncItem& row = partly.items[static_cast<size_t>(FindRow(partly, KrisType) - partly.items.data())];
     row.fields.front().checked = false;
-    ForgetAppliedClientMarks(partly, known);
+    ForgetAppliedMarks(partly, known);
     CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
     SetRowChecked(row, true);
-    CHECK(ForgetAppliedClientMarks(partly, known));
+    CHECK(ForgetAppliedMarks(partly, known));
     CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::None);
+    // Wrong in the server, but checked by hand and applied.
+    CHECK(known.Find(0, 0, "repairable") == WrongSide::None);
 }
 
 TEST_CASE("An item the file has twice shows its mark [data][items][editor]")

@@ -913,7 +913,7 @@ bool CMuItemSyncUI::Apply()
         {std::to_string(changes.added + changes.changed + changes.removed), std::to_string(changes.formulaEntries)});
     const std::string path = m_comparedPath;
     g_MuEditorConsoleUI.LogEditor(path + ": " + done);
-    if (ForgetAppliedClientMarks(*m_diff, m_known))
+    if (ForgetAppliedMarks(*m_diff, m_known))
     {
         SaveKnownDifferences();
     }
