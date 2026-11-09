@@ -19,6 +19,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
+| `Tooltips/NameCases.json` | The cases each language declines item names in, for texts that name items with a case; see [Name forms](#name-forms) |
 | `Options/*.json` | The option definitions, one file per option group (luck so far); see [Item options](#item-options) |
 | `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
 | `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
@@ -95,6 +96,32 @@ read as the English name only; saving writes the object form.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
+#### Name forms
+
+Texts can name an item by its number, `{item:14,25}` (see
+[Texts that name items](translation-system.md#texts-that-name-items)). In a
+language that declines names a text can ask for a form, `{item:14,25:acc}`,
+and the item gives it in `nameForms`, after `name`:
+
+```json
+"name": { "en": "Tear of Elf", "de": "Träne der Elfe", "pl": "Łza Elfa" },
+"nameForms": { "pl": { "gen": "Łzy Elfa", "acc": "Łzę Elfa" } },
+```
+
+A name line with a text (a name at a level, written in place or a shared text,
+`"@x"`) has its forms after its `text`; a line written as `{name}` uses the
+item's. The cases are `gen`, `dat`,
+`acc`, `ins` and `loc`; `Tooltips/NameCases.json` gives the ones each language
+uses:
+
+```json
+{ "formatVersion": 1, "languages": { "de": ["gen", "dat", "acc"], "pl": ["gen", "dat", "acc", "ins", "loc"] } }
+```
+
+A missing form shows the name itself. Forms in English, in a language or case
+the file does not give, or in a language the name has no text of its own in are
+never shown; loading warns about them. Item Translations edits the forms.
+
 ### MU Helper pickup filters
 
 **Pick All** collects every eligible drop. **Selected** applies the enabled
@@ -131,6 +158,7 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
+| `nameForms` | Forms of the name for texts that ask for a case, per language: `{"pl": {"acc": "Łzę Elfa"}}`; see [Name forms](#name-forms). A client-only field; the bmd import keeps it |
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
@@ -592,6 +620,12 @@ by that value for the hovered item, e.g.
 `"Increases damage by {table:damageIncreaseWeapons} at +{level}"`. Item texts
 have no braces of their own, so every brace belongs to a placeholder. A
 placeholder is one of:
+
+- an **item**, `{item:14,113}` (with `+level` and `:case`): its name in the item
+  name language, which follows Translate item names while the rest of the text
+  stays in the UI language
+  ([Texts that name items](translation-system.md#texts-that-name-items)). A
+  translation names the same items as the English text, its case may differ;
 
 - a **built-in value**, by its name: `{level}`, the item's + level, or a value of the tooltip's stat
   lines, as the game computes them for the item and the hero:
@@ -1478,6 +1512,10 @@ shows it in the others.
   - **Move item**: to a free number, with its model (the model data and the
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
+
+  Both list what uses the item by its number and stays there: the game data,
+  the code and the texts that name it (`{item:14,13}`), which then name
+  whatever takes the number.
 
   An entry without a name moves and is removed as an item is; there is
   nothing to duplicate.

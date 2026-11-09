@@ -51,6 +51,8 @@ public:
     bool RemoveGlowColors(std::string label, std::span<const std::string> names);
     // CItemDataHandler::SetGroundLabelStyle.
     void SetGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style);
+    // CItemDataHandler::SetNameCases, as one step.
+    void SetNameCases(std::string label, const Data::Items::ItemNameCases& cases);
     // A new label style (CItemDataHandler::SetGroundLabelStyle) put into the ground label folder at `folder` (the empty
     // path: under the root), as one step.
     void AddGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style,

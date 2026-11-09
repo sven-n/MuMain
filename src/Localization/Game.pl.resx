@@ -5122,10 +5122,10 @@
     <value>i naciśnij przycisk odpowiadający liczbie klejnotów</value>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
-    <value>Klejnot Błogosławieństwa</value>
+    <value>{item:14,13}</value>
   </data>
   <data name="Jewel of Soul" xml:space="preserve">
-    <value>Klejnot Duszy</value>
+    <value>{item:14,14}</value>
   </data>
   <data name="Combine %d (%d zen is required)" xml:space="preserve">
     <value>Połącz %d (koszt: %d zen)</value>
@@ -5716,7 +5716,7 @@
     <value>Sukces %s %s : %d%%</value>
   </data>
   <data name="Jewel stone" xml:space="preserve">
-    <value>Kamień klejnotu</value>
+    <value>{item:14,41}</value>
   </data>
   <data name="Weapons or shields" xml:space="preserve">
     <value>Broń lub tarcze</value>
@@ -5971,7 +5971,7 @@
     <value>O uszlachetnianiu</value>
   </data>
   <data name="Jewel of Harmony" xml:space="preserve">
-    <value>Klejnot Harmonii</value>
+    <value>{item:14,42}</value>
   </data>
   <data name="Refine Gemstone" xml:space="preserve">
     <value>Uszlachetnij Kamień szlachetny</value>
@@ -8077,22 +8077,22 @@
     <value>Wybierz klejnot do rozpakowania.</value>
   </data>
   <data name="Jewel of Life" xml:space="preserve">
-    <value>Klejnot Życia</value>
+    <value>{item:14,16}</value>
   </data>
   <data name="Jewel of Creation" xml:space="preserve">
-    <value>Klejnot Stworzenia</value>
+    <value>{item:14,22}</value>
   </data>
   <data name="Jewel of Guardian" xml:space="preserve">
-    <value>Klejnot Strażnika</value>
+    <value>{item:14,31}</value>
   </data>
   <data name="Jewel of Chaos" xml:space="preserve">
-    <value>Klejnot Chaosu</value>
+    <value>{item:12,15}</value>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Niższy kamień rafinacji</value>
+    <value>{item:14,43}</value>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Wyższy kamień rafinacji</value>
+    <value>{item:14,44}</value>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
     <value>Czy na pewno chcesz rozpakować</value>

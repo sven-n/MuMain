@@ -62,6 +62,8 @@ constexpr int ItemTooltipJsonFormatVersion = 2;
 // its layout has neither those lines nor the sections they go between.
 constexpr int ItemTooltipJsonOldestFormatVersion = 2;
 constexpr const char* ItemTooltipFileName = "Tooltip.json";
+// The key of the file's layouts; problems name a layout's fields by its place in the list ("layouts[2].lines[0]").
+constexpr const char* TooltipLayoutsKey = "layouts";
 // The layout of an item that names none.
 constexpr const char* DefaultTooltipLayout = "default";
 // The id of the default layout's class lines ("Can be equipped by ..."); Item Checks warns about an item of a kind

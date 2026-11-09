@@ -111,6 +111,7 @@ void CopyFieldsNotInItemAttribute(const ItemDefinition& source, ItemDefinition& 
     target.tags = source.tags;
     target.description = source.description;
     target.nameLines = source.nameLines;
+    target.nameForms = source.nameForms;
     target.levelValues = source.levelValues;
     target.groundLabels = source.groundLabels;
     target.tooltipLayout = source.tooltipLayout;
