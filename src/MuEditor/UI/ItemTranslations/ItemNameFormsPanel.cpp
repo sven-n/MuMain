@@ -239,6 +239,9 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
         ImGui::TableSetupColumn(std::string(caseKey).c_str(), ImGuiTableColumnFlags_None, FormColumnWidth * uiScale);
     }
     ImGui::TableHeadersRow();
+    // The fields' IDs name the item: what was typed in a field left in the frame another item becomes selected never
+    // lands on the new item's field.
+    ImGui::PushID(Data::Items::MakeItemType(definition.group, definition.number));
     for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
     {
         if (!DeclinesNames(locale))
@@ -250,6 +253,7 @@ void CItemNameFormsPanel::RenderTable(const ItemDefinition& definition)
             RenderRow(definition, index, locale);
         }
     }
+    ImGui::PopID();
     ImGui::EndTable();
 }
 
