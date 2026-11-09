@@ -149,6 +149,17 @@ bool IsKeptByClient(WrongSide side, bool checked)
     return side == WrongSide::Server && !checked;
 }
 
+// A field's or a formula entry's name, grey while the client keeps its value.
+void RenderEntryName(const std::string& name, bool keptByClient)
+{
+    if (keptByClient)
+    {
+        ImGui::TextDisabled("%s", name.c_str());
+        return;
+    }
+    ImGui::TextUnformatted(name.c_str());
+}
+
 // Whether the row changes something when it is applied: the whole New or Removed item, or a
 // field of a changed one.
 bool AppliesSomething(const SyncItem& row)
@@ -1421,7 +1432,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
             }
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(field.field.c_str());
+        RenderEntryName(field.field, markable && IsKeptByClient(field.wrongSide, field.checked));
         if (changed)
         {
             ImGui::TableNextColumn();
@@ -1514,7 +1525,7 @@ void CMuItemSyncUI::RenderFormulas()
             ImGui::Checkbox("##Checked", &row.checked);
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(row.entry.c_str());
+        RenderEntryName(row.entry, checkable && IsKeptByClient(row.wrongSide, row.checked));
         ImGui::TableNextColumn();
         RenderValue(row.current);
         ImGui::TableNextColumn();
