@@ -64,7 +64,7 @@ Błogosławieństwa" in the jewel bundle window; German mixes "Jewel of Soul" an
 - [x] Validation of forms; Data Checks "Texts"; Item Translations' name forms with the count of texts.
 - [x] Editing `NameCases.json` in the editor (Item Translations, **Cases…**), with undo, saved by Save Items.
 - [x] Docs; demo texts: the jewel window's ten jewel names (Game "Jewel of Bless" to "Higher Refining Stone", en,
-      de, es, pt, pl), Dialog `Answer_65_Slot_0` (en, de, es, pl).
+      de, es, pt, pl; "Jewel of Harmony" is also Elpis's menu button), Dialog `Answer_65_Slot_0` (en, de, es, pl).
 - [ ] Tests pass in the Release editor build; in-game check, Polish and German, the option on and off.
 
 ### PR 3: texts window

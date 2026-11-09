@@ -1541,6 +1541,7 @@ void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
     cfg.buttons.push_back(std::move(btnAboutRefinary));
 
     GenericMenuConfig::MenuButton btnAboutJewel;
+    // The jewel window's text, {item:14,42}: the item data's name, as the inventory shows it.
     btnAboutJewel.label = I18N::Game::JewelOfHarmony;
     btnAboutJewel.onClick = [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY); };
     cfg.buttons.push_back(std::move(btnAboutJewel));

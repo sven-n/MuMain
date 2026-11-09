@@ -145,6 +145,21 @@ TEST_CASE("The jewel window names the jewels as the item data does, translated o
     }
 }
 
+TEST_CASE("Elpis's menu button names the Jewel of Harmony as the item data does, translated or not [data][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+
+    // The button shares the jewel window's text, so it follows the item data too: Spanish and Portuguese show the
+    // inventory's name, not the text's former "Joya de la armonía" and "Jóia da Harmonia".
+    I18N::SetLocale("es");
+    CHECK(std::wstring_view(I18N::Game::JewelOfHarmony) == L"Joya de la Armonía");
+    I18N::SetLocale("pt");
+    CHECK(std::wstring_view(I18N::Game::JewelOfHarmony) == L"Joia da harmonia");
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(std::wstring_view(I18N::Game::JewelOfHarmony) == L"Jewel of Harmony");
+}
+
 TEST_CASE("A text naming an item reads the name in the UI language, or English while translated item names are off "
           "[data][texts]")
 {
