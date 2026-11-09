@@ -2061,7 +2061,8 @@ number, fields with their default value left out, LF line endings.
   one) as a Markdown table in English: each item's group, number and name,
   for the items that differ also the change and the number of fields, and
   the side marked wrong (*Client* or *Server*: the whole item's mark, or the
-  one all its fields have; empty otherwise). Paste
+  one all its fields have; empty otherwise; not for a comparison of two
+  files, which has no marks). Paste
   it into an issue, e.g. one asking OpenMU for the items it lacks or to fix
   the items marked wrong in the server.
 - **Names**: only the client's UI languages are taken from the file; a

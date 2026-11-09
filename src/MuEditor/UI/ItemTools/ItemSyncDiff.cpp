@@ -627,7 +627,7 @@ const char* MarkdownWrongIn(WrongSide side)
     }
 }
 
-std::string WriteMarkdownRow(const SyncItem& row, bool withChange)
+std::string WriteMarkdownRow(const SyncItem& row, bool withChange, bool withWrongIn)
 {
     std::string text = "| ";
     if (withChange)
@@ -641,8 +641,11 @@ std::string WriteMarkdownRow(const SyncItem& row, bool withChange)
     {
         text += MarkdownCellSeparator + std::to_string(row.fields.size());
     }
-    text += MarkdownCellSeparator;
-    text += MarkdownWrongIn(GetRowWrongSide(row));
+    if (withWrongIn)
+    {
+        text += MarkdownCellSeparator;
+        text += MarkdownWrongIn(GetRowWrongSide(row));
+    }
     return text + " |\n";
 }
 } // namespace
@@ -867,7 +870,7 @@ WrongSide GetRowWrongSide(const SyncItem& row)
 }
 
 std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
-                                  std::string_view changeColumn)
+                                  std::string_view changeColumn, bool withWrongIn)
 {
     const bool withChange = !changeColumn.empty();
     std::string text(title);
@@ -881,9 +884,13 @@ std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::st
     {
         text += std::string(MarkdownCellSeparator) + MarkdownFieldsColumn;
     }
-    text += std::string(MarkdownCellSeparator) + MarkdownWrongInColumn + " |\n|";
-    const int columns =
-        MarkdownItemColumnCount + MarkdownWrongInColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
+    if (withWrongIn)
+    {
+        text += std::string(MarkdownCellSeparator) + MarkdownWrongInColumn;
+    }
+    text += " |\n|";
+    const int columns = MarkdownItemColumnCount + (withWrongIn ? MarkdownWrongInColumnCount : 0) +
+                        (withChange ? MarkdownChangeColumnCount : 0);
     for (int column = 0; column < columns; ++column)
     {
         text += MarkdownSeparatorCell;
@@ -891,7 +898,7 @@ std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::st
     text += "\n";
     for (const SyncItem* row : rows)
     {
-        text += WriteMarkdownRow(*row, withChange);
+        text += WriteMarkdownRow(*row, withChange, withWrongIn);
     }
     return text;
 }

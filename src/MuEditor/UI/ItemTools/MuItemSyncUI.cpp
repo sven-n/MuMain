@@ -1250,8 +1250,8 @@ void CMuItemSyncUI::CopyItemList(ItemList list, const std::vector<int>& rows)
                                  : (m_fromServer ? MarkdownDifferFromServer : MarkdownDifferFromFile);
         changeColumn = m_comparingFiles ? MarkdownFromAToB : MarkdownInTheClient;
     }
-    const std::string text =
-        WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")", changeColumn);
+    const std::string text = WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")",
+                                                   changeColumn, !m_comparingFiles);
     ImGui::SetClipboardText(text.c_str());
     m_copiedList = list;
     m_copiedRows = static_cast<int>(rows.size());

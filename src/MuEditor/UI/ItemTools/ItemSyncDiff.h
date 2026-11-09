@@ -148,10 +148,11 @@ bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known);
 WrongSide GetRowWrongSide(const SyncItem& row);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
 // editor's language: `title`, an empty line, then a table of each item's group, number and name,
-// and the side marked wrong (GetRowWrongSide). With a `changeColumn` (its head, e.g. "In the
-// client"), the table also has each row's change first and its number of differing fields.
+// and `withWrongIn` the side marked wrong (GetRowWrongSide; a comparison of two files has no
+// marks). With a `changeColumn` (its head, e.g. "In the client"), the table also has each row's
+// change first and its number of differing fields.
 std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
-                                  std::string_view changeColumn);
+                                  std::string_view changeColumn, bool withWrongIn);
 // How many formula entries differ between two item stat files: the formula rows a diff lists.
 int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming);
 

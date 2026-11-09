@@ -397,7 +397,7 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK(FindField(changed, "height")->wrongSide == WrongSide::Client);
     CHECK(FindField(changed, "height")->checked);
     const std::vector<const SyncItem*> rows = {&changed};
-    CHECK(WriteSyncRowsMarkdown(rows, "Items", "").find("| Server |") != std::string::npos);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") != std::string::npos);
 
     // Marking the whole item takes out the fields' own marks; wrong in client leaves the boxes.
     MarkWrongSide(known, changed, "", WrongSide::Client);
@@ -772,14 +772,22 @@ TEST_CASE("Copy as Markdown writes the rows as a table [data][items][editor]")
                                      "| 12 | 73 | Sphere (4) | Server |\n"
                                      "| 14 | 15 | Zen \\| Gold Coin |  |\n"
                                      "| 13 | 50 | Illusion Sorcerer Covenant | Client |\n";
-    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (3)", "") == onlyInClient);
-    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (3)", "In the client") ==
+    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (3)", "", true) == onlyInClient);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (3)", "In the client", true) ==
           "Items that differ (3)\n\n"
           "| In the client | Group | Number | Item | Fields | Wrong in |\n"
           "|---|---|---|---|---|---|\n"
           "| Added | 12 | 73 | Sphere (4) | 2 | Server |\n"
           "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |  |\n"
           "| Changed | 13 | 50 | Illusion Sorcerer Covenant | 2 | Client |\n");
+    // A comparison of two files has no marks, so no column for them.
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (3)", "From A to B", false) ==
+          "Items that differ (3)\n\n"
+          "| From A to B | Group | Number | Item | Fields |\n"
+          "|---|---|---|---|---|\n"
+          "| Added | 12 | 73 | Sphere (4) | 2 |\n"
+          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |\n"
+          "| Changed | 13 | 50 | Illusion Sorcerer Covenant | 2 |\n");
     // Fields marked with different sides name none.
     changed.fields.back().wrongSide = WrongSide::Server;
     CHECK(GetRowWrongSide(changed) == WrongSide::None);
@@ -1353,7 +1361,7 @@ TEST_CASE("An item the file has twice shows its mark [data][items][editor]")
     CHECK_FALSE(row.locked.empty());
     CHECK(GetRowWrongSide(row) == WrongSide::Server);
     const std::vector<const SyncItem*> rows = {&row};
-    CHECK(WriteSyncRowsMarkdown(rows, "Items", "").find("| Server |") != std::string::npos);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") != std::string::npos);
 
     // Clicking it again clears it; a locked row stays unchecked whatever its mark.
     MarkWrongSide(known, row, "", WrongSide::None);
