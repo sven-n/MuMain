@@ -9,6 +9,8 @@ namespace Core::Input
     namespace
     {
         bool g_leftMouseButtonPressEdge = false;
+        bool g_printScreenPressEdge = false;
+        bool g_printScreenDown = false;
 
 #ifdef _EDITOR
         OtherWindowQuery g_otherWindowQuery = nullptr;
@@ -70,6 +72,24 @@ namespace Core::Input
     void ClearLeftMouseButtonPressEdge()
     {
         g_leftMouseButtonPressEdge = false;
+    }
+
+    void SetPrintScreenDown(bool down)
+    {
+        // Only the release-to-press edge counts: a repeat or a duplicated event must not queue
+        // another screenshot.
+        if (down && !g_printScreenDown)
+        {
+            g_printScreenPressEdge = true;
+        }
+        g_printScreenDown = down;
+    }
+
+    bool ConsumePrintScreenPress()
+    {
+        const bool pressed = g_printScreenPressEdge;
+        g_printScreenPressEdge = false;
+        return pressed;
     }
 
     bool IsKeyDown(int virtualKey)

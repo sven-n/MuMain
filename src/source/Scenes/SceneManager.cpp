@@ -255,8 +255,11 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
     // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
+    // Print Screen also works before a character exists (login), where there is no name to add.
     const std::wstring server =
-        L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
+        Hero != nullptr
+            ? L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID)
+            : std::wstring();
     Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
 }
 
@@ -465,12 +468,15 @@ static void HandleScreenshotCapture()
 {
     ConsumeScreenshot();
 
-    if (PressKey(VK_SNAPSHOT))
+    const bool printScreenKey = PressKey(VK_SNAPSHOT);
+    const bool printScreenEvent = Core::Input::ConsumePrintScreenPress();
+
+    if (printScreenKey)
     {
         GrabEnable = !GrabEnable;
     }
 
-    if (!GrabEnable)
+    if (!GrabEnable && !printScreenEvent)
     {
         return;
     }
