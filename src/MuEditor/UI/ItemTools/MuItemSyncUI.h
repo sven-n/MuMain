@@ -195,6 +195,8 @@ private:
     int m_lastShownFrame = -1;
     // False while the file has something that could not be read: the marks are not saved then.
     bool m_knownSavable = true;
+    // That the marks were not saved; apart from m_messages, which a new comparison clears.
+    std::string m_marksNotSaved;
     // g_ItemDatabase.GetVersion() when the diff was made (a formula change counts there too).
     int m_diffVersion = 0;
     // The row of m_diff->items whose fields are shown, or -1, and what uses the item when the

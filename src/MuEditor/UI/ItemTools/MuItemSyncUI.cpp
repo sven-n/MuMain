@@ -391,6 +391,7 @@ void CMuItemSyncUI::Render(bool* open)
             m_knownSavable =
                 std::ranges::none_of(issues, [](const ItemDataIssue& issue)
                                      { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+            m_marksNotSaved.clear();
             m_knownLoaded = true;
         }
         TakeChosenFile();
@@ -1680,6 +1681,12 @@ void CMuItemSyncUI::RenderExportPopup()
 
 void CMuItemSyncUI::RenderMessages()
 {
+    if (!m_marksNotSaved.empty())
+    {
+        ImGui::PushTextWrapPos(0.0f);
+        ImGui::TextColored(ErrorColor, "%s", m_marksNotSaved.c_str());
+        ImGui::PopTextWrapPos();
+    }
     for (const std::string& message : m_messages)
     {
         ImGui::PushTextWrapPos(0.0f);
@@ -1711,11 +1718,10 @@ void CMuItemSyncUI::SaveKnownDifferences()
 {
     if (!m_knownSavable)
     {
-        const std::string message = I18N::Format(I18N::Editor::TheMarksAreNotSavedWhile0CannotBeRead,
-                                                 {GetKnownDifferencesFile().generic_string()});
-        g_MuEditorConsoleUI.LogEditor(message);
-        m_messages = {message};
-        m_messagesAreErrors = true;
+        // The import's messages stay.
+        m_marksNotSaved = I18N::Format(I18N::Editor::TheMarksAreNotSavedWhile0CannotBeRead,
+                                       {GetKnownDifferencesFile().generic_string()});
+        g_MuEditorConsoleUI.LogEditor(m_marksNotSaved);
         return;
     }
     std::vector<ItemDataIssue> issues;
