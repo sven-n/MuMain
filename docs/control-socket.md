@@ -195,8 +195,9 @@ For a gameplay Shift-click, use
 `shift` must be boolean and defaults to false. Shift is pressed during the
 hover frames, so the legacy key scan sees it held before the mouse press,
 and stays down through the mouse release. Both inputs belong to the same
-injection. Shift reaches gameplay even when the UI consumes the key, as a
-physical Shift does; a mouse press consumed by the UI does not reach the world.
+injection. Shift reaches gameplay until its key-up even when the UI consumes
+the key or mouse press, as a physical Shift does; a mouse press consumed by
+the UI does not reach the world.
 This supplies gameplay's modifier state; RmlUi shortcut modifiers still come
 from the physical keyboard.
 

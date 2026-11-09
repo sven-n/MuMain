@@ -717,8 +717,8 @@ void mu::ui::window::CCursedTempleSystem::UpdateTutorialStep()
 
 bool mu::ui::window::CCursedTempleSystem::Update()
 {
-    // A new right press starts a gesture; releasing both RMB and Shift ends it.
-    if (MouseRButtonPush || (!MouseRButton && !mu::ui::window::IsRepeat(VK_SHIFT)))
+    // A new right press or releasing Shift ends the gesture.
+    if (MouseRButtonPush || !mu::ui::window::IsRepeat(VK_SHIFT))
         m_CursedTempleGestureConsumed = false;
 
     UpdateScore();
@@ -1121,6 +1121,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
 
     if (m_SkillPoint < MaxKillCount)
     {
+        m_CursedTempleGestureConsumed = true;
         g_pSystemLogBox->AddText(I18N::Game::KillPointIsnTSufficient, mu::ui::window::TYPE_ERROR_MESSAGE);
         MouseRButtonPush = false;
         return;

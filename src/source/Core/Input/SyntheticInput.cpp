@@ -565,8 +565,6 @@ void AdvanceClick()
         }
         g_injection.uiDown = !propagates;
         g_injection.legacyDown = propagates;
-        if (!g_injection.legacyDown)
-            g_injection.shiftDown = false;
         if (g_injection.legacyDown)
         {
             ApplyPointerPosition();
