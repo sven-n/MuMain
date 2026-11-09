@@ -555,8 +555,10 @@ constexpr const char* MarkdownFieldsColumn = "Fields";
 constexpr const char* MarkdownWrongInColumn = "Wrong in";
 constexpr const char* MarkdownCellSeparator = " | ";
 constexpr const char* MarkdownSeparatorCell = "---|";
-// The item's group, number and name, and the side marked wrong.
-constexpr int MarkdownItemColumnCount = 4;
+// The item's group, number and name (MarkdownItemColumns).
+constexpr int MarkdownItemColumnCount = 3;
+// The side marked wrong.
+constexpr int MarkdownWrongInColumnCount = 1;
 // The change and the field count.
 constexpr int MarkdownChangeColumnCount = 2;
 
@@ -867,7 +869,8 @@ std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::st
         text += std::string(MarkdownCellSeparator) + MarkdownFieldsColumn;
     }
     text += std::string(MarkdownCellSeparator) + MarkdownWrongInColumn + " |\n|";
-    const int columns = MarkdownItemColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
+    const int columns =
+        MarkdownItemColumnCount + MarkdownWrongInColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
     for (int column = 0; column < columns; ++column)
     {
         text += MarkdownSeparatorCell;
