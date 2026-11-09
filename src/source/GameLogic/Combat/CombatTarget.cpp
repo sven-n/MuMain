@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Combat/CombatTarget.h"
+#include "GameLogic/Combat/SkillAim.h"
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
 #include "Core/Platform/Imm.h"
@@ -65,6 +66,15 @@ bool CheckTarget(CHARACTER* c)
         if (SelectFlag)
         {
             VectorCopy(CollisionPosition, c->TargetPosition);
+            if (c == Hero)
+            {
+                const auto skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+                if (SkillAim::IsAimedByDirection(skill))
+                {
+                    SkillAim::PullIntoRange(c->Object.Position, c->TargetPosition,
+                                            gSkillManager.GetSkillDistance(skill, c), TERRAIN_SCALE);
+                }
+            }
             TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
             TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
             return true;

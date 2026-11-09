@@ -155,3 +155,11 @@ mu_add_test(
 )
 
 target_compile_definitions(test_received_attack_target PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
+
+mu_add_test(
+    NAME test_skill_aim
+    SOURCES
+        test_skill_aim.cpp
+    LINK_LIBS
+        MuClient
+)
