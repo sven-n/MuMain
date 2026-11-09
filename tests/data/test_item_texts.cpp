@@ -10,6 +10,7 @@
 #include "Data/Translation/ItemTextExpansion.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
 
 #ifdef _EDITOR
@@ -21,10 +22,18 @@
 #endif
 
 #include <algorithm>
+#include <cstring>
 #include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// An NPC dialog's page, text and answer lines as CSQuest copies them (SceneCore.cpp).
+extern int g_iCurrentDialogScript;
+extern int g_iNumLineMessageBoxCustom;
+extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern int g_iNumAnswer;
+extern wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
 namespace
 {
@@ -229,6 +238,29 @@ TEST_CASE("Turning translated item names off tells the texts-changed observers o
 
     I18N::UnregisterLocaleObserver(&CountLocaleChange, nullptr);
     Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&CountChange, nullptr);
+}
+
+TEST_CASE("An open NPC dialog's copied answer follows Translate item names [data][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    I18N::SetLocale("pl");
+
+    // The Tear of Elf quest's answer, "{item:14,25:acc}" in Polish, as the dialog shows it.
+    constexpr int TearOfElfQuestPage = 65;
+    g_csQuest.ShowDialogText(TearOfElfQuestPage);
+    CHECK(std::wstring_view(g_lpszDialogAnswer[0][0]).find(L"Łzę Elfa") != std::wstring_view::npos);
+
+    // CSQuest's texts-changed observer copies it again: the English name.
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(std::wstring_view(g_lpszDialogAnswer[0][0]).find(L"Tear of Elf") != std::wstring_view::npos);
+
+    // No dialog open for the tests after this one.
+    g_iCurrentDialogScript = -1;
+    g_iNumLineMessageBoxCustom = 0;
+    std::memset(g_lpszMessageBoxCustom, 0, sizeof g_lpszMessageBoxCustom);
+    g_iNumAnswer = 0;
+    std::memset(g_lpszDialogAnswer, 0, sizeof g_lpszDialogAnswer);
 }
 
 TEST_CASE("A language without a text of its own names the items as the English text does [data][texts]")
