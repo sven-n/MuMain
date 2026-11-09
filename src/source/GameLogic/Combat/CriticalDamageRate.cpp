@@ -67,6 +67,7 @@ void AddOwnBuff(CriticalDamageRate& rate)
 // The Scroll of Battle (14/97) adds its value of the item option table (ItemAddOption.bmd: 20, OpenMU's BuffItems:
 // CriticalDamageChance +0.2) while its buff is on, as the other scrolls add theirs. The hero reads it from the
 // inventory, so the buff is always the hero's own.
+// The buffs design (B13) moves this value to Data/Buffs.json; this reader moves with it, or it reads 0.
 void AddScrollOfBattle(CriticalDamageRate& rate)
 {
     if (Hero != nullptr && g_pItemAddOptioninfo != nullptr && g_isCharacterBuff((&Hero->Object), eBuff_Scroll_Battle))

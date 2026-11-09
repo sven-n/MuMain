@@ -319,6 +319,13 @@ AG use: 75
   tooltips show the same numbers as before, and lists where OpenMU stores a
   number another way (the Scroll of Defense shows +60 base defense; OpenMU adds
   half of it to the final defense, `BuffItems.cs:50-57`).
+- Every reader of those values moves to `Buffs.json` with it: the character
+  stats' item buffs (`CHARACTER_MACHINE` in `ZzzInfomation.cpp`: the scrolls,
+  elixirs, Jack O'Lantern drinks and cherry blossom petals), the Scroll of
+  Battle's critical damage rate (`GetHeroCriticalDamageRate`), the buff strip's
+  values and times (`w_BuffStateValueControl`, `w_BuffTimeControl`) and the
+  item tooltips. A reader left on the bmd would read 0 once the buff part is
+  gone.
 
 ## Pull requests
 
