@@ -171,6 +171,14 @@ bool StartsChecked(WrongSide side, bool byDefault, bool locked)
     return side == WrongSide::None ? byDefault : side == WrongSide::Client;
 }
 
+// A field: an inexact one starts unchecked like a locked one, also when it is marked wrong in the
+// client: the file's value is not the client's (a drop level over 255 that OpenMU keeps as 255).
+// Its box takes it still.
+bool FieldStartsChecked(const SyncField& field)
+{
+    return StartsChecked(field.wrongSide, true, !field.locked.empty() || !field.inexact.empty());
+}
+
 WrongSide MarkedSide(const SyncOptions& options, const ItemKey& key, const std::string& field)
 {
     return options.known != nullptr ? options.known->Find(key.first, key.second, field) : WrongSide::None;
@@ -194,7 +202,7 @@ void MarkField(SyncField& field, const ItemKey& key, const ItemExchangeFile& inc
             field.inexact = I18N::Editor::OpenMUKeepsTheDropLevelInAByteAtMost255;
         }
     }
-    field.checked = StartsChecked(field.wrongSide, field.inexact.empty(), !field.locked.empty());
+    field.checked = FieldStartsChecked(field);
 }
 
 SyncItem CompareItem(const ItemKey& key, const ItemDefinition* current, const ItemDefinition* incoming,
@@ -725,7 +733,7 @@ void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
         if (entry.field == field)
         {
             entry.wrongSide = side;
-            entry.checked = StartsChecked(side, entry.inexact.empty(), !entry.locked.empty());
+            entry.checked = FieldStartsChecked(entry);
         }
     }
 }

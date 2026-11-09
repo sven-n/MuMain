@@ -281,6 +281,18 @@ TEST_CASE("A drop level OpenMU cannot keep is not taken by default [data][items]
     REQUIRE(level != nullptr);
     CHECK_FALSE(level->inexact.empty());
     CHECK_FALSE(level->checked);
+
+    // Nor when the client is marked wrong: OpenMU's 255 is not the drop level.
+    KnownDifferences known;
+    known.Set(row->group, row->number, "level", WrongSide::Client);
+    const ItemSyncDiff marked = sides.Diff(&known);
+    const SyncField* markedLevel = FindField(*FindRow(marked, ITEM_HORN_OF_FENRIR), "level");
+    REQUIRE(markedLevel != nullptr);
+    CHECK(markedLevel->wrongSide == WrongSide::Client);
+    CHECK_FALSE(markedLevel->checked);
+    SyncItem changed = *row;
+    SetWrongSide(changed, "level", WrongSide::Client);
+    CHECK_FALSE(FindField(changed, "level")->checked);
 }
 
 TEST_CASE("A difference wrong in the client starts checked, one wrong in the server unchecked [data][items][editor]")
