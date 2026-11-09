@@ -42,9 +42,17 @@ constexpr SideKey SideKeys[] = {
     {WrongSide::Server, "wrongInServer"},
 };
 
+// The list a side is written to; nothing for WrongSide::None, which is no mark.
 const char* KeyOf(WrongSide side)
 {
-    return side == WrongSide::Client ? SideKeys[0].key : SideKeys[1].key;
+    for (const auto& [listed, key] : SideKeys)
+    {
+        if (listed == side)
+        {
+            return key;
+        }
+    }
+    return nullptr;
 }
 
 // The strings of a list; other entries are skipped.
@@ -127,6 +135,10 @@ OrderedJson WriteItems(const KnownDifferences& known)
     std::map<ItemKey, std::map<WrongSide, std::vector<std::string>>> byItem;
     for (const auto& [entry, side] : known.fields)
     {
+        if (KeyOf(side) == nullptr)
+        {
+            continue;
+        }
         const auto& [group, number, field] = entry;
         byItem[{group, number}][side].push_back(field);
     }
@@ -157,7 +169,10 @@ OrderedJson WriteFormulas(const KnownDifferences& known)
     }
     for (const auto& [formula, side] : known.formulas)
     {
-        formulas[KeyOf(side)].push_back(formula);
+        if (const char* key = KeyOf(side))
+        {
+            formulas[key].push_back(formula);
+        }
     }
     return formulas;
 }

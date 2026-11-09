@@ -1173,6 +1173,11 @@ TEST_CASE("The wrong sides of the differences are written and read back [data][i
     const std::string text = WriteKnownDifferencesJson(known);
     CHECK(text.find(R"({"group": 13, "number": 50, "wrongInClient": ["height"], "wrongInServer": ["width"]})") !=
           std::string::npos);
+    // An entry without a side is no mark: it is not written.
+    KnownDifferences unmarked = known;
+    unmarked.fields[{1, 2, "width"}] = WrongSide::None;
+    unmarked.formulas["tables.damageIncreaseWeapons"] = WrongSide::None;
+    CHECK(WriteKnownDifferencesJson(unmarked) == text);
     const std::filesystem::path directory = std::filesystem::temp_directory_path() /
                                             ("mu_test_known_differences_" + std::to_string(std::random_device{}()));
     std::filesystem::create_directories(directory);
