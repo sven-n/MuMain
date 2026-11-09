@@ -33,6 +33,10 @@ void SetActiveBoneTransform(const float (*ptr)[3][4]);
 #define MAX_MESH     50
 #define MAX_VERTICES 15000
 
+// A projected body shadow is a solid silhouette; at full opacity it reads as a hole in the
+// ground. Every RenderBodyShadow() call that does not ask for its own alpha gets this.
+inline constexpr float DefaultBodyShadowAlpha = 0.35f;
+
 #define RENDER_COLOR        0x00000001
 #define RENDER_TEXTURE      0x00000002
 #define RENDER_CHROME       0x00000004
@@ -442,8 +446,10 @@ public:
     // script (_DC, _DT) adds its shadow pass.
     void RenderScriptedMesh(int mesh, int renderFlag, float alpha, int blendMesh, float blendMeshLight,
                             float blendMeshTexCoordU, float blendMeshTexCoordV, int texture = -1);
+    // A projected body shadow is a solid silhouette; at full opacity it reads as a hole in the
+    // ground. Every RenderBodyShadow() call that does not ask for its own alpha gets this.
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
-        int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
+        int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = DefaultBodyShadowAlpha);
     // Moves a skinned position onto the ground for the planar shadow (with `context`).
     using ShadowProjection = void (*)(float position[3], const void* context);
     // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
