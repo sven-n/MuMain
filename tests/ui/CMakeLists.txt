@@ -57,6 +57,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME party_card_skill_tests
+    SOURCES
+        test_party_card_skill.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Party/PartyCardSkill.cpp
+)
+
+mu_add_test(
     NAME jewel_unmix_selection_tests
     SOURCES
         test_jewel_unmix_selection.cpp

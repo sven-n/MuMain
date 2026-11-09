@@ -13,6 +13,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Party/PartyCardSkill.h"
 #include "UI/Party/PartyListLayout.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -300,35 +301,21 @@ void CPartyListWindow::ClosingProcess()
 
 bool CPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
 {
-    auto HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    if (!HeroCastsOnPartyCard())
+        return false;
 
-    if (HeroClass == CLASS_ELF
-        || HeroClass == CLASS_WIZARD
-        || HeroClass == CLASS_SUMMONER
-        )
-    {
-        auto Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    SelectedCharacter = pMember->index;
+    return true;
+}
 
-        if (Skill == AT_SKILL_HEALING
-            || Skill == AT_SKILL_HEALING_STR
-            || Skill == AT_SKILL_DEFENSE
-            || Skill == AT_SKILL_DEFENSE_STR
-            || Skill == AT_SKILL_DEFENSE_MASTERY
-            || Skill == AT_SKILL_ATTACK
-            || Skill == AT_SKILL_ATTACK_STR
-            || Skill == AT_SKILL_ATTACK_MASTERY
-            || Skill == AT_SKILL_TELEPORT_ALLY
-            || Skill == AT_SKILL_SOUL_BARRIER
-            || Skill == AT_SKILL_SOUL_BARRIER_STR
-            || Skill == AT_SKILL_SOUL_BARRIER_PROFICIENCY
-            || Skill == AT_SKILL_ALICE_THORNS
-            || Skill == AT_SKILL_RECOVER
-            )
-        {
-            SelectedCharacter = pMember->index;
-            return true;
-        }
-    }
+bool CPartyListWindow::HeroCastsOnPartyCard() const
+{
+    const auto heroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    return UI::Party::CastsOnPartyCard(heroClass, CharacterAttribute->Skill[Hero->CurrentSkill]);
+}
 
-    return false;
+bool CPartyListWindow::TakesSupportSkillClick() const
+{
+    const bool cardHovered = m_bActive && m_HoveredCard >= 0 && m_HoveredCard < PartyNumber;
+    return cardHovered && HeroCastsOnPartyCard();
 }

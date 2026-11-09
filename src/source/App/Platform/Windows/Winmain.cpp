@@ -1411,6 +1411,20 @@ SDL_WindowID ActionWindowId(const SDL_Event& event)
     }
 }
 
+// RmlUi claims each press over its documents. A right press on a party card that casts the hero's support skill still
+// reaches the game, which casts it on that member, and a right release always does, so that the game's held right
+// button can't stay down after a press it saw.
+static bool RightButtonReachesGame(const SDL_Event& event)
+{
+    if (event.button.button != SDL_BUTTON_RIGHT)
+        return false;
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+        return true;
+
+    const auto* partyList = g_pNewUISystem ? g_pNewUISystem->GetUI_NewPartyListWindow() : nullptr;
+    return partyList != nullptr && partyList->TakesSupportSkillClick();
+}
+
 // Physical and scripted input share UI-first routing. Scripted input owns its
 // own legacy held state; it never acquires the OS pointer or replays SDL events.
 bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
@@ -1431,7 +1445,7 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         if (!synthetic && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
-        if (propagates && !synthetic)
+        if (!synthetic && (propagates || RightButtonReachesGame(event)))
             HandleMouseButton(event);
         return true;
     case SDL_EVENT_TEXT_INPUT:

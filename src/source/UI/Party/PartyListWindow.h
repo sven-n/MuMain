@@ -76,6 +76,9 @@ namespace mu::ui::window
         void ClosingProcess();
 
         int GetSelectedCharacter();
+        // Whether the pointer is on a member's card and the hero's current skill is cast on such a card. RmlUi claims
+        // each press over a card, so the event pump hands this right press to the game too, which casts it (Attack()).
+        bool TakesSupportSkillClick() const;
         void SetListBGColor();
 
     private:
@@ -85,6 +88,7 @@ namespace mu::ui::window
         bool CanLeave(int member) const;
 
         bool SelectCharacterInPartyList(PARTY_t* pMember);
+        bool HeroCastsOnPartyCard() const;
     };
 }
 
