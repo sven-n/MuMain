@@ -406,6 +406,8 @@ TEST_CASE("A Texts problem of a UI or tooltip file text naming a number no item 
     REQUIRE(g_ItemDatabase.Find(14, 511) == nullptr);
     MuEditor::Items::ItemTextCheckArea area;
     const int tear = Data::Items::MakeItemType(14, 25);
+    // The selection is the editor's, shared by the tests: put back as it was.
+    const int selected = g_ItemSelection.GetItemType();
     g_ItemSelection.Select(tear);
 
     area.Open({Data::Items::ItemDataIssueSeverity::Error, "Game.pl.resx", 14, 511, "Tear", "names no item"}, false);
@@ -416,5 +418,6 @@ TEST_CASE("A Texts problem of a UI or tooltip file text naming a number no item 
     // An item the text names is selected.
     area.Open({Data::Items::ItemDataIssueSeverity::Warning, "Game.pl.resx", 14, 13, "Bless", "missing form"}, false);
     CHECK(g_ItemSelection.GetItemType() == Data::Items::MakeItemType(14, 13));
+    g_ItemSelection.Select(selected);
 }
 #endif // _EDITOR
