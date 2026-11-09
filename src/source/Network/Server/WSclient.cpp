@@ -3647,14 +3647,15 @@ constexpr int NoActionTargetKey = 0;
 
 void StartReceivedAttack(CHARACTER* character, int targetIndex)
 {
-    character->Skill = 0;
+    // A monster's attack data may pick the animation from the stored player skill.
     SetPlayerAttack(character);
+    character->Skill = 0;
     character->AttackTime = 1;
     character->LastAttackEffectTime = -1;
     character->Object.AnimationFrame = 0;
     const bool targetFound = targetIndex != MAX_CHARACTERS_CLIENT;
     character->TargetCharacter = targetFound ? static_cast<short>(targetIndex) : -1;
-    character->ReceivedUnknownTargetHitSoundPending = !targetFound;
+    character->ReceivedAttackTargetUnknown = !targetFound;
 }
 } // namespace
 
@@ -3670,7 +3671,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     int iTargetKey, iTargetIndex;
 
     iTargetKey = ((int)(Data->TargetKeyH) << 8) + Data->TargetKeyL;
-    // Local/cinematic characters may reuse the absent-target key.
+    // OpenMU sends 0 for an animation without a target; local characters can use key 0 too.
     iTargetIndex = iTargetKey != NoActionTargetKey ? FindCharacterIndex(iTargetKey) : MAX_CHARACTERS_CLIENT;
 
     if (!c->SafeZone && c->Helper.Type == MODEL_DARK_HORSE_ITEM)

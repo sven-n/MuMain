@@ -1,11 +1,15 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Engine/AI/GOBoid.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Quests/GM3rdChangeUp.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Effects/EffectBlurs.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/GameMaps/GMCrywolf1st.h"
 #include "World/GameMaps/GMEmpireGuardian1.h"
 #include "World/GameMaps/GMEmpireGuardian2.h"
@@ -26,6 +30,8 @@ struct EffectScope
     std::unique_ptr<CHARACTER[]> characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 2);
     std::unique_ptr<BMD[]> models = std::make_unique<BMD[]>(MAX_MODELS);
     std::unique_ptr<vec34_t[]> bones = std::make_unique<vec34_t[]>(MAX_BONES);
+    std::unique_ptr<CHARACTER_MACHINE> machine = std::make_unique<CHARACTER_MACHINE>();
+    CHARACTER_MACHINE* previousMachine = CharacterMachine;
     CHARACTER* previousCharacters = CharactersClient;
     BMD* previousModels = Models;
     int previousWorld = gMapManager.WorldActive;
@@ -36,6 +42,7 @@ struct EffectScope
     EffectScope()
     {
         g_MapProcess = MapProcess::Make();
+        CharacterMachine = machine.get();
         CharactersClient = characters.get() + 1;
         Models = models.get();
         FPS_ANIMATION_FACTOR = 1.f;
@@ -59,6 +66,7 @@ struct EffectScope
         gMapManager.WorldActive = previousWorld;
         Models = previousModels;
         CharactersClient = previousCharacters;
+        CharacterMachine = previousMachine;
     }
 
     static void Clear()
@@ -259,4 +267,46 @@ TEST_CASE("Death Spirit attacks skip missing-target projectiles on both maps [co
             },
             [] { return EffectsOf(MODEL_DEATH_SPI_SKILL); });
     }
+}
+
+TEST_CASE("Earthquake skill skips missing-target stones and strike but keeps its step [combat][target_effects]")
+{
+    constexpr int MaxSkill = 3;
+    EffectScope scope;
+    auto* c = &scope.attacker;
+    auto* b = scope.Set(MODEL_HAMMERIZE, MONSTER01_ATTACK2, 0.f, WD_70EMPIREGUARDIAN2);
+    const int previousStep = REFERENCE_FRAME_STEP;
+    REFERENCE_FRAME_STEP = 1;
+    CheckTargets(
+        scope,
+        [&]
+        {
+            const int level = c->Object.WeaponLevel;
+            SpawnSkillEarthQuake(c, &c->Object, b, MaxSkill);
+            CHECK(c->Object.WeaponLevel == (level + 1 > MaxSkill ? 0 : level + 1));
+        },
+        [] { return EffectsOf(MODEL_GROUND_STONE + 1) + EffectsOf(MODEL_SKILL_FURY_STRIKE); });
+    REFERENCE_FRAME_STEP = previousStep;
+}
+
+TEST_CASE("Dark Ghost flame and poison spirit smoke skip missing slots [combat][target_effects]")
+{
+    EffectScope scope;
+    auto* c = &scope.attacker;
+    auto map = GMEmpireGuardian2::Make();
+    c->MonsterIndex = MONSTER_DARK_GHOST;
+    auto* b = scope.Set(MODEL_DARK_GHOST, MONSTER01_ATTACK2, 0.f, WD_70EMPIREGUARDIAN2);
+    CheckTargets(
+        scope,
+        [&]
+        {
+            c->MonsterSkill = 51;
+            CHECK(map->AttackEffectMonster(c, &c->Object, b));
+        },
+        [] { return EffectsOf(BITMAP_FLAME); });
+    c->MonsterIndex = MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON;
+    b = scope.Set(MODEL_DARK_GHOST, MONSTER01_ATTACK1, 0.f, WD_45CURSEDTEMPLE_LV1);
+    CheckTargets(
+        scope, [&] { CHECK(g_CursedTemple->AttackEffectMonster(c, &c->Object, b)); },
+        [] { return ParticlesOf(BITMAP_SMOKE); });
 }

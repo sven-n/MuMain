@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "w_CursedTemple.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -271,17 +272,14 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->TargetCharacter != -1)
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
-
                 Vector(0.4f, 0.6f, 1.f, Light);
 
                 for (int i = 0; i < 5; i++)
                     CreateParticleFpsChecked(BITMAP_SMOKE, to->Position, o->Angle, Light, 1);
             }
-            if (c->TargetCharacter != -1 || c->ReceivedUnknownTargetHitSoundPending)
+            if (c->TargetCharacter != -1 || c->ReceivedAttackTargetUnknown)
                 PlayBuffer(SOUND_HEART);
         }
     }

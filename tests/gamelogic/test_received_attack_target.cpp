@@ -144,7 +144,7 @@ struct AttackScope
         CHECK(attacker.TargetCharacter == targetSlot);
         CHECK(attacker.AttackTime == 1);
         CHECK(attacker.Object.AnimationFrame == 0);
-        CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (targetSlot == -1));
+        CHECK(attacker.ReceivedAttackTargetUnknown == (targetSlot == -1));
         CHECK(AttackPlayer == AttackerSlot);
         CHECK(Hero->Hit == PreviousHeroHit);
         CHECK(Hero->Object.CurrentAction == PLAYER_STOP_MALE);
@@ -231,7 +231,7 @@ TEST_CASE("MoveCharacter keeps received hit sounds without a target [combat][rec
         }
         CHECK(hits == 1);
         CHECK(attacker.AttackTime == 0);
-        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+        CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
         MoveCharacter(&attacker, &attacker.Object);
         CHECK(audio.TakePlayedSounds().empty());
     }
@@ -299,7 +299,7 @@ TEST_CASE("A replacement local attack clears a pending received hit sound [comba
     auto& attacker = scope.characters[AttackerSlot];
     scope.Receive(MissingKey, AT_ATTACK1);
     SetPlayerAttack(&attacker);
-    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
     attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
     audio.TakePlayedSounds();
     MoveCharacter(&attacker, &attacker.Object);
@@ -314,7 +314,7 @@ TEST_CASE("A replacement magic action clears a pending received hit sound [comba
     scope.Receive(MissingKey, AT_ATTACK1);
     attacker.Skill = AT_SKILL_DEFENSE;
     SetPlayerMagic(&attacker);
-    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
     attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
     audio.TakePlayedSounds();
     MoveCharacter(&attacker, &attacker.Object);
@@ -337,7 +337,7 @@ TEST_CASE("Dark Ghost target-clearing attacks retain meteor without a generic hi
         scope.Receive(target, AT_ATTACK1);
         REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
         CHECK(attacker.TargetCharacter == (target == VictimKey ? VictimSlot : -1));
-        CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (target == MissingKey));
+        CHECK(attacker.ReceivedAttackTargetUnknown == (target == MissingKey));
         audio.TakePlayedSounds();
 
         CHECK(map->AttackEffectMonster(&attacker, &attacker.Object, &Models[MODEL_DARK_GHOST]));
@@ -349,7 +349,7 @@ TEST_CASE("Dark Ghost target-clearing attacks retain meteor without a generic hi
         REQUIRE(attackSounds.size() == 1);
         CHECK(attackSounds[0].id == SOUND_METEORITE01);
         CHECK(attackSounds[0].object == nullptr);
-        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+        CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
 
         CHECK(map->AttackEffectMonster(&attacker, &attacker.Object, &Models[MODEL_DARK_GHOST]));
         CHECK(audio.TakePlayedSounds().empty());
@@ -399,6 +399,26 @@ TEST_CASE("Received basic attacks replace interrupted skill feedback [combat][re
     }
 }
 
+TEST_CASE("Received basic attacks play a monster's stored player-skill attack [combat][received_attack]")
+{
+    // Fire Golem: "skills": {"50": "attack1"}, "otherwise": "attack2" (docs/monster-data.md).
+    for (const int skill : {static_cast<int>(AT_SKILL_BOSS), 0})
+    {
+        CAPTURE(skill);
+        MonsterRecorder::LoadScope audio(WD_31HUNTING_GROUND);
+        AttackScope scope;
+        scope.SetMonsterAttacker(MODEL_FIRE_GOLEM);
+        auto& attacker = scope.characters[AttackerSlot];
+        attacker.MonsterIndex = MONSTER_FIRE_GOLEM;
+        attacker.Skill = static_cast<WORD>(skill);
+        attacker.AttackTime = 1.f;
+        scope.Receive(VictimKey, AT_ATTACK1);
+        CHECK(attacker.Object.CurrentAction == (skill != 0 ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2));
+        CHECK(attacker.Skill == 0);
+        CHECK(attacker.TargetCharacter == VictimSlot);
+    }
+}
+
 TEST_CASE("ReceiveAction keeps zero target absent beside a live key-zero character [combat][received_attack]")
 {
     for (const BYTE action : {static_cast<BYTE>(AT_ATTACK1), static_cast<BYTE>(AT_ATTACK2)})
@@ -445,7 +465,7 @@ TEST_CASE("CreateCharacterPointer clears received attack feedback on slot reuse 
     AttackScope scope;
     auto& attacker = scope.characters[AttackerSlot];
     scope.Receive(MissingKey, AT_ATTACK1);
-    REQUIRE(attacker.ReceivedUnknownTargetHitSoundPending);
+    REQUIRE(attacker.ReceivedAttackTargetUnknown);
     attacker.Skill = AT_SKILL_ICE;
     attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
     attacker.LastAttackEffectTime = 1;
@@ -459,7 +479,7 @@ TEST_CASE("CreateCharacterPointer clears received attack feedback on slot reuse 
     CHECK(attacker.LastAttackEffectTime == -1);
     CHECK(attacker.TargetCharacter == -1);
     CHECK(attacker.AttackFlag == ATTACK_FAIL);
-    CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
 
     // A timer-only animation start must not inherit the previous occupant's receipt.
     attacker.Object.CurrentAction = PLAYER_ATTACK_FIST;
@@ -542,7 +562,7 @@ TEST_CASE("Cursed Temple poison signatures keep target-independent audio cadence
                 expectedSmoke += SmokePerCall;
             CHECK(std::count_if(Particles, Particles + MAX_PARTICLES,
                                 [](const auto& p) { return p.Live && p.Type == BITMAP_SMOKE; }) == expectedSmoke);
-            CHECK(attacker.ReceivedUnknownTargetHitSoundPending == (target == MissingKey));
+            CHECK(attacker.ReceivedAttackTargetUnknown == (target == MissingKey));
         }
 
         attacker.AttackTime = static_cast<float>(g_iLimitAttackTime - 1);
@@ -593,7 +613,7 @@ TEST_CASE("Local targetless poison attacks retain signature silence [combat][rec
     attacker.TargetCharacter = -1;
     SetPlayerAttack(&attacker);
     REQUIRE(attacker.Object.CurrentAction == MONSTER01_ATTACK1);
-    REQUIRE_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+    REQUIRE_FALSE(attacker.ReceivedAttackTargetUnknown);
     audio.TakePlayedSounds();
     for (int i = 0; i < MAX_PARTICLES; ++i)
         Particles[i].Live = false;
@@ -605,6 +625,6 @@ TEST_CASE("Local targetless poison attacks retain signature silence [combat][rec
         CHECK(audio.TakePlayedSounds().empty());
         CHECK(std::none_of(Particles, Particles + MAX_PARTICLES,
                            [](const auto& p) { return p.Live && p.Type == BITMAP_SMOKE; }));
-        CHECK_FALSE(attacker.ReceivedUnknownTargetHitSoundPending);
+        CHECK_FALSE(attacker.ReceivedAttackTargetUnknown);
     }
 }

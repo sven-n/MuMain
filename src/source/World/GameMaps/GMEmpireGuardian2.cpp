@@ -1072,24 +1072,22 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->TargetCharacter == -1 && c->ReceivedUnknownTargetHitSoundPending)
+            const bool targetKnown = c->TargetCharacter != -1;
+            if (targetKnown || c->ReceivedAttackTargetUnknown)
                 PlayBuffer(SOUND_METEORITE01);
-            c->ReceivedUnknownTargetHitSoundPending = false;
-            if (c->TargetCharacter != -1)
+            c->ReceivedAttackTargetUnknown = false;
+            if (targetKnown)
             {
-                CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];
-                CreateEffect(MODEL_FIRE, pTargetCharacter->Object.Position, o->Angle, o->Light);
-                PlayBuffer(SOUND_METEORITE01);
+                if (OBJECT* target = GameLogic::Combat::AttackTargetObject(*c))
+                    CreateEffect(MODEL_FIRE, target->Position, o->Angle, o->Light);
                 c->TargetCharacter = -1;
                 c->MonsterSkill = -1;
             }
         }
         else if (c->MonsterSkill == 51)
         {
-            if (c->TargetCharacter != -1)
+            if (OBJECT* pTargetObject = GameLogic::Combat::AttackTargetObject(*c))
             {
-                CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];
-                OBJECT* pTargetObject = &pTargetCharacter->Object;
                 CreateEffect(BITMAP_FLAME, pTargetObject->Position, pTargetObject->Angle, pTargetObject->Light, 0,
                              pTargetObject);
                 PlayBuffer(SOUND_FLAME);
