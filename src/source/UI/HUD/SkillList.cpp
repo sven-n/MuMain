@@ -45,6 +45,7 @@
 #include <RmlUi/Core/Event.h>
 #include "GameLogic/Quests/QuestMng.h"
 #include "UI/Social/FriendWindow.h"
+#include "Engine/Object/ZzzOpenData.h"
 
 mu::ui::window::CSkillList::CSkillList()
 {
@@ -84,6 +85,21 @@ void mu::ui::window::CSkillList::Release()
         m_pNewUIMng = NULL;
     }
 }
+
+extern BOOL g_bGameServerConnected;
+
+namespace
+{
+// The server stores the hotkeys per character, but the client only sent them when leaving through the
+// menu: closing the window, a crash or a disconnect lost the changes. Save them as they change.
+void SaveHotKeys()
+{
+    if (SocketClient != nullptr && g_bGameServerConnected)
+    {
+        SaveOptions();
+    }
+}
+} // namespace
 
 void mu::ui::window::CSkillList::Reset()
 {
@@ -167,6 +183,7 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
                 if (mu::ui::window::IsPress('1' + i))
                 {
                     SetHotKey(i + 1, m_iHoveredGridSkillIndex);
+                    SaveHotKeys();
 
                     return false;
                 }
@@ -175,6 +192,7 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
             if (mu::ui::window::IsPress('0'))
             {
                 SetHotKey(0, m_iHoveredGridSkillIndex);
+                SaveHotKeys();
 
                 return false;
             }

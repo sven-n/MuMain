@@ -120,6 +120,7 @@ using namespace mu::ui::window;
 #include "Network/Server/ServerMessageTexts.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -10144,9 +10145,11 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     for (int i = 0; i < 10; ++i)
     {
         int iIndex = i * 2;
-        iHotKey = MAKEWORD(Data->HotKey[iIndex + 1], Data->HotKey[iIndex]);
+        iHotKey = GameLogic::SkillHotkeyConfiguration::SkillNumber(Data->HotKey[iIndex], Data->HotKey[iIndex + 1]);
 
-        if (iHotKey != 0xffff)
+        // Zeros (OpenMU's default) would bind the hotkey to the first empty skill slot, which then shows
+        // the next learned skill.
+        if (GameLogic::SkillHotkeyConfiguration::IsAssigned(static_cast<uint16_t>(iHotKey)))
         {
             for (int j = 0; j < MAX_SKILLS; ++j)
             {
