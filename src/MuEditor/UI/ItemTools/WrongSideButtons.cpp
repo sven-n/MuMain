@@ -11,11 +11,10 @@ namespace MuEditor::Items::WrongSideButtons
 {
 namespace
 {
-// A column as wide as its head.
+// A column as wide as its head (the table adds the cell padding itself).
 void SetupColumn(const char* head)
 {
-    const float width = ImGui::CalcTextSize(head).x + ImGui::GetStyle().CellPadding.x * 2.0f;
-    ImGui::TableSetupColumn(head, ImGuiTableColumnFlags_WidthFixed, width);
+    ImGui::TableSetupColumn(head, ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize(head).x);
 }
 
 // The alpha of a field's button that shows its item's mark.
