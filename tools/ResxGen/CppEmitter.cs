@@ -610,30 +610,20 @@ internal static class CppEmitter
     }
 
     /// Emits the group's texts that name items (ItemReferenceSyntax) as `ItemTexts()`, the table
-    /// I18N::GetItemTexts joins: per text its key, runtime pointer, the value of every master locale
-    /// (as kSlots has them) and a bit per locale with a text of its own.
+    /// I18N::GetItemTexts joins: per text its key, runtime pointer, its kSlots row's values (one per
+    /// master locale, with the same fallback) and a bit per locale with a text of its own.
     private static void WriteItemTexts(StringBuilder sb, ResourceGroup group, IReadOnlyList<string> masterLocales)
     {
-        var defaultSanitized = Naming.SanitizeLocale(ResxLoader.DefaultLocale);
-        var groupLocaleSet = new HashSet<string>(group.Locales, StringComparer.Ordinal);
-        var entries = group.Entries.Where(e => e.Translations.Values.Any(ItemReferenceSyntax.HasReference)).ToList();
+        var rows = group.Entries
+            .Select((entry, row) => (entry, row))
+            .Where(e => e.entry.Translations.Values.Any(ItemReferenceSyntax.HasReference))
+            .ToList();
 
         sb.AppendLine("namespace {");
-        foreach (var entry in entries)
-        {
-            sb.Append($"constexpr const wchar_t* kItemTextValues_{entry.Identifier}[] = {{ ");
-            for (var i = 0; i < masterLocales.Count; i++)
-            {
-                if (i > 0) sb.Append(", ");
-                var key = groupLocaleSet.Contains(masterLocales[i]) ? Naming.SanitizeLocale(masterLocales[i]) : defaultSanitized;
-                sb.Append($"k_{key}_{entry.Identifier}");
-            }
-            sb.AppendLine(" };");
-        }
-        if (entries.Count > 0)
+        if (rows.Count > 0)
         {
             sb.AppendLine($"constexpr {RootNamespace}::ItemText kItemTexts[] = {{");
-            foreach (var entry in entries)
+            foreach (var (entry, row) in rows)
             {
                 uint own = 0;
                 for (var i = 0; i < masterLocales.Count; i++)
@@ -641,7 +631,7 @@ internal static class CppEmitter
                     if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
                 }
                 sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
-                              $"kItemTextValues_{entry.Identifier}, 0x{own:X}u }},");
+                              $"kSlots[{row}].values, 0x{own:X}u }},");
             }
             sb.AppendLine("};");
         }
@@ -649,7 +639,7 @@ internal static class CppEmitter
         sb.AppendLine();
         sb.AppendLine($"std::span<const {RootNamespace}::ItemText> ItemTexts() noexcept");
         sb.AppendLine("{");
-        sb.AppendLine(entries.Count > 0 ? "    return kItemTexts;" : "    return {};");
+        sb.AppendLine(rows.Count > 0 ? "    return kItemTexts;" : "    return {};");
         sb.AppendLine("}");
     }
 
