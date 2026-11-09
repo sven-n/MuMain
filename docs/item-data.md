@@ -2099,12 +2099,13 @@ field, and the Formulas list for an entry. Marking the whole item takes
 out its fields' own marks; marking one field of an item marked as a whole
 gives the item's mark to its other fields. At most one of
 them is selected; clicking the selected one again clears it, and the row
-starts as without a mark. *Wrong in client* checks the difference, so
-Apply takes the server's value; *Wrong in server* unchecks it and shows it
+starts as without a mark. *Wrong in client* only marks the difference: it
+leaves its box as it is, so whether Apply takes the server's value stays
+your choice; *Wrong in server* unchecks it and shows it
 grey, so the client keeps its value (checking it by hand applies it after
-all, and it is no longer grey). A locked field or item, and a drop
-level OpenMU cannot keep, stay unchecked either way (the drop level's box
-still takes it). The marks count in every comparison, also after a
+all, and it is no longer grey; clearing the mark gives the box its
+default back). A locked field or item, and a drop level OpenMU cannot
+keep, start unchecked either way (the drop level's box still takes it). The marks count in every comparison, also after a
 new download. Apply takes out the *Wrong in client* marks of what it
 applied (on a changed item marked as a whole, once all its fields were
 applied): the client has the server's value then. They are kept in `Data/Items/Sync/KnownDifferences.json`

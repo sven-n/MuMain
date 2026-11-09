@@ -2561,7 +2561,7 @@
     <value>Błędne na serwerze</value>
   </data>
   <data name="What wrong in client means" xml:space="preserve">
-    <value>Wartość klienta jest błędna: zostaje przyjęta wartość serwera, więc różnica jest zaznaczona. Kliknij ponownie, aby cofnąć. Zapisane w Data/Items/Sync/KnownDifferences.json.</value>
+    <value>Wartość klienta jest błędna: zaznaczenie pozostaje bez zmian: zaznacz, aby przyjąć wartość serwera. Kliknij ponownie, aby cofnąć. Zapisane w Data/Items/Sync/KnownDifferences.json.</value>
   </data>
   <data name="What wrong in server means" xml:space="preserve">
     <value>Wartość serwera jest błędna: klient zachowuje swoją, więc różnica zostaje odznaczona (szara). Kliknij ponownie, aby cofnąć. Zapisane w Data/Items/Sync/KnownDifferences.json.</value>

@@ -295,7 +295,8 @@ TEST_CASE("A drop level OpenMU cannot keep is not taken by default [data][items]
     CHECK_FALSE(FindField(changed, "level")->checked);
 }
 
-TEST_CASE("A difference wrong in the client starts checked, one wrong in the server unchecked [data][items][editor]")
+TEST_CASE("A difference wrong in the server starts unchecked, one wrong in the client as without a mark "
+          "[data][items][editor]")
 {
     Sides sides;
     ItemDefinition& kris = sides.FileItem(KrisType);
@@ -323,7 +324,7 @@ TEST_CASE("A difference wrong in the client starts checked, one wrong in the ser
     CHECK(GetRowWrongSide(*row) == WrongSide::None);
     const SyncItem* removed = FindRow(diff, ShortSwordType);
     REQUIRE(removed != nullptr);
-    CHECK(removed->checked);
+    CHECK_FALSE(removed->checked);
     CHECK(GetRowWrongSide(*removed) == WrongSide::Client);
     const SyncItem* newItem = FindRow(diff, MakeItemType(0, 100));
     REQUIRE(newItem != nullptr);
@@ -333,25 +334,32 @@ TEST_CASE("A difference wrong in the client starts checked, one wrong in the ser
     CHECK(bonus->wrongSide == WrongSide::Server);
     CHECK_FALSE(bonus->checked);
 
-    // Marking again checks or unchecks as a comparison starts; clearing the mark gives the default.
+    // Wrong in client leaves a box as it is; clearing wrong in server gives the default.
     ItemSyncDiff marked = diff;
     SyncItem& kept = marked.items[static_cast<size_t>(row - diff.items.data())];
     SetWrongSide(kept, "width", WrongSide::Client);
     SetWrongSide(kept, "repairable", WrongSide::Client);
     CHECK(GetRowWrongSide(kept) == WrongSide::Client);
-    CHECK(FindField(kept, "width")->checked);
+    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(FindField(kept, "repairable")->checked);
+    SetWrongSide(kept, "width", WrongSide::None);
+    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(GetRowWrongSide(kept) == WrongSide::None);
+    SetWrongSide(kept, "width", WrongSide::Server);
     SetWrongSide(kept, "width", WrongSide::None);
     CHECK(FindField(kept, "width")->checked);
-    CHECK(GetRowWrongSide(kept) == WrongSide::None);
     SyncItem& removal = marked.items[static_cast<size_t>(removed - diff.items.data())];
     SetWrongSide(removal, "", WrongSide::None);
     CHECK_FALSE(removal.checked);
+    SetRowChecked(removal, true);
+    SetWrongSide(removal, "", WrongSide::Client);
+    CHECK(removal.checked);
     SyncItem& addition = marked.items[static_cast<size_t>(newItem - diff.items.data())];
     SetWrongSide(addition, "", WrongSide::None);
     CHECK(addition.checked);
     SyncFormula& formula = marked.formulas[static_cast<size_t>(bonus - diff.formulas.data())];
     SetWrongSide(formula, WrongSide::Client);
-    CHECK(formula.checked);
+    CHECK_FALSE(formula.checked);
 
     // A click keeps the mark for the next comparisons too.
     KnownDifferences clicked;
@@ -391,11 +399,12 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     const std::vector<const SyncItem*> rows = {&changed};
     CHECK(WriteSyncRowsMarkdown(rows, "Items", "").find("| Server |") != std::string::npos);
 
-    // Marking the whole item takes out the fields' own marks.
+    // Marking the whole item takes out the fields' own marks; wrong in client leaves the boxes.
     MarkWrongSide(known, changed, "", WrongSide::Client);
     CHECK(known.fields.size() == 1);
     CHECK(known.Find(0, 0, "") == WrongSide::Client);
-    CHECK(std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.checked; }));
+    CHECK_FALSE(FindField(changed, "repairable")->checked);
+    CHECK(FindField(changed, "height")->checked);
 
     // A field's mark gives the item's mark to the other fields as their own.
     MarkWrongSide(known, changed, "width", WrongSide::Server);
@@ -405,11 +414,12 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK(known.Find(0, 0, "repairable") == WrongSide::Client);
     CHECK(GetRowWrongSide(changed) == WrongSide::None);
 
-    // Clearing the whole item clears its fields.
+    // Clearing the whole item clears its fields; the one wrong in the server gets its box back.
     MarkWrongSide(known, changed, "", WrongSide::None);
     CHECK(known.fields.empty());
-    CHECK(std::ranges::all_of(changed.fields, [](const SyncField& field)
-                              { return field.wrongSide == WrongSide::None && field.checked; }));
+    CHECK(
+        std::ranges::all_of(changed.fields, [](const SyncField& field) { return field.wrongSide == WrongSide::None; }));
+    CHECK(FindField(changed, "width")->checked);
 }
 
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")
@@ -1248,7 +1258,8 @@ TEST_CASE("Applying a difference wrong in the client takes out its mark [data][i
     // A mark of an item that does not differ stays.
     known.Set(0, 2, "", WrongSide::Client);
     ItemSyncDiff diff = sides.Diff(&known);
-    // The excellent drop level bonus is not applied.
+    // The removal is checked by hand; the excellent drop level bonus is not applied.
+    diff.items[static_cast<size_t>(FindRow(diff, ShortSwordType) - diff.items.data())].checked = true;
     std::ranges::find(diff.formulas, "dropLevelBonus.excellent", &SyncFormula::entry)->checked = false;
 
     CHECK(ForgetAppliedClientMarks(diff, known));

@@ -107,8 +107,8 @@ struct SyncOptions
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
 // by default: what the file changes; unchecked: removals (items and formula entries the file
-// lacks), inexact and locked fields. A difference marked wrong in the client is checked, one
-// wrong in the server unchecked (locked and inexact ones stay unchecked). A language one side lacks stays as it is
+// lacks), inexact and locked fields. A difference marked wrong in the server is unchecked; one
+// marked wrong in the client starts as without a mark. A language one side lacks stays as it is
 // on the other (unless comparingFiles). An item a side has more than once (its repeatedItems) is a
 // locked row without fields. The formulas are compared while both sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
@@ -124,8 +124,9 @@ void SetRowChecked(SyncItem& row, bool checked);
 // Check all and Check none: every row and formula entry, also the items only the client has
 // (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
-// Marks which side of a difference is wrong (WrongSide::None: not decided) and checks or unchecks
-// it as a comparison starts with that mark. An empty `field` names the item as a whole: a New or
+// Marks which side of a difference is wrong (WrongSide::None: not decided). Wrong in server
+// unchecks it, and clearing that mark gives the default back; wrong in client leaves the box as
+// it is, checking it is the user's. An empty `field` names the item as a whole: a New or
 // Removed one, or every field of a Changed one.
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);

@@ -20,8 +20,8 @@
 // The Item Sync window (phase 7, section 9's Item Sync): Import and Export of the item exchange
 // file with OpenMU. Import lists how the file differs from the client's items and item formulas
 // (ItemSyncDiff); after a confirmation that says what changes, the checked rows are applied as one
-// step of the undo history. A difference can be marked wrong in the client (checked) or wrong in
-// the server (unchecked); the marks are kept in Data/Items/Sync/KnownDifferences.json. Export
+// step of the undo history. A difference can be marked wrong in the client (the box stays as it
+// is) or wrong in the server (unchecked); the marks are kept in Data/Items/Sync/KnownDifferences.json. Export
 // writes the client's items and formulas into a file without a diff (OpenMU's import page shows
 // one); a file that is there is replaced after a confirmation that says what changes in it. Compare
 // two files lists, read-only, what changes from one exchange file to another (e.g. a client export

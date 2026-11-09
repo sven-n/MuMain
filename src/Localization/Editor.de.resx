@@ -2879,7 +2879,7 @@
     <value>Falsch auf dem Server</value>
   </data>
   <data name="What wrong in client means" xml:space="preserve">
-    <value>Der Wert des Clients ist falsch: der des Servers wird übernommen, der Unterschied hat daher einen Haken. Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+    <value>Der Wert des Clients ist falsch: der Haken bleibt, wie er ist: einen Haken setzen übernimmt den des Servers. Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
   <data name="What wrong in server means" xml:space="preserve">
     <value>Der Wert des Servers ist falsch: der Client behält seinen eigenen, der Unterschied bleibt daher ohne Haken (grau). Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>

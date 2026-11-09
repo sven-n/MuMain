@@ -3098,7 +3098,7 @@
     <value>Wrong in server</value>
   </data>
   <data name="What wrong in client means" xml:space="preserve">
-    <value>The client's value is wrong: the server's is taken, so the difference is checked. Click again to undo. Kept in Data/Items/Sync/KnownDifferences.json.</value>
+    <value>The client's value is wrong: its box stays as it is: check it to take the server's. Click again to undo. Kept in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
   <data name="What wrong in server means" xml:space="preserve">
     <value>The server's value is wrong: the client keeps its own, so the difference stays unchecked (grey). Click again to undo. Kept in Data/Items/Sync/KnownDifferences.json.</value>

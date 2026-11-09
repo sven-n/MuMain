@@ -160,15 +160,25 @@ bool IsHeld(const SyncOptions& options, const ItemKey& key)
     return options.isHeld && options.isHeld(Data::Items::MakeItemType(key.first, key.second));
 }
 
-// Whether a field, an item or a formula entry starts checked: a marked wrong side decides (the
-// client's: take the file's value), otherwise `byDefault`; a locked one never.
+// Whether a field, an item or a formula entry starts checked: one wrong in the server not,
+// otherwise `byDefault` (wrong in the client too: checking it is the user's); a locked one never.
 bool StartsChecked(WrongSide side, bool byDefault, bool locked)
 {
     if (locked)
     {
         return false;
     }
-    return side == WrongSide::None ? byDefault : side == WrongSide::Client;
+    return side == WrongSide::Server ? false : byDefault;
+}
+
+// A click on a mark: Wrong in server unchecks the box, and clearing that mark gives the box its
+// default back (`start`). Wrong in client leaves the box as it is.
+void UpdateBoxForMark(bool& checked, WrongSide old, WrongSide side, bool start)
+{
+    if (side == WrongSide::Server || (old == WrongSide::Server && side == WrongSide::None))
+    {
+        checked = start;
+    }
 }
 
 // A field: an inexact one starts unchecked like a locked one, also when it is marked wrong in the
@@ -733,16 +743,19 @@ void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
 {
     if (field.empty())
     {
+        const WrongSide old = row.wrongSide;
         row.wrongSide = side;
         if (row.change != SyncChange::Changed)
         {
-            row.checked = StartsChecked(side, row.change == SyncChange::New, !row.locked.empty());
+            UpdateBoxForMark(row.checked, old, side,
+                             StartsChecked(side, row.change == SyncChange::New, !row.locked.empty()));
             return;
         }
         for (SyncField& entry : row.fields)
         {
+            const WrongSide oldField = entry.wrongSide;
             entry.wrongSide = side;
-            entry.checked = FieldStartsChecked(entry);
+            UpdateBoxForMark(entry.checked, oldField, side, FieldStartsChecked(entry));
         }
         return;
     }
@@ -750,16 +763,18 @@ void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
     {
         if (entry.field == field)
         {
+            const WrongSide old = entry.wrongSide;
             entry.wrongSide = side;
-            entry.checked = FieldStartsChecked(entry);
+            UpdateBoxForMark(entry.checked, old, side, FieldStartsChecked(entry));
         }
     }
 }
 
 void SetWrongSide(SyncFormula& row, WrongSide side)
 {
+    const WrongSide old = row.wrongSide;
     row.wrongSide = side;
-    row.checked = StartsChecked(side, row.incoming.has_value(), false);
+    UpdateBoxForMark(row.checked, old, side, StartsChecked(side, row.incoming.has_value(), false));
 }
 
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side)
