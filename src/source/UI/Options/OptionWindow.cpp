@@ -265,6 +265,11 @@ UI::Options::TuningLock TuningLockOf(int group)
         state.active = Render::Lighting::DynamicLightsActive();
         state.sessionOff = session.dynamicLights == false || session.enhancedLighting == false;
         break;
+    case EnhancedFeature::Sun:
+        state.active = Render::Lighting::SunlightActive();
+        state.sessionOff =
+            session.sunlight == false || session.dynamicLights == false || session.enhancedLighting == false;
+        break;
     case EnhancedFeature::LightMood:
         state.sessionOff = session.lightMood == false;
         state.sessionSet = session.lightMoodStrength.has_value();
@@ -274,9 +279,9 @@ UI::Options::TuningLock TuningLockOf(int group)
         state.sessionOff = session.postProcessing == false;
         break;
     }
-    return UI::Options::TuningGroupLock(static_cast<Render::Look::TuningGroup>(group),
-                                        Render::Look::ActiveLookPreset() == LookPreset::Enhanced,
-                                        EnhancedFeatureChosen(EnhancedFeature::Lighting), state);
+    return UI::Options::TuningGroupLock(
+        static_cast<Render::Look::TuningGroup>(group), Render::Look::ActiveLookPreset() == LookPreset::Enhanced,
+        EnhancedFeatureChosen(EnhancedFeature::Lighting), EnhancedFeatureChosen(EnhancedFeature::DynamicLights), state);
 }
 
 Rml::String TuningStateClass(UI::Options::TuningRowState state)
@@ -439,12 +444,15 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("enhanced_graphics", &model.enhancedGraphics);
     c.Bind("look_lighting", &model.lookLighting);
     c.Bind("look_dynamic_lights", &model.lookDynamicLights);
+    c.Bind("look_sunlight", &model.lookSunlight);
     c.Bind("look_light_mood", &model.lookLightMood);
     c.Bind("look_post_processing", &model.lookPostProcessing);
     c.Bind("look_features_locked", &model.lookFeaturesLocked);
     c.Bind("look_dynamic_lights_locked", &model.lookDynamicLightsLocked);
+    c.Bind("look_sunlight_locked", &model.lookSunlightLocked);
     c.Bind("look_lighting_label", &model.lookLightingLabel);
     c.Bind("look_dynamic_lights_label", &model.lookDynamicLightsLabel);
+    c.Bind("look_sunlight_label", &model.lookSunlightLabel);
     c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
     c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
@@ -1116,13 +1124,16 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedGraphics()
 void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
 {
     using Render::Look::EnhancedFeature;
-    if (feature < 0 || feature > static_cast<int>(EnhancedFeature::PostProcessing))
+    if (feature < 0 || feature > static_cast<int>(EnhancedFeature::Sun))
         return;
     if (Render::Look::ActiveLookPreset() != LookPreset::Enhanced)
         return;
     const auto chosen = static_cast<EnhancedFeature>(feature);
     if (chosen == EnhancedFeature::DynamicLights && !Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting))
         return; // dynamic lights act only with Enhanced lighting
+    if (chosen == EnhancedFeature::Sun && (!Render::Look::EnhancedFeatureChosen(EnhancedFeature::Lighting) ||
+                                           !Render::Look::EnhancedFeatureChosen(EnhancedFeature::DynamicLights)))
+        return; // the sun acts only with dynamic lights
     Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
 }
 
@@ -1759,6 +1770,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     SyncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
     SyncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
     SyncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
+    SyncLabel(model.lookSunlightLabel, "look_sunlight_label", I18N::Game::Sunlight);
     SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
     SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
     SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
@@ -1873,10 +1885,13 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         const bool lighting = EnhancedFeatureChosen(EnhancedFeature::Lighting);
         syncFlag(model.lookLighting, "look_lighting", lighting);
         syncFlag(model.lookDynamicLights, "look_dynamic_lights", lighting && EnhancedFeatureChosen(EnhancedFeature::DynamicLights));
+        const bool dynamicLights = lighting && EnhancedFeatureChosen(EnhancedFeature::DynamicLights);
+        syncFlag(model.lookSunlight, "look_sunlight", dynamicLights && EnhancedFeatureChosen(EnhancedFeature::Sun));
         syncFlag(model.lookLightMood, "look_light_mood", EnhancedFeatureChosen(EnhancedFeature::LightMood));
         syncFlag(model.lookPostProcessing, "look_post_processing", EnhancedFeatureChosen(EnhancedFeature::PostProcessing));
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
+        syncFlag(model.lookSunlightLocked, "look_sunlight_locked", !enhancedGraphics || !dynamicLights);
     }
     SyncTuningModel(model);
 

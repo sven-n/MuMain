@@ -36,7 +36,7 @@ profile's `lighting.highlightKnee`).
 ```json
 {
   "formatVersion": 1,
-  "default": { "base": 0.45, "figures": 0.7, "dynamicGain": 1.7, "background": 1.0, "sun": 0.8,
+  "default": { "base": 0.6, "figures": 0.7, "dynamicGain": 1.7, "background": 1.0, "sun": 0.8,
                "shadowKeep": 0.8, "brightScale": 0.8, "shadeCool": 0.1 },
   "maps": [ { "world": 7, "name": "Atlans", "base": 0.8, "figures": 0.8, "brightScale": 1.0, "sun": 1.0 } ]
 }
@@ -52,7 +52,7 @@ for the reader.
 | `figures` | the baked light on characters, monsters and NPCs, and the fixed light of the player's own character | `base` to 1 |
 | `dynamicGain` | the light candles, fires, skills and effects add each frame | 0.5 to 2 |
 | `background` | the clear and fog colour behind the scene | 0 to 1 |
-| `sun` | how much brighter a model face turned to the sun is than one turned away (1 is Classic, 0 leaves only the even fill light) | 0 to 1 |
+| `sun` | how much brighter a model face turned to the sun is than one turned away (1 is Classic, 0 leaves only the even fill light); with Enhanced dynamic lights the direction follows `dynamic.shadowAngle` | 0 to 1 |
 | `shadowKeep` | optional: the baked light at which a place keeps its full brightness; `base` and `figures` then darken the shade only, fading out towards this light (sunlit ground stays day). 0 (the default) darkens everything evenly | 0 to 1.5 |
 | `brightScale` | optional, with a shadow keep: the scale places at the shadow keep get, never below `base` (figures: never below `figures`) | 0.3 to 1 (default) |
 | `shadeCool` | optional: how much bluer the darkened shade gets | 0 (default) to 0.5 |
@@ -62,11 +62,12 @@ log every problem once (`render` log) and keep the whole world Classic; it
 never applies part of a file.
 
 The shipped values come from side-by-side review rounds over eleven scenes and
-a survey of 26 places: base 0.45 with the shadow keep at
+a survey of 26 places: base 0.6 with the shadow keep at
 0.8, so the shade darkens while sunlit ground keeps most of its light
 (`brightScale` 0.8), figures at 0.7 so characters stay readable, a slightly
 cooler shade, and dynamic lights 1.7 times as strong. Maps that had a weaker
-sun (indoors, underground, event maps) light models from the sun at 1.0. Maps that looked too dark
+sun (indoors, underground, event maps) light models from the sun at 1.0. The enclosed maps have
+no sunlight to keep: base 0.45 and no shadow keep, so their baked light darkens evenly. Maps that looked too dark
 have their own, lighter values (Atlans, Icarus, Raklion, Vulcanus, Karutan);
 Icarus draws no terrain, so its `background` of 0.7 darkens it instead.
 

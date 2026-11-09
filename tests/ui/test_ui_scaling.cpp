@@ -872,11 +872,12 @@ TEST_CASE("each Enhanced feature switch loads and saves through its own config.i
         bool (GameConfig::*get)() const;
         void (GameConfig::*set)(bool);
     };
-    const std::array<Switch, 4> switches{{
+    const std::array<Switch, 5> switches{{
         {"EnhancedLighting", &GameConfig::GetEnhancedLighting, &GameConfig::SetEnhancedLighting},
         {"DynamicLights", &GameConfig::GetDynamicLights, &GameConfig::SetDynamicLights},
         {"LightMood", &GameConfig::GetLightMood, &GameConfig::SetLightMood},
         {"PostProcessing", &GameConfig::GetPostProcessing, &GameConfig::SetPostProcessing},
+        {"Sunlight", &GameConfig::GetSunlight, &GameConfig::SetSunlight},
     }};
     const ExecutableConfigFile file;
     GameConfig& config = GameConfig::GetInstance();
@@ -979,6 +980,7 @@ TEST_CASE(
     CHECK(enhanced.textureFiltering);
     CHECK(enhanced.enhancedLighting);
     CHECK(enhanced.dynamicLights);
+    CHECK(enhanced.sunlight);
     CHECK(enhanced.lightMood);
     CHECK(enhanced.postProcessing);
     CHECK(enhanced.lightMoodStrength == 100);
@@ -988,6 +990,7 @@ TEST_CASE(
     CHECK_FALSE(classic.textureFiltering);
     CHECK_FALSE(classic.enhancedLighting);
     CHECK_FALSE(classic.dynamicLights);
+    CHECK_FALSE(classic.sunlight);
     CHECK_FALSE(classic.lightMood);
     CHECK_FALSE(classic.postProcessing);
     CHECK_FALSE(classic.antialiasing);

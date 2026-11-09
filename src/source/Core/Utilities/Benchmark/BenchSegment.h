@@ -64,6 +64,7 @@ struct SceneConfig
     bool lookTextureFilteringOff = false;
     bool lookLightingOff = false;
     bool lookDynamicLightsOff = false;
+    bool lookSunlightOff = false;
     bool lookLightMoodOff = false;
     bool lookPostProcessingOff = false;
 

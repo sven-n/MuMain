@@ -413,3 +413,21 @@ TEST_CASE("$look commands parse their verb, scope, name and value [render][look]
     REQUIRE(knee.has_value());
     CHECK(knee->assignments[0].value == LookValue::HighlightKnee);
 }
+
+TEST_CASE("a value an environment sets names the environment as its source [render][look][tuning]")
+{
+    FakeFileSystem fileSystem = Shipped();
+    fileSystem.files[LookFile] = R"({
+  "formatVersion": 1,
+  "default": { "bloom.strength": 1.0, "ao.strength": 0.5 },
+  "environments": { "enclosed": { "bloom.strength": 0.4 } },
+  "maps": [ { "world": 1, "name": "Dungeon", "environment": "enclosed", "ao.strength": 0.2 } ]
+})";
+    LookFiles files = Load(fileSystem);
+    constexpr int Dungeon = 1;
+    constexpr int Open = 0;
+    CHECK(SourceOf(files, "bloom.strength", Dungeon) == LookValueSource::Environment);
+    CHECK(Effective(files, "bloom.strength", Dungeon) == Approx(0.4));
+    CHECK(SourceOf(files, "ao.strength", Dungeon) == LookValueSource::Map);
+    CHECK(SourceOf(files, "bloom.strength", Open) == LookValueSource::Default);
+}

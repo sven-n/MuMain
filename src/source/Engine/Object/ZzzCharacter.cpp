@@ -8,8 +8,10 @@
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
 #include <execution>
+#include <optional>
 #include <algorithm>
 #include <span>
+#include "Render/Drawing/LegacyCalls.h"
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
 #ifdef _WIN32
@@ -6997,6 +6999,56 @@ bool IsPlacedAt(const Engine::Object::Attachments::Posed& posed, const LinkPlace
 }
 
 // Poses a linked part into bones.
+namespace
+{
+// The shadow a linked part casts of its own: wings cast their body's, capes and other cloth the cloth's.
+enum class LinkedPartShadow
+{
+    None,
+    Body,
+    Cloth,
+};
+
+LinkedPartShadow LinkedPartShadowOf(int type, const OBJECT& o)
+{
+    switch (type)
+    {
+    case MODEL_WINGS_OF_ELF:    // Wings of Elf
+    case MODEL_WINGS_OF_HEAVEN: // Wings of Heaven
+    case MODEL_WINGS_OF_SATAN:  // Wings of Satan
+    case MODEL_WING_OF_CURSE:   // Wing of Curse
+
+    case MODEL_WINGS_OF_SPIRITS:  // Wings of Spirits
+    case MODEL_WINGS_OF_SOUL:     // Wings of Soul
+    case MODEL_WINGS_OF_DRAGON:   // Wings of Dragon
+    case MODEL_WINGS_OF_DARKNESS: // Wings of Darkness
+    case MODEL_WINGS_OF_DESPAIR:  // Wings of Despair
+
+    case MODEL_WING_OF_STORM:     // Wing of Storm
+    case MODEL_WING_OF_ETERNAL:   // Wing of Eternal
+    case MODEL_WING_OF_ILLUSION:  // Wing of Illusion
+    case MODEL_WING_OF_RUIN:      // Wing of Ruin
+    case MODEL_WING_OF_DIMENSION: // Wing of Dimension
+
+    case MODEL_SMALL_WING_OF_CURSE:   // Small Wing of Curse
+    case MODEL_SMALL_WINGS_OF_ELF:    // Small Wings of Elf
+    case MODEL_SMALL_WINGS_OF_HEAVEN: // Small Wings of Heaven
+    case MODEL_SMALL_WINGS_OF_SATAN:  // Small Wings of Satan
+        return LinkedPartShadow::Body;
+
+    case MODEL_CAPE_OF_LORD:          // Cape of Lord
+    case MODEL_CAPE_OF_FIGHTER:       // Cape of Fighter
+    case MODEL_CAPE_OF_EMPEROR:       // Cape of Emperor
+    case MODEL_CAPE_OF_OVERRULE:      // Cape of Overrule
+    case MODEL_SMALL_CAPE_OF_LORD:    // Small Cape of Lord
+    case MODEL_LITTLE_WARRIORS_CLOAK: // Little Warrior's Cloak
+        return LinkedPartShadow::Cloth;
+    default:
+        return o.m_pCloth ? LinkedPartShadow::Cloth : LinkedPartShadow::None;
+    }
+}
+} // namespace
+
 void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Object::Attachments::Posed& posed,
                     vec34_t* bones)
 {
@@ -7118,6 +7170,11 @@ vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const P
         && Type != MODEL_WING + 135 // Small Cape of Fighter
         )
     {
+        std::optional<Render::Drawing::ScopedNoSunCasters> noSunShadow;
+        if (IsWingShadowDisabledDebug() && LinkedPartShadowOf(Type, *o) != LinkedPartShadow::None)
+        {
+            noSunShadow.emplace();
+        }
         RenderPartObjectEffect(
             Object, Type, light, o->Alpha, Level, Option1, false, 0,
             RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM)
@@ -7142,45 +7199,15 @@ vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const P
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
         !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
     {
-        switch (Type) // 날개인지 검사
+        switch (LinkedPartShadowOf(Type, *o))
         {
-        case MODEL_WINGS_OF_ELF:    // Wings of Elf
-        case MODEL_WINGS_OF_HEAVEN: // Wings of Heaven
-        case MODEL_WINGS_OF_SATAN:  // Wings of Satan
-        case MODEL_WING_OF_CURSE:   // Wing of Curse
-
-        case MODEL_WINGS_OF_SPIRITS:  // Wings of Spirits
-        case MODEL_WINGS_OF_SOUL:     // Wings of Soul
-        case MODEL_WINGS_OF_DRAGON:   // Wings of Dragon
-        case MODEL_WINGS_OF_DARKNESS: // Wings of Darkness
-        case MODEL_WINGS_OF_DESPAIR:  // Wings of Despair
-
-        case MODEL_WING_OF_STORM:     // Wing of Storm
-        case MODEL_WING_OF_ETERNAL:   // Wing of Eternal
-        case MODEL_WING_OF_ILLUSION:  // Wing of Illusion
-        case MODEL_WING_OF_RUIN:      // Wing of Ruin
-        case MODEL_WING_OF_DIMENSION: // Wing of Dimension
-
-        case MODEL_SMALL_WING_OF_CURSE:   // Small Wing of Curse
-        case MODEL_SMALL_WINGS_OF_ELF:    // Small Wings of Elf
-        case MODEL_SMALL_WINGS_OF_HEAVEN: // Small Wings of Heaven
-        case MODEL_SMALL_WINGS_OF_SATAN:  // Small Wings of Satan
+        case LinkedPartShadow::Body:
             b->RenderBodyShadow();
             break;
-
-        case MODEL_CAPE_OF_LORD:          // Cape of Lord
-        case MODEL_CAPE_OF_FIGHTER:       // Cape of Fighter
-        case MODEL_CAPE_OF_EMPEROR:       // Cape of Emperor
-        case MODEL_CAPE_OF_OVERRULE:      // Cape of Overrule
-        case MODEL_SMALL_CAPE_OF_LORD:    // Small Cape of Lord
-        case MODEL_LITTLE_WARRIORS_CLOAK: // Little Warrior's Cloak
+        case LinkedPartShadow::Cloth:
             b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
             break;
-        default:
-            if (o->m_pCloth)
-            {
-                b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
-            }
+        case LinkedPartShadow::None:
             break;
         }
     }

@@ -12,8 +12,8 @@ using Render::Look::LookPresetController;
 
 namespace
 {
-const LookFeatures AllOn{true, true, true, true, true, 100, true};
-const LookFeatures AllOff{false, false, false, false, false, 100, false};
+const LookFeatures AllOn{true, true, true, true, true, 100, true, true};
+const LookFeatures AllOff{false, false, false, false, false, 100, false, false};
 
 // Records what the controller saves and applies.
 struct Recorder
@@ -192,6 +192,7 @@ TEST_CASE("$look classic|enhanced and the per-feature commands parse [render][lo
     CHECK(ParseFeatureOverrideCommand(L"$texfilter off")->textureFiltering == false);
     CHECK(ParseFeatureOverrideCommand(L"$lighting on")->enhancedLighting == true);
     CHECK(ParseFeatureOverrideCommand(L"$dynlights off")->dynamicLights == false);
+    CHECK(ParseFeatureOverrideCommand(L"$sun off")->sunlight == false);
     CHECK(ParseFeatureOverrideCommand(L"$post off")->postProcessing == false);
     CHECK(ParseFeatureOverrideCommand(L"$lightmood on")->lightMood == true);
     const auto strength = ParseFeatureOverrideCommand(L"$lightmood 40");

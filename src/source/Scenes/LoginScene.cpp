@@ -324,7 +324,10 @@ static void UpdateLogInSceneView()
     ResetFrustrumBoundsFullTerrain();
     // Behind the credits the world is not drawn.
     if (!g_CreditWin.IsVisible())
+    {
         CullWorld();
+        Scenes::Lighting::PinWorldDynamicLights();
+    }
 }
 
 void PlayLogInSceneMusic()
@@ -439,7 +442,10 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!g_CreditWin.IsVisible())
     {
-        { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+        {
+            FRAME_PROFILE(Terrain);
+            RenderTerrain(false);
+        }
         { FRAME_PROFILE(Characters); RenderCharactersClient(); }
         { FRAME_PROFILE(Objects); RenderMount(); }
         {

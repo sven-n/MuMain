@@ -1,0 +1,95 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct VSInput
+{
+    float3 pos;
+    float2 uv;
+    float4 color;
+    float3 normal;
+};
+
+struct VSOutput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+    float fogFactor;
+    float eyeDepth;
+    float3 worldPosition;
+    float3 darkening;
+    float clipDist;
+};
+
+struct Transform
+{
+    float4x4 mvp;
+    float fogStart;
+    float fogEnd;
+    float2 fogPad;
+};
+
+struct main0_out
+{
+    float2 _entryPointOutput_uv [[user(locn0)]];
+    float4 _entryPointOutput_color [[user(locn1)]];
+    float _entryPointOutput_fogFactor [[user(locn2)]];
+    float _entryPointOutput_eyeDepth [[user(locn3)]];
+    float3 _entryPointOutput_worldPosition [[user(locn4)]];
+    float3 _entryPointOutput_darkening [[user(locn5)]];
+    float4 gl_Position [[position]];
+    float gl_ClipDistance [[clip_distance]] [1];
+    float gl_ClipDistance_0 [[user(clip0)]];
+};
+
+struct main0_in
+{
+    float3 input_pos [[attribute(0)]];
+    float2 input_uv [[attribute(1)]];
+    float4 input_color [[attribute(2)]];
+    float3 input_normal [[attribute(3)]];
+};
+
+static inline __attribute__((always_inline))
+VSOutput _main(thread const VSInput& _input, constant Transform& _32)
+{
+    VSOutput o;
+    o.pos = _32.mvp * float4(_input.pos, 1.0);
+    o.uv = _input.uv;
+    o.color = _input.color;
+    o.clipDist = o.pos.w - 1.0;
+    float dist = abs(o.pos.w);
+    float range = _32.fogEnd - _32.fogStart;
+    o.fogFactor = (range > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - dist) / range, 0.0, 1.0) : 1.0;
+    o.eyeDepth = dist;
+    o.worldPosition = _input.pos;
+    o.darkening = _input.normal - float3(0.0, 0.0, 1.0);
+    return o;
+}
+
+vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffer(0)]])
+{
+    main0_out out = {};
+    VSInput _input;
+    _input.pos = in.input_pos;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    _input.normal = in.input_normal;
+    VSInput param = _input;
+    VSOutput flattenTemp = _main(param, _32);
+    out.gl_Position = flattenTemp.pos;
+    out._entryPointOutput_uv = flattenTemp.uv;
+    out._entryPointOutput_color = flattenTemp.color;
+    out._entryPointOutput_fogFactor = flattenTemp.fogFactor;
+    out._entryPointOutput_eyeDepth = flattenTemp.eyeDepth;
+    out._entryPointOutput_worldPosition = flattenTemp.worldPosition;
+    out._entryPointOutput_darkening = flattenTemp.darkening;
+    out.gl_ClipDistance[0] = flattenTemp.clipDist;
+    out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
+    return out;
+}
+

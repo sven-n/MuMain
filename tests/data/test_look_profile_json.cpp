@@ -261,10 +261,14 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
         {LookValue::DiffuseScale, 1.0},        {LookValue::DiffuseAmbient, 0.3},
         {LookValue::DiffuseFloor, 0.15},       {LookValue::RimStrength, 0.4},
         {LookValue::DynamicWrap, 0.3},         {LookValue::DynamicMapSmoothing, 0.5},
-        {LookValue::DynamicEffectGain, 2.5},   {LookValue::DynamicEffectRange, 3.0},
+        {LookValue::DynamicEffectGain, 0.5},   {LookValue::DynamicEffectRange, 2.0},
         {LookValue::DynamicEffectRangeMax, 8}, {LookValue::DynamicEffectFade, 0.5},
         {LookValue::DynamicEffectCap, 2.5},    {LookValue::BloomStrength, 1.0},
-        {LookValue::BloomLevelFalloff, 0.6},
+        {LookValue::BloomLevelFalloff, 0.6},   {LookValue::GroundShadowAngle, 135},
+        {LookValue::GroundShadowLights, 1},    {LookValue::AmbientOcclusionStrength, 0.8},
+        {LookValue::SpecularScale, 0.8},       {LookValue::SunShadowStrength, 1.0},
+        {LookValue::CloudStrength, 0.35},      {LookValue::SkyFill, 0.5},
+        {LookValue::RimSunFollow, 1.0},
     };
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
     {
@@ -284,4 +288,33 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
     // Icarus: less bloom, which widened its fog clouds.
     CHECK(loaded.data.ForWorld(Icarus)[LookValue::BloomStrength] == doctest::Approx(0.3));
     CHECK(loaded.data.ForWorld(Lorencia)[LookValue::BloomStrength] == doctest::Approx(1.0));
+    // Indoor and underground maps: no sun, and no flat sun shadow under characters.
+    for (const int world : {1, 4, 38, 39})
+    {
+        CAPTURE(world);
+        CHECK(loaded.data.ForWorld(world)[LookValue::SunShadowStrength] == 0.0);
+        CHECK(loaded.data.ForWorld(world)[LookValue::FlatSunShadow] == 0.0);
+    }
+    CHECK(loaded.data.ForWorld(Lorencia)[LookValue::FlatSunShadow] == 1.0);
+}
+
+TEST_CASE("a map's environment applies between the default and the map's own values [data][look]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1,
+        "default": {"bloom.strength": 1.0, "sun.shadow": 1},
+        "environments": {"enclosed": {"sun.shadow": 0, "bloom.strength": 0.8}},
+        "maps": [{"world": 1, "environment": "enclosed", "bloom.strength": 0.5},
+                 {"world": 10, "environment": "enclosed"}]})");
+    REQUIRE_MESSAGE(!HasFatal(result.issues), Messages(result.issues));
+    CHECK(result.data.ForWorld(Lorencia)[LookValue::SunShadowStrength] == 1.0);
+    CHECK(result.data.ForWorld(Dungeon)[LookValue::SunShadowStrength] == 0.0);
+    // The map's own value wins over its environment's.
+    CHECK(result.data.ForWorld(Dungeon)[LookValue::BloomStrength] == doctest::Approx(0.5));
+    CHECK(result.data.ForWorld(Icarus)[LookValue::BloomStrength] == doctest::Approx(0.8));
+}
+
+TEST_CASE("an unknown environment makes the file unusable [data][look]")
+{
+    CheckBuiltInEverywhere(Read(R"({"formatVersion": 1, "maps": [{"world": 1, "environment": "cave"}]})"));
+    CheckBuiltInEverywhere(Read(R"({"formatVersion": 1, "environments": {"cave": 1}})"));
 }
