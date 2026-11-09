@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace
 {
@@ -93,7 +94,74 @@ float TableHeight(int rows)
     return static_cast<float>(std::min(rows, MaxVisibleRows) + 1) * rowHeight + style.ScrollbarSize;
 }
 
-// The languages that may decline names: the UI languages but English.
+// The languages of the Cases table: the UI languages but English, then the name cases file's other languages (a typo
+// such as "pl-PL"; Data Checks warns about them), so they can be taken out.
+std::vector<std::string> CasesTableLanguages()
+{
+    std::vector<std::string> locales;
+    for (const char* locale : I18N::GetAvailableLocales())
+    {
+        if (std::string_view(locale) != Data::LocalizedString::NeutralLocale)
+        {
+            locales.emplace_back(locale);
+        }
+    }
+    for (const auto& [locale, cases] : g_ItemDatabase.GetNameCases().GetLanguages())
+    {
+        if (std::find(locales.begin(), locales.end(), locale) == locales.end())
+        {
+            locales.push_back(locale);
+        }
+    }
+    return locales;
+}
+
+bool IsUiLanguage(const std::string& locale)
+{
+    const auto locales = I18N::GetAvailableLocales();
+    return std::any_of(locales.begin(), locales.end(), [&](const char* uiLocale) { return locale == uiLocale; });
+}
+
+void RenderCasesRow(const std::string& locale)
+{
+    ImGui::PushID(locale.c_str());
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    if (IsUiLanguage(locale))
+    {
+        ImGui::TextUnformatted(I18N::GetLanguageDisplayName(locale.c_str()));
+    }
+    else
+    {
+        ImGui::TextDisabled("%s", locale.c_str());
+    }
+    for (const std::string_view caseKey : Data::Translation::ItemCaseKeys)
+    {
+        ImGui::TableNextColumn();
+        ImGui::PushID(std::string(caseKey).c_str());
+        const Data::Items::ItemNameCases& current = g_ItemDatabase.GetNameCases();
+        bool uses = current.Uses(locale, caseKey);
+        if (ImGui::Checkbox("##Uses", &uses))
+        {
+            std::vector<std::string> cases = current.GetCases(locale);
+            if (uses)
+            {
+                cases.emplace_back(caseKey);
+            }
+            else
+            {
+                std::erase(cases, std::string(caseKey));
+            }
+            Data::Items::ItemNameCases changed = current;
+            changed.SetCases(locale, std::move(cases));
+            // Through the item tools' history, so it can be undone like any edit.
+            g_ItemEdits.SetNameCases(I18N::Editor::NameCases, changed);
+        }
+        ImGui::PopID();
+    }
+    ImGui::PopID();
+}
+
 void RenderCasesTable()
 {
     constexpr ImGuiTableFlags flags =
@@ -109,41 +177,9 @@ void RenderCasesTable()
         ImGui::TableSetupColumn(std::string(caseKey).c_str());
     }
     ImGui::TableHeadersRow();
-    for (const char* locale : I18N::GetAvailableLocales())
+    for (const std::string& locale : CasesTableLanguages())
     {
-        if (std::string_view(locale) == Data::LocalizedString::NeutralLocale)
-        {
-            continue;
-        }
-        ImGui::PushID(locale);
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TextUnformatted(I18N::GetLanguageDisplayName(locale));
-        for (const std::string_view caseKey : Data::Translation::ItemCaseKeys)
-        {
-            ImGui::TableNextColumn();
-            ImGui::PushID(std::string(caseKey).c_str());
-            const Data::Items::ItemNameCases& current = g_ItemDatabase.GetNameCases();
-            bool uses = current.Uses(locale, caseKey);
-            if (ImGui::Checkbox("##Uses", &uses))
-            {
-                std::vector<std::string> cases = current.GetCases(locale);
-                if (uses)
-                {
-                    cases.emplace_back(caseKey);
-                }
-                else
-                {
-                    std::erase(cases, std::string(caseKey));
-                }
-                Data::Items::ItemNameCases changed = current;
-                changed.SetCases(locale, std::move(cases));
-                // Through the item tools' history, so it can be undone like any edit.
-                g_ItemEdits.SetNameCases(I18N::Editor::NameCases, changed);
-            }
-            ImGui::PopID();
-        }
-        ImGui::PopID();
+        RenderCasesRow(locale);
     }
     ImGui::EndTable();
 }

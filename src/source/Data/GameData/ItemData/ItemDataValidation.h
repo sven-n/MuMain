@@ -80,6 +80,11 @@ void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLab
 void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                        const ItemNameCases& cases, const std::string& casesFile, std::vector<ItemDataIssue>& issues);
 
+// A language of the name cases file (`casesFile` names it in messages) the game has no texts in ("pl-PL" for "pl")
+// declines names no text shows: a warning for each. `uiLocales` are the game's languages (I18N::GetAvailableLocales).
+void ValidateNameCaseLocales(const ItemNameCases& cases, std::span<const char* const> uiLocales,
+                             const std::string& casesFile, std::vector<ItemDataIssue>& issues);
+
 // The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
 // lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description
 // names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of most of the

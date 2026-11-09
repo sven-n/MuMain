@@ -633,6 +633,21 @@ TEST_CASE("Forms a text can never show are warnings [data][items][texts]")
     CHECK(issues.size() == 5);
 }
 
+TEST_CASE("A language of the name cases file the game has no texts in is a warning [data][items][texts]")
+{
+    ItemNameCases cases;
+    cases.SetCases("pl", {"gen"});
+    cases.SetCases("pl-PL", {"gen"});
+    const std::vector<const char*> uiLocales = {"en", "de", "pl"};
+
+    std::vector<ItemDataIssue> issues;
+    ValidateNameCaseLocales(cases, uiLocales, "NameCases.json", issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].source == "NameCases.json");
+    CHECK(issues[0].field == "languages.pl-PL");
+}
+
 TEST_CASE("A name line's shared text gives its forms, and its placeholders are a warning [data][items][texts]")
 {
     ItemTooltipFile tooltips;

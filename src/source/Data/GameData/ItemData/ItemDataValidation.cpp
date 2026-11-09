@@ -969,6 +969,21 @@ void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipF
     }
 }
 
+void ValidateNameCaseLocales(const ItemNameCases& cases, std::span<const char* const> uiLocales,
+                             const std::string& casesFile, std::vector<ItemDataIssue>& issues)
+{
+    for (const auto& [locale, languageCases] : cases.GetLanguages())
+    {
+        if (std::none_of(uiLocales.begin(), uiLocales.end(), [&](const char* uiLocale) { return locale == uiLocale; }))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, casesFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "languages." + locale,
+                              "the game has no texts in \"" + locale +
+                                  "\": no text shows its cases; take it out (Item Translations, Cases...)"});
+        }
+    }
+}
+
 void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
                           const std::string& labelFile, std::vector<ItemDataIssue>& issues)
 {

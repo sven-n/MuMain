@@ -278,6 +278,8 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     result.issues.insert(result.issues.end(), nameCases.issues.begin(), nameCases.issues.end());
     ValidateNameForms(result.items, tooltips.file, nameCases.cases, GetItemNameCasesFile().generic_string(),
                       result.issues);
+    ValidateNameCaseLocales(nameCases.cases, I18N::GetAvailableLocales(), GetItemNameCasesFile().generic_string(),
+                            result.issues);
     GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
     result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
     if (!HasFatal(groundLabels.issues))
@@ -908,6 +910,8 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateItemOptionLinks(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetOptions(), issues);
     ValidateNameForms(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetNameCases(),
                       GetItemNameCasesFile().generic_string(), issues);
+    ValidateNameCaseLocales(g_ItemDatabase.GetNameCases(), I18N::GetAvailableLocales(),
+                            GetItemNameCasesFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
