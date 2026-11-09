@@ -398,7 +398,8 @@ TEST_CASE("Name forms leaves the rest of Item Translations to the names grid [ed
     CHECK(left > RoomForTheGrid);
 }
 
-TEST_CASE("A Texts problem of a UI text naming a number no item has leaves the selection [editor][items][texts]")
+TEST_CASE("A Texts problem of a UI or tooltip file text naming a number no item has leaves the selection "
+          "[editor][items][texts]")
 {
     ItemTextScope scope;
     REQUIRE(scope.Loaded());
@@ -408,6 +409,9 @@ TEST_CASE("A Texts problem of a UI text naming a number no item has leaves the s
     g_ItemSelection.Select(tear);
 
     area.Open({Data::Items::ItemDataIssueSeverity::Error, "Game.pl.resx", 14, 511, "Tear", "names no item"}, false);
+    CHECK(g_ItemSelection.GetItemType() == tear);
+    area.Open({Data::Items::ItemDataIssueSeverity::Error, "Tooltip.json", 14, 511, "texts.talisman", "names no item"},
+              false);
     CHECK(g_ItemSelection.GetItemType() == tear);
     // An item the text names is selected.
     area.Open({Data::Items::ItemDataIssueSeverity::Warning, "Game.pl.resx", 14, 13, "Bless", "missing form"}, false);
