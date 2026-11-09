@@ -20,7 +20,13 @@ class BitmapGpuResources final
 public:
     static constexpr std::size_t kSlotCount = 3;
     static constexpr std::uint64_t kBytesPerPixel = 4;
+#if defined(__APPLE__)
+    // SDL's Metal backend (up to 3.4.20 at least) ignores pixels_per_row and reads tightly packed rows
+    // (libsdl-org/SDL#16474). Drop this once the SDL submodule includes libsdl-org/SDL#16610.
+    static constexpr std::uint64_t kRowAlignment = kBytesPerPixel;
+#else
     static constexpr std::uint64_t kRowAlignment = 256;
+#endif
     static_assert(Sprites::kBitmapMaximumWidth > 0 && Sprites::kBitmapMaximumHeight > 0);
     static_assert(static_cast<std::uint64_t>(Sprites::kBitmapMaximumWidth) <=
                   (std::numeric_limits<std::uint64_t>::max() - kRowAlignment + 1) / kBytesPerPixel);
