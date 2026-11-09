@@ -1385,6 +1385,8 @@ server with original clients (after phases 6 and B).
 11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
     `pet` and drop settings, one phase each. Order decided when we get
     there. Each one gets OpenMU work where the server has matching data.
+    The buff values and durations of `ItemAddOption` (potions, scrolls,
+    seals, charms) move with the buffs instead (buffs design B13).
 12. **New item groups** (D21) — *to discuss again when we get here.*
     Groups 12–15 mix unrelated items. The new client may get new groups
     (e.g. 16 = jewels, 17 = orbs, 18 = scrolls) so the group means
