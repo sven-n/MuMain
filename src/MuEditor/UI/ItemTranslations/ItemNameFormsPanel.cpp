@@ -16,6 +16,8 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <string>
+#include <utility>
 
 namespace
 {
@@ -292,16 +294,13 @@ void CItemNameFormsPanel::RenderFormCell(const ItemDefinition& definition, int i
         return;
     }
     ImGui::PushID(caseKey.c_str());
-    // While the field is active, and once more when it stops being active, ImGui writes its own text into
-    // m_cellText; the form from the data only counts while the field is not being edited.
-    m_cellText = FormsOf(definition, index).Find(locale, caseKey);
     ImGui::SetNextItemWidth(-FLT_MIN);
     // An empty form shows the name it falls back to, greyed.
-    MuEditor::Items::InputStringWithHint("##Form", NamesOf(definition, index, locale)->GetOwn(locale).c_str(),
-                                         m_cellText);
-    if (ImGui::IsItemDeactivatedAfterEdit())
+    std::string typed;
+    if (MuEditor::Items::InputStringOnLeave("##Form", NamesOf(definition, index, locale)->GetOwn(locale).c_str(),
+                                            FormsOf(definition, index).Find(locale, caseKey), typed))
     {
-        CommitForm(definition, index, locale, caseKey, m_cellText);
+        CommitForm(definition, index, locale, caseKey, std::move(typed));
     }
     ImGui::PopID();
 }

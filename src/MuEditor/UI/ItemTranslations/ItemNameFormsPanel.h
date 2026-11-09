@@ -36,9 +36,6 @@ private:
     int m_usesItemType = -1;
     int m_usesVersion = -1;
     std::vector<std::string> m_uses;
-
-    // The text of the field being drawn; ImGui writes its own into it while the field is active.
-    std::string m_cellText;
 };
 
 #endif // _EDITOR
