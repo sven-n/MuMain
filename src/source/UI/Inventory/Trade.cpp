@@ -26,6 +26,10 @@
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <algorithm>
+#include <array>
+#include <span>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -813,53 +817,39 @@ void CTrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const 
 
 void CTrade::AlertYourTradeInven()
 {
-    int nCount = 0;
-    int nCompareItemType[10];
+    const size_t nYourItems = std::min(m_pYourInvenCtrl->GetNumberOfItems(), static_cast<size_t>(MAX_TRADE_INVEN));
 
-    m_bTradeAlert = false;
+    std::array<UI::Inventory::OfferedItemCheck, MAX_TRADE_INVEN> offers{};
+    for (size_t i = 0; i < nYourItems; ++i)
+        offers[i] = CheckAgainstYourInvenBackUp(*m_pYourInvenCtrl->GetItem(static_cast<int>(i)));
 
-    int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-    ITEM* pYourItemObj;
-    int nCompareValue;
+    std::array<bool, MAX_TRADE_INVEN> marked{};
+    m_bTradeAlert =
+        UI::Inventory::MarkWorseOffers(std::span(offers.data(), nYourItems), std::span(marked.data(), nYourItems));
 
-    for (int i = 0; i < nYourItems; ++i)
+    for (size_t i = 0; i < nYourItems; ++i)
+        m_pYourInvenCtrl->GetItem(static_cast<int>(i))->byColorState =
+            marked[i] ? ITEM_COLOR_TRADE_WARNING : ITEM_COLOR_NORMAL;
+}
+
+UI::Inventory::OfferedItemCheck CTrade::CheckAgainstYourInvenBackUp(const ITEM& yourItem) const
+{
+    UI::Inventory::OfferedItemCheck check{.itemType = yourItem.Type};
+    for (const ITEM& backUp : m_aYourInvenBackUp)
     {
-        pYourItemObj = m_pYourInvenCtrl->GetItem(i);
-        for (int j = 0; j < MAX_TRADE_INVEN; ++j)
-        {
-            if (m_aYourInvenBackUp[j].Type == pYourItemObj->Type)
-            {
-                nCompareValue = ::CompareItem(m_aYourInvenBackUp[j], *pYourItemObj);
-                if (1 == nCompareValue)
-                {
-                    m_bTradeAlert = true;
-                    pYourItemObj->byColorState = ITEM_COLOR_TRADE_WARNING;
-                }
-                else
-                {
-                    if (0 == nCompareValue)
-                        nCompareItemType[nCount++] = m_aYourInvenBackUp[j].Type;
+        if (backUp.Type != yourItem.Type)
+            continue;
 
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-                    break;
-                }
-            }
-        }
+        const int nCompareValue = ::CompareItem(backUp, yourItem);
+        check.worseThanRemembered = (1 == nCompareValue);
+        if (check.worseThanRemembered)
+            continue;
+
+        check.sameAsRemembered = (0 == nCompareValue);
+        break;
     }
 
-    if (nCount > 0)
-    {
-        m_bTradeAlert = false;
-        for (int i = 0; i < nCount; ++i)
-        {
-            for (int j = 0; j < nYourItems; ++j)
-            {
-                pYourItemObj = m_pYourInvenCtrl->GetItem(j);
-                if (nCompareItemType[i] == pYourItemObj->Type)
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-            }
-        }
-    }
+    return check;
 }
 
 void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
