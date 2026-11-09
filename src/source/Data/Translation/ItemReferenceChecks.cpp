@@ -10,6 +10,8 @@
 #include "Data/Translation/ItemReference.h"
 #include "I18N/All.h"
 
+#include <algorithm>
+#include <iterator>
 #include <set>
 #include <tuple>
 
@@ -133,6 +135,34 @@ void AddIssue(const CheckedText& text, ItemDataIssueSeverity severity, int group
     issues.push_back({severity, text.source, group, number, text.field, std::move(message)});
 }
 
+// UTF-8: the bytes that continue a character are 10xxxxxx and carry 6 bits each; a lead byte below 0x80 is a character
+// of its own, below 0xE0 starts 2 bytes, below 0xF0 3, else 4.
+constexpr unsigned char ContinuationMask = 0xC0;
+constexpr unsigned char ContinuationBits = 0x80;
+constexpr unsigned char ContinuationPayload = 0x3F;
+constexpr int ContinuationPayloadBits = 6;
+constexpr unsigned char FirstTwoByteLead = 0x80;
+constexpr unsigned char FirstThreeByteLead = 0xE0;
+constexpr unsigned char FirstFourByteLead = 0xF0;
+constexpr unsigned char LeadPayload = 0x7F;
+
+// The letters a word goes on through outside ASCII: Latin (Latin-1 Supplement to Latin Extended-B, without the signs
+// "×" and "÷"; Latin Extended Additional), Greek and Cyrillic (to Cyrillic Supplement).
+struct CharacterRange
+{
+    char32_t first;
+    char32_t last;
+};
+constexpr char32_t FirstNonAscii = 0x80;
+constexpr CharacterRange WordLetterRanges[] = {{0xC0, 0x24F}, {0x370, 0x52F}, {0x1E00, 0x1EFF}};
+constexpr char32_t MultiplicationSign = 0xD7;
+constexpr char32_t DivisionSign = 0xF7;
+
+bool IsContinuationByte(char byte)
+{
+    return (static_cast<unsigned char>(byte) & ContinuationMask) == ContinuationBits;
+}
+
 // The character of UTF-8 `text` that starts at `at` (a lead byte), or that ends right before it when `before`; 0 at the
 // text's ends.
 char32_t CharacterAt(std::string_view text, size_t at, bool before)
@@ -147,18 +177,19 @@ char32_t CharacterAt(std::string_view text, size_t at, bool before)
         do
         {
             --at;
-        } while (at > 0 && (static_cast<unsigned char>(text[at]) & 0xC0) == 0x80);
+        } while (at > 0 && IsContinuationByte(text[at]));
     }
     if (at >= text.size())
     {
         return 0;
     }
     const auto lead = static_cast<unsigned char>(text[at]);
-    const int length = lead < 0x80 ? 1 : lead < 0xE0 ? 2 : lead < 0xF0 ? 3 : 4;
-    char32_t character = length == 1 ? lead : lead & (0x7F >> length);
+    const int length = lead < FirstTwoByteLead ? 1 : lead < FirstThreeByteLead ? 2 : lead < FirstFourByteLead ? 3 : 4;
+    char32_t character = length == 1 ? lead : lead & (LeadPayload >> length);
     for (int i = 1; i < length && at + i < text.size(); ++i)
     {
-        character = (character << 6) | (static_cast<unsigned char>(text[at + i]) & 0x3F);
+        character =
+            (character << ContinuationPayloadBits) | (static_cast<unsigned char>(text[at + i]) & ContinuationPayload);
     }
     return character;
 }
@@ -168,13 +199,18 @@ char32_t CharacterAt(std::string_view text, size_t at, bool before)
 // spaces) end a word.
 bool ContinuesWord(char32_t character)
 {
-    if (character < 0x80)
+    if (character < FirstNonAscii)
     {
         return (character >= U'0' && character <= U'9') || (character >= U'A' && character <= U'Z') ||
                (character >= U'a' && character <= U'z');
     }
-    return (character >= 0xC0 && character <= 0x24F && character != 0xD7 && character != 0xF7) ||
-           (character >= 0x370 && character <= 0x52F) || (character >= 0x1E00 && character <= 0x1EFF);
+    if (character == MultiplicationSign || character == DivisionSign)
+    {
+        return false;
+    }
+    return std::any_of(std::begin(WordLetterRanges), std::end(WordLetterRanges),
+                       [character](const CharacterRange& range)
+                       { return character >= range.first && character <= range.last; });
 }
 
 // Whether `text` has `name` as words of its own, not inside a longer word ("Rena" in "Arena").
