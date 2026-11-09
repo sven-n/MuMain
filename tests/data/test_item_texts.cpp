@@ -261,7 +261,8 @@ TEST_CASE("The texts that name items follow the editor's name and form edits and
     g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
     CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Łzę Elfa'!");
 
-    // Without the accusative in Polish's cases (Cases...), the text shows the name itself.
+#ifdef _EDITOR
+    // Without the accusative in Polish's cases (Cases..., an editor edit), the text shows the name itself.
     const Data::Items::ItemNameCases cases = g_ItemDatabase.GetNameCases();
     Data::Items::ItemNameCases withoutAccusative = cases;
     withoutAccusative.SetCases("pl", {"gen", "dat", "ins", "loc"});
@@ -271,6 +272,7 @@ TEST_CASE("The texts that name items follow the editor's name and form edits and
     g_ItemDataHandler.SetNameCases(cases);
     g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
     CHECK(std::wstring_view(I18N::Dialog::Answer65Slot0) == L"Pójdę odnaleźć 'Łzę Elfa'!");
+#endif // _EDITOR
 
     I18N::SetLocale("de");
     CHECK(std::wstring_view(I18N::Game::JewelOfBless) == L"Juwel des Segens");
