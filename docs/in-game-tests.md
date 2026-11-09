@@ -130,6 +130,7 @@ scenarios need `--fresh-server` (or **Recreate the test server**) to run again.
 | `repair` | `test9` | `test9Dk` (level 91, gloves and boots at 30 of 45 durability) |
 | `icarus-flying-item-take-off` | `test400` | `test400Elf` (level 400 High Elf with a Wing of Illusion, a Horn of Fenrir and room in the inventory) |
 | `equip-all-slots` | `testgm2` | `testgm2Sum` (level 400 Dimension Master, all twelve slots worn) |
+| `look-references` | `testgm2` | `testgm2Rf` (level 400 Fist Master with a Cape of Overrule; a game master, so it can move to any spot) |
 | `quest-blade-knight`, `quest-soul-master`, `quest-muse-elf` | `quest1` | `quest1Dk`, `quest1Dw`, `quest1Elf` (level 150, first class, with Sebina's items) |
 | `quest-combo` | `quest2` | `quest2Dk` (level 220, with Sebina's items, the Ring of Honor and the Dark Stone) |
 | `quest-hero-status-wizard`, `quest-hero-status-elf`, `quest-evidence-of-strength` | `quest3` | `quest3Dw`, `quest3Elf` (level 400, with Sebina's items and the Ring of Honor), `quest3Dl` (with Devin's three items) |
@@ -270,6 +271,7 @@ followed by the options runs it too; it then needs `--client`.
 | `-q` | JPEG quality of the step screenshots, 1 to 100; default `70`; lower makes the report smaller |
 | `--gui` | open the window; also without any option |
 | `--list` | list the scenarios |
+| `--compare` | `--compare <report before> <report after>`: compare the `look-references` pictures of two reports (see [Look references](#look-references)) |
 
 On Windows the tester is a window program, so no empty console window opens
 with it; typed into a terminal it writes its log there, but the prompt comes
@@ -305,8 +307,60 @@ them under these categories.
 | Quests | `quest-hero-status-wizard` | A level 400 Dark Wizard becomes a Soul Master, goes to Marlon (he wanders between Devias, Lorencia, Noria and Atlans; the test server's log says where he is) and hands him the Ring of Honor for "Gain Hero Status": one more level-up point per level, which the server pays for the 180 levels above 220 at once. |
 | Quests | `quest-hero-status-elf` | The same for a level 400 Elf, which also learns Infinity Arrow. |
 | Quests | `quest-combo` | A level 220 Dark Knight becomes a Blade Knight, gains hero status from Marlon and hands him the Dark Stone for "Secret of Dark Stone": the combo, which is still there after logging out and in again. |
+| Look References | `look-references` | Pictures fixed scenes in the Enhanced and the Classic look, each twice a few seconds apart, for comparing the rendering of two builds (see [Look references](#look-references)). Fails when a scene cannot be reached, e.g. when the server puts the character on another map. |
 | Quests | `quest-evidence-of-strength` | A level 400 Dark Lord hands Apostle Devin the three items of "Evidence of Strength", the first quest towards the third class: +20 level-up points. |
 | Game Behaviour | `icarus-flying-item-take-off` | An Elf with wings and a Horn of Fenrir warps to Icarus. Right-clicking the wings takes them off, because the Fenrir flies; the Fenrir, now the last flying item, stays on both on a right-click and when dragged. Then the other way round: with the wings back on, right-clicking the Fenrir takes it off, and the wings, now the last flying item, stay on both ways (sven-n/MuMain#631). Both are put back on afterwards. |
+
+## Look references
+
+`look-references` pictures the same scenes every run, to compare how two
+builds render them: before and after a lighting or rendering change, or a
+build against `main`. A game master stands on fixed spots and each spot is
+pictured in the Enhanced look and then in the Classic look, twice a few
+seconds apart:
+
+- the character list;
+- Lorencia's town (roofs, walls and the road);
+- Noria (trees, leaves and grass);
+- Devias (snow, stairs and a wall);
+- the Dungeon (an enclosed map with torches);
+- Kalima (its moving ground);
+- Atlans (the underwater environment);
+- Lorencia with a fire next to a darkening effect.
+
+The character wears a see-through cape. After entering the world the
+scenario holds the clouds still (`$clouds speed 0`, for the session only):
+their shadows drift with the clock, so they would lie elsewhere in every run.
+Monsters may walk into the Dungeon and Kalima pictures. The clients of this scenario start
+with a config of their own, not the `config.ini` next to `Main`: a
+1920x1080 window, the Enhanced look with every feature on and 4x
+anti-aliasing, and no player tuning, so the pictures show the shipped look
+whoever runs them. The player's own `config.ini` is left alone. (Developer
+builds take the config file to use from `MU_CONFIG_PATH`; see the
+[control socket](control-socket.md).)
+
+To compare two builds, run the scenario with each, then compare the two
+reports:
+
+```sh
+./InGameTests --scenario look-references -q 75 --out before
+# build the other version, then
+./InGameTests --scenario look-references -q 75 --out after
+./InGameTests --compare before/in-game-report-<…>.html after/in-game-report-<…>.html
+```
+
+At `-q 75` a report of the scenario is about 18 MB, under the 25 MB GitHub
+takes in a comment; `-q 90` keeps finer detail but makes it about 31 MB. The comparison is one HTML file with, per
+scene, the first picture of each run and a heat map that is white where
+they differ. A scene's two pictures within a run show how much it changes
+by itself (grass sways, birds fly, fire burns), and the comparison weighs
+the difference between the runs against that: "beyond the scene's motion"
+points at what to look at. It is no pass or fail: the character facing
+another way after its move, a monster walking into the picture or a server
+message counts as a difference too. Two runs of the same build come out
+within the motion for most scenes; the Dungeon, with its monsters and
+torch, often does not. Run both
+builds against the same server, on the same machine and backend.
 
 ## Writing a scenario
 
@@ -315,8 +369,11 @@ A scenario is a class in `tools/InGameTests/Scenarios` that derives from
 needs by role and gets them started and logged out, says its `Category`
 (`PlayerInteractions` for players doing something with each other,
 `NpcInteractions` for a player and an NPC, `GameBehaviour` for how the game
-treats a player, e.g. the rules of a map; a new kind gets a new value in
-`ScenarioCategory`), and its `StepCount` for the progress bar.
+treats a player, e.g. the rules of a map, `LookReferences` for pictures to
+compare builds by; a new kind gets a new value in `ScenarioCategory`), and
+its `StepCount` for the progress bar. A scenario whose clients have to start
+with settings of their own gives them as `ClientConfig`, and a step can take
+several captioned pictures with `context.PictureAsync`.
 
 - **Write it as steps.** Everything a scenario does goes through
   `context.StepAsync(title, expectation, action)`: the title says what is
