@@ -2101,7 +2101,8 @@ gives the item's mark to its other fields. At most one of
 them is selected; clicking the selected one again clears it, and the row
 starts as without a mark. *Wrong in client* checks the difference, so
 Apply takes the server's value; *Wrong in server* unchecks it and shows it
-grey, so the client keeps its value. A locked field or item, and a drop
+grey, so the client keeps its value (checking it by hand applies it after
+all, and it is no longer grey). A locked field or item, and a drop
 level OpenMU cannot keep, stay unchecked either way (the drop level's box
 still takes it). The marks count in every comparison, also after a
 new download. Apply takes out the *Wrong in client* marks of what it

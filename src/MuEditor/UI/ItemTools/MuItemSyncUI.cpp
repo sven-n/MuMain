@@ -142,6 +142,13 @@ bool IsRowChecked(const SyncItem& row)
     return std::ranges::any_of(row.fields, [](const SyncField& field) { return field.checked; });
 }
 
+// What is marked wrong in the server and left unchecked is grey: the client keeps its value. A
+// box checked by hand (or Check all) applies it after all, so it is not grey then.
+bool IsKeptByClient(WrongSide side, bool checked)
+{
+    return side == WrongSide::Server && !checked;
+}
+
 // Whether the row changes something when it is applied: the whole New or Removed item, or a
 // field of a changed one.
 bool AppliesSomething(const SyncItem& row)
@@ -1284,9 +1291,8 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted(ChangeName(row.change));
                 ImGui::TableNextColumn();
-                // The client keeps what is wrong in the server: grey, as it is not applied.
                 const WrongSide side = GetRowWrongSide(row);
-                const bool keptByClient = side == WrongSide::Server;
+                const bool keptByClient = IsKeptByClient(side, IsRowChecked(row));
                 if (keptByClient)
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
