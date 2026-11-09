@@ -78,7 +78,14 @@ namespace mu::ui::window
         int GetSelectedCharacter();
         void SetListBGColor();
 
+        // A right click on a hovered card of a member in sight must still reach the game, which casts the
+        // selected support skill on that member (SelectCharacterInPartyList); RmlUi consumes it otherwise.
+        bool IsCardHoveredForMemberSkill() const;
+
     private:
+        // Whether the hero's class and current skill can target a party member through its card.
+        static bool IsMemberSkillSelected();
+
         void BuildRmlUi();
         void SyncRmlModel();
         void SyncCards();
