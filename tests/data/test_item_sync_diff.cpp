@@ -1223,4 +1223,29 @@ TEST_CASE("A known differences file of version 1 reads as wrong in the server [d
     std::filesystem::remove_all(directory, ignored);
 }
 
+TEST_CASE("A known differences entry of version 2 that cannot be read is reported [data][items][editor]")
+{
+    TemporaryFolder folder;
+    const std::filesystem::path file = folder.Path() / "KnownDifferences.json";
+    // A side that is not a list, an entry of version 1 and formulas of version 1.
+    WriteFile(file, R"({
+  "formatVersion": 2,
+  "items": [
+    {"group": 13, "number": 4, "wrongInClient": "repairable"},
+    {"group": 13, "number": 5, "fields": ["repairable"]},
+    {"group": 13, "number": 6, "wrongInServer": ["width"]}
+  ],
+  "formulas": ["default.requirements.leadership"]
+})");
+    std::vector<ItemDataIssue> issues;
+    const KnownDifferences known = LoadKnownDifferences(file, issues);
+    REQUIRE(issues.size() == 3);
+    CHECK(std::ranges::all_of(issues, [](const ItemDataIssue& issue)
+                              { return issue.severity == ItemDataIssueSeverity::Fatal; }));
+    CHECK(issues[2].field == "formulas");
+    // What can be read still is.
+    CHECK(known.fields.size() == 1);
+    CHECK(known.Find(13, 6, "width") == WrongSide::Server);
+}
+
 #endif // _EDITOR

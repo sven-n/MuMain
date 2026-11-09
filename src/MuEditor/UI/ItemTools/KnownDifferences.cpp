@@ -7,6 +7,7 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
+#include <algorithm>
 #include <optional>
 #include <utility>
 
@@ -73,11 +74,45 @@ std::vector<std::string> ReadStrings(const OrderedJson& list)
     return strings;
 }
 
-bool HasItemKey(const OrderedJson& item, bool knownList)
+// Whether `entry` has a side's list (and every side it has is a list).
+bool HasSideLists(const OrderedJson& entry)
+{
+    bool any = false;
+    for (const auto& [side, key] : SideKeys)
+    {
+        if (const auto list = entry.find(key); list != entry.end())
+        {
+            if (!list->is_array())
+            {
+                return false;
+            }
+            any = true;
+        }
+    }
+    return any;
+}
+
+bool IsValidItem(const OrderedJson& item, bool knownList)
 {
     const bool numbered = item.is_object() && item.contains(GroupKey) && item.contains(NumberKey) &&
                           item[GroupKey].is_number_integer() && item[NumberKey].is_number_integer();
-    return numbered && (!knownList || (item.contains(KnownFieldsKey) && item[KnownFieldsKey].is_array()));
+    if (!numbered)
+    {
+        return false;
+    }
+    return knownList ? item.contains(KnownFieldsKey) && item[KnownFieldsKey].is_array() : HasSideLists(item);
+}
+
+// Version 1: a list; version 2: an object with the sides' lists (an empty one is fine).
+bool IsValidFormulas(const OrderedJson& formulas, bool knownList)
+{
+    if (knownList)
+    {
+        return formulas.is_array();
+    }
+    return formulas.is_object() &&
+           std::ranges::all_of(SideKeys, [&](const SideKey& side)
+                               { return !formulas.contains(side.key) || formulas[side.key].is_array(); });
 }
 
 void ReadItem(const OrderedJson& item, bool knownList, KnownDifferences& known)
@@ -112,10 +147,6 @@ void ReadFormulas(const OrderedJson& formulas, bool knownList, KnownDifferences&
         {
             known.Set(formula, WrongSide::Server);
         }
-        return;
-    }
-    if (!formulas.is_object())
-    {
         return;
     }
     for (const auto& [side, key] : SideKeys)
@@ -230,24 +261,44 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
         return known;
     }
     const bool knownList = root[FormatVersionKey].get<int>() == KnownListFormatVersion;
-    if (const auto items = root.find(ItemsKey); items != root.end() && items->is_array())
+    // What is not read is reported: the next save would leave it out.
+    const auto addError = [&](const char* field, const char* message)
     {
-        for (const OrderedJson& item : *items)
+        issues.push_back(
+            {ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
+    };
+    if (const auto items = root.find(ItemsKey); items != root.end())
+    {
+        if (!items->is_array())
         {
-            if (!HasItemKey(item, knownList))
+            addError(ItemsKey, "the items need to be a list");
+        }
+        else
+        {
+            for (const OrderedJson& item : *items)
             {
-                issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
-                                  ItemsKey,
-                                  knownList ? "an entry needs a group, a number and a list of fields"
-                                            : "an entry needs a group and a number"});
-                continue;
+                if (!IsValidItem(item, knownList))
+                {
+                    addError(ItemsKey, knownList ? "an entry needs a group, a number and a list of fields"
+                                                 : "an entry needs a group, a number and a wrongInClient or "
+                                                   "wrongInServer list");
+                    continue;
+                }
+                ReadItem(item, knownList, known);
             }
-            ReadItem(item, knownList, known);
         }
     }
     if (const auto formulas = root.find(FormulasKey); formulas != root.end())
     {
-        ReadFormulas(*formulas, knownList, known);
+        if (!IsValidFormulas(*formulas, knownList))
+        {
+            addError(FormulasKey, knownList ? "the formulas need to be a list"
+                                            : "the formulas need wrongInClient and wrongInServer lists");
+        }
+        else
+        {
+            ReadFormulas(*formulas, knownList, known);
+        }
     }
     return known;
 }
