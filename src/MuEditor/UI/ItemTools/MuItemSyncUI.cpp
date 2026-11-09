@@ -355,6 +355,10 @@ void CMuItemSyncUI::Render(bool* open)
             {
                 g_MuEditorConsoleUI.LogEditor(issue.ToString());
             }
+            // A save would replace what could not be read (e.g. a file of a newer format version).
+            m_knownSavable =
+                std::ranges::none_of(issues, [](const ItemDataIssue& issue)
+                                     { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
             m_knownLoaded = true;
         }
         TakeChosenFile();
@@ -1688,6 +1692,15 @@ void CMuItemSyncUI::MarkWrongSide(int group, int number, const std::string& fiel
 
 void CMuItemSyncUI::SaveKnownDifferences()
 {
+    if (!m_knownSavable)
+    {
+        const std::string message = I18N::Format(I18N::Editor::TheMarksAreNotSavedWhile0CannotBeRead,
+                                                 {GetKnownDifferencesFile().generic_string()});
+        g_MuEditorConsoleUI.LogEditor(message);
+        m_messages = {message};
+        m_messagesAreErrors = true;
+        return;
+    }
     std::vector<ItemDataIssue> issues;
     Data::Items::WriteItemTextFile(GetKnownDifferencesFile(), WriteKnownDifferencesJson(m_known), issues);
     for (const ItemDataIssue& issue : issues)

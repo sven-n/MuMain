@@ -2884,6 +2884,9 @@
   <data name="What wrong in server means" xml:space="preserve">
     <value>Der Wert des Servers ist falsch: der Client behält seinen eigenen, der Unterschied bleibt daher ohne Haken (grau). Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
+  <data name="The marks are not saved while {0} cannot be read" xml:space="preserve">
+    <value>Die Markierungen werden nicht gespeichert, solange {0} nicht gelesen werden kann (siehe Konsole). Datei korrigieren oder entfernen und den Editor neu öffnen.</value>
+  </data>
   <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
     <value>OpenMU speichert die Drop-Stufe in einem Byte (höchstens 255)</value>
   </data>
