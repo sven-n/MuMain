@@ -68,6 +68,12 @@ void ItemTextCheckArea::Open(const ItemDataIssue& issue, bool clicked)
     {
         return;
     }
+    // A UI text that names a number no item has ({item:14,511}): the selection stays, Item Translations would show
+    // nothing.
+    if (IsUiText(issue) && g_ItemDatabase.Find(issue.group, issue.number) == nullptr)
+    {
+        return;
+    }
     g_ItemSelection.Select(Data::Items::MakeItemType(issue.group, issue.number));
     if (!clicked)
     {
