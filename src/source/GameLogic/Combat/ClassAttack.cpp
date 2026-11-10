@@ -104,7 +104,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         return;
     }
 
-    bool Success = CheckTarget(c);
+    bool Success = CheckTarget(c, Skill, Distance);
 
     switch (Skill)
     {
@@ -1153,7 +1153,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         return;
     }
-    bool Success = CheckTarget(c);
+    bool Success = CheckTarget(c, Skill, Distance);
 
     switch (Skill)
     {

@@ -1000,7 +1000,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         return;
     }*/
 
-    bool bSuccess = CheckTarget(pCha);
+    bool bSuccess = CheckTarget(pCha, nSkill, fDistance);
     bool bCheckAttack = CheckAttack();
     g_MovementSkill.m_bMagic = TRUE;
     g_MovementSkill.m_iSkill = Hero->CurrentSkill;

@@ -86,7 +86,7 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER* pCharacter, OB
     extern MovementSkill g_MovementSkill;
     extern int SelectedCharacter;
 
-    GameLogic::Combat::CheckTarget(pCharacter);
+    GameLogic::Combat::CheckTarget(pCharacter, iSkill, gSkillManager.GetSkillDistance(iSkill, pCharacter));
 
     int iTargetKey = -1;
     if (CheckAttack())
