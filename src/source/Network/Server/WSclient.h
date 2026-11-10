@@ -1161,19 +1161,6 @@ typedef struct
 typedef struct
 {
     PBMSG_HEADER	Header;
-    // One byte each on the wire; the GuildRelationshipType/GuildRequestType
-    // enums are uint32_t and would shift the requester key out of the packet.
-    BYTE byRelationShipType;
-    BYTE byRequestType;
-    BYTE			byTargetUserIndexH;
-    BYTE			byTargetUserIndexL;
-} PMSG_GUILD_RELATIONSHIP, * LPPMSG_GUILD_RELATIONSHIP;
-static_assert(sizeof(PMSG_GUILD_RELATIONSHIP) == sizeof(PBMSG_HEADER) + 4,
-              "E5 guild relationship request is 4 bytes after the header");
-
-typedef struct
-{
-    PBMSG_HEADER	Header;
     BYTE			byRelationShipType;
     BYTE			byRequestType;
     BYTE			byResult;

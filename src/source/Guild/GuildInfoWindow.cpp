@@ -901,26 +901,22 @@ int mu::ui::window::CGuildInfoWindow::GetUnionCount()
     return static_cast<int>(m_Unions.size());
 }
 
-void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
-    BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
+void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType,
+                                                                GuildRequestType byRequestType, WORD requesterKey)
 {
     if (mu::ui::window::g_pGenericConfirmDialog->IsVisible())
     {
-        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-            byRelationShipType,
-            byRequestType,
-            0x00,
-            MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(byRelationShipType, byRequestType, 0x00,
+                                                                          requesterKey);
     }
     else
     {
         m_MessageInfo.s_byRelationShipType = byRelationShipType;
         m_MessageInfo.s_byRelationShipRequestType = byRequestType;
-        m_MessageInfo.s_byTargetUserIndexH = byTargetUserIndexH;
-        m_MessageInfo.s_byTargetUserIndexL = byTargetUserIndexL;
+        m_MessageInfo.s_byTargetUserIndexH = HIBYTE(requesterKey);
+        m_MessageInfo.s_byTargetUserIndexL = LOBYTE(requesterKey);
 
-        int nCharKey = MAKEWORD(m_MessageInfo.s_byTargetUserIndexL, m_MessageInfo.s_byTargetUserIndexH);
-        int nIndex = FindCharacterIndex(nCharKey);
+        int nIndex = FindCharacterIndex(requesterKey);
         if (nIndex < 0 || nIndex >= MAX_CHARACTERS_CLIENT)
             return;
         CHARACTER* pPlayer = &CharactersClient[nIndex];
@@ -966,17 +962,15 @@ void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshi
             { szText[1], false },
             { szText[2], false },
         };
-        cfg.onPrimary = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
+        cfg.onPrimary = [byRelationShipType, byRequestType, requesterKey]
         {
-            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-                byRelationShipType, byRequestType, 0x01,
-                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(byRelationShipType, byRequestType, 0x01,
+                                                                              requesterKey);
         };
-        cfg.onCancel = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
+        cfg.onCancel = [byRelationShipType, byRequestType, requesterKey]
         {
-            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
-                byRelationShipType, byRequestType, 0x00,
-                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(byRelationShipType, byRequestType, 0x00,
+                                                                              requesterKey);
         };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }

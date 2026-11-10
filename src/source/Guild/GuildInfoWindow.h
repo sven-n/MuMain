@@ -145,7 +145,7 @@ namespace mu::ui::window
 
     public:
         void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
-            BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
+                                      WORD requesterKey);
 
     private:
         void SelectTab(int tab);

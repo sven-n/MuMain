@@ -118,6 +118,7 @@ using namespace mu::ui::window;
 #include "MUHelper/MuHelper.h"
 #include "Network/Server/ServerListManager.h"
 #include "Network/Server/ServerMessageTexts.h"
+#include "Network/Server/GuildRelationshipRequest.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
@@ -8002,13 +8003,16 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
     UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
-void ReceiveGuildRelationShip(const BYTE* ReceiveBuffer)
+void ReceiveGuildRelationShip(std::span<const BYTE> ReceiveBuffer)
 {
-    auto pData = (LPPMSG_GUILD_RELATIONSHIP)ReceiveBuffer;
+    const auto request = Network::Packets::ParseGuildRelationshipRequest(ReceiveBuffer);
+    if (!request)
+    {
+        LogSafeCastSizeMismatch("GuildRelationshipRequest", ReceiveBuffer.size(), 7);
+        return;
+    }
 
-    UI::Guild::ShowRelationshipRequest(static_cast<std::uint32_t>(pData->byRelationShipType),
-                                       static_cast<std::uint32_t>(pData->byRequestType), pData->byTargetUserIndexH,
-                                       pData->byTargetUserIndexL);
+    UI::Guild::ShowRelationshipRequest(request->relationshipType, request->requestType, request->requesterKey);
 }
 
 void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
@@ -13928,7 +13932,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         ReceiveGuildAssign(ReceiveBuffer);
         break;
     case 0xE5:
-        ReceiveGuildRelationShip(ReceiveBuffer);
+        ReceiveGuildRelationShip(received_span);
         break;
     case 0xE6:
         ReceiveGuildRelationShipResult(ReceiveBuffer);
