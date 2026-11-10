@@ -140,6 +140,7 @@ mu_add_test(
     NAME test_helper_actions
     SOURCES
         test_helper_actions.cpp
+        test_skill_list_hotkeys.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
