@@ -198,6 +198,11 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
                         });
     c.BindEventCallback("chainfo_line_leave", [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
                         { m_LineHint.Leave(event); });
+    SetStaticTexts(model);
+}
+
+void mu::ui::window::CCharacterInfoWindow::SetStaticTexts(CharacterInfoRmlModel& model)
+{
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);

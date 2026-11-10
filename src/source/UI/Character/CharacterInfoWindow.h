@@ -178,6 +178,8 @@ namespace mu::ui::window
         };
 
         void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
+        // The attribute labels and the buttons' tooltips, which don't change while the window is open.
+        void SetStaticTexts(CharacterInfoRmlModel& model);
         UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/character_info.rml"}}};

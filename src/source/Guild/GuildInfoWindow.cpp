@@ -573,8 +573,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                 const int Class = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
                 if (Class == CLASS_DARK_LORD)
                 {
-                    const int nCount = GameLogic::Character::GetDarkLordGuildMembers(CharacterAttribute->Level,
-                                                                                     CharacterAttribute->Charisma);
+                    const int nCount = GameLogic::Character::GetDarkLordGuildMembers(
+                        CharacterAttribute->Level, CharacterAttribute->Charisma + CharacterAttribute->AddCharisma);
                     mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, nCount);
                 }
                 else
