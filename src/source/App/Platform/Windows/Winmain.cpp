@@ -173,6 +173,16 @@ extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
 
+// Closing the window skips the menu exit, which is what sends the key configuration (skill and item hotkeys,
+// options, chat box); send it here while still connected. Once is enough: several close events can arrive.
+void SaveOptionsBeforeClose()
+{
+    if (!Destroy)
+    {
+        SaveOptionsIfConnected();
+    }
+}
+
 void CheckHack()
 {
     if (!g_bGameServerConnected)
@@ -739,6 +749,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // Just request shutdown; the main loop exits on Destroy and the teardown
         // (sound, GL, window) runs after it. SDL owns the window now, so the GL
         // context and window must not be torn down from inside a message.
+        SaveOptionsBeforeClose();
         Destroy = true;
         if (SocketClient != nullptr)
         {
@@ -1513,11 +1524,13 @@ MSG MainLoop()
             switch (event.type)
             {
             case SDL_EVENT_QUIT:
+                SaveOptionsBeforeClose();
                 Destroy = true;
                 break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 // Titlebar X / Alt+F4: request shutdown directly on SDL's close
                 // event, without relying on a subsequent SDL_EVENT_QUIT (#535).
+                SaveOptionsBeforeClose();
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:

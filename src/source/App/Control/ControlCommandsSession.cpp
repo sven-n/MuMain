@@ -660,7 +660,7 @@ std::string Quit(const Request& request, std::unique_ptr<Act>&)
     // scene, including those where there is no connection at all.
     if (SocketClient != nullptr && g_bGameServerConnected)
     {
-        SaveOptions();
+        SaveOptionsIfConnected();
         SaveMacro(L"Data\\Macro.txt");
         MUHelper::g_MuHelper.TriggerStop();
 

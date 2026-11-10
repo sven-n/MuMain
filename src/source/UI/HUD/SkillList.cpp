@@ -86,21 +86,6 @@ void mu::ui::window::CSkillList::Release()
     }
 }
 
-extern BOOL g_bGameServerConnected;
-
-namespace
-{
-// The server stores the hotkeys per character, but the client only sent them when leaving through the
-// menu: closing the window, a crash or a disconnect lost the changes. Save them as they change.
-void SaveHotKeys()
-{
-    if (SocketClient != nullptr && g_bGameServerConnected)
-    {
-        SaveOptions();
-    }
-}
-} // namespace
-
 void mu::ui::window::CSkillList::Reset()
 {
     m_bSkillList = false;
@@ -182,8 +167,9 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
             {
                 if (mu::ui::window::IsPress('1' + i))
                 {
-                    SetHotKey(i + 1, m_iHoveredGridSkillIndex);
-                    SaveHotKeys();
+                    // Saved as it changes, so a crash or a disconnect doesn't lose it.
+                    if (SetHotKey(i + 1, m_iHoveredGridSkillIndex))
+                        SaveOptionsIfConnected();
 
                     return false;
                 }
@@ -191,8 +177,8 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
 
             if (mu::ui::window::IsPress('0'))
             {
-                SetHotKey(0, m_iHoveredGridSkillIndex);
-                SaveHotKeys();
+                if (SetHotKey(0, m_iHoveredGridSkillIndex))
+                    SaveOptionsIfConnected();
 
                 return false;
             }
@@ -247,8 +233,13 @@ bool mu::ui::window::CSkillList::IsArrayIn(BYTE bySkill)
     return false;
 }
 
-void mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
+bool mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
 {
+    if (m_iHotKeySkillType[iHotKey] == iSkillType)
+    {
+        return false;
+    }
+
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
         if (m_iHotKeySkillType[i] == iSkillType)
@@ -259,6 +250,7 @@ void mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
     }
 
     m_iHotKeySkillType[iHotKey] = iSkillType;
+    return true;
 }
 
 int mu::ui::window::CSkillList::GetHotKey(int iHotKey)

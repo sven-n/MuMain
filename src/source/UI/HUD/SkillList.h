@@ -68,7 +68,8 @@ namespace mu::ui::window
 
         void Reset();
 
-        void SetHotKey(int iHotKey, int iSkillType);
+        // Whether the binding changed.
+        bool SetHotKey(int iHotKey, int iSkillType);
         int GetHotKey(int iHotKey);
         int GetSkillIndex(int iSkillType);
 

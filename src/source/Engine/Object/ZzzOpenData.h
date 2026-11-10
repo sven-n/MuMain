@@ -24,6 +24,9 @@ void OpenItemEffectTextures();
 void PrepareGrandSoulPantsClothMesh();
 
 void SaveOptions();
+// Sends the key configuration while connected to the game server with a character in the game world;
+// does nothing elsewhere, where there is no character to save it for.
+void SaveOptionsIfConnected();
 void SaveMacro(const wchar_t* FileName);
 void OpenMacro(const wchar_t* FileName);
 

@@ -160,6 +160,4 @@ mu_add_test(
     NAME test_skill_hotkey_configuration
     SOURCES
         test_skill_hotkey_configuration.cpp
-    LINK_LIBS
-        MuClient
 )

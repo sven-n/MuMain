@@ -8,6 +8,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
+#include "Scenes/SceneCore.h"
 #include "Engine/Object/PlayerBodyModels.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Engine/AI/ZzzAI.h"
@@ -1506,27 +1508,21 @@ void OpenMacro(const wchar_t* FileName)
     fclose(fp);
 }
 
+extern BOOL g_bGameServerConnected;
+
 void SaveOptions()
 {
     // 0 ~ 19 skill hotkey
     BYTE options[30]{};
 
-    int iSkillType = -1;
-    for (int i = 0; i < 10; ++i)
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
+    for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
-        iSkillType = g_pMainFrame->GetSkillHotKey(i);
-
-        int iIndex = i * 2;
-        if (iSkillType != -1)
-        {
-            options[iIndex] = HIBYTE(CharacterAttribute->Skill[iSkillType]);
-            options[iIndex + 1] = LOBYTE(CharacterAttribute->Skill[iSkillType]);
-        }
-        else
-        {
-            options[iIndex] = 0xff;
-            options[iIndex + 1] = 0xff;
-        }
+        const int iSkillType = g_pMainFrame->GetSkillHotKey(i);
+        const auto skillNumber =
+            iSkillType != -1 ? static_cast<std::uint16_t>(CharacterAttribute->Skill[iSkillType]) : Hotkeys::FreeHotkey;
+        const auto bytes = Hotkeys::Encode(skillNumber);
+        std::copy(bytes.begin(), bytes.end(), options + i * Hotkeys::BytesPerHotkey);
     }
 
     if (g_pOption->IsAutoAttack())
@@ -1569,6 +1565,14 @@ void SaveOptions()
     options[29] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_R);
 
     SocketClient->ToGameServer()->SendSaveKeyConfiguration(options, sizeof options);
+}
+
+void SaveOptionsIfConnected()
+{
+    if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE)
+    {
+        SaveOptions();
+    }
 }
 
 void OpenLogoSceneData()

@@ -10141,15 +10141,16 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
 
     UI::Hud::ClearSkillHotkeys();
 
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
     int iHotKey;
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
-        int iIndex = i * 2;
-        iHotKey = GameLogic::SkillHotkeyConfiguration::SkillNumber(Data->HotKey[iIndex], Data->HotKey[iIndex + 1]);
+        int iIndex = i * Hotkeys::BytesPerHotkey;
+        iHotKey = Hotkeys::SkillNumber(Data->HotKey[iIndex], Data->HotKey[iIndex + 1]);
 
         // Zeros (OpenMU's default) would bind the hotkey to the first empty skill slot, which then shows
         // the next learned skill.
-        if (GameLogic::SkillHotkeyConfiguration::IsAssigned(static_cast<uint16_t>(iHotKey)))
+        if (Hotkeys::IsAssigned(static_cast<uint16_t>(iHotKey)))
         {
             for (int j = 0; j < MAX_SKILLS; ++j)
             {
