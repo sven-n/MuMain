@@ -72,8 +72,9 @@ Update (#1032): the aura belongs to Greater Defense and the Elf Soldier buff
 (HelpNpc) only; Greater Damage (Attack) shows just its red weapon sparkles. One
 shared rule, `Render::Effects::HasDefenseAura`, decides where the aura is created
 (`UpdateBuffAuraEffects`) and where joint subtypes 4 and 9 are kept alive
-(`MoveJoint`), and `ClearBuffPhysicalEffect` keeps the aura while the other buff
-remains. Do not add Attack back to either side.
+(`MoveJoint`). `ClearBuffPhysicalEffect` does not delete the aura: `MoveJoint`
+ends it the frame after the last aura buff leaves. Do not add Attack back to
+either side.
 
 Aura creation count, tails, faces, blend mode, texture, and duplicate search
 remain unchanged.
