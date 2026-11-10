@@ -157,6 +157,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     c.Bind("ene_value_source", &model.eneValueSource);
     c.Bind("cmd_value_text", &model.cmdValueText);
     c.Bind("cmd_value_source", &model.cmdValueSource);
+    c.Bind("cmd_hint", &model.cmdHint);
 
     auto statLine = c.RegisterStruct<StatLine>();
     statLine.RegisterMember("text", &StatLine::text);
@@ -429,6 +430,8 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildTableTexts();
     BuildAttributeLines();
     BuildCriticalHits();
+    BuildCommandHint();
+    ShowLineHint();
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
@@ -451,7 +454,21 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
     {
         model.strLines.front().source = "buffed";
     }
+}
 
+void mu::ui::window::CCharacterInfoWindow::BuildCommandHint()
+{
+    if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+    {
+        return;
+    }
+    const int command = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
+    m_CommandHintTexts.Update(GameLogic::Character::GetCommandEffects(CharacterAttribute->Level, command),
+                              I18N::GetCurrentLocale());
+}
+
+void mu::ui::window::CCharacterInfoWindow::ShowLineHint()
+{
     switch (m_LineHint.Hovered())
     {
     case DamageHint:
@@ -459,6 +476,9 @@ void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
         break;
     case CriticalDamageRateHint:
         m_LineHint.Show(m_CriticalHitTexts.RateHintLines());
+        break;
+    case CommandHint:
+        m_LineHint.Show(m_CommandHintTexts.Lines());
         break;
     default:
         m_LineHint.Hide();

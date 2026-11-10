@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Character/CommandEffects.h"
 #include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CGuildBreakPasswordMsgBoxLayout's own maxLength
 #include "I18N/All.h"
 
@@ -572,9 +573,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                 const int Class = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
                 if (Class == CLASS_DARK_LORD)
                 {
-                    int nCount = CharacterAttribute->Level / 10 + CharacterAttribute->Charisma / 10;
-                    if (nCount > 80)
-                        nCount = 80;
+                    const int nCount = GameLogic::Character::GetDarkLordGuildMembers(CharacterAttribute->Level,
+                                                                                     CharacterAttribute->Charisma);
                     mu_swprintf(Text, I18N::Game::GuildMembersDD, g_nGuildMemberCount, nCount);
                 }
                 else

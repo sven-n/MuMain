@@ -9207,4 +9207,16 @@
   <data name="Critical damage total: +%d" xml:space="preserve">
     <value>Gesamt: +%d</value>
   </data>
+  <data name="Attack rate (PvM): +%d" xml:space="preserve">
+    <value>Angriffsrate (PvM): +%d</value>
+  </data>
+  <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
+    <value>Schaden des Dunklen Raben: +%d~%d</value>
+  </data>
+  <data name="Dark Raven attack speed: +%d" xml:space="preserve">
+    <value>Angriffsgeschwindigkeit des Dunklen Raben: +%d</value>
+  </data>
+  <data name="Guild members as guild master: %d" xml:space="preserve">
+    <value>Gildenmitglieder als Gildenmeister: %d</value>
+  </data>
 </root>
