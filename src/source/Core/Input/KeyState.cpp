@@ -110,7 +110,16 @@ namespace Core::Input
         if (sc == SDL_SCANCODE_UNKNOWN) return false;
 
         const bool* state = SDL_GetKeyboardState(nullptr);
-        return state != nullptr && state[sc];
+        if (state == nullptr) return false;
+
+        // Windows reports the numpad Enter as VK_RETURN too; SDL gives it its own scancode, so
+        // every VK_RETURN check has to accept both.
+        if (virtualKey == VK_RETURN)
+        {
+            return state[SDL_SCANCODE_RETURN] || state[SDL_SCANCODE_KP_ENTER];
+        }
+
+        return state[sc];
     }
 
 #ifdef _EDITOR
