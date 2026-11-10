@@ -19,7 +19,8 @@ namespace MuEditor::Items
 enum class WrongSide : uint8_t
 {
     None,
-    // The file's value is right: the diff checks the difference, so Apply takes it.
+    // The file's value is right. The difference starts as without a mark: whether Apply takes it
+    // is the user's choice.
     Client,
     // The client's value is right: the diff leaves the difference unchecked.
     Server,
