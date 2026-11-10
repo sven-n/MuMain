@@ -10760,7 +10760,6 @@ namespace
 void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t p, Position, Light;
-    float Luminosity;
     // RenderCharacter's check: it also sets EquipmentLevelSet, which the set glow reads.
     const bool fullset = !c->HideShadow && CheckFullSet(c);
 

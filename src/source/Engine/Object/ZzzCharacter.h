@@ -47,7 +47,8 @@ bool IsCharacterDrawn(CHARACTER* c);
 // The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
 // bones are final, and what they spawn is drawn this frame.
 void UpdateCharacterEffects();
-// The Greater Damage weapon sparkles and the defense aura of a buffed player, spawned by its effects update.
+// The Greater Damage weapon sparkles and the defense aura of a buffed player, spawned by its effects update. Only for
+// CharactersClient entries: the aura's joints carry the character's index in that array.
 void UpdateBuffAuraEffects(CHARACTER* c, OBJECT* o, BMD* b);
 // A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
 // cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
