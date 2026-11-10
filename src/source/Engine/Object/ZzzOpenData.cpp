@@ -1512,10 +1512,10 @@ extern BOOL g_bGameServerConnected;
 
 void SaveOptions()
 {
-    // 0 ~ 19 skill hotkey
-    BYTE options[30]{};
-
     namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
+    // 0 ~ 19 skill hotkey
+    BYTE options[Hotkeys::KeyConfigurationSize]{};
+
     for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
         const int iSkillType = g_pMainFrame->GetSkillHotKey(i);

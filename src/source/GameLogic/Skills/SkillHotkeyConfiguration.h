@@ -11,6 +11,9 @@ namespace GameLogic::Skills::HotkeyConfiguration
 inline constexpr std::uint16_t FreeHotkey = 0xFFFF;
 inline constexpr int HotkeyCount = 10;
 inline constexpr int BytesPerHotkey = 2;
+// The whole key configuration the client sends: the skill hotkeys first, then the options, Q/W/E/R and the chat box.
+inline constexpr int KeyConfigurationSize = 30;
+static_assert(HotkeyCount * BytesPerHotkey <= KeyConfigurationSize);
 
 inline constexpr std::uint16_t SkillNumber(std::uint8_t highByte, std::uint8_t lowByte)
 {
