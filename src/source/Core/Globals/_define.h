@@ -608,8 +608,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 /////////////////////////////////////_cdirection end_////////////////////////////////////////////////////
 /////////////////////////////////////_ccomgem start_////////////////////////////////////////////////////
 
-#define INDEX_COMPILED_CELE		ITEM_WING+30
-#define INDEX_COMPILED_SOUL		ITEM_WING+31
 #define MODEL_COMPILED_CELE		MODEL_WING+30
 #define MODEL_COMPILED_SOUL		MODEL_WING+31
 #define MAX_LINE_UNMIXLIST		8
