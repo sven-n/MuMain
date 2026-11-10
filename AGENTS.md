@@ -57,6 +57,12 @@ Quick references:
 - Run `scripts/install-hooks.sh` once per clone: the pre-push hook runs the same
   static checks and formatting check as CI's Quality Gates.
 - Reference the related issue in the PR description when applicable.
+- Once a PR is under review, push review changes as new follow-up commits so the
+  reviewer only has to read what changed. Don't amend, squash or force-push. The
+  one exception is a rebase that resolves merge conflicts; say so on the PR when
+  you do it.
+- Reply to each review comment in its own thread rather than in one long summary
+  comment. Update the PR title and description when the scope changes.
 
 ## Out of scope for AI changes
 
