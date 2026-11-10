@@ -7,6 +7,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/BitmapTextureLimits.h"
 #include "Render/Sprites/GpuUploadSkip.h"
+#include "Render/Sprites/TextureDecode.h"
 #include "GlobalBitmapPath.h"
 
 #include "Render/RmlUi/RmlPremultiply.h"
@@ -22,6 +23,8 @@
 
 #include <SDL3/SDL_gpu.h>
 #include <algorithm>
+#include <cstdarg>
+#include <cwchar>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
@@ -74,16 +77,6 @@ public:
 private:
     tjhandle handle;
 };
-
-void ReportTurboError(const wchar_t* context, const std::wstring& path)
-{
-    const char* message = tjGetErrorStr();
-    if (message == nullptr)
-    {
-        message = "Unknown TurboJPEG error";
-    }
-    g_ErrorReport.Write(L"[TurboJPEG] %ls %ls: %hs", context, path.c_str(), message);
-}
 
 int NextPowerOfTwo(int value, int maxValue)
 {
@@ -164,35 +157,6 @@ template <typename Read> std::optional<TextureFileBytes> TimedRead(double& secon
     return file;
 }
 
-// Loads a texture file through `load`: the copy in the active pack first, and
-// the original in Data when the pack has no copy or its copy does not load,
-// so a broken file in a pack costs only that file's replacement.
-template <typename Load>
-bool LoadPackCopyOrOriginal(const Render::Textures::TexturePackFiles& pack, const std::wstring& path,
-                            const char* loader, double& readSeconds, Load&& load)
-{
-    if (const std::optional<TextureFileBytes> packCopy =
-            TimedRead(readSeconds, [&] { return ReadPackCopy(pack, path); }))
-    {
-        if (load(*packCopy))
-        {
-            mu::log::Get("render")->debug("{} -- read from the texture pack: {}", loader,
-                                          mu_wchar_to_utf8(packCopy->path.c_str()));
-            return true;
-        }
-        mu::log::Get("render")->warn("{} -- the texture pack's copy did not load, using the original: {}", loader,
-                                     mu_wchar_to_utf8(packCopy->path.c_str()));
-    }
-
-    const std::optional<TextureFileBytes> original = TimedRead(readSeconds, [&] { return ReadOriginal(path); });
-    if (!original)
-    {
-        mu::log::Get("render")->debug("{} -- file open failed: {}", loader, mu_wchar_to_utf8(path.c_str()));
-        return false;
-    }
-    return load(*original);
-}
-
 SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
 {
     return filter == GL_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
@@ -246,12 +210,7 @@ void ShrinkCanvas(BITMAP_t& bitmap, int& width, int& height, int scale)
     height /= scale;
 }
 
-// The levels below the image: built on the CPU (`chain`) or by the GPU (`generate`).
-struct MipLevels
-{
-    std::vector<Render::Textures::MipLevel> chain;
-    bool generate = false;
-};
+using Render::Sprites::MipLevels;
 
 // Set by tests only (Render::Sprites::SetGpuUploadsSkipped).
 bool s_gpuUploadsSkipped = false;
@@ -432,15 +391,25 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     std::wstring ext;
     SplitExt(filename, ext, false);
 
-    const bool worldTexture = Render::Textures::IsWorldTexturePath(filename);
+    const bool jpeg = 0 == _wcsicmp(ext.c_str(), L"jpg");
     const auto start = std::chrono::steady_clock::now();
     bool loaded = false;
-    if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        loaded =
-            OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode, worldTexture, padToPowerOfTwo, keepPixels);
-    else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode, worldTexture, padToPowerOfTwo,
-                         premultiplyAlpha, keepPixels);
+    if (jpeg || 0 == _wcsicmp(ext.c_str(), L"tga"))
+    {
+        Render::Sprites::TextureDecodeRequest request;
+        request.index = uiBitmapIndex;
+        request.filename = filename;
+        ExchangeExt(filename, jpeg ? L"OZJ" : L"OZT", request.path);
+        request.jpeg = jpeg;
+        request.filter = uiFilter;
+        request.wrapMode = uiWrapMode;
+        request.worldTexture = Render::Textures::IsWorldTexturePath(filename);
+        request.padToPowerOfTwo = padToPowerOfTwo;
+        request.premultiplyAlpha = premultiplyAlpha;
+        request.keepPixels = keepPixels;
+        request.filteringEnabled = m_textureFilteringEnabled;
+        loaded = CommitTexture(request, Render::Sprites::DecodeTextureFile(m_texturePack, request));
+    }
     m_textureLoadSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
 #ifdef _EDITOR
     if (loaded)
@@ -578,29 +547,41 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
     return uiSeed + 1;
 }
 
-bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter,
-                                  GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool keepPixels)
+namespace
 {
-    std::wstring filename_ozj;
-    ExchangeExt(filename, L"OZJ", filename_ozj);
+using Render::Sprites::DecodedTexture;
+using Render::Sprites::TextureDecodeRequest;
+using Render::Sprites::TextureDecodeResult;
 
-    return LoadPackCopyOrOriginal(m_texturePack, filename_ozj, "OpenJpegTurbo", m_fileReadSeconds,
-                                  [&](const TextureFileBytes& file)
-                                  {
-                                      return LoadJpegFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
-                                                          worldTexture, padToPowerOfTwo, keepPixels);
-                                  });
+std::wstring FormatError(const wchar_t* format, ...)
+{
+    wchar_t buffer[1024] = {};
+    va_list args;
+    va_start(args, format);
+    vswprintf(buffer, std::size(buffer), format, args);
+    va_end(args);
+    return buffer;
 }
 
-bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file,
-                                 GLuint uiFilter, GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo,
-                                 bool keepPixels)
+std::wstring TurboError(const wchar_t* context, const std::wstring& path, tjhandle handle)
+{
+    const char* message = tjGetErrorStr2(handle);
+    if (message == nullptr)
+    {
+        message = "Unknown TurboJPEG error";
+    }
+    return FormatError(L"[TurboJPEG] %ls %ls: %hs", context, path.c_str(), message);
+}
+
+std::optional<DecodedTexture> DecodeJpeg(const TextureDecodeRequest& request, const TextureFileBytes& file,
+                                         TextureDecodeResult& result)
 {
     const std::vector<unsigned char>& jpegBuf = file.bytes;
     if (jpegBuf.size() <= 24)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", file.path.c_str(), jpegBuf.size());
-        return false;
+        result.errors.push_back(
+            FormatError(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", file.path.c_str(), jpegBuf.size()));
+        return std::nullopt;
     }
 
     // A marked file holds an image up to its scale times the largest original.
@@ -619,22 +600,22 @@ bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filen
     TurboJpegHandle tjHandle;
     if (!tjHandle.valid())
     {
-        ReportTurboError(L"tjInitDecompress", file.path);
-        return false;
+        result.errors.push_back(TurboError(L"tjInitDecompress", file.path, nullptr));
+        return std::nullopt;
     }
 
     auto headerResult =
         tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
     if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0)
     {
-        ReportTurboError(L"tjDecompressHeader3", file.path);
-        return false;
+        result.errors.push_back(TurboError(L"tjDecompressHeader3", file.path, tjHandle.get()));
+        return std::nullopt;
     }
     if (jpegWidth > maxWidth || jpegHeight > maxHeight)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: image too large %ls (%dx%d, at most %dx%d)\r\n", file.path.c_str(),
-                            jpegWidth, jpegHeight, maxWidth, maxHeight);
-        return false;
+        result.errors.push_back(FormatError(L"OpenJpegTurbo: image too large %ls (%dx%d, at most %dx%d)\r\n",
+                                            file.path.c_str(), jpegWidth, jpegHeight, maxWidth, maxHeight));
+        return std::nullopt;
     }
 
     std::vector<unsigned char> decompressedBuffer(static_cast<std::size_t>(jpegWidth) *
@@ -643,16 +624,16 @@ bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filen
                                           jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);
     if (decompressResult != 0)
     {
-        ReportTurboError(L"tjDecompress2", file.path);
-        return false;
+        result.errors.push_back(TurboError(L"tjDecompress2", file.path, tjHandle.get()));
+        return std::nullopt;
     }
 
-    const int textureWidth = padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, maxWidth) : jpegWidth;
-    const int textureHeight = padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, maxHeight) : jpegHeight;
+    const int textureWidth = request.padToPowerOfTwo ? NextPowerOfTwo(jpegWidth, maxWidth) : jpegWidth;
+    const int textureHeight = request.padToPowerOfTwo ? NextPowerOfTwo(jpegHeight, maxHeight) : jpegHeight;
     const int scale = Render::Textures::Upscale::ReadScale(jpegBuf, textureWidth, textureHeight);
-    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
+    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !request.keepPixels;
 
-    auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, textureWidth, textureHeight, 3);
+    auto pNewBitmap = CreateBitmapStorage(request.index, request.filename, textureWidth, textureHeight, 3);
     pNewBitmap->Width = static_cast<float>(textureWidth / scale);
     pNewBitmap->Height = static_cast<float>(textureHeight / scale);
 
@@ -676,62 +657,28 @@ bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filen
                static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
-    int uploadWidth = textureWidth;
-    int uploadHeight = textureHeight;
-    if (keepPixels && scale > Render::Textures::Upscale::NoScale)
+    DecodedTexture decoded;
+    decoded.uploadWidth = textureWidth;
+    decoded.uploadHeight = textureHeight;
+    if (request.keepPixels && scale > Render::Textures::Upscale::NoScale)
     {
-        ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
+        ShrinkCanvas(*pNewBitmap, decoded.uploadWidth, decoded.uploadHeight, scale);
     }
 
-    pNewBitmap->TextureNumber = uiBitmapIndex;
-    pNewBitmap->worldTexture = worldTexture;
-    pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
+    pNewBitmap->TextureNumber = request.index;
+    pNewBitmap->worldTexture = request.worldTexture;
+    pNewBitmap->wrapRepeat = request.wrapMode == GL_REPEAT;
     pNewBitmap->scale = static_cast<std::uint8_t>(upscaled ? scale : 1);
     pNewBitmap->fromTexturePack = file.fromTexturePack;
-    std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, uploadWidth, uploadHeight);
-    const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), rgbaData.data(),
-                                         uploadWidth, uploadHeight, false, m_mipChainSeconds);
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData, uploadWidth, uploadHeight, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode), mips, m_uploadSeconds))
-    {
-        return false;
-    }
-    pNewBitmap->UploadedBytes = UploadedBytes(uploadWidth, uploadHeight);
-    if (!keepPixels)
-    {
-        ReleaseUploadedPixels(*pNewBitmap);
-    }
-
-    SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
-    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
-    const BITMAP_t& loaded = *pNewBitmap;
-    const std::uint32_t uploadedBytes = pNewBitmap->UploadedBytes;
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-    mu::RegisterTexture(uiBitmapIndex, rawTexture);
-    mu::RegisterSampler(uiBitmapIndex, rawSampler);
-    RegisterFilteredSampler(loaded);
-    m_dwUsedTextureMemory += uploadedBytes;
-
-    return true;
+    decoded.rgba = PadRGBToRGBA(pNewBitmap->Buffer, decoded.uploadWidth, decoded.uploadHeight);
+    decoded.mips = PlanMipLevels(upscaled || (request.worldTexture && request.filteringEnabled), decoded.rgba.data(),
+                                 decoded.uploadWidth, decoded.uploadHeight, false, result.mipSeconds);
+    decoded.bitmap = std::move(pNewBitmap);
+    return decoded;
 }
 
-bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                            bool worldTexture, bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels)
-{
-    std::wstring filename_ozt;
-    ExchangeExt(filename, L"OZT", filename_ozt);
-
-    return LoadPackCopyOrOriginal(m_texturePack, filename_ozt, "OpenTga", m_fileReadSeconds,
-                                  [&](const TextureFileBytes& file)
-                                  {
-                                      return LoadTgaFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
-                                                         worldTexture, padToPowerOfTwo, premultiplyAlpha, keepPixels);
-                                  });
-}
-
-bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file,
-                                GLuint uiFilter, GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo,
-                                bool premultiplyAlpha, bool keepPixels)
+std::optional<DecodedTexture> DecodeTga(const TextureDecodeRequest& request, const TextureFileBytes& file,
+                                        TextureDecodeResult& result)
 {
     namespace Ozt = Render::Textures::Ozt;
 
@@ -746,22 +693,24 @@ bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filena
     const Ozt::Header header = Ozt::ReadHeader(pakBuffer, maxWidth, maxHeight);
     if (header.status == Ozt::Status::TooSmall)
     {
-        g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", file.path.c_str(), pakBuffer.size());
-        return false;
+        result.errors.push_back(
+            FormatError(L"OpenTga: file too small %ls (%zu bytes)\r\n", file.path.c_str(), pakBuffer.size()));
+        return std::nullopt;
     }
     if (header.status == Ozt::Status::InvalidFormat)
     {
-        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d, at most %dx%d)\r\n", file.path.c_str(),
-                            header.bitsPerPixel, header.width, header.height, maxWidth, maxHeight);
-        return false;
+        result.errors.push_back(FormatError(L"OpenTga: invalid format %ls (bit=%d, %dx%d, at most %dx%d)\r\n",
+                                            file.path.c_str(), header.bitsPerPixel, header.width, header.height,
+                                            maxWidth, maxHeight));
+        return std::nullopt;
     }
 
-    const int Width = padToPowerOfTwo ? NextPowerOfTwo(header.width, maxWidth) : header.width;
-    const int Height = padToPowerOfTwo ? NextPowerOfTwo(header.height, maxHeight) : header.height;
+    const int Width = request.padToPowerOfTwo ? NextPowerOfTwo(header.width, maxWidth) : header.width;
+    const int Height = request.padToPowerOfTwo ? NextPowerOfTwo(header.height, maxHeight) : header.height;
     const int scale = Render::Textures::Upscale::ReadScale(pakBuffer, Width, Height);
-    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !keepPixels;
+    const bool upscaled = scale > Render::Textures::Upscale::NoScale && !request.keepPixels;
 
-    auto pNewBitmap = CreateBitmapStorage(uiBitmapIndex, filename, Width, Height, 4);
+    auto pNewBitmap = CreateBitmapStorage(request.index, request.filename, Width, Height, 4);
     pNewBitmap->Width = static_cast<float>(Width / scale);
     pNewBitmap->Height = static_cast<float>(Height / scale);
     const std::size_t BufferSize = pNewBitmap->BufferStorage.size();
@@ -769,41 +718,103 @@ bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filena
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
     pNewBitmap->hasHoles = Render::Textures::HasAlphaTestHoles(
         std::span<const std::uint8_t>(pNewBitmap->Buffer, BufferSize), header.width, header.height, Width);
-    if (premultiplyAlpha)
+    if (request.premultiplyAlpha)
     {
         Render::RmlUi::PremultiplyAlpha(pNewBitmap->Buffer, BufferSize / Ozt::BytesPerPixel);
     }
 
-    int uploadWidth = Width;
-    int uploadHeight = Height;
-    if (keepPixels && scale > Render::Textures::Upscale::NoScale)
+    DecodedTexture decoded;
+    decoded.uploadWidth = Width;
+    decoded.uploadHeight = Height;
+    if (request.keepPixels && scale > Render::Textures::Upscale::NoScale)
     {
-        ShrinkCanvas(*pNewBitmap, uploadWidth, uploadHeight, scale);
+        ShrinkCanvas(*pNewBitmap, decoded.uploadWidth, decoded.uploadHeight, scale);
     }
 
-    pNewBitmap->TextureNumber = uiBitmapIndex;
-    pNewBitmap->worldTexture = worldTexture;
-    pNewBitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
+    pNewBitmap->TextureNumber = request.index;
+    pNewBitmap->worldTexture = request.worldTexture;
+    pNewBitmap->wrapRepeat = request.wrapMode == GL_REPEAT;
     pNewBitmap->scale = static_cast<std::uint8_t>(upscaled ? scale : 1);
     pNewBitmap->fromTexturePack = file.fromTexturePack;
-    const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), pNewBitmap->Buffer,
-                                         uploadWidth, uploadHeight, true, m_mipChainSeconds);
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->BufferStorage, uploadWidth, uploadHeight,
-                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode), mips, m_uploadSeconds))
+    decoded.mips = PlanMipLevels(upscaled || (request.worldTexture && request.filteringEnabled), pNewBitmap->Buffer,
+                                 decoded.uploadWidth, decoded.uploadHeight, true, result.mipSeconds);
+    decoded.bitmap = std::move(pNewBitmap);
+    return decoded;
+}
+} // namespace
+
+TextureDecodeResult Render::Sprites::DecodeTextureFile(const Render::Textures::TexturePackFiles& pack,
+                                                       const TextureDecodeRequest& request)
+{
+    const char* loader = request.jpeg ? "OpenJpegTurbo" : "OpenTga";
+    TextureDecodeResult result;
+    const auto decode = [&](const TextureFileBytes& file)
+    { return request.jpeg ? DecodeJpeg(request, file, result) : DecodeTga(request, file, result); };
+
+    if (const std::optional<TextureFileBytes> packCopy =
+            TimedRead(result.readSeconds, [&] { return ReadPackCopy(pack, request.path); }))
+    {
+        result.texture = decode(*packCopy);
+        if (result.texture)
+        {
+            mu::log::Get("render")->debug("{} -- read from the texture pack: {}", loader,
+                                          mu_wchar_to_utf8(packCopy->path.c_str()));
+            return result;
+        }
+        mu::log::Get("render")->warn("{} -- the texture pack's copy did not load, using the original: {}", loader,
+                                     mu_wchar_to_utf8(packCopy->path.c_str()));
+    }
+
+    const std::optional<TextureFileBytes> original =
+        TimedRead(result.readSeconds, [&] { return ReadOriginal(request.path); });
+    if (!original)
+    {
+        mu::log::Get("render")->debug("{} -- file open failed: {}", loader, mu_wchar_to_utf8(request.path.c_str()));
+        return result;
+    }
+    result.texture = decode(*original);
+    return result;
+}
+
+bool CGlobalBitmap::CommitTexture(const TextureDecodeRequest& request, TextureDecodeResult&& result)
+{
+    for (const std::wstring& error : result.errors)
+    {
+        g_ErrorReport.Write(L"%ls", error.c_str());
+    }
+    m_fileReadSeconds += result.readSeconds;
+    m_mipChainSeconds += result.mipSeconds;
+    if (!result.texture)
     {
         return false;
     }
-    pNewBitmap->UploadedBytes = UploadedBytes(uploadWidth, uploadHeight);
+    DecodedTexture& decoded = *result.texture;
+    // Before the bitmap moves: the pixels can be its own buffer.
+    const std::span<const std::uint8_t> pixels = decoded.UploadPixels();
+    return CommitBitmap(std::move(decoded.bitmap), pixels, decoded.uploadWidth, decoded.uploadHeight, decoded.mips,
+                        request.filter, request.wrapMode, request.keepPixels);
+}
+
+bool CGlobalBitmap::CommitBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> pixels, int width,
+                                 int height, const MipLevels& mips, GLuint uiFilter, GLuint uiWrapMode, bool keepPixels)
+{
+    if (!UploadTextureSDLGpu(bitmap.get(), pixels, width, height, MapGLFilterToSDL(uiFilter),
+                             MapGLWrapToSDL(uiWrapMode), mips, m_uploadSeconds))
+    {
+        return false;
+    }
+    bitmap->UploadedBytes = UploadedBytes(width, height);
     if (!keepPixels)
     {
-        ReleaseUploadedPixels(*pNewBitmap);
+        ReleaseUploadedPixels(*bitmap);
     }
 
-    SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
-    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
-    const BITMAP_t& loaded = *pNewBitmap;
-    const std::uint32_t uploadedBytes = pNewBitmap->UploadedBytes;
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+    const GLuint uiBitmapIndex = bitmap->BitmapIndex;
+    SDL_GPUTexture* rawTexture = bitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = bitmap->sdlSampler;
+    const BITMAP_t& loaded = *bitmap;
+    const std::uint32_t uploadedBytes = bitmap->UploadedBytes;
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(bitmap)));
     mu::RegisterTexture(uiBitmapIndex, rawTexture);
     mu::RegisterSampler(uiBitmapIndex, rawSampler);
     RegisterFilteredSampler(loaded);
@@ -818,31 +829,13 @@ bool CGlobalBitmap::UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<con
                                  GLuint uiWrapMode)
 {
     const bool hasAlpha = bitmap->Components == 4;
-    const GLuint uiBitmapIndex = bitmap->BitmapIndex;
     const int width = static_cast<int>(bitmap->Width);
     const int height = static_cast<int>(bitmap->Height);
-    bitmap->TextureNumber = uiBitmapIndex;
+    bitmap->TextureNumber = bitmap->BitmapIndex;
     bitmap->wrapRepeat = uiWrapMode == GL_REPEAT;
     const MipLevels mips = PlanMipLevels(bitmap->worldTexture && m_textureFilteringEnabled, rgba.data(), width, height,
                                          hasAlpha, m_mipChainSeconds);
-    if (!UploadTextureSDLGpu(bitmap.get(), rgba, width, height, MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode),
-                             mips, m_uploadSeconds))
-    {
-        return false;
-    }
-    bitmap->UploadedBytes = UploadedBytes(width, height);
-
-    SDL_GPUTexture* rawTexture = bitmap->sdlTexture;
-    SDL_GPUSampler* rawSampler = bitmap->sdlSampler;
-    const BITMAP_t& loaded = *bitmap;
-    const std::uint32_t uploadedBytes = bitmap->UploadedBytes;
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(bitmap)));
-    mu::RegisterTexture(uiBitmapIndex, rawTexture);
-    mu::RegisterSampler(uiBitmapIndex, rawSampler);
-    RegisterFilteredSampler(loaded);
-    m_dwUsedTextureMemory += uploadedBytes;
-
-    return true;
+    return CommitBitmap(std::move(bitmap), rgba, width, height, mips, uiFilter, uiWrapMode, true);
 }
 
 GLuint CGlobalBitmap::LoadImagePixels(const std::wstring& name, std::span<const std::uint8_t> rgba, int width,

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "Render/Sprites/TextureDecode.h"
 #include "Render/Renderer/BitmapUpload.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "../data/ClientFolderScope.h"
@@ -474,4 +475,68 @@ TEST_CASE("without a pack, or with a missing one, textures come from Data [textu
     REQUIRE(bitmaps.LoadImage(id, L"Data\\Interface\\frame.tga"));
     CHECK(record.pixels[0] == FirstPixel(0));
     bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("decoding a texture file reaches neither the uploader nor the registry")
+{
+    record = {};
+    const FixtureFolder fixture("decode_only");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "frame.OZT");
+    WriteJpeg(dir / "photo.OZJ");
+    const Render::Textures::TexturePackFiles noPack;
+
+    Render::Sprites::TextureDecodeRequest tga;
+    tga.index = 520u;
+    tga.filename = (dir / "frame.tga").wstring();
+    tga.path = (dir / "frame.OZT").wstring();
+    const Render::Sprites::TextureDecodeResult tgaResult = Render::Sprites::DecodeTextureFile(noPack, tga);
+    REQUIRE(tgaResult.texture);
+    CHECK(tgaResult.errors.empty());
+    const Render::Sprites::DecodedTexture& tgaTexture = *tgaResult.texture;
+    CHECK(tgaTexture.bitmap->BitmapIndex == 520u);
+    CHECK(tgaTexture.bitmap->Components == 4);
+    CHECK(tgaTexture.uploadWidth == 2);
+    CHECK(tgaTexture.uploadHeight == 2);
+    REQUIRE(tgaTexture.UploadPixels().size() == 16);
+    CHECK(tgaTexture.UploadPixels()[0] == FirstPixel(0));
+
+    Render::Sprites::TextureDecodeRequest jpeg;
+    jpeg.index = 521u;
+    jpeg.filename = (dir / "photo.jpg").wstring();
+    jpeg.path = (dir / "photo.OZJ").wstring();
+    jpeg.jpeg = true;
+    const Render::Sprites::TextureDecodeResult jpegResult = Render::Sprites::DecodeTextureFile(noPack, jpeg);
+    REQUIRE(jpegResult.texture);
+    CHECK(jpegResult.texture->bitmap->Components == 3);
+    REQUIRE(jpegResult.texture->UploadPixels().size() == 16);
+    CHECK(jpegResult.texture->UploadPixels()[3] == 255u);
+
+    CHECK(record.calls == 0);
+    CHECK(record.textures.empty());
+    CHECK(record.samplers.empty());
+}
+
+TEST_CASE("a texture file that does not decode comes back with its error")
+{
+    record = {};
+    const FixtureFolder fixture("decode_error");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "frame.OZT");
+    std::filesystem::resize_file(dir / "frame.OZT", 10);
+    const Render::Textures::TexturePackFiles noPack;
+
+    Render::Sprites::TextureDecodeRequest request;
+    request.filename = (dir / "frame.tga").wstring();
+    request.path = (dir / "frame.OZT").wstring();
+    const Render::Sprites::TextureDecodeResult truncated = Render::Sprites::DecodeTextureFile(noPack, request);
+    CHECK_FALSE(truncated.texture);
+    REQUIRE(truncated.errors.size() == 1);
+    CHECK(truncated.errors[0].find(L"file too small") != std::wstring::npos);
+
+    // A missing file is not an error report line, as before.
+    request.path = (dir / "missing.OZT").wstring();
+    const Render::Sprites::TextureDecodeResult missing = Render::Sprites::DecodeTextureFile(noPack, request);
+    CHECK_FALSE(missing.texture);
+    CHECK(missing.errors.empty());
 }
