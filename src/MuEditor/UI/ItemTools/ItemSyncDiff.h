@@ -144,8 +144,9 @@ void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
 // without one). A changed item's whole-item mark goes when all its fields were applied.
 // Whether `known` changed.
 bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known);
-// The side marked on the item as a whole, or on every field of a Changed one; None when nothing or
-// not every field is marked, or the fields name different sides.
+// The side marked on a New or Removed item, or the side every field of a Changed one has (its own
+// mark or the item's); None when nothing or not every field is marked, or the fields have
+// different sides.
 WrongSide GetRowWrongSide(const SyncItem& row);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
 // editor's language: `title`, an empty line, then a table of each item's group, number and name,

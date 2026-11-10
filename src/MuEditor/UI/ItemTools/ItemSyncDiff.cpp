@@ -860,13 +860,11 @@ bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known)
 
 WrongSide GetRowWrongSide(const SyncItem& row)
 {
-    if (row.change != SyncChange::Changed || row.wrongSide != WrongSide::None)
+    // A changed row's fields have the item's mark unless they have their own (a repeated row has
+    // no fields).
+    if (row.change != SyncChange::Changed || row.fields.empty())
     {
         return row.wrongSide;
-    }
-    if (row.fields.empty())
-    {
-        return WrongSide::None;
     }
     const WrongSide side = row.fields.front().wrongSide;
     const bool same =

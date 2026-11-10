@@ -398,8 +398,10 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK_FALSE(FindField(changed, "repairable")->checked);
     CHECK(FindField(changed, "height")->wrongSide == WrongSide::Client);
     CHECK(FindField(changed, "height")->checked);
+    // Its fields have different sides, so the item names none.
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
     const std::vector<const SyncItem*> rows = {&changed};
-    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") != std::string::npos);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") == std::string::npos);
 
     // Marking the whole item takes out the fields' own marks; the fields that leave wrong in the
     // server get their default.
@@ -416,7 +418,7 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     CHECK(known.Find(0, 0, "height") == WrongSide::None);
     CHECK_FALSE(FindField(changed, "width")->markOfItem);
     CHECK(FindField(changed, "height")->markOfItem);
-    CHECK(GetRowWrongSide(changed) == WrongSide::Client);
+    CHECK(GetRowWrongSide(changed) == WrongSide::None);
     // Without its own mark, the field has the item's again.
     MarkWrongSide(known, changed, "width", WrongSide::None);
     CHECK(FindField(changed, "width")->wrongSide == WrongSide::Client);
@@ -442,10 +444,13 @@ TEST_CASE("A field's mark leaves the other fields' own marks and its item's mark
     known.Set(0, 0, "height", WrongSide::Client);
     ItemSyncDiff diff = sides.Diff(&known);
     SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    CHECK(GetRowWrongSide(row) == WrongSide::None);
     MarkWrongSide(known, row, "width", WrongSide::Client);
     CHECK(known.Find(0, 0, "height") == WrongSide::Client);
     CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Server);
     CHECK(FindField(row, "height")->wrongSide == WrongSide::Client);
+    // Every field has its own mark of the same side now.
+    CHECK(GetRowWrongSide(row) == WrongSide::Client);
 
     // A field that differs later has the item's mark.
     kris.repairable = !kris.repairable;
