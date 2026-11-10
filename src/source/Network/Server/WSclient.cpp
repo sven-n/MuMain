@@ -124,6 +124,7 @@ using namespace mu::ui::window;
 #include "Network/Server/GuildRelationshipRequest.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -9996,13 +9997,16 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
 
     UI::Hud::ClearSkillHotkeys();
 
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
     int iHotKey;
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
-        int iIndex = i * 2;
-        iHotKey = MAKEWORD(Data->HotKey[iIndex + 1], Data->HotKey[iIndex]);
+        int iIndex = i * Hotkeys::BytesPerHotkey;
+        iHotKey = Hotkeys::SkillNumber(Data->HotKey[iIndex], Data->HotKey[iIndex + 1]);
 
-        if (iHotKey != 0xffff)
+        // Zeros (OpenMU's default) would bind the hotkey to the first empty skill slot, which then shows
+        // the next learned skill.
+        if (Hotkeys::IsAssigned(static_cast<uint16_t>(iHotKey)))
         {
             for (int j = 0; j < MAX_SKILLS; ++j)
             {
@@ -10033,6 +10037,8 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
 
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::R, Data->KeyR + ITEM_POTION, byRLevel);
+
+    SetKeyConfigurationReceived(true);
 }
 
 void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)

@@ -35,6 +35,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "Guild/GuildCache.h"
 #include "UI/HUD/UIMapName.h"
@@ -145,6 +146,8 @@ static bool ShouldRenderLeaves()
 static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
+    // The character's key configuration arrives after the selection below.
+    SetKeyConfigurationReceived(false);
 
     MU_LOG_INFO(mu::log::Get("scenes"), "Character selected: slot {}", SelectedHero + 1);
 
