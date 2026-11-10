@@ -191,6 +191,12 @@ static_assert(offsetof(FogUniform, fogPadding) == 24, "FogUniform HLSL cbuffer l
 static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 register alignment");
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
+// Whether SDL picked its Metal backend; `driver` is SDL_GetGPUDeviceDriver's name.
+[[nodiscard]] static bool IsMetalDriver(const char* driver)
+{
+    return driver && std::string_view(driver) == "metal";
+}
+
 // ---------------------------------------------------------------------------
 // Returns the absolute path to a compiled shader blob given GPU driver name,
 // shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
@@ -205,7 +211,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
     {
         ext = "dxil";
     }
-    else if (driver && std::string(driver) == "metal")
+    else if (IsMetalDriver(driver))
     {
         ext = "msl";
     }
@@ -239,7 +245,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
     {
         return SDL_GPU_SHADERFORMAT_DXIL;
     }
-    if (driver && std::string(driver) == "metal")
+    if (IsMetalDriver(driver))
     {
         return SDL_GPU_SHADERFORMAT_MSL;
     }
@@ -7243,7 +7249,7 @@ private:
     // skinned draws still work everywhere else; on Metal they may read stale bones after a plain draw.
     static void CreateStorageRebindDummyBuffer(const char* driverName)
     {
-        if (!driverName || std::string_view(driverName) != "metal")
+        if (!IsMetalDriver(driverName))
             return;
 
         SDL_GPUBufferCreateInfo info{};
