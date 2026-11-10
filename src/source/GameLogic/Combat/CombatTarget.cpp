@@ -76,6 +76,11 @@ bool CheckTarget(CHARACTER* c, int skill, float distance)
     if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[SelectedCharacter].Object.Position, c->TargetPosition);
+        // A character that can't be attacked only gives a direction skill its direction.
+        if (!CheckAttack())
+        {
+            PullDirectionAimIntoRange(c, skill, distance);
+        }
         SetTargetTile(c);
         return true;
     }

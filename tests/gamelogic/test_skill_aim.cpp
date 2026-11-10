@@ -4,13 +4,17 @@
 
 #include "doctest.h"
 
+#include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillAim.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 
 #include <cmath>
+#include <memory>
 
-extern int TargetX, TargetY;
+extern int SelectedCharacter, TargetX, TargetY;
 
+using GameLogic::Combat::CheckTarget;
 using GameLogic::Combat::SkillAim::IsAimedByDirection;
 using GameLogic::Combat::SkillAim::PullIntoRange;
 
@@ -28,6 +32,47 @@ bool TileCentreInRange(const float origin[2], const float point[2], float rangeT
     TargetY = static_cast<int>(point[1] / Tile);
     return CheckTile(&caster, &caster.Object, rangeTiles);
 }
+
+// The hero and a character under the cursor, restoring the globals afterwards.
+struct SelectionFixture
+{
+    static constexpr int HeroIndex = 0;
+    static constexpr int SelectedIndex = 1;
+    static constexpr float HeroTile = 120.0f;
+
+    std::unique_ptr<CHARACTER[]> characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    CHARACTER* previousCharacters = CharactersClient;
+    CHARACTER* previousHero = Hero;
+    int previousSelected = SelectedCharacter;
+    int previousTargetX = TargetX;
+    int previousTargetY = TargetY;
+
+    SelectionFixture()
+    {
+        CharactersClient = characters.get();
+        Hero = &characters[HeroIndex];
+        Hero->Object.Position[0] = Hero->Object.Position[1] = (HeroTile + 0.5f) * Tile;
+        SelectedCharacter = SelectedIndex;
+    }
+
+    ~SelectionFixture()
+    {
+        CharactersClient = previousCharacters;
+        Hero = previousHero;
+        SelectedCharacter = previousSelected;
+        TargetX = previousTargetX;
+        TargetY = previousTargetY;
+    }
+
+    // Places a monster, or an NPC that can't be attacked, `tiles` east of the hero.
+    void Select(float tiles, bool attackable)
+    {
+        CHARACTER& selected = characters[SelectedIndex];
+        selected.Object.Kind = attackable ? KIND_MONSTER : KIND_NPC;
+        selected.Object.Position[0] = Hero->Object.Position[0] + tiles * Tile;
+        selected.Object.Position[1] = Hero->Object.Position[1];
+    }
+};
 } // namespace
 
 TEST_CASE("The skills held on the ground toward the cursor are direction skills [gamelogic][skills]")
@@ -78,4 +123,44 @@ TEST_CASE("A ground point within the range is left where it is [gamelogic][skill
 
     float tooShortRange[2] = {9000.0f, 9000.0f};
     CHECK_FALSE(PullIntoRange(origin, tooShortRange, 1.0f, Tile));
+}
+
+TEST_CASE("A direction skill aimed at a character that can't be attacked beyond its range is pulled into range "
+          "[gamelogic][skills]")
+{
+    SelectionFixture fixture;
+    constexpr float Range = 6.0f;
+    fixture.Select(9.0f, false);
+
+    REQUIRE(CheckTarget(Hero, AT_SKILL_EVIL_SPIRIT, Range));
+
+    CHECK(CheckTile(Hero, &Hero->Object, Range));
+    CHECK(Hero->TargetPosition[0] > Hero->Object.Position[0]);
+    CHECK(Hero->TargetPosition[1] == doctest::Approx(Hero->Object.Position[1]));
+}
+
+TEST_CASE("The range a caller passes, such as the dark horse's extra two tiles, sets how far the aim is pulled "
+          "[gamelogic][skills]")
+{
+    SelectionFixture fixture;
+    constexpr float RangeOnDarkHorse = 6.0f + 2.0f;
+    fixture.Select(12.0f, false);
+
+    REQUIRE(CheckTarget(Hero, AT_SKILL_EARTHSHAKE, RangeOnDarkHorse));
+
+    CHECK(CheckTile(Hero, &Hero->Object, RangeOnDarkHorse));
+    CHECK_FALSE(CheckTile(Hero, &Hero->Object, 6.0f));
+}
+
+TEST_CASE("Other skills and attackable characters keep the selected character as the aim [gamelogic][skills]")
+{
+    SelectionFixture fixture;
+    constexpr float Range = 6.0f;
+    fixture.Select(9.0f, false);
+    REQUIRE(CheckTarget(Hero, AT_SKILL_DECAY, Range));
+    CHECK_FALSE(CheckTile(Hero, &Hero->Object, Range));
+
+    fixture.Select(9.0f, true);
+    REQUIRE(CheckTarget(Hero, AT_SKILL_EVIL_SPIRIT, Range));
+    CHECK_FALSE(CheckTile(Hero, &Hero->Object, Range));
 }
