@@ -7,12 +7,14 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "GameLogic/Items/ItemOptions.h"
 #include "GameLogic/Items/ItemStats.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 namespace MuEditor::Items
 {
@@ -35,9 +37,20 @@ GameLogic::Items::ItemStatValues ComputeValuesAt(const ItemDefinition& item, con
 {
     const GameLogic::Items::ItemStatSources sources{attribute, &item, profile,
                                                     item.slot == Data::Items::ItemSlot::Wings};
-    const GameLogic::Items::ItemStatInput input{
-        Data::Items::MakeItemType(item.group, item.number), level, static_cast<BYTE>(variant.excellent ? 1 : 0),
-        static_cast<BYTE>(variant.ancient ? 1 : 0), static_cast<BYTE>(std::clamp(variant.optionLevel, 0, 255))};
+    const int itemType = Data::Items::MakeItemType(item.group, item.number);
+    // The option level counts as the game counts it (option type 0), from the draft's own option links and slot: the
+    // value list's last level above the list. Resolved only for a level: the table and the weight searches ask
+    // mostly without one.
+    int optionLevel = 0;
+    if (variant.optionLevel > 0)
+    {
+        const std::vector<Data::Items::ItemOptionIndex> links = g_ItemDatabase.GetOptions().ResolveLinks(item.options);
+        optionLevel = GameLogic::Items::CountAdditionalOptionLevel(links, item.slot == Data::Items::ItemSlot::Wings,
+                                                                   variant.optionLevel, 0);
+    }
+    const GameLogic::Items::ItemStatInput input{itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+                                                static_cast<BYTE>(variant.ancient ? 1 : 0),
+                                                static_cast<BYTE>(std::clamp(optionLevel, 0, 255))};
     return GameLogic::Items::ComputeItemStats(sources, input);
 }
 

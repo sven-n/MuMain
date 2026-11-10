@@ -21,6 +21,9 @@ enum class ItemOptionType : BYTE
 {
     // The luck flag; one option.
     Luck,
+    // The additional option's level (ITEM::OptionLevel, the option byte's low four bits: 1 to 15, Season 6 sends 1 to
+    // 4); its options numbered by the option type the server sends (ITEM::OptionType), their value by that level.
+    Option,
 };
 
 // How an option's value adds to its attribute: as it is, after the other additions (OpenMU's AddFinal), or in per

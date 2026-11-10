@@ -345,6 +345,7 @@
         "pl": "Pierścień Lodu",
         "pt": "Anel de gelo"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -377,6 +378,7 @@
         "pl": "Pierścień Trucizny",
         "pt": "Anel do veneno"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -610,6 +612,7 @@
         "pl": "Wisior Błyskawic",
         "pt": "Pingente da luz"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -642,6 +645,7 @@
         "pl": "Wisior Ognia",
         "pt": "Pingente do fogo"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1733,6 +1737,7 @@
         "pl": "Pierścień Ognia",
         "pt": "Anel do fogo"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1765,6 +1770,7 @@
         "pl": "Pierścień Ziemi",
         "pt": "Anel da terra"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1797,6 +1803,7 @@
         "pl": "Pierścień Wiatru",
         "pt": "Anel do vento"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1829,6 +1836,7 @@
         "pl": "Pierścień Magii",
         "pt": "Anel da magia"
       },
+      "options": ["ringOfMagicMana"],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -1858,6 +1866,7 @@
         "pl": "Wisior Lodu",
         "pt": "Pingente do gelo"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1890,6 +1899,7 @@
         "pl": "Wisior Wiatru",
         "pt": "Pingente do vento"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1922,6 +1932,7 @@
         "pl": "Wisior Wody",
         "pt": "Pingente da água"
       },
+      "options": ["jewelryHealthRecovery"],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -1954,6 +1965,7 @@
         "pl": "Wisior Zdolności",
         "pt": "Pingente da habilidade"
       },
+      "options": ["pendantOfAbilityAg"],
       "width": 1,
       "height": 1,
       "slot": "pendant",

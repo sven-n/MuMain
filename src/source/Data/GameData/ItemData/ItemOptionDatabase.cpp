@@ -11,7 +11,7 @@ namespace
 {
 // The order the game takes an item's definitions in, by type (the tooltip shows their lines in it): wing options,
 // the skill (no definition), luck, the additional option, the Dark Horse, excellent options, fixed options.
-constexpr std::array<ItemOptionType, 1> TakeOrder = {ItemOptionType::Luck};
+constexpr std::array<ItemOptionType, 2> TakeOrder = {ItemOptionType::Luck, ItemOptionType::Option};
 
 size_t GetTakeOrder(ItemOptionType type)
 {

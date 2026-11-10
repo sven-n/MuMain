@@ -15,6 +15,8 @@ struct ItemOptionEffect
 {
     WORD effect = 0;
     bool writesValue = false;
+    // The effect raises the wizardry damage too (a magic sword's damage option, which the stat code adds to both).
+    bool raisesWizardry = false;
 
     bool operator==(const ItemOptionEffect& other) const = default;
 };

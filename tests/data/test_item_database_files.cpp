@@ -1926,17 +1926,17 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
         REQUIRE(g_ItemDataHandler.AddItem(spear, nullptr));
         CHECK(g_ItemDatabase.GetWeaponKind(MakeItemType(3, 100)) == WeaponKind::Spear);
         // And the options the option rules give it.
-        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck"});
+        CHECK(g_ItemDatabase.Find(3, 100)->options == std::vector<std::string>{"luck", "physicalDamageOption"});
     }
 
     SUBCASE("an item's option list follows its data, and a list an edit picked stays")
     {
-        const std::vector<std::string> luck{"luck"};
-        REQUIRE(g_ItemDatabase.Find(KrisType)->options == luck);
+        const std::vector<std::string> weapon{"luck", "physicalDamageOption"};
+        REQUIRE(g_ItemDatabase.Find(KrisType)->options == weapon);
         EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition); });
         CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
         EditItem(KrisType, [](ItemDefinition& item) { item.tags.Set(ItemTag::Ammunition, false); });
-        CHECK(g_ItemDatabase.Find(KrisType)->options == luck);
+        CHECK(g_ItemDatabase.Find(KrisType)->options == weapon);
 
         EditItem(KrisType, [](ItemDefinition& item) { item.options.clear(); });
         CHECK(g_ItemDatabase.Find(KrisType)->options.empty());
@@ -4034,6 +4034,12 @@ TEST_CASE("Item Requirements shows what the game asks at each level, from the va
     }
     CHECK(ComputeRequirementTable(kris, {true, false, 0})[0][Strength] == 57);
     CHECK(ComputeRequirementTable(kris, {false, false, 4})[0][Strength] == 47);
+    // The option level counts as the game counts it: above the Kris's list (4 levels) its last level.
+    CHECK(ComputeRequirementTable(kris, {false, false, 7})[0][Strength] == 47);
+    // From the draft's own option links: without the additional option the level adds nothing.
+    ItemDefinition withoutOption = kris;
+    withoutOption.options = {"luck"};
+    CHECK(ComputeRequirementTable(withoutOption, {false, false, 7})[0][Strength] == normal[0][Strength]);
     // The weapon profile adds strength per option level, the default one none.
     CHECK(MuEditor::Items::OptionLevelAddsStrength(kris));
     ItemDefinition defaultProfile = kris;

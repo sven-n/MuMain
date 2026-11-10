@@ -1,0 +1,203 @@
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "physicalDamageOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional damage",
+        "de": "Zusätzlicher Schaden",
+        "es": "Daño adicional",
+        "id": "Kerusakan tambahan",
+        "ja": "追加攻撃力",
+        "pl": "Dodatkowe obrażenia",
+        "pt": "Dano adicional",
+        "ru": "Дополнительный урон",
+        "tl": "Karagdagang pinsala",
+        "uk": "Додаткова шкода",
+        "zh-TW": "附加傷害"
+      },
+      "openMu": {"id": "00000083-0003-0000-0000-000000000000", "name": "Physical Base Damage (min and max) Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "physicalBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    },
+    {
+      "name": "physicalAndWizardryDamageOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional damage and wizardry damage",
+        "de": "Zusätzlicher Schaden und Zaubereischaden",
+        "es": "Daño y daño de hechicería adicional",
+        "id": "Kerusakan dan kerusakan sihir tambahan",
+        "ja": "追加攻撃力・魔力",
+        "pl": "Dodatkowe obrażenia i obrażenia magiczne",
+        "pt": "Dano e dano de magia adicional",
+        "ru": "Дополнительный физический и магический урон",
+        "tl": "Karagdagang pinsala at wizardry na pinsala",
+        "uk": "Додаткова фізична і магічна шкода",
+        "zh-TW": "附加傷害與魔法傷害"
+      },
+      "openMu": {"id": "00000083-0007-0000-0000-000000000000", "name": "Base Damage Bonus (physical and wizardry, min and max) Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "baseDamageBonus", "add": {"values": [4, 8, 12, 16]}, "text": ["additionalDamage", "additionalWizardryDamage"]}
+      ]
+    },
+    {
+      "name": "wizardryDamageOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional wizardry damage",
+        "de": "Zusätzlicher Zaubereischaden",
+        "es": "Daño de hechicería adicional",
+        "id": "Kerusakan sihir tambahan",
+        "ja": "追加魔力",
+        "pl": "Dodatkowe obrażenia magiczne",
+        "pt": "Dano de magia adicional",
+        "ru": "Дополнительный магический урон",
+        "tl": "Karagdagang wizardry na pinsala",
+        "uk": "Додаткова магічна шкода",
+        "zh-TW": "附加魔法傷害"
+      },
+      "openMu": {"id": "00000083-0004-0000-0000-000000000000", "name": "Wizardry Base Damage (min and max) Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "wizardryBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalWizardryDamage"}
+      ]
+    },
+    {
+      "name": "curseDamageOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional curse damage",
+        "de": "Zusätzlicher Fluchschaden",
+        "es": "Daño de maldición adicional",
+        "id": "Kerusakan kutukan tambahan",
+        "ja": "追加呪い",
+        "pl": "Dodatkowe obrażenia klątwy",
+        "pt": "Dano de maldição adicional",
+        "ru": "Дополнительный урон проклятием",
+        "tl": "Karagdagang curse na pinsala",
+        "uk": "Додаткова шкода прокляттям",
+        "zh-TW": "附加詛咒傷害"
+      },
+      "openMu": {"id": "00000083-0005-0000-0000-000000000000", "name": "Curse Base Damage (min and max) Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "curseBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalCurseDamage"}
+      ]
+    },
+    {
+      "name": "defenseRateOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional defense rate",
+        "de": "Zusätzliche Verteidigungsrate",
+        "es": "Tasa de defensa adicional",
+        "id": "Tingkat pertahanan tambahan",
+        "ja": "追加防御率",
+        "pl": "Dodatkowy współczynnik obrony",
+        "pt": "Taxa de defesa adicional",
+        "ru": "Дополнительный коэффициент защиты",
+        "tl": "Karagdagang antas ng depensa",
+        "uk": "Додатковий рівень захисту",
+        "zh-TW": "附加防禦率"
+      },
+      "openMu": {"id": "00000083-0006-0000-0000-000000000000", "name": "Defense Rate (PvM) Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "defenseRatePvm", "add": {"values": [5, 10, 15, 20]}, "text": "additionalDefenseRate"}
+      ]
+    },
+    {
+      "name": "defenseOption",
+      "type": "option",
+      "displayName": {
+        "en": "Additional defense",
+        "de": "Zusätzliche Verteidigung",
+        "es": "Defensa adicional",
+        "id": "Pertahanan tambahan",
+        "ja": "追加防御力",
+        "pl": "Dodatkowa obrona",
+        "pt": "Defesa adicional",
+        "ru": "Дополнительная защита",
+        "tl": "Karagdagang depensa",
+        "uk": "Додатковий захист",
+        "zh-TW": "附加防禦"
+      },
+      "openMu": {"id": "00000083-0002-0000-0000-000000000000", "name": "Base Defense Option"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "defenseBase", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDefense"}
+      ]
+    },
+    {
+      "name": "jewelryHealthRecovery",
+      "type": "option",
+      "displayName": {
+        "en": "Automatic HP recovery",
+        "de": "Automatische HP-Wiederherstellung",
+        "es": "Recuperación automática de HP",
+        "id": "Pemulihan HP otomatis",
+        "ja": "オートヒーリング",
+        "pl": "Automatyczne odzyskiwanie HP",
+        "pt": "Recuperação automática de HP",
+        "ru": "Автоматическое восстановление HP",
+        "tl": "Awtomatikong pagbawi ng HP",
+        "uk": "Автоматичне відновлення HP",
+        "zh-TW": "HP自動恢復"
+      },
+      "openMu": {"id": "00000083-0010-7a13-0000-000000000000", "name": "Health recover for jewelery"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3]}, "text": "automaticHpRecovery"}
+      ]
+    },
+    {
+      "name": "ringOfMagicMana",
+      "type": "option",
+      "displayName": {
+        "en": "Maximum mana",
+        "de": "Maximales Mana",
+        "es": "Maná máximo",
+        "id": "Mana maksimum",
+        "ja": "最大マナ",
+        "pl": "Maksymalna mana",
+        "pt": "Mana máxima",
+        "ru": "Максимальная мана",
+        "tl": "Pinakamataas na mana",
+        "uk": "Максимальна мана",
+        "zh-TW": "最大法力值"
+      },
+      "openMu": {"name": "Jewelery option Maximum Mana"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "maximumMana", "percent": {"values": [1, 2, 3]}, "text": "maxManaIncrease"}
+      ]
+    },
+    {
+      "name": "pendantOfAbilityAg",
+      "type": "option",
+      "displayName": {
+        "en": "Maximum AG",
+        "de": "Maximale AG",
+        "es": "AG máximo",
+        "id": "AG maksimum",
+        "ja": "最大AG",
+        "pl": "Maksymalne AG",
+        "pt": "AG máximo",
+        "ru": "Максимальный AG",
+        "tl": "Pinakamataas na AG",
+        "uk": "Максимальний AG",
+        "zh-TW": "最大 AG"
+      },
+      "openMu": {"name": "Jewelery option Maximum Ability"},
+      "server": {"addsRandomly": true, "addChance": 0.25, "maximumOptionsPerItem": 1},
+      "options": [
+        {"number": 0, "attribute": "maximumAbility", "percent": {"values": [1, 2, 3]}, "text": "maxAgIncrease"}
+      ]
+    }
+  ]
+}

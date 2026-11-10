@@ -11,7 +11,7 @@
         "pl": "Brązowy hełm",
         "pt": "Elmo de bronze"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -38,7 +38,7 @@
         "pl": "Smoczy hełm",
         "pt": "Elmo do dragão"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -64,7 +64,7 @@
         "pl": "Pikowany hełm",
         "pt": "Elmo acolchoado"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -89,7 +89,7 @@
         "pl": "Legendarny hełm",
         "pt": "Elmo lendário"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -114,7 +114,7 @@
         "pl": "Kościany hełm",
         "pt": "Elmo de osso"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -139,7 +139,7 @@
         "pl": "Skórzany hełm",
         "pt": "Elmo de couro"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -166,7 +166,7 @@
         "pl": "Łuskowy hełm",
         "pt": "Elmo de escamas"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -193,7 +193,7 @@
         "pl": "Maska Sfinksa",
         "pt": "Máscara da esfinge"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -218,7 +218,7 @@
         "pl": "Mosiężny hełm",
         "pt": "Elmo de latão"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -245,7 +245,7 @@
         "pl": "Płytowy hełm",
         "pt": "Elmo de placa"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -271,7 +271,7 @@
         "pl": "Hełm z pnączy",
         "pt": "Elmo da vinha"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -297,7 +297,7 @@
         "pl": "Jedwabny hełm",
         "pt": "Elmo de seda"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -323,7 +323,7 @@
         "pl": "Hełm Wiatru",
         "pt": "Elmo do vento"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -349,7 +349,7 @@
         "pl": "Hełm Ducha",
         "pt": "Elmo do espírito"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -375,7 +375,7 @@
         "pl": "Hełm Strażnika",
         "pt": "Elmo do guardião"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -401,7 +401,7 @@
         "pl": "Hełm Czarnego Smoka",
         "pt": "Elmo do dragão negro"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -427,7 +427,7 @@
         "pl": "Hełm Mrocznego Feniksa",
         "pt": "Elmo da fênix negra"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -453,7 +453,7 @@
         "pl": "Hełm Wielkiej Duszy",
         "pt": "Grande elmo da alma"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -479,7 +479,7 @@
         "pl": "Boski hełm",
         "pt": "Elmo divino"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -505,7 +505,7 @@
         "pl": "Hełm Wielkiego Smoka",
         "pt": "Grande elmo do dragão"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -531,7 +531,7 @@
         "pl": "Hełm Mrocznej Duszy",
         "pt": "Elmo da alma negra"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -557,7 +557,7 @@
         "pl": "Hełm Czerwonego Ducha",
         "pt": "Elmo do espírito vermelho"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -583,7 +583,7 @@
         "pl": "Lekka maska płytowa",
         "pt": "Máscara de placa leve"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -609,7 +609,7 @@
         "pl": "Adamantytowa maska",
         "pt": "Máscara de adamantina"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -635,7 +635,7 @@
         "pl": "Maska z mrocznej stali",
         "pt": "Máscara de aço negro"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -661,7 +661,7 @@
         "pl": "Maska Mrocznego Mistrza",
         "pt": "Máscara do Mestre Negro"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -687,7 +687,7 @@
         "pl": "Hełm Smoczego Rycerza",
         "pt": "Elmo do cavaleiro dragão"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -714,7 +714,7 @@
         "pl": "Hełm Jadowitej Mgły",
         "pt": "Elmo da névoa de veneno"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -741,7 +741,7 @@
         "pl": "Hełm Sylphid Ray",
         "pt": "Elmo do raio silfídico"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -768,7 +768,7 @@
         "pl": "Maska Słońca",
         "pt": "Máscara da luz do sol"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -795,7 +795,7 @@
         "pl": "Hełm Ashcrow",
         "pt": "Elmo de Ashcrow"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -820,7 +820,7 @@
         "pl": "Hełm Zaćmienia",
         "pt": "Elmo do eclipse"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -845,7 +845,7 @@
         "pl": "Hełm Iris",
         "pt": "Elmo de Iris"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -870,7 +870,7 @@
         "pl": "Chwalebna maska",
         "pt": "Máscara gloriosa"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -895,7 +895,7 @@
         "pl": "Hełm Gwałtownego Wiatru",
         "pt": "Elmo do vento violento"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -920,7 +920,7 @@
         "pl": "Hełm Czerwonego Skrzydła",
         "pt": "Elmo da asa vermelha"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -946,7 +946,7 @@
         "pl": "Pradawny hełm",
         "pt": "Elmo antigo"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -972,7 +972,7 @@
         "pl": "Demoniczny hełm",
         "pt": "Elmo demoníaco"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -997,7 +997,7 @@
         "pl": "Hełm Burzowego Błysku",
         "pt": "Elmo Relâmpago de Tempestade"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1024,7 +1024,7 @@
         "pl": "Hełm Wiecznego Skrzydła",
         "pt": "Elmo da asa eterna"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1051,7 +1051,7 @@
         "pl": "Hełm Tytana",
         "pt": "Elmo do titã"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1077,7 +1077,7 @@
         "pl": "Hełm Śmiałka",
         "pt": "Elmo do guerreiro"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1103,7 +1103,7 @@
         "pl": "Hełm Serafina",
         "pt": "Elmo de serafim"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1129,7 +1129,7 @@
         "pl": "Hełm Wiary",
         "pt": "Elmo da fé"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1156,7 +1156,7 @@
         "pl": "Królewska maska",
         "pt": "Máscara real"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1182,7 +1182,7 @@
         "pl": "Hełm Hadesa",
         "pt": "Elmo de Hades"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1212,7 +1212,7 @@
         "pl": "Hełm Świętego Ognia",
         "pt": "Elmo de Fogo Sagrado"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1238,7 +1238,7 @@
         "pl": "Hełm Storm Jahad",
         "pt": "Elmo de Tempestade Zahard"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1263,7 +1263,7 @@
         "pl": "Hełm Piercing Groove",
         "pt": "Elmo de Entalhe Perfurante"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1289,7 +1289,7 @@
         "pt": "Elmo de escamas"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1323,7 +1323,7 @@
         "pt": "Elmo de seda"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1355,7 +1355,7 @@
         "pt": "Elmo de Esfinge"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1387,7 +1387,7 @@
         "pt": "Elmo do vento violento"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1419,7 +1419,7 @@
         "pt": "Máscara de adamantina"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1451,7 +1451,7 @@
         "pt": "Elmo de Dragão"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1483,7 +1483,7 @@
         "pt": "Elmo de Guardião"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1515,7 +1515,7 @@
         "pt": "Elmo Lendário"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1547,7 +1547,7 @@
         "pt": "Elmo da asa vermelha"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1579,7 +1579,7 @@
         "pt": "Elmo de Tempestade Zahard"
       },
       "tags": ["luckyItem"],
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",
@@ -1610,7 +1610,7 @@
         "pl": "Hełm Duszy Feniksa",
         "pt": "Elmo de Alma de Fênix"
       },
-      "options": ["luck"],
+      "options": ["luck", "defenseOption"],
       "width": 2,
       "height": 2,
       "slot": "helm",

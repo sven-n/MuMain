@@ -242,7 +242,7 @@ template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
 }
 std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana);
+void GetSpecialOptionText(wchar_t* Text, WORD Option, WORD Value, int iMana);
 // The tooltip lines of the item's option slot `slot` when its option comes from an option definition: its texts with
 // its value, blue and not bold, from row `textNum` on and before row `rowLimit`. The rows written (a text the option
 // texts lack has none), or nothing for a slot the code wrote, whose line the caller writes (GetSpecialOptionText).

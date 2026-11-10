@@ -1,6 +1,84 @@
 {
   "formatVersion": 1,
   "texts": {
+    "additionalCurseDamage": {
+      "en": "Additional Curse Spell +{value}",
+      "de": "Zusätzlicher Fluchzauber +{value}",
+      "es": "Hechizo de maldición adicional +{value}",
+      "id": "Mantra Kutukan Tambahan +{value}",
+      "ja": "追加呪い+{value}",
+      "pl": "Dodatkowe zaklęcie klątwy +{value}",
+      "pt": "Feitiço de Maldição Adicional +{value}",
+      "ru": "Дополнительное заклинание проклятия +{value}",
+      "tl": "Karagdagang Curse Spell +{value}",
+      "uk": "Додаткове закляття +{value}",
+      "zh-TW": "附加詛咒法術+{value}"
+    },
+    "additionalDamage": {
+      "en": "Additional Dmg +{value}",
+      "de": "Zusätzlicher Schaden +{value}",
+      "es": "Daño adicional +{value}",
+      "id": "Dmg Tambahan +{value}",
+      "ja": "追加攻撃力 +{value}",
+      "pl": "Dodatkowe obrażenia +{value}",
+      "pt": "Dano Adicional +{value}",
+      "ru": "Дополнительный урон +{value}",
+      "tl": "Karagdagang Dmg +{value}",
+      "uk": "Додатковий Dmg +{value}",
+      "zh-TW": "附加傷害+{value}"
+    },
+    "additionalDefense": {
+      "en": "Additional defense +{value}",
+      "de": "Zusätzliche Verteidigung +{value}",
+      "es": "Defensa adicional +{value}",
+      "id": "Pertahanan tambahan +{value}",
+      "ja": "追加防御力 +{value}",
+      "pl": "Dodatkowa obrona +{value}",
+      "pt": "Defesa adicional +{value}",
+      "ru": "Дополнительная защита +{value}",
+      "tl": "Karagdagang depensa +{value}",
+      "uk": "Додатковий захист +{value}",
+      "zh-TW": "附加防禦+{value}"
+    },
+    "additionalDefenseRate": {
+      "en": "Additional defense rate +{value}",
+      "de": "Zusätzliche Verteidigungsrate +{value}",
+      "es": "Tasa de defensa adicional +{value}",
+      "id": "Tingkat pertahanan tambahan +{value}",
+      "ja": "追加防御率 +{value}",
+      "pl": "Dodatkowy współczynnik obrony +{value}",
+      "pt": "Taxa de defesa adicional +{value}",
+      "ru": "Дополнительный коэффициент защиты +{value}",
+      "tl": "Karagdagang antas ng pagtatanggol +{value}",
+      "uk": "Швидкість додаткового захисту +{value}",
+      "zh-TW": "附加防禦率+{value}"
+    },
+    "additionalWizardryDamage": {
+      "en": "Additional Wizardry Dmg +{value}",
+      "de": "Zusätzlicher Zaubereischaden +{value}",
+      "es": "Daño de hechicería adicional +{value}",
+      "id": "Dmg Sihir Tambahan +{value}",
+      "ja": "追加魔力 +{value}",
+      "pl": "Dodatkowe obrażenia magiczne +{value}",
+      "pt": "Dano Adicional de Magia +{value}",
+      "ru": "Дополнительный магический урон +{value}",
+      "tl": "Karagdagang Wizardry Dmg +{value}",
+      "uk": "Додатковий Wizardry Dmg +{value}",
+      "zh-TW": "額外魔法傷害+{value}"
+    },
+    "automaticHpRecovery": {
+      "en": "Automatic HP recovery {value}%",
+      "de": "Automatische HP-Wiederherstellung {value}%",
+      "es": "Recuperación automática de HP {value}%",
+      "id": "Pemulihan HP otomatis {value}%",
+      "ja": "オートヒーリング {value}%",
+      "pl": "Automatyczne odzyskiwanie HP {value}%",
+      "pt": "Recuperação automática de HP {value}%",
+      "ru": "Автоматическое восстановление HP {value}%",
+      "tl": "Awtomatikong pagbawi ng HP {value}%",
+      "uk": "Автоматичне відновлення HP {value}%",
+      "zh-TW": "HP自動恢復 {value}%"
+    },
     "luckCriticalDamage": {
       "en": "Luck (critical damage rate +{value}%)",
       "de": "Glück (kritische Schadensrate +{value}%)",
@@ -26,6 +104,32 @@
       "tl": "Suwerte (rate ng tagumpay ng Jewel of Soul +25%)",
       "uk": "Удача (швидкість успіху Jewel of Soul +25%)",
       "zh-TW": "幸運（靈魂寶石成功率+25%）"
+    },
+    "maxAgIncrease": {
+      "en": "Max AG increased by {value}%",
+      "de": "Max. AG um {value}% erhöht",
+      "es": "Max AG aumentó en {value}%",
+      "id": "Maks AG meningkat sebesar {value}%",
+      "ja": "最大AG {value}%増加",
+      "pl": "Maks. AG zwiększona o {value}%",
+      "pt": "Max AG aumentou em {value}%",
+      "ru": "Макс. AG увеличен на {value}%",
+      "tl": "Ang Max AG ay tumaas ng {value}%",
+      "uk": "Макс. AG збільшено на {value}%",
+      "zh-TW": "最大 AG 增加 {value}%"
+    },
+    "maxManaIncrease": {
+      "en": "Max mana increased by {value}%",
+      "de": "Maximales Mana um {value}% erhöht",
+      "es": "Maná máximo aumentado en {value}%",
+      "id": "Mana maksimum meningkat sebesar {value}%",
+      "ja": "最大マナ {value}%増加",
+      "pl": "Maksymalna mana zwiększona o {value}%",
+      "pt": "Mana máxima aumentada em {value}%",
+      "ru": "Максимальное количество маны увеличено на {value}%",
+      "tl": "Ang max mana ay tumaas ng {value}%",
+      "uk": "Макс мани збільшено на {value}%",
+      "zh-TW": "最大法力值增加 {value}%"
     }
   }
 }
