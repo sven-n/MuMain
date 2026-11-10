@@ -86,161 +86,6 @@ bool CGM_Raklion::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-    switch (iType)
-    {
-    case MONSTER_ICE_WALKER:
-        OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
-        pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
-        // pCharacter->Object.Scale = 1.0f;
-        pCharacter->Object.Scale = 1.2f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-
-    case MONSTER_GIANT_MAMMOTH:
-        OpenMonsterModel(MONSTER_MODEL_GIANT_MAMMOTH);
-        pCharacter = CreateCharacter(Key, MODEL_GIANT_MAMMOTH, PosX, PosY);
-        pCharacter->Object.Scale = 1.7f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL", 45);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_1", 6);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_2", 7);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_1", 3);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_2", 4);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_3", 5);
-        break;
-
-    case MONSTER_ICE_GIANT:
-        OpenMonsterModel(MONSTER_MODEL_ICE_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_ICE_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-        break;
-
-    case MONSTER_COOLUTIN:
-        OpenMonsterModel(MONSTER_MODEL_COOLUTIN);
-        pCharacter = CreateCharacter(Key, MODEL_COOLUTIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-
-    case MONSTER_IRON_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_IRON_KNIGHT);
-        pCharacter = CreateCharacter(Key, MODEL_IRON_KNIGHT, PosX, PosY);
-        pCharacter->Object.Scale = 1.5f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-
-    case MONSTER_SELUPAN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SELUPAN);
-        pCharacter = CreateCharacter(Key, MODEL_SELUPAN, PosX, PosY);
-        pCharacter->Object.Scale = 2.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-
-        if (m_byState >= RAKLION_STATE_STANDBY && m_byState <= RAKLION_STATE_READY)
-        {
-            pCharacter->Object.Position[2] = 1000.f;
-            m_bBossHeightMove = true;
-        }
-    }
-    break;
-    case MONSTER_SPIDER_EGGS_1:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SPIDER_EGGS_1);
-        pCharacter = CreateCharacter(Key, MODEL_SPIDER_EGGS_1, PosX, PosY);
-        pCharacter->Object.Scale = 0.3f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.EnableShadow = false;
-        pCharacter->Object.m_bRenderShadow = false;
-    }
-    break;
-    case MONSTER_SPIDER_EGGS_2:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SPIDER_EGGS_2);
-        pCharacter = CreateCharacter(Key, MODEL_SPIDER_EGGS_2, PosX, PosY);
-        pCharacter->Object.Scale = 0.3f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.EnableShadow = false;
-        pCharacter->Object.m_bRenderShadow = false;
-    }
-    break;
-    case MONSTER_SPIDER_EGGS_3:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SPIDER_EGGS_3);
-        pCharacter = CreateCharacter(Key, MODEL_SPIDER_EGGS_3, PosX, PosY);
-        pCharacter->Object.Scale = 0.3f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.EnableShadow = false;
-        pCharacter->Object.m_bRenderShadow = false;
-    }
-    break;
-
-    case MONSTER_DARK_MAMMOTH:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_MAMMOTH);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_MAMMOTH, PosX, PosY);
-        // pCharacter->Object.Scale = 1.7f;
-        pCharacter->Object.Scale = 1.9f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL", 45);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_1", 6);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_2", 7);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_1", 3);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_2", 4);
-        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_3", 5);
-    }
-    break;
-    case MONSTER_DARK_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_GIANT, PosX, PosY);
-        // pCharacter->Object.Scale = 1.0f;
-        pCharacter->Object.Scale = 1.1f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-
-    case MONSTER_DARK_COOLUTIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_COOLUTIN);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_COOLUTIN, PosX, PosY);
-        // pCharacter->Object.Scale = 1.0f;
-        pCharacter->Object.Scale = 1.3f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_DARK_IRON_KNIGHT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_IRON_KNIGHT);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_IRON_KNIGHT, PosX, PosY);
-        // pCharacter->Object.Scale = 1.5f;
-        pCharacter->Object.Scale = 1.8f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-    }
-    break;
-    }
-
-    return pCharacter;
-}
-
 bool CGM_Raklion::MoveObject(OBJECT* o)
 {
     if (IsIceCity() == false)
@@ -2418,6 +2263,22 @@ void CGM_Raklion::SetCanGoBossMap()
     {
         m_bCanGoBossMap = false;
     }
+}
+
+bool CGM_Raklion::IsBossWaiting() const
+{
+    return m_byState >= RAKLION_STATE_STANDBY && m_byState <= RAKLION_STATE_READY;
+}
+
+void CGM_Raklion::LetBossDrop()
+{
+    if (IsBossWaiting())
+        m_bBossHeightMove = true;
+}
+
+bool CGM_Raklion::IsBossDropping() const
+{
+    return m_bBossHeightMove;
 }
 
 void CGM_Raklion::SetState(BYTE byState, BYTE byDetailState)

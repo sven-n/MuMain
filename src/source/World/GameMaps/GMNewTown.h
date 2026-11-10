@@ -27,8 +27,6 @@ namespace SEASON3B
         static void RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
         //. 몬스터
-        static CHARACTER* CreateNewTownMonster(int iType, int PosX, int PosY, int Key);
-
         static bool MoveMonsterVisual(OBJECT* pObject, BMD* pModel);
         static void MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
         static bool UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);

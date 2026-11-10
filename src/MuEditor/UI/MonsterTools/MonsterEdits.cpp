@@ -153,8 +153,24 @@ MonsterEdits::MonsterEdits()
                  [](std::span<const MonsterSoundSetSnapshot> snapshots)
                  { g_MonsterDataHandler.RestoreSoundSets(snapshots); }, [](int id)
                  { return g_MonsterDataHandler.ReadGroup(id); }, [](std::span<const MonsterGroupSnapshot> snapshots)
-                 { g_MonsterDataHandler.RestoreGroups(snapshots); }})
+                 { g_MonsterDataHandler.RestoreGroups(snapshots); }, [] { return g_MonsterDatabase.GetUnknownLook(); },
+                 [](const Data::Monsters::UnknownMonsterLook& look) { g_MonsterDatabase.SetUnknownLook(look); }})
 {
+}
+
+bool MonsterEdits::SetUnknownLook(std::string label, const Data::Monsters::UnknownMonsterLook& look)
+{
+    const Data::Monsters::UnknownMonsterLook before = g_MonsterDatabase.GetUnknownLook();
+    if (before == look)
+    {
+        return false;
+    }
+    g_MonsterDatabase.SetUnknownLook(look);
+    MonsterEditEntry entry{std::move(label), {}, {}, {}, {}};
+    entry.unknownBefore = before;
+    entry.unknownAfter = look;
+    m_history.Record(std::move(entry));
+    return true;
 }
 
 bool MonsterEdits::SetMonster(std::string label, const MonsterDefinition& monster)
@@ -336,7 +352,7 @@ bool MonsterEdits::SetSharedValues(std::string label, int number, const MonsterD
     for (const int member : numbers)
     {
         MonsterDefinition changed = *g_MonsterDataHandler.ReadMonster(member);
-        for (const MonsterValueField field : Data::Monsters::MonsterValueFields)
+        for (const MonsterValueField field : Data::Monsters::GetMonsterValueFields())
         {
             // A value the number shares follows; its own stays.
             if (!Data::Monsters::HasSameValue(before, after, field) &&

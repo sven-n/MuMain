@@ -31,7 +31,6 @@ public:
     bool RenderObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
     void RenderAfterObjectMesh(const OBJECT* object, DrawLook& look, BMD* bmd, bool extraMon = false) override;
 
-    CHARACTER* CreateMonster(int type, int positionX, int positionY, int key) override;
     bool MoveMonsterVisual(OBJECT* object, BMD* bmd) override;
     void MoveBlurEffect(CHARACTER* character, OBJECT* object, BMD* bmd) override;
     bool UpdateMonsterEffects(CHARACTER* character, OBJECT* object, BMD* bmd) override;

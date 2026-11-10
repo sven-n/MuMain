@@ -1,6 +1,7 @@
 #ifndef _DIRECTION_H_
 #define _DIRECTION_H_
 
+#include <utility>
 #include <vector>
 #include "Core/Utilities/Singleton.h"
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
@@ -22,6 +23,10 @@ private:
     bool m_bTimeCheck;
     int m_iBackupTime;
     bool m_bStateCheck;
+
+    // The walk speeds of the models whose speed the cutscene changed, as
+    // they were before: DeleteMonster puts them back (P27).
+    std::vector<std::pair<int, float>> m_savedWalkSpeeds;
 
 public:
     std::vector<DirectionMonster> stl_Monster;

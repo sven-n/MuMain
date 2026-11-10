@@ -140,11 +140,13 @@ mu_add_test(
         test_monster_edit_history.cpp
         test_monster_grouped_edits.cpp
         test_monster_grouped_tools.cpp
+        test_monster_item_references.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
         test_monster_model_values.cpp
         test_monster_models_json.cpp
+        test_monster_setup_json.cpp
         test_monster_sound_files.cpp
         test_monster_sounds_json.cpp
         test_monster_names.cpp

@@ -5,6 +5,7 @@
 #include "Data/GameData/MapData/MapRef.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterKind.h"
+#include "Data/GameData/MonsterData/MonsterSetup.h"
 
 #include <optional>
 #include <string>
@@ -21,28 +22,36 @@ constexpr int MonsterNumberCount = MAX_MONSTER;
 constexpr int MaxMonsterNameLength = MAX_MONSTER_NAME;
 
 // What a monster does differently on some maps (monsters design, D62): on
-// its maps, a field the variant has replaces the entry's (Q-MN68). The
-// attacks PR brings `attacks`; the setup fields follow in their PR.
+// its maps, a field the variant has replaces the entry's (Q-MN68, Q-MN35).
 struct MonsterMapVariant
 {
     // The maps, by the numbers the server sends and the stages of Devil
     // Square (D67): sorted, at least one.
     std::vector<Data::Maps::MapRef> maps;
+    // The model on its maps, as MonsterDefinition::model names it (Balram's
+    // body on Crywolf 2nd); nullopt: the entry's.
+    std::optional<std::string> model;
     std::optional<MonsterAttacks> attacks;
+    // The setup fields it changes (the Cursed Wizard's scale in Devil
+    // Square); every other field is the entry's.
+    MonsterSetup setup;
 
     bool operator==(const MonsterMapVariant&) const = default;
 };
 
 // Another look the monster can appear with, drawn when it appears (monsters
 // design, D63, Q-MN83): it names the model of the look and what it changes.
-// The code still draws the look until MN4 (the Chaos Castle elf or wizard);
-// the variant whose model it drew applies.
+// The draw is the old code's: one of the entry's look and its variants, each
+// as likely (the Chaos Castle elf or wizard).
 struct MonsterRandomVariant
 {
     // The model of the look, as MonsterDefinition::model names it.
     std::string model;
     // The sound set the look plays; nullopt: the entry's.
     std::optional<std::string> soundSet;
+    // The equipment the look wears instead of the entry's; nullopt: the
+    // entry's (the wizard's staff where the elf has a crossbow).
+    std::optional<MonsterEquipment> equipment;
 
     bool operator==(const MonsterRandomVariant&) const = default;
 };
@@ -68,6 +77,8 @@ struct MonsterDefinition
     std::string soundSet;
     // Its other looks; no model is in two.
     std::vector<MonsterRandomVariant> randomVariants;
+    // What its character gets when it appears (D63, MN4).
+    MonsterSetup setup;
     // The maps the number appears on, by the numbers the server sends
     // (Q-MN61): where OpenMU's Season 6 data places it, and empty for a number
     // it places nowhere. Each number has its own; only the tools read them.
@@ -75,6 +86,15 @@ struct MonsterDefinition
 
     bool operator==(const MonsterDefinition& other) const = default;
 };
+
+// The map variant that names the map the server sent with that stage: the
+// first one; nullptr for none.
+const MonsterMapVariant* FindMapVariant(const MonsterDefinition& monster, int map, int stage);
+// The setup of the monster on that map: the entry's, with the fields of its
+// map variant.
+MonsterSetup GetSetupOnMap(const MonsterDefinition& monster, int map, int stage);
+// Its model there: the map variant's, else the entry's.
+const std::string& GetModelOnMap(const MonsterDefinition& monster, int map, int stage);
 
 // The attacks the monster plays on a map (a server map number and stage):
 // those of the map variant that names the map and has attacks, else the

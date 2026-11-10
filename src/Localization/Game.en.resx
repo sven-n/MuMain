@@ -9411,6 +9411,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls of %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Unknown monster %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>I am a bug: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Would you like to cancel %ls?</value>
   </data>

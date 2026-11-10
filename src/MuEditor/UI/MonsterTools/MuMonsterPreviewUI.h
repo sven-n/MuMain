@@ -81,6 +81,21 @@ private:
     MuMonsterPreviewUI() = default;
 
     void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
+    // The Map and State rows: the map or state variant whose setup the
+    // character shows (Q-MN40).
+    void RenderPickers(const Data::Monsters::MonsterDefinition& monster);
+    // Show equipment, Pointed at and Light, a line for a monster that rides
+    // its helper, and Replay spawn and Replay appear. Returns the look of
+    // this frame, built once after its controls.
+    MonsterPreviewLook RenderLookControls(int slot);
+    // Replay appear: the appear's animation once from its start, then the
+    // stand, with what the scene plays of it.
+    void PlayAppear(int slot);
+    // How the view shows the monster of this frame.
+    MonsterPreviewLook BuildLook() const;
+    // The map variant whose state variants the State row lists and the look
+    // takes: the picked one once it has maps, else none (the monster's).
+    int StatesMapVariant(const Data::Monsters::MonsterDefinition& monster) const;
     void RenderPreview(int slot);
     void RenderCueTags(int slot, int keys, float last);
     void RenderAddSound(int slot);
@@ -96,7 +111,7 @@ private:
     void PlayDrawnSounds(int slot);
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
-    void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
+    void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values, const MonsterPreviewLook& look);
     void StandAfterAttack(int slot);
     void Restart(int slot);
     float SpeedFactor(int slot) const;
@@ -104,8 +119,20 @@ private:
     Effects::EffectPreviewCamera m_camera;
     Effects::EffectPreviewTarget m_target;
     MonsterPreviewScene m_scene;
+    // The monster shown in this frame (nullptr: a model only), and the
+    // preview's look choices.
+    const Data::Monsters::MonsterDefinition* m_monster = nullptr;
+    int m_pickedNumber = -1;
+    int m_mapVariant = -1;
+    // The picked state by its name (empty: Always), so a list that changes
+    // under it keeps it or goes back to Always.
+    std::string m_state;
+    bool m_showEquipment = true;
+    bool m_pointedAt = false;
+    float m_light = 1.0f;
     // The slot the camera was framed for, and the animation shown.
     int m_framedSlot = -1;
+    float m_framedScale = 1.0f;
     int m_slot = -1;
     // The ImGui frame the preview last showed m_slot animating in.
     int m_shownFrame = -1;

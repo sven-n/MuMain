@@ -1621,6 +1621,33 @@
   <data name="Nothing uses the item" xml:space="preserve">
     <value>Nichts nutzt den Gegenstand</value>
   </data>
+  <data name="Monster {0} wears it: {1}" xml:space="preserve">
+    <value>Monster {0} trägt ihn: {1}</value>
+  </data>
+  <data name="{0} (map variant {1})" xml:space="preserve">
+    <value>{0} (Kartenvariante {1})</value>
+  </data>
+  <data name="{0} (while {1})" xml:space="preserve">
+    <value>{0} (während {1})</value>
+  </data>
+  <data name="{0} (random look {1})" xml:space="preserve">
+    <value>{0} (Zufallsaussehen {1})</value>
+  </data>
+  <data name="Wearers of a removed item" xml:space="preserve">
+    <value>Die Monster, die ihn tragen, tragen dort nichts, und die Datenprüfung listet sie als Fehler, bis für sie ein anderer Gegenstand gewählt ist.</value>
+  </data>
+  <data name="Update them to the new number as well?" xml:space="preserve">
+    <value>Sollen auch sie die neue Nummer bekommen?</value>
+  </data>
+  <data name="Move and update them" xml:space="preserve">
+    <value>Verschieben und anpassen</value>
+  </data>
+  <data name="Move only" xml:space="preserve">
+    <value>Nur verschieben</value>
+  </data>
+  <data name="Wearers after a move only" xml:space="preserve">
+    <value>Nur verschieben: Sie behalten die alte Nummer und tragen dort nichts; die Datenprüfung listet sie als Fehler, bis für sie ein anderer Gegenstand gewählt ist.</value>
+  </data>
   <data name="Redo" xml:space="preserve">
     <value>Wiederholen</value>
   </data>
@@ -3509,7 +3536,7 @@
     <value>keine SOUND_-ID, die die Monsterdaten nennen können</value>
   </data>
   <data name="Monster model player note" xml:space="preserve">
-    <value>Ein Monster in Spielergestalt: Das Spiel zeichnet es als Spielerfigur, mit dem Modell, den Animationen und den Gegenständen, die sein Code ihm gibt, manche mit eigener Haut (die Körper der Skelette). Sein Aussehen kommt noch aus dem Code; die Modellliste enthält Monster- und NPC-Modelle.</value>
+    <value>Ein Monster in Spielergestalt: Das Spiel zeichnet es als Spielerfigur, mit dem Modell, den Animationen und den Gegenständen, die seine Einrichtung ihm gibt (Monster-Ausrüstung), manche mit eigener Haut (die Körper der Skelette). Die Modellliste enthält Monster- und NPC-Modelle; die Monster-Vorschau zeigt es mit seiner Ausrüstung.</value>
   </data>
   <data name="Monster model map object note" xml:space="preserve">
     <value>Das Monster erscheint als Objekt {0} seiner Karte (eine Falle): Die Karte lädt dieses Modell, nicht die Modellliste.</value>
@@ -4597,6 +4624,417 @@
   <data name="Item options" xml:space="preserve">
     <value>Item-Optionen</value>
   </data>
+  <data name="Outline" xml:space="preserve">
+    <value>Umriss</value>
+  </data>
+  <data name="Skin" xml:space="preserve">
+    <value>Haut</value>
+  </data>
+  <data name="Render tier" xml:space="preserve">
+    <value>Darstellungsstufe</value>
+  </data>
+  <data name="Glow light" xml:space="preserve">
+    <value>Leuchtstärke</value>
+  </data>
+  <data name="Shadow" xml:space="preserve">
+    <value>Schatten</value>
+  </data>
+  <data name="Hide shadow" xml:space="preserve">
+    <value>Schatten verbergen</value>
+  </data>
+  <data name="Alpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
+  <data name="Lit by the light" xml:space="preserve">
+    <value>Vom Licht beleuchtet</value>
+  </data>
+  <data name="PK colour" xml:space="preserve">
+    <value>PK-Farbe</value>
+  </data>
+  <data name="Helper plate lights" xml:space="preserve">
+    <value>Helferplatten-Lichter</value>
+  </data>
+  <data name="Player class" xml:space="preserve">
+    <value>Spielerklasse</value>
+  </data>
+  <data name="Class step" xml:space="preserve">
+    <value>Klassenstufe</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Ausrüstung</value>
+  </data>
+  <data name="Start action" xml:space="preserve">
+    <value>Startaktion</value>
+  </data>
+  <data name="Start frame" xml:space="preserve">
+    <value>Startbild</value>
+  </data>
+  <data name="Position offset" xml:space="preserve">
+    <value>Positionsversatz</value>
+  </data>
+  <data name="Tile offset" xml:space="preserve">
+    <value>Feldversatz</value>
+  </data>
+  <data name="Height above ground" xml:space="preserve">
+    <value>Höhe über dem Boden</value>
+  </data>
+  <data name="Fixed height" xml:space="preserve">
+    <value>Feste Höhe</value>
+  </data>
+  <data name="Keep ground height" xml:space="preserve">
+    <value>Bodenhöhe behalten</value>
+  </data>
+  <data name="Bounding box" xml:space="preserve">
+    <value>Begrenzungsbox</value>
+  </data>
+  <data name="Fixed facing" xml:space="preserve">
+    <value>Feste Blickrichtung</value>
+  </data>
+  <data name="Facing step" xml:space="preserve">
+    <value>Richtungsschritt</value>
+  </data>
+  <data name="Facing by tile" xml:space="preserve">
+    <value>Richtung nach Feld</value>
+  </data>
+  <data name="Random skin" xml:space="preserve">
+    <value>Zufällige Haut</value>
+  </data>
+  <data name="Random start" xml:space="preserve">
+    <value>Zufälliger Start</value>
+  </data>
+  <data name="Spawn buffs" xml:space="preserve">
+    <value>Buffs beim Erscheinen</value>
+  </data>
+  <data name="Spawn sound" xml:space="preserve">
+    <value>Ton beim Erscheinen</value>
+  </data>
+  <data name="Spawn effects" xml:space="preserve">
+    <value>Effekte beim Erscheinen</value>
+  </data>
+  <data name="Appear" xml:space="preserve">
+    <value>Erscheinen</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>Teleport</value>
+  </data>
+  <data name="Move speed" xml:space="preserve">
+    <value>Laufgeschwindigkeit</value>
+  </data>
+  <data name="No turn on a magic hit" xml:space="preserve">
+    <value>Kein Drehen bei Magietreffer</value>
+  </data>
+  <data name="No blood pool" xml:space="preserve">
+    <value>Keine Blutlache</value>
+  </data>
+  <data name="Can be pointed at" xml:space="preserve">
+    <value>Kann angezeigt werden</value>
+  </data>
+  <data name="Shown" xml:space="preserve">
+    <value>Sichtbar</value>
+  </data>
+  <data name="Death effect" xml:space="preserve">
+    <value>Todeseffekt</value>
+  </data>
+  <data name="Castle gate" xml:space="preserve">
+    <value>Burgtor</value>
+  </data>
+  <data name="Hooks" xml:space="preserve">
+    <value>Hooks</value>
+  </data>
+  <data name="State variants" xml:space="preserve">
+    <value>Zustandsvarianten</value>
+  </data>
+  <data name="Monster Setup" xml:space="preserve">
+    <value>Monster-Einrichtung</value>
+  </data>
+  <data name="Look" xml:space="preserve">
+    <value>Aussehen</value>
+  </data>
+  <data name="Spawn" xml:space="preserve">
+    <value>Erscheinen beim Spawn</value>
+  </data>
+  <data name="Appear and teleport" xml:space="preserve">
+    <value>Erscheinen und Teleport</value>
+  </data>
+  <data name="Behaviour" xml:space="preserve">
+    <value>Verhalten</value>
+  </data>
+  <data name="Gate and hooks" xml:space="preserve">
+    <value>Tor und Hooks</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>Zustand</value>
+  </data>
+  <data name="Always" xml:space="preserve">
+    <value>Immer</value>
+  </data>
+  <data name="Add a state variant" xml:space="preserve">
+    <value>Zustandsvariante hinzufügen</value>
+  </data>
+  <data name="Remove the state variant" xml:space="preserve">
+    <value>Zustandsvariante entfernen</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>Setzen</value>
+  </data>
+  <data name="at once" xml:space="preserve">
+    <value>sofort</value>
+  </data>
+  <data name="next spawn" xml:space="preserve">
+    <value>beim nächsten Erscheinen</value>
+  </data>
+  <data name="Living monsters take it at once" xml:space="preserve">
+    <value>Lebende Monster übernehmen es sofort</value>
+  </data>
+  <data name="Living monsters take it when they appear next" xml:space="preserve">
+    <value>Lebende Monster übernehmen es, wenn sie das nächste Mal erscheinen</value>
+  </data>
+  <data name="The game sets it" xml:space="preserve">
+    <value>Das Spiel setzt es</value>
+  </data>
+  <data name="Use the monster value" xml:space="preserve">
+    <value>Den Wert des Monsters nehmen</value>
+  </data>
+  <data name="Leave it to the game" xml:space="preserve">
+    <value>Dem Spiel überlassen</value>
+  </data>
+  <data name="Size of a player" xml:space="preserve">
+    <value>Größe eines Spielers</value>
+  </data>
+  <data name="Setup shared hint" xml:space="preserve">
+    <value>Graue Werte teilen die {0} Nummern von {1}; Rechtsklick auf einen macht ihn zum eigenen Wert dieser Nummer.</value>
+  </data>
+  <data name="Setup state variant note" xml:space="preserve">
+    <value>Während der Zustand aktiv ist, ersetzen die Felder der Variante die des Monsters.</value>
+  </data>
+  <data name="Setup map variant note" xml:space="preserve">
+    <value>Auf ihren Karten ersetzen die Felder der Variante die des Monsters; die Variante hat auch die Angriffe dieser Karten.</value>
+  </data>
+  <data name="Setup row count" xml:space="preserve">
+    <value>{0} Einträge</value>
+  </data>
+  <data name="Setup player model note" xml:space="preserve">
+    <value>Ein Monster mit Spielerkörper greift wie ein Spieler an (Monster-Angriffe zeigt warum).</value>
+  </data>
+  <data name="Unknown name" xml:space="preserve">
+    <value>Unbekannter Name: {0}</value>
+  </data>
+  <data name="yes" xml:space="preserve">
+    <value>ja</value>
+  </data>
+  <data name="no" xml:space="preserve">
+    <value>nein</value>
+  </data>
+  <data name="Joint" xml:space="preserve">
+    <value>Gelenk</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Effekt</value>
+  </data>
+  <data name="Particle" xml:space="preserve">
+    <value>Partikel</value>
+  </data>
+  <data name="Object" xml:space="preserve">
+    <value>Objekt</value>
+  </data>
+  <data name="Eyes" xml:space="preserve">
+    <value>Augen</value>
+  </data>
+  <data name="Bones" xml:space="preserve">
+    <value>Knochen</value>
+  </data>
+  <data name="Angle" xml:space="preserve">
+    <value>Winkel</value>
+  </data>
+  <data name="Scale random" xml:space="preserve">
+    <value>Zufällige Größe</value>
+  </data>
+  <data name="Key" xml:space="preserve">
+    <value>Schlüssel</value>
+  </data>
+  <data name="Bone" xml:space="preserve">
+    <value>Knochen</value>
+  </data>
+  <data name="Colour" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Target offset" xml:space="preserve">
+    <value>Zielversatz</value>
+  </data>
+  <data name="Add an effect" xml:space="preserve">
+    <value>Effekt hinzufügen</value>
+  </data>
+  <data name="Add a tile" xml:space="preserve">
+    <value>Feld hinzufügen</value>
+  </data>
+  <data name="Blend from the animation before" xml:space="preserve">
+    <value>Aus der vorigen Animation überblenden</value>
+  </data>
+  <data name="Fade in" xml:space="preserve">
+    <value>Einblenden</value>
+  </data>
+  <data name="Appear time" xml:space="preserve">
+    <value>Erscheinzeit</value>
+  </data>
+  <data name="Sound" xml:space="preserve">
+    <value>Ton</value>
+  </data>
+  <data name="Effects where it comes in" xml:space="preserve">
+    <value>Effekte, wo es hereinkommt</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Geschlossen</value>
+  </data>
+  <data name="Opening" xml:space="preserve">
+    <value>Öffnend</value>
+  </data>
+  <data name="Plays its opening" xml:space="preserve">
+    <value>Spielt sein Öffnen</value>
+  </data>
+  <data name="Stands open" xml:space="preserve">
+    <value>Steht offen</value>
+  </data>
+  <data name="An open gate coming into view" xml:space="preserve">
+    <value>Ein offenes Tor, das in Sicht kommt</value>
+  </data>
+  <data name="Show code" xml:space="preserve">
+    <value>Code zeigen</value>
+  </data>
+  <data name="Add a hook" xml:space="preserve">
+    <value>Hook hinzufügen</value>
+  </data>
+  <data name="Appears on {0}" xml:space="preserve">
+    <value>Erscheint auf {0}</value>
+  </data>
+  <data name="Respawn live monsters ({0})" xml:space="preserve">
+    <value>Lebende Monster neu erscheinen lassen ({0})</value>
+  </data>
+  <data name="Play appear" xml:space="preserve">
+    <value>Erscheinen abspielen</value>
+  </data>
+  <data name="Waiting {0}" xml:space="preserve">
+    <value>wartet: {0}</value>
+  </data>
+  <data name="Waiting tooltip" xml:space="preserve">
+    <value>{0} lebende Monster zeigen es nach „Lebende Monster neu erscheinen lassen“ oder wenn sie das nächste Mal erscheinen.</value>
+  </data>
+  <data name="Monster Equipment" xml:space="preserve">
+    <value>Monster-Ausrüstung</value>
+  </data>
+  <data name="Open Monster Equipment" xml:space="preserve">
+    <value>Monster-Ausrüstung öffnen</value>
+  </data>
+  <data name="Weapon 1" xml:space="preserve">
+    <value>Waffe 1</value>
+  </data>
+  <data name="Weapon 2" xml:space="preserve">
+    <value>Waffe 2</value>
+  </data>
+  <data name="Helm" xml:space="preserve">
+    <value>Helm</value>
+  </data>
+  <data name="Armor" xml:space="preserve">
+    <value>Rüstung</value>
+  </data>
+  <data name="Pants" xml:space="preserve">
+    <value>Hose</value>
+  </data>
+  <data name="Gloves" xml:space="preserve">
+    <value>Handschuhe</value>
+  </data>
+  <data name="Boots" xml:space="preserve">
+    <value>Stiefel</value>
+  </data>
+  <data name="Wings" xml:space="preserve">
+    <value>Flügel</value>
+  </data>
+  <data name="Helper" xml:space="preserve">
+    <value>Helfer</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Leer</value>
+  </data>
+  <data name="Body" xml:space="preserve">
+    <value>Körper</value>
+  </data>
+  <data name="Body {0}" xml:space="preserve">
+    <value>Körper: {0}</value>
+  </data>
+  <data name="No item at {0}/{1}" xml:space="preserve">
+    <value>Kein Gegenstand bei {0}/{1}</value>
+  </data>
+  <data name="Excellent flags" xml:space="preserve">
+    <value>Exzellent-Flags</value>
+  </data>
+  <data name="Horse look" xml:space="preserve">
+    <value>Pferdeaussehen</value>
+  </data>
+  <data name="Equipment inherited note" xml:space="preserve">
+    <value>Es trägt die Ausrüstung des Monsters; „Setzen“ gibt ihm eine eigene.</value>
+  </data>
+  <data name="Unknown monsters" xml:space="preserve">
+    <value>Unbekannte Monster</value>
+  </data>
+  <data name="Unknown monsters note" xml:space="preserve">
+    <value>Wie das Spiel ein Monster zeigt, das es nicht als es selbst zeigen kann, für alle Monster (das Fehler-Aussehen).</value>
+  </data>
+  <data name="Red X marks" xml:space="preserve">
+    <value>Rote X-Zeichen</value>
+  </data>
+  <data name="Message every seconds" xml:space="preserve">
+    <value>Meldung alle (s)</value>
+  </data>
+  <data name="For" xml:space="preserve">
+    <value>Für</value>
+  </data>
+  <data name="A number without an entry" xml:space="preserve">
+    <value>Eine Nummer ohne Eintrag</value>
+  </data>
+  <data name="An entry without a model" xml:space="preserve">
+    <value>Ein Eintrag ohne Modell</value>
+  </data>
+  <data name="A model whose file is missing" xml:space="preserve">
+    <value>Ein Modell, dessen Datei fehlt</value>
+  </data>
+  <data name="Preview as" xml:space="preserve">
+    <value>Vorschau als</value>
+  </data>
+  <data name="Show in Monster Preview" xml:space="preserve">
+    <value>In der Monster-Vorschau zeigen</value>
+  </data>
+  <data name="Preview unknown look note" xml:space="preserve">
+    <value>Das Spiel zeigt es mit dem Körper der unbekannten Monster; im Spiel leuchtet es auch, sendet rote X-Zeichen und sagt, dass es ein Fehler ist.</value>
+  </data>
+  <data name="Show equipment" xml:space="preserve">
+    <value>Ausrüstung zeigen</value>
+  </data>
+  <data name="Pointed at" xml:space="preserve">
+    <value>Angezeigt (Maus darauf)</value>
+  </data>
+  <data name="Preview mount note" xml:space="preserve">
+    <value>Es reitet im Spiel sein Dunkles Pferd; die Vorschau zeichnet kein Reittier.</value>
+  </data>
+  <data name="Replay spawn" xml:space="preserve">
+    <value>Erscheinen wiederholen</value>
+  </data>
+  <data name="Replay spawn tip" xml:space="preserve">
+    <value>Erzeugt seine Erscheinungseffekte neu, wie wenn es im Spiel erscheint. Objekte, die eine Zeile neben es stellt, fehlen: Sie kämen in die Karte.</value>
+  </data>
+  <data name="Replay appear" xml:space="preserve">
+    <value>Auftritt wiederholen</value>
+  </data>
+  <data name="Replay appear tip" xml:space="preserve">
+    <value>Spielt, wie es hereinkommt: seine Auftrittsanimation, das Einblenden, die Effekte und das Geräusch (mit „Geräusche abspielen“). Objekte, die eine Zeile neben es stellt, fehlen.</value>
+  </data>
+  <data name="Map variant monster states {0}" xml:space="preserve">
+    <value>Auf diesen Karten gelten die Zustandsvarianten des Monsters: {0}. Eine hier hinzugefügte Zustandsvariante beginnt mit ihnen, da die eigenen der Kartenvariante die des Monsters ersetzen.</value>
+  </data>
+  <data name="Own map variant states {0}" xml:space="preserve">
+    <value>Diese Kartenvarianten haben eigene Zustandsvarianten, die auf ihren Karten die des Monsters ersetzen: {0}. Eine Änderung hier erreicht sie nicht.</value>
+  </data>
+  <data name="Map variant own states note" xml:space="preserve">
+    <value>Diese Zustandsvarianten ersetzen auf den Karten der Variante die des Monsters: eine Änderung der eigenen des Monsters erreicht sie nicht.</value>
+  </data>
   <data name="Name forms" xml:space="preserve">
     <value>Namensformen</value>
   </data>
@@ -4617,5 +5055,26 @@
   </data>
   <data name="Name cases note" xml:space="preserve">
     <value>Die Fälle, in denen jede Sprache Gegenstandsnamen dekliniert (Data/Items/Tooltips/NameCases.json).</value>
+  </data>
+  <data name="Monster model items note" xml:space="preserve">
+    <value>Auf einem Monstermodell nehmen nur die Waffen Gegenstände, an den Verbindungsknochen seines Modells; die anderen Plätze nehmen einen Körper (ein Teilmodell, wie es die Händler tragen) oder nichts, denn ein Gegenstand hängt dort an einer zufälligen Stelle.</value>
+  </data>
+  <data name="Monster model item off weapons" xml:space="preserve">
+    <value>Ein Gegenstand hängt hier auf einem Monstermodell an einer zufälligen Stelle: ein Körper oder nichts passt.</value>
+  </data>
+  <data name="Preview shadow note" xml:space="preserve">
+    <value>Die Schatten des Spiels fehlen hier: sie fallen nach der Sonne der Karte auf ihren Boden, daher zeigen sich die Schattenfelder des Setups nur im Spiel.</value>
+  </data>
+  <data name="Box min" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="Box max" xml:space="preserve">
+    <value>max</value>
+  </data>
+  <data name="As the model" xml:space="preserve">
+    <value>wie beim Modell</value>
+  </data>
+  <data name="Eye bones note" xml:space="preserve">
+    <value>Augen brauchen 2, 4 oder 6 Knochen (rechts, links und bis zu zwei weitere Paare), jeweils 0 oder mehr; bis dahin speichert Speichern die Monster nicht.</value>
   </data>
 </root>

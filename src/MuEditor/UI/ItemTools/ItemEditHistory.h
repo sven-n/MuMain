@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
@@ -62,6 +63,10 @@ struct ItemEditStep
         // The render style file (its looks and folders, design L39) went from `renderStylesBefore` to
         // `renderStylesAfter`.
         RenderStyles,
+        // The monsters that wear a moved item went from `monstersBefore` to `monstersAfter`, and the monsters with
+        // several numbers whose shared values name it from `monsterGroupsBefore` to `monsterGroupsAfter` (a move
+        // that updated them, D60).
+        MonsterItems,
         // The cases the languages decline item names in went from `casesBefore` to `casesAfter`.
         NameCases,
     };
@@ -86,6 +91,10 @@ struct ItemEditStep
     // Shared, as the stat file.
     std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesBefore;
     std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesAfter;
+    std::vector<Data::Monsters::MonsterSnapshot> monstersBefore;
+    std::vector<Data::Monsters::MonsterSnapshot> monstersAfter;
+    std::vector<Data::Monsters::MonsterGroupSnapshot> monsterGroupsBefore;
+    std::vector<Data::Monsters::MonsterGroupSnapshot> monsterGroupsAfter;
     Data::Items::ItemNameCases casesBefore;
     Data::Items::ItemNameCases casesAfter;
 };
@@ -144,6 +153,14 @@ public:
         // The render style file, and putting one back (the game draws its looks). Optional.
         std::function<Data::Looks::RenderStylesFile()> readRenderStyles;
         std::function<void(const Data::Looks::RenderStylesFile& file)> restoreRenderStyles;
+        // The monster table's entries and monsters with several numbers, and putting them back (a move that
+        // updated the monsters that wear the item). Optional; without them no step names monsters.
+        std::function<std::optional<Data::Monsters::MonsterDefinition>(int number)> readMonster;
+        std::function<void(std::span<const Data::Monsters::MonsterSnapshot> snapshots)> restoreMonsters;
+        std::function<std::optional<Data::Monsters::MonsterGroupLayout>(int id)> readMonsterGroup;
+        std::function<void(std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)> restoreMonsterGroups;
+        // Told after a MonsterItems step was undone or redone. Optional.
+        std::function<void(const ItemEditStep& step, bool undoing)> monstersRestored;
         // The name cases, and putting them back. Optional.
         std::function<Data::Items::ItemNameCases()> readNameCases;
         std::function<void(const Data::Items::ItemNameCases& cases)> restoreNameCases;
@@ -204,6 +221,7 @@ public:
 private:
     bool TryApply(const ItemEditEntry& entry, bool undoing);
     bool IsAsLeft(const ItemEditEntry& entry, bool undoing) const;
+    bool AreMonstersAsLeft(const ItemEditStep& step, bool undoing) const;
     bool ChangesHeldItem(const ItemEditEntry& entry, bool undoing) const;
     void Apply(const ItemEditEntry& entry, bool undoing);
     void ApplyStep(const ItemEditStep& step, bool undoing);

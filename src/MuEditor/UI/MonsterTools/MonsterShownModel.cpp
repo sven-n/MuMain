@@ -4,6 +4,9 @@
 
 #include "MonsterShownModel.h"
 
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
+
 #include "MonsterEdits.h"
 #include "MonsterSelection.h"
 
@@ -75,6 +78,23 @@ std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monste
     {
         return std::nullopt;
     }
+    return slot;
+}
+
+std::optional<int> FindUnknownLookSlot(int number, const Data::Monsters::MonsterDefinition* monster)
+{
+    using Data::Monsters::UnknownReason;
+    if (number < 0)
+        return std::nullopt;
+    const Data::Monsters::UnknownMonsterLook& look = g_MonsterDatabase.GetUnknownLook();
+    const bool noEntry = monster == nullptr;
+    const bool noModel = !noEntry && !Data::Monsters::FindMonsterModelReference(monster->model);
+    if (!(noEntry && Data::Monsters::IsFor(look, UnknownReason::NoEntry)) &&
+        !(noModel && Data::Monsters::IsFor(look, UnknownReason::NoModel)))
+        return std::nullopt;
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(look.model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+        return std::nullopt;
     return slot;
 }
 

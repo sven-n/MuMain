@@ -21,6 +21,10 @@
 #include "Character/CSParts.h"
 
 #include "World/MapInfra/MapManager.h"
+#include "Data/GameData/MonsterData/MonsterAnimations.h"
+#include "Data/GameData/MonsterData/MonsterSetup.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Render/Models/BoneManager.h"
 
@@ -1309,221 +1313,6 @@ namespace battleCastle
     {
     }
 
-    CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
-    {
-        if (gMapManager.InBattleCastle() == false) return NULL;
-
-        CHARACTER* c = NULL;
-        switch (Type)
-        {
-        case MONSTER_TRAP:
-            c = CreateCharacter(Key, 11, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.m_bRenderShadow = false;
-            break;
-
-        case MONSTER_SHIELD:
-            OpenNpc(MODEL_NPC_BARRIER);      //  MODEL_NPC_BARRIER
-            c = CreateCharacter(Key, MODEL_NPC_BARRIER, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->m_bIsSelected = false;
-            c->Object.m_bRenderShadow = false;
-            c->Object.Scale = 1.52f;
-            c->Object.LifeTime = 0;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_CROWN:
-            OpenNpc(MODEL_NPC_CROWN);      //  MODEL_NPC_CROWN
-            c = CreateCharacter(Key, MODEL_NPC_CROWN, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.m_bRenderShadow = false;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_CROWN_SWITCH1:
-            OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
-            c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            c->Object.Velocity = c->Object.Position[2];
-            if (IsBattleCastleStart() == false)
-                c->Object.Position[2] -= 100.f;
-            break;
-
-        case MONSTER_CROWN_SWITCH2:
-            OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
-            c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            c->Object.Velocity = c->Object.Position[2];
-            if (IsBattleCastleStart() == false)
-                c->Object.Position[2] -= 100.f;
-            break;
-
-        case MONSTER_CASTLE_GATE_SWITCH:
-            OpenNpc(MODEL_NPC_GATE_SWITCH);      //  MODEL_NPC_GATE_SWITCH
-            c = CreateCharacter(Key, MODEL_NPC_GATE_SWITCH, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.1f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_GUARD:
-            OpenNpc(77);      //  MODEL_MONSTER01+77
-            c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.1f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_SLINGSHOT_ATTACK:
-            OpenNpc(MODEL_NPC_CAPATULT_ATT);
-            c = CreateCharacter(Key, MODEL_NPC_CAPATULT_ATT, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.m_bRenderShadow = false;
-            c->Object.Scale = 0.8f;
-            c->Object.m_fEdgeScale = 1.03f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_SLINGSHOT_DEFENSE:
-            OpenNpc(MODEL_NPC_CAPATULT_DEF);   //  MODEL_NPC_CATAPULT_DEF
-            c = CreateCharacter(Key, MODEL_NPC_CAPATULT_DEF, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.m_bRenderShadow = false;
-            c->Object.Scale = 0.8f;
-            c->Object.m_fEdgeScale = 1.03f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_SENIOR:
-            OpenNpc(MODEL_NPC_SENATUS);      //  MODEL_NPC_SENATUS
-            c = CreateCharacter(Key, MODEL_NPC_SENATUS, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.1f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_GUARDSMAN:
-            OpenNpc(MODEL_NPC_CLERK);        //
-            c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Object.SubType = Random::Rand() % 2 + 10;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_CASTLE_GATE1:
-            OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE1);
-            c = CreateCharacter(Key, MODEL_CASTLE_GATE1, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.0f;
-            c->Object.m_bRenderShadow = false;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_LIFE_STONE:
-            OpenMonsterModel(MONSTER_MODEL_LIFE_STONE);
-            c = CreateCharacter(Key, MODEL_LIFE_STONE, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.0f;
-            c->Object.m_bRenderShadow = false;
-            c->Object.BlendMesh = 3;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-
-            CreateEffect(MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120);
-            break;
-
-        case MONSTER_GUARDIAN_STATUE:
-            OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
-            c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Object.m_fEdgeScale = 1.03f;
-            c->Object.m_bRenderShadow = false;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-
-            if (IsBattleCastleStart())
-            {
-                c->Object.HiddenMesh = -1;
-            }
-            else
-            {
-                c->Object.HiddenMesh = -2;
-            }
-            CreateEffect(MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120);
-            break;
-
-        case MONSTER_GUARDIAN:
-            OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
-            c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Object.m_bRenderShadow = false;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_BATTLE_GUARD1:
-            OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD1);
-            c = CreateCharacter(Key, MODEL_BATTLE_GUARD1, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_BATTLE_GUARD2:
-            OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
-            c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Object.SubType = 30;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-            break;
-
-        case MONSTER_CANON_TOWER:
-            OpenMonsterModel(MONSTER_MODEL_CANON_TOWER);
-            c = CreateCharacter(Key, MODEL_CANON_TOWER, PositionX, PositionY);
-            c->NotRotateOnMagicHit = true;
-            c->Object.Scale = 1.f;
-            c->Object.m_fEdgeScale = 1.04f;
-            c->Object.m_bRenderShadow = false;
-            c->Weapon[0].Type = -1;
-            c->Weapon[1].Type = -1;
-
-            if (IsBattleCastleStart())
-            {
-                c->Object.HiddenMesh = -1;
-            }
-            else
-            {
-                c->Object.HiddenMesh = -2;
-            }
-            c->Object.HiddenMesh = -1;
-            break;
-        default:
-            break;
-        }
-
-        return c;
-    }
-
     void ResetCastleGateAttackCount(CHARACTER* c, int Type)
     {
         if (Type == MODEL_CASTLE_GATE1)
@@ -1532,9 +1321,52 @@ namespace battleCastle
         }
     }
 
+    std::optional<GateLooks> GateLooksOf(const CHARACTER& c)
+    {
+        const Data::Monsters::MonsterGate* gate =
+            GameLogic::Monsters::Setup::GateOf(c, World::Monsters::GetSpawnWorld());
+        if (gate == nullptr)
+            return std::nullopt;
+        const auto animation = [](const std::string& name)
+        { return Data::Monsters::FindMonsterAnimation(name).value_or(0); };
+        return GateLooks{animation(gate->closed), animation(gate->opening), animation(gate->open),
+                         gate->arrivalOpening};
+    }
+
+    void ShowGateOnArrival(CHARACTER& c, const GateLooks& gate, int x, int y, bool closeOnlyWithoutBuffs)
+    {
+        OBJECT* o = &c.Object;
+        if (g_isCharacterBuff(o, eBuff_CastleGateIsOpen))
+        {
+            SetAction(o, gate.arrivalOpening ? gate.opening : gate.open);
+            SetCastleGate_Attribute(x, y, 0);
+        }
+        else if (!closeOnlyWithoutBuffs || g_isNotCharacterBuff(o))
+        {
+            SetAction(o, gate.closed);
+            SetCastleGate_Attribute(x, y, 1);
+        }
+    }
+
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o)
     {
         if (gMapManager.InBattleCastle() == false)  return false;
+
+        // A gate stands as its buff says when an animation ends.
+        if (const std::optional<GateLooks> gate = GateLooksOf(*c))
+        {
+            if (g_isCharacterBuff(o, eBuff_CastleGateIsOpen))
+            {
+                c->m_bIsSelected = false;
+                SetAction(o, gate->open);
+            }
+            else
+            {
+                c->m_bIsSelected = true;
+                SetAction(o, gate->closed);
+            }
+            return true;
+        }
 
         switch (c->MonsterIndex)
         {
@@ -1583,20 +1415,6 @@ namespace battleCastle
             SetAction(o, 0);
             return true;
 
-        case MONSTER_CASTLE_GATE1:
-        {
-            if (g_isCharacterBuff(o, eBuff_CastleGateIsOpen))
-            {
-                c->m_bIsSelected = false;
-                SetAction(o, 2);
-            }
-            else
-            {
-                c->m_bIsSelected = true;
-                SetAction(o, 0);
-            }
-        }
-        return true;
         default:
             break;
         }

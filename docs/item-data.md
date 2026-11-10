@@ -1592,7 +1592,19 @@ shows it in the others.
   model entry and the shared model it names) and what uses it by its
   number and stays there: the source lines that name it (read from the
   sources the editor was built from; without them that part is not known)
-  and an ancient set, add option, buff or pet of the game data.
+  and an ancient set, add option, buff or pet of the game data, and the
+  monsters that wear it, with their places ("Monster 163 Chaos Castle Elf
+  wears it: weapons[0], weapons[1] (random look 1)"; see
+  [monster-data.md](monster-data.md)).
+
+  Monsters name an item by its number in their equipment, so the move
+  asks: **Move and update them** makes them name the new number too, in
+  the same undo step as the move; **Move only** leaves them at the old
+  number, where they wear nothing, and Data Checks lists them as errors
+  until another item is picked for them. Removing an item says the same of
+  its wearers. Save Items writes the references a move changed into
+  `Data/Monsters/Monsters.json` as it was last saved, with the item files
+  (all or none); the monster tools' other unsaved changes stay theirs.
 - **Item Basics**: the English name, size, slot and wing tier (*None* for
   none), two-handed, weapon kind (*By the group* takes the kind the item's
   group gives, which then follows its group, slot and classes), skill, drop

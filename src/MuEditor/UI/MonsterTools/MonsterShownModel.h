@@ -26,6 +26,11 @@ void SetShownVariant(int number, int variant);
 // variant's model), with the same conditions as FindSlot.
 std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monster);
 
+// The slot of the unknown monsters' body (D64) for a number the game shows
+// with it: one without an entry (`monster` nullptr), or an entry without a
+// model, while the look is for that; nullopt otherwise.
+std::optional<int> FindUnknownLookSlot(int number, const Data::Monsters::MonsterDefinition* monster);
+
 // The tools show the animations of an open model: a model the game does not
 // have open (no monster of it appeared on this map) is opened between frames
 // (MonsterDataHandler::OpenModelForTools). Called each frame the slot is

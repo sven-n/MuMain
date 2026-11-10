@@ -69,6 +69,11 @@ void Build(Links& links)
         {
             AddLook(links, *monster, number, variant.model);
         }
+        for (const MonsterMapVariant& variant : monster->mapVariants)
+        {
+            if (variant.model)
+                AddLook(links, *monster, number, *variant.model);
+        }
     }
 }
 

@@ -1561,6 +1561,33 @@
   <data name="Nothing uses the item" xml:space="preserve">
     <value>Nothing uses the item</value>
   </data>
+  <data name="Monster {0} wears it: {1}" xml:space="preserve">
+    <value>Monster {0} wears it: {1}</value>
+  </data>
+  <data name="{0} (map variant {1})" xml:space="preserve">
+    <value>{0} (map variant {1})</value>
+  </data>
+  <data name="{0} (while {1})" xml:space="preserve">
+    <value>{0} (while {1})</value>
+  </data>
+  <data name="{0} (random look {1})" xml:space="preserve">
+    <value>{0} (random look {1})</value>
+  </data>
+  <data name="Wearers of a removed item" xml:space="preserve">
+    <value>The monsters that wear it wear nothing there, and Data Checks lists them as errors until another item is picked for them.</value>
+  </data>
+  <data name="Update them to the new number as well?" xml:space="preserve">
+    <value>Update them to the new number as well?</value>
+  </data>
+  <data name="Move and update them" xml:space="preserve">
+    <value>Move and update them</value>
+  </data>
+  <data name="Move only" xml:space="preserve">
+    <value>Move only</value>
+  </data>
+  <data name="Wearers after a move only" xml:space="preserve">
+    <value>Move only: they keep the old number and wear nothing there; Data Checks lists them as errors until another item is picked for them.</value>
+  </data>
   <data name="Redo" xml:space="preserve">
     <value>Redo</value>
   </data>
@@ -3728,7 +3755,7 @@
     <value>not a SOUND_ id the monster data can name</value>
   </data>
   <data name="Monster model player note" xml:space="preserve">
-    <value>A player-shaped monster: the game draws it as a player character, with the player's model, animations and the items its code gives it, some with a skin of their own (the skeletons' bodies). Its look still comes from the code; the model list holds monster and NPC models.</value>
+    <value>A player-shaped monster: the game draws it as a player character, with the player's model, animations and the items its setup gives it (Monster Equipment), some with a skin of their own (the skeletons' bodies). The model list holds monster and NPC models; Monster Preview shows it with its equipment.</value>
   </data>
   <data name="Monster model map object note" xml:space="preserve">
     <value>The monster appears as object {0} of its map (a trap): the map loads that model, not the model list.</value>
@@ -4813,6 +4840,417 @@
   <data name="Item options" xml:space="preserve">
     <value>Item options</value>
   </data>
+  <data name="Outline" xml:space="preserve">
+    <value>Outline</value>
+  </data>
+  <data name="Skin" xml:space="preserve">
+    <value>Skin</value>
+  </data>
+  <data name="Render tier" xml:space="preserve">
+    <value>Render tier</value>
+  </data>
+  <data name="Glow light" xml:space="preserve">
+    <value>Glow light</value>
+  </data>
+  <data name="Shadow" xml:space="preserve">
+    <value>Shadow</value>
+  </data>
+  <data name="Hide shadow" xml:space="preserve">
+    <value>Hide shadow</value>
+  </data>
+  <data name="Alpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
+  <data name="Lit by the light" xml:space="preserve">
+    <value>Lit by the light</value>
+  </data>
+  <data name="PK colour" xml:space="preserve">
+    <value>PK colour</value>
+  </data>
+  <data name="Helper plate lights" xml:space="preserve">
+    <value>Helper plate lights</value>
+  </data>
+  <data name="Player class" xml:space="preserve">
+    <value>Player class</value>
+  </data>
+  <data name="Class step" xml:space="preserve">
+    <value>Class step</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="Start action" xml:space="preserve">
+    <value>Start action</value>
+  </data>
+  <data name="Start frame" xml:space="preserve">
+    <value>Start frame</value>
+  </data>
+  <data name="Position offset" xml:space="preserve">
+    <value>Position offset</value>
+  </data>
+  <data name="Tile offset" xml:space="preserve">
+    <value>Tile offset</value>
+  </data>
+  <data name="Height above ground" xml:space="preserve">
+    <value>Height above ground</value>
+  </data>
+  <data name="Fixed height" xml:space="preserve">
+    <value>Fixed height</value>
+  </data>
+  <data name="Keep ground height" xml:space="preserve">
+    <value>Keep ground height</value>
+  </data>
+  <data name="Bounding box" xml:space="preserve">
+    <value>Bounding box</value>
+  </data>
+  <data name="Fixed facing" xml:space="preserve">
+    <value>Fixed facing</value>
+  </data>
+  <data name="Facing step" xml:space="preserve">
+    <value>Facing step</value>
+  </data>
+  <data name="Facing by tile" xml:space="preserve">
+    <value>Facing by tile</value>
+  </data>
+  <data name="Random skin" xml:space="preserve">
+    <value>Random skin</value>
+  </data>
+  <data name="Random start" xml:space="preserve">
+    <value>Random start</value>
+  </data>
+  <data name="Spawn buffs" xml:space="preserve">
+    <value>Spawn buffs</value>
+  </data>
+  <data name="Spawn sound" xml:space="preserve">
+    <value>Spawn sound</value>
+  </data>
+  <data name="Spawn effects" xml:space="preserve">
+    <value>Spawn effects</value>
+  </data>
+  <data name="Appear" xml:space="preserve">
+    <value>Appear</value>
+  </data>
+  <data name="Teleport" xml:space="preserve">
+    <value>Teleport</value>
+  </data>
+  <data name="Move speed" xml:space="preserve">
+    <value>Move speed</value>
+  </data>
+  <data name="No turn on a magic hit" xml:space="preserve">
+    <value>No turn on a magic hit</value>
+  </data>
+  <data name="No blood pool" xml:space="preserve">
+    <value>No blood pool</value>
+  </data>
+  <data name="Can be pointed at" xml:space="preserve">
+    <value>Can be pointed at</value>
+  </data>
+  <data name="Shown" xml:space="preserve">
+    <value>Shown</value>
+  </data>
+  <data name="Death effect" xml:space="preserve">
+    <value>Death effect</value>
+  </data>
+  <data name="Castle gate" xml:space="preserve">
+    <value>Castle gate</value>
+  </data>
+  <data name="Hooks" xml:space="preserve">
+    <value>Hooks</value>
+  </data>
+  <data name="State variants" xml:space="preserve">
+    <value>State variants</value>
+  </data>
+  <data name="Monster Setup" xml:space="preserve">
+    <value>Monster Setup</value>
+  </data>
+  <data name="Look" xml:space="preserve">
+    <value>Look</value>
+  </data>
+  <data name="Spawn" xml:space="preserve">
+    <value>Spawn</value>
+  </data>
+  <data name="Appear and teleport" xml:space="preserve">
+    <value>Appear and teleport</value>
+  </data>
+  <data name="Behaviour" xml:space="preserve">
+    <value>Behaviour</value>
+  </data>
+  <data name="Gate and hooks" xml:space="preserve">
+    <value>Gate and hooks</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="Always" xml:space="preserve">
+    <value>Always</value>
+  </data>
+  <data name="Add a state variant" xml:space="preserve">
+    <value>Add a state variant</value>
+  </data>
+  <data name="Remove the state variant" xml:space="preserve">
+    <value>Remove the state variant</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>Set</value>
+  </data>
+  <data name="at once" xml:space="preserve">
+    <value>at once</value>
+  </data>
+  <data name="next spawn" xml:space="preserve">
+    <value>next spawn</value>
+  </data>
+  <data name="Living monsters take it at once" xml:space="preserve">
+    <value>Living monsters take it at once</value>
+  </data>
+  <data name="Living monsters take it when they appear next" xml:space="preserve">
+    <value>Living monsters take it when they appear next</value>
+  </data>
+  <data name="The game sets it" xml:space="preserve">
+    <value>The game sets it</value>
+  </data>
+  <data name="Use the monster value" xml:space="preserve">
+    <value>Use the monster value</value>
+  </data>
+  <data name="Leave it to the game" xml:space="preserve">
+    <value>Leave it to the game</value>
+  </data>
+  <data name="Size of a player" xml:space="preserve">
+    <value>Size of a player</value>
+  </data>
+  <data name="Setup shared hint" xml:space="preserve">
+    <value>Grey values are shared by the {0} numbers of {1}; right-click one to make it this number's own.</value>
+  </data>
+  <data name="Setup state variant note" xml:space="preserve">
+    <value>While the state is on, the variant's fields replace the monster's.</value>
+  </data>
+  <data name="Setup map variant note" xml:space="preserve">
+    <value>On its maps the variant's fields replace the monster's; the variant also holds the attacks of those maps.</value>
+  </data>
+  <data name="Setup row count" xml:space="preserve">
+    <value>{0} rows</value>
+  </data>
+  <data name="Setup player model note" xml:space="preserve">
+    <value>A player-shaped monster attacks as a player does (Monster Attacks shows why).</value>
+  </data>
+  <data name="Unknown name" xml:space="preserve">
+    <value>Unknown name: {0}</value>
+  </data>
+  <data name="yes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="no" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="Joint" xml:space="preserve">
+    <value>Joint</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Effect</value>
+  </data>
+  <data name="Particle" xml:space="preserve">
+    <value>Particle</value>
+  </data>
+  <data name="Object" xml:space="preserve">
+    <value>Object</value>
+  </data>
+  <data name="Eyes" xml:space="preserve">
+    <value>Eyes</value>
+  </data>
+  <data name="Bones" xml:space="preserve">
+    <value>Bones</value>
+  </data>
+  <data name="Angle" xml:space="preserve">
+    <value>Angle</value>
+  </data>
+  <data name="Scale random" xml:space="preserve">
+    <value>Scale random</value>
+  </data>
+  <data name="Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Bone" xml:space="preserve">
+    <value>Bone</value>
+  </data>
+  <data name="Colour" xml:space="preserve">
+    <value>Colour</value>
+  </data>
+  <data name="Target offset" xml:space="preserve">
+    <value>Target offset</value>
+  </data>
+  <data name="Add an effect" xml:space="preserve">
+    <value>Add an effect</value>
+  </data>
+  <data name="Add a tile" xml:space="preserve">
+    <value>Add a tile</value>
+  </data>
+  <data name="Blend from the animation before" xml:space="preserve">
+    <value>Blend from the animation before</value>
+  </data>
+  <data name="Fade in" xml:space="preserve">
+    <value>Fade in</value>
+  </data>
+  <data name="Appear time" xml:space="preserve">
+    <value>Appear time</value>
+  </data>
+  <data name="Sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="Effects where it comes in" xml:space="preserve">
+    <value>Effects where it comes in</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Opening" xml:space="preserve">
+    <value>Opening</value>
+  </data>
+  <data name="Plays its opening" xml:space="preserve">
+    <value>Plays its opening</value>
+  </data>
+  <data name="Stands open" xml:space="preserve">
+    <value>Stands open</value>
+  </data>
+  <data name="An open gate coming into view" xml:space="preserve">
+    <value>An open gate coming into view</value>
+  </data>
+  <data name="Show code" xml:space="preserve">
+    <value>Show code</value>
+  </data>
+  <data name="Add a hook" xml:space="preserve">
+    <value>Add a hook</value>
+  </data>
+  <data name="Appears on {0}" xml:space="preserve">
+    <value>Appears on {0}</value>
+  </data>
+  <data name="Respawn live monsters ({0})" xml:space="preserve">
+    <value>Respawn live monsters ({0})</value>
+  </data>
+  <data name="Play appear" xml:space="preserve">
+    <value>Play appear</value>
+  </data>
+  <data name="Waiting {0}" xml:space="preserve">
+    <value>waiting: {0}</value>
+  </data>
+  <data name="Waiting tooltip" xml:space="preserve">
+    <value>{0} living monsters show it after Respawn live monsters or when they appear next.</value>
+  </data>
+  <data name="Monster Equipment" xml:space="preserve">
+    <value>Monster Equipment</value>
+  </data>
+  <data name="Open Monster Equipment" xml:space="preserve">
+    <value>Open Monster Equipment</value>
+  </data>
+  <data name="Weapon 1" xml:space="preserve">
+    <value>Weapon 1</value>
+  </data>
+  <data name="Weapon 2" xml:space="preserve">
+    <value>Weapon 2</value>
+  </data>
+  <data name="Helm" xml:space="preserve">
+    <value>Helm</value>
+  </data>
+  <data name="Armor" xml:space="preserve">
+    <value>Armor</value>
+  </data>
+  <data name="Pants" xml:space="preserve">
+    <value>Pants</value>
+  </data>
+  <data name="Gloves" xml:space="preserve">
+    <value>Gloves</value>
+  </data>
+  <data name="Boots" xml:space="preserve">
+    <value>Boots</value>
+  </data>
+  <data name="Wings" xml:space="preserve">
+    <value>Wings</value>
+  </data>
+  <data name="Helper" xml:space="preserve">
+    <value>Helper</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Empty</value>
+  </data>
+  <data name="Body" xml:space="preserve">
+    <value>Body</value>
+  </data>
+  <data name="Body {0}" xml:space="preserve">
+    <value>Body: {0}</value>
+  </data>
+  <data name="No item at {0}/{1}" xml:space="preserve">
+    <value>No item at {0}/{1}</value>
+  </data>
+  <data name="Excellent flags" xml:space="preserve">
+    <value>Excellent flags</value>
+  </data>
+  <data name="Horse look" xml:space="preserve">
+    <value>Horse look</value>
+  </data>
+  <data name="Equipment inherited note" xml:space="preserve">
+    <value>It wears the monster's equipment; Set gives it its own.</value>
+  </data>
+  <data name="Unknown monsters" xml:space="preserve">
+    <value>Unknown monsters</value>
+  </data>
+  <data name="Unknown monsters note" xml:space="preserve">
+    <value>How the game shows a monster it cannot show as itself, for every monster (the bug look).</value>
+  </data>
+  <data name="Red X marks" xml:space="preserve">
+    <value>Red X marks</value>
+  </data>
+  <data name="Message every seconds" xml:space="preserve">
+    <value>Message every (s)</value>
+  </data>
+  <data name="For" xml:space="preserve">
+    <value>For</value>
+  </data>
+  <data name="A number without an entry" xml:space="preserve">
+    <value>A number without an entry</value>
+  </data>
+  <data name="An entry without a model" xml:space="preserve">
+    <value>An entry without a model</value>
+  </data>
+  <data name="A model whose file is missing" xml:space="preserve">
+    <value>A model whose file is missing</value>
+  </data>
+  <data name="Preview as" xml:space="preserve">
+    <value>Preview as</value>
+  </data>
+  <data name="Show in Monster Preview" xml:space="preserve">
+    <value>Show in Monster Preview</value>
+  </data>
+  <data name="Preview unknown look note" xml:space="preserve">
+    <value>The game shows it with the unknown monsters' body; in the game it also glows, sends up red X marks and says it is a bug.</value>
+  </data>
+  <data name="Show equipment" xml:space="preserve">
+    <value>Show equipment</value>
+  </data>
+  <data name="Pointed at" xml:space="preserve">
+    <value>Pointed at</value>
+  </data>
+  <data name="Preview mount note" xml:space="preserve">
+    <value>It rides its Dark Horse in the game; the preview draws no mount.</value>
+  </data>
+  <data name="Replay spawn" xml:space="preserve">
+    <value>Replay spawn</value>
+  </data>
+  <data name="Replay spawn tip" xml:space="preserve">
+    <value>Makes its spawn effects again, as when it appears in the game. Objects a row puts beside it are left out: they would go into the map.</value>
+  </data>
+  <data name="Replay appear" xml:space="preserve">
+    <value>Replay appear</value>
+  </data>
+  <data name="Replay appear tip" xml:space="preserve">
+    <value>Plays how it comes in: its appear animation, fade-in, effects and sound (the sound with Play the sounds on). Objects a row puts beside it are left out.</value>
+  </data>
+  <data name="Map variant monster states {0}" xml:space="preserve">
+    <value>On these maps the monster's state variants apply: {0}. A state variant added here starts from them, as the map variant's own replace the monster's.</value>
+  </data>
+  <data name="Own map variant states {0}" xml:space="preserve">
+    <value>These map variants have state variants of their own, which replace the monster's on their maps: {0}. A change here does not reach them.</value>
+  </data>
+  <data name="Map variant own states note" xml:space="preserve">
+    <value>These state variants replace the monster's on the variant's maps: a change of the monster's own does not reach them.</value>
+  </data>
   <data name="Name forms" xml:space="preserve">
     <value>Name forms</value>
   </data>
@@ -4833,5 +5271,26 @@
   </data>
   <data name="Name cases note" xml:space="preserve">
     <value>The cases each language declines item names in (Data/Items/Tooltips/NameCases.json).</value>
+  </data>
+  <data name="Monster model items note" xml:space="preserve">
+    <value>On a monster model only the weapons take items, on its model's link bones; the other slots take a body (a part model, as the merchants wear) or nothing, as an item there hangs at a random place.</value>
+  </data>
+  <data name="Monster model item off weapons" xml:space="preserve">
+    <value>An item here hangs at a random place on a monster model: a body or nothing fits.</value>
+  </data>
+  <data name="Preview shadow note" xml:space="preserve">
+    <value>The game's shadows are left out here: they fall by the map's sun onto its ground, so the setup's shadow fields show in the game only.</value>
+  </data>
+  <data name="Box min" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="Box max" xml:space="preserve">
+    <value>max</value>
+  </data>
+  <data name="As the model" xml:space="preserve">
+    <value>as the model's</value>
+  </data>
+  <data name="Eye bones note" xml:space="preserve">
+    <value>Eyes need 2, 4 or 6 bones (right, left and up to two more pairs), 0 or more each; until then Save refuses the monsters.</value>
   </data>
 </root>

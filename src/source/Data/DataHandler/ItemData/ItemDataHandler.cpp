@@ -948,7 +948,8 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateItemModelFilesExist(models, issues);
 }
 
-ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues,
+                                          std::span<const Data::TextFileToWrite> alsoWrite)
 {
     // Everything is checked before anything is written, so all problems are
     // reported at once.
@@ -994,6 +995,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
             return ItemDataSaveResult::InvalidData;
         }
     }
+    models.alsoWrite = alsoWrite;
     models.nameCasesFile = GetItemNameCasesFile();
     models.nameCases = &g_ItemDatabase.GetNameCases();
     models.nameCasesChanged = m_nameCasesChanged;

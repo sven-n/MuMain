@@ -2,13 +2,11 @@
 
 #include "MonsterSoundValidation.h"
 
-#include "Core/Globals/_enum.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <map>
 #include <optional>
@@ -20,14 +18,6 @@ namespace
 {
 using Items::ItemDataIssue;
 using Items::ItemDataIssueSeverity;
-
-constexpr std::array<std::string_view, 2> ChaosCastleLooks = {"MONSTER_MODEL_CHAOSCASTLE_ELF",
-                                                              "MONSTER_MODEL_CHAOSCASTLE_WIZARD"};
-// The creator of the ranged Chaos Castle soldiers draws one of the two
-// (ZzzCharacter.cpp, CreateMonster).
-constexpr std::array<int, 7> ChaosCastleRanged = {
-    MONSTER_CHAOS_CASTLE_2,  MONSTER_CHAOS_CASTLE_4,  MONSTER_CHAOS_CASTLE_6, MONSTER_CHAOS_CASTLE_8,
-    MONSTER_CHAOS_CASTLE_10, MONSTER_CHAOS_CASTLE_12, MONSTER_CHAOS_CASTLE_14};
 
 bool NamesSoundOfSet(const MonsterSoundSet& set, const std::string& value)
 {
@@ -153,15 +143,6 @@ void ValidateMonsterSoundSetNames(std::span<const MonsterSoundSet> sets, const s
     ValidateSharedIds(sets, source, issues);
 }
 
-std::span<const std::string_view> GetDrawnLookModels(int number)
-{
-    if (std::find(ChaosCastleRanged.begin(), ChaosCastleRanged.end(), number) != ChaosCastleRanged.end())
-    {
-        return ChaosCastleLooks;
-    }
-    return {};
-}
-
 void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
                                std::span<const MonsterModelDefinition> models, std::span<const MonsterSoundSet> sets,
                                const std::string& monstersSource, const std::string& soundsSource,
@@ -225,18 +206,10 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
         {
             use(monster.soundSet, "soundSet", monster.number, monster.model);
         }
-        const std::span<const std::string_view> drawn = GetDrawnLookModels(monster.number);
         for (size_t i = 0; i < monster.randomVariants.size(); ++i)
         {
             const MonsterRandomVariant& variant = monster.randomVariants[i];
             const std::string key = "randomVariants[" + std::to_string(i) + "]";
-            if (std::find(drawn.begin(), drawn.end(), variant.model) == drawn.end())
-            {
-                AddIssue(issues, ItemDataIssueSeverity::Error, monstersSource, monster.number,
-                         MonsterField(monster.number, key + ".model"),
-                         "the game never shows the monster with " + variant.model +
-                             ": its looks are drawn in code until the setup moves into data (MN4)");
-            }
             if (variant.soundSet)
             {
                 use(*variant.soundSet, key + ".soundSet", monster.number, variant.model);
@@ -246,6 +219,12 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
                 // The look plays the entry's set on its own model.
                 users[monster.soundSet].push_back({monster.number, FindMonsterModelReference(variant.model)});
             }
+        }
+        // A map variant's model plays the entry's set on its maps.
+        for (const MonsterMapVariant& variant : monster.mapVariants)
+        {
+            if (variant.model && byName.contains(monster.soundSet))
+                users[monster.soundSet].push_back({monster.number, FindMonsterModelReference(*variant.model)});
         }
     }
     for (const MonsterSoundSet& set : sets)

@@ -62,46 +62,14 @@ bool GMEmpireGuardian3::CreateObject(OBJECT* o)
     return false;
 }
 
-CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int Key)
+bool GMEmpireGuardian3::ResetRage(std::string_view boss)
 {
-    CHARACTER* pCharacter = g_EmpireGuardian1.CreateMonster(iType, PosX, PosY, Key);
-
-    if (NULL != pCharacter)
+    if (boss == "Kato")
     {
-        return pCharacter;
-    }
-
-    switch (iType)
-    {
-    case MONSTER_DUAL_BERSERKER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DUAL_BERSERKER);
-        pCharacter = CreateCharacter(Key, MODEL_DUAL_BERSERKER, PosX, PosY);
-        pCharacter->Object.Scale = 1.35f;
-
         m_bCurrentIsRage_Kato = false;
+        return true;
     }
-    break;
-    case MONSTER_BANSHEE:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BANSHEE);
-        pCharacter = CreateCharacter(Key, MODEL_BANSHEE, PosX, PosY);
-        pCharacter->Object.Scale = 1.55f;
-    }
-    break;
-    case MONSTER_HEAD_MOUNTER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_HEAD_MOUNTER);
-        pCharacter = CreateCharacter(Key, MODEL_HEAD_MOUNTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.25f;
-    }
-    break;
-
-    default:
-        return pCharacter;
-    }
-
-    return pCharacter;
+    return false;
 }
 
 bool GMEmpireGuardian3::MoveObject(OBJECT* o)

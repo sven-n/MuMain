@@ -50,6 +50,9 @@
 
 #include "GameLogic/Events/MatchEvent.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "GameLogic/Monsters/MonsterFacing.h"
+#include "GameLogic/Monsters/MonsterSetupApply.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -2827,13 +2830,13 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
 
             auto Type = (EMonsterType)(((WORD)(Data2->TypeH) << 8) + Data2->TypeL);
 
-            CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
-            OBJECT* o = &c->Object;
-
-            if (c->MonsterIndex == MONSTER_GIANT)
+            CHARACTER* c = nullptr;
             {
-                o->Scale = 0.8f;
+                // The monster data's state playerTransformed (Q-MN38d).
+                const World::Monsters::PlayerTransformScope transformed;
+                c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
             }
+            OBJECT* o = &c->Object;
 
             if (Type == MONSTER_JACK_OLANTERN)
             {
@@ -2901,93 +2904,6 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
 }
 
-void AppearMonster(CHARACTER* c)
-{
-    OBJECT* o = &c->Object;
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_GOLDEN_DRAGON:
-        SetAction(o, MONSTER01_STOP2);
-        o->PriorAction = MONSTER01_STOP2;
-        c->Object.Alpha = 1.f;
-        PlayBuffer(SOUND_MONSTER_BULLATTACK1);
-        break;
-    case MONSTER_ASSASSIN:
-        SetAction(o, MONSTER01_STOP2);
-        o->PriorAction = MONSTER01_STOP2;
-        c->Object.Alpha = 1.f;
-        PlayBuffer(SOUND_ASSASSIN);
-        break;
-    case MONSTER_GOLDEN_TITAN:
-    case MONSTER_GOLDEN_SOLDIER:
-        c->Appear = 60;
-        SetAction(o, MONSTER01_STOP2);
-        o->PriorAction = MONSTER01_STOP2;
-        c->Object.Alpha = 1.f;
-        // PlayBuffer(SOUND_ASSASSIN);
-        break;
-    case MONSTER_CHIEF_SKELETON_ARCHER_1:
-    case MONSTER_CHIEF_SKELETON_ARCHER_2:
-    case MONSTER_CHIEF_SKELETON_ARCHER_3:
-    case MONSTER_CHIEF_SKELETON_ARCHER_4:
-    case MONSTER_CHIEF_SKELETON_ARCHER_5:
-    case MONSTER_CHIEF_SKELETON_ARCHER_6:
-        PlayBuffer(SOUND_MONSTER_ORCCAPATTACK1);
-        break;
-    case MONSTER_DARK_ELF:
-    case MONSTER_DARKELF:
-    case MONSTER_SORAM:
-    case MONSTER_BALRAM:
-    case MONSTER_DEATH_SPIRIT:
-    {
-        if (g_Direction.m_CMVP.m_iCryWolfState == CRYWOLF_STATE_READY)
-            c->Object.Alpha = 1.0f;
-        else
-        {
-            c->Object.Alpha = 0.f;
-
-            vec3_t vPos;
-            Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
-
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
-
-            CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
-            CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
-            CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
-
-            Vector(c->Object.Position[0], c->Object.Position[1], c->Object.Position[2] + 120.0f, vPos);
-            CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
-            CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
-            CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
-            CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
-        }
-    }
-    break;
-    case MONSTER_MAYA_HAND_LEFT:
-    case MONSTER_MAYA_HAND_RIGHT:
-    {
-        SetAction(o, MONSTER01_APEAR);
-        c->Object.Alpha = 0.f;
-    }
-    break;
-    default:
-        if (o->Type == MODEL_PLAYER)
-        {
-            SetAction(o, PLAYER_COME_UP);
-            o->PriorAction = PLAYER_COME_UP;
-            c->Object.Alpha = 1.f;
-        }
-        else
-        {
-            c->Object.Alpha = 0.f;
-        }
-        break;
-    }
-}
-
 void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -3031,77 +2947,25 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
                                   static_cast<int>(Data2->s_BuffEffectState[j]));
         }
 
-        float fAngle = 45.0f;
-        if (o->Type == MODEL_BALLISTA)
-        {
-            if (c->PositionY == 90)
-                fAngle = 0.0f;
-            if (c->PositionX == 62)
-                fAngle = -135.0f;
-            if (c->PositionX == 183)
-                fAngle = 90.0f;
-        }
-        else if (o->Type == MODEL_KANTURU2ND_ENTER_NPC)
-        {
-            o->m_fEdgeScale = 1.0f;
-            fAngle = 90.f;
-        }
-
-        c->Object.Angle[2] = ((float)(Data2->Path >> 4) - 1.f) * fAngle;
-
-        if (o->Type >= MODEL_LITTLESANTA + 1 && o->Type <= MODEL_LITTLESANTA + 4)
-        {
-            c->Object.Angle[2] = 90.f;
-        }
-        else if (o->Type >= MODEL_LITTLESANTA + 6 && o->Type <= MODEL_LITTLESANTA + 7)
-        {
-            c->Object.Angle[2] = 90.f;
-        }
-        else if (o->Type == MODEL_XMAS2008_SANTA_NPC)
-        {
-            c->Object.Angle[2] = 20.f;
-        }
-        else if (o->Type == MODEL_UNITEDMARKETPLACE_JULIA)
-        {
-            // c->Object.Angle[2] = 44.0f;
-            c->Object.Angle[2] = 49.0f;
-            // c->Object.Angle[2] = 90.0f;
-        }
-
-        c->PositionX = Data2->PositionX;
-        c->PositionY = Data2->PositionY;
-        c->TargetX = Data2->PositionX;
-        c->TargetY = Data2->PositionY;
+        // CreateMonster keeps the server's tile: the facing by tile is the
+        // server's.
+        c->Object.Angle[2] =
+            GameLogic::Monsters::Facing::AngleOnArrival(*c, Data2->Path >> 4, World::Monsters::GetSpawnWorld());
 
         c->m_byFriend = bMyMob;
         o->m_byBuildTime = byBuildTime;
 
-        if (gMapManager.InBattleCastle() && c->MonsterIndex == MONSTER_CASTLE_GATE1)
+        // A castle gate shows what its buff says (Q-MN38c).
+        if (gMapManager.InBattleCastle())
         {
-            if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))
-            {
-                SetAction(&c->Object, 1);
-                battleCastle::SetCastleGate_Attribute(Data2->PositionX, Data2->PositionY, 0);
-            }
-            else
-            {
-                SetAction(&c->Object, 0);
-                battleCastle::SetCastleGate_Attribute(Data2->PositionX, Data2->PositionY, 1);
-            }
+            if (const std::optional<battleCastle::GateLooks> gate = battleCastle::GateLooksOf(*c))
+                battleCastle::ShowGateOnArrival(*c, *gate, Data2->PositionX, Data2->PositionY, false);
         }
+        // How it comes in, from its entry (Q-MN38c).
         if (CreateFlag)
-        {
-            AppearMonster(c);
-        }
-        else if (gMapManager.WorldActive == WD_39KANTURU_3RD && o->Type == MODEL_DARK_SKULL_SOLDIER_5 && TeleportFlag)
-        {
-            vec3_t Light;
-            Vector(1.0f, 1.0f, 1.0f, Light);
-            o->AlphaTarget = 1.f;
-            CreateEffect(BITMAP_SPARK + 1, o->Position, o->Angle, Light);
-            CreateEffect(BITMAP_SPARK + 1, o->Position, o->Angle, Light);
-            PlayBuffer(SOUND_KANTURU_3RD_NIGHTMARE_TELE);
-        }
+            GameLogic::Monsters::Setup::Appear(*c, World::Monsters::GetSpawnWorld());
+        else if (TeleportFlag)
+            GameLogic::Monsters::Setup::Teleport(*c, World::Monsters::GetSpawnWorld());
 
         int iDefaultWall = TW_CHARACTER;
 
@@ -3186,15 +3050,11 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
 
         if (CreateFlag)
         {
-            AppearMonster(c);
+            // How it comes in, from its entry (Q-MN38c): the Kalima gates'
+            // thunder, frame and sound too.
+            GameLogic::Monsters::Setup::Appear(*c, World::Monsters::GetSpawnWorld());
             CreateEffect(MODEL_MAGIC_CIRCLE1, o->Position, o->Angle, o->Light, 0, o);
             CreateParticle(BITMAP_LIGHTNING + 1, o->Position, o->Angle, o->Light, 2, 1.f, o);
-            if (Type >= 152 && Type <= 158)
-            {
-                o->PriorAnimationFrame = 0.f;
-                o->AnimationFrame = 0.f;
-                PlayBuffer(SOUND_CHAOS_FALLING_STONE);
-            }
         }
         else if (PathFinding2(c->PositionX, c->PositionY, Data2->TargetX, Data2->TargetY, &c->Path))
         {
@@ -11886,27 +11746,16 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
                 RegisterBuff(static_cast<eBuffState>(pData2->s_BuffEffectState[j]), o);
             }
 
-            c->PositionX = pData2->m_byPosX;
-            c->PositionY = pData2->m_byPosY;
-            c->TargetX = pData2->m_byPosX;
-            c->TargetY = pData2->m_byPosY;
             c->Object.Angle[2] = Random::Rand() % 360;
 
             c->m_iDeleteTime = 150;
 
-            if (gMapManager.InBattleCastle() && c->MonsterIndex == MONSTER_CASTLE_GATE1)
+            // A castle gate shows what its buff says (Q-MN38c); the preview
+            // closes only one without buffs.
+            if (gMapManager.InBattleCastle())
             {
-                //  State
-                if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))
-                {
-                    SetAction(&c->Object, 1);
-                    battleCastle::SetCastleGate_Attribute(pData2->m_byPosX, pData2->m_byPosY, 0);
-                }
-                else if (g_isNotCharacterBuff((&c->Object)))
-                {
-                    SetAction(&c->Object, 0);
-                    battleCastle::SetCastleGate_Attribute(pData2->m_byPosX, pData2->m_byPosY, 1);
-                }
+                if (const std::optional<battleCastle::GateLooks> gate = battleCastle::GateLooksOf(*c))
+                    battleCastle::ShowGateOnArrival(*c, *gate, pData2->m_byPosX, pData2->m_byPosY, true);
             }
         }
         break;

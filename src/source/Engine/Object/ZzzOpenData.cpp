@@ -662,6 +662,9 @@ void DeleteMonsters()
 
     // The model sounds without a SOUND_* id; their models load them again.
     Audio::SoundNumbers::ReleaseAll();
+
+    // A missing model file is tried once a map (Q-MN45c).
+    Data::Monsters::ModelLoader::ForgetMissingFiles();
 }
 
 // Opens a monster model from its entry in the model list

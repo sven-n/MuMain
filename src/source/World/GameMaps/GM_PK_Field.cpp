@@ -84,40 +84,6 @@ void CGM_PK_Field::Destroy()
     //n/a
 }
 
-CHARACTER* CGM_PK_Field::CreateMonster(int type, int positionX, int positionY, int key)
-{
-    if (!gMapManager.IsPKField())
-    {
-        return nullptr;
-    }
-
-    const MonsterDefinition* definition = FindMonsterDefinition(type);
-    if (definition == nullptr)
-    {
-        return nullptr;
-    }
-
-    OpenMonsterModel(definition->monsterModelId);
-
-    CHARACTER* character = CreateCharacter(key, definition->objectModelId, positionX, positionY);
-    if (character == nullptr)
-    {
-        return nullptr;
-    }
-
-    character->Object.Scale = definition->scale;
-    character->Object.m_iAnimation = 0;
-    character->Weapon[0].Type = -1;
-    character->Weapon[1].Type = -1;
-
-    if (definition->assignLifetime)
-    {
-        character->Object.LifeTime = definition->lifetime;
-    }
-
-    return character;
-}
-
 void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsPKField())

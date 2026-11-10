@@ -9,7 +9,8 @@ namespace MuEditor::Items
 {
 // The dialog that moves an item, with its model, to a free number. What uses
 // the item by its number (code, tags of other items, game data) stays there,
-// so it is listed first.
+// so it is listed first. The monsters that wear it may follow it: the dialog
+// asks (D60).
 class CItemMoveDialog
 {
 public:

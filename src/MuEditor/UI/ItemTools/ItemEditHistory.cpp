@@ -211,6 +211,36 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::MonsterItems:
+            if (!AreMonstersAsLeft(step, undoing))
+            {
+                return false;
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+bool ItemEditHistory::AreMonstersAsLeft(const ItemEditStep& step, bool undoing) const
+{
+    if (!m_hooks.readMonster || !m_hooks.readMonsterGroup)
+    {
+        return false;
+    }
+    for (const Data::Monsters::MonsterSnapshot& snapshot : undoing ? step.monstersAfter : step.monstersBefore)
+    {
+        if (m_hooks.readMonster(snapshot.number) != snapshot.monster)
+        {
+            return false;
+        }
+    }
+    for (const Data::Monsters::MonsterGroupSnapshot& snapshot :
+         undoing ? step.monsterGroupsAfter : step.monsterGroupsBefore)
+    {
+        if (m_hooks.readMonsterGroup(snapshot.id) != snapshot.group)
+        {
+            return false;
         }
     }
     return true;
@@ -249,6 +279,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::GroundLabelStyles:
         case ItemEditStep::Kind::ColorFolders:
         case ItemEditStep::Kind::RenderStyles:
+        case ItemEditStep::Kind::MonsterItems:
         case ItemEditStep::Kind::NameCases:
             break;
         }
@@ -335,6 +366,15 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         if (m_hooks.restoreRenderStyles)
         {
             m_hooks.restoreRenderStyles(*(undoing ? step.renderStylesBefore : step.renderStylesAfter));
+        }
+        break;
+    case ItemEditStep::Kind::MonsterItems:
+        // IsAsLeft refused the step without the hooks.
+        m_hooks.restoreMonsters(undoing ? step.monstersBefore : step.monstersAfter);
+        m_hooks.restoreMonsterGroups(undoing ? step.monsterGroupsBefore : step.monsterGroupsAfter);
+        if (m_hooks.monstersRestored)
+        {
+            m_hooks.monstersRestored(step, undoing);
         }
         break;
     }

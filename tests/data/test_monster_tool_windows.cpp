@@ -10,10 +10,12 @@
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Core/MuEditorCore.h"
+#include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Engine/Object/MonsterModelBody.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorToolWindows.h"
@@ -31,11 +33,17 @@
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterModelUI.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
+#include "UI/MonsterTools/MonsterSetupFields.h"
+#include "UI/MonsterTools/MonsterSetupLists.h"
+#include "UI/MonsterTools/MuMonsterSetupUI.h"
+#include "UI/MonsterTools/MuMonsterEquipmentUI.h"
+#include "UI/Common/MapPicker.h"
 #include "UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <algorithm>
 #include <array>
 #include <optional>
 #include <span>
@@ -66,6 +74,8 @@ void RenderMonsterTools()
     g_MuMonsterModelUI.Render(&open);
     g_MuMonsterPreviewUI.Render(&open);
     g_MuMonsterAttacksUI.Render(&open);
+    g_MuMonsterSetupUI.Render(&open);
+    g_MuMonsterEquipmentUI.Render(&open);
     g_MuMonsterTranslationsUI.Render(&open);
 }
 
@@ -112,6 +122,8 @@ TEST_CASE("The monster tools draw their frames without ImGui errors [editor][mon
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterModel) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterPreview) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterAttacks) != nullptr);
+    CHECK(ImGui::FindWindowByName(WindowIds::MonsterSetup) != nullptr);
+    CHECK(ImGui::FindWindowByName(WindowIds::MonsterEquipment) != nullptr);
 }
 
 // Monster Attacks with attacks of each kind (skill tables, a draw, a skill
@@ -1252,6 +1264,782 @@ TEST_CASE("Monster Sounds: the question whether a cue goes too removes only the 
     set.soundEvents = {attack, step};
     set.soundEvents[1].sounds = {"SOUND_MONSTER_DSIDLE2"};
     CHECK_FALSE(IsSameEventAt(set, 1, step));
+}
+
+// Monster Setup shows every setup field once, in a section, with when a
+// living monster takes it (D55, Q-MN39).
+TEST_CASE("Monster Setup: every setup field has a row, a section and a time it takes effect [editor][monsters]")
+{
+    namespace SetupFields = MuEditor::Monsters::SetupFields;
+    for (const Data::Monsters::MonsterSetupField& field : Data::Monsters::GetMonsterSetupFields())
+    {
+        INFO(field.key);
+        const SetupFields::Field* row = SetupFields::Find(field.key);
+        REQUIRE(row != nullptr);
+        CHECK(std::string_view(*row->label) != field.key);
+        CHECK(SetupFields::GetValueField(field.key).has_value());
+    }
+    CHECK(SetupFields::GetFields().size() == Data::Monsters::GetMonsterSetupFields().size());
+    CHECK(SetupFields::Find("scale")->takes == SetupFields::Takes::AtOnce);
+    CHECK(SetupFields::Find("spawnEffects")->takes == SetupFields::Takes::NextSpawn);
+}
+
+namespace
+{
+// The id of an item in a field row of Monster Setup, or of the Map row.
+ImGuiID SetupItemId(int key, const char* row, const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    const ImGuiID scope = ImGui::GetIDWithSeed(row, nullptr, ImGui::GetIDWithSeed(key, window->ID));
+    return ImGui::GetIDWithSeed(label, nullptr, scope);
+}
+} // namespace
+
+// A map variant's own state variants are in the State row while the map
+// variant is picked; Set on one takes the map variant's value, and Remove
+// removes it from the map variant.
+TEST_CASE("Monster Setup: a map variant's state variants are edited under the map variant [editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle Elf");
+    elf.model = "MONSTER_MODEL_CHAOS_CASTLE_ELF";
+    elf.setup.outline = 1.0f;
+    elf.mapVariants.emplace_back();
+    elf.mapVariants[0].maps = {{18}};
+    elf.mapVariants[0].setup.outline = 2.0f;
+    const std::string state(Data::Monsters::GetMonsterStates().front());
+    Data::Monsters::MonsterStateVariant variant;
+    variant.state = state;
+    elf.mapVariants[0].setup.stateVariants.push_back(variant);
+    const std::array monsters = {elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(163); };
+    render();
+
+    const std::string map =
+        MuEditor::MapPicker::Describe(elf.mapVariants[0].maps, I18N::Editor::NoMapYet) + "##Variant0";
+    click(SetupItemId(163, "MapRow", map.c_str()));
+    click(SetupItemId(163, "StateRow", (state + "##State0").c_str()));
+    click(SetupItemId(163, "outline", I18N::Editor::Set));
+    REQUIRE(stored().mapVariants[0].setup.stateVariants.size() == 1);
+    CHECK(stored().mapVariants[0].setup.stateVariants[0].setup.outline == 2.0f);
+    CHECK(stored().setup.stateVariants.empty());
+
+    click(SetupItemId(163, "StateVariant", I18N::Editor::RemoveTheStateVariant));
+    CHECK(stored().mapVariants[0].setup.stateVariants.empty());
+    CHECK(stored().mapVariants.size() == 1);
+    // The window keeps its picks for the monster: back to All maps.
+    click(SetupItemId(163, "MapRow", I18N::Editor::AllMaps));
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// A map variant's own state variants replace the monster's on its maps, so
+// its first one starts from the monster's: they keep applying there.
+TEST_CASE("Monster Setup: a map variant's first state variant keeps the monster's [editor][monsters]")
+{
+    MonsterDefinition giant = Monster(7, "Giant");
+    giant.model = "MONSTER_MODEL_GIANT";
+    Data::Monsters::MonsterStateVariant transformed;
+    transformed.state = "playerTransformed";
+    transformed.setup.scale = 0.8f;
+    giant.setup.stateVariants.push_back(transformed);
+    giant.mapVariants.emplace_back();
+    giant.mapVariants[0].maps = {{34}};
+    const std::array monsters = {giant};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(7);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(7); };
+    render();
+
+    const std::string map =
+        MuEditor::MapPicker::Describe(giant.mapVariants[0].maps, I18N::Editor::NoMapYet) + "##Variant0";
+    click(SetupItemId(7, "MapRow", map.c_str()));
+    CHECK(MuEditor::Monsters::SetupLists::MonsterStatesOnMap(stored(), 0) == "playerTransformed");
+    click(SetupItemId(7, "StateRow", "##AddState"));
+    const ImGuiWindow* combo = ImGui::FindWindowByName("##Combo_00");
+    REQUIRE(combo != nullptr);
+    click(ImGui::GetIDWithSeed("crywolfReady", nullptr, combo->ID));
+
+    const std::vector<Data::Monsters::MonsterStateVariant> states = stored().mapVariants[0].setup.stateVariants;
+    REQUIRE(states.size() == 2);
+    CHECK(states[0] == transformed);
+    CHECK(states[1].state == "crywolfReady");
+    CHECK(stored().setup.stateVariants.size() == 1);
+    CHECK(MuEditor::Monsters::SetupLists::MonsterStatesOnMap(stored(), 0).empty());
+    click(SetupItemId(7, "MapRow", I18N::Editor::AllMaps));
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// Set gives a field a value, x leaves it to the game; on a map variant Set
+// takes the monster's value and x the monster's value again.
+TEST_CASE("Monster Setup: Set and x on the monster and on a map variant [editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle Elf");
+    elf.model = "MONSTER_MODEL_CHAOS_CASTLE_ELF";
+    elf.setup.scale = 1.2f;
+    elf.mapVariants.emplace_back();
+    elf.mapVariants[0].maps = {{18}};
+    const std::array monsters = {elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(163); };
+    render();
+
+    click(SetupItemId(163, "outline", I18N::Editor::Set));
+    CHECK(stored().setup.outline == 1.0f);
+    click(SetupItemId(163, "outline", "x"));
+    CHECK_FALSE(stored().setup.outline.has_value());
+    CHECK(stored().setup.scale == 1.2f);
+
+    const std::string variant =
+        MuEditor::MapPicker::Describe(elf.mapVariants[0].maps, I18N::Editor::NoMapYet) + "##Variant0";
+    click(SetupItemId(163, "MapRow", variant.c_str()));
+    click(SetupItemId(163, "scale", I18N::Editor::Set));
+    REQUIRE(stored().mapVariants.size() == 1);
+    CHECK(stored().mapVariants[0].setup.scale == 1.2f);
+    CHECK(stored().setup.scale == 1.2f);
+    click(SetupItemId(163, "scale", "x"));
+    CHECK_FALSE(stored().mapVariants[0].setup.scale.has_value());
+
+    // The model of the variant: the monster's while it names none.
+    CHECK_FALSE(stored().mapVariants[0].model.has_value());
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(stored().mapVariants[0].setup.scale == 1.2f);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+TEST_CASE("Monster Setup: a list of numbers is read from its text [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::FormatNumbers;
+    using MuEditor::Monsters::SetupLists::ParseNumbers;
+    CHECK(ParseNumbers("0, 1, 2") == std::vector<int>{0, 1, 2});
+    CHECK(ParseNumbers("7") == std::vector<int>{7});
+    CHECK(ParseNumbers("") == std::vector<int>{});
+    CHECK(ParseNumbers(" 3 ,4") == std::vector<int>{3, 4});
+    CHECK_FALSE(ParseNumbers("1,,2").has_value());
+    CHECK_FALSE(ParseNumbers("a").has_value());
+    CHECK(FormatNumbers({0, 1, 2}) == "0, 1, 2");
+}
+
+// An appear's or a teleport's effects are joints, effects and particles: the
+// reader refuses objects and eyes there, so their rows do not offer them.
+TEST_CASE("Monster Setup: appear effects offer the kinds the reader takes [editor][monsters]")
+{
+    using Data::Monsters::MonsterSpawnEffect;
+    using MuEditor::Monsters::SetupLists::EffectRows;
+    using MuEditor::Monsters::SetupLists::IsEffectKindAllowed;
+    for (const MonsterSpawnEffect::Kind kind :
+         {MonsterSpawnEffect::Kind::Joint, MonsterSpawnEffect::Kind::Effect, MonsterSpawnEffect::Kind::Particle,
+          MonsterSpawnEffect::Kind::Object, MonsterSpawnEffect::Kind::Eyes})
+    {
+        CHECK(IsEffectKindAllowed(EffectRows::Spawn, kind));
+    }
+    CHECK(IsEffectKindAllowed(EffectRows::Appear, MonsterSpawnEffect::Kind::Joint));
+    CHECK(IsEffectKindAllowed(EffectRows::Appear, MonsterSpawnEffect::Kind::Effect));
+    CHECK(IsEffectKindAllowed(EffectRows::Appear, MonsterSpawnEffect::Kind::Particle));
+    CHECK_FALSE(IsEffectKindAllowed(EffectRows::Appear, MonsterSpawnEffect::Kind::Object));
+    CHECK_FALSE(IsEffectKindAllowed(EffectRows::Appear, MonsterSpawnEffect::Kind::Eyes));
+}
+
+// A row switched to another kind keeps none of the old kind's fields (a
+// joint's bone would make an object a bone row until the file is read again).
+TEST_CASE("Monster Setup: an effect row switched to another kind starts fresh [editor][monsters]")
+{
+    using Data::Monsters::MonsterSpawnEffect;
+    using MuEditor::Monsters::SetupLists::SwitchedKind;
+    MonsterSpawnEffect joint;
+    joint.kind = MonsterSpawnEffect::Kind::Joint;
+    joint.type = "BITMAP_JOINT_ENERGY";
+    joint.bone = 27;
+    joint.scale = 30.0f;
+    joint.count = 3;
+    joint.offset = std::array<float, 3>{20.0f, 0.0f, 0.0f};
+    joint.targetOffset = std::array<float, 3>{0.0f, 0.0f, 120.0f};
+
+    const MonsterSpawnEffect object = SwitchedKind(joint, MonsterSpawnEffect::Kind::Object);
+    CHECK(object.kind == MonsterSpawnEffect::Kind::Object);
+    CHECK_FALSE(object.bone.has_value());
+    CHECK_FALSE(object.offset.has_value());
+    CHECK_FALSE(object.targetOffset.has_value());
+    CHECK(object.count == 1);
+
+    const MonsterSpawnEffect particle = SwitchedKind(joint, MonsterSpawnEffect::Kind::Particle);
+    CHECK(particle.kind == MonsterSpawnEffect::Kind::Particle);
+    CHECK_FALSE(particle.bone.has_value());
+    CHECK_FALSE(particle.targetOffset.has_value());
+    CHECK(particle.scale == MonsterSpawnEffect{}.scale);
+    CHECK(particle.count == 3);
+    CHECK(particle.offset == joint.offset);
+    CHECK(std::ranges::any_of(Data::Effects::GetEffectTypeSymbols(Data::Effects::EffectKind::Particle),
+                              [&](const Data::Effects::EffectTypeSymbol& symbol)
+                              { return symbol.code == particle.type; }));
+}
+
+// The Spawn section's lists: an effect added and removed, a buff ticked, a
+// tile added.
+TEST_CASE("Monster Setup: the spawn lists add and remove rows [editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle Elf");
+    elf.model = "MONSTER_MODEL_CHAOS_CASTLE_ELF";
+    const std::array monsters = {elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(163); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::Spawn, nullptr, ImGui::GetIDWithSeed(163, window->ID)));
+
+    click(SetupItemId(163, "spawnEffects", I18N::Editor::AddAnEffect));
+    REQUIRE(stored().setup.spawnEffects.size() == 1);
+    CHECK(stored().setup.spawnEffects[0].kind == Data::Monsters::MonsterSpawnEffect::Kind::Joint);
+    // A joint type the reader takes, not an empty one.
+    CHECK(std::ranges::any_of(Data::Effects::GetEffectTypeSymbols(Data::Effects::EffectKind::Joint),
+                              [&](const Data::Effects::EffectTypeSymbol& symbol)
+                              { return symbol.code == stored().setup.spawnEffects[0].type; }));
+
+    click(SetupItemId(163, "spawnBuffs", "poison"));
+    CHECK(stored().setup.spawnBuffs == std::vector<std::string>{"poison"});
+
+    click(SetupItemId(163, "facingByTile", I18N::Editor::AddATile));
+    REQUIRE(stored().setup.facingByTile.size() == 1);
+    CHECK(stored().setup.facingByTile[0].tileX == 0);
+
+    const ImGuiWindow* setup = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    const ImGuiID row = ImGui::GetIDWithSeed(
+        0, ImGui::GetIDWithSeed("spawnEffects", nullptr, ImGui::GetIDWithSeed(163, setup->ID)));
+    click(ImGui::GetIDWithSeed("x", nullptr, row));
+    CHECK(stored().setup.spawnEffects.empty());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// A box with only one corner keeps the other as the model's: drawing the
+// Spawn section writes nothing, so an edit of another field saves no corner.
+TEST_CASE("Monster Setup: a max-only box survives an edit of another field [editor][monsters]")
+{
+    MonsterDefinition dragon = Monster(42, "Red Dragon");
+    dragon.setup.boxMax = std::array<float, 3>{100.0f, 100.0f, 200.0f};
+    const std::array monsters = {dragon};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(42);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(42); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::Spawn, nullptr, ImGui::GetIDWithSeed(42, window->ID)));
+    render();
+
+    click(SetupItemId(42, "scale", I18N::Editor::Set));
+    REQUIRE(stored().setup.scale.has_value());
+    CHECK_FALSE(stored().setup.boxMin.has_value());
+    CHECK(stored().setup.boxMax == std::array<float, 3>{100.0f, 100.0f, 200.0f});
+
+    // Its own min is ticked on, from the model's (a monster without a model:
+    // the game's default box), and off again.
+    click(SetupItemId(42, "boundingBox", I18N::Editor::BoxMin));
+    CHECK(stored().setup.boxMin == std::array<float, 3>{-60.0f, -60.0f, 0.0f});
+    click(SetupItemId(42, "boundingBox", I18N::Editor::BoxMin));
+    CHECK_FALSE(stored().setup.boxMin.has_value());
+    CHECK(stored().setup.boxMax.has_value());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// A player-shaped monster's box starts as the player model's character slot
+// has it (40, 40, 120 at the top), not as the other models' default.
+TEST_CASE("Monster Setup: a player-shaped monster's box starts as the player's [editor][monsters]")
+{
+    MonsterDefinition luke = Monster(258, "Luke the Helper");
+    luke.model = "player";
+    const std::array monsters = {luke};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(258);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::Spawn, nullptr, ImGui::GetIDWithSeed(258, window->ID)));
+    render();
+    render();
+    ImGui::ActivateItemByID(SetupItemId(258, "boundingBox", I18N::Editor::Set));
+    render();
+    render();
+    const MonsterDefinition& stored = *g_MonsterDatabase.Find(258);
+    CHECK(stored.setup.boxMin == Engine::Object::MonsterBody::DefaultBoxMin);
+    CHECK(stored.setup.boxMax == Engine::Object::MonsterBody::PlayerBoxMax);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// A facing-by-tile row switched to the other axis has that axis only, with
+// its tile, and the field shows that axis' tile.
+// A typed value the reader would refuse is kept to its range: a class step
+// is 0, 1 or 2, so a save is not refused for it.
+TEST_CASE("Monster Setup: a typed class step is kept to the reader's range [editor][monsters]")
+{
+    const std::array monsters = {Monster(163, "Chaos Castle Elf")};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = [](const char* typed = nullptr)
+    {
+        if (typed != nullptr)
+            ImGui::GetIO().AddInputCharactersUTF8(typed);
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    render();
+    ImGui::ActivateItemByID(SetupItemId(163, "classStep", I18N::Editor::Set));
+    render();
+    render();
+    REQUIRE(g_MonsterDatabase.Find(163)->setup.classStep == 0);
+
+    const ImGuiID field = SetupItemId(163, "classStep", "##Value");
+    ImGui::ActivateItemByID(field);
+    render();
+    REQUIRE(ImGui::GetActiveID() == field);
+    render("7");
+    ImGui::ClearActiveID();
+    render();
+    render();
+    CHECK(g_MonsterDatabase.Find(163)->setup.classStep == Data::Monsters::MaxClassStep);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// An eyes row takes the bones the reader takes: pairs, up to three, from 0.
+TEST_CASE("Monster Setup: an eyes row takes two, four or six bones [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::ParseEyeBones;
+    CHECK(ParseEyeBones("16, 17") == std::vector<int>{16, 17});
+    CHECK(ParseEyeBones("1, 2, 3, 4, 5, 6") == std::vector<int>{1, 2, 3, 4, 5, 6});
+    CHECK_FALSE(ParseEyeBones("16").has_value());
+    CHECK_FALSE(ParseEyeBones("5, 6, 7").has_value());
+    CHECK_FALSE(ParseEyeBones("1, 2, 3, 4, 5, 6, 7, 8").has_value());
+    CHECK_FALSE(ParseEyeBones("-1, 2").has_value());
+    CHECK_FALSE(ParseEyeBones("").has_value());
+}
+
+// The state variants that apply on a map variant's maps, which Monster
+// Preview's State row lists: its own, else the monster's.
+TEST_CASE("Monster Preview: the State row lists the state variants on the picked map [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::StatesOnMap;
+    MonsterDefinition giant = Monster(7, "Giant");
+    giant.setup.stateVariants.emplace_back().state = "playerTransformed";
+    giant.mapVariants.resize(2);
+    giant.mapVariants[0].setup.stateVariants.emplace_back().state = "crywolfReady";
+
+    CHECK(&StatesOnMap(giant, -1) == &giant.setup.stateVariants);
+    CHECK(&StatesOnMap(giant, 0) == &giant.mapVariants[0].setup.stateVariants);
+    CHECK(&StatesOnMap(giant, 1) == &giant.setup.stateVariants);
+}
+
+// Monster Preview keeps its picked state by name: when the listed state
+// variants change under it (a map variant gets its maps), it stays on that
+// state or goes back to Always, never to another state.
+TEST_CASE("Monster Preview: a picked state stays itself when the list changes [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::PickedState;
+    std::vector<Data::Monsters::MonsterStateVariant> monsterStates(2);
+    monsterStates[0].state = "playerTransformed";
+    monsterStates[1].state = "raklionBossWaiting";
+    std::vector<Data::Monsters::MonsterStateVariant> mapStates(2);
+    mapStates[0].state = "castleSiegeRunning";
+    mapStates[1].state = "crywolfReady";
+
+    CHECK(PickedState(monsterStates, "raklionBossWaiting") == "raklionBossWaiting");
+    CHECK(PickedState(mapStates, "raklionBossWaiting").empty());
+    CHECK(PickedState(mapStates, "crywolfReady") == "crywolfReady");
+    CHECK(PickedState(mapStates, "").empty());
+}
+
+TEST_CASE("Monster Setup: a facing-by-tile row switches its axis [editor][monsters]")
+{
+    using MuEditor::Monsters::SetupLists::SetTileAxis;
+    using MuEditor::Monsters::SetupLists::TileOnAxis;
+    Data::Monsters::MonsterTileFacing tile;
+    tile.tileX = 62;
+
+    SetTileAxis(tile, 1);
+    CHECK_FALSE(tile.tileX.has_value());
+    CHECK(tile.tileY == 62);
+    TileOnAxis(tile) = 90;
+    CHECK(tile.tileY == 90);
+    CHECK_FALSE(tile.tileX.has_value());
+
+    SetTileAxis(tile, 0);
+    CHECK(tile.tileX == 90);
+    CHECK_FALSE(tile.tileY.has_value());
+    TileOnAxis(tile) = 183;
+    CHECK(tile.tileX == 183);
+    CHECK_FALSE(tile.tileY.has_value());
+}
+
+TEST_CASE("Monster Setup: every hook says what code it runs [editor][monsters]")
+{
+    for (const Data::Monsters::MonsterHookKind& kind : Data::Monsters::GetMonsterHookKinds())
+    {
+        INFO(kind.name);
+        CHECK_FALSE(MuEditor::Monsters::SetupLists::GetHookCode(kind.name).empty());
+    }
+}
+
+// Appear is set and left to the game again; a hook is added and removed.
+TEST_CASE("Monster Setup: appear and hooks [editor][monsters]")
+{
+    MonsterDefinition gate = Monster(277, "Castle Gate");
+    gate.model = "MONSTER_MODEL_CASTLE_GATE";
+    const std::array monsters = {gate};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(277);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(277); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    const ImGuiID scope = ImGui::GetIDWithSeed(277, window->ID);
+    click(ImGui::GetIDWithSeed(I18N::Editor::AppearAndTeleport, nullptr, scope));
+    click(ImGui::GetIDWithSeed(I18N::Editor::GateAndHooks, nullptr, scope));
+
+    click(SetupItemId(277, "appear", I18N::Editor::Set));
+    REQUIRE(stored().setup.appear.has_value());
+    CHECK(stored().setup.appear->effects.empty());
+    click(SetupItemId(277, "appear", "x"));
+    CHECK_FALSE(stored().setup.appear.has_value());
+
+    click(SetupItemId(277, "gate", I18N::Editor::Set));
+    REQUIRE(stored().setup.gate.has_value());
+    CHECK(stored().setup.gate->arrivalOpening);
+
+    click(SetupItemId(277, "hooks", I18N::Editor::AddAHook));
+    REQUIRE(stored().setup.hooks.size() == 1);
+    CHECK_FALSE(stored().setup.hooks[0].name.empty());
+    const ImGuiID row = ImGui::GetIDWithSeed(0, ImGui::GetIDWithSeed("hooks", nullptr, scope));
+    click(ImGui::GetIDWithSeed("x", nullptr, row));
+    CHECK(stored().setup.hooks.empty());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// Monster Equipment's paper doll: a slot picked and set to a body, then
+// emptied; a random look takes the monster's equipment with Set and gives it
+// back.
+TEST_CASE("Monster Equipment: a slot of the doll, and a random look's equipment [editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle Elf");
+    elf.model = "MONSTER_MODEL_CHAOS_CASTLE_ELF";
+    elf.setup.equipment.weapons[0] = Data::Monsters::MonsterItem{4, 8};
+    elf.randomVariants.emplace_back();
+    elf.randomVariants[0].model = "MONSTER_MODEL_CHAOS_CASTLE_WIZARD";
+    const std::array monsters = {elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterEquipmentUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(163); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterEquipment);
+    REQUIRE(window != nullptr);
+    const ImGuiID scope = ImGui::GetIDWithSeed(163, window->ID);
+    const auto in = [&](const char* group, const char* label)
+    { return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(group, nullptr, scope)); };
+
+    click(in("Doll", "###Slot2"));
+    click(in("Slot", I18N::Editor::Body));
+    REQUIRE(stored().setup.equipment.helm.has_value());
+    CHECK(stored().setup.equipment.helm->part == "MODEL_BODY_HELM");
+    click(in("Slot", I18N::Editor::Empty));
+    CHECK_FALSE(stored().setup.equipment.helm.has_value());
+    CHECK(stored().setup.equipment.weapons[0].has_value());
+
+    click(in("Rows", "MONSTER_MODEL_CHAOS_CASTLE_WIZARD##Look0"));
+    click(ImGui::GetIDWithSeed(I18N::Editor::Set, nullptr, scope));
+    REQUIRE(stored().randomVariants[0].equipment.has_value());
+    CHECK(*stored().randomVariants[0].equipment == stored().setup.equipment);
+    click(ImGui::GetIDWithSeed(I18N::Editor::UseTheMonsterValue, nullptr, scope));
+    CHECK_FALSE(stored().randomVariants[0].equipment.has_value());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// A monster model takes items in its weapon slots only: its other slots take
+// a body (the merchants' part models) or nothing.
+TEST_CASE("Monster Equipment: a monster model's other slots take a body, not an item [editor][monsters]")
+{
+    MonsterDefinition bull = Monster(0, "Bull Fighter");
+    bull.model = "MONSTER_MODEL_BULL_FIGHTER";
+    const std::array monsters = {bull};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(0);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterEquipmentUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(0); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterEquipment);
+    REQUIRE(window != nullptr);
+    const ImGuiID scope = ImGui::GetIDWithSeed(0, window->ID);
+    const auto in = [&](const char* group, const char* label)
+    { return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(group, nullptr, scope)); };
+
+    click(in("Doll", "###Slot0"));
+    click(in("Slot", I18N::Editor::Item));
+    REQUIRE(stored().setup.equipment.weapons[0].has_value());
+    click(in("Doll", "###Slot2"));
+    click(in("Slot", I18N::Editor::Item));
+    CHECK_FALSE(stored().setup.equipment.helm.has_value());
+    click(in("Slot", I18N::Editor::Body));
+    REQUIRE(stored().setup.equipment.helm.has_value());
+    CHECK(stored().setup.equipment.helm->part == "MODEL_BODY_HELM");
+    click(in("Slot", I18N::Editor::Empty));
+    CHECK_FALSE(stored().setup.equipment.helm.has_value());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// A map variant's own state variants are in the State row of Monster
+// Equipment while the map variant is picked; Set takes the map variant's
+// equipment.
+TEST_CASE("Monster Equipment: a map variant's state variant wears the map variant's equipment [editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle Elf");
+    elf.model = "MONSTER_MODEL_CHAOS_CASTLE_ELF";
+    elf.setup.equipment.weapons[0] = Data::Monsters::MonsterItem{4, 8};
+    elf.mapVariants.emplace_back();
+    elf.mapVariants[0].maps = {{18}};
+    elf.mapVariants[0].setup.equipment.weapons[0] = Data::Monsters::MonsterItem{4, 9};
+    const std::string state(Data::Monsters::GetMonsterStates().front());
+    Data::Monsters::MonsterStateVariant variant;
+    variant.state = state;
+    variant.setup.outline = 2.0f;
+    elf.mapVariants[0].setup.stateVariants.push_back(variant);
+    const std::array monsters = {elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(163);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterEquipmentUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(163); };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterEquipment);
+    REQUIRE(window != nullptr);
+    const ImGuiID scope = ImGui::GetIDWithSeed(163, window->ID);
+    const auto in = [&](const char* group, const char* label)
+    { return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(group, nullptr, scope)); };
+
+    const std::string map = MuEditor::MapPicker::Describe(elf.mapVariants[0].maps, I18N::Editor::NoMapYet) + "##Map0";
+    click(in("Rows", map.c_str()));
+    click(in("Rows", (state + "##State0").c_str()));
+    click(ImGui::GetIDWithSeed(I18N::Editor::Set, nullptr, scope));
+    REQUIRE(stored().mapVariants[0].setup.stateVariants.size() == 1);
+    CHECK(stored().mapVariants[0].setup.stateVariants[0].setup.equipment == stored().mapVariants[0].setup.equipment);
+    // Back to the monster's own, as the window keeps its picks.
+    click(in("Rows", I18N::Editor::AllMaps));
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterEdits.GetHistory().Clear();
+}
+
+// The unknown monsters' look in Monster Setup (D64): a box changes it as an
+// undo step, and Preview as selects the number for Monster Preview, which
+// shows the look's body for a number without an entry.
+TEST_CASE("Monster Setup: the unknown monsters' look is edited, undone and previewed as a number [editor][monsters]")
+{
+    const std::array monsters = {Monster(2, "Budge Dragon")};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterDatabase.SetUnknownLook({});
+    Data::Monsters::MonsterModelDefinition ghost;
+    ghost.slot = "MONSTER_MODEL_GHOST";
+    const std::array models = {ghost};
+    g_MonsterModelDatabase.Build(models);
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSetupUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    render();
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterSetup);
+    REQUIRE(window != nullptr);
+    click(ImGui::GetIDWithSeed(I18N::Editor::UnknownMonsters, nullptr, window->ID));
+    const ImGuiID section = ImGui::GetIDWithSeed("UnknownMonsters", nullptr, window->ID);
+
+    click(ImGui::GetIDWithSeed(I18N::Editor::ANumberWithoutAnEntry, nullptr, section));
+    CHECK_FALSE(g_MonsterDatabase.GetUnknownLook().forNoEntry);
+    CHECK_FALSE(MuEditor::Monsters::ShownModel::FindUnknownLookSlot(700, nullptr).has_value());
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDatabase.GetUnknownLook().forNoEntry);
+    CHECK(MuEditor::Monsters::ShownModel::FindUnknownLookSlot(700, nullptr) ==
+          MODEL_MONSTER01 + MONSTER_MODEL_GHOST);
+    // An entry with a model shows its own.
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    CHECK_FALSE(MuEditor::Monsters::ShownModel::FindUnknownLookSlot(2, &budge).has_value());
+
+    click(ImGui::GetIDWithSeed(I18N::Editor::ShowInMonsterPreview, nullptr, section));
+    CHECK(g_MonsterSelection.GetNumber() == 700);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
 }
 
 #endif // _EDITOR

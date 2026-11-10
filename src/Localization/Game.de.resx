@@ -9027,6 +9027,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls von %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Unbekanntes Monster %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Ich bin ein Fehler: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>Möchten Sie %ls abbrechen?</value>
   </data>

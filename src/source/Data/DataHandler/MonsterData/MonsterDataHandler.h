@@ -80,6 +80,14 @@ public:
     // Told when the shown names changed: the number of the monster, or -1 for
     // all. The game sets it to write the names into the living monsters.
     using NamesChangedCallback = void (*)(int number);
+    // Told when entries changed (the editor's changes, a load or a revert,
+    // not a language switch): the number, or AllNumbers. The game sets it to
+    // give the living monsters what they take at once (D55).
+    using MonstersChangedCallback = void (*)(int number);
+    void SetMonstersChangedCallback(MonstersChangedCallback callback)
+    {
+        m_monstersChanged = callback;
+    }
     static constexpr int AllNumbers = -1;
 
     static MonsterDataHandler& GetInstance();
@@ -215,6 +223,15 @@ public:
     // read back; the problems are added to `issues`.
     bool SaveSoundSets(const std::function<bool(std::vector<MonsterSoundSet>& sets)>& change,
                        std::vector<Items::ItemDataIssue>& issues);
+    // The monster list file as it is, its monsters changed by `change`, as the
+    // text to write together with other files: the item tools' Save writes
+    // the item references a move changed with the items (D60), and the
+    // monster tools' unsaved changes stay theirs. nullopt when the file
+    // cannot be read, `change` returns false (nothing to write) or the
+    // monsters would not read back; the problems are added to `issues`.
+    std::optional<std::string>
+    MakeMonstersFileWith(const std::function<bool(std::vector<MonsterGroup>& groups)>& change,
+                         std::vector<Items::ItemDataIssue>& issues) const;
     // The three files read again together: no table changes when one file
     // has fatal problems.
     bool RevertAll(std::vector<Items::ItemDataIssue>& issues);
@@ -270,6 +287,7 @@ private:
 #endif
 
     NamesChangedCallback m_namesChanged = nullptr;
+    MonstersChangedCallback m_monstersChanged = nullptr;
     bool m_localeObserverRegistered = false;
 #ifdef _EDITOR
     ModelsReopenedCallback m_modelsReopened = nullptr;

@@ -40,6 +40,10 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterItemReferences.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -57,6 +61,7 @@
 #include "UI/ItemEditor/ItemEditorActions.h"
 #include "UI/ItemEditor/ItemListModel.h"
 #include "UI/ItemTools/GlowColorDialog.h"
+#include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/ItemTools/ItemAddDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemFieldWidgets.h"
@@ -2822,6 +2827,152 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage bless = MuEditor::Items::FindItemUsage(MakeItemType(14, 13));
     CHECK(std::ranges::find(bless.texts, "Game: Jewel of Bless") != bless.texts.end());
     CHECK(bless.IsUsedAtNumber());
+}
+
+// The monsters that wear an item use it by its number (D60): the move and
+// remove dialogs list them with their places.
+TEST_CASE("The usage of an item lists the monsters that wear it [data][items][editor]")
+{
+    std::vector<Data::Monsters::MonsterDefinition> previous;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+            previous.push_back(*monster);
+    }
+    Data::Monsters::MonsterDefinition knight;
+    knight.number = 163;
+    knight.names.Set("en", "Chaos Castle Knight");
+    knight.setup.equipment.weapons[0] = Data::Monsters::MonsterItem{0, 0};
+    knight.randomVariants.emplace_back();
+    knight.randomVariants[0].equipment.emplace();
+    knight.randomVariants[0].equipment->weapons[1] = Data::Monsters::MonsterItem{0, 0};
+    Data::Monsters::MonsterDefinition other;
+    other.number = 7;
+    other.names.Set("en", "Giant");
+    other.setup.equipment.helm = Data::Monsters::MonsterItem{7, 2};
+    g_MonsterDatabase.Build(std::array{other, knight}, "en");
+
+    const MuEditor::Items::ItemUsage kris = MuEditor::Items::FindItemUsage(KrisType);
+    const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
+    g_MonsterDatabase.Build(previous, "en");
+
+    REQUIRE(kris.monsters.size() == 2);
+    CHECK(kris.monsters[0].number == 163);
+    CHECK(kris.monsters[0].place.slot == "weapons[0]");
+    CHECK(kris.monsters[1].place.variant == Data::Monsters::MonsterItemPlace::Variant::Random);
+    CHECK(kris.IsUsedAtNumber());
+    CHECK(nothing.monsters.empty());
+}
+
+// A move asks whether the monsters that wear the item follow it (D60,
+// Q-MN41): yes puts the move and the monsters into one step, and the item
+// tools' Save writes those references into the monster list as last saved,
+// with the items; the monster tools' other unsaved changes stay unsaved.
+TEST_CASE("An item move can update the monsters that wear it, and the item Save writes them [data][items][editor]")
+{
+    std::vector<Data::Monsters::MonsterDefinition> previous;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+            previous.push_back(*monster);
+    }
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    const std::filesystem::path monstersFile = folder.Directory() / Data::Monsters::GetMonstersFile();
+    std::filesystem::create_directories(monstersFile.parent_path());
+    std::ofstream(monstersFile, std::ios::binary) << R"({ "formatVersion": 2, "monsters": [
+        {"name": {"en": "Giant"}, "kind": "monster", "numbers": [{"number": 7}]},
+        {"name": {"en": "Chaos Castle Knight"}, "kind": "monster",
+         "equipment": {"weapons": [{"group": 0, "number": 0, "level": 5}]},
+         "numbers": [{"number": 163}, {"number": 164}]}
+    ] })";
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    REQUIRE(g_MonsterDataHandler.Load(errorMessage));
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const int target = MakeItemType(0, 100);
+    Data::Monsters::MonsterItemPlace weapon;
+    weapon.slot = "weapons[0]";
+    const auto weaponOf = [&](int number) { return Data::Monsters::FindItemAt(*g_MonsterDatabase.Find(number), weapon); };
+    const auto weaponInFile = [&](int number) -> std::optional<int>
+    {
+        const Data::Monsters::MonsterDataLoadResult file = Data::Monsters::LoadMonstersFile(monstersFile);
+        for (const Data::Monsters::MonsterDefinition& monster : file.monsters)
+        {
+            if (monster.number == number)
+                return Data::Monsters::FindItemAt(monster, weapon);
+        }
+        return std::nullopt;
+    };
+    const auto nameInFile = [&](int number)
+    {
+        const Data::Monsters::MonsterDataLoadResult file = Data::Monsters::LoadMonstersFile(monstersFile);
+        for (const Data::Monsters::MonsterDefinition& monster : file.monsters)
+        {
+            if (monster.number == number)
+                return monster.names.GetNeutral();
+        }
+        return std::string();
+    };
+
+    SUBCASE("yes: one step, saved with the items")
+    {
+        // An unsaved change of the monster tools, which the item tools' Save leaves.
+        REQUIRE(g_MonsterEdits.SetMonsterName("Name", 7, "en", "Big Giant"));
+
+        REQUIRE(edits.MoveItem("Move", KrisType, target, true));
+        CHECK(weaponOf(163) == target);
+        CHECK(weaponOf(164) == target);
+        CHECK(g_MonsterDatabase.Find(163)->setup.equipment.weapons[0]->level == 5);
+        const std::optional<int> group = g_MonsterDataHandler.FindGroupOf(163);
+        REQUIRE(group);
+        CHECK(Data::Monsters::FindItemAt(g_MonsterDataHandler.ReadGroup(*group)->shared, weapon) == target);
+        CHECK(edits.GetUnsavedMonsterItems().size() == 2);
+
+        REQUIRE(edits.Undo());
+        CHECK(g_ItemDatabase.Find(KrisType) != nullptr);
+        CHECK(weaponOf(163) == KrisType);
+        CHECK(Data::Monsters::FindItemAt(g_MonsterDataHandler.ReadGroup(*group)->shared, weapon) == KrisType);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        REQUIRE(edits.Redo());
+        CHECK(weaponOf(164) == target);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        CHECK(weaponInFile(163) == target);
+        CHECK(weaponInFile(164) == target);
+        CHECK(nameInFile(7) == "Giant");
+        CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
+
+        // Undone after the save: the next save writes the old number back.
+        REQUIRE(edits.Undo());
+        CHECK(edits.GetUnsavedMonsterItems().size() == 2);
+        issues.clear();
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(weaponInFile(163) == KrisType);
+        CHECK(nameInFile(7) == "Giant");
+    }
+
+    SUBCASE("no: the monsters keep the old number")
+    {
+        const std::string before = TestFiles::ReadWholeFile(monstersFile);
+        REQUIRE(edits.MoveItem("Move", KrisType, target));
+        CHECK(weaponOf(163) == KrisType);
+        CHECK(edits.GetUnsavedMonsterItems().empty());
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(edits.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(monstersFile) == before);
+    }
+
+    g_MonsterEdits.OnDataReplaced();
+    g_MonsterDatabase.Build(previous, "en");
 }
 
 TEST_CASE("A number that is not free names what takes it [data][items][editor]")
