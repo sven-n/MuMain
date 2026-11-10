@@ -6,26 +6,29 @@
 
 namespace Core::Input
 {
-    namespace
-    {
-        bool g_leftMouseButtonPressEdge = false;
+namespace
+{
+bool g_leftMouseButtonPressEdge = false;
 
 #ifdef _EDITOR
-        OtherWindowQuery g_otherWindowQuery = nullptr;
+OtherWindowQuery g_otherWindowQuery = nullptr;
 #endif
 
-        } // namespace
+} // namespace
 
-        // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
-        // scancode. Returns SDL_SCANCODE_UNKNOWN for keys we don't translate.
-        SDL_Scancode VkToScancode(int vk)
-        {
-            // ASCII letters and digits: VK codes equal their ASCII values.
-            if (vk >= 'A' && vk <= 'Z') return static_cast<SDL_Scancode>(SDL_SCANCODE_A + (vk - 'A'));
-            if (vk >= '1' && vk <= '9') return static_cast<SDL_Scancode>(SDL_SCANCODE_1 + (vk - '1'));
-            if (vk == '0') return SDL_SCANCODE_0;
+// Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
+// scancode. Returns SDL_SCANCODE_UNKNOWN for keys we don't translate.
+SDL_Scancode VkToScancode(int vk)
+{
+    // ASCII letters and digits: VK codes equal their ASCII values.
+    if (vk >= 'A' && vk <= 'Z')
+        return static_cast<SDL_Scancode>(SDL_SCANCODE_A + (vk - 'A'));
+    if (vk >= '1' && vk <= '9')
+        return static_cast<SDL_Scancode>(SDL_SCANCODE_1 + (vk - '1'));
+    if (vk == '0')
+        return SDL_SCANCODE_0;
 
-            // clang-format off: a table, one key a line.
+    // clang-format off: a table, one key a line.
             switch (vk)
             {
             case VK_UP:      return SDL_SCANCODE_UP;
@@ -59,64 +62,71 @@ namespace Core::Input
             case VK_MENU:    return SDL_SCANCODE_LALT;
             default:         return SDL_SCANCODE_UNKNOWN;
             }
-            // clang-format on
-        }
-
-    void RecordLeftMouseButtonPressEdge()
-    {
-        g_leftMouseButtonPressEdge = true;
-    }
-
-    void ClearLeftMouseButtonPressEdge()
-    {
-        g_leftMouseButtonPressEdge = false;
-    }
-
-    bool IsKeyDown(int virtualKey)
-    {
-        // A scripted press (control socket) counts as down for the frame it
-        // is injected, ahead of the device state below.
-        if (Synthetic::IsKeyHeld(virtualKey))
-        {
-            return true;
-        }
-#ifdef _EDITOR
-        if (g_otherWindowQuery != nullptr && g_otherWindowQuery(virtualKey))
-        {
-            return false;
-        }
-#endif
-
-        // Poll live input from SDL on every platform. The Win32 path used
-        // GetAsyncKeyState because the old child EDIT controls stole keyboard
-        // focus from the SDL window; they were replaced by the portable text
-        // field (#447), so SDL input state is authoritative here too. The main
-        // loop pumps SDL_PollEvent each frame, so this state stays current.
-        // Mouse buttons and modifiers come from the SDL mouse / mod state.
-        switch (virtualKey)
-        {
-        case VK_LBUTTON:
-            return g_leftMouseButtonPressEdge
-                || (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
-        case VK_RBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
-        case VK_MBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
-        case VK_SHIFT:   return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
-        case VK_CONTROL: return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
-        case VK_MENU:    return (SDL_GetModState() & SDL_KMOD_ALT) != 0;
-        default: break;
-        }
-
-        const SDL_Scancode sc = VkToScancode(virtualKey);
-        if (sc == SDL_SCANCODE_UNKNOWN) return false;
-
-        const bool* state = SDL_GetKeyboardState(nullptr);
-        return state != nullptr && state[sc];
-    }
-
-#ifdef _EDITOR
-    void SetOtherWindowQuery(OtherWindowQuery query)
-    {
-        g_otherWindowQuery = query;
-    }
-#endif
+    // clang-format on
 }
+
+void RecordLeftMouseButtonPressEdge()
+{
+    g_leftMouseButtonPressEdge = true;
+}
+
+void ClearLeftMouseButtonPressEdge()
+{
+    g_leftMouseButtonPressEdge = false;
+}
+
+bool IsKeyDown(int virtualKey)
+{
+    // A scripted press (control socket) counts as down for the frame it
+    // is injected, ahead of the device state below.
+    if (Synthetic::IsKeyHeld(virtualKey))
+    {
+        return true;
+    }
+#ifdef _EDITOR
+    if (g_otherWindowQuery != nullptr && g_otherWindowQuery(virtualKey))
+    {
+        return false;
+    }
+#endif
+
+    // Poll live input from SDL on every platform. The Win32 path used
+    // GetAsyncKeyState because the old child EDIT controls stole keyboard
+    // focus from the SDL window; they were replaced by the portable text
+    // field (#447), so SDL input state is authoritative here too. The main
+    // loop pumps SDL_PollEvent each frame, so this state stays current.
+    // Mouse buttons and modifiers come from the SDL mouse / mod state.
+    switch (virtualKey)
+    {
+    case VK_LBUTTON:
+        return g_leftMouseButtonPressEdge ||
+               (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
+    case VK_RBUTTON:
+        return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
+    case VK_MBUTTON:
+        return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
+    case VK_SHIFT:
+        return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
+    case VK_CONTROL:
+        return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
+    case VK_MENU:
+        return (SDL_GetModState() & SDL_KMOD_ALT) != 0;
+    default:
+        break;
+    }
+
+    const SDL_Scancode sc = VkToScancode(virtualKey);
+    if (sc == SDL_SCANCODE_UNKNOWN)
+        return false;
+
+    const bool* state = SDL_GetKeyboardState(nullptr);
+    return state != nullptr && state[sc];
+}
+
+#ifdef _EDITOR
+void SetOtherWindowQuery(OtherWindowQuery query)
+{
+    g_otherWindowQuery = query;
+}
+#endif
+} // namespace Core::Input
