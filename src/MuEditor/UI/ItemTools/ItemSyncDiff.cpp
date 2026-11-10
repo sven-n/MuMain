@@ -794,6 +794,41 @@ void SetWrongSide(SyncFormula& row, WrongSide side)
     UpdateBoxForMark(row.checked, old, side, StartsChecked(side, row.incoming.has_value(), false));
 }
 
+void ApplyMarks(ItemSyncDiff& diff, const KnownDifferences& known)
+{
+    for (SyncItem& row : diff.items)
+    {
+        const WrongSide whole = known.Find(row.group, row.number, WholeItemField(row.change));
+        if (row.change != SyncChange::Changed)
+        {
+            if (whole != row.wrongSide)
+            {
+                SetWrongSide(row, "", whole);
+            }
+            continue;
+        }
+        row.wrongSide = whole;
+        for (SyncField& field : row.fields)
+        {
+            const WrongSide own = known.Find(row.group, row.number, field.field);
+            const WrongSide old = field.wrongSide;
+            field.wrongSide = own != WrongSide::None ? own : whole;
+            field.markOfItem = own == WrongSide::None && whole != WrongSide::None;
+            if (field.wrongSide != old)
+            {
+                UpdateBoxForMark(field.checked, old, field.wrongSide, FieldStartsChecked(field));
+            }
+        }
+    }
+    for (SyncFormula& row : diff.formulas)
+    {
+        if (const WrongSide side = known.Find(row.entry); side != row.wrongSide)
+        {
+            SetWrongSide(row, side);
+        }
+    }
+}
+
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side)
 {
     if (field.empty())

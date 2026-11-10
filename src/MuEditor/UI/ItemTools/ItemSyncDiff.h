@@ -133,6 +133,9 @@ void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 // Removed one, or every field of a Changed one.
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);
+// Gives the diff's rows the marks `known` has now (e.g. read again from the file), each box as
+// SetWrongSide changes it; a row whose mark is the same keeps its box.
+void ApplyMarks(ItemSyncDiff& diff, const KnownDifferences& known);
 // SetWrongSide, and the mark kept in `known` for the next comparisons. A mark of a changed item
 // as a whole takes out its fields' own marks (not the mark of the item new or removed, nor the
 // other way round); a field's own mark counts for that field instead of the

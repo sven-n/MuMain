@@ -393,6 +393,11 @@ void CMuItemSyncUI::Render(bool* open)
                                      { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
             m_marksNotSaved.clear();
             m_knownLoaded = true;
+            // A comparison shown still has the marks from before.
+            if (m_diff && !m_comparingFiles)
+            {
+                ApplyMarks(*m_diff, m_known);
+            }
         }
         TakeChosenFile();
         TakeServerDownload();

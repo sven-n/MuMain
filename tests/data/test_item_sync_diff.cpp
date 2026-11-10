@@ -461,6 +461,50 @@ TEST_CASE("A field's mark leaves the other fields' own marks and its item's mark
     CHECK(repairable->markOfItem);
 }
 
+TEST_CASE("A diff takes the marks read again from the file [data][items][editor]")
+{
+    Sides sides;
+    ItemDefinition& kris = sides.FileItem(KrisType);
+    ++kris.width;
+    kris.repairable = !kris.repairable;
+    sides.file.formulas->excellentDropLevelBonus = sides.client.formulas->excellentDropLevelBonus + 1;
+    KnownDifferences before;
+    before.Set(0, 0, "width", WrongSide::Server);
+    ItemSyncDiff diff = sides.Diff(&before);
+    // A box checked by hand stays when its mark does not change.
+    SyncItem& row = diff.items[static_cast<size_t>(FindRow(diff, KrisType) - diff.items.data())];
+    for (SyncField& field : row.fields)
+    {
+        field.checked = field.field == "width";
+    }
+
+    KnownDifferences now;
+    now.Set(0, 0, EveryFieldOfItem, WrongSide::Server);
+    now.Set(0, 0, "width", WrongSide::Server);
+    now.Set("dropLevelBonus.excellent", WrongSide::Server);
+    ApplyMarks(diff, now);
+    const ItemSyncDiff fresh = sides.Diff(&now);
+    const SyncItem& freshRow = *FindRow(fresh, KrisType);
+    CHECK(row.wrongSide == freshRow.wrongSide);
+    for (const SyncField& field : row.fields)
+    {
+        const SyncField* freshField = FindField(freshRow, field.field);
+        REQUIRE(freshField != nullptr);
+        CHECK(field.wrongSide == freshField->wrongSide);
+        CHECK(field.markOfItem == freshField->markOfItem);
+    }
+    CHECK(FindField(row, "width")->checked);
+    CHECK_FALSE(FindField(row, "repairable")->checked);
+    CHECK(FindFormula(diff, "dropLevelBonus.excellent")->wrongSide == WrongSide::Server);
+    CHECK_FALSE(FindFormula(diff, "dropLevelBonus.excellent")->checked);
+
+    // Marks no longer in the file go.
+    ApplyMarks(diff, KnownDifferences{});
+    CHECK(GetRowWrongSide(row) == WrongSide::None);
+    CHECK(FindField(row, "width")->checked);
+    CHECK(FindFormula(diff, "dropLevelBonus.excellent")->wrongSide == WrongSide::None);
+}
+
 TEST_CASE("The mark of an item only one side had does not mark its fields once both have it "
           "[data][items][editor]")
 {
