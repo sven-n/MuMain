@@ -205,7 +205,7 @@ can have several tags; the file lists them in the order below.
 | `guardianPet` | Demon and Spirit of Guardian |
 | `pandaOrSkeleton` | The panda and skeleton pets and transformation rings |
 | `transformationRing` | Rings that change the character's look: a second one cannot be dragged onto a ring slot, the Kanturu entry and `/move` to Icarus refuse them, and the move window offers no Icarus with one that is not the panda or skeleton ring |
-| `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian |
+| `jewel` | Jewels of Bless, Soul, Life, Chaos, Creation and Guardian, and the ten bundles of jewels and stones (Lahap's): they play the jewel sound when picked up or dropped by a monster, and MU Helper's Jewel/Gem option picks them up |
 | `refineStone` | Lower and Higher Refine Stone |
 | `socketSeed`, `socketSphere`, `socketSeedSphere` | Socket system items |
 | `healingPotion`, `manaPotion`, `complexPotion`, `shieldPotion` | Potions the hotkeys look for; a skill without enough mana takes a mana potion and the MU Helper a healing potion. They take the one with the highest `potionPriority` first, then the highest group and number |
