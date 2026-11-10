@@ -1074,7 +1074,11 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
                            "unknown button `" + buttonName + "`; known: left, right");
     }
 
-    if (!Core::Input::Synthetic::Click(static_cast<float>(windowX), static_cast<float>(windowY), *button))
+    bool shift = false;
+    if (request.Contains("shift") && !request.GetStrictBool("shift", shift))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`shift` must be boolean");
+
+    if (!Core::Input::Synthetic::Click(static_cast<float>(windowX), static_cast<float>(windowY), *button, shift))
     {
         return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
     }
@@ -1083,6 +1087,8 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     result["x"] = windowX;
     result["y"] = windowY;
     result["button"] = buttonName;
+    if (shift)
+        result["shift"] = true;
     act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
     return {};
 }

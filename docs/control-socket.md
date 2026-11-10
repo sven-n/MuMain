@@ -79,7 +79,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, `alt` (shows every drop's name until pressed again), … |
-| `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
+| `click-ui` (`x`, `y`, `button`, `shift`) | click a window pixel (`left` by default), optionally holding Shift for gameplay |
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
@@ -201,6 +201,16 @@ case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
 `home`, `end`, `insert`, `delete`, `pageup`, `pagedown`, arrows,
 `printscreen`, `f1`–`f12` and `alt`.
 
+For a gameplay Shift-click, use
+`{"cmd":"click-ui","x":320,"y":240,"button":"right","shift":true}`.
+`shift` must be boolean and defaults to false. Shift is pressed during the
+hover frames, so the legacy key scan sees it held before the mouse press,
+and stays down through the mouse release. Both inputs belong to the same
+injection. Shift reaches gameplay even when the UI consumes the key, as a
+physical Shift does; a mouse press consumed by the UI does not reach the world.
+This supplies gameplay's modifier state; RmlUi shortcut modifiers still come
+from the physical keyboard.
+
 Focus a text field with a supported UI click or keyboard navigation before
 `type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;
 `{"cmd":"type","text":"hello","enter":true}` delivers Return on a later rendered frame.
@@ -208,7 +218,8 @@ Focus a text field with a supported UI click or keyboard navigation before
 `enter` must be boolean. A successful reply confirms delivery, **not** that a
 field accepted the characters or a login succeeded. Its result reports only
 byte count and whether Enter was requested, never the text (which may be a
-password). No IME composition or key chords are synthesized; `drag-ui` is the only drag.
+password). No IME composition or general key chords are synthesized;
+only `click-ui` supports the Shift modifier. `drag-ui` is the only drag.
 
 Only one injection runs at a time; another answers `busy`. Injection commands
 are observational and do not interrupt an ongoing world act. They answer after
@@ -216,10 +227,13 @@ release processing on rendered frames. A stalled client times out and retracts
 pending input rather than delivering it later. Cancellation is not a rollback:
 text or effects already delivered before cancellation remain. An abandoned
 held RmlUi click is cleared without activating the pressed element. Independent
-physical input continues to work; a physical press of the same button cancels
-an outstanding scripted click before that press is routed, returning a
-`failed` response naming the physical press; a lost window/UI delivery target
-instead reports `failed` with a target-disappeared message. UI hover can remain
+physical input continues to work, but legacy gameplay also sees the injected
+Shift during a shifted click: for example, a physical left click will not walk,
+and physical number keys can select pet commands. A physical press of the same
+button cancels an outstanding scripted click before that press is routed,
+returning a `failed` response naming the physical press; windowed focus loss
+or a lost window/UI delivery target instead reports `failed` with a
+target-disappeared message. UI hover can remain
 at the injected pixel after a completed click or a cancelled click whose UI
 press did not need clearing (a non-primary click or a primary click the UI did
 not consume). A later physical or scripted motion updates it; the OS pointer

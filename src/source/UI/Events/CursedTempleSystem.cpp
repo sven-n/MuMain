@@ -429,6 +429,7 @@ void mu::ui::window::CCursedTempleSystem::ResetCursedTempleSystemInfo()
     m_Scale = 2.5f;
     m_Alph = 1.0f;
     m_SkillPoint = 0;
+    m_CursedTempleGestureConsumed = false;
     m_IsTutorialStep = false;
     m_TutorialStepState = 0;
     m_TutorialStepTime = 0;
@@ -621,7 +622,8 @@ bool mu::ui::window::CCursedTempleSystem::CheckDragonRender()
 
 bool mu::ui::window::CCursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
 {
-    if (Hero->m_CursedTempleCurSkillPacket) return false;
+    if (Hero->m_CursedTempleCurSkillPacket)
+        return false;
 
     return mu::ui::window::IsRepeat(VK_SHIFT);
 }
@@ -715,6 +717,10 @@ void mu::ui::window::CCursedTempleSystem::UpdateTutorialStep()
 
 bool mu::ui::window::CCursedTempleSystem::Update()
 {
+    // A new right press starts a gesture; releasing both RMB and Shift ends it.
+    if (MouseRButtonPush || (!MouseRButton && !mu::ui::window::IsRepeat(VK_SHIFT)))
+        m_CursedTempleGestureConsumed = false;
+
     UpdateScore();
     UpdateTutorialStep();
     SyncView();
@@ -1090,7 +1096,7 @@ bool mu::ui::window::CCursedTempleSystem::Render()
 
 void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
 {
-    if (Hero->m_CursedTempleCurSkillPacket)
+    if (m_CursedTempleGestureConsumed || Hero->m_CursedTempleCurSkillPacket)
     {
         MouseRButtonPush = false;
         return;
@@ -1153,6 +1159,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
         }
         SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType,
                                                                      static_cast<uint16_t>(tc->Key), Distance);
+        m_CursedTempleGestureConsumed = true;
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 

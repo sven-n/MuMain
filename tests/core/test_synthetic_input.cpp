@@ -28,6 +28,9 @@ extern float g_fWindowMouseY;
 extern bool MouseLButton;
 extern bool MouseLButtonPush;
 extern bool MouseLButtonPop;
+extern bool MouseRButton;
+extern bool MouseRButtonPush;
+extern bool MouseRButtonPop;
 extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
 
@@ -37,6 +40,8 @@ namespace
 {
 std::vector<SDL_EventType> delivered;
 bool consume = false;
+bool consumeKeyDown = false;
+bool consumeButtonDown = false;
 std::string deliveredText;
 std::vector<SDL_KeyboardEvent> deliveredKeys;
 bool FakeDelivery(SDL_Event& event, bool& propagates)
@@ -46,7 +51,8 @@ bool FakeDelivery(SDL_Event& event, bool& propagates)
         deliveredText = event.text.text;
     if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
         deliveredKeys.push_back(event.key);
-    propagates = !consume;
+    propagates = !consume && !(consumeKeyDown && event.type == SDL_EVENT_KEY_DOWN) &&
+                 !(consumeButtonDown && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
     return true;
 }
 
@@ -122,6 +128,8 @@ struct ResetInjector
         SetEventDelivery(&FakeDelivery, nullptr);
         delivered.clear();
         consume = false;
+        consumeKeyDown = false;
+        consumeButtonDown = false;
         deliveredText.clear();
         deliveredKeys.clear();
     }
@@ -131,6 +139,45 @@ struct ResetInjector
         SetEventDelivery(nullptr, nullptr);
     }
 };
+
+struct RestoreLegacyInput
+{
+    mu::ui::window::CNewKeyInput keys = *g_pNewKeyInput;
+    unsigned int width = WindowWidth;
+    unsigned int height = WindowHeight;
+    bool right = MouseRButton;
+    bool push = MouseRButtonPush;
+    bool pop = MouseRButtonPop;
+    RestoreLegacyInput()
+    {
+        WindowWidth = 1280;
+        WindowHeight = 960;
+        MouseRButton = MouseRButtonPush = MouseRButtonPop = false;
+        g_pNewKeyInput->SetKeyState(VK_SHIFT, mu::ui::window::CNewKeyInput::KEY_NONE);
+        g_pNewKeyInput->SetKeyState(VK_RBUTTON, mu::ui::window::CNewKeyInput::KEY_NONE);
+    }
+    ~RestoreLegacyInput()
+    {
+        Reset();
+        *g_pNewKeyInput = keys;
+        WindowWidth = width;
+        WindowHeight = height;
+        MouseRButton = right;
+        MouseRButtonPush = push;
+        MouseRButtonPop = pop;
+    }
+};
+
+std::unique_ptr<App::Control::Act> ShiftedRightClick()
+{
+    std::unique_ptr<App::Control::Act> act;
+    const auto request =
+        App::Control::Request::Parse(R"({"cmd":"click-ui","id":7,"x":100,"y":200,"button":"right","shift":true})");
+    REQUIRE(App::Control::Commands::ClickUi(request, act).empty());
+    REQUIRE(act != nullptr);
+    act->SetEncodedId(request.EncodedId());
+    return act;
+}
 } // namespace
 
 TEST_CASE("Synthetic input names the keys the shim translates [core][synthetic-input]")
@@ -770,4 +817,205 @@ TEST_CASE("Type handler rejects invalid arguments before scheduling and refuses 
         App::Control::Request::Parse(R"({"cmd":"type","text":"x"})"), act);
     CHECK(response.find(R"("error":"busy")") != std::string::npos);
     CHECK(act == nullptr);
+}
+
+TEST_CASE("A shifted click reaches the legacy scan with Shift repeated before the right press [core][synthetic-input]")
+{
+    ResetInjector guard;
+    RestoreLegacyInput restore;
+    const auto physicalModifiers = SDL_GetModState();
+    auto act = ShiftedRightClick();
+    bool pressed = false;
+    bool released = false;
+    for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+    {
+        BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+        if (g_pNewKeyInput->IsPress(VK_RBUTTON))
+        {
+            pressed = true;
+            CHECK(mu::ui::window::IsRepeat(VK_SHIFT));
+            CHECK(IsKeyHeld(VK_SHIFT));
+        }
+        if (g_pNewKeyInput->IsRelease(VK_RBUTTON))
+        {
+            released = true;
+            CHECK(IsKeyHeld(VK_SHIFT));
+        }
+    }
+    CHECK(pressed);
+    CHECK(released);
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+    CHECK_FALSE(IsKeyHeld(VK_RBUTTON));
+    REQUIRE(deliveredKeys.size() == 2);
+    CHECK(deliveredKeys.front().type == SDL_EVENT_KEY_DOWN);
+    CHECK(deliveredKeys.front().scancode == SDL_SCANCODE_LSHIFT);
+    CHECK(deliveredKeys.back().type == SDL_EVENT_KEY_UP);
+    CHECK(deliveredKeys.back().scancode == SDL_SCANCODE_LSHIFT);
+    CHECK(SDL_GetModState() == physicalModifiers);
+}
+
+TEST_CASE("Click rejects nonboolean Shift before scheduling [core][synthetic-input]")
+{
+    ResetInjector guard;
+    for (const auto* value : {"null", "0", "1", "\"true\"", "[]", "{}"})
+    {
+        INFO(value);
+        std::unique_ptr<App::Control::Act> act;
+        const auto generation = CurrentGeneration();
+        const auto response = App::Control::Commands::ClickUi(
+            App::Control::Request::Parse(std::string(R"({"cmd":"click-ui","x":1,"y":2,"shift":)") + value + "}"), act);
+        CHECK(response.find(R"("error":"bad_request")") != std::string::npos);
+        CHECK(act == nullptr);
+        CHECK(CurrentGeneration() == generation);
+        act.reset();
+        Reset();
+    }
+}
+
+TEST_CASE("Shifted clicks preserve physical modifier semantics when the UI consumes input [core][synthetic-input]")
+{
+    ResetInjector guard;
+    RestoreLegacyInput restore;
+    SUBCASE("The UI takes Shift")
+    {
+        consumeKeyDown = true;
+    }
+    SUBCASE("The UI takes the mouse press")
+    {
+        consumeButtonDown = true;
+    }
+    auto act = ShiftedRightClick();
+    bool sawMousePress = false;
+    for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+    {
+        BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+        if (consumeButtonDown)
+        {
+            CHECK_FALSE(MouseRButton);
+            CHECK_FALSE(MouseRButtonPush);
+            CHECK_FALSE(g_pNewKeyInput->IsPress(VK_RBUTTON));
+        }
+        if (!delivered.empty() && delivered.back() == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        {
+            sawMousePress = true;
+            CHECK(MouseRButton == !consumeButtonDown);
+            CHECK(MouseRButtonPush == !consumeButtonDown);
+            CHECK(g_pNewKeyInput->IsPress(VK_RBUTTON) == !consumeButtonDown);
+            if (!consumeButtonDown)
+            {
+                CHECK(IsKeyHeld(VK_SHIFT));
+                CHECK(mu::ui::window::IsRepeat(VK_SHIFT));
+            }
+        }
+    }
+    CHECK(sawMousePress);
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+}
+
+TEST_CASE("Dropping a shifted click retracts both inputs without a late release [core][synthetic-input]")
+{
+    ResetInjector guard;
+    RestoreLegacyInput restore;
+    const auto physicalModifiers = SDL_GetModState();
+    for (const int frames : {0, 1, 3, 4})
+    {
+        INFO(frames);
+        delivered.clear();
+        auto act = ShiftedRightClick();
+        for (int frame = 0; frame < frames; ++frame)
+            BeginFrame();
+        if (frames >= 3)
+        {
+            REQUIRE(IsKeyHeld(VK_RBUTTON));
+            CHECK(IsKeyHeld(VK_SHIFT));
+        }
+        act.reset();
+        CHECK(IsIdle());
+        CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+        CHECK_FALSE(IsKeyHeld(VK_RBUTTON));
+        CHECK_FALSE(MouseRButton);
+        CHECK_FALSE(MouseRButtonPush);
+        CHECK_FALSE(MouseRButtonPop);
+        const auto eventCount = delivered.size();
+        BeginFrame();
+        CHECK(delivered.size() == eventCount);
+        CHECK(SDL_GetModState() == physicalModifiers);
+    }
+}
+
+TEST_CASE("A failed shifted click cannot retain Shift or retract a newer injection [core][synthetic-input]")
+{
+    ResetInjector guard;
+    RestoreLegacyInput restore;
+    auto act = ShiftedRightClick();
+    BeginFrame();
+    BeginFrame();
+    BeginFrame();
+    REQUIRE(IsKeyHeld(VK_RBUTTON));
+    CHECK(IsKeyHeld(VK_SHIFT));
+    const auto generation = CurrentGeneration();
+    SUBCASE("Physical right button takes ownership")
+    {
+        CancelForPhysicalButton(SDL_BUTTON_RIGHT);
+        CHECK(FailureFor(generation) == DeliveryFailure::PhysicalOverlap);
+    }
+    SUBCASE("Focus or delivery owner is lost")
+    {
+        CancelDelivery();
+        CHECK(FailureFor(generation) == DeliveryFailure::TargetLost);
+    }
+    SUBCASE("Delivery callback disappears")
+    {
+        SetEventDelivery(nullptr, nullptr);
+        CHECK(FailureFor(generation) == DeliveryFailure::TargetLost);
+    }
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+    CHECK_FALSE(IsKeyHeld(VK_RBUTTON));
+    CHECK_FALSE(MouseRButtonPop);
+    std::string response;
+    CHECK(act->Tick(response) == App::Control::Act::Status::Finished);
+    CHECK(response.find(R"("ok":false)") != std::string::npos);
+    CHECK(response.find(R"("id":7)") != std::string::npos);
+    SetEventDelivery(&FakeDelivery, nullptr);
+    REQUIRE(PressKey(VK_HOME));
+    act.reset();
+    BeginFrame();
+    CHECK(IsKeyHeld(VK_HOME));
+    CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+}
+
+TEST_CASE("Unmodified clicks keep their response shape and do not inherit Shift [core][synthetic-input]")
+{
+    ResetInjector guard;
+    RestoreLegacyInput restore;
+    auto shifted = ShiftedRightClick();
+    for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+        BeginFrame();
+    REQUIRE(IsIdle());
+    shifted.reset();
+    deliveredKeys.clear();
+    for (const auto* suffix : {"", ",\"shift\":false"})
+    {
+        std::unique_ptr<App::Control::Act> act;
+        REQUIRE(App::Control::Commands::ClickUi(
+                    App::Control::Request::Parse(std::string(R"({"cmd":"click-ui","x":1,"y":2)") + suffix + "}"), act)
+                    .empty());
+        for (int frame = 0; frame < 12 && !IsIdle(); ++frame)
+        {
+            BeginFrame();
+            CHECK_FALSE(IsKeyHeld(VK_SHIFT));
+        }
+        CHECK(IsIdle());
+        std::string response;
+        CHECK(act->Tick(response) == App::Control::Act::Status::Finished);
+        CHECK(response.find(R"("ok":true)") != std::string::npos);
+        if (*suffix == '\0')
+            CHECK(response.find("shift") == std::string::npos);
+        CHECK(deliveredKeys.empty());
+    }
 }
