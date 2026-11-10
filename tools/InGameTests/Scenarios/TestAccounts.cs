@@ -48,6 +48,12 @@ internal static class TestAccounts
     public static readonly TestCharacter Equipper = new("testgm2", "testgm2", "testgm2Sum");
 
     /// <summary>
+    /// <c>look-references</c>: level 400 Fist Master with a Cape of Overrule (a see-through part to
+    /// picture) and a Golden Fenrir; a game master, so it can move to any spot of any map.
+    /// </summary>
+    public static readonly TestCharacter LookViewer = new("testgm2", "testgm2", "testgm2Rf");
+
+    /// <summary>
     /// <c>trade-inventory-full</c>: level 71 and 81 Dark Wizards in Lorencia. The test data leaves
     /// nine single free squares and no free 2x2 area in their inventories, and gives each 2x2 pad
     /// armour pieces and rows of jewels and potions to offer.

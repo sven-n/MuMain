@@ -32,7 +32,7 @@ internal sealed class ScenarioRunner(
             foreach (var role in scenario.Roles)
             {
                 log.WriteLine($"    starting client '{role}'");
-                clients[role] = await GameClient.StartAsync(clientOptions, role, cancellationToken);
+                clients[role] = await GameClient.StartAsync(clientOptions, role, this.WriteClientConfig(scenario, role), cancellationToken);
                 clientStarted?.Invoke(clients[role]);
             }
 
@@ -58,6 +58,19 @@ internal sealed class ScenarioRunner(
                 await client.DisposeAsync();
             }
         }
+    }
+
+    // Each client gets a file of its own: the client writes its config back when it quits.
+    private string? WriteClientConfig(Scenario scenario, string role)
+    {
+        if (scenario.ClientConfig is not { } config)
+        {
+            return null;
+        }
+
+        var path = Path.GetFullPath(Path.Combine(folder, $"{role}-config.ini"));
+        File.WriteAllText(path, config);
+        return path;
     }
 
     private ScenarioResult Result(Scenario scenario, bool passed, TimeSpan duration, string? failure, ScenarioContext context)

@@ -32,6 +32,12 @@ and removes the file when it exits normally.
 An option would not do: the client's command line is split on spaces, so a
 path containing one could not be passed.
 
+The same builds take `MU_CONFIG_PATH` too: the client then reads and writes
+that file instead of the `config.ini` next to it, so a scripted client can run
+with settings of its own and leave the player's alone. The in-game tests use
+it for scenarios that need fixed settings, such as `look-references`. Player
+builds ignore it.
+
 ## Talking to it
 
 Newline-delimited JSON, one request object per line, exactly one response per
