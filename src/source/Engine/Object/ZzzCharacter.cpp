@@ -11110,37 +11110,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4);
     }
 
-    if (g_isCharacterBuff((&c->Object), eDeBuff_AttackDown))
-    {
-        if (!SearchEffect(BITMAP_SHINY + 6, o, 1))
-        {
-            vec3_t vLight;
-            Vector(1.4f, 0.2f, 0.2f, vLight);
-            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
-            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
-        }
-    }
-    else
-    {
-        DeleteEffect(BITMAP_SHINY + 6, o, 1);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
-    }
-
-    if (g_isCharacterBuff((&c->Object), eDeBuff_DefenseDown))
-    {
-        if (!SearchEffect(BITMAP_SHINY + 6, o, 2))
-        {
-            vec3_t vLight;
-            Vector(0.25f, 1.0f, 0.7f, Light);
-            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
-            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
-        }
-    }
-    else
-    {
-        DeleteEffect(BITMAP_SHINY + 6, o, 2);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
-    }
+    UpdateStatDownDebuffEffects(o);
 
     if (g_isCharacterBuff((&c->Object), eDeBuff_SahamuttDOT))
     {
@@ -12330,6 +12300,41 @@ void RequestEarthQuake(float value)
         return;
     s_hasEarthQuakeRequest = true;
     s_earthQuakeRequest = value;
+}
+
+void UpdateStatDownDebuffEffects(OBJECT* o)
+{
+    if (g_isCharacterBuff(o, eDeBuff_AttackDown))
+    {
+        if (!SearchEffect(BITMAP_SHINY + 6, o, 1))
+        {
+            vec3_t vLight;
+            Vector(1.4f, 0.2f, 0.2f, vLight);
+            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
+            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
+        }
+    }
+    else
+    {
+        DeleteEffect(BITMAP_SHINY + 6, o, 1);
+        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
+    }
+
+    if (g_isCharacterBuff(o, eDeBuff_DefenseDown))
+    {
+        if (!SearchEffect(BITMAP_SHINY + 6, o, 2))
+        {
+            vec3_t vLight;
+            Vector(0.25f, 1.0f, 0.7f, vLight);
+            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
+            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
+        }
+    }
+    else
+    {
+        DeleteEffect(BITMAP_SHINY + 6, o, 2);
+        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
+    }
 }
 
 void UpdateCharacterEffects()

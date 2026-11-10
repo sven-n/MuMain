@@ -712,6 +712,41 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
     CHECK(skulls() == 0);
 }
 
+TEST_CASE("The defense-down debuff lights get their own color, as the attack-down ones do [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    OBJECT* o = &scope.character().Object;
+    FenrirScope::ClearSpawns();
+    auto lightsOf = [o](int subType, float red, float green, float blue)
+    {
+        int matching = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& effect = Effects[i];
+            if (!effect.Live || effect.Owner != o || effect.SubType != subType ||
+                (effect.Type != BITMAP_SHINY + 6 && effect.Type != BITMAP_PIN_LIGHT))
+                continue;
+            CHECK(effect.Light[0] == doctest::Approx(red));
+            CHECK(effect.Light[1] == doctest::Approx(green));
+            CHECK(effect.Light[2] == doctest::Approx(blue));
+            ++matching;
+        }
+        return matching;
+    };
+
+    g_CharacterRegisterBuff(o, eDeBuff_AttackDown);
+    g_CharacterRegisterBuff(o, eDeBuff_DefenseDown);
+    UpdateStatDownDebuffEffects(o);
+    CHECK(lightsOf(1, 1.4f, 0.2f, 0.2f) == 2);
+    CHECK(lightsOf(2, 0.25f, 1.0f, 0.7f) == 2);
+
+    g_CharacterClearBuff(o);
+    UpdateStatDownDebuffEffects(o);
+    CHECK(lightsOf(1, 0.f, 0.f, 0.f) == 0);
+    CHECK(lightsOf(2, 0.f, 0.f, 0.f) == 0);
+    FenrirScope::ClearSpawns();
+}
+
 TEST_CASE("Every spawn while drawing is a violation, outside a draw it is none [effects]")
 {
     using namespace Diagnostics::DrawSpawnCheck;

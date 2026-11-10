@@ -50,6 +50,8 @@ void UpdateCharacterEffects();
 // A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
 // cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
 void UpdatePreviewCharacter(CHARACTER* c);
+// The attack-down and defense-down debuff lights, spawned while the debuff lasts and removed once it ends.
+void UpdateStatDownDebuffEffects(OBJECT* o);
 // What a character's draw used to set while drawing it, set before the draw: its light, a Doppelganger's look and
 // rise, a Blood Castle corpse held to the ground, the blend mesh lights it draws with.
 void PrepareCharacterForDraw(CHARACTER* c);
