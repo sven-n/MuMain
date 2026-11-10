@@ -30,10 +30,12 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Lighting/DynamicLightHistory.h"
 #include "Render/Lighting/DynamicLightList.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Terrain/TerrainLightGrid.h"
 #include "Scenes/SceneCore.h"
@@ -42,6 +44,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <optional>
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
@@ -79,6 +83,12 @@ bool DetailLowEnable = false;
 
 char            LodBuffer[64 * 64];
 vec3_t          TerrainNormal[TERRAIN_SIZE * TERRAIN_SIZE];
+// The terrain light, one value per cell, from the map file to the frame:
+// TerrainLight: the map's painted lightmap, as loaded.
+// BackTerrainLight: the static light, the lightmap × the sun's slope shading × the light mood
+//   (CreateStaticLightCell); rebuilt when the sun or the mood changes.
+// PrimaryTerrainLight: this frame's light, the static light plus the frame's dynamic lights (game
+//   code adds them through AddTerrainLight); what the ground and the models sample.
 vec3_t          PrimaryTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          BackTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          TerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
@@ -545,11 +555,15 @@ void CreateTerrainNormal_Part(int xi, int yi)
 // How much of each cell keeps its Classic brightness under the light mood (its
 // bright weight, the same in all three channels so the grid sampler reads it).
 static vec3_t StaticLightBrightWeight[TERRAIN_SIZE * TERRAIN_SIZE];
+// The static light figures stand in: BackTerrainLight with the mood's figure scale instead of its base.
 static vec3_t FigureStaticTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 
 // The static light of one cell: the baked light, shaded by the slope towards
 // the sun and darkened by the map's light mood: by its base where the baked
 // light is dark, less towards its shadow keep.
+// Per cell, the direct sunlight inside BackTerrainLight (RGBA8): what Enhanced clouds take away.
+static std::vector<std::uint8_t> s_terrainSunLight(TERRAIN_SIZE * TERRAIN_SIZE * 4, 0);
+
 static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lighting::LightMood::Scales& scales)
 {
     float Luminosity = VectorDotProduct(TerrainNormal[Index], Sun) + 0.5f;
@@ -557,6 +571,8 @@ static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lig
         Luminosity = 0.f;
     else if (Luminosity > 1.f)
         Luminosity = 1.f;
+    // The sun's share: the slope term above the half Classic gives every face.
+    const float direct = std::max(Luminosity - 0.5f, 0.f);
     vec3_t undarkened;
     for (int i = 0; i < 3; i++)
     {
@@ -571,6 +587,11 @@ static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lig
         BackTerrainLight[Index][i] = undarkened[i] * factor[i];
     }
     Vector(weight, weight, weight, StaticLightBrightWeight[Index]);
+    for (int i = 0; i < 3; i++)
+    {
+        const float value = TerrainLight[Index][i] * direct * factor[i];
+        s_terrainSunLight[Index * 4 + i] = static_cast<std::uint8_t>(std::clamp(value, 0.f, 1.f) * 255.f + 0.5f);
+    }
     VectorCopy(BackTerrainLight[Index], FigureStaticTerrainLight[Index]);
     Render::Lighting::LightMood::CorrectFigureLight(scales, undarkened, FigureStaticTerrainLight[Index], weight);
 }
@@ -593,17 +614,23 @@ float RequestStaticLightBrightWeight(float xf, float yf)
     return weight[0];
 }
 
+// The sun the slope shading leans towards: the map's baked one, following the frame's sun.
+static glm::vec3 TerrainSunVector()
+{
+    const glm::vec3 baked = gMapManager.InBattleCastle() ? glm::vec3(0.5f, -1.f, 1.f) : glm::vec3(0.5f, -0.5f, 0.5f);
+    return Render::Lighting::FollowFrameSun(baked);
+}
+
+// The vector BackTerrainLight was last built with.
+static glm::vec3 s_terrainLightSun{0.f};
+// The light mood revision the static light was last built with.
+static std::uint32_t s_bakedMoodRevision = 0;
+
 void CreateTerrainLight()
 {
-    vec3_t Light;
-    if (gMapManager.InBattleCastle())
-    {
-        Vector(0.5f, -1.f, 1.f, Light);
-    }
-    else
-    {
-        Vector(0.5f, -0.5f, 0.5f, Light);
-    }
+    s_terrainLightSun = TerrainSunVector();
+    s_bakedMoodRevision = Render::Lighting::LightMood::Revision();
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
     const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = 0; y < TERRAIN_SIZE; y++)
     {
@@ -612,6 +639,7 @@ void CreateTerrainLight()
             CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
+    mu::GetRenderer().SetTerrainSunLight(s_terrainSunLight);
 }
 
 void CreateTerrainLight_Part(int xi, int yi)
@@ -622,8 +650,7 @@ void CreateTerrainLight_Part(int xi, int yi)
     if (yi > TERRAIN_SIZE - 4) yi = TERRAIN_SIZE - 4;
     else if (yi < 4)         yi = 4;
 
-    vec3_t Light;
-    Vector(0.5f, -0.5f, 0.5f, Light);
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
     const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = yi - 4; y < yi + 4; y++)
     {
@@ -1397,6 +1424,55 @@ inline void Interpolation(int mx, int my)
     }
 }
 
+// The terrain light without the brightening part of the frame's pinned point lights
+// (WorldDynamicLights): the ground lit per pixel adds that part back in its shader.
+static vec3_t GroundTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
+static bool s_groundLightBuilt = false;
+// The light the ground's faces take: GroundTerrainLight inside a lit GroundLightScope.
+static vec3_t* s_faceLight = PrimaryTerrainLight;
+
+extern int FrustrumBoundMinX, FrustrumBoundMinY, FrustrumBoundMaxX, FrustrumBoundMaxY;
+
+void BuildGroundLight()
+{
+    for (int yi = FrustrumBoundMinY; yi <= FrustrumBoundMaxY + 3; ++yi)
+    {
+        for (int xi = FrustrumBoundMinX; xi <= FrustrumBoundMaxX + 3; ++xi)
+        {
+            const int index = TERRAIN_INDEX_REPEAT(xi, yi);
+            VectorCopy(PrimaryTerrainLight[index], GroundTerrainLight[index]);
+        }
+    }
+    Render::Terrain::LightGrid::RemovePinnedLights(GroundTerrainLight,
+                                                   Render::Lighting::FrameWorldDynamicLights().Selection().uniform);
+    s_groundLightBuilt = true;
+}
+
+// While alive, the ground's faces take the ground light and draw lit per pixel, once the frame's
+// ground light is built and `lit` holds; otherwise they keep the terrain light.
+class GroundLightScope
+{
+public:
+    explicit GroundLightScope(bool lit) : m_previous(s_faceLight)
+    {
+        if (lit && s_groundLightBuilt)
+        {
+            s_faceLight = GroundTerrainLight;
+            m_worldLit.emplace();
+        }
+    }
+    ~GroundLightScope()
+    {
+        s_faceLight = m_previous;
+    }
+    GroundLightScope(const GroundLightScope&) = delete;
+    GroundLightScope& operator=(const GroundLightScope&) = delete;
+
+private:
+    vec3_t* m_previous;
+    std::optional<mu::ScopedWorldLitGeometry> m_worldLit;
+};
+
 void RenderFace(int Texture, int mx, int my)
 {
     if (gMapManager.WorldActive == WD_39KANTURU_3RD)
@@ -1459,13 +1535,14 @@ void RenderFace(int Texture, int mx, int my)
 
     auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
     {
-        return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
-                mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
-    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
-    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
-    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
-    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
     const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
@@ -1483,13 +1560,14 @@ void RenderFace_After(int Texture, int mx, int my)
 
     auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
     {
-        return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
-                mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
-    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
-    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
-    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
-    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
     const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
@@ -1501,6 +1579,7 @@ struct LayerFace
     int texture;
     bool blend;
     mu::Vertex3D vertices[4];
+    bool groundLit = false; // coloured by the ground light (GroundLightScope)
 };
 static std::vector<LayerFace> s_layerFaces;
 
@@ -1511,6 +1590,7 @@ static void RenderLayerFaces()
     EnableDepthTest();
     for (const LayerFace& face : s_layerFaces)
     {
+        const GroundLightScope ground(face.groundLit);
         if (face.blend)
             EnableAlphaBlend();
         else
@@ -1525,14 +1605,19 @@ void RenderFaceAlpha(int Texture, int mx, int my)
 {
     auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
     {
-        return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
-                mu::PackABGR(light[0], light[1], light[2], alpha)};
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, alpha);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
     };
-    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1], TerrainMappingAlpha[TerrainIndex1]);
-    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2], TerrainMappingAlpha[TerrainIndex2]);
-    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3], TerrainMappingAlpha[TerrainIndex3]);
-    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
-    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}});
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1],
+                                     TerrainMappingAlpha[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2],
+                                     TerrainMappingAlpha[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3],
+                                     TerrainMappingAlpha[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4],
+                                     TerrainMappingAlpha[TerrainIndex4]);
+    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}, s_faceLight == GroundTerrainLight});
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
@@ -1730,17 +1815,14 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 #endif	// ASG_ADD_MAP_KARUTAN
                 const auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
                 {
-                    return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1],
-                            mu::PackABGR(light[0], light[1], light[2], 1.f)};
+                    const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+                    return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                            ground.normal[2], tc[0],  tc[1],  ground.color};
                 };
-                const mu::Vertex3D v0 =
-                    MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
-                const mu::Vertex3D v1 =
-                    MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
-                const mu::Vertex3D v2 =
-                    MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
-                const mu::Vertex3D v3 =
-                    MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+                const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+                const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+                const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+                const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
                 const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
                 mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
@@ -1950,23 +2032,30 @@ void RenderTerrainBitmapTile(int Texture, float xf, float yf, float lodf, int lo
     Vector(sx + TileScale, sy + TileScale, BackTerrainHeight[TerrainIndex3] + Height, TerrainVertex[2]);
     Vector(sx, sy + TileScale, BackTerrainHeight[TerrainIndex4] + Height, TerrainVertex[3]);
 
+    const GroundLightScope ground(LightEnable);
     vec3_t Light[4];
     if (LightEnable)
     {
-        VectorCopy(PrimaryTerrainLight[TerrainIndex1], Light[0]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex2], Light[1]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex3], Light[2]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
+        VectorCopy(s_faceLight[TerrainIndex1], Light[0]);
+        VectorCopy(s_faceLight[TerrainIndex2], Light[1]);
+        VectorCopy(s_faceLight[TerrainIndex3], Light[2]);
+        VectorCopy(s_faceLight[TerrainIndex4], Light[3]);
     }
 
     mu::Vertex3D verts[4];
     for (int i = 0; i < 4; i++)
     {
-        std::uint32_t color = fallbackColor;
-        if (LightEnable)
-            color = mu::PackABGR(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        verts[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
-                    0.f, 0.f, 1.f, c[i][0], c[i][1], color};
+        const auto ground = LightEnable ? Render::Terrain::LightGrid::EncodeGroundLight(Light[i], Alpha)
+                                        : Render::Terrain::LightGrid::GroundVertexLight{{0.f, 0.f, 1.f}, fallbackColor};
+        verts[i] = {TerrainVertex[i][0],
+                    TerrainVertex[i][1],
+                    TerrainVertex[i][2],
+                    ground.normal[0],
+                    ground.normal[1],
+                    ground.normal[2],
+                    c[i][0],
+                    c[i][1],
+                    ground.color};
     }
     mu::GetRenderer().RenderQuad3D(verts, static_cast<std::uint32_t>(Texture));
 }
@@ -2822,7 +2911,19 @@ extern int EnableEvent;
 
 void InitTerrainLight()
 {
+    Render::Lighting::UpdateFrameSun();
+    // The sun moved (dynamic.shadowAngle), or look values or the tint source changed the mood's scales since
+    // the last build: the static light follows.
+    const glm::vec3 sun = TerrainSunVector();
+    if (glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))) ||
+        Render::Lighting::LightMood::Revision() != s_bakedMoodRevision)
+    {
+        FRAME_PROFILE(TerrainBake);
+        CreateTerrainLight();
+    }
     Render::Lighting::FrameDynamicLights().Clear();
+    Render::Lighting::FrameWorldDynamicLights().Clear();
+    s_groundLightBuilt = false;
     if (UseLightHistory())
     {
         Render::Lighting::FrameLightHistory().BeginTick();
@@ -3329,7 +3430,10 @@ void RenderTerrain(bool EditFlag)
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
-    RenderTerrainFrustrum(EditFlag);
+    {
+        const GroundLightScope ground(!EditFlag);
+        RenderTerrainFrustrum(EditFlag);
+    }
     RenderLayerFaces();
     //
     if (EditFlag && SelectFlag)
@@ -3346,6 +3450,7 @@ void RenderTerrain(bool EditFlag)
         if (TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
         {
             TerrainFlag = TERRAIN_MAP_GRASS;
+            const GroundLightScope ground(true);
             RenderTerrainFrustrum(EditFlag);
         }
 #ifdef _EDITOR
@@ -3367,6 +3472,7 @@ void RenderTerrain_After(bool EditFlag)
         return;
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
+    const GroundLightScope ground(!EditFlag);
     RenderTerrainFrustrum_After(EditFlag);
 }
 

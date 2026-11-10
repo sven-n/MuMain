@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -321,12 +322,14 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.3f)
             {
-                CHARACTER* chT = &CharactersClient[c->TargetCharacter];
-                vec3_t& v3TargetPos = chT->Object.Position;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t& v3TargetPos = to->Position;
 
-                Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
-                CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0,
-                             0, 1.0f);
+                    Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
+                    CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0,
+                                 0, 0, 1.0f);
+                }
             }
 
             if (6.0f <= o->AnimationFrame && o->AnimationFrame < 12.0f)
@@ -1069,21 +1072,22 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->TargetCharacter != -1)
-            {
-                CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];
-                CreateEffect(MODEL_FIRE, pTargetCharacter->Object.Position, o->Angle, o->Light);
+            const bool targetKnown = c->TargetCharacter != -1;
+            if (targetKnown || c->ReceivedAttackTargetUnknown)
                 PlayBuffer(SOUND_METEORITE01);
+            c->ReceivedAttackTargetUnknown = false;
+            if (targetKnown)
+            {
+                if (OBJECT* target = GameLogic::Combat::AttackTargetObject(*c))
+                    CreateEffect(MODEL_FIRE, target->Position, o->Angle, o->Light);
                 c->TargetCharacter = -1;
                 c->MonsterSkill = -1;
             }
         }
         else if (c->MonsterSkill == 51)
         {
-            if (c->TargetCharacter != -1)
+            if (OBJECT* pTargetObject = GameLogic::Combat::AttackTargetObject(*c))
             {
-                CHARACTER* pTargetCharacter = &CharactersClient[c->TargetCharacter];
-                OBJECT* pTargetObject = &pTargetCharacter->Object;
                 CreateEffect(BITMAP_FLAME, pTargetObject->Position, pTargetObject->Angle, pTargetObject->Light, 0,
                              pTargetObject);
                 PlayBuffer(SOUND_FLAME);

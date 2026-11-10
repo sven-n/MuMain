@@ -5,6 +5,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
@@ -71,6 +72,18 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
 // warnings.
 void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
                           const std::string& labelFile, std::vector<ItemDataIssue>& issues);
+
+// The forms of the items' names and name lines ("nameForms") against the name cases file (`casesFile` names it in
+// messages): a form in English, in a language or case the file does not give, or in a language the name has no text
+// of its own in, is never shown (a text shows the name itself instead): warnings. A name line's shared text is read
+// from `tooltips`.
+void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                       const ItemNameCases& cases, const std::string& casesFile, std::vector<ItemDataIssue>& issues);
+
+// A language of the name cases file (`casesFile` names it in messages) the game has no texts in ("pl-PL" for "pl")
+// declines names no text shows: a warning for each. `uiLocales` are the game's languages (I18N::GetAvailableLocales).
+void ValidateNameCaseLocales(const ItemNameCases& cases, std::span<const char* const> uiLocales,
+                             const std::string& casesFile, std::vector<ItemDataIssue>& issues);
 
 // The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
 // lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description

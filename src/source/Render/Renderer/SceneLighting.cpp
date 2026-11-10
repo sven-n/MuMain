@@ -80,6 +80,18 @@ SceneLightingUniform PackSceneLightingUniform(const SceneLighting& lighting, con
     uniform.cameraPosition[0] = lighting.cameraPosition[0];
     uniform.cameraPosition[1] = lighting.cameraPosition[1];
     uniform.cameraPosition[2] = lighting.cameraPosition[2];
+    uniform.cloudParameters[0] = lighting.cloudStrength;
+    uniform.cloudParameters[1] = 1.0f / std::max(lighting.cloudScale, 1.0f);
+    uniform.cloudParameters[2] = lighting.cloudCover;
+    uniform.cloudOffset[0] = lighting.cloudOffset[0];
+    uniform.cloudOffset[1] = lighting.cloudOffset[1];
+    // The clear sky's blue the shade turns towards.
+    constexpr float SkyTint[3] = {0.72f, 0.84f, 1.0f};
+    CopyColor(SkyTint, uniform.skyFill);
+    uniform.skyFill[3] = lighting.skyFill;
+    NormalizeInto(lighting.sunDirection, uniform.sunTowards);
+    uniform.sunTowards[3] = lighting.rimSunFollow;
+    CopyColor(lighting.sunColor, uniform.sunColor);
     return uniform;
 }
 

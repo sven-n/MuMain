@@ -4597,4 +4597,25 @@
   <data name="Item options" xml:space="preserve">
     <value>Item-Optionen</value>
   </data>
+  <data name="Name forms" xml:space="preserve">
+    <value>Namensformen</value>
+  </data>
+  <data name="Name form" xml:space="preserve">
+    <value>Namensform</value>
+  </data>
+  <data name="No language declines item names" xml:space="preserve">
+    <value>Keine Sprache dekliniert Gegenstandsnamen: Data/Items/Tooltips/NameCases.json gibt jeder Sprache ihre Fälle.</value>
+  </data>
+  <data name="Texts naming the item {0}" xml:space="preserve">
+    <value>Texte, die den Gegenstand nennen: {0}</value>
+  </data>
+  <data name="Name cases" xml:space="preserve">
+    <value>Namensfälle</value>
+  </data>
+  <data name="Name cases button" xml:space="preserve">
+    <value>Fälle…</value>
+  </data>
+  <data name="Name cases note" xml:space="preserve">
+    <value>Die Fälle, in denen jede Sprache Gegenstandsnamen dekliniert (Data/Items/Tooltips/NameCases.json).</value>
+  </data>
 </root>

@@ -23,6 +23,8 @@
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/LookData/LookStore.h"
+#include "Data/GameData/ItemData/ItemReferenceNames.h"
+#include "Data/Translation/ItemTextExpansion.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -272,6 +274,12 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
+    ItemNameCasesLoadResult nameCases = LoadItemNameCasesFile(GetItemNameCasesFile());
+    result.issues.insert(result.issues.end(), nameCases.issues.begin(), nameCases.issues.end());
+    ValidateNameForms(result.items, tooltips.file, nameCases.cases, GetItemNameCasesFile().generic_string(),
+                      result.issues);
+    ValidateNameCaseLocales(nameCases.cases, I18N::GetAvailableLocales(), GetItemNameCasesFile().generic_string(),
+                            result.issues);
     GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
     result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
     if (!HasFatal(groundLabels.issues))
@@ -290,6 +298,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     m_statFile = InWriterOrder(std::move(stats.file));
     m_statFileChanged = false;
     m_groundLabelsChanged = false;
+    m_nameCasesChanged = false;
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
@@ -298,10 +307,12 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.SetGroundLabels(std::move(groundLabels.file));
     g_ItemDatabase.SetOptions(std::move(options));
+    g_ItemDatabase.SetNameCases(std::move(nameCases.cases));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
     RegisterLocaleObserver();
+    ConnectItemTexts();
 
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
                 g_ItemDatabase.GetExistingItemCount(), GetItemDataDirectory().string(), loadMilliseconds,
@@ -383,6 +394,36 @@ void CItemDataHandler::SetTranslateItemNames(bool translate)
     if (m_loaded)
     {
         RefreshItemNames();
+        RefreshItemTexts();
+    }
+}
+
+void CItemDataHandler::ConnectItemTexts()
+{
+    // The name of a text's item in the text's language, computed from the item data rather than from the shown names:
+    // a locale switch expands the texts before this handler's observer shows the names in the new language.
+    Data::Translation::ItemTexts::SetNameResolver(
+        [this](const Data::Translation::ItemReference& reference,
+               std::string_view textLocale) -> std::optional<std::string>
+        {
+            const Data::Items::ReferencedName name = Data::Items::ResolveUiTextName(
+                g_ItemDatabase, reference, Data::Items::GetItemNameLocale(textLocale, m_translateItemNames));
+            return name.text.empty() ? std::nullopt : std::optional<std::string>(name.text);
+        });
+    RefreshItemTexts();
+}
+
+void CItemDataHandler::RefreshItemTexts()
+{
+    m_itemTextsNameVersion = g_ItemDatabase.GetNameVersion();
+    Data::Translation::ItemTexts::Refresh();
+}
+
+void CItemDataHandler::RefreshItemTextsIfNamesChanged()
+{
+    if (m_loaded && g_ItemDatabase.GetNameVersion() != m_itemTextsNameVersion)
+    {
+        RefreshItemTexts();
     }
 }
 
@@ -867,6 +908,10 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
                          GetGroundLabelsFile().generic_string(), issues);
     ValidateItemOptionLinks(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetOptions(), issues);
+    ValidateNameForms(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetNameCases(),
+                      GetItemNameCasesFile().generic_string(), issues);
+    ValidateNameCaseLocales(g_ItemDatabase.GetNameCases(), I18N::GetAvailableLocales(),
+                            GetItemNameCasesFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
@@ -949,6 +994,9 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
             return ItemDataSaveResult::InvalidData;
         }
     }
+    models.nameCasesFile = GetItemNameCasesFile();
+    models.nameCases = &g_ItemDatabase.GetNameCases();
+    models.nameCasesChanged = m_nameCasesChanged;
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 
@@ -957,6 +1005,12 @@ void CItemDataHandler::SetStatFile(const ItemStatFile& file)
     m_statFile = InWriterOrder(file);
     m_statFileChanged = true;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
+}
+
+void CItemDataHandler::SetNameCases(const ItemNameCases& cases)
+{
+    g_ItemDatabase.SetNameCases(cases);
+    m_nameCasesChanged = true;
 }
 
 void CItemDataHandler::SetGroundLabelStyle(const GroundLabelStyle& style)

@@ -16,6 +16,7 @@
 #include "Render/Models/Gltf/SkinnedModel.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Scenes/MainScene.h"
 
 #include <array>
 #include <algorithm>
@@ -567,6 +568,107 @@ TEST_CASE("Draws asked for inside a bloom exclusion and drawn later are drawn in
                          RENDER_TEXTURE | RENDER_BRIGHT);
     };
     CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
+TEST_CASE("Characters drawn later are drawn inside the character scope they were asked for in [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    static float secondBones[MAX_BONES][3][4];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, firstBones);
+    Place(second, 400.f, 5.5f, secondBones);
+    AnimateCharacterBones(&first);
+    AnimateCharacterBones(&second);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        {
+            const Render::Drawing::ScopedCharacterDraws characters;
+            const Render::Drawing::ScopedNoSunCasters noSunCasters;
+            RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                             RENDER_TEXTURE);
+        }
+        RenderPartObject(&second, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                         RENDER_TEXTURE);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
+namespace
+{
+bool MarksDrawsNoSunCasters(const std::vector<std::string>& calls)
+{
+    return std::any_of(calls.begin(), calls.end(), [](const std::string& call)
+                       { return call.rfind("final", 0) != 0 && call.find(" noSunCasters 1") != std::string::npos; });
+}
+} // namespace
+
+TEST_CASE("A wing casts no sun shadow under its switch, drawn at once or later, and stays drawn [draw-parity]")
+{
+    PlayerModels models;
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(Models[MODEL_WINGS_OF_ELF].Open2(folder.c_str(), L"ArmorClass01.bmd"));
+    static float bones[MAX_BONES][3][4];
+    static CHARACTER character;
+    Place(character.Object, 100.f, 2.5f, bones);
+    AnimateCharacterBones(&character.Object);
+    Vector(1.f, 1.f, 1.f, character.Light);
+    PART_t wing{};
+    wing.Type = MODEL_WINGS_OF_ELF;
+    wing.LinkBone = 19;
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    const auto scene = [&]
+    { RenderLinkObject(0.f, 0.f, 15.f, &character, &wing, MODEL_WINGS_OF_ELF, 0, 0, true, true); };
+
+    SetDisableWingShadow(false);
+    for (const bool later : {false, true})
+    {
+        CAPTURE(later);
+        CHECK_FALSE(MarksDrawsNoSunCasters(CallsOf(scene, later, false)));
+    }
+    SetDisableWingShadow(true);
+    for (const bool later : {false, true})
+    {
+        CAPTURE(later);
+        CHECK(MarksDrawsNoSunCasters(CallsOf(scene, later, false)));
+    }
+    CheckDrawnLaterAsAtOnce(scene);
+    SetDisableWingShadow(false);
+}
+
+TEST_CASE("Disable Shadows removes body shadows through the same switch as the sun's casters [draw-parity]")
+{
+    SetDisableBodyShadows(false);
+    CHECK(ModelShadowsEnabled());
+    SetDisableBodyShadows(true);
+    CHECK_FALSE(ModelShadowsEnabled());
+
+    PlayerModels models;
+    OBJECT object;
+    Place(object, 100.f, 2.5f, nullptr);
+    BMD& skeleton = Models[MODEL_PLAYER];
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        skeleton.Animation(BoneTransform, object.AnimationFrame, object.PriorAnimationFrame, object.PriorAction,
+                           object.Angle, object.HeadAngle, false, false);
+        RenderPartObject(&object, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, true, false, true);
+        Models[MODEL_BODY_ARMOR].RenderBodyShadow();
+    };
+    const auto triangles = [](const std::vector<std::string>& calls)
+    {
+        return std::count_if(calls.begin(), calls.end(),
+                             [](const std::string& call) { return call.rfind("Triangles", 0) == 0; });
+    };
+    const auto without = triangles(CallsOf(scene, false, false));
+    SetDisableBodyShadows(false);
+    CHECK(triangles(CallsOf(scene, false, false)) > without);
 }
 
 TEST_CASE("A cloth's shadow drawn later falls where the cloth was when it was asked for [draw-parity]")

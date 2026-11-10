@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -245,32 +246,33 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.5f &&
             rand_fps_check(1))
         {
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
-            vec3_t vLight;
-
-            if (gMapManager.WorldActive == WD_39KANTURU_3RD)
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
             {
-                Vector(0.4f, 0.9f, 0.6f, vLight);
-                for (int i = 0; i < 2; i++)
-                    CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
+                vec3_t vLight;
 
-                Vector(0.4f, 1.0f, 0.6f, vLight);
-                CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
-            }
-            else
-            {
-                Vector(0.4f, 0.9f, 0.6f, vLight);
-                for (int i = 0; i < 5; i++)
+                if (gMapManager.WorldActive == WD_39KANTURU_3RD)
                 {
-                    CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
-                }
+                    Vector(0.4f, 0.9f, 0.6f, vLight);
+                    for (int i = 0; i < 2; i++)
+                        CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 
-                Vector(0.4f, 1.0f, 0.6f, vLight);
-
-                for (int i = 0; i < 2; i++)
-                {
+                    Vector(0.4f, 1.0f, 0.6f, vLight);
                     CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+                }
+                else
+                {
+                    Vector(0.4f, 0.9f, 0.6f, vLight);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
+                    }
+
+                    Vector(0.4f, 1.0f, 0.6f, vLight);
+
+                    for (int i = 0; i < 2; i++)
+                    {
+                        CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
+                    }
                 }
             }
         }
@@ -1209,37 +1211,37 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
-
-            vec3_t vPos, vRelative;
-            Vector(0.f, 0.f, 0.f, vRelative);
-            if (gMapManager.WorldActive == WD_39KANTURU_3RD)
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
             {
-                if (rand_fps_check(4))
+                vec3_t vPos, vRelative;
+                Vector(0.f, 0.f, 0.f, vRelative);
+                if (gMapManager.WorldActive == WD_39KANTURU_3RD)
                 {
-                    BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
-                    CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
-                }
+                    if (rand_fps_check(4))
+                    {
+                        BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
+                        CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    }
 
-                if (rand_fps_check(4))
-                {
-                    BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
-                    CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    if (rand_fps_check(4))
+                    {
+                        BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
+                        CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    }
                 }
-            }
-            else
-            {
-                if (rand_fps_check(2))
+                else
                 {
-                    BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
-                    CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
-                }
+                    if (rand_fps_check(2))
+                    {
+                        BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
+                        CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    }
 
-                if (rand_fps_check(2))
-                {
-                    BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
-                    CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    if (rand_fps_check(2))
+                    {
+                        BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
+                        CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
+                    }
                 }
             }
         }
@@ -1356,13 +1358,14 @@ void CTrapCanon::Spawn_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (c->CheckAttackTime(1))
     {
-        CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-        OBJECT* to = &tc->Object;
-        vec3_t vPos, vPos2;
-        VectorCopy(o->Position, vPos);
-        VectorCopy(to->Position, vPos2);
-        vPos[2] += 85.f;
-        CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, to->Angle, 43, to, 30.0f);
+        if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+        {
+            vec3_t vPos, vPos2;
+            VectorCopy(o->Position, vPos);
+            VectorCopy(to->Position, vPos2);
+            vPos[2] += 85.f;
+            CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, to->Angle, 43, to, 30.0f);
+        }
         c->SetLastAttackEffectTime();
     }
 }

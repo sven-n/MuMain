@@ -4813,4 +4813,25 @@
   <data name="Item options" xml:space="preserve">
     <value>Item options</value>
   </data>
+  <data name="Name forms" xml:space="preserve">
+    <value>Name forms</value>
+  </data>
+  <data name="Name form" xml:space="preserve">
+    <value>Name form</value>
+  </data>
+  <data name="No language declines item names" xml:space="preserve">
+    <value>No language declines item names: Data/Items/Tooltips/NameCases.json gives each language its cases.</value>
+  </data>
+  <data name="Texts naming the item {0}" xml:space="preserve">
+    <value>Texts that name the item: {0}</value>
+  </data>
+  <data name="Name cases" xml:space="preserve">
+    <value>Name cases</value>
+  </data>
+  <data name="Name cases button" xml:space="preserve">
+    <value>Cases…</value>
+  </data>
+  <data name="Name cases note" xml:space="preserve">
+    <value>The cases each language declines item names in (Data/Items/Tooltips/NameCases.json).</value>
+  </data>
 </root>

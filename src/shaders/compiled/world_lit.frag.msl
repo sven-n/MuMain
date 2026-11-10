@@ -1,0 +1,291 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+#pragma clang diagnostic ignored "-Wmissing-braces"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+template<typename T, size_t Num>
+struct spvUnsafeArray
+{
+    T elements[Num ? Num : 1];
+    
+    thread T& operator [] (size_t pos) thread
+    {
+        return elements[pos];
+    }
+    constexpr const thread T& operator [] (size_t pos) const thread
+    {
+        return elements[pos];
+    }
+    
+    device T& operator [] (size_t pos) device
+    {
+        return elements[pos];
+    }
+    constexpr const device T& operator [] (size_t pos) const device
+    {
+        return elements[pos];
+    }
+    
+    constexpr const constant T& operator [] (size_t pos) const constant
+    {
+        return elements[pos];
+    }
+    
+    threadgroup T& operator [] (size_t pos) threadgroup
+    {
+        return elements[pos];
+    }
+    constexpr const threadgroup T& operator [] (size_t pos) const threadgroup
+    {
+        return elements[pos];
+    }
+};
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+    float fogFactor;
+    float eyeDepth;
+    float3 worldPosition;
+    float3 darkening;
+};
+
+struct SceneLighting
+{
+    float4 sceneLightDirection;
+    float4 sceneLightColor;
+    float4 diffuseCurve;
+    float4 rimParameters;
+    float4 specularParameters;
+    float4 sceneFogColor;
+    float4 sceneFogParameters;
+    float4 cameraPosition;
+    float4x4 sunViewProjection;
+    float4 sunShadowParameters;
+    float4 lightingParameters;
+    float4 cloudParameters;
+    float4 cloudOffset;
+    float4 skyFill;
+    float4 sunTowards;
+    float4 sunColor;
+};
+
+struct DynamicLights
+{
+    uint dynamicLightCount;
+    float dynamicLightWrap;
+    uint dynamicWorldLightCount;
+    float groundShadowOpacity;
+    float4 dynamicLightPositionAndRadius[32];
+    float4 dynamicLightColor[32];
+};
+
+struct FogUniforms
+{
+    uint fogEnabled;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    uint alphaToCoverage;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+constant spvUnsafeArray<float2, 12> _250 = spvUnsafeArray<float2, 12>({ float2(-0.3260000050067901611328125, -0.4059999883174896240234375), float2(-0.839999973773956298828125, -0.07400000095367431640625), float2(-0.69599997997283935546875, 0.4569999873638153076171875), float2(-0.20299999415874481201171875, 0.620999991893768310546875), float2(0.96200001239776611328125, -0.194999992847442626953125), float2(0.472999989986419677734375, -0.4799999892711639404296875), float2(0.518999993801116943359375, 0.767000019550323486328125), float2(0.185000002384185791015625, -0.89300000667572021484375), float2(0.507000029087066650390625, 0.064000003039836883544921875), float2(0.89600002765655517578125, 0.412000000476837158203125), float2(-0.3219999969005584716796875, -0.933000028133392333984375), float2(-0.791999995708465576171875, -0.597999989986419677734375) });
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+    float input_fogFactor [[user(locn2)]];
+    float input_eyeDepth [[user(locn3)]];
+    float3 input_worldPosition [[user(locn4)]];
+    float3 input_darkening [[user(locn5)]];
+};
+
+static inline __attribute__((always_inline))
+float SunVisibility(thread const float3& worldPosition, thread const float3& worldNormal, constant SceneLighting& _56, depth2d<float> sunShadowMap, sampler sunShadowSampler)
+{
+    if (_56.sunShadowParameters.x <= 0.0)
+    {
+        return 1.0;
+    }
+    float slope = 1.0 - fast::clamp(dot(worldNormal, fast::normalize(_56.sunTowards.xyz)), 0.0, 1.0);
+    float3 lifted = worldPosition + (worldNormal * ((1.5 + (2.0 * slope)) * _56.sunShadowParameters.w));
+    float4 clip = _56.sunViewProjection * float4(lifted, 1.0);
+    float3 ndc = clip.xyz / float3(clip.w);
+    float2 uv = float2((ndc.x * 0.5) + 0.5, 0.5 - (ndc.y * 0.5));
+    if ((any(uv < float2(0.0)) || any(uv > float2(1.0))) || (ndc.z >= 1.0))
+    {
+        return 1.0;
+    }
+    float turn = 6.283185482025146484375 * fract(52.98291778564453125 * fract(dot(worldPosition.xy, float2(0.067110560834407806396484375, 0.005837149918079376220703125))));
+    float2x2 rotation = float2x2(float2(cos(turn), -sin(turn)), float2(sin(turn), cos(turn)));
+    float radius = (_56.sunShadowParameters.z * fast::max(_56.sunShadowParameters.y, 0.25)) * 1.5;
+    float visible = 0.0;
+    float total = 0.0;
+    for (int i = 0; i < 12; i++)
+    {
+        float2 offset = _250[i] * rotation;
+        float weight = exp((-2.0) * dot(offset, offset));
+        float3 _285 = float3(uv + (offset * radius), ndc.z);
+        visible += (weight * sunShadowMap.sample_compare(sunShadowSampler, _285.xy, _285.z, level(0.0)));
+        total += weight;
+    }
+    return visible / total;
+}
+
+static inline __attribute__((always_inline))
+float CloudHash(thread const float2& p)
+{
+    return fract(sin(dot(p, float2(127.09999847412109375, 311.70001220703125))) * 43758.546875);
+}
+
+static inline __attribute__((always_inline))
+float CloudNoise(thread const float2& p)
+{
+    float2 cell = floor(p);
+    float2 f = fract(p);
+    float2 u = (f * f) * (float2(3.0) - (f * 2.0));
+    float2 param = cell;
+    float a = CloudHash(param);
+    float2 param_1 = cell + float2(1.0, 0.0);
+    float b = CloudHash(param_1);
+    float2 param_2 = cell + float2(0.0, 1.0);
+    float c = CloudHash(param_2);
+    float2 param_3 = cell + float2(1.0);
+    float d = CloudHash(param_3);
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+static inline __attribute__((always_inline))
+float CloudLight(thread const float2& xy, thread const float4& parameters, thread const float2& offset)
+{
+    if (parameters.x <= 0.0)
+    {
+        return 1.0;
+    }
+    float2 p = (xy + offset) * parameters.y;
+    float2 param = p;
+    float2 param_1 = (p * 2.0299999713897705078125) + float2(17.1000003814697265625);
+    float2 param_2 = (p * 4.070000171661376953125) + float2(31.700000762939453125);
+    float cover = ((0.550000011920928955078125 * CloudNoise(param)) + (0.300000011920928955078125 * CloudNoise(param_1))) + (0.1500000059604644775390625 * CloudNoise(param_2));
+    float threshold = 1.0 - parameters.z;
+    float cloud = smoothstep(threshold - 0.119999997317790985107421875, threshold + 0.119999997317790985107421875, cover);
+    return 1.0 - (parameters.x * cloud);
+}
+
+static inline __attribute__((always_inline))
+float PointLightFalloff(thread const float3& toLight, thread const float& radius)
+{
+    float horizontal = length(toLight.xy);
+    return (horizontal < radius) ? ((radius - horizontal) / radius) : 0.0;
+}
+
+static inline __attribute__((always_inline))
+float3 WorldDynamicLighting(thread const float3& worldPosition, constant DynamicLights& _449)
+{
+    float3 light = float3(0.0);
+    uint count = min(min(_449.dynamicWorldLightCount, _449.dynamicLightCount), 32u);
+    for (uint i = 0u; i < count; i++)
+    {
+        float4 positionAndRadius = _449.dynamicLightPositionAndRadius[i];
+        float3 param = positionAndRadius.xyz - worldPosition;
+        float param_1 = positionAndRadius.w;
+        light += (_449.dynamicLightColor[i].xyz * PointLightFalloff(param, param_1));
+    }
+    return light;
+}
+
+static inline __attribute__((always_inline))
+float EnhancedFogAmount(thread const float& eyeDepth, constant SceneLighting& _56)
+{
+    float scaledDistance = fast::max(eyeDepth - _56.sceneFogParameters.x, 0.0) * _56.sceneFogParameters.z;
+    return fast::clamp(1.0 - exp((-scaledDistance) * scaledDistance), 0.0, 1.0);
+}
+
+static inline __attribute__((always_inline))
+float4 _main(thread const FSInput& _input, constant SceneLighting& _56, depth2d<float> sunShadowMap, sampler sunShadowSampler, constant DynamicLights& _449, texture2d<float> tex, sampler s, texture2d<float> groundShadowMask, sampler groundShadowSampler, texture2d<float> terrainSunLight, sampler terrainSunSampler, constant FogUniforms& _682)
+{
+    float4 texel = tex.sample(s, _input.uv);
+    uint2 sizeQueryTemp = uint2(groundShadowMask.get_width(), groundShadowMask.get_height());
+    uint maskWidth = sizeQueryTemp.x;
+    uint maskHeight = sizeQueryTemp.y;
+    float2 visibility = groundShadowMask.sample(groundShadowSampler, (_input.pos.xy / float2(float(maskWidth), float(maskHeight)))).xy;
+    float2 shadow = float2(1.0) - ((float2(1.0) - visibility) * _449.groundShadowOpacity);
+    bool sunShadows = _56.sunShadowParameters.x > 0.0;
+    float3 param = _input.worldPosition;
+    float3 param_1 = float3(0.0, 0.0, 1.0);
+    float sunVisible = sunShadows ? SunVisibility(param, param_1, _56, sunShadowMap, sunShadowSampler) : 1.0;
+    shadow.x *= (1.0 - (_56.sunShadowParameters.x * (1.0 - sunVisible)));
+    float2 param_2 = _input.worldPosition.xy;
+    float4 param_3 = _56.cloudParameters;
+    float2 param_4 = _56.cloudOffset.xy;
+    float cloud = sunShadows ? CloudLight(param_2, param_3, param_4) : 1.0;
+    float3 ground = _input.color.xyz * shadow.x;
+    if ((cloud < 1.0) && (_56.lightingParameters.y > 0.0))
+    {
+        float2 cellUv = ((_input.worldPosition.xy / float2(100.0)) + float2(0.5)) / float2(256.0);
+        float3 direct = terrainSunLight.sample(terrainSunSampler, cellUv).xyz;
+        ground = fast::max(ground - ((direct * sunVisible) * (1.0 - cloud)), float3(0.0));
+    }
+    float3 skyShade = mix(float3(1.0), _56.skyFill.xyz, float3(_56.skyFill.w * (1.0 - (sunVisible * cloud))));
+    float3 param_5 = _input.worldPosition;
+    float3 pointLight = fast::max((WorldDynamicLighting(param_5, _449) * shadow.y) + _input.darkening, float3(0.0));
+    float3 light = fast::clamp((ground * skyShade) + pointLight, float3(0.0), float3(1.0));
+    float4 color = float4(texel.xyz * light, texel.w * _input.color.w);
+    if (_682.alphaToCoverage != 0u)
+    {
+        float edge = fast::clamp(((color.w - _682.alphaThreshold) / fast::max(fwidth(color.w), 9.9999997473787516355514526367188e-05)) + 0.5, 0.0, 1.0);
+        color.w *= edge;
+        if (color.w <= 0.0)
+        {
+            discard_fragment();
+        }
+    }
+    else
+    {
+        if ((_682.alphaDiscardEnabled != 0u) && (color.w <= _682.alphaThreshold))
+        {
+            discard_fragment();
+        }
+    }
+    if ((_682.fogEnabled != 0u) && (_56.sceneFogColor.w > 0.0))
+    {
+        float4 _735 = color;
+        float param_6 = _input.eyeDepth;
+        float3 _745 = mix(_735.xyz, _56.sceneFogColor.xyz, float3(EnhancedFogAmount(param_6, _56)));
+        color.x = _745.x;
+        color.y = _745.y;
+        color.z = _745.z;
+    }
+    return color;
+}
+
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _682 [[buffer(0)]], constant SceneLighting& _56 [[buffer(1)]], constant DynamicLights& _449 [[buffer(2)]], texture2d<float> tex [[texture(0)]], texture2d<float> groundShadowMask [[texture(1)]], depth2d<float> sunShadowMap [[texture(2)]], texture2d<float> terrainSunLight [[texture(3)]], sampler s [[sampler(0)]], sampler groundShadowSampler [[sampler(1)]], sampler sunShadowSampler [[sampler(2)]], sampler terrainSunSampler [[sampler(3)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    _input.fogFactor = in.input_fogFactor;
+    _input.eyeDepth = in.input_eyeDepth;
+    _input.worldPosition = in.input_worldPosition;
+    _input.darkening = in.input_darkening;
+    FSInput param = _input;
+    float4 _785 = _main(param, _56, sunShadowMap, sunShadowSampler, _449, tex, s, groundShadowMask, groundShadowSampler, terrainSunLight, terrainSunSampler, _682);
+    out._entryPointOutput = _785;
+    return out;
+}
+

@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -301,25 +302,25 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
+                    vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
+                    vec3_t v3RelativePos, v3StartPos;
 
-                vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
-                vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
-                vec3_t v3RelativePos, v3StartPos;
+                    Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1],
+                           o->Angle[2] + AngleRelative[2], Angle);
 
-                Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2],
-                       Angle);
+                    Vector(0.f, 0.f, 0.f, v3RelativePos);
 
-                Vector(0.f, 0.f, 0.f, v3RelativePos);
+                    b->TransformPosition(o->BoneTransform[2], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[2], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0, 0,
-                             0, o->Scale);
-
-                b->TransformPosition(o->BoneTransform[10], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[10], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0,
+                                 0, 0, o->Scale);
+                }
             }
         }
         break;
@@ -334,24 +335,24 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.7f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
+                    vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
+                    vec3_t v3RelativePos, v3StartPos;
 
-                vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
-                vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
-                vec3_t v3RelativePos, v3StartPos;
+                    Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1],
+                           o->Angle[2] + AngleRelative[2], Angle);
+                    Vector(0.f, 0.f, 0.f, v3RelativePos);
 
-                Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2],
-                       Angle);
-                Vector(0.f, 0.f, 0.f, v3RelativePos);
+                    b->TransformPosition(o->BoneTransform[4], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[4], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0, 0,
-                             0, o->Scale);
-
-                b->TransformPosition(o->BoneTransform[8], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[8], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0,
+                                 0, 0, o->Scale);
+                }
             }
         }
         break;
@@ -359,37 +360,37 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
+                    vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
+                    vec3_t v3RelativePos, v3StartPos;
 
-                vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
-                vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
-                vec3_t v3RelativePos, v3StartPos;
+                    Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1],
+                           o->Angle[2] + AngleRelative[2], Angle);
 
-                Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2],
-                       Angle);
+                    Vector(0.f, 0.f, 0.f, v3RelativePos);
 
-                Vector(0.f, 0.f, 0.f, v3RelativePos);
+                    b->TransformPosition(o->BoneTransform[4], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[4], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[8], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[8], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[2], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[2], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[10], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0,
+                                 0, 0, o->Scale);
 
-                b->TransformPosition(o->BoneTransform[10], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0, 0,
-                             0, o->Scale);
-
-                b->TransformPosition(o->BoneTransform[6], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[6], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 3, o, -1, 0,
+                                 0, 0, o->Scale);
+                }
             }
         }
         break;
@@ -406,21 +407,21 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
+                    vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
+                    vec3_t v3RelativePos, v3StartPos;
 
-                vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
-                vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
-                vec3_t v3RelativePos, v3StartPos;
+                    Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1],
+                           o->Angle[2] + AngleRelative[2], Angle);
 
-                Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2],
-                       Angle);
+                    Vector(0.f, 0.f, 0.f, v3RelativePos);
 
-                Vector(0.f, 0.f, 0.f, v3RelativePos);
-
-                b->TransformPosition(o->BoneTransform[6], v3RelativePos, v3StartPos, true);
-                CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0, 0,
-                             0, o->Scale);
+                    b->TransformPosition(o->BoneTransform[6], v3RelativePos, v3StartPos, true);
+                    CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o, -1, 0,
+                                 0, 0, o->Scale);
+                }
             }
         }
         break;
@@ -601,12 +602,14 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 0.2f && o->AnimationFrame <= 1.0f)
             {
-                CHARACTER* chT = &CharactersClient[c->TargetCharacter];
-                vec3_t& v3TargetPos = chT->Object.Position;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t& v3TargetPos = to->Position;
 
-                Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
-                CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0,
-                             0, 1.0f);
+                    Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);
+                    CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o, -1, 0,
+                                 0, 0, 1.0f);
+                }
             }
 
             if (9.8f <= o->AnimationFrame && o->AnimationFrame < 14.0f)

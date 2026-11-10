@@ -5,6 +5,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
@@ -61,6 +62,8 @@ struct ItemEditStep
         // The render style file (its looks and folders, design L39) went from `renderStylesBefore` to
         // `renderStylesAfter`.
         RenderStyles,
+        // The cases the languages decline item names in went from `casesBefore` to `casesAfter`.
+        NameCases,
     };
 
     Kind kind = Kind::Slot;
@@ -83,6 +86,8 @@ struct ItemEditStep
     // Shared, as the stat file.
     std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesBefore;
     std::shared_ptr<const Data::Looks::RenderStylesFile> renderStylesAfter;
+    Data::Items::ItemNameCases casesBefore;
+    Data::Items::ItemNameCases casesAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -139,6 +144,9 @@ public:
         // The render style file, and putting one back (the game draws its looks). Optional.
         std::function<Data::Looks::RenderStylesFile()> readRenderStyles;
         std::function<void(const Data::Looks::RenderStylesFile& file)> restoreRenderStyles;
+        // The name cases, and putting them back. Optional.
+        std::function<Data::Items::ItemNameCases()> readNameCases;
+        std::function<void(const Data::Items::ItemNameCases& cases)> restoreNameCases;
     };
 
     // Why the last Undo or Redo did nothing.

@@ -9,6 +9,7 @@ mu_add_test(
         test_item_edit_history.cpp
         test_item_ground_labels.cpp
         test_item_json.cpp
+        test_item_references.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
         test_item_model_display_json.cpp
@@ -185,6 +186,7 @@ mu_add_test(
     SOURCES
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
+        test_critical_damage_rate.cpp
         test_style_editor.cpp
         test_dark_lord_pet_tooltip.cpp
         test_item_bytes.cpp
@@ -202,6 +204,7 @@ mu_add_test(
         test_item_sync_diff.cpp
         test_item_sync_server.cpp
         test_item_tooltip_text.cpp
+        test_item_texts.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp

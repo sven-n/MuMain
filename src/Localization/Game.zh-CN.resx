@@ -831,4 +831,55 @@
   <data name="Base Attributes" xml:space="preserve">
     <value>基础属性</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>暴击伤害率：%d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>暴击伤害率：%d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>暴击伤害率</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>幸运 (×%d)：%d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>套装属性：%d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>镶嵌属性：%d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>合计：%d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>伤害</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>普通攻击：%d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>暴击：%d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>卓越攻击：%d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>未计算目标防御</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>暴击伤害</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>套装属性：+%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>再生属性：+%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>镶嵌属性：+%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>合计：+%d</value>
+  </data>
 </root>

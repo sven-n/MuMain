@@ -32,7 +32,8 @@ public:
 
     // Whether item names follow the UI locale; off shows them in English. The
     // game sets it from [UI] TranslateItemNames at start and when the option
-    // changes. Once items are loaded, the names change at once.
+    // changes. Once items are loaded, the names change at once, also in the
+    // texts that name items ({item:14,25}).
     void SetTranslateItemNames(bool translate);
     bool GetTranslateItemNames() const
     {
@@ -180,6 +181,9 @@ public:
     bool RemoveGroundLabelStyle(std::string_view name);
     // Makes the ground label styles these (an undo); the standard rules stay as they are.
     void RestoreGroundLabelStyles(std::span<const Data::Items::GroundLabelStyle> styles);
+    // The cases each language declines item names in (also an undo); the texts that name items show the forms of
+    // these. Save writes Data/Items/Tooltips/NameCases.json.
+    void SetNameCases(const Data::Items::ItemNameCases& cases);
     // The folders MuEditor sorts the ground label styles in (D69); Save writes them with the styles.
     void SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
@@ -228,6 +232,11 @@ public:
     bool ExportToCsv(wchar_t* fileName);
 #endif
 
+    // Expands the texts that name items again when item names changed since the
+    // last time (the editor's name edits, undo and revert). Called every frame
+    // by the editor; cheap while nothing changed.
+    void RefreshItemTextsIfNamesChanged();
+
     // Data Access
     ITEM_ATTRIBUTE* GetItemAttributes();
     ITEM_ATTRIBUTE* GetItemAttribute(int index);
@@ -245,6 +254,9 @@ private:
     void RefreshItemNames();
     void RegisterLocaleObserver();
     static void OnLocaleChanged(void* context) noexcept;
+    // Lets the texts that name items take their names from the item data, and expands them.
+    void ConnectItemTexts();
+    void RefreshItemTexts();
 
 #ifdef _EDITOR
     // Gives imported items without an English name the one the item has now.
@@ -309,6 +321,8 @@ private:
     std::vector<Data::Items::ItemDataIssue> m_renderStyleIssues;
     bool m_renderStylesChanged = false;
     int m_renderStylesVersion = 0;
+    // Whether the editor changed the name cases since Load.
+    bool m_nameCasesChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
     OpenedModelHooks m_openedModelHooks;
@@ -323,6 +337,8 @@ private:
 
     bool m_localeObserverRegistered = false;
     bool m_translateItemNames = true;
+    // The item database's name version when the texts that name items were last expanded.
+    int m_itemTextsNameVersion = -1;
     // Load succeeded once: there are item names to show.
     bool m_loaded = false;
 

@@ -67,6 +67,7 @@ void ApplyConfig(const SceneConfig& config)
     switchOff(overrides.textureFiltering, config.lookTextureFilteringOff);
     switchOff(overrides.enhancedLighting, config.lookLightingOff);
     switchOff(overrides.dynamicLights, config.lookDynamicLightsOff || config.lookLightingOff);
+    switchOff(overrides.sunlight, config.lookSunlightOff);
     switchOff(overrides.lightMood, config.lookLightMoodOff);
     switchOff(overrides.postProcessing, config.lookPostProcessingOff);
     if (!(overrides == Render::Look::SessionOverrides()))

@@ -63,6 +63,11 @@ BOOL CSocketItemMgr::IsSocketItem(const OBJECT* pObject)
     return IsSocketItem(Data::Items::ToItemType(pObject->Type));
 }
 
+bool CSocketItemMgr::AreSocketOptionsActive(const ITEM* pItem)
+{
+    return IsSocketItem(pItem) && pItem->Durability != 0;
+}
+
 BOOL CSocketItemMgr::IsSocketItem(int iItemType)
 {
     switch (iItemType)
@@ -468,6 +473,9 @@ void CSocketItemMgr::CheckSocketSetOption()
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
         pItem = &CharacterMachine->Equipment[i];
+        if (!AreSocketOptionsActive(pItem))
+            continue;
+
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
             if (pItem->SocketSeedID[j] != SOCKET_EMPTY)
@@ -520,7 +528,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
     {
         pItem = &CharacterMachine->Equipment[i];
 
-        if (!IsSocketItem(pItem)) continue;
+        if (!AreSocketOptionsActive(pItem))
+            continue;
 
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
@@ -572,6 +581,15 @@ void CSocketItemMgr::CalcSocketStatusBonus()
                     break;
                 case SOPT_ENERGY_BONUS:
                     m_StatusBonus.m_iEnergyBonus += iBonus;
+                    break;
+                case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageRateBonus += iBonus;
+                    break;
+                case SOPT_CRITICAL_DAMAGE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageBonus += iBonus;
+                    break;
+                case SOPT_EXCELLENT_DAMAGE_BONUS:
+                    m_StatusBonus.m_iExcellentDamageBonus += iBonus;
                     break;
                 }
             }

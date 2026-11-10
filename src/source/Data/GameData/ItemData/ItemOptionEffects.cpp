@@ -18,9 +18,10 @@ struct EffectRow
     ItemOptionEffect effect;
 };
 
-// Luck writes no value: the code before the definitions gave AT_LUCK 0, so the client adds no critical damage rate.
+// Luck writes its value: the character window adds it up into the critical damage rate
+// (GameLogic::Combat::GetHeroCriticalDamageRate).
 constexpr std::array<EffectRow, 1> EffectRows = {{
-    {ItemOptionType::Luck, "criticalDamageChance", ItemOptionAdd::Percent, {AT_LUCK, false}},
+    {ItemOptionType::Luck, "criticalDamageChance", ItemOptionAdd::Percent, {AT_LUCK, true}},
 }};
 } // namespace
 

@@ -1354,6 +1354,11 @@
         "pl": "Łza Elfa",
         "pt": "Lágrima do elfo"
       },
+      "nameForms": {
+        "pl": {
+          "acc": "Łzę Elfa"
+        }
+      },
       "tags": ["secondClassQuestItem"],
       "description": [
         {

@@ -18,13 +18,14 @@ void ApplyLookPreset(LookPreset preset);
 bool HandleLookPresetCommand(std::wstring_view command);
 
 // The Enhanced features a player can switch off ([Render] EnhancedLighting, DynamicLights,
-// LightMood, PostProcessing).
+// LightMood, PostProcessing, Sunlight).
 enum class EnhancedFeature
 {
     Lighting,
     DynamicLights,
     LightMood,
     PostProcessing,
+    Sun,
 };
 [[nodiscard]] bool EnhancedFeatureChosen(EnhancedFeature feature);
 // Saves the choice and applies it while the Enhanced look is active.

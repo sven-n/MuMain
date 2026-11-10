@@ -65,9 +65,10 @@ bool SetPostProcessingView(std::wstring_view name)
 void SubmitPostProcessingLook()
 {
     using Data::Maps::LookValue;
-    mu::GetRenderer().SetPostProcessingLook({Render::Look::Value(LookValue::BloomStrength),
-                                             Render::Look::Value(LookValue::BloomLevelFalloff),
-                                             Render::Look::Value(LookValue::GradingStrength)});
+    mu::GetRenderer().SetPostProcessingLook(
+        {Render::Look::Value(LookValue::BloomStrength), Render::Look::Value(LookValue::BloomLevelFalloff),
+         Render::Look::Value(LookValue::GradingStrength), Render::Look::Value(LookValue::AmbientOcclusionStrength),
+         Render::Look::Value(LookValue::AmbientOcclusionRadius)});
 }
 
 } // namespace Render::PostProcessing

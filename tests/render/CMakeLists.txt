@@ -81,6 +81,21 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sun_shadow_map_tests
+    SOURCES
+        test_sun_shadow_map.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME shadow_pass_selection_tests
+    SOURCES
+        test_shadow_pass_selection.cpp
+)
+
+mu_add_test(
     NAME antialiasing_tests
     SOURCES
         test_antialiasing.cpp
@@ -236,8 +251,19 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightHistory.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightList.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightSelection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/WorldDynamicLights.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/LightShadowCasters.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainLightGrid.cpp
 )
+
+mu_add_test(
+    NAME sun_shadow_tests
+    SOURCES
+        test_sun_shadow.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/SunShadow.cpp
+    LINK_LIBS glm::glm
+)
+target_compile_definitions(sun_shadow_tests PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
 mu_add_test(
     NAME single_sample_twins_tests

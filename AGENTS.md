@@ -30,6 +30,14 @@ several near-identical-name classes across different eras that look interchangea
 these docs exist specifically so new code doesn't reach for a closed or transitional one by
 accident.
 
+## Data-driven features — read this too
+
+New features are data-driven by design: data files and a MuEditor tool (the
+design principle at the top of [`docs/CODING_RULES.md`](docs/CODING_RULES.md)).
+In areas that are already data-driven (items, monsters, effects, ...), new or
+changed behaviour is a data field that every entry of that kind can use, never
+a special case in code.
+
 ## Build setup
 
 The project uses CMake. Supported build environments and setup steps are

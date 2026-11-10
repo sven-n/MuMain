@@ -2376,7 +2376,7 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.validationIssues.empty());
-    // Tags, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
+    // Tags, name forms, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
     // the items keep the ones they have, so the files below match.
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -2816,6 +2816,12 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
     CHECK(nothing.tags.empty());
+    CHECK(nothing.texts.empty());
+
+    // The jewel window's text names the Jewel of Bless by its number: it stays there when the item moves.
+    const MuEditor::Items::ItemUsage bless = MuEditor::Items::FindItemUsage(MakeItemType(14, 13));
+    CHECK(std::ranges::find(bless.texts, "Game: Jewel of Bless") != bless.texts.end());
+    CHECK(bless.IsUsedAtNumber());
 }
 
 TEST_CASE("A number that is not free names what takes it [data][items][editor]")
@@ -4225,6 +4231,47 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
                                   return issue.severity == ItemDataIssueSeverity::Fatal && issue.group == 0 &&
                                          issue.number == 0 && issue.field != "statProfile";
                               }));
+}
+
+TEST_CASE("The shipped name cases file is in the written format [data][items][texts]")
+{
+    const std::filesystem::path file = DataDirectory / "Items" / "Tooltips" / ItemNameCasesFileName;
+    const ItemNameCasesLoadResult shipped = LoadItemNameCasesFile(file);
+    CHECK(shipped.issues.empty());
+    CHECK(shipped.cases.Uses("pl", "gen"));
+    CHECK(WriteItemNameCasesJson(shipped.cases) == TestFiles::ReadWholeFile(file));
+}
+
+TEST_CASE("Save Items writes the name cases file when the editor changed it [data][items][editor][texts]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const std::filesystem::path casesFile = folder.Directory() / GetItemNameCasesFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(casesFile);
+
+    SUBCASE("unchanged, it is left as it is")
+    {
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(casesFile) == shippedText);
+    }
+
+    SUBCASE("changed, it is written and reads back the same")
+    {
+        ItemNameCases changed = g_ItemDatabase.GetNameCases();
+        changed.SetCases("ru", {"gen", "acc"});
+        g_ItemDataHandler.SetNameCases(changed);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const ItemNameCasesLoadResult saved = LoadItemNameCasesFile(casesFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.cases == changed);
+    }
 }
 
 TEST_CASE("Save Items writes the item stat file when the editor changed it [data][items][editor]")

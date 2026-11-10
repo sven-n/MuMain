@@ -1574,47 +1574,50 @@ bool IsRequireEquipItem(ITEM* pItem)
     return bEquipable;
 }
 
+bool AreItemOptionsActive(ITEM* Item)
+{
+    return Item->Type != -1 && Item->Durability != 0 && IsRequireEquipItem(Item);
+}
+
 void PlusSpecial(WORD* Value, int Special, ITEM* Item)
 {
-    if (Item->Type == -1) {
+    if (!AreItemOptionsActive(Item))
+    {
         return;
     }
 
-    if (IsRequireEquipItem(Item))
+    for (int i = 0; i < Item->SpecialNum; i++)
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += Item->SpecialValue[i];
-        }
+        if (Item->Special[i] == Special)
+            *Value += Item->SpecialValue[i];
     }
 }
 
 void PlusSpecialPercent(WORD* Value, int Special, ITEM* Item, WORD Percent)
 {
-    if (Item->Type == -1) return;
-
-    if (IsRequireEquipItem(Item))
+    if (!AreItemOptionsActive(Item))
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += *Value * Percent / 100;
-        }
+        return;
+    }
+
+    for (int i = 0; i < Item->SpecialNum; i++)
+    {
+        if (Item->Special[i] == Special)
+            *Value += *Value * Percent / 100;
     }
 }
 
 void PlusSpecialPercent2(WORD* Value, int Special, ITEM* Item)
 {
-    if (Item->Type == -1) return;
-
-    if (IsRequireEquipItem(Item))
+    if (!AreItemOptionsActive(Item))
     {
-        for (int i = 0; i < Item->SpecialNum; i++)
-        {
-            if (Item->Special[i] == Special && Item->Durability != 0)
-                *Value += (unsigned short)(*Value * (Item->SpecialValue[i] / 100.f));
-        }
+        return;
+    }
+
+    for (int i = 0; i < Item->SpecialNum; i++)
+    {
+        if (Item->Special[i] == Special)
+            *Value += (unsigned short)(*Value * (Item->SpecialValue[i] / 100.f));
     }
 }
 
@@ -2045,19 +2048,6 @@ void CHARACTER_MACHINE::CalculateDamage()
         Character.AttackDamageMinLeft += _Temp;
         Character.AttackDamageMaxLeft += _Temp;
     }
-}
-
-void CHARACTER_MACHINE::CalculateCriticalDamage()
-{
-    Character.CriticalDamage = 0;
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WEAPON_RIGHT]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WEAPON_LEFT]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_HELM]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_ARMOR]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_PANTS]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_GLOVES]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_BOOTS]);
-    PlusSpecial(&Character.CriticalDamage, AT_LUCK, &Equipment[EQUIPMENT_WING]);
 }
 
 void CHARACTER_MACHINE::CalculateMagicDamage()
