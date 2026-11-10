@@ -35,6 +35,11 @@ TEST_CASE("The skills held on the ground toward the cursor are direction skills 
     CHECK(IsAimedByDirection(AT_SKILL_POWER_SLASH));
     CHECK(IsAimedByDirection(AT_SKILL_POWER_SLASH_STR));
     CHECK(IsAimedByDirection(AT_SKILL_FIRE_SLASH));
+    CHECK(IsAimedByDirection(AT_SKILL_THUNDER_STRIKE));
+    CHECK(IsAimedByDirection(AT_SKILL_FLAME_STRIKE));
+    CHECK(IsAimedByDirection(AT_SKILL_GIGANTIC_STORM));
+    CHECK(IsAimedByDirection(AT_SKILL_LIGHTNING_SHOCK));
+    CHECK(IsAimedByDirection(AT_SKILL_LIGHTNING_SHOCK_STR));
 
     // Skills cast on a chosen spot or creature keep their range.
     CHECK_FALSE(IsAimedByDirection(AT_SKILL_DECAY));

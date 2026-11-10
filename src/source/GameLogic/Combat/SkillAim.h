@@ -26,6 +26,10 @@ namespace GameLogic::Combat::SkillAim
     case AT_SKILL_INFERNO:
     case AT_SKILL_INFERNO_STR:
     case AT_SKILL_INFERNO_STR_MG:
+    case AT_SKILL_FLAME_STRIKE:
+    case AT_SKILL_GIGANTIC_STORM:
+    case AT_SKILL_LIGHTNING_SHOCK:
+    case AT_SKILL_LIGHTNING_SHOCK_STR:
     case AT_SKILL_TRIPLE_SHOT:
     case AT_SKILL_TRIPLE_SHOT_STR:
     case AT_SKILL_TRIPLE_SHOT_MASTERY:
@@ -50,6 +54,7 @@ namespace GameLogic::Combat::SkillAim
     case AT_SKILL_EARTHSHAKE:
     case AT_SKILL_EARTHSHAKE_STR:
     case AT_SKILL_EARTHSHAKE_MASTERY:
+    case AT_SKILL_THUNDER_STRIKE:
         return true;
     default:
         return false;
