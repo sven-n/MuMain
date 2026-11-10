@@ -17,7 +17,7 @@
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 
-SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp() : m_nDarkElfAppearance(false) {}
+SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp() {}
 
 SEASON3A::CGM3rdChangeUp::~CGM3rdChangeUp() {}
 
@@ -394,64 +394,6 @@ void SEASON3A::CGM3rdChangeUp::PlayBGM()
     }
 }
 
-CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int PosX, int PosY, int Key)
-{
-    if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap() || gMapManager.InDevilSquare()))
-        return NULL;
-
-    CHARACTER* c = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_BALRAM_TRAINEE:
-    case MONSTER_BALRAM_TRAINEE_SOLDIER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALRAM);
-        c = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_DEATH_SPIRIT_TRAINEE_SOLDIER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT);
-        c = CreateCharacter(Key, MODEL_DEATH_SPIRIT, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster94_zx", 27);
-        BoneManager::RegisterBone(c, L"Monster94_zx01", 28);
-    }
-    break;
-    case MONSTER_SORAM_TRAINEE:
-    case MONSTER_SORAM_TRAINEE_SOLDIER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SORAM);
-        c = CreateCharacter(Key, MODEL_SORAM, PosX, PosY);
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_DARK_ELF_TRAINEE_SOLDIER:
-    {
-        m_nDarkElfAppearance = true;
-
-        OpenMonsterModel(MONSTER_MODEL_DARK_ELF);
-        c = CreateCharacter(Key, MODEL_DARK_ELF, PosX, PosY);
-        //			c->Object.Scale = 1.5f;
-        c->Object.Scale = 1.7f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, L"Left_Hand", 17);
-    }
-    break;
-    }
-    return c;
-}
-
 bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
@@ -541,28 +483,6 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
         }
     }
     break;
-    case MODEL_DARK_ELF:
-        if (m_nDarkElfAppearance)
-        {
-            m_nDarkElfAppearance = false;
-
-            vec3_t Light;
-            vec3_t EndPos, EndRelative;
-
-            Vector(1.f, 0.2f, 0.2f, Light);
-            Vector(0.0f, 0.0f, 0.0f, EndRelative);
-            b->TransformPosition(o->BoneTransform[27], EndRelative, EndPos, true);
-            CreateEffect(BITMAP_CRATER, EndPos, o->Angle, o->Light, 2);
-            CreateParticle(BITMAP_BLUE_BLUR, EndPos, o->Angle, Light, 1);
-            CreateParticle(BITMAP_BLUE_BLUR, EndPos, o->Angle, Light, 1);
-            Vector(1.0f, 0.2f, 0.2f, Light);
-            CreateEffect(BITMAP_SHOCK_WAVE, EndPos, o->Angle, Light, 8);
-            CreateEffect(BITMAP_SHOCK_WAVE, EndPos, o->Angle, Light, 8);
-            CreateEffect(BITMAP_SHOCK_WAVE, EndPos, o->Angle, Light, 8);
-            CreateEffect(BITMAP_SHOCK_WAVE, EndPos, o->Angle, Light, 8);
-            CreateEffect(BITMAP_SHOCK_WAVE, EndPos, o->Angle, Light, 8);
-        }
-        break;
     }
     return false;
 }

@@ -1051,9 +1051,14 @@ phase.
   stays as their supply box's angle); `Angle[0] = 0` and `Weapon[i].Type = -1`
   (already so after `CreateCharacterPointer`); the Canon Tower's if/else hidden
   mesh (overwritten on the next line); the never compiled 227, 228 and 276;
-  Necron's weapon level 7 on an empty slot.
-- The comparison runs on clean, dirty and same-key slots, through 0x13, 0x1F,
-  0x45, 0x68 and `CDirection` (section 10, Q-MN59).
+  Necron's weapon level 7 on an empty slot; the Lunar Rabbit's and the PK
+  Field creator's `m_iAnimation = 0` (nothing reads it for their models);
+  the Totem Golem's `ShadowScale` (only the birds' shadows read it).
+  The monster recorder leaves these out of the comparison (`CompareMoved`).
+- The comparison runs on each map the entry names, on clean, dirty and
+  same-key slots, through 0x13, 0x1F, 0x45, 0x68 and `CDirection` (section
+  10, Q-MN59). A conversion reads the scale on world 0: `Setting_Monster`
+  adds the Blood Castle step (P13) on the castle maps after every creation.
 - MN4c: the item tools list monsters in "used by" and in the move and remove
   dialogs (D60).
 

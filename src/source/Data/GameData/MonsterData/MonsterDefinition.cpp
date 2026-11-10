@@ -20,6 +20,37 @@ const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& mo
     return monster.attacks;
 }
 
+const MonsterMapVariant* FindMapVariant(const MonsterDefinition& monster, int map, int stage)
+{
+    const auto found = std::ranges::find_if(monster.mapVariants, [&](const MonsterMapVariant& variant)
+                                            { return Data::Maps::Names(variant.maps, map, stage); });
+    return found != monster.mapVariants.end() ? &*found : nullptr;
+}
+
+MonsterSetup GetSetupOnMap(const MonsterDefinition& monster, int map, int stage)
+{
+    MonsterSetup setup = monster.setup;
+    if (const MonsterMapVariant* variant = FindMapVariant(monster, map, stage))
+    {
+        for (const MonsterSetupField& field : GetMonsterSetupFields())
+        {
+            if (field.isSet(variant->setup))
+                field.copy(setup, variant->setup);
+        }
+    }
+    return setup;
+}
+
+const std::string& GetModelOnMap(const MonsterDefinition& monster, int map, int stage)
+{
+    for (const MonsterMapVariant& variant : monster.mapVariants)
+    {
+        if (variant.model && Data::Maps::Names(variant.maps, map, stage))
+            return *variant.model;
+    }
+    return monster.model;
+}
+
 const std::string& GetSoundSetWithModel(const MonsterDefinition& monster, int slot)
 {
     for (const MonsterRandomVariant& variant : monster.randomVariants)

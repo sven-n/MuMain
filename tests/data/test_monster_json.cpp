@@ -126,10 +126,10 @@ TEST_CASE("Monster data: a bad header or list is an error, unknown fields are wa
     CHECK(HasIssueAbout(Read(MonsterFile("5")).issues, "monsters[0]", "an object"));
 
     const ReadResult unknown = Read(R"({ "formatVersion": 1, "color": "red", "monsters": [
-        { "number": 7, "name": "X", "kind": "monster", "scale": 2 } ] })");
+        { "number": 7, "name": "X", "kind": "monster", "colour": 2 } ] })");
     CHECK_FALSE(HasFatal(unknown.issues));
     CHECK(HasIssueAbout(unknown.issues, "color", "unknown field"));
-    CHECK(HasIssueAbout(unknown.issues, "monster 7 scale", "unknown field"));
+    CHECK(HasIssueAbout(unknown.issues, "monster 7 colour", "unknown field"));
     CHECK(unknown.monsters.size() == 1);
 }
 
@@ -516,6 +516,26 @@ TEST_CASE("Monster data: a number's own value may be empty where its monster's i
     CHECK(ReadGroups(text).monsters == read.monsters);
 }
 
+// A map variant's setup is read with its maps: its problems show at once,
+// not only once the maps are right.
+TEST_CASE("Monster data: a map variant's setup problems show with its maps' [data][monsters]")
+{
+    const GroupsResult read = ReadGroups(GroupFile(
+        R"({ "name": "Chaos Castle 2", "kind": "monster", "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+             "mapVariants": [{"maps": "nine", "scale": "big"}],
+             "numbers": [ {"number": 163} ] })"));
+
+    const std::string messages = Messages(read.issues);
+    INFO(messages);
+    const auto names = [&](std::string_view field)
+    {
+        return std::ranges::any_of(read.issues, [&](const ItemDataIssue& issue)
+                                   { return issue.field.find(field) != std::string::npos; });
+    };
+    CHECK(names(".maps"));
+    CHECK(names(".scale"));
+}
+
 TEST_CASE("Monster data: the writer writes the shared values once, and each number's own ones [data][monsters]")
 {
     MonsterGroup centurion = Centurion();
@@ -648,10 +668,10 @@ TEST_CASE("Monster data: an error leaves out the number it is in, or the monster
 TEST_CASE("Monster data: unknown fields of a monster and of a number are warnings [data][monsters]")
 {
     const GroupsResult read = ReadGroups(
-        GroupFile(R"({ "name": "X", "kind": "monster", "scale": 2, "numbers": [{"number": 7, "size": 3}] })"));
+        GroupFile(R"({ "name": "X", "kind": "monster", "colour": 2, "numbers": [{"number": 7, "size": 3}] })"));
 
     CHECK_FALSE(HasFatal(read.issues));
-    CHECK(HasIssueAbout(read.issues, "monster 7 scale", "unknown field"));
+    CHECK(HasIssueAbout(read.issues, "monster 7 colour", "unknown field"));
     CHECK(HasIssueAbout(read.issues, "monster 7 size", "unknown field"));
     REQUIRE(read.monsters.size() == 1);
     CHECK(read.monsters[0].numbers.size() == 1);
@@ -723,4 +743,39 @@ TEST_CASE("Monster data: maps that are no list of maps are an error, a monster's
     CHECK(HasIssueAbout(shared.issues, "monster 7 maps", "unknown field"));
     REQUIRE(shared.monsters.size() == 1);
     CHECK(shared.monsters[0].numbers[0].maps.empty());
+}
+
+// Old behaviours the setup keeps are warnings (Q-MN36): `live` false drops the
+// character when it appears (the Wolf Status, P24), wherever it is set.
+TEST_CASE("Monster data: a setup that drops the monster when it appears is a warning (P24) [data][monsters]")
+{
+    MonsterDefinition statue = Monster(204, "Wolf Status");
+    statue.setup.live = false;
+    MonsterDefinition onMap = Monster(205, "Altar");
+    Data::Monsters::MonsterMapVariant variant;
+    variant.maps = {Data::Maps::MapRef{34, 0}};
+    variant.setup.live = false;
+    onMap.mapVariants.push_back(variant);
+    MonsterDefinition inState = Monster(206, "Altar 2");
+    Data::Monsters::MonsterStateVariant state;
+    state.state = "crywolfReady";
+    state.setup.live = false;
+    inState.setup.stateVariants.push_back(state);
+    MonsterDefinition shown = Monster(207, "Altar 3");
+    shown.setup.live = true;
+    const std::array<const MonsterDefinition*, 4> monsters = {&statue, &onMap, &inState, &shown};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterSetups(monsters, "Monsters.json", issues);
+
+    REQUIRE(issues.size() == 3);
+    for (const ItemDataIssue& issue : issues)
+    {
+        CHECK(issue.severity == ItemDataIssueSeverity::Warning);
+        CHECK(issue.message.find("(P24)") != std::string::npos);
+    }
+    CHECK(issues[0].number == 204);
+    CHECK(issues[0].field == "monster 204 live");
+    CHECK(issues[1].field == "monster 205 (map variant 1) live");
+    CHECK(issues[2].field == "monster 206 (state crywolfReady) live");
 }

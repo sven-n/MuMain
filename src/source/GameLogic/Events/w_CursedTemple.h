@@ -28,11 +28,15 @@ namespace SEASON3A
         bool IsHolyItemPickState();
         bool IsPartyMember(DWORD selectcharacterindex);
         void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer);
+        // A new storage shows no point effect its team's points had (the
+        // spawn hook IllusionTempleStorageReset): the allied or the
+        // illusion one.
+        void HideStoragePointEffect(bool allied);
+        bool IsStoragePointEffectShown(bool allied) const;
         void ReceiveCursedTempleState(const eCursedTempleState state);
 
     public:
         bool CreateObject(OBJECT* o);
-        CHARACTER* CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey);
 
     public:
         bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);

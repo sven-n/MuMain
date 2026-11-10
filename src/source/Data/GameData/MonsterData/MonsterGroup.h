@@ -3,6 +3,7 @@
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 
 #include <array>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -44,13 +45,27 @@ enum class MonsterValueField
     Attacks,
     MapVariants,
     RandomVariants,
+    // The setup fields (MonsterSetupField) follow, in the order of
+    // GetMonsterSetupFields: SetupFirst + their index.
+    SetupFirst = 64,
 };
 
+// The fields of an entry besides its setup, in the order the file writes
+// them.
 inline constexpr std::array<MonsterValueField, 7> MonsterValueFields{
     MonsterValueField::Names,          MonsterValueField::Kind,    MonsterValueField::Model,
     MonsterValueField::SoundSet,       MonsterValueField::Attacks, MonsterValueField::MapVariants,
     MonsterValueField::RandomVariants,
 };
+
+// Every field: MonsterValueFields, then the setup fields.
+std::span<const MonsterValueField> GetMonsterValueFields();
+
+// The field of the setup field at `index` of GetMonsterSetupFields.
+MonsterValueField GetSetupValueField(size_t index);
+// The index of a setup field in GetMonsterSetupFields; nullopt for another
+// field.
+std::optional<size_t> GetSetupFieldIndex(MonsterValueField field);
 
 // Whether the two have the same value in the field.
 bool HasSameValue(const MonsterDefinition& left, const MonsterDefinition& right, MonsterValueField field);

@@ -502,6 +502,12 @@ ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path&
     std::vector<FileToSave> files;
     AddItemGroupFiles(itemDirectory, GetItemEntries(items), files);
     AddItemModelFiles(models, files);
+#ifdef _EDITOR
+    for (const TextFileToWrite& file : models.alsoWrite)
+    {
+        files.push_back({file.path, std::string(file.text)});
+    }
+#endif
     return WriteChangedFiles(files, issues);
 }
 

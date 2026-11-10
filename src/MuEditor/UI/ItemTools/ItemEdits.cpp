@@ -8,6 +8,8 @@
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -15,8 +17,11 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Render/Items/LookDrawing.h"
 
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+
 #include <algorithm>
 #include <memory>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -173,8 +178,14 @@ ItemEdits::ItemEdits()
                  [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
                  &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
                  &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
-                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles, &ReadNameCases,
-                 &RestoreNameCases})
+                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles, [](int number) { return g_MonsterDataHandler.ReadMonster(number); },
+                 [](std::span<const Data::Monsters::MonsterSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreMonsters(snapshots); },
+                 [](int id) { return g_MonsterDataHandler.ReadGroup(id); },
+                 [](std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreGroups(snapshots); },
+                 [this](const ItemEditStep& step, bool undoing) { NoteMonsterItems(step, undoing); },
+                 &ReadNameCases, &RestoreNameCases})
 {
 }
 
@@ -282,7 +293,7 @@ bool ItemEdits::RemoveItem(std::string label, int itemType)
     return removed;
 }
 
-bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
+bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType, bool updateMonsters)
 {
     if (IsHeldByCharacter(fromItemType))
     {
@@ -293,10 +304,163 @@ bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
     {
         return false;
     }
-    Record({std::move(label),
-            {{ItemEditStep::Kind::Move, fromItemType, toItemType, std::move(before), ReadSlot(toItemType), std::nullopt,
-              std::nullopt}}});
+    ItemEditEntry entry{std::move(label),
+                        {{ItemEditStep::Kind::Move, fromItemType, toItemType, std::move(before), ReadSlot(toItemType),
+                          std::nullopt, std::nullopt}}};
+    if (updateMonsters)
+    {
+        if (std::optional<ItemEditStep> monsters = UpdateMonsterItems(fromItemType, toItemType))
+        {
+            entry.steps.push_back(std::move(*monsters));
+        }
+    }
+    Record(std::move(entry));
     return true;
+}
+
+std::optional<ItemEditStep> ItemEdits::UpdateMonsterItems(int fromItemType, int toItemType)
+{
+    ItemEditStep step{ItemEditStep::Kind::MonsterItems};
+    std::set<int> groups;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+        if (monster == nullptr)
+        {
+            continue;
+        }
+        Data::Monsters::MonsterDefinition changed = *monster;
+        if (Data::Monsters::ReplaceItemReferences(changed, fromItemType, toItemType) == 0)
+        {
+            continue;
+        }
+        step.monstersBefore.push_back({number, *monster});
+        step.monstersAfter.push_back({number, std::move(changed)});
+        if (const std::optional<int> group = g_MonsterDataHandler.FindGroupOf(number))
+        {
+            groups.insert(*group);
+        }
+    }
+    if (step.monstersBefore.empty())
+    {
+        return std::nullopt;
+    }
+    for (const int id : groups)
+    {
+        std::optional<Data::Monsters::MonsterGroupLayout> group = g_MonsterDataHandler.ReadGroup(id);
+        if (!group)
+        {
+            continue;
+        }
+        Data::Monsters::MonsterGroupLayout changed = *group;
+        if (Data::Monsters::ReplaceItemReferences(changed.shared, fromItemType, toItemType) == 0)
+        {
+            continue;
+        }
+        step.monsterGroupsBefore.push_back({id, std::move(group)});
+        step.monsterGroupsAfter.push_back({id, std::move(changed)});
+    }
+    g_MonsterDataHandler.RestoreMonsters(step.monstersAfter);
+    g_MonsterDataHandler.RestoreGroups(step.monsterGroupsAfter);
+    NoteMonsterItems(step, false);
+    return step;
+}
+
+void ItemEdits::NoteMonsterItems(const ItemEditStep& step, bool undoing)
+{
+    using Data::Monsters::MonsterItemChange;
+    using Data::Monsters::MonsterItemPlace;
+    // The places in their order; a step changes only the items' numbers, so
+    // both sides have the same places.
+    const auto itemsOf = [](const std::optional<Data::Monsters::MonsterDefinition>& monster)
+    {
+        std::vector<std::pair<MonsterItemPlace, int>> items;
+        if (monster)
+        {
+            Data::Monsters::ForEachMonsterItem(
+                *monster, [&](const Data::Monsters::MonsterItem& item, const MonsterItemPlace& place)
+                { items.emplace_back(place, Data::Items::MakeItemType(item.group, item.number)); });
+        }
+        return items;
+    };
+    for (size_t i = 0; i < step.monstersBefore.size() && i < step.monstersAfter.size(); ++i)
+    {
+        const auto before = itemsOf(step.monstersBefore[i].monster);
+        const auto after = itemsOf(step.monstersAfter[i].monster);
+        const int number = step.monstersBefore[i].number;
+        for (size_t place = 0; place < before.size() && place < after.size(); ++place)
+        {
+            if (before[place].first != after[place].first || before[place].second == after[place].second)
+            {
+                continue;
+            }
+            const int from = undoing ? after[place].second : before[place].second;
+            const int to = undoing ? before[place].second : after[place].second;
+            const auto pending =
+                std::ranges::find_if(m_monsterItems, [&](const MonsterItemChange& change)
+                                     { return change.number == number && change.place == before[place].first; });
+            if (pending == m_monsterItems.end())
+            {
+                m_monsterItems.push_back({number, before[place].first, from, to});
+            }
+            else if (pending->saved == to)
+            {
+                m_monsterItems.erase(pending);
+            }
+            else
+            {
+                pending->current = to;
+            }
+        }
+    }
+}
+
+Data::Items::ItemDataSaveResult ItemEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
+{
+    // The places the table still names as the moves left them.
+    std::vector<Data::Monsters::MonsterItemChange> changes;
+    for (const Data::Monsters::MonsterItemChange& change : m_monsterItems)
+    {
+        const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(change.number);
+        if (monster != nullptr && Data::Monsters::FindItemAt(*monster, change.place) == change.current)
+        {
+            changes.push_back(change);
+        }
+    }
+    std::optional<std::string> monsters;
+    if (!changes.empty())
+    {
+        bool changed = false;
+        const size_t first = issues.size();
+        monsters = g_MonsterDataHandler.MakeMonstersFileWith(
+            [&](std::vector<Data::Monsters::MonsterGroup>& groups)
+            {
+                changed = Data::Monsters::ApplyMonsterItemChanges(groups, changes);
+                return changed;
+            },
+            issues);
+        // The file cannot be read, or would not read back: no file is written,
+        // so the items and the monsters stay alike.
+        const bool failed = std::any_of(issues.begin() + static_cast<std::ptrdiff_t>(first), issues.end(),
+                                        [](const Data::Items::ItemDataIssue& issue)
+                                        { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+        if (failed || (changed && !monsters))
+        {
+            return Data::Items::ItemDataSaveResult::InvalidData;
+        }
+    }
+    std::vector<Data::TextFileToWrite> alsoWrite;
+    if (monsters)
+    {
+        alsoWrite.push_back({Data::Monsters::GetMonstersFile(), *monsters});
+    }
+    const Data::Items::ItemDataSaveResult result = g_ItemDataHandler.Save(issues, alsoWrite);
+    if (result == Data::Items::ItemDataSaveResult::Saved)
+    {
+        m_history.MarkSaved();
+        m_monsterItems.clear();
+    }
+    return result;
 }
 
 void ItemEdits::SetItemModel(std::string label, const ItemModelDefinition& model)

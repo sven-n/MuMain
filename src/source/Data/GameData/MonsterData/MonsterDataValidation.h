@@ -19,4 +19,10 @@ void ValidateMonsterNames(std::span<const MonsterDefinition> monsters, std::vect
 // each. `uiLocales` are the game's languages (I18N::GetAvailableLocales).
 void ValidateMonsterNameLocales(std::span<const MonsterDefinition> monsters, std::span<const char* const> uiLocales,
                                 std::vector<Items::ItemDataIssue>& issues);
+
+// Old behaviours the setup keeps (Q-MN36), a warning each: `live` false drops
+// the character when it appears (the Wolf Status, P24), on the entry, a map
+// variant or a state variant.
+void ValidateMonsterSetups(std::span<const MonsterDefinition* const> monsters, const std::string& source,
+                           std::vector<Items::ItemDataIssue>& issues);
 } // namespace Data::Monsters

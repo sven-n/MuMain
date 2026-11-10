@@ -13,8 +13,9 @@
 // (MonsterDataHandler::ValidateModels), among them the model files that are
 // not in the client folder (a monster without a body, P1); and the checks of
 // the monsters' attacks (MonsterAttackChecks) and of the monsters with their
-// numbers (MonsterGroupChecks). The checks of later monster fields go here
-// too.
+// numbers (MonsterGroupChecks); and an item a monster names that the item
+// list does not have, an error (ValidateMonsterItems, D60). The checks of
+// later monster fields go here too.
 namespace MuEditor::Monsters::MonsterChecks
 {
 // Appends the problems of the monster table and the monsters' attacks as they

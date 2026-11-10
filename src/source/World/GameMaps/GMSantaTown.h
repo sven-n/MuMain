@@ -23,7 +23,6 @@ public: // Object
     virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
 public: // Character
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);

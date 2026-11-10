@@ -251,28 +251,6 @@ void CNewYearsDayEvent::LoadSound()
     LoadGameSound(SOUND_NEWYEARSDAY_DIE);
 }
 
-CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
-{
-    CHARACTER* pCharacter = nullptr;
-
-    switch (iType)
-    {
-    case MONSTER_POUCH_OF_BLESSING:
-    {
-        OpenMonsterModel(MONSTER_MODEL_POUCH_OF_BLESSING);
-        pCharacter = CreateCharacter(iKey, MODEL_POUCH_OF_BLESSING, iPosX, iPosY);
-        if (pCharacter != nullptr)
-        {
-            CopyWideString(pCharacter->ID, L"Fortune Pouch");
-            pCharacter->Object.Scale = 1.5f;
-        }
-    }
-    break;
-    }
-
-    return pCharacter;
-}
-
 bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (c == nullptr || o == nullptr || b == nullptr)
@@ -425,26 +403,6 @@ void C09SummerEvent::LoadSound()
     LoadGameSound(SOUND_UMBRELLA_MONSTER_WALK2);
     LoadGameSound(SOUND_UMBRELLA_MONSTER_DAMAGE);
     LoadGameSound(SOUND_UMBRELLA_MONSTER_DEAD);
-}
-
-CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
-{
-    CHARACTER* pCharacter = nullptr;
-
-    if (iType == MONSTER_FIRE_FLAME_GHOST)
-    {
-        OpenMonsterModel(MONSTER_MODEL_FIRE_FLAME_GHOST);
-        pCharacter = CreateCharacter(iKey, MODEL_FIRE_FLAME_GHOST, iPosX, iPosY);
-        if (pCharacter != nullptr)
-        {
-            CopyWideString(pCharacter->ID, L"Initial Helper");
-            pCharacter->Object.Scale = 0.8f;
-            pCharacter->Object.HiddenMesh = 2;
-            pCharacter->Object.m_iAnimation = 0;
-        }
-    }
-
-    return pCharacter;
 }
 
 bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)

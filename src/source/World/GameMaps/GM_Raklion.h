@@ -59,8 +59,7 @@ namespace SEASON4A
         virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
         virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
-    public:	// Character
-        virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
+    public: // Character
         virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
         virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
         virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
@@ -86,6 +85,13 @@ namespace SEASON4A
         bool CreateSnow(PARTICLE* o);
         void RenderBaseSmoke();
         void SetState(BYTE byState, BYTE byDetailState);
+        // Selupan waits above the map to drop down: the states from standby to
+        // ready (his height and drop at spawn).
+        bool IsBossWaiting() const;
+        // Lets Selupan drop down from where he waits, while he waits (the
+        // spawn hook RaklionBossDrop); whether he will.
+        void LetBossDrop();
+        bool IsBossDropping() const;
         bool CanGoBossMap();
         void SetCanGoBossMap();
         void SetEffect();

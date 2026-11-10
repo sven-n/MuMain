@@ -207,8 +207,10 @@ public:
     // with the model files of Data/Items/Models whose models changed (moved,
     // edited) since they were loaded, SharedModels.json when a shared model
     // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has fatal
-    // problems, and no file is replaced when one of them cannot be written.
-    Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
+    // problems, and no file is replaced when one of them cannot be written; `alsoWrite` are written with them, all
+    // or none (the monster list with the item references a move changed, D60).
+    Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues,
+                                         std::span<const Data::TextFileToWrite> alsoWrite = {});
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
     // English file lacks keep their current English name. The imported items

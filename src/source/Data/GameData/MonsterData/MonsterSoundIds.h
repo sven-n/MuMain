@@ -13,4 +13,7 @@ namespace Data::Monsters
 {
 // The id of a SOUND_* name of the list, or nullopt.
 std::optional<int> FindMonsterSoundId(std::string_view name);
+// The first name of the list: a new sound field starts with it, so it names
+// a sound the reader takes.
+std::string_view GetFirstMonsterSoundName();
 } // namespace Data::Monsters

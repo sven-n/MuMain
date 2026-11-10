@@ -29,7 +29,6 @@ public:
     void RenderFrontSideVisual();
 
 public:
-    CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     bool MoveMonsterVisual(OBJECT* o, BMD* b);
     void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);

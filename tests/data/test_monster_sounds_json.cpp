@@ -479,7 +479,7 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     MonsterDefinition lost = Monster(5, "MONSTER_MODEL_HOUND", "Nobody");
     MonsterDefinition elf = Monster(163, "MONSTER_MODEL_CHAOSCASTLE_ELF", "Raymond");
     elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::string("Nobody either")}};
-    // A random variant on a monster whose look the code does not draw.
+    // A random variant of its own model.
     MonsterDefinition drawnNot = Monster(2, "MONSTER_MODEL_HOUND", "Raymond");
     drawnNot.randomVariants = {{"MONSTER_MODEL_BUDGE_DRAGON", std::nullopt}};
     // A player-shaped monster: no model of the list loads its set's sounds.
@@ -494,14 +494,12 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "monster 5 soundSet", "\"Nobody\" is no sound set"));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "monster 163 randomVariants[0].soundSet",
                         "\"Nobody either\" is no sound set"));
-    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "monster 2 randomVariants[0].model",
-                        "never shows the monster with MONSTER_MODEL_BUDGE_DRAGON"));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Raymond soundEvents[0].cues",
                         "the model of monster 1, 2, 4, 163 has no cue \"step 1\""));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Unused name", "no monster plays the set"));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "monster 4 soundSet",
                         "player is no model of the model list, which loads the sounds of \"Raymond\""));
-    CHECK(issues.size() == 6);
+    CHECK(issues.size() == 5);
     // The Error of a monster has its number, so Data Checks selects it.
     const auto lostIssue =
         std::find_if(issues.begin(), issues.end(), [](const ItemDataIssue& issue) { return issue.number == 5; });
@@ -690,16 +688,4 @@ TEST_CASE("Monster sounds: the monsters of a model are those that appear with it
     g_MonsterDatabase.Build(monsters, "en");
     CHECK(Links::CountMonstersWithModel(MODEL_CHAOS_CASTLE_WIZARD) == 0);
     g_MonsterDatabase.Build({}, "en");
-}
-
-TEST_CASE("Monster sounds: the code draws the looks of the ranged Chaos Castle soldiers only (Q-MN83) "
-          "[data][monsters]")
-{
-    for (const int number : {163, 165, 167, 169, 171, 173, 427})
-    {
-        INFO(number);
-        CHECK(Data::Monsters::GetDrawnLookModels(number).size() == 2);
-    }
-    CHECK(Data::Monsters::GetDrawnLookModels(162).empty());
-    CHECK(Data::Monsters::GetDrawnLookModels(0).empty());
 }

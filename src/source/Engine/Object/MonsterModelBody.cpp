@@ -12,8 +12,6 @@ namespace Engine::Object::MonsterBody
 {
 namespace
 {
-constexpr std::array<float, 3> DefaultBoxMin = {-60.f, -60.f, 0.f};
-constexpr std::array<float, 3> DefaultBoxMax = {50.f, 50.f, 150.f};
 constexpr int DefaultRightHandBone = 33;
 constexpr int DefaultLeftHandBone = 42;
 
@@ -25,8 +23,18 @@ void SetPoint(const std::array<float, 3>& point, vec3_t target)
 
 void ApplyBoundingBox(OBJECT& object, const Data::Monsters::MonsterModelBody& body)
 {
-    SetPoint(body.boxMin.value_or(DefaultBoxMin), object.BoundingBoxMin);
-    SetPoint(body.boxMax.value_or(DefaultBoxMax), object.BoundingBoxMax);
+    SetPoint(GetBoxMin(&body), object.BoundingBoxMin);
+    SetPoint(GetBoxMax(&body), object.BoundingBoxMax);
+}
+
+std::array<float, 3> GetBoxMin(const Data::Monsters::MonsterModelBody* body)
+{
+    return body != nullptr && body->boxMin ? *body->boxMin : DefaultBoxMin;
+}
+
+std::array<float, 3> GetBoxMax(const Data::Monsters::MonsterModelBody* body)
+{
+    return body != nullptr && body->boxMax ? *body->boxMax : DefaultBoxMax;
 }
 
 void ApplyLinkBones(CHARACTER& character, const Data::Monsters::MonsterModelBody& body)

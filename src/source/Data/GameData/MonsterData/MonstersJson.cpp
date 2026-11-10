@@ -4,7 +4,9 @@
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
+#include "Data/GameData/MonsterData/MonsterJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSetupJson.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 
 #include <algorithm>
@@ -20,6 +22,16 @@ using Items::ItemDataIssueSeverity;
 using Items::Json::OrderedJson;
 
 constexpr const char* MonstersKey = "monsters";
+constexpr const char* UnknownKey = "unknownMonsters";
+constexpr const char* UnknownModelKey = "model";
+constexpr const char* UnknownScaleKey = "scale";
+constexpr const char* UnknownGlowKey = "glow";
+constexpr const char* UnknownMarksKey = "marks";
+constexpr const char* UnknownMessageKey = "messageSeconds";
+constexpr const char* UnknownForKey = "for";
+constexpr const char* ForNoEntry = "noEntry";
+constexpr const char* ForNoModel = "noModel";
+constexpr const char* ForMissingFile = "missingFile";
 constexpr const char* NumberKey = "number";
 constexpr const char* NameKey = "name";
 constexpr const char* KindKey = "kind";
@@ -28,6 +40,7 @@ constexpr const char* AttacksKey = "attacks";
 constexpr const char* MapVariantsKey = "mapVariants";
 constexpr const char* SoundSetKey = "soundSet";
 constexpr const char* RandomVariantsKey = "randomVariants";
+constexpr const char* EquipmentKey = "equipment";
 constexpr const char* NumbersKey = "numbers";
 constexpr const char* MapsKey = "maps";
 constexpr const char* MonsterSkillsKey = "monsterSkills";
@@ -60,6 +73,18 @@ public:
     void Warning(const std::string& field, const std::string& message, int monster = ItemDataIssue::NoItem)
     {
         Add(ItemDataIssueSeverity::Warning, field, message, monster);
+    }
+
+    void Error(const std::string& field, const std::string& message, int monster = ItemDataIssue::NoItem)
+    {
+        Add(ItemDataIssueSeverity::Error, field, message, monster);
+    }
+
+    // The setup fields' problems of the monster.
+    SetupProblem ForMonster(int monster)
+    {
+        return [this, monster](ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
+        { Add(severity, field, message, monster); };
     }
 
 private:
@@ -214,7 +239,17 @@ bool ReadRandomVariants(const OrderedJson& json, const MonsterDefinition& monste
         {
             variant.soundSet = std::move(soundSet);
         }
-        Items::Json::WarnAboutUnknownKeys(entry, {ModelKey, SoundSetKey}, key + " ",
+        if (const auto equipment = entry.find(EquipmentKey); equipment != entry.end())
+        {
+            MonsterEquipment worn;
+            if (!ReadMonsterEquipment(*equipment, key + "." + EquipmentKey, worn, issues.ForMonster(number)))
+            {
+                valid = false;
+                continue;
+            }
+            variant.equipment = std::move(worn);
+        }
+        Items::Json::WarnAboutUnknownKeys(entry, {ModelKey, SoundSetKey, EquipmentKey}, key + " ",
                                           [&](const std::string& unknown, const std::string& message)
                                           { issues.Warning(unknown, message, number); });
         variants.push_back(std::move(variant));
@@ -501,12 +536,41 @@ bool ReadMapVariants(const OrderedJson& json, int number, std::vector<MonsterMap
             }
         }
         named.insert(named.end(), variant.maps.begin(), variant.maps.end());
-        entryValid = ReadAttacks(entry, key + "." + AttacksKey, number, variant.attacks, issues) && entryValid;
-        if (entryValid && !variant.attacks)
+        if (const auto model = entry.find(ModelKey); model != entry.end())
         {
-            issues.Warning(key, "changes nothing: it has no attacks", number);
+            if (!model->is_string() || !FindMonsterModelReference(model->get<std::string>()))
+            {
+                issues.Fatal(key + "." + ModelKey, "must be a model, as the monster's model names one", number);
+                entryValid = false;
+            }
+            else
+            {
+                variant.model = model->get<std::string>();
+            }
         }
-        Items::Json::WarnAboutUnknownKeys(entry, {MapsKey, AttacksKey}, key + " ",
+        entryValid = ReadAttacks(entry, key + "." + AttacksKey, number, variant.attacks, issues) && entryValid;
+        // A variant changes fields; the entry's stay where it names none.
+        for (const MonsterSetupField& setupField : GetMonsterSetupFields())
+        {
+            const auto setupValue = entry.find(setupField.key);
+            if (setupValue != entry.end() && setupValue->is_null())
+            {
+                issues.Fatal(key + "." + std::string(setupField.key),
+                             "must be a value: a map variant changes a field, it does not clear it", number);
+                entryValid = false;
+            }
+        }
+        // Read always, so its problems show with those of the maps and attacks.
+        entryValid = ReadMonsterSetup(entry, key + ".", variant.setup, issues.ForMonster(number)) && entryValid;
+        const bool changesSetup = std::ranges::any_of(GetMonsterSetupFields(), [&](const MonsterSetupField& setupField)
+                                                      { return setupField.isSet(variant.setup); });
+        if (entryValid && !variant.model && !variant.attacks && !changesSetup)
+        {
+            issues.Warning(key, "changes nothing: it has no model, attacks or setup field", number);
+        }
+        Items::Json::KeySet knownKeys{MapsKey, ModelKey, AttacksKey};
+        AddMonsterSetupKeys(knownKeys);
+        Items::Json::WarnAboutUnknownKeys(entry, knownKeys, key + " ",
                                           [&](const std::string& unknown, const std::string& message)
                                           { issues.Warning(unknown, message, number); });
         if (entryValid)
@@ -571,6 +635,9 @@ bool ReadSharedValues(const OrderedJson& json, int number, MonsterDefinition& sh
     valid = ReadMapVariants(json, number, shared.mapVariants, issues) && valid;
     valid = ReadSoundSet(json, MonsterField(number, SoundSetKey), number, shared.soundSet, issues) && valid;
     valid = ReadRandomVariants(json, shared, shared.randomVariants, issues) && valid;
+    valid =
+        ReadMonsterSetup(json, "monster " + std::to_string(number) + " ", shared.setup, issues.ForMonster(number)) &&
+        valid;
     return valid;
 }
 
@@ -687,6 +754,10 @@ bool ReadOwnValues(const OrderedJson& json, MonsterDefinition& entry, IssueList&
     bool valid = ReadOwnNamesAndKind(json, entry, issues);
     valid = ReadOwnModelSetAndAttacks(json, entry, issues) && valid;
     valid = ReadOwnLists(json, entry, issues) && valid;
+    // The setup fields too, each a value of its own (WriteMonsterSetupDifferences).
+    valid = ReadMonsterSetup(json, "monster " + std::to_string(entry.number) + " ", entry.setup,
+                             issues.ForMonster(entry.number)) &&
+            valid;
     return CheckModelIsNoLook(entry, issues) && valid;
 }
 
@@ -738,10 +809,10 @@ std::vector<MonsterDefinition> ReadNumberEntries(const std::vector<NumberJson>& 
         MonsterDefinition entry = shared;
         entry.number = number.number;
         const bool valid = ReadOwnValues(*number.json, entry, issues);
-        WarnAboutUnknownMonsterKeys(*number.json,
-                                    {NumberKey, MapsKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey,
-                                     MapVariantsKey, RandomVariantsKey},
-                                    number.number, issues);
+        Items::Json::KeySet ownKeys{NumberKey,   MapsKey,    NameKey,        KindKey,          ModelKey,
+                                    SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey};
+        AddMonsterSetupKeys(ownKeys);
+        WarnAboutUnknownMonsterKeys(*number.json, ownKeys, number.number, issues);
         if (valid)
         {
             entries.push_back(std::move(entry));
@@ -772,9 +843,10 @@ std::optional<MonsterGroup> ReadMonster(const OrderedJson& json, const std::stri
     MonsterGroup monster;
     const int first = numbers.front().number;
     const bool valid = ReadSharedValues(json, first, monster.shared, issues);
-    WarnAboutUnknownMonsterKeys(
-        json, {NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey, NumbersKey},
-        first, issues);
+    Items::Json::KeySet sharedKeys{NameKey,    KindKey,        ModelKey,          SoundSetKey,
+                                   AttacksKey, MapVariantsKey, RandomVariantsKey, NumbersKey};
+    AddMonsterSetupKeys(sharedKeys);
+    WarnAboutUnknownMonsterKeys(json, sharedKeys, first, issues);
     if (!valid)
     {
         return std::nullopt;
@@ -802,9 +874,10 @@ std::optional<MonsterGroup> ReadOneNumberEntry(const OrderedJson& json, const st
     }
     MonsterDefinition entry;
     const bool valid = ReadSharedValues(json, *number, entry, issues);
-    WarnAboutUnknownMonsterKeys(
-        json, {NumberKey, NameKey, KindKey, ModelKey, SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey},
-        *number, issues);
+    Items::Json::KeySet keys{NumberKey,   NameKey,    KindKey,        ModelKey,
+                             SoundSetKey, AttacksKey, MapVariantsKey, RandomVariantsKey};
+    AddMonsterSetupKeys(keys);
+    WarnAboutUnknownMonsterKeys(json, keys, *number, issues);
     if (!valid)
     {
         return std::nullopt;
@@ -819,10 +892,15 @@ OrderedJson WriteMapVariants(const std::vector<MonsterMapVariant>& variants)
     {
         OrderedJson entry = OrderedJson::object();
         entry[MapsKey] = Data::Maps::WriteMapRefs(variant.maps);
+        if (variant.model)
+        {
+            entry[ModelKey] = *variant.model;
+        }
         if (variant.attacks)
         {
             entry[AttacksKey] = WriteAttacks(*variant.attacks);
         }
+        WriteMonsterSetup(entry, variant.setup);
         list.push_back(std::move(entry));
     }
     return list;
@@ -838,6 +916,10 @@ OrderedJson WriteRandomVariants(const std::vector<MonsterRandomVariant>& variant
         if (variant.soundSet)
         {
             entry[SoundSetKey] = *variant.soundSet;
+        }
+        if (variant.equipment)
+        {
+            entry[EquipmentKey] = WriteMonsterEquipment(*variant.equipment);
         }
         list.push_back(std::move(entry));
     }
@@ -869,6 +951,7 @@ OrderedJson WriteSharedValues(const MonsterDefinition& shared)
     {
         json[RandomVariantsKey] = WriteRandomVariants(shared.randomVariants);
     }
+    WriteMonsterSetup(json, shared.setup);
     return json;
 }
 
@@ -899,6 +982,9 @@ void WriteOwnValue(OrderedJson& json, const MonsterDefinition& entry, MonsterVal
     case MonsterValueField::RandomVariants:
         json[RandomVariantsKey] = WriteRandomVariants(entry.randomVariants);
         break;
+    case MonsterValueField::SetupFirst:
+        // The setup fields are written by their own table.
+        break;
     }
 }
 
@@ -919,6 +1005,7 @@ OrderedJson WriteNumber(const MonsterDefinition& shared, const MonsterDefinition
             WriteOwnValue(json, entry, field);
         }
     }
+    WriteMonsterSetupDifferences(json, shared.setup, entry.setup);
     return json;
 }
 
@@ -960,8 +1047,122 @@ int FirstNumber(const MonsterGroup& monster)
 }
 } // namespace
 
+namespace
+{
+// The unknown monsters' look (D64): each value the section has replaces the
+// default; a value of the wrong kind is fatal, a model the list lacks an error.
+void ReadUnknownLook(const OrderedJson& root, UnknownMonsterLook& unknown, IssueList& list)
+{
+    const auto section = root.find(UnknownKey);
+    if (section == root.end())
+        return;
+    if (!section->is_object())
+    {
+        list.Fatal(UnknownKey, "must be an object: model, scale, glow, marks, messageSeconds, for");
+        return;
+    }
+    const auto field = [](const char* key) { return std::string(UnknownKey) + "." + key; };
+    if (const auto model = section->find(UnknownModelKey); model != section->end())
+    {
+        if (!model->is_string())
+            list.Fatal(field(UnknownModelKey), "must be a model, as a monster's model names one");
+        else if (!FindMonsterModelReference(model->get<std::string>()))
+            list.Error(field(UnknownModelKey), model->get<std::string>() + " is no model: the default stays");
+        else
+            unknown.model = model->get<std::string>();
+    }
+    if (const auto scale = section->find(UnknownScaleKey); scale != section->end())
+    {
+        if (!scale->is_number() || scale->get<float>() <= 0.0f)
+            list.Fatal(field(UnknownScaleKey), "must be a number above 0");
+        else
+            unknown.scale = scale->get<float>();
+    }
+    if (const auto glow = section->find(UnknownGlowKey); glow != section->end())
+    {
+        if (!glow->is_array() || glow->size() != 3 ||
+            std::ranges::any_of(*glow, [](const OrderedJson& part) { return !part.is_number(); }))
+            list.Fatal(field(UnknownGlowKey), "must be three numbers: [red, green, blue]");
+        else
+            unknown.glow = {(*glow)[0].get<float>(), (*glow)[1].get<float>(), (*glow)[2].get<float>()};
+    }
+    if (const auto marks = section->find(UnknownMarksKey); marks != section->end())
+    {
+        if (!marks->is_boolean())
+            list.Fatal(field(UnknownMarksKey), "must be true or false");
+        else
+            unknown.marks = marks->get<bool>();
+    }
+    if (const auto seconds = section->find(UnknownMessageKey); seconds != section->end())
+    {
+        if (!seconds->is_number_integer() || seconds->get<int>() < 0 || seconds->get<int>() > MaxUnknownMessageSeconds)
+            list.Fatal(field(UnknownMessageKey), "must be whole seconds from 0 to " +
+                                                     std::to_string(MaxUnknownMessageSeconds) +
+                                                     " (0: only when it appears)");
+        else
+            unknown.messageSeconds = seconds->get<int>();
+    }
+    if (const auto who = section->find(UnknownForKey); who != section->end())
+    {
+        if (!who->is_array() || std::ranges::any_of(*who, [](const OrderedJson& name) { return !name.is_string(); }))
+        {
+            list.Fatal(field(UnknownForKey), "must be a list of noEntry, noModel and missingFile");
+        }
+        else
+        {
+            unknown.forNoEntry = false;
+            unknown.forNoModel = false;
+            unknown.forMissingFile = false;
+            for (const OrderedJson& name : *who)
+            {
+                const std::string value = name.get<std::string>();
+                if (value == ForNoEntry)
+                    unknown.forNoEntry = true;
+                else if (value == ForNoModel)
+                    unknown.forNoModel = true;
+                else if (value == ForMissingFile)
+                    unknown.forMissingFile = true;
+                else
+                    list.Error(field(UnknownForKey), value + " is not noEntry, noModel or missingFile");
+            }
+        }
+    }
+    Items::Json::WarnAboutUnknownKeys(
+        *section, {UnknownModelKey, UnknownScaleKey, UnknownGlowKey, UnknownMarksKey, UnknownMessageKey, UnknownForKey},
+        std::string(UnknownKey) + " ",
+        [&](const std::string& unknownKey, const std::string& message) { list.Warning(unknownKey, message); });
+}
+
+OrderedJson WriteUnknownLook(const UnknownMonsterLook& unknown)
+{
+    OrderedJson section = OrderedJson::object();
+    section[UnknownModelKey] = unknown.model;
+    section[UnknownScaleKey] = Json::WriteFloat(unknown.scale);
+    section[UnknownGlowKey] = OrderedJson::array(
+        {Json::WriteFloat(unknown.glow[0]), Json::WriteFloat(unknown.glow[1]), Json::WriteFloat(unknown.glow[2])});
+    section[UnknownMarksKey] = unknown.marks;
+    section[UnknownMessageKey] = unknown.messageSeconds;
+    OrderedJson who = OrderedJson::array();
+    if (unknown.forNoEntry)
+        who.push_back(ForNoEntry);
+    if (unknown.forNoModel)
+        who.push_back(ForNoModel);
+    if (unknown.forMissingFile)
+        who.push_back(ForMissingFile);
+    section[UnknownForKey] = std::move(who);
+    return section;
+}
+} // namespace
+
 void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
                       std::vector<ItemDataIssue>& issues)
+{
+    UnknownMonsterLook unknown;
+    ReadMonstersJson(text, source, monsters, unknown, issues);
+}
+
+void ReadMonstersJson(std::string_view text, const std::string& source, std::vector<MonsterGroup>& monsters,
+                      UnknownMonsterLook& unknown, std::vector<ItemDataIssue>& issues)
 {
     IssueList list(source, issues);
     OrderedJson root;
@@ -969,9 +1170,10 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
     {
         return;
     }
-    Items::Json::WarnAboutUnknownKeys(root, {Items::Json::Keys::FormatVersion, MonstersKey}, "",
-                                      [&](const std::string& unknown, const std::string& message)
-                                      { list.Warning(unknown, message); });
+    Items::Json::WarnAboutUnknownKeys(root, {Items::Json::Keys::FormatVersion, UnknownKey, MonstersKey}, "",
+                                      [&](const std::string& unknownKey, const std::string& message)
+                                      { list.Warning(unknownKey, message); });
+    ReadUnknownLook(root, unknown, list);
     const auto entries = root.find(MonstersKey);
     if (entries == root.end() || !entries->is_array())
     {
@@ -1016,7 +1218,9 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
     numbers.insert(numbers.end(), entries.begin(), entries.end());
 }
 
-std::string WriteMonstersJson(std::span<const MonsterGroup> monsters)
+namespace
+{
+std::string WriteFile(std::span<const MonsterGroup> monsters, const UnknownMonsterLook* unknown)
 {
     std::vector<const MonsterGroup*> sorted;
     sorted.reserve(monsters.size());
@@ -1037,6 +1241,8 @@ std::string WriteMonstersJson(std::span<const MonsterGroup> monsters)
     }
     OrderedJson root = OrderedJson::object();
     root[Items::Json::Keys::FormatVersion] = MonstersFormatVersion;
+    if (unknown != nullptr)
+        root[UnknownKey] = WriteUnknownLook(*unknown);
     root[MonstersKey] = std::move(entries);
     const std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     std::string compact = Items::Json::PutObjectsOnOneLine(text, NameKey);
@@ -1044,9 +1250,22 @@ std::string WriteMonstersJson(std::span<const MonsterGroup> monsters)
     compact = Items::Json::PutObjectsOnOneLine(compact, SkillsKey);
     compact = Items::Json::PutListsOnOneLine(compact, OtherwiseKey);
     compact = Items::Json::PutListsOnOneLine(compact, MapsKey);
+    compact = Items::Json::PutListsOnOneLine(compact, UnknownGlowKey);
+    compact = Items::Json::PutListsOnOneLine(compact, UnknownForKey);
     compact = Items::Json::PutListEntriesOnOneLine(compact, RandomVariantsKey);
     compact = Items::Json::PutListEntriesOnOneLine(compact, NumbersKey);
     return compact + "\n";
+}
+} // namespace
+
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters)
+{
+    return WriteFile(monsters, nullptr);
+}
+
+std::string WriteMonstersJson(std::span<const MonsterGroup> monsters, const UnknownMonsterLook& unknown)
+{
+    return WriteFile(monsters, &unknown);
 }
 
 std::string WriteMonstersJson(std::span<const MonsterDefinition> numbers)

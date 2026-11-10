@@ -8935,6 +8935,12 @@
   <data name="SummonedMonsterOwner" xml:space="preserve">
     <value>%ls з %ls</value>
   </data>
+  <data name="UnknownMonsterName" xml:space="preserve">
+    <value>Невідомий монстр %d</value>
+  </data>
+  <data name="UnknownMonsterMessage" xml:space="preserve">
+    <value>Я — баг: %d</value>
+  </data>
   <data name="CancelSkillQuestion" xml:space="preserve">
     <value>%ls Хочете скасувати?</value>
   </data>
