@@ -115,6 +115,8 @@ TEST_CASE("Data Checks: a click on a file area's problem opens its window, the m
         {MuEditor::DataChecks::CreateModelFileCheckArea(), nullptr, I18N::Editor::ModelFiles},
         // No tool edits the item options yet.
         {MuEditor::DataChecks::CreateItemOptionCheckArea(), nullptr, I18N::Editor::ItemOptions},
+        // No tool edits the buffs yet.
+        {MuEditor::DataChecks::CreateBuffCheckArea(), nullptr, I18N::Editor::Buffs},
     };
     for (Case& each : cases)
     {

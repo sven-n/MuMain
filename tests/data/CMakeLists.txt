@@ -40,6 +40,19 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The buffs (Data/Buffs/Buffs.json, buffs design): reader, writer, checks, the
+# table and the game's buff info.
+mu_add_test(
+    NAME buff_data_tests
+    SOURCES
+        test_buffs.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(buff_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
 # the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
 mu_add_test(

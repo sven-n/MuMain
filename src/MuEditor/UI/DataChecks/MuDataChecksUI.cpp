@@ -42,6 +42,7 @@ std::vector<std::unique_ptr<DataCheckArea>> CreateAllAreas()
     areas.push_back(CreateModelFileCheckArea());
     areas.push_back(CreateServerListCheckArea());
     areas.push_back(CreateEffectCheckArea());
+    areas.push_back(CreateBuffCheckArea());
     areas.push_back(CreateMapSoundCheckArea());
     areas.push_back(Looks::CreateRenderStyleCheckArea());
     areas.push_back(CreateLookCheckArea());

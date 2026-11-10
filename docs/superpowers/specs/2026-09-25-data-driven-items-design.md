@@ -1674,8 +1674,8 @@ types and model slots (4d2). 239 identify an item by its model slot
 - `Data/Local/<lang>/JewelOfHarmonySmelt_<lang>.bmd` lists the 85 items
   that cannot be smelted below +4. The client never loads it; `MixMgr.cpp`
   has the same list in code.
-- `BuffEffect_<lang>.bmd` links buffs to items and is loaded; the elixir
-  code lists the same link again.
+- `Data/Buffs/Buffs.json` (`BuffEffect_<lang>.bmd` before the buffs design)
+  links buffs to items; the elixir code lists the same link again.
 - The item field `skill` is empty for all scrolls and parchments;
   `GetSkillByBook` maps them in code (SK1).
 
