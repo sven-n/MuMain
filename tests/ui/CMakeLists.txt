@@ -78,6 +78,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME shop_pages_tests
+    SOURCES
+        test_shop_pages.cpp
+)
+
+mu_add_test(
     NAME shop_script_list_tests
     SOURCES
         test_shop_script_list.cpp
