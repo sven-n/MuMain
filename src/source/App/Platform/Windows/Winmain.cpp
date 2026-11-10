@@ -172,12 +172,14 @@ extern wchar_t LogInID[];
 extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
+extern bool LogOut;
 
 // Closing the window skips the menu exit, which is what sends the key configuration (skill and item hotkeys,
-// options, chat box); send it here while still connected. Once is enough: several close events can arrive.
+// options, chat box); send it here while still connected. Once is enough: several close events can arrive, and the
+// menu exit has already saved before it logs out and closes the window.
 void SaveOptionsBeforeClose()
 {
-    if (!Destroy)
+    if (!Destroy && !LogOut)
     {
         SaveOptionsIfInGame();
     }
