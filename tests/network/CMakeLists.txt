@@ -28,6 +28,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_remove_alliance_guild_result
+    SOURCES
+        test_remove_alliance_guild_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/RemoveAllianceGuildResult.cpp
+)
+
+mu_add_test(
     NAME test_illusion_temple_result
     SOURCES
         test_illusion_temple_result.cpp

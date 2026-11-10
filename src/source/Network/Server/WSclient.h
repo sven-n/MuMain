@@ -1160,14 +1160,6 @@ typedef struct
 
 typedef struct
 {
-    PREQUEST_DEFAULT_SUBCODE	Header;
-    BYTE			byResult;
-    BYTE			byRequestType;
-    BYTE			byRelationShipType;
-} PMSG_BAN_UNIONGUILD, * LPPMSG_BAN_UNIONGUILD;
-
-typedef struct
-{
     PWMSG_HEADER	Header;
     BYTE			byCount;
 } PMSG_UNION_VIEWPORT_NOTIFY_COUNT, * LPPMSG_UNION_VIEWPORT_NOTIFY_COUNT;

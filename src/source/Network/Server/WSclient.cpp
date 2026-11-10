@@ -123,6 +123,7 @@ using namespace mu::ui::window;
 #include "Network/Server/ServerMessageTexts.h"
 #include "Network/Server/GuildRelationshipRequest.h"
 #include "Network/Server/GuildRelationshipResult.h"
+#include "Network/Server/RemoveAllianceGuildResult.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
@@ -7996,10 +7997,16 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
         GuildMark[Hero->GuildMarkIndex].UnionName[0] = 0;
 }
 
-void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
+void ReceiveBanUnionGuildResult(std::span<const BYTE> ReceiveBuffer)
 {
-    auto pData = (LPPMSG_BAN_UNIONGUILD)ReceiveBuffer;
-    if (pData->byResult == 0x01)
+    const auto pData = Network::Packets::ParseRemoveAllianceGuildResult(ReceiveBuffer);
+    if (!pData)
+    {
+        LogSafeCastSizeMismatch("RemoveAllianceGuildResult", ReceiveBuffer.size(), 7);
+        return;
+    }
+
+    if (pData->succeeded)
     {
         if (UI::Guild::AllianceGuildCount() > 2)
         {
@@ -8007,7 +8014,7 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
         }
         UI::Guild::ClearAllianceGuilds();
     }
-    else if (pData->byResult == 0)
+    else
     {
         UI::Chat::PostSystem(I18N::Game::Failed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
@@ -13813,7 +13820,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         switch (Data->SubCode)
         {
         case 0x01:
-            ReceiveBanUnionGuildResult(ReceiveBuffer);
+            ReceiveBanUnionGuildResult(received_span);
             break;
         }
     }
