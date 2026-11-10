@@ -5,24 +5,28 @@
 #include "doctest.h"
 
 #include "GameLogic/Combat/SkillAim.h"
+#include "Engine/Object/ZzzInterface.h"
 
 #include <cmath>
+
+extern int TargetX, TargetY;
 
 using GameLogic::Combat::SkillAim::IsAimedByDirection;
 using GameLogic::Combat::SkillAim::PullIntoRange;
 
 namespace
 {
-constexpr float Tile = 100.0f;
+constexpr float Tile = TERRAIN_SCALE;
 
-// CheckTile's test: the centre of the point's tile within the range.
+// The real CheckTile on the tile the point falls on, as the attack code tests it.
 bool TileCentreInRange(const float origin[2], const float point[2], float rangeTiles)
 {
-    const float cx = std::floor(point[0] / Tile) * Tile + Tile * 0.5f;
-    const float cy = std::floor(point[1] / Tile) * Tile + Tile * 0.5f;
-    const float dx = origin[0] - cx;
-    const float dy = origin[1] - cy;
-    return dx * dx + dy * dy <= (rangeTiles * Tile) * (rangeTiles * Tile);
+    CHARACTER caster{};
+    caster.Object.Position[0] = origin[0];
+    caster.Object.Position[1] = origin[1];
+    TargetX = static_cast<int>(point[0] / Tile);
+    TargetY = static_cast<int>(point[1] / Tile);
+    return CheckTile(&caster, &caster.Object, rangeTiles);
 }
 } // namespace
 

@@ -108,6 +108,7 @@ mu_add_test(
     NAME test_helper_attack_rotation
     SOURCES
         test_helper_attack_rotation.cpp
+        test_skill_aim.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
@@ -155,11 +156,3 @@ mu_add_test(
 )
 
 target_compile_definitions(test_received_attack_target PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
-
-mu_add_test(
-    NAME test_skill_aim
-    SOURCES
-        test_skill_aim.cpp
-    LINK_LIBS
-        MuClient
-)
