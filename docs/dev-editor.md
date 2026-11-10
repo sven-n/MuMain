@@ -114,8 +114,8 @@ the item models, the part models and the texture files) and the item effects
 (area **Item effects**: checked against the items that name them) as their
 Save would write them now,
 and the glTF model file table, the server list, the effect
-catalogue, the graphics look (the look
-profile and the light moods, area **Graphics look**), the item options
+catalogue, the graphics look (`Data/Render/Look.json`,
+area **Graphics look**), the item options
 (`Data/Items/Options` and the option texts, area **Item options**,
 [item-data.md](item-data.md#item-options)) and the buffs (area **Buffs**,
 [buff-data.md](buff-data.md)) as the game reads their files at
