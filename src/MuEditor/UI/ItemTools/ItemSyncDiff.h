@@ -33,7 +33,10 @@ struct SyncField
     // As JSON; nothing when that side has the field's default (it leaves the field out).
     std::optional<std::string> current;
     std::optional<std::string> incoming;
-    bool known = false;
+    // Its own mark, else the mark of its item as a whole.
+    WrongSide wrongSide = WrongSide::None;
+    // wrongSide is the item's mark: the field has none of its own.
+    bool markOfItem = false;
     // Why it cannot be checked (the game holds the item), or empty.
     std::string locked;
     // Why the value is not exact on the other side, or empty.
@@ -59,7 +62,9 @@ struct SyncItem
     std::vector<SyncField> fields;
     // New and Removed rows. Changed rows apply their checked fields.
     bool checked = false;
-    bool known = false;
+    // The item's mark as a whole: a New or Removed item, or the fields of a Changed one that have
+    // no mark of their own (also one that differs only later).
+    WrongSide wrongSide = WrongSide::None;
     std::string locked;
 };
 
@@ -68,7 +73,7 @@ struct SyncFormula
     std::string entry;
     std::optional<std::string> current;
     std::optional<std::string> incoming;
-    bool known = false;
+    WrongSide wrongSide = WrongSide::None;
     bool checked = false;
 };
 
@@ -105,7 +110,8 @@ struct SyncOptions
 
 // The differences between the client's data (`client`, BuildItemExchange) and `file`. Checked
 // by default: what the file changes; unchecked: removals (items and formula entries the file
-// lacks), known differences, inexact and locked fields. A language one side lacks stays as it is
+// lacks), inexact and locked fields. A difference marked wrong in the server is unchecked; one
+// marked wrong in the client starts as without a mark. A language one side lacks stays as it is
 // on the other (unless comparingFiles). An item a side has more than once (its repeatedItems) is a
 // locked row without fields. The formulas are compared while both sides have them.
 ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, const Data::Items::ItemExchangeFile& file,
@@ -121,12 +127,37 @@ void SetRowChecked(SyncItem& row, bool checked);
 // Check all and Check none: every row and formula entry, also the items only the client has
 // (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
+// Marks which side of a difference is wrong (WrongSide::None: not decided). Wrong in server
+// unchecks it, and leaving that mark gives the default back; otherwise wrong in client leaves
+// the box as it is, checking it is the user's. An empty `field` names the item as a whole: a New or
+// Removed one, or every field of a Changed one.
+void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
+void SetWrongSide(SyncFormula& row, WrongSide side);
+// Gives the diff's rows the marks `known` has now (e.g. read again from the file), each box as
+// SetWrongSide changes it; a row whose mark is the same keeps its box.
+void ApplyMarks(ItemSyncDiff& diff, const KnownDifferences& known);
+// SetWrongSide, and the mark kept in `known` for the next comparisons. A mark of a changed item
+// as a whole takes out its fields' own marks (not the mark of the item new or removed, nor the
+// other way round); a field's own mark counts for that field instead of the
+// item's, which stays for the others (also ones that differ only later).
+void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
+void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
+// After the diff's checked rows were applied: takes out of `known` the marks of what was applied,
+// either side's, as the client has the file's value now; an applied removal takes every mark of
+// the item (an item number used again later starts without one). A changed item's whole-item mark
+// goes when all its fields were applied. Whether `known` changed.
+bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known);
+// The side marked on a New or Removed item, or the side every field of a Changed one has (its own
+// mark or the item's); None when nothing or not every field is marked, or the fields have
+// different sides.
+WrongSide GetRowWrongSide(const SyncItem& row);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
-// editor's language: `title`, an empty line, then a table of each item's group, number and name.
-// With a `changeColumn` (its head, e.g. "In the client"), the table also has each row's change
-// first and its number of differing fields last.
+// editor's language: `title`, an empty line, then a table of each item's group, number and name,
+// and `withWrongIn` the side marked wrong (GetRowWrongSide; a comparison of two files has no
+// marks). With a `changeColumn` (its head, e.g. "In the client"), the table also has each row's
+// change first and its number of differing fields.
 std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
-                                  std::string_view changeColumn);
+                                  std::string_view changeColumn, bool withWrongIn);
 // How many formula entries differ between two item stat files: the formula rows a diff lists.
 int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming);
 

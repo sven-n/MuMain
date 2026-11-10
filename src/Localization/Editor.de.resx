@@ -2872,11 +2872,26 @@
   <data name="Entry" xml:space="preserve">
     <value>Eintrag</value>
   </data>
-  <data name="Known" xml:space="preserve">
-    <value>Bekannt</value>
+  <data name="Wrong in client" xml:space="preserve">
+    <value>Falsch im Client</value>
   </data>
-  <data name="What a known difference is" xml:space="preserve">
-    <value>Ein bekannter Unterschied: zwischen Client und Server gewollt, er bleibt daher ohne Haken. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  <data name="Wrong in server" xml:space="preserve">
+    <value>Falsch auf dem Server</value>
+  </data>
+  <data name="What wrong in client means" xml:space="preserve">
+    <value>Der Wert des Clients ist falsch: der Haken bleibt, wie er ist: einen Haken setzen übernimmt den des Servers. Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="What wrong in server means" xml:space="preserve">
+    <value>Der Wert des Servers ist falsch: der Client behält seinen eigenen, der Unterschied bleibt daher ohne Haken (grau). Erneut klicken nimmt es zurück. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="What a mark of the item means" xml:space="preserve">
+    <value>Mit dem ganzen Item markiert. Auf der Zeile des Items ändern oder für dieses Feld allein die andere Seite wählen. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="What a mark of the item with marked fields means" xml:space="preserve">
+    <value>Als Ganzes markiert, aber einige Felder haben eine eigene Markierung. Ein Klick auf eine Seite markiert jedes Feld damit. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="The marks are not saved while {0} cannot be read" xml:space="preserve">
+    <value>Die Markierungen werden nicht gespeichert, solange {0} nicht gelesen werden kann (siehe Konsole). Datei korrigieren oder entfernen und dieses Fenster schließen und wieder öffnen.</value>
   </data>
   <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
     <value>OpenMU speichert die Drop-Stufe in einem Byte (höchstens 255)</value>
