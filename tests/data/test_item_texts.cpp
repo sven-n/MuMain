@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "Core/Platform/ProcessLocale.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -10,6 +11,7 @@
 #include "Data/Translation/ItemTextExpansion.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
 
 #ifdef _EDITOR
@@ -21,10 +23,19 @@
 #endif
 
 #include <algorithm>
+#include <clocale>
+#include <cstring>
 #include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// An NPC dialog's page, text and answer lines as CSQuest copies them (SceneCore.cpp).
+extern int g_iCurrentDialogScript;
+extern int g_iNumLineMessageBoxCustom;
+extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern int g_iNumAnswer;
+extern wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
 namespace
 {
@@ -231,6 +242,34 @@ TEST_CASE("Turning translated item names off tells the texts-changed observers o
     Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&CountChange, nullptr);
 }
 
+TEST_CASE("An open NPC dialog's copied answer follows Translate item names [data][texts]")
+{
+    ItemTextScope scope;
+    REQUIRE(scope.Loaded());
+    // The game's process locale: macOS writes the answer line (mu_swprintf) through LC_CTYPE, and in the test's "C"
+    // locale it leaves "Pójdę ..." unwritten.
+    const std::string previousLocale = std::setlocale(LC_ALL, nullptr);
+    Core::Platform::ApplyProcessLocale();
+    I18N::SetLocale("pl");
+
+    // The Tear of Elf quest's answer, "{item:14,25:acc}" in Polish, as the dialog shows it.
+    constexpr int TearOfElfQuestPage = 65;
+    g_csQuest.ShowDialogText(TearOfElfQuestPage);
+    CHECK(std::wstring_view(g_lpszDialogAnswer[0][0]).find(L"Łzę Elfa") != std::wstring_view::npos);
+
+    // CSQuest's texts-changed observer copies it again: the English name.
+    g_ItemDataHandler.SetTranslateItemNames(false);
+    CHECK(std::wstring_view(g_lpszDialogAnswer[0][0]).find(L"Tear of Elf") != std::wstring_view::npos);
+
+    // No dialog open for the tests after this one.
+    g_iCurrentDialogScript = -1;
+    g_iNumLineMessageBoxCustom = 0;
+    std::memset(g_lpszMessageBoxCustom, 0, sizeof g_lpszMessageBoxCustom);
+    g_iNumAnswer = 0;
+    std::memset(g_lpszDialogAnswer, 0, sizeof g_lpszDialogAnswer);
+    std::setlocale(LC_ALL, previousLocale.c_str());
+}
+
 TEST_CASE("A language without a text of its own names the items as the English text does [data][texts]")
 {
     ItemTextScope scope;
@@ -398,19 +437,26 @@ TEST_CASE("Name forms leaves the rest of Item Translations to the names grid [ed
     CHECK(left > RoomForTheGrid);
 }
 
-TEST_CASE("A Texts problem of a UI text naming a number no item has leaves the selection [editor][items][texts]")
+TEST_CASE("A Texts problem of a UI or tooltip file text naming a number no item has leaves the selection "
+          "[editor][items][texts]")
 {
     ItemTextScope scope;
     REQUIRE(scope.Loaded());
     REQUIRE(g_ItemDatabase.Find(14, 511) == nullptr);
     MuEditor::Items::ItemTextCheckArea area;
     const int tear = Data::Items::MakeItemType(14, 25);
+    // The selection is the editor's, shared by the tests: put back as it was.
+    const int selected = g_ItemSelection.GetItemType();
     g_ItemSelection.Select(tear);
 
     area.Open({Data::Items::ItemDataIssueSeverity::Error, "Game.pl.resx", 14, 511, "Tear", "names no item"}, false);
     CHECK(g_ItemSelection.GetItemType() == tear);
+    area.Open({Data::Items::ItemDataIssueSeverity::Error, "Tooltip.json", 14, 511, "texts.talisman", "names no item"},
+              false);
+    CHECK(g_ItemSelection.GetItemType() == tear);
     // An item the text names is selected.
     area.Open({Data::Items::ItemDataIssueSeverity::Warning, "Game.pl.resx", 14, 13, "Bless", "missing form"}, false);
     CHECK(g_ItemSelection.GetItemType() == Data::Items::MakeItemType(14, 13));
+    g_ItemSelection.Select(selected);
 }
 #endif // _EDITOR

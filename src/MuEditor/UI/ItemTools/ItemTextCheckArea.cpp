@@ -68,9 +68,9 @@ void ItemTextCheckArea::Open(const ItemDataIssue& issue, bool clicked)
     {
         return;
     }
-    // A UI text that names a number no item has ({item:14,511}): the selection stays, Item Translations would show
-    // nothing.
-    if (IsUiText(issue) && g_ItemDatabase.Find(issue.group, issue.number) == nullptr)
+    // A UI or tooltip file text that names a number no item has ({item:14,511}): the selection stays, the tool would
+    // show nothing.
+    if (!IsItemText(issue) && g_ItemDatabase.Find(issue.group, issue.number) == nullptr)
     {
         return;
     }

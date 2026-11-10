@@ -135,13 +135,15 @@ void AddIssue(const CheckedText& text, ItemDataIssueSeverity severity, int group
     issues.push_back({severity, text.source, group, number, text.field, std::move(message)});
 }
 
-// UTF-8: the bytes that continue a character are 10xxxxxx and carry 6 bits each; a lead byte below 0x80 is a character
-// of its own, below 0xE0 starts 2 bytes, below 0xF0 3, else 4.
+// Below this a byte, and a character, is ASCII.
+constexpr char32_t FirstNonAscii = 0x80;
+
+// UTF-8: the bytes that continue a character are 10xxxxxx and carry 6 bits each; an ASCII byte is a character of its
+// own, a lead byte below 0xE0 (from 0xC0) starts 2 bytes, below 0xF0 3, else 4.
 constexpr unsigned char ContinuationMask = 0xC0;
 constexpr unsigned char ContinuationBits = 0x80;
 constexpr unsigned char ContinuationPayload = 0x3F;
 constexpr int ContinuationPayloadBits = 6;
-constexpr unsigned char FirstTwoByteLead = 0x80;
 constexpr unsigned char FirstThreeByteLead = 0xE0;
 constexpr unsigned char FirstFourByteLead = 0xF0;
 constexpr unsigned char LeadPayload = 0x7F;
@@ -153,7 +155,6 @@ struct CharacterRange
     char32_t first;
     char32_t last;
 };
-constexpr char32_t FirstNonAscii = 0x80;
 constexpr CharacterRange WordLetterRanges[] = {{0xC0, 0x24F}, {0x370, 0x52F}, {0x1E00, 0x1EFF}};
 constexpr char32_t MultiplicationSign = 0xD7;
 constexpr char32_t DivisionSign = 0xF7;
@@ -184,7 +185,7 @@ char32_t CharacterAt(std::string_view text, size_t at, bool before)
         return 0;
     }
     const auto lead = static_cast<unsigned char>(text[at]);
-    const int length = lead < FirstTwoByteLead ? 1 : lead < FirstThreeByteLead ? 2 : lead < FirstFourByteLead ? 3 : 4;
+    const int length = lead < FirstNonAscii ? 1 : lead < FirstThreeByteLead ? 2 : lead < FirstFourByteLead ? 3 : 4;
     char32_t character = length == 1 ? lead : lead & (LeadPayload >> length);
     for (int i = 1; i < length && at + i < text.size(); ++i)
     {
