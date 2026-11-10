@@ -865,6 +865,11 @@ bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known)
             if (row.checked && row.locked.empty())
             {
                 forget(row, AddedOrRemovedItemField);
+                // A removed item's other marks go too: its number may come back as another item.
+                if (row.change == SyncChange::Removed)
+                {
+                    changed = known.ClearChangedItem(row.group, row.number) || changed;
+                }
             }
             continue;
         }

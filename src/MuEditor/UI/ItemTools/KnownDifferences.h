@@ -48,8 +48,8 @@ struct KnownDifferences
     void Set(int group, int number, const std::string& field, WrongSide side);
     void Set(const std::string& formula, WrongSide side);
     // Takes out the marks of the item while it is changed: EveryFieldOfItem and its fields'. The
-    // mark of the item new or removed stays.
-    void ClearChangedItem(int group, int number);
+    // mark of the item new or removed stays. Whether any went.
+    bool ClearChangedItem(int group, int number);
     bool operator==(const KnownDifferences& other) const = default;
 };
 

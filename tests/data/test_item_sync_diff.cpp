@@ -1384,6 +1384,9 @@ TEST_CASE("Applying a marked difference takes out its mark [data][items][editor]
     known.Set(0, 0, "width", WrongSide::Client);
     known.Set(0, 0, "repairable", WrongSide::Server);
     known.Set(0, 1, "", WrongSide::Client);
+    // Marks of the removed item from while it was changed.
+    known.Set(0, 1, EveryFieldOfItem, WrongSide::Server);
+    known.Set(0, 1, "width", WrongSide::Server);
     known.Set("dropLevelBonus.excellent", WrongSide::Client);
     // A mark of an item that does not differ stays.
     known.Set(0, 2, "", WrongSide::Client);
@@ -1396,6 +1399,8 @@ TEST_CASE("Applying a marked difference takes out its mark [data][items][editor]
     CHECK(known.Find(0, 0, "width") == WrongSide::None);
     CHECK(known.Find(0, 0, "repairable") == WrongSide::Server);
     CHECK(known.Find(0, 1, "") == WrongSide::None);
+    CHECK(known.Find(0, 1, EveryFieldOfItem) == WrongSide::None);
+    CHECK(known.Find(0, 1, "width") == WrongSide::None);
     CHECK(known.Find("dropLevelBonus.excellent") == WrongSide::Client);
     CHECK(known.Find(0, 2, "") == WrongSide::Client);
     CHECK_FALSE(ForgetAppliedMarks(diff, known));

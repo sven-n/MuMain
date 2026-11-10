@@ -2113,7 +2113,8 @@ client* gives the box its default back, as a new comparison starts it). A locked
 keep, start unchecked either way (the drop level's box still takes it). The marks count in every comparison, also after a
 new download. Apply takes out the marks of what it applied, either side's
 (on a changed item marked as a whole, once all its fields were applied):
-the client has the server's value then. They are kept in `Data/Items/Sync/KnownDifferences.json`
+the client has the server's value then. An applied removal takes every
+mark of the item, so a number used again later starts without one. They are kept in `Data/Items/Sync/KnownDifferences.json`
 next to the game, read when the Item Sync window opens and written on
 every click (not while it has an entry that cannot be read: fix or remove
 the file, then close the window and open it again); copy it to

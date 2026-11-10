@@ -143,9 +143,9 @@ void ApplyMarks(ItemSyncDiff& diff, const KnownDifferences& known);
 void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& field, WrongSide side);
 void MarkWrongSide(KnownDifferences& known, SyncFormula& row, WrongSide side);
 // After the diff's checked rows were applied: takes out of `known` the marks of what was applied,
-// either side's, as the client has the file's value now (an item number used again later starts
-// without one). A changed item's whole-item mark goes when all its fields were applied.
-// Whether `known` changed.
+// either side's, as the client has the file's value now; an applied removal takes every mark of
+// the item (an item number used again later starts without one). A changed item's whole-item mark
+// goes when all its fields were applied. Whether `known` changed.
 bool ForgetAppliedMarks(const ItemSyncDiff& diff, KnownDifferences& known);
 // The side marked on a New or Removed item, or the side every field of a Changed one has (its own
 // mark or the item's); None when nothing or not every field is marked, or the fields have
