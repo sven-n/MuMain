@@ -169,7 +169,7 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
                 {
                     // Saved as it changes, so a crash or a disconnect doesn't lose it.
                     if (SetHotKey(i + 1, m_iHoveredGridSkillIndex))
-                        SaveOptionsIfConnected();
+                        SaveOptionsIfInGame();
 
                     return false;
                 }
@@ -178,7 +178,7 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
             if (mu::ui::window::IsPress('0'))
             {
                 if (SetHotKey(0, m_iHoveredGridSkillIndex))
-                    SaveOptionsIfConnected();
+                    SaveOptionsIfInGame();
 
                 return false;
             }

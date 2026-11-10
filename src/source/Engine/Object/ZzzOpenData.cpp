@@ -1577,7 +1577,7 @@ void SetKeyConfigurationReceived(bool received)
     s_keyConfigurationReceived = received;
 }
 
-void SaveOptionsIfConnected()
+void SaveOptionsIfInGame()
 {
     if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE && s_keyConfigurationReceived)
     {

@@ -24,9 +24,8 @@ void OpenItemEffectTextures();
 void PrepareGrandSoulPantsClothMesh();
 
 void SaveOptions();
-// Sends the key configuration while connected to the game server with a character in the game world;
-// does nothing elsewhere, where there is no character to save it for.
-void SaveOptionsIfConnected();
+// SaveOptions, once the character's key configuration has arrived in the game world.
+void SaveOptionsIfInGame();
 // Whether the selected character's key configuration has arrived. Until it has, the hotkeys in memory are the reset
 // ones (or another character's Q/W/E/R), and saving them would overwrite the character's stored layout.
 void SetKeyConfigurationReceived(bool received);

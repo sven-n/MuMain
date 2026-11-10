@@ -179,7 +179,7 @@ void SaveOptionsBeforeClose()
 {
     if (!Destroy)
     {
-        SaveOptionsIfConnected();
+        SaveOptionsIfInGame();
     }
 }
 
