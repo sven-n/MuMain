@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "Core/Platform/ProcessLocale.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -22,6 +23,7 @@
 #endif
 
 #include <algorithm>
+#include <clocale>
 #include <cstring>
 #include <filesystem>
 #include <string>
@@ -244,6 +246,10 @@ TEST_CASE("An open NPC dialog's copied answer follows Translate item names [data
 {
     ItemTextScope scope;
     REQUIRE(scope.Loaded());
+    // The game's process locale: macOS writes the answer line (mu_swprintf) through LC_CTYPE, and in the test's "C"
+    // locale it leaves "Pójdę ..." unwritten.
+    const std::string previousLocale = std::setlocale(LC_ALL, nullptr);
+    Core::Platform::ApplyProcessLocale();
     I18N::SetLocale("pl");
 
     // The Tear of Elf quest's answer, "{item:14,25:acc}" in Polish, as the dialog shows it.
@@ -261,6 +267,7 @@ TEST_CASE("An open NPC dialog's copied answer follows Translate item names [data
     std::memset(g_lpszMessageBoxCustom, 0, sizeof g_lpszMessageBoxCustom);
     g_iNumAnswer = 0;
     std::memset(g_lpszDialogAnswer, 0, sizeof g_lpszDialogAnswer);
+    std::setlocale(LC_ALL, previousLocale.c_str());
 }
 
 TEST_CASE("A language without a text of its own names the items as the English text does [data][texts]")
