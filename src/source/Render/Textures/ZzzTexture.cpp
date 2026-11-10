@@ -249,27 +249,24 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
 
 namespace
 {
+void ReportBitmapLoadFailure(const wchar_t* path)
+{
+    wchar_t szErrorMsg[256] = {
+        0,
+    };
+    mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", path);
+#ifdef FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg);
+#else  // FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg, true);
+#endif // FOR_WORK
+}
+
 bool LoadDataBitmap(const wchar_t* szFullPath, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
                     bool keepPixels)
 {
-    if (bCheck)
-    {
-        if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels))
-        {
-            wchar_t szErrorMsg[256] = {
-                0,
-            };
-            mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
-#ifdef FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg);
-#else  // FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg, true);
-#endif // FOR_WORK
-            return false;
-        }
-        return true;
-    }
-    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels);
+    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels,
+                             bCheck ? &ReportBitmapLoadFailure : nullptr);
 }
 } // namespace
 

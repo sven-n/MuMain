@@ -141,6 +141,8 @@ constexpr std::uint8_t FirstPixel(std::uint8_t shade)
     return static_cast<std::uint8_t>(shade + 32);
 }
 constexpr std::uint8_t PackShade = 100;
+// Batches in these tests decode on this many threads, so how many loads run ahead does not depend on the machine.
+constexpr unsigned TestDecodeThreads = 8;
 } // namespace
 
 namespace mu
@@ -539,4 +541,208 @@ TEST_CASE("a texture file that does not decode comes back with its error")
     const Render::Sprites::TextureDecodeResult missing = Render::Sprites::DecodeTextureFile(noPack, request);
     CHECK_FALSE(missing.texture);
     CHECK(missing.errors.empty());
+}
+
+namespace
+{
+std::vector<std::wstring> reportedFailures;
+void RecordFailure(const wchar_t* filename)
+{
+    reportedFailures.emplace_back(filename);
+}
+} // namespace
+
+TEST_CASE("a load batch uploads nothing until a bitmap is asked for or the batch ends")
+{
+    record = {};
+    const FixtureFolder fixture("batch");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "a.OZT");
+    WriteTga(dir / "b.OZT", PackShade);
+    WriteJpeg(dir / "c.OZJ");
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage(530u, (dir / "a.tga").wstring()));
+    CHECK(bitmaps.LoadImage(531u, (dir / "b.tga").wstring()));
+    CHECK(bitmaps.LoadImage(532u, (dir / "c.jpg").wstring()));
+    CHECK(record.calls == 0);
+    CHECK(bitmaps.GetNumberOfTexture() == 0);
+
+    // Asking for one waits for it alone.
+    const BITMAP_t* second = bitmaps.FindTexture(531u);
+    REQUIRE(second != nullptr);
+    CHECK(record.calls == 1);
+    CHECK(record.pixels[0] == FirstPixel(PackShade));
+    CHECK(second->Width == 2.0f);
+    CHECK(bitmaps.GetNumberOfTexture() == 1);
+
+    bitmaps.EndLoadBatch();
+    CHECK(record.calls == 3);
+    // The rest committed in the order asked for: the JPEG last.
+    CHECK(record.pixels.size() == 16);
+    CHECK(record.pixels[3] == 255u);
+    CHECK(bitmaps.GetNumberOfTexture() == 3);
+    CHECK(record.textures.size() == 3);
+    CHECK(bitmaps.GetUsedTextureMemory() == 48);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("a queued load that is unloaded or loaded again commits first")
+{
+    record = {};
+    const FixtureFolder fixture("batch_unload");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "a.OZT");
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage(540u, (dir / "a.tga").wstring()));
+    CHECK(bitmaps.LoadImage(540u, (dir / "a.tga").wstring()));
+    CHECK(record.calls == 1);
+    CHECK(bitmaps.FindTexture(540u)->Ref == 2);
+
+    CHECK(bitmaps.LoadImage(541u, (dir / "a.tga").wstring()));
+    bitmaps.UnloadImage(541u);
+    CHECK(record.calls == 2);
+    CHECK(bitmaps.FindTexture(541u) == nullptr);
+    bitmaps.EndLoadBatch();
+    CHECK(record.calls == 2);
+    CHECK(bitmaps.GetNumberOfTexture() == 1);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("a queued load that fails is reported when it commits")
+{
+    record = {};
+    reportedFailures.clear();
+    const FixtureFolder fixture("batch_failure");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "broken.OZT");
+    std::filesystem::resize_file(dir / "broken.OZT", 10);
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage(550u, (dir / "broken.tga").wstring(), GL_NEAREST, GL_CLAMP_TO_EDGE, true, false, false,
+                            &RecordFailure));
+    // A missing file fails at once.
+    CHECK_FALSE(bitmaps.LoadImage(551u, (dir / "missing.tga").wstring(), GL_NEAREST, GL_CLAMP_TO_EDGE, true, false,
+                                  false, &RecordFailure));
+    REQUIRE(reportedFailures.size() == 1);
+    CHECK(reportedFailures[0] == (dir / "missing.tga").wstring());
+    // The inner batch ending commits nothing.
+    bitmaps.EndLoadBatch();
+    CHECK(reportedFailures.size() == 1);
+    bitmaps.EndLoadBatch();
+    REQUIRE(reportedFailures.size() == 2);
+    CHECK(reportedFailures[1] == (dir / "broken.tga").wstring());
+    CHECK(record.calls == 0);
+    CHECK(bitmaps.GetNumberOfTexture() == 0);
+
+    // Outside a batch the failure is reported at once, as before.
+    CHECK_FALSE(bitmaps.LoadImage(552u, (dir / "broken.tga").wstring(), GL_NEAREST, GL_CLAMP_TO_EDGE, true, false,
+                                  false, &RecordFailure));
+    CHECK(reportedFailures.size() == 3);
+}
+
+TEST_CASE("a canvas loads at once inside a load batch")
+{
+    record = {};
+    const FixtureFolder fixture("batch_canvas");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "canvas.OZT");
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage(560u, (dir / "canvas.tga").wstring(), GL_NEAREST, GL_CLAMP_TO_EDGE, true, false, true));
+    CHECK(record.calls == 1);
+    bitmaps.EndLoadBatch();
+    CHECK(record.calls == 1);
+    bitmaps.UnloadAllImages();
+}
+
+TEST_CASE("inside a load batch a search over folders finds the folder that has the file")
+{
+    record = {};
+    const FixtureFolder fixture("batch_search");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "second" / "skin.OZT");
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage((dir / "first" / "skin.tga").wstring()) == BITMAP_UNKNOWN);
+    const GLuint found = bitmaps.LoadImage((dir / "second" / "skin.tga").wstring());
+    CHECK(found != BITMAP_UNKNOWN);
+    CHECK(record.calls == 0);
+    bitmaps.EndLoadBatch();
+    REQUIRE(bitmaps.FindTexture(found) != nullptr);
+    CHECK(bitmaps.GetNumberOfTexture() == 1);
+    bitmaps.UnloadAllImages();
+}
+
+namespace
+{
+CGlobalBitmap* quittingBitmaps = nullptr;
+// What the error dialog's Quit does: the game tears down and unloads every bitmap.
+void QuitOnFailure(const wchar_t* filename)
+{
+    reportedFailures.emplace_back(filename);
+    quittingBitmaps->UnloadAllImages();
+}
+} // namespace
+
+TEST_CASE("quitting from a failed queued load unloads the batch cleanly")
+{
+    record = {};
+    reportedFailures.clear();
+    const FixtureFolder fixture("batch_quit");
+    const auto& dir = fixture.path;
+    WriteTga(dir / "broken.OZT");
+    std::filesystem::resize_file(dir / "broken.OZT", 10);
+    WriteTga(dir / "good.OZT");
+    CGlobalBitmap bitmaps;
+    quittingBitmaps = &bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    CHECK(bitmaps.LoadImage(600u, (dir / "broken.tga").wstring(), GL_NEAREST, GL_CLAMP_TO_EDGE, true, false, false,
+                            &QuitOnFailure));
+    CHECK(bitmaps.LoadImage(601u, (dir / "good.tga").wstring()));
+    // Looking the broken one up by name commits it; its failure quits while the lookup runs.
+    CHECK(bitmaps.FindTexture((dir / "broken.tga").wstring()) == nullptr);
+    REQUIRE(reportedFailures.size() == 1);
+    CHECK(record.calls == 1);
+    CHECK(bitmaps.GetNumberOfTexture() == 0);
+    bitmaps.EndLoadBatch();
+    CHECK(bitmaps.GetNumberOfTexture() == 0);
+    CHECK(record.textures.empty());
+    quittingBitmaps = nullptr;
+}
+
+TEST_CASE("a load batch commits older loads instead of holding every decoded file")
+{
+    record = {};
+    const FixtureFolder fixture("batch_window");
+    const auto& dir = fixture.path;
+    constexpr int files = 40;
+    for (int i = 0; i < files; ++i)
+    {
+        WriteTga(dir / ("t" + std::to_string(i) + ".OZT"));
+    }
+    CGlobalBitmap bitmaps;
+
+    bitmaps.BeginLoadBatch(TestDecodeThreads);
+    for (int i = 0; i < files; ++i)
+    {
+        CHECK(bitmaps.LoadImage(700u + static_cast<std::uint32_t>(i),
+                                (dir / ("t" + std::to_string(i) + ".tga")).wstring()));
+    }
+    // At most one load per worker is still waiting to commit.
+    constexpr int window = static_cast<int>(TestDecodeThreads);
+    CHECK(record.calls >= files - window);
+    CHECK(bitmaps.GetNumberOfTexture() == static_cast<std::size_t>(record.calls));
+    bitmaps.EndLoadBatch();
+    CHECK(record.calls == files);
+    CHECK(bitmaps.GetNumberOfTexture() == files);
+    bitmaps.UnloadAllImages();
 }

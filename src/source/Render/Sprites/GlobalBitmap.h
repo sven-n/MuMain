@@ -18,6 +18,7 @@
 namespace Render::Sprites
 {
 struct MipLevels;
+struct PendingTextureLoads;
 struct TextureDecodeRequest;
 struct TextureDecodeResult;
 } // namespace Render::Sprites
@@ -169,6 +170,9 @@ class CGlobalBitmap
     double m_uploadSeconds = 0.0;
     // The files of the active texture pack; empty for the original textures.
     Render::Textures::TexturePackFiles m_texturePack;
+    // Set while a load batch is open.
+    std::unique_ptr<Render::Sprites::PendingTextureLoads> m_pending;
+    int m_batchDepth = 0;
 #ifdef DEBUG_BITMAP_CACHE
     CTimer2				m_DebugOutputTimer;
 #endif // DEBUG_BITMAP_CACHE
@@ -176,15 +180,25 @@ class CGlobalBitmap
     void Init();
 
 public:
+    using LoadFailureReporter = void (*)(const wchar_t* filename);
+
     CGlobalBitmap();
     virtual ~CGlobalBitmap();
 
     GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     // keepPixels: the game draws on the texture through Buffer (a canvas), so Buffer stays
-    // at the original size, also for an upscaled file.
+    // at the original size, also for an upscaled file. reportFailure, when set, is told
+    // about a failed load.
+    // Inside a load batch the file is only queued and the call returns true: it decodes
+    // on a worker, and a failure is reported when it commits. A canvas loads at once.
     bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST,
                    GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
-                   bool keepPixels = false);
+                   bool keepPixels = false, LoadFailureReporter reportFailure = nullptr);
+    // A load batch decodes the files it loads on worker threads. Asking for a bitmap
+    // still decoding waits for it; the batch commits the rest, in order, when it ends.
+    // Batches nest: the outermost one counts, and so do its decode threads (0: one fewer than the hardware's).
+    void BeginLoadBatch(unsigned decodeThreads = 0);
+    void EndLoadBatch();
     // Like LoadImage(filename, ...), but never shares an existing by-filename match -- always
     // creates its own independent entry, even if the same file is already resident under a
     // numbered slot (e.g. BITMAP_LOG_IN+7). Needed by callers that cache the resolved GPU
@@ -273,6 +287,11 @@ protected:
     // it under its BitmapIndex; the bitmap keeps its pixels.
     bool UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> rgba, GLuint uiFilter,
                       GLuint uiWrapMode);
+    void QueueLoad(Render::Sprites::TextureDecodeRequest&& request);
+    // Commits the queued load of the index, if there is one, waiting for its decode.
+    void FlushPending(GLuint uiBitmapIndex);
+    void FlushPending(const std::wstring& filename);
+    void FlushAllPending();
     // Reports a decoded file's errors and uploads it as the texture.
     bool CommitTexture(const Render::Sprites::TextureDecodeRequest& request,
                        Render::Sprites::TextureDecodeResult&& result);
@@ -294,3 +313,19 @@ protected:
 };
 
 extern CGlobalBitmap Bitmaps;
+
+// Opens a load batch on Bitmaps for its lifetime.
+class TextureLoadBatch final
+{
+public:
+    TextureLoadBatch()
+    {
+        Bitmaps.BeginLoadBatch();
+    }
+    ~TextureLoadBatch()
+    {
+        Bitmaps.EndLoadBatch();
+    }
+    TextureLoadBatch(const TextureLoadBatch&) = delete;
+    TextureLoadBatch& operator=(const TextureLoadBatch&) = delete;
+};
