@@ -2105,8 +2105,8 @@ starts as without a mark. *Wrong in client* only marks the difference: it
 leaves its box as it is, so whether Apply takes the server's value stays
 your choice; *Wrong in server* unchecks it and shows it
 grey, so the client keeps its value (checking it by hand applies it after
-all, and it is no longer grey; clearing the mark gives the box its
-default back). A locked field or item, and a drop level OpenMU cannot
+all, and it is no longer grey; clearing the mark or switching to *Wrong in
+client* gives the box its default back, as a new comparison starts it). A locked field or item, and a drop level OpenMU cannot
 keep, start unchecked either way (the drop level's box still takes it). The marks count in every comparison, also after a
 new download. Apply takes out the marks of what it applied, either side's
 (on a changed item marked as a whole, once all its fields were applied):

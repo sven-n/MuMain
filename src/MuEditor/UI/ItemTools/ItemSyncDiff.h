@@ -128,8 +128,8 @@ void SetRowChecked(SyncItem& row, bool checked);
 // (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 // Marks which side of a difference is wrong (WrongSide::None: not decided). Wrong in server
-// unchecks it, and clearing that mark gives the default back; wrong in client leaves the box as
-// it is, checking it is the user's. An empty `field` names the item as a whole: a New or
+// unchecks it, and leaving that mark gives the default back; otherwise wrong in client leaves
+// the box as it is, checking it is the user's. An empty `field` names the item as a whole: a New or
 // Removed one, or every field of a Changed one.
 void SetWrongSide(SyncItem& row, const std::string& field, WrongSide side);
 void SetWrongSide(SyncFormula& row, WrongSide side);

@@ -334,14 +334,16 @@ TEST_CASE("A difference wrong in the server starts unchecked, one wrong in the c
     CHECK(bonus->wrongSide == WrongSide::Server);
     CHECK_FALSE(bonus->checked);
 
-    // Wrong in client leaves a box as it is; clearing wrong in server gives the default.
+    // Leaving wrong in server, also for wrong in client, gives the default as a new comparison
+    // would; otherwise wrong in client leaves a box as it is.
     ItemSyncDiff marked = diff;
     SyncItem& kept = marked.items[static_cast<size_t>(row - diff.items.data())];
     SetWrongSide(kept, "width", WrongSide::Client);
     SetWrongSide(kept, "repairable", WrongSide::Client);
     CHECK(GetRowWrongSide(kept) == WrongSide::Client);
-    CHECK_FALSE(FindField(kept, "width")->checked);
+    CHECK(FindField(kept, "width")->checked);
     CHECK(FindField(kept, "repairable")->checked);
+    SetRowChecked(kept, false);
     SetWrongSide(kept, "width", WrongSide::None);
     CHECK_FALSE(FindField(kept, "width")->checked);
     CHECK(GetRowWrongSide(kept) == WrongSide::None);
@@ -359,7 +361,7 @@ TEST_CASE("A difference wrong in the server starts unchecked, one wrong in the c
     CHECK(addition.checked);
     SyncFormula& formula = marked.formulas[static_cast<size_t>(bonus - diff.formulas.data())];
     SetWrongSide(formula, WrongSide::Client);
-    CHECK_FALSE(formula.checked);
+    CHECK(formula.checked);
 
     // A click keeps the mark for the next comparisons too.
     KnownDifferences clicked;
@@ -399,11 +401,12 @@ TEST_CASE("A mark of a changed item as a whole counts for its fields, also ones 
     const std::vector<const SyncItem*> rows = {&changed};
     CHECK(WriteSyncRowsMarkdown(rows, "Items", "", true).find("| Server |") != std::string::npos);
 
-    // Marking the whole item takes out the fields' own marks; wrong in client leaves the boxes.
+    // Marking the whole item takes out the fields' own marks; the fields that leave wrong in the
+    // server get their default.
     MarkWrongSide(known, changed, "", WrongSide::Client);
     CHECK(known.fields.size() == 1);
     CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
-    CHECK_FALSE(FindField(changed, "repairable")->checked);
+    CHECK(FindField(changed, "repairable")->checked);
     CHECK(FindField(changed, "height")->checked);
 
     // A field's own mark counts for it instead; the item's mark stays for the others.

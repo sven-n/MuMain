@@ -171,11 +171,12 @@ bool StartsChecked(WrongSide side, bool byDefault, bool locked)
     return side == WrongSide::Server ? false : byDefault;
 }
 
-// A click on a mark: Wrong in server unchecks the box, and clearing that mark gives the box its
-// default back (`start`). Wrong in client leaves the box as it is.
+// A click on a mark: Wrong in server unchecks the box, and leaving it (cleared or switched to
+// Wrong in client) gives the box its default back (`start`), as a new comparison would start it.
+// Otherwise Wrong in client leaves the box as it is.
 void UpdateBoxForMark(bool& checked, WrongSide old, WrongSide side, bool start)
 {
-    if (side == WrongSide::Server || (old == WrongSide::Server && side == WrongSide::None))
+    if (side == WrongSide::Server || old == WrongSide::Server)
     {
         checked = start;
     }
