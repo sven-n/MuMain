@@ -2086,31 +2086,6 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%ls)]", Text);
 }
 
-// Walks another player or a monster from its tile to c->TargetX/TargetY.
-static void StartObservedWalk(CHARACTER* c)
-{
-    if (c->Appear != 0)
-    {
-        return;
-    }
-
-    const bool isDoppelganger =
-        gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4;
-    const int defaultWall = isDoppelganger ? TW_NOMOVE : TW_CHARACTER;
-    if (!PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, defaultWall))
-    {
-        c->Movement = false;
-        SetPlayerStop(c);
-        return;
-    }
-
-    // A walk replaces a running glide (an instant move, a knockback or a skill that moves the attacker): the glide
-    // heads for TargetX/TargetY, which the walk has just overwritten, so it would fly the character to the walk's
-    // end. Without a path the glide finishes instead, so the character never freezes where it is drawn.
-    c->JumpTime = 0;
-    c->Movement = true;
-}
-
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
 {
     auto fixedSize = sizeof(PMOVE_CHARACTER);
@@ -2176,7 +2151,18 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    StartObservedWalk(c);
+    if (c->Appear != 0)
+    {
+        return;
+    }
+
+    // Without a path the running glide carries on to the walk's end, as before, so the character never freezes where
+    // it is drawn. MoveMonsterClient tries the walk again every frame.
+    if (!StartObservedWalk(c))
+    {
+        c->Movement = false;
+        SetPlayerStop(c);
+    }
 }
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer)

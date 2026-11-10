@@ -5,10 +5,13 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <memory>
 #include <span>
+#include <utility>
+#include <vector>
 
 extern float FPS_ANIMATION_FACTOR;
 void MoveMonsterClient(CHARACTER* c, OBJECT* o);
@@ -146,6 +149,46 @@ TEST_CASE("A walk right after an instant move walks instead of gliding to the wa
     CHECK(drawnX > TileCentre(StartTile));
     CHECK(drawnX < TileCentre(CorrectedTile + 1));
     CHECK(fixture.observed.Movement);
+}
+
+TEST_CASE("A walk whose path clears a frame later still replaces the glide [network][movement]")
+{
+    ObservedPlayerFixture fixture;
+    fixture.observed.Object.Kind = KIND_MONSTER;
+    fixture.observed.MoveSpeed = RunSpeed;
+    fixture.ReceiveInstantMove(CorrectedTile, StartTile);
+
+    // When the walk arrives, characters stand on every tile around it, so it has no step to take.
+    std::vector<std::pair<int, WORD>> blockedTiles;
+    for (int dy = -1; dy <= 1; ++dy)
+    {
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            if (dx == 0 && dy == 0)
+            {
+                continue;
+            }
+            const int index = TERRAIN_INDEX_REPEAT(CorrectedTile + dx, StartTile + dy);
+            blockedTiles.emplace_back(index, TerrainWall[index]);
+            TerrainWall[index] |= TW_CHARACTER;
+        }
+    }
+    fixture.ReceiveWalk(CorrectedTile, StartTile, WalkTargetTile, StartTile);
+    for (const auto& [index, wall] : blockedTiles)
+    {
+        TerrainWall[index] = wall;
+    }
+
+    CHECK_FALSE(fixture.observed.Movement);
+    CHECK(fixture.observed.JumpTime > 0);
+
+    // They have stepped away, so MoveMonsterClient's retry finds the path.
+    fixture.RunFrames(FramesToWatch);
+
+    CHECK(fixture.observed.Movement);
+    CHECK(fixture.observed.JumpTime == 0);
+    // One frame of glide moved it a fifth of the way to tile 56; walking on from there keeps it short of tile 53.
+    CHECK(fixture.observed.Object.Position[0] < TileCentre(CorrectedTile + 2));
 }
 
 TEST_CASE("A walk that cannot start yet lets the running glide finish [network][movement]")
