@@ -14,11 +14,21 @@ namespace MuEditor::Items::WrongSideButtons
 constexpr int ColumnCount = 2;
 // The two columns of a table.
 void SetupColumns();
+// Whose mark the buttons show.
+enum class Shown : uint8_t
+{
+    // The row's own.
+    Own,
+    // A field's item's, shown faint: it is cleared on the item's row, so a click on it picks
+    // nothing.
+    OfItem,
+    // A changed item's own, shown faint while some of its fields have their own of the other
+    // side: a click on it marks every field with it.
+    OfItemWithMarkedFields,
+};
 // The two buttons in the table's next two columns, showing `side`; the side a click picks
-// (WrongSide::None when it clears the selected one), or nothing. `ofItem`: `side` is the mark of
-// the field's item as a whole, shown faint; it is cleared on the item's row, so a click on it
-// picks nothing.
-std::optional<WrongSide> Render(WrongSide side, bool ofItem = false);
+// (WrongSide::None when it clears the selected one), or nothing.
+std::optional<WrongSide> Render(WrongSide side, Shown shown = Shown::Own);
 } // namespace MuEditor::Items::WrongSideButtons
 
 #endif // _EDITOR

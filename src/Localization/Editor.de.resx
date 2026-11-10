@@ -2887,6 +2887,9 @@
   <data name="What a mark of the item means" xml:space="preserve">
     <value>Mit dem ganzen Item markiert. Auf der Zeile des Items ändern oder für dieses Feld allein die andere Seite wählen. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
   </data>
+  <data name="What a mark of the item with marked fields means" xml:space="preserve">
+    <value>Als Ganzes markiert, aber einige Felder haben eine eigene Markierung. Ein Klick auf eine Seite markiert jedes Feld damit. Gespeichert in Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
   <data name="The marks are not saved while {0} cannot be read" xml:space="preserve">
     <value>Die Markierungen werden nicht gespeichert, solange {0} nicht gelesen werden kann (siehe Konsole). Datei korrigieren oder entfernen und dieses Fenster schließen und wieder öffnen.</value>
   </data>

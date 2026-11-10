@@ -1343,7 +1343,13 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 ImGui::Text("%d", static_cast<int>(row.fields.size()));
                 if (checkable)
                 {
-                    if (const std::optional<WrongSide> picked = WrongSideButtons::Render(side))
+                    // A changed item marked as a whole whose fields name different sides: its mark,
+                    // faint.
+                    const bool mixed = side == WrongSide::None && row.wrongSide != WrongSide::None;
+                    const std::optional<WrongSide> picked =
+                        mixed ? WrongSideButtons::Render(row.wrongSide, WrongSideButtons::Shown::OfItemWithMarkedFields)
+                              : WrongSideButtons::Render(side);
+                    if (picked)
                     {
                         SetWrongSide(row, "", *picked);
                     }
@@ -1466,7 +1472,8 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
         }
         if (markable)
         {
-            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(field.wrongSide, field.markOfItem))
+            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(
+                    field.wrongSide, field.markOfItem ? WrongSideButtons::Shown::OfItem : WrongSideButtons::Shown::Own))
             {
                 SetWrongSide(row, field.field, *picked);
             }

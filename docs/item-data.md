@@ -2100,7 +2100,9 @@ field, and the Formulas list for an entry. Marking a changed item as a
 whole takes out its fields' own marks (a new or removed item's mark stays,
 and the other way round); a field's own mark counts for that field
 instead of the item's, which stays for the others. A field shows its
-item's mark faint; it is changed on the item's row. At most one of
+item's mark faint; it is changed on the item's row. While some fields have
+their own mark of the other side, the item's row shows its mark faint too;
+a click on a side there marks every field with it. At most one of
 them is selected; clicking the selected one again clears it, and the row
 starts as without a mark. *Wrong in client* only marks the difference: it
 leaves its box as it is, so whether Apply takes the server's value stays

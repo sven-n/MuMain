@@ -17,18 +17,19 @@ void SetupColumn(const char* head)
     ImGui::TableSetupColumn(head, ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize(head).x);
 }
 
-// The alpha of a field's button that shows its item's mark.
+// The alpha of a button that shows an item's mark faint.
 constexpr float ItemMarkAlpha = 0.5f;
 
 // Whether the button was clicked.
-bool RenderButton(const char* id, bool selected, bool ofItem, const char* tooltip)
+bool RenderButton(const char* id, bool selected, Shown shown, const char* tooltip)
 {
     ImGui::TableNextColumn();
-    const bool faint = selected && ofItem;
+    const bool faint = selected && shown != Shown::Own;
     if (faint)
     {
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * ItemMarkAlpha);
-        tooltip = I18N::Editor::WhatAMarkOfTheItemMeans;
+        tooltip = shown == Shown::OfItem ? I18N::Editor::WhatAMarkOfTheItemMeans
+                                         : I18N::Editor::WhatAMarkOfTheItemWithMarkedFieldsMeans;
     }
     const bool clicked = ImGui::RadioButton(id, selected);
     if (faint)
@@ -52,21 +53,30 @@ void SetupColumns()
     SetupColumn(I18N::Editor::WrongInServer);
 }
 
-std::optional<WrongSide> Render(WrongSide side, bool ofItem)
+std::optional<WrongSide> Render(WrongSide side, Shown shown)
 {
     std::optional<WrongSide> picked;
-    if (RenderButton("##WrongInClient", side == WrongSide::Client, ofItem, I18N::Editor::WhatWrongInClientMeans))
+    if (RenderButton("##WrongInClient", side == WrongSide::Client, shown, I18N::Editor::WhatWrongInClientMeans))
     {
         picked = Toggle(side, WrongSide::Client);
     }
-    if (RenderButton("##WrongInServer", side == WrongSide::Server, ofItem, I18N::Editor::WhatWrongInServerMeans))
+    if (RenderButton("##WrongInServer", side == WrongSide::Server, shown, I18N::Editor::WhatWrongInServerMeans))
     {
         picked = Toggle(side, WrongSide::Server);
     }
-    // The item's mark is not the field's to clear.
-    if (ofItem && picked == WrongSide::None)
+    if (picked == WrongSide::None)
     {
-        return std::nullopt;
+        switch (shown)
+        {
+        case Shown::OfItem:
+            // The item's mark is not the field's to clear.
+            return std::nullopt;
+        case Shown::OfItemWithMarkedFields:
+            // Every field takes the item's mark.
+            return side;
+        default:
+            break;
+        }
     }
     return picked;
 }
