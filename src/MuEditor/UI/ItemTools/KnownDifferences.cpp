@@ -231,12 +231,17 @@ void KnownDifferences::Set(int group, int number, const std::string& field, Wron
     fields[{group, number, field}] = side;
 }
 
-void KnownDifferences::ClearItem(int group, int number)
+void KnownDifferences::ClearChangedItem(int group, int number)
 {
     // The item's entries are in a row, from the empty field on.
     auto entry = fields.lower_bound({group, number, std::string()});
     while (entry != fields.end() && std::get<0>(entry->first) == group && std::get<1>(entry->first) == number)
     {
+        if (std::get<2>(entry->first) == AddedOrRemovedItemField)
+        {
+            ++entry;
+            continue;
+        }
         entry = fields.erase(entry);
     }
 }

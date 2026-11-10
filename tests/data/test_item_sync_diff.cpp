@@ -472,11 +472,27 @@ TEST_CASE("The mark of an item only one side had does not mark its fields once b
     CHECK(FindField(*row, "width")->wrongSide == WrongSide::None);
     CHECK(FindField(*row, "width")->checked);
 
-    // Marking the changed item as a whole keeps the other mark apart.
+    // Marking the changed item as a whole keeps the other mark, for when the item is new or
+    // removed again.
     SyncItem changed = *row;
+    known.Set(0, 0, "width", WrongSide::Server);
     MarkWrongSide(known, changed, "", WrongSide::Client);
     CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
+    CHECK(known.Find(0, 0, "width") == WrongSide::None);
+    CHECK(known.Find(0, 0, AddedOrRemovedItemField) == WrongSide::Server);
+
+    // Nor does marking the item removed take out the marks of the changed item.
+    known.Set(0, 0, "width", WrongSide::Server);
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == KrisType; });
+    ItemSyncDiff removedDiff = sides.Diff(&known);
+    SyncItem& removed =
+        removedDiff.items[static_cast<size_t>(FindRow(removedDiff, KrisType) - removedDiff.items.data())];
+    REQUIRE(removed.change == SyncChange::Removed);
+    MarkWrongSide(known, removed, "", WrongSide::None);
     CHECK(known.Find(0, 0, AddedOrRemovedItemField) == WrongSide::None);
+    CHECK(known.Find(0, 0, "width") == WrongSide::Server);
+    CHECK(known.Find(0, 0, EveryFieldOfItem) == WrongSide::Client);
 }
 
 TEST_CASE("The formulas differ by drop level bonus, table, term and whole profile [data][items][editor]")

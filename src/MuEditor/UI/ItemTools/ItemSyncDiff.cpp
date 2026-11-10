@@ -798,8 +798,12 @@ void MarkWrongSide(KnownDifferences& known, SyncItem& row, const std::string& fi
 {
     if (field.empty())
     {
-        // The whole item: its fields' own marks go.
-        known.ClearItem(row.group, row.number);
+        // The whole item: a changed one's fields' own marks go. The marks of the other state (new
+        // or removed, or changed) stay, for when the item is in it again.
+        if (row.change == SyncChange::Changed)
+        {
+            known.ClearChangedItem(row.group, row.number);
+        }
         known.Set(row.group, row.number, WholeItemField(row.change), side);
         SetWrongSide(row, "", side);
         return;
