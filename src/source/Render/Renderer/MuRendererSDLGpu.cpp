@@ -739,7 +739,7 @@ static std::uint64_t s_submittedFrames = 0u;
 // Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
 static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
 static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
-// Metal only: bound just before the real storage buffers so SDL sees a changed handle (see ReplayDrawCommand).
+// Metal only: bound before the real storage buffers so SDL sees a changed handle.
 static SDL_GPUBuffer* s_storageRebindDummyBuf = nullptr;
 static Uint32 s_boneCapacity = 0u;
 static std::vector<float> s_boneRowScratch;
@@ -1065,6 +1065,24 @@ static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUI
     SDL_BindGPUIndexBuffer(s_renderPass, &indexBinding, elementSize);
 }
 
+// A skinned draw's bones, plus the terrain heights for its ground shadow.
+// SDL 3.4.8's Metal backend binds vertex storage buffers at draw time only while needVertexStorageBufferBind is
+// set, and a draw whose pipeline has no storage buffers clears that flag without binding anything. A skinned draw
+// after such a plain draw keeps the same bone buffer handle, so SDL never sets the flag again and Metal reads the
+// bones from whatever sits in that slot, stretching monsters across the void. Binding a different buffer first
+// marks the slot as changed.
+static void BindReplayVertexStorageBuffers(bool shadow, Render::SdlGpuReplayState& state)
+{
+    SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
+    const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
+    if (!state.SelectVertexStorageBuffers(bound))
+        return;
+
+    if (s_storageRebindDummyBuf)
+        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &s_storageRebindDummyBuf, 1);
+    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
+}
+
 // Passes outside the frame's main pass draw with one sample even while anti-aliasing is on: the
 // offscreen captures and render targets, the post-RmlUi pass and FlushRenderCommands render into
 // single-sample textures. Each multisampled pipeline maps to its single-sample twin, built with
@@ -1123,21 +1141,7 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     }
 
     if (skinned)
-    {
-        SDL_GPUBuffer* const storageBuffers[] = {s_boneGpuBuf, s_terrainHeightGpuBuf};
-        const std::span<SDL_GPUBuffer* const> bound{storageBuffers, shadow ? 2u : 1u};
-        if (state.SelectVertexStorageBuffers(bound))
-        {
-            // SDL 3.4.8's Metal backend binds vertex storage buffers at draw time only while
-            // needVertexStorageBufferBind is set, and a draw whose pipeline has no storage buffers clears that
-            // flag without binding anything. A skinned draw after such a plain draw keeps the same bone buffer
-            // handle, so SDL never sets the flag again and Metal reads the bones from whatever sits in that slot,
-            // stretching monsters across the void. Binding a different buffer first marks the slot as changed.
-            if (s_storageRebindDummyBuf)
-                SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &s_storageRebindDummyBuf, 1);
-            SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, bound.data(), static_cast<Uint32>(bound.size()));
-        }
-    }
+        BindReplayVertexStorageBuffers(shadow, state);
 
     Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
@@ -7235,8 +7239,8 @@ private:
         return true;
     }
 
-    // Only the Metal backend needs the storage-buffer rebind (see ReplayDrawCommand). Without the buffer, skinned
-    // draws still work everywhere else; on Metal they may read stale bones after a plain draw.
+    // Only the Metal backend needs the storage-buffer rebind (see BindReplayVertexStorageBuffers). Without the buffer,
+    // skinned draws still work everywhere else; on Metal they may read stale bones after a plain draw.
     static void CreateStorageRebindDummyBuffer(const char* driverName)
     {
         if (!driverName || std::string_view(driverName) != "metal")
