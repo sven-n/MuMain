@@ -2124,7 +2124,7 @@ one side has says nothing about its values once both sides have it.
   "formatVersion": 2,
   "items": [
     {"group": 13, "number": 4, "wrongInServer": [""]},
-    {"group": 13, "number": 39, "wrongInServer": ["*"], "wrongInClient": ["repairable"]},
+    {"group": 13, "number": 39, "wrongInClient": ["repairable"], "wrongInServer": ["*"]},
     {"group": 13, "number": 50, "wrongInClient": ["height"], "wrongInServer": ["width"]}
   ],
   "formulas": {
