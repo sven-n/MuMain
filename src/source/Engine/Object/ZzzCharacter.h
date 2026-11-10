@@ -151,6 +151,8 @@ float CharacterMoveSpeed(CHARACTER* c);
 // Paths another player or a monster from its tile to c->TargetX/TargetY and starts the walk, cancelling any running
 // glide. Returns false, and changes nothing, when there is no path yet.
 bool StartObservedWalk(CHARACTER* c);
+void MoveMonsterClient(CHARACTER* c, OBJECT* o);
+void PushingCharacter(CHARACTER* c, OBJECT* o);
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);

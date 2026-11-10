@@ -14,8 +14,6 @@
 #include <vector>
 
 extern float FPS_ANIMATION_FACTOR;
-void MoveMonsterClient(CHARACTER* c, OBJECT* o);
-void PushingCharacter(CHARACTER* c, OBJECT* o);
 
 namespace
 {
