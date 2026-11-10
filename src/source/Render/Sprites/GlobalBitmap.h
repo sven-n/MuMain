@@ -15,6 +15,13 @@
 #include "Core/Time/Timer.h"
 #include "Render/Textures/TexturePackFiles.h"
 
+namespace Render::Sprites
+{
+struct MipLevels;
+struct TextureDecodeRequest;
+struct TextureDecodeResult;
+} // namespace Render::Sprites
+
 struct SDL_GPUTexture;
 struct SDL_GPUSampler;
 
@@ -262,21 +269,16 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                       bool worldTexture, bool padToPowerOfTwo = true, bool keepPixels = false);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                 bool worldTexture, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
-                 bool keepPixels = false);
     // Uploads the RGBA8 pixels of a bitmap (Components 4: they have alpha) and adds
     // it under its BitmapIndex; the bitmap keeps its pixels.
     bool UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> rgba, GLuint uiFilter,
                       GLuint uiWrapMode);
-    // Decode a file OpenJpegTurbo/OpenTga read and upload it as the texture.
-    bool LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
-                      GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool keepPixels);
-    bool LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
-                     GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool premultiplyAlpha,
-                     bool keepPixels);
+    // Reports a decoded file's errors and uploads it as the texture.
+    bool CommitTexture(const Render::Sprites::TextureDecodeRequest& request,
+                       Render::Sprites::TextureDecodeResult&& result);
+    // Uploads `pixels` as the bitmap's texture and adds it under its BitmapIndex.
+    bool CommitBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> pixels, int width, int height,
+                      const Render::Sprites::MipLevels& mips, GLuint uiFilter, GLuint uiWrapMode, bool keepPixels);
     void RegisterFilteredSampler(const BITMAP_t& bitmap);
     SDL_GPUSampler* GetFilteredSampler(bool wrapRepeat);
     void ReleaseFilteredSamplers();
