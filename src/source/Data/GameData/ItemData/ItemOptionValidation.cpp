@@ -62,9 +62,8 @@ void ValidateOptions(std::span<const ItemOptionDefinition> definitions, const It
             {
                 issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition), ItemDataIssue::NoItem,
                                   ItemDataIssue::NoItem, field + ".attribute",
-                                  "the client computes no " + option.attribute + " of a " +
-                                      FindEnumName(definition.type) +
-                                      " option this way: its line is shown, it adds nothing"});
+                                  "the client computes no " + option.attribute + " for a definition of type " +
+                                      FindEnumName(definition.type) + " this way: its line is shown, it adds nothing"});
             }
             for (const std::string& text : option.texts)
             {

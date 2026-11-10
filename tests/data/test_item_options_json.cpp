@@ -316,3 +316,61 @@ TEST_CASE("The item stat file's profile rules have neither item numbers nor tags
     ReadItemStatsJson(statFile(R"({"profile": "default", "tags": ["!ammunition"]})"), "ItemStats.json", file, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "profileRules[0].tags[0]"));
 }
+
+// An additional option definition: its options numbered (OpenMU's ItemOption.Number, which the option type the server
+// sends picks), several of them in one definition, each with a value per level.
+TEST_CASE("Option definitions of type option read their numbered options and write them back [data][items]")
+{
+    constexpr const char* OptionFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "wingOption",
+      "type": "option",
+      "displayName": {
+        "en": "Wing option"
+      },
+      "options": [
+        {"number": 0, "attribute": "healthRecoveryMultiplier", "percent": {"values": [1, 2, 3, 4]}, "text": "automaticHpRecovery"},
+        {"number": 2, "attribute": "physicalBaseDmg", "add": {"values": [4, 8, 12, 16]}, "text": "additionalDamage"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(OptionFile, "Options/Option.json", "Option.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 1);
+    const ItemOptionDefinition& wing = definitions[0];
+    CHECK(wing.type == ItemOptionType::Option);
+    REQUIRE(wing.options.size() == 2);
+    CHECK(wing.options[0].number == 0);
+    CHECK(wing.options[0].add == ItemOptionAdd::Percent);
+    CHECK(wing.options[0].value.isList);
+    CHECK(wing.options[0].value.At(3) == 3);
+    CHECK(wing.options[1].number == 2);
+    CHECK(wing.options[1].attribute == "physicalBaseDmg");
+    CHECK(wing.options[1].value.At(4) == 16);
+    CHECK(wing.options[1].value.At(7) == 16);
+    CHECK(WriteItemOptionsJson(definitions) == OptionFile);
+
+    const auto option = [](const std::string& options)
+    {
+        return R"({"name": "o", "type": "option", "displayName": {"en": "O"}, "options": [)" + options + "]}";
+    };
+    // Each option has a number, and no two have the same.
+    CHECK(HasIssue(ReadDefinition(option(R"({"attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 0, "attribute": "a", "add": {"values": [1]}, "text": "t"}, )"
+                                         R"({"number": 0, "attribute": "b", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[1].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": -1, "attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    // The number is the option type the server sends in four bits: 15 at most.
+    CHECK_FALSE(
+        HasFatal(ReadDefinition(option(R"({"number": 15, "attribute": "a", "add": {"values": [1]}, "text": "t"})"))));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 16, "attribute": "a", "add": {"values": [1]}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+}

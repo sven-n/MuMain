@@ -19,6 +19,13 @@ struct TooltipVariant
     void (*apply)(ItemCreationParams& params);
 };
 
+void ApplyOption(ItemCreationParams& params, BYTE level, BYTE type)
+{
+    params.WithOption = true;
+    params.OptionLevel = level;
+    params.OptionType = type;
+}
+
 constexpr TooltipVariant TooltipVariants[] = {
     {"plain", [](ItemCreationParams&) {}},
     {"full",
@@ -53,6 +60,17 @@ constexpr TooltipVariant TooltipVariants[] = {
          params.WithOption = true;
          params.OptionLevel = 1;
      }},
+    // The additional option at the other levels a server can send (Season 6 has 1 to 4, jewelry 1 to 3) and with the
+    // other option types (the byte's high nibble: 0 for most items, 0, 2 or 3 for wings).
+    {"option 2", [](ItemCreationParams& params) { ApplyOption(params, 2, 0); }},
+    {"option 3", [](ItemCreationParams& params) { ApplyOption(params, 3, 0); }},
+    {"option 4", [](ItemCreationParams& params) { ApplyOption(params, 4, 0); }},
+    {"option 5", [](ItemCreationParams& params) { ApplyOption(params, 5, 0); }},
+    {"option 6", [](ItemCreationParams& params) { ApplyOption(params, 6, 0); }},
+    {"option 7", [](ItemCreationParams& params) { ApplyOption(params, 7, 0); }},
+    {"option type 1", [](ItemCreationParams& params) { ApplyOption(params, 1, 1); }},
+    {"option type 2", [](ItemCreationParams& params) { ApplyOption(params, 1, 2); }},
+    {"option type 3", [](ItemCreationParams& params) { ApplyOption(params, 1, 3); }},
     {"excellent",
      [](ItemCreationParams& params)
      {

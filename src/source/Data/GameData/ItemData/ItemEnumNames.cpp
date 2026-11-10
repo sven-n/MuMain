@@ -90,8 +90,9 @@ constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequir
     {ItemRequirement::Leadership, "leadership"},
 }};
 
-constexpr std::array<EnumName<ItemOptionType>, 1> ItemOptionTypeNames = {{
+constexpr std::array<EnumName<ItemOptionType>, 2> ItemOptionTypeNames = {{
     {ItemOptionType::Luck, "luck"},
+    {ItemOptionType::Option, "option"},
 }};
 
 constexpr std::array<EnumName<ItemTextColor>, ItemTextColorCount> ItemTextColorNames = {{

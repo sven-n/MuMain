@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "HeroScope.h"
+#include "ItemOptionsScope.h"
 #include "LogCapture.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -17,9 +18,11 @@
 #include "Network/Server/WSclient.h"
 #include "UI/Inventory/ItemMng.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -31,6 +34,8 @@ struct OptionSlot
 {
     WORD option;
     WORD value;
+
+    bool operator==(const OptionSlot& other) const = default;
 };
 } // namespace
 
@@ -355,4 +360,324 @@ TEST_CASE("A slot of an option definition writes its texts into the tooltip's ro
     CHECK(TextBold[4] == 0);
     // Only the rows before the limit.
     CHECK(WriteDefinitionOptionLines(blade, 1, 3, 4) == 1);
+}
+
+namespace
+{
+// The rings and pendants with an additional option (Options/OptionRules.json).
+bool IsJewelryWithOption(int type)
+{
+    if (type / MAX_ITEM_INDEX != ITEM_HELPER / MAX_ITEM_INDEX)
+    {
+        return false;
+    }
+    constexpr std::array<int, 12> numbers{8, 9, 12, 13, 21, 22, 23, 24, 25, 26, 27, 28};
+    return std::find(numbers.begin(), numbers.end(), type % MAX_ITEM_INDEX) != numbers.end();
+}
+
+// The additional option the code before the definitions gave an item at `level` (SetItemAttributes up to 9a2), without
+// the Horn of Dinorant and the wings, whose code stays. Its levels end at Season 6's: 4, the jewelry's 3.
+std::optional<OptionSlot> OldAdditionalOption(int type, int optionLevel)
+{
+    if (optionLevel == 0)
+    {
+        return std::nullopt;
+    }
+    const int level = std::min(optionLevel, 4);
+    const int jewelryLevel = std::min(optionLevel, 3);
+    if (type >= ITEM_SWORD && type < ITEM_BOW + MAX_ITEM_INDEX)
+    {
+        if (g_ItemDatabase.HasTag(type, Data::Items::ItemTag::Ammunition))
+        {
+            return std::nullopt;
+        }
+        return OptionSlot{AT_IMPROVE_DAMAGE, static_cast<WORD>(level * 4)};
+    }
+    if (type >= ITEM_STAFF && type < ITEM_STAFF + MAX_ITEM_INDEX)
+    {
+        const bool book = g_ItemDatabase.HasTag(type, Data::Items::ItemTag::SummonerBook);
+        return OptionSlot{static_cast<WORD>(book ? AT_IMPROVE_CURSE : AT_IMPROVE_MAGIC), static_cast<WORD>(level * 4)};
+    }
+    if (type >= ITEM_SHIELD && type < ITEM_SHIELD + MAX_ITEM_INDEX)
+    {
+        return OptionSlot{AT_IMPROVE_BLOCKING, static_cast<WORD>(level * 5)};
+    }
+    if (type >= ITEM_HELM && type < ITEM_BOOTS + MAX_ITEM_INDEX)
+    {
+        return OptionSlot{AT_IMPROVE_DEFENSE, static_cast<WORD>(level * 4)};
+    }
+    if (IsJewelryWithOption(type))
+    {
+        if (type == ITEM_RING_OF_MAGIC)
+        {
+            return OptionSlot{AT_IMPROVE_MAX_MANA, static_cast<WORD>(jewelryLevel)};
+        }
+        if (type == ITEM_PENDANT_OF_ABILITY)
+        {
+            return OptionSlot{AT_IMPROVE_MAX_AG, static_cast<WORD>(jewelryLevel)};
+        }
+        return OptionSlot{AT_LIFE_REGENERATION, static_cast<WORD>(jewelryLevel)};
+    }
+    return std::nullopt;
+}
+
+// All of the item's option slots.
+std::vector<OptionSlot> AllSlots(const ITEM& item)
+{
+    std::vector<OptionSlot> slots;
+    for (int slot = 0; slot < item.SpecialNum; ++slot)
+    {
+        slots.push_back({item.Special[slot], item.SpecialValue[slot]});
+    }
+    return slots;
+}
+
+// The slots of the item's option definitions.
+std::vector<OptionSlot> DefinitionSlots(const ITEM& item)
+{
+    std::vector<OptionSlot> slots;
+    for (int slot = 0; slot < item.SpecialNum; ++slot)
+    {
+        if (GameLogic::Items::GetOptionSource(item, slot).has_value())
+        {
+            slots.push_back({item.Special[slot], item.SpecialValue[slot]});
+        }
+    }
+    return slots;
+}
+
+ITEM MakeItemWithOption(int type, int level, int optionType = 0)
+{
+    ItemCreationParams params{};
+    params.Group = type / MAX_ITEM_INDEX;
+    params.Number = type % MAX_ITEM_INDEX;
+    params.WithOption = level > 0;
+    params.OptionLevel = static_cast<BYTE>(level);
+    params.OptionType = static_cast<BYTE>(optionType);
+    ITEM item;
+    FillItemFromParameters(item, params);
+    return item;
+}
+} // namespace
+
+// The additional option comes from the definition the item links (Data/Items/Options/Option.json) with the slot and
+// value the code before the definitions gave it, at every level the server can send up to 7: the item's whole slot
+// list is the one without an option level and the old code's option after it. The wings keep their option code.
+TEST_CASE("Every item's additional option comes from its option links as the code before the definitions gave it "
+          "[data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    int itemsWithOption = 0;
+    for (int type = 0; type < MAX_ITEM; ++type)
+    {
+        if (g_ItemDatabase.Find(type) == nullptr || type == ITEM_HORN_OF_DINORANT)
+        {
+            continue;
+        }
+        CAPTURE(type);
+        const bool optionInCode = g_ItemDatabase.GetSlot(type) == Data::Items::ItemSlot::Wings;
+        const std::vector<OptionSlot> withoutOption = AllSlots(MakeItemWithOption(type, 0));
+        for (int level = 1; level <= 7; ++level)
+        {
+            CAPTURE(level);
+            const ITEM item = MakeItemWithOption(type, level);
+            const std::optional<OptionSlot> expected = OldAdditionalOption(type, level);
+            REQUIRE(DefinitionSlots(item).size() == (expected ? 1u : 0u));
+            if (!optionInCode)
+            {
+                std::vector<OptionSlot> expectedSlots = withoutOption;
+                if (expected)
+                {
+                    expectedSlots.push_back(*expected);
+                }
+                CHECK(AllSlots(item) == expectedSlots);
+            }
+            itemsWithOption += expected && level == 1 ? 1 : 0;
+        }
+        // Without a level, no option.
+        CHECK(DefinitionSlots(MakeItemWithOption(type, 0)).empty());
+    }
+    CHECK(itemsWithOption > 400);
+}
+
+// Above the list (a server that sends more than Season 6 has) the last value counts; a longer list gives such a server
+// its own values.
+TEST_CASE("An additional option above its list has the list's last value [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    for (int level = 5; level <= 7; ++level)
+    {
+        CAPTURE(level);
+        const std::vector<OptionSlot> kris = DefinitionSlots(MakeItemWithOption(ITEM_KRIS, level));
+        REQUIRE(kris.size() == 1);
+        CHECK(kris.front().value == 16);
+    }
+    const std::vector<OptionSlot> ring = DefinitionSlots(MakeItemWithOption(ITEM_RING_OF_ICE, 4));
+    REQUIRE(ring.size() == 1);
+    CHECK(ring.front().value == 3);
+}
+
+// A magic sword's one option shows two lines, the damage and the wizardry damage; the rings' lines show the per cent.
+TEST_CASE("The additional option's tooltip lines come from its texts [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+    REQUIRE(g_ItemDatabase.HasTag(ITEM_RUNE_BLADE, Data::Items::ItemTag::MagicSword));
+
+    const ITEM sword = MakeItemWithOption(ITEM_RUNE_BLADE, 4);
+    REQUIRE(sword.SpecialNum == 1);
+    CHECK(sword.Special[0] == AT_IMPROVE_DAMAGE);
+    CHECK(WriteDefinitionOptionLines(sword, 0, 0, MaxTextListRows) == 2);
+    CHECK(std::wstring(TextList[0]) == L"Additional Dmg +16");
+    CHECK(std::wstring(TextList[1]) == L"Additional Wizardry Dmg +16");
+
+    const ITEM ring = MakeItemWithOption(ITEM_RING_OF_ICE, 3);
+    REQUIRE(ring.SpecialNum == 1);
+    CHECK(WriteDefinitionOptionLines(ring, 0, 0, MaxTextListRows) == 1);
+    CHECK(std::wstring(TextList[0]) == L"Automatic HP recovery 3%");
+
+    const ITEM pendant = MakeItemWithOption(ITEM_PENDANT_OF_ABILITY, 2);
+    CHECK(WriteDefinitionOptionLines(pendant, 0, 0, MaxTextListRows) == 1);
+    CHECK(std::wstring(TextList[0]) == L"Max AG increased by 2%");
+
+    // Loch's Feather had a hidden line for the level the server sent; it links no option now.
+    CHECK(MakeItemWithOption(ITEM_LOCHS_FEATHER, 2).SpecialNum == 0);
+}
+
+// The option type the server sends picks the option of that number, as OpenMU reads it: the additional options are
+// numbered 0, so another type turns none of them on.
+TEST_CASE("An additional option turns on only for its number [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    CHECK(DefinitionSlots(MakeItemWithOption(ITEM_KRIS, 2, 0)).size() == 1);
+    for (int optionType = 1; optionType <= 3; ++optionType)
+    {
+        CAPTURE(optionType);
+        CHECK(DefinitionSlots(MakeItemWithOption(ITEM_KRIS, 2, optionType)).empty());
+        CHECK(DefinitionSlots(MakeItemWithOption(ITEM_RING_OF_ICE, 2, optionType)).empty());
+    }
+}
+
+// The wings' and the Horn of Dinorant's additional options are still code, which leaves out an item that links an
+// option definition, so one option level never gives two options.
+TEST_CASE("The code gives an additional option only to an item without one in data [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    CHECK(GameLogic::Items::LinksOptionType(ITEM_KRIS, Data::Items::ItemOptionType::Option));
+    CHECK(GameLogic::Items::LinksOptionType(ITEM_KRIS, Data::Items::ItemOptionType::Luck));
+    CHECK_FALSE(GameLogic::Items::LinksOptionType(ITEM_WINGS_OF_SATAN, Data::Items::ItemOptionType::Option));
+    CHECK(MakeItemWithOption(ITEM_KRIS, 2).SpecialNum == 1);
+    CHECK(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 2).SpecialNum == 1);
+}
+
+// "+Option" in the name and the ground label, and the tooltip state skillLuckOrOption, follow whether the item has an
+// additional option, not the option level the server sends.
+TEST_CASE("Only an item with an additional option counts as one [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    CHECK(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_KRIS, 1)));
+    CHECK(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_RING_OF_ICE, 1)));
+    CHECK(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 1)));
+    CHECK(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_HORN_OF_DINORANT, 1)));
+    CHECK_FALSE(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_KRIS, 0)));
+    CHECK_FALSE(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_KRIS, 1, 2)));
+    CHECK_FALSE(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_LOCHS_FEATHER, 1)));
+}
+
+// The stat code adds a magic sword's damage option to the wizardry damage too, by the option's effect, not by the
+// sword's tag.
+TEST_CASE("A magic sword's damage option raises the wizardry damage by its effect [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    CHECK(GameLogic::Items::DamageOptionRaisesWizardry(MakeItemWithOption(ITEM_RUNE_BLADE, 1)));
+    CHECK_FALSE(GameLogic::Items::DamageOptionRaisesWizardry(MakeItemWithOption(ITEM_RUNE_BLADE, 0)));
+    CHECK_FALSE(GameLogic::Items::DamageOptionRaisesWizardry(MakeItemWithOption(ITEM_KRIS, 4)));
+    CHECK_FALSE(GameLogic::Items::DamageOptionRaisesWizardry(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 4)));
+}
+
+// The strength requirement grows by the level the additional option counts at, as OpenMU adds it for the option the
+// item has: nothing without one, the list's last level above the list.
+TEST_CASE("The strength requirement grows by the additional option's counted level [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    const ITEM plain = MakeItemWithOption(ITEM_KRIS, 0);
+    const ITEM levelTwo = MakeItemWithOption(ITEM_KRIS, 2);
+    REQUIRE(levelTwo.RequireStrength > plain.RequireStrength);
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(levelTwo) == 2);
+    // An option type that turns no option on adds no strength.
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(MakeItemWithOption(ITEM_KRIS, 2, 2)) == 0);
+    CHECK(MakeItemWithOption(ITEM_KRIS, 2, 2).RequireStrength == plain.RequireStrength);
+    // Above the list the last level counts.
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(MakeItemWithOption(ITEM_KRIS, 7)) == 4);
+    CHECK(MakeItemWithOption(ITEM_KRIS, 7).RequireStrength == MakeItemWithOption(ITEM_KRIS, 4).RequireStrength);
+    // The wings keep their option level, their option still code.
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(MakeItemWithOption(ITEM_WINGS_OF_SATAN, 3)) == 3);
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(MakeItemWithOption(ITEM_LOCHS_FEATHER, 3)) == 0);
+    // The Horn of Dinorant's option level is three option flags, no level; it still shows "+Option".
+    CHECK(GameLogic::Items::GetAdditionalOptionLevel(MakeItemWithOption(ITEM_HORN_OF_DINORANT, 7)) == 0);
+    CHECK(GameLogic::Items::HasAdditionalOption(MakeItemWithOption(ITEM_HORN_OF_DINORANT, 7)));
+}
+
+// An option with one value for every level (no list) counts at the option level the server sends, also above 4.
+TEST_CASE("An additional option with a constant value counts at its option level [data][items]")
+{
+    ClientDataScope client(ClientDirectory);
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    HeroScope hero;
+
+    const ItemOptionsScope options;
+    const Data::Items::ItemOptionDatabase& shipped = options.Saved();
+    std::vector<Data::Items::ItemOptionDefinition> definitions(shipped.GetDefinitions().begin(),
+                                                              shipped.GetDefinitions().end());
+    const int physical = shipped.Find("physicalDamageOption");
+    REQUIRE(physical != Data::Items::ItemOptionDatabase::NoDefinition);
+    definitions[static_cast<size_t>(physical)].options[0].value = {{6}, false};
+    g_ItemDatabase.SetOptions(Data::Items::ItemOptionDatabase(std::move(definitions), shipped.GetTexts()));
+
+    CHECK(GameLogic::Items::CountAdditionalOptionLevel(ITEM_KRIS, 1, 0) == 1);
+    CHECK(GameLogic::Items::CountAdditionalOptionLevel(ITEM_KRIS, 7, 0) == 7);
+    CHECK(GameLogic::Items::CountAdditionalOptionLevel(ITEM_KRIS, 7, 2) == 0);
+    const std::vector<OptionSlot> slots = DefinitionSlots(MakeItemWithOption(ITEM_KRIS, 7));
+    REQUIRE(slots.size() == 1);
+    CHECK(slots.front().value == 6);
 }

@@ -11,7 +11,7 @@
         "pl": "Buława",
         "pt": "Maça"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -42,7 +42,7 @@
         "pl": "Morgenstern",
         "pt": "Estrela da manhã"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -74,7 +74,7 @@
         "pl": "Cep bojowy",
         "pt": "Mangual"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -106,7 +106,7 @@
         "pl": "Wielki młot",
         "pt": "Martelo grande"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -138,7 +138,7 @@
         "pl": "Kryształowy morgenstern",
         "pt": "Estrela da manhã de cristal"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -172,7 +172,7 @@
         "pl": "Kryształowy miecz",
         "pt": "Espada de cristal"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -206,7 +206,7 @@
         "pl": "Topór Smoka Chaosu",
         "pt": "Machado do dragão do caos"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -238,7 +238,7 @@
         "pl": "Buława żywiołów",
         "pt": "Maça elemental"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -268,7 +268,7 @@
         "pt": "Cetro de batalha"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -300,7 +300,7 @@
         "pt": "Cetro do mestre"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -332,7 +332,7 @@
         "pt": "Grande cetro"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -364,7 +364,7 @@
         "pt": "Cetro do Lorde"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -396,7 +396,7 @@
         "pt": "Grande cetro do Lorde"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -428,7 +428,7 @@
         "pt": "Cetro divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "sceptre", "valuable"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "nameLines": [
         {
           "text": {
@@ -475,7 +475,7 @@
         "pt": "Cetro Soleil"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -508,7 +508,7 @@
         "pt": "Cetro brilhante"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -538,7 +538,7 @@
         "pl": "Mroźna buława",
         "pt": "Maça de gelo"
       },
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -569,7 +569,7 @@
         "pt": "Cetro absoluto"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -601,7 +601,7 @@
         "pt": "Cetro golpeador"
       },
       "tags": ["sceptre"],
-      "options": ["luck"],
+      "options": ["luck", "physicalDamageOption"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",

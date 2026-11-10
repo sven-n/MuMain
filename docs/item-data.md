@@ -20,7 +20,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
 | `Tooltips/NameCases.json` | The cases each language declines item names in, for texts that name items with a case; see [Name forms](#name-forms) |
-| `Options/*.json` | The option definitions, one file per option group (luck so far); see [Item options](#item-options) |
+| `Options/*.json` | The option definitions, one file per option group (luck and the additional option so far); see [Item options](#item-options) |
 | `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
 | `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync marks as wrong in the client or wrong in the server; see [Item Sync](#item-sync) |
@@ -822,7 +822,12 @@ defense and magic defense, and how its requirements grow. It is in a folder of i
     the drop level (without the item level) when it has one. A requirement the item
     does not have stays 0;
   - `strengthPerOptionLevel`: the strength requirement grows by this much per
-    option level (also when the item has no strength requirement).
+    level the additional option counts at (also when the item has no
+    strength requirement): none when no option turns on (no option linked,
+    or an option type that picks none), the value list's last level above
+    the list, as OpenMU adds it for the option the item has. The wings'
+    options, still code, count at their option level, the Horn of
+    Dinorant's (flags, not a level) at none.
 - **Profiles** (`profiles`) write only what differs from the default. A term
   a profile writes replaces the default's as a whole. An item names its
   profile with `statProfile`; an item without one has the default.
@@ -920,10 +925,11 @@ The option groups an item can have are data, as OpenMU's item option
 definitions: the files of `Data/Items/Options` hold the definitions, one
 file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
-data turns them on (luck by the luck flag). Luck is in data so far; the
-additional option, the excellent, wing, harmony, guardian, socket and pet
-options and the ancient bonus are still code and move into data one group
-at a time.
+data turns them on (luck by the luck flag, the additional option by its
+level). Luck and the additional option of the items that are no wings are in
+data so far; the wings' and the Horn of Dinorant's options, the excellent,
+harmony, guardian, socket and pet options and the ancient bonus are still
+code and move into data one group at a time.
 
 ```json
 {
@@ -947,8 +953,12 @@ at a time.
   definition is in is a convention: its type says what it is.
 - `type`: which part of the server's item data turns its options on, as
   OpenMU's option types: `luck` is the luck flag, with one option without
-  a number. Each option group brings its type when it moves into data. An
-  item links at most one definition of a type.
+  a number; `option` is the additional option's level (the option byte's
+  low four bits, 1 to 15; Season 6 sends 1 to 4), its options numbered
+  (`"number": 0`) by the option type the server sends in the byte's high
+  four bits, their value by that level.
+  Each option group brings its type when it moves into data. An item links
+  at most one definition of a type.
 - `displayName`: the definition's name by language, English first.
 - `openMu` and `server`: OpenMU's labels of the same definition (its GUID
   and its English name, which the exchange with the server will match by)
@@ -967,6 +977,29 @@ of adding: luck's option fills the item's luck slot with its value, which
 the price and the mixes count as before and the character window adds up
 into the [critical damage rate](#critical-damage-rate). An attribute the
 client does not compute still shows its lines and adds nothing.
+
+`Options/Option.json` holds the additional options, as OpenMU's (all with
+OpenMU's server values: a 25 % chance, one per item):
+
+| Definition | Attribute | Value by level | Lines | Items |
+|---|---|---|---|---|
+| `physicalDamageOption` | `physicalBaseDmg` | 4, 8, 12, 16 | Additional Dmg | Groups 0 to 4 but arrows, bolts and magic swords |
+| `physicalAndWizardryDamageOption` | `baseDamageBonus` | 4, 8, 12, 16 | Additional Dmg, Additional Wizardry Dmg | Magic swords |
+| `wizardryDamageOption` | `wizardryBaseDmg` | 4, 8, 12, 16 | Additional Wizardry Dmg | Group 5 but the summoner's books |
+| `curseDamageOption` | `curseBaseDmg` | 4, 8, 12, 16 | Additional Curse Spell | The summoner's books |
+| `defenseRateOption` | `defenseRatePvm` | 5, 10, 15, 20 | Additional defense rate | Shields |
+| `defenseOption` | `defenseBase` | 4, 8, 12, 16 | Additional defense | Groups 7 to 11 |
+| `jewelryHealthRecovery` | `healthRecoveryMultiplier` (per cent) | 1, 2, 3 | Automatic HP recovery | The rings 13/8, 13/9, 13/21 to 13/23 and the pendants 13/12, 13/13, 13/25 to 13/27 |
+| `ringOfMagicMana` | `maximumMana` (per cent) | 1, 2, 3 | Max mana increased by | The Ring of Magic (13/24) |
+| `pendantOfAbilityAg` | `maximumAbility` (per cent) | 1, 2, 3 | Max AG increased by | The Pendant of Ability (13/28) |
+
+The lists end where Season 6 does; a level above a list counts as its
+last value, and a longer list gives a server that sends more its own
+values. A magic sword's one option fills one slot and shows two lines. The
+other items of group 13 (the Transformation Rings, the quest items, Loch's
+Feather and the others) have no additional option, as on OpenMU. The
+wings, the capes and the Horn of Dinorant keep their additional options in
+code until they move into data.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
 
@@ -1057,10 +1090,18 @@ The game does not read it: the editor writes the items' lists from it.
   "formatVersion": 1,
   "rules": [
     {"options": [], "tags": ["ammunition"]},
-    {"options": ["luck"], "group": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]},
+    {"options": ["luck", "physicalAndWizardryDamageOption"], "tags": ["magicSword"]},
+    {"options": ["luck", "physicalDamageOption"], "group": [0, 1, 2, 3, 4]},
+    {"options": ["luck", "curseDamageOption"], "group": [5], "tags": ["summonerBook"]},
+    {"options": ["luck", "wizardryDamageOption"], "group": [5]},
+    {"options": ["luck", "defenseRateOption"], "group": [6]},
+    {"options": ["luck", "defenseOption"], "group": [7, 8, 9, 10, 11]},
     {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
     {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
-    {"options": ["luck"], "group": [13], "numbers": [30]}
+    {"options": ["luck"], "group": [13], "numbers": [30]},
+    {"options": ["jewelryHealthRecovery"], "group": [13], "numbers": [8, 9, 12, 13, 21, 22, 23, 25, 26, 27]},
+    {"options": ["ringOfMagicMana"], "group": [13], "numbers": [24]},
+    {"options": ["pendantOfAbilityAg"], "group": [13], "numbers": [28]}
   ]
 }
 ```
@@ -1073,8 +1114,9 @@ more: `numbers`, item numbers (with `group`), and a tag with `!` before it
 shipped rules give luck to the items the client gave it before: groups 0
 to 11 but arrows and bolts, the wings 12/0 to 12/6, 12/41 and 12/42, the
 Cape of Fighter (12/49), the Cape of Lord (13/30) and the third tier
-wings. A test checks that every shipped item's list is the one its rules
-give.
+wings; and the additional options of the table above. Since the first
+rule counts, a rule lists all of its items' definitions. A test checks
+that every shipped item's list is the one its rules give.
 
 **Problems** (see [Loading and errors](#loading-and-errors)). Fatal: a
 file that cannot be read or is no JSON, a missing or newer
@@ -1644,7 +1686,7 @@ shows it in the others.
   the base value back; excellent and ancient items get no higher stat
   requirement from them, while excellent options still raise a level given
   by level and the option level still adds the strength its stat profile
-  gives per option level; a stat requirement whose formula takes the level
+  gives per level the additional option counts at; a stat requirement whose formula takes the level
   requirement, follows a level given by level). Below them, what the game asks at each + level
   (the `/<item name>` window shows the normal item), also as excellent,
   ancient or with an option level, while a value is still being typed. Then

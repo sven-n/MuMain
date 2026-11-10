@@ -40,6 +40,8 @@ constexpr std::array<const char*, 3> AddKeys = {"add", "addFinal", "percent"};
 
 constexpr int MaxValue = 65535;
 constexpr int MaxNumber = 255;
+// The additional option's number is the option type the server sends, the option byte's high four bits.
+constexpr int MaxOptionTypeNumber = 15;
 constexpr int MaxOptionsPerItem = 255;
 // OpenMU's GUIDs: 8, 4, 4, 4 and 12 hexadecimal digits.
 constexpr std::array<size_t, 5> GuidGroupLengths = {8, 4, 4, 4, 12};
@@ -351,7 +353,8 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    ReadWholeNumber(*number, field + "." + Keys::Number, 0, MaxNumber, option.number);
+    ReadWholeNumber(*number, field + "." + Keys::Number, 0,
+                    type == ItemOptionType::Option ? MaxOptionTypeNumber : MaxNumber, option.number);
 }
 
 void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option)

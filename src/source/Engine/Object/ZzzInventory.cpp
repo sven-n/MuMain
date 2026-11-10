@@ -1106,7 +1106,7 @@ std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int te
     return row - textNum;
 }
 
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int iMana)
+void GetSpecialOptionText(wchar_t* Text, WORD Option, WORD Value, int iMana)
 {
     switch (Option)
     {
@@ -1178,10 +1178,7 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, WORD Value, int 
         mu_swprintf(Text, I18N::Game::AdditionalDefenseD, Value);
         break;
     case AT_LIFE_REGENERATION:
-        if (!(ITEM_LOCHS_FEATHER <= Type && Type <= ITEM_INVISIBILITY_CLOAK))
-        {
-            mu_swprintf(Text, I18N::Game::AutomaticHPRecoveryD, Value);
-        }
+        mu_swprintf(Text, I18N::Game::AutomaticHPRecoveryD, Value);
         break;
     case AT_IMPROVE_LIFE:
         mu_swprintf(Text, I18N::Game::IncreaseMaxHP4);
@@ -2164,11 +2161,6 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     int iMana;
     for (int i = 0; i < ip->SpecialNum; i++)
     {
-        if (ITEM_SAPPHIRE_RING <= ip->Type && ITEM_SAPPHIRE_NECKLACE >= ip->Type)
-        {
-            break;
-        }
-
         if (const std::optional<int> rows = WriteDefinitionOptionLines(*ip, i, TextNum, MaxTextListRows))
         {
             TextNum += *rows;
@@ -2176,7 +2168,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         }
 
         gSkillManager.GetSkillInformation(ip->Special[i], 1, NULL, &iMana, NULL);
-        GetSpecialOptionText(ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
+        GetSpecialOptionText(TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++;
@@ -2194,12 +2186,6 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
             mu_swprintf(TextList[TextNum], I18N::Game::DarkLordExclusiveSkill);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
-        else if (ip->Special[i] == AT_IMPROVE_DAMAGE && GameLogic::Items::IsMagicSwordType(ip->Type))
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::AdditionalWizardryDmgD, ip->SpecialValue[i]);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false; TextNum++;
-        }
     }
 
     // The blank row after the options.
@@ -2208,7 +2194,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
 
     if (ip->Type == ITEM_HORN_OF_FENRIR)
     {
-        GetSpecialOptionText(0, TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0);
+        GetSpecialOptionText(TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false; TextNum++; SkipNum++;
         if (ip->ExcellentFlags == 0x01)
@@ -2866,7 +2852,7 @@ void BuildGroundItemLabelDescriptor(const OBJECT* o, const ITEM* ip, GroundItemL
             AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::KnightSpecificSkill);
         }
     }
-    if (ip->OptionLevel > 0)
+    if (GameLogic::Items::HasAdditionalOption(*ip))
     {
         AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Option);
     }
@@ -3116,7 +3102,7 @@ void AppendItemOptionKeywords(const ITEM& item, std::wstring& options)
     {
         options += I18N::Game::Skill;
     }
-    if (item.OptionLevel)
+    if (GameLogic::Items::HasAdditionalOption(item))
     {
         options += I18N::Game::Option;
     }
