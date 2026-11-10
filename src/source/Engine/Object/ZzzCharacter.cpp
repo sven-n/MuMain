@@ -6332,6 +6332,24 @@ void MoveCharacterPosition(CHARACTER* c)
     o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
 }
 
+bool StartObservedWalk(CHARACTER* c)
+{
+    const bool isDoppelganger =
+        gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4;
+    const int defaultWall = isDoppelganger ? TW_NOMOVE : TW_CHARACTER;
+    if (!PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, defaultWall))
+    {
+        return false;
+    }
+
+    // A walk replaces a running glide (an instant move, a knockback or a skill that moves the attacker): the glide
+    // heads for TargetX/TargetY, which the walk has just overwritten, so it would fly the character to the walk's
+    // end.
+    c->JumpTime = 0;
+    c->Movement = true;
+    return true;
+}
+
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
 {
     if (c == Hero) return;
@@ -6347,17 +6365,7 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
         {
             if (c->Appear == 0 && o->Type != MODEL_GHOST && ((c->PositionX) != c->TargetX || (c->PositionY) != c->TargetY))
             {
-                int iDefaultWall = TW_CHARACTER;
-
-                if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
-                {
-                    iDefaultWall = TW_NOMOVE;
-                }
-
-                if (PathFinding2((c->PositionX), (c->PositionY), c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
-                {
-                    c->Movement = true;
-                }
+                StartObservedWalk(c);
             }
         }
         else

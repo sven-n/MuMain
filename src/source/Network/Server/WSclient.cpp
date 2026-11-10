@@ -2155,25 +2155,17 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    if (c->Appear == 0)
+    if (c->Appear != 0)
     {
-        int iDefaultWall = TW_CHARACTER;
+        return;
+    }
 
-        if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4 &&
-            Key != HeroKey)
-        {
-            iDefaultWall = TW_NOMOVE;
-        }
-
-        if (PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
-        {
-            c->Movement = true;
-        }
-        else
-        {
-            c->Movement = false;
-            SetPlayerStop(c);
-        }
+    // Without a path the running glide carries on to the walk's end, as before, so the character never freezes where
+    // it is drawn. MoveMonsterClient tries the walk again every frame.
+    if (!StartObservedWalk(c))
+    {
+        c->Movement = false;
+        SetPlayerStop(c);
     }
 }
 
