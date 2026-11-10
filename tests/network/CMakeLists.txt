@@ -21,6 +21,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_guild_relationship_result
+    SOURCES
+        test_guild_relationship_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/GuildRelationshipResult.cpp
+)
+
+mu_add_test(
     NAME test_illusion_temple_result
     SOURCES
         test_illusion_temple_result.cpp

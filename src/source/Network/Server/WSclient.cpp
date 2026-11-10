@@ -122,6 +122,7 @@ using namespace mu::ui::window;
 #include "Network/Server/ServerListManager.h"
 #include "Network/Server/ServerMessageTexts.h"
 #include "Network/Server/GuildRelationshipRequest.h"
+#include "Network/Server/GuildRelationshipResult.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
@@ -7890,42 +7891,48 @@ void ReceiveGuildRelationShip(std::span<const BYTE> ReceiveBuffer)
     UI::Guild::ShowRelationshipRequest(request->relationshipType, request->requestType, request->requesterKey);
 }
 
-void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
+void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
 {
-    wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildRelationShipResult";
-    auto pData = (LPPMSG_GUILD_RELATIONSHIP_RESULT)ReceiveBuffer;
-    if (pData->byResult == 0x01)
+    const auto pData = Network::Packets::ParseGuildRelationshipResult(ReceiveBuffer);
+    if (!pData)
     {
-        if (pData->byRelationShipType == 0x01)
+        LogSafeCastSizeMismatch("GuildRelationshipResult", ReceiveBuffer.size(), 8);
+        return;
+    }
+
+    wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildRelationShipResult";
+    if (pData->result == 0x01)
+    {
+        if (pData->relationshipType == 0x01)
         {
-            if (pData->byRequestType == 0x01)
+            if (pData->requestType == 0x01)
             {
                 wcscpy(szTemp, I18N::Game::GuildAllianceRegistrationIsSuccessful);
             }
-            else if (pData->byRequestType == 0x02)
+            else if (pData->requestType == 0x02)
             {
                 wcscpy(szTemp, I18N::Game::GuildAllianceWithdrawalIsSuccessful);
             }
-            else if (pData->byRequestType == 0x10)
+            else if (pData->requestType == 0x10)
             {
                 wcscpy(szTemp, I18N::Game::DisbandOfAllianceGuildOrRequest);
             }
         }
         else
         {
-            if (pData->byRequestType == 0x01)
+            if (pData->requestType == 0x01)
                 wcscpy(szTemp, I18N::Game::HostileGuildIsConnected);
             else
                 wcscpy(szTemp, I18N::Game::HostileGuildIsDisconnected);
         }
     }
-    else if (pData->byResult == 0)
+    else if (pData->result == 0)
     {
         wcscpy(szTemp, I18N::Game::Failed);
     }
     else
     {
-        switch (pData->byResult)
+        switch (pData->result)
         {
         case GUILD_ANS_UNIONFAIL_BY_CASTLE:
             wcscpy(szTemp, I18N::Game::AllianceFunctionWillBeRestrictedDueToTheCastleSiege);
@@ -7984,9 +7991,8 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
     }
     UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    int nCharKey = MAKEWORD(pData->byTargetUserIndexL, pData->byTargetUserIndexH);
-    if (nCharKey == HeroKey && pData->byResult == 0x01 && pData->byRelationShipType == 0x01 &&
-        pData->byRequestType == 0x02)
+    if (pData->guildMasterKey == HeroKey && pData->result == 0x01 && pData->relationshipType == 0x01 &&
+        pData->requestType == 0x02)
         GuildMark[Hero->GuildMarkIndex].UnionName[0] = 0;
 }
 
@@ -13799,7 +13805,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         ReceiveGuildRelationShip(received_span);
         break;
     case 0xE6:
-        ReceiveGuildRelationShipResult(ReceiveBuffer);
+        ReceiveGuildRelationShipResult(received_span);
         break;
     case 0xEB:
     {

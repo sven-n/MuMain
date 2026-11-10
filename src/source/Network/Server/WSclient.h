@@ -1160,16 +1160,6 @@ typedef struct
 
 typedef struct
 {
-    PBMSG_HEADER	Header;
-    BYTE			byRelationShipType;
-    BYTE			byRequestType;
-    BYTE			byResult;
-    BYTE			byTargetUserIndexH;
-    BYTE			byTargetUserIndexL;
-} PMSG_GUILD_RELATIONSHIP_RESULT, * LPPMSG_GUILD_RELATIONSHIP_RESULT;
-
-typedef struct
-{
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE			byResult;
     BYTE			byRequestType;
