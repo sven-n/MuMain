@@ -191,7 +191,7 @@ TEST_CASE("A walk whose path clears a frame later still replaces the glide [netw
     CHECK(fixture.observed.Object.Position[0] < TileCentre(CorrectedTile + 2));
 }
 
-TEST_CASE("A walk that cannot start yet lets the running glide finish [network][movement]")
+TEST_CASE("A walk that cannot start yet lets the running glide carry the character to its end [network][movement]")
 {
     ObservedPlayerFixture fixture;
     fixture.ReceiveInstantMove(CorrectedTile, StartTile);
@@ -200,4 +200,11 @@ TEST_CASE("A walk that cannot start yet lets the running glide finish [network][
 
     CHECK_FALSE(fixture.observed.Movement);
     CHECK(fixture.observed.JumpTime > 0);
+
+    fixture.RunFrames(FramesToWatch);
+
+    // The glide carries it on towards the walk's end instead of leaving it frozen where it was drawn.
+    CHECK_FALSE(fixture.observed.Movement);
+    CHECK(fixture.observed.Object.Position[0] > TileCentre(CorrectedTile + 2));
+    CHECK(fixture.observed.Object.Position[0] <= TileCentre(WalkTargetTile));
 }
