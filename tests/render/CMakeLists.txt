@@ -187,12 +187,6 @@ mu_add_test(
 )
 
 mu_add_test(
-    NAME aura_joint_lifecycle_tests
-    SOURCES
-        test_aura_joint_lifecycle.cpp
-)
-
-mu_add_test(
     NAME gpu_skinning_path_tests
     SOURCES
         test_gpu_skinning_path.cpp

@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Render/Effects/AuraJointLifecycle.h"
 #include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Audio/SoundPlaces.h"
@@ -15652,17 +15651,6 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_Defense:
-    {
-        // The other aura buff keeps the aura; deleting it here would restart it next frame.
-        if (!Render::Effects::ShouldKeepAuraJointAlive(false, g_isCharacterBuff(o, eBuff_HelpNpc)))
-        {
-            DeleteJoint(MODEL_SPEARSKILL, o, 4);
-            DeleteJoint(MODEL_SPEARSKILL, o, 9);
-        }
-    }
-    break;
-
     case eBuff_AddAG:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
@@ -15684,24 +15672,11 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HelpNpc:
-    {
-        // The other aura buff keeps the aura; deleting it here would restart it next frame.
-        if (!Render::Effects::ShouldKeepAuraJointAlive(g_isCharacterBuff(o, eBuff_Defense), false))
-        {
-            DeleteJoint(MODEL_SPEARSKILL, o, 4);
-            DeleteJoint(MODEL_SPEARSKILL, o, 9);
-        }
-    }
-    break;
-
     case eBuff_RemovalMagic:
     {
         DeleteEffect(BITMAP_LIGHT, o, 2);
         DeleteEffect(BITMAP_LIGHT, o, 1);
         DeleteEffect(BITMAP_SKULL, o, 0);
-        DeleteJoint(MODEL_SPEARSKILL, o, 4);
-        DeleteJoint(MODEL_SPEARSKILL, o, 9);
         DeleteJoint(MODEL_SPEARSKILL, o, 0);
     }
     break;

@@ -2855,7 +2855,7 @@ void DeleteJoint(int Type, OBJECT* Target, int SubType)
 
 bool Render::Effects::HasDefenseAura(OBJECT* o)
 {
-    return ShouldKeepAuraJointAlive(g_isCharacterBuff(o, eBuff_Defense), g_isCharacterBuff(o, eBuff_HelpNpc));
+    return g_isCharacterBuff(o, eBuff_Defense) || g_isCharacterBuff(o, eBuff_HelpNpc);
 }
 
 bool SearchJoint(int Type, OBJECT* Target, int SubType)
