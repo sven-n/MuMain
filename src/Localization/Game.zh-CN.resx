@@ -967,7 +967,7 @@
     <value>[商店]</value>
   </data>
   <data name="Open1107" xml:space="preserve">
-    <value>开店</value>
+    <value>开启</value>
   </data>
   <data name="Closed" xml:space="preserve">
     <value>关店</value>
@@ -1003,7 +1003,7 @@
     <value>请输入售价。</value>
   </data>
   <data name="Selling price : %s zen" xml:space="preserve">
-    <value>售价：%s金</value>
+    <value>售价：%s 金币</value>
   </data>
   <data name="Do you want to sell item at this price?" xml:space="preserve">
     <value>确定以此价格出售该物品吗？</value>
@@ -1117,13 +1117,13 @@
     <value>攻击力：%d~%d</value>
   </data>
   <data name="Defense (rate):%d (%d +%d)" xml:space="preserve">
-    <value>防御力（成功率）：%d（%d +%d）</value>
+    <value>防御率：%d（%d +%d）</value>
   </data>
   <data name="Defense: %d (+%d)" xml:space="preserve">
     <value>防御力：%d（+%d）</value>
   </data>
   <data name="Defense (rate):%d (%d)" xml:space="preserve">
-    <value>防御力（成功率）：%d（%d）</value>
+    <value>防御率：%d（%d）</value>
   </data>
   <data name="HP: %d / %d" xml:space="preserve">
     <value>生命值：%d / %d</value>
