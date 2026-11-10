@@ -8,6 +8,47 @@ language explicitly.
 
 ---
 
+## Design Principle: Data-Driven by Design — Data and Editor
+
+Content and settings that a designer, admin or modder would want to change are **data, not code**. Rule 3 gives a value a name; this principle moves it out of the code. It comes before the numbered rules because it decides how a feature is designed, not only how its code is written.
+
+### New features
+
+A new feature with content or settings ships as **two parts**:
+
+1. **Data** — its content and settings live in JSON files under `src/bin/Data/<Area>/`, loaded once at startup into in-memory tables. The code holds the rules for using the data, not the values or the lists.
+2. **Editor** — a MuEditor tool window that shows, changes and saves that data, with Undo/Redo, and reports its problems in **Data Checks**.
+
+- The editor has **no rules of its own**: it changes the data only through the area's edit operations (`ItemEdits` for items), which check every change.
+- The data, its loader and its docs may land first; the editor may follow in its own PR. The feature is **not done until both are merged**.
+- The editor exists only in editor builds (`_EDITOR`). Player builds load the data and nothing else.
+
+### Areas that are already data-driven
+
+Items, monsters and their models, effects and looks, the server list, tooltips, ground labels, ... — and any part of an area that has already moved to data:
+
+- **New or changed behaviour is a field in the data, not a check in code.** Don't add `if (type == ITEM_...)` or another `case` for one monster number; add a field, a tag or a rule to the data.
+- **A field works for every entry of its kind.** An option one sword needed is available to every item; a setting one monster needed is available to every monster. No field that only one hard-coded entry reads.
+- **A new field is complete when it is everywhere the data is:** loading and saving, the editor tool, Data Checks, the area's docs (`docs/<area>-data.md`), and — where the server has the same value — the exchange with OpenMU, under OpenMU's name.
+- **Special cases you touch move into data.** When your change affects a hard-coded case for one entry, turn it into data as part of the change. Cases you don't touch stay until someone works on them (no retroactive cleanups, see [`AGENTS.md`](../AGENTS.md)).
+- **Moving game behaviour into data must not change it.** A test that compares the old code with the new data for every entry ships with the move; changes you mean to make go in commits of their own.
+
+### How the data looks
+
+Follow the existing data files ([`item-data.md`](item-data.md), [`monster-data.md`](monster-data.md)):
+
+- JSON, UTF-8, LF, with a `formatVersion`. Fields with their default value are left out; entries are sorted and fields come in a fixed order, so saving unchanged data gives the same file (test it).
+- Texts players see are per language (`{"en": ..., "de": ...}`), as item and monster names are.
+- Anything several entries use is **defined once, with a name**, and referenced by that name (glow colors, looks, effect types). Names are resolved when loading, never per frame (rule 12).
+- Unknown names and invalid values are reported when loading and in Data Checks, never ignored silently.
+- Logic becomes data where someone would want to adjust it: tables, rules and formulas with parameters (how stats grow with item level, which items a rule applies to). Logic without a meaningful knob stays code.
+
+### What stays code
+
+Engine and platform internals, the rendering pipeline, network protocol decoding, build tooling, and fixes that need no new special case.
+
+---
+
 ## 1. Keep Functions Short and Focused — Break Apart Monoliths
 
 - A function does **one thing**. If you can describe it with "and", split it.
