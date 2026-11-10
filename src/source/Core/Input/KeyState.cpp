@@ -4,11 +4,15 @@
 
 #include <SDL3/SDL.h>
 
+#include <bitset>
+
 namespace Core::Input
 {
 namespace
 {
-bool g_leftMouseButtonPressEdge = false;
+std::bitset<SDL_SCANCODE_COUNT> g_keyPressEdges;
+// Indexed by virtual-key code; only the mouse buttons are set.
+std::bitset<8> g_buttonPressEdges;
 
 #ifdef _EDITOR
 OtherWindowQuery g_otherWindowQuery = nullptr;
@@ -65,14 +69,48 @@ SDL_Scancode VkToScancode(int vk)
     // clang-format on
 }
 
-void RecordLeftMouseButtonPressEdge()
+void RecordButtonPressEdge(int virtualKey)
 {
-    g_leftMouseButtonPressEdge = true;
+    if (virtualKey >= 0 && virtualKey < static_cast<int>(g_buttonPressEdges.size()))
+        g_buttonPressEdges.set(virtualKey);
 }
 
-void ClearLeftMouseButtonPressEdge()
+void RecordPressEdge(const SDL_Event& event)
 {
-    g_leftMouseButtonPressEdge = false;
+    if (event.type == SDL_EVENT_KEY_DOWN)
+    {
+        if (!event.key.repeat && event.key.scancode > SDL_SCANCODE_UNKNOWN && event.key.scancode < SDL_SCANCODE_COUNT)
+            g_keyPressEdges.set(event.key.scancode);
+        return;
+    }
+    if (event.type != SDL_EVENT_MOUSE_BUTTON_DOWN)
+        return;
+    switch (event.button.button)
+    {
+    case SDL_BUTTON_LEFT:
+        RecordButtonPressEdge(VK_LBUTTON);
+        break;
+    case SDL_BUTTON_RIGHT:
+        RecordButtonPressEdge(VK_RBUTTON);
+        break;
+    case SDL_BUTTON_MIDDLE:
+        RecordButtonPressEdge(VK_MBUTTON);
+        break;
+    default:
+        break;
+    }
+}
+
+void ClearButtonPressEdge(int virtualKey)
+{
+    if (virtualKey >= 0 && virtualKey < static_cast<int>(g_buttonPressEdges.size()))
+        g_buttonPressEdges.reset(virtualKey);
+}
+
+void ClearPressEdges()
+{
+    g_keyPressEdges.reset();
+    g_buttonPressEdges.reset();
 }
 
 bool IsKeyDown(int virtualKey)
@@ -99,12 +137,14 @@ bool IsKeyDown(int virtualKey)
     switch (virtualKey)
     {
     case VK_LBUTTON:
-        return g_leftMouseButtonPressEdge ||
+        return g_buttonPressEdges[VK_LBUTTON] ||
                (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
     case VK_RBUTTON:
-        return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
+        return g_buttonPressEdges[VK_RBUTTON] ||
+               (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
     case VK_MBUTTON:
-        return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
+        return g_buttonPressEdges[VK_MBUTTON] ||
+               (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
     case VK_SHIFT:
         return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
     case VK_CONTROL:
@@ -119,6 +159,8 @@ bool IsKeyDown(int virtualKey)
     if (sc == SDL_SCANCODE_UNKNOWN)
         return false;
 
+    if (g_keyPressEdges[sc])
+        return true;
     const bool* state = SDL_GetKeyboardState(nullptr);
     return state != nullptr && state[sc];
 }

@@ -1117,7 +1117,6 @@ void HandleMouseButton(const SDL_Event& e)
             if (!MouseLButton)
                 MouseLButtonPush = true;
             MouseLButton = true;
-            Core::Input::RecordLeftMouseButtonPressEdge();
             if (e.button.clicks >= 2)
                 MouseLButtonDBClick = true;
             SetCapture(g_hWnd);
@@ -1230,8 +1229,8 @@ void HandleFocusChange(bool active)
             MouseMButtonPop = false;
             MouseMButtonPush = false;
             MouseWheel = 0;
-            Core::Input::ClearLeftMouseButtonPressEdge();
         }
+        Core::Input::ClearPressEdges();
     }
     else
     {
@@ -1444,7 +1443,10 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
             Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
         propagates = Core::Input::RouteToUi(event, g_sdlWindow) || PassesRightButtonToGame(event);
         if (propagates && !synthetic)
+        {
+            Core::Input::RecordPressEdge(event);
             HandleMouseButton(event);
+        }
         return true;
     case SDL_EVENT_TEXT_INPUT:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
@@ -1455,6 +1457,9 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         return true;
     case SDL_EVENT_KEY_DOWN:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        // Scripted keys keep their own held state (Synthetic::IsKeyHeld).
+        if (propagates && !synthetic)
+            Core::Input::RecordPressEdge(event);
 #if !defined(_WIN32)
         // Physical Windows messages already handle these keys; SDL-only paths
         // (and Windows synthetic events below) must handle them here instead.
