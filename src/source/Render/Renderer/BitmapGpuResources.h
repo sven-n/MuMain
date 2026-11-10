@@ -98,6 +98,13 @@ public:
     Result Upload(std::span<const std::uint8_t> pixels, int width, int height, SDL_GPUFilter filter,
                   SDL_GPUSamplerAddressMode wrap, std::span<const Textures::MipLevel> mips = {},
                   bool generateMips = false);
+    // Between BeginBatch and EndBatch, uploads share a submission until a slot is
+    // full, so a load waits on a fence per slot instead of one per texture. A
+    // texture is ready on the GPU once its submission is in: Flush submits the
+    // open one, and the frame submit must come after it.
+    void BeginBatch();
+    bool EndBatch();
+    bool Flush();
     // Call before destroying the device, after clearing non-owning sampler registries.
     bool Shutdown();
     const std::string& LastError() const
@@ -130,6 +137,7 @@ private:
     bool OnOwnerThread() const;
     void Fail(const char* stage, bool gpuError);
     bool Retire(Slot& slot);
+    bool SubmitOpen();
     void LoseSlot(Slot& slot);
     void AdvanceSlot();
     void ReleaseHandles();
@@ -141,6 +149,10 @@ private:
     std::array<Slot, kSlotCount> m_slots{};
     std::array<SDL_GPUSampler*, 4> m_samplers{};
     std::size_t m_next = 0;
+    // The command buffer staging into m_slots[m_next], and how much of that slot it used.
+    SDL_GPUCommandBuffer* m_open = nullptr;
+    std::uint64_t m_openUsed = 0;
+    bool m_batching = false;
     bool m_faulted = false;
     double m_fenceWaitSeconds = 0.0;
     std::string m_stage;

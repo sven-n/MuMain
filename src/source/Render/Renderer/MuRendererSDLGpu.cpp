@@ -3552,6 +3552,13 @@ public:
         }
 
         s_submitTime = std::chrono::steady_clock::now();
+        // The frame may draw bitmaps whose uploads are still in an open upload batch.
+        if (!s_bitmapGpuResources.Flush())
+        {
+            mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                          s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+        }
+
         if (s_frameReadbackTexture)
         {
             if (!renderPassCompleted)
@@ -8329,6 +8336,20 @@ const char* BitmapUploadDriverName()
 double BitmapUploadFenceWaitSeconds()
 {
     return s_bitmapGpuResources.FenceWaitSeconds();
+}
+
+void BeginBitmapUploadBatch()
+{
+    s_bitmapGpuResources.BeginBatch();
+}
+
+void EndBitmapUploadBatch()
+{
+    if (!s_bitmapGpuResources.EndBatch())
+    {
+        mu::log::Get("render")->error("SDL_gpu -- bitmap upload batch failed at {}: {}",
+                                      s_bitmapGpuResources.LastStage(), s_bitmapGpuResources.LastError());
+    }
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).

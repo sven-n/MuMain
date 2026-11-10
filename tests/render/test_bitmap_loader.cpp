@@ -220,6 +220,8 @@ double BitmapUploadFenceWaitSeconds()
 {
     return 0.0;
 }
+void BeginBitmapUploadBatch() {}
+void EndBitmapUploadBatch() {}
 } // namespace mu
 
 TEST_CASE("truncated OZT headers and pixel payloads never reach the uploader")
