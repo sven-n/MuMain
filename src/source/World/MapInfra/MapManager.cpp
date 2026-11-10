@@ -28,6 +28,7 @@
 
 #include <SDL3/SDL_timer.h>
 #include <chrono>
+#include <optional>
 
 CMapManager gMapManager;
 
@@ -921,6 +922,7 @@ int CMapManager::GetFilesFolder(int serverMap)
 void CMapManager::LoadWorld(int Map)
 {
     const auto start = std::chrono::steady_clock::now();
+    std::optional<TextureLoadBatch> textureBatch(std::in_place);
     SetServerMap(Map);
     Map = this->WorldActive;
 
@@ -1236,6 +1238,7 @@ void CMapManager::LoadWorld(int Map)
         g_pNewUIMiniMap->LoadImages(WorldName);
     }
 
+    textureBatch.reset();
     Bitmaps.LogTextureFilteringSummary("world loaded");
     mu::log::Get("render")->info(
         "World {} loaded in {:.0f} ms, {} ms after start", iMapWorld,

@@ -129,8 +129,11 @@ void WebzenScene(HDC hDC)
     {
         // The game draws no cursor while it loads.
         const Core::Platform::ScopedSystemCursor cursor;
-        OpenBasicData(hDC);
-        g_pNewUISystem->LoadMainSceneInterface();
+        {
+            const TextureLoadBatch textureBatch;
+            OpenBasicData(hDC);
+            g_pNewUISystem->LoadMainSceneInterface();
+        }
         Bitmaps.LogTextureFilteringSummary("startup");
         mu::log::Get("render")->info("Startup data loaded {} ms after start", SDL_GetTicks());
         TitleSceneUI::RenderSceneUI(hDC, 11, 11);

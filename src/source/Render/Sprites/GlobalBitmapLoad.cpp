@@ -30,6 +30,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <memory>
 #include <optional>
 #include <span>
@@ -346,8 +347,12 @@ GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint ui
     return BITMAP_UNKNOWN;
 }
 bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
-                              bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels)
+                              bool padToPowerOfTwo, bool premultiplyAlpha, bool keepPixels,
+                              LoadFailureReporter reportFailure)
 {
+    // A queued load of this index finishes first, so the checks below see it.
+    FlushPending(uiBitmapIndex);
+
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
     unsigned int UIREPEAT = GL_REPEAT;
 
@@ -394,6 +399,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     const bool jpeg = 0 == _wcsicmp(ext.c_str(), L"jpg");
     const auto start = std::chrono::steady_clock::now();
     bool loaded = false;
+    bool queued = false;
     if (jpeg || 0 == _wcsicmp(ext.c_str(), L"tga"))
     {
         Render::Sprites::TextureDecodeRequest request;
@@ -408,9 +414,27 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
         request.premultiplyAlpha = premultiplyAlpha;
         request.keepPixels = keepPixels;
         request.filteringEnabled = m_textureFilteringEnabled;
-        loaded = CommitTexture(request, Render::Sprites::DecodeTextureFile(m_texturePack, request));
+        request.reportFailure = reportFailure;
+        // A canvas is drawn on through Buffer as soon as it is loaded. A missing file fails
+        // here, at once: callers look for a texture in several folders by what this returns.
+        // shortcut: a file that is there but does not decode fails only when it commits, so such a
+        // search stops at it; check the header here too if a broken file in an early folder matters.
+        queued = m_pending != nullptr && !keepPixels && Render::Sprites::TextureFileExists(m_texturePack, request.path);
+        if (queued)
+        {
+            QueueLoad(std::move(request));
+            loaded = true;
+        }
+        else
+        {
+            loaded = CommitTexture(request, Render::Sprites::DecodeTextureFile(m_texturePack, request));
+        }
     }
     m_textureLoadSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    if (!loaded && reportFailure != nullptr)
+    {
+        reportFailure(filename.c_str());
+    }
 #ifdef _EDITOR
     if (loaded)
         m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
@@ -419,6 +443,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
 }
 void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 {
+    FlushPending(uiBitmapIndex);
     auto mi = m_mapBitmap.find(uiBitmapIndex);
     if (mi != m_mapBitmap.end())
     {
@@ -466,6 +491,7 @@ std::optional<int> CGlobalBitmap::GetLoadWorld(GLuint uiBitmapIndex) const
 
 void CGlobalBitmap::UnloadAllImages()
 {
+    FlushAllPending();
     if (m_mapBitmap.empty())
     {
         // The bitmaps may have been unloaded one by one; the shared Enhanced
@@ -776,6 +802,158 @@ TextureDecodeResult Render::Sprites::DecodeTextureFile(const Render::Textures::T
     return result;
 }
 
+void CGlobalBitmap::BeginLoadBatch(unsigned decodeThreads)
+{
+    if (m_batchDepth++ == 0)
+    {
+        m_pending = std::make_unique<Render::Sprites::PendingTextureLoads>();
+        if (decodeThreads > 0)
+        {
+            m_pending->threads = decodeThreads;
+        }
+    }
+}
+
+void CGlobalBitmap::EndLoadBatch()
+{
+    if (--m_batchDepth > 0)
+    {
+        return;
+    }
+    const auto start = std::chrono::steady_clock::now();
+    FlushAllPending();
+    const std::size_t queued = m_pending->queued;
+    const unsigned threads = m_pending->pool ? m_pending->pool->ThreadCount() : 0u;
+    m_pending.reset();
+    if (queued > 0)
+    {
+        mu::log::Get("render")->info(
+            "Texture load batch: {} files decoded on {} threads; committing the last of them took {:.0f} ms", queued,
+            threads, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count());
+    }
+}
+
+void CGlobalBitmap::QueueLoad(TextureDecodeRequest&& request)
+{
+    const GLuint index = request.index;
+    auto decode = std::make_shared<std::packaged_task<TextureDecodeResult()>>(
+        [request, &pack = m_texturePack, &decodedBytes = m_pending->decodedBytes]
+        {
+            TextureDecodeResult result = Render::Sprites::DecodeTextureFile(pack, request);
+            decodedBytes += Render::Sprites::DecodedBytes(result);
+            return result;
+        });
+    Render::Sprites::PendingTextureLoads::Load load{std::move(request), decode->get_future()};
+    if (!m_pending->pool)
+    {
+        m_pending->pool.emplace(m_pending->threads);
+    }
+    m_pending->pool->Post([decode] { (*decode)(); });
+    m_pending->loads.emplace(index, std::move(load));
+    m_pending->order.push_back(index);
+    ++m_pending->queued;
+
+    // Decoded pixels wait in memory until they commit. At most one load per worker runs ahead, and while the
+    // decoded ones hold more than the budget the oldest commit first: at most the budget plus a texture per worker.
+    constexpr std::size_t DecodedBytesBudget = std::size_t{256} * 1024u * 1024u;
+    const std::size_t maxPending = m_pending->pool->ThreadCount();
+    while (!m_pending->order.empty() &&
+           (m_pending->loads.size() > maxPending || m_pending->decodedBytes > DecodedBytesBudget))
+    {
+        const GLuint oldest = m_pending->order.front();
+        m_pending->order.pop_front();
+        FlushPending(oldest);
+    }
+}
+
+void CGlobalBitmap::FlushPending(GLuint uiBitmapIndex)
+{
+    if (!m_pending)
+    {
+        return;
+    }
+    const auto found = m_pending->loads.find(uiBitmapIndex);
+    if (found == m_pending->loads.end())
+    {
+        return;
+    }
+    Render::Sprites::PendingTextureLoads::Load load = std::move(found->second);
+    m_pending->loads.erase(found);
+
+    const auto start = std::chrono::steady_clock::now();
+    TextureDecodeResult result = load.result.get();
+    m_pending->decodedBytes -= Render::Sprites::DecodedBytes(result);
+    const bool loaded = CommitTexture(load.request, std::move(result));
+    m_textureLoadSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    if (!loaded)
+    {
+#ifdef _EDITOR
+        m_loadWorlds.erase(uiBitmapIndex);
+#endif
+        if (load.request.reportFailure != nullptr)
+        {
+            load.request.reportFailure(load.request.filename.c_str());
+        }
+    }
+}
+
+void CGlobalBitmap::FlushPending(const std::wstring& filename)
+{
+    if (!m_pending)
+    {
+        return;
+    }
+    // Collected first: a commit can report a failure whose Quit unloads everything, which drains `order`.
+    std::vector<GLuint> matching;
+    for (const GLuint index : m_pending->order)
+    {
+        const auto found = m_pending->loads.find(index);
+        if (found != m_pending->loads.end() && 0 == _wcsicmp(found->second.request.filename.c_str(), filename.c_str()))
+        {
+            matching.push_back(index);
+        }
+    }
+    for (const GLuint index : matching)
+    {
+        FlushPending(index);
+    }
+}
+
+void CGlobalBitmap::FlushAllPending()
+{
+    if (!m_pending)
+    {
+        return;
+    }
+    while (!m_pending->order.empty())
+    {
+        const GLuint index = m_pending->order.front();
+        m_pending->order.pop_front();
+        FlushPending(index);
+    }
+}
+
+std::size_t Render::Sprites::DecodedBytes(const TextureDecodeResult& result)
+{
+    if (!result.texture)
+    {
+        return 0;
+    }
+    const DecodedTexture& texture = *result.texture;
+    std::size_t bytes = texture.bitmap->BufferStorage.size() + texture.rgba.size();
+    for (const Render::Textures::MipLevel& level : texture.mips.chain)
+    {
+        bytes += level.rgba.size();
+    }
+    return bytes;
+}
+
+bool Render::Sprites::TextureFileExists(const Render::Textures::TexturePackFiles& pack, const std::wstring& path)
+{
+    std::error_code error;
+    return pack.Find(path) != nullptr || std::filesystem::exists(Render::Sprites::NarrowBitmapPath(path), error);
+}
+
 bool CGlobalBitmap::CommitTexture(const TextureDecodeRequest& request, TextureDecodeResult&& result)
 {
     for (const std::wstring& error : result.errors)
@@ -901,6 +1079,8 @@ void CGlobalBitmap::SetTexturePack(const std::wstring& pack)
 {
     namespace TexturePack = Render::Textures::TexturePack;
 
+    // The queued decodes read the pack's files.
+    FlushAllPending();
     m_texturePack = {};
     if (pack.empty())
     {
@@ -960,6 +1140,8 @@ void CGlobalBitmap::UpdateTextureFiltering()
 
 void CGlobalBitmap::ApplyTextureFilteringSwitch()
 {
+    // The queued decodes planned their mip levels for the old setting.
+    FlushAllPending();
     m_textureFilteringSwitchPending = false;
 
     const Render::Textures::AnisotropyLevel anisotropy = Render::Textures::ClampAnisotropy(m_requestedAnisotropy);
