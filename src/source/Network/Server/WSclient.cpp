@@ -10181,6 +10181,8 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
 
     UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::R, Data->KeyR + ITEM_POTION, byRLevel);
+
+    SetKeyConfigurationReceived(true);
 }
 
 void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
