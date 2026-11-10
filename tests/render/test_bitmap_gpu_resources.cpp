@@ -583,3 +583,57 @@ TEST_CASE("a mip chain whose levels do not halve is refused before anything is c
     CHECK(fake.uploads.empty());
     CHECK(owner.LastStage() == "upload: invalid mip chain");
 }
+
+TEST_CASE("bitmap uploads in a batch share a submission until the slot is full")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    // 65 pixels of 4 bytes take a 512-byte pitch; two rows are 1024 bytes, a multiple of the level alignment.
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    owner.BeginBatch();
+    for (int i = 0; i < 100; ++i)
+    {
+        auto result = owner.Upload(small, 65, 2, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == static_cast<Uint32>(i) * 1024u);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(fake.fences == 0);
+    CHECK(fake.waits == 0);
+    CHECK(owner.EndBatch());
+    CHECK(fake.fences == 1);
+
+    // A full-size image fills a slot: each one submits the batch it started.
+    std::vector<std::uint8_t> full(std::size_t{1024} * 1024u * 4u, 0x11);
+    owner.BeginBatch();
+    for (int i = 0; i < 5; ++i)
+    {
+        auto result = owner.Upload(full, 1024, 1024, filter, wrap);
+        REQUIRE(result);
+        CHECK(fake.source.offset == 0);
+        fake.Calls().releaseTexture(Device(), result.texture);
+    }
+    CHECK(owner.Flush());
+    CHECK(owner.Flush());
+    CHECK(owner.EndBatch());
+    CHECK(fake.waits == 3);
+    CHECK_FALSE(fake.overwrite);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+}
+
+TEST_CASE("an upload batch still open at shutdown is submitted and retired")
+{
+    Fake fake;
+    Owner owner(fake.Calls());
+    REQUIRE(owner.Initialize(Device()));
+    std::vector<std::uint8_t> small(std::size_t{65} * 2u * 4u, 0x5a);
+    owner.BeginBatch();
+    auto result = owner.Upload(small, 65, 2, filter, wrap);
+    REQUIRE(result);
+    CHECK(fake.fences == 0);
+    CHECK(owner.Shutdown());
+    CHECK(fake.fences == 0);
+    CHECK(fake.waits == 1);
+}

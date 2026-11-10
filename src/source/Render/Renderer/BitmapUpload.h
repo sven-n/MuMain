@@ -14,4 +14,7 @@ Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const 
 void ReleaseBitmapTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture);
 const char* BitmapUploadDriverName();
 double BitmapUploadFenceWaitSeconds();
+// Uploads in between share submissions (BitmapGpuResources::BeginBatch).
+void BeginBitmapUploadBatch();
+void EndBitmapUploadBatch();
 } // namespace mu
