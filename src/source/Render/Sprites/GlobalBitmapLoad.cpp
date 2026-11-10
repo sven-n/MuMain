@@ -27,7 +27,6 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <span>
@@ -123,7 +122,16 @@ std::optional<TextureFileBytes> ReadTextureFile(std::ifstream input, std::wstrin
         return std::nullopt;
     }
     TextureFileBytes file;
-    file.bytes.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+    // One read of the whole file: istreambuf_iterator copies it a character at a time.
+    input.seekg(0, std::ios::end);
+    const std::streamoff size = input.tellg();
+    input.seekg(0, std::ios::beg);
+    if (size > 0)
+    {
+        file.bytes.resize(static_cast<std::size_t>(size));
+        input.read(reinterpret_cast<char*>(file.bytes.data()), size);
+        file.bytes.resize(static_cast<std::size_t>(input.gcount()));
+    }
     file.path = std::move(path);
     file.fromTexturePack = fromTexturePack;
     return file;
