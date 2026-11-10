@@ -213,6 +213,10 @@ const char* BitmapUploadDriverName()
 {
     return "fixture";
 }
+double BitmapUploadFenceWaitSeconds()
+{
+    return 0.0;
+}
 } // namespace mu
 
 TEST_CASE("truncated OZT headers and pixel payloads never reach the uploader")

@@ -158,6 +158,8 @@ class CGlobalBitmap
     std::vector<std::uint32_t> m_mipChainRequests;
     double m_textureLoadSeconds = 0.0;
     double m_mipChainSeconds = 0.0;
+    double m_fileReadSeconds = 0.0;
+    double m_uploadSeconds = 0.0;
     // The files of the active texture pack; empty for the original textures.
     Render::Textures::TexturePackFiles m_texturePack;
 #ifdef DEBUG_BITMAP_CACHE
@@ -244,7 +246,7 @@ public:
         return m_textureFilteringEnabled;
     }
     // Logs how many textures are world (and how many of those have a mip
-    // chain) and screen-space, their GPU size, and the time spent loading.
+    // chain) and screen-space, their GPU size, and the time spent loading, by stage.
     void LogTextureFilteringSummary(const char* context) const;
 
     inline BITMAP_t& operator [] (GLuint uiBitmapIndex) { return *GetTexture(uiBitmapIndex); }

@@ -27,7 +27,6 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <span>
@@ -123,7 +122,16 @@ std::optional<TextureFileBytes> ReadTextureFile(std::ifstream input, std::wstrin
         return std::nullopt;
     }
     TextureFileBytes file;
-    file.bytes.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+    // One read of the whole file: istreambuf_iterator copies it a character at a time.
+    input.seekg(0, std::ios::end);
+    const std::streamoff size = input.tellg();
+    input.seekg(0, std::ios::beg);
+    if (size > 0)
+    {
+        file.bytes.resize(static_cast<std::size_t>(size));
+        input.read(reinterpret_cast<char*>(file.bytes.data()), size);
+        file.bytes.resize(static_cast<std::size_t>(input.gcount()));
+    }
     file.path = std::move(path);
     file.fromTexturePack = fromTexturePack;
     return file;
@@ -148,14 +156,23 @@ std::optional<TextureFileBytes> ReadPackCopy(const Render::Textures::TexturePack
     return ReadTextureFile(std::ifstream(*copy, std::ios::binary), std::move(copyPath), true);
 }
 
+template <typename Read> std::optional<TextureFileBytes> TimedRead(double& seconds, Read&& read)
+{
+    const auto start = std::chrono::steady_clock::now();
+    std::optional<TextureFileBytes> file = read();
+    seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    return file;
+}
+
 // Loads a texture file through `load`: the copy in the active pack first, and
 // the original in Data when the pack has no copy or its copy does not load,
 // so a broken file in a pack costs only that file's replacement.
 template <typename Load>
 bool LoadPackCopyOrOriginal(const Render::Textures::TexturePackFiles& pack, const std::wstring& path,
-                            const char* loader, Load&& load)
+                            const char* loader, double& readSeconds, Load&& load)
 {
-    if (const std::optional<TextureFileBytes> packCopy = ReadPackCopy(pack, path))
+    if (const std::optional<TextureFileBytes> packCopy =
+            TimedRead(readSeconds, [&] { return ReadPackCopy(pack, path); }))
     {
         if (load(*packCopy))
         {
@@ -167,7 +184,7 @@ bool LoadPackCopyOrOriginal(const Render::Textures::TexturePackFiles& pack, cons
                                      mu_wchar_to_utf8(packCopy->path.c_str()));
     }
 
-    const std::optional<TextureFileBytes> original = ReadOriginal(path);
+    const std::optional<TextureFileBytes> original = TimedRead(readSeconds, [&] { return ReadOriginal(path); });
     if (!original)
     {
         mu::log::Get("render")->debug("{} -- file open failed: {}", loader, mu_wchar_to_utf8(path.c_str()));
@@ -240,14 +257,17 @@ struct MipLevels
 bool s_gpuUploadsSkipped = false;
 
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, std::span<const std::uint8_t> pixels, int width, int height,
-                         SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode, const MipLevels& mips)
+                         SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode, const MipLevels& mips,
+                         double& seconds)
 {
     if (s_gpuUploadsSkipped)
     {
         bitmap->mipLevels = 1;
         return true;
     }
+    const auto start = std::chrono::steady_clock::now();
     auto result = mu::UploadBitmapPixels(pixels, width, height, filter, wrapMode, mips.chain, mips.generate);
+    seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
     if (!result)
     {
         const char* driver = mu::BitmapUploadDriverName();
@@ -564,7 +584,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
 
-    return LoadPackCopyOrOriginal(m_texturePack, filename_ozj, "OpenJpegTurbo",
+    return LoadPackCopyOrOriginal(m_texturePack, filename_ozj, "OpenJpegTurbo", m_fileReadSeconds,
                                   [&](const TextureFileBytes& file)
                                   {
                                       return LoadJpegFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
@@ -672,7 +692,7 @@ bool CGlobalBitmap::LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filen
     const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), rgbaData.data(),
                                          uploadWidth, uploadHeight, false, m_mipChainSeconds);
     if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData, uploadWidth, uploadHeight, MapGLFilterToSDL(uiFilter),
-                             MapGLWrapToSDL(uiWrapMode), mips))
+                             MapGLWrapToSDL(uiWrapMode), mips, m_uploadSeconds))
     {
         return false;
     }
@@ -701,7 +721,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::wstring filename_ozt;
     ExchangeExt(filename, L"OZT", filename_ozt);
 
-    return LoadPackCopyOrOriginal(m_texturePack, filename_ozt, "OpenTga",
+    return LoadPackCopyOrOriginal(m_texturePack, filename_ozt, "OpenTga", m_fileReadSeconds,
                                   [&](const TextureFileBytes& file)
                                   {
                                       return LoadTgaFile(uiBitmapIndex, filename, file, uiFilter, uiWrapMode,
@@ -769,7 +789,7 @@ bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filena
     const MipLevels mips = PlanMipLevels(upscaled || (worldTexture && m_textureFilteringEnabled), pNewBitmap->Buffer,
                                          uploadWidth, uploadHeight, true, m_mipChainSeconds);
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->BufferStorage, uploadWidth, uploadHeight,
-                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode), mips))
+                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode), mips, m_uploadSeconds))
     {
         return false;
     }
@@ -806,7 +826,7 @@ bool CGlobalBitmap::UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<con
     const MipLevels mips = PlanMipLevels(bitmap->worldTexture && m_textureFilteringEnabled, rgba.data(), width, height,
                                          hasAlpha, m_mipChainSeconds);
     if (!UploadTextureSDLGpu(bitmap.get(), rgba, width, height, MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode),
-                             mips))
+                             mips, m_uploadSeconds))
     {
         return false;
     }
@@ -1220,9 +1240,11 @@ void CGlobalBitmap::LogTextureFilteringSummary(const char* context) const
 
     mu::log::Get("render")->info(
         "Texture filtering ({}): {}, anisotropy {}; {} world textures ({} mipmapped), {} screen-space; "
-        "{:.1f} MiB on the GPU; texture loading {:.0f} ms, of which mip chains {:.0f} ms",
+        "{:.1f} MiB on the GPU; texture loading {:.0f} ms, of which file reads {:.0f} ms, mip chains {:.0f} ms, "
+        "uploads {:.0f} ms (waiting for upload slots {:.0f} ms)",
         context, m_textureFilteringEnabled ? "Enhanced" : "Classic", m_anisotropy, world, mipmapped, screenSpace,
-        static_cast<double>(gpuBytes) / (1024.0 * 1024.0), m_textureLoadSeconds * 1000.0, m_mipChainSeconds * 1000.0);
+        static_cast<double>(gpuBytes) / (1024.0 * 1024.0), m_textureLoadSeconds * 1000.0, m_fileReadSeconds * 1000.0,
+        m_mipChainSeconds * 1000.0, m_uploadSeconds * 1000.0, mu::BitmapUploadFenceWaitSeconds() * 1000.0);
 }
 
 void CGlobalBitmap::SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot)

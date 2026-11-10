@@ -8326,6 +8326,11 @@ const char* BitmapUploadDriverName()
     return s_device ? SDL_GetGPUDeviceDriver(s_device) : "no device";
 }
 
+double BitmapUploadFenceWaitSeconds()
+{
+    return s_bitmapGpuResources.FenceWaitSeconds();
+}
+
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
                                       std::string_view renderBackend, float normalPointSize,

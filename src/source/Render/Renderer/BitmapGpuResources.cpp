@@ -3,6 +3,7 @@
 #include <SDL3/SDL_error.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <vector>
 
@@ -108,7 +109,10 @@ bool BitmapGpuResources::Retire(Slot& slot)
     {
         return true;
     }
-    if (!m_calls.wait(m_device, true, &slot.fence, 1))
+    const auto start = std::chrono::steady_clock::now();
+    const bool waited = m_calls.wait(m_device, true, &slot.fence, 1);
+    m_fenceWaitSeconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    if (!waited)
     {
         Fail("wait for upload fence", true);
         LoseSlot(slot);

@@ -113,6 +113,11 @@ public:
     {
         return m_faulted;
     }
+    // Time spent waiting for a slot's previous upload to finish.
+    double FenceWaitSeconds() const
+    {
+        return m_fenceWaitSeconds;
+    }
 
 private:
     struct Slot
@@ -137,6 +142,7 @@ private:
     std::array<SDL_GPUSampler*, 4> m_samplers{};
     std::size_t m_next = 0;
     bool m_faulted = false;
+    double m_fenceWaitSeconds = 0.0;
     std::string m_stage;
     std::string m_error;
 };
