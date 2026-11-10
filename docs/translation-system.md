@@ -195,12 +195,14 @@ The active locale is selected through the Option window's language dropdown
 (the single source of truth for the active locale; on startup
 `GameLogic/Config/GameConfig` re-applies it).
 
-`SetLocale` does three things:
+`SetLocale` does four things:
 
 1. Resolves `locale` to a `LocaleIndex` (unknown -> default 0).
 2. Calls each group's generated `ApplyLocale(int)` (a data-driven `kSlots`
    table that overwrites every `extern` pointer in the group).
-3. Fires every registered `LocaleObserver`.
+3. Points the texts that name items at their expansion
+   ([Texts that name items](#texts-that-name-items)).
+4. Fires every registered `LocaleObserver`.
 
 Most rendering picks up the change for free, because text is read straight
 from the now-updated `I18N::<Group>::Name` slot on the next frame. Widgets
@@ -394,6 +396,13 @@ language, English first.
 **Item Basics** edits the English name. Each name change is one step of
 the item tools' Undo and Redo.
 
+Above the grid, **Name forms** shows the selected item's forms for the texts that
+name it with a case ([Texts that name items](#texts-that-name-items)): a row for
+its name and one for each name of a level, per language that declines names,
+with a field per case. An empty field shows the name it falls back to, greyed;
+each change is a step of Undo. The line above the table counts the texts that
+name the item; hover it for the list.
+
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
@@ -425,6 +434,62 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Texts that name items
+
+A text names an item by its number instead of spelling its name, and the game
+puts the item's name in when it shows the text:
+
+| Written | Shows (English, German) |
+|---|---|
+| `{item:14,13}` | Jewel of Bless, Juwel des Segens |
+| `{item:13,20+3}` | the name of item 13,20 at level 3: Ring of glory |
+| `{item:14,25:acc}` | the accusative of the name, where the language has one |
+| `{item:14,21+2:gen}` | both |
+
+The numbers are the item's group and number, as the editor shows them (`14,13`
+in Item Translations, `Jewel of Bless (14,13)` in logs). `+level` picks the
+item's name at that level (its name line, [item-data.md](item-data.md#name-lines)),
+for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`).
+
+- **Where:** the `Game` and `Dialog` texts (`ResxGen --item-text-groups`), and
+  the item data's own texts: description lines, name lines, and the shared texts
+  and layout lines of `Tooltips/Tooltip.json`. Not the editor's texts.
+- **Which name:** the item name language, so the names follow **Translate item
+  names**: with it off a Polish text shows `Jewel of Bless`, as the inventory
+  does, while the rest of the text stays Polish. A language whose file has no
+  text of its own for the key shows the English text, and names the items in
+  English like it; so does an item data text without a translation of its own.
+- **When:** a text is expanded when the language switches, when the item data
+  is loaded, when Translate item names changes and when the editor changes a
+  name; the text's pointer then shows the expansion, so the code that shows a
+  text needs nothing. Code that keeps a copy of a text (an NPC dialog's lines)
+  registers with `ItemTexts::RegisterTextsChangedObserver` as well as with
+  `RegisterLocaleObserver`: a change of names calls only the first, since the
+  language stayed. Before the item data is loaded a text shows `{item:...}`
+  as written (no such text is shown that early). A number no item has, or a
+  level above +15, stays as written, and the rest of the text is still filled
+  in; so does a name with `%` in a Game or Dialog text, a printf format that
+  would read it as a conversion.
+- **Grammar:** languages that decline names (German, Polish) can ask for a form
+  with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
+  data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item
+  Translations; `Tooltips/NameCases.json` gives each language its cases. A
+  missing form shows the name itself. English has no forms.
+- **Translations** of an item's own text must name the same items as the English
+  text; the case may differ (`{item:14,25}` in English, `{item:14,25:acc}` in
+  Polish). The UI texts may spell a name in a language that has no item names
+  yet (Russian, Japanese, ...): a reference there would show the English name.
+
+A malformed reference in a `.resx` file (`{item:14;13}`, an unknown case) stops
+the build with the file, key and text, and so does a reference in the texts of
+another group (the editor's), which the game would show as written. In the
+editor, **Data Checks** lists the texts under **Texts**: a number or a level no
+item has, a level whose name needs game values (a skill's or monster's name), a
+level without a name of its own, a missing form, a translation that names other
+items than the English text, and one that still spells the names the English
+text writes by number, in a language the item data has those names in. A click selects the item and opens Item
+Translations (or the tool of an item's own text).
 
 ## Simplified Chinese (`zh-CN`)
 

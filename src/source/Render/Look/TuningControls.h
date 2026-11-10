@@ -26,6 +26,7 @@ enum class TuningGroup : std::uint8_t
     DynamicLights,
     LightMood,
     PostProcessing,
+    Sunlight,
     Count,
 };
 inline constexpr std::size_t TuningGroupCount = static_cast<std::size_t>(TuningGroup::Count);
@@ -39,6 +40,7 @@ enum class TuningUnit : std::uint8_t
     // Terrain cells.
     Cells,
     Percent,
+    Degrees,
 };
 
 // What a value of zero means for a control, where it is not simply none of it.
@@ -66,6 +68,8 @@ enum class TuningControlId : std::uint8_t
     EffectRange,
     EffectFade,
     EffectCap,
+    ShadowOpacity,
+    ShadowLights,
     Wrap,
     MapSmoothing,
     EffectRangeMax,
@@ -73,6 +77,18 @@ enum class TuningControlId : std::uint8_t
     BloomStrength,
     BloomLevelFalloff,
     GradingStrength,
+    AmbientOcclusionStrength,
+    AmbientOcclusionRadius,
+    SunShadowStrength,
+    SunShadowSoftness,
+    SunShadowResolution,
+    FlatSunShadow,
+    CloudStrength,
+    CloudScale,
+    CloudSpeed,
+    CloudCover,
+    SkyFill,
+    RimSunFollow,
     Count,
 };
 inline constexpr std::size_t TuningControlCount = static_cast<std::size_t>(TuningControlId::Count);
@@ -134,7 +150,7 @@ struct DeveloperLookEdits
     // A `$look reset <name>` on `world`: the default and that world's entry, as the reset restores.
     void Clear(Data::Maps::LookValue value, int world);
     // True when the developer's value is what `profile` gives `world`: the world's edited entry, or an
-    // edited default that no entry of the world overrides.
+    // edited default that neither an entry of the world nor its environment overrides.
     [[nodiscard]] bool Covers(const Data::Maps::LookProfileData& profile, int world, Data::Maps::LookValue value) const;
     bool operator==(const DeveloperLookEdits&) const = default;
 };
@@ -164,6 +180,7 @@ struct LookFeatureAppliers
     // Rebuilds the map light, which reads the look values (the highlight knee).
     std::function<void(bool enabled, int strengthPercent)> lightMood;
     std::function<void(bool)> antialiasing;
+    std::function<void(bool)> sunlight;
 };
 
 // Applies `requested`: Enhanced lighting before dynamic lights, which only act while it is on; then

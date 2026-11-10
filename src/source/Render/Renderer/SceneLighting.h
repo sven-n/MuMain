@@ -45,6 +45,26 @@ struct SceneLighting
     float specularPower = kDefaultSpecularPower;
     // World-space camera position.
     float cameraPosition[3]{};
+    // Enhanced sun shadows: the direction towards the sun, how much a shadow darkens (0: no shadow
+    // map), how many texels its edges blur over, the map's size in texels, and the heights between
+    // which the camera's view meets the ground.
+    float sunDirection[3]{0.0f, 0.0f, 1.0f};
+    float sunShadowDarkness = 0.0f;
+    float sunShadowSoftness = 1.0f;
+    std::uint32_t sunShadowResolution = 2048;
+    float groundLow = 0.0f;
+    float groundHigh = 0.0f;
+    // Enhanced cloud shadows: how much a cloud dims the sun's light (0: none), the pattern's size in
+    // world units, the share of sky covered and the pattern's offset (drift and the sun's slant).
+    float cloudStrength = 0.0f;
+    float cloudScale = 3000.0f;
+    float cloudCover = 0.45f;
+    float cloudOffset[2]{};
+    // How far the shade takes the sky's blue (0: not at all), and how far the rim light follows the sun.
+    float skyFill = 0.0f;
+    float rimSunFollow = 0.0f;
+    // The sun's colour.
+    float sunColor[3]{1.0f, 1.0f, 1.0f};
 };
 
 // The frame's fog as configured through IMuRenderer::SetFog() when the scene lighting was set.
@@ -68,6 +88,14 @@ struct SceneLightingUniform
     float fogColor[4];           // rgb, w = 1 when the scene has fog
     float fogParameters[4];      // start, end, Enhanced density, unused
     float cameraPosition[4];     // xyz world space, w unused
+    float sunViewProjection[16]; // column-major, world to the sun shadow map's clip space
+    float sunShadowParameters[4]; // darkness (0: no shadow map), softness in texels, 1 / map size, texel size
+    float lightingParameters[4];  // unused, terrain sunlight grid bound, unused, unused
+    float cloudParameters[4];     // strength (0: no clouds), 1 / pattern size, sky cover, unused
+    float cloudOffset[4];         // xy: drift plus the sun's slant through the clouds, zw unused
+    float skyFill[4];             // rgb: the sky's tint of the shade, w: how far shade takes it
+    float sunTowards[4];          // xyz: towards the sun, w: how far the rim follows it
+    float sunColor[4];            // rgb: the sun's colour, w unused
 };
 
 inline constexpr std::size_t kSceneLightingRegisterSize = 16;
@@ -79,13 +107,22 @@ static_assert(offsetof(SceneLightingUniform, specularParameters) == 4 * kSceneLi
 static_assert(offsetof(SceneLightingUniform, fogColor) == 5 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, fogParameters) == 6 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, cameraPosition) == 7 * kSceneLightingRegisterSize);
-static_assert(sizeof(SceneLightingUniform) == 8 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunViewProjection) == 8 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunShadowParameters) == 12 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, lightingParameters) == 13 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, cloudParameters) == 14 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunColor) == 18 * kSceneLightingRegisterSize);
+static_assert(sizeof(SceneLightingUniform) == 19 * kSceneLightingRegisterSize);
 
 [[nodiscard]] SceneLightingUniform PackSceneLightingUniform(const SceneLighting& lighting, const SceneFog& fog);
 
 // Point lights on models light a face with saturate(dot(n, l) * (1 - wrap) + wrap): 0 is Lambert,
 // 0.5 (the built-in value) half-Lambert. Up to 0.5 a face turned away from the light gets nothing.
 inline constexpr float kDefaultDynamicWrap = 0.5f;
+// How much a character's shadow darkens the world-lit ground's own light (the built-in value).
+inline constexpr float kDefaultGroundShadowOpacity = 0.6f;
+// Where characters' shadows fall, in degrees counter-clockwise from world +x: towards -x, as in Classic.
+inline constexpr float kClassicGroundShadowAngle = 180.0f;
 // CPU mirror of the wrapped diffuse in skinned_lit.frag.hlsl's DynamicLighting(); the shader is the
 // implementation.
 [[nodiscard]] float WrappedDiffuse(float normalDotLight, float wrap);
@@ -100,9 +137,12 @@ struct DynamicLightsUniform
 {
     std::uint32_t lightCount = 0;     // lights used
     float wrap = kDefaultDynamicWrap; // see WrappedDiffuse()
-    std::uint32_t padding[2]{};
+    // The first lights, which the ground's vertex colour leaves out (ScopedWorldLitGeometry).
+    std::uint32_t worldLightCount = 0;
+    // How much a ground shadow darkens the ground's own light, 0 to 1 (ScopedGroundShadow).
+    float groundShadowOpacity = 0.f;
     float positionAndRadius[kMaxDynamicLights][4]; // xyz world position, w radius in world units
-    float color[kMaxDynamicLights][4];             // rgb, w unused
+    float color[kMaxDynamicLights][4];             // rgb, w 1 when it casts character shadows
 };
 
 static_assert(offsetof(DynamicLightsUniform, lightCount) == 0);

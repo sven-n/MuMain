@@ -2,131 +2,92 @@
 
 #include "doctest.h"
 
+#include "ClientFolderScope.h"
 #include "TestModelSlots.h"
+#include "PlayerTextureScope.h"
+#include "Engine/Object/PlayerBodyModels.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include "Core/Globals/_enum.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Render/Sprites/GlobalBitmap.h"
-#include "Render/Sprites/GpuUploadSkip.h"
+#include "Render/Sprites/TextureScript.h"
 #include "Render/Textures/ZzzTexture.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
-#include <cwctype>
 #include <filesystem>
 #include <set>
 #include <string>
+#include <vector>
 
-// The 13 selected S6 body families, read through the real model/texture loaders.
-// GPU uploads alone are skipped: these are CPU compatibility checks, not rendering evidence.
+// Every improved body found on disk is checked against its original, through the real loaders.
+// GPU uploads alone are skipped: CPU compatibility checks, not rendering evidence.
 namespace
 {
+using Engine::Object::PlayerBodyPart;
+using Engine::Object::PlayerBodyParts;
 const std::filesystem::path ClientFolder = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 const std::filesystem::path PlayerFolder = std::filesystem::path(MU_TEST_DATA_DIR) / "Player";
-
-struct BodyAssets
-{
-    const char* name;
-    const wchar_t* modelFolder;
-    bool prepared;
-};
-
-constexpr std::array<BodyAssets, 2> AssetSets{{
-    {"original S6", L"Data\\Player\\", false},
-    {"updated", L"Data\\Player\\Updated\\", true},
-}};
-
-// The role fixture below retains the original Dark Knight model.
 constexpr int BodyClass = CLASS_KNIGHT;
-struct BodyFamily
-{
-    const char* suffix;
-    int baseClass;
-    int stage;
-    const char* stockTexture;
-    const char* preparedTexture;
-};
-
-// OpenPlayers: base slots, MAX_CLASS + class for second forms (not MG/DL),
-// 2 * MAX_CLASS + class for third forms. OpenPlayerTextures visits stage first.
-constexpr std::array<BodyFamily, 13> Families{{
-    {"01", CLASS_WIZARD, 0, "skin_barbarian_01.jpg", "skin_hq_class01.jpg"},
-    {"02", CLASS_KNIGHT, 0, "skin_wizard_01.jpg", "skin_hq_class02.jpg"},
-    {"03", CLASS_ELF, 0, "skin_warrior_01.jpg", "skin_hq_class03.jpg"},
-    {"04", CLASS_DARK, 0, "skin_special_01.jpg", "skin_hq_class04.jpg"},
-    {"05", CLASS_DARK_LORD, 0, "level_man02.jpg", "skin_hq_class05.jpg"},
-    {"201", CLASS_WIZARD, 1, "level_man022.jpg", "skin_hq_class201.jpg"},
-    {"202", CLASS_KNIGHT, 1, "level_man01.jpg", "skin_hq_class202.jpg"},
-    {"203", CLASS_ELF, 1, "level_man033.jpg", "skin_hq_class203.jpg"},
-    {"301", CLASS_WIZARD, 2, "SkinClass302.jpg", "body_hq_class301.jpg"},
-    {"302", CLASS_KNIGHT, 2, "SkinClass301.jpg", "body_hq_class302.jpg"},
-    {"303", CLASS_ELF, 2, "SkinClass303.jpg", "body_hq_class303.jpg"},
-    {"304", CLASS_DARK, 2, "SkinClass304.jpg", "body_hq_class304.jpg"},
-    {"305", CLASS_DARK_LORD, 2, "SkinClass305.jpg", "body_hq_class305.jpg"},
-}};
-// A shipped texture the role fixture copies; only its name is under test.
 constexpr const char* RoleFixtureSource = "skin_wizard_01.OZJ";
-// The player's head bone, as OpenPlayers sets it (ZzzOpenData.cpp).
 constexpr int PlayerHeadBone = 20;
-// Model units; a body part spans tens of them.
 constexpr float MinimumPartExtent = 1.f;
 constexpr float MaximumCoordinate = 10000.f;
 constexpr float MaximumTexCoord = 16.f;
+constexpr int OriginalSlot = MODEL_BODY_HELM;
+constexpr int ImprovedSlot = MODEL_BODY_ARMOR;
 
-struct BodyPart
+struct BodyFile
 {
-    int slot;
-    const wchar_t* file;
+    std::wstring stem;
+    int baseClass;
 };
 
-// The slots and file names OpenPlayers gives the first-form body parts.
-const std::array<BodyPart, 5> BodyParts{{
-    {MODEL_BODY_HELM, L"HelmClass"},
-    {MODEL_BODY_ARMOR, L"ArmorClass"},
-    {MODEL_BODY_PANTS, L"PantClass"},
-    {MODEL_BODY_GLOVES, L"GloveClass"},
-    {MODEL_BODY_BOOTS, L"BootClass"},
-}};
-
-// Runs the test from the client folder, where model and texture paths start with Data.
-class ClientFolderScope
+std::vector<BodyFile> FindImprovedBodies(const std::filesystem::path& playerFolder)
 {
-public:
-    explicit ClientFolderScope(const std::filesystem::path& folder) : m_previous(std::filesystem::current_path())
+    std::vector<BodyFile> bodies;
+    for (const auto& entry : std::filesystem::directory_iterator(playerFolder / "Updated"))
     {
-        std::filesystem::current_path(folder);
+        if (!entry.is_regular_file() || !Data::Items::EqualsIgnoringCase(entry.path().extension().string(), ".bmd"))
+            continue;
+        const std::wstring stem = entry.path().stem().wstring();
+        bool recognized = false;
+        for (int stage = 0; stage < MAX_CLASS_STAGES; ++stage)
+        {
+            for (int baseClass = 0; baseClass < MAX_CLASS; ++baseClass)
+            {
+                if (!Engine::Object::HasPlayerBodyForm(stage, baseClass))
+                    continue;
+                for (const PlayerBodyPart& part : PlayerBodyParts)
+                {
+                    if (stem == Engine::Object::PlayerBodyFileName(stage, part, baseClass))
+                    {
+                        REQUIRE(std::filesystem::is_regular_file(playerFolder / entry.path().filename()));
+                        bodies.push_back({stem, baseClass});
+                        recognized = true;
+                    }
+                }
+            }
+        }
+        INFO(entry.path().string());
+        CHECK(recognized);
     }
-    ~ClientFolderScope()
-    {
-        std::filesystem::current_path(m_previous);
-    }
-    ClientFolderScope(const ClientFolderScope&) = delete;
-    ClientFolderScope& operator=(const ClientFolderScope&) = delete;
+    std::ranges::sort(bodies, {}, &BodyFile::stem);
+    REQUIRE_FALSE(bodies.empty());
+    return bodies;
+}
 
-private:
-    std::filesystem::path m_previous;
-};
-
-// Textures load without a GPU device and are unloaded afterwards.
-class TextureScope
+void OpenBodyPair(const BodyFile& body)
 {
-public:
-    TextureScope()
-    {
-        Bitmaps.UnloadAllImages();
-        Render::Sprites::SetGpuUploadsSkipped(true);
-    }
-    ~TextureScope()
-    {
-        Bitmaps.UnloadAllImages();
-        Render::Sprites::SetGpuUploadsSkipped(false);
-    }
-    TextureScope(const TextureScope&) = delete;
-    TextureScope& operator=(const TextureScope&) = delete;
-};
+    Models[OriginalSlot].Release();
+    Models[ImprovedSlot].Release();
+    REQUIRE(gLoadData.AccessModel(OriginalSlot, Engine::Object::OriginalPlayerModelFolder, body.stem.c_str()));
+    REQUIRE(gLoadData.AccessModel(ImprovedSlot, Engine::Object::ImprovedPlayerModelFolder, body.stem.c_str()));
+}
 
 BMD& OpenPlayer()
 {
@@ -136,42 +97,20 @@ BMD& OpenPlayer()
     return player;
 }
 
-int ModelSlot(const BodyFamily& family, const BodyPart& part)
-{
-    return part.slot + family.stage * MAX_CLASS + family.baseClass;
-}
-
-std::wstring ModelPrefix(const BodyFamily& family, const BodyPart& part)
-{
-    return std::wstring(part.file) + (family.stage == 0 ? L"" : std::to_wstring(family.stage + 1));
-}
-
-void OpenBodyParts(const BodyFamily& family, const BodyAssets& assets)
-{
-    for (const BodyPart& part : BodyParts)
-    {
-        INFO("family ", std::string(family.suffix), " part ", Core::Text::ToUtf8(part.file));
-        const std::wstring prefix = ModelPrefix(family, part);
-        REQUIRE(gLoadData.AccessModel(ModelSlot(family, part), assets.modelFolder, prefix.c_str(), family.baseClass + 1));
-    }
-}
-
 std::string MeshTextureName(const BMD& model, int mesh)
 {
     const char* name = model.Textures[mesh].FileName;
     return std::string(name, strnlen(name, sizeof(model.Textures[mesh].FileName)));
 }
 
-bool IsHairMesh(const BodyFamily& family, const BodyPart& part, int mesh)
+bool IsSkin(std::string_view name)
 {
-    return family.baseClass == CLASS_DARK_LORD && part.slot == MODEL_BODY_HELM && mesh == 1;
+    return name.starts_with("ski") || (name.size() >= 5 && Data::Items::EqualsIgnoringCase(name.substr(0, 5), "level"));
 }
 
-std::string ExpectedTexture(const BodyFamily& family, const BodyPart& part, int mesh, bool prepared)
+bool IsHair(std::string_view name)
 {
-    if (IsHairMesh(family, part, mesh))
-        return prepared ? "hair_hq_player.jpg" : "hair_R.jpg";
-    return prepared ? family.preparedTexture : family.stockTexture;
+    return name.starts_with("hair");
 }
 
 bool IsFinite(const float* values, int count)
@@ -196,7 +135,8 @@ void CheckRigBone(const BMD& player, int node)
 std::set<int> SkinnedBonesWithAncestors(const BMD& part, const BMD& player)
 {
     std::set<int> bones;
-    const auto addWithAncestors = [&](int bone) {
+    const auto addWithAncestors = [&](int bone)
+    {
         for (int step = 0; bone >= 0 && bone < player.NumBones && step < player.NumBones; ++step)
         {
             bones.insert(bone);
@@ -333,59 +273,58 @@ const BITMAP_t* MeshBitmap(const BMD& model, int mesh)
     return bitmap;
 }
 
-void CheckBodyCompatibility(const BodyAssets& assets)
+void CheckBodyCompatibility(const std::filesystem::path& playerFolder)
 {
+    const auto bodies = FindImprovedBodies(playerFolder);
     TestModelSlots slots;
-    ClientFolderScope folder(ClientFolder);
+    ClientFolderScope folder(playerFolder.parent_path().parent_path());
     const BMD& player = OpenPlayer();
     REQUIRE(player.NumBones > 0);
-    int parts = 0;
-    int meshes = 0;
-    for (const BodyFamily& family : Families)
+    for (const BodyFile& body : bodies)
     {
-        INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family, assets);
-        const bool prepared = assets.prepared;
-        for (const BodyPart& part : BodyParts)
+        INFO(Core::Text::ToUtf8(body.stem.c_str()));
+        OpenBodyPair(body);
+        const BMD& original = Models[OriginalSlot];
+        const BMD& improved = Models[ImprovedSlot];
+        REQUIRE(improved.NumMeshs == original.NumMeshs);
+        for (const BMD* model : {&original, &improved})
         {
-            INFO("part ", Core::Text::ToUtf8(part.file));
-            const BMD& model = Models[ModelSlot(family, part)];
-            REQUIRE(model.NumMeshs == (IsHairMesh(family, part, 1) ? 2 : 1));
-            REQUIRE(model.NumMeshs <= MAX_MESH);
-            for (int m = 0; m < model.NumMeshs; ++m)
+            REQUIRE(model->NumMeshs > 0);
+            REQUIRE(model->NumMeshs <= MAX_MESH);
+            for (int m = 0; m < model->NumMeshs; ++m)
             {
                 INFO("mesh ", m);
-                CHECK(MeshTextureName(model, m) == ExpectedTexture(family, part, m, prepared));
-                CHECK(model.Meshs[m].Texture >= 0);
-                CHECK(model.Meshs[m].Texture < model.NumMeshs);
-                CheckMeshVertices(model.Meshs[m], player);
-                CheckMeshNormalsAndTexCoords(model.Meshs[m], player);
-                CheckMeshTriangles(model.Meshs[m]);
-                ++meshes;
+                CHECK(model->Meshs[m].Texture >= 0);
+                CHECK(model->Meshs[m].Texture < model->NumMeshs);
+                CheckMeshVertices(model->Meshs[m], player);
+                CheckMeshNormalsAndTexCoords(model->Meshs[m], player);
+                CheckMeshTriangles(model->Meshs[m]);
             }
-            CheckSkinnedBonesMatchPlayer(model, player);
-            ++parts;
-            MESSAGE("rig family=", std::string(family.suffix), " part=", Core::Text::ToUtf8(part.file), " meshes=", model.NumMeshs);
+            CheckSkinnedBonesMatchPlayer(*model, player);
         }
+        for (int m = 0; m < original.NumMeshs; ++m)
+        {
+            INFO("mesh ", m);
+            CHECK(IsSkin(MeshTextureName(improved, m)) == IsSkin(MeshTextureName(original, m)));
+            CHECK(IsHair(MeshTextureName(improved, m)) == IsHair(MeshTextureName(original, m)));
+        }
+        MESSAGE("rig pair=", Core::Text::ToUtf8(body.stem.c_str()), " meshes=", improved.NumMeshs);
     }
-    CHECK(parts == 65);
-    CHECK(meshes == 67);
-    MESSAGE("rig assets=", std::string(assets.name), " totals families=", Families.size(), " parts=", parts, " meshes=", meshes);
+    MESSAGE("rig body pairs=", bodies.size());
 }
 
-void CheckBodySkinning(const BodyAssets& assets)
+void CheckBodySkinning()
 {
     TestModelSlots slots;
     ClientFolderScope folder(ClientFolder);
     BMD& player = OpenPlayer();
     static float bones[MAX_BONES][3][4];
-    int skinnedParts = 0;
-    for (const BodyFamily& family : Families)
+    for (const BodyFile& body : FindImprovedBodies(PlayerFolder))
     {
-        INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family, assets);
+        INFO(Core::Text::ToUtf8(body.stem.c_str()));
+        OpenBodyPair(body);
         auto poses = Poses;
-        if (family.baseClass == CLASS_ELF)
+        if (body.baseClass == CLASS_ELF)
         {
             poses[0].action = PLAYER_STOP_FEMALE;
             poses[1].action = PLAYER_WALK_FEMALE;
@@ -405,124 +344,108 @@ void CheckBodySkinning(const BodyAssets& assets)
             const float frame = keys > 1 ? 0.5f * static_cast<float>(keys - 1) : 0.f;
             player.Animation(bones, frame, frame, pose.action, angle, headAngle, false, false, nullptr, pose.action);
             REQUIRE(IsFinite(&bones[0][0][0], player.NumBones * 12));
-            for (const BodyPart& part : BodyParts)
-            {
-                INFO("part ", Core::Text::ToUtf8(part.file));
-                CheckPartSkinsInPose(Models[ModelSlot(family, part)], bones);
-                ++skinnedParts;
-                MESSAGE("skin family=", std::string(family.suffix), " part=", Core::Text::ToUtf8(part.file), " pose=", std::string(pose.name));
-            }
+            CheckPartSkinsInPose(Models[OriginalSlot], bones);
+            CheckPartSkinsInPose(Models[ImprovedSlot], bones);
         }
     }
-    CHECK(skinnedParts == 65 * Poses.size());
-    MESSAGE("skin assets=", std::string(assets.name), " totals families=", Families.size(), " parts=65 poses=", Poses.size(), " part_poses=", skinnedParts);
 }
 
-void CheckBodyTextures(const BodyAssets& assets)
+void CheckBodyTextures()
 {
+    PlayerTextureScope textures;
     TestModelSlots slots;
     ClientFolderScope folder(ClientFolder);
-    TextureScope textures;
     // OpenPlayerTextures preloads this bitmap before visiting the body slots.
     REQUIRE(LoadBitmap(L"Player\\hair_r.jpg", BITMAP_HAIR));
     const BITMAP_t* originalHair = Bitmaps.FindTexture(BITMAP_HAIR);
     REQUIRE(originalHair != nullptr);
-    const BITMAP_t* sharedHair = nullptr;
-    std::set<std::string> dependencies;
-    int parts = 0;
-    int references = 0;
-    for (const BodyFamily& family : Families)
+    for (const BodyFile& body : FindImprovedBodies(PlayerFolder))
     {
-        INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family, assets);
-        const bool prepared = assets.prepared;
-        for (const BodyPart& part : BodyParts)
+        INFO(Core::Text::ToUtf8(body.stem.c_str()));
+        OpenBodyPair(body);
+        for (const int slot : {OriginalSlot, ImprovedSlot})
         {
-            const int slot = ModelSlot(family, part);
-            INFO("part ", Core::Text::ToUtf8(part.file));
-            // OpenPlayerTextures uses the shared Player texture folder for both model sets.
             gLoadData.OpenTexture(slot, L"Player\\");
             const BMD& model = Models[slot];
             for (int m = 0; m < model.NumMeshs; ++m)
             {
-                const std::string name = ExpectedTexture(family, part, m, prepared);
-                CHECK(MeshTextureName(model, m) == name);
+                const std::string name = MeshTextureName(model, m);
+                INFO("mesh ", m, " texture ", name);
                 const BITMAP_t* bitmap = MeshBitmap(model, m);
                 REQUIRE(bitmap->Width > 0.f);
                 REQUIRE(bitmap->Height > 0.f);
-                std::wstring path = bitmap->FileName;
-                std::wstring expected = L"Data\\Player\\" + Core::Text::FromUtf8(name);
-                const auto lower = [](wchar_t c) { return std::towlower(c); };
-                std::transform(path.begin(), path.end(), path.begin(), lower);
-                std::transform(expected.begin(), expected.end(), expected.begin(), lower);
-                CHECK(path == expected);
-                const bool hair = IsHairMesh(family, part, m);
-                CHECK(bitmap->IsSkin == (!hair && family.stage < 2));
-                CHECK(bitmap->IsHair == hair);
-                if (hair)
-                {
-                    CHECK((bitmap == originalHair) == !prepared);
-                    if (sharedHair != nullptr)
-                    {
-                        CHECK(bitmap == sharedHair);
-                        MESSAGE("shared hair cache reused by family=", std::string(family.suffix));
-                    }
-                    sharedHair = bitmap;
-                    CHECK_FALSE(sharedHair->IsSkin);
-                    CHECK(sharedHair->IsHair);
-                }
-                dependencies.insert(name);
-                ++references;
-                MESSAGE("texture family=", std::string(family.suffix), " part=", Core::Text::ToUtf8(part.file), " mesh=", m,
-                        " name=", name, " decoded=", bitmap->Width, "x", bitmap->Height,
-                        " skin=", bitmap->IsSkin, " hair=", bitmap->IsHair);
+                CHECK(Data::Items::EqualsIgnoringCase(Core::Text::ToUtf8(bitmap->FileName), "Data\\Player\\" + name));
+                CHECK(bitmap->IsSkin == IsSkin(name));
+                CHECK(bitmap->IsHair == IsHair(name));
+                // Native cache reuses the same bitmap, with one additional reference.
+                const int before = bitmap->Ref;
+                const GLuint again = Bitmaps.LoadImage(bitmap->FileName, GL_NEAREST, GL_REPEAT);
+                CHECK(again == bitmap->BitmapIndex);
+                CHECK(bitmap->Ref == before + 1);
+                Bitmaps.UnloadImage(again);
+                if (IsHair(name) && body.baseClass == CLASS_DARK_LORD)
+                    CHECK((bitmap == originalHair) == (slot == OriginalSlot));
             }
-            ++parts;
         }
     }
-    REQUIRE(sharedHair != nullptr);
-    CHECK(sharedHair->IsHair);
-    CHECK_FALSE(sharedHair->IsSkin);
-    CHECK(parts == 65);
-    CHECK(references == 67);
-    CHECK(dependencies.size() == 14);
-    MESSAGE("texture assets=", std::string(assets.name), " totals families=", Families.size(), " parts=", parts, " references=", references,
-            " dependencies=", dependencies.size(), " GPU uploads skipped");
+}
+
+// The drawing flags the client reads from a mesh's texture name (TextureScriptParsing):
+// glowing, hidden, stream, unblended and shadow.
+struct MeshFlags
+{
+    bool bright = false;
+    bool hidden = false;
+    bool stream = false;
+    bool noneBlend = false;
+    BYTE shadow = SHADOW_NONE;
+
+    bool operator==(const MeshFlags&) const = default;
+};
+
+MeshFlags ReadMeshFlags(const BMD& model, int mesh)
+{
+    TextureScript* script = model.Meshs[mesh].m_csTScript;
+    if (script == nullptr)
+        return {};
+    return {script->getBright(), script->getHiddenMesh(), script->getStreamMesh(), script->getNoneBlendMesh(),
+            script->getShadowMesh()};
 }
 
 } // namespace
 
-TEST_CASE("All 13 body families load 65 parts through native slots and fit the player rig [data][player]")
+TEST_CASE("Every discovered improved body keeps its original mesh drawing flags [data][player]")
 {
-    for (const BodyAssets& assets : AssetSets)
+    TestModelSlots slots;
+    ClientFolderScope folder(ClientFolder);
+    for (const BodyFile& body : FindImprovedBodies(PlayerFolder))
     {
-        SUBCASE(assets.name)
+        INFO(Core::Text::ToUtf8(body.stem.c_str()));
+        OpenBodyPair(body);
+        const BMD& original = Models[OriginalSlot];
+        const BMD& improved = Models[ImprovedSlot];
+        REQUIRE(improved.NumMeshs == original.NumMeshs);
+        for (int m = 0; m < original.NumMeshs; ++m)
         {
-            CheckBodyCompatibility(assets);
+            INFO("mesh ", m, " original ", MeshTextureName(original, m), " improved ", MeshTextureName(improved, m));
+            CHECK(ReadMeshFlags(improved, m) == ReadMeshFlags(original, m));
         }
     }
 }
 
-TEST_CASE("All 65 body parts skin to finite positions with the retained player palette [data][player]")
+TEST_CASE("Every discovered body pair fits the player rig and keeps mesh roles [data][player]")
 {
-    for (const BodyAssets& assets : AssetSets)
-    {
-        SUBCASE(assets.name)
-        {
-            CheckBodySkinning(assets);
-        }
-    }
+    CheckBodyCompatibility(PlayerFolder);
 }
 
-TEST_CASE("All body mesh textures decode with native roles and shared Dark Lord hair caching [data][player]")
+TEST_CASE("Every discovered body pair skins with the retained player palette [data][player]")
 {
-    for (const BodyAssets& assets : AssetSets)
-    {
-        SUBCASE(assets.name)
-        {
-            CheckBodyTextures(assets);
-        }
-    }
+    CheckBodySkinning();
+}
+
+TEST_CASE("Every discovered body texture decodes with native roles and caching [data][player]")
+{
+    CheckBodyTextures();
 }
 
 namespace
@@ -573,11 +496,11 @@ TEST_CASE("Model texture names decide the skin and hair roles of their bitmaps [
         fixture.Add(stem);
     }
     ClientFolderScope folder(fixture.client);
-    TextureScope textures;
-    const int slot = BodyParts[0].slot + BodyClass;
+    PlayerTextureScope textures;
+    const int slot = PlayerBodyParts[0].firstSlot + BodyClass;
     {
         ClientFolderScope source(ClientFolder);
-        REQUIRE(gLoadData.AccessModel(slot, L"Data\\Player\\", BodyParts[0].file, BodyClass + 1));
+        REQUIRE(gLoadData.AccessModel(slot, L"Data\\Player\\", PlayerBodyParts[0].filePrefix, BodyClass + 1));
     }
     BMD& model = Models[slot];
 
@@ -605,4 +528,19 @@ TEST_CASE("Model texture names decide the skin and hair roles of their bitmaps [
     CHECK(recased == cached);
     CHECK(recased->IsSkin);
     CHECK_FALSE(recased->IsHair);
+}
+
+TEST_CASE("An additional Summoner body is discovered and checked without a family-table edit [data][player]")
+{
+    RoleFixture fixture;
+    const auto player = fixture.client / "Data" / "Player";
+    std::filesystem::create_directories(player / "Updated");
+    const auto file = Engine::Object::PlayerBodyFileName(0, PlayerBodyParts[0], CLASS_SUMMONER) + L".bmd";
+    std::filesystem::copy_file(PlayerFolder / "player.bmd", player / "player.bmd");
+    std::filesystem::copy_file(PlayerFolder / file, player / file);
+    std::filesystem::copy_file(PlayerFolder / file, player / "Updated" / file);
+    const auto bodies = FindImprovedBodies(player);
+    REQUIRE(bodies.size() == 1);
+    CHECK(bodies[0].baseClass == CLASS_SUMMONER);
+    CheckBodyCompatibility(player);
 }

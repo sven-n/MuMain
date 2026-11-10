@@ -167,7 +167,8 @@ public:
     char		PKPartyLevel;
 #endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
     BYTE        AttackFlag;
-    
+    bool ReceivedAttackTargetUnknown;
+
     BYTE        TargetAngle;
     float        Dead; // Number of reference frames after death
     WORD		Skill;

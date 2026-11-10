@@ -154,7 +154,7 @@
     <value>That place is a very dangerous place and the 'Tear of Elf' is extremely hard to find. But if you find the 'Tear of Elf', new power will be bestowed upon you. Now, go find the 'Tear of Elf' and return to me.</value>
   </data>
   <data name="Answer_65_Slot_0" xml:space="preserve">
-    <value> I will go find the 'Tear of Elf'!</value>
+    <value> I will go find the '{item:14,25}'!</value>
   </data>
   <data name="Text_66" xml:space="preserve">
     <value>You've found the 'Tear of Elf'! After the War, Lunedil, the elf queen, created the tear stone by casting magic on the spirit stone so that elves could invoke the goddess' power and build their power.</value>

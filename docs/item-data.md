@@ -19,6 +19,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
+| `Tooltips/NameCases.json` | The cases each language declines item names in, for texts that name items with a case; see [Name forms](#name-forms) |
 | `Options/*.json` | The option definitions, one file per option group (luck so far); see [Item options](#item-options) |
 | `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
 | `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
@@ -95,6 +96,32 @@ read as the English name only; saving writes the object form.
 - Logs always use the English name and the item id, e.g.
   `Short Sword (0,1)`, never a translation.
 
+#### Name forms
+
+Texts can name an item by its number, `{item:14,25}` (see
+[Texts that name items](translation-system.md#texts-that-name-items)). In a
+language that declines names a text can ask for a form, `{item:14,25:acc}`,
+and the item gives it in `nameForms`, after `name`:
+
+```json
+"name": { "en": "Tear of Elf", "de": "Träne der Elfe", "pl": "Łza Elfa" },
+"nameForms": { "pl": { "gen": "Łzy Elfa", "acc": "Łzę Elfa" } },
+```
+
+A name line with a text (a name at a level, written in place or a shared text,
+`"@x"`) has its forms after its `text`; a line written as `{name}` uses the
+item's. The cases are `gen`, `dat`,
+`acc`, `ins` and `loc`; `Tooltips/NameCases.json` gives the ones each language
+uses:
+
+```json
+{ "formatVersion": 1, "languages": { "de": ["gen", "dat", "acc"], "pl": ["gen", "dat", "acc", "ins", "loc"] } }
+```
+
+A missing form shows the name itself. Forms in English, in a language or case
+the file does not give, or in a language the name has no text of its own in are
+never shown; loading warns about them. Item Translations edits the forms.
+
 ### MU Helper pickup filters
 
 **Pick All** collects every eligible drop. **Selected** applies the enabled
@@ -131,6 +158,7 @@ variants or option words. An online keyword need not select the same items offli
 | Field | Meaning |
 |---|---|
 | `tags` | Categories the game code asks for, e.g. `["mount", "flying"]`; see [Tags](#tags) |
+| `nameForms` | Forms of the name for texts that ask for a case, per language: `{"pl": {"acc": "Łzę Elfa"}}`; see [Name forms](#name-forms). A client-only field; the bmd import keeps it |
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
@@ -593,6 +621,12 @@ by that value for the hovered item, e.g.
 have no braces of their own, so every brace belongs to a placeholder. A
 placeholder is one of:
 
+- an **item**, `{item:14,113}` (with `+level` and `:case`): its name in the item
+  name language, which follows Translate item names while the rest of the text
+  stays in the UI language
+  ([Texts that name items](translation-system.md#texts-that-name-items)). A
+  translation names the same items as the English text, its case may differ;
+
 - a **built-in value**, by its name: `{level}`, the item's + level, or a value of the tooltip's stat
   lines, as the game computes them for the item and the hero:
   `damageMin`, `damageMax` (with the Jewel of Harmony's attack bonus; a skill
@@ -929,9 +963,9 @@ at a time.
   list in their order.
 
 What an option does in the client is code, by its type, attribute and way
-of adding: luck's option fills the item's luck slot, which the price and
-the mixes count as before, with the value 0, so the client adds no
-critical damage rate for luck (the server adds the 5 %). An attribute the
+of adding: luck's option fills the item's luck slot with its value, which
+the price and the mixes count as before and the character window adds up
+into the [critical damage rate](#critical-damage-rate). An attribute the
 client does not compute still shows its lines and adds nothing.
 
 `Tooltips/OptionTexts.json` holds the lines' texts:
@@ -950,6 +984,68 @@ client does not compute still shows its lines and adds nothing.
 
 `{value}` is the option's value at the item's level (luck's is 5). The
 lines are in the UI's language, English where a text has no translation.
+
+### Critical damage rate
+
+The character window shows the critical damage rate under the strength's
+lines: the chance that a hit is critical, which deals the maximum damage. The
+server rolls it (OpenMU's `CriticalDamageChance`), and the client adds it up
+the same way to show it:
+
+| Part | Adds |
+|---|---|
+| Luck | The luck option's value (`Options/Luck.json`: 5 %) for each worn item with luck, while the item is not broken and the hero meets its requirements |
+| Set options | The active ancient set options "Increase critical damage rate" (the full Warrior set: 5 %) |
+| Socket options | The seed spheres' option "Critical damage rate" (Lightning: 8 % to 12 % by sphere level), while the item is not broken |
+| Own buff | While it is on: the Wizard's Expansion of Wizardry Mastery or the Dark Lord's Critical Damage Increase with its third power-up. It adds the value of that master skill, as the server sends it with the master skill tree |
+| Scroll of Battle | While its buff is on: 20 % (OpenMU's buff items) |
+
+No stat changes the rate; stats only change how much a critical hit adds
+(the Dark Lord's Critical Damage Increase). The line shows what the worn
+items add, in the window's colour for items once it is above 0, and what the
+buff adds in brackets, in the colour for buffs: `Critical damage rate: 33%
+(+9%)`. With the pointer over it, the window lists each part above 0 and the
+total; the Scroll of Battle counts with the buffs.
+
+The client can't tell who cast a buff. A buff counts as the hero's own when
+the hero has its skill (for the rate, its master skill), and then with the
+hero's own values; a buff from a party member who has other values is shown
+with the hero's, and a buff the hero can't cast isn't counted, since its
+value comes from the caster's master skill.
+
+Luck and the other options count while the hero meets the item's
+requirements, as everywhere in the client. OpenMU counts every worn item that
+is not broken, so the two differ while the hero wears an item whose
+requirements a lost stat bonus (a set's, a buff's) no longer meets.
+
+The original client had a sum of the luck slots' values, but nothing called
+it, nothing showed it, and luck's value in the slot was 0.
+
+The damage line above it has a hint too, with what a hit deals before the
+target's defense: a normal hit (the line's range), a critical hit (the
+maximum plus the critical damage bonus) and an excellent hit (the maximum
+× 1.2, plus the excellent damage bonus and the critical damage bonus). When
+something adds to the critical damage bonus, the hint lists each part above 0
+and their total:
+
+| Part | Adds to every critical hit |
+|---|---|
+| Set options | The active ancient set options "Increase critical damage" (the Cloud set: 50) |
+| Harmony options | A weapon's or staff's harmony option "Increase critical damage", while the item's level reaches the option's level |
+| Socket options | The seed spheres' option "Critical damage" (Lightning: 30 to 50 by sphere level in the client's data; OpenMU has 15 to 40, a known difference), while the item is not broken |
+| Own buff | While it is on: the Dark Lord's Increase Critical Damage, 1 per 30 energy and 1 per 25 command, plus its first power-up's value. The damage line takes the colour for buffs meanwhile |
+
+The excellent damage bonus comes from ancient set options and seed spheres.
+
+A broken socket item adds none of its seed spheres, as on the server: not
+these parts, and not its other socket options and socket set bonus either
+(damage, defense, attack speed, skill damage, the stat bonuses). A stat bonus
+lost that way can also leave another worn item's requirements unmet, and then
+that item's options stop counting too.
+
+As with the rate, the buff counts when the hero has the skill, with the
+hero's energy and command; a buff from a party member is counted only that
+way, since its value comes from that member's energy and command.
 
 ### Option rules
 
@@ -1123,9 +1219,10 @@ and server share.
 |---|---|
 | `number` | The item number (0–511) in the file's group. |
 | `file` | The `.bmd` model, relative to the game folder, with `/` between folders. |
-| `model` | The name of a shared model, instead of `file`, `textureFolders` and `noneBlendMeshes`; see [Shared models](#shared-models). |
+| `model` | The name of a shared model, instead of `file`, `textureFolders`, `noneBlendMeshes` and `meshNames`; see [Shared models](#shared-models). |
 | `textureFolders` | Folders below `Data/` with the model's textures. Each texture is taken from the **first** folder that has it. Without folders the model has no textures. |
 | `noneBlendMeshes` | Mesh numbers (from 0) that are drawn without blending. Optional. |
+| `meshNames` | A name for each part (mesh) by its number, as `{"0": "Shaft", "1": "Crystal"}`, which the editor shows: 1 to 32 characters without a space at either end. Only shown, so a name that can't be one, or a key that is no mesh number from 0 to 49, is a warning that leaves it out. Optional. |
 | `inventory` | How the item is drawn in the inventory, see below. Optional. |
 | `ground` | How the item lies on the ground, see below. Optional. |
 | `glow` | How the item glows, see below. Optional. |
@@ -1201,18 +1298,19 @@ for the inventory, ...
 { "number": 15, "file": "Data/Player/ArmorMale16.bmd", "textureFolders": ["Player"], "renderStyle": "stormCrow" }
 ```
 
-Each look is code, a render style with a name; the names are listed at
-the end of `src/source/Render/Items/ItemRenderStyles.cpp`. Items with the
-same look share a style (the Storm Crow set, the archangel staff and
-crossbow, …), and a few plain looks have names of their own: `textured`
-(drawn with its texture only, whatever the drawing asks for),
+A render style is a named look in `Data/Effects/RenderStyles.json` (see
+[Render styles and item effects](#render-styles-and-item-effects)), or one
+still in code, listed at the end of
+`src/source/Render/Items/ItemRenderStyles.cpp`; the looks move from the code
+into the file step by step, and the game looks a name up in the file first.
+Items with the same look share a style (the Storm Crow set, the archangel
+staff and crossbow, …), and a few plain looks have names of their own:
+`textured` (drawn with its texture only, whatever the drawing asks for),
 `texturedAllMeshes`, `chromeMesh0` and `chromeMesh1` (a chrome shine on
 one mesh), `onlyMesh0WithoutSkin`, `onlyMesh1WithoutSkin` and
 `onlyMesh2WithoutSkin` (in the inventory and on the ground only the armor
-mesh, without the character skin). Styles that only differ in a texture
-share their code, with the texture in the list of names (the package
-boxes, the tickets, the chaos cards, …). An item without `renderStyle` is
-drawn plainly; a new look needs a new style in code.
+mesh, without the character skin). An item without `renderStyle` is drawn
+plainly; a new look is made in the [Style Editor](#style-editor).
 
 Most styles fit any item. The ones that pick a mesh, a texture or a color
 for each of their items only know those items and draw other items
@@ -1283,7 +1381,7 @@ Model files are checked like the item files: invalid JSON, a missing
 letter or `..`), `\` in a path, display or glow values of the wrong kind
 (e.g. a rotation with two numbers, a scale of 0 or a color value above
 1), an item with two models, `model` together with `file`,
-`textureFolders` or `noneBlendMeshes`, a `model` that is not in
+`textureFolders`, `noneBlendMeshes` or `meshNames`, a `model` that is not in
 `SharedModels.json`, or a shared model defined twice stop the start with
 a message; unknown fields and a shared model that no item uses are
 warnings. The automated tests also check that every number with a model
@@ -1328,6 +1426,84 @@ with `hid` are not drawn, so their texture is not loaded.
 On Linux the game itself hands out the copied text, so it may only be
 pastable while the game runs. The text is in `MuError.log` as well.
 
+### Render styles and item effects
+
+The render styles that are data are in `Data/Effects/RenderStyles.json`: a
+format version, the kind, the folders the [Style Editor](#style-editor) sorts
+them in, and the looks sorted by name.
+
+```json
+{
+  "formatVersion": 1,
+  "kind": "renderStyle",
+  "lookFolders": [{"name": "Scepters", "looks": ["masterScepter"]}],
+  "looks": [
+    {
+      "name": "masterScepter",
+      "layers": [
+        {"kind": "texture", "opacity": "drawing"},
+        {"kind": "texture", "meshes": [0], "opacity": "drawing", "glowMesh": 0, "glowStrength": {"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}, "light": [0.1, 0.3, 1]},
+        {"kind": "texture", "meshes": [1], "texture": "Effect/Chrome01.jpg", "opacity": "drawing", "glowMesh": 1, "glowStrength": 1, "scrollV": {"shape": "scroll", "perSecond": 0.3}, "light": [0.6, 0.8, 1]}
+      ],
+      "itemValuesAfter": {"glowMesh": 1, "glowStrength": 1}
+    }
+  ]
+}
+```
+
+A look draws its layers in their order; each layer draws some of the model's
+meshes in one way. A field left out takes the item's value, the one the
+drawing hands the look.
+
+| Field | Values |
+|---|---|
+| `kind` | `texture`: the mesh's own texture, or the layer's; `reflection`: a reflection that moves over the mesh (chrome) |
+| `motion` | How a reflection moves: `slowDrift` (left out), `fastSweep`, `followsLight`, `swirl`, `strongSwirl`, `stripes`, `verySlowDrift`, `oilSheen`, `stillShine` |
+| `blend` | `normal` (left out), `glow` (added to what is below), `asDrawing` (the drawing's own: a doppelganger draws see-through) |
+| `meshes` | Left out: every mesh, with the model's texture scripts, without the item's hidden mesh; `"allEvenHidden"`: every mesh, the hidden one too; `[0, 2]`: those meshes; `{"allBut": [2]}`: every mesh but those |
+| `texture` | A texture file under `Data` (`Effect/Chrome01.jpg`) instead of the mesh's own: a `.jpg` or a `.tga`, which the game reads from its `.OZJ` or `.OZT` file |
+| `light` | The light the layer is drawn in: `[red, green, blue]`, or `{"tint": [red, green, blue]}`, the item's light times those; each a number or a shape. It stays for the layers after it, and `{"tint": [1, 1, 1]}` is the item's light again. Left out: the light the layer before left |
+| `opacity` | A number, a shape, or `"drawing"`: the drawing's opacity |
+| `glowMesh` | The mesh drawn glowing: a mesh number, `"none"` or `"all"` |
+| `glowStrength`, `scrollU`, `scrollV` | A number or a shape |
+| `scrollingMesh` | The mesh whose texture scrolls while the layer draws, without the light of the scene; otherwise the model's own stays |
+
+A value that changes over time names a **shape**. Its numbers give the
+code's values exactly, so a look moved from code keeps them:
+`{"shape": "wave", "from": -0.2, "to": 1, "seconds": 6.283185}` is the
+code's `sin(WorldTime * 0.001f) * 0.6f + 0.4f`.
+
+| Shape | Fields | Value |
+|---|---|---|
+| `wave` | `from`, `to`, `seconds` | A sine between `from` and `to`, starting halfway and going up; `seconds` a cycle |
+| `bounce` | `from`, `to`, `seconds` | From `from` up to `to` and back (the absolute sine); `seconds` a bounce |
+| `scroll` | `perSecond` | `perSecond` more every second, without end |
+| `ramp` | `from`, `to`, `seconds` | From `from` towards `to` in `seconds`, then from `from` again |
+| `frames` | `count`, `step`, `secondsEach` | `count` steps of `step` from 0, `secondsEach` each, then again from 0 (a texture's frames) |
+| `random` | `from`, `to`, `step` | A value from `from` to `to` in steps of `step`, a new one each frame |
+
+`itemValuesAfter` holds what the look leaves for what is drawn after it in
+the same drawing, the +7 glow and the excellent glow: `opacity`,
+`glowStrength`, `scrollU` and `scrollV` (numbers or shapes), and `glowMesh`,
+`hiddenMesh` and `scrollingMesh` (a mesh number or `"none"`). The scrolling
+mesh stays on the model for its later drawings too.
+
+The checks run at start, in **Data Checks** (area Render styles, on the
+looks as the Style Editor has them before Save Items) and in the Style
+Editor under the picked look. **Fatal**, the game stops at start with
+a message: a file that can't be read, a wrong format version or kind, a name
+that isn't letters and digits or is in the file twice, an unknown kind,
+motion, blend or shape, a shape's missing or wrong number (`seconds` 0 or
+less, `count` outside 1 to 1000, a `random` whose `to` is below `from`), a
+mesh number above 49, and an item effect's part (`itemValuesBefore`).
+**Error**, the game skips that layer: a texture that is no `.jpg` or `.tga`,
+or whose file is missing. **Warning**: unknown fields, a look without
+layers, a look no item uses, a mesh number an item's model doesn't have
+(about that item), and a folder naming a look the file doesn't have.
+
+The item effects are all still code (above); their file,
+`Data/Effects/ItemEffects.json`, comes when the first ones move.
+
 ### Shared models
 
 Items that show the same model file (the skill parchments, the socket
@@ -1349,7 +1525,7 @@ instead of a file of their own. The shared models are in
 ```
 
 A shared model has a `name` of letters and digits and the `file`,
-`textureFolders` and `noneBlendMeshes` of a model entry. Its file is
+`textureFolders`, `noneBlendMeshes` and `meshNames` of a model entry. Its file is
 opened once, by the first of its items, and its textures are loaded once;
 the other items use that data. Everything else (`inventory`, `ground`,
 `glow`, `renderStyle`, `itemEffect`, `cloth`) stays each item's own.
@@ -1398,6 +1574,10 @@ shows it in the others.
   - **Move item**: to a free number, with its model (the model data and the
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
+
+  Both list what uses the item by its number and stays there: the game data,
+  the code and the texts that name it (`{item:14,13}`), which then name
+  whatever takes the number.
 
   An entry without a name moves and is removed as an item is; there is
   nothing to duplicate.
@@ -1501,7 +1681,9 @@ How changes work:
 - **Save Items** runs the checks and writes `Data/Items` next to the game,
   with the model files of the groups whose models changed,
   `SharedModels.json` when a shared model changed,
-  `Data/Effects/GlowColors.json` when a glow color changed and
+  `Data/Effects/GlowColors.json` when a glow color changed,
+  `Data/Effects/RenderStyles.json` when a look of the
+  [Style Editor](#style-editor) changed and
   `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
   how many. With fatal problems nothing is written, and they are listed in
@@ -1533,8 +1715,9 @@ number that has a model but no item:
 - A preview of the model as the game has it opened, at an item level,
   excellent or ancient, standing as the inventory turns it or lying as on
   the ground (over a ground plane as high below it as the game drops it) (drag to turn, drag with the middle mouse button to move,
-  wheel to zoom, double click to put it back). A click on a part of the
-  item finds its mesh in the mesh list and keeps it shown.
+  wheel to zoom, double click to put it back; **Turn**, off at first, turns it). A click on a part of the
+  item finds its mesh in the mesh list and keeps it shown. The preview
+  stays at the top of the window while the fields below it scroll.
 - The model file, picked from the `.bmd` files below `Data/Item` and
   `Data/Player`. An item without a model gets an entry, with the file's
   folder as its texture folder; a model whose only texture folder is its
@@ -1549,7 +1732,9 @@ number that has a model but no item:
   are listed with a button that removes them.
 - For a file of its own, the texture folders and none-blend meshes.
 - **Meshes**: a row for each mesh of the opened model, with its number, its
-  texture's name, its marks (*hidden*: a texture name starting with `hid`
+  **Name** (typed in, stored in `meshNames` when the field is left, in the
+  shared model for an item that names one; the Style Editor lists the parts
+  by it), its texture's name, its marks (*hidden*: a texture name starting with `hid`
   or the `_H` script, never drawn; *glows*: `_R`; *scrolls*: `_S`; *no
   chrome*: `_N` or a none-blend mesh, which the chrome-type passes and the
   level glow skip; *holes*: its texture has pixels the alpha test drops,
@@ -1560,8 +1745,9 @@ number that has a model but no item:
   as it is and the others see-through; a click on a row keeps it so until
   it is clicked again. At a level the preview draws with another model (the
   Box of Luck's levels, for example), the list says so and the preview
-  shows none of its meshes. Which meshes a render style or item effect draws is
-  still drawing code and not listed.
+  shows none of its meshes. Which parts the render style draws, and with which
+  effects, shows in the [Style Editor](#style-editor); an item effect is
+  drawing code.
 - The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of
   its size, drawn as
@@ -1577,8 +1763,10 @@ number that has a model but no item:
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
 - **Style and effect**: the render style and the item effect, picked from
-  their lists with how many models use each, and the items that use the
-  picked one (a click selects one). What they are made of is drawing code.
+  their lists with how many models use each and "(code)" for one still in
+  code, and the items that use the picked one (a click selects one). **Open
+  in Style Editor** shows the render style in the
+  [Style Editor](#style-editor).
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game
@@ -1630,6 +1818,102 @@ digits no other style has, starting with the look of the picked style. A
 style no item names is removed (**Remove**, or **Remove them** for all of
 them); the styles of the standard rules stay. Renaming a style is left out.
 The editor has no bold font, so it draws a bold label twice, a pixel apart.
+
+### Style Editor
+
+**Windows > Style Editor** shows the looks of items as a tree, built like the
+[Colors](#colors) window and docked with the item tools, one of them: the roots **Render
+styles** and **Item effects**, each look with how many models use it, and
+"(code)" for a look that is still drawing code, which you see with its items
+but can't change. Folders sort the render styles of the file as in the Colors
+window (**New folder**, **Rename**, **Remove**, **Move up**, **Move down**,
+drag and drop); the file keeps them as `"lookFolders"`. A look in code stays
+under its root, and the looks there are sorted by name.
+
+**New look** adds a look to the picked folder that draws the item plainly
+(one texture layer), **Copy** copies the picked look under a new name, and
+**Rename** and **Remove** change a look no item uses. A name has letters and
+digits only, and no other render style has it, in the file or in code.
+
+The picked look shows:
+
+- **Apply** and **Revert**: the fields change a copy of the look, which stays
+  with the look while another one is picked (the tree marks a look with
+  changes not applied with `*`); Revert takes it back, Apply asks what the
+  change is for:
+  - **For all its items**: the look itself changes, so every item that uses
+    it does; the items are listed, and Ctrl+Z undoes it.
+  - **Only** the item picked in the item tools: the change becomes a copy of
+    the look under a name you give (`archangelStaffGold`), in the same
+    folder, and only that item's model names it (`renderStyle`); the other
+    items keep the look.
+  - **A new item** from the picked item: as **Duplicate item**, a copy of it
+    with its model at a free number and with a name, wearing the copy of the
+    look. The game shows it once the server knows the new item
+    ([Item Sync](#item-sync)).
+
+  The look and the item change as one undo step. Apply is off while the look
+  has a fatal problem.
+- A **preview** of the item picked in the item tools, in three views side by
+  side: **Original item**, the item as the game draws it with its own look
+  (**As in the game**) or with no look at all (**Without a look**, picked in
+  the dropdown above it); **Chosen look**, the picked look as the game draws
+  it now, for reference; and **As edited**, the look as the fields have it,
+  before Apply. The last two draw the picked item with the picked look,
+  whatever look the item names, and all three keep the item's item effect.
+  They share the Item Model window's controls and one camera (a drag in any
+  turns all),
+  with **Stop time** and a time slider, an eye per effect or layer that
+  leaves it out of the edited view, and **Draw as a doppelganger**. A look
+  still in code shows one view. The preview stays where it is while what is
+  below it scrolls.
+- The **problems** of the look as the fields have it, with the file's checks.
+- **Parts and their effects**: a row for the look's **base** (the item's own
+  texture), one for **every part** and one for each part of the picked item
+  (its mesh, by the name the [mesh list](#item-model) gives it, else its
+  number and texture), each with the effects on it. Pointing at a part draws
+  it in the previews as it is and the others see-through; a click on a part,
+  in the list or in a preview, picks it. **Add effect** puts an effect of the
+  gallery on the picked part: **Glow**, **Pulse** (a glow whose strength
+  waves), **Shine** (a reflection moving over it), **Overlay texture**,
+  **Flowing texture**, **Color** and **Frames and flicker**. A flowing
+  texture and frames go on one part, not on every part, and make it glow: the
+  game moves a texture only on a layer's glowing mesh (or on its scrolling
+  mesh), as the looks moved from code do. A click on an
+  effect shows its settings only (a pulse's range and seconds with its curve,
+  a shine's motion, an overlay's texture); **All fields** shows every field of
+  its layer, and **Remove the effect** removes it. An effect is one layer of
+  the look and aims at mesh numbers, so it fits every item that uses the
+  look; a layer that does several things (an overlay that glows and flows)
+  shows as its main effect, with the others among its settings.
+- **Show the layers** shows the look as its layers instead, for what the
+  effects don't cover: the layers in drawing order, one line each written
+  from its fields, and **Item values after drawing** as the last line;
+  **Add**, **Copy**, **Move up**, **Move down** and **Remove** change the
+  list. Below it are the fields of the picked line: kind, motion, blend,
+  meshes, texture, light, opacity, glow mesh and strength, scroll and the
+  scrolling mesh. A value is the item's, the drawing's (opacity), a number or
+  a shape. A shape's curve is drawn below its fields: ten seconds of the
+  preview's clock, its values from 0 to 1 or as far as the shape goes, with
+  the numbers at its edges and a mark at the preview's time (or the time
+  slider's while Stop time is on), so a change of From, To or Seconds shows
+  in it.
+- The **fields**, of an effect and of a layer: a number is a drag field
+  (dragged sideways it changes, a double click types an exact number), and
+  pointing at a field or its name shows what it does; the choices of a
+  dropdown say what each does. The meshes are the picked item's parts by
+  name, a checkbox each (one stays ticked), with meshes the look names beyond
+  the model listed after them; a single mesh (the glow mesh, the scrolling
+  mesh) is picked from the same parts. Without a picked item they are mesh
+  numbers. A light's color has a swatch that opens a color picker;
+  **Each channel apart** gives red, green and blue a field each, so one can
+  change over time.
+- The items that use the look; a click selects one.
+
+Each change of the looks or their folders is a step of the item undo history
+and reaches the game at once. **Save Items** writes
+`Data/Effects/RenderStyles.json` with the items. A file read with a fatal
+problem is never written; the editor then shows the looks the game has.
 
 ### Item Tooltip
 

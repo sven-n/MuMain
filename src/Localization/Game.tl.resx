@@ -9046,4 +9046,55 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Critical damage rate: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Critical damage rate: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Critical damage rate</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Swerte (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Mga set option: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Mga socket option: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Kabuuan: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Pinsala</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Karaniwang tama: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Critical na tama: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Excellent na tama: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>bago ang depensa ng target</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Critical damage</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Mga set option: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Mga harmony option: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Mga socket option: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Kabuuan: +%d</value>
+  </data>
 </root>

@@ -131,6 +131,7 @@ require_enhanced_switch(EnhancedLighting m_enhancedLighting Lighting enhancedLig
 require_enhanced_switch(DynamicLights m_dynamicLights DynamicLights dynamicLights)
 require_enhanced_switch(LightMood m_lightMood LightMood lightMood)
 require_enhanced_switch(PostProcessing m_postProcessing PostProcessing postProcessing)
+require_enhanced_switch(Sunlight m_sunlight Sun sunlight)
 
 # Texture filtering and the bloom strength follow the look preset: no switch of their own.
 foreach(feature IN ITEMS TextureFiltering BloomStrength)

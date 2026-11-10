@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <exception>
+#include "Core/Text/Utf8.h"
 #include "Guild/GuildTypes.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
@@ -1447,6 +1449,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             break;
         case AT_SKILL_TWISTING_SLASH:
         case AT_SKILL_TWISTING_SLASH_STR:
+        case AT_SKILL_TWISTING_SLASH_STR_MG:
         case AT_SKILL_TWISTING_SLASH_MASTERY:
         case AT_SKILL_FIRE_SLASH:
         case AT_SKILL_FIRE_SLASH_STR:
@@ -2035,7 +2038,28 @@ bool CheckMacroLimit(wchar_t* Text)
 
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
-    if (g_ConsoleDebug->CheckCommand(Text) == true)
+    ConsoleCommandResult result;
+    try
+    {
+        result = g_ConsoleDebug->CheckCommand(Text);
+    }
+    catch (const std::exception& exception)
+    {
+        // A command that throws must not close the client; report the failure in the chat
+        // instead, like the control-socket console does. The commands report a bad argument
+        // themselves, so this only catches an unforeseen failure.
+        const std::wstring message = L"command failed: " + Core::Text::FromUtf8(exception.what());
+        g_pSystemLogBox->AddText(message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (result.status == ConsoleCommandStatus::BadArgument)
+    {
+        g_pSystemLogBox->AddText(result.message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (result.status == ConsoleCommandStatus::Handled)
     {
         return true;
     }

@@ -89,6 +89,49 @@ std::string MakeSharedModelName(const std::string& itemName)
 }
 } // namespace
 
+void DuplicateItem(const char* step, int sourceItemType, int itemType, const std::string& name, bool shareModel,
+                   const std::function<void(ItemModelDefinition&)>& changeModel)
+{
+    const ItemDefinition* source = g_ItemDatabase.Find(sourceItemType);
+    if (source == nullptr)
+    {
+        return;
+    }
+    // The source as it is now: making its model shared below changes the
+    // model database only.
+    const ItemDefinition copiedFrom = *source;
+    ItemDefinition item = copiedFrom;
+    item.group = Data::Items::GetItemGroup(itemType);
+    item.number = Data::Items::GetItemNumber(itemType);
+    item.names = Data::LocalizedString::Parse(name);
+
+    const ItemModelDefinition* sourceModel = g_ItemModelDatabase.Find(sourceItemType);
+    if (sourceModel == nullptr || (sourceModel->model.empty() && !shareModel))
+    {
+        g_ItemEdits.AddItem(step, item, nullptr, &copiedFrom);
+        return;
+    }
+    ItemModelDefinition model = *sourceModel;
+    g_ItemEdits.BeginGroup(step);
+    if (model.model.empty())
+    {
+        // The file goes into a shared model that both items name.
+        const Data::Items::SharedItemModel shared{MakeSharedModelName(source->names.GetNeutral()), model.file,
+                                                  model.textureFolders, model.noneBlendMeshes, model.meshNames};
+        g_ItemEdits.SetSharedModel(step, shared);
+        ItemModelDefinition sourceShared = *sourceModel;
+        sourceShared.model = shared.name;
+        g_ItemEdits.SetItemModel(step, sourceShared);
+        model.model = shared.name;
+    }
+    if (changeModel)
+    {
+        changeModel(model);
+    }
+    g_ItemEdits.AddItem(step, item, &model, &copiedFrom);
+    g_ItemEdits.EndGroup();
+}
+
 void CItemAddDialog::OpenAdd(int templateItemType)
 {
     m_mode = Mode::Add;
@@ -293,40 +336,8 @@ void CItemAddDialog::AddNew()
 
 void CItemAddDialog::Duplicate()
 {
-    const ItemDefinition* source = g_ItemDatabase.Find(m_sourceItemType);
-    if (source == nullptr)
-    {
-        return;
-    }
-    // The source as it is now: making its model shared below changes the
-    // model database only.
-    const ItemDefinition copiedFrom = *source;
-    ItemDefinition item = copiedFrom;
-    item.group = m_group;
-    item.number = m_number;
-    item.names = Data::LocalizedString::Parse(m_name);
-
-    const ItemModelDefinition* sourceModel = g_ItemModelDatabase.Find(m_sourceItemType);
-    if (sourceModel == nullptr || (sourceModel->model.empty() && !m_shareModel))
-    {
-        g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, nullptr, &copiedFrom);
-        return;
-    }
-    ItemModelDefinition model = *sourceModel;
-    g_ItemEdits.BeginGroup(I18N::Editor::DuplicateItem);
-    if (model.model.empty())
-    {
-        // The file goes into a shared model that both items name.
-        const Data::Items::SharedItemModel shared{MakeSharedModelName(source->names.GetNeutral()), model.file,
-                                                  model.textureFolders, model.noneBlendMeshes};
-        g_ItemEdits.SetSharedModel(I18N::Editor::DuplicateItem, shared);
-        ItemModelDefinition sourceShared = *sourceModel;
-        sourceShared.model = shared.name;
-        g_ItemEdits.SetItemModel(I18N::Editor::DuplicateItem, sourceShared);
-        model.model = shared.name;
-    }
-    g_ItemEdits.AddItem(I18N::Editor::DuplicateItem, item, &model, &copiedFrom);
-    g_ItemEdits.EndGroup();
+    DuplicateItem(I18N::Editor::DuplicateItem, m_sourceItemType, Data::Items::MakeItemType(m_group, m_number), m_name,
+                  m_shareModel);
 }
 } // namespace MuEditor::Items
 

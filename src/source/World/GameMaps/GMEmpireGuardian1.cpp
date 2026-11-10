@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian1.cpp: implementation of the GMEmpireGuardian1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -890,19 +891,19 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             float _fActSpdTemp = b->Actions[o->CurrentAction].PlaySpeed;
             if (o->AnimationFrame >= 4.5f && o->AnimationFrame < (4.5f + _fActSpdTemp))
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
+                    vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
+                    vec3_t v3RelativePos, v3StartPos;
 
-                vec3_t Angle, AngleRelative = {0.0f, 0.0f, 0.0f};
-                vec3_t v3PosTo = {to->Position[0], to->Position[1], to->Position[2]};
-                vec3_t v3RelativePos, v3StartPos;
+                    Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1],
+                           o->Angle[2] + AngleRelative[2], Angle);
 
-                Vector(o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2],
-                       Angle);
-
-                Vector(0.0f, 0.0f, 0.0f, v3RelativePos);
-                b->TransformPosition(o->BoneTransform[20], v3RelativePos, v3StartPos, true);
-                CreateEffectFpsChecked(MODEL_DEASULER, v3StartPos, Angle, v3PosTo, 0, o, -1, 0, 0, 0, 1.8f);
+                    Vector(0.0f, 0.0f, 0.0f, v3RelativePos);
+                    b->TransformPosition(o->BoneTransform[20], v3RelativePos, v3StartPos, true);
+                    CreateEffectFpsChecked(MODEL_DEASULER, v3StartPos, Angle, v3PosTo, 0, o, -1, 0, 0, 0, 1.8f);
+                }
             }
         }
         break;
@@ -1205,8 +1206,7 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateSprite(BITMAP_FLARE_RED, vPos, 1.2f * fScale * o->AnimationFrame * 0.15f, vLight, o,
                          -WorldTime * 0.1f);
 
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
+            OBJECT* to = GameLogic::Combat::AttackTargetObject(*c);
 
             if (o->AnimationFrame > 10)
             {
@@ -1216,10 +1216,13 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[55], p, vPos, true);
                 Vector(-60.0f, 0.0f, o->Angle[2], Angle);
                 Vector(-60.0f, 0.0f, o->Angle[2], Angle);
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, to->Position, Angle, 27, to, 50.0f, -1, 0, 0, 0,
-                                      vLight);
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, to->Position, Angle, 27, to, 10.0f, -1, 0, 0, 0,
-                                      vLight);
+                if (to)
+                {
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, to->Position, Angle, 27, to, 50.0f, -1, 0, 0, 0,
+                                          vLight);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, to->Position, Angle, 27, to, 10.0f, -1, 0, 0, 0,
+                                          vLight);
+                }
                 CreateParticleFpsChecked(BITMAP_ENERGY, vPos, o->Angle, vLight);
             }
         }
@@ -1237,11 +1240,11 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateSprite(BITMAP_FLARE_BLUE, vPos, 1.2f * fScale * o->AnimationFrame * 0.15f, vLight, o,
                          -WorldTime * 0.1f);
 
-            CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-            OBJECT* to = &tc->Object;
-
-            if (o->AnimationFrame > 4.5f && o->AnimationFrame <= 4.8f)
-                CreateEffectFpsChecked(BITMAP_MAGIC + 1, to->Position, to->Angle, to->Light, 1, to);
+            if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+            {
+                if (o->AnimationFrame > 4.5f && o->AnimationFrame <= 4.8f)
+                    CreateEffectFpsChecked(BITMAP_MAGIC + 1, to->Position, to->Angle, to->Light, 1, to);
+            }
         }
         break;
         }

@@ -13,7 +13,7 @@ class SdlGpuReplayState final
 public:
     bool SelectPipeline(SDL_GPUGraphicsPipeline* pipeline);
     bool SelectFragmentSampler(SDL_GPUTexture* texture, SDL_GPUSampler* sampler);
-    // The second fragment texture slot (skinned_lit.frag's normal map).
+    // The second fragment texture slot (skinned_lit.frag's normal map, world_lit.frag's ground shadow mask).
     bool SelectNormalMapSampler(SDL_GPUTexture* texture, SDL_GPUSampler* sampler);
     bool SelectVertexUniforms(Uint32 slot, std::span<const std::byte> bytes);
     bool SelectFragmentUniforms(std::span<const std::byte> bytes);

@@ -122,7 +122,7 @@ TEST_CASE("A weapon keeps its skill, luck, additional option and six excellent o
 
     const std::array<OptionSlot, 9> expected{{
         {bladeSkill, 0},
-        {AT_LUCK, 0},
+        {AT_LUCK, 5},
         {AT_IMPROVE_DAMAGE, 16},
         {AT_EXCELLENT_DAMAGE, 0},
         {AT_IMPROVE_DAMAGE_LEVEL, 5},
@@ -264,8 +264,8 @@ bool OldCodeGivesLuck(int type)
 } // namespace
 
 // Luck comes from the definition the item links (Data/Items/Options/Luck.json): every item gets its slot where the code
-// before the definitions put it (after the skill), with the value 0 that adds no critical damage rate, and the slot
-// keeps where it came from, which gives its tooltip lines the definition's value.
+// before the definitions put it (after the skill), with the definition's value, which the character window adds up
+// into the critical damage rate, and the slot keeps where it came from.
 TEST_CASE("Every item's luck comes from its option links as the code before the definitions gave it [data][items]")
 {
     ClientDataScope client(ClientDirectory);
@@ -309,7 +309,7 @@ TEST_CASE("Every item's luck comes from its option links as the code before the 
         ++luckyItems;
         const int slot = luckSlots.front();
         CHECK(slot == (ItemAttribute[type].m_wSkillIndex != 0 ? 1 : 0));
-        CHECK(item.SpecialValue[slot] == 0);
+        CHECK(item.SpecialValue[slot] == 5);
         CHECK(GameLogic::Items::GetOptionSource(item, slot) ==
               GameLogic::Items::OptionSource{static_cast<std::uint16_t>(luck), 0});
         CHECK(GameLogic::Items::GetItemOptionValue(item, slot) == 5);

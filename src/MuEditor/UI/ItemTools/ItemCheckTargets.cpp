@@ -20,6 +20,10 @@ constexpr char SubKeySeparator = '.';
 constexpr std::string_view KeyEnds = ".[";
 
 constexpr std::string_view NameKey = "name";
+// The forms of the item's name ("nameForms.pl.acc") or of a name line's ("nameLines[2].nameForms.de"), which Item
+// Translations edits.
+constexpr std::string_view NameFormsKey = "nameForms";
+constexpr std::string_view NameLineFormsPart = ".nameForms";
 constexpr std::string_view TagsKey = "tags";
 // The keys of how the item is presented, Item Tooltip's: its ground label rules, the tooltip layout it uses and its own
 // changes to that layout.
@@ -108,6 +112,10 @@ ItemTool GetToolForField(std::string_view field)
     if (key == NameKey)
     {
         return GetToolForName(field);
+    }
+    if (key == NameFormsKey || field.find(NameLineFormsPart) != std::string_view::npos)
+    {
+        return ItemTool::Translations;
     }
     if (key == TagsKey)
     {

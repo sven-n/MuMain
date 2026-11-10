@@ -12,6 +12,7 @@
 #include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/Translation/ItemReferenceChecks.h"
 #include "GameLogic/Buffs/w_BuffStateSystem.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -92,6 +93,8 @@ ItemUsage FindItemUsage(int itemType)
     usage.codeKnown = references.IsLoaded();
     usage.code = references.Find(itemType);
     FindGameData(itemType, usage);
+    usage.texts = Data::Translation::FindTextsNamingItem(g_ItemDatabase, Data::Items::GetItemGroup(itemType),
+                                                         Data::Items::GetItemNumber(itemType));
     return usage;
 }
 

@@ -317,7 +317,8 @@ when they reach their target. A change that moves a type looks at these too.
 ### Preview
 
 The **Preview** section of the details shows what the selected type's slot
-holds in a small 3D view. It loads nothing: a slot that holds nothing on
+holds in a small 3D view; it stays where it is while the sections below it
+scroll. It loads nothing: a slot that holds nothing on
 this map says so. The effect's own move and draw code do not run, so nothing
 it would create (sprites, particles, sounds) appears; the preview in the
 world (below) is for that.
@@ -345,7 +346,7 @@ world (below) is for that.
   picks its frame (0 to 7) instead.
 - **The view**: drag to turn the camera, drag with the middle mouse button
   to move the picture, the wheel zooms, a double click or **Reset view**
-  puts it back; **Turn** turns the type slowly.
+  puts it back; **Turn** (off at first) turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
   a texture the code chooses, a model the game never draws itself, an effect
   whose values start it transparent or at size 0 (the preview shows it

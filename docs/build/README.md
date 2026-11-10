@@ -326,7 +326,9 @@ packages** then collects the listed files for **Save apt packages**
 ([`scripts/ci_apt_cache.py`](../../scripts/ci_apt_cache.py)), before **Install build
 tools** installs them, so no clean-up after dpkg can remove them first. When one is
 missing, the save stores nothing and a notice names it. Quality Gates gets cppcheck,
-which the image lacks, from an apt cache of its own the same way.
+which the image lacks, from an apt cache of its own the same way, and only in runs
+that change C++ files: only its formatting check and static analysis use cppcheck
+and clang-format, and they skip the other runs.
 
 PR runs only read the library, vcpkg and apt caches, as they do the compiler caches:
 **Restore dependencies**, **Restore vcpkg packages** and **Restore apt packages** read
@@ -345,12 +347,12 @@ compiler cache for each main push. After the builds of a run on main, the
 deletes all but the newest entry of each cache on main. The compiler caches keep
 the newest entry of each compiler: a job restores only entries of its own compiler,
 and while GitHub moves the runners to a new image, jobs land on both images. The apt
-caches keep the newest entry of each image for the same reason. An
-entry a job read in the last 15 minutes is left for a later run, as that job may
-still be downloading it, unless the last read was the run's own: each build job
-notes when its restores ended (**Note when the caches were read**), so the entry a
-build started from goes in the same run. It is the only job with a token that can
-delete caches.
+caches keep the newest entry of each image for the same reason. An entry a job read
+in the last 15 minutes is left for a later run, as that job may still be downloading
+it, unless the last read was the run's own: each build job, and Quality Gates for its
+cppcheck, notes when its restores ended (**Note when the caches were read**), so the
+entry a job started from goes in the same run. Prune caches is the only job with a
+token that can delete caches.
 CI Required waits for it: a prune that fails or warns fails the run like a build,
 since without it the caches fill up again. A new cache that is restored by a
 key prefix needs its prefix in the script's `KINDS`, and in `PER_COMPILER` when that

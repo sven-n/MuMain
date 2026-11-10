@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemModelDatabaseScope.h"
+#include "LookEditsScope.h"
 #include "LogCapture.h"
 #include "ItemStatProfilesScope.h"
 #include "TestFiles.h"
@@ -38,6 +39,7 @@
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -81,6 +83,7 @@
 #include "UI/ItemTools/MuItemTooltipUI.h"
 #include "UI/ItemTools/TooltipLineLooks.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "UI/StyleEditor/LookEdits.h"
 #include "../ui/RmlLayoutFixture.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -2373,7 +2376,7 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.validationIssues.empty());
-    // Tags, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
+    // Tags, name forms, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
     // the items keep the ones they have, so the files below match.
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
@@ -2813,6 +2816,12 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
     CHECK(nothing.tags.empty());
+    CHECK(nothing.texts.empty());
+
+    // The jewel window's text names the Jewel of Bless by its number: it stays there when the item moves.
+    const MuEditor::Items::ItemUsage bless = MuEditor::Items::FindItemUsage(MakeItemType(14, 13));
+    CHECK(std::ranges::find(bless.texts, "Game: Jewel of Bless") != bless.texts.end());
+    CHECK(bless.IsUsedAtNumber());
 }
 
 TEST_CASE("A number that is not free names what takes it [data][items][editor]")
@@ -2880,6 +2889,63 @@ TEST_CASE("An entry without a name moves and goes as an item does [data][items][
     CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
     CHECK(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
     g_ItemEdits.GetHistory().Clear();
+}
+
+// The Style Editor's Apply for one item (design L36, L39): a copy of the look in the original's folder, which only that
+// item or a new duplicate of it names; one undo step takes back the look and the item together.
+TEST_CASE("Apply for only this item or a new item makes a copy of the look, which the item wears [data][items][editor]")
+{
+    using Data::Looks::Layer;
+    using Data::Looks::LookDefinition;
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    const LookEditsScope looks({{"brightBlade", {Layer{}}, {}}}, {{"Blades", {}, {"brightBlade"}}});
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    const ItemModelDefinition kris = *g_ItemModelDatabase.Find(KrisType);
+    REQUIRE(kris.model.empty());
+    LookDefinition gold{"brightBladeGold", {Layer{.blend = Data::Looks::Blend::Glow}}, {}};
+
+    g_LookEdits.ApplyToItemOnly("Only this item", "brightBlade", gold, KrisType);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->renderStyle == "brightBladeGold");
+    REQUIRE(g_LookEdits.Find("brightBladeGold") != nullptr);
+    CHECK(*g_LookEdits.Find("brightBladeGold") == gold);
+    CHECK(g_LookEdits.Find("brightBlade")->layers == std::vector<Layer>{Layer{}});
+    CHECK(g_LookEdits.GetState().folders ==
+          std::vector<Data::Colors::ColorFolder>{{"Blades", {}, {"brightBlade", "brightBladeGold"}}});
+    CHECK(Data::Looks::g_LookStore.FindRenderStyle("brightBladeGold") != nullptr);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Only this item");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(*g_ItemModelDatabase.Find(KrisType) == kris);
+    CHECK(g_LookEdits.Find("brightBladeGold") == nullptr);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // A new item: Duplicate item's steps (the model file becomes shared) are part of the one step.
+    const int newType = MakeItemType(0, GetNextFreeItemNumber(0, 0));
+    REQUIRE(IsFreeItemType(newType));
+    g_LookEdits.ApplyToNewItem("A new item", "brightBlade", gold, KrisType, newType, "Golden Kris");
+    REQUIRE(g_ItemDatabase.Find(newType) != nullptr);
+    CHECK(g_ItemDatabase.Find(newType)->names.GetNeutral() == "Golden Kris");
+    REQUIRE(g_ItemModelDatabase.Find(newType) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(newType)->renderStyle == "brightBladeGold");
+    CHECK(g_ItemModelDatabase.Find(newType)->model == g_ItemModelDatabase.Find(KrisType)->model);
+    CHECK(g_ItemModelDatabase.Find(KrisType)->renderStyle == kris.renderStyle);
+    CHECK(g_LookEdits.Find("brightBladeGold") != nullptr);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "A new item");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(IsFreeItemType(newType));
+    CHECK(*g_ItemModelDatabase.Find(KrisType) == kris);
+    CHECK(g_LookEdits.Find("brightBladeGold") == nullptr);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // A name a look has already is no copy.
+    g_LookEdits.ApplyToItemOnly("Only this item", "brightBlade", {"brightBlade", {}, {}}, KrisType);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
 }
 
 namespace
@@ -2975,18 +3041,34 @@ void RenderModelTool()
     bool open = true;
     g_MuItemModelUI.BeforeFrame();
     ImGui::NewFrame();
+    // Tall enough for the fields below the preview: ImGui leaves out a part a window shows none of.
+    ImGui::SetNextWindowSize(ImVec2(900.0f, 1000.0f));
     g_MuItemModelUI.Render(&open);
     ImGui::Render();
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+}
+
+// The part of the model tool below its preview, which scrolls: its fields are there.
+const ImGuiWindow* ModelToolFields()
+{
+    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
+    REQUIRE(tool != nullptr);
+    for (const ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    {
+        if (window->ParentWindow == tool && std::strstr(window->Name, "##Fields") != nullptr)
+        {
+            return window;
+        }
+    }
+    FAIL("the model tool has no fields below its preview");
+    return nullptr;
 }
 
 // A widget of the shared model form: the tool pushes the selected item's ID,
 // the form's fields "SharedModel" too.
 ImGuiID SharedModelFormId(const char* label, const char* scope = nullptr)
 {
-    const ImGuiWindow* tool = ImGui::FindWindowByName(MuEditor::WindowIds::ItemModel);
-    REQUIRE(tool != nullptr);
-    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), tool->ID);
+    ImGuiID id = ImGui::GetIDWithSeed(g_ItemSelection.GetItemType(), ModelToolFields()->ID);
     if (scope != nullptr)
     {
         id = ImGui::GetIDWithSeed(scope, nullptr, id);
@@ -4149,6 +4231,47 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
                                   return issue.severity == ItemDataIssueSeverity::Fatal && issue.group == 0 &&
                                          issue.number == 0 && issue.field != "statProfile";
                               }));
+}
+
+TEST_CASE("The shipped name cases file is in the written format [data][items][texts]")
+{
+    const std::filesystem::path file = DataDirectory / "Items" / "Tooltips" / ItemNameCasesFileName;
+    const ItemNameCasesLoadResult shipped = LoadItemNameCasesFile(file);
+    CHECK(shipped.issues.empty());
+    CHECK(shipped.cases.Uses("pl", "gen"));
+    CHECK(WriteItemNameCasesJson(shipped.cases) == TestFiles::ReadWholeFile(file));
+}
+
+TEST_CASE("Save Items writes the name cases file when the editor changed it [data][items][editor][texts]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const std::filesystem::path casesFile = folder.Directory() / GetItemNameCasesFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(casesFile);
+
+    SUBCASE("unchanged, it is left as it is")
+    {
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(casesFile) == shippedText);
+    }
+
+    SUBCASE("changed, it is written and reads back the same")
+    {
+        ItemNameCases changed = g_ItemDatabase.GetNameCases();
+        changed.SetCases("ru", {"gen", "acc"});
+        g_ItemDataHandler.SetNameCases(changed);
+
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const ItemNameCasesLoadResult saved = LoadItemNameCasesFile(casesFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.cases == changed);
+    }
 }
 
 TEST_CASE("Save Items writes the item stat file when the editor changed it [data][items][editor]")

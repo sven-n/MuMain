@@ -15,6 +15,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/AI/BirdLanding.h"
 #include "Engine/AI/BoidSteering.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -837,7 +838,8 @@ void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 
     float  Matrix[3][4];
     vec3_t Angle, p, Position;
-    OBJECT& TargetO = CharactersClient[c->TargetCharacter].Object;
+    // The stones and the strike land on the target; without one only the local shake remains.
+    OBJECT* target = GameLogic::Combat::AttackTargetObject(*c);
 
     // The weapon level counts reference frames; each value lasts one of them.
     if (REFERENCE_FRAME_STEP == 0)
@@ -847,9 +849,8 @@ void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
     o->WeaponLevel++;
 
     //if ( o->WeaponLevel >= 6 && o->WeaponLevel <= 8 )
-    if (o->WeaponLevel == iMaxSkill - 2 ||
-        o->WeaponLevel == iMaxSkill - 1 ||
-        o->WeaponLevel == iMaxSkill - 0)
+    if (target != nullptr &&
+        (o->WeaponLevel == iMaxSkill - 2 || o->WeaponLevel == iMaxSkill - 1 || o->WeaponLevel == iMaxSkill - 0))
     {
         Vector(0.f, 40.f * (o->WeaponLevel / 2), 0.f, p);
         Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
@@ -858,18 +859,19 @@ void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
             Angle[2] += 60.f;
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
-            VectorAdd(TargetO.Position, Position, Position);
+            VectorAdd(target->Position, Position, Position);
 
             int iCurrentStone = MODEL_GROUND_STONE;
 
-            CreateEffect(iCurrentStone + 1, Position, TargetO.Angle, TargetO.Light);
+            CreateEffect(iCurrentStone + 1, Position, target->Angle, target->Light);
         }
     }
 
     if (o->WeaponLevel == iMaxSkill - 1)
     {
         SetEarthQuakeAt(o->Position, (Random::Rand() % 3 - 3) * 0.7f);
-        CreateEffect(MODEL_SKILL_FURY_STRIKE, TargetO.Position, TargetO.Angle, TargetO.Light, 0, o, -1, 0, 2);
+        if (target != nullptr)
+            CreateEffect(MODEL_SKILL_FURY_STRIKE, target->Position, target->Angle, target->Light, 0, o, -1, 0, 2);
     }
 
     if (o->WeaponLevel > iMaxSkill)

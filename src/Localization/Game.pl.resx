@@ -5122,10 +5122,10 @@
     <value>i naciśnij przycisk odpowiadający liczbie klejnotów</value>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
-    <value>Klejnot Błogosławieństwa</value>
+    <value>{item:14,13}</value>
   </data>
   <data name="Jewel of Soul" xml:space="preserve">
-    <value>Klejnot Duszy</value>
+    <value>{item:14,14}</value>
   </data>
   <data name="Combine %d (%d zen is required)" xml:space="preserve">
     <value>Połącz %d (koszt: %d zen)</value>
@@ -5716,7 +5716,7 @@
     <value>Sukces %s %s : %d%%</value>
   </data>
   <data name="Jewel stone" xml:space="preserve">
-    <value>Kamień klejnotu</value>
+    <value>{item:14,41}</value>
   </data>
   <data name="Weapons or shields" xml:space="preserve">
     <value>Broń lub tarcze</value>
@@ -5971,7 +5971,7 @@
     <value>O uszlachetnianiu</value>
   </data>
   <data name="Jewel of Harmony" xml:space="preserve">
-    <value>Klejnot Harmonii</value>
+    <value>{item:14,42}</value>
   </data>
   <data name="Refine Gemstone" xml:space="preserve">
     <value>Uszlachetnij Kamień szlachetny</value>
@@ -8077,22 +8077,22 @@
     <value>Wybierz klejnot do rozpakowania.</value>
   </data>
   <data name="Jewel of Life" xml:space="preserve">
-    <value>Klejnot Życia</value>
+    <value>{item:14,16}</value>
   </data>
   <data name="Jewel of Creation" xml:space="preserve">
-    <value>Klejnot Stworzenia</value>
+    <value>{item:14,22}</value>
   </data>
   <data name="Jewel of Guardian" xml:space="preserve">
-    <value>Klejnot Strażnika</value>
+    <value>{item:14,31}</value>
   </data>
   <data name="Jewel of Chaos" xml:space="preserve">
-    <value>Klejnot Chaosu</value>
+    <value>{item:12,15}</value>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Niższy kamień rafinacji</value>
+    <value>{item:14,43}</value>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Wyższy kamień rafinacji</value>
+    <value>{item:14,44}</value>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
     <value>Czy na pewno chcesz rozpakować</value>
@@ -9446,5 +9446,56 @@
   </data>
   <data name="Base Attributes" xml:space="preserve">
     <value>Statystyki bazowe</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych: %d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych: %d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>Wskaźnik obrażeń krytycznych</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>Szczęście (×%d): %d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>Opcje zestawu: %d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>Opcje gniazd: %d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>Łącznie: %d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Obrażenia</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>Zwykłe trafienie: %d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>Trafienie krytyczne: %d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>Trafienie doskonałe: %d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>przed obroną celu</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>Obrażenia krytyczne</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>Opcje zestawu: +%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>Opcje harmonii: +%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>Opcje gniazd: +%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>Łącznie: +%d</value>
   </data>
 </root>

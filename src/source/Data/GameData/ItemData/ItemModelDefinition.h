@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -132,6 +133,9 @@ struct ItemModelDefinition
     std::vector<std::string> textureFolders;
     // Indexes of the meshes that are drawn without blending.
     std::vector<int> noneBlendMeshes;
+    // A name for each mesh by its number ("Shaft", "Crystal"), for the editor's lists (design L38); a mesh without
+    // one shows its number and texture. The shared model's for an item that names one, as the file is.
+    std::map<int, std::string> meshNames;
     ItemInventoryDisplay inventory;
     ItemGroundDisplay ground;
     // A cape worn as cloth: putting it on or taking it off deletes the cloth
