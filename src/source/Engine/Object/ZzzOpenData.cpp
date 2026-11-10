@@ -40,6 +40,7 @@
 #include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
@@ -417,6 +418,17 @@ static void OpenMapData()
     if (!Data::Maps::LoadMapObjectSounds(errorMessage))
     {
         StopOnDataError("Map data error", errorMessage);
+    }
+}
+
+// Loads the buffs (Data/Buffs/Buffs.json): their names, texts and the buff
+// strip's rules; errors stop the game.
+static void OpenBuffData()
+{
+    std::string errorMessage;
+    if (!Data::Buffs::LoadBuffs(errorMessage))
+    {
+        StopOnDataError("Buff data error", errorMessage);
     }
 }
 
@@ -2161,6 +2173,7 @@ void OpenBasicData(HDC hDC)
 
     OpenMonsterData();
     OpenMapData();
+    OpenBuffData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);

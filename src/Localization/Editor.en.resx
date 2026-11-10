@@ -5272,6 +5272,9 @@
   <data name="Name cases note" xml:space="preserve">
     <value>The cases each language declines item names in (Data/Items/Tooltips/NameCases.json).</value>
   </data>
+  <data name="Buffs" xml:space="preserve">
+    <value>Buffs</value>
+  </data>
   <data name="Monster model items note" xml:space="preserve">
     <value>On a monster model only the weapons take items, on its model's link bones; the other slots take a body (a part model, as the merchants wear) or nothing, as an item there hangs at a random place.</value>
   </data>

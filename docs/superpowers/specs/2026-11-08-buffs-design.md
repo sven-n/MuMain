@@ -36,6 +36,9 @@ time left and the value of each buff on the hero.
   OpenMU change that sends the time left and the values.
 - **Later:** a Buffs tool in MuEditor; syncing the buff data with OpenMU's
   configuration (like items phase 7); buff visuals (the roadmap's "later" row).
+  The Buffs tool also carries a buff's `item` along when the item tools move
+  that item, as they carry the monsters' items; until then the buff keeps the
+  old place, which the start and Data Checks report as an error.
 - **Out:** skills as data (SK1); this area only reads the skill data's `Effect`
   field, which names a skill's buff.
 

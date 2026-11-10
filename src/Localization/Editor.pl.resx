@@ -4174,4 +4174,7 @@
   <data name="Sound kind everything else" xml:space="preserve">
     <value>Wszystko inne</value>
   </data>
+  <data name="Buffs" xml:space="preserve">
+    <value>Buffy</value>
+  </data>
 </root>

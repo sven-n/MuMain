@@ -56,7 +56,7 @@ DWORD BuffTimeControl::GetBuffMaxTime(eBuffState bufftype, DWORD curbufftime)
     {
         const BuffInfo& buffinfo = g_BuffInfo(bufftype);
 
-        if (buffinfo.s_ItemType == 255)
+        if (!buffinfo.HasItem())
         {
             return -1;
         }

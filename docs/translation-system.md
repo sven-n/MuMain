@@ -319,9 +319,10 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item, monster and NPC names in the new language, add them to the
-   item data and the monster list; see [Item names](#item-names) and
-   [Monster and NPC names](#monster-and-npc-names).
+5. To show item, monster and NPC names and buff names and descriptions in the
+   new language, add them to the item data, the monster list and the buffs;
+   see [Item names](#item-names), [Monster and NPC names](#monster-and-npc-names)
+   and [Buff names](#buff-names).
 
 ## Item names
 
@@ -635,6 +636,13 @@ export writes the names of every monster, in English where a language has
 none. Names in other languages exist only in the monster list. The rules
 are in
 [monster-data.md → Import and export of NpcName txt](monster-data.md#import-and-export-of-npcname-txt).
+
+## Buff names
+
+Buff names and descriptions are not in the `.resx` files either. They are in
+`src/bin/Data/Buffs/Buffs.json` ([buff-data.md](buff-data.md)): each buff's
+`displayName` and `description` hold the texts by language code. The game
+shows them in the UI language and falls back to English.
 
 ## Migration history
 

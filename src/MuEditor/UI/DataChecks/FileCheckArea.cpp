@@ -6,6 +6,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
@@ -84,6 +85,24 @@ std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::ModelFiles, [] { return Data::Models::ReadGameModelFileTable().issues; }, nullptr, nullptr);
+}
+
+std::unique_ptr<DataCheckArea> CreateBuffCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::Buffs,
+        []
+        {
+            // The file as the game reads it, its items checked against the item list as the item tools have it.
+            Data::Buffs::BuffsLoadResult loaded = Data::Buffs::LoadBuffsFile(Data::Buffs::GetBuffsFile());
+            if (!Data::Items::HasFatal(loaded.issues))
+            {
+                Data::Buffs::ValidateBuffItemsInGame(loaded.buffs, Data::Buffs::GetBuffsFile().generic_string(),
+                                                     loaded.issues);
+            }
+            return loaded.issues;
+        },
+        nullptr, nullptr);
 }
 
 std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea()

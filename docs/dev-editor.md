@@ -109,13 +109,13 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 
 **Windows > Data Checks** lists the problems of all game data in one table:
 the items, the monsters, the monster models and the render styles (area
-**Render styles**: the looks as the Style Editor has them, checked against
-the item models and the texture files) as their Save would write them now,
-and the glTF model file table, the server list, the effect
-catalogue, the graphics look (the look
-profile and the light moods, area **Graphics look**) and the item options
-(`Data/Items/Options` and the option texts, area **Item options**,
-[item-data.md](item-data.md#item-options)) as the game reads their files at
+**Render styles**: the looks as the Style Editor has them, checked against the
+item models and the texture files) as their Save would write them now, and the
+glTF model file table, the server list, the effect catalogue, the graphics
+look (the look profile and the light moods, area **Graphics look**) and the
+item options (`Data/Items/Options` and the option texts, area **Item
+options**, [item-data.md](item-data.md#item-options)) and the buffs (area
+**Buffs**, [buff-data.md](buff-data.md)) as the game reads their files at
 start, and the map object sounds as the Map Editor's Sounds tab has them
 ([map-data.md](map-data.md)).
 
