@@ -4872,17 +4872,19 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                     {
                         g_CharacterRegisterBuff(to, eBuff_Defense);
 
-                        for (int j = 0; j < 5; ++j)
+                        for (int j = 0; j < Render::Effects::DefenseAuraJointCount; ++j)
                         {
-                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to, 20.0f, -1, 0, 0, c->TargetCharacter);
+                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to,
+                                        Render::Effects::DefenseAuraScale, -1, 0, 0, c->TargetCharacter);
                         }
                     }
                     else if (!SearchJoint(MODEL_SPEARSKILL, to, 4)
                         && !SearchJoint(MODEL_SPEARSKILL, to, 9))
                     {
-                        for (int j = 0; j < 5; ++j)
+                        for (int j = 0; j < Render::Effects::DefenseAuraJointCount; ++j)
                         {
-                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to, 20.0f, -1, 0, 0, c->TargetCharacter);
+                            CreateJoint(MODEL_SPEARSKILL, to->Position, to->Position, to->Angle, 4, to,
+                                        Render::Effects::DefenseAuraScale, -1, 0, 0, c->TargetCharacter);
                         }
                     }
                 }
@@ -10745,9 +10747,10 @@ void UpdateBuffAuraEffects(CHARACTER* c, OBJECT* o, BMD* b)
     {
         // The aura's own character: MoveJoint reads its Helper and SafeZone to choose subtype 4 or 9.
         const int self = static_cast<int>(c - CharactersClient);
-        for (int i = 0; i < 5; ++i)
+        for (int i = 0; i < Render::Effects::DefenseAuraJointCount; ++i)
         {
-            CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, self);
+            CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, Render::Effects::DefenseAuraScale,
+                        -1, 0, 0, self);
         }
     }
 }

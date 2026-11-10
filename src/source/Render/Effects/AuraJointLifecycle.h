@@ -12,6 +12,10 @@ namespace Render::Effects
     return hasDefense || hasHelpNpc;
 }
 
+// The aura's joints and their scale, wherever the aura is created.
+inline constexpr int DefenseAuraJointCount = 5;
+inline constexpr float DefenseAuraScale = 20.0f;
+
 // Whether the object's buffs give it the defense aura: where the aura is created and where it is kept alive.
 [[nodiscard]] bool HasDefenseAura(OBJECT* o);
 
