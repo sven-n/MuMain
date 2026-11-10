@@ -87,6 +87,14 @@ struct ClothShadow
 };
 
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
+// A shadow a point light casts, taken when the draw is described.
+struct ShadowLightCast
+{
+    // Radians from world +x to the axis the shear acts along.
+    float axisAngle = 0.f;
+    float strength = 0.f;
+};
+
 struct ShadowDraw
 {
     const BMD* model = nullptr;
@@ -98,6 +106,13 @@ struct ShadowDraw
     // Set: the cloth casts the shadow instead of the meshes.
     std::span<const ClothShadow> clothes;
     float alpha = 1.f;
+    // The shadow's fall and strength under the frame's sun, and what the frame's point lights cast.
+    float shearX = 2000.f;
+    float shearHeight = 4000.f;
+    float axisAngle = 0.f;
+    float flatStrength = 1.f;
+    ShadowLightCast lightCasts[4];
+    int lightCastCount = 0;
 
     float bodyOrigin[3] = {};
     float bodyScale = 1.f;

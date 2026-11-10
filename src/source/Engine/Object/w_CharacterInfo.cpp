@@ -52,6 +52,7 @@ void CHARACTER::Initialize()
     m_byGensInfluence = 0;
     PK = 0;
     AttackFlag = 0;
+    ReceivedAttackTargetUnknown = false;
     AttackTime = 0;
     LastAttackEffectTime = -1;
     TargetAngle = 0;

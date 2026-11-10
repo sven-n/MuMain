@@ -28,8 +28,23 @@
 //   $dynlights spell <g> <r> <f>   dynamic.effectGain, .effectRange, .effectFade
 //   $dynlights cap <c>             dynamic.effectCap
 //   $dynlights reach <m>           dynamic.effectRangeMax
+//   $dynlights shadow <o>          dynamic.shadowOpacity
+//   $dynlights shadowangle <a>     dynamic.shadowAngle
+//   $dynlights shadowlights <n>    dynamic.shadowLights
 //   $bloom falloff <f>             bloom.levelFalloff
 //   $bloom <v>                     bloom.strength
+//   $ao radius <r>                 ao.radius
+//   $clouds scale <units>          clouds.scale
+//   $clouds speed <units/s>        clouds.speed
+//   $clouds cover <f>              clouds.cover
+//   $clouds <strength>             clouds.strength
+//   $sky <f>                       sky.fill
+//   $rim sun <f>                   lighting.rim.sunFollow
+//   $ao <v>                        ao.strength
+//   $sun softness <f>              sun.softness
+//   $sun resolution <texels>       sun.resolution
+//   $sun <v>                       sun.shadow
+//   $dynlights flatsun <f>         dynamic.flatSunShadow
 namespace Render::Look
 {
 

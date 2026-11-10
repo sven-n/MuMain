@@ -3,6 +3,7 @@
 #include "Core/Globals/_define.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
+#include "Data/Translation/ItemTextExpansion.h"
 #include "I18N/All.h"
 
 #include <filesystem>
@@ -33,6 +34,9 @@ public:
 
     ~ClientDataScope()
     {
+        // Loading the item data let the texts that name items take their names
+        // from it; later tests see them as written again.
+        Data::Translation::ItemTexts::SetNameResolver(nullptr);
         // Resetting the locale refills ItemAttribute, so it runs while
         // ItemAttribute still points at the test's table.
         I18N::SetLocale("en");

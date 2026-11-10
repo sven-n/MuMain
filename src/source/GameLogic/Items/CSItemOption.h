@@ -147,6 +147,8 @@ public:
     std::uint16_t    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;
 
+    // The active set options' value of an AT_SET_OPTION_* effect, added up over the worn sets.
+    int GetSetOptionValue(int Special) const;
     void	PlusSpecial(std::uint16_t* Value, int Special) const;
     void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
     void    PlusMastery(int* Value, std::uint8_t MasteryType) const;

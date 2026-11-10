@@ -3,8 +3,10 @@
 #include "Core/Utilities/Random.h"
 #include "ItemRenderStyles.h"
 #include "ItemModelTable.h"
+#include "LookDrawing.h"
 
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -53,8 +55,15 @@ struct RenderStyle
     {
     }
 
+    // A render style that is data (Data/Effects/RenderStyles.json); the look outlives the entry.
+    explicit RenderStyle(const Data::Looks::LookDefinition& look) : name(look.name.c_str()), data(&look) {}
     bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType) const
     {
+        if (data != nullptr)
+        {
+            Looks::DrawRenderStyle(*data, b, o, look, alpha, renderType);
+            return true;
+        }
         return texturedRender != nullptr ? texturedRender(b, o, look, modelType, alpha, renderType, texture)
                                          : render(b, o, look, modelType, alpha, renderType);
     }
@@ -65,6 +74,7 @@ struct RenderStyle
     int texture = 0;
     GlowFunction glow = nullptr;
     const ShineBelowPlus3* shine = nullptr;
+    const Data::Looks::LookDefinition* data = nullptr;
 };
 
 // ------------------------------------------------ the shine below +3
@@ -187,17 +197,6 @@ bool RenderThunderHawk(BMD* b, const OBJECT* o, DrawLook& look, int Type, float 
     return true;
 }
 
-bool RenderWingsOfDarkness(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    Vector(0.8f, 0.6f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, 0.5f, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh, BITMAP_CHROME + 1);
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    return true;
-}
-
 bool RenderWingOfStorm(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     Vector(1.f, 0.7f, 0.5f, b->BodyLight);
@@ -216,21 +215,6 @@ bool RenderWingOfStorm(BMD* b, const OBJECT* o, DrawLook& look, int Type, float 
     return true;
 }
 
-bool RenderWingOfRuin(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
-    Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.8f;
-    Vector(0.0f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, BITMAP_3RDWING_LAYER);
-    return true;
-}
-
 bool RenderCapeOfEmperor(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     if (b->BodyLight[0] == 1 && b->BodyLight[1] == 1 && b->BodyLight[2] == 1)
@@ -245,68 +229,6 @@ bool RenderCapeOfEmperor(BMD* b, const OBJECT* o, DrawLook& look, int Type, floa
         b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                       look.blendMeshV);
     }
-    return true;
-}
-
-bool RenderWingsOfDespair(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME6, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderWingOfDimension(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderDivineSwordOfArchangel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_METAL, Alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_LIGHTMAP | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  WorldTime * 0.0001f, BITMAP_CHROME);
-    b->RenderMesh(1, RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderArchangelStaff(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_METAL, Alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_LIGHTMAP | RENDER_TEXTURE, 1.f, 0, look.blendMeshLight, look.blendMeshU,
-                  -WorldTime * 0.0001f, BITMAP_CHROME);
-    b->RenderMesh(1, RENDER_TEXTURE, Alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderDivineScepterOfArchangel(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_LIGHTMAP | RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  -WorldTime * 0.0001f, BITMAP_CHROME);
-    return true;
-}
-
-bool RenderGreatReignCrossbow(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    Vector(0.8f * Light[0], 0.f, 0.8f * Light[2], b->BodyLight);
-    b->RenderMesh(0, RENDER_LIGHTMAP | RENDER_TEXTURE, 1.f, 0, look.blendMeshLight, -WorldTime * 0.0002f,
-                  look.blendMeshV, BITMAP_CHROME);
-    VectorCopy(Light, b->BodyLight);
-    b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 1.f, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
     return true;
 }
 
@@ -333,16 +255,6 @@ void SpawnPumpkinOfLuck(BMD* b, OBJECT* o, vec34_t* bones)
     CreateSprite(BITMAP_LIGHT, vPos, 0.5f, o->Light, o, 0.5f);
 }
 
-bool RenderSkillParchment(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.5f;
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh, BITMAP_ROOLOFPAPER_EFFECT_R);
-    return true;
-}
-
 bool RenderRuneBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     // Doppelgangers are drawn plainly.
@@ -367,14 +279,6 @@ bool RenderRuneBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Al
     return true;
 }
 
-bool RenderDragonSpear(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE, 1.f, 1, look.blendMeshLight, WorldTime * 0.0001f, WorldTime * 0.0005f);
-    return true;
-}
-
 bool RenderElementalMace(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     vec3_t Light;
@@ -389,107 +293,6 @@ bool RenderElementalMace(BMD* b, const OBJECT* o, DrawLook& look, int Type, floa
     return true;
 }
 
-bool RenderDarkHorse(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    Vector(0.8f, 0.4f, 0.1f, b->BodyLight);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderDarkRaven(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderBattleScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.6f + 0.4f;
-    b->BeginRender(1.f);
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE, Alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
-    b->EndRender();
-    return true;
-}
-
-bool RenderMasterScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    Vector(0.1f, 0.3f, 1.f, b->BodyLight);
-    look.blendMesh = 0;
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.6f + 0.4f;
-    b->RenderMesh(0, RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    Vector(0.6f, 0.8f, 1.f, b->BodyLight);
-    look.blendMesh = 1;
-    look.blendMeshLight = 1.f;
-    b->RenderMesh(1, RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, WorldTime * 0.0003f,
-                  BITMAP_CHROME);
-    return true;
-}
-
-bool RenderFlamberge(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    // b->RenderBody( RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-    // 5 );
-
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    look.blendMesh = 1;
-    Vector(1.f, 0.f, 0.2f, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    float fV;
-    fV = (((int)(WorldTime * 0.05) % 16) / 4) * 0.25f;
-    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 5, look.blendMeshLight, look.blendMeshU, fV);
-    return true;
-}
-
-bool RenderSwordBreaker(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderRuneBastardSword(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    look.blendMesh = 1;
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.6f + 0.4f;
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderFrostMace(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 1);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
 bool RenderDeadlyStaff(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
@@ -501,96 +304,10 @@ bool RenderDeadlyStaff(BMD* b, const OBJECT* o, DrawLook& look, int Type, float 
     return true;
 }
 
-bool RenderImperialStaff(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    look.blendMesh = 0;
-    look.blendMeshLight = fabs(sinf(WorldTime * 0.001f)) + 0.1f;
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  BITMAP_SOCKETSTAFF);
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  BITMAP_SOCKETSTAFF);
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  BITMAP_SOCKETSTAFF);
-    return true;
-}
-
-bool RenderStaff32(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderCrimsonGlory(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderSalamanderShield(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 1);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderFrostBarrier(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    look.blendMesh = 2;
-    look.blendMeshLight = absf((sinf(WorldTime * 0.001f)));
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderGuardianShield(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderCrossShield(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->StreamMesh = 1;
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, -(int)WorldTime % 2000 * 0.0005f);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
 // The light of a blended mesh that pulses slowly between 0.4 and 1.
 float BlendMeshPulse()
 {
     return sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
-}
-
-bool RenderOldScroll(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, 0.7f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 1);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 4, BlendMeshPulse(), look.blendMeshU, look.blendMeshV, 0);
-    return true;
 }
 
 bool RenderIllusionSorcererCovenant(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
@@ -598,13 +315,6 @@ bool RenderIllusionSorcererCovenant(BMD* b, const OBJECT* o, DrawLook& look, int
     float sine = float(sinf(WorldTime * 0.00004f) * 0.15f) + 0.5f;
     b->RenderBody(RenderType, 1.f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 0);
     b->RenderBody(RenderType, 1.f, 0, sine, look.blendMeshU, look.blendMeshV, 1);
-    return true;
-}
-
-bool RenderScrollOfBlood(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, 0.7f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 0);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, BlendMeshPulse(), look.blendMeshU, look.blendMeshV, 1);
     return true;
 }
 
@@ -628,91 +338,6 @@ void SpawnCursedCastleWater(BMD* b, OBJECT* o, vec34_t* bones)
     b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, 2.f / 7.f, o->Position, o->Angle);
 }
 
-bool RenderCondorFlame(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, 0.9, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderCondorFeather(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, 0.9, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderThirdClassQuestItem(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
-                               int Texture)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.5f) * 0.4f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
-    return true;
-}
-
-bool RenderAbyssalEye(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.5f) * 0.4f;
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
-                  BITMAP_ITEM_EFFECT_DEYE_R);
-    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.2f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderFreeTicket(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType, int Texture)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.2f) * 0.3f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
-    return true;
-}
-
-bool RenderChaosCard(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType, int Texture)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.2f) * 0.4f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 1);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
-    return true;
-}
-
-bool RenderRareItemTicketWithBrightMesh1(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
-                                         int Texture)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.f) * 0.5f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderRareItemTicket(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType, int Texture)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.f) * 0.5f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
-    return true;
-}
-
-bool RenderTalismanOfLuck(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.5f) * 0.5f;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
-                  BITMAP_LUCKY_CHARM_EFFECT53);
-    return true;
-}
-
 bool RenderSeal(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType, int Texture)
 {
     float fLumi = (sinf(WorldTime * 0.001f) + 1.5f) * 0.25f;
@@ -721,26 +346,6 @@ bool RenderSeal(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, 
     b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, Texture);
     b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                   look.blendMeshV);
-    return true;
-}
-
-bool RenderElitePotion(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_CHROME4, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderTextured(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    return true;
-}
-
-bool RenderTexturedAllMeshes(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     return true;
 }
 
@@ -761,42 +366,6 @@ bool RenderGreatScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float
                   look.hiddenMesh);
     b->RenderMesh(2, RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, Luminosity, Luminosity);
     b->EndRender();
-    return true;
-}
-
-bool RenderLordScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    look.blendMeshLight = 1.f;
-    look.blendMeshU = WorldTime * 0.0008f;
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    look.blendMeshLight = sinf(WorldTime * 0.001f) * 0.3f + 0.7f;
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, Alpha, 0, look.blendMeshLight, 0.f, look.blendMeshV);
-    return true;
-}
-
-bool RenderKnightBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-
-    float Luminosity = sinf(WorldTime * 0.0008f) * 0.7f + 0.5f;
-    b->RenderMesh(2, RENDER_TEXTURE, Alpha, 2, Luminosity, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE, Alpha, 1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    //. 날
-    b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, Alpha, 3, look.blendMeshLight, WorldTime * 0.0001f,
-                  WorldTime * 0.0005f);
-    return true;
-}
-
-bool RenderDarkReignBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_TEXTURE, 1.f, 0, look.blendMeshLight, WorldTime * 0.0005f, WorldTime * 0.0005f);
-    look.hiddenMesh = 0;
-    b->StreamMesh = 1;
-    b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, WorldTime * 0.0005f);
     return true;
 }
 
@@ -841,21 +410,6 @@ bool RenderSylphWindBow(BMD* b, const OBJECT* o, DrawLook& look, int Type, float
     return true;
 }
 
-bool RenderExplosionBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshU);
-    float Luminosity = sinf(WorldTime * 0.0015f) * 0.03f + 0.3f;
-    Vector(Luminosity, Luminosity, Luminosity + 0.1f, b->BodyLight);
-    b->RenderMesh(2, RENDER_TEXTURE, look.alpha, -2, look.blendMeshLight, look.blendMeshU, look.blendMeshU);
-
-    float Luminosity4 = sinf(WorldTime * 0.0025f) * 0.5f + 0.7f;
-    Vector(0.4f, 0.4f, 0.8f, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE, 0.5f, -2, look.blendMeshLight, look.blendMeshU, look.blendMeshU);
-    return true;
-}
-
 bool RenderSylphidRay(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     if (b->HideSkin == true)
@@ -870,38 +424,6 @@ bool RenderSylphidRay(BMD* b, const OBJECT* o, DrawLook& look, int Type, float A
         b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
                       look.hiddenMesh);
     }
-    return true;
-}
-
-bool RenderSwordDancer(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    look.hiddenMesh = 1;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE, 0.5f, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV, BITMAP_LAVA);
-    b->RenderMesh(1, RENDER_TEXTURE, 0.7f, 1, look.blendMeshLight, look.blendMeshU, WorldTime * 0.0009f);
-    return true;
-}
-
-bool RenderAlbatrossBow(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    look.hiddenMesh = 1;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE, 1.0f, 1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME5, 0.5f, -1, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderPlatinaStaff(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    look.hiddenMesh = 1;
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 1, look.blendMeshLight, WorldTime * 0.0009f,
-                  WorldTime * 0.0009f);
     return true;
 }
 
@@ -1099,54 +621,6 @@ bool RenderDivineAndSuccubusSkin(BMD* b, const OBJECT* o, DrawLook& look, int Ty
     return true;
 }
 
-bool RenderBrova(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(5, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, 0.4f, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.8f, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderStrikerScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(5, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(6, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.5f, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderArrowViperBow(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-    b->BeginRender(1.f);
-    b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(6, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, Luminosity, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(4, RENDER_TEXTURE, 1.f, 4, Luminosity, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(5, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-
-    b->EndRender();
-    return true;
-}
-
-bool RenderLostMap(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    Models[o->Type].StreamMesh = 1;
-    b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, WorldTime * 0.0005f);
-    Models[o->Type].StreamMesh = -1;
-    b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
 bool RenderSymbolOfKundun(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1163,40 +637,6 @@ bool RenderSymbolOfKundun(BMD* b, const OBJECT* o, DrawLook& look, int Type, flo
     Vector(1.f, 1.f, 1.f, b->BodyLight);
     b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderStaffOfKundun(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, Alpha, 1, 0.2f, look.blendMeshU, look.blendMeshV);
-
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 0, sinf(WorldTime * 0.005f), look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderDemonicStick(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 1, 1.f, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderStormBlitzStick(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    float fLumi = (sinf(WorldTime * 0.002f) + 0.5f) * 0.5f;
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 1, fLumi, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderGreatLordScepter(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 1, 1.f, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 3, 1.f, look.blendMeshU, look.blendMeshV);
     return true;
 }
 
@@ -1225,20 +665,6 @@ bool RenderGrandSoulShield(BMD* b, const OBJECT* o, DrawLook& look, int Type, fl
     Vector(Light[0] * Luminosity, Light[0] * Luminosity, Light[0] * Luminosity, b->BodyLight);
     b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 2, look.blendMeshLight, WorldTime * 0.0001f,
                   WorldTime * 0.0005f);
-    b->EndRender();
-    return true;
-}
-
-bool RenderElementalShield(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->BeginRender(1.f);
-    b->RenderMesh(1, RENDER_TEXTURE, 0.8f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE, 0.5f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-
-    b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE, 1.f, 2, look.blendMeshLight, WorldTime * 0.0005f, look.blendMeshV);
-    b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, look.blendMeshLight, (float)(Random::DrawRand(o, 1) % 10) * 0.1f,
-                  (float)(Random::DrawRand(o, 2) % 10) * 0.1f);
     b->EndRender();
     return true;
 }
@@ -1297,18 +723,6 @@ bool RenderContractSummon(BMD* b, const OBJECT* o, DrawLook& look, int Type, flo
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE, 1.f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     }
-    b->EndRender();
-    return true;
-}
-
-bool RenderLifeStone(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->BeginRender(1.f);
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
-    b->RenderMesh(0, RENDER_TEXTURE, 1.f, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    Vector(0.f, 0.5f, 1.f, b->BodyLight);
-    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 1.f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
     b->EndRender();
     return true;
 }
@@ -1441,110 +855,6 @@ bool RenderGambleItem(BMD* b, const OBJECT* o, DrawLook& look, int Type, float A
     return true;
 }
 
-bool RenderTalismanOfResurrection(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    float Luminosity = (sinf(WorldTime * 0.003f) + 1) * 0.3f + 0.3f;
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, Luminosity, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    return true;
-}
-
-bool RenderTalismanOfMobility(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, look.hiddenMesh);
-    return true;
-}
-
-bool RenderTalismanOfGuardian(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderTalismanOfItemProtection(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV, look.hiddenMesh);
-    return true;
-}
-
-bool RenderInvitationToSantaVillage(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME4, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-
-    float Luminosity = (sinf(WorldTime * 0.003f) + 1) * 0.3f + 0.6f;
-    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, Luminosity, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderLuckyCoin(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderChromeMesh1(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderBoostAura(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderChromeMesh0(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderSealedBox(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, 1, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    return true;
-}
-
-bool RenderGoldenOrSilverBox(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, 1, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
 bool RenderSmallCapeOfLord(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     if (b->BodyLight[0] == 1 && b->BodyLight[1] == 1 && b->BodyLight[2] == 1)
@@ -1553,30 +863,6 @@ bool RenderSmallCapeOfLord(BMD* b, const OBJECT* o, DrawLook& look, int Type, fl
         b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
                       look.hiddenMesh);
     }
-    return true;
-}
-
-bool RenderMesh0WithTexture(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType, int Texture)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV, Texture);
-    return true;
-}
-
-bool RenderJewelryCase(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                  look.blendMeshV);
-    b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    return true;
-}
-
-bool RenderSkeletonTransformationRing(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
-{
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
     return true;
 }
 
@@ -1757,88 +1043,24 @@ void RenderDeadlyStaffGlow(BMD* b, const OBJECT* o, DrawLook& look, float Alpha,
 const RenderStyle RenderStyles[] = {
     {"stormCrow", RenderStormCrow},
     {"thunderHawk", RenderThunderHawk},
-    {"wingsOfDarkness", RenderWingsOfDarkness},
     {"wingOfStorm", RenderWingOfStorm},
-    {"wingOfRuin", RenderWingOfRuin},
     {"capeOfEmperor", RenderCapeOfEmperor},
-    {"wingsOfDespair", RenderWingsOfDespair},
-    {"wingOfDimension", RenderWingOfDimension},
-    {"divineSwordOfArchangel", RenderDivineSwordOfArchangel},
-    {"archangelStaff", RenderArchangelStaff},
-    {"divineScepterOfArchangel", RenderDivineScepterOfArchangel},
-    {"greatReignCrossbow", RenderGreatReignCrossbow},
     {"pumpkinOfLuck", RenderPumpkinOfLuck},
-    {"skillParchment", RenderSkillParchment},
     {"runeBlade", RenderRuneBlade},
-    {"dragonSpear", RenderDragonSpear},
     {"elementalMace", RenderElementalMace},
-    {"darkHorse", RenderDarkHorse},
-    {"darkRaven", RenderDarkRaven},
-    {"battleScepter", RenderBattleScepter},
-    {"masterScepter", RenderMasterScepter},
-    {"flamberge", RenderFlamberge},
-    {"swordBreaker", RenderSwordBreaker},
-    {"runeBastardSword", RenderRuneBastardSword},
-    {"frostMace", RenderFrostMace},
     {"deadlyStaff", RenderDeadlyStaff, RenderDeadlyStaffGlow},
-    {"imperialStaff", RenderImperialStaff},
-    {"staff32", RenderStaff32},
-    {"crimsonGlory", RenderCrimsonGlory},
-    {"salamanderShield", RenderSalamanderShield},
-    {"frostBarrier", RenderFrostBarrier},
-    {"guardianShield", RenderGuardianShield},
-    {"crossShield", RenderCrossShield},
-    {"oldScroll", RenderOldScroll},
     {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, &HarmonyShine},
     {"bloodBone", RenderBloodBone},
     {"invisibilityCloak", RenderInvisibilityCloak},
-    {"scrollOfBlood", RenderScrollOfBlood},
     {"cursedCastleWater", RenderCursedCastleWater, &CursedCastleWaterShine},
     {"harmonyShine", RenderPlainly, &HarmonyShine},
-    {"condorFlame", RenderCondorFlame},
-    {"condorFeather", RenderCondorFeather},
-    {"deathBeamKnightFlame", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_DBSTONE_R},
-    {"hellMinerHorn", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_HELLHORN_R},
-    {"darkPhoenixFeather", RenderThirdClassQuestItem, BITMAP_ITEM_EFFECT_PFEATHER_R},
-    {"abyssalEye", RenderAbyssalEye},
-    {"eventTicket", RenderFreeTicket, BITMAP_FREETICKET_R},
-    {"chaosCard", RenderChaosCard, BITMAP_CHAOSCARD_R},
-    {"rareItemTicket1", RenderRareItemTicketWithBrightMesh1, BITMAP_RAREITEM1_R},
-    {"rareItemTicket2", RenderRareItemTicketWithBrightMesh1, BITMAP_RAREITEM2_R},
-    {"rareItemTicket3", RenderRareItemTicketWithBrightMesh1, BITMAP_RAREITEM3_R},
-    {"rareItemTicket4", RenderRareItemTicket, BITMAP_RAREITEM4_R},
-    {"rareItemTicket", RenderRareItemTicket, BITMAP_RAREITEM5_R},
-    {"talismanOfLuck", RenderTalismanOfLuck},
     {"sealOfAscension", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT43, &SealShine},
     {"sealOfWealth", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT44, &SealShine},
     {"sealOfSustenance", RenderSeal, BITMAP_LUCKY_SEAL_EFFECT45, &SealShine},
-    {"elitePotion", RenderElitePotion},
-    {"textured", RenderTextured},
-    {"rareItemTicket7", RenderRareItemTicket, BITMAP_RAREITEM7},
-    {"rareItemTicket8", RenderRareItemTicket, BITMAP_RAREITEM8},
-    {"rareItemTicket9", RenderRareItemTicket, BITMAP_RAREITEM9},
-    {"rareItemTicket10", RenderRareItemTicket, BITMAP_RAREITEM10},
-    {"rareItemTicket11", RenderRareItemTicket, BITMAP_RAREITEM11},
-    {"rareItemTicket12", RenderRareItemTicket, BITMAP_RAREITEM12},
-    {"openAccessTicketToDoppelganger", RenderFreeTicket, BITMAP_DOPPLEGANGGER_FREETICKET},
-    {"openAccessTicketToVarka", RenderFreeTicket, BITMAP_BARCA_FREETICKET},
-    {"openAccessTicketToVarka7", RenderFreeTicket, BITMAP_BARCA7TH_FREETICKET},
-    {"summonerCharacterCard", RenderChaosCard, BITMAP_CHARACTERCARD_R},
-    {"chaosCardGold", RenderChaosCard, BITMAP_NEWCHAOSCARD_GOLD_R},
-    {"chaosCardRare", RenderChaosCard, BITMAP_NEWCHAOSCARD_RARE_R},
-    {"chaosCardMini", RenderChaosCard, BITMAP_NEWCHAOSCARD_MINI_R},
-    {"texturedAllMeshes", RenderTexturedAllMeshes},
     {"greatScepter", RenderGreatScepter},
-    {"lordScepter", RenderLordScepter},
-    {"knightBlade", RenderKnightBlade},
-    {"darkReignBlade", RenderDarkReignBlade},
     {"hurricane", RenderHurricane},
     {"sylphWindBow", RenderSylphWindBow},
-    {"explosionBlade", RenderExplosionBlade},
     {"sylphidRay", RenderSylphidRay},
-    {"swordDancer", RenderSwordDancer},
-    {"albatrossBow", RenderAlbatrossBow},
-    {"platinaStaff", RenderPlatinaStaff},
     {"onlyMesh2WithoutSkin", RenderOnlyMesh2WithoutSkin},
     {"onlyMesh0WithoutSkin", RenderOnlyMesh0WithoutSkin},
     {"onlyMesh1WithoutSkin", RenderOnlyMesh1WithoutSkin},
@@ -1847,49 +1069,17 @@ const RenderStyle RenderStyles[] = {
     {"violentWindToEternalWingPants", RenderViolentWindToEternalWingPants},
     {"characterCard", RenderCharacterCard},
     {"divineAndSuccubusSkin", RenderDivineAndSuccubusSkin},
-    {"brova", RenderBrova},
-    {"strikerScepter", RenderStrikerScepter},
-    {"arrowViperBow", RenderArrowViperBow},
-    {"lostMap", RenderLostMap},
     {"symbolOfKundun", RenderSymbolOfKundun},
-    {"staffOfKundun", RenderStaffOfKundun},
-    {"demonicStick", RenderDemonicStick},
-    {"stormBlitzStick", RenderStormBlitzStick},
-    {"greatLordScepter", RenderGreatLordScepter},
     {"grandSoulShield", RenderGrandSoulShield},
-    {"elementalShield", RenderElementalShield},
     {"monsterBattleBow", RenderMonsterBattleBow},
     {"siegePotion", RenderSiegePotion},
     {"contractSummon", RenderContractSummon},
-    {"lifeStone", RenderLifeStone},
     {"ammunition", RenderAmmunition},
     {"helperNpcPlate", RenderHelperNpcPlate},
     {"socketSeed", RenderSocketSeed},
     {"socketSeedSphere", RenderSocketSeedSphere},
     {"gambleItem", RenderGambleItem},
-    {"talismanOfResurrection", RenderTalismanOfResurrection},
-    {"talismanOfMobility", RenderTalismanOfMobility},
-    {"talismanOfGuardian", RenderTalismanOfGuardian},
-    {"talismanOfItemProtection", RenderTalismanOfItemProtection},
-    {"invitationToSantaVillage", RenderInvitationToSantaVillage},
-    {"luckyCoin", RenderLuckyCoin},
-    {"chromeMesh1", RenderChromeMesh1},
-    {"boostAura", RenderBoostAura},
-    {"chromeMesh0", RenderChromeMesh0},
-    {"sealedBox", RenderSealedBox},
-    {"goldenOrSilverBox", RenderGoldenOrSilverBox},
     {"smallCapeOfLord", RenderSmallCapeOfLord},
-    {"packageBoxA", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_RED},
-    {"packageBoxB", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_BLUE},
-    {"packageBoxC", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_GOLD},
-    {"packageBoxD", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_GREEN},
-    {"packageBoxE", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_PUPLE},
-    {"packageBoxF", RenderMesh0WithTexture, BITMAP_PACKAGEBOX_SKY},
-    {"accountServiceItem", RenderMesh0WithTexture, BITMAP_INGAMESHOP_PRIMIUM6},
-    {"dayPass", RenderMesh0WithTexture, BITMAP_INGAMESHOP_COMMUTERTICKET4},
-    {"hourPass", RenderMesh0WithTexture, BITMAP_INGAMESHOP_SIZECOMMUTERTICKET3},
-    {"jewelryCase", RenderJewelryCase},
-    {"skeletonTransformationRing", RenderSkeletonTransformationRing},
     {"phoenixSoulStar", RenderPhoenixSoulStar},
     {"phoenixSoulHelmet", RenderPhoenixSoulHelmet},
     {"phoenixSoulArmor", RenderPhoenixSoulArmor},
@@ -1917,22 +1107,45 @@ ItemModelTable<SpawnFunction> g_itemSpawns{[](const Data::Items::ItemModelDefini
                                                return SpawnFunction{};
                                            }};
 
+// The render styles that are data, one entry per look of g_LookStore; built again when the looks change.
+const std::vector<RenderStyle>& DataStyles()
+{
+    static std::vector<RenderStyle> styles;
+    static int version = -1;
+    if (version != Data::Looks::g_LookStore.GetVersion())
+    {
+        version = Data::Looks::g_LookStore.GetVersion();
+        styles.clear();
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetRenderStyles())
+        {
+            styles.emplace_back(look);
+        }
+    }
+    return styles;
+}
+
+// A style that is data first, then one still in code (design L14).
 const RenderStyle* FindStyle(std::string_view name)
 {
+    if (const Data::Looks::LookDefinition* look = Data::Looks::g_LookStore.FindRenderStyle(name))
+    {
+        return &DataStyles()[static_cast<size_t>(look - Data::Looks::g_LookStore.GetRenderStyles().data())];
+    }
     const auto found = std::find_if(std::begin(RenderStyles), std::end(RenderStyles),
                                     [name](const RenderStyle& style) { return style.name == name; });
     return found != std::end(RenderStyles) ? found : nullptr;
 }
 
 // The render style of every item type, taken from the item model database
-// after each build of it.
+// after each build of it and after each change of the looks that are data.
 ItemModelTable<const RenderStyle*> g_itemStyles{[](const Data::Items::ItemModelDefinition& model)
                                                 {
                                                     // Names that are not styles are drawn plainly; the model
                                                     // loader reports them.
                                                     return model.renderStyle.empty() ? nullptr
                                                                                      : FindStyle(model.renderStyle);
-                                                }};
+                                                },
+                                                [] { return Data::Looks::g_LookStore.GetVersion(); }};
 } // namespace
 
 bool Exists(std::string_view name)
@@ -1940,18 +1153,30 @@ bool Exists(std::string_view name)
     return FindStyle(name) != nullptr;
 }
 
+bool ExistsInCode(std::string_view name)
+{
+    return std::ranges::any_of(RenderStyles, [name](const RenderStyle& style) { return style.name == name; });
+}
+
 std::span<const std::string_view> GetNames()
 {
-    static const std::vector<std::string_view> names = []
+    static std::vector<std::string_view> names;
+    static int version = -1;
+    if (version != Data::Looks::g_LookStore.GetVersion())
     {
-        std::vector<std::string_view> sorted;
+        version = Data::Looks::g_LookStore.GetVersion();
+        names.clear();
         for (const RenderStyle& style : RenderStyles)
         {
-            sorted.emplace_back(style.name);
+            names.emplace_back(style.name);
         }
-        std::ranges::sort(sorted);
-        return sorted;
-    }();
+        for (const Data::Looks::LookDefinition& look : Data::Looks::g_LookStore.GetRenderStyles())
+        {
+            names.emplace_back(look.name);
+        }
+        std::ranges::sort(names);
+        names.erase(std::unique(names.begin(), names.end()), names.end());
+    }
     return names;
 }
 
@@ -1975,8 +1200,64 @@ void SpawnHelperNpcPlateLights(OBJECT* o)
     CreateSprite(BITMAP_LIGHT, EndPos, 2.0f, o->Light, o);
 }
 
+namespace
+{
+#ifdef _EDITOR
+// PreviewLook's model and look, while one lives; the look is nullptr for the model drawn with no render style.
+struct Preview
+{
+    bool active = false;
+    int modelType = -1;
+    const Data::Looks::LookDefinition* look = nullptr;
+};
+Preview s_preview;
+#endif
+
+// The look the Style Editor's preview draws the model with (PreviewLook): nullopt while it shows no preview of the
+// model, nullptr for the model drawn with no render style. Only the editor previews looks.
+std::optional<const Data::Looks::LookDefinition*> PreviewOf(int modelType)
+{
+#ifdef _EDITOR
+    if (s_preview.active && s_preview.modelType == modelType)
+    {
+        return s_preview.look;
+    }
+#else
+    static_cast<void>(modelType);
+#endif
+    return std::nullopt;
+}
+} // namespace
+
+#ifdef _EDITOR
+PreviewLook::PreviewLook(int modelType, const Data::Looks::LookDefinition& look)
+{
+    s_preview = {true, modelType, &look};
+}
+
+PreviewLook::PreviewLook(int modelType)
+{
+    s_preview = {true, modelType, nullptr};
+}
+
+PreviewLook::~PreviewLook()
+{
+    s_preview = {};
+}
+#endif
+
 bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType)
 {
+    if (const std::optional<const Data::Looks::LookDefinition*> preview = PreviewOf(modelType))
+    {
+        if (*preview == nullptr)
+        {
+            // No render style: the drawing code draws the model itself.
+            return false;
+        }
+        Looks::DrawRenderStyle(**preview, b, o, look, alpha, renderType);
+        return true;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, look, modelType, alpha, renderType);
 }
@@ -1994,12 +1275,20 @@ void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
 
 const ShineBelowPlus3* FindShineBelowPlus3(int modelType)
 {
+    if (PreviewOf(modelType))
+    {
+        return nullptr;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr ? style->shine : nullptr;
 }
 
 bool RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
+    if (PreviewOf(modelType))
+    {
+        return false;
+    }
     const RenderStyle* style = g_itemStyles.Find(modelType);
     if (style == nullptr || style->glow == nullptr)
     {

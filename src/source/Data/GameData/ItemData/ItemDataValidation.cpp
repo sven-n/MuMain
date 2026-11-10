@@ -5,6 +5,7 @@
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
 #include "ItemJsonFormat.h"
+#include "ItemTooltipLines.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -68,48 +69,6 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
         check(locale, text);
     }
 }
-// A line of an item's description or name lines, and the field the item file writes it at ("description[2]").
-struct TooltipLineOf
-{
-    const ItemDescriptionLine* line;
-    std::string field;
-};
-
-// The lines ForEachItemTooltipLine walks (the description lines, the name lines, the added lines), each with its
-// field in the item file.
-std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
-{
-    std::vector<TooltipLineOf> lines;
-    for (size_t index = 0; index < definition.description.size(); ++index)
-    {
-        lines.push_back({&definition.description[index], "description[" + std::to_string(index) + "]"});
-    }
-    for (size_t index = 0; index < definition.nameLines.size(); ++index)
-    {
-        lines.push_back({&definition.nameLines[index], "nameLines[" + std::to_string(index) + "]"});
-    }
-    const std::vector<ItemTooltipLayoutAddition>& additions = definition.tooltipLayoutChanges.add;
-    for (size_t addition = 0; addition < additions.size(); ++addition)
-    {
-        for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-        {
-            lines.push_back({&additions[addition].lines[index], "tooltipLayoutChanges.add[" + std::to_string(addition) +
-                                                                    "].lines[" + std::to_string(index) + "]"});
-        }
-    }
-    return lines;
-}
-
-// The field of a line's text in one language, as the item file writes it.
-std::string TextField(const std::string& lineField, std::string_view locale)
-{
-    std::string field = lineField + ".text";
-    if (locale != LocalizedString::NeutralLocale)
-    {
-        field += "." + std::string(locale);
-    }
-    return field;
-}
 
 std::string ListPlaceholders(const std::set<std::string>& names)
 {
@@ -153,22 +112,22 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
                                    const std::string& lineField, std::vector<ItemDataIssue>& issues)
 {
     const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
-    const std::set<std::string> englishNames(english.names.begin(), english.names.end());
+    const std::set<std::string> englishNames = ToParityPlaceholders(english.names);
     if (!english.error.empty())
     {
         AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, english.error,
-                 TextField(lineField, LocalizedString::NeutralLocale).c_str());
+                 LineTextField(lineField, LocalizedString::NeutralLocale).c_str());
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
-        const std::string field = TextField(lineField, locale);
+        const std::string field = LineTextField(lineField, locale);
         const PlaceholderScan scan = ScanPlaceholders(translation);
         if (!scan.error.empty())
         {
             AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, scan.error, field.c_str());
             continue;
         }
-        const std::set<std::string> names(scan.names.begin(), scan.names.end());
+        const std::set<std::string> names = ToParityPlaceholders(scan.names);
         if (english.error.empty() && names != englishNames)
         {
             AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
@@ -183,7 +142,7 @@ void ValidateDescription(const ItemDefinition& definition, std::vector<ItemDataI
 {
     for (const auto& [line, lineField] : TooltipLinesOf(definition))
     {
-        ValidateItemText(definition, line->text, TextField(lineField, LocalizedString::NeutralLocale), issues);
+        ValidateItemText(definition, line->text, LineTextField(lineField, LocalizedString::NeutralLocale), issues);
         ValidateLinePlaceholderBraces(definition, line->text, lineField, issues);
     }
     for (const ItemLevelValues& levelValues : definition.levelValues)
@@ -475,8 +434,13 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
     {
         builtIns.push_back(MakeTablePlaceholder(table));
     }
+    // An item reference names an item; whether one has the number is the editor's Data Checks' concern, as the item
+    // data is read before it is known which numbers exist.
     const auto isValue = [&](std::string_view name)
-    { return IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles).has_value(); };
+    {
+        return IsBuiltInPlaceholder(name) || GetPlaceholderValue(name, 0, profiles).has_value() ||
+               IsItemReferencePlaceholder(name);
+    };
     // A table written without "table:" is suggested with it. Its own name comes first, also when it is close to a
     // built-in value: {levels} for the table "levels" is not {level}.
     const auto suggest = [&](const std::string& name, std::span<const std::string> candidates)
@@ -922,6 +886,104 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
     }
 }
 
+namespace
+{
+// The problems of one name's forms; `names` is the text they are forms of (none for a shared text the tooltip file
+// doesn't have, which is reported with the shared texts).
+void CheckNameForms(const ItemDefinition& definition, const ItemNameForms& forms, const LocalizedString* names,
+                    const std::string& field, const ItemNameCases& cases, const std::string& casesFile,
+                    std::vector<ItemDataIssue>& issues)
+{
+    const auto warn = [&](const std::string& at, const std::string& message)
+    { issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, at, message}); };
+    for (const auto& [locale, caseForms] : forms.GetAll())
+    {
+        const std::string localeField = field + "." + locale;
+        if (locale == LocalizedString::NeutralLocale)
+        {
+            warn(localeField, "English names have no forms: a text in English shows the name itself");
+            continue;
+        }
+        if (cases.GetCases(locale).empty())
+        {
+            warn(localeField, "\"" + locale + "\" declines no names in " + casesFile + "; give it its cases there");
+            continue;
+        }
+        if (names != nullptr && !names->HasOwn(locale))
+        {
+            warn(localeField, "has forms, but the name has no \"" + locale + "\" text of its own to decline");
+        }
+        else if (names != nullptr && names->Get(locale).find('{') != std::string::npos)
+        {
+            warn(localeField, "the name has placeholders: a text that names the item fills in the item's own forms, "
+                              "so these never show");
+            continue;
+        }
+        for (const auto& [caseKey, form] : caseForms)
+        {
+            if (!cases.Uses(locale, caseKey))
+            {
+                warn(localeField + "." + caseKey,
+                     "\"" + locale + "\" does not use the case " + caseKey + " in " + casesFile);
+            }
+        }
+    }
+}
+} // namespace
+
+void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                       const ItemNameCases& cases, const std::string& casesFile, std::vector<ItemDataIssue>& issues)
+{
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        CheckNameForms(definition, definition.nameForms, &definition.names, "nameForms", cases, casesFile, issues);
+        for (size_t index = 0; index < definition.nameLines.size(); ++index)
+        {
+            const ItemNameLine& line = definition.nameLines[index];
+            if (line.nameForms.IsEmpty())
+            {
+                continue;
+            }
+            const std::string field = "nameLines[" + std::to_string(index) + "].nameForms";
+            if (!line.hasText)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
+                                  "the line has no text of its own: it shows the standard name, whose forms are the "
+                                  "item's nameForms"});
+                continue;
+            }
+            if (!line.when.empty())
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
+                                  "the line has conditions: a text that names the item at a level takes a line "
+                                  "without conditions, so these forms never show"});
+                continue;
+            }
+            // A shared text ("@x") has its languages and placeholders in the tooltip file.
+            CheckNameForms(definition, line.nameForms, FindLineText(tooltips, line), field, cases, casesFile, issues);
+        }
+    }
+}
+
+void ValidateNameCaseLocales(const ItemNameCases& cases, std::span<const char* const> uiLocales,
+                             const std::string& casesFile, std::vector<ItemDataIssue>& issues)
+{
+    for (const auto& [locale, languageCases] : cases.GetLanguages())
+    {
+        if (std::none_of(uiLocales.begin(), uiLocales.end(), [&](const char* uiLocale) { return locale == uiLocale; }))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, casesFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "languages." + locale,
+                              "the game has no texts in \"" + locale +
+                                  "\": no text shows its cases; take it out (Item Translations, Cases...)"});
+        }
+    }
+}
+
 void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
                           const std::string& labelFile, std::vector<ItemDataIssue>& issues)
 {
@@ -1031,7 +1093,7 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         };
         for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            warnAbout(line->text, TextField(field, LocalizedString::NeutralLocale));
+            warnAbout(line->text, LineTextField(field, LocalizedString::NeutralLocale));
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
@@ -1112,6 +1174,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
         model.file = shared->second->file;
         model.textureFolders = shared->second->textureFolders;
         model.noneBlendMeshes = shared->second->noneBlendMeshes;
+        model.meshNames = shared->second->meshNames;
         usedNames.insert(model.model);
     }
 

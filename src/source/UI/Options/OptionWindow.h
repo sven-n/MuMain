@@ -232,7 +232,7 @@ namespace mu::ui::window
 
             bool operator==(const TuningRowModel&) const = default;
         };
-        static constexpr std::size_t TuningGroupCount = 4;
+        static constexpr std::size_t TuningGroupCount = 5;
 
         struct OptionRmlModel
         {
@@ -346,12 +346,15 @@ namespace mu::ui::window
             // also without Enhanced lighting.
             bool lookLighting = true;
             bool lookDynamicLights = true;
+            bool lookSunlight = true;
             bool lookLightMood = true;
             bool lookPostProcessing = true;
             bool lookFeaturesLocked = false;
             bool lookDynamicLightsLocked = false;
+            bool lookSunlightLocked = false;
             Rml::String lookLightingLabel;
             Rml::String lookDynamicLightsLabel;
+            Rml::String lookSunlightLabel;
             Rml::String lookLightMoodLabel;
             Rml::String lookPostProcessingLabel;
             bool enhancedMovement = true;

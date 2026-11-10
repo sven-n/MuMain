@@ -1,6 +1,7 @@
 #include "Render/Look/LookTuningCommand.h"
 
-#include <cwchar>
+#include "Core/Text/NumberParse.h"
+
 #include <initializer_list>
 #include <vector>
 
@@ -27,26 +28,24 @@ const CommandForm CommandForms[] = {
     {L"$dynlights spell ", {LookValue::DynamicEffectGain, LookValue::DynamicEffectRange, LookValue::DynamicEffectFade}},
     {L"$dynlights cap ", {LookValue::DynamicEffectCap}},
     {L"$dynlights reach ", {LookValue::DynamicEffectRangeMax}},
+    {L"$dynlights shadow ", {LookValue::GroundShadowOpacity}},
+    {L"$dynlights shadowangle ", {LookValue::GroundShadowAngle}},
+    {L"$dynlights shadowlights ", {LookValue::GroundShadowLights}},
+    {L"$dynlights flatsun ", {LookValue::FlatSunShadow}},
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
+    {L"$ao radius ", {LookValue::AmbientOcclusionRadius}},
+    {L"$clouds scale ", {LookValue::CloudScale}},
+    {L"$clouds speed ", {LookValue::CloudSpeed}},
+    {L"$clouds cover ", {LookValue::CloudCover}},
+    {L"$clouds ", {LookValue::CloudStrength}},
+    {L"$sky ", {LookValue::SkyFill}},
+    {L"$rim sun ", {LookValue::RimSunFollow}},
+    {L"$ao ", {LookValue::AmbientOcclusionStrength}},
+    {L"$sun softness ", {LookValue::SunShadowSoftness}},
+    {L"$sun resolution ", {LookValue::SunShadowResolution}},
+    {L"$sun ", {LookValue::SunShadowStrength}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };
-
-// One number, the whole word.
-std::optional<double> ParseNumber(std::wstring_view word)
-{
-    if (word.empty())
-    {
-        return std::nullopt;
-    }
-    const std::wstring copy(word);
-    wchar_t* end = nullptr;
-    const double number = std::wcstod(copy.c_str(), &end);
-    if (end != copy.c_str() + copy.size())
-    {
-        return std::nullopt;
-    }
-    return number;
-}
 
 std::vector<std::wstring_view> Words(std::wstring_view text)
 {
@@ -116,7 +115,7 @@ std::optional<LookTuningCommand> ParseNumbers(std::wstring_view text, std::initi
     LookTuningCommand command;
     for (const LookValue value : values)
     {
-        const std::optional<double> number = ParseNumber(words[command.count]);
+        const std::optional<double> number = Core::Text::TryParseDouble(words[command.count]);
         if (!number)
         {
             return std::nullopt;
@@ -191,7 +190,7 @@ std::optional<LookCommand> ParseLookCommand(std::wstring_view command)
             return std::nullopt;
         }
         const std::optional<std::string> name = Ascii(words[next]);
-        const std::optional<double> value = ParseNumber(words[next + 1]);
+        const std::optional<double> value = Core::Text::TryParseDouble(words[next + 1]);
         if (!name || !value)
         {
             return std::nullopt;

@@ -206,6 +206,14 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
     }
+    if (models.renderStylesChanged)
+    {
+        files.push_back({models.renderStylesFile, models.renderStylesText});
+    }
+    if (models.nameCasesChanged && models.nameCases != nullptr)
+    {
+        files.push_back({models.nameCasesFile, WriteItemNameCasesJson(*models.nameCases)});
+    }
 #endif
 }
 } // namespace
@@ -414,6 +422,30 @@ GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
         return result;
     }
     ReadGroundLabelsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
+std::filesystem::path GetItemNameCasesFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / ItemNameCasesFileName;
+}
+
+ItemNameCasesLoadResult LoadItemNameCasesFile(const std::filesystem::path& file)
+{
+    ItemNameCasesLoadResult result;
+    std::error_code error;
+    if (!std::filesystem::exists(file, error))
+    {
+        return result;
+    }
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemNameCasesJson(*text, source, result.cases, result.issues);
     return result;
 }
 

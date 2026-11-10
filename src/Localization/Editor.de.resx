@@ -527,7 +527,7 @@
     <value>Wird nie gezeichnet; die Vorschau kann es nicht allein zeigen.</value>
   </data>
   <data name="Mesh code looks note" xml:space="preserve">
-    <value>Darstellungsstil und Gegenstandseffekt sind Zeichencode: welche Meshes sie zeichnen, steht hier, sobald sie Daten sind.</value>
+    <value>Der Stil-Editor zeigt, welche Teile der Darstellungsstil mit welchen Effekten zeichnet; der Gegenstandseffekt ist Zeichencode.</value>
   </data>
   <data name="Preview pick note" xml:space="preserve">
     <value>Ein Klick auf einen Teil findet sein Mesh in der Mesh-Liste.</value>
@@ -546,6 +546,405 @@
   </data>
   <data name="Item effect" xml:space="preserve">
     <value>Gegenstandseffekt</value>
+  </data>
+  <data name="Render styles" xml:space="preserve">
+    <value>Darstellungsstile</value>
+  </data>
+  <data name="Item effects" xml:space="preserve">
+    <value>Gegenstandseffekte</value>
+  </data>
+  <data name="Style Editor" xml:space="preserve">
+    <value>Stil-Editor</value>
+  </data>
+  <data name="Open in Style Editor" xml:space="preserve">
+    <value>Im Stil-Editor öffnen</value>
+  </data>
+  <data name="Code mark" xml:space="preserve">
+    <value>(Code)</value>
+  </data>
+  <data name="Item looks note" xml:space="preserve">
+    <value>Darstellungsstile stehen in Data/Effects/RenderStyles.json oder sind noch Zeichencode, markiert mit (Code); Im Stil-Editor öffnen zeigt den Look. Hier wird gewählt, welchen der Gegenstand nutzt.</value>
+  </data>
+  <data name="Style Editor tree note" xml:space="preserve">
+    <value>Darstellungsstile zeichnen einen Gegenstand in Ebenen; Gegenstandseffekte wirken, bevor er gezeichnet wird. Ordner sortieren die Looks nur: Ziehe einen Look oder einen Ordner auf einen Ordner oder auf seine Wurzel. Ein Look mit (Code) ist noch Zeichencode: Du siehst ihn und seine Gegenstände, kannst ihn aber nicht ändern.</value>
+  </data>
+  <data name="New look" xml:space="preserve">
+    <value>Neuer Look</value>
+  </data>
+  <data name="Copy a look" xml:space="preserve">
+    <value>Look kopieren</value>
+  </data>
+  <data name="Rename a look" xml:space="preserve">
+    <value>Look umbenennen</value>
+  </data>
+  <data name="Remove a look" xml:space="preserve">
+    <value>Look entfernen</value>
+  </data>
+  <data name="Change a look" xml:space="preserve">
+    <value>Look ändern</value>
+  </data>
+  <data name="Move a look" xml:space="preserve">
+    <value>Look verschieben</value>
+  </data>
+  <data name="New look folder" xml:space="preserve">
+    <value>Neuer Look-Ordner</value>
+  </data>
+  <data name="Rename a look folder" xml:space="preserve">
+    <value>Look-Ordner umbenennen</value>
+  </data>
+  <data name="Remove a look folder" xml:space="preserve">
+    <value>Look-Ordner entfernen</value>
+  </data>
+  <data name="Move a look folder" xml:space="preserve">
+    <value>Look-Ordner verschieben</value>
+  </data>
+  <data name="It holds {0} looks and {1} folders." xml:space="preserve">
+    <value>Er enthält {0} Looks und {1} Ordner.</value>
+  </data>
+  <data name="Look name" xml:space="preserve">
+    <value>Name des Looks</value>
+  </data>
+  <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Darstellungsstil hat, weder in der Datei noch im Code.</value>
+  </data>
+  <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
+    <value>Nur ein Look, den kein Gegenstand nutzt, kann umbenannt oder entfernt werden.</value>
+  </data>
+  <data name="Code look note" xml:space="preserve">
+    <value>Noch Zeichencode (Render/Items/ItemRenderStyles.cpp): Du siehst den Look und seine Gegenstände hier, kannst ihn aber nicht ändern. Er kommt in einem späteren Schritt in die Look-Datei.</value>
+  </data>
+  <data name="Item effects root note" xml:space="preserve">
+    <value>Gegenstandseffekte wirken, bevor ein Gegenstand gezeichnet wird. Sie sind alle noch Zeichencode (Render/Items/ItemEffects.cpp): Du siehst jeden und seine Gegenstände hier, kannst sie aber nicht ändern.</value>
+  </data>
+  <data name="Render styles root note" xml:space="preserve">
+    <value>Die Darstellungsstile aus {0} und die, die noch Zeichencode sind, markiert mit (Code).</value>
+  </data>
+  <data name="The look file has a fatal problem" xml:space="preserve">
+    <value>Die Look-Datei hatte beim Lesen ein fatales Problem (siehe Darstellungsstile): Speichern ist aus, bis es behoben ist und Zurücksetzen sie neu liest.</value>
+  </data>
+  <data name="Apply is off while a fatal problem is left." xml:space="preserve">
+    <value>Übernehmen ist aus, solange ein fatales Problem bleibt.</value>
+  </data>
+  <data name="Problems of this look" xml:space="preserve">
+    <value>Probleme dieses Looks</value>
+  </data>
+  <data name="Layers" xml:space="preserve">
+    <value>Ebenen</value>
+  </data>
+  <data name="Show this layer in the preview" xml:space="preserve">
+    <value>Diese Ebene in der Vorschau zeigen</value>
+  </data>
+  <data name="Item values after drawing" xml:space="preserve">
+    <value>Gegenstandswerte nach dem Zeichnen</value>
+  </data>
+  <data name="Leaves it" xml:space="preserve">
+    <value>Der Look hinterlässt diesen Wert für das, was danach gezeichnet wird, etwa das Stufenleuchten.</value>
+  </data>
+  <data name="Drag field tooltip" xml:space="preserve">
+    <value>Seitlich ziehen ändert den Wert, ein Doppelklick tippt eine Zahl.</value>
+  </data>
+  <data name="Layer kind tooltip" xml:space="preserve">
+    <value>Was die Ebene zeichnet: eine Textur auf den Teilen oder eine Spiegelung, die wie Licht auf Metall darüber wandert.</value>
+  </data>
+  <data name="Layer motion tooltip" xml:space="preserve">
+    <value>Wie die Spiegelung über die Teile wandert: treibend, wischend, wirbelnd, in Streifen oder still.</value>
+  </data>
+  <data name="Layer blend tooltip" xml:space="preserve">
+    <value>Wie sich die Ebene mit dem mischt, was vor ihr gezeichnet wurde.</value>
+  </data>
+  <data name="Blend normal tooltip" xml:space="preserve">
+    <value>Deckt ab, was vor ihr gezeichnet wurde.</value>
+  </data>
+  <data name="Blend glow tooltip" xml:space="preserve">
+    <value>Addiert ihr Licht zu dem, was vor ihr gezeichnet wurde: Helles leuchtet, Dunkles bleibt durchsichtig.</value>
+  </data>
+  <data name="Blend as the drawing asks tooltip" xml:space="preserve">
+    <value>Überblendet, wie die Zeichnung des Gegenstands es wählt, wie seine eigene Textur.</value>
+  </data>
+  <data name="Layer meshes tooltip" xml:space="preserve">
+    <value>Auf welchen Teilen des Modells die Ebene zeichnet: auf jedem Teil, nur auf den angehakten oder auf jedem außer den angehakten.</value>
+  </data>
+  <data name="Layer hidden mesh tooltip" xml:space="preserve">
+    <value>Zeichnet auch auf dem Teil, den der Gegenstand verbirgt und den seine eigene Zeichnung auslässt.</value>
+  </data>
+  <data name="Layer part tooltip" xml:space="preserve">
+    <value>Angehakt: Die Ebene zeichnet auf diesem Teil. Ein Teil bleibt angehakt.</value>
+  </data>
+  <data name="Layer part left out tooltip" xml:space="preserve">
+    <value>Angehakt: Die Ebene lässt dieses Teil aus und zeichnet auf jedem anderen. Ein Teil bleibt angehakt.</value>
+  </data>
+  <data name="Layer mesh numbers tooltip" xml:space="preserve">
+    <value>Die Nummern der Meshes, auf denen die Ebene zeichnet, etwa 0, 2. Wähle einen Gegenstand, um seine Teile stattdessen nach Namen anzuhaken.</value>
+  </data>
+  <data name="Mesh not in the model" xml:space="preserve">
+    <value>{0} (nicht im Modell)</value>
+  </data>
+  <data name="Layer texture tooltip" xml:space="preserve">
+    <value>Das Bild, das die Ebene zeichnet, eine .jpg oder .tga unter Data, etwa Item/Deye_R.jpg. Leer: die eigene Textur jedes Teils.</value>
+  </data>
+  <data name="Layer light tooltip" xml:space="preserve">
+    <value>Die Farbe, in der die Ebene gezeichnet wird: das Licht davor (wie der Gegenstand beleuchtet ist), eine eigene Farbe oder eine Tönung des Lichts des Gegenstands.</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Layer color tooltip" xml:space="preserve">
+    <value>Klicke auf das Farbfeld, um eine Farbe zu wählen, oder ziehe die Zahl von Rot, Grün oder Blau: 0 ist nichts davon, 1 ist alles.</value>
+  </data>
+  <data name="Each channel apart" xml:space="preserve">
+    <value>Jeder Kanal einzeln</value>
+  </data>
+  <data name="Each channel apart tooltip" xml:space="preserve">
+    <value>Gibt Rot, Grün und Blau je ein Feld, damit sich einer mit der Zeit ändern kann, etwa als Welle. Bleibt an, solange einer das tut.</value>
+  </data>
+  <data name="Layer light channel tooltip" xml:space="preserve">
+    <value>Wie viel von dieser Farbe das Licht hat: 0 ist nichts, 1 ist alles.</value>
+  </data>
+  <data name="Layer opacity tooltip" xml:space="preserve">
+    <value>Wie deckend die Ebene ist: 0 ist unsichtbar, 1 ist voll gezeichnet.</value>
+  </data>
+  <data name="Layer glow mesh tooltip" xml:space="preserve">
+    <value>Welches Teil mit der Leuchtstärke leuchtet: das Leucht-Mesh des Gegenstands, keines, jedes Teil oder das hier gewählte.</value>
+  </data>
+  <data name="Layer glow strength tooltip" xml:space="preserve">
+    <value>Wie hell das Leucht-Mesh leuchtet: 0 ist kein Leuchten, 1 ist voll, mehr leuchtet noch heller.</value>
+  </data>
+  <data name="Layer scroll tooltip" xml:space="preserve">
+    <value>Verschiebt die Textur über das Teil, seitlich (U) oder auf und ab (V); Laufen lässt sie immer weiter fließen.</value>
+  </data>
+  <data name="Layer scrolling mesh tooltip" xml:space="preserve">
+    <value>Das Teil, dessen Textur die Verschiebung bewegt; „Die des Modells“ nimmt das, welches das Modell nennt.</value>
+  </data>
+  <data name="Item hidden mesh tooltip" xml:space="preserve">
+    <value>Das Teil, das beim Zeichnen nach dem Look ausgelassen wird, etwa beim Stufenleuchten.</value>
+  </data>
+  <data name="From the item tooltip" xml:space="preserve">
+    <value>Der Wert, den das Spiel dem Gegenstand gibt, wie ohne diesen Look.</value>
+  </data>
+  <data name="From the drawing tooltip" xml:space="preserve">
+    <value>Der Wert, den die Zeichnung verlangt, etwa während ein Gegenstand ein- oder ausblendet.</value>
+  </data>
+  <data name="A number tooltip" xml:space="preserve">
+    <value>Eine Zahl, die gleich bleibt.</value>
+  </data>
+  <data name="Wave tooltip" xml:space="preserve">
+    <value>Steigt und fällt sanft zwischen Von und Bis; ein Auf und Ab dauert Sekunden.</value>
+  </data>
+  <data name="Bounce tooltip" xml:space="preserve">
+    <value>Geht von Von hinauf zu Bis und zurück wie ein hüpfender Ball; ein Sprung dauert Sekunden.</value>
+  </data>
+  <data name="Scroll tooltip" xml:space="preserve">
+    <value>Wächst gleichmäßig um Pro Sekunde, für eine Textur, die immer weiter läuft.</value>
+  </data>
+  <data name="Ramp tooltip" xml:space="preserve">
+    <value>Steigt in Sekunden von Von bis Bis und beginnt dann von vorn.</value>
+  </data>
+  <data name="Frames tooltip" xml:space="preserve">
+    <value>Springt alle Sekunden je Bild um Schritt weiter, Anzahl Mal, und beginnt dann von vorn: eine Textur aus Bildern.</value>
+  </data>
+  <data name="Random value tooltip" xml:space="preserve">
+    <value>Ein neuer Wert zwischen Von und Bis in jedem Bild, in Schritten von Schritt: ein Flackern.</value>
+  </data>
+  <data name="Shape from tooltip" xml:space="preserve">
+    <value>Wo der Wert beginnt: der tiefste einer Welle oder eines Hüpfens.</value>
+  </data>
+  <data name="Shape to tooltip" xml:space="preserve">
+    <value>Wohin der Wert geht: der höchste einer Welle oder eines Hüpfens.</value>
+  </data>
+  <data name="Shape seconds tooltip" xml:space="preserve">
+    <value>Wie lange eine Runde dauert, in Sekunden.</value>
+  </data>
+  <data name="Shape per second tooltip" xml:space="preserve">
+    <value>Um wie viel der Wert jede Sekunde wächst; unter 0 läuft er andersherum.</value>
+  </data>
+  <data name="Shape count tooltip" xml:space="preserve">
+    <value>Wie viele Bilder es gibt, bevor es von vorn beginnt.</value>
+  </data>
+  <data name="Shape step tooltip" xml:space="preserve">
+    <value>Um wie viel sich der Wert von einem Bild zum nächsten ändert.</value>
+  </data>
+  <data name="Shape seconds each tooltip" xml:space="preserve">
+    <value>Wie lange jedes Bild zu sehen ist, in Sekunden.</value>
+  </data>
+  <data name="Stop time" xml:space="preserve">
+    <value>Zeit anhalten</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Zeit</value>
+  </data>
+  <data name="Draw as a doppelganger" xml:space="preserve">
+    <value>Als Doppelgänger zeichnen</value>
+  </data>
+  <data name="Pick an item to see the look on it" xml:space="preserve">
+    <value>Wähle einen Gegenstand in den Gegenstandswerkzeugen oder einen der Gegenstände oben, um den Look an ihm zu sehen.</value>
+  </data>
+  <data name="The preview draws {0}" xml:space="preserve">
+    <value>Die Vorschau zeichnet {0} mit dem Look, wie er übernommen ist, und daneben, wie seine Felder ihn jetzt haben.</value>
+  </data>
+  <data name="Original item: as in the game" xml:space="preserve">
+    <value>Originaler Gegenstand: wie im Spiel</value>
+  </data>
+  <data name="Original item: without a look" xml:space="preserve">
+    <value>Originaler Gegenstand: ohne Look</value>
+  </data>
+  <data name="Chosen look" xml:space="preserve">
+    <value>Gewählter Look</value>
+  </data>
+  <data name="As edited" xml:space="preserve">
+    <value>Wie bearbeitet</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>Textur</value>
+  </data>
+  <data name="Texture hint" xml:space="preserve">
+    <value>Leer: die eigene des Meshes</value>
+  </data>
+  <data name="Reflection" xml:space="preserve">
+    <value>Spiegelung</value>
+  </data>
+  <data name="Motion" xml:space="preserve">
+    <value>Bewegung</value>
+  </data>
+  <data name="Slow drift" xml:space="preserve">
+    <value>Langsames Treiben</value>
+  </data>
+  <data name="Fast sweep" xml:space="preserve">
+    <value>Schnelles Wischen</value>
+  </data>
+  <data name="Follows the light" xml:space="preserve">
+    <value>Folgt dem Licht</value>
+  </data>
+  <data name="Swirl" xml:space="preserve">
+    <value>Wirbel</value>
+  </data>
+  <data name="Strong swirl" xml:space="preserve">
+    <value>Starker Wirbel</value>
+  </data>
+  <data name="Stripes" xml:space="preserve">
+    <value>Streifen</value>
+  </data>
+  <data name="Very slow drift" xml:space="preserve">
+    <value>Sehr langsames Treiben</value>
+  </data>
+  <data name="Oil sheen" xml:space="preserve">
+    <value>Ölschimmer</value>
+  </data>
+  <data name="Still shine" xml:space="preserve">
+    <value>Ruhiger Glanz</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="As the drawing asks" xml:space="preserve">
+    <value>Wie die Zeichnung es verlangt</value>
+  </data>
+  <data name="Every mesh" xml:space="preserve">
+    <value>Jedes Mesh</value>
+  </data>
+  <data name="These meshes" xml:space="preserve">
+    <value>Diese Meshes</value>
+  </data>
+  <data name="Every mesh but" xml:space="preserve">
+    <value>Jedes Mesh außer</value>
+  </data>
+  <data name="Also the hidden mesh" xml:space="preserve">
+    <value>Auch das verborgene Mesh des Gegenstands</value>
+  </data>
+  <data name="Mesh numbers hint" xml:space="preserve">
+    <value>Mesh-Nummern, z. B. 0, 2</value>
+  </data>
+  <data name="A mesh" xml:space="preserve">
+    <value>Ein Mesh</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Licht</value>
+  </data>
+  <data name="The light before" xml:space="preserve">
+    <value>Wie die Ebene davor</value>
+  </data>
+  <data name="A color" xml:space="preserve">
+    <value>Eine Farbe</value>
+  </data>
+  <data name="Tint of the item light" xml:space="preserve">
+    <value>Eine Tönung des Gegenstandslichts</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>Rot</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>Grün</value>
+  </data>
+  <data name="Blue" xml:space="preserve">
+    <value>Blau</value>
+  </data>
+  <data name="Opacity" xml:space="preserve">
+    <value>Deckkraft</value>
+  </data>
+  <data name="Glow mesh" xml:space="preserve">
+    <value>Leucht-Mesh</value>
+  </data>
+  <data name="Glow strength" xml:space="preserve">
+    <value>Leuchtstärke</value>
+  </data>
+  <data name="Scroll U" xml:space="preserve">
+    <value>Verschiebung U</value>
+  </data>
+  <data name="Scroll V" xml:space="preserve">
+    <value>Verschiebung V</value>
+  </data>
+  <data name="Scrolling mesh" xml:space="preserve">
+    <value>Laufendes Mesh</value>
+  </data>
+  <data name="Hidden mesh" xml:space="preserve">
+    <value>Verborgenes Mesh</value>
+  </data>
+  <data name="Kept from the model" xml:space="preserve">
+    <value>Die des Modells</value>
+  </data>
+  <data name="From the item" xml:space="preserve">
+    <value>Die des Gegenstands</value>
+  </data>
+  <data name="From the drawing" xml:space="preserve">
+    <value>Die der Zeichnung</value>
+  </data>
+  <data name="A number" xml:space="preserve">
+    <value>Eine Zahl</value>
+  </data>
+  <data name="Wave" xml:space="preserve">
+    <value>Welle</value>
+  </data>
+  <data name="Bounce" xml:space="preserve">
+    <value>Hüpfen</value>
+  </data>
+  <data name="Scroll" xml:space="preserve">
+    <value>Laufen</value>
+  </data>
+  <data name="Ramp" xml:space="preserve">
+    <value>Rampe</value>
+  </data>
+  <data name="Frames" xml:space="preserve">
+    <value>Bilder</value>
+  </data>
+  <data name="Random value" xml:space="preserve">
+    <value>Zufall</value>
+  </data>
+  <data name="A new value each frame" xml:space="preserve">
+    <value>Jedes Bild ein neuer Wert</value>
+  </data>
+  <data name="Seconds" xml:space="preserve">
+    <value>Sekunden</value>
+  </data>
+  <data name="Per second" xml:space="preserve">
+    <value>Pro Sekunde</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Anzahl</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Schritt</value>
+  </data>
+  <data name="Seconds each" xml:space="preserve">
+    <value>Sekunden je Bild</value>
   </data>
   <data name="Used by" xml:space="preserve">
     <value>verwendet von</value>
@@ -603,6 +1002,141 @@
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
+  </data>
+  <data name="Name this part" xml:space="preserve">
+    <value>Teil benennen</value>
+  </data>
+  <data name="Name a part" xml:space="preserve">
+    <value>Teil benennen</value>
+  </data>
+  <data name="Parts and their effects" xml:space="preserve">
+    <value>Teile und ihre Effekte</value>
+  </data>
+  <data name="Parts note" xml:space="preserve">
+    <value>Die Teile des Gegenstands, den die Vorschau zeichnet, jedes mit seinen Effekten; auch ein Klick auf ein Teil in der Vorschau wählt es. Effekte zielen auf Mesh-Nummern, sie passen also zu jedem Gegenstand, der den Look nutzt.</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>Teil</value>
+  </data>
+  <data name="Base: own texture" xml:space="preserve">
+    <value>Grundlage: eigene Textur</value>
+  </data>
+  <data name="Every part" xml:space="preserve">
+    <value>Jedes Teil</value>
+  </data>
+  <data name="No effect" xml:space="preserve">
+    <value>kein Effekt</value>
+  </data>
+  <data name="Add effect to {0}" xml:space="preserve">
+    <value>Effekt zu {0} hinzufügen</value>
+  </data>
+  <data name="Remove the effect" xml:space="preserve">
+    <value>Effekt entfernen</value>
+  </data>
+  <data name="Show this effect in the preview" xml:space="preserve">
+    <value>Diesen Effekt in der Vorschau zeigen</value>
+  </data>
+  <data name="Effect Base" xml:space="preserve">
+    <value>Eigene Textur</value>
+  </data>
+  <data name="Effect Glow" xml:space="preserve">
+    <value>Leuchten</value>
+  </data>
+  <data name="Effect Pulse" xml:space="preserve">
+    <value>Pulsieren</value>
+  </data>
+  <data name="Effect Shine" xml:space="preserve">
+    <value>Glanz</value>
+  </data>
+  <data name="Effect Overlay texture" xml:space="preserve">
+    <value>Überlagerte Textur</value>
+  </data>
+  <data name="Effect Flowing texture" xml:space="preserve">
+    <value>Fließende Textur</value>
+  </data>
+  <data name="Effect Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Effect Frames and flicker" xml:space="preserve">
+    <value>Bilder und Flackern</value>
+  </data>
+  <data name="Effect Glow note" xml:space="preserve">
+    <value>Zeichnet das Teil leuchtend in einer Stärke.</value>
+  </data>
+  <data name="Effect Pulse note" xml:space="preserve">
+    <value>Ein Leuchten, dessen Stärke schwankt.</value>
+  </data>
+  <data name="Effect Shine note" xml:space="preserve">
+    <value>Eine Spiegelung, die über das Teil wandert.</value>
+  </data>
+  <data name="Effect Overlay texture note" xml:space="preserve">
+    <value>Eine andere Textur über dem Teil.</value>
+  </data>
+  <data name="Effect Flowing texture note" xml:space="preserve">
+    <value>Eine Textur, die über das Teil gleitet; das Teil leuchtet.</value>
+  </data>
+  <data name="Effect Color note" xml:space="preserve">
+    <value>Zeichnet das Teil in einer Farbe.</value>
+  </data>
+  <data name="Effect Frames and flicker note" xml:space="preserve">
+    <value>Die Textur schaltet auf dem Teil Bild für Bild weiter; das Teil leuchtet.</value>
+  </data>
+  <data name="Moves on one part" xml:space="preserve">
+    <value>Wähle zuerst ein Teil: Eine fließende Textur oder Bilder bewegen sich auf einem Teil, das leuchtet.</value>
+  </data>
+  <data name="Also glows" xml:space="preserve">
+    <value>leuchtet</value>
+  </data>
+  <data name="Also pulses" xml:space="preserve">
+    <value>pulsiert</value>
+  </data>
+  <data name="Also flows" xml:space="preserve">
+    <value>fließt</value>
+  </data>
+  <data name="Also steps through frames" xml:space="preserve">
+    <value>Bilder</value>
+  </data>
+  <data name="Also colored" xml:space="preserve">
+    <value>gefärbt</value>
+  </data>
+  <data name="Show the layers" xml:space="preserve">
+    <value>Ebenen zeigen (alle Felder, Zeichenreihenfolge)</value>
+  </data>
+  <data name="All fields" xml:space="preserve">
+    <value>Alle Felder</value>
+  </data>
+  <data name="Pick an effect or add one" xml:space="preserve">
+    <value>Wähle einen Effekt in der Liste, oder wähle ein Teil und füge einen hinzu.</value>
+  </data>
+  <data name="Apply the change" xml:space="preserve">
+    <value>Änderung übernehmen</value>
+  </data>
+  <data name="For all {0} items that use it" xml:space="preserve">
+    <value>Für alle {0} Gegenstände, die ihn nutzen</value>
+  </data>
+  <data name="This changes {0} for these items; Ctrl+Z undoes it." xml:space="preserve">
+    <value>Das ändert {0} für diese Gegenstände; Strg+Z macht es rückgängig.</value>
+  </data>
+  <data name="Only {0}, as a copy of the look" xml:space="preserve">
+    <value>Nur {0}, als Kopie des Looks</value>
+  </data>
+  <data name="The other items keep {0}." xml:space="preserve">
+    <value>Die anderen Gegenstände behalten {0}.</value>
+  </data>
+  <data name="A new item from {0}" xml:space="preserve">
+    <value>Ein neuer Gegenstand aus {0}</value>
+  </data>
+  <data name="New item note" xml:space="preserve">
+    <value>Eine Kopie des Gegenstands mit seinem Modell, an einer freien Nummer, mit der Kopie des Looks; die anderen Gegenstände behalten den Look. Das Spiel zeigt ihn, sobald der Server den neuen Gegenstand kennt (Item Sync).</value>
+  </data>
+  <data name="Pick an item to apply to it" xml:space="preserve">
+    <value>Wähle einen Gegenstand in den Gegenstandswerkzeugen, um die Änderung nur auf ihn oder auf einen neuen Gegenstand anzuwenden.</value>
+  </data>
+  <data name="Only this item: a copy of the look" xml:space="preserve">
+    <value>Nur dieser Gegenstand: Kopie des Looks</value>
+  </data>
+  <data name="A new item with the look" xml:space="preserve">
+    <value>Neuer Gegenstand mit dem Look</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
@@ -1323,9 +1857,6 @@
   </data>
   <data name="Excellent mesh without skin" xml:space="preserve">
     <value>Excellent-Mesh ohne Haut</value>
-  </data>
-  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
-    <value>Die Looks sind Zeichencode; hier wird gewählt, welchen der Gegenstand nutzt.</value>
   </data>
   <data name="Remove the model entry" xml:space="preserve">
     <value>Modelleintrag entfernen</value>
@@ -4050,5 +4581,26 @@
   </data>
   <data name="Item options" xml:space="preserve">
     <value>Item-Optionen</value>
+  </data>
+  <data name="Name forms" xml:space="preserve">
+    <value>Namensformen</value>
+  </data>
+  <data name="Name form" xml:space="preserve">
+    <value>Namensform</value>
+  </data>
+  <data name="No language declines item names" xml:space="preserve">
+    <value>Keine Sprache dekliniert Gegenstandsnamen: Data/Items/Tooltips/NameCases.json gibt jeder Sprache ihre Fälle.</value>
+  </data>
+  <data name="Texts naming the item {0}" xml:space="preserve">
+    <value>Texte, die den Gegenstand nennen: {0}</value>
+  </data>
+  <data name="Name cases" xml:space="preserve">
+    <value>Namensfälle</value>
+  </data>
+  <data name="Name cases button" xml:space="preserve">
+    <value>Fälle…</value>
+  </data>
+  <data name="Name cases note" xml:space="preserve">
+    <value>Die Fälle, in denen jede Sprache Gegenstandsnamen dekliniert (Data/Items/Tooltips/NameCases.json).</value>
   </data>
 </root>

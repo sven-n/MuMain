@@ -1,0 +1,102 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+};
+
+struct AmbientOcclusion
+{
+    float4x4 projection;
+    float4x4 inverseProjection;
+    float2 depthTexelSize;
+    float radius;
+    float padding;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+};
+
+static inline __attribute__((always_inline))
+float3 ViewPosition(thread float2& uv, constant AmbientOcclusion& _31, texture2d<float> depthTexture, sampler depthSampler)
+{
+    uv = (floor((uv / _31.depthTexelSize) + float2(0.25)) + float2(0.5)) * _31.depthTexelSize;
+    float depth = depthTexture.sample(depthSampler, uv, level(0.0)).x;
+    float4 view = _31.inverseProjection * float4((uv.x * 2.0) - 1.0, 1.0 - (uv.y * 2.0), depth, 1.0);
+    return view.xyz / float3(view.w);
+}
+
+static inline __attribute__((always_inline))
+float3 SurfaceNormal(thread const float2& uv, thread const float3& position, constant AmbientOcclusion& _31, texture2d<float> depthTexture, sampler depthSampler)
+{
+    float2 param = uv + float2(_31.depthTexelSize.x, 0.0);
+    float3 _103 = ViewPosition(param, _31, depthTexture, depthSampler);
+    float3 right = _103 - position;
+    float2 param_1 = uv - float2(_31.depthTexelSize.x, 0.0);
+    float3 _114 = ViewPosition(param_1, _31, depthTexture, depthSampler);
+    float3 left = position - _114;
+    float2 param_2 = uv + float2(0.0, _31.depthTexelSize.y);
+    float3 _123 = ViewPosition(param_2, _31, depthTexture, depthSampler);
+    float3 down = _123 - position;
+    float2 param_3 = uv - float2(0.0, _31.depthTexelSize.y);
+    float3 _134 = ViewPosition(param_3, _31, depthTexture, depthSampler);
+    float3 up = position - _134;
+    float3 alongX = select(left, right, bool3(abs(right.z) < abs(left.z)));
+    float3 alongY = select(up, down, bool3(abs(down.z) < abs(up.z)));
+    return fast::normalize(cross(alongX, alongY));
+}
+
+static inline __attribute__((always_inline))
+float4 _main(thread const FSInput& _input, constant AmbientOcclusion& _31, texture2d<float> depthTexture, sampler depthSampler, texture2d<float> occlusionTexture, sampler occlusionSampler)
+{
+    float2 param = _input.uv;
+    float3 _173 = ViewPosition(param, _31, depthTexture, depthSampler);
+    float3 centre = _173;
+    float2 param_1 = _input.uv;
+    float3 param_2 = centre;
+    float3 normal = SurfaceNormal(param_1, param_2, _31, depthTexture, depthSampler);
+    float2 occlusionTexelSize = _31.depthTexelSize * 2.0;
+    float planeTolerance = _31.radius * 0.25;
+    float sum = 0.0;
+    float weightSum = 0.0;
+    for (int y = -2; y < 2; y++)
+    {
+        for (int x = -2; x < 2; x++)
+        {
+            float2 uv = _input.uv + (float2(float(x), float(y)) * occlusionTexelSize);
+            float2 param_3 = uv;
+            float3 _224 = ViewPosition(param_3, _31, depthTexture, depthSampler);
+            float offPlane = abs(dot(_224 - centre, normal));
+            float weight = fast::clamp(1.0 - (offPlane / planeTolerance), 0.0, 1.0) + 0.001000000047497451305389404296875;
+            sum += (occlusionTexture.sample(occlusionSampler, uv, level(0.0)).x * weight);
+            weightSum += weight;
+        }
+    }
+    float visibility = sum / weightSum;
+    return float4(visibility);
+}
+
+fragment main0_out main0(main0_in in [[stage_in]], constant AmbientOcclusion& _31 [[buffer(0)]], texture2d<float> depthTexture [[texture(0)]], texture2d<float> occlusionTexture [[texture(1)]], sampler depthSampler [[sampler(0)]], sampler occlusionSampler [[sampler(1)]], float4 gl_FragCoord [[position]])
+{
+    main0_out out = {};
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    FSInput param = _input;
+    out._entryPointOutput = _main(param, _31, depthTexture, depthSampler, occlusionTexture, occlusionSampler);
+    return out;
+}
+

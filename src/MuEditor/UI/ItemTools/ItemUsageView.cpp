@@ -60,6 +60,23 @@ void RenderGameData(const ItemUsage& usage)
         }
     }
 }
+
+// The texts that name the item by its number, each below their count.
+void RenderTexts(const ItemUsage& usage)
+{
+    if (usage.texts.empty())
+    {
+        return;
+    }
+    ImGui::BulletText("%s",
+                      I18N::Format(I18N::Editor::TextsNamingTheItem0, {std::to_string(usage.texts.size())}).c_str());
+    ImGui::Indent();
+    for (const std::string& text : usage.texts)
+    {
+        ImGui::BulletText("%s", text.c_str());
+    }
+    ImGui::Unindent();
+}
 } // namespace
 
 void RenderGoingWithItem(const ItemUsage& usage)
@@ -77,6 +94,7 @@ void RenderUsesAtNumber(const ItemUsage& usage)
         return;
     }
     RenderGameData(usage);
+    RenderTexts(usage);
     CodeReferenceList::Render(usage.codeKnown, usage.code,
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
@@ -111,6 +129,7 @@ void RenderNumberHolder(const ItemNumberHolder& holder, const ItemUsage& usage)
     ImGui::BulletText("%s", holder.entryWithoutName ? I18N::Editor::TheItemBrowserListsItAsEntryWithoutAName
                                                     : I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
     RenderGameData(usage);
+    RenderTexts(usage);
     // The move dialog lists the code of the moved item too.
     ImGui::PushID("NumberHolder");
     CodeReferenceList::Render(usage.codeKnown, usage.code,

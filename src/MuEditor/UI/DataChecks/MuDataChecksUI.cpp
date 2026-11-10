@@ -13,9 +13,11 @@
 #include "../MuEditor/UI/Common/ToolWindowFrame.h"
 #include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/ItemTools/ItemCheckArea.h"
+#include "../MuEditor/UI/ItemTools/ItemTextCheckArea.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/MonsterTools/MonsterCheckArea.h"
 #include "../MuEditor/UI/MonsterTools/MonsterToolWindow.h"
+#include "../MuEditor/UI/StyleEditor/RenderStyleCheckArea.h"
 #include "I18N/All.h"
 #include "Render/Look/LookTuning.h"
 #include "imgui.h"
@@ -33,6 +35,7 @@ std::vector<std::unique_ptr<DataCheckArea>> CreateAllAreas()
     std::vector<std::unique_ptr<DataCheckArea>> areas;
     areas.push_back(Items::CreateItemCheckArea());
     areas.push_back(CreateItemOptionCheckArea());
+    areas.push_back(Items::CreateItemTextCheckArea());
     areas.push_back(Monsters::CreateMonsterCheckArea());
     areas.push_back(Monsters::CreateMonsterModelCheckArea());
     areas.push_back(Monsters::CreateMonsterSoundCheckArea());
@@ -40,6 +43,7 @@ std::vector<std::unique_ptr<DataCheckArea>> CreateAllAreas()
     areas.push_back(CreateServerListCheckArea());
     areas.push_back(CreateEffectCheckArea());
     areas.push_back(CreateMapSoundCheckArea());
+    areas.push_back(Looks::CreateRenderStyleCheckArea());
     areas.push_back(CreateLookCheckArea());
     return areas;
 }

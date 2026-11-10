@@ -5,6 +5,9 @@
 #include "ItemModelFiles.h"
 
 #include "../MuEditor/UI/Common/TextSearch.h"
+#include "Core/Platform/WinCompat.h"
+#include "Data/GameData/ItemData/ItemTextureFiles.h"
+#include "Engine/Object/PlayerBodyModels.h"
 
 #include <algorithm>
 #include <system_error>
@@ -16,6 +19,18 @@ namespace
 {
 constexpr std::string_view ModelExtension = ".bmd";
 constexpr std::string_view DataFolder = "Data/";
+// The engine uses Windows separators and a trailing slash; the picker stores generic paths.
+bool IsImprovedBodyFolder(std::string_view file)
+{
+    static const std::string folder = []
+    {
+        std::string path = mu_narrow_path(Engine::Object::ImprovedPlayerModelFolder);
+        if (path.ends_with('/'))
+            path.pop_back();
+        return path;
+    }();
+    return Data::Items::EqualsIgnoringCase(file, folder);
+}
 
 bool IsModelFile(const std::filesystem::path& path)
 {
@@ -33,10 +48,15 @@ void AddFiles(const std::filesystem::path& clientFolder, const char* folder, std
     for (auto entry = std::filesystem::recursive_directory_iterator(root, error);
          !error && entry != std::filesystem::recursive_directory_iterator(); entry.increment(error))
     {
-        if (entry->is_regular_file(error) && IsModelFile(entry->path()))
+        // The model files write paths with '/', relative to the client folder.
+        const std::string file = entry->path().lexically_relative(clientFolder).generic_string();
+        if (entry->is_directory(error) && IsImprovedBodyFolder(file))
         {
-            // The model files write paths with '/', relative to the client folder.
-            files.push_back(entry->path().lexically_relative(clientFolder).generic_string());
+            entry.disable_recursion_pending();
+        }
+        else if (entry->is_regular_file(error) && IsModelFile(entry->path()))
+        {
+            files.push_back(file);
         }
     }
 }

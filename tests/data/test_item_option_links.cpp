@@ -115,7 +115,7 @@ TEST_CASE(
 TEST_CASE("An option's effect is what the client computes for its attribute, or none [data][items]")
 {
     const ItemOptionDatabase options({MakeLuck("luck"), MakeLuck("luckyHit", "excellentDamageChance")}, MakeTexts());
-    CHECK(options.GetEffect(0, 0) == ItemOptionEffect{AT_LUCK, false});
+    CHECK(options.GetEffect(0, 0) == ItemOptionEffect{AT_LUCK, true});
     CHECK(options.GetEffect(1, 0).effect == NoItemOptionEffect);
     CHECK_FALSE(FindItemOptionEffect(ItemOptionType::Luck, "criticalDamageChance", ItemOptionAdd::Add).has_value());
 }

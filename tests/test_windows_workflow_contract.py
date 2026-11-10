@@ -664,9 +664,11 @@ def check_cache_pair(job_body, job_name, restore_name, save_name):
           f"{job_name} {save_name} must save the paths {restore_name} restores")
 
 
-def check_apt_cache(job_body, job_name, kind, install_name):
+def check_apt_cache(job_body, job_name, kind, install_name, after=None, when=None):
     """An apt cache: named after the image and the files apt would fetch, restored, fetched into apt's archive folder,
-    gathered and saved by main pushes (only with every file), and installed from there."""
+    gathered and saved by main pushes (only with every file), and installed from there. `when` is the condition of a
+    job whose apt steps and install run only when its step `after` says so."""
+    and_when = f" && {when}" if when else ""
     find = step(job_body, job_name, "Find apt packages")
     for required in ("id: apt_packages\n", "sudo apt-get update",
                      'apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"',
@@ -688,7 +690,7 @@ def check_apt_cache(job_body, job_name, kind, install_name):
     # Only the runs that save gather the files, so the gather has the save's conditions. It runs before the install,
     # which could clean apt's archive folder.
     gather = step(job_body, job_name, "Gather apt packages")
-    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'\n",
+    for required in ("id: gather\n", f"if: {CACHE_SAVER} && steps.apt.outputs.cache-hit != 'true'{and_when}\n",
                      'python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives '
                      '"$APT_ARCHIVES"'):
         check(required in gather, f"{job_name} Gather apt packages missing {required}")
@@ -699,9 +701,14 @@ def check_apt_cache(job_body, job_name, kind, install_name):
     # save that went on after an error would save an entry without them.
     check("continue-on-error" not in gather + save, f"{job_name} must not save its apt packages after a failed gather")
     check("sudo apt-get update" not in fetch + install, f"{job_name} must update the apt index before naming the cache")
+    if when:
+        # The save needs no condition of its own: without the gather, it has no complete.
+        for name, body in (("Find apt packages", find), ("Restore apt packages", restore),
+                           ("Fetch apt packages", fetch), (install_name, install)):
+            check(f"if: {when}\n" in body, f"{job_name} {name} must run only when {after} says so")
     names = re.findall(r"(?m)^      - name: (.+)$", job_body)
-    order = ["Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
-             "Save apt packages", install_name]
+    order = ([after] if after else []) + ["Find apt packages", "Restore apt packages", "Fetch apt packages",
+                                          "Gather apt packages", "Save apt packages", install_name]
     check(all(name in names for name in order)
           and [names.index(name) for name in order] == sorted(names.index(name) for name in order),
           f"{job_name} must find, restore, fetch, gather and save its apt packages, then install them, in that order")
@@ -709,9 +716,47 @@ def check_apt_cache(job_body, job_name, kind, install_name):
 
 check_apt_cache(linux_job, "build-linux", "apt-linux-x64-", "Install build tools")
 # Quality Gates installs cppcheck from its own apt cache; its restore and save are checked here, as the build jobs'
-# caches are below.
-check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools")
+# caches are below. Only Check formatting and Static analysis use the tools, and they skip a run without C++ changes.
+QUALITY_COUNT = "Detect changed C++ files"
+QUALITY_TOOLS_WANTED = "steps.changed.outputs.count != '0'"
+check_apt_cache(quality_job, "quality", "apt-cppcheck-linux-x64-", "Install quality tools",
+                after=QUALITY_COUNT, when=QUALITY_TOOLS_WANTED)
 check_cache_pair(quality_job, "quality", "Restore apt packages", "Save apt packages")
+# The pip cache holds clang-format, so it runs when the install does. A step that read Detect changed C++ files' count
+# before that step ran would get none, and run or skip without an error.
+check(f"if: {QUALITY_TOOLS_WANTED}\n" in step(quality_job, "quality", "Cache quality tools"),
+      f"quality Cache quality tools must run only when {QUALITY_COUNT} counts a file")
+quality_names = re.findall(r"(?m)^      - name: (.+)$", quality_job)
+for index, name in enumerate(quality_names):
+    if "steps.changed.outputs." in step(quality_job, "quality", name):
+        check(QUALITY_COUNT in quality_names[:index],
+              f"quality {name} reads what {QUALITY_COUNT} counted, so it must come after it")
+
+
+def apt_step_lines(job_body, job_name, step_name, kind, when=None):
+    """A step of an apt cache without its comments, blank lines and the job's own condition (`when`, as for
+    check_apt_cache), with its kind as KIND."""
+    lines = []
+    for line in step(job_body, job_name, step_name).splitlines():
+        if when:
+            line = line.replace(f" && {when}", "")
+        text = line.strip()
+        if text and not text.startswith("#") and not (when and text == f"if: {when}"):
+            lines.append(line.replace(kind, "KIND"))
+    return lines
+
+
+# The two apt caches run the same steps, so that a fix to one cannot miss the other: they differ only in their kind,
+# their packages (APT_PACKAGES) and Quality Gates' condition. They stay steps of their own jobs rather than a composite
+# action, whose steps the job's step list would show as one, without the time each took.
+for step_name in ("Find apt packages", "Restore apt packages", "Fetch apt packages", "Gather apt packages",
+                  "Save apt packages"):
+    check(apt_step_lines(linux_job, "build-linux", step_name, "apt-linux-x64-")
+          == apt_step_lines(quality_job, "quality", step_name, "apt-cppcheck-linux-x64-", when=QUALITY_TOOLS_WANTED),
+          f"quality {step_name} must run what build-linux's does, apart from its kind and condition")
+apt_archives = job_env(linux_job, "APT_ARCHIVES")
+check(apt_archives != "" and job_env(quality_job, "APT_ARCHIVES") == apt_archives,
+      "quality must keep its apt packages in the folder build-linux keeps them in (APT_ARCHIVES)")
 # Each compiler cache save holds the objects its build used, not every build's since the cache began: the step before
 # the save drops the older ones, in the runs that save.
 for job_name, job_body, system in (("build-windows", native_job, "Windows"), ("build-linux", linux_job, "Linux"),
@@ -751,7 +796,7 @@ for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_
 # A save under a new key leaves older entries of the cache behind; the caches job deletes them, so it has to know each
 # cache the build jobs restore by a key prefix.
 caches_job = job(ci, "caches")
-for required in ("needs: [build-windows, build-linux, build-macos]", "!cancelled()",
+for required in ("needs: [quality, build-windows, build-linux, build-macos]", "!cancelled()",
                  "github.event_name != 'pull_request'", "actions: write", "python3 scripts/ci_cache_prune.py",
                  "GH_TOKEN: ${{ github.token }}"):
     check(required in caches_job, f"caches job must prune after the builds of runs on main: {required}")
@@ -761,20 +806,43 @@ for required in ("sparse-checkout: scripts", "persist-credentials: false"):
           f"caches job must check out only the scripts, without credentials: {required}")
 for job_name, job_body in (("build-windows", native_job), ("build-linux", linux_job), ("build-macos", macos_job)):
     check("actions: write" not in job_body, f"{job_name} must not get a token that can delete caches")
+sys.path.insert(0, str(ROOT / "scripts"))
+from ci_cache_prune import READERS as PRUNE_READERS, reader as prune_reader  # noqa: E402
 # The prune job leaves an entry that a job read in the last minutes, unless the last read was this run's own: each
-# build job notes when its restores ended, after the last of them, and passes that on.
-for job_name, job_body, system in (("build-windows", native_job, "WINDOWS"), ("build-linux", linux_job, "LINUX"),
-                                   ("build-macos", macos_job, "MACOS")):
+# build job, and Quality Gates for its cppcheck, notes when its restores ended, after the last of them, and passes that
+# on. The note runs exactly when that restore does: a time without a restore would count other runs' reads as its own.
+# scripts/ci_cache_prune.py names these jobs (READERS) after their system, and Quality Gates "quality".
+READER_JOBS = {"linux": ("build-linux", linux_job), "macos": ("build-macos", macos_job),
+               "quality": ("quality", quality_job), "windows": ("build-windows", native_job)}
+check(set(PRUNE_READERS) == set(READER_JOBS),
+      f"scripts/ci_cache_prune.py must time reads by the jobs that note them: READERS has "
+      f"{sorted(set(PRUNE_READERS))}, this test checks the notes of {sorted(READER_JOBS)}")
+for reader_name, (job_name, job_body) in READER_JOBS.items():
     names = re.findall(r"(?m)^      - name: (.+)$", job_body)
     restores = [index for index, name in enumerate(names)
                 if "uses: actions/cache/restore@v6" in step(job_body, job_name, name)]
     note = names.index("Note when the caches were read") if "Note when the caches were read" in names else -1
     check(restores and note == max(restores) + 1, f"{job_name} must note when its caches were read, after every restore")
+    if restores and note == max(restores) + 1:
+        conditions = [re.findall(r"(?m)^        if: .*$", step(job_body, job_name, names[index]))
+                      for index in (note - 1, note)]
+        check(conditions[0] == conditions[1], f"{job_name} must note when its caches were read whenever it reads them")
     check("caches-read-at: ${{ steps.caches_read.outputs.at }}" in job_body,
           f"{job_name} must pass on when its caches were read")
-    check(f"CACHES_READ_AT_{system}: ${{{{ needs.{job_name}.outputs.caches-read-at }}}}" in caches_job,
+    check(f"CACHES_READ_AT_{reader_name.upper()}: ${{{{ needs.{job_name}.outputs.caches-read-at }}}}" in caches_job,
           f"caches job must know when {job_name} read its caches")
-sys.path.insert(0, str(ROOT / "scripts"))
+    # The prune counts a read up to the note as this run's own, so it times each kind by the job that restores it
+    # (READ_BY, else the build job of the system the key names): a later note would count other runs' reads too.
+    for name in names:
+        restore = step(job_body, job_name, name)
+        if "uses: actions/cache/restore@v6" in restore:
+            for kind in sorted({prefix.split("${{")[0] for prefix in restore_prefixes(restore)}):
+                check(prune_reader(kind) == reader_name,
+                      f"scripts/ci_cache_prune.py must time {kind} by {job_name}, which restores it (READ_BY)")
+# Quality Gates' one restore (2 MB) can end within the second its read began, and GitHub notes the read with its
+# fraction of a second: a note cut to the second would come before the run's own read, which then stays a run longer.
+check("date -u +%Y-%m-%dT%H:%M:%S.%6NZ" in step(quality_job, "quality", "Note when the caches were read"),
+      "quality must note when it read its cppcheck cache to the microsecond")
 from ci_cache_prune import KINDS as PRUNED_CACHE_KINDS, PER_COMPILER as PRUNED_PER_COMPILER  # noqa: E402
 restore_prefixes_by_kind = {}
 # Quality Gates' pip cache is not pruned: it is saved once (actions/cache@v6 under a fixed key).

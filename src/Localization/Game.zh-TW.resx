@@ -9046,4 +9046,55 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>暴擊傷害率：%d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>暴擊傷害率：%d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>暴擊傷害率</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>幸運 (×%d)：%d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>套裝屬性：%d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>插座選項：%d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>合計：%d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>傷害</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>普通攻擊：%d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>暴擊：%d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>優異攻擊：%d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>未計算目標防禦</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>暴擊傷害</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>套裝屬性：+%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>再生屬性：+%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>插座選項：+%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>合計：+%d</value>
+  </data>
 </root>

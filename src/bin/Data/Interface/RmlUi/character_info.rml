@@ -15,7 +15,7 @@
 	     being enlarged. Positions and box
 	     widths stay in reference px; each leaf's transform-origin (character_info.rcss) keeps it
 	     anchored to the edge or centre its text is aligned to. -->
-	<div id="panel" data-model="character_info">
+	<div id="panel" data-model="character_info" data-class-vitality-two-lines="vit_lines.size > 1">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -55,7 +55,8 @@
 		<span class="attr-label attr-label-str counter-scaled" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{str_label}}</span>
 		<span class="attr-value attr-value-str counter-scaled" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{str_value_text}}</span>
 		<div class="attr-lines attr-lines-str counter-scaled" data-style-font-size="text_px + 'px'">
-			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
+			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-class-hinted="line.hint >= 0" data-event-mouseover="chainfo_line_hover(line.hint)" data-event-mouseout="chainfo_line_leave">{{line.text}}</span>
+			<span class="hinted" data-class-boosted="critical_damage_rate_line.source == 'boosted'" data-class-buffed="critical_damage_rate_line.source == 'buffed'" data-event-mouseover="chainfo_line_hover(critical_damage_rate_line.hint)" data-event-mouseout="chainfo_line_leave">{{critical_damage_rate_line.text}}</span>
 		</div>
 		<div id="btn_stat_str" class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)"></div>
