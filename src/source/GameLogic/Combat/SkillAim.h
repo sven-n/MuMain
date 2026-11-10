@@ -1,10 +1,10 @@
 #pragma once
 
 // Skills that fire toward the cursor (or around the caster) instead of at a
-// clicked target. When the player holds the right button on the ground beyond the
-// skill's range, the aim point is pulled back along the same direction so the skill
-// still fires, as in the original servers' clients, instead of the hero walking there
-// and standing still with the button held.
+// clicked target. When the player holds the right button on the ground, or on a
+// character that can't be attacked, beyond the skill's range, the aim point is
+// pulled back along the same direction so the skill still fires. See
+// docs/skill-aiming.md.
 
 #include <cmath>
 
