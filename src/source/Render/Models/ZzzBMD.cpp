@@ -25,7 +25,10 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "Render/Models/AnimationSampling.h"
+#include "Render/Models/BoneMath.h"
+#include "Render/Models/HeadTurn.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -221,6 +224,8 @@ std::map<ShadowStreamId, char>& ShadowStreams()
     static auto* streams = new std::map<ShadowStreamId, char>();
     return *streams;
 }
+// Turns a head bone in the world whatever way it lies (defined below, by FindHeadTurnBones).
+void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t angle, float turnUp, float roll);
 } // namespace
 
 bool  StopMotion = false;
@@ -257,7 +262,8 @@ static std::optional<float> GltfCrossfadeKeyTime(const BMD& model, unsigned shor
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
                     const vec3_t Angle, const vec3_t HeadAngle, bool Parent, bool Translate,
-                    const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity)
+                    const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity,
+                    float PonytailLag, float HeadTurnUp, float HeadRoll, const PoseBlend* Blend)
 {
     if (NumActions <= 0) return;
 
@@ -323,39 +329,107 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
     }
 
-    // Pre-calculate Head bone quaternions ONCE outside loop. HeadAngle turns every
-    // sampled key before it becomes a quaternion.
-    vec4_t headQ1, headQ2;
     const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
     constexpr float radFactor = 1.0f / (180.f / Q_PI);
     const float HeadAngleX = HeadAngle[0] * radFactor;
     const float HeadAngleY = HeadAngle[1] * radFactor;
     // A model from a glTF binary samples its clips at the same points (see GltfSample).
     const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
-    if (hasHeadBone && !gltf)
+
+    // The pose faded out of (Blend) at its frame. A model from a glTF binary keeps its own crossfade.
+    const bool blending = !gltf && Blend != nullptr && Blend->Weight > 0.f && Blend->Action < NumActions &&
+                          Actions[Blend->Action].NumAnimationKeys > 0;
+    Sampling::KeySample blendSample{};
+    if (blending)
     {
-        const Bone_t* hb = &Bones[BoneHead];
-        const auto headKey = [&](const Sampling::KeySample& sample, int key, vec4_t out)
+        const int keys = Actions[Blend->Action].NumAnimationKeys;
+        const float frame = std::fmod(std::max(Blend->Frame, 0.f), static_cast<float>(keys));
+        blendSample.action = Blend->Action;
+        blendSample.key0 = std::min(static_cast<int>(frame), keys - 1);
+        blendSample.key1 = (blendSample.key0 + 1) % keys;
+        blendSample.fraction = frame - static_cast<float>(blendSample.key0);
+    }
+
+    // The head's turn (HeadAngle), worked into the sampled keys ONCE outside the loop. On a Biped skeleton (Bip01
+    // Head on Neck, Spine1 and Spine) with Enhanced Movement, the neck and spine take a share of the turn to the side
+    // (HeadTurn.h), so the shoulders follow the head while the feet stay put; their share comes off the head's, which
+    // ends up turned as far as before. The nod (up and down) is the head's alone. Each bone turns about its own X
+    // axis, which runs along a Biped spine. The pose faded out of is turned the same way, so a turned bone fades too.
+    struct TurnedBone
+    {
+        int bone = -1;
+        float share = 0.f; // radians
+        vec4_t q1, q2, blend;
+    };
+    TurnedBone turned[4];
+    int turnedCount = 0;
+    // The bones turned lie between these: the loop below looks for a bone among them only in that range.
+    int turnedFirst = NumBones;
+    int turnedLast = -1;
+    if (hasHeadBone)
+    {
+        namespace HeadTurn = Render::Models::HeadTurn;
+        // The neck and spine found at load, while this model's head is the Biped's and turned to the side (without
+        // Enhanced Movement the head turns alone).
+        const short* chain =
+            Engine::Characters::EnhancedMovementEnabled() && HeadAngle[0] != 0.f && HeadTurnBones[0] == BoneHead
+                ? HeadTurnBones
+                : nullptr;
+        turned[turnedCount].bone = BoneHead;
+        turned[turnedCount++].share = HeadAngleX;
+        if (chain != nullptr)
+        {
+            const HeadTurn::BoneTurns turns =
+                HeadTurn::SplitTurn(HeadTurn::SignedYaw(HeadAngle[0]), chain[1] >= 0, chain[2] >= 0, chain[3] >= 0);
+            turned[0].share = turns.head * radFactor;
+            const float shares[3] = {turns.neck, turns.spine1, turns.spine};
+            for (int s = 0; s < 3 && chain[s + 1] >= 0; ++s)
+            {
+                turned[turnedCount].bone = chain[s + 1];
+                turned[turnedCount++].share = shares[s] * radFactor;
+            }
+        }
+        for (int t = 0; t < turnedCount; ++t)
+        {
+            turnedFirst = std::min(turnedFirst, turned[t].bone);
+            turnedLast = std::max(turnedLast, turned[t].bone);
+        }
+    }
+    // A BMD's turned bones are worked out here; a model from a glTF binary turns its sampled joints in the loop.
+    if (turnedCount > 0 && !gltf)
+    {
+        // One key of a turned bone: its share of the turn to the side, and the nod for the head.
+        const auto turnedKey = [&](const TurnedBone& tb, const Sampling::KeySample& sample, int key, vec4_t out)
         {
             vec3_t angle;
-            VectorCopy(hb->BoneMatrixes[sample.action].Rotation[key], angle);
-            angle[0] -= HeadAngleX;
-            angle[2] -= HeadAngleY;
+            VectorCopy(Bones[tb.bone].BoneMatrixes[sample.action].Rotation[key], angle);
+            angle[0] -= tb.share;
+            if (tb.bone == BoneHead)
+            {
+                angle[2] -= HeadAngleY;
+            }
             AngleQuaternion(angle, out);
         };
-        const auto headSample = [&](const Sampling::KeySample& sample, vec4_t out)
+        const auto turnedSample = [&](const TurnedBone& tb, const Sampling::KeySample& sample, vec4_t out)
         {
-            headKey(sample, sample.key0, out);
+            turnedKey(tb, sample, sample.key0, out);
             if (sample.fraction == 0.f || sample.key0 == sample.key1)
                 return;
             vec4_t next, from;
-            headKey(sample, sample.key1, next);
+            turnedKey(tb, sample, sample.key1, next);
             QuaternionCopy(out, from);
             if (!QuaternionCompare(from, next))
                 QuaternionNLERP(from, next, sample.fraction, out);
         };
-        headSample(pose.from, headQ1);
-        headSample(pose.to, headQ2);
+        for (int t = 0; t < turnedCount; ++t)
+        {
+            turnedSample(turned[t], pose.from, turned[t].q1);
+            turnedSample(turned[t], pose.to, turned[t].q2);
+            if (blending)
+            {
+                turnedSample(turned[t], blendSample, turned[t].blend);
+            }
+        }
     }
 
     // One action's rotation and position of a bone at a sample: the key itself,
@@ -427,16 +501,24 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const float* Position2;
         // A locked root keeps x and y of the current action's key 0.
         vec3_t lockedRoot;
+        // This bone's rotation in the pose faded out of (turned with the head where the bone is), while one fades.
+        const float* blendRotation = nullptr;
+        vec4_t blendScratch;
 
         if (gltf)
         {
             Render::Models::Gltf::JointPose from, to;
             GltfSample(*gltf, Actions, i, pose.from, from);
             GltfSample(*gltf, Actions, i, pose.to, to);
-            if (i == BoneHead && hasHeadBone)
+            for (int t = 0; i >= turnedFirst && i <= turnedLast && t < turnedCount; ++t)
             {
-                Render::Models::Gltf::SkinnedModel::TurnHead(from.rotation, HeadAngleX, HeadAngleY);
-                Render::Models::Gltf::SkinnedModel::TurnHead(to.rotation, HeadAngleX, HeadAngleY);
+                if (turned[t].bone == i)
+                {
+                    const float nod = i == BoneHead ? HeadAngleY : 0.f;
+                    Render::Models::Gltf::SkinnedModel::TurnHead(from.rotation, turned[t].share, nod);
+                    Render::Models::Gltf::SkinnedModel::TurnHead(to.rotation, turned[t].share, nod);
+                    break;
+                }
             }
             QuaternionCopy(from.rotation.data(), rotationScratch1);
             QuaternionCopy(to.rotation.data(), rotationScratch2);
@@ -455,15 +537,28 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
         else
         {
-            if (i == BoneHead)
+            const TurnedBone* turn = nullptr;
+            for (int t = 0; i >= turnedFirst && i <= turnedLast && t < turnedCount; ++t)
             {
-                q1 = headQ1;
-                q2 = headQ2;
+                if (turned[t].bone == i)
+                {
+                    turn = &turned[t];
+                    break;
+                }
+            }
+            if (turn != nullptr)
+            {
+                q1 = turn->q1;
+                q2 = turn->q2;
             }
             else
             {
                 q1 = sampleRotation(b, pose.from, rotationScratch1);
                 q2 = sampleRotation(b, pose.to, rotationScratch2);
+            }
+            if (blending)
+            {
+                blendRotation = turn != nullptr ? turn->blend : sampleRotation(b, blendSample, blendScratch);
             }
             Position1 = samplePosition(b, pose.from, positionScratch1);
             Position2 = samplePosition(b, pose.to, positionScratch2);
@@ -482,9 +577,26 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         {
             QuaternionCopy(q1, boneQuaternion);
         }
+        // The pose faded out of, toward it by its weight.
+        if (blendRotation != nullptr)
+        {
+            vec4_t mixed;
+            QuaternionNLERP(boneQuaternion, blendRotation, Blend->Weight, mixed);
+            QuaternionCopy(mixed, boneQuaternion);
+        }
 
         float Matrix[3][4];
         QuaternionMatrix(boneQuaternion, Matrix);
+        if (i == BoneHead && hasHeadBone && (HeadTurnUp != 0.f || HeadRoll != 0.f) && b->Parent >= 0)
+        {
+            TurnHeadInWorld(BoneMatrix[b->Parent], Matrix, Angle, HeadTurnUp, HeadRoll);
+        }
+        // The ponytail trailing a turn: its rotation turned about the head's X axis (the head's upright, as the head
+        // turns about), at its root, which stays where it hangs from the head.
+        if (i == PonytailBone && PonytailLag != 0.f)
+        {
+            Render::Models::BoneMath::TurnInPlane(Matrix, 1, 2, PonytailLag * (Q_PI / 180.f), false);
+        }
 
         if (i == 0 && bLockPositions)
         {
@@ -497,6 +609,27 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
             Matrix[0][3] = Position1[0] * s2 + Position2[0] * s1;
             Matrix[1][3] = Position1[1] * s2 + Position2[1] * s1;
             Matrix[2][3] = Position1[2] * s2 + Position2[2] * s1;
+        }
+        if (blending)
+        {
+            // An action that locks its root in place (its keys walk forward) has it locked here too, as above, or the
+            // body would lurch forward by the walk the keys hold.
+            const bool lockedBlendRoot = i == 0 && Actions[Blend->Action].LockPositions;
+            vec3_t blendPositionScratch;
+            const float* blendPosition = samplePosition(b, blendSample, blendPositionScratch);
+            for (int r = 0; r < 3; ++r)
+            {
+                float blended = blendPosition[r];
+                if (lockedBlendRoot && r < 2)
+                {
+                    blended = b->BoneMatrixes[Blend->Action].Position[0][r];
+                }
+                else if (lockedBlendRoot)
+                {
+                    blended += BodyHeight;
+                }
+                Matrix[r][3] += (blended - Matrix[r][3]) * Blend->Weight;
+            }
         }
 
         if (b->Parent == -1)
@@ -3250,6 +3383,8 @@ void BMD::ShareFrom(BMD& owner)
     Textures = owner.Textures;
     IndexTexture = owner.IndexTexture;
     GltfModel = owner.GltfModel;
+    std::copy(std::begin(owner.HeadTurnBones), std::end(owner.HeadTurnBones), std::begin(HeadTurnBones));
+    PonytailBone = owner.PonytailBone;
     m_bSharedData = true;
     // What Init sets for this slot; the bounding boxes of the bones are the owner's.
     renderCount = 0;
@@ -3278,6 +3413,8 @@ void BMD::SwapData(BMD& other)
     std::swap(Textures, other.Textures);
     std::swap(IndexTexture, other.IndexTexture);
     std::swap(GltfModel, other.GltfModel);
+    std::swap(HeadTurnBones, other.HeadTurnBones);
+    std::swap(PonytailBone, other.PonytailBone);
     m_boneLookup.clear();
     m_boneLookupBones = nullptr;
     m_boneLookupBoneCount = 0;
@@ -3546,6 +3683,104 @@ bool DecryptModulusBody(unsigned char* fileData, int fileSize, int& ptr)
 }
 } // namespace
 
+namespace
+{
+// Turns a head bone's local rotation (`local`, under `parent`) by world-space turns, whatever way the bone lies in
+// its model: `turnUp` degrees about the upright, and `roll` degrees about whichever of its own axes points most along
+// where the model faces (`angle`'s facing; a four-legged Biped's head points along the snout, but its bone axes differ
+// from model to model and lean with the head). The head's place stays; only its rotation changes.
+void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t angle, float turnUp, float roll)
+{
+    namespace BoneMath = Render::Models::BoneMath;
+    float parentRotation[3][3];
+    float localRotation[3][3];
+    float scaleSquared = 0.f;
+    for (int r = 0; r < 3; ++r)
+    {
+        for (int c = 0; c < 3; ++c)
+        {
+            parentRotation[r][c] = parent[r][c];
+            localRotation[r][c] = local[r][c];
+        }
+        scaleSquared += parent[r][0] * parent[r][0];
+    }
+    if (scaleSquared <= 0.f)
+    {
+        return;
+    }
+    // The head's rotation in the world, and the world rotation to put on it.
+    float head[3][3];
+    BoneMath::Multiply(parentRotation, localRotation, head);
+    float world[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
+    if (roll != 0.f)
+    {
+        // Where the model faces: it walks along -Y before its facing (angle[2]) turns it.
+        const float facing = angle[2] * (Q_PI / 180.f);
+        const float forward[3] = {std::sin(facing), -std::cos(facing), 0.f};
+        int along = 0;
+        float best = -1.f;
+        for (int c = 0; c < 3; ++c)
+        {
+            const float length = std::sqrt(head[0][c] * head[0][c] + head[1][c] * head[1][c] + head[2][c] * head[2][c]);
+            const float dot =
+                length > 0.f
+                    ? std::fabs(head[0][c] * forward[0] + head[1][c] * forward[1] + head[2][c] * forward[2]) / length
+                    : 0.f;
+            if (dot > best)
+            {
+                best = dot;
+                along = c;
+            }
+        }
+        const float length = std::sqrt(head[0][along] * head[0][along] + head[1][along] * head[1][along] +
+                                       head[2][along] * head[2][along]);
+        const float axis[3] = {head[0][along] / length, head[1][along] / length, head[2][along] / length};
+        BoneMath::RotationAbout(axis, roll * (Q_PI / 180.f), world);
+    }
+    if (turnUp != 0.f)
+    {
+        const float up[3] = {0.f, 0.f, 1.f};
+        float turn[3][3];
+        BoneMath::RotationAbout(up, turnUp * (Q_PI / 180.f), turn);
+        BoneMath::Multiply(turn, world, world);
+    }
+    // Back under the parent: parent^-1 * world * head, the parent's inverse its transpose over its scale squared.
+    float turned[3][3];
+    BoneMath::Multiply(world, head, turned);
+    for (int r = 0; r < 3; ++r)
+    {
+        for (int c = 0; c < 3; ++c)
+        {
+            local[r][c] = (parentRotation[0][r] * turned[0][c] + parentRotation[1][r] * turned[1][c] +
+                           parentRotation[2][r] * turned[2][c]) /
+                          scaleSquared;
+        }
+    }
+}
+
+// HeadTurnBones: "Bip01 Head", then each bone it hangs from while it is the next of the Biped's neck and spine.
+void FindHeadTurnBones(const BMD& model, short (&found)[4])
+{
+    constexpr const char* Chain[] = {"Bip01 Head", "Bip01 Neck", "Bip01 Spine1", "Bip01 Spine"};
+    for (short& bone : found)
+    {
+        bone = -1;
+    }
+    const Bone_t* bones = model.Bones;
+    const int numBones = model.NumBones;
+    int bone = model.FindBone(Chain[0]);
+    for (int link = 0; link < 4; ++link)
+    {
+        if (bone < 0 || bone >= numBones || bones[bone].Dummy || strcmp(bones[bone].Name, Chain[link]) != 0)
+        {
+            return;
+        }
+        found[link] = static_cast<short>(bone);
+        bone = bones[bone].Parent;
+    }
+}
+} // namespace
+
 bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
     if (m_bCompletedAlloc)
@@ -3804,6 +4039,8 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         }
     }
 
+    FindHeadTurnBones(*this, HeadTurnBones);
+    PonytailBone = static_cast<short>(FindBone("Bip01 Ponytail1"));
     Init(false);
 
     m_bCompletedAlloc = true;
