@@ -60,7 +60,7 @@ Two details are worth knowing before touching this:
 ## Weapon animation follows the character's action
 
 A bow or crossbow is a separate model with its own animation, and its draw has to
-stay in step with the character's shot. `RenderCharacter` therefore copies the
+stay in step with the character's shot. `PrepareHeldWeapons` therefore copies the
 playback speed of the **action the character is currently playing** onto the
 weapon part:
 

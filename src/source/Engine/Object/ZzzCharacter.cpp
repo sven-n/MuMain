@@ -4759,8 +4759,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_STR
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_MASTERY)
                 Skill = 1;
-            if ((o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction))
-                || (o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER))
+            if ((o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction)) ||
+                (o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, NULL, FindHotKey((c->Skill)), Skill, (c->Skill));
@@ -11543,7 +11543,8 @@ void PrepareHeldWeapons(CHARACTER* c)
         if (!DrawsHeldWeapon(c, i))
             continue;
         PART_t* w = &c->Weapon[i];
-        if (Engine::Object::IsBowAttackAction(o->CurrentAction) || Engine::Object::IsRaisedBowAttackAction(o->CurrentAction))
+        if (Engine::Object::IsBowAttackAction(o->CurrentAction) ||
+            Engine::Object::IsRaisedBowAttackAction(o->CurrentAction))
         {
             if (w->Type == MODEL_STINGER_BOW)
             {
