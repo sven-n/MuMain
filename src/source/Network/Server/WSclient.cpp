@@ -13816,8 +13816,13 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         break;
     case 0xEB:
     {
-        auto Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
-        switch (Data->SubCode)
+        constexpr std::size_t SubCodeOffset = 3;
+        if (received_span.size() <= SubCodeOffset)
+        {
+            mu::log::Get("network")->warn("NET: EB packet without a subcode dropped");
+            break;
+        }
+        switch (received_span[SubCodeOffset])
         {
         case 0x01:
             ReceiveBanUnionGuildResult(received_span);
