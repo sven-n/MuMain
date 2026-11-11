@@ -3,8 +3,8 @@
 
 #include <array>
 
-using UI::Inventory::MarkWorseOffers;
-using UI::Inventory::OfferedItemCheck;
+using UI::Trade::MarkWorseOffers;
+using UI::Trade::OfferedItemCheck;
 
 namespace
 {
@@ -51,14 +51,25 @@ TEST_CASE("an unchanged item of the same type clears the warning of a worse one"
     CHECK_FALSE(marked[1]);
 }
 
-TEST_CASE("a full trade window of unchanged items marks none")
+TEST_CASE("a full trade window keeps the warning of the one worse item with no unchanged item of its type")
 {
-    constexpr size_t TradeSlots = 32;
+    // More unchanged types than the ten the original client had room for.
+    constexpr int ClearedTypes = 15;
+    constexpr int LoneWorseType = 99;
+    constexpr size_t TradeSlots = 2 * ClearedTypes + 1;
     std::array<OfferedItemCheck, TradeSlots> offers{};
-    offers.fill(Same(SwordType));
+    for (int type = 0; type < ClearedTypes; ++type)
+    {
+        offers[2 * type] = Worse(type);
+        offers[2 * type + 1] = Same(type);
+    }
+    offers[TradeSlots - 1] = Worse(LoneWorseType);
     std::array<bool, TradeSlots> marked{};
 
-    CHECK_FALSE(MarkWorseOffers(offers, marked));
+    CHECK(MarkWorseOffers(offers, marked));
+    for (size_t i = 0; i + 1 < TradeSlots; ++i)
+        CHECK_FALSE(marked[i]);
+    CHECK(marked[TradeSlots - 1]);
 }
 
 TEST_CASE("no offered items raise no warning")

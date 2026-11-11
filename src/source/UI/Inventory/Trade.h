@@ -13,7 +13,6 @@
 #include "UI/Inventory/StorageInventory.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Inventory/TradeUpdates.h"
-#include "UI/Inventory/TradeWorseOffers.h"
 
 #include <vector>
 
@@ -215,7 +214,6 @@ namespace mu::ui::window
         void BackUpYourInven(int nYourInvenIndex);
         void BackUpYourInven(ITEM* pYourItemObj);
         void AlertYourTradeInven();
-        UI::Inventory::OfferedItemCheck CheckAgainstYourInvenBackUp(const ITEM& yourItem) const;
 
         void SendRequestItemToTrade(const UI::Items::Placement::HeldItemMove& move);
         void UncheckMyConfirm();
