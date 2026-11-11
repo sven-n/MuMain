@@ -10891,7 +10891,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(1.0f, 0.1f, 0.2f, vLight);
         }
-        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
         {
             Vector(0.8f, 0.1f, 0.1f, vLight);
         }
@@ -10931,7 +10931,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(1.0f, 0.1f, 0.2f, vLight);
         }
-        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
         {
             Vector(0.8f, 0.1f, 0.1f, vLight);
         }
