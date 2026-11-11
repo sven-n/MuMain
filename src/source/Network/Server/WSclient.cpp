@@ -7918,8 +7918,10 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
     namespace GR = Network::Packets::GuildRelationship;
 
     if (change->characterKey == HeroKey && change->result == GR::Success && change->relationshipType == GR::Alliance &&
-        change->requestType == GR::Leave)
+        change->requestType == GR::Leave && Hero->GuildMarkIndex != -1)
+    {
         GuildMark[Hero->GuildMarkIndex].UnionName[0] = 0;
+    }
 }
 
 void ReceiveBanUnionGuildResult(std::span<const BYTE> ReceiveBuffer)
