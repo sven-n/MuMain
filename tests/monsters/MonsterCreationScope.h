@@ -83,6 +83,11 @@ public:
     // The buffs the packets of the next creations carry (eBuffState values,
     // a castle gate's "gate is open"); none when the scope starts.
     void SetPacketBuffs(std::vector<int> buffs);
+    // The server gives the character a buff or takes it (0x07,
+    // ReceiveSkillStatus), and ends a skill's debuff on it (0x1B,
+    // ReceiveMagicFinish: AT_SKILL_POISON ends poison).
+    static void SendBuffState(const CHARACTER& character, int buff, bool add);
+    static void SendMagicFinish(const CHARACTER& character, int skill);
 
     LoadScope& Load()
     {

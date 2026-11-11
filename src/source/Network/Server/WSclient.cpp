@@ -3768,8 +3768,11 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
 
         if (g_isCharacterBuff(o, bufftype))
         {
-            if ((o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5) || MODEL_SMITH ||
-                MODEL_NPC_SERBIS || MODEL_MERCHANT_MAN || MODEL_STORAGE || MODEL_NPC_BREEDER)
+            // Shown already (a monster's spawn buff): the server's now too.
+            GameLogic::Monsters::Setup::NoteServerBuff(*o, static_cast<int>(bufftype), true);
+            if ((o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5) || o->Type == MODEL_SMITH ||
+                o->Type == MODEL_NPC_SERBIS || o->Type == MODEL_MERCHANT_MAN || o->Type == MODEL_STORAGE ||
+                o->Type == MODEL_NPC_BREEDER)
             {
                 if (g_isCharacterBuff(o, eBuff_CrywolfHeroContracted))
                 {
@@ -15699,6 +15702,7 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
     if (CheckExceptionBuff(buff, o, false))
     {
         g_CharacterRegisterBuff(o, buff);
+        GameLogic::Monsters::Setup::NoteServerBuff(*o, static_cast<int>(buff), true);
 
         if (buffclasstype != eBuffClass_Count)
         {
@@ -15709,6 +15713,7 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
 
 void UnRegisterBuff(eBuffState buff, OBJECT* o)
 {
+    GameLogic::Monsters::Setup::NoteServerBuff(*o, static_cast<int>(buff), false);
     eBuffClass buffclasstype = g_IsBuffClass(buff);
 
     if (buffclasstype != eBuffClass_Count)

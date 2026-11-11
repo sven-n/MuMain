@@ -498,12 +498,13 @@ TEST_CASE("Monster setup: a castle gate opens and closes by its entry's gate [mo
         CHECK(gate->m_bIsSelected == !open);
     }
 
-    // An open gate that stands open as it comes into view.
+    // An open gate that stands open as it comes into view. The switch opens
+    // it in view (ReceiveGateCurrentState: GateOpen registers the buff by the
+    // macro, which NoteServerBuff does not see); Respawn keeps it.
     MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
     CHARACTER* gate = scope.Create(MONSTER_CASTLE_GATE1);
     REQUIRE(gate != nullptr);
-    OBJECT* gateObject = &gate->Object;
-    g_CharacterRegisterBuff(gateObject, eBuff_CastleGateIsOpen);
+    npcGateSwitch::GateOpen(gate, &gate->Object);
     battleCastle::GateLooks standing;
     standing.arrivalOpening = false;
     battleCastle::ShowGateOnArrival(*gate, standing, 102, 100, false);
@@ -514,6 +515,34 @@ TEST_CASE("Monster setup: a castle gate opens and closes by its entry's gate [mo
     CHECK(gate->Object.m_BuffMap.isBuff(eBuff_CastleGateIsOpen));
     CHECK(gate->Object.CurrentAction == 1);
     scope.SetServerMap(0, 0);
+}
+
+// 0x07 for a buff a character shows already runs the Crywolf hero contract
+// rule only for the altars and the NPCs it names: on another character it
+// keeps its Crywolf states (the rule's condition was always true).
+TEST_CASE("Monster setup: a buff sent again keeps a monster's Crywolf states [monsters][creation]")
+{
+    using MonsterRecorder::CreationScope;
+    CreationScope scope(0);
+    MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
+    CHARACTER* budge = scope.Create(MONSTER_BUDGE_DRAGON);
+    REQUIRE(budge != nullptr);
+    CreationScope::SendBuffState(*budge, eDeBuff_Poison, true);
+    REQUIRE(budge->Object.m_BuffMap.isBuff(eDeBuff_Poison));
+    g_CharacterRegisterBuff((&budge->Object), eBuff_CrywolfNPCHide);
+
+    CreationScope::SendBuffState(*budge, eDeBuff_Poison, true);
+    CHECK(budge->Object.m_BuffMap.isBuff(eDeBuff_Poison));
+    CHECK(budge->Object.m_BuffMap.isBuff(eBuff_CrywolfNPCHide));
+
+    // A Crywolf altar still runs it: its altar state goes with the token list.
+    MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
+    CHARACTER* altar = scope.Create(MONSTER_WOLF_ALTAR1);
+    REQUIRE(altar != nullptr);
+    REQUIRE(altar->Object.Type == MODEL_CRYWOLF_ALTAR1);
+    g_CharacterRegisterBuff((&altar->Object), eBuff_CrywolfAltarEnable);
+    CreationScope::SendBuffState(*altar, eBuff_CrywolfAltarEnable, true);
+    CHECK_FALSE(altar->Object.m_BuffMap.isBuff(eBuff_CrywolfAltarEnable));
 }
 
 // Molt's model file is missing: it is tried once a map, not at each spawn,
@@ -910,6 +939,7 @@ TEST_CASE("Monster setup: Respawn keeps the server's buffs and runs no hooks aga
     CHARACTER* budge = scope.Create(MONSTER_BUDGE_DRAGON);
     REQUIRE(budge != nullptr);
     REQUIRE(budge->Object.m_BuffMap.isBuff(static_cast<eBuffState>(*poison)));
+    // A buff of another path than the noted packets (a macro registration).
     g_CharacterRegisterBuff((&budge->Object), eBuff_CastleGateIsOpen);
     budge->Object.m_byBuildTime = 3;
     budge->HealthStatus = 0.5f;
@@ -939,6 +969,69 @@ TEST_CASE("Monster setup: Respawn keeps the server's buffs and runs no hooks aga
     REQUIRE(GameLogic::Monsters::Setup::Create(changed, budge->PositionX, budge->PositionY, key, world, nullptr) !=
             nullptr);
     CHECK(hooksRun == 1);
+}
+
+// Respawn takes off only the last spawn's setup buffs the server did not
+// give too: a spawn buff the server gives too stays (a player poisons a Bull
+// Fighter that spawns poisoned; 0x07 for a buff it shows already), and so
+// does one the server gives again after it ended it (0x1B); one the client
+// put on by itself goes with the setup's (a poison cast the server resisted).
+TEST_CASE("Monster setup: Respawn keeps the buffs the server gave (D55) [monsters][creation]")
+{
+    using MonsterRecorder::CreationScope;
+    CreationScope scope(0);
+    const MonsterEntryScope kept(MONSTER_BULL_FIGHTER);
+    Data::Monsters::MonsterDefinition changed = kept.Original();
+    changed.setup.spawnBuffs = {"poison"};
+    g_MonsterDatabase.Set(changed);
+    REQUIRE(Data::Monsters::FindMonsterBuff("poison") == static_cast<int>(eDeBuff_Poison));
+    MonsterRecorder::PrepareCreationSlot(CreationSlot::Clean);
+    CHARACTER* bull = scope.Create(MONSTER_BULL_FIGHTER);
+    REQUIRE(bull != nullptr);
+    const OBJECT& object = bull->Object;
+    REQUIRE(object.m_BuffMap.isBuff(eDeBuff_Poison));
+    const auto respawn = [&](std::vector<std::string> spawnBuffs)
+    {
+        changed.setup.spawnBuffs = std::move(spawnBuffs);
+        g_MonsterDatabase.Set(changed);
+        CHECK(World::Monsters::RespawnLive(MONSTER_BULL_FIGHTER, false) == 1);
+    };
+
+    // Only the setup's poison: it goes with the setup.
+    respawn({});
+    CHECK_FALSE(object.m_BuffMap.isBuff(eDeBuff_Poison));
+
+    // A player poisons the poisoned Bull Fighter: the server's poison stays.
+    respawn({"poison"});
+    CreationScope::SendBuffState(*bull, eDeBuff_Poison, true);
+    respawn({});
+    CHECK(object.m_BuffMap.isBuff(eDeBuff_Poison));
+
+    // The server ends it and poisons it again: still the server's.
+    respawn({"poison"});
+    CreationScope::SendMagicFinish(*bull, AT_SKILL_POISON);
+    CHECK_FALSE(object.m_BuffMap.isBuff(eDeBuff_Poison));
+    CreationScope::SendBuffState(*bull, eDeBuff_Poison, true);
+    respawn({});
+    CHECK(object.m_BuffMap.isBuff(eDeBuff_Poison));
+
+    // The setup poisons it too and the server ends its poison; the client
+    // poisons it by itself (a cast the server resisted): not the server's,
+    // so it goes with the setup's.
+    respawn({"poison"});
+    CreationScope::SendBuffState(*bull, eDeBuff_Poison, false);
+    g_CharacterRegisterBuff((&bull->Object), eDeBuff_Poison);
+    respawn({});
+    CHECK_FALSE(object.m_BuffMap.isBuff(eDeBuff_Poison));
+
+    // A note of a poison the client took off by itself (the macro, not the
+    // server) ends at the next Respawn: the setup's poison after it goes.
+    respawn({"poison"});
+    CreationScope::SendBuffState(*bull, eDeBuff_Poison, true);
+    g_CharacterUnRegisterBuff((&bull->Object), eDeBuff_Poison);
+    respawn({"poison"});
+    respawn({});
+    CHECK_FALSE(object.m_BuffMap.isBuff(eDeBuff_Poison));
 }
 
 // Respawn makes a monster with a tile offset (Elpis) on the server's tile, as
