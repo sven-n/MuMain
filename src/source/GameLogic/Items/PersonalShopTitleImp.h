@@ -7,15 +7,16 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Items/PersonalShopCurrency.h"
 
 inline POINT MakePos(long x, long y)
 {
-    POINT pos = { x, y };
+    POINT pos = {static_cast<LONG>(x), static_cast<LONG>(y)};
     return pos;
 }
 inline SIZE MakeSize(int cx, int cy)
 {
-    SIZE size = { cx, cy };
+    SIZE size = {cx, cy};
     return size;
 }
 
@@ -25,7 +26,10 @@ class CPersonalShopTitleImp
     class CShopTitleDrawObj
     {
     public:
-        enum { EXTRA_SPACE = 25 };
+        enum
+        {
+            EXTRA_SPACE = 25
+        };
 
         CShopTitleDrawObj();
         ~CShopTitleDrawObj();
@@ -33,7 +37,7 @@ class CPersonalShopTitleImp
         bool Create(int key, const std::wstring& name, const std::wstring& title, POINT pos);
         void Release();
 
-        int	GetKey() const;
+        int GetKey() const;
 
         void SetBoxContent(const std::wstring& name, const std::wstring& title);
         void SetBoxPos(POINT pos);
@@ -55,19 +59,20 @@ class CPersonalShopTitleImp
     private:
         void Init();
         void SeparateShopTitle(IN const std::wstring& title, OUT std::wstring& topTitle, OUT std::wstring& bottomTitle);
-        void CalculateBooleanSize(IN const std::wstring& name, IN const std::wstring& topTitle, IN const std::wstring& bottomTitle, OUT SIZE& size);
+        void CalculateBooleanSize(IN const std::wstring& name, IN const std::wstring& topTitle,
+                                  IN const std::wstring& bottomTitle, OUT SIZE& size);
 
     private:
-        std::wstring	m_fullname;
-        std::wstring	m_fulltitle;
-        std::wstring	m_topTitle;
-        std::wstring	m_bottomTitle;
+        std::wstring m_fullname;
+        std::wstring m_fulltitle;
+        std::wstring m_topTitle;
+        std::wstring m_bottomTitle;
 
-        int		m_key;
-        bool	m_bDraw;
-        POINT	m_pos;
-        SIZE	m_size, m_icon;
-        bool	m_bHighlight;
+        int m_key;
+        bool m_bDraw;
+        POINT m_pos;
+        SIZE m_size, m_icon;
+        bool m_bHighlight;
     };
 
 public:
@@ -101,10 +106,10 @@ public:
     void Update();
     void Draw();
 
-    static CPersonalShopTitleImp* GetObjPtr();		//. singleton obj pointer
+    static CPersonalShopTitleImp* GetObjPtr(); //. singleton obj pointer
 
 protected:
-    CPersonalShopTitleImp();	//. ban create instance
+    CPersonalShopTitleImp(); //. ban create instance
 
     void UpdatePosition();
     void RevisionPosition();
@@ -116,24 +121,29 @@ private:
     typedef std::map<CHARACTER*, CShopTitleDrawObj*> type_drawobj_map;
     type_drawobj_map m_listShopTitleDrawObj;
 
-    int	m_iHighlightFrame;
+    [[maybe_unused]] int m_iHighlightFrame;
     bool m_bShow;
 };
 
 //. wrapping to C-style function
-inline bool AddShopTitle(int key, CHARACTER* pPlayer, const std::wstring& title) {
+inline bool AddShopTitle(int key, CHARACTER* pPlayer, const std::wstring& title)
+{
     return CPersonalShopTitleImp::GetObjPtr()->AddShopTitle(key, pPlayer, title);
 }
-inline void RemoveShopTitle(CHARACTER* pPlayer) {
+inline void RemoveShopTitle(CHARACTER* pPlayer)
+{
     CPersonalShopTitleImp::GetObjPtr()->RemoveShopTitle(pPlayer);
 }
-inline void RemoveAllShopTitle() {
+inline void RemoveAllShopTitle()
+{
     CPersonalShopTitleImp::GetObjPtr()->RemoveAllShopTitle();
 }
-inline void RemoveAllShopTitleExceptHero() {
+inline void RemoveAllShopTitleExceptHero()
+{
     CPersonalShopTitleImp::GetObjPtr()->RemoveAllShopTitleExceptHero();
 }
-inline CHARACTER* FindCharacterTagShopTitle(int key) {
+inline CHARACTER* FindCharacterTagShopTitle(int key)
+{
     return CPersonalShopTitleImp::GetObjPtr()->FindCharacter(key);
 }
 
@@ -147,31 +157,39 @@ inline void HideShopTitles()
     CPersonalShopTitleImp::GetObjPtr()->HideShopTitles();
 }
 
-inline bool IsShowShopTitles() {
+inline bool IsShowShopTitles()
+{
     return CPersonalShopTitleImp::GetObjPtr()->IsShowShopTitles();
 }
 
-inline void EnableShopTitleDraw(CHARACTER* pPlayer) {
+inline void EnableShopTitleDraw(CHARACTER* pPlayer)
+{
     CPersonalShopTitleImp::GetObjPtr()->EnableShopTitleDraw(pPlayer);
 }
-inline void DisableShopTitleDraw(CHARACTER* pPlayer) {
+inline void DisableShopTitleDraw(CHARACTER* pPlayer)
+{
     CPersonalShopTitleImp::GetObjPtr()->DisableShopTitleDraw(pPlayer);
 }
-inline bool IsShopTitleVisible(CHARACTER* pPlayer) {
+inline bool IsShopTitleVisible(CHARACTER* pPlayer)
+{
     return CPersonalShopTitleImp::GetObjPtr()->IsShopTitleVisible(pPlayer);
 }
 
-inline bool IsShopTitleHighlight(CHARACTER* pPlayer) {
+inline bool IsShopTitleHighlight(CHARACTER* pPlayer)
+{
     return CPersonalShopTitleImp::GetObjPtr()->IsShopTitleHighlight(pPlayer);
 }
 
-inline bool IsShopInViewport(CHARACTER* pPlayer) {
+inline bool IsShopInViewport(CHARACTER* pPlayer)
+{
     return CPersonalShopTitleImp::GetObjPtr()->IsInViewport(pPlayer);
 }
-inline void GetShopTitle(CHARACTER* pPlayer, std::wstring& title) {
+inline void GetShopTitle(CHARACTER* pPlayer, std::wstring& title)
+{
     CPersonalShopTitleImp::GetObjPtr()->GetShopTitle(pPlayer, title);
 }
-inline void GetShopTitleSummary(CHARACTER* pPlayer, std::wstring& summary) {
+inline void GetShopTitleSummary(CHARACTER* pPlayer, std::wstring& summary)
+{
     CPersonalShopTitleImp::GetObjPtr()->GetShopTitleSummary(pPlayer, summary);
 }
 
@@ -203,30 +221,28 @@ inline void DrawPersonalShopTitleImp()
 //. CPersonalItemPriceTable
 class CPersonalItemPriceTable
 {
-    std::map<int, int>	m_mapTable;
+    std::map<int, GameLogic::PersonalShop::ItemPrice> m_mapTable;
 
     static CPersonalItemPriceTable* ms_pSeller;
     static CPersonalItemPriceTable* ms_pBuyer;
 
 public:
-    enum { TYPE_NONE = -1, TYPE_SELLER = 1, TYPE_BUYER };
-
-    CPersonalItemPriceTable()
+    enum
     {
-    }
+        TYPE_NONE = -1,
+        TYPE_SELLER = 1,
+        TYPE_BUYER
+    };
+
+    CPersonalItemPriceTable() {}
     ~CPersonalItemPriceTable()
     {
         RemoveAllItemPrice();
     }
 
-    void AddItemPrice(int index, int price)
+    void AddItemPrice(int index, const GameLogic::PersonalShop::ItemPrice& price)
     {
-        auto mi = m_mapTable.find(index);
-        if (mi != m_mapTable.end())
-        {
-            m_mapTable.erase(mi);
-        }
-        m_mapTable.insert(std::map<int, int>::value_type(index, price));
+        m_mapTable[index] = price;
     }
     void RemoveItemPrice(int index)
     {
@@ -241,7 +257,7 @@ public:
         m_mapTable.clear();
     }
 
-    bool GetItemPrice(int index, int& price)
+    bool GetItemPrice(int index, GameLogic::PersonalShop::ItemPrice& price)
     {
         auto mi = m_mapTable.find(index);
         if (mi != m_mapTable.end())
@@ -255,7 +271,7 @@ public:
     static bool CreatePersonalItemTable()
     {
         if (ms_pSeller != NULL || ms_pBuyer != NULL)
-            return false;	//. error
+            return false; //. error
 
         ms_pSeller = new CPersonalItemPriceTable;
         ms_pBuyer = new CPersonalItemPriceTable;
@@ -281,9 +297,11 @@ public:
         switch (type)
         {
         case TYPE_SELLER:
-            pPersonalItemTable = ms_pSeller; break;
+            pPersonalItemTable = ms_pSeller;
+            break;
         case TYPE_BUYER:
-            pPersonalItemTable = ms_pBuyer; break;
+            pPersonalItemTable = ms_pBuyer;
+            break;
         }
 
         return pPersonalItemTable;
@@ -301,13 +319,19 @@ inline void ReleasePersonalItemTable()
     CPersonalItemPriceTable::ReleasePersonalItemTable();
 }
 
-inline void AddPersonalItemPrice(int index, int price, int type)
+inline void AddPersonalItemPrice(int index, const GameLogic::PersonalShop::ItemPrice& price, int type)
 {
     CPersonalItemPriceTable* pPersonalItemTable = CPersonalItemPriceTable::GetObjPtr(type);
     if (pPersonalItemTable)
     {
         pPersonalItemTable->AddItemPrice(index, price);
     }
+}
+
+/// Adds a price in zen.
+inline void AddPersonalItemPrice(int index, int price, int type)
+{
+    AddPersonalItemPrice(index, GameLogic::PersonalShop::ItemPrice{price}, type);
 }
 
 inline void RemovePersonalItemPrice(int index, int type)
@@ -328,7 +352,7 @@ inline void RemoveAllPerosnalItemPrice(int type)
     }
 }
 
-inline bool GetPersonalItemPrice(int index, int& price, int type)
+inline bool GetPersonalItemPrice(int index, GameLogic::PersonalShop::ItemPrice& price, int type)
 {
     CPersonalItemPriceTable* pPersonalItemTable = CPersonalItemPriceTable::GetObjPtr(type);
     if (!pPersonalItemTable)
@@ -337,9 +361,21 @@ inline bool GetPersonalItemPrice(int index, int& price, int type)
     return pPersonalItemTable->GetItemPrice(index, price);
 }
 
+/// Gets the amount of the price, whatever its currency is.
+inline bool GetPersonalItemPrice(int index, int& price, int type)
+{
+    GameLogic::PersonalShop::ItemPrice itemPrice;
+    if (!GetPersonalItemPrice(index, itemPrice, type))
+        return false;
+
+    price = itemPrice.Amount;
+    return true;
+}
+
 inline bool CheckPriceIntegrity(const wchar_t* szZen, int size)
 {
-    if (size > 255) return false;
+    if (size > 255)
+        return false;
     for (int i = 0; i < size; i++)
     {
         if (szZen[i] == '\0')

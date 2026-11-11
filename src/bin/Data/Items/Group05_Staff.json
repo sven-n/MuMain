@@ -1,0 +1,914 @@
+{
+  "formatVersion": 1,
+  "group": 5,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Skull Staff",
+        "de": "Schädelstab",
+        "es": "Báculo Calavera",
+        "pl": "Kostur czaszki",
+        "pt": "Bastão da caveira"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 6,
+      "magicDurability": 20,
+      "damageMin": 3,
+      "damageMax": 4,
+      "attackSpeed": 20,
+      "magicPower": 6,
+      "attackType": 3,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Angelic Staff",
+        "de": "Engelsstab",
+        "es": "Báculo Angelical",
+        "pl": "Anielski kostur",
+        "pt": "Bastão angelical"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 18,
+      "magicDurability": 38,
+      "damageMin": 10,
+      "damageMax": 12,
+      "attackSpeed": 25,
+      "magicPower": 20,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Serpent Staff",
+        "de": "Schlangenstab",
+        "es": "Báculo Serpiente",
+        "pl": "Wężowy kostur",
+        "pt": "Bastão da serpente"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 30,
+      "magicDurability": 50,
+      "damageMin": 17,
+      "damageMax": 18,
+      "attackSpeed": 25,
+      "magicPower": 34,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Thunder Staff",
+        "de": "Donnerstab",
+        "es": "Báculo Trueno",
+        "pl": "Kostur gromu",
+        "pt": "Bastão do trovão"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 42,
+      "magicDurability": 60,
+      "damageMin": 23,
+      "damageMax": 25,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "attackType": 3,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Gorgon Staff",
+        "de": "Gorgonenstab",
+        "es": "Báculo Gorgon",
+        "pl": "Kostur Gorgony",
+        "pt": "Bastão da górgone"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 52,
+      "magicDurability": 65,
+      "damageMin": 29,
+      "damageMax": 32,
+      "attackSpeed": 25,
+      "magicPower": 58,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Legendary Staff",
+        "de": "Legendärer Stab",
+        "es": "Báculo Legendario",
+        "pl": "Legendarny kostur",
+        "pt": "Bastão lendário"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 59,
+      "magicDurability": 66,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "attackType": 3,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Staff of Resurrection",
+        "de": "Stab der Auferstehung",
+        "es": "Báculo de la Resurrección",
+        "pl": "Kostur Wskrzeszenia",
+        "pt": "Bastão da ressurreição"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 70,
+      "magicDurability": 70,
+      "damageMin": 35,
+      "damageMax": 39,
+      "attackSpeed": 25,
+      "magicPower": 70,
+      "attackType": 3,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Chaos Lighting Staff",
+        "de": "Chaos-Blitzstab",
+        "es": "Báculo Relámpago de Caos",
+        "pl": "Kostur Błyskawic Chaosu",
+        "pt": "Bastão do relâmpago do caos"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 75,
+      "magicDurability": 70,
+      "damageMin": 47,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 94,
+      "excellentBonus": 25,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Staff of Destruction",
+        "de": "Stab der Zerstörung",
+        "es": "Báculo de la Destrucción",
+        "pl": "Kostur Zniszczenia",
+        "pt": "Bastão da destruição"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 90,
+      "magicDurability": 85,
+      "damageMin": 50,
+      "damageMax": 54,
+      "attackSpeed": 30,
+      "magicPower": 101,
+      "attackType": 3,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Dragon Soul Staff",
+        "de": "Drachenseelenstab",
+        "es": "Báculo Alma de Dragón",
+        "pl": "Kostur Smoczej Duszy",
+        "pt": "Bastão da alma do dragão"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 100,
+      "magicDurability": 91,
+      "damageMin": 46,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 92,
+      "attackType": 3,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Divine Staff of Archangel",
+        "de": "Göttlicher Stab des Erzengels",
+        "es": "Báculo Divino de Arcángel",
+        "pl": "Boski Kostur Archanioła",
+        "pt": "Bastão divino do arcanjo"
+      },
+      "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck", "wizardryDamageOption"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 104,
+      "magicDurability": 182,
+      "damageMin": 153,
+      "damageMax": 165,
+      "attackSpeed": 30,
+      "magicPower": 156,
+      "requirements": {
+        "strength": 36,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Staff of Kundun",
+        "de": "Stab von Kundun",
+        "es": "Báculo de Kundun",
+        "pl": "Kostur Kunduna",
+        "pt": "Bastão de Kundun"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 140,
+      "magicDurability": 95,
+      "damageMin": 55,
+      "damageMax": 61,
+      "attackSpeed": 30,
+      "magicPower": 110,
+      "requirements": {
+        "strength": 45,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Grand Viper Staff",
+        "de": "Großvipernstab",
+        "es": "Gran Báculo Víbora",
+        "pl": "Kostur Wielkiej Żmii",
+        "pt": "Grande bastão da víbora"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 147,
+      "magicDurability": 100,
+      "damageMin": 66,
+      "damageMax": 74,
+      "attackSpeed": 30,
+      "magicPower": 130,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 39,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Platina Staff",
+        "de": "Platinstab",
+        "es": "Báculo Platina",
+        "pl": "Platynowy kostur",
+        "pt": "Bastão de platina"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 110,
+      "magicDurability": 78,
+      "damageMin": 51,
+      "damageMax": 53,
+      "attackSpeed": 30,
+      "magicPower": 120,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Mystery Stick",
+        "de": "Mysterienstock",
+        "es": "Vara del Misterio",
+        "pl": "Różdżka tajemnic",
+        "pt": "Cajado misterioso"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 28,
+      "magicDurability": 50,
+      "damageMin": 17,
+      "damageMax": 18,
+      "attackSpeed": 25,
+      "magicPower": 34,
+      "requirements": {
+        "strength": 34,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Violent Wind Stick",
+        "de": "Sturmwindstock",
+        "es": "Vara Viento Violento",
+        "pl": "Różdżka Gwałtownego Wiatru",
+        "pt": "Cajado do vento violento"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 42,
+      "magicDurability": 60,
+      "damageMin": 23,
+      "damageMax": 25,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "requirements": {
+        "strength": 33,
+        "dexterity": 17
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Red Wing Stick",
+        "de": "Rotschwingenstock",
+        "es": "Vara Ala Roja",
+        "pl": "Różdżka Czerwonego Skrzydła",
+        "pt": "Cajado da asa vermelha"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 59,
+      "magicDurability": 65,
+      "damageMin": 29,
+      "damageMax": 31,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "requirements": {
+        "strength": 36,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Ancient Stick",
+        "de": "Uralter Stock",
+        "es": "Vara Antigua",
+        "pl": "Pradawna różdżka",
+        "pt": "Cajado ancestral"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 78,
+      "magicDurability": 81,
+      "damageMin": 38,
+      "damageMax": 40,
+      "attackSpeed": 25,
+      "magicPower": 76,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 19
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Demonic Stick",
+        "de": "Dämonischer Stock",
+        "es": "Vara Demoníaca",
+        "pl": "Demoniczna różdżka",
+        "pt": "Cajado demoníaco"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 100,
+      "magicDurability": 91,
+      "damageMin": 46,
+      "damageMax": 48,
+      "attackSpeed": 30,
+      "magicPower": 92,
+      "requirements": {
+        "strength": 54,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Storm Blitz Stick",
+        "de": "Sturmblitzstock",
+        "es": "Vara Ráfaga Tormentosa",
+        "pl": "Różdżka Burzowego Błysku",
+        "pt": "Caj. Relâmpago de Tempestade"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 110,
+      "magicDurability": 95,
+      "damageMin": 51,
+      "damageMax": 53,
+      "attackSpeed": 30,
+      "magicPower": 110,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 64,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Eternal Wing Stick",
+        "de": "Ewigschwingenstock",
+        "es": "Vara Ala Eterna",
+        "pl": "Różdżka Wiecznego Skrzydła",
+        "pt": "Cajado da asa eterna"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 147,
+      "magicDurability": 100,
+      "damageMin": 66,
+      "damageMax": 74,
+      "attackSpeed": 30,
+      "magicPower": 106,
+      "requirements": {
+        "level": 380,
+        "strength": 57,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Book of Samut",
+        "de": "Buch von Samut",
+        "es": "Libro de Samut",
+        "pl": "Księga Samuta",
+        "pt": "Livro de Samut"
+      },
+      "tags": ["summonerBook"],
+      "options": ["luck", "curseDamageOption"],
+      "width": 1,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "book",
+      "statProfile": "book",
+      "skill": 223,
+      "level": 52,
+      "magicDurability": 60,
+      "attackSpeed": 25,
+      "magicPower": 46,
+      "requirements": {
+        "dexterity": 20,
+        "energy": 135
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Book of Neil",
+        "de": "Buch von Neil",
+        "es": "Libro de Neil",
+        "pl": "Księga Neila",
+        "pt": "Livro de Neil"
+      },
+      "tags": ["summonerBook"],
+      "options": ["luck", "curseDamageOption"],
+      "width": 1,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "book",
+      "statProfile": "book",
+      "skill": 224,
+      "level": 59,
+      "magicDurability": 65,
+      "attackSpeed": 25,
+      "magicPower": 59,
+      "requirements": {
+        "dexterity": 25,
+        "energy": 168
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Book of Lagle",
+        "de": "Buch von Lagle",
+        "es": "Libro de Lagle",
+        "pl": "Księga Lagle’a",
+        "pt": "Livro de Lagle"
+      },
+      "tags": ["summonerBook"],
+      "options": ["luck", "curseDamageOption"],
+      "width": 1,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "book",
+      "statProfile": "book",
+      "skill": 225,
+      "level": 65,
+      "magicDurability": 50,
+      "attackSpeed": 25,
+      "magicPower": 72,
+      "requirements": {
+        "dexterity": 30,
+        "energy": 201
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Deadly Staff",
+        "de": "Todesstab",
+        "es": "Báculo Mortal",
+        "pl": "Śmiercionośny kostur",
+        "pt": "Bastão letal"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 138,
+      "magicDurability": 91,
+      "damageMin": 57,
+      "damageMax": 59,
+      "attackSpeed": 30,
+      "magicPower": 126,
+      "attackType": 3,
+      "requirements": {
+        "level": 380,
+        "strength": 47,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Inberial Staff",
+        "de": "Kaiserlicher Stab",
+        "es": "Báculo Inberial",
+        "pl": "Imperialny kostur",
+        "pt": "Bastão inberial"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 137,
+      "magicDurability": 182,
+      "damageMin": 57,
+      "damageMax": 61,
+      "attackSpeed": 30,
+      "magicPower": 124,
+      "requirements": {
+        "level": 380,
+        "strength": 48,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 32
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Chromatic Staff",
+        "de": "Chromatischer Stab",
+        "es": "Báculo Cromático",
+        "pl": "Chromatyczny kostur",
+        "pt": "Bastão cromático"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 147,
+      "magicDurability": 78,
+      "damageMin": 55,
+      "damageMax": 57,
+      "attackSpeed": 30,
+      "magicPower": 124,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 2,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Raven Stick",
+        "de": "Rabenstock",
+        "es": "Vara Cuervo",
+        "pl": "Różdżka Kruka",
+        "pt": "Cajado do corvo"
+      },
+      "options": ["luck", "wizardryDamageOption"],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 147,
+      "magicDurability": 98,
+      "damageMin": 70,
+      "damageMax": 78,
+      "attackSpeed": 30,
+      "magicPower": 130,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 14
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Divine Stick of the Archangel",
+        "de": "Göttlicher Stock des Erzengels",
+        "es": "Bastón Divino de Arcángel",
+        "pl": "Boska Różdżka Archanioła",
+        "pt": "Bastão Divino do Arcanjo"
+      },
+      "tags": ["divineArchangelWeapon", "valuable"],
+      "options": ["luck", "wizardryDamageOption"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
+      "width": 1,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "staff",
+      "statProfile": "weapon",
+      "level": 104,
+      "magicDurability": 182,
+      "damageMin": 153,
+      "damageMax": 165,
+      "attackSpeed": 30,
+      "magicPower": 146,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 13
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    }
+  ]
+}

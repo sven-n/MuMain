@@ -1,0 +1,224 @@
+/* Classic (0.97) look for a native message box drawn by MessageBoxView: 0.97's tall box from
+   RenderMessageBox (0051af50) -- Message_box2 (213x5) as the top and bottom edges, Message_box1
+   (213x40, the stone with its golden sides) stacked between them, 213 wide and centred (x 213..426
+   of the 640x480 frame), its top at y 60 for the server and event texts and at y 100 for the
+   confirmations -- and 0.97's OK plate, Ok / Ok2 (70x21, the second image under the mouse),
+   centred at x 284.
+   Two of the kinds are 0.97 boxes, placed as 0.97 placed them:
+   - "blood-castle-result" (opened by 0051da80, drawn by 0051db00): four strips (213x170) at y 60,
+     the outcome on two lines at y 70 and 86, the experience at 106 and the zen at 130, OK at
+     (284, 190);
+   - "devil-square-rank" (opened by 0051d9e0, drawn by 0051ddf0): seven strips (213x290) at y 60,
+     the title at (229, 70) and the "your bravery" line at (229, 86), the column headers at y 110,
+     the rows from 126, 16 apart, OK at (284, 320).
+   The others ("progress", "gem-disjoint", "chaos-castle-result", "guild-appoint") have no 0.97
+   counterpart: they keep legacy's S6 frame heights (the 67 cap, 15 per strip, the 50 foot), lines
+   and buttons, at y 100 like legacy, only narrowed to 0.97's 213 -- every x that legacy centred on
+   its 230 box is 8.5 less, so it stays centred on this one.
+   The box is the original 213 wide, so its edges are the original Message_box2: legacy's 230 (and
+   the derived Message_box2_230) is not needed.
+
+   Copied from legacy's message_box_view.rcss (a theme sheet replaces the whole file). Reference px
+   inside #panel, on the 640x480 .stage; text at the native size in the counter-scaled #lines, as
+   legacy. What 0.97 does not have (the jewel list, the table's rules, the labelled buttons) keeps
+   legacy's rules, the labelled buttons on 0.97's Bar plate; the progress bar is Season 1's. */
+
+@spritesheet classic-box-edge-sheet { src: ../../../Classic/Message_box2.jpg; classic-box-edge: 0px 0px 213px 5px; }
+@spritesheet classic-box-stone-sheet { src: ../../../Classic/Message_box1.jpg; classic-box-stone: 0px 0px 213px 40px; }
+@spritesheet classic-box-btn-sheet { src: ../../../Classic/Bar.jpg; classic-box-btn: 0px 0px 40px 18px; }
+@spritesheet classic-box-ok-sheet { src: ../../../Classic/Ok.jpg; classic-box-ok: 0px 0px 70px 21px; }
+@spritesheet classic-box-ok2-sheet { src: ../../../Classic/Ok2.jpg; classic-box-ok-hover: 0px 0px 70px 21px; }
+
+@spritesheet box-separator-sheet { src: "../../../newui_separate_line.jpg"; box-separator: 0px 0px 205px 2px; }
+@spritesheet box-progress-back-sheet { src: ../../../Classic/Progress_back.jpg; box-progress-back: 0px 0px 200px 16px; }
+@spritesheet box-progress-bar-sheet { src: ../../../Classic/Progress_add.tga; box-progress-bar: 0px 0px 200px 16px; }
+
+/* 0.97's boxes: centred on the 640x480 stage (x 213), the top at 100 (the confirmations), at 60
+   for the event results 0.97 has (the Blood Castle result and the Devil Square ranking). */
+#stage { pointer-events: none; }
+#panel { position: absolute; left: 213px; top: 100px; width: 213px; font-family: "token(font-body)"; pointer-events: auto; }
+#panel[data-kind="blood-castle-result"], #panel[data-kind="devil-square-rank"] { top: 60px; }
+/* The stone between the two edges: Message_box1 stretched over the box's height (0.97 stacked
+   whole 40-unit strips; its gold sides are vertical, so stretching keeps them). The box is on the
+   .stage, whose transform already scales it: a decorator drawn at the image's own size
+   (scale-none, repeat) would be scaled twice and spill past the box, so every piece of art here
+   fits its element's box. Legacy's newui_msgbox_back fill (222 wide, from y 2 to 8 above the
+   bottom) is dropped: 0.97's stone is opaque and has no backing. */
+#back { position: absolute; left: 0; top: 5px; bottom: 5px; width: 213px; decorator: image(classic-box-stone fill); }
+/* The frame stacks by flow: the cap, then one element per strip C++ reported, then the foot. Their
+   heights are the box's height and live only here -- C++ used to add them up itself. Legacy's
+   heights (the cap 67, the strips 15, the foot 50) stay, since the S6 boxes' lines and buttons are
+   placed by them; the stone shows through them, the top edge rides the cap and the bottom edge the
+   frame's own bottom, each fitted to the box's width (contain). Legacy's newui_msgbox_top / middle
+   / bottom art is dropped for 0.97's. */
+#frame { position: relative; display: block; width: 213px; decorator: image(classic-box-edge contain left bottom); }
+#box_top { display: block; width: 213px; height: 67px; decorator: image(classic-box-edge contain left top); }
+#box_bottom { display: block; width: 213px; height: 50px; }
+.box-strip { display: block; }
+.box-strip--middle { width: 213px; height: 15px; }
+/* Legacy's newui_Message_Line after the Devil Square ranking's 11th strip is dropped: 0.97's
+   ranking is plain stone, and its fixed 290 (below) leaves that strip's place mid-table. The
+   strip keeps its height. */
+.box-strip--divider { width: 213px; height: 21px; }
+/* The two 0.97 boxes are 0.97's height, whatever C++ reports for the S6 frame: 5 + 40 * N + 5.
+   The strips inside are art-less spacers, so the part past this height shows nothing; they take
+   no mouse either (C++ reports 6 strips for the Blood Castle result and 11 + the divider + 3 for
+   the ranking, 37 and 58 past the box), so a click under the box reaches the world. */
+#panel[data-kind="blood-castle-result"] #frame { height: 170px; }
+#panel[data-kind="devil-square-rank"] #frame { height: 290px; }
+#panel[data-kind="blood-castle-result"] #frame div, #panel[data-kind="devil-square-rank"] #frame div { pointer-events: none; }
+/* Legacy's rules, inside the stone's golden sides (x 0-5 and 207-212). */
+.box-separator { display: none; position: absolute; left: 6px; width: 201px; height: 2px; decorator: image(box-separator); }
+
+/* CProgressMsgBox's bar as the Season 1 client's message box draws its progress (RE\mains1
+   castle_siege_ui.md 0.4, render 00625a20): Progress_back (150x12) centred, and the 0.97 fill
+   (Progress, an orange line Season 1 adds over it; Progress_add carries that as alpha) over the
+   same place, as wide as the elapsed fraction of 150. Legacy's height above the bottom edge. */
+#progress_back { position: absolute; left: 31.5px; bottom: 35px; width: 150px; height: 12px; decorator: image(box-progress-back fill); }
+#progress_bar { position: absolute; left: 31.5px; bottom: 35px; height: 12px; decorator: image(box-progress-bar fill); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; }
+/* pre: RenderText() keeps leading and repeated spaces (the result tables' padded numbers). */
+
+/* A labelled button: 0.97's Bar plate (40x18) stretched to the button's box, lighter under the
+   mouse and darker while pressed (0.97's own buttons are lettered art; it has no plain plate with
+   states). */
+.box-btn { display: block; position: absolute; decorator: image(classic-box-btn); pointer-events: auto; }
+.box-btn:hover { image-color: #ffe6b4; }
+.box-btn:active { image-color: #b4b4b4; }
+.box-btn.disabled, .box-btn.disabled:hover, .box-btn.disabled:active { decorator: image(classic-box-btn); image-color: #99999999; }
+.box-label { color: #ffffff; }
+.box-btn.disabled .box-label { color: #808080; }
+
+/* The lettered OK: 0.97's Ok, Ok2 under the mouse (0.97 has no pressed image), untinted -- the
+   plate's hover / press tint above is not 0.97's; the art is lettered, so the label is hidden. */
+.box-btn.ok-art { decorator: image(classic-box-ok); image-color: #ffffff; }
+.box-btn.ok-art:hover { decorator: image(classic-box-ok-hover); image-color: #ffffff; }
+.box-btn.ok-art:active { decorator: image(classic-box-ok-hover); image-color: #ffffff; }
+.box-btn.ok-art .box-label { display: none; }
+
+/* The jewel list keeps native text metrics while RmlUi handles scrolling. */
+#list_box { position: absolute; left: 15.5px; top: 64.5px; width: 181px; height: 111px; pointer-events: none; background-color: rgba(0, 0, 0, 102); }
+#list { position: absolute; left: 16.5px; top: 65.5px; transform-origin: left top; overflow: hidden scroll; }
+.list-row { display: block; position: relative; pointer-events: auto; }
+.list-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.list-row.selected .list-row-back { background-color: rgb(106, 97, 88); }
+.list-row-text { position: absolute; left: 3.5714%; top: 23.0769%; white-space: pre; pointer-events: none; color: #e6dcc8; }
+.list-row.selected .list-row-text { color: #000000; }
+
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#list { width: calc(180px * var(--root-scale)); height: calc(109px * var(--root-scale)); }
+.list-row { width: calc(168px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The lines, in one counter-scaled flow from the box's text top, centred on the box. The progress
+   notices, the jewel dissolve box and the guild appointment stack each line one native line height
+   + 4 apart (RenderTexts()); the event results space theirs as below. */
+#lines { left: 0; top: 40px; --flow-w: 213px; text-align: center; }
+.box-line { display: block; white-space: pre; }
+.box-cell { white-space: pre; }
+.box-cell.bold { font-weight: bold; }
+#panel[data-kind="progress"] #lines { top: 35px; }
+#panel[data-kind="gem-disjoint"] #lines { top: 17px; }
+#panel[data-kind="guild-appoint"] #lines { top: 97px; }
+#panel[data-kind="progress"] .box-line, #panel[data-kind="gem-disjoint"] .box-line,
+#panel[data-kind="guild-appoint"] .box-line { height: calc((var(--line-height, 0px) + 4px) * var(--root-scale)); }
+#panel[data-kind="progress"] .box-line.bold, #panel[data-kind="gem-disjoint"] .box-line.bold,
+#panel[data-kind="guild-appoint"] .box-line.bold { height: calc((var(--bold-line-height, 0px) + 4px) * var(--root-scale)); }
+
+/* The Chaos Castle result (S6 only, legacy's RenderMatchResult() spacing): the message 16 apart
+   from 40, the rewards 30 below it, 20 apart. */
+#panel[data-kind="chaos-castle-result"] .box-line { height: calc(16px * var(--root-scale)); }
+#panel[data-kind="chaos-castle-result"] .box-line--message + .box-line--reward { margin-top: calc(14px * var(--root-scale)); }
+#panel[data-kind="chaos-castle-result"] .box-line--reward { height: calc(20px * var(--root-scale)); }
+
+/* The Blood Castle result (0051db00): the outcome from 10 (y 70), 16 apart, the rewards 20 below
+   the outcome's last line (y 106), 24 apart (y 130). The outcome is one translated sentence,
+   wrapped to the box's text width -- legacy's 10 clear of each side -- each line 16 apart. */
+#panel[data-kind="blood-castle-result"] #lines { top: 10px; }
+#panel[data-kind="blood-castle-result"] .box-line { height: calc(16px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message + .box-line--reward { margin-top: calc(4px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--reward { height: calc(24px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message { height: auto; white-space: normal; width: calc(193px * var(--root-scale));
+    margin: 0 auto; line-height: calc(16px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message .box-cell { white-space: normal; }
+
+/* The Devil Square ranking (0051ddf0): the two message lines from (16, 10), 16 apart; the headers
+   at 50 over the rank, point, experience and reward columns; the rows from 66, 16 apart, the rank
+   and the name first. 0.97's column x are not known: the columns keep legacy's place on the screen
+   (legacy's x 8 less, the box being 8 further right), which fits them inside the golden sides.
+   "My info" and its row (S6's section) follow the table's ten rows at its pitch, at 226 and 242,
+   above 0.97's OK at 260. */
+#panel[data-kind="devil-square-rank"] #lines { top: 10px; }
+#panel[data-kind="devil-square-rank"] .box-line--message {
+	height: calc(16px * var(--root-scale));
+	padding-left: calc(16px * var(--root-scale));
+	text-align: left;
+}
+#panel[data-kind="devil-square-rank"] .box-line--header { position: relative; margin-top: calc(8px * var(--root-scale)); height: calc(16px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row { position: relative; height: calc(16px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--my-info { position: absolute; left: 0; width: 100%; top: calc(216px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--my-row { position: absolute; left: 0; width: 100%; top: calc(232px * var(--root-scale)); height: calc(16px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell,
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell,
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell { position: absolute; top: 0; }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(1) { left: calc(22px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(2) { left: calc(82px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(3) { left: calc(132px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--header .box-cell:nth-child(4) { left: calc(170px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(1),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(1) { left: calc(7px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(2),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(2) { left: calc(22px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(3),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(3) { left: calc(82px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(4),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(4) { left: calc(132px * var(--root-scale)); }
+#panel[data-kind="devil-square-rank"] .box-line--row .box-cell:nth-child(5),
+#panel[data-kind="devil-square-rank"] .box-line--my-row .box-cell:nth-child(5) { left: calc(170px * var(--root-scale)); }
+/* Legacy's rules over and under the headers, 4 above them and 3 above the rows. Its two rules
+   around "my info" are dropped: 0.97's 16 pitch leaves no room between the table, "my info", its
+   row and the OK. */
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(1) { display: block; top: 46px; }
+#panel[data-kind="devil-square-rank"] .box-separator:nth-child(2) { display: block; top: 63px; }
+
+/* The buttons. The 0.97 results' OK: centred (x 284), at 130 in the Blood Castle box (y 190) and
+   at 260 in the Devil Square one (y 320); the Chaos Castle result's 20 above the bottom edge, as
+   legacy. The S6 boxes' buttons as legacy's SetButtonInfo() placed them, 8.5 left for the
+   narrower box: the jewel dissolve box's Close and Dissolve centred, 21 and 56 above the bottom
+   edge; the guild appointment's two appointments 114 wide at (48.5, 30) and (48.5, 57), OK and
+   Close 64 wide at (39.5, 127) and (103.5, 127). */
+#panel[data-kind="blood-castle-result"] .box-btn, #panel[data-kind="chaos-castle-result"] .box-btn,
+#panel[data-kind="devil-square-rank"] .box-btn { left: 71px; width: 70px; height: 21px; }
+#panel[data-kind="blood-castle-result"] .box-btn { top: 130px; }
+#panel[data-kind="devil-square-rank"] .box-btn { top: 260px; }
+#panel[data-kind="chaos-castle-result"] .box-btn { bottom: 20px; }
+#panel[data-kind="gem-disjoint"] .box-btn { left: 74.5px; width: 64px; height: 29px; }
+#panel[data-kind="gem-disjoint"] .box-btn:nth-child(1) { bottom: 21px; }
+#panel[data-kind="gem-disjoint"] .box-btn:nth-child(2) { bottom: 56px; }
+#panel[data-kind="guild-appoint"] .box-btn { width: 64px; height: 29px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(1) { left: 48.5px; top: 30px; width: 114px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(2) { left: 48.5px; top: 57px; width: 114px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(3) { left: 39.5px; top: 127px; }
+#panel[data-kind="guild-appoint"] .box-btn:nth-child(4) { left: 103.5px; top: 127px; }
+
+/* Scrolling lists: the Season 1 client's win_scrollbar (as the classic social windows'), in place of
+   base.rcss's S6 track and knob: 13x13 arrows at both ends, the track between two 106,97,88 lines,
+   a grey thumb sized to the list. */
+@spritesheet mbv-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	mbv-scroll-thumb: 0px 1px 11px 1px;
+	mbv-scroll-up: 0px 3px 13px 13px;
+	mbv-scroll-down: 0px 16px 13px 13px;
+}
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(mbv-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(mbv-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(mbv-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }

@@ -6,12 +6,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/AI/BoidSteering.h"
 
 #include <algorithm>
 #include <cmath>
@@ -31,109 +33,15 @@
 
 namespace
 {
-constexpr float FULL_ROTATION_DEGREES = 360.f;
-constexpr float HALF_ROTATION_DEGREES = 180.f;
-constexpr float RAD_TO_DEG = 180.f / static_cast<float>(Q_PI);
 constexpr double MIN_FRAME_TIME_MS = 0.001;
 constexpr double MILLISECONDS_IN_SECOND = 1000.0;
-
-float NormalizeAngleDegrees(float angle)
-{
-    angle = std::fmod(angle, FULL_ROTATION_DEGREES);
-    if (angle < 0.f)
-    {
-        angle += FULL_ROTATION_DEGREES;
-    }
-
-    return angle;
-}
-
-int NormalizeAngleInt(int angle)
-{
-    angle %= static_cast<int>(FULL_ROTATION_DEGREES);
-    if (angle < 0)
-    {
-        angle += static_cast<int>(FULL_ROTATION_DEGREES);
-    }
-    return angle;
-}
-
-float SignedAngleDelta(float from, float to)
-{
-    float delta = NormalizeAngleDegrees(to) - NormalizeAngleDegrees(from);
-    if (delta > HALF_ROTATION_DEGREES)
-    {
-        delta -= FULL_ROTATION_DEGREES;
-    }
-    else if (delta < -HALF_ROTATION_DEGREES)
-    {
-        delta += FULL_ROTATION_DEGREES;
-    }
-    return delta;
-}
-
-float StepTowardsAngle(float current, float target, float maxDelta)
-{
-    const float clampedDelta = std::clamp(SignedAngleDelta(current, target), -maxDelta, maxDelta);
-    return NormalizeAngleDegrees(current + clampedDelta);
-}
+constexpr float BoidNeighborRange = 400.f;
+constexpr float BoidSeparationRange = 80.f;
 } // namespace
 
-float CreateAngle2D(const vec3_t from, const vec2_t to)
+float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn, bool perFrame)
 {
-    return CreateAngle(from[0], from[1], to[0], to[1]);
-}
-
-float CreateAngle(float x1, float y1, float x2, float y2)
-{
-    const float dx = x2 - x1;
-    const float dy = y2 - y1;
-
-    if (std::fabs(dx) < std::numeric_limits<float>::epsilon() && std::fabs(dy) < std::numeric_limits<float>::epsilon())
-    {
-        return 0.f;
-    }
-
-    const float angle = std::atan2(dx, -dy) * RAD_TO_DEG;
-    return NormalizeAngleDegrees(angle);
-}
-
-int TurnAngle(int iTheta, int iHeading, int maxTURN)
-{
-    if (maxTURN <= 0)
-    {
-        return NormalizeAngleInt(iTheta);
-    }
-
-    const float updated = StepTowardsAngle(static_cast<float>(iTheta), static_cast<float>(iHeading), static_cast<float>(maxTURN));
-    return NormalizeAngleInt(static_cast<int>(std::lround(updated)));
-}
-
-float TurnAngle2(float angle, float a, float d)
-{
-    if (d <= 0.f)
-    {
-        return NormalizeAngleDegrees(angle);
-    }
-
-    return StepTowardsAngle(angle, a, d);
-}
-
-float FarAngle(float angle1, float angle2, bool absolute)
-{
-    const float delta = SignedAngleDelta(angle1, angle2);
-    return absolute ? std::fabs(delta) : delta;
-}
-
-int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
-{
-    const float targetAngle = CreateAngle(PositionX, PositionY, TargetX, TargetY);
-    return NormalizeAngleInt(static_cast<int>(std::lround(targetAngle)));
-}
-
-float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
-{
-    float scaledTurn = Turn * FPS_ANIMATION_FACTOR;
+    float scaledTurn = perFrame ? Turn * FPS_ANIMATION_FACTOR : Turn;
     float targetAngle = CreateAngle2D(Position, TargetPosition);
     Angle[2] = TurnAngle2(Angle[2], targetAngle, scaledTurn);
     vec3_t Range;
@@ -175,12 +83,14 @@ void Alpha(OBJECT* o)
         if (o->AlphaTarget > o->Alpha)
         {
             o->Alpha += 0.05f;
-            if (o->Alpha > 1.f) o->Alpha = 1.f;
+            if (o->Alpha > 1.f)
+                o->Alpha = 1.f;
         }
         else if (o->AlphaTarget < o->Alpha)
         {
             o->Alpha -= 0.05f;
-            if (o->Alpha < 0.f) o->Alpha = 0.f;
+            if (o->Alpha < 0.f)
+                o->Alpha = 0.f;
         }
     }
     else
@@ -189,7 +99,7 @@ void Alpha(OBJECT* o)
         o->BlendMeshLight = o->Alpha;
 }
 
-void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
+void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX, float referenceFrames)
 {
     int NumBirds = 0;
     float TargetX = 0.f;
@@ -197,49 +107,53 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
     for (int j = 0; j < MAX; j++)
     {
         OBJECT* t = &Boids[j];
-        if (t->Live && j != i)
+        if (!t->Live || j == i)
         {
-            vec3_t Range;
-            VectorSubtract(o->Position, t->Position, Range);
-            const auto distance = VectorLength(Range);
-            if (distance < 400.f)
-            {
-                float xdist = t->Direction[0] - t->Position[0];
-                float ydist = t->Direction[1] - t->Position[1];
-                if (distance < 80.f)
-                {
-                    xdist -= t->Direction[0] - o->Position[0];
-                    ydist -= t->Direction[1] - o->Position[1];
-                }
-                else
-                {
-                    xdist += t->Direction[0] - o->Position[0];
-                    ydist += t->Direction[1] - o->Position[1];
-                }
-
-                xdist *= FPS_ANIMATION_FACTOR;
-                ydist *= FPS_ANIMATION_FACTOR;
-                float pdist = std::sqrt(xdist * xdist + ydist * ydist);
-                TargetX += xdist / pdist;
-                TargetY += ydist / pdist;
-                NumBirds++;
-            }
+            continue;
         }
-    }
-    if (NumBirds > 0)
-    {
-        TargetX = o->Position[0] + TargetX / NumBirds;
-        TargetY = o->Position[1] + TargetY / NumBirds;
 
-        o->Angle[2] = (float)TurnAngle((int)o->Angle[2], CalcAngle(o->Position[0], o->Position[1], TargetX, TargetY), (int)o->Gravity);
+        vec3_t Range;
+        VectorSubtract(o->Position, t->Position, Range);
+        const float distanceSquared = VectorDotProduct(Range, Range);
+        const bool withinFlockRange = distanceSquared < BoidNeighborRange * BoidNeighborRange;
+        if (!withinFlockRange)
+        {
+            continue;
+        }
+
+        float xdist = t->Direction[0] - t->Position[0];
+        float ydist = t->Direction[1] - t->Position[1];
+        if (distanceSquared < BoidSeparationRange * BoidSeparationRange)
+        {
+            xdist -= t->Direction[0] - o->Position[0];
+            ydist -= t->Direction[1] - o->Position[1];
+        }
+        else
+        {
+            xdist += t->Direction[0] - o->Position[0];
+            ydist += t->Direction[1] - o->Position[1];
+        }
+
+        Engine::AI::BoidSteering::AddDirection(xdist, ydist, TargetX, TargetY);
+        ++NumBirds;
     }
+    if (NumBirds == 0 || (TargetX == 0.f && TargetY == 0.f))
+    {
+        return;
+    }
+
+    const float targetX = o->Position[0] + TargetX / NumBirds;
+    const float targetY = o->Position[1] + TargetY / NumBirds;
+    const float targetHeading = static_cast<float>(CalcAngle(o->Position[0], o->Position[1], targetX, targetY));
+    o->Angle[2] = Engine::AI::BoidSteering::TurnTowards(o->Angle[2], targetHeading, o->Gravity, referenceFrames);
 }
 
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)
 {
     Vector(0.f, 0.f, 0.f, Angle);
     Angle[2] = CreateAngle2D(PushPosition, Position) + 180.f;
-    if (Angle[2] >= 360.f) Angle[2] -= 360.f;
+    if (Angle[2] >= 360.f)
+        Angle[2] -= 360.f;
 
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
@@ -300,14 +214,15 @@ void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else	// 맨손
+        else // 맨손
             SetAction(o, PLAYER_FENRIR_DAMAGE);
     }
 }
 
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 {
-    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
+    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS &&
+        c->Weapon[1].Type != MODEL_BOLT)
     {
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
             SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
@@ -372,7 +287,8 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
     }
     else
     {
-        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
+        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS &&
+            c->Weapon[1].Type != MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
@@ -389,14 +305,9 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
 
 bool IsAliceRideAction_UniDino(unsigned short byAction)
 {
-    if (
-        byAction == PLAYER_SKILL_CHAIN_LIGHTNING_UNI
-        || byAction == PLAYER_SKILL_CHAIN_LIGHTNING_DINO
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_UNI
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_DINO
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_UNI
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_DINO
-        )
+    if (byAction == PLAYER_SKILL_CHAIN_LIGHTNING_UNI || byAction == PLAYER_SKILL_CHAIN_LIGHTNING_DINO ||
+        byAction == PLAYER_SKILL_LIGHTNING_ORB_UNI || byAction == PLAYER_SKILL_LIGHTNING_ORB_DINO ||
+        byAction == PLAYER_SKILL_DRAIN_LIFE_UNI || byAction == PLAYER_SKILL_DRAIN_LIFE_DINO)
     {
         return true;
     }
@@ -406,11 +317,8 @@ bool IsAliceRideAction_UniDino(unsigned short byAction)
 
 bool IsAliceRideAction_Fenrir(unsigned short byAction)
 {
-    if (
-        byAction == PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_FENRIR
-        )
+    if (byAction == PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR || byAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR ||
+        byAction == PLAYER_SKILL_DRAIN_LIFE_FENRIR)
     {
         return true;
     }
@@ -420,8 +328,10 @@ bool IsAliceRideAction_Fenrir(unsigned short byAction)
 
 void SetAction(OBJECT* o, int Action, bool bBlending)
 {
+    Diagnostics::DrawSpawnCheck::Note("set-action");
     BMD* b = &Models[o->Type];
-    if (Action >= b->NumActions) return;
+    if (Action >= b->NumActions)
+        return;
     if (o->CurrentAction != Action)
     {
         o->PriorAction = o->CurrentAction;
@@ -441,7 +351,8 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range)
     VectorSubtract(c->Object.Position, TargetPosition, Range2);
     float Distance = Range2[0] * Range2[0] + Range2[1] * Range2[1];
     float ZoneRange = Range;
-    if (Distance <= ZoneRange * ZoneRange) return true;
+    if (Distance <= ZoneRange * ZoneRange)
+        return true;
     return false;
 }
 
@@ -489,26 +400,48 @@ void MoveHead(CHARACTER* c)
                 o->HeadTargetAngle[0] = Random::RangeFloat(-64, 63);
                 o->HeadTargetAngle[1] = Random::RangeFloat(-16, 31);
                 for (int i = 0; i < 2; i++)
-                    if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
+                    if (o->HeadTargetAngle[i] < 0)
+                        o->HeadTargetAngle[i] += 360.f;
             }
         }
+        else if (o->CurrentAction == MONSTER01_WALK && c->TargetCharacter != -1)
+        {
+            LookAtTarget(o, &CharactersClient[c->TargetCharacter]);
+        }
         else
-            if (o->CurrentAction == MONSTER01_WALK && c->TargetCharacter != -1)
-            {
-                LookAtTarget(o, &CharactersClient[c->TargetCharacter]);
-            }
-            else
-            {
-                o->HeadTargetAngle[0] = 0.f;
-                o->HeadTargetAngle[1] = 0.f;
-            }
+        {
+            o->HeadTargetAngle[0] = 0.f;
+            o->HeadTargetAngle[1] = 0.f;
+        }
+    }
+}
+
+void SmoothHeadAngles(vec3_t angles, const vec3_t targetAngles, float referenceFrames)
+{
+    constexpr int HeadRotationAxisCount = 2;
+    constexpr float ReferenceHeadTurnBlend = 0.2f;
+    const float boundedReferenceFrames = std::clamp(referenceFrames, 0.f, 1.f);
+    if (boundedReferenceFrames == 0.f)
+    {
+        return;
+    }
+
+    // Preserve the remaining angular gap across fractional 25-FPS reference frames.
+    const float blend = boundedReferenceFrames == 1.f
+                            ? ReferenceHeadTurnBlend
+                            : 1.f - std::pow(1.f - ReferenceHeadTurnBlend, boundedReferenceFrames);
+    for (int axis = 0; axis < HeadRotationAxisCount; ++axis)
+    {
+        const float turnStep = FarAngle(angles[axis], targetAngles[axis]) * blend;
+        angles[axis] = TurnAngle2(angles[axis], targetAngles[axis], turnStep);
     }
 }
 
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit)
 {
     return;
-    if (tc == NULL) return;
+    if (tc == NULL)
+        return;
 
     OBJECT* to = &tc->Object;
 
@@ -531,7 +464,7 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
         CreateParticle(BITMAP_SPARK + 1, Position, to->Angle, Light);
     }
 
-    //point
+    // point
     VectorCopy(to->Position, Position);
     Position[2] += 130.f + to->CollisionRange * 0.5f;
     vec3_t Color;
@@ -644,7 +577,8 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
     if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
     {
-        if ((CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
+        if ((CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 &&
+             CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
         {
             Value = true;
         }
@@ -655,7 +589,9 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
     bool PathFound = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
     if (!PathFound)
     {
-        if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) && (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
+        if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE ||
+             (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) &&
+            (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
         {
             Wall = TW_NOMOVE;
         }
@@ -690,7 +626,7 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
 CTimer* g_WorldTime = new CTimer();
 
-double   FPS;
+double FPS;
 
 /**
  * \brief A factor which should applied to all values which get an added offset, frame-by-frame.
@@ -699,9 +635,21 @@ double   FPS;
  * frame rate of 50 fps, this factor is 0.5f, so it moves just 5 positions in this frame.
  * Therefore, the speed of the game is maintained even when the FPS change dynamically.
  */
-float   FPS_ANIMATION_FACTOR;
-double   FPS_AVG;
-double   WorldTime = 0.0;
+float FPS_ANIMATION_FACTOR;
+// Whole 25 FPS reference frames that passed this frame (0 or 1): the step for integer frame counters.
+int REFERENCE_FRAME_STEP;
+// Counts rendered frames: tells which calls came within the same frame.
+unsigned int RENDERED_FRAME;
+double FPS_AVG;
+double WorldTime = 0.0;
+
+int TakeReferenceFrameSteps(float& referenceFrames, float frameFactor)
+{
+    referenceFrames += frameFactor;
+    const int steps = static_cast<int>(referenceFrames);
+    referenceFrames -= static_cast<float>(steps);
+    return steps;
+}
 
 bool rand_fps_check(int reference_frames)
 {
@@ -728,6 +676,9 @@ void CalcFPS()
     // animate with no less than REFERENCE_FPS, otherwise some animations don't work correctly
     const double fpsRatio = (FPS <= 0.0) ? 0.0 : REFERENCE_FPS / FPS;
     FPS_ANIMATION_FACTOR = std::clamp(static_cast<float>(fpsRatio), 0.f, 1.f);
+    static float referenceFrames = 0.f;
+    REFERENCE_FRAME_STEP = TakeReferenceFrameSteps(referenceFrames, FPS_ANIMATION_FACTOR);
+    ++RENDERED_FRAME;
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;

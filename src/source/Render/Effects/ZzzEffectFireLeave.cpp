@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -16,12 +17,11 @@
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Core/Utilities/Random.h"
 
 #include <cmath>
@@ -36,7 +36,12 @@ float RainCurrent = 0.f;
 
 static  int RainSpeed = 30;
 static  int RainAngle = 0;
-static  int RainPosition = 0;
+// float, not int -- RainSpeed/RainAngle above are recomputed from WorldTime each call (no carry-
+// over needed), but RainPosition accumulates (+=) every frame; at high/uncapped FPS
+// FPS_ANIMATION_FACTOR collapses toward 0, and an int accumulator truncates a sub-1.0 per-call
+// delta straight back to the same value forever, freezing the rain/leaf scroll (same root cause
+// CCreditWin's alpha fade had -- see that fix's own comment).
+static  float RainPosition = 0.f;
 
 void CreateBonfire(vec3_t Position, vec3_t Angle)
 {
@@ -162,7 +167,7 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
     }
 
     vec3_t Velocity;
-    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -(Random::RangeFloat(0, 39) + RainSpeed), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -207,7 +212,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
         Vector(-(Random::RangeFloat(30, 49) + RainAngle), 0.f, 0.f, o->Angle);
     }
     vec3_t Velocity;
-    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed + 20) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -(Random::RangeFloat(0, 39) + RainSpeed + 20), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -233,9 +238,13 @@ bool CreateLorenciaLeaf(PARTICLE* o)
         o->Velocity[0] = -o->Velocity[0] + 3.2f;
     }
 
-    o->Velocity[0] *= FPS_ANIMATION_FACTOR;
-    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
-    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
+    // No *FPS_ANIMATION_FACTOR here -- MoveHeavenRain (this file) already scales o->Velocity by it
+    // every frame via VectorAddScaled(..., FPS_ANIMATION_FACTOR) when it integrates Position. Baking
+    // the factor into the spawn-time velocity too (as this used to) double-applies it, making these
+    // leaves drift at factor^2 instead of factor -- crawling instead of drifting under high FPS.
+    // CreateAtlanseLeaf below (same move handler) never had this extra multiply; match it.
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
     o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
     o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
     o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
@@ -387,7 +396,11 @@ bool MoveHeavenRain(PARTICLE* o)
         o->TurningForce[0] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
         o->TurningForce[1] += Random::RangeFloat(-8, 7) * 0.02f * FPS_ANIMATION_FACTOR;
         o->TurningForce[2] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
-        VectorAdd(o->Angle, o->TurningForce, o->Angle);
+        // *FPS_ANIMATION_FACTOR -- TurningForce is an angular-velocity term (correctly dt-scaled
+        // just above), but was being applied to Angle as a plain VectorAdd with no matching dt
+        // scale, unlike its Velocity->Position sibling right above (VectorAddScaled(..., FPS_
+        // ANIMATION_FACTOR)) -- tumbling rotation ran N times faster than intended at high FPS.
+        VectorAddScaled(o->Angle, o->TurningForce, o->Angle, FPS_ANIMATION_FACTOR);
 
         vec3_t Range;
         VectorSubtract(o->StartPosition, o->Position, Range);
@@ -458,10 +471,10 @@ bool MoveLeaves()
     else if (RainCurrent < RainTarget)
         RainCurrent += FPS_ANIMATION_FACTOR;
 
-    RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
-    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
-    RainPosition += 20 * FPS_ANIMATION_FACTOR;
-    RainPosition %= 2000;
+    RainSpeed = (int)sinf(WorldTime * 0.001f) * 10 + 30;
+    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20;
+    RainPosition += 20.f * FPS_ANIMATION_FACTOR;
+    RainPosition = fmodf(RainPosition, 2000.f);
 
     // DevEditor weather effects toggle
 #ifdef _EDITOR
@@ -517,6 +530,8 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     if (!g_pOption->GetRenderAllEffects())
     {
         return;
@@ -532,21 +547,20 @@ void RenderLeaves()
         || gMapManager.IsEmpireGuardian3()
         || IsUnitedMarketPlace()
         )
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
     else if (gMapManager.InChaosCastle() == true)
-        EnableAlphaTest();
+        out.SetState({.blend = Blend::AlphaTest});
     else if (gMapManager.InBattleCastle() == true)
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
     else if (gMapManager.WorldActive == WD_55LOGINSCENE)
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
     else if (gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND)
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
     else
     {
-        EnableAlphaTest();
+        out.SetState({.blend = Blend::AlphaTest});
     }
 
-    glColor3f(1.f, 1.f, 1.f);
 #ifdef DEVIAS_XMAS_EVENT
     int iMaxLeaves;
     if (World == WD_2DEVIAS)
@@ -559,26 +573,30 @@ void RenderLeaves()
     for (int i = 0; i < MAX_LEAVES; i++)
 #endif // DEVIAS_XMAS_EVENT
     {
-        PARTICLE* o = &Leaves[i];
+        const PARTICLE* o = &Leaves[i];
         if (o->Live
             && Bitmaps.FindTexture(o->Type)
             )
         {
-            BindTexture(o->Type);
+            out.SetState({.texture = o->Type});
             if (gMapManager.WorldActive == WD_2DEVIAS || IsIceCity() || IsSantaTown())
             {
-                RenderSprite(o->Type, o->Position, o->Scale, o->Scale, o->Light);
+                out.DrawSprite(Render::EffectDrawing::Sprite(o->Type, o->Position, o->Scale, o->Scale, o->Light));
             }
             else
             {
-                GlobalUBO::Instance().PushModel();
-                GlobalUBO::Instance().SetModel(o->Position, 1.0f);
-
-                float Matrix[3][4];
-                AngleMatrix(o->Angle, Matrix);
+                Render::EffectDrawing::PlaneDraw plane;
+                VectorCopy(o->Position, plane.position);
+                AngleMatrix(o->Angle, plane.rotation);
+                const auto Plane = [&out, &plane](float width, float height)
+                {
+                    plane.width = width;
+                    plane.height = height;
+                    out.DrawPlane(plane);
+                };
 
                 if (gMapManager.InChaosCastle() == true)
-                    RenderPlane3D(o->TurningForce[0], o->TurningForce[1], Matrix);
+                    Plane(o->TurningForce[0], o->TurningForce[1]);
                 else
                 {
                     if (o->Type == BITMAP_RAIN)
@@ -586,20 +604,18 @@ void RenderLeaves()
                         if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
                         {
                             if (weather == 1)
-                                RenderPlane3D(1.f, 20.f, Matrix);
+                                Plane(1.f, 20.f);
                         }
                         else
-                            RenderPlane3D(1.f, 20.f, Matrix);
+                            Plane(1.f, 20.f);
                     }
                     else if (o->Type == BITMAP_FIRE_SNUFF)
-                        RenderPlane3D(o->Scale * 2.f, o->Scale * 4.f, Matrix);
+                        Plane(o->Scale * 2.f, o->Scale * 4.f);
                     else
                     {
-                        RenderPlane3D(3.f, 3.f, Matrix);
+                        Plane(3.f, 3.f);
                     }
                 }
-
-                GlobalUBO::Instance().PopModel();
             }
         }
     }

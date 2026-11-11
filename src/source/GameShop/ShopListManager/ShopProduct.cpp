@@ -1,11 +1,7 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopProduct.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
@@ -15,22 +11,19 @@
 
 #include <iterator>
 
-CShopProduct::CShopProduct() // OK
-{
-}
-CShopProduct::~CShopProduct() // OK
-{
-}
+// cppcheck-suppress uninitMemberVar
+CShopProduct::CShopProduct() {}
+CShopProduct::~CShopProduct() {}
 
-bool CShopProduct::SetProduct(std::wstring strdata) // OK
+bool CShopProduct::SetProduct(std::wstring strdata)
 {
     if (strdata.empty())
-        return 0;
+        return false;
 
     CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
-        return 0;
+        return false;
 
     this->ProductSeq = _wtoi(token.nextToken().c_str());
     StringCchCopy(this->ProductName, std::size(this->ProductName), token.nextToken().c_str());
@@ -50,6 +43,6 @@ bool CShopProduct::SetProduct(std::wstring strdata) // OK
     this->ProductType = _wtoi(token.nextToken().c_str());
     this->UnitType = _wtoi(token.nextToken().c_str());
 
-    return 1;
+    return true;
 }
 #endif

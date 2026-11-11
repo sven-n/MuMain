@@ -1,0 +1,59 @@
+/* Legacy theme for CSystemLogWindow -- the top-left system/error message overlay, distinct from
+   CChatLogWindow's own bottom-left panel despite sharing a source file.
+
+   Geometry is native's, and it is entirely static: Create() places it at (0, 80) and nothing ever
+   calls SetPosition(), while m_WndSize.cy is left at 0 and never recomputed. So the first line's
+   origin is simply m_WndPos + FONT_LEADING on both axes -- (4, 84) -- and the block grows
+   downward, the opposite of the chat log, which grows up from its bottom edge. */
+
+#panel {
+	position: absolute;
+	left: 4dp;
+	top: 84dp;
+	/* CLIENT_WIDTH: WND_WIDTH(281) - WND_LEFT_RIGHT_EDGE(4) * 2. */
+	width: 273dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+
+	/* Nothing in this window is interactive, so it must never claim the cursor: any
+	   pointer-events:auto element under the pointer makes Core::Input::IsMouseOverUI() true and
+	   blocks click-to-move, even without a click. Inherited from base.rcss's body reset; stated
+	   here because this overlay sits over open world where walking matters. */
+	pointer-events: none;
+
+	/* Lines hug their own text: native passed no box width to RenderText(), so the renderer fell
+	   back to the measured width for each line's background quad. Flex defaults to
+	   align-items:stretch, which would make every line a full-width bar instead. */
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+/* No padding: native's background quad is exactly the measured text (RenderText() without a box).
+   Position, pitch, height and text size come from system_log.rml's bindings. */
+/* A line is the native renderer's line height, and the next starts a row pitch below it. */
+.syslog-line {
+	display: block;
+	white-space: nowrap;
+	position: relative;
+	height: var(--line-px, 0px);
+	line-height: var(--line-px, 0px);
+	margin-bottom: calc(var(--row-px, 0px) - var(--line-px, 0px));
+}
+/* RenderMessages() drew each line's own quad in black at the user's transparency; the colour is
+   the theme's, the transparency the player's. A backgrounded element with children paints an
+   unclosed box in this build, so the backdrop is a childless leaf (engine-findings.md). */
+.syslog-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: #000000; }
+.syslog-text { position: relative; }
+
+/* Native's two colours: system messages blue, everything else the error red. */
+.syslog-line--system { color: rgb(100, 150, 255); }
+.syslog-line--error  { color: rgb(255, 30, 0); }
+
+/* Keep all six message rows available, including while no message is visible. */
+#panel { min-height: 7.2em; }
+#panel.workspace-placed { transform-origin: left top; }
+.syslog-line { flex-shrink: 0; }
+
+.syslog-line { min-height: 1.2em; }
+.syslog-line.empty { border-left-color: transparent; }

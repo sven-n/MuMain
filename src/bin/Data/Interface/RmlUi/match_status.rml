@@ -1,0 +1,58 @@
+<rml>
+	<!-- bound-geometry: the countdown centres on the world the open docks leave uncovered -->
+<head>
+	<title>Match Status</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="match_status.rcss"/>
+</head>
+<body data-model="match_status">
+	<!-- A guild war's or battle soccer's time and result (UI::Hud::MatchStatus): the big countdown
+	     above the HUD, centred on the world the open docks leave uncovered (world_centre, the HUD
+	     board's reference px), and the result panel on the .stage with the two teams, their scores,
+	     who won, and OK, which closes it (match_result_close). C++ fills the texts; the theme
+	     places and colours them. Text is .sharp-text at the native size. -->
+	<div id="hud" class="hud-board">
+		<div id="countdown" data-if="countdown != ''" data-style-left="world_centre + 'px'"
+		     data-class-soon="countdown_soon">
+			<div class="sharp-text sharp-centre countdown-shadow" data-style-font-size="big_text_px + 'px'">{{countdown}}</div>
+			<div class="sharp-text sharp-centre countdown-face" data-style-font-size="big_text_px + 'px'">{{countdown}}</div>
+		</div>
+	</div>
+
+	<div id="stage" class="stage">
+		<div id="result" data-if="result_shown">
+			<div id="result_back"></div>
+			<div class="result-line" id="result_title">
+				<span class="sharp-text sharp-centre big" data-style-font-size="big_text_px + 'px'">{{title}}</span>
+			</div>
+			<div class="result-line" id="result_vs">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{vs}}</span>
+			</div>
+			<div class="result-cell" id="result_team1">
+				<span class="sharp-text sharp-right" data-style-font-size="text_px + 'px'">{{team1}}</span>
+			</div>
+			<div class="result-cell" id="result_team2">
+				<span class="sharp-text sharp-right" data-style-font-size="text_px + 'px'">{{team2}}</span>
+			</div>
+			<div class="result-cell" id="result_score1">
+				<span class="sharp-text" data-style-font-size="text_px + 'px'">({{score1}})</span>
+			</div>
+			<div class="result-cell" id="result_score2">
+				<span class="sharp-text" data-style-font-size="text_px + 'px'">({{score2}})</span>
+			</div>
+			<div class="result-cell" id="result_outcome1" data-if="!tie" data-class-win="team1_won">
+				<span class="sharp-text" data-style-font-size="big_text_px + 'px'">{{outcome1}}</span>
+			</div>
+			<div class="result-cell" id="result_outcome2" data-if="!tie" data-class-win="!team1_won">
+				<span class="sharp-text" data-style-font-size="big_text_px + 'px'">{{outcome2}}</span>
+			</div>
+			<div class="result-line" id="result_tie" data-if="tie">
+				<span class="sharp-text sharp-centre" data-style-font-size="big_text_px + 'px'">{{tie_text}}</span>
+			</div>
+			<div id="result_ok" data-event-click="match_result_close">
+				<span class="sharp-text sharp-centre sharp-middle ok-label" data-style-font-size="text_px + 'px'">OK</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

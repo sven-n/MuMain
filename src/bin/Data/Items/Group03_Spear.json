@@ -1,0 +1,394 @@
+{
+  "formatVersion": 1,
+  "group": 3,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Light Spear",
+        "de": "Leichter Speer",
+        "es": "Jabalina de Luz",
+        "pl": "Lekka włócznia",
+        "pt": "Lança de luz"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 42,
+      "durability": 56,
+      "damageMin": 50,
+      "damageMax": 63,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Spear",
+        "de": "Speer",
+        "es": "Jabalina",
+        "pl": "Włócznia",
+        "pt": "Lança"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 23,
+      "durability": 42,
+      "damageMin": 30,
+      "damageMax": 41,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Dragon Lance",
+        "de": "Drachenlanze",
+        "es": "Lanza Dragón",
+        "pl": "Smocza lanca",
+        "pt": "Lança do dragão"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 15,
+      "durability": 34,
+      "damageMin": 21,
+      "damageMax": 33,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Giant Trident",
+        "de": "Riesendreizack",
+        "es": "Tridente Gigante",
+        "pl": "Trójząb olbrzyma",
+        "pt": "Tridente gigante"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 29,
+      "durability": 44,
+      "damageMin": 35,
+      "damageMax": 43,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Serpent Spear",
+        "de": "Schlangenspeer",
+        "es": "Jabalina Serpiente",
+        "pl": "Wężowa włócznia",
+        "pt": "Lança da serpente"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 20,
+      "level": 46,
+      "durability": 58,
+      "damageMin": 58,
+      "damageMax": 80,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Double Poleaxe",
+        "de": "Doppelstangenaxt",
+        "es": "Hacha Doble de Mástil",
+        "pl": "Podwójny czekan",
+        "pt": "Gadanha dupla"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 13,
+      "durability": 38,
+      "damageMin": 19,
+      "damageMax": 31,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Halberd",
+        "de": "Hellebarde",
+        "es": "Alabarda",
+        "pl": "Halabarda",
+        "pt": "Alabarda"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "level": 19,
+      "durability": 40,
+      "damageMin": 25,
+      "damageMax": 35,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Berdysh",
+        "de": "Berdysch",
+        "es": "Berdiche",
+        "pl": "Berdysz",
+        "pt": "Berdysh"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 37,
+      "durability": 54,
+      "damageMin": 42,
+      "damageMax": 54,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Great Scythe",
+        "de": "Großartige Sense",
+        "es": "Gran Guadaña",
+        "pl": "Wielka kosa",
+        "pt": "Grande foice"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 54,
+      "durability": 68,
+      "damageMin": 71,
+      "damageMax": 92,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Bill of Balrog",
+        "de": "Hippe des Balrog",
+        "es": "Pico de Balrog",
+        "pl": "Gizarma Balroga",
+        "pt": "Gancho de Balrog"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 63,
+      "durability": 74,
+      "damageMin": 76,
+      "damageMax": 102,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Dragon Spear",
+        "de": "Drachenspeer",
+        "es": "Jabalina Dragón",
+        "pl": "Smocza włócznia",
+        "pt": "Lança do dragão"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 92,
+      "durability": 85,
+      "damageMin": 112,
+      "damageMax": 140,
+      "attackSpeed": 35,
+      "attackType": 1,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Brova",
+        "de": "Brova",
+        "es": "Brova",
+        "pl": "Brova",
+        "pt": "Brova"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 4,
+      "slot": "mainHand",
+      "weaponKind": "spear",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 22,
+      "level": 147,
+      "durability": 90,
+      "damageMin": 190,
+      "damageMax": 226,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 152,
+        "dexterity": 25
+      },
+      "classRequirements": {
+        "darkKnight": 2,
+        "magicGladiator": 1
+      }
+    }
+  ]
+}

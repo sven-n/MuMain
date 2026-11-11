@@ -1,0 +1,665 @@
+{
+  "formatVersion": 1,
+  "group": 6,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Small Shield",
+        "de": "Kleiner Schild",
+        "es": "Escudo Pequeño",
+        "pl": "Mała tarcza",
+        "pt": "Escudo pequeno"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 3,
+      "durability": 22,
+      "blockRate": 3,
+      "defense": 1,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Horn Shield",
+        "de": "Hornschild",
+        "es": "Escudo Cuerno",
+        "pl": "Rogowa tarcza",
+        "pt": "Escudo de chifre"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 9,
+      "durability": 28,
+      "blockRate": 9,
+      "defense": 3,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Kite Shield",
+        "de": "Normannenschild",
+        "es": "Escudo Cometa",
+        "pl": "Tarcza migdałowa",
+        "pt": "Escudo ogival"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 12,
+      "durability": 32,
+      "blockRate": 12,
+      "defense": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Elven Shield",
+        "de": "Elfenschild",
+        "es": "Escudo de los Elfos",
+        "pl": "Elfia tarcza",
+        "pt": "Escudo élfico"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 21,
+      "durability": 36,
+      "blockRate": 21,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 100
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Buckler",
+        "de": "Faustschild",
+        "es": "Broquel",
+        "pl": "Puklerz",
+        "pt": "Broquel"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 6,
+      "durability": 24,
+      "blockRate": 6,
+      "defense": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Dragon Slayer Shield",
+        "de": "Drachentöterschild",
+        "es": "Escudo Mata Dragones",
+        "pl": "Tarcza Pogromcy Smoków",
+        "pt": "Escudo do matador de dragões"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 35,
+      "durability": 44,
+      "blockRate": 36,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Skull Shield",
+        "de": "Schädelschild",
+        "es": "Escudo Calavera",
+        "pl": "Tarcza czaszki",
+        "pt": "Escudo da caveira"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 15,
+      "durability": 34,
+      "blockRate": 15,
+      "defense": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Spiked Shield",
+        "de": "Stachelschild",
+        "es": "Escudo con Púas",
+        "pl": "Kolczasta tarcza",
+        "pt": "Escudo com espinhos"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 30,
+      "durability": 40,
+      "blockRate": 30,
+      "defense": 9,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Tower Shield",
+        "de": "Turmschild",
+        "es": "Escudo Torre",
+        "pl": "Tarcza wieżowa",
+        "pt": "Escudo de torre"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 40,
+      "durability": 46,
+      "blockRate": 40,
+      "defense": 11,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Shield",
+        "de": "Plattenschild",
+        "es": "Escudo de Plata",
+        "pl": "Płytowa tarcza",
+        "pt": "Escudo de placa"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 25,
+      "durability": 38,
+      "blockRate": 25,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Large Round Shield",
+        "de": "Großer Rundschild",
+        "es": "Escudo Redondo Grande",
+        "pl": "Duża okrągła tarcza",
+        "pt": "Grande escudo redondo"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 18,
+      "durability": 35,
+      "blockRate": 18,
+      "defense": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Serpent Shield",
+        "de": "Schlangenschild",
+        "es": "Escudo Serpiente",
+        "pl": "Wężowa tarcza",
+        "pt": "Escudo da serpente"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 45,
+      "durability": 48,
+      "blockRate": 45,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Bronze Shield",
+        "de": "Bronzeschild",
+        "es": "Escudo de Bronce",
+        "pl": "Brązowa tarcza",
+        "pt": "Escudo de bronze"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 54,
+      "durability": 52,
+      "blockRate": 54,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 140
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Dragon Shield",
+        "de": "Drachenschild",
+        "es": "Escudo Dragón",
+        "pl": "Smocza tarcza",
+        "pt": "Escudo do dragão"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 60,
+      "durability": 60,
+      "blockRate": 60,
+      "defense": 14,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Legendary Shield",
+        "de": "Legendärer Schild",
+        "es": "Escudo Legendario",
+        "pl": "Legendarna tarcza",
+        "pt": "Escudo lendário"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 48,
+      "durability": 50,
+      "blockRate": 48,
+      "defense": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 90,
+        "dexterity": 25
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Grand Soul Shield",
+        "de": "Großseelenschild",
+        "es": "Escudo Gran Alma",
+        "pl": "Tarcza Wielkiej Duszy",
+        "pt": "Grande escudo da alma"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 74,
+      "durability": 55,
+      "blockRate": 55,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 23
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Elemental Shield",
+        "de": "Elementarschild",
+        "es": "Escudo Elemental",
+        "pl": "Tarcza żywiołów",
+        "pt": "Escudo elemental"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 66,
+      "durability": 51,
+      "blockRate": 28,
+      "defense": 11,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60,
+        "energy": 30
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Crimson Glory",
+        "de": "Purpurruhm",
+        "es": "Gloria Carmesí",
+        "pl": "Szkarłatna Chwała",
+        "pt": "Glória carmesim"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 104,
+      "durability": 51,
+      "blockRate": 90,
+      "defense": 19,
+      "attackType": 4,
+      "requirements": {
+        "level": 380,
+        "strength": 95,
+        "dexterity": 48
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Salamander Shield",
+        "de": "Salamanderschild",
+        "es": "Escudo Salamandra",
+        "pl": "Tarcza Salamandry",
+        "pt": "Escudo da salamandra"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 102,
+      "durability": 51,
+      "blockRate": 96,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "level": 380,
+        "strength": 80,
+        "dexterity": 61
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Frost Barrier",
+        "de": "Frostbarriere",
+        "es": "Barrera Congelada",
+        "pl": "Mroźna Bariera",
+        "pt": "Barreira gelada"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "level": 99,
+      "durability": 51,
+      "blockRate": 58,
+      "defense": 14,
+      "attackType": 4,
+      "requirements": {
+        "level": 380,
+        "strength": 26,
+        "dexterity": 53,
+        "energy": 26
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Guardian Shield",
+        "de": "Wächterschild",
+        "es": "Escudo Guardián",
+        "pl": "Tarcza Strażnika",
+        "pt": "Escudo do guardião"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 106,
+      "durability": 51,
+      "blockRate": 30,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "level": 380,
+        "strength": 54,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Cross Shield",
+        "de": "Kreuzschild",
+        "es": "Escudo Cruz",
+        "pl": "Tarcza z krzyżem",
+        "pt": "Escudo em cruz"
+      },
+      "options": ["luck", "defenseRateOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "offHand",
+      "weaponKind": "shield",
+      "statProfile": "shield",
+      "skill": 18,
+      "level": 70,
+      "durability": 65,
+      "blockRate": 75,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "strength": 140,
+        "dexterity": 55
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    }
+  ]
+}

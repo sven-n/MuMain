@@ -1,8 +1,6 @@
-﻿// GMNewTown.cpp: implementation of the GMNewTown class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -25,12 +23,10 @@
 #include "World/MapInfra/w_MapHeaders.h"
 
 using namespace SEASON3B;
-
-bool GMNewTown::m_bCharacterSceneCheckMouse = false;
+using namespace mu::ui::window;
 
 GMNewTown::GMNewTown()
 {
-    m_bCharacterSceneCheckMouse = false;
 }
 
 GMNewTown::~GMNewTown()
@@ -101,19 +97,19 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
     switch (pObject->Type)
     {
     case 0:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
         break;
     case 2:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 53:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 54:
@@ -121,7 +117,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         break;
     case 55:
     {
-        pObject->BlendMeshTexCoordV += 0.015f;
+        pObject->BlendMeshTexCoordV += 0.015f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 56:
@@ -133,7 +129,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         break;
     case 61:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity * 0.2f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -146,7 +142,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         break;
     case 89:
     {
-        pObject->BlendMeshTexCoordV += 0.005f;
+        pObject->BlendMeshTexCoordV += 0.005f * FPS_ANIMATION_FACTOR;
     }
     break;
     case 62:
@@ -179,7 +175,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
                         pBoid->ShadowScale = 0.f;
                 pBoid->HiddenMesh = -1;
                 pBoid->BlendMesh = -1;
-                pBoid->Timer = (float)(rand() % 314) * 0.01f;
+                pBoid->Timer = (float)(Random::Rand() % 314) * 0.01f;
                 pBoid->Type = MODEL_EAGLE;
                 Vector(0.f, 0.f, 0.f, pBoid->Angle);
                 VectorCopy(pObject->Position, pBoid->Position);
@@ -231,21 +227,38 @@ void GMNewTown::PlayObjectSound(OBJECT* pObject)
     }
 }
 
-bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
+bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
 
     if (IsNewMap73_74())
     {
-        g_EmpireGuardian4.RenderObjectVisual(pObject, pModel);
+        g_EmpireGuardian4.UpdateObjectEffects(pObject, pModel);
         return true;
     }
+
+    // The light these objects are drawn with.
+    if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
+        Vector(1.0f, 1.0f, 1.0f, pObject->Light);
 
     vec3_t p, Position, Light;
 
     switch (pObject->Type)
     {
+    case 78:
+    case 79:
+    {
+        vec3_t sparkP, sparkPosition, sparkLight;
+        Vector(0.0f, 0.0f, 0.0f, sparkP);
+        Vector(0.1f, 0.1f, 0.3f, sparkLight);
+        for (int i = 1; i <= (pObject->Type == 78 ? 4 : 6); ++i)
+        {
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[i], sparkP, sparkPosition, false);
+            CreateSprite(BITMAP_SPARK + 1, sparkPosition, 5.5f, sparkLight, pObject);
+        }
+    }
+    break;
     case 0:
         if (rand_fps_check(3))
         {
@@ -294,7 +307,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(fLumi * 1.0f, fLumi * 1.0f, fLumi * 0.6f, Light);
 
         Vector(-40.0f, -10.0f, 0.0f, vRelative);
-        pModel->TransformPosition(BoneTransform[5], vRelative, vPos, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[5], vRelative, vPos, false);
         CreateSprite(BITMAP_LIGHT, vPos, pObject->Scale * 6.f, Light, pObject);
     }
     break;
@@ -303,9 +316,9 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(0.f, 0.f, 70.f, p);
         if (rand_fps_check(2))
         {
-            p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + rand() % 5);
-            p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + rand() % 5);
-            pModel->TransformPosition(BoneTransform[0], p, Position, false);
+            p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + Random::Rand() % 5);
+            p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + Random::Rand() % 5);
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[0], p, Position, false);
             CreateParticle(BITMAP_LIGHT, Position, pObject->Angle, Light, 11, 0.6f, pObject);
         }
         break;
@@ -321,7 +334,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(5.0f, -4.0f, -1.0f, vRelative);
         for (int i = 3; i <= 8; ++i)
         {
-            pModel->TransformPosition(BoneTransform[i], vRelative, vPos, false);
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[i], vRelative, vPos, false);
             CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, pObject);
         }
     }
@@ -554,7 +567,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
             SetPlayerAttack(pCharacter);
             pNewObject->PriorAnimationFrame = pNewObject->AnimationFrame =
-                rand() % Models[pNewObject->Type].Actions[pNewObject->CurrentAction].NumAnimationKeys;
+                Random::Rand() % Models[pNewObject->Type].Actions[pNewObject->CurrentAction].NumAnimationKeys;
             pObject->Owner = pNewObject;
             pObject->SubType = icntIndex;
         }
@@ -595,7 +608,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             if (Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys > 0)
             {
                 pNewObject->PriorAnimationFrame = pNewObject->AnimationFrame =
-                    rand() % Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys;
+                    Random::Rand() % Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys;
             }
             else
             {
@@ -699,7 +712,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             {
                 if (pObject->Type == 153)
                 {
-                    int iRand = rand() % 3;
+                    int iRand = Random::Rand() % 3;
                     if (iRand == 0) SetAction(pObject->Owner, MONSTER01_ATTACK1);
                     else if (iRand == 1)  SetAction(pObject->Owner, MONSTER01_ATTACK2);
                     else SetAction(pObject->Owner, MONSTER01_SHOCK);
@@ -722,18 +735,18 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 extern float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 
-bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool GMNewTown::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (!IsCurrentMap())
         return false;
 
     if (IsNewMap73_74())
-        return g_EmpireGuardian4.RenderObjectMesh(pObject, pModel, ExtraMon);
+        return g_EmpireGuardian4.RenderObjectMesh(pObject, look, pModel, ExtraMon);
 
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
     {
-        // DXP-20 inc4: flat IntensityTransform override -- must materialize before overwriting, or
+        // Flat IntensityTransform override -- must materialize before overwriting, or
         // a later lazy EnsureCpuNormals() (e.g. from RenderMesh()'s CPU fallback) would clobber this
         // flat value with freshly computed per-vertex lighting.
         pModel->EnsureCpuNormals(-1);
@@ -746,7 +759,6 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
                 IntensityTransform[i][j] = 2.0f;
             }
         }
-        Vector(1.0f, 1.0f, 1.0f, pObject->Light);
     }
 
     if (pObject->Type == 53 || pObject->Type == 55
@@ -756,50 +768,55 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         || pObject->Type == 2
         )
     {
-        pObject->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(pObject);
     }
     else if (pObject->Type == 73)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderBody(RENDER_BRIGHT | RENDER_CHROME, 0.5f, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderBody(RENDER_BRIGHT | RENDER_CHROME, 0.5f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
     }
     else if (pObject->Type == 104)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        pModel->RenderMesh(4, RENDER_BRIGHT, pObject->Alpha, 4, fLumi);
+        pModel->RenderMesh(4, RENDER_BRIGHT, look.alpha, 4, fLumi);
     }
     else if (pObject->Type == 113)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 114)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 121)
     {
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        pModel->RenderMesh(1, RENDER_BRIGHT, pObject->Alpha, 1, fLumi);
+        pModel->RenderMesh(1, RENDER_BRIGHT, look.alpha, 1, fLumi);
         fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.1f + 0.1f;
         pModel->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, fLumi, 0, fLumi);
     }
     // NPC
     else if (pObject->Type == MODEL_ELBELAND_MARCE)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == MODEL_HIDEOUS_RABBIT)
     {
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == MODEL_TOTEM_GOLEM && pObject->CurrentAction == MONSTER01_DIE)
     {
@@ -810,144 +827,43 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     return true;
 }
 
-void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon0)
+void GMNewTown::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
 {
     if (!IsCurrentMap())
         return;
 
     if (IsNewMap73_74())
     {
-        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, pModel, ExtraMon0);
+        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, look, pModel, ExtraMon0);
         return;
     }
 
     if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ������1,2, ����, ȸ����, ��
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
     }
     else if (pObject->Type == 110)
     {
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME2, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh,
+                           look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 78)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        vec3_t p, Position, Light;
-        for (int i = 1; i <= 4; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            pModel->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
-        }
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
     }
     else if (pObject->Type == 79)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-
-        vec3_t p, Position, Light;
-        for (int i = 1; i <= 6; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            pModel->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
-        }
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
     }
-}
-
-CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_SILVIA:
-        OpenNpc(MODEL_ELBELAND_SILVIA);
-        pCharacter = CreateCharacter(Key, MODEL_ELBELAND_SILVIA, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_RHEA:
-        OpenNpc(MODEL_ELBELAND_RHEA);
-        pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Object.m_fEdgeScale = 1.1f;
-        Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
-        Models[MODEL_ELBELAND_RHEA].Actions[1].PlaySpeed = 0.4f;
-        break;
-    case MONSTER_MARCE:
-        OpenNpc(MODEL_ELBELAND_MARCE);
-        pCharacter = CreateCharacter(Key, MODEL_ELBELAND_MARCE, PosX, PosY);
-        pCharacter->Object.Scale = 1.05f;
-        pCharacter->Object.m_fEdgeScale = 1.2f;
-        break;
-    case MONSTER_STRANGE_RABBIT:
-        OpenMonsterModel(MONSTER_MODEL_RABBIT);
-        pCharacter = CreateCharacter(Key, MODEL_RABBIT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_POLLUTED_BUTTERFLY:
-        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY);
-        pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY, PosX, PosY);
-        pCharacter->Object.Scale = 0.8f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_HIDEOUS_RABBIT:
-        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT);
-        pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_WEREWOLF2:
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2);
-        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2, PosX, PosY);
-        pCharacter->Object.Scale = 0.8f * 1.1f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_CURSED_LICH:
-        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH);
-        pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_TOTEM_GOLEM:
-        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM);
-        pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM, PosX, PosY);
-        pCharacter->Object.Scale = 0.17f * 0.95f;
-        pCharacter->Object.ShadowScale = 0.01f;
-        pCharacter->Object.m_fEdgeScale = 1.05f;
-        pCharacter->Object.LifeTime = 100;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_GRIZZLY:
-        OpenMonsterModel(MONSTER_MODEL_GRIZZLY);
-        pCharacter = CreateCharacter(Key, MODEL_GRIZZLY, PosX, PosY);
-        pCharacter->Object.Scale = 1.2f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_CAPTAIN_GRIZZLY:
-        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY);
-        pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
-        pCharacter->Object.Scale = 1.3f * 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    }
-
-    return pCharacter;
 }
 
 bool GMNewTown::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
@@ -997,7 +913,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
     }
 }
 
-bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
@@ -1010,11 +926,12 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     case MODEL_ELBELAND_RHEA:
         if (pObject->CurrentAction == 0 && rand_fps_check(5))
         {
-            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-            fScale = (rand() % 5 + 5) * 0.1f;
+            Vector((Random::Rand() % 90 + 10) * 0.01f, (Random::Rand() % 90 + 10) * 0.01f,
+                   (Random::Rand() % 90 + 10) * 0.01f, Light);
+            fScale = (Random::Rand() % 5 + 5) * 0.1f;
             Vector(0.f, 0.f, 0.f, vRelative);
-            vRelative[0] = 20 + (rand() % 1000 - 500) * 0.1f;
-            vRelative[1] = (rand() % 300 - 150) * 0.1f;
+            vRelative[0] = 20 + (Random::Rand() % 1000 - 500) * 0.1f;
+            vRelative[1] = (Random::Rand() % 300 - 150) * 0.1f;
             pModel->TransformPosition(pObject->BoneTransform[35], vRelative, vPos, true);
             CreateParticle(BITMAP_LIGHT, vPos, pObject->Angle, Light, 13, fScale, pObject);
             CreateParticle(BITMAP_LIGHT, vPos, pObject->Angle, Light, 12, fScale, pObject);
@@ -1037,7 +954,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     case MODEL_CURSED_LICH:
         for (int i = 0; i < 4; ++i)
         {
-            Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
+            Vector(0, (Random::Rand() % 300 - 150) * 0.1f, (Random::Rand() % 200 - 100) * 0.1f, vRelative);
             pModel->TransformPosition(pObject->BoneTransform[30], vRelative, vPos, true);
             CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
@@ -1046,7 +963,8 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
-            Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], Position);
+            Vector(pObject->Position[0] + Random::Rand() % 200 - 100, pObject->Position[1] + Random::Rand() % 200 - 100,
+                   pObject->Position[2], Position);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -1084,8 +1002,8 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 
                 for (int i = 0; i < 6; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
                     vWorldPos[2] = vRelativePos[2];
                     CreateParticle(BITMAP_LEAF_TOTEMGOLEM, vWorldPos, pObject->Angle, Light, 0, 1.0f);
                 }
@@ -1094,163 +1012,14 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 
                 for (int i = 0; i < 20; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 150) - 50;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 150) - 50;
                     CreateParticle(BITMAP_SMOKE, vWorldPos, pObject->Angle, Light, 48, 1.0f);
                 }
             }
         }
         break;
-    }
-
-    return false;
-}
-
-bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
-{
-    if (!IsCurrentMap())
-        return false;
-
-    float fDis_x, fDis_y;
-    fDis_x = pObject->Position[0] - Hero->Object.Position[0];
-    fDis_y = pObject->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f) return true;
-
-    switch (pObject->Type)
-    {
-    case MODEL_RABBIT:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_DEATH01);
-        }
-        return true;
-    case MODEL_BUTTERFLY:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_ELBELAND_RABBITUGLY_BREATH01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_RABBITUGLY_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_RABBITUGLY_DEATH01);
-        }
-        return true;
-    case MODEL_HIDEOUS_RABBIT:
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
-            || pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(30))
-            {
-                PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_MOVE02);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
-        }
-        return true;
-    case MODEL_WEREWOLF2:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01);
-        }
-        return true;
-    case MODEL_CURSED_LICH:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_ELBELAND_CURSERICH_MOVE01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_CURSERICH_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_CURSERICH_DEATH01);
-        }
-        return true;
-    case MODEL_TOTEM_GOLEM:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(2))
-                PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_MOVE01);
-            else
-                PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_MOVE02);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_ATTACK02);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_DEATH01);
-        }
-        return true;
-    case MODEL_GRIZZLY:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_ELBELAND_BEASTWOO_MOVE01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_BEASTWOO_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
-        }
-        return true;
-    case MODEL_CAPTAIN_GRIZZLY:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_ELBELAND_BEASTWOOLEADER_MOVE01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
-        }
-        return true;
     }
 
     return false;
@@ -1264,34 +1033,3 @@ bool GMNewTown::AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     return false;
 }
 
-bool GMNewTown::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsCurrentMap())
-        return false;
-
-    return false;
-}
-
-bool GMNewTown::CharacterSceneCheckMouse(OBJECT* pObj)
-{
-    m_bCharacterSceneCheckMouse = false;
-    if (CheckMouseIn(480, 90, 30, 20) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 2);
-        return true;
-    }
-    else if (CheckMouseIn(485, 110, 50, 50) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 0);
-        return true;
-    }
-
-    return false;
-}
-
-bool GMNewTown::IsCheckMouseIn()
-{
-    return m_bCharacterSceneCheckMouse;
-}

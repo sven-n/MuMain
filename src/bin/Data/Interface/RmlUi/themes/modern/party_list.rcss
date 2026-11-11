@@ -1,0 +1,68 @@
+/* Modern theme for CPartyListWindow: the same cards at the same place (reference px under the
+   dock transform, see party_list.rml), drawn on the modern surfaces instead of the card art: a
+   framed dark card, the health as a semantic red bar, the leader in the warm accent, the states
+   as tints of the modern palette. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 77px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+.card { display: block; position: relative; width: 77px; height: 23px; margin-bottom: 1px; }
+
+.card-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 75px;
+	height: 21px;
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+.card-tint, .card-select { display: none; position: absolute; left: 1px; top: 1px; width: 75px; height: 21px; }
+.card.defense .card-tint { display: block; background-color: rgba(142, 176, 107, 60); }
+.card.selected .card-select { display: block; background-color: rgba(255, 255, 255, 30); }
+.card.absent .card-tint { display: block; background-color: rgba(162, 44, 30, 90); }
+
+.card-back, .card-flag { display: none; }
+
+.card-name {
+	display: block;
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	white-space: nowrap;
+	color: token(text-primary);
+}
+.card.absent .card-name { color: token(text-muted); }
+.card.leader .card-name { color: token(text-warm); }
+
+.card-health { position: absolute; left: 4px; top: 16px; height: 3px; background-color: token(semantic-danger); }
+
+.card-leave {
+	position: absolute;
+	left: 63px;
+	top: 3px;
+	width: 11px;
+	height: 11px;
+	background-color: token(surface-control);
+	border: 1px token(border-frame);
+	border-radius: 2px;
+	pointer-events: auto;
+}
+.card-leave:hover { border-color: token(accent-gold-hover); }
+
+/* Keep the dock's preferred offset where it fits; the workspace's top edge clears the shell
+   header. All five cards fit below this anchor at the supported viewport and scale settings. */
+#panel {
+	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
+	top: max(calc(var(--workspace-top, 0px) + 14px * var(--dock-scale, 1)), calc(var(--workspace-bottom, 100%) - 418px * var(--dock-scale, 1)));
+	transform: scale(var(--dock-scale, 1));
+	--root-scale: var(--dock-scale, 1);
+}
+/* A card takes the pointer: its hover is the skill target, and a click on it never walks. */
+.card { pointer-events: auto; }

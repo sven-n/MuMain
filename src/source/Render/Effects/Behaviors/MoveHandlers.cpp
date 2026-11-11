@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -9,13 +10,13 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "MoveHandlers.h"
 
@@ -47,8 +48,8 @@ namespace Render::Effects::Behaviors
             o->Timer = 0.0f;
             break;
         }
-        if (o->Timer > o->Angle[1]) o->Angle[1] += 0.5f;
-        if (o->Timer < o->Angle[1]) o->Angle[1] -= 0.5f;
+        if (o->Timer > o->Angle[1]) o->Angle[1] += 0.5f * FPS_ANIMATION_FACTOR;
+        if (o->Timer < o->Angle[1]) o->Angle[1] -= 0.5f * FPS_ANIMATION_FACTOR;
 
         if (fTemp <= 800.0f && fTemp >= -800.0f)
         {
@@ -359,12 +360,12 @@ namespace Render::Effects::Behaviors
                     int Ran = -1;
                     CHARACTER* c = &CharactersClient[(int)o->PKKey];
 
-                    Ran = rand() % 6;
+                    Ran = Random::Rand() % 6;
                     if (o->m_sTargetIndex > -1)
                     {
                         while (true)
                         {
-                            Ran = rand() % 6;
+                            Ran = Random::Rand() % 6;
                             if (Ran != o->m_sTargetIndex)
                             {
                                 break;
@@ -395,20 +396,20 @@ namespace Render::Effects::Behaviors
                         break;
                     }
 
-                    if (Ran < 0)
-                        Ran = Ran;
                     for (int i = 0; i < 3; i++)
                     {
                         VectorCopy(o->Position, p);
                         Vector(0.2f, 0.3f, 1.f, Light);
 
-                        p[1] += rand() % 200 - 100;
-                        p[2] += rand() % 200 - 100;
-                        CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.2f, Light, o->Owner, (float)(rand() % 360));
+                        p[1] += Random::Rand() % 200 - 100;
+                        p[2] += Random::Rand() % 200 - 100;
+                        CreateSprite(BITMAP_SHINY + 1, p, (float)(Random::Rand() % 8 + 8) * 0.2f, Light, o->Owner,
+                                     (float)(Random::Rand() % 360));
                         Vector(1.f, 1.f, 1.f, Light);
-                        CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.07f, Light, o->Owner, (float)(rand() % 360));
+                        CreateSprite(BITMAP_SHINY + 1, p, (float)(Random::Rand() % 8 + 8) * 0.07f, Light, o->Owner,
+                                     (float)(Random::Rand() % 360));
                         VectorCopy(o->Owner->Position, p);
-                        p[2] += ((rand() % 80 - 40) + 200);
+                        p[2] += ((Random::Rand() % 80 - 40) + 200);
                         CreateJointFpsChecked(BITMAP_SPARK + 1, p, p, o->Owner->Angle, 1, o->Owner, 18.7f);
                     }
                     CreateArrow(c, o->Owner, to, FindHotKey((o->Skill)), 1, 0);
@@ -476,15 +477,15 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_GHOST(OBJECT* o, int index, float Luminosity)
     {
     {
-        if (rand() % 40 == 1)
+        if (Random::Rand() % 40 == 1)
         {
             o->Velocity = o->Velocity * -1.0f;
-            o->Gravity = o->Velocity * ((float)(rand() % 3) + 5.0f);
+            o->Gravity = o->Velocity * ((float)(Random::Rand() % 3) + 5.0f);
         }
-        if (rand() % 40 == 1)
+        if (Random::Rand() % 40 == 1)
         {
             o->Velocity = o->Velocity * -1.0f;
-            o->Distance = o->Velocity * ((float)(rand() % 3) + 1.0f);
+            o->Distance = o->Velocity * ((float)(Random::Rand() % 3) + 1.0f);
         }
 
         vec3_t vTemp;
@@ -532,15 +533,15 @@ namespace Render::Effects::Behaviors
         float Height;
     {
         if (o->Kind > 0)
-            o->Angle[2] += (rand() % 10) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] += (Random::Rand() % 10) * FPS_ANIMATION_FACTOR;
         else
-            o->Angle[2] -= (rand() % 10) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] -= (Random::Rand() % 10) * FPS_ANIMATION_FACTOR;
 
         if (rand_fps_check(32))
         {
-            o->Direction[2] = (float)(rand() % 15 - 7) * 1.f;
+            o->Direction[2] = (float)(Random::Rand() % 15 - 7) * 1.f;
         }
-        o->Direction[2] += ((float)(rand() % 15 - 7) * 0.2f) * FPS_ANIMATION_FACTOR;
+        o->Direction[2] += ((float)(Random::Rand() % 15 - 7) * 0.2f) * FPS_ANIMATION_FACTOR;
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height + 50.f)
         {
@@ -552,9 +553,9 @@ namespace Render::Effects::Behaviors
             o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->Direction[2] -= (1.f) * FPS_ANIMATION_FACTOR;
         }
-        o->Position[2] += ((float)(rand() % 15 - 7) * 0.3f) * FPS_ANIMATION_FACTOR;
+        o->Position[2] += ((float)(Random::Rand() % 15 - 7) * 0.3f) * FPS_ANIMATION_FACTOR;
 
-        float  Luminosity = (float)(rand() % 32 + 64) * 0.01f;
+        float Luminosity = (float)(Random::Rand() % 32 + 64) * 0.01f;
         if (o->SubType == 0) {
             Vector(Luminosity * 0.4f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
         }
@@ -570,9 +571,10 @@ namespace Render::Effects::Behaviors
             if (rand_fps_check(2))
             {
                 vec3_t Position;
-                Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+                Vector((float)(Random::Rand() % 16 - 8), (float)(Random::Rand() % 16 - 8),
+                       (float)(Random::Rand() % 16 - 8), Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateParticleFpsChecked(BITMAP_SPARK, Position, o->Angle, o->Light, 7);
+                CreateParticle(BITMAP_SPARK, Position, o->Angle, o->Light, 7);
             }
         }
         CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
@@ -681,7 +683,7 @@ namespace Render::Effects::Behaviors
         Vector(0.f, -100.f, 0.f, p);
         for (int j = 0; j < 3; j++)
         {
-            Vector((float)(rand() % 90), 0.f, (float)(rand() % 360), Angle);
+            Vector((float)(Random::Rand() % 90), 0.f, (float)(Random::Rand() % 360), Angle);
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
             VectorSubtract(o->Position, Position, Position);
@@ -716,7 +718,7 @@ namespace Render::Effects::Behaviors
             {
                 if (rand_fps_check(3))
                 {
-                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 5, 0.4f + rand() % 10 * 0.01f);
+                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 5, 0.4f + Random::Rand() % 10 * 0.01f);
                 }
             }
         }
@@ -801,13 +803,13 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 1)
         {
             VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, o->Position, o->Angle, o->Light, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, o->Position, o->Angle, o->Light, 0, 1.0f);
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 23, 1.0f);
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 8, 1.0f);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 11, 1.0f);
             if (rand_fps_check(2))
             {
-                CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 3, 3.f);
+                CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 3, 3.f);
             }
         }
         else if (o->SubType == 2)
@@ -870,10 +872,11 @@ namespace Render::Effects::Behaviors
             vec3_t vFirePosition;
             for (int i = 0; i < 1; ++i)
             {
-                Vector(o->Position[0] + (rand() % 100 - 50) * 1.0f,
-                    o->Position[1] + (rand() % 100 - 50) * 1.0f, o->Position[2] + (rand() % 10 + 5) * 1.0f, vFirePosition);
-                float fScale = (rand() % 5 + 13) * 0.1f;
-                switch (rand() % 3)
+                Vector(o->Position[0] + (Random::Rand() % 100 - 50) * 1.0f,
+                       o->Position[1] + (Random::Rand() % 100 - 50) * 1.0f,
+                       o->Position[2] + (Random::Rand() % 10 + 5) * 1.0f, vFirePosition);
+                float fScale = (Random::Rand() % 5 + 13) * 0.1f;
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
@@ -892,11 +895,12 @@ namespace Render::Effects::Behaviors
             vec3_t vFirePosition;
             for (int i = 0; i < 1; ++i)
             {
-                Vector(o->Position[0] + (rand() % 50 - 25) * 1.0f,
-                    o->Position[1] + (rand() % 50 - 25) * 1.0f, o->Position[2] + (rand() % 10 + 5) * 1.0f, vFirePosition);
-                float fScale = ((rand() % 5 + 13) * 0.05f) * o->Scale;
+                Vector(o->Position[0] + (Random::Rand() % 50 - 25) * 1.0f,
+                       o->Position[1] + (Random::Rand() % 50 - 25) * 1.0f,
+                       o->Position[2] + (Random::Rand() % 10 + 5) * 1.0f, vFirePosition);
+                float fScale = ((Random::Rand() % 5 + 13) * 0.05f) * o->Scale;
 
-                switch (rand() % 3)
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
@@ -922,7 +926,7 @@ namespace Render::Effects::Behaviors
             for (int i = 0; i < 8; ++i)
             {
                 int iNumBones = Models[o->Owner->Type].NumBones;
-                Models[o->Owner->Type].TransformByObjectBone(vFirePosition, o->Owner, rand() % iNumBones);
+                Models[o->Owner->Type].TransformByObjectBone(vFirePosition, o->Owner, Random::Rand() % iNumBones);
 
                 vec3_t vLightFire;
                 Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -930,8 +934,8 @@ namespace Render::Effects::Behaviors
 
                 vec3_t vLight;
                 Vector(1.0f, 1.0f, 1.0f, vLight);
-                float fScale = (rand() % 5 + 13) * 0.1f;
-                switch (rand() % 3)
+                float fScale = (Random::Rand() % 5 + 13) * 0.1f;
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, vLight, 0, fScale);
@@ -949,9 +953,9 @@ namespace Render::Effects::Behaviors
         {
             for (int i = 0; i < 2; ++i)
             {
-                float fScale = (rand() % 5 + 18) * 0.03f;
+                float fScale = (Random::Rand() % 5 + 18) * 0.03f;
 
-                switch (rand() % 3)
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, o->Light, 0, fScale);
@@ -969,9 +973,9 @@ namespace Render::Effects::Behaviors
         {
             for (int i = 0; i < 2; ++i)
             {
-                float fScale = (rand() % 5 + 18) * 0.03f;
+                float fScale = (Random::Rand() % 5 + 18) * 0.03f;
                 Vector(0.6f, 0.9f, 0.1f, o->Light);
-                switch (rand() % 3)
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, o->Light, 0, fScale);
@@ -1030,14 +1034,14 @@ namespace Render::Effects::Behaviors
 
             if (o->Kind == 1)
             {
-                if (o->Alpha > 0.0f) o->Alpha -= 0.03f;
+                if (o->Alpha > 0.0f) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
                 else DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, o->Owner);
             }
             else
             {
                 if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
-                if (o->Alpha < 1.0f) o->Alpha += 0.03f;
+                if (o->Alpha < 1.0f) o->Alpha += 0.03f * FPS_ANIMATION_FACTOR;
             }
 
             if (pObject->Live)
@@ -1047,7 +1051,7 @@ namespace Render::Effects::Behaviors
             {
                 vec3_t vLight;
                 Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
-                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
+                CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
             }
         }
         else if (o->SubType == 1)
@@ -1062,7 +1066,8 @@ namespace Render::Effects::Behaviors
                 }
                 BMD* pModel = &Models[pObject->Type];
                 int iNumBones = pModel->NumBones;
-                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, pObject->Position, pObject->Angle, pObject->Light, 0, pObject, -1, rand() % iNumBones);
+                CreateEffect(BITMAP_FIRE_CURSEDLICH, pObject->Position, pObject->Angle, pObject->Light, 0, pObject, -1,
+                             Random::Rand() % iNumBones);
             }
         }
         return true;
@@ -1088,14 +1093,14 @@ namespace Render::Effects::Behaviors
 
             if (o->Kind == 1)
             {
-                if (o->Alpha > 0.0f) o->Alpha -= 0.03f;
+                if (o->Alpha > 0.0f) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
                 else DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, o->Owner);
             }
             else
             {
                 if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
-                if (o->Alpha < 1.0f) o->Alpha += 0.03f;
+                if (o->Alpha < 1.0f) o->Alpha += 0.03f * FPS_ANIMATION_FACTOR;
             }
 
             if (pObject->Live)
@@ -1105,12 +1110,12 @@ namespace Render::Effects::Behaviors
             Vector(o->Alpha, o->Alpha, o->Alpha, vLight);
             if (rand_fps_check(1))
             {
-                CreateParticleFpsChecked(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+                CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
             }
 
             if (rand_fps_check(2))
             {
-                CreateParticleFpsChecked(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+                CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
             }
             //DeleteJoint(MODEL_SPEARSKILL, o, 15);
         }
@@ -1133,8 +1138,8 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_SUMMONER_CASTING_EFFECT1(OBJECT* o, int index, float Luminosity)
     {
     {
-        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f;
-        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f;
+        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f * FPS_ANIMATION_FACTOR;
+        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f * FPS_ANIMATION_FACTOR;
 
         switch (o->Type)
         {
@@ -1238,6 +1243,7 @@ namespace Render::Effects::Behaviors
         if (o->AnimationFrame >= 11.0f)
         {
             CreateBomb3(o->Position, o->SubType);
+            // AnimationFrame stays clamped at 12, so this runs every frame until the summon fades out.
             if (rand_fps_check(2))
                 PlayBuffer(SOUND_SUMMON_EXPLOSION);
         }
@@ -1265,8 +1271,8 @@ namespace Render::Effects::Behaviors
     {
         float Matrix[3][4];
     {
-        if (o->LifeTime < 20) o->Alpha -= 0.05f;
-        else if (o->Alpha < 0.7f) o->Alpha += 0.04f;
+        if (o->LifeTime < 20) o->Alpha -= 0.05f * FPS_ANIMATION_FACTOR;
+        else if (o->Alpha < 0.7f) o->Alpha += 0.04f * FPS_ANIMATION_FACTOR;
 
         if (o->AnimationFrame > 8 && o->Skill == 0)
         {
@@ -1297,7 +1303,7 @@ namespace Render::Effects::Behaviors
             PlayBuffer(SOUND_SUMMON_REQUIEM);
         }
         // 			if (o->AnimationFrame > 11 && o->AnimationFrame < 12)
-        // 				EarthQuake = (float)(-rand()%2-5)*0.1f;
+        // 				EarthQuake = (float)(-Random::Rand()%2-5)*0.1f;
     }
         return true;
     }
@@ -1309,19 +1315,19 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 0)
         {
             int anEffectVolume[3] = { 5, 4, 3 };
-            if (rand() % anEffectVolume[(int)o->PKKey] == 0)
+            if (Random::Rand() % anEffectVolume[(int)o->PKKey] == 0)
             {
                 vec3_t vPos, vLight;
 
                 VectorCopy(o->HeadTargetAngle, vPos);
-                vPos[0] += (float)(rand() % 500 - 250);
-                vPos[1] += (float)(rand() % 500 - 250);
+                vPos[0] += (float)(Random::Rand() % 500 - 250);
+                vPos[1] += (float)(Random::Rand() % 500 - 250);
                 Vector(1.0f, 1.0f, 1.0f, vLight);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 3.5f);
 
                 VectorCopy(o->HeadTargetAngle, vPos);
-                vPos[0] += (float)(rand() % 400 - 200);
-                vPos[1] += (float)(rand() % 400 - 200);
+                vPos[0] += (float)(Random::Rand() % 400 - 200);
+                vPos[1] += (float)(Random::Rand() % 400 - 200);
                 Vector(0.6f, 0.1f, 1.f, vLight);
                 CreateEffectFpsChecked(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 
@@ -1373,8 +1379,8 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 9)
         {
-            if (o->LifeTime < 20) o->Alpha -= 0.05f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
+            if (o->LifeTime < 20) o->Alpha -= 0.05f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.05f * FPS_ANIMATION_FACTOR;
 
             o->HeadAngle[0] += (4.0f) * FPS_ANIMATION_FACTOR;
             o->HeadAngle[1] -= (8.0f) * FPS_ANIMATION_FACTOR;
@@ -1382,8 +1388,8 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 10)
         {
-            if (o->LifeTime < 20) o->Alpha -= 0.03f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
+            if (o->LifeTime < 20) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.05f * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 11)
         {
@@ -1422,27 +1428,27 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 13)
         {
             o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.95f, o->Light);
+            VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Scale > 8)
             {
                 o->Live = false;
             }
             if (o->Scale > 4)
             {
-                VectorScale(o->Light, 0.5f, o->Light);
+                VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 14)
         {
             o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.95f, o->Light);
+            VectorScale(o->Light, powf(0.95f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Scale > 8)
             {
                 o->Live = false;
             }
             if (o->Scale > 4)
             {
-                VectorScale(o->Light, 0.5f, o->Light);
+                VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         return true;
@@ -1520,15 +1526,15 @@ namespace Render::Effects::Behaviors
         {
         case 3:
         case 0:
-            Position[0] = o->Position[0] + (float)(rand() % 500 - 250);
-            Position[1] = o->Position[1] + (float)(rand() % 500 - 250);
-            Position[2] = o->Position[2] - (float)(rand() % 100) + 150.0f;
+            Position[0] = o->Position[0] + (float)(Random::Rand() % 500 - 250);
+            Position[1] = o->Position[1] + (float)(Random::Rand() % 500 - 250);
+            Position[2] = o->Position[2] - (float)(Random::Rand() % 100) + 150.0f;
             if (rand_fps_check(2))
             {
                 if (o->SubType == 3)
-                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
+                    CreateParticle(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
                 else
-                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
+                    CreateParticle(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
             }
             break;
         case 1:
@@ -1539,7 +1545,7 @@ namespace Render::Effects::Behaviors
             {
                 o->LifeTime = 100;
                 BMD* pModel = &Models[o->Owner->Type];
-                int iBone = rand() % pModel->NumBones;
+                int iBone = Random::Rand() % pModel->NumBones;
                 vec3_t vRelativePos, vWorldPos;
                 Vector(0.f, 0.f, 100.f, vRelativePos);
                 if (!pModel->Bones[iBone].Dummy)
@@ -1550,7 +1556,7 @@ namespace Render::Effects::Behaviors
                     if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
-                        CreateParticleFpsChecked(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
+                        CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
                     }
                 }
             }
@@ -1612,7 +1618,7 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 1 || o->SubType == 2)
         {
             BMD* b = &Models[o->Owner->Type];
-            Vector(0.f, 0.f, 10.f * FPS_ANIMATION_FACTOR, p);
+            Vector(0.f, 0.f, 10.f, p);
             VectorCopy(o->StartPosition, b->BodyOrigin);
             b->TransformPosition(o->Owner->BoneTransform[33], p, o->Position, true);
         }
@@ -1626,44 +1632,52 @@ namespace Render::Effects::Behaviors
                 Vector(0.f, 25.f, 0.f, p);
             }
 
-            Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), Angle);
+            Vector((float)(Random::Rand() % 360), 0.f, (float)(Random::Rand() % 360), Angle);
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
             VectorAdd(o->Position, Position, Position);
 
-            if (!rand_fps_check(1))
-            {
-                break;
-            }
+            // Sprites draw every frame; the sparks and bolts spawn at the reference rate.
+            const bool spawn = rand_fps_check(1);
 
             if (o->SubType == 1)
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    if (spawn)
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
                 else
                 {
-                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                    if (spawn)
+                        CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (Random::Rand() % 50 + 10) / 100.f,
+                                       o);
                 }
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 8 + 8) * 0.2f, o->Light, o,
+                             (float)(Random::Rand() % 360));
             }
             else if (o->SubType == 2)
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    if (spawn)
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 8 + 8) * 0.2f, o->Light, o,
+                             (float)(Random::Rand() % 360));
             }
             else if (o->SubType == 3)
             {
-                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
+                if (spawn)
+                    CreateParticle(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (Random::Rand() % 10 + 5) / 25.f,
+                                   o);
             }
             else
             {
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, o, (float)(rand() % 360));
-                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 8 + 8) * 0.3f, o->Light, o,
+                             (float)(Random::Rand() % 360));
+                if (spawn)
+                    CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (Random::Rand() % 50 + 10) / 100.f, o);
             }
         }
         return true;
@@ -1673,24 +1687,24 @@ namespace Render::Effects::Behaviors
     bool Move_BITMAP_JOINT_THUNDER(OBJECT* o, int index, float Luminosity)
     {
     {
-        float fScale = (rand() % 400 + 100) / 10.0f;
+        float fScale = (Random::Rand() % 400 + 100) / 10.0f;
         vec3_t vPosition, vStartPosition;
         VectorCopy(o->StartPosition, vStartPosition);
         VectorCopy(o->Position, vPosition);
-        vStartPosition[0] += rand() % 100 - 50;
-        vStartPosition[1] += rand() % 100 - 50;
-        vPosition[0] += rand() % 100 - 50;
-        vPosition[1] += rand() % 100 - 50;
+        vStartPosition[0] += Random::Rand() % 100 - 50;
+        vStartPosition[1] += Random::Rand() % 100 - 50;
+        vPosition[0] += Random::Rand() % 100 - 50;
+        vPosition[1] += Random::Rand() % 100 - 50;
 
         if (rand_fps_check(2))
         {
             if (o->SubType == 1)
             {
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);
+                CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);
             }
             else
             {
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);
+                CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);
             }
         }
 
@@ -1699,22 +1713,22 @@ namespace Render::Effects::Behaviors
         if (o->LifeTime > 10)
         {
             if (rand_fps_check(2))
-                CreateEffectFpsChecked(BITMAP_MAGIC + 1, vPosition, o->Angle, vLight, 11, o);
+                CreateEffect(BITMAP_MAGIC + 1, vPosition, o->Angle, vLight, 11, o);
         }
 
         if (rand_fps_check(4))
-            CreateParticleFpsChecked(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
+            CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
 
         if (rand_fps_check(4))
         {
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, vLight, 13);
+            CreateEffect(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, vLight, 13);
         }
 
         if (o->LifeTime > 5)
         {
             Vector(0.15f, 0.15f, 0.4f, vLight);
             if (rand_fps_check(5))
-                CreateEffectFpsChecked(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
+                CreateEffect(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
         }
 
         if (o->Owner != NULL && rand_fps_check(5) && o->Owner->BoneTransform != NULL)
@@ -1726,15 +1740,18 @@ namespace Render::Effects::Behaviors
             Vector(0.0f, 0.0f, 0.0f, vRelativePos);
             for (int i = 0; i < iNumBones; ++i)
             {
-                if (iNumBones > 100 && rand() % iNumBones > iNumBones / 10) continue;
-                else if (iNumBones > 50 && rand() % iNumBones > iNumBones / 5) continue;
-                else if (iNumBones > 20 && rand() % iNumBones > iNumBones / 2) continue;
+                if (iNumBones > 100 && Random::Rand() % iNumBones > iNumBones / 10)
+                    continue;
+                else if (iNumBones > 50 && Random::Rand() % iNumBones > iNumBones / 5)
+                    continue;
+                else if (iNumBones > 20 && Random::Rand() % iNumBones > iNumBones / 2)
+                    continue;
                 VectorCopy(o->Owner->Position, pTargetModel->BodyOrigin);
                 pTargetModel->TransformPosition(o->Owner->BoneTransform[i], vRelativePos, vPos, true);
 
                 Vector(0.2f, 0.2f, 0.8f, vLight);
-                fRandom = 3.0f + ((float)(rand() % 20 - 10) * 0.1f);
-                CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                fRandom = 3.0f + ((float)(Random::Rand() % 20 - 10) * 0.1f);
+                CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
             }
         }
     }
@@ -1803,14 +1820,12 @@ namespace Render::Effects::Behaviors
         {
             for (int j = 0; j < 6; j++)
             {
-                Vector((float)(rand() % 50 - 25), (float)(rand() % 50 - 25), 0.f, Position);
+                Vector((float)(Random::Rand() % 50 - 25), (float)(Random::Rand() % 50 - 25), 0.f, Position);
                 VectorAdd(Position, o->Position, Position);
                 CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light);
             }
-            if (rand_fps_check(8))
-            {
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
-            }
+            // The original spawned a stone on 15 of every 16 frames ((int)WorldTime % 16); rand_fps_check(8) thins it.
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light);
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -1831,12 +1846,12 @@ namespace Render::Effects::Behaviors
                     AngleMatrix(Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
                     VectorAdd(Position, o->Position, Position);
-                    Position[0] += rand() % 64 - 32;
-                    Position[1] += rand() % 64 - 32;
+                    Position[0] += Random::Rand() % 64 - 32;
+                    Position[1] += Random::Rand() % 64 - 32;
                     if (o->SubType == 1)
-                        CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                        CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
                     else if (o->SubType == 2)
-                        CreateParticleFpsChecked(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                        CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
                 }
             }
         }
@@ -1846,17 +1861,17 @@ namespace Render::Effects::Behaviors
             {
                 if (rand_fps_check(1))
                 {
-                    CreateParticleFpsChecked(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
-                    Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), 40.f, Position);
+                    CreateParticle(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
+                    Vector((float)(Random::Rand() % 10 - 5), (float)(Random::Rand() % 10 - 5), 40.f, Position);
                     VectorAdd(Position, o->Position, Position);
-                    CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
+                    CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
                 }
             }
-            Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), -40.f, Position);
+            Vector((float)(Random::Rand() % 10 - 5), (float)(Random::Rand() % 10 - 5), -40.f, Position);
             VectorAdd(Position, o->Position, Position);
             CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 21, 0.8f);
 
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light, 12);
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -1873,22 +1888,22 @@ namespace Render::Effects::Behaviors
                     AngleMatrix(Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
                     VectorAdd(Position, o->Position, Position);
-                    Position[0] += rand() % 64 - 32;
-                    Position[1] += rand() % 64 - 32;
-                    CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                    Position[0] += Random::Rand() % 64 - 32;
+                    Position[1] += Random::Rand() % 64 - 32;
+                    CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
                 }
             }
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light, 12);
         }
         else if (o->SubType == 5)
         {
-            Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
+            Vector((float)(Random::Rand() % 32 - 16), (float)(Random::Rand() % 32 - 16), 0.f, Position);
             VectorAdd(Position, o->Position, Position);
             CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, o->Scale);
         }
         else if (o->SubType == 6)
         {
-            Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
+            Vector((float)(Random::Rand() % 32 - 16), (float)(Random::Rand() % 32 - 16), 0.f, Position);
             VectorAdd(Position, o->Position, Position);
             CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, o->Light, 12, o->Scale);
         }
@@ -1928,16 +1943,16 @@ namespace Render::Effects::Behaviors
         {
             for (int i = 0; i < 2; ++i)
             {
-                Vector((float)(rand() % 30 - 15), (float)(rand() % 30 - 15), 0.f, p);
+                Vector((float)(Random::Rand() % 30 - 15), (float)(Random::Rand() % 30 - 15), 0.f, p);
                 VectorAdd(p, o->Position, Position);
-                if (rand() % 3 != 0)
+                if (Random::Rand() % 3 != 0)
                 {
                     CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, o->Light, 11, 1.4f);
                 }
 
                 if (rand_fps_check(8))
                 {
-                    CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light, 0);
+                    CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light, 0);
                 }
             }
         }
@@ -1952,9 +1967,9 @@ namespace Render::Effects::Behaviors
                     AngleMatrix(Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
                     VectorAdd(Position, o->Position, Position);
-                    Position[0] += rand() % 64 - 32;
-                    Position[1] += rand() % 64 - 32;
-                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                    Position[0] += Random::Rand() % 64 - 32;
+                    Position[1] += Random::Rand() % 64 - 32;
+                    CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
                 }
             }
         }
@@ -2052,7 +2067,7 @@ namespace Render::Effects::Behaviors
                     pTargetModel->TransformPosition(pTargetObj->BoneTransform[i], vRelativePos, vPos, true);
 
                     Vector(0.2f, 0.2f, 0.8f, vLight);
-                    fRandom = 3.0f + ((float)(rand() % 20 - 10) * 0.1f);
+                    fRandom = 3.0f + ((float)(Random::Rand() % 20 - 10) * 0.1f);
                     CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
                 }
             }
@@ -2073,17 +2088,16 @@ namespace Render::Effects::Behaviors
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 
         OBJECT* pSourceObj = o->Owner;
-        OBJECT* pTargetObj = pSourceObj->Owner;
-        BMD* pSourceModel = &Models[pSourceObj->Type];
-        BMD* pTargetModel = &Models[pTargetObj->Type];
-
+        OBJECT* pTargetObj = pSourceObj != NULL ? pSourceObj->Owner : NULL;
         if (pSourceObj == NULL || pTargetObj == NULL ||
             pSourceObj->Live == false || pTargetObj->Live == false)
         {
             return true;
         }
+        BMD* pSourceModel = &Models[pSourceObj->Type];
+        BMD* pTargetModel = &Models[pTargetObj->Type];
 
-        int iRandom = rand() % 10;
+        int iRandom = Random::Rand() % 10;
         int iCnt = 0;
         switch (iRandom)
         {
@@ -2108,9 +2122,9 @@ namespace Render::Effects::Behaviors
         for (int i = 0; i < iCnt; i++)
         {
             VectorCopy(pSourceObj->Position, vSourcePos);
-            vSourcePos[0] += ((float)((rand() % 80 - 40)));
-            vSourcePos[1] += ((float)((rand() % 60 - 30)));
-            vSourcePos[2] += (80.0f + ((float)((rand() % 180 - 100))));
+            vSourcePos[0] += ((float)((Random::Rand() % 80 - 40)));
+            vSourcePos[1] += ((float)((Random::Rand() % 60 - 30)));
+            vSourcePos[2] += (80.0f + ((float)((Random::Rand() % 180 - 100))));
             Vector(1.0f, 0.2f, 0.2f, vLight);
             CreateParticleFpsChecked(BITMAP_LIGHT + 2, vSourcePos, pSourceObj->Angle, vLight, 7, 1.8f);
         }
@@ -2120,9 +2134,9 @@ namespace Render::Effects::Behaviors
             for (int i = 0; i < iCnt; i++)
             {
                 VectorCopy(pTargetObj->Position, vTargetPos);
-                vTargetPos[0] += ((float)((rand() % 80 - 40)));
-                vTargetPos[1] += ((float)((rand() % 60 - 30)));
-                vTargetPos[2] += (80.0f + ((float)((rand() % 180 - 100))));
+                vTargetPos[0] += ((float)((Random::Rand() % 80 - 40)));
+                vTargetPos[1] += ((float)((Random::Rand() % 60 - 30)));
+                vTargetPos[2] += (80.0f + ((float)((Random::Rand() % 180 - 100))));
                 Vector(1.0f, 0.2f, 0.2f, vLight);
                 CreateParticleFpsChecked(BITMAP_LIGHT + 2, vTargetPos, pTargetObj->Angle, vLight, 7, 1.8f);
             }
@@ -2130,7 +2144,7 @@ namespace Render::Effects::Behaviors
 
         if (o->LifeTime <= 70 && o->LifeTime >= 66)
         {
-            int iRandom = rand() % 10;
+            int iRandom = Random::Rand() % 10;
             int iCnt2 = 0;
             switch (iRandom)
             {
@@ -2169,12 +2183,12 @@ namespace Render::Effects::Behaviors
 
                 VectorNormalize(vDir);
 
-                vSourcePos[0] = vSourcePos[0] + ((vDir[0]) * 100.0f) + (float)((rand() % 10) * 5);
-                vSourcePos[1] = vSourcePos[1] + ((vDir[1]) * 100.0f) + (float)((rand() % 10) * 5);
-                vSourcePos[2] += (float)((rand() % 10) * 5);
+                vSourcePos[0] = vSourcePos[0] + ((vDir[0]) * 100.0f) + (float)((Random::Rand() % 10) * 5);
+                vSourcePos[1] = vSourcePos[1] + ((vDir[1]) * 100.0f) + (float)((Random::Rand() % 10) * 5);
+                vSourcePos[2] += (float)((Random::Rand() % 10) * 5);
 
                 VectorCopy(pTargetObj->Position, vTargetPos);
-                vTargetPos[2] += 100.f + (float)(((rand() % 10 - 5)) * 4);		// 80~120
+                vTargetPos[2] += 100.f + (float)(((Random::Rand() % 10 - 5)) * 4); // 80~120
 
                 Vector(0.8f, 0.1f, 0.2f, vLight);
                 CreateJointFpsChecked(BITMAP_DRAIN_LIFE_GHOST, vSourcePos, vTargetPos, o->Angle, 0, pSourceObj, 40.f, 0, 0, 0, -1, vLight);
@@ -2201,7 +2215,8 @@ namespace Render::Effects::Behaviors
                     VectorCopy(pSourceObj->Position, vSourcePos);
                     vSourcePos[2] += 80.0f;
                     Vector(1.0f, 0.0f, 0.1f, vLight);
-                    CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f, -1, 0, 0, -1, vLight);
+                    CreateJoint(BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f,
+                                -1, 0, 0, -1, vLight);
                 }
             }
         }
@@ -2307,7 +2322,7 @@ namespace Render::Effects::Behaviors
             Vector(0.f, -200.f, 0.f, vPos);
             for (int i = 0; i < 3; ++i)
             {
-                Vector((float)(rand() % 90), 0.f, (float)(rand() % 360), vAngle);
+                Vector((float)(Random::Rand() % 90), 0.f, (float)(Random::Rand() % 360), vAngle);
                 AngleMatrix(vAngle, Matrix);
                 VectorRotate(vPos, Matrix, vWorldPos);
                 VectorSubtract(o->Position, vWorldPos, vWorldPos);
@@ -2346,7 +2361,7 @@ namespace Render::Effects::Behaviors
                 o->LifeTime = 100;
 
                 BMD* pModel = &Models[o->Owner->Type];
-                int iBone = rand() % pModel->NumBones;
+                int iBone = Random::Rand() % pModel->NumBones;
 
                 vec3_t vRelativePos, vWorldPos;
                 Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -2360,7 +2375,7 @@ namespace Render::Effects::Behaviors
                     if (o->SubType == 3)
                     {
                         CreateParticleFpsChecked(BITMAP_LIGHT + 2, vWorldPos, o->Angle, o->Light, 6, o->Scale);
-                        iBone = rand() % pModel->NumBones;
+                        iBone = Random::Rand() % pModel->NumBones;
                         pModel->TransformPosition(o->Owner->BoneTransform[iBone], vRelativePos, vWorldPos, false);
                         VectorScale(vWorldPos, pModel->BodyScale, vWorldPos);
                         VectorAdd(vWorldPos, o->Owner->Position, vWorldPos);
@@ -2371,7 +2386,7 @@ namespace Render::Effects::Behaviors
                         if (rand_fps_check(2))
                         {
                             vWorldPos[2] -= 20.f;
-                            CreateParticleFpsChecked(BITMAP_TWINTAIL_WATER, vWorldPos, o->Angle, o->Light, 2);
+                            CreateParticle(BITMAP_TWINTAIL_WATER, vWorldPos, o->Angle, o->Light, 2);
                         }
                     }
                 }
@@ -2415,8 +2430,8 @@ namespace Render::Effects::Behaviors
             CreateSprite(BITMAP_MAGIC, o->Position, 0.5f * fScale, vLight, o, -fRot);
             // pin_light
             Vector(1.0f, 0.4f, 0.4f, vLight);
-            CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(rand() % 360));
-            CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(Random::Rand() % 360));
+            CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(Random::Rand() % 360));
 
             Vector(1.0f, 0.3f, 0.3f, vLight);
             CreateParticleFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f * fScale);
@@ -2426,23 +2441,28 @@ namespace Render::Effects::Behaviors
             Vector(1.0f, 0.2f, 0.1f, vLightFlare);
             for (int i = 0; i < 11; ++i)
             {
-                fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
-                Vector(o->Position[0] + (rand() % 70 - 35) * 1.0f, o->Position[1] + (rand() % 70 - 35) * 1.0f,
-                    o->Position[2] + (rand() % 70 - 35) * 1.0f, vPos);
+                fScale = (float)(Random::Rand() % 80 + 32) * 0.01f * 1.0f;
+                Vector(o->Position[0] + (Random::Rand() % 70 - 35) * 1.0f,
+                       o->Position[1] + (Random::Rand() % 70 - 35) * 1.0f,
+                       o->Position[2] + (Random::Rand() % 70 - 35) * 1.0f, vPos);
                 CreateSprite(BITMAP_LIGHT, vPos, 2.2f, vLightFlare, pObject);
-                if (rand() % 3 > 0) continue;
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+                if (Random::Rand() % 3 > 0)
+                    continue;
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0,
+                                         fScale);
             }
 
             Vector(1.0f, 0.5f, 0.4f, vLight);
 
             for (int i = 0; i < 2; ++i)
             {
-                fScale = (float)(rand() % 60 + 22) * 0.01f * 1.0f;
-                int iBone = rand() % 41;
-                Vector((rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, vRelative);
+                fScale = (float)(Random::Rand() % 60 + 22) * 0.01f * 1.0f;
+                int iBone = Random::Rand() % 41;
+                Vector((Random::Rand() % 30 - 15) * 1.0f, (Random::Rand() % 30 - 15) * 1.0f,
+                       (Random::Rand() % 30 - 15) * 1.0f, vRelative);
                 pOwnerModel->TransformByObjectBone(vPos, pOwner, iBone, vRelative);
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0,
+                                         fScale);
             }
 
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -2462,10 +2482,12 @@ namespace Render::Effects::Behaviors
             Vector(1.0f, 0.2f, 0.1f, vLightFlare);
             for (int i = 0; i < 11; ++i)
             {
-                fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
-                Vector(o->Position[0] + (rand() % 70 - 35) * 1.0f, o->Position[1] + (rand() % 70 - 35) * 1.0f,
-                    o->Position[2] + (rand() % 70 - 35) * 1.0f, vPos);
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);	// 전기
+                fScale = (float)(Random::Rand() % 80 + 32) * 0.01f * 1.0f;
+                Vector(o->Position[0] + (Random::Rand() % 70 - 35) * 1.0f,
+                       o->Position[1] + (Random::Rand() % 70 - 35) * 1.0f,
+                       o->Position[2] + (Random::Rand() % 70 - 35) * 1.0f, vPos);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0,
+                                         fScale); // 전기
             }
 
             vec34_t Matrix;
@@ -2475,16 +2497,17 @@ namespace Render::Effects::Behaviors
 
             for (int i = 0; i < 6; ++i)
             {
-                fScale = (float)(rand() % 60 + 22) * 0.01f * 1.0f;
-                Vector(0.f, rand() % 400, 0.f, vDirection);
-                fAngle = o->Angle[2] + rand() % 360;
+                fScale = (float)(Random::Rand() % 60 + 22) * 0.01f * 1.0f;
+                Vector(0.f, Random::Rand() % 400, 0.f, vDirection);
+                fAngle = o->Angle[2] + Random::Rand() % 360;
                 Vector(0.f, 0.f, fAngle, vAngle);
                 AngleMatrix(vAngle, Matrix);
                 VectorRotate(vDirection, Matrix, vPosition);
                 VectorAdd(vPosition, o->Position, vPosition);
                 vPosition[2] = RequestTerrainHeight(vPosition[0], vPosition[1]) + 20;
 
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPosition, pObject->Angle, vLight, 0, fScale);	// 전기
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPosition, pObject->Angle, vLight,
+                                         0, fScale); // 전기
             }
 
             VectorCopy(o->Position, vPosition);
@@ -2498,10 +2521,10 @@ namespace Render::Effects::Behaviors
             if (rand_fps_check(2))
             {
                 Vector(1.0f, 0.0f, 0.0f, vLight);
-                CreateParticleFpsChecked(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
+                CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
             }
 
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vPosition, o->Angle, vLight, 13, o);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, vPosition, o->Angle, vLight, 13, o);
         }
         else if (o->SubType == 2)
         {
@@ -2520,14 +2543,14 @@ namespace Render::Effects::Behaviors
                     Vector(0.8f, 0.0f, 0.0f, vLight);
                     if (rand_fps_check(60))
                     {
-                        fRandom = 5.0f + ((float)(rand() % 20 - 10) * 0.1f);
-                        CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                        fRandom = 5.0f + ((float)(Random::Rand() % 20 - 10) * 0.1f);
+                        CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
                     }
                     Vector(1.0f, 0.8f, 0.4f, vLight);
                     if (rand_fps_check(5))
                     {
-                        fRandom = (float)(rand() % 70 + 22) * 0.01f * 1.0f;
-                        CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, vAngle, vLight, 0, fRandom);
+                        fRandom = (float)(Random::Rand() % 70 + 22) * 0.01f * 1.0f;
+                        CreateParticle(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, vAngle, vLight, 0, fRandom);
                     }
                 }
 
@@ -2538,7 +2561,7 @@ namespace Render::Effects::Behaviors
                 if (rand_fps_check(4))
                 {
                     Vector(1.0f, 0.0f, 0.0f, vLight);
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
+                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
                 }
             }
         }
@@ -2564,7 +2587,7 @@ namespace Render::Effects::Behaviors
             {
                 if (rand_fps_check(1))
                 {
-                    CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                    CreateEffect(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light);
                 }
             }
             CreateParticleFpsChecked(BITMAP_SHINY + 4, Position, o->Angle, Light);
@@ -2793,7 +2816,7 @@ namespace Render::Effects::Behaviors
         case 3:o->Alpha = 0.4f; break;
         case 4:o->Alpha = 0.3f; break;
         }
-        if (o->Owner->Weapon >= MODEL_SPEAR - MODEL_SWORD && o->Owner->Weapon < MODEL_SPEAR - MODEL_SWORD + MAX_ITEM_INDEX)
+        if (o->Owner->Weapon >= ITEM_SPEAR && o->Owner->Weapon < ITEM_SPEAR + MAX_ITEM_INDEX)
         {
             Vector(0.f, -180.f, 0.f, p);
         }
@@ -2808,7 +2831,7 @@ namespace Render::Effects::Behaviors
         o->Angle[2] -= 18 * FPS_ANIMATION_FACTOR;
 
         if (rand_fps_check(1)) {
-            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
             Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
         }
@@ -2818,11 +2841,11 @@ namespace Render::Effects::Behaviors
         if (gMapManager.InHellas())
         {
             Height = 60.f;
-            Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+            Vector((float)(Random::Rand() % 60 + 60 - 90), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
             VectorAdd(Angle, o->Angle, Angle);
             VectorCopy(o->Position, Position);
-            Position[0] += rand() % 20 - 10;
-            Position[1] += rand() % 20 - 10;
+            Position[0] += Random::Rand() % 20 - 10;
+            Position[1] += Random::Rand() % 20 - 10;
             Position[2] += 120.f;
             Vector(0.5f, 0.5f, 0.5f, Light);
             CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 3);
@@ -2833,13 +2856,14 @@ namespace Render::Effects::Behaviors
             {
                 if (rand_fps_check(1))
                 {
-                    Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                    Vector((float)(Random::Rand() % 60 + 60 - 90), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
                     VectorAdd(Angle, o->Angle, Angle);
                     VectorCopy(o->Position, Position);
-                    Position[0] += rand() % 20 - 10;
-                    Position[1] += rand() % 20 - 10;
-                    CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                    if (rand_fps_check(4)) CreateParticleFpsChecked(BITMAP_SPARK, Position, Angle, Light);
+                    Position[0] += Random::Rand() % 20 - 10;
+                    Position[1] += Random::Rand() % 20 - 10;
+                    CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                    if (Random::Rand() % 4 == 0)
+                        CreateParticle(BITMAP_SPARK, Position, Angle, Light);
                 }
             }
         }
@@ -2877,14 +2901,14 @@ namespace Render::Effects::Behaviors
                 //if ( (i%8)==0 )
                     //CreateEffect(BITMAP_MAGIC+1,o->Position,Angle,o->Light,4,o);
 
-                Position[0] += rand() % 600 - 200;
-                Position[1] += rand() % 600 - 400;
+                Position[0] += Random::Rand() % 600 - 200;
+                Position[1] += Random::Rand() % 600 - 400;
                 CreateJointFpsChecked(BITMAP_FLARE, Position, Position, Angle, 24, NULL, 90);
             }
         }
         else if ((int)o->LifeTime == 2)
         {
-            Vector(0.f, 0.f, rand() % 360, Angle);
+            Vector(0.f, 0.f, Random::Rand() % 360, Angle);
             CreateEffectFpsChecked(MODEL_FISSURE, o->Position, Angle, o->Light, 0, o);
             CreateEffectFpsChecked(MODEL_FISSURE_LIGHT, o->Position, Angle, o->Light, 0, o);
             o->Live = false;
@@ -2908,16 +2932,16 @@ namespace Render::Effects::Behaviors
         Vector(fLevel, fLevel, fLevel + 0.1f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 10, PrimaryTerrainLight);
 
-        EarthQuake = (float)(rand() % 4 - 2) * 0.1f;
+        SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 4 - 2) * 0.1f);
 
         if (rand_fps_check(2)) {
-            Vector(0.f, (float)(rand() % 150) + 300.f, 0.f, p);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, (float)(Random::Rand() % 150) + 300.f, 0.f, p);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
             VectorAdd(Position, o->Position, Position);
 
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+            CreateEffect(MODEL_STONE1 + Random::Rand() % 2, Position, o->Angle, o->Light, 0);
         }
 
         BMD* pModel = &Models[o->Type];
@@ -2928,8 +2952,8 @@ namespace Render::Effects::Behaviors
             {
                 Vector(0.f, 0.f, 0.f, p);
                 pModel->TransformPosition(BoneTransform[i], p, Position, true);
-                CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 3, 4.f, o);
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 21, 1.f);
+                CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 3, 4.f, o);
+                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 21, 1.f);
             }
         }
     }
@@ -2996,13 +3020,14 @@ namespace Render::Effects::Behaviors
                 {
                     if (rand_fps_check(1))
                     {
-                        Vector((float)(rand() % 60 - 60.f), 0.f, (float)(rand() % 30 + 90), Angle);
+                        Vector((float)(Random::Rand() % 60 - 60.f), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
                         VectorAdd(Angle, o->Angle, Angle);
                         VectorCopy(o->StartPosition, Position);
-                        Position[0] += rand() % 20 - 10;
-                        Position[1] += rand() % 20 - 10;
-                        CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                        if (rand_fps_check(8)) CreateParticleFpsChecked(BITMAP_SPARK, Position, Angle, Light);
+                        Position[0] += Random::Rand() % 20 - 10;
+                        Position[1] += Random::Rand() % 20 - 10;
+                        CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                        if (Random::Rand() % 8 == 0)
+                            CreateParticle(BITMAP_SPARK, Position, Angle, Light);
                     }
                 }
             }
@@ -3025,16 +3050,16 @@ namespace Render::Effects::Behaviors
 
             for (int i = 0; i < 5; ++i)
             {
-                Vector(0.f, (float)(rand() % 150 + 100), 0.f, p);
+                Vector(0.f, (float)(Random::Rand() % 150 + 100), 0.f, p);
                 Vector(0.f, 0.f, (float)(o->SubType + (i * 72.f)), Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->StartPosition, Position);
 
                 Position[2] += 3;
-                scale = rand() % 50 + 40;
+                scale = Random::Rand() % 50 + 40;
 
-                Vector(0.f, 0.f, 45 + (float)(rand() % 30 - 15), Angle);
+                Vector(0.f, 0.f, 45 + (float)(Random::Rand() % 30 - 15), Angle);
 
                 TargetX = (int)(Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Position[1] / TERRAIN_SCALE);
@@ -3067,17 +3092,20 @@ namespace Render::Effects::Behaviors
 
             for (int j = 0; j < 4; ++j)
             {
-                Vector(0.f, rand() % 15 + 85.f, 0.f, p);
+                Vector(0.f, Random::Rand() % 15 + 85.f, 0.f, p);
 
-                if (j >= 3) count = rand();
+                if (j >= 3)
+                    count = Random::Rand();
 
                 for (int i = 0; i < 5; ++i)
                 {
-                    if ((count % 2) == 0) random = rand() % 30 + 50;
-                    else                random = -(rand() % 30 + 50);
+                    if ((count % 2) == 0)
+                        random = Random::Rand() % 30 + 50;
+                    else
+                        random = -(Random::Rand() % 30 + 50);
 
                     ang[i] += random;
-                    Angle[2] = ang[i] + (i * (rand() % 10 + 62));
+                    Angle[2] = ang[i] + (i * (Random::Rand() % 10 + 62));
 
                     AngleMatrix(Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
@@ -3138,8 +3166,8 @@ namespace Render::Effects::Behaviors
                         position[2] = pos[2] - (i * 50);
                         CreateEffectFpsChecked(MODEL_TAIL, position, Angle, o->Light);
                     }
-                    pos[0] += rand() % 30 + 20;
-                    pos[2] += rand() % 500 - 250;
+                    pos[0] += Random::Rand() % 30 + 20;
+                    pos[2] += Random::Rand() % 500 - 250;
 
                     for (int i = 0; i < 4; ++i)
                     {
@@ -3203,7 +3231,7 @@ namespace Render::Effects::Behaviors
         int STwo = 2;
         if (rand_fps_check(STwo))
         {
-            //               Vector(0.f,0.f,(float)(rand()%360),o->Angle);
+            //               Vector(0.f,0.f,(float)(Random::Rand()%360),o->Angle);
 
             if (o->SubType == 2)
             {
@@ -3211,8 +3239,8 @@ namespace Render::Effects::Behaviors
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 22.0f;
             }
 
-            Loc[0] = o->Position[0] + rand() % 200 - 100;
-            Loc[1] = o->Position[1] + rand() % 200 - 100;
+            Loc[0] = o->Position[0] + Random::Rand() % 200 - 100;
+            Loc[1] = o->Position[1] + Random::Rand() % 200 - 100;
             Loc[2] = o->Position[2] - 200;
             if (o->SubType == 0 || o->SubType == 2)
             {
@@ -3366,16 +3394,17 @@ namespace Render::Effects::Behaviors
             vec3_t Light2;
             VectorCopy(o->Angle, Angle);
             VectorCopy(o->Position, Position);
-            Angle[2] += rand() % 10 - 5;
+            Angle[2] += Random::Rand() % 10 - 5;
             if (rand_fps_check(1))
-                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.015f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 11,
+                                         (float)(Random::Rand() % 32 + 80) * 0.015f);
 
             Vector(1.f, 1.f, 1.f, Light2);
             Position[2] += 50.f;
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light2, NULL, (float)(rand() % 360));
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light2, NULL, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light2, NULL, (float)(Random::Rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light2, NULL, (float)(Random::Rand() % 360));
 
-            CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, NULL, (float)(rand() % 360));
+            CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, NULL, (float)(Random::Rand() % 360));
         }
         return true;
     }
@@ -3407,7 +3436,7 @@ namespace Render::Effects::Behaviors
             }
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (rand_fps_check(4))
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+                CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light, 2);
             Vector(-Luminosity * 0.4f, -Luminosity * 0.3f, -Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 5, PrimaryTerrainLight);
 
@@ -3424,13 +3453,13 @@ namespace Render::Effects::Behaviors
             }
             if ((int)o->LifeTime % 15 == 0)
                 if (o->Owner == &Hero->Object)
-                    AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
+                    SpinMonstersInTornado(o->Position, 150.f);
             break;
 
         case 1:
             o->BlendMeshLight = o->LifeTime * 0.01f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
-            o->Angle[2] += (rand() % 30 + 30.f) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] += (Random::Rand() % 30 + 30.f) * FPS_ANIMATION_FACTOR;
 
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
@@ -3445,7 +3474,7 @@ namespace Render::Effects::Behaviors
             o->BlendMeshLight = o->LifeTime * 0.1f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
 
-            o->Gravity = (float)(rand() % 360);
+            o->Gravity = (float)(Random::Rand() % 360);
 
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
@@ -3460,12 +3489,12 @@ namespace Render::Effects::Behaviors
         case 5:
         case 6:
         case 7:
-            EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 4) * 0.1f);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
             if (rand_fps_check(2))
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+                CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light, 2);
             break;
         case 8:
         {
@@ -3544,20 +3573,20 @@ namespace Render::Effects::Behaviors
 
             Vector(90.f, 0.f, 0.0f, Angle);
 
-            Pos1[0] = o->Position[0] + rand() % 600 - 300.0f;
-            Pos1[1] = o->Position[1] + rand() % 600 - 300.0f;
+            Pos1[0] = o->Position[0] + Random::Rand() % 600 - 300.0f;
+            Pos1[1] = o->Position[1] + Random::Rand() % 600 - 300.0f;
             Pos1[2] = o->Position[2];
 
-            Pos2[0] = Pos1[0] + rand() % 100 - 50.0f;
-            Pos2[1] = Pos1[1] + rand() % 100 - 50.0f;
+            Pos2[0] = Pos1[0] + Random::Rand() % 100 - 50.0f;
+            Pos2[1] = Pos1[1] + Random::Rand() % 100 - 50.0f;
             Pos2[2] = Pos1[2];
 
             CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
 
-            Pos2[0] = Pos1[0] + rand() % 100 - 50.0f;
-            Pos2[1] = Pos1[1] + rand() % 100 - 50.0f;
+            Pos2[0] = Pos1[0] + Random::Rand() % 100 - 50.0f;
+            Pos2[1] = Pos1[1] + Random::Rand() % 100 - 50.0f;
             Pos2[2] = Pos1[2];
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Pos2, o->Angle, Light, 2);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, Pos2, o->Angle, Light, 2);
 
             o->Angle[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
             o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
@@ -3580,7 +3609,7 @@ namespace Render::Effects::Behaviors
                 o->Light[2] *= pow(1.0f / (1.01f), FPS_ANIMATION_FACTOR);
             }
 
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light, 2);
         }
     }
         return true;
@@ -3607,12 +3636,12 @@ namespace Render::Effects::Behaviors
             {
                 vec3_t Pos1, Pos2;
 
-                Pos1[0] = o->StartPosition[0] + rand() % 2000 - 1000.0f;
-                Pos1[1] = o->StartPosition[1] + rand() % 2000 - 1000.0f;
+                Pos1[0] = o->StartPosition[0] + Random::Rand() % 2000 - 1000.0f;
+                Pos1[1] = o->StartPosition[1] + Random::Rand() % 2000 - 1000.0f;
                 Pos1[2] = o->StartPosition[2];
 
-                Pos2[0] = Pos1[1] + rand() % 200 - 100.0f;
-                Pos2[1] = Pos1[1] + rand() % 200 - 100.0f;
+                Pos2[0] = Pos1[1] + Random::Rand() % 200 - 100.0f;
+                Pos2[1] = Pos1[1] + Random::Rand() % 200 - 100.0f;
 
                 CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
             }
@@ -3653,16 +3682,17 @@ namespace Render::Effects::Behaviors
 
             for (int i = 0; i < smokeNum; ++i)
             {
-                Position[0] = o->Position[0] + (rand() % 160 - 80);
-                Position[1] = o->Position[1] + (rand() % 160 - 100);
+                Position[0] = o->Position[0] + (Random::Rand() % 160 - 80);
+                Position[1] = o->Position[1] + (Random::Rand() % 160 - 100);
                 Position[2] = o->Position[2] + 50;
 
                 Vector(0.3f, 0.5f, 1.0f, Light);
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11,
+                                         (float)(Random::Rand() % 32 + 80) * 0.025f);
             }
 
             for (int j = 0; j < 6; j++)
-                CreateEffectFpsChecked(MODEL_MAYASTONE4 + rand() % 2, o->Position, o->Angle, Light);
+                CreateEffectFpsChecked(MODEL_MAYASTONE4 + Random::Rand() % 2, o->Position, o->Angle, Light);
 
             CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light, 0, 4.0f);
 
@@ -3678,7 +3708,7 @@ namespace Render::Effects::Behaviors
         float Height;
     {
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
         o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -3730,7 +3760,7 @@ namespace Render::Effects::Behaviors
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, o->StartPosition, 17, 10.0f);
 
             vec3_t Direction;
-            Vector(0.0f, (-80.0f - rand() % 30) * o->Scale, 0.0f, Direction);
+            Vector(0.0f, (-80.0f - Random::Rand() % 30) * o->Scale, 0.0f, Direction);
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(Direction, Matrix, Position);
             VectorAdd(Position, o->Position, o->Position);
@@ -3770,7 +3800,7 @@ namespace Render::Effects::Behaviors
                 {
                     Angle[0] = -10.f;
                     Angle[1] = 0.f;
-                    Angle[2] = i * (10.f + rand() % 10);
+                    Angle[2] = i * (10.f + Random::Rand() % 10);
                     vec3_t Position;
                     VectorCopy(o->Position, Position);
                     Position[2] += 100.f;
@@ -3845,19 +3875,19 @@ namespace Render::Effects::Behaviors
             else
                 o->BlendMeshLight = o->LifeTime * 0.1f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
-            EarthQuake = (float)(rand() % 6 - 6) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 6 - 6) * 0.1f);
 
             if (rand_fps_check(value))
             {
                 vec3_t p, Position;
                 vec3_t Angle;
                 float Matrix[3][4];
-                Vector(0.f, (float)(rand() % 300), 0.f, p);
-                Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                Vector(0.f, (float)(Random::Rand() % 300), 0.f, p);
+                Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 1);
+                CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, Position, o->Angle, o->Light, 1);
             }
             Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
@@ -3878,8 +3908,8 @@ namespace Render::Effects::Behaviors
                 vec3_t p, Position;
                 vec3_t Angle;
                 float Matrix[3][4];
-                Vector(0.f, (float)(rand() % 200), 0.f, p);
-                Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                Vector(0.f, (float)(Random::Rand() % 200), 0.f, p);
+                Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
@@ -3911,8 +3941,8 @@ namespace Render::Effects::Behaviors
                 vec3_t p, Position;
                 vec3_t Angle;
                 float Matrix[3][4];
-                Vector(0.f, (float)(rand() % 100), 0.f, p);
-                Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                Vector(0.f, (float)(Random::Rand() % 100), 0.f, p);
+                Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
@@ -3940,7 +3970,7 @@ namespace Render::Effects::Behaviors
         }
         else if (o->Type == MODEL_EFFECT_SAPITRES_ATTACK_2 && o->SubType == 14)
         {
-            auto fMoveSpeed = (float)(rand() % 5 + 25);
+            auto fMoveSpeed = (float)(Random::Rand() % 5 + 25);
             o->Position[0] -= ((o->Direction[0] * fMoveSpeed)) * FPS_ANIMATION_FACTOR;
             o->Position[1] -= ((o->Direction[1] * fMoveSpeed)) * FPS_ANIMATION_FACTOR;
             o->Position[2] -= ((o->Direction[2] * fMoveSpeed)) * FPS_ANIMATION_FACTOR;
@@ -3956,7 +3986,7 @@ namespace Render::Effects::Behaviors
             VectorRotate(o->Direction, Matrix, Position);
             VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
         }
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
         if (o->SubType == 0 || o->SubType == 10 || o->SubType == 12 || o->SubType == 13)
         {
@@ -3978,7 +4008,7 @@ namespace Render::Effects::Behaviors
                     CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
                 else if (o->Type == MODEL_STONE1 || o->Type == MODEL_STONE2)
                 {
-                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 1 + rand() % 3);
+                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 1 + Random::Rand() % 3);
                 }
             }
         }
@@ -4010,8 +4040,8 @@ namespace Render::Effects::Behaviors
 
             MoveHumming(o->Position, o->Angle, o->StartPosition, 10.f);
 
-            o->HeadAngle[0] += ((float)(rand() % 32 - 16) * 0.2f) * FPS_ANIMATION_FACTOR;
-            o->HeadAngle[2] += ((float)(rand() % 32 - 16) * 0.8f) * FPS_ANIMATION_FACTOR;
+            o->HeadAngle[0] += ((float)(Random::Rand() % 32 - 16) * 0.2f) * FPS_ANIMATION_FACTOR;
+            o->HeadAngle[2] += ((float)(Random::Rand() % 32 - 16) * 0.8f) * FPS_ANIMATION_FACTOR;
             o->Angle[0] += (o->HeadAngle[0]) * FPS_ANIMATION_FACTOR;
             o->Angle[2] += (o->HeadAngle[2]) * FPS_ANIMATION_FACTOR;
             o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
@@ -4066,13 +4096,13 @@ namespace Render::Effects::Behaviors
         case 3:
             if (o->LifeTime < 250 + 50 + (34 - o->Skill) * 5)
             {
-                //RenderMeshEffect
+                // SpawnMeshEffects
                 if (o->Position[2] > 350)//o->StartPosition[2])
                 {
                     if (o->Direction[0] == 0 && o->Direction[1] == 0 && o->Direction[2] == 0)
                     {
-                        o->Direction[0] = (float)((-1 + (rand() % 2)) * 2);
-                        o->Direction[1] = (float)((-1 + (rand() % 2)) * 2);
+                        o->Direction[0] = (float)((-1 + (Random::Rand() % 2)) * 2);
+                        o->Direction[1] = (float)((-1 + (Random::Rand() % 2)) * 2);
                         o->Direction[2] = 0;
                     }
                     o->Direction[2] -= (6.0f) * FPS_ANIMATION_FACTOR;
@@ -4093,19 +4123,19 @@ namespace Render::Effects::Behaviors
                         for (int i = 0; i < 100; ++i)
                         {
                             VectorCopy(o->Position, Position);
-                            auto fAngle = (float)(rand() % 360);
-                            auto fLength = (float)(rand() % 30 + 30);
+                            auto fAngle = (float)(Random::Rand() % 360);
+                            auto fLength = (float)(Random::Rand() % 30 + 30);
                             Position[0] += sinf(fAngle) * fLength;
                             Position[1] += cosf(fAngle) * fLength;
                             Position[2] -= 30.f;
                             VectorCopy(o->Angle, Angle);
-                            Angle[2] += rand() % 180;
+                            Angle[2] += Random::Rand() % 180;
                             CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 2);
                         }
                     }
                     VectorCopy(o->Position, Position);
-                    Position[0] += rand() % 40 - 20;
-                    Position[1] += rand() % 40 - 20;
+                    Position[0] += Random::Rand() % 40 - 20;
+                    Position[1] += Random::Rand() % 40 - 20;
                     Position[2] -= 50.f;
                     CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 4);
 
@@ -4117,7 +4147,8 @@ namespace Render::Effects::Behaviors
                     {
                         if (o->Angle[0] > -30)
                         {
-                            Vector(o->Angle[0] - (rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f, o->Angle);
+                            Vector(o->Angle[0] - (Random::Rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f,
+                                   o->Angle);
                         }
                         else
                         {
@@ -4128,7 +4159,8 @@ namespace Render::Effects::Behaviors
                     {
                         if (o->Angle[0] < 30)
                         {
-                            Vector(o->Angle[0] + (rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f, o->Angle);
+                            Vector(o->Angle[0] + (Random::Rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f,
+                                   o->Angle);
                         }
                         else
                         {
@@ -4149,9 +4181,9 @@ namespace Render::Effects::Behaviors
                     if (rand_fps_check(2))
                     {
                         //Angle[2] = ( float)i * 10.0f;
-                        Angle[0] = 0;//( float)( rand() % 360);
-                        Angle[1] = 0;//( float)( rand() % 360);
-                        Angle[2] = (float)(rand() % 360);
+                        Angle[0] = 0; //( float)( Random::Rand() % 360);
+                        Angle[1] = 0; //( float)( Random::Rand() % 360);
+                        Angle[2] = (float)(Random::Rand() % 360);
                         vec3_t Position;
                         VectorCopy(o->Position, Position);
                         //Position[2] += 100.f;
@@ -4163,7 +4195,8 @@ namespace Render::Effects::Behaviors
                     {
                         vec3_t Light;
                         Vector(0.5f, 0.5f, 0.5f, Light);
-                        CreateParticleFpsChecked(BITMAP_SMOKE + 3, o->Position, o->Angle, Light, 2, (float)(rand() % 32 + 48) * 0.02f);
+                        CreateParticleFpsChecked(BITMAP_SMOKE + 3, o->Position, o->Angle, Light, 2,
+                                                 (float)(Random::Rand() % 32 + 48) * 0.02f);
                     }
                 }
             }
@@ -4212,7 +4245,7 @@ namespace Render::Effects::Behaviors
         if (o->Position[2] > 290)//o->StartPosition[2])
         {
             o->Direction[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
-            o->Angle[2] -= ((float)(rand() % 10)) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] -= ((float)(Random::Rand() % 10)) * FPS_ANIMATION_FACTOR;
         }
         else if (o->Position[2] < 290)
         {
@@ -4220,7 +4253,7 @@ namespace Render::Effects::Behaviors
             o->Direction[0] = 0;
             o->Direction[1] = 0;
             o->Direction[2] = 0;
-            EarthQuake = (float)(rand() % 4 + 1) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 4 + 1) * 0.1f);
         }
         else
         {
@@ -4354,7 +4387,7 @@ namespace Render::Effects::Behaviors
 
             for (int j = 0; j < 6; j++)
             {
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light);
             }
             o->Live = false;
         }
@@ -4387,7 +4420,8 @@ namespace Render::Effects::Behaviors
             Vector(1.f, 1.f, 1.f, Light);
 
             CreateJointFpsChecked(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 3, NULL, 20.f, 7); //  전기
-            CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 8 + 8) * 0.2f, Light, o,
+                         (float)(Random::Rand() % 360));
         }
 
         if (gMapManager.InHellas())
@@ -4420,7 +4454,7 @@ namespace Render::Effects::Behaviors
         {
             o->BlendMeshLight = 1.f;
         }
-        o->Angle[1] += (rand() % 60 + 30.f) * FPS_ANIMATION_FACTOR;
+        o->Angle[1] += (Random::Rand() % 60 + 30.f) * FPS_ANIMATION_FACTOR;
         VectorCopy(o->Position, o->EyeLeft);
 
         VectorCopy(o->Angle, Angle);
@@ -4558,7 +4592,8 @@ namespace Render::Effects::Behaviors
                 {
                     for (int j = 0; j < 2; j++)
                     {
-                        Vector((float)(rand() % 32 - 16), (float)(rand() % 64 - 32), (float)(rand() % 32 - 16), Position);
+                        Vector((float)(Random::Rand() % 32 - 16), (float)(Random::Rand() % 64 - 32),
+                               (float)(Random::Rand() % 32 - 16), Position);
                         VectorAdd(Position, o->Position, Position);
 
                         Vector(0.4f, 1.f, 0.2f, Light);
@@ -4572,9 +4607,10 @@ namespace Render::Effects::Behaviors
                 CreateSprite(BITMAP_LIGHTNING + 1, o->Position, 1.f, o->Light, o, -(int)WorldTime * 0.1f);
                 for (int j = 0; j < 4; j++)
                 {
-                    Vector((float)(rand() % 32 - 16), (float)(rand() % 64 - 32), (float)(rand() % 32 - 16), Position);
+                    Vector((float)(Random::Rand() % 32 - 16), (float)(Random::Rand() % 64 - 32),
+                           (float)(Random::Rand() % 32 - 16), Position);
                     VectorAdd(Position, o->Position, Position);
-                    CreateParticleFpsChecked(BITMAP_FLOWER01 + rand() % 3, Position, o->Angle, o->Light);
+                    CreateParticleFpsChecked(BITMAP_FLOWER01 + Random::Rand() % 3, Position, o->Angle, o->Light);
                     //CreateParticle(BITMAP_BUBBLE,Position,o->Angle,o->Light);
                 }
                 o->Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
@@ -4591,7 +4627,8 @@ namespace Render::Effects::Behaviors
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    Vector((float)(rand() % 32 - 16), (float)(rand() % 64 - 32), (float)(rand() % 32 - 16), Position);
+                    Vector((float)(Random::Rand() % 32 - 16), (float)(Random::Rand() % 64 - 32),
+                           (float)(Random::Rand() % 32 - 16), Position);
                     VectorAdd(Position, o->Position, Position);
 
                     Vector(0.4f, 0.2f, 1.f, Light);
@@ -4610,7 +4647,8 @@ namespace Render::Effects::Behaviors
             CreateSprite(BITMAP_LIGHTNING + 1, o->Position, 1.f, o->Light, o, -(int)WorldTime * 0.1f);
             for (int j = 0; j < 4; j++)
             {
-                Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+                Vector((float)(Random::Rand() % 16 - 8), (float)(Random::Rand() % 16 - 8),
+                       (float)(Random::Rand() % 16 - 8), Position);
                 VectorAdd(Position, o->Position, Position);
                 CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
             }
@@ -4798,7 +4836,8 @@ namespace Render::Effects::Behaviors
 
         for (int j = 0; j < 4; j++)
         {
-            Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+            Vector((float)(Random::Rand() % 16 - 8), (float)(Random::Rand() % 16 - 8), (float)(Random::Rand() % 16 - 8),
+                   Position);
             VectorAdd(Position, o->Position, Position);
             CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
         }
@@ -4830,7 +4869,7 @@ namespace Render::Effects::Behaviors
 
         BMD* pModel = &Models[o->Type];
 
-        int iNumCreateFeather = rand() % 2;
+        int iNumCreateFeather = Random::Rand() % 2;
 
         vec3_t vPos;
 
@@ -4851,7 +4890,7 @@ namespace Render::Effects::Behaviors
 
         if ((int)o->LifeTime == 30 || (int)o->LifeTime == 28 || (int)o->LifeTime == 26 || (int)o->LifeTime == 24)
         {
-            int iNumCreateFeather = rand() % 3;
+            int iNumCreateFeather = Random::Rand() % 3;
             Vector(0.6f, 0.7f, 0.9f, Light);
             pModel->TransformByObjectBone(vPos, o, 1);
             for (int i = 0; i < iNumCreateFeather; i++)
@@ -4898,7 +4937,7 @@ namespace Render::Effects::Behaviors
     // BITMAP_FIRECRACKERRISE
     bool Move_BITMAP_FIRECRACKERRISE(OBJECT* o, int index, float Luminosity)
     {
-        if (0 == ((int)o->LifeTime % 5) && (0 == (rand() % 3)))
+        if (0 == ((int)o->LifeTime % 5) && (0 == (Random::Rand() % 3)))
         {
             CreateEffectFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, o->Light);
         }
@@ -4912,10 +4951,16 @@ namespace Render::Effects::Behaviors
         Vector(1.f, 1.f, 1.f, Light);
         if (1 == o->LifeTime)
         {
-            int iSubType = rand() % 30;
-            Vector((rand() % 3) * .3f + .4f, (rand() % 4) * .1f, .0f, Light);
+            int iSubType = Random::Rand() % 30;
+            Vector((Random::Rand() % 3) * .3f + .4f, (Random::Rand() % 4) * .1f, .0f, Light);
+            // No *FPS_ANIMATION_FACTOR on the loop bound -- CreateParticleFpsChecked() already
+            // gates each call through rand_fps_check(1), whose own spawn chance IS
+            // FPS_ANIMATION_FACTOR (Random.cpp). Scaling the loop bound by it too double-applies
+            // the factor (expected spawns ~80*factor^2 instead of ~80*factor), making the burst
+            // quadratically sparser at high FPS -- the commented-out original (200, no factor) is
+            // the correct shape this was meant to follow.
             //for ( int j = 0; j < 200; ++j)
-            for (int j = 0; j < 80 * FPS_ANIMATION_FACTOR; ++j)
+            for (int j = 0; j < 80; ++j)
             {
                 CreateParticleFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, Light, iSubType);
             }
@@ -4935,8 +4980,8 @@ namespace Render::Effects::Behaviors
         if ((int)o->LifeTime == 1 || (int)o->LifeTime == 9 || (int)o->LifeTime == 17
             || (int)o->LifeTime == 24 || (int)o->LifeTime == 31)
         {
-            Vector(o->Position[0] + (rand() % 200 - 100), o->Position[1] + (rand() % 200 - 100),
-                o->Position[2], Position);
+            Vector(o->Position[0] + (Random::Rand() % 200 - 100), o->Position[1] + (Random::Rand() % 200 - 100),
+                   o->Position[2], Position);
             CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, o->Angle, 25, o, 1.f, -1, o->SubType);
         }
     }
@@ -4951,11 +4996,12 @@ namespace Render::Effects::Behaviors
         if (rand_fps_check(5))
         {
             vec3_t vLight;
-            Vector(0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, vLight);
-            Vector(o->Position[0] + (rand() % 300 - 150), o->Position[1] + (rand() % 300 - 150),
-                o->Position[2], Position);
-            float fScale = 0.5f + (rand() % 5) * 0.1f;
-            CreateEffectFpsChecked(BITMAP_FIRECRACKER0003, Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, fScale);
+            Vector(0.3f + (Random::Rand() % 700) * 0.001f, 0.3f + (Random::Rand() % 700) * 0.001f,
+                   0.3f + (Random::Rand() % 700) * 0.001f, vLight);
+            Vector(o->Position[0] + (Random::Rand() % 300 - 150), o->Position[1] + (Random::Rand() % 300 - 150),
+                   o->Position[2], Position);
+            float fScale = 0.5f + (Random::Rand() % 5) * 0.1f;
+            CreateEffect(BITMAP_FIRECRACKER0003, Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, fScale);
         }
     }
         return true;
@@ -5026,8 +5072,8 @@ namespace Render::Effects::Behaviors
         {
             if (o->SubType == 0)
             {
-                o->Position[0] = o->StartPosition[0] + sinf((rand() % 1000) * 0.01f) * 10.f;
-                o->Position[1] = o->StartPosition[1] + sinf((rand() % 1000) * 0.01f) * 10.f;
+                o->Position[0] = o->StartPosition[0] + sinf((Random::Rand() % 1000) * 0.01f) * 10.f;
+                o->Position[1] = o->StartPosition[1] + sinf((Random::Rand() % 1000) * 0.01f) * 10.f;
                 o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
                 o->Gravity -= (2.f) * FPS_ANIMATION_FACTOR;
 
@@ -5038,8 +5084,9 @@ namespace Render::Effects::Behaviors
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
                 o->Light[1] = o->Light[0];
                 o->Light[2] = o->Light[0];
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 4 + 4) * 0.2f, o->Light, o, (float)(rand() % 360));
-                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(rand() % 360));
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 4 + 4) * 0.2f, o->Light, o,
+                             (float)(Random::Rand() % 360));
+                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(Random::Rand() % 360));
             }
             else if (o->SubType == 1)
             {
@@ -5055,8 +5102,9 @@ namespace Render::Effects::Behaviors
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
                 o->Light[1] = o->Light[0];
                 o->Light[2] = o->Light[0];
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 4 + 4) * 0.2f, o->Light, o, (float)(rand() % 360));
-                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(rand() % 360));
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 4 + 4) * 0.2f, o->Light, o,
+                             (float)(Random::Rand() % 360));
+                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(Random::Rand() % 360));
 
                 Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 if (o->Position[2] < Height)
@@ -5064,10 +5112,11 @@ namespace Render::Effects::Behaviors
                     Vector(0.24f, 0.28f, 0.8f, Light);
                     VectorCopy(o->Position, Position);
                     Position[2] += 50.f;
-                    CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11,
+                                             (float)(Random::Rand() % 32 + 80) * 0.025f);
 
                     if (rand_fps_check(5))
-                        CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
+                        CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
             }
         }
@@ -5091,7 +5140,7 @@ namespace Render::Effects::Behaviors
         VectorCopy(o->Angle, Angle);
         Angle[2] += 90.f;
 
-        o->Scale = ((15 - o->LifeTime) / 20.f) * (rand() % 3 + 2);
+        o->Scale = ((15 - o->LifeTime) / 20.f) * (Random::Rand() % 3 + 2);
 
         AngleMatrix(Angle, Matrix);
         Vector(0.f, 20.f, 0.f, p);
@@ -5118,13 +5167,13 @@ namespace Render::Effects::Behaviors
         vec3_t Position;
         if (o->SubType == 0 && o->Owner != NULL && o->LifeTime > 10)
         {
-            Position[0] = (float)(rand() % 128 - 64) - 50.f;
+            Position[0] = (float)(Random::Rand() % 128 - 64) - 50.f;
             Position[1] = Position[0] + 100.f;
             Position[2] = 0.f;
             VectorAdd(Position, o->Owner->Position, Position);
             Position[2] += 360.f;
 
-            float Scale = (rand() % 30 + 50) / 100.f;
+            float Scale = (Random::Rand() % 30 + 50) / 100.f;
             CreateParticleFpsChecked(BITMAP_SHINY, Position, o->Angle, o->Light, 2, Scale);
         }
         return true;
@@ -5139,17 +5188,17 @@ namespace Render::Effects::Behaviors
         float Height;
         if (o->SubType == 0)
         {
-            o->Position[0] = o->StartPosition[0] + sinf((rand() % 1000) * 0.01f) * 10.f;
-            o->Position[1] = o->StartPosition[1] + sinf((rand() % 1000) * 0.01f) * 10.f;
+            o->Position[0] = o->StartPosition[0] + sinf((Random::Rand() % 1000) * 0.01f) * 10.f;
+            o->Position[1] = o->StartPosition[1] + sinf((Random::Rand() % 1000) * 0.01f) * 10.f;
             o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
-            o->Gravity -= (rand() % 5) * FPS_ANIMATION_FACTOR;
+            o->Gravity -= (Random::Rand() % 5) * FPS_ANIMATION_FACTOR;
 
             o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
             if (rand_fps_check(2))
             {
-                CreateParticleFpsChecked(BITMAP_ENERGY, o->Position, o->Angle, Light, 1, 0.5f);
+                CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, Light, 1, 0.5f);
             }
             else
             {
@@ -5159,8 +5208,9 @@ namespace Render::Effects::Behaviors
             o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
             o->Light[1] = o->Light[0];
             o->Light[2] = o->Light[0];
-            CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 4 + 4) * 0.2f, o->Light, o, (float)(rand() % 360));
-            CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 4 + 4) * 0.2f, o->Light, o,
+                         (float)(Random::Rand() % 360));
+            CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(Random::Rand() % 360));
 
             Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < Height)
@@ -5168,11 +5218,12 @@ namespace Render::Effects::Behaviors
                 Vector(0.24f, 0.28f, 0.8f, Light);
                 VectorCopy(o->Position, Position);
                 Position[2] += 50.f;
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11,
+                                         (float)(Random::Rand() % 32 + 80) * 0.025f);
 
                 if (rand_fps_check(5))
                 {
-                    CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
+                    CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
 
                 CreateEffectFpsChecked(MODEL_BLIZZARD, Position, o->Angle, o->Light, 1, NULL, o->PKKey);
@@ -5189,10 +5240,10 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 2)
         {
-            o->Position[0] = o->StartPosition[0] + sinf((rand() % 1000) * 0.01f) * 50.f;
-            o->Position[1] = o->StartPosition[1] + sinf((rand() % 1000) * 0.01f) * 50.f;
+            o->Position[0] = o->StartPosition[0] + sinf((Random::Rand() % 1000) * 0.01f) * 50.f;
+            o->Position[1] = o->StartPosition[1] + sinf((Random::Rand() % 1000) * 0.01f) * 50.f;
             o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
-            o->Gravity -= (rand() % 5) * FPS_ANIMATION_FACTOR;
+            o->Gravity -= (Random::Rand() % 5) * FPS_ANIMATION_FACTOR;
 
             o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
@@ -5201,14 +5252,15 @@ namespace Render::Effects::Behaviors
             {
                 if (rand_fps_check(2))
                 {
-                    CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
+                    CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
                 }
 
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
                 o->Light[1] = o->Light[0];
                 o->Light[2] = o->Light[0];
-                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 4 + 4) * 0.2f, o->Light, o, (float)(rand() % 360));
-                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(rand() % 360));
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(Random::Rand() % 4 + 4) * 0.2f, o->Light, o,
+                             (float)(Random::Rand() % 360));
+                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, o->Light, o, (float)(Random::Rand() % 360));
             }
         }
         return true;
@@ -5513,16 +5565,17 @@ namespace Render::Effects::Behaviors
 
                                 VectorCopy(arrEachBonePos[1], vPosition);
 
-                                float	fRandDistance = (float)(rand() % 100) + 100;
+                                float fRandDistance = (float)(Random::Rand() % 100) + 100;
                                 Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
-                                CreateParticleFpsChecked(BITMAP_FIRE + 2, vPosition, o->Angle, o->Light, 17, 1.35f);
+                                CreateParticle(BITMAP_FIRE + 2, vPosition, o->Angle, o->Light, 17, 1.35f);
 
-                                Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                                Vector((float)(Random::Rand() % 360), 0.f, (float)(Random::Rand() % 360), vAngle);
                                 AngleMatrix(vAngle, matRandomRotation);
                                 VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                 VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
-                                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                CreateJoint(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL,
+                                            10.f, 10, 10);
                             }
                         }
                         delete[] arrEachBonePos;
@@ -5548,7 +5601,6 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))
@@ -5558,7 +5610,7 @@ namespace Render::Effects::Behaviors
                         else
                             o->Angle[0] -= (20.f) * FPS_ANIMATION_FACTOR;
                     }
-                    Distance = MoveHumming(o->Position, o->Angle, p, o->Velocity);
+                    MoveHumming(o->Position, o->Angle, p, o->Velocity);
                     o->Velocity += (0.4f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime < 10)
@@ -5572,11 +5624,6 @@ namespace Render::Effects::Behaviors
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
                     CreateEffectFpsChecked(MODEL_TAIL, o->Position, o->Angle, o->Light, 0, o);
-                }
-                if (Distance < 40 && (int)o->LifeTime == 5)
-                {
-                    VectorCopy(o->Position, Position);
-                    Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 }
                 o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
 
@@ -5608,7 +5655,6 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))
@@ -5618,7 +5664,7 @@ namespace Render::Effects::Behaviors
                         else
                             o->Angle[0] -= (20.f) * FPS_ANIMATION_FACTOR;
                     }
-                    Distance = MoveHumming(o->Position, o->Angle, p, o->Velocity);
+                    MoveHumming(o->Position, o->Angle, p, o->Velocity);
                     o->Velocity += (0.4f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime < 10)
@@ -5631,11 +5677,6 @@ namespace Render::Effects::Behaviors
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
                     CreateEffectFpsChecked(MODEL_PIER_PART, o->Position, o->Angle, o->Light, 1, o);
-                }
-                if (Distance < 40 && (int)o->LifeTime == 5)
-                {
-                    VectorCopy(o->Position, Position);
-                    Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 }
                 o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
 
@@ -5698,7 +5739,7 @@ namespace Render::Effects::Behaviors
 
             Vector(1.f, 0.8f, 0.6f, Light);
             CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, 2.f, o);
-            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 10);
+            CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, Position, o->Angle, o->Light, 10);
         }
         //        o->BlendMeshTexCoordU = -(int)WorldTime%2000 * 0.0005f;
 
@@ -5769,17 +5810,17 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 1)
         {
-            o->Scale += ((rand() % 5) / 10.f) * FPS_ANIMATION_FACTOR;
+            o->Scale += ((Random::Rand() % 5) / 10.f) * FPS_ANIMATION_FACTOR;
 
-            o->Position[0] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
-            o->Position[1] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[0] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 2)
         {
-            o->Scale += ((rand() % 5) / 40.f) * FPS_ANIMATION_FACTOR;
+            o->Scale += ((Random::Rand() % 5) / 40.f) * FPS_ANIMATION_FACTOR;
 
-            o->Position[0] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
-            o->Position[1] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[0] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 3)
         {
@@ -5821,10 +5862,10 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 11)
         {
-            o->Scale += ((rand() % 5) / 10.f) * FPS_ANIMATION_FACTOR;
+            o->Scale += ((Random::Rand() % 5) / 10.f) * FPS_ANIMATION_FACTOR;
 
-            o->Position[0] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
-            o->Position[1] += (rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[0] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (Random::Rand() % 8 - 4.f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 12)
         {
@@ -5927,7 +5968,7 @@ namespace Render::Effects::Behaviors
             if (o->SubType == 3)
             {
                 Vector(0.9f, 0.4f, 0.1f, Light);
-                float fRandom = 3.5f + ((float)(rand() % 20 - 10) * 0.1f);
+                float fRandom = 3.5f + ((float)(Random::Rand() % 20 - 10) * 0.1f);
                 CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, Light, 5, fRandom);
             }
             else
@@ -5941,7 +5982,7 @@ namespace Render::Effects::Behaviors
                     if (rand_fps_check(2) && o->LifeTime > 5 && o->LifeTime < 15)
                     {
                         Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
-                        CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 20.f);
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 20.f);
                     }
                 }
         return true;
@@ -5952,7 +5993,7 @@ namespace Render::Effects::Behaviors
     {
         vec3_t Angle;
         vec3_t Position;
-        o->Angle[2] += (10 + rand() % 10) * FPS_ANIMATION_FACTOR;
+        o->Angle[2] += (10 + Random::Rand() % 10) * FPS_ANIMATION_FACTOR;
 
         if (o->Position[2] > 300 && o->Position[2] < 600)
         {
@@ -5963,8 +6004,8 @@ namespace Render::Effects::Behaviors
             Position[2] = 350;
             if (rand_fps_check(2))
             {
-                Angle[2] = (float)(rand() % 24 * 30);
-                CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
+                Angle[2] = (float)(Random::Rand() % 24 * 30);
+                CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
             }
         }
         return true;
@@ -6004,9 +6045,9 @@ namespace Render::Effects::Behaviors
             o->Position[2] += ((o->PKKey * 0.8f)) * FPS_ANIMATION_FACTOR;
 
             VectorCopy(o->Position, Position);
-            Position[0] += rand() % 120 - 60;
-            Position[1] += rand() % 120 - 60;
-            Position[2] += rand() % 60;
+            Position[0] += Random::Rand() % 120 - 60;
+            Position[1] += Random::Rand() % 120 - 60;
+            Position[2] += Random::Rand() % 60;
             Vector(1, 1, 1, Light);
             for (int i = 0; i < 3; ++i)
                 CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 20, 10.f);
@@ -6024,15 +6065,15 @@ namespace Render::Effects::Behaviors
 
             Vector(1, 1, 1, Light);
             VectorCopy(o->Position, Position);
-            Position[0] += rand() % 1200 - 600;
-            Position[1] += rand() % 1200 - 600;
+            Position[0] += Random::Rand() % 1200 - 600;
+            Position[1] += Random::Rand() % 1200 - 600;
             vec3_t Angle;
-            Vector(0.f, 0.f, rand() % 10 * 20.f, Angle);
+            Vector(0.f, 0.f, Random::Rand() % 10 * 20.f, Angle);
             CreateEffectFpsChecked(MODEL_FIRE, Position, Angle, Light, 0, NULL, 0);
 
             o->Scale += (0.02f) * FPS_ANIMATION_FACTOR;
             //				o->Position[2] -= 0.5f;
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 8) * 0.1f);
         }
         return true;
     }
@@ -6093,8 +6134,8 @@ namespace Render::Effects::Behaviors
             {
                 VectorCopy(o->Position, Position);
 
-                Position[0] += rand() % 100 - 50.f;
-                Position[1] -= rand() % 30 + 15.f;
+                Position[0] += Random::Rand() % 100 - 50.f;
+                Position[1] -= Random::Rand() % 30 + 15.f;
                 CreateEffectFpsChecked(MODEL_FLY_BIG_STONE1, Position, o->Angle, o->Light, 2);
             }
         }
@@ -6130,17 +6171,19 @@ namespace Render::Effects::Behaviors
                 CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
             }
 
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
-            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+            if (SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 8) * 0.1f))
+            {
+                EarthQuake *= 0.5f;
+            }
 
             o->HiddenMesh = 99;
         }
 
         if (o->HiddenMesh == 99)
         {
-            o->Position[0] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-            o->Position[1] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
-            o->Position[2] += ((float)(rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+            o->Position[0] += ((float)(Random::Rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += ((float)(Random::Rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
+            o->Position[2] += ((float)(Random::Rand() % 100 - 50)) * FPS_ANIMATION_FACTOR;
             o->Scale = 2.2f;
         }
 
@@ -6184,8 +6227,8 @@ namespace Render::Effects::Behaviors
             o->Position[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
             o->Gravity += (1.9f) * FPS_ANIMATION_FACTOR;
 
-            o->Angle[0] += (rand() % 20 + 20.f) * FPS_ANIMATION_FACTOR;
-            o->Angle[1] += (rand() % 5) * FPS_ANIMATION_FACTOR;
+            o->Angle[0] += (Random::Rand() % 20 + 20.f) * FPS_ANIMATION_FACTOR;
+            o->Angle[1] += (Random::Rand() % 5) * FPS_ANIMATION_FACTOR;
 
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < Height)
@@ -6331,14 +6374,17 @@ namespace Render::Effects::Behaviors
                         int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                         int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                        EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                        const bool shaking = SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 8) * 0.1f);
                         if (CollisionY < 104 && o->Visible)
                         {
                             AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                             CreateTerrainNormal_Part(CollisionX, CollisionY);
                             CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                            EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                            if (shaking)
+                            {
+                                EarthQuake *= 0.5f;
+                            }
                         }
                     }
                 }
@@ -6391,7 +6437,7 @@ namespace Render::Effects::Behaviors
 
                 if (rand_fps_check(2))
                 {
-                    CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 2.f);
+                    CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 2.f);
                 }
             }
 
@@ -6488,14 +6534,17 @@ namespace Render::Effects::Behaviors
                     int CollisionX = (int)(o->Position[0] / TERRAIN_SCALE);
                     int CollisionY = (int)(o->Position[1] / TERRAIN_SCALE);
 
-                    EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                    const bool shaking = SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 8) * 0.1f);
                     if (CollisionY < 104 && o->Visible)
                     {
                         AddTerrainHeight(o->Position[0], o->Position[1], -30.f, 2, BackTerrainHeight);
                         CreateTerrainNormal_Part(CollisionX, CollisionY);
                         CreateTerrainLight_Part(CollisionX, CollisionY);
 
-                        EarthQuake *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
+                        if (shaking)
+                        {
+                            EarthQuake *= 0.5f;
+                        }
                     }
                 }
             }
@@ -6525,24 +6574,24 @@ namespace Render::Effects::Behaviors
                 o->HiddenMesh = 0;
 
                 if (rand_fps_check(10))
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 1.25f * o->Scale);
+                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 1.25f * o->Scale);
             }
             else
             {
                 if (rand_fps_check(2))
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 0.2f);
+                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 0.2f);
             }
             return true;
         }
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
         if (o->Type >= MODEL_WALL_PART1 && o->Type <= MODEL_WALL_PART2)
         {
-            VectorScale(o->Direction, 0.9f, o->Direction);
+            VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
             o->Gravity -= (6.f) * FPS_ANIMATION_FACTOR;
         }
         else
         {
-            VectorScale(o->Direction, 0.9f, o->Direction);
+            VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
             o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         }
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
@@ -6564,11 +6613,11 @@ namespace Render::Effects::Behaviors
         if (o->Type == MODEL_GOLEM_STONE)
         {
             if (rand_fps_check(4)) {
-                CreateParticleFpsChecked(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
-                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, 1.8f);
+                CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
+                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, 1.8f);
             }
             if (rand_fps_check(10)) {
-                CreateParticleFpsChecked(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
+                CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
         else if (o->Type == MODEL_BIG_STONE_PART1 && o->SubType == 2)
@@ -6576,7 +6625,7 @@ namespace Render::Effects::Behaviors
             if (rand_fps_check(10)) {
                 Vector(0.2f, 0.5f, 0.35f, Light);
                 o->Position[2] = Height;
-                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, 2.f);
+                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, 2.f);
             }
         }
         return true;
@@ -6590,12 +6639,12 @@ namespace Render::Effects::Behaviors
         vec3_t Position;
         float Height;
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
         if (o->SubType == 1)
         {
-            VectorScale(o->Direction, 1.1f, o->Direction);
+            VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
         }
 
         o->Gravity -= (4.f) * FPS_ANIMATION_FACTOR;
@@ -6612,7 +6661,7 @@ namespace Render::Effects::Behaviors
 
         if (rand_fps_check(10))
         {
-            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         return true;
     }
@@ -6733,12 +6782,13 @@ namespace Render::Effects::Behaviors
             {
                 vec3_t vLight;
                 Vector(0.5f, 0.5f, 0.5f, vLight);
-                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 11, (float)(rand() % 20 + 30) * 0.020f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 11,
+                                         (float)(Random::Rand() % 20 + 30) * 0.020f);
 
-                int iRand = rand() % 2 + 2;
+                int iRand = Random::Rand() % 2 + 2;
                 for (int i = 0; i < iRand; ++i)
                 {
-                    float fScale = 0.03f + (rand() % 10) / 40.0f + o->Scale * 0.3f;
+                    float fScale = 0.03f + (Random::Rand() % 10) / 40.0f + o->Scale * 0.3f;
                     CreateEffectFpsChecked(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, fScale);
                 }
 
@@ -6948,8 +6998,8 @@ namespace Render::Effects::Behaviors
             }
             else
             {
-                VectorAdd(o->Position, o->StartPosition, o->Position);
-                VectorScale(o->StartPosition, 0.9f, o->StartPosition);
+                VectorAddScaled(o->Position, o->StartPosition, o->Position, FPS_ANIMATION_FACTOR);
+                VectorScale(o->StartPosition, powf(0.9f, FPS_ANIMATION_FACTOR), o->StartPosition);
 
                 o->HeadAngle[0] -= (o->Scale * 32.f) * FPS_ANIMATION_FACTOR;
 
@@ -6979,10 +7029,10 @@ namespace Render::Effects::Behaviors
     {
         float Height;
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-        VectorScale(o->Direction, 0.9f, o->Direction);
+        VectorScale(o->Direction, powf(0.9f, FPS_ANIMATION_FACTOR), o->Direction);
         o->Position[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
 
-        VectorScale(o->Direction, 1.1f, o->Direction);
+        VectorScale(o->Direction, powf(1.1f, FPS_ANIMATION_FACTOR), o->Direction);
 
         o->Gravity -= (3.f) * FPS_ANIMATION_FACTOR;
         Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -7091,7 +7141,7 @@ namespace Render::Effects::Behaviors
             VectorRotate(o->Direction, Matrix, Position);
             VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
-            o->Gravity = rand() % 30 + 30.f;
+            o->Gravity = Random::Rand() % 30 + 30.f;
 
             if (o->Direction[1] > -50.f)
             {
@@ -7137,8 +7187,8 @@ namespace Render::Effects::Behaviors
             o->SubType = 1;
 
             VectorCopy(o->Owner->Position, Position);
-            Position[0] += rand() % 100 - 50.f;
-            Position[1] += rand() % 100 - 50.f;
+            Position[0] += Random::Rand() % 100 - 50.f;
+            Position[1] += Random::Rand() % 100 - 50.f;
             Position[2] += 1200.f;
             CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 2, o, 50.f);
             CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 3, o, 50.f);
@@ -7148,6 +7198,44 @@ namespace Render::Effects::Behaviors
             o->Live = false;
         }
         return true;
+    }
+
+    // BITMAP_JOINT_FORCE
+    bool Move_BITMAP_JOINT_FORCE(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Position;
+        float Matrix[3][4];
+        if (o->SubType == 0)
+        {
+            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
+            {
+                Vector(90.f, 0.f, 0.f, o->Angle);
+                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
+                AngleMatrix(o->HeadAngle, Matrix);
+                VectorRotate(o->Direction, Matrix, Position);
+                VectorAdd(o->StartPosition, Position, Position);
+
+                Position[2] += Random::Rand() % 400 + 700.f;
+                CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 5, o, 110.f);
+            }
+        }
+        else if (o->SubType == 1)
+        {
+            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
+            {
+                Vector(90.f, 0.f, 0.f, o->Angle);
+                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
+                AngleMatrix(o->HeadAngle, Matrix);
+                VectorRotate(o->Direction, Matrix, Position);
+                VectorAdd(o->StartPosition, Position, Position);
+
+                Position[2] += 100.f;
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+            }
+        }
+        // The original code went on with the move code of MODEL_SWORD_FORCE.
+        return Move_MODEL_SWORD_FORCE(o, index, Luminosity);
     }
 
     // MODEL_SWORD_FORCE
@@ -7183,12 +7271,12 @@ namespace Render::Effects::Behaviors
                 o->Direction[1] -= (2.f) * FPS_ANIMATION_FACTOR;
 
                 VectorCopy(o->Position, Position);
-                Position[0] += rand() % 30 - 15.f;
-                Position[1] += rand() % 30 - 15.f;
+                Position[0] += Random::Rand() % 30 - 15.f;
+                Position[1] += Random::Rand() % 30 - 15.f;
                 Position[2] -= 100.f;
                 for (int i = 0; i < 4; i++)
                 {
-                    Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
+                    Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
                     CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
                     if (o->SubType == 2)
                     {
@@ -7222,7 +7310,10 @@ namespace Render::Effects::Behaviors
             o->LifeTime = 0;
             return true;
         }
-        if (o->Alpha >= 1.0f) o->Angle[2] += 5.0f;
+        // *FPS_ANIMATION_FACTOR below on the spin/fade steps -- none had a time basis, so the
+        // shield icon's steady-state spin rate and fade-in/out both ran N times faster at
+        // high/uncapped FPS than the rate this was tuned against.
+        if (o->Alpha >= 1.0f) o->Angle[2] += 5.0f * FPS_ANIMATION_FACTOR;
         //				o->Alpha = sin((o->LifeTime/130.0f)*3.14f) - 0.1f;
         if (o->LifeTime > 120)
         {
@@ -7235,12 +7326,12 @@ namespace Render::Effects::Behaviors
         else if (o->LifeTime > 95)
         {
             if (o->Alpha > 1.0f) o->Alpha = 1.0f;
-            else o->Alpha += 0.4f;
+            else o->Alpha += 0.4f * FPS_ANIMATION_FACTOR;
         }
         else if (o->LifeTime < 50)
         {
             if (o->Alpha < 0) o->Alpha = 0;
-            else o->Alpha -= 0.1f;
+            else o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
         }
 
         BMD* b = &Models[o->Owner->Type];
@@ -7261,11 +7352,11 @@ namespace Render::Effects::Behaviors
             vec3_t p;
             for (int i = 0; i < 1; ++i)
             {
-                float fAngle = rand() % 360;
-                Vector(o->Position[0] + (rand() % 26 - 13) * sinf(fAngle),
-                    o->Position[1] + (rand() % 26 - 13) * cosf(fAngle),
-                    //o->Position[2] + 45+(10-o->LifeTime)*1.5f+rand()%5, p);
-                    o->Position[2] + 48 - o->LifeTime + (rand() % 5), p);
+                float fAngle = Random::Rand() % 360;
+                Vector(o->Position[0] + (Random::Rand() % 26 - 13) * sinf(fAngle),
+                       o->Position[1] + (Random::Rand() % 26 - 13) * cosf(fAngle),
+                       // o->Position[2] + 45+(10-o->LifeTime)*1.5f+Random::Rand()%5, p);
+                       o->Position[2] + 48 - o->LifeTime + (Random::Rand() % 5), p);
                 CreateParticleFpsChecked(BITMAP_SPARK, p, o->Angle, o->Light, 5, 2.0f, o);
             }
         }
@@ -7373,8 +7464,8 @@ namespace Render::Effects::Behaviors
     {
         if ((int)o->LifeTime % 6 == 0)
         {
-            o->Position[0] += ((float)((rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
-            o->Position[1] += ((float)((rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
+            o->Position[0] += ((float)((Random::Rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += ((float)((Random::Rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
 
             CreateEffectFpsChecked(MODEL_EFFECT_SAPITRES_ATTACK_1, o->Position, o->Angle, o->Light, 0, o->Owner);
         }
@@ -7394,11 +7485,12 @@ namespace Render::Effects::Behaviors
             VectorCopy(o->Position, vPos);
             if (o->LifeTime >= 4)
             {
-                o->Scale = 0.8f + ((float)(rand() % 10) * 0.1f);
-                vPos[0] += (3.0f * ((float)(rand() % 40) - 20));
-                vPos[1] += (3.0f * ((float)(rand() % 40) - 20));
-                vPos[2] += (3.0f * ((float)(rand() % 40) - 20));
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
+                o->Scale = 0.8f + ((float)(Random::Rand() % 10) * 0.1f);
+                vPos[0] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                vPos[1] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                vPos[2] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, o->Angle, vLight, 0,
+                                         o->Scale);
             }
             CreateSprite(BITMAP_LIGHT, o->Position, 8.0f, vLightFlare, o);
             CreateSprite(BITMAP_LIGHT, o->Position, 8.0f, vLightFlare, o);
@@ -7412,23 +7504,24 @@ namespace Render::Effects::Behaviors
             Vector(0.1f, 0.2f, 0.8f, vLightFlare);
             VectorCopy(o->Position, vPos);
 
-            vPos[0] = vPos[0] + ((rand() % iOffsetPos) - (iOffsetPos * 0.5f));
-            vPos[1] = vPos[1] + ((rand() % iOffsetPos) - (iOffsetPos * 0.5f));
-            vPos[2] = vPos[2] + ((rand() % (iOffsetPos / 2)) - ((iOffsetPos * 0.5f) * 0.5f));
+            vPos[0] = vPos[0] + ((Random::Rand() % iOffsetPos) - (iOffsetPos * 0.5f));
+            vPos[1] = vPos[1] + ((Random::Rand() % iOffsetPos) - (iOffsetPos * 0.5f));
+            vPos[2] = vPos[2] + ((Random::Rand() % (iOffsetPos / 2)) - ((iOffsetPos * 0.5f) * 0.5f));
             if (o->LifeTime >= 4)
             {
-                o->Scale = (0.8f + ((float)(rand() % 10) * 0.1f));
-                vPos[0] += (3.0f * ((float)(rand() % 40) - 20));
-                vPos[1] += (3.0f * ((float)(rand() % 40) - 20));
-                vPos[2] += (3.0f * ((float)(rand() % 40) - 20));
-                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
+                o->Scale = (0.8f + ((float)(Random::Rand() % 10) * 0.1f));
+                vPos[0] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                vPos[1] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                vPos[2] += (3.0f * ((float)(Random::Rand() % 40) - 20));
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, o->Angle, vLight, 0,
+                                         o->Scale);
             }
 
             VectorCopy(o->Position, vPos);
 
-            vPos[0] = vPos[0] + ((rand() % iOffsetPos) - (iOffsetPos * 0.5f));
-            vPos[1] = vPos[1] + ((rand() % iOffsetPos) - (iOffsetPos * 0.5f));
-            vPos[2] = vPos[2] + ((rand() % (iOffsetPos / 2)) - ((iOffsetPos * 0.5f) * 0.5f));
+            vPos[0] = vPos[0] + ((Random::Rand() % iOffsetPos) - (iOffsetPos * 0.5f));
+            vPos[1] = vPos[1] + ((Random::Rand() % iOffsetPos) - (iOffsetPos * 0.5f));
+            vPos[2] = vPos[2] + ((Random::Rand() % (iOffsetPos / 2)) - ((iOffsetPos * 0.5f) * 0.5f));
             CreateSprite(BITMAP_LIGHT, vPos, 8.0f, vLightFlare, o);
             CreateSprite(BITMAP_LIGHT, vPos, 8.0f, vLightFlare, o);
         }
@@ -7461,7 +7554,8 @@ namespace Render::Effects::Behaviors
                 for (int i = 0; i < 7; ++i)
                 {
                     CreateParticleFpsChecked(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
-                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                                             Random::Rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
                 }
 
                 b->TransformPosition(BoneTransform[2], vRelativePos, vtaWorldPos, false);
@@ -7470,28 +7564,31 @@ namespace Render::Effects::Behaviors
                 for (int i = 0; i < 7; ++i)
                 {
                     CreateParticleFpsChecked(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
-                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                                             Random::Rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
                 }
 
                 if ((int)o->LifeTime == 30 || (int)o->LifeTime == 15 || (int)o->LifeTime == 4)
                 {
                     vec3_t vAngle;
 
+                    // Placed at this effect, so not the owner's own bones that its draw reuses.
+                    static vec34_t ownerBones[MAX_BONES];
                     BMD* characterBMD = &Models[o->Owner->Type];
                     VectorCopy(o->Position, characterBMD->BodyOrigin);
 
-                    characterBMD->Animation(o->Owner->BoneTransform, o->Owner->AnimationFrame,
-                        o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
-                    characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
+                    characterBMD->Animation(ownerBones, o->Owner->AnimationFrame, o->Owner->PriorAnimationFrame,
+                                            o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
+                    characterBMD->TransformPosition(ownerBones[20], vRelativePos, vtaWorldPos, false);
 
                     if (rand_fps_check(2)) {
-                        vtaWorldPos[0] += rand() % 40 + 10;
+                        vtaWorldPos[0] += Random::Rand() % 40 + 10;
                     }
                     else {
-                        vtaWorldPos[0] -= rand() % 30 + 10;
+                        vtaWorldPos[0] -= Random::Rand() % 30 + 10;
                     }
 
-                    vtaWorldPos[2] += rand() % 110 + 50;
+                    vtaWorldPos[2] += Random::Rand() % 110 + 50;
 
                     Vector(0.7f, 0.71f, 1.0f, vLight1);
                     Vector(0.8f, 0.85f, 1.0f, vLight2);
@@ -7499,18 +7596,20 @@ namespace Render::Effects::Behaviors
                     for (int k = 0; k < 70; ++k)
                     {
                         if (rand_fps_check(3)) {
-                            CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.4f);
+                            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                                           Random::Rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.4f);
                         }
-                        CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, vtaWorldPos, o->Angle, rand() % 4 == 3 ? vLight2 : vLight1, 0, 0.4f);
+                        CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, vtaWorldPos, o->Angle,
+                                                 Random::Rand() % 4 == 3 ? vLight2 : vLight1, 0, 0.4f);
                     }
 
                     Vector(0.f, 1.f, 0.f, vAngle);
                     Vector(1.f, 0.6f, 0.8f, vLight2);
                     CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, vtaWorldPos, vAngle, vLight2, 4, 0.005f);
 
-                    characterBMD->Animation(o->Owner->BoneTransform, o->Owner->AnimationFrame,
-                        o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
-                    characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
+                    characterBMD->Animation(ownerBones, o->Owner->AnimationFrame, o->Owner->PriorAnimationFrame,
+                                            o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
+                    characterBMD->TransformPosition(ownerBones[20], vRelativePos, vtaWorldPos, false);
 
                     vtaWorldPos[2] += 70;
                     Vector(1.f, 0.3f, 0.6f, vLight2);
@@ -7539,11 +7638,11 @@ namespace Render::Effects::Behaviors
             {
                 if (o->LifeTime >= 15.f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                    SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 4) * 0.1f);
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
@@ -7565,11 +7664,11 @@ namespace Render::Effects::Behaviors
                         VectorCopy(o->Owner->Angle, vAngle);
                         if (i % 2 == 0)
                         {
-                            vAngle[2] += (rand() % 20 + 10);
+                            vAngle[2] += (Random::Rand() % 20 + 10);
                         }
                         else
                         {
-                            vAngle[2] -= (rand() % 20 + 10);
+                            vAngle[2] -= (Random::Rand() % 20 + 10);
                         }
                         CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_B, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 1.0f);
                     }
@@ -7590,17 +7689,17 @@ namespace Render::Effects::Behaviors
                     for (int i = 0; i < 15; ++i)
                     {
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += rand() % 300 - 150;
-                        vPos[1] += rand() % 300 - 150;
-                        vPos[2] += rand() % 300 - 150;
-                        float fScale = 1.6f + rand() % 10 * 0.1f;
+                        vPos[0] += Random::Rand() % 300 - 150;
+                        vPos[1] += Random::Rand() % 300 - 150;
+                        vPos[2] += Random::Rand() % 300 - 150;
+                        float fScale = 1.6f + Random::Rand() % 10 * 0.1f;
                         Vector(0.5f, 0.5f, 1.0f, vLight);
-                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (Random::Rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, 1.f);
+                            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, 1.f);
                         }
                     }
                 }
@@ -7618,15 +7717,15 @@ namespace Render::Effects::Behaviors
                     vec3_t vPos, vResult;
                     vec3_t vAngle;
                     float Matrix[3][4];
-                    for (int i = 0; i < (5 + rand() % 3); ++i)
+                    for (int i = 0; i < (5 + Random::Rand() % 3); ++i)
                     {
-                        Vector(0.f, (float)(rand() % 150), 0.f, vPos);
-                        Vector(0.f, 0.f, (float)(rand() % 360), vAngle);
+                        Vector(0.f, (float)(Random::Rand() % 150), 0.f, vPos);
+                        Vector(0.f, 0.f, (float)(Random::Rand() % 360), vAngle);
                         AngleMatrix(vAngle, Matrix);
                         VectorRotate(vPos, Matrix, vResult);
                         VectorAdd(vResult, o->Position, vResult);
 
-                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
+                        CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, vResult, o->Angle, o->Light, 13);
                     }
                 }
 
@@ -7640,11 +7739,11 @@ namespace Render::Effects::Behaviors
             vec3_t vLight;
             if (o->LifeTime <= 35.0f && o->LifeTime >= 15.0f)
             {
-                EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 4) * 0.1f);
             }
             else
             {
-                EarthQuake = 0.f;
+                SetEarthQuakeAt(o->Position, 0.f);
             }
 
             if ((int)o->LifeTime == 30)
@@ -7657,7 +7756,7 @@ namespace Render::Effects::Behaviors
                 VectorScale(vDir, 55.f, vPos);
                 VectorAdd(o->Position, vPos, vPos);
                 VectorCopy(o->Owner->Angle, vAngle);
-                vAngle[2] += (rand() % 40 + 140);
+                vAngle[2] += (Random::Rand() % 40 + 140);
                 CreateEffectFpsChecked(MODEL_DRAGON_LOWER_DUMMY, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 0.8f);
 
                 Vector(1.0f, 1.0f, 1.0f, vLight);
@@ -7715,8 +7814,8 @@ namespace Render::Effects::Behaviors
                 EffectDestructor(o);
                 return true;
             }
-            if (o->LifeTime < 20) o->Alpha -= 0.1f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.1f;
+            if (o->LifeTime < 20) o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.1f * FPS_ANIMATION_FACTOR;
 
             OBJECT* pObject = o;
             BMD* pModel = &Models[pObject->Type];
@@ -7992,13 +8091,13 @@ namespace Render::Effects::Behaviors
 
             if (rand_fps_check(4))
             {
-                Vector(0.f, (float)(rand() % 80) + 50.f, 0.f, p);
-                Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                Vector(0.f, (float)(Random::Rand() % 80) + 50.f, 0.f, p);
+                Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffect(MODEL_STONE1 + Random::Rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
         else
@@ -8017,7 +8116,7 @@ namespace Render::Effects::Behaviors
 
         if (rand_fps_check(3))
         {
-            CreateParticleFpsChecked(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light, 6);
+            CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light, 6);
         }
     }
         return true;
@@ -8283,16 +8382,17 @@ namespace Render::Effects::Behaviors
                                         VectorCopy(arrEachBonePos[1], vPosition);
                                     }
 
-                                    float	fRandDistance = (float)(rand() % 100) + 100;
+                                    float fRandDistance = (float)(Random::Rand() % 100) + 100;
                                     Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
-                                    CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 5, 1.35f);
+                                    CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 5, 1.35f);
 
-                                    Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                                    Vector((float)(Random::Rand() % 360), 0.f, (float)(Random::Rand() % 360), vAngle);
                                     AngleMatrix(vAngle, matRandomRotation);
                                     VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                     VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
-                                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                    CreateJoint(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL,
+                                                10.f, 10, 10);
                                 }
                             }
                         }
@@ -8333,12 +8433,12 @@ namespace Render::Effects::Behaviors
                                         VectorCopy(arrEachBonePos[1], vPosition);
                                     }
 
-                                    float	fRandDistance = (float)(rand() % 100) + 100;
+                                    float fRandDistance = (float)(Random::Rand() % 100) + 100;
                                     Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
                                     CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
-                                    Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                                    Vector((float)(Random::Rand() % 360), 0.f, (float)(Random::Rand() % 360), vAngle);
                                     AngleMatrix(vAngle, matRandomRotation);
                                     VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                     VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
@@ -8471,7 +8571,8 @@ namespace Render::Effects::Behaviors
                         {
                             if (rand_fps_check(20))
                             {
-                                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                                CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o,
+                                             -1, 0, 0, 0, o->Scale);
                             }
                         }
                     }
@@ -8499,12 +8600,13 @@ namespace Render::Effects::Behaviors
 
                     for (int i = 0; i < b->NumBones; i++)
                     {
-                        v3PosModify[0] = arrEachBonePos[i][0] + (float)((rand() % 80) - 40);
-                        v3PosModify[1] = arrEachBonePos[i][1] + (float)((rand() % 80) - 40);
-                        v3PosModify[2] = arrEachBonePos[i][2] + (float)((rand() % 80) - 40);
+                        v3PosModify[0] = arrEachBonePos[i][0] + (float)((Random::Rand() % 80) - 40);
+                        v3PosModify[1] = arrEachBonePos[i][1] + (float)((Random::Rand() % 80) - 40);
+                        v3PosModify[2] = arrEachBonePos[i][2] + (float)((Random::Rand() % 80) - 40);
                         if (rand_fps_check(10))
                         {
-                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale * 1.5f);
+                            CreateEffect(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0,
+                                         o->Scale * 1.5f);
                         }
                     }
 
@@ -8687,34 +8789,34 @@ namespace Render::Effects::Behaviors
 
                     Vector(0.7f, 0.7f, 1.f, vLight);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[0] = vPosition[0] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((Random::Rand() % iLimitPos) - (iLimitPos * 0.5f));
                     CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     Vector(0.3f, 0.2f, 1.f, vLight);
@@ -8737,7 +8839,7 @@ namespace Render::Effects::Behaviors
             int	iSwordOnTheLand = (o->ExtState / 2) + 5;
             if (o->LifeTime <= iSwordOnTheLand && o->LifeTime > 10)
             {
-                EarthQuake = (float)(rand() % 2 - 2) * 0.5f;
+                SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 2 - 2) * 0.5f);
             }
 
             if ((int)o->LifeTime == o->ExtState)
@@ -8806,7 +8908,7 @@ namespace Render::Effects::Behaviors
                         Vector(1.0f, 1.0f, 1.0f, v3LightModify);
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
+                            CreateParticle(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
                         }
                     }
                 }
@@ -8820,7 +8922,8 @@ namespace Render::Effects::Behaviors
                     {
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                            CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10,
+                                           o->Scale);
                         }
                     }
                 }
@@ -8833,7 +8936,8 @@ namespace Render::Effects::Behaviors
                     {
                         if (rand_fps_check(20))
                         {
-                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                            CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0,
+                                         0, 0, o->Scale);
                         }
                     }
                 }
@@ -8905,7 +9009,8 @@ namespace Render::Effects::Behaviors
                     {
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                            CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10,
+                                           o->Scale);
                         }
                     }
                 }
@@ -8969,11 +9074,11 @@ namespace Render::Effects::Behaviors
             {
                 if (o->LifeTime >= 15.f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+                    SetEarthQuakeAt(o->Position, (float)(Random::Rand() % 8 - 4) * 0.1f);
                 }
                 else
                 {
-                    EarthQuake = 0.f;
+                    SetEarthQuakeAt(o->Position, 0.f);
                 }
 
                 if ((int)o->LifeTime == 23)
@@ -8999,11 +9104,11 @@ namespace Render::Effects::Behaviors
                         VectorCopy(o->Owner->Angle, vAngle);
                         if (i % 2 == 0)
                         {
-                            vAngle[2] += (rand() % 20 + 10);
+                            vAngle[2] += (Random::Rand() % 20 + 10);
                         }
                         else
                         {
-                            vAngle[2] -= (rand() % 20 + 10);
+                            vAngle[2] -= (Random::Rand() % 20 + 10);
                         }
                         CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_B,
                             vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, o->Scale);
@@ -9025,17 +9130,17 @@ namespace Render::Effects::Behaviors
                     for (int i = 0; i < 15; ++i)
                     {
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += rand() % 400 - 200;
-                        vPos[1] += rand() % 400 - 200;
-                        vPos[2] += rand() % 400 - 200;
-                        float fScale = (o->Scale * 1.6f) + rand() % 10 * 0.1f;
+                        vPos[0] += Random::Rand() % 400 - 200;
+                        vPos[1] += Random::Rand() % 400 - 200;
+                        vPos[2] += Random::Rand() % 400 - 200;
+                        float fScale = (o->Scale * 1.6f) + Random::Rand() % 10 * 0.1f;
                         Vector(0.3f, 0.3f, 1.0f, vLight);
-                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (Random::Rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
                         {
-                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, o->Scale * 0.9f);
+                            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, o->Scale * 0.9f);
                         }
                     }
                 }
@@ -9054,15 +9159,15 @@ namespace Render::Effects::Behaviors
                     vec3_t vPos, vResult;
                     vec3_t vAngle;
                     float Matrix[3][4];
-                    for (int i = 0; i < (5 + rand() % 3); ++i)
+                    for (int i = 0; i < (5 + Random::Rand() % 3); ++i)
                     {
-                        Vector(0.f, (float)(rand() % 150), 0.f, vPos);
-                        Vector(0.f, 0.f, (float)(rand() % 360), vAngle);
+                        Vector(0.f, (float)(Random::Rand() % 150), 0.f, vPos);
+                        Vector(0.f, 0.f, (float)(Random::Rand() % 360), vAngle);
                         AngleMatrix(vAngle, Matrix);
                         VectorRotate(vPos, Matrix, vResult);
                         VectorAdd(vResult, o->Position, vResult);
 
-                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
+                        CreateEffectFpsChecked(MODEL_STONE1 + Random::Rand() % 2, vResult, o->Angle, o->Light, 13);
                     }
                 }
 
@@ -9150,14 +9255,14 @@ namespace Render::Effects::Behaviors
             if (o->LifeTime >= 3)
             {
                 VectorCopy(o->Owner->Angle, Angle);
-                int nRandom = rand() % 6;
-                float _Value = 7.0f + rand() % 3;
+                int nRandom = Random::Rand() % 6;
+                float _Value = 7.0f + Random::Rand() % 3;
                 if (nRandom / 3)
                     o->Owner->Angle[2] = Angle[2] + (_Value * (nRandom % 3 * 2 + 1));
                 else
                     o->Owner->Angle[2] = Angle[2] - (_Value * (nRandom % 3 * 2 + 1));
 
-                int _Temp = rand() % 3;
+                int _Temp = Random::Rand() % 3;
                 if (_Temp == 1)
                     o->Owner->Angle[0] = Angle[0] + (_Value * (nRandom % 3 * 2 + 1));
                 else if (_Temp == 2)
@@ -9170,8 +9275,8 @@ namespace Render::Effects::Behaviors
                     VectorCopy(p, o->Position);
                     o->Scale = 1.5f;
                     Vector(0.2f, 0.3f, 1.0f, Light);
-                    p[1] += rand() % 20 - 10;
-                    p[2] += rand() % 28 + 6;
+                    p[1] += Random::Rand() % 20 - 10;
+                    p[2] += Random::Rand() % 28 + 6;
                     CreateJointFpsChecked(BITMAP_PIN_LIGHT, p, p, o->Owner->Angle, 0, o->Owner, 5.0f);
                 }
                 CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 1, o->Owner);
@@ -9204,8 +9309,9 @@ namespace Render::Effects::Behaviors
                 return true;
 
             VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
-            Vector(vPosition[0] + rand() % 80 - 40, vPosition[1] + rand() % 80 - 40, vPosition[2] + rand() % 120 + 30, vPosition);
-            float Scale = 1.5f + (rand() % 10 * 0.02f);
+            Vector(vPosition[0] + Random::Rand() % 80 - 40, vPosition[1] + Random::Rand() % 80 - 40,
+                   vPosition[2] + Random::Rand() % 120 + 30, vPosition);
+            float Scale = 1.5f + (Random::Rand() % 10 * 0.02f);
             CreateParticleFpsChecked(BITMAP_SBUMB, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
         }
         if ((int)o->LifeTime == 15 || (int)o->LifeTime == 9 || (int)o->LifeTime == 6)
@@ -9388,7 +9494,7 @@ namespace Render::Effects::Behaviors
             o->Alpha = 1.0f;
             o->Scale *= pow(1.24f, FPS_ANIMATION_FACTOR);
             o->Position[2] *= pow(1.19f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.45f, o->Light);
+            VectorScale(o->Light, powf(0.45f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] < 0.001f)
             {
                 Vector(0.0f, 0.0f, 0.0f, o->Light);
@@ -9397,9 +9503,9 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 3)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 0.99f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.7f, o->Light);
+            VectorScale(o->StartPosition, powf(0.99f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.7f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] > 0.6f)
             {
                 o->SubType = 5;
@@ -9409,9 +9515,9 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 4)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 1.04f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 1.5f, o->Light);
+            VectorScale(o->StartPosition, powf(1.04f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(1.5f, FPS_ANIMATION_FACTOR), o->Light);
             if (o->Light[0] > 0.6f)
             {
                 o->SubType = 5;
@@ -9421,18 +9527,18 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 5)
         {
             o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->StartPosition, 1.04f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.5f, o->Light);
+            VectorScale(o->StartPosition, powf(1.04f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.5f, FPS_ANIMATION_FACTOR), o->Light);
             o->Position[2] = 160.0f + o->Scale * 10.0f;
         }
         else
         {
             o->Alpha = 1.0f;
             o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
-            VectorScale(o->StartPosition, 0.99f, o->StartPosition);
-            VectorSubtract(o->Position, o->StartPosition, o->Position);
-            VectorScale(o->Light, 0.65f, o->Light);
+            VectorScale(o->StartPosition, powf(0.99f, FPS_ANIMATION_FACTOR), o->StartPosition);
+            VectorAddScaled(o->Position, o->StartPosition, o->Position, -FPS_ANIMATION_FACTOR);
+            VectorScale(o->Light, powf(0.65f, FPS_ANIMATION_FACTOR), o->Light);
             o->Position[2] = 220.0f + o->Scale * 80.0f;
         }
     }
@@ -9444,9 +9550,9 @@ namespace Render::Effects::Behaviors
     {
     {
         o->Alpha = 1.0f;
-        VectorScale(o->Light, 0.8f, o->Light);
+        VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
         o->Scale += (0.1f) * FPS_ANIMATION_FACTOR;
-        VectorScale(o->StartPosition, 0.95f, o->StartPosition);
+        VectorScale(o->StartPosition, powf(0.95f, FPS_ANIMATION_FACTOR), o->StartPosition);
         VectorSubtract(o->Position, o->StartPosition, o->Position);
     }
         return true;
@@ -9468,8 +9574,9 @@ namespace Render::Effects::Behaviors
                 return true;
 
             VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
-            Vector(vPosition[0] + rand() % 90 - 40, vPosition[1] + rand() % 90 - 40, vPosition[2] + rand() % 100 + 50, vPosition);
-            float Scale = 1.5f + (rand() % 5 * 0.01f);
+            Vector(vPosition[0] + Random::Rand() % 90 - 40, vPosition[1] + Random::Rand() % 90 - 40,
+                   vPosition[2] + Random::Rand() % 100 + 50, vPosition);
+            float Scale = 1.5f + (Random::Rand() % 5 * 0.01f);
             CreateParticleFpsChecked(BITMAP_DAMAGE1, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
         }
     }
@@ -9486,7 +9593,7 @@ namespace Render::Effects::Behaviors
         {
             o->Angle[1] += (20.0f) * FPS_ANIMATION_FACTOR;
         }
-        VectorScale(o->Light, 0.9f, o->Light);
+        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         o->Alpha = 1.0f;
     }
         return true;
@@ -9504,7 +9611,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 5.0f;
             }
             o->Angle[0] = -(int)WorldTime * 0.5f;
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else
         {
@@ -9514,7 +9621,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3.0f;
             }
             o->Angle[0] = -(int)WorldTime * 0.5f;
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;
@@ -9534,7 +9641,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
             if ((int)o->LifeTime == 40 || (int)o->LifeTime == 30)
             {
                 vec3_t vLight;
@@ -9585,7 +9692,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.85f, o->Light);
+            VectorScale(o->Light, powf(0.85f, FPS_ANIMATION_FACTOR), o->Light);
 
             if ((int)o->LifeTime == 60 || (int)o->LifeTime == 50)
             {
@@ -9603,7 +9710,7 @@ namespace Render::Effects::Behaviors
                 o->Scale = 3;
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.85f, o->Light);
+            VectorScale(o->Light, powf(0.85f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;
@@ -9626,7 +9733,7 @@ namespace Render::Effects::Behaviors
 
             if (g_isCharacterBuff(o->Owner, eBuff_Def_up_Ourforces))
             {
-                if (rand() % 70 == 7)
+                if (Random::Rand() % 70 == 7)
                 {
                     if (!SearchEffect(MODEL_WINDFOCE_MIRROR, o->Owner))
                     {
@@ -9640,7 +9747,7 @@ namespace Render::Effects::Behaviors
         else if (o->SubType == 3 || o->SubType == 4)
         {
             vec3_t Light;
-            float Luminosity = (float)(rand() % 5) * 0.1f;
+            float Luminosity = (float)(Random::Rand() % 5) * 0.1f;
             Vector(Luminosity + 0.4f, Luminosity + 0.0f, Luminosity + 0.0f, Light);
             int range = 2;
             if (o->SubType == 4)
@@ -9670,7 +9777,7 @@ namespace Render::Effects::Behaviors
                 {
                     VectorCopy(o->Position, Position);
                     Vector(1.0f, 0.12f, 0.0f, Light);
-                    b->TransformByObjectBone(Position, o->Owner, (rand_fps_check(2)) ? 26 : 35);
+                    b->TransformByObjectBone(Position, o->Owner, (Random::Rand() % 2 == 0) ? 26 : 35);
                     CreateParticleFpsChecked(BITMAP_SMOKELINE1, Position, o->Angle, Light, 5, 0.005f, o->Owner);
                 }
             }
@@ -9696,7 +9803,7 @@ namespace Render::Effects::Behaviors
         {
             o->Scale = 1.5f;
         }
-        VectorScale(o->Light, 0.9f, o->Light);
+        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         VectorCopy(o->Owner->Position, o->Position);
     }
         return true;
@@ -9753,14 +9860,14 @@ namespace Render::Effects::Behaviors
             if (o->LifeTime >= 3)
             {
                 VectorCopy(o->Owner->Angle, Angle);
-                int nRandom = rand() % 6;
-                float _Value = 2.0f + rand() % 3;
+                int nRandom = Random::Rand() % 6;
+                float _Value = 2.0f + Random::Rand() % 3;
                 if (nRandom / 3)
                     o->Owner->Angle[2] = Angle[2] + (_Value * (nRandom % 3 * 2 + 1));
                 else
                     o->Owner->Angle[2] = Angle[2] - (_Value * (nRandom % 3 * 2 + 1));
 
-                int _Temp = rand() % 3;
+                int _Temp = Random::Rand() % 3;
                 if (_Temp == 1)
                     o->Owner->Angle[0] = Angle[0] + (_Value * (nRandom % 3 * 2 + 1));
                 else if (_Temp == 2)
@@ -9806,17 +9913,17 @@ namespace Render::Effects::Behaviors
         if (o->SubType == 1)
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.9f, o->Light);
+            VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else if (o->SubType == 2)
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.7f, o->Light);
+            VectorScale(o->Light, powf(0.7f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else
         {
             o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-            VectorScale(o->Light, 0.8f, o->Light);
+            VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
         }
     }
         return true;
@@ -9872,7 +9979,7 @@ namespace Render::Effects::Behaviors
                     float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
                     VectorCopy(vPosition, vPos);
                     vPos[2] += 30.0f;
-                    float fScale = ((float)(rand() % 40 + 50) * 0.01f * 1.5f) * o->Scale * 1.8f;
+                    float fScale = ((float)(Random::Rand() % 40 + 50) * 0.01f * 1.5f) * o->Scale * 1.8f;
                     for (int i = 0; i < 4; ++i)
                     {
                         CreateParticleFpsChecked(BITMAP_ENERGY, vPos, o->Angle, o->Light, 7, fScale);
@@ -9888,11 +9995,13 @@ namespace Render::Effects::Behaviors
 
                         if (i % 2)
                         {
-                            Vector(vPos[0] + rand() % 40 + 20.0f, vPos[1] + rand() % 30 + 10.0f, vPos[2] + rand() % 30 + 25.0f, vPos);
+                            Vector(vPos[0] + Random::Rand() % 40 + 20.0f, vPos[1] + Random::Rand() % 30 + 10.0f,
+                                   vPos[2] + Random::Rand() % 30 + 25.0f, vPos);
                         }
                         else
                         {
-                            Vector(vPos[0] - rand() % 20 - 10.0f, vPos[1] + rand() % 30 - 10.0f, vPos[2] + rand() % 30 + 30.0f, vPos);
+                            Vector(vPos[0] - Random::Rand() % 20 - 10.0f, vPos[1] + Random::Rand() % 30 - 10.0f,
+                                   vPos[2] + Random::Rand() % 30 + 30.0f, vPos);
                         }
                     }
                 }
@@ -9931,7 +10040,8 @@ namespace Render::Effects::Behaviors
             o->LifeTime = 0;
             return true;
         }
-        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 & rand_fps_check(1))
+        // A bitwise &, not &&: the random check draws whenever the frame is above 2.
+        if (o->Owner->AnimationFrame > 2 && ((o->Owner->AnimationFrame < 8) & rand_fps_check(1)))
         {
             BMD* pModel = &Models[o->Owner->Type];
             vec3_t _StartPos, _EndPos;
@@ -9948,8 +10058,8 @@ namespace Render::Effects::Behaviors
                 pModel->TransformByObjectBone(_StartPos, o->Owner, 36);
                 pModel->TransformByObjectBone(_EndPos, o->Owner, 28);
 
-                CreateJointFpsChecked(BITMAP_LAVA, _StartPos, _StartPos, o->Owner->Angle, i, o->Owner, 20.0f);
-                CreateJointFpsChecked(BITMAP_LAVA, _EndPos, _EndPos, o->Owner->Angle, 7 + i, o->Owner, 20.0f);
+                CreateJoint(BITMAP_LAVA, _StartPos, _StartPos, o->Owner->Angle, i, o->Owner, 20.0f);
+                CreateJoint(BITMAP_LAVA, _EndPos, _EndPos, o->Owner->Angle, 7 + i, o->Owner, 20.0f);
                 fAnimationFrame += fSpeedPerFrame;
             }
         }
@@ -9974,11 +10084,11 @@ namespace Render::Effects::Behaviors
         if (o->Owner->AnimationFrame > 5)
         {
             Vector(1.0f, 1.0f, 1.0f, vLight);
-            float fScale = o->Scale * (rand() % 5 + 18) * 0.1f;
+            float fScale = o->Scale * (Random::Rand() % 5 + 18) * 0.1f;
             VectorCopy(o->Position, vPos);
             vPos[2] += (80 - o->LifeTime) * 1.0f * 10.0f - (80 - o->LifeTime) * 3.0f;
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
@@ -10000,8 +10110,8 @@ namespace Render::Effects::Behaviors
                     continue;
 
                 float Matrix[3][4];
-                Vector(rand() % 100 - 50, rand() % 100 - 50, 0.0f, PosL);
-                Vector((float)(rand() % 90), 0.0f, 45.0f * i, Angle);
+                Vector(Random::Rand() % 100 - 50, Random::Rand() % 100 - 50, 0.0f, PosL);
+                Vector((float)(Random::Rand() % 90), 0.0f, 45.0f * i, Angle);
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(PosL, Matrix, outPos);
                 VectorAdd(vPos, outPos, vPos);
@@ -10063,16 +10173,16 @@ namespace Render::Effects::Behaviors
         BMD* pModel = &Models[o->Owner->Type];
         vec3_t MonRanPos;
         VectorCopy(o->Owner->Position, MonRanPos);
-        int BoneIndex = rand() % (pModel->NumBones - 1);
+        int BoneIndex = Random::Rand() % (pModel->NumBones - 1);
         pModel->TransformByObjectBone(MonRanPos, o->Owner, BoneIndex);
 
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        float fScale = o->Scale * (rand() % 5 + 5) * 0.1f;
+        float fScale = o->Scale * (Random::Rand() % 5 + 5) * 0.1f;
         VectorCopy(MonRanPos, o->Position);
         for (int i = 0; i < 3; ++i)
         {
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
@@ -10100,14 +10210,14 @@ namespace Render::Effects::Behaviors
             vec3_t vLight, vPos;
             Vector(1.0f, 1.0f, 1.0f, vLight);
             VectorCopy(o->Position, vPos);
-            vPos[2] += (80 - o->LifeTime) * (0.9f + rand() % 5 * 0.1f);
+            vPos[2] += (80 - o->LifeTime) * (0.9f + Random::Rand() % 5 * 0.1f);
             vPos[2] += o->SubType * 20.0f;
             if (vPos[2] > 400.0f)
             {
                 return true;
             }
-            float fScale = o->Scale * (rand() % 5 + 8) * 0.19f;
-            switch (rand() % 3)
+            float fScale = o->Scale * (Random::Rand() % 5 + 8) * 0.19f;
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 6, fScale);
@@ -10142,7 +10252,7 @@ namespace Render::Effects::Behaviors
             }
 
             vec3_t Light;
-            float Luminosity = (float)(rand() % 5) * 0.01f;
+            float Luminosity = (float)(Random::Rand() % 5) * 0.01f;
             Vector(Luminosity + 1.0f, Luminosity + 0.4f, Luminosity + 0.4f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
         }
@@ -10198,8 +10308,8 @@ namespace Render::Effects::Behaviors
 
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        float fScale = o->Scale * (rand() % 5 + 5) * 0.1f;
-        switch (rand() % 3)
+        float fScale = o->Scale * (Random::Rand() % 5 + 5) * 0.1f;
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
@@ -10217,6 +10327,7 @@ namespace Render::Effects::Behaviors
 
     const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers()
     {
+        // clang-format off
         static const std::vector<std::pair<int, MoveHandler>> handlers = {
             { MODEL_DRAGON, &Move_MODEL_DRAGON },
             { MODEL_ARROW_AUTOLOAD, &Move_MODEL_ARROW_AUTOLOAD },
@@ -10436,6 +10547,7 @@ namespace Render::Effects::Behaviors
             { MODEL_MANA_RUNE, &Move_MODEL_MANA_RUNE },
             { MODEL_SKILL_JAVELIN, &Move_MODEL_SKILL_JAVELIN },
             { MODEL_ARROW_IMPACT, &Move_MODEL_ARROW_IMPACT },
+            { BITMAP_JOINT_FORCE, &Move_BITMAP_JOINT_FORCE },
             { MODEL_SWORD_FORCE, &Move_MODEL_SWORD_FORCE },
             { MODEL_PROTECTGUILD, &Move_MODEL_PROTECTGUILD },
             { MODEL_MOVE_TARGETPOSITION_EFFECT, &Move_MODEL_MOVE_TARGETPOSITION_EFFECT },
@@ -10506,6 +10618,7 @@ namespace Render::Effects::Behaviors
             { MODEL_VOLCANO_OF_MONK, &Move_MODEL_VOLCANO_OF_MONK },
             { MODEL_VOLCANO_STONE, &Move_MODEL_VOLCANO_STONE },
         };
+        // clang-format on
         return handlers;
     }
 }

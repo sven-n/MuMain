@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Combat/ClassAttack.h"
 #include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillCast.h"
@@ -7,7 +8,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit these functions were extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -33,22 +34,22 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern void SetPlayerBow(CHARACTER* c);
@@ -276,10 +277,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         if (g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) == false)
         {
             SendRequestMagic(Skill, HeroKey);
-            if ((c->Helper.Type == MODEL_HORN_OF_FENRIR)
-                || (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
-                || (c->Helper.Type == MODEL_HORN_OF_DINORANT)
-                || (c->Helper.Type == MODEL_DARK_HORSE_ITEM))
+            if (GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                 SetPlayerMagic(c);
             else
                 SetAction(o, PLAYER_RUSH1);
@@ -472,8 +470,51 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     c->SkillSuccess = true;
 }
 
+namespace
+{
+// The knight skills that work without a weapon in the right hand, or with a staff.
+bool NeedsNoMeleeWeapon(ActionSkillType skill)
+{
+    switch (skill)
+    {
+    case AT_SKILL_SWELL_LIFE:
+    case AT_SKILL_SWELL_LIFE_STR:
+    case AT_SKILL_SWELL_LIFE_PROFICIENCY:
+    case AT_SKILL_ADD_CRITICAL:
+    case AT_SKILL_ADD_CRITICAL_STR1:
+    case AT_SKILL_ADD_CRITICAL_STR2:
+    case AT_SKILL_ADD_CRITICAL_STR3:
+    case AT_SKILL_PARTY_TELEPORT:
+    case AT_SKILL_THUNDER_STRIKE:
+    case AT_SKILL_EARTHSHAKE:
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
+    case AT_SKILL_BRAND_OF_SKILL:
+    case AT_SKILL_PLASMA_STORM_FENRIR:
+    case AT_SKILL_FIRE_SCREAM:
+    case AT_SKILL_FIRE_SCREAM_STR:
+    case AT_SKILL_GIGANTIC_STORM:
+    case AT_SKILL_CHAOTIC_DISEIER:
+    case AT_SKILL_TWISTING_SLASH:
+    case AT_SKILL_TWISTING_SLASH_STR:
+    case AT_SKILL_TWISTING_SLASH_STR_MG:
+    case AT_SKILL_TWISTING_SLASH_MASTERY:
+        return true;
+    default:
+        return false;
+    }
+}
+
+void CompleteKnightCast(CHARACTER* c)
+{
+    c->Movement = false;
+    c->SkillSuccess = true;
+}
+} // namespace
+
 void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
+    c->SkillSuccess = false;
     OBJECT* o = &c->Object;
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
 
@@ -484,32 +525,9 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
     int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
     int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 
-    if (((iTypeR != -1 &&
-        (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-        (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX))
-        || Skill == AT_SKILL_SWELL_LIFE
-        || Skill == AT_SKILL_SWELL_LIFE_STR
-        || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY
-        || Skill == AT_SKILL_ADD_CRITICAL
-        || Skill == AT_SKILL_ADD_CRITICAL_STR1
-        || Skill == AT_SKILL_ADD_CRITICAL_STR2
-        || Skill == AT_SKILL_ADD_CRITICAL_STR3
-        || Skill == AT_SKILL_PARTY_TELEPORT
-        || Skill == AT_SKILL_THUNDER_STRIKE
-        || Skill == AT_SKILL_EARTHSHAKE
-        || Skill == AT_SKILL_EARTHSHAKE_STR
-        || Skill == AT_SKILL_EARTHSHAKE_MASTERY
-        || Skill == AT_SKILL_BRAND_OF_SKILL
-        || Skill == AT_SKILL_PLASMA_STORM_FENRIR
-        || Skill == AT_SKILL_FIRE_SCREAM
-        || Skill == AT_SKILL_FIRE_SCREAM_STR
-        || Skill == AT_SKILL_GIGANTIC_STORM
-        || Skill == AT_SKILL_CHAOTIC_DISEIER
-        || Skill == AT_SKILL_TWISTING_SLASH
-        || Skill == AT_SKILL_TWISTING_SLASH_STR
-        || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
-        || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
-        ))
+    const bool hasMeleeWeapon =
+        iTypeR != -1 && !GameLogic::Items::IsStaffOrBookType(iTypeR) && !GameLogic::Items::IsStaffOrBookType(iTypeL);
+    if (hasMeleeWeapon || NeedsNoMeleeWeapon(Skill))
     {
         bool Success = true;
 
@@ -607,6 +625,17 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_TWISTING_SLASH_MASTERY:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
+                    if (CheckAttack() && !CheckTile(c, o, Distance))
+                    {
+                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        {
+                            c->Movement = true;
+                            c->MovementType = MOVEMENT_SKILL;
+                            SendMove(c, o);
+                            break;
+                        }
+                    }
+
                     BYTE PathX[1];
                     BYTE PathY[1];
                     PathX[0] = (c->PositionX);
@@ -624,7 +653,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     SetAttackSpeed();
                     SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
 
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 break;
             case AT_SKILL_FIRE_SLASH:
@@ -653,13 +682,13 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         SetAttackSpeed();
 
                         SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
                     }
                 }
                 break;
             case AT_SKILL_POWER_SLASH:
             case AT_SKILL_POWER_SLASH_STR:
-                if (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM && c->Helper.Type != MODEL_HORN_OF_FENRIR)
+                if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -691,7 +720,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         {
                             SetAction(o, PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
                         }
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
                     }
                 }
                 break;
@@ -725,7 +754,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     //									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
 
                     //									SetPlayerMagic(c);
 
@@ -761,8 +790,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 
                     for (int i = 0; i < 8; i++)
                     {
-                        Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-                        Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+                        Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+                        Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
                         CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0, o->m_bySkillSerialNum);
                     }
                     if (c == Hero && SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
@@ -808,7 +837,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                     //c->AttackTime = 15;
                 }
             }
@@ -838,18 +867,18 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
             }
             break;
             case AT_SKILL_PARTY_TELEPORT:
                 if (gMapManager.IsCursedTemple()
-                    && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                    && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
                 {
                     return;
                 }
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
 
             case AT_SKILL_ADD_CRITICAL:
@@ -857,11 +886,11 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_ADD_CRITICAL_STR2:
             case AT_SKILL_ADD_CRITICAL_STR3:
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_BRAND_OF_SKILL:
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_FIRE_SCREAM:
             case AT_SKILL_FIRE_SCREAM_STR:
@@ -897,7 +926,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                             SetAction(o, PLAYER_ATTACK_STRIKE);
                         }
                     }
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -950,7 +979,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         SetAction(o, PLAYER_ATTACK_DARKHORSE);
                         PlayBuffer(SOUND_EARTH_QUAKE);
                     }
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -962,7 +991,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_SWELL_LIFE_PROFICIENCY:
                 SendRequestMagic(Skill, HeroKey);
                 SetAction(o, PLAYER_SKILL_VITALITY);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_RAGEFUL_BLOW:
             case AT_SKILL_RAGEFUL_BLOW_STR:
@@ -984,7 +1013,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     SendRequestMagicContinue(Skill, (c->PositionX),
                         (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
                     SetAction(o, PLAYER_ATTACK_SKILL_FURY_STRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -1009,7 +1038,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     }
                     SendRequestMagicContinue(Skill, TargetX, TargetY, (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
                     SetAction(o, PLAYER_SKILL_BLOW_OF_DESTRUCTION);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -1035,7 +1064,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
                         SendRequestMagicContinue(Skill, (c->PositionX),
                             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
 
                         if (o->Type == MODEL_PLAYER)
                         {
@@ -1063,11 +1092,11 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
             }
             break;
+            default:
+                break;
             }
         }
     }
-
-    c->SkillSuccess = true;
 }
 
 void AttackWizard(CHARACTER* c, int Skill, float Distance)
@@ -1204,6 +1233,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_HELL);
         c->Movement = 0;
@@ -1215,6 +1245,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_INFERNO);
         c->Movement = 0;
@@ -1359,6 +1390,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_EVIL_SPIRIT_STR_MG:
             {
                 SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
             }
             return;
@@ -1366,6 +1398,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             {
                 SendRequestMagicContinue(Skill, (c->PositionX),
                     (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetAttackSpeed();
 
                 if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
@@ -1381,6 +1414,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_FLAME_STR:
             case AT_SKILL_FLAME_STR_MG:
                 SendRequestMagicContinue(Skill, (BYTE)(c->TargetPosition[0] / TERRAIN_SCALE), (BYTE)(c->TargetPosition[1] / TERRAIN_SCALE), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
                 return;
             case AT_SKILL_DECAY:
@@ -1406,7 +1440,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         {
         case AT_SKILL_TELEPORT_ALLY:
             if (gMapManager.IsCursedTemple()
-                && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
+                && !g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true))
             {
                 return;
             }
@@ -1415,7 +1449,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 if (!g_pPartyManager->IsPartyMember(SelectedCharacter))
                     return;
 
-                if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+                if (mu::ui::window::CInventoryCtrl::GetPickedItem())
                 {
                     return;
                 }
@@ -1441,8 +1475,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                     while (1)
                     {
-                        indexX = rand() % 3;
-                        indexY = rand() % 3;
+                        indexX = Random::Rand() % 3;
+                        indexY = Random::Rand() % 3;
 
                         if (indexX != 1 || indexY != 1)
                         {
@@ -1481,7 +1515,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         case AT_SKILL_TELEPORT:
         {
-            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem()
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem()
                 || g_isCharacterBuff(o, eDeBuff_Stun)
                 || g_isCharacterBuff(o, eDeBuff_Sleep)
                 )

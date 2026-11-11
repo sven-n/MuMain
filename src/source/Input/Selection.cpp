@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 #include "Input/Selection.h"
+#include "Camera/CameraProjection.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -32,24 +33,30 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
+#include "Core/Input/UiInputRouter.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern int SelectedCharacter, SelectedNpc, SelectedItem, SelectedOperate;
+
+#ifdef _EDITOR
+// True while the MuEditor UI is open (implemented in MuEditor/Core/MuEditorCore.cpp).
+extern "C" bool MuEditor_IsOpen();
+#endif
 extern int Attacking;
 
 namespace Input::Selection
@@ -116,7 +123,6 @@ int SelectCharacter(BYTE Kind)
     Vector(0.8f, 0.8f, 0.8f, Light);
     int iSelected = -1;
     float fNearestDist = 1000000000000.0f;
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -184,7 +190,7 @@ int SelectCharacter(BYTE Kind)
                     vec3_t vSub;
                     VectorSubtract(o->Position, g_Camera.Position, vSub);
 
-                    float fNewDist = DotProduct(vSub, vSub);
+                    float fNewDist = VectorDotProduct(vSub, vSub);
 
                     if (fNewDist < fNearestDist)
                     {
@@ -265,7 +271,20 @@ int SelectOperate()
 
 void SelectObjects()
 {
+    // The cursor as it is now, through the view the last frame was drawn with: what the player sees under it.
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+
     BYTE CKind_1, CKind_2;
+
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        SelectedCharacter = SelectCharacter(KIND_PLAYER);
+        SelectedItem = -1;
+        SelectedNpc = -1;
+        SelectedOperate = -1;
+        Attacking = -1;
+        return;
+    }
 
     if (g_pOption->IsAutoAttack() && gMapManager.WorldActive != WD_6STADIUM && gMapManager.InChaosCastle() == false)
     {
@@ -307,11 +326,20 @@ void SelectObjects()
     SelectedNpc = -1;
     SelectedOperate = -1;
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    const bool mouseOnHud = g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud();
+    // Core::Input::IsMouseOverUI() added as a 4th gate --
+    // none of the other three flags know about RmlUi-rendered content (CSysMenuWin, already
+    // reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
+    // element). Routes to whichever UI framework is registered as the active input consumer
+    // (UiInputRouter.h -- RmlUiRuntime today), so it stays correct regardless of how any
+    // individual migrated element's legacy CObject bookkeeping is positioned -- see
+    // CalculateFixedAnchorLayout()'s own comment for why "authoritative state, not a shadow rect"
+    // matters here.
+    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {
-            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                 SelectedItem = SelectItem();
 
             if (SelectedItem == -1)
@@ -381,7 +409,7 @@ void SelectObjects()
                         SelectedNpc = SelectCharacter(KIND_NPC);
                         if (SelectedNpc == -1)
                         {
-                            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+                            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                             {
                                 SelectedItem = SelectItem();
                             }
@@ -403,6 +431,19 @@ void SelectObjects()
     {
         g_pPartyManager->SearchPartyMember();
     }
+
+#ifdef _EDITOR
+    // While the editor UI is up it consumes world clicks (painting, placing...).
+    // If the "interactable" pick (pose box / chair / lever) stays alive, the game
+    // shows the sit-down cursor and reroutes clicks into "walk to that object"
+    // instead of normal movement - and because the editor eats those clicks, the
+    // state can never be worked off, so it sticks until you relog.
+    // Suppress the pick while the editor is open; normal play is unaffected.
+    if (MuEditor_IsOpen())
+    {
+        SelectedOperate = -1;
+    }
+#endif
 
     if (SelectedCharacter == -1)
     {

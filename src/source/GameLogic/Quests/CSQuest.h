@@ -5,6 +5,9 @@
 
 #include <array>
 #include <cstdint>
+#ifdef _EDITOR
+#include <span>
+#endif
 
 #include "Core/Utilities/Singleton.h"
 #include "Core/Globals/_enum.h"
@@ -30,8 +33,6 @@ private:
     short FindQuestContext(QUEST_ATTRIBUTE* pQuest, int index);
     bool CheckRequestCondition(QUEST_ATTRIBUTE* pQuest, bool bLastCheck = false);
     bool CheckActCondition(QUEST_ATTRIBUTE* pQuest);
-    void RenderDevilSquare(void);
-    void RenderBloodCastle(void);
 
 public:
     CSQuest(void);
@@ -70,6 +71,15 @@ public:
     int FindQuestItemsInInven(int nType, int nCount, int nLevel = -1);
     int GetKillMobCount(int nMobType);
 
+#ifdef _EDITOR
+    // The quests as the quest script defines them, for the editor's monster
+    // tools (the NPC and the monsters to kill of each quest).
+    std::span<const QUEST_ATTRIBUTE> GetQuests() const
+    {
+        return m_Quest;
+    }
+#endif
+
 private:
     std::uint8_t    m_byClass;
 
@@ -94,8 +104,6 @@ private:
     KillTracker m_anKillMobCount;
     std::uint16_t m_wNPCIndex;
 
-    int     m_iStartX;
-    int     m_iStartY;
 };
 
 #define g_csQuest CSQuest::GetSingleton ()

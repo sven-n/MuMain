@@ -28,6 +28,7 @@ public:
     void OnDeactivate() override;
     void ResetView() override;
     const char* GetName() const override { return "Orbital"; }
+    bool DescribeState(wchar_t* text, std::size_t textSize) const override;
 
     // Phase 5: Scene-specific reset
     void ResetForScene(EGameScene scene);

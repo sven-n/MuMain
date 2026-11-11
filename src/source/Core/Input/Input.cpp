@@ -4,16 +4,29 @@
 
 #include "stdafx.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/SyntheticInput.h"
 #include "Core/Utilities/UsefulDef.h"
 #include "Core/Time/Timer.h"
 
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 
 extern CTimer* g_pTimer;
 
-CInput::CInput() {}
-
-CInput::~CInput() {}
+namespace
+{
+void UpdateCursorPosition(HWND window, POINT& cursor)
+{
+    // Scripted events update the game pointer without moving the OS cursor.
+    if (Core::Input::Synthetic::IsInjectingPointer())
+    {
+        cursor.x = static_cast<LONG>(g_fWindowMouseX);
+        cursor.y = static_cast<LONG>(g_fWindowMouseY);
+        return;
+    }
+    ::GetCursorPos(&cursor);
+    ::ScreenToClient(window, &cursor);
+}
+} // namespace
 
 CInput& CInput::Instance()
 {
@@ -33,8 +46,7 @@ bool CInput::Create(HWND hWnd, long lScreenWidth, long lScreenHeight)
 #endif
 
     m_hWnd = hWnd;
-    m_lScreenWidth = lScreenWidth;
-    m_lScreenHeight = lScreenHeight;
+    SetScreenSize(lScreenWidth, lScreenHeight);
 
     ::GetCursorPos(&m_ptCursor);
     ::ScreenToClient(m_hWnd, &m_ptCursor);
@@ -68,8 +80,7 @@ void CInput::Update()
     m_bLBtnDn = m_bRBtnDn = m_bMBtnDn = false;
     m_bLBtnDbl = m_bRBtnDbl = m_bMBtnDbl = false;
 
-    ::GetCursorPos(&m_ptCursor);
-    ::ScreenToClient(m_hWnd, &m_ptCursor);
+    UpdateCursorPosition(m_hWnd, m_ptCursor);
 
     m_ptCursor.x = LIMIT(m_ptCursor.x, 0, m_lScreenWidth - 1);
     m_ptCursor.y = LIMIT(m_ptCursor.y, 0, m_lScreenHeight - 1);
@@ -86,7 +97,7 @@ void CInput::Update()
 
     if (m_bLeftHand)
     {
-        if (SEASON3B::IsPress(VK_LBUTTON))
+        if (mu::ui::window::IsPress(VK_LBUTTON))
         {
             dAbsTime = g_pTimer->GetAbsTime();
             if (dAbsTime - m_dBtn0LastClickTime <= m_dDoubleClickTime && m_bFormerBtn0Dn)
@@ -103,13 +114,13 @@ void CInput::Update()
             }
             m_dBtn0LastClickTime = dAbsTime;
         }
-        else if (SEASON3B::IsNone(VK_LBUTTON) && m_bRBtnHeldDn)
+        else if (mu::ui::window::IsNone(VK_LBUTTON) && m_bRBtnHeldDn)
         {
             m_bRBtnDn = m_bRBtnHeldDn = m_bRBtnDbl = false;
             m_bRBtnUp = true;
         }
 
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             dAbsTime = g_pTimer->GetAbsTime();
             if (dAbsTime - m_dBtn1LastClickTime <= m_dDoubleClickTime && m_bFormerBtn1Dn)
@@ -126,7 +137,7 @@ void CInput::Update()
             }
             m_dBtn1LastClickTime = dAbsTime;
         }
-        else if (SEASON3B::IsNone(VK_RBUTTON) && m_bLBtnHeldDn)
+        else if (mu::ui::window::IsNone(VK_RBUTTON) && m_bLBtnHeldDn)
         {
             m_bLBtnDn = m_bLBtnHeldDn = m_bLBtnDbl = false;
             m_bLBtnUp = true;
@@ -134,7 +145,7 @@ void CInput::Update()
     }
     else
     {
-        if (SEASON3B::IsPress(VK_LBUTTON))
+        if (mu::ui::window::IsPress(VK_LBUTTON))
         {
             dAbsTime = g_pTimer->GetAbsTime();
             if (dAbsTime - m_dBtn0LastClickTime <= m_dDoubleClickTime && m_bFormerBtn0Dn)
@@ -151,13 +162,13 @@ void CInput::Update()
             }
             m_dBtn0LastClickTime = dAbsTime;
         }
-        else if (SEASON3B::IsNone(VK_LBUTTON) && m_bLBtnHeldDn)
+        else if (mu::ui::window::IsNone(VK_LBUTTON) && m_bLBtnHeldDn)
         {
             m_bLBtnDn = m_bLBtnHeldDn = m_bLBtnDbl = false;
             m_bLBtnUp = true;
         }
 
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             dAbsTime = g_pTimer->GetAbsTime();
             if (dAbsTime - m_dBtn1LastClickTime <= m_dDoubleClickTime && m_bFormerBtn1Dn)
@@ -174,14 +185,14 @@ void CInput::Update()
             }
             m_dBtn1LastClickTime = dAbsTime;
         }
-        else if (SEASON3B::IsNone(VK_RBUTTON) && m_bRBtnHeldDn)
+        else if (mu::ui::window::IsNone(VK_RBUTTON) && m_bRBtnHeldDn)
         {
             m_bRBtnDn = m_bRBtnHeldDn = m_bRBtnDbl = false;
             m_bRBtnUp = true;
         }
     }
 
-    if (SEASON3B::IsPress(VK_MBUTTON))
+    if (mu::ui::window::IsPress(VK_MBUTTON))
     {
         dAbsTime = g_pTimer->GetAbsTime();
         if (dAbsTime - m_dBtn2LastClickTime <= m_dDoubleClickTime && m_bFormerBtn2Dn)
@@ -198,13 +209,13 @@ void CInput::Update()
         m_bMBtnUp = false;
         m_dBtn2LastClickTime = dAbsTime;
     }
-    else if (SEASON3B::IsNone(VK_MBUTTON) && m_bMBtnHeldDn)
+    else if (mu::ui::window::IsNone(VK_MBUTTON) && m_bMBtnHeldDn)
     {
         m_bMBtnDn = m_bMBtnHeldDn = m_bMBtnDbl = false;
         m_bMBtnUp = true;
     }
 
-    if (GetActiveWindow() == NULL)
+    if (!Core::Input::Synthetic::IsInjectingPointer() && GetActiveWindow() == NULL)
     {
         m_lDX = m_lDY = 0L;
         m_bLBtnUp = m_bRBtnUp = m_bMBtnUp = false;

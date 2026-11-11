@@ -1,0 +1,2602 @@
+{
+  "formatVersion": 2,
+  "models": [
+    {
+      "slot": "MONSTER_MODEL_BULL_FIGHTER",
+      "file": "Data/Monster/Monster01.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [42, 33]
+    },
+    {
+      "slot": "MONSTER_MODEL_HOUND",
+      "file": "Data/Monster/Monster02.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 5,
+      "linkBones": [19, 14]
+    },
+    {
+      "slot": "MONSTER_MODEL_BUDGE_DRAGON",
+      "file": "Data/Monster/Monster03.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.7},
+      "headBone": 7,
+      "boundingBox": {"max": [50, 50, 80]}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_KNIGHT",
+      "file": "Data/Monster/Monster04.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.24000001, "walk": 0.40800002, "attack1": 0.39600003, "attack2": 0.39600003, "shock": 0.6},
+      "headBone": 16,
+      "linkBones": [26, 36]
+    },
+    {
+      "slot": "MONSTER_MODEL_LICH",
+      "file": "Data/Monster/Monster05.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [41, 32]
+    },
+    {
+      "slot": "MONSTER_MODEL_GIANT",
+      "file": "Data/Monster/Monster06.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.175, "stop2": 0.14, "walk": 0.238, "attack1": 0.231, "attack2": 0.231, "shock": 0.35},
+      "headBone": 20,
+      "linkBones": [41, 32]
+    },
+    {
+      "slot": "MONSTER_MODEL_LARVA",
+      "file": "Data/Monster/Monster07.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.6},
+      "boundingBox": {"max": [50, 50, 80]}
+    },
+    {
+      "slot": "MONSTER_MODEL_GHOST",
+      "file": "Data/Monster/Monster08.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20
+    },
+    {
+      "slot": "MONSTER_MODEL_HELL_SPIDER",
+      "file": "Data/Monster/Monster09.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.7},
+      "headBone": 16,
+      "linkBones": [29, 38]
+    },
+    {
+      "slot": "MONSTER_MODEL_SPIDER",
+      "file": "Data/Monster/Monster10.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 1.2},
+      "boundingBox": {"max": [50, 50, 80]}
+    },
+    {
+      "slot": "MONSTER_MODEL_CYCLOPS",
+      "file": "Data/Monster/Monster11.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.28},
+      "headBone": 20,
+      "linkBones": [41, 32]
+    },
+    {
+      "slot": "MONSTER_MODEL_GORGON",
+      "file": "Data/Monster/Monster12.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_YETI",
+      "file": "Data/Monster/Monster13.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.3},
+      "headBone": 20
+    },
+    {
+      "slot": "MONSTER_MODEL_ELITE_YETI",
+      "file": "Data/Monster/Monster14.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.28},
+      "headBone": 20
+    },
+    {
+      "slot": "MONSTER_MODEL_ASSASSIN",
+      "file": "Data/Monster/Monster15.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.35},
+      "holdLastFrame": ["stop2", "die"],
+      "headBone": 20
+    },
+    {
+      "slot": "MONSTER_MODEL_ICE_MONSTER",
+      "file": "Data/Monster/Monster16.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 19
+    },
+    {
+      "slot": "MONSTER_MODEL_HOMMERD",
+      "file": "Data/Monster/Monster17.bmd",
+      "textureFolders": ["Monster"],
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_WORM",
+      "file": "Data/Monster/Monster18.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.5},
+      "boundingBox": {"max": [50, 50, 80]}
+    },
+    {
+      "slot": "MONSTER_MODEL_ICE_QUEEN",
+      "file": "Data/Monster/Monster19.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 16,
+      "linkBones": [26, 35]
+    },
+    {
+      "slot": "MONSTER_MODEL_GOBLIN",
+      "file": "Data/Monster/Monster20.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.6},
+      "headBone": 6,
+      "boundingBox": {"max": [50, 50, 80]},
+      "linkBones": [31, 22]
+    },
+    {
+      "slot": "MONSTER_MODEL_CHAIN_SCORPION",
+      "file": "Data/Monster/Monster21.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.4},
+      "boundingBox": {"max": [50, 50, 80]}
+    },
+    {
+      "slot": "MONSTER_MODEL_BEETLE_MONSTER",
+      "file": "Data/Monster/Monster22.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.5},
+      "headBone": 5,
+      "linkBones": [24, 19]
+    },
+    {
+      "slot": "MONSTER_MODEL_HUNTER",
+      "file": "Data/Monster/Monster23.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 6,
+      "linkBones": [25, 16]
+    },
+    {
+      "slot": "MONSTER_MODEL_FOREST_MONSTER",
+      "file": "Data/Monster/Monster24.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 6
+    },
+    {
+      "slot": "MONSTER_MODEL_AGON",
+      "file": "Data/Monster/Monster25.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 16,
+      "linkBones": [39, 30]
+    },
+    {
+      "slot": "MONSTER_MODEL_STONE_GOLEM",
+      "file": "Data/Monster/Monster26.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.175, "stop2": 0.14, "walk": 0.238, "attack1": 0.231, "attack2": 0.231, "shock": 0.35},
+      "headBone": 5
+    },
+    {
+      "slot": "MONSTER_MODEL_DEVIL",
+      "file": "Data/Monster/Monster27.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 6,
+      "linkBones": [16, 25]
+    },
+    {
+      "slot": "MONSTER_MODEL_BALROG",
+      "file": "Data/Monster/Monster28.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 6,
+      "streamMesh": 1,
+      "linkBones": [17, 28]
+    },
+    {
+      "slot": "MONSTER_MODEL_SHADOW",
+      "file": "Data/Monster/Monster29.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.3},
+      "headBone": 5
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_KNIGHT",
+      "file": "Data/Monster/Monster30.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_COW",
+      "file": "Data/Monster/Monster31.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [42, 33]
+    },
+    {
+      "slot": "MONSTER_MODEL_DRAGON",
+      "file": "Data/Monster/Monster32.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.8, "attack1": 0.5, "attack2": 0.7, "appear": 0.8},
+      "holdLastFrame": ["stop2", "die"],
+      "boundingBox": {"max": [70, 70, 250]}
+    },
+    {
+      "slot": "MONSTER_MODEL_BALI",
+      "file": "Data/Monster/Monster33.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"appear": 0.4, "attack3": 0.4, "attack4": 0.4, "run": 0.4},
+      "headBone": 6
+    },
+    {
+      "slot": "MONSTER_MODEL_BAHAMUT",
+      "file": "Data/Monster/Monster34.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_VEPAR",
+      "file": "Data/Monster/Monster35.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.5, "attack2": 0.5},
+      "headBone": 20,
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_VALKYRIE",
+      "file": "Data/Monster/Monster36.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 19,
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_LIZARD",
+      "file": "Data/Monster/Monster37.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 19,
+      "linkBones": [52, 65]
+    },
+    {
+      "slot": "MONSTER_MODEL_HYDRA",
+      "file": "Data/Monster/Monster38.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.1, "stop2": 0.080000006, "walk": 0.136, "attack1": 0.15, "attack2": 0.15, "shock": 0.2, "die": 0.2},
+      "boundingBox": {"max": [100, 100, 150]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SEA_WORM",
+      "file": "Data/Monster/Monster39.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_TITAN",
+      "file": "Data/Monster/Monster40.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.22},
+      "holdLastFrame": ["stop2", "die"],
+      "headBone": 19,
+      "boundingBox": {"max": [70, 70, 250]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SOLDIER",
+      "file": "Data/Monster/Monster41.bmd",
+      "textureFolders": ["Monster"],
+      "holdLastFrame": ["stop2", "die"],
+      "headBone": 6,
+      "linkBones": [20, 33]
+    },
+    {
+      "slot": "MONSTER_MODEL_GOLDEN_WHEEL",
+      "file": "Data/Monster/Monster42.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.18},
+      "headBone": 3,
+      "linkBones": [23]
+    },
+    {
+      "slot": "MONSTER_MODEL_TANTALLOS",
+      "file": "Data/Monster/Monster43.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.1, "stop2": 0.080000006, "walk": 0.136, "attack1": 0.35, "attack2": 0.35, "shock": 0.2},
+      "headBone": 20,
+      "bitmaps": [
+        {"file": "Monster/bv01_2.jpg", "slot": "BITMAP_MONSTER_SKIN", "filter": "linear", "wrap": "repeat"},
+        {"file": "Monster/bv02_2.jpg", "slot": "BITMAP_MONSTER_SKIN+1", "filter": "linear", "wrap": "repeat"}
+      ],
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [43]
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOODY_WOLF",
+      "file": "Data/Monster/Monster44.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 7
+    },
+    {
+      "slot": "MONSTER_MODEL_BEAM_KNIGHT",
+      "file": "Data/Monster/Monster45.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.3},
+      "headBone": 6,
+      "boundingBox": {"max": [70, 70, 250]},
+      "linkBones": [55, 70]
+    },
+    {
+      "slot": "MONSTER_MODEL_MUTANT",
+      "file": "Data/Monster/Monster46.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 6
+    },
+    {
+      "slot": "MONSTER_MODEL_ORC_ARCHER",
+      "file": "Data/Monster/Monster47.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 7,
+      "linkBones": [39, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_ORC",
+      "file": "Data/Monster/Monster48.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [27, 38]
+    },
+    {
+      "slot": "MONSTER_MODEL_CURSED_KING",
+      "file": "Data/Monster/Monster49.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [32, 43]
+    },
+    {
+      "slot": "MONSTER_MODEL_MOLT",
+      "file": "Data/Monster/Monster50.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_ALQUAMOS",
+      "file": "Data/Monster/Monster51.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_QUEEN_RAINER",
+      "file": "Data/Monster/Monster52.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_CRUST",
+      "file": "Data/Monster/Monster53.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22},
+      "linkBones": [36, 45]
+    },
+    {
+      "slot": "MONSTER_MODEL_PHANTOM_KNIGHT",
+      "file": "Data/Monster/Monster54.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22},
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_DRAKAN",
+      "file": "Data/Monster/Monster55.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22},
+      "noneBlendMeshes": [0, 3, 4]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_PHOENIX_SHIELD",
+      "file": "Data/Monster/Monster56.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22},
+      "streamMesh": 0,
+      "linkBones": [27, 18]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_PHOENIX",
+      "file": "Data/Monster/Monster57.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "file": "Data/Monster/Monster58.bmd",
+      "textureFolders": ["Monster"],
+      "linkBones": [30, 39]
+    },
+    {
+      "slot": "MONSTER_MODEL_GIANT_OGRE",
+      "file": "Data/Monster/Monster59.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "file": "Data/Monster/Monster60.bmd",
+      "textureFolders": ["Monster"],
+      "linkBones": [33, 20]
+    },
+    {
+      "slot": "MONSTER_MODEL_STATUE_OF_SAINT",
+      "file": "Data/Monster/Monster61.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-90, -50, 0], "max": [90, 50, 200]},
+      "linkBones": [1, 1]
+    },
+    {
+      "slot": "MONSTER_MODEL_CASTLE_GATE",
+      "file": "Data/Monster/Monster62.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-120, -120, 0], "max": [100, 100, 300]}
+    },
+    {
+      "slot": "MONSTER_MODEL_MAGIC_SKELETON",
+      "file": "Data/Monster/Monster63.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_ANGEL",
+      "file": "Data/Monster/Monster64.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.1}
+    },
+    {
+      "slot": "MONSTER_MODEL_ILLUSION_OF_KUNDUN",
+      "file": "Data/Monster/monster65.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.3, "attack2": 0.25, "shock": 0.15, "die": 0.25},
+      "parts": [
+        {
+          "effect": "kundunPart1",
+          "file": "Data/Monster/cd71a.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart2",
+          "file": "Data/Monster/cd71b.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart3",
+          "file": "Data/Monster/cd71c.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart4",
+          "file": "Data/Monster/cd71d.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart5",
+          "file": "Data/Monster/cd71e.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart6",
+          "file": "Data/Monster/cd71f.bmd",
+          "textureFolders": ["Monster"],
+          "animations": {"stop1": 0.13},
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart7",
+          "file": "Data/Monster/cd71g.bmd",
+          "textureFolders": ["Monster"],
+          "animations": {"stop1": 0.13},
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPart8",
+          "file": "Data/Monster/cd71h.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunDragonHead",
+          "file": "Data/Skill/dragonhead.bmd",
+          "textureFolders": ["Skill"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunPhoenix",
+          "file": "Data/Skill/phoenix.bmd",
+          "textureFolders": ["Skill"],
+          "holdLastFrame": ["stop1"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        },
+        {
+          "effect": "kundunGhost",
+          "file": "Data/Monster/cundun_gone.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [24, 25, 26, 27, 28, 29, 36]
+        }
+      ],
+      "linkBones": [29, 49]
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "file": "Data/Monster/Monster66.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_AEGIS",
+      "file": "Data/Monster/Monster67.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.1},
+      "linkBones": [13, 14]
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_CENTURION",
+      "file": "Data/Monster/monster68.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.2, "attack2": 0.3},
+      "linkBones": [56, 42]
+    },
+    {
+      "slot": "MONSTER_MODEL_NECRON",
+      "file": "Data/Monster/monster69.bmd",
+      "textureFolders": ["Monster"],
+      "linkBones": [60, 60]
+    },
+    {
+      "slot": "MONSTER_MODEL_SHRIKER",
+      "file": "Data/Monster/Monster70.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.1},
+      "linkBones": [41, 51]
+    },
+    {
+      "slot": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "file": "Data/Monster/Monster71.bmd",
+      "textureFolders": ["Monster"],
+      "mapTextureFolders": [
+        {"maps": [18, 19, 20, 21, 22, 23, 53], "folders": ["NPC"]}
+      ],
+      "animations": {"walk": 0.3, "attack1": 0.5, "attack2": 0.5},
+      "headBone": 20,
+      "boundingBox": {"max": [40, 40, 120]}
+    },
+    {
+      "slot": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "file": "Data/Monster/Monster72.bmd",
+      "textureFolders": ["Monster"],
+      "mapTextureFolders": [
+        {"maps": [18, 19, 20, 21, 22, 23, 53], "folders": ["NPC"]}
+      ],
+      "animations": {"walk": 0.3, "attack1": 0.5, "attack2": 0.5},
+      "headBone": 20,
+      "boundingBox": {"max": [40, 40, 120]}
+    },
+    {
+      "slot": "MONSTER_MODEL_CHAOSCASTLE_WIZARD",
+      "file": "Data/Monster/Monster73.bmd",
+      "textureFolders": ["Monster"],
+      "mapTextureFolders": [
+        {"maps": [18, 19, 20, 21, 22, 23, 53], "folders": ["NPC"]}
+      ],
+      "animations": {"walk": 0.3, "attack1": 0.4, "attack2": 0.4},
+      "headBone": 20,
+      "boundingBox": {"max": [40, 40, 120]}
+    },
+    {
+      "slot": "MONSTER_MODEL_CASTLE_GATE1",
+      "file": "Data/Monster/Monster74.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-140, -140, 0], "max": [140, 140, 300]},
+      "linkBones": []
+    },
+    {
+      "slot": "MONSTER_MODEL_GUARDIAN_STATUE",
+      "file": "Data/Monster/Monster75.bmd",
+      "textureFolders": ["Monster"],
+      "mapTextureFolders": [
+        {"maps": [30], "folders": ["Object31"]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_BATTLE_GUARD1",
+      "file": "Data/Monster/Monster77.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_BATTLE_GUARD2",
+      "file": "Data/Monster/Monster78.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_GOLDEN_GOBLIN",
+      "file": "Data/Monster/Monster79.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_CANON_TOWER",
+      "file": "Data/Monster/Monster80.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_LIZARD_WARRIOR",
+      "file": "Data/Monster/Monster82.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster81_EyeRight": 29, "Monster81_EyeLeft": 30}
+    },
+    {
+      "slot": "MONSTER_MODEL_FIRE_GOLEM",
+      "file": "Data/Monster/Monster83.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster82_RHand": 45, "Monster82_LHand": 34, "Monster82_Eye": 48, "Monster82_Back": 46}
+    },
+    {
+      "slot": "MONSTER_MODEL_QUEEN_BEE",
+      "file": "Data/Monster/Monster84.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster83_Tail": 62}
+    },
+    {
+      "slot": "MONSTER_MODEL_POISON_GOLEM",
+      "file": "Data/Monster/Monster85.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster84_PoisonTop": 53, "Monster84_PoisonRight": 54, "Monster84_PoisonLeft": 55, "Monster84_LeftHand": 37, "Monster84_RightHand": 50}
+    },
+    {
+      "slot": "MONSTER_MODEL_AXE_HERO",
+      "file": "Data/Monster/Monster86.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster85_LeftEye": 18, "Monster85_RightEye": 19}
+    },
+    {
+      "slot": "MONSTER_MODEL_LIFE_STONE",
+      "file": "Data/Monster/Monster87.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.05, "stop2": 0.05, "walk": 0.1}
+    },
+    {
+      "slot": "MONSTER_MODEL_EROHIM",
+      "file": "Data/Monster/Monster88.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster87_LeftEye": 8, "Monster87_RightEye": 9, "Monster87_LeftHand": 16}
+    },
+    {
+      "slot": "MONSTER_MODEL_BALGASS",
+      "file": "Data/Monster/Monster90.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"appear": 0.33, "attack3": 0.33, "attack4": 0.33}
+    },
+    {
+      "slot": "MONSTER_MODEL_CHIEF_SKELETON_WARRIOR_2",
+      "file": "Data/Monster/Monster91.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_BALRAM",
+      "file": "Data/Monster/Monster92.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_ELF_1",
+      "file": "Data/Monster/Monster93.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"appear": 0.33, "attack3": 0.33},
+      "namedBones": {"Left_Hand": 17}
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_SPIRIT",
+      "file": "Data/Monster/Monster94.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster94_zx": 27, "Monster94_zx01": 28}
+    },
+    {
+      "slot": "MONSTER_MODEL_SORAM",
+      "file": "Data/Monster/Monster95.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_WEREWOLF_HERO",
+      "file": "Data/Monster/Monster96.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster95_Head": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_VALAM",
+      "file": "Data/Monster/Monster97.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster96_Top": 27, "Monster96_Center": 28, "Monster96_Bottom": 29}
+    },
+    {
+      "slot": "MONSTER_MODEL_SOLAM",
+      "file": "Data/Monster/Monster98.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_SCOUT",
+      "file": "Data/Monster/Monster99.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_BALLISTA",
+      "file": "Data/Monster/Monster100.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.37, "attack2": 0.37, "die": 0.15},
+      "parts": [
+        {
+          "effect": "arrowTanker",
+          "file": "Data/Monster/arrowstusk.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [34]
+        },
+        {
+          "effect": "arrowTankerHit",
+          "file": "Data/Monster/arrowstusk.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [34]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_WITCH_QUEEN",
+      "file": "Data/Monster/monster101.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster100_Footstepst": 0, "Monster100_L_Hand": 76, "Monster100_R_Hand": 94, "Monster100_Pelvis": 2, "Monster100_Head": 57, "Monster100_z02": 107, "Monster100_z03": 108, "Monster100_z04": 109, "Monster100_z05": 110}
+    },
+    {
+      "slot": "MONSTER_MODEL_GOLDEN_STONE_GOLEM",
+      "file": "Data/Monster/monster102.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.2},
+      "namedBones": {"Monster101_L_Arm": 12, "Monster101_R_Arm": 20, "Monster101_Head": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_RIDER",
+      "file": "Data/Monster/monster103.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15},
+      "namedBones": {"Monster102_Footstepst": 0, "Monster102_Head": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_FOREST_ORC",
+      "file": "Data/Monster/monster104.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_DEATH_TREE",
+      "file": "Data/Monster/monster105.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster104_Horn0": 37, "Monster104_Horn1": 38, "Monster104_Horn2": 39, "Monster104_Horn3": 40, "Monster104_Horn4": 44, "Monster104_Horn5": 45, "Monster104_Footsteps": 1}
+    },
+    {
+      "slot": "MONSTER_MODEL_HELL_MAINE",
+      "file": "Data/Monster/monster106.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.15},
+      "namedBones": {"Monster105_R_Eye": 9, "Monster105_L_Eye": 10, "Monster105_L_Arm00": 33, "Monster105_L_Arm01": 34, "Monster105_L_Arm02": 35, "Monster105_L_Hand": 20, "Monster105_R_Hand": 39}
+    },
+    {
+      "slot": "MONSTER_MODEL_BERSERK",
+      "file": "Data/Monster/Monster107.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19},
+      "namedBones": {"BERSERK_MOUTH": 9}
+    },
+    {
+      "slot": "MONSTER_MODEL_SPLINTER_WOLF",
+      "file": "Data/Monster/monster108.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"SPL_WOLF_EYE_26": 16, "SPL_WOLF_EYE_25": 17}
+    },
+    {
+      "slot": "MONSTER_MODEL_IRON_RIDER",
+      "file": "Data/Monster/monster109.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.25, "attack2": 0.25, "die": 0.25},
+      "namedBones": {"IRON_RIDER_BIP01": 2, "IRON_RIDER_BOW_6": 42, "IRON_RIDER_BOW_15": 52, "IRON_RIDER_BOW_16": 47}
+    },
+    {
+      "slot": "MONSTER_MODEL_SATYROS",
+      "file": "Data/Monster/monster110.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.3, "attack2": 0.3, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLADE_HUNTER",
+      "file": "Data/Monster/monster111.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.23, "attack2": 0.23, "die": 0.2},
+      "namedBones": {"BLADE_L_HAND": 12, "BOX1": 54, "BOX2": 55}
+    },
+    {
+      "slot": "MONSTER_MODEL_KENTAUROS",
+      "file": "Data/Monster/monster112.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25},
+      "namedBones": {"KENTAUROS_BIP_23": 27, "KENTAUROS_BIP_24": 28, "KENTAUROS_BIP_25": 29, "KENTAUROS_BIP_26": 30, "KENTAUROS_BIP_18": 34, "KENTAUROS_BIP_19": 35, "KENTAUROS_BIP_20": 36, "KENTAUROS_BIP_21": 37, "KENTAUROS_BIP_TAIL": 81, "KENTAUROS_BIP_TAIL_1": 82, "KENTAUROS_BIP_TAIL_2": 83, "KENTAUROS_BIP_SPAIN_1": 4, "KENTAUROS_BIP_SPAIN_2": 5, "KENTAUROS_BIP_SPAIN_3": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_GIGANTIS",
+      "file": "Data/Monster/Monster113.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.26, "attack2": 0.26, "die": 0.21}
+    },
+    {
+      "slot": "MONSTER_MODEL_GENOCIDER",
+      "file": "Data/Monster/Monster114.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"GENO_WP": 47}
+    },
+    {
+      "slot": "MONSTER_MODEL_PERSONA",
+      "file": "Data/Monster/Monster115.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "die": 0.23},
+      "namedBones": {"PRSona_A1": 73, "PRSona_Tail": 76, "PRSona_Tail1": 77}
+    },
+    {
+      "slot": "MONSTER_MODEL_TWIN_TAIL",
+      "file": "Data/Monster/Monster116.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "attack1": 0.23, "attack2": 0.23, "die": 0.23},
+      "timers": [
+        {"name": "hair swing", "animation": "walk", "everyMs": 500}
+      ],
+      "namedBones": {"Twintail_Hair24": 16, "Twintail_Hair32": 24}
+    },
+    {
+      "slot": "MONSTER_MODEL_DREADFEAR",
+      "file": "Data/Monster/Monster117.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.25},
+      "cues": [
+        {"name": "attack2 sound", "animation": "attack2", "frames": [0, 2.001]}
+      ],
+      "namedBones": {"Dreadfear_Wing32": 71, "Dreadfear_Wing34": 68, "Dreadfear_Wing51": 50, "Dreadfear_Wing53": 47, "Dreadfear_Eye52": 9, "Dreadfear_Eye54": 10}
+    },
+    {
+      "slot": "MONSTER_MODEL_RED_SKELETON_KNIGHT_4",
+      "file": "Data/Monster/monster118.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_MAYA_HAND_LEFT",
+      "file": "Data/Monster/monster119.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.12, "appear": 0.12},
+      "namedBones": {"L_Hand01": 7, "L_Hand02": 13, "L_Hand03": 19, "L_Hand04": 25, "L_Hand05": 31, "L_Hand11": 11, "L_Hand12": 17, "L_Hand13": 23, "L_Hand14": 29, "L_Hand15": 5, "L_Hand21": 12, "L_Hand22": 18, "L_Hand23": 24, "L_Hand24": 30, "L_Hand25": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_MAYA_HAND_RIGHT",
+      "file": "Data/Monster/monster120.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.12, "appear": 0.12},
+      "namedBones": {"R_Hand01": 59, "R_Hand02": 48, "R_Hand03": 11, "R_Hand04": 37, "R_Hand05": 26, "R_Hand11": 54, "R_Hand12": 43, "R_Hand13": 32, "R_Hand14": 6, "R_Hand15": 21, "R_Hand21": 5, "R_Hand22": 53, "R_Hand23": 42, "R_Hand24": 20, "R_Hand25": 31}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_SKULL_SOLDIER_5",
+      "file": "Data/Monster/monster122.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.22, "stop2": 0.22, "walk": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.12, "appear": 0.22, "attack3": 0.25, "attack4": 0.25},
+      "namedBones": {"Body_Bone1": 61, "Body_Bone2": 62, "Body_Bone3": 54, "Body_Bone4": 55, "Body_Bone5": 21, "Body_Bone6": 22, "Body_Bone7": 25, "Body_Bone8": 26, "Body_Bone9": 71, "Body_Bone10": 70, "Body_Bone11": 43, "Body_Bone12": 44, "LHand_Bone": 14, "Body_Bone13": 63, "Sword_Bone1": 39, "Sword_Bone2": 40, "Eye_Bone1": 9, "Eye_Bone2": 10, "Windmill_Bone1": 47}
+    },
+    {
+      "slot": "MONSTER_MODEL_POUCH_OF_BLESSING",
+      "file": "Data/Monster/Monster123.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"shock": 0.3, "die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING",
+      "file": "Data/Monster/monster124.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE",
+      "file": "Data/Monster/monster125.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON",
+      "file": "Data/Monster/monster126.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_ELF",
+      "file": "Data/Monster/Monster127.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"Left_Hand": 17}
+    },
+    {
+      "slot": "MONSTER_MODEL_LUNAR_RABBIT",
+      "file": "Data/Monster/Monster128.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.4, "shock": 0.4, "die": 0.5},
+      "namedBones": {"Rabbit_1": 3, "Rabbit_2": 16, "Rabbit_3": 15, "Rabbit_4": 2}
+    },
+    {
+      "slot": "MONSTER_MODEL_RABBIT",
+      "file": "Data/Monster/Monster129.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.28, "walk": 0.25, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25}
+    },
+    {
+      "slot": "MONSTER_MODEL_BUTTERFLY",
+      "file": "Data/Monster/Monster130.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.2, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "shock": 0.25, "die": 0.23}
+    },
+    {
+      "slot": "MONSTER_MODEL_HIDEOUS_RABBIT",
+      "file": "Data/Monster/Monster131.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.5, "attack2": 0.5, "shock": 0.25, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_WEREWOLF2",
+      "file": "Data/Monster/Monster132.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.45, "stop2": 0.45, "walk": 0.45, "attack1": 0.45, "attack2": 0.45, "shock": 0.45, "die": 0.45}
+    },
+    {
+      "slot": "MONSTER_MODEL_CURSED_LICH",
+      "file": "Data/Monster/Monster133.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.2, "walk": 0.25, "attack1": 0.35, "attack2": 0.35, "shock": 0.25, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_TOTEM_GOLEM",
+      "file": "Data/Monster/Monster134.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.2, "attack1": 0.35, "attack2": 0.35, "shock": 0.25, "die": 0.2},
+      "parts": [
+        {
+          "effect": "totemGolemPart1",
+          "file": "Data/Monster/totemhead.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        },
+        {
+          "effect": "totemGolemPart2",
+          "file": "Data/Monster/totembody.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        },
+        {
+          "effect": "totemGolemPart3",
+          "file": "Data/Monster/totemleft.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        },
+        {
+          "effect": "totemGolemPart4",
+          "file": "Data/Monster/totemright.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        },
+        {
+          "effect": "totemGolemPart5",
+          "file": "Data/Monster/totemleg.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        },
+        {
+          "effect": "totemGolemPart6",
+          "file": "Data/Monster/totemleg2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [51]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_GRIZZLY",
+      "file": "Data/Monster/Monster135.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.25, "shock": 0.25, "die": 0.22}
+    },
+    {
+      "slot": "MONSTER_MODEL_CAPTAIN_GRIZZLY",
+      "file": "Data/Monster/Monster136.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "shock": 0.25, "die": 0.28}
+    },
+    {
+      "slot": "MONSTER_MODEL_SAPIUNUS",
+      "file": "Data/Monster/Monster137.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25}
+    },
+    {
+      "slot": "MONSTER_MODEL_SAPIDUO",
+      "file": "Data/Monster/Monster138.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25}
+    },
+    {
+      "slot": "MONSTER_MODEL_SAPITRES",
+      "file": "Data/Monster/Monster139.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25}
+    },
+    {
+      "slot": "MONSTER_MODEL_SHADOW_PAWN",
+      "file": "Data/Monster/Monster140.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.4, "attack2": 0.4, "die": 0.25},
+      "parts": [
+        {
+          "effect": "shadowPawnAnkleLeft",
+          "file": "Data/Monster/shadow_pawn_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnAnkleRight",
+          "file": "Data/Monster/shadow_pawn_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnBelt",
+          "file": "Data/Monster/shadow_pawn_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnChest",
+          "file": "Data/Monster/shadow_pawn_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnHelmet",
+          "file": "Data/Monster/shadow_pawn_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnKneeLeft",
+          "file": "Data/Monster/shadow_pawn_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnKneeRight",
+          "file": "Data/Monster/shadow_pawn_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnWristLeft",
+          "file": "Data/Monster/shadow_pawn_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowPawnWristRight",
+          "file": "Data/Monster/shadow_pawn_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_SHADOW_KNIGHT",
+      "file": "Data/Monster/Monster141.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.45, "attack2": 0.45, "die": 0.25},
+      "parts": [
+        {
+          "effect": "shadowKnightAnkleLeft",
+          "file": "Data/Monster/shadow_knight_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightAnkleRight",
+          "file": "Data/Monster/shadow_knight_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightBelt",
+          "file": "Data/Monster/shadow_knight_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightChest",
+          "file": "Data/Monster/shadow_knight_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightHelmet",
+          "file": "Data/Monster/shadow_knight_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightKneeLeft",
+          "file": "Data/Monster/shadow_knight_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightKneeRight",
+          "file": "Data/Monster/shadow_knight_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightWristLeft",
+          "file": "Data/Monster/shadow_knight_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowKnightWristRight",
+          "file": "Data/Monster/shadow_knight_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_SHADOW_LOOK",
+      "file": "Data/Monster/Monster142.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25},
+      "parts": [
+        {
+          "effect": "shadowRookAnkleLeft",
+          "file": "Data/Monster/shadow_rock_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookAnkleRight",
+          "file": "Data/Monster/shadow_rock_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookBelt",
+          "file": "Data/Monster/shadow_rock_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookChest",
+          "file": "Data/Monster/shadow_rock_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookHelmet",
+          "file": "Data/Monster/shadow_rock_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookKneeLeft",
+          "file": "Data/Monster/shadow_rock_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookKneeRight",
+          "file": "Data/Monster/shadow_rock_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookWristLeft",
+          "file": "Data/Monster/shadow_rock_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "shadowRookWristRight",
+          "file": "Data/Monster/shadow_rock_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_NAPIN",
+      "file": "Data/Monster/Monster143.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "die": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_GHOST_NAPIN",
+      "file": "Data/Monster/Monster144.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "die": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLAZE_NAPIN",
+      "file": "Data/Monster/Monster145.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "die": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_ICE_WALKER",
+      "file": "Data/Monster/Monster146.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.6, "attack1": 0.4, "die": 0.35}
+    },
+    {
+      "slot": "MONSTER_MODEL_GIANT_MAMMOTH",
+      "file": "Data/Monster/Monster147.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"GIANT_MAMUD_BIP_TAIL": 45, "GIANT_MAMUD_BIP_TAIL_1": 6, "GIANT_MAMUD_BIP_TAIL_2": 7, "GIANT_MAMUD_BIP_SPAIN_1": 3, "GIANT_MAMUD_BIP_SPAIN_2": 4, "GIANT_MAMUD_BIP_SPAIN_3": 5}
+    },
+    {
+      "slot": "MONSTER_MODEL_ICE_GIANT",
+      "file": "Data/Monster/Monster148.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.13},
+      "parts": [
+        {
+          "effect": "iceGiantPart1",
+          "file": "Data/Monster/icegiantpart_1.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "iceGiantPart2",
+          "file": "Data/Monster/icegiantpart_2.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "iceGiantPart3",
+          "file": "Data/Monster/icegiantpart_3.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "iceGiantPart4",
+          "file": "Data/Monster/icegiantpart_4.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "iceGiantPart5",
+          "file": "Data/Monster/icegiantpart_5.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "iceGiantPart6",
+          "file": "Data/Monster/icegiantpart_6.bmd",
+          "textureFolders": ["Monster"]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_COOLUTIN",
+      "file": "Data/Monster/Monster149.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.46}
+    },
+    {
+      "slot": "MONSTER_MODEL_IRON_KNIGHT",
+      "file": "Data/Monster/Monster150.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "attack1": 0.21, "die": 0.23}
+    },
+    {
+      "slot": "MONSTER_MODEL_SELUPAN",
+      "file": "Data/Monster/Monster151.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.2, "attack1": 0.25, "attack2": 0.25, "shock": 0.35, "die": 0.18, "appear": 0.25, "attack3": 0.25, "attack4": 0.25},
+      "boundingBox": {"min": [-150, -150, 0], "max": [150, 150, 400]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SPIDER_EGGS_1",
+      "file": "Data/Monster/Monster152.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SPIDER_EGGS_2",
+      "file": "Data/Monster/Monster153.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SPIDER_EGGS_3",
+      "file": "Data/Monster/Monster154.bmd",
+      "textureFolders": ["Monster"],
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 200]}
+    },
+    {
+      "slot": "MONSTER_MODEL_FIRE_FLAME_GHOST",
+      "file": "Data/Monster/monster155.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.6, "die": 0.5}
+    },
+    {
+      "slot": "MONSTER_MODEL_CURSED_SANTA",
+      "file": "Data/Monster/Monster156.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.3, "walk": 0.29, "die": 0.4}
+    },
+    {
+      "slot": "MONSTER_MODEL_EVIL_GOBLIN",
+      "file": "Data/Monster/Monster157.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_ZOMBIE_FIGHTER",
+      "file": "Data/Monster/MONSTER158.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.17, "shock": 0.25, "die": 0.2},
+      "boundingBox": {"min": [-100, -70, 0], "max": [100, 70, 150]}
+    },
+    {
+      "slot": "MONSTER_MODEL_GLADIATOR",
+      "file": "Data/Monster/MONSTER159.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.3, "attack1": 0.28, "shock": 0.2, "die": 0.18},
+      "boundingBox": {"min": [-100, -100, 50], "max": [100, 100, 150]}
+    },
+    {
+      "slot": "MONSTER_MODEL_SLAUGTHERER",
+      "file": "Data/Monster/MONSTER160.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.2, "walk": 0.4, "attack1": 0.17, "shock": 0.25, "die": 0.2},
+      "boundingBox": {"min": [-100, -100, 0], "max": [100, 100, 180]}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOOD_ASSASSIN",
+      "file": "Data/Monster/MONSTER161.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.28, "walk": 0.5, "attack1": 0.17, "shock": 0.25, "die": 0.4},
+      "parts": [
+        {
+          "effect": "pkFieldAssassinEffectGreenHead",
+          "file": "Data/Monster/pk_manhead_green.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectRedHead",
+          "file": "Data/Monster/pk_manhead_red.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectGreenBody",
+          "file": "Data/Monster/assassin_dieg.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [63]
+        },
+        {
+          "effect": "pkFieldAssassinEffectRedBody",
+          "file": "Data/Monster/assassin_dier.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [63]
+        }
+      ],
+      "boundingBox": {"min": [-80, -80, 0], "max": [80, 80, 130]}
+    },
+    {
+      "slot": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
+      "file": "Data/Monster/MONSTER162.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.28, "walk": 0.5, "attack1": 0.17, "shock": 0.25, "die": 0.4},
+      "boundingBox": {"min": [-80, -80, 0], "max": [80, 80, 130]}
+    },
+    {
+      "slot": "MONSTER_MODEL_LAVA_GIANT",
+      "file": "Data/Monster/MONSTER163.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25},
+      "boundingBox": {"min": [-100, -80, 50], "max": [100, 70, 280]}
+    },
+    {
+      "slot": "MONSTER_MODEL_BURNING_LAVA_GIANT",
+      "file": "Data/Monster/MONSTER164.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.28, "walk": 0.3, "attack1": 0.25, "attack2": 0.25, "shock": 0.25, "die": 0.25},
+      "boundingBox": {"min": [-100, -80, 50], "max": [100, 70, 280]}
+    },
+    {
+      "slot": "MONSTER_MODEL_GAYION",
+      "file": "Data/Monster/Monster165.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.38, "attack2": 0.4, "die": 0.2, "appear": 0.4, "attack3": 0.38, "attack4": 0.38},
+      "parts": [
+        {
+          "effect": "swordLeft01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_left01.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordLeft02EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_left02.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordRight01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_right01.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordRight02EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_right02.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordMain01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_main01.bmd",
+          "textureFolders": ["Monster"]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_JERRY",
+      "file": "Data/Monster/Monster166.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.5, "attack1": 0.86, "attack2": 0.86, "die": 0.4, "appear": 0.4, "attack3": 0.76}
+    },
+    {
+      "slot": "MONSTER_MODEL_RAYMOND",
+      "file": "Data/Monster/Monster167.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.55, "attack1": 0.75, "attack2": 0.5, "die": 0.3, "appear": 0.8, "attack3": 0.5},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_LUCAS",
+      "file": "Data/Monster/Monster168.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.5, "attack1": 0.71, "attack2": 0.4, "die": 0.3, "appear": 0.8, "attack3": 0.4}
+    },
+    {
+      "slot": "MONSTER_MODEL_FRED",
+      "file": "Data/Monster/monster169.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack2": 0.38, "die": 0.3, "appear": 0.4, "attack3": 0.4, "attack4": 0.45},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ],
+      "namedBones": {"node_eyes01": 14, "node_eyes02": 15, "node_blade01": 71, "node_blade05": 72, "node_blade04": 73, "node_blade02": 74}
+    },
+    {
+      "slot": "MONSTER_MODEL_HAMMERIZE",
+      "file": "Data/Monster/Monster170.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.45, "die": 0.4, "appear": 0.45, "attack3": 0.45}
+    },
+    {
+      "slot": "MONSTER_MODEL_DUAL_BERSERKER",
+      "file": "Data/Monster/Monster171.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "attack1": 0.4, "attack2": 0.35, "die": 0.35, "appear": 0.4, "attack3": 0.4}
+    },
+    {
+      "slot": "MONSTER_MODEL_DEVIL_LORD",
+      "file": "Data/Monster/monster172.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.45, "attack2": 0.5, "die": 0.3, "appear": 0.45, "attack3": 0.45}
+    },
+    {
+      "slot": "MONSTER_MODEL_QUARTER_MASTER",
+      "file": "Data/Monster/monster173.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.5, "attack1": 0.66},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_COMBAT_INSTRUCTOR",
+      "file": "Data/Monster/Monster174.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.4, "attack2": 0.36, "die": 0.3, "appear": 0.4},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_ATICLES_HEAD",
+      "file": "Data/Monster/Monster175.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.65, "attack1": 0.86, "attack2": 0.86, "die": 0.3, "appear": 0.86}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_GHOST",
+      "file": "Data/Monster/Monster176.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 0.8, "attack1": 0.96, "attack2": 0.96, "shock": 1, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_BANSHEE",
+      "file": "Data/Monster/Monster177.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.2, "attack1": 0.4, "attack2": 0.38, "die": 0.4, "attack3": 0.38}
+    },
+    {
+      "slot": "MONSTER_MODEL_HEAD_MOUNTER",
+      "file": "Data/Monster/monster178.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.37, "die": 0.3, "appear": 0.33, "attack3": 0.33},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_DEFENDER",
+      "file": "Data/Monster/Monster179.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.4, "attack1": 0.4, "attack2": 0.4, "shock": 0.4, "die": 0.45, "appear": 0.4},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_FORSAKER",
+      "file": "Data/Monster/monster180.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_OCELOT",
+      "file": "Data/Monster/monster181.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.55, "attack1": 0.66, "attack2": 0.66}
+    },
+    {
+      "slot": "MONSTER_MODEL_ERIC",
+      "file": "Data/Monster/monster182.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.35, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_EVIL_GATE",
+      "file": "Data/Monster/monster184.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_LION_GATE",
+      "file": "Data/Monster/monster185.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_STATUE",
+      "file": "Data/Monster/monster186.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_STAR_GATE",
+      "file": "Data/Monster/monster187.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_RUSH_GATE",
+      "file": "Data/Monster/monster188.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_MAD_BUTCHER",
+      "file": "Data/Monster/monster190.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"shock": 0.25, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_TERRIBLE_BUTCHER",
+      "file": "Data/Monster/monster191.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"shock": 0.25, "die": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_DOPPELGANGER",
+      "file": "Data/Monster/monster192.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.5, "stop2": 0.4, "walk": 0.68, "attack1": 0.5, "attack2": 0.5, "shock": 1, "die": 1.1, "appear": 0.99}
+    },
+    {
+      "slot": "MONSTER_MODEL_MEDUSA",
+      "file": "Data/Monster/monster193.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.3, "attack1": 0.3, "attack2": 0.3, "shock": 0.3, "die": 0.3, "appear": 0.3, "attack3": 0.3}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOODY_ORC",
+      "file": "Data/Monster/monster194.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOODY_DEATH_RIDER",
+      "file": "Data/Monster/monster195.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15},
+      "namedBones": {"Monster102_Footstepst": 0, "Monster102_Head": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOODY_GOLEM",
+      "file": "Data/Monster/Monster196.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster101_L_Arm": 12, "Monster101_R_Arm": 20, "Monster101_Head": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_BLOODY_WITCH_QUEEN",
+      "file": "Data/Monster/monster197.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster100_Footstepst": 0, "Monster100_L_Hand": 76, "Monster100_R_Hand": 94, "Monster100_Pelvis": 2, "Monster100_Head": 57, "Monster100_z02": 107, "Monster100_z03": 108, "Monster100_z04": 109, "Monster100_z05": 110}
+    },
+    {
+      "slot": "MONSTER_MODEL_BERSERKER_WARRIOR",
+      "file": "Data/Monster/Monster198.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19},
+      "namedBones": {"BERSERK_MOUTH": 9}
+    },
+    {
+      "slot": "MONSTER_MODEL_KENTAUROS_WARRIOR",
+      "file": "Data/Monster/monster199.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25},
+      "namedBones": {"KENTAUROS_BIP_23": 27, "KENTAUROS_BIP_24": 28, "KENTAUROS_BIP_25": 29, "KENTAUROS_BIP_26": 30, "KENTAUROS_BIP_18": 34, "KENTAUROS_BIP_19": 35, "KENTAUROS_BIP_20": 36, "KENTAUROS_BIP_21": 37, "KENTAUROS_BIP_TAIL": 81, "KENTAUROS_BIP_TAIL_1": 82, "KENTAUROS_BIP_TAIL_2": 83, "KENTAUROS_BIP_SPAIN_1": 4, "KENTAUROS_BIP_SPAIN_2": 5, "KENTAUROS_BIP_SPAIN_3": 6}
+    },
+    {
+      "slot": "MONSTER_MODEL_GIGANTIS_WARRIOR",
+      "file": "Data/Monster/Monster200.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.26, "attack2": 0.26, "die": 0.21}
+    },
+    {
+      "slot": "MONSTER_MODEL_SOCCERBALL",
+      "file": "Data/Monster/Monster201.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"GENO_WP": 47}
+    },
+    {
+      "slot": "MONSTER_MODEL_SAPI_QUEEN",
+      "file": "Data/Monster/monster202.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25}
+    },
+    {
+      "slot": "MONSTER_MODEL_ICE_NAPIN",
+      "file": "Data/Monster/monster203.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "die": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_SHADOW_MASTER",
+      "file": "Data/Monster/monster204.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.25},
+      "parts": [
+        {
+          "effect": "ex01ShadowMasterAnkleLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_ankle_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterAnkleRight",
+          "file": "Data/Monster/ex01shadow_rock_7_ankle_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterBelt",
+          "file": "Data/Monster/ex01shadow_rock_7_belt.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterChest",
+          "file": "Data/Monster/ex01shadow_rock_7_chest.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterHelmet",
+          "file": "Data/Monster/ex01shadow_rock_7_helmet.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterKneeLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_knee_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterKneeRight",
+          "file": "Data/Monster/ex01shadow_rock_7_knee_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterWristLeft",
+          "file": "Data/Monster/ex01shadow_rock_7_wrist_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        },
+        {
+          "effect": "ex01ShadowMasterWristRight",
+          "file": "Data/Monster/ex01shadow_rock_7_wrist_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [56]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_MAMMOTH",
+      "file": "Data/Monster/Monster206.bmd",
+      "textureFolders": ["Monster"],
+      "namedBones": {"GIANT_MAMUD_BIP_TAIL": 45, "GIANT_MAMUD_BIP_TAIL_1": 6, "GIANT_MAMUD_BIP_TAIL_2": 7, "GIANT_MAMUD_BIP_SPAIN_1": 3, "GIANT_MAMUD_BIP_SPAIN_2": 4, "GIANT_MAMUD_BIP_SPAIN_3": 5}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_GIANT",
+      "file": "Data/Monster/Monster207.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"die": 0.13}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_COOLUTIN",
+      "file": "Data/Monster/Monster208.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.46}
+    },
+    {
+      "slot": "MONSTER_MODEL_DARK_IRON_KNIGHT",
+      "file": "Data/Monster/Monster209.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.25, "attack1": 0.21, "die": 0.23}
+    },
+    {
+      "slot": "MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION",
+      "file": "Data/Monster/Monster210.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.95}
+    },
+    {
+      "slot": "MONSTER_MODEL_BONE_SCORPION",
+      "file": "Data/Monster/Monster211.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 1, "attack1": 0.4, "attack2": 0.4, "die": 0.2}
+    },
+    {
+      "slot": "MONSTER_MODEL_ORCUS",
+      "file": "Data/Monster/Monster212.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"stop1": 0.7, "stop2": 0.7, "walk": 0.6, "attack1": 0.8, "attack2": 0.8, "shock": 0.25, "die": 0.3},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_GOLLOCK",
+      "file": "Data/Monster/Monster213.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.4, "die": 0.3},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_CRYPTA",
+      "file": "Data/Monster/Monster214.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.9, "attack1": 0.37, "attack2": 0.37, "die": 0.25},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_CRYPOS",
+      "file": "Data/Monster/Monster215.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"walk": 0.9, "attack1": 0.37, "attack2": 0.37, "die": 0.25},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_CONDRA",
+      "file": "Data/Monster/Monster216.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.8, "attack2": 0.8},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ],
+      "parts": [
+        {
+          "effect": "condraArmL",
+          "file": "Data/Monster/condra_7_arm_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraArmL2",
+          "file": "Data/Monster/condra_7_arm_left_2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraShoulder",
+          "file": "Data/Monster/condra_7_shoulder_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraArmR",
+          "file": "Data/Monster/condra_7_arm_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraArmR2",
+          "file": "Data/Monster/condra_7_arm_right_2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraConeL",
+          "file": "Data/Monster/condra_7_cone_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "condraConeR",
+          "file": "Data/Monster/condra_7_cone_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        }
+      ]
+    },
+    {
+      "slot": "MONSTER_MODEL_NACONDRA",
+      "file": "Data/Monster/Monster217.bmd",
+      "textureFolders": ["Monster"],
+      "animations": {"attack1": 0.75, "attack2": 0.75},
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ],
+      "parts": [
+        {
+          "effect": "narcondraArmL",
+          "file": "Data/Monster/nar_condra_7_arm_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraArmL2",
+          "file": "Data/Monster/nar_condra_7_arm_left_2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraShoulderL",
+          "file": "Data/Monster/nar_condra_7_shoulder_left.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraShoulderR",
+          "file": "Data/Monster/nar_condra_7_shoulder_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR",
+          "file": "Data/Monster/nar_condra_7_arm_right.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR2",
+          "file": "Data/Monster/nar_condra_7_arm_right_2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraArmR3",
+          "file": "Data/Monster/nar_condra_7_arm_right_3.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone1",
+          "file": "Data/Monster/nar_condra_7_cone_1.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone2",
+          "file": "Data/Monster/nar_condra_7_cone_2.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone3",
+          "file": "Data/Monster/nar_condra_7_cone_3.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone4",
+          "file": "Data/Monster/nar_condra_7_cone_4.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone5",
+          "file": "Data/Monster/nar_condra_7_cone_5.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraCone6",
+          "file": "Data/Monster/nar_condra_7_cone_6.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraPelvis",
+          "file": "Data/Monster/nar_condra_7_pelvis.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraStomach",
+          "file": "Data/Monster/nar_condra_7_stomach.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        },
+        {
+          "effect": "narcondraNeck",
+          "file": "Data/Monster/nar_condra_7_neck.bmd",
+          "textureFolders": ["Monster"],
+          "maps": [80, 81]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_MERCHANT_FEMALE",
+      "file": "Data/NPC/Female01.bmd",
+      "textureFolders": ["NPC"],
+      "parts": [
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_HEAD",
+          "file": "Data/NPC/FemaleHead01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_HEAD+1",
+          "file": "Data/NPC/FemaleHead02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_UPPER",
+          "file": "Data/NPC/FemaleUpper01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_UPPER+1",
+          "file": "Data/NPC/FemaleUpper02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_LOWER",
+          "file": "Data/NPC/FemaleLower01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_LOWER+1",
+          "file": "Data/NPC/FemaleLower02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_BOOTS",
+          "file": "Data/NPC/FemaleBoots01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_FEMALE_BOOTS+1",
+          "file": "Data/NPC/FemaleBoots02.bmd",
+          "textureFolders": ["NPC"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_MERCHANT_MAN",
+      "file": "Data/NPC/Man01.bmd",
+      "textureFolders": ["NPC"],
+      "parts": [
+        {
+          "slot": "MODEL_MERCHANT_MAN_HEAD",
+          "file": "Data/NPC/ManHead01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_HEAD+1",
+          "file": "Data/NPC/ManHead02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_UPPER",
+          "file": "Data/NPC/ManUpper01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_UPPER+1",
+          "file": "Data/NPC/ManUpper02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_GLOVES",
+          "file": "Data/NPC/ManGloves01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_GLOVES+1",
+          "file": "Data/NPC/ManGloves02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_BOOTS",
+          "file": "Data/NPC/ManBoots01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_MAN_BOOTS+1",
+          "file": "Data/NPC/ManBoots02.bmd",
+          "textureFolders": ["NPC"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_MERCHANT_GIRL",
+      "file": "Data/NPC/Girl01.bmd",
+      "textureFolders": ["NPC"],
+      "parts": [
+        {
+          "slot": "MODEL_MERCHANT_GIRL_HEAD",
+          "file": "Data/NPC/GirlHead01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_GIRL_HEAD+1",
+          "file": "Data/NPC/GirlHead02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_GIRL_UPPER",
+          "file": "Data/NPC/GirlUpper01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_GIRL_UPPER+1",
+          "file": "Data/NPC/GirlUpper02.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_GIRL_LOWER",
+          "file": "Data/NPC/GirlLower01.bmd",
+          "textureFolders": ["NPC"]
+        },
+        {
+          "slot": "MODEL_MERCHANT_GIRL_LOWER+1",
+          "file": "Data/NPC/GirlLower02.bmd",
+          "textureFolders": ["NPC"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_SMITH",
+      "file": "Data/NPC/Smith01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_SCIENTIST",
+      "file": "Data/NPC/Wizard01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_SNOW_MERCHANT",
+      "file": "Data/NPC/SnowMerchant01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_SNOW_SMITH",
+      "file": "Data/NPC/SnowSmith01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_SNOW_WIZARD",
+      "file": "Data/NPC/SnowWizard01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_ELF_WIZARD",
+      "file": "Data/NPC/ElfWizard01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_ELF_MERCHANT",
+      "file": "Data/NPC/ElfMerchant01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_MASTER",
+      "file": "Data/NPC/Master01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_STORAGE",
+      "file": "Data/NPC/Storage01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_TOURNAMENT",
+      "file": "Data/NPC/Tournament01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_MIX_NPC",
+      "file": "Data/NPC/MixNpc01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_DEVILSQUARE",
+      "file": "Data/NPC/DevilNpc01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_SEVINA",
+      "file": "Data/NPC/Sevina01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_ARCHANGEL",
+      "file": "Data/NPC/BloodCastle01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_ARCHANGEL_MESSENGER",
+      "file": "Data/NPC/BloodCastle02.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_DEVIAS_TRADER",
+      "file": "Data/NPC/DeviasTrader01.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_BREEDER",
+      "file": "Data/NPC/Breeder.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_KALIMA_SHOP",
+      "file": "Data/NPC/kalnpc.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_BC_NPC1",
+      "file": "Data/NPC/npcpharmercy1.bmd",
+      "textureFolders": ["NPC"],
+      "parts": [
+        {
+          "slot": "MODEL_BC_BOX",
+          "file": "Data/NPC/box.bmd",
+          "textureFolders": ["NPC"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_BC_NPC2",
+      "file": "Data/NPC/npcpharmercy2.bmd",
+      "textureFolders": ["NPC"],
+      "parts": [
+        {
+          "slot": "MODEL_BC_BOX",
+          "file": "Data/NPC/box.bmd",
+          "textureFolders": ["NPC"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_NPC_CAPATULT_ATT",
+      "file": "Data/NPC/Model_Npc_Catapult_Att.bmd",
+      "textureFolders": ["NPC"],
+      "boundingBox": {"min": [-200, -50, -100], "max": [200, 50, 100]}
+    },
+    {
+      "slot": "MODEL_NPC_CAPATULT_DEF",
+      "file": "Data/NPC/Model_Npc_Catapult_Def.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_SENATUS",
+      "file": "Data/NPC/NpcSenatus.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_GATE_SWITCH",
+      "file": "Data/NPC/NpcGateSwitch.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_CROWN",
+      "file": "Data/NPC/NpcCrown.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_CHECK_FLOOR",
+      "file": "Data/NPC/NpcCheckFloor.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_CLERK",
+      "file": "Data/NPC/NpcClerk.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_BARRIER",
+      "file": "Data/NPC/npcbarrier.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_SERBIS",
+      "file": "Data/NPC/npc_mulyak.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_STATUE",
+      "file": "Data/Object35/Object82.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_ALTAR1",
+      "file": "Data/Object35/Object57.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_ALTAR2",
+      "file": "Data/Object35/Object57.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_ALTAR3",
+      "file": "Data/Object35/Object57.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_ALTAR4",
+      "file": "Data/Object35/Object57.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_CRYWOLF_ALTAR5",
+      "file": "Data/Object35/Object57.bmd",
+      "textureFolders": ["Object35"]
+    },
+    {
+      "slot": "MODEL_KANTURU2ND_ENTER_NPC",
+      "file": "Data/NPC/to3gate.bmd",
+      "textureFolders": ["NPC"],
+      "namedBones": {"KANTURU2ND_ENTER_NPC_1": 37, "KANTURU2ND_ENTER_NPC_2": 38, "KANTURU2ND_ENTER_NPC_3": 39, "KANTURU2ND_ENTER_NPC_4": 40, "KANTURU2ND_ENTER_NPC_5": 41, "KANTURU2ND_ENTER_NPC_6": 42, "KANTURU2ND_ENTER_NPC_7": 43, "KANTURU2ND_ENTER_NPC_8": 6, "KANTURU2ND_ENTER_NPC_9": 7, "KANTURU2ND_ENTER_NPC_10": 8, "KANTURU2ND_ENTER_NPC_11": 15, "KANTURU2ND_ENTER_NPC_12": 16, "KANTURU2ND_ENTER_NPC_13": 17, "KANTURU2ND_ENTER_NPC_14": 10}
+    },
+    {
+      "slot": "MODEL_SMELTING_NPC",
+      "file": "Data/NPC/Elpis.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_REFINERY_NPC",
+      "file": "Data/NPC/os.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_RECOVERY_NPC",
+      "file": "Data/NPC/je.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_WEDDING_NPC",
+      "file": "Data/NPC/Wedding.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_DEVIN",
+      "file": "Data/NPC/devin.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_QUARREL",
+      "file": "Data/NPC/WereQuarrel.bmd",
+      "textureFolders": ["Monster"]
+    },
+    {
+      "slot": "MODEL_NPC_CASTEL_GATE",
+      "file": "Data/NPC/cry2doorhead.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_ENTER_NPC",
+      "file": "Data/NPC/mirazu.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_ALLIED_NPC",
+      "file": "Data/NPC/allied.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_ILLUSION_NPC",
+      "file": "Data/NPC/illusion.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_STATUE",
+      "file": "Data/NPC/songsom.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_ALLIED_BASKET",
+      "file": "Data/NPC/songko.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_CURSEDTEMPLE_ILLUSION__BASKET",
+      "file": "Data/NPC/songk2.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_ELBELAND_SILVIA",
+      "file": "Data/NPC/silvia.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_ELBELAND_RHEA",
+      "file": "Data/NPC/rhea.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.2, "stop2": 0.4}
+    },
+    {
+      "slot": "MODEL_ELBELAND_MARCE",
+      "file": "Data/NPC/marce.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_NPC_CHERRYBLOSSOM",
+      "file": "Data/NPC/cherryblossom/cherry_blossom.bmd",
+      "textureFolders": ["NPC/cherryblossom"]
+    },
+    {
+      "slot": "MODEL_NPC_CHERRYBLOSSOMTREE",
+      "file": "Data/NPC/cherryblossom/sakuratree.bmd",
+      "textureFolders": ["NPC/cherryblossom"]
+    },
+    {
+      "slot": "MODEL_SEED_MASTER",
+      "file": "Data/NPC/goblinmaster.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_SEED_INVESTIGATOR",
+      "file": "Data/NPC/seedgoblin.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_LITTLESANTA",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta1.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+1",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta2.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+2",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta3.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+3",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta4.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+4",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta5.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+5",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta6.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+6",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta7.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_LITTLESANTA+7",
+      "file": "Data/NPC/xmassanta.bmd",
+      "textureFolders": ["NPC"],
+      "textureNames": {"0": "xmassanta8.jpg"},
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.5, "attack1": 0.5, "attack2": 0.4},
+      "boundingBox": {"min": [-160, -60, -20], "max": [10, 80, 50]}
+    },
+    {
+      "slot": "MODEL_XMAS2008_SNOWMAN",
+      "file": "Data/Item/xmas/snowman.bmd",
+      "textureFolders": ["NPC", "Item/xmas"],
+      "animations": {"walk": 0.9},
+      "parts": [
+        {
+          "slot": "MODEL_XMAS2008_SNOWMAN_HEAD",
+          "file": "Data/Item/xmas/snowman_die_head_model.bmd",
+          "textureFolders": ["Item/xmas"]
+        },
+        {
+          "slot": "MODEL_XMAS2008_SNOWMAN_BODY",
+          "file": "Data/Item/xmas/snowman_die_body.bmd",
+          "textureFolders": ["Item/xmas"]
+        }
+      ]
+    },
+    {
+      "slot": "MODEL_XMAS2008_SNOWMAN_NPC",
+      "file": "Data/NPC/snowman.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_XMAS2008_SANTA_NPC",
+      "file": "Data/NPC/npcsanta.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_DUEL_NPC_TITUS",
+      "file": "Data/NPC/titus.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_GAMBLE_NPC_MOSS",
+      "file": "Data/NPC/gambler_moss.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.33, "stop2": 0.33, "walk": 0.33, "attack1": 0.33, "attack2": 0.33, "shock": 0.33}
+    },
+    {
+      "slot": "MODEL_DOPPELGANGER_NPC_LUGARD",
+      "file": "Data/NPC/Lugard.bmd",
+      "textureFolders": ["NPC"]
+    },
+    {
+      "slot": "MODEL_DOPPELGANGER_NPC_BOX",
+      "file": "Data/NPC/DoppelgangerBox.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"die": 0.1}
+    },
+    {
+      "slot": "MODEL_DOPPELGANGER_NPC_GOLDENBOX",
+      "file": "Data/NPC/DoppelgangerBox.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"die": 0.1}
+    },
+    {
+      "slot": "MODAL_GENS_NPC_DUPRIAN",
+      "file": "Data/NPC/duprian.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.6, "stop2": 0.6, "walk": 1.4}
+    },
+    {
+      "slot": "MODAL_GENS_NPC_BARNERT",
+      "file": "Data/NPC/barnert.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.3, "stop2": 1.2, "walk": 0.3}
+    },
+    {
+      "slot": "MODEL_UNITEDMARKETPLACE_CHRISTIN",
+      "file": "Data/NPC/UnitedMarketPlace_christine.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.5, "stop2": 0.6}
+    },
+    {
+      "slot": "MODEL_UNITEDMARKETPLACE_RAUL",
+      "file": "Data/NPC/UnitedMarkedPlace_raul.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.5, "stop2": 0.5, "walk": 0.5}
+    },
+    {
+      "slot": "MODEL_UNITEDMARKETPLACE_JULIA",
+      "file": "Data/NPC/UnitedMarkedPlace_julia.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.5, "stop2": 0.5, "walk": 0.5}
+    },
+    {
+      "slot": "MODEL_KARUTAN_NPC_REINA",
+      "file": "Data/NPC/UnitedMarketPlace_christine.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.5, "stop2": 0.6}
+    },
+    {
+      "slot": "MODEL_KARUTAN_NPC_VOLVO",
+      "file": "Data/NPC/volvo.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.2}
+    },
+    {
+      "slot": "MODEL_LUCKYITEM_NPC",
+      "file": "Data/NPC/LuckyItem/npc_burial.bmd",
+      "textureFolders": ["NPC/LuckyItem"],
+      "animations": {"stop1": 0.45, "stop2": 0.5}
+    },
+    {
+      "slot": "MODEL_TERSIA",
+      "file": "Data/NPC/tersia.bmd",
+      "textureFolders": ["NPC"],
+      "animations": {"stop1": 0.35, "stop2": 0.3}
+    },
+    {
+      "slot": "MODEL_BENA",
+      "file": "Data/NPC/bena.bmd",
+      "textureFolders": ["NPC"]
+    }
+  ]
+}

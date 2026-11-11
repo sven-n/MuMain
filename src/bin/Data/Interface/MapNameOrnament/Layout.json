@@ -1,0 +1,220 @@
+{
+  "banner": {
+    "width": 166,
+    "height": 90
+  },
+  "swirls": {
+    "SwirlLeft": {
+      "x": 2,
+      "y": 46,
+      "width": 54,
+      "height": 26
+    },
+    "SwirlRight": {
+      "x": 109,
+      "y": 46,
+      "width": 55,
+      "height": 27
+    }
+  },
+  "icons": {
+    "aida": {
+      "x": 63,
+      "y": 45,
+      "width": 42,
+      "height": 34
+    },
+    "atlans": {
+      "x": 55,
+      "y": 44,
+      "width": 55,
+      "height": 33
+    },
+    "BalgasBarrack": {
+      "x": 60,
+      "y": 43,
+      "width": 47,
+      "height": 42
+    },
+    "BalgasRefuge": {
+      "x": 60,
+      "y": 43,
+      "width": 47,
+      "height": 42
+    },
+    "bloodcastle": {
+      "x": 65,
+      "y": 36,
+      "width": 42,
+      "height": 50
+    },
+    "chaoscastle": {
+      "x": 61,
+      "y": 43,
+      "width": 47,
+      "height": 39
+    },
+    "crywolffortress": {
+      "x": 55,
+      "y": 39,
+      "width": 56,
+      "height": 45
+    },
+    "devias": {
+      "x": 57,
+      "y": 47,
+      "width": 54,
+      "height": 35
+    },
+    "devilsquare": {
+      "x": 60,
+      "y": 43,
+      "width": 46,
+      "height": 35
+    },
+    "Doppelganger": {
+      "x": 58,
+      "y": 48,
+      "width": 47,
+      "height": 37
+    },
+    "duelarena": {
+      "x": 62,
+      "y": 46,
+      "width": 41,
+      "height": 39
+    },
+    "dungeun": {
+      "x": 56,
+      "y": 45,
+      "width": 54,
+      "height": 32
+    },
+    "Elbeland": {
+      "x": 48,
+      "y": 43,
+      "width": 69,
+      "height": 46
+    },
+    "EmpireGuardian": {
+      "x": 54,
+      "y": 52,
+      "width": 57,
+      "height": 31
+    },
+    "Icarus": {
+      "x": 56,
+      "y": 45,
+      "width": 52,
+      "height": 37
+    },
+    "IllusionTemple": {
+      "x": 56,
+      "y": 42,
+      "width": 50,
+      "height": 44
+    },
+    "Kalima": {
+      "x": 56,
+      "y": 45,
+      "width": 56,
+      "height": 24
+    },
+    "kantru": {
+      "x": 59,
+      "y": 44,
+      "width": 48,
+      "height": 37
+    },
+    "loren": {
+      "x": 56,
+      "y": 43,
+      "width": 50,
+      "height": 47
+    },
+    "lorencia": {
+      "x": 59,
+      "y": 46,
+      "width": 43,
+      "height": 36
+    },
+    "lostkalima": {
+      "x": 56,
+      "y": 45,
+      "width": 56,
+      "height": 24
+    },
+    "losttower": {
+      "x": 57,
+      "y": 44,
+      "width": 52,
+      "height": 34
+    },
+    "mapname_karutan": {
+      "x": 58,
+      "y": 45,
+      "width": 48,
+      "height": 39
+    },
+    "MapName_MarketRolen": {
+      "x": 61,
+      "y": 46,
+      "width": 41,
+      "height": 44
+    },
+    "mapname_raklion": {
+      "x": 52,
+      "y": 46,
+      "width": 60,
+      "height": 40
+    },
+    "mapname_raklionboss": {
+      "x": 52,
+      "y": 46,
+      "width": 60,
+      "height": 40
+    },
+    "noria": {
+      "x": 67,
+      "y": 45,
+      "width": 36,
+      "height": 39
+    },
+    "ordeal": {
+      "x": 55,
+      "y": 42,
+      "width": 53,
+      "height": 35
+    },
+    "pkfield": {
+      "x": 59,
+      "y": 46,
+      "width": 48,
+      "height": 42
+    },
+    "santatown": {
+      "x": 55,
+      "y": 44,
+      "width": 57,
+      "height": 40
+    },
+    "stadium": {
+      "x": 57,
+      "y": 45,
+      "width": 48,
+      "height": 38
+    },
+    "SwampOfCalmness": {
+      "x": 41,
+      "y": 49,
+      "width": 81,
+      "height": 40
+    },
+    "tarcan": {
+      "x": 57,
+      "y": 42,
+      "width": 49,
+      "height": 41
+    }
+  }
+}

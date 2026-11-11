@@ -8,6 +8,22 @@
 *.cs text
 *.csproj text
 *.sln text
+*.spv binary
+*.dxil binary
+src/shaders/compiled/*.msl text eol=lf whitespace=-blank-at-eof
+# Item data is written by the item editor with LF; keep checkouts identical
+# so saving unchanged data does not change the files.
+src/bin/Data/Items/**/*.json text eol=lf
+# The effect catalogue is checked against the format its writer produces (LF).
+src/bin/Data/Effects/*.json text eol=lf
+# The server list is written by the editor's Server List window with LF.
+src/bin/Data/Local/ServerList.json text eol=lf
+# The monster list is written by the editor's monster tools with LF.
+src/bin/Data/Monsters/**/*.json text eol=lf
+# The creation baseline of the effect recorder is compared line by line on every platform.
+tests/effects/baseline/*.txt text eol=lf
+# So is the draw baseline of the render styles in data.
+tests/data/baseline/*.txt text eol=lf
 
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`
@@ -35,3 +51,10 @@
 *.[Ww][Aa][Vv]   binary
 *.[Oo][Gg][Gg]   binary
 *.[Mm][Pp]3      binary
+*.[Gg][Ll][Bb]   binary
+# Shell scripts and git hooks run under bash on every platform; CRLF breaks them.
+*.sh text eol=lf
+.githooks/* text eol=lf
+# The patches must keep LF: they apply to downloaded archives (miniaudio, SDL_ttf and the
+# libraries it vendors), which are LF on every platform.
+cmake/patches/*.patch text eol=lf

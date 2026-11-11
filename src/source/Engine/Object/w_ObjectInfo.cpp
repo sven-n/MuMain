@@ -8,11 +8,11 @@ void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, V
 {
     auto iterBegin = vecInterpolates.begin();
     auto iterEnd = vecInterpolates.end();
-    VEC_INTERPOLATES::iterator	iter_;
+    VEC_INTERPOLATES::iterator iter_;
 
     INTERPOLATE_FACTOR* pCurFactor = NULL;
 
-    bool	bFindInterpolateFactor = false;
+    bool bFindInterpolateFactor = false;
 
     for (iter_ = iterBegin; iter_ < iterEnd; ++iter_)
     {
@@ -28,11 +28,8 @@ void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, V
 
     if (bFindInterpolateFactor == true)
     {
-        VectorInterpolation_F(v3Out,
-            pCurFactor->v3Start,
-            pCurFactor->v3End,
-            pCurFactor->fRateEnd - pCurFactor->fRateStart,
-            fCurrentRate - pCurFactor->fRateStart);
+        VectorInterpolation_F(v3Out, pCurFactor->v3Start, pCurFactor->v3End,
+                              pCurFactor->fRateEnd - pCurFactor->fRateStart, fCurrentRate - pCurFactor->fRateStart);
     }
 }
 
@@ -40,11 +37,11 @@ void CInterpolateContainer::GetCurrentValueF(float& fOut, float fCurrentRate, VE
 {
     auto iterBegin = vecInterpolates.begin();
     auto iterEnd = vecInterpolates.end();
-    VEC_INTERPOLATES_F::iterator	iter_;
+    VEC_INTERPOLATES_F::iterator iter_;
 
     INTERPOLATE_FACTOR_F* pCurFactor = NULL;
 
-    bool	bFindInterpolateFactor = false;
+    bool bFindInterpolateFactor = false;
 
     for (iter_ = iterBegin; iter_ < iterEnd; ++iter_)
     {
@@ -60,10 +57,9 @@ void CInterpolateContainer::GetCurrentValueF(float& fOut, float fCurrentRate, VE
 
     if (bFindInterpolateFactor == true)
     {
-        LInterpolationF(fOut,
-            pCurFactor->fStart,
-            pCurFactor->fEnd,
-            (float)(fCurrentRate - pCurFactor->fRateStart) / (float)(pCurFactor->fRateEnd - pCurFactor->fRateStart));
+        LInterpolationF(fOut, pCurFactor->fStart, pCurFactor->fEnd,
+                        (float)(fCurrentRate - pCurFactor->fRateStart) /
+                            (float)(pCurFactor->fRateEnd - pCurFactor->fRateStart));
     }
 }
 
@@ -75,6 +71,7 @@ void CInterpolateContainer::ClearContainer()
     m_vecInterpolatesAlpha.clear();
 }
 
+// cppcheck-suppress uninitMemberVar
 OBJECT::OBJECT()
 {
     Initialize();
@@ -98,6 +95,7 @@ void OBJECT::Initialize()
     Visible = false;
     AlphaEnable = false;
     EnableBoneMatrix = false;
+    OwnsBoneTransform = false;
     ContrastEnable = false;
     ChromeEnable = false;
     m_bRenderAfterCharacter = false;
@@ -174,6 +172,8 @@ void OBJECT::Initialize()
     IdentityVector3D(EyeRight2);
     IdentityVector3D(EyeLeft3);
     IdentityVector3D(EyeRight3);
+    IdentityVector3D(SetTrailLeft);
+    IdentityVector3D(SetTrailRight);
 
     IdentityVector3D(OBB.StartPos);
     IdentityVector3D(OBB.XAxis);
@@ -182,6 +182,8 @@ void OBJECT::Initialize()
 
     m_pCloth = NULL;
     BoneTransform = NULL;
+    Pose = {};
+    DrawnFrame = 0;
 
     Owner = NULL;
     Prior = NULL;
@@ -190,5 +192,5 @@ void OBJECT::Initialize()
 
 void OBJECT::Destroy()
 {
-    //m_BuffMap.ClearBuff();
+    // m_BuffMap.ClearBuff();
 }

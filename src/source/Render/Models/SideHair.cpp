@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -10,11 +11,10 @@
 #include "Render/Models/ShadowVolume.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "SideHair.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Effects/EffectDraw.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -29,7 +29,7 @@ CSideHair::~CSideHair()
 {
 }
 
-void CSideHair::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
+void CSideHair::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, const OBJECT* o, bool SkipTga)
 {
     VectorSubtract(Hero->Object.Position, g_Camera.Position, m_vLight);
     VectorNormalize(m_vLight);
@@ -99,7 +99,6 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 {
     vec3_t p1, p2, d;
 
-    glColor3f(1.f, 1.f, 1.f);
     VectorSubtract(v2, v1, d);
     const float fLength = VectorLength(d);
     float fTextureMove = 0.0f;
@@ -112,21 +111,22 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     VectorSubtract(p1, d, p1);
     VectorAdd(p2, d, p2);
 
-    float fTextureV = (float)(rand() % 100) * 0.01f;
-    glColor3f(1.f, 1.f, 1.f);
+    float fTextureV = (float)(Random::DrawRand(v1, 1) % 100) * 0.01f;
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
     vec3_t vOrtho;
     CrossProduct(m_vLight, d, vOrtho);
     VectorNormalize(vOrtho);
     VectorScale(vOrtho, 10.f, vOrtho);
-
-    IR::Begin(GL_QUADS);
-    PassthroughShader::Instance().SetUseTexture(true);
-    IR::Color3f(1.f, 1.f, 1.f);
-    IR::TexCoord2f(0.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2]);
-    IR::TexCoord2f(0.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2]);
-    IR::TexCoord2f(1.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2]);
-    IR::TexCoord2f(1.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2]);
-    IR::End();
+    const mu::Vertex3D quad[4] = {
+        {p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+    };
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({.vertices = quad});
 }

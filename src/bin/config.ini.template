@@ -1,5 +1,6 @@
 [LOGIN]
 RememberMe=0
+SavePassword=0
 Language=Eng
 EncryptedUsername=
 EncryptedPassword=
@@ -11,8 +12,32 @@ Windowed=1
 SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
-ServerIP=127.127.127.127
+ServerIP=localhost
 ServerPort=44406
 [UI]
 Locale=en
+TranslateItemNames=1
 Font=
+RmlTheme=legacy
+UIScalePercent=100
+[Camera]
+Zoom=1735
+[Render]
+; Original S6 bodies when 1, improved bodies when 0. Restart required.
+UseS6PlayerModels=1
+VSync=1
+Look=Classic
+Anisotropy=8
+Antialiasing=4
+EnhancedLighting=1
+DynamicLights=1
+LightMood=1
+PostProcessing=1
+DisableEffects=0
+DisableParticles=0
+DisableSkillEffectModels=0
+DisableBoids=0
+DisableWingShadow=0
+DisableBodyShadows=0
+FpsCap=-1
+Backend=default

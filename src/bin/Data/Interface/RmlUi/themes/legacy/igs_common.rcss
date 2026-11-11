@@ -1,0 +1,21 @@
+/* What the cash shop's documents share (in_game_shop.rml and its igs_* dialogs): the
+   Ingame_Bt03 button with its label, the dimmed screen behind a dialog, and the counter-scaled
+   text layer. */
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+
+/* CMessageBoxBase::RenderMsgBackColor(): black at half alpha over the whole screen. It also takes
+   the clicks the shop under the dialog would otherwise get. */
+.igs-dim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 128); pointer-events: auto; }
+
+/* Up, over and pressed frames; the label drops a unit while pressed. A disabled button is greyed
+   and its label dim (CMessageBoxButton::Render()). */
+@spritesheet igs-btn-sheet { src: "../../../InGameShop/Ingame_Bt03.tga"; igs-btn-up: 0px 0px 52px 26px; igs-btn-over: 0px 26px 52px 26px; igs-btn-down: 0px 52px 52px 26px; }
+.igs-btn { position: absolute; width: 52px; height: 26px; decorator: image(igs-btn-up); pointer-events: auto; }
+.igs-btn:hover { decorator: image(igs-btn-over); }
+.igs-btn:active { decorator: image(igs-btn-down); }
+.igs-btn-label { color: #ffffff; margin-top: -1px; }
+/* A centred label sits at margin-left -1000px (base.rcss's .sharp-centre); a unit right is -999px. */
+.igs-btn:active .igs-btn-label { margin-left: -999px; margin-top: 0; }
+.igs-btn.disabled, .igs-btn.disabled:hover { decorator: image(igs-btn-up); image-color: rgba(204, 204, 204, 230); pointer-events: none; }
+.igs-btn.disabled .igs-btn-label { color: #808080; }

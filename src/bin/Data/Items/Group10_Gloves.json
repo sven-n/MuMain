@@ -1,0 +1,1778 @@
+{
+  "formatVersion": 1,
+  "group": 10,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Gloves",
+        "de": "Bronzehandschuhe",
+        "es": "Guantes de Bronce",
+        "pl": "Brązowe rękawice",
+        "pt": "Luvas de bronze"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 13,
+      "durability": 34,
+      "defense": 4,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Gloves",
+        "de": "Drachenhandschuhe",
+        "es": "Guantes Dragón",
+        "pl": "Smocze rękawice",
+        "pt": "Luvas do dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 52,
+      "durability": 68,
+      "defense": 14,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Gloves",
+        "de": "Polsterhandschuhe",
+        "es": "Guantes Rellenos",
+        "pl": "Pikowane rękawice",
+        "pt": "Luvas acolchoadas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 3,
+      "durability": 28,
+      "defense": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Gloves",
+        "de": "Legendäre Handschuhe",
+        "es": "Guantes Legendarios",
+        "pl": "Legendarne rękawice",
+        "pt": "Luvas lendárias"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 44,
+      "durability": 42,
+      "defense": 11,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Gloves",
+        "de": "Knochenhandschuhe",
+        "es": "Guantes de Hueso",
+        "pl": "Kościane rękawice",
+        "pt": "Luvas de osso"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 14,
+      "durability": 30,
+      "defense": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Gloves",
+        "de": "Lederhandschuhe",
+        "es": "Guantes de Cuero",
+        "pl": "Skórzane rękawice",
+        "pt": "Luvas de couro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 4,
+      "durability": 30,
+      "defense": 2,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Gloves",
+        "de": "Schuppenhandschuhe",
+        "es": "Guantes de Escamas",
+        "pl": "Łuskowe rękawice",
+        "pt": "Luvas de escamas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 22,
+      "durability": 40,
+      "defense": 7,
+      "attackSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Gloves",
+        "de": "Sphinxhandschuhe",
+        "es": "Guantes Esfinge",
+        "pl": "Rękawice Sfinksa",
+        "pt": "Luvas da esfinge"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 36,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Gloves",
+        "de": "Messinghandschuhe",
+        "es": "Guantes de Metal",
+        "pl": "Mosiężne rękawice",
+        "pt": "Luvas de latão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 32,
+      "durability": 44,
+      "defense": 9,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Gloves",
+        "de": "Plattenhandschuhe",
+        "es": "Guantes de Plata",
+        "pl": "Płytowe rękawice",
+        "pt": "Luvas de placa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 42,
+      "durability": 50,
+      "defense": 12,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Gloves",
+        "de": "Rankenhandschuhe",
+        "es": "Guantes Vid",
+        "pl": "Rękawice z pnączy",
+        "pt": "Luvas da vinha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 4,
+      "durability": 22,
+      "defense": 2,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Gloves",
+        "de": "Seidenhandschuhe",
+        "es": "Guantes de Seda",
+        "pl": "Jedwabne rękawice",
+        "pt": "Luvas de seda"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 14,
+      "durability": 26,
+      "defense": 4,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Gloves",
+        "de": "Windhandschuhe",
+        "es": "Guantes Viento",
+        "pl": "Rękawice Wiatru",
+        "pt": "Luvas do vento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 26,
+      "durability": 32,
+      "defense": 6,
+      "attackSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Gloves",
+        "de": "Geisterhandschuhe",
+        "es": "Guantes Espíritu",
+        "pl": "Rękawice Ducha",
+        "pt": "Luvas do espírito"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 38,
+      "durability": 38,
+      "defense": 9,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Gloves",
+        "de": "Wächterhandschuhe",
+        "es": "Guantes Guardián",
+        "pl": "Rękawice Strażnika",
+        "pt": "Luvas do guardião"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 45,
+      "defense": 15,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Storm Crow Gloves",
+        "de": "Sturmkrähenhandschuhe",
+        "es": "Guantes Cuervo de Tormenta",
+        "pl": "Rękawice Burzowej Wrony",
+        "pt": "Luvas do corvo da tempestade"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 80,
+      "defense": 20,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Gloves",
+        "de": "Schwarzdrachenhandschuhe",
+        "es": "Guantes Dragón Negro",
+        "pl": "Rękawice Czarnego Smoka",
+        "pt": "Luvas do dragão negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 76,
+      "durability": 74,
+      "defense": 22,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Gloves",
+        "de": "Dunkelphönixhandschuhe",
+        "es": "Guantes Fénix Oscuro",
+        "pl": "Rękawice Mrocznego Feniksa",
+        "pt": "Luvas da fênix negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 86,
+      "durability": 80,
+      "defense": 37,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 205,
+        "dexterity": 63
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Gloves",
+        "de": "Großseelenhandschuhe",
+        "es": "Guantes Gran Alma",
+        "pl": "Rękawice Wielkiej Duszy",
+        "pt": "Luvas da grande alma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 67,
+      "defense": 20,
+      "attackSpeed": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 49,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Gloves",
+        "de": "Göttliche Handschuhe",
+        "es": "Guantes Divinos",
+        "pl": "Boskie rękawice",
+        "pt": "Luvas divinas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 72,
+      "durability": 74,
+      "defense": 29,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Thunder Hawk Gloves",
+        "de": "Donnerfalkenhandschuhe",
+        "es": "Guantes Halcón de Trueno",
+        "pl": "Rękawice Gromowego Jastrzębia",
+        "pt": "Luvas de Thunder Hawk"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 88,
+      "durability": 82,
+      "defense": 34,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Gloves",
+        "de": "Großartige Drachenhandschuhe",
+        "es": "Guantes Gran Dragón",
+        "pl": "Rękawice Wielkiego Smoka",
+        "pt": "Luvas do grande dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 94,
+      "durability": 86,
+      "defense": 48,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Gloves",
+        "de": "Dunkelseelenhandschuhe",
+        "es": "Guantes Alma Oscura",
+        "pl": "Rękawice Mrocznej Duszy",
+        "pt": "Luvas da alma negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 87,
+      "durability": 75,
+      "defense": 30,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Hurricane Gloves",
+        "de": "Orkanhandschuhe",
+        "es": "Guantes Huracán",
+        "pl": "Rękawice Huraganu",
+        "pt": "Luvas do furacão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 102,
+      "durability": 90,
+      "defense": 45,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 162,
+        "dexterity": 66
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Spirit Gloves",
+        "de": "Rotgeisterhandschuhe",
+        "es": "Guantes Espíritu Rojo",
+        "pl": "Rękawice Czerwonego Ducha",
+        "pt": "Luvas do espírito vermelho"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 84,
+      "durability": 80,
+      "defense": 38,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Gloves",
+        "de": "Leichtplattenhandschuhe",
+        "es": "Guantes Plata de Luz",
+        "pl": "Lekkie rękawice płytowe",
+        "pt": "Luvas de placa leve"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 42,
+      "durability": 42,
+      "defense": 12,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Gloves",
+        "de": "Adamanthandschuhe",
+        "es": "Guantes Adamantinos",
+        "pl": "Adamantytowe rękawice",
+        "pt": "Luvas de adamantina"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 56,
+      "defense": 18,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Gloves",
+        "de": "Dunkelstahlhandschuhe",
+        "es": "Guantes Acero Oscuro",
+        "pl": "Rękawice z mrocznej stali",
+        "pt": "Luvas de aço negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 75,
+      "durability": 70,
+      "defense": 21,
+      "attackSpeed": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Gloves",
+        "de": "Dunkelmeisterhandschuhe",
+        "es": "Guantes Amo Oscuro",
+        "pl": "Rękawice Mrocznego Mistrza",
+        "pt": "Luvas do Mestre negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 89,
+      "durability": 78,
+      "defense": 29,
+      "attackSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Gloves",
+        "de": "Drachenritterhandschuhe",
+        "es": "Guantes Caballero Dragón",
+        "pl": "Rękawice Smoczego Rycerza",
+        "pt": "Luvas do cavaleiro dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 114,
+      "durability": 90,
+      "defense": 60,
+      "attackSpeed": 7,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Gloves",
+        "de": "Giftnebelhandschuhe",
+        "es": "Guantes Bruma de Veneno",
+        "pl": "Rękawice Jadowitej Mgły",
+        "pt": "Luvas da névoa de veneno"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 111,
+      "durability": 86,
+      "defense": 44,
+      "attackSpeed": 7,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Gloves",
+        "de": "Sylphenstrahlhandschuhe",
+        "es": "Guantes Rayo de Sílfide",
+        "pl": "Rękawice Sylphid Ray",
+        "pt": "Luvas do raio silfídico"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 111,
+      "durability": 86,
+      "defense": 50,
+      "attackSpeed": 7,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Volcano Gloves",
+        "de": "Vulkanhandschuhe",
+        "es": "Guantes Volcán",
+        "pl": "Rękawice Wulkanu",
+        "pt": "Luvas do vulcão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 127,
+      "durability": 95,
+      "defense": 55,
+      "attackSpeed": 7,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 145,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Gloves",
+        "de": "Sonnenlichthandschuhe",
+        "es": "Guantes Luz Solar",
+        "pl": "Rękawice Słońca",
+        "pt": "Luvas da luz do sol"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 110,
+      "durability": 82,
+      "defense": 40,
+      "attackSpeed": 5,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Gloves",
+        "de": "Aschkrähenhandschuhe",
+        "es": "Guantes Cuervo Ceniza",
+        "pl": "Rękawice Ashcrow",
+        "pt": "Luvas de Ashcrow"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 61,
+      "durability": 72,
+      "defense": 18,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Gloves",
+        "de": "Finsternishandschuhe",
+        "es": "Guantes Eclipse",
+        "pl": "Rękawice Zaćmienia",
+        "pt": "Luvas do eclipse"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 61,
+      "durability": 54,
+      "defense": 15,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Gloves",
+        "de": "Iris-Handschuhe",
+        "es": "Guantes Iris",
+        "pl": "Rękawice Iris",
+        "pt": "Luvas de Iris"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 61,
+      "durability": 59,
+      "defense": 22,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Valiant Gloves",
+        "de": "Kühne Handschuhe",
+        "es": "Guantes Valientes",
+        "pl": "Waleczne rękawice",
+        "pt": "Luvas do valor"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 91,
+      "durability": 81,
+      "defense": 27,
+      "attackSpeed": 7,
+      "requirements": {
+        "strength": 155,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Gloves",
+        "de": "Glorreiche Handschuhe",
+        "es": "Guantes Gloriosos",
+        "pl": "Chwalebne rękawice",
+        "pt": "Luvas gloriosas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 91,
+      "durability": 74,
+      "defense": 25,
+      "attackSpeed": 5,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Gloves",
+        "de": "Sturmwindhandschuhe",
+        "es": "Guantes Viento Violento",
+        "pl": "Rękawice Gwałtownego Wiatru",
+        "pt": "Luvas do vento violento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 24,
+      "durability": 36,
+      "defense": 9,
+      "attackSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 22
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Gloves",
+        "de": "Rotschwingenhandschuhe",
+        "es": "Guantes Ala Roja",
+        "pl": "Rękawice Czerwonego Skrzydła",
+        "pt": "Luvas da asa vermelha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 44,
+      "durability": 42,
+      "defense": 13,
+      "attackSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 18,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Gloves",
+        "de": "Uralte Handschuhe",
+        "es": "Guantes Antiguos",
+        "pl": "Pradawne rękawice",
+        "pt": "Luvas antigas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 61,
+      "durability": 54,
+      "defense": 19,
+      "attackSpeed": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Gloves",
+        "de": "Dämonische Handschuhe",
+        "es": "Guantes Demoníacos",
+        "pl": "Demoniczne rękawice",
+        "pt": "Luvas demoníacas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 67,
+      "defense": 26,
+      "attackSpeed": 6,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Gloves",
+        "de": "Sturmblitzhandschuhe",
+        "es": "Guantes Ráfaga Tormentosa",
+        "pl": "Rękawice Burzowego Błysku",
+        "pt": "Luvas Relâmpago de Tempest."
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 87,
+      "durability": 75,
+      "defense": 34,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 56,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Gloves",
+        "de": "Ewigschwingenhandschuhe",
+        "es": "Guantes Ala Eterna",
+        "pl": "Rękawice Wiecznego Skrzydła",
+        "pt": "Luvas da asa eterna"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 102,
+      "durability": 86,
+      "defense": 29,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan  Gloves",
+        "de": "Titanenhandschuhe",
+        "es": "Guantes Titán",
+        "pl": "Rękawice Tytana",
+        "pt": "Luvas do titã"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 100,
+      "durability": 86,
+      "defense": 56,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Gloves",
+        "de": "Tapfere Handschuhe",
+        "es": "Guantes Valerosos",
+        "pl": "Rękawice Śmiałka",
+        "pt": "Luvas da coragem"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 97,
+      "durability": 86,
+      "defense": 42,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Phantom  Gloves",
+        "de": "Phantom-Handschuhe",
+        "es": "Guantes Fantasma",
+        "pl": "Rękawice Widma",
+        "pt": "Luvas do fantasma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 101,
+      "durability": 86,
+      "defense": 49,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 212,
+        "dexterity": 57
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Destroy Gloves",
+        "de": "Zerstörerhandschuhe",
+        "es": "Guantes Destructores",
+        "pl": "Rękawice Zniszczenia",
+        "pt": "Luvas da destruição"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 99,
+      "durability": 86,
+      "defense": 40,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 19,
+        "energy": 165
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Gloves",
+        "de": "Seraphim-Handschuhe",
+        "es": "Guantes Serafín",
+        "pl": "Rękawice Serafina",
+        "pt": "Luvas do serafim"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 100,
+      "durability": 86,
+      "defense": 43,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Faith Gloves",
+        "de": "Glaubenshandschuhe",
+        "es": "Guantes de Fe",
+        "pl": "Rękawice Wiary",
+        "pt": "Luvas da fé"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 95,
+      "durability": 86,
+      "defense": 36,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Gloves",
+        "de": "Königliche Handschuhe",
+        "es": "Guantes Reales",
+        "pl": "Królewskie rękawice",
+        "pt": "Luvas reais"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 101,
+      "durability": 86,
+      "defense": 34,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Gloves",
+        "de": "Hades-Handschuhe",
+        "es": "Guantes Hades",
+        "pl": "Rękawice Hadesa",
+        "pt": "Luvas de Hades"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 100,
+      "durability": 86,
+      "defense": 31,
+      "attackSpeed": 7,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 53
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Gloves",
+        "de": "Schuppenhandschuhe",
+        "es": "Guantes de Escamas",
+        "pl": "Łuskowe rękawice",
+        "pt": "Luvas de escamas"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 22,
+      "durability": 255,
+      "defense": 10,
+      "attackSpeed": 10,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Gloves",
+        "de": "Seidenhandschuhe",
+        "es": "Guantes de Seda",
+        "pl": "Jedwabne rękawice",
+        "pt": "Luvas de seda"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 14,
+      "durability": 255,
+      "defense": 6,
+      "attackSpeed": 8,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Gloves",
+        "de": "Sphinxhandschuhe",
+        "es": "Guantes Esfinge",
+        "pl": "Rękawice Sfinksa",
+        "pt": "Luvas de Esfinge"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 255,
+      "defense": 12,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Gloves",
+        "de": "Sturmwindhandschuhe",
+        "es": "Guantes Viento Violento",
+        "pl": "Rękawice Gwałtownego Wiatru",
+        "pt": "Luvas do vento violento"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 24,
+      "durability": 255,
+      "defense": 13,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Adamantine Gloves",
+        "de": "Adamanthandschuhe",
+        "es": "Guantes Adamantinos",
+        "pl": "Adamantytowe rękawice",
+        "pt": "Luvas de adamantina"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 255,
+      "defense": 20,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Gloves",
+        "de": "Drachenhandschuhe",
+        "es": "Guantes Dragón",
+        "pl": "Smocze rękawice",
+        "pt": "Luvas de Dragão"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 52,
+      "durability": 255,
+      "defense": 19,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Gloves",
+        "de": "Wächterhandschuhe",
+        "es": "Guantes Guardián",
+        "pl": "Rękawice Strażnika",
+        "pt": "Luvas de Guardião"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 255,
+      "defense": 20,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Gloves",
+        "de": "Legendäre Handschuhe",
+        "es": "Guantes Legendarios",
+        "pl": "Legendarne rękawice",
+        "pt": "Luvas Lendárias"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 44,
+      "durability": 255,
+      "defense": 16,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Gloves",
+        "de": "Rotschwingenhandschuhe",
+        "es": "Guantes Ala Roja",
+        "pl": "Rękawice Czerwonego Skrzydła",
+        "pt": "Luvas da asa vermelha"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 44,
+      "durability": 255,
+      "defense": 18,
+      "attackSpeed": 8,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Atlans Gloves",
+        "de": "Atlans-Handschuhe",
+        "es": "Guantes Cuervo de Tormenta",
+        "pl": "Rękawice Atlans",
+        "pt": "Luvas do corvo da tempestade"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "gloves",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 255,
+      "defense": 25,
+      "attackSpeed": 6,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    }
+  ]
+}

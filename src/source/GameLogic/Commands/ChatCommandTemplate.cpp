@@ -9,63 +9,63 @@ namespace GameLogic::Commands::Templates
 {
 namespace
 {
-    // The parts of a stored entry are separated by a pipe, which is why a value
-    // must not contain one.
-    constexpr wchar_t Separator = L'|';
+// The parts of a stored entry are separated by a pipe, which is why a value
+// must not contain one.
+constexpr wchar_t Separator = L'|';
 
-    std::wstring WithoutSeparator(const std::wstring& value)
-    {
-        std::wstring sanitized = value;
-        std::replace(sanitized.begin(), sanitized.end(), Separator, L' ');
-        return sanitized;
-    }
+std::wstring WithoutSeparator(const std::wstring& value)
+{
+    std::wstring sanitized = value;
+    std::replace(sanitized.begin(), sanitized.end(), Separator, L' ');
+    return sanitized;
+}
 
-    std::vector<std::wstring> Split(const std::wstring& line)
+std::vector<std::wstring> Split(const std::wstring& line)
+{
+    std::vector<std::wstring> parts;
+    size_t start = 0;
+    while (true)
     {
-        std::vector<std::wstring> parts;
-        size_t start = 0;
-        while (true)
+        const auto separator = line.find(Separator, start);
+        if (separator == std::wstring::npos)
         {
-            const auto separator = line.find(Separator, start);
-            if (separator == std::wstring::npos)
-            {
-                parts.push_back(line.substr(start));
-                return parts;
-            }
-
-            parts.push_back(line.substr(start, separator - start));
-            start = separator + 1;
-        }
-    }
-
-    std::wstring Serialize(const ChatCommandTemplate& entry)
-    {
-        std::wstring line = WithoutSeparator(entry.Label);
-        line += Separator;
-        line += WithoutSeparator(entry.Command);
-        for (const auto& value : entry.Values)
-        {
-            line += Separator;
-            line += WithoutSeparator(value);
+            parts.push_back(line.substr(start));
+            return parts;
         }
 
-        return line;
-    }
-
-    bool TryParse(const std::wstring& line, ChatCommandTemplate& entry)
-    {
-        const auto parts = Split(line);
-        if (parts.size() < 2 || parts[0].empty() || parts[1].empty())
-        {
-            return false;
-        }
-
-        entry.Label = parts[0];
-        entry.Command = parts[1];
-        entry.Values.assign(parts.begin() + 2, parts.end());
-        return true;
+        parts.push_back(line.substr(start, separator - start));
+        start = separator + 1;
     }
 }
+
+std::wstring Serialize(const ChatCommandTemplate& entry)
+{
+    std::wstring line = WithoutSeparator(entry.Label);
+    line += Separator;
+    line += WithoutSeparator(entry.Command);
+    for (const auto& value : entry.Values)
+    {
+        line += Separator;
+        line += WithoutSeparator(value);
+    }
+
+    return line;
+}
+
+bool TryParse(const std::wstring& line, ChatCommandTemplate& entry)
+{
+    const auto parts = Split(line);
+    if (parts.size() < 2 || parts[0].empty() || parts[1].empty())
+    {
+        return false;
+    }
+
+    entry.Label = parts[0];
+    entry.Command = parts[1];
+    entry.Values.assign(parts.begin() + 2, parts.end());
+    return true;
+}
+} // namespace
 
 std::vector<ChatCommandTemplate> GetAll()
 {
@@ -127,4 +127,4 @@ void RemoveAt(size_t index)
         --remaining;
     }
 }
-}
+} // namespace GameLogic::Commands::Templates

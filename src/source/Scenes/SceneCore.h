@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Object/ZzzInfomation.h"
-#include "Core/Utilities/SpinLock.h"
 
 // Include refactored scene headers
 #ifdef USE_REFACTORED_SCENES
@@ -18,19 +17,23 @@ extern const wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
 
-inline SpinLock* g_render_lock = new SpinLock();
-
 extern bool CheckRenderNextFrame();
 extern void WaitForNextActivity(bool usePreciseSleep);
 extern void UpdateSceneState();
 extern void LoadingScene(HDC hDC);
+// Closes the RmlUi loading-screen wallpaper LoadingScene() shows and keeps open (rather than
+// closing it after its own one-frame flash) -- called from MainScene.cpp's RenderMainScene()
+// once LoadingWorld actually drops below the "world ready" threshold. Safe to call any time,
+// including when there's nothing to close (no-op).
+extern void HideLoadingSceneOverlay();
 extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();
 void SetTargetFps(double targetFps);
 double GetTargetFps();
-
-BOOL	ShowCheckBox(int num, int index, int message = MESSAGE_TRADE_CHECK);
+// `$pause`: no frames run for a while, as for a mobile or browser client in the background.
+void PauseFrames(unsigned int seconds);
+bool FramesPaused();
 
 int	SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize);
 

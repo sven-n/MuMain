@@ -40,12 +40,13 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="tickCount">The tick count.</param>
     /// <param name="attackSpeed">The attack speed.</param>
+    /// <param name="magicSpeed">The magic speed.</param>
     /// <remarks>
     /// Is sent by the client when: This packet is sent by the client every few seconds. It contains the current "TickCount" of the client operating system and the attack speed of the selected character.
     /// Causes reaction on server side: By the original server this is used to detect speed hacks.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendPing")]
-    public static void SendPing(int handle, uint @tickCount, ushort @attackSpeed)
+    public static void SendPing(int handle, uint @tickCount, ushort @attackSpeed, ushort @magicSpeed)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -60,6 +61,7 @@ public unsafe partial class ConnectionManager
                 var packet = new PingRef(pipeWriter.GetSpan(length)[..length]);
                 packet.TickCount = @tickCount;
                 packet.AttackSpeed = @attackSpeed;
+                packet.MagicSpeed = @magicSpeed;
 
                 return length;
             });
@@ -616,6 +618,46 @@ public unsafe partial class ConnectionManager
                 var packet = new PlayerShopCloseOtherRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
                 packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="PlayerShopSetItemPriceExtended" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="moneyPrice">The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="priceItemType">The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="requiredItemAmount">The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).
+    /// Causes reaction on server side: The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendPlayerShopSetItemPriceExtended")]
+    public static void SendPlayerShopSetItemPriceExtended(int handle, uint @moneyPrice, ushort @priceItemType, ushort @requiredItemAmount, byte @itemSlot)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopSetItemPriceExtendedRef.Length;
+                var packet = new PlayerShopSetItemPriceExtendedRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MoneyPrice = @moneyPrice;
+                packet.PriceItemType = @priceItemType;
+                packet.RequiredItemAmount = @requiredItemAmount;
+                packet.ItemSlot = @itemSlot;
 
                 return length;
             });
@@ -1570,14 +1612,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="CastleSiegeTaxChangeRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleSiegeTaxChangeRequest")]
-    public static void SendCastleSiegeTaxChangeRequest(int handle, byte @taxType, uint @taxRate)
+    public static void SendCastleSiegeTaxChangeRequest(int handle, CastleSiegeTaxType @taxType, uint @taxValue)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1591,7 +1633,7 @@ public unsafe partial class ConnectionManager
                 var length = CastleSiegeTaxChangeRequestRef.Length;
                 var packet = new CastleSiegeTaxChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.TaxType = @taxType;
-                packet.TaxRate = @taxRate;
+                packet.TaxValue = @taxValue;
 
                 return length;
             });
@@ -1640,14 +1682,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="ToggleCastleGateRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendToggleCastleGateRequest")]
-    public static void SendToggleCastleGateRequest(int handle, byte @closeState, ushort @gateId)
+    public static void SendToggleCastleGateRequest(int handle, byte @isOpen, ushort @gateId)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1660,7 +1702,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ToggleCastleGateRequestRef.Length;
                 var packet = new ToggleCastleGateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.CloseState = @closeState == 1;
+                packet.IsOpen = @isOpen == 1;
                 packet.GateId = @gateId;
 
                 return length;
@@ -1679,13 +1721,13 @@ public unsafe partial class ConnectionManager
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleGuildCommand")]
-    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, byte @command)
+    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, CastleSiegeGuildCommandType @command)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -2690,12 +2732,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="pin">The pin.</param>
+    /// <param name="password">The password.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to unlock the protected vault with a pin.
     /// Causes reaction on server side: The vault lock state on the server is updated. VaultProtectionInformation is sent as response.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendUnlockVault")]
-    public static void SendUnlockVault(int handle, ushort @pin)
+    public static void SendUnlockVault(int handle, ushort @pin, IntPtr @password)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -2709,6 +2752,7 @@ public unsafe partial class ConnectionManager
                 var length = UnlockVaultRef.Length;
                 var packet = new UnlockVaultRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Pin = @pin;
+                packet.Password = NativeInterop.PtrToWideString(@password);
 
                 return length;
             });
@@ -3264,7 +3308,7 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="name">The name of the character which should be deleted.</param>
-    /// <param name="securityCode">A security code (7 bytes long). Some game clients/servers also expect to transmit the account password (up to 20 bytes long) here. In OpenMU, we work with the security here, but are not limiting to a length of 7 bytes.</param>
+    /// <param name="securityCode">A security code (7 bytes long). Some game clients/servers also expect to transmit the account password (up to 20 bytes long) here. In OpenMU, we work with the security here, but are not limiting to a length of 7 bytes. The 1.04d client always sends 20 bytes.</param>
     /// <remarks>
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to delete an existing character.
     /// Causes reaction on server side: The server checks if the player transmitted the correct security code and if the character actually exists. If all is valid, it deletes the character from the account. It then sends a response with a result code back to the game client.
@@ -3498,7 +3542,7 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="AddMasterSkillPoint" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="skillId">The skill id.</param>
+    /// <param name="skillId">The client sends the skill id as 32-bit value; the upper 16 bits are 0.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to add or increase the level of a specific master skill of the master skill tree.
     /// Causes reaction on server side: Adds or increases the master skill level of the specified skill, if the character is allowed to do that. A response is sent back to the client.
@@ -4813,12 +4857,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="inventoryItemSlot">The inventory slot of the target item. If it's 0xFF, the player requests to repair all items with the help of an NPC. If it's 8 (Pet slot), using the pet trainer NPC is mandatory, too.</param>
+    /// <param name="isSelfRepair">The is self repair.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to repair an item of his inventory, either himself or with the usage of an NPC.
     /// Causes reaction on server side: If the item is damaged and repairable, the durability of the item is maximized and corresponding responses are sent back to the client.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendItemRepair")]
-    public static void SendItemRepair(int handle, byte @inventoryItemSlot)
+    public static void SendItemRepair(int handle, byte @inventoryItemSlot, byte @isSelfRepair)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4832,6 +4877,7 @@ public unsafe partial class ConnectionManager
                 var length = ItemRepairRef.Length;
                 var packet = new ItemRepairRef(pipeWriter.GetSpan(length)[..length]);
                 packet.InventoryItemSlot = @inventoryItemSlot;
+                packet.IsSelfRepair = @isSelfRepair == 1;
 
                 return length;
             });
@@ -5341,7 +5387,7 @@ public unsafe partial class ConnectionManager
     /// Causes reaction on server side: The server checks if the player is inside the event etc. and performs the skills accordingly.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendIllusionTempleSkillRequest")]
-    public static void SendIllusionTempleSkillRequest(int handle, ushort @skillNumber, byte @targetObjectIndex, byte @distance)
+    public static void SendIllusionTempleSkillRequest(int handle, ushort @skillNumber, ushort @targetObjectIndex, byte @distance)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6697,12 +6743,13 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="DuelChannelQuitRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
+    /// <param name="channelId">The channel id.</param>
     /// <remarks>
     /// Is sent by the client when: A player requested to quit the duel as a spectator.
     /// Causes reaction on server side: The server will remove the player as spectator.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendDuelChannelQuitRequest")]
-    public static void SendDuelChannelQuitRequest(int handle)
+    public static void SendDuelChannelQuitRequest(int handle, byte @channelId)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6715,6 +6762,8 @@ public unsafe partial class ConnectionManager
             {
                 var length = DuelChannelQuitRequestRef.Length;
                 var packet = new DuelChannelQuitRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ChannelId = @channelId;
+
                 return length;
             });
         }
@@ -6746,6 +6795,271 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatCommandListRequestRef.Length;
                 var packet = new ChatCommandListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordIntegrationInfoRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports the Discord integration requests how the server is connected to Discord. It's usually sent after the character entered the game world, and again when the player opens a Discord dialog. By sending it, the client also announces that it understands the ExternalChatMessage.
+    /// Causes reaction on server side: The server sends a DiscordIntegrationInfo message, and from then on sends messages which were written in Discord as ExternalChatMessage.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordIntegrationInfoRequest")]
+    public static void SendDiscordIntegrationInfoRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordIntegrationInfoRequestRef.Length;
+                var packet = new DiscordIntegrationInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordLinkCodeRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to link the account to a Discord user, e.g. with a button of a Discord dialog.
+    /// Causes reaction on server side: The server creates a one-time code and sends it with a DiscordLinkCode message. The player enters the code in Discord to complete the link.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordLinkCodeRequest")]
+    public static void SendDiscordLinkCodeRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordLinkCodeRequestRef.Length;
+                var packet = new DiscordLinkCodeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordUnlinkRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to remove the link of the account to a Discord user.
+    /// Causes reaction on server side: The server removes the link and sends an updated DiscordIntegrationInfo message.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordUnlinkRequest")]
+    public static void SendDiscordUnlinkRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordUnlinkRequestRef.Length;
+                var packet = new DiscordUnlinkRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="CharacterRenameRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="oldName">The old name.</param>
+    /// <param name="newName">The new name.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to rename a character in the character selection.
+    /// Causes reaction on server side: The server renames the character and answers with CharacterRenameResult (F3 16).
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendCharacterRenameRequest")]
+    public static void SendCharacterRenameRequest(int handle, IntPtr @oldName, IntPtr @newName)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CharacterRenameRequestRef.Length;
+                var packet = new CharacterRenameRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.OldName = NativeInterop.PtrToWideString(@oldName);
+                packet.NewName = NativeInterop.PtrToWideString(@newName);
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="InventoryItemEquipRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="inventorySlot">The inventory slot.</param>
+    /// <param name="value">The value.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player (un)equips an item which is used inside the inventory.
+    /// Causes reaction on server side: The server answers with InventoryItemEquipResult (BF 20).
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendInventoryItemEquipRequest")]
+    public static void SendInventoryItemEquipRequest(int handle, byte @inventorySlot, byte @value)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = InventoryItemEquipRequestRef.Length;
+                var packet = new InventoryItemEquipRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.InventorySlot = @inventorySlot;
+                packet.Value = @value;
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="RequestD000" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: Sent by the 1.04d client; its purpose is not identified yet.
+    /// Causes reaction on server side: Unknown.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendRequestD000")]
+    public static void SendRequestD000(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RequestD000Ref.Length;
+                var packet = new RequestD000Ref(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="GameServerChannelRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="value">The value.</param>
+    /// <remarks>
+    /// Is sent by the client when: Sent when the player confirms the game server channel message box.
+    /// Causes reaction on server side: The server answers with GameServerChannelResult (F1 06).
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendGameServerChannelRequest")]
+    public static void SendGameServerChannelRequest(int handle, byte @value)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GameServerChannelRequestRef.Length;
+                var packet = new GameServerChannelRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Value = @value;
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="GameGuardAuthResponse" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="data">The data.</param>
+    /// <param name="dataByteLength">The length of <paramref name="data"/>.</param>
+    /// <remarks>
+    /// Is sent by the client when: The client answers the GameGuardAuthRequest (C3 73).
+    /// Causes reaction on server side: The server can verify the GameGuard answer.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendGameGuardAuthResponse")]
+    public static void SendGameGuardAuthResponse(int handle, byte* @data, uint dataByteLength)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GameGuardAuthResponseRef.Length;
+                var packet = new GameGuardAuthResponseRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@data, (int)dataByteLength).CopyTo(packet.Data);
+
                 return length;
             });
         }

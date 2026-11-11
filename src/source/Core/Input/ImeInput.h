@@ -20,3 +20,16 @@ namespace Input::IME
     // Debug overlay: dump the current/old IME conversion state on screen.
     void RenderStatus();
 }
+
+// The legacy text-input boxes' own conversion-mode backup, independent of Input::IME above.
+// Declared here rather than re-declared extern per translation unit, as it used to be.
+extern DWORD g_dwBKConv;
+extern DWORD g_dwBKSent;
+extern BOOL g_bForceIMEConv;
+extern BOOL g_bForceIMESent;
+extern BOOL g_bBKOpenState;
+extern BOOL g_bIMEBlock;
+
+void SaveIMEStatus();
+void RestoreIMEStatus();
+void CheckTextInputBoxIME(int iMode);

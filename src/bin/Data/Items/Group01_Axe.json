@@ -1,0 +1,297 @@
+{
+  "formatVersion": 1,
+  "group": 1,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Small Axe",
+        "de": "Kleine Axt",
+        "es": "Hacha Pequeña",
+        "pl": "Mały topór",
+        "pt": "Machado pequeno"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "level": 1,
+      "durability": 18,
+      "damageMin": 1,
+      "damageMax": 6,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 50
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Hand Axe",
+        "de": "Handaxt",
+        "es": "Hacha de Mano",
+        "pl": "Toporek",
+        "pt": "Machado de mão"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "level": 4,
+      "durability": 20,
+      "damageMin": 4,
+      "damageMax": 9,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "summoner": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Double Axe",
+        "de": "Doppelaxt",
+        "es": "Hacha Doble",
+        "pl": "Podwójny topór",
+        "pt": "Machado duplo"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "skill": 19,
+      "level": 14,
+      "durability": 26,
+      "damageMin": 14,
+      "damageMax": 24,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 90
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Tomahawk",
+        "de": "Tomahawk",
+        "es": "Tomahawk",
+        "pl": "Tomahawk",
+        "pt": "Machadinha"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "skill": 19,
+      "level": 18,
+      "durability": 28,
+      "damageMin": 18,
+      "damageMax": 28,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Elven Axe",
+        "de": "Elfenaxt",
+        "es": "Hacha de los Elfos",
+        "pl": "Elfi topór",
+        "pt": "Machado élfico"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 1,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "level": 26,
+      "durability": 32,
+      "damageMin": 26,
+      "damageMax": 38,
+      "attackSpeed": 40,
+      "attackType": 1,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1,
+        "summoner": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Battle Axe",
+        "de": "Kampfaxt",
+        "es": "Hacha de Batalla",
+        "pl": "Topór bojowy",
+        "pt": "Machado de batalha"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 19,
+      "level": 30,
+      "durability": 36,
+      "damageMin": 36,
+      "damageMax": 44,
+      "attackSpeed": 20,
+      "attackType": 1,
+      "requirements": {
+        "strength": 120
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Nikea Axe",
+        "de": "Nikea-Axt",
+        "es": "Hacha Nikea",
+        "pl": "Topór Nikei",
+        "pt": "Machado de Nikea"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 19,
+      "level": 34,
+      "durability": 44,
+      "damageMin": 38,
+      "damageMax": 50,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "fairyElf": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Larkan Axe",
+        "de": "Larkan-Axt",
+        "es": "Hacha Larkan",
+        "pl": "Topór Larkana",
+        "pt": "Machado de Larkan"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 19,
+      "level": 46,
+      "durability": 55,
+      "damageMin": 54,
+      "damageMax": 67,
+      "attackSpeed": 25,
+      "attackType": 1,
+      "requirements": {
+        "strength": 140
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Crescent Axe",
+        "de": "Halbmondaxt",
+        "es": "Hacha Medialuna",
+        "pl": "Topór półksiężyca",
+        "pt": "Machado crescente"
+      },
+      "options": ["luck", "physicalDamageOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "mainHand",
+      "weaponKind": "axe",
+      "statProfile": "weapon",
+      "twoHanded": true,
+      "skill": 19,
+      "level": 54,
+      "durability": 65,
+      "damageMin": 69,
+      "damageMax": 89,
+      "attackSpeed": 30,
+      "attackType": 1,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    }
+  ]
+}

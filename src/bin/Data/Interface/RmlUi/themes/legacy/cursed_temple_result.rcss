@@ -1,0 +1,133 @@
+/* Legacy theme for CCursedTempleResult, reproducing its RenderFrame()/RenderResultPanel()/
+   RenderText()/RenderButtons(): the message-box back (222 x 272 from y 2), the titled top
+   (newui_Message_03, 230 x 67), eleven middle tiles, the bottom and separator lines at y 45 and
+   205; illusion_success / illusion_failure (351 x 115) 110 units above the window; the texts in
+   the normal font (the title and headings (255, 176, 73), the MU Alliance rows (100, 178, 251),
+   the Illusion Sorcery rows (254, 214, 55), the notice red), the hero's row on a red 220-unit
+   text box at x 2; Close (newui_btn_empty_very_small, 54 x 23) centred at y 245. Reference px
+   inside #panel. */
+
+@spritesheet result-back-sheet { src: "../../../newui_msgbox_back.jpg"; result-back: 0px 0px 222px 272px; }
+@spritesheet result-top-sheet { src: "../../../newui_Message_03.tga"; result-top: 0px 0px 230px 67px; }
+@spritesheet result-middle-sheet { src: "../../../newui_msgbox_middle.tga"; result-middle: 0px 0px 230px 15px; }
+@spritesheet result-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; result-bottom: 0px 0px 230px 50px; }
+@spritesheet result-line-sheet { src: "../../../newui_Message_Line.tga"; result-line: 0px 0px 223px 21px; }
+@spritesheet result-success-sheet { src: "../../../illusion_success.tga"; result-success: 0px 0px 351px 115px; }
+@spritesheet result-failure-sheet { src: "../../../illusion_failure.tga"; result-failure: 0px 0px 351px 115px; }
+@spritesheet result-btn-sheet
+{
+	src: "../../../newui_btn_empty_very_small.tga";
+	result-btn-up: 0px 0px 54px 23px;
+	result-btn-over: 0px 23px 54px 23px;
+	result-btn-down: 0px 46px 54px 23px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 282px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+#back { position: absolute; left: 0; top: 2px; width: 222px; height: 272px; decorator: image(result-back); }
+#frame_top { position: absolute; left: 0; top: 0; width: 230px; height: 67px; decorator: image(result-top); }
+.frame-middle { position: absolute; left: 0; width: 230px; height: 15px; decorator: image(result-middle); }
+#frame_bottom { position: absolute; left: 0; top: 232px; width: 230px; height: 50px; decorator: image(result-bottom); }
+.line { position: absolute; left: 0; width: 223px; height: 21px; decorator: image(result-line); }
+
+.result-banner { position: absolute; left: calc(50% - 180px); top: -110px; width: 351px; height: 115px; pointer-events: none; }
+.result-banner.success { decorator: image(result-success); }
+.result-banner.failure { decorator: image(result-failure); }
+
+.hero-row { position: absolute; left: 2px; width: 220px; background-color: #ff0000; pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: pre; text-align: center; pointer-events: none; }
+.result-text.cell { text-align: left; }
+
+.result-btn {
+	display: block;
+	position: absolute;
+	left: 88px;
+	top: 245px;
+	width: 54px;
+	height: 23px;
+	decorator: image(result-btn-up);
+	pointer-events: auto;
+}
+.result-btn:hover { decorator: image(result-btn-over); }
+.result-btn:active { decorator: image(result-btn-down); }
+.result-label { left: 0; color: #ffffff; }
+
+/* RenderText()'s own rows: the title, the column heading and the reward notice centred on the
+   window, then one 15-unit row per player in each team's block. */
+.frame-middles, .result-rows { position: static; }
+.result-line { position: absolute; left: 0; text-align: center; }
+#ct_hero_list { top: 13px; }
+#ct_column_header { top: 38px; }
+/* RenderText()'s notice sits 55 above the window's bottom, the Close button 37. */
+#ct_reward_hint { top: 227px; }
+/* The heading as one label per column, over its cells, rather than native's single centred string,
+   which ran past the frame once translated. */
+#ct_column_header { display: none; }
+.column-label { top: 38px; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
+.frame-middles .frame-middle:nth-child(11) { top: 217px; }
+.line-upper { top: 45px; }
+.line-lower { top: 205px; }
+
+.result-row { position: absolute; left: 0; width: 230px; height: 15px; }
+.result-row:nth-child(1) { top: 0px; }
+.result-row:nth-child(2) { top: 15px; }
+.result-row:nth-child(3) { top: 30px; }
+.result-row:nth-child(4) { top: 45px; }
+.result-row:nth-child(5) { top: 60px; }
+.result-row:nth-child(6) { top: 75px; }
+.result-row:nth-child(7) { top: 90px; }
+.result-row:nth-child(8) { top: 105px; }
+.result-row:nth-child(9) { top: 120px; }
+.result-row:nth-child(10) { top: 135px; }
+.result-row:nth-child(11) { top: 150px; }
+.result-row:nth-child(12) { top: 165px; }
+.rows-allied .result-row { margin-top: 65px; }
+.rows-illusion .result-row { margin-top: 140px; }
+.result-cell { position: absolute; top: 0; }
+/* Each column keeps native's offset and the room before the next one; a longer value ends in ".."
+   and scrolls on hover (base.rcss .marquee). */
+.result-cell, .column-label { text-align: left; }
+.cell-team, .label-team { left: 5px; }
+.cell-name, .label-name { left: 56px; }
+.cell-class-name, .label-class-name { left: 106px; }
+.cell-added-exp, .label-added-exp { left: 150px; }
+.cell-point, .label-point { left: 190px; }
+.hero-row { top: 0; }
+
+#ct_hero_list, #ct_column_header, .column-label { color: rgb(255, 176, 73); }
+#ct_reward_hint { color: rgb(255, 0, 0); }
+.rows-allied .result-cell { color: rgb(100, 178, 251); }
+.rows-illusion .result-cell { color: rgb(254, 214, 55); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#ct_hero_list { width: calc(230px * var(--root-scale)); }
+#ct_column_header { width: calc(230px * var(--root-scale)); }
+/* Inside the frame's edges. */
+#ct_reward_hint { left: 7px; width: calc(216px * var(--root-scale)); }
+.cell-team, .label-team { width: calc(49px * var(--root-scale)); }
+.cell-name, .label-name { width: calc(48px * var(--root-scale)); }
+.cell-class-name, .label-class-name { width: calc(42px * var(--root-scale)); }
+.cell-added-exp, .label-added-exp { width: calc(38px * var(--root-scale)); }
+.cell-point, .label-point { width: calc(30px * var(--root-scale)); }
+.result-label { width: calc(54px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.hero-row { height: calc(var(--line-height) / var(--root-scale)); }

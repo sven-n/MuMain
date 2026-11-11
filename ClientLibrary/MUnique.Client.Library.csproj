@@ -13,9 +13,12 @@
 
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <WarningsAsErrors>nullable;CS4014;VSTHRD110;VSTHRD100</WarningsAsErrors>
+    <!-- NU1900 only says that NuGet could not download its vulnerability list (a network failure), which no
+         change here can fix; a package with a known vulnerability still warns (NU1901 to NU1904). -->
+    <NoWarn>$(NoWarn);NU1900</NoWarn>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <!-- The version of the packet definitions this client is built against. -->
-    <OpenMuPacketsVersion>0.9.10</OpenMuPacketsVersion>
+    <OpenMuPacketsVersion>0.11.0</OpenMuPacketsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +34,8 @@
 
   <ItemGroup>
     <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="$(OpenMuPacketsVersion)" />
+    <!-- Read by LibraryVersion for MuError.log. -->
+    <AssemblyMetadata Include="OpenMuPacketsVersion" Value="$(OpenMuPacketsVersion)" />
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
   </ItemGroup>
 

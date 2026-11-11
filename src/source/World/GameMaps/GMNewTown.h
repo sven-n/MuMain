@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 namespace SEASON3B
 {
     class GMNewTown
@@ -17,29 +19,22 @@ namespace SEASON3B
 
         static bool IsCurrentMap();
         static bool IsNewMap73_74();
-        //. ø¿∫Í¡ß∆Æ
+        //. Ïò§Î∏åÏ†ùÌä∏
         static void CreateObject(OBJECT* pObject);
         static bool MoveObject(OBJECT* pObject);
-        static bool RenderObjectVisual(OBJECT* pObject, BMD* pModel);
-        static bool RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
-        static void RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
+        static bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
+        static bool RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
+        static void RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
-        //. ∏ÛΩ∫≈Õ
-        static CHARACTER* CreateNewTownMonster(int iType, int PosX, int PosY, int Key);
-
+        //. Î™¨Ïä§ÌÑ∞
         static bool MoveMonsterVisual(OBJECT* pObject, BMD* pModel);
         static void MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-        static bool RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
+        static bool UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
         static bool AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-        static bool SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
-        static bool PlayMonsterSound(OBJECT* pObject);
         static void PlayObjectSound(OBJECT* pObject);
 
-        static bool IsCheckMouseIn();
-        static bool CharacterSceneCheckMouse(OBJECT* pObj);
-        static bool m_bCharacterSceneCheckMouse;
     };
 }
 #endif // !defined(AFX_GMNEWTOWN_H__3FBE665B_5FFE_4BF4_B723_A6A9A5DFE479__INCLUDED_)

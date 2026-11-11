@@ -1,0 +1,160 @@
+#pragma once
+
+#ifdef _EDITOR
+
+#include "MonsterPreviewScene.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
+
+#include "../MuEditor/UI/EffectBrowser/EffectPreviewCamera.h"
+#include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+#include "Data/GameData/MonsterData/MonsterSoundSet.h"
+
+#include <optional>
+#include <span>
+#include <string>
+
+namespace MuEditor::Monsters
+{
+// The Monster Preview tool (monsters design, section 9): the selected
+// monster's model in a view with the item preview's camera (the mouse turns
+// it, the middle button moves the picture, the wheel zooms). Any animation of
+// the model plays, pauses and goes frame by frame; the speeds are the Monster
+// Model tool's, also while one is being dragged; the sound events of the
+// monster's set play at their animations, cues and moments as the game plays
+// them, on any map (Q-MN74, Q-MN76, Q-MN78); the impact frame of attacks 1 and
+// 2, the animation that follows and the model's cues are marked (a cue's tag
+// opens its event in Monster Sounds, Q-MN80); Add a sound at this frame adds a
+// cue and its event (Q-MN82); a monster with random variants shows each look
+// (Q-MN83); the speed factors the game adds can be played too; Monster
+// Attacks' Play plays an attack once (Q-MN73). Only in the editor's window
+// (Q-MN17).
+class MuMonsterPreviewUI
+{
+public:
+    static MuMonsterPreviewUI& GetInstance();
+
+    void Render(bool* open);
+
+    // Between frames: the texture can only be released then.
+    void BeforeFrame()
+    {
+        m_target.BeforeFrame();
+    }
+
+    // The Monster Attacks tool's Play: the attack animation once from the
+    // start with the model's attack sounds and `sound` (the attacks' own), then
+    // the model stands as the game's does. Nothing while the model of `slot`
+    // is not open or lacks the animation.
+    void PlayAttack(int slot, int animation, std::optional<int> sound);
+
+    // The animation shown, its frame, and whether it plays.
+    int GetAnimation() const
+    {
+        return m_animation;
+    }
+    float GetFrame() const
+    {
+        return m_frame;
+    }
+    // Whether the preview showed the model in `slot` in this frame or the one
+    // before (it may draw after a tool in a frame): only then are the
+    // animation and frame that model's.
+    bool ShowsSlot(int slot) const;
+    bool IsPlaying() const
+    {
+        return m_playing;
+    }
+    // The cues the preview marks and plays for the model in `slot`: those of
+    // Monster Sounds' draft, which edits only the cues, with an edit that is
+    // not stored yet, also while Monster Model shows a draft of the model
+    // (Q-MN81); else those of the values it plays.
+    std::span<const Data::Monsters::MonsterModelCue> GetCues(int slot) const;
+
+    // One frame of the animation shown, as Render plays it while it plays:
+    // a held animation stops at its last frame, others start again, and an
+    // attack Play started ends with the model standing.
+    void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
+
+private:
+    MuMonsterPreviewUI() = default;
+
+    void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
+    // The Map and State rows: the map or state variant whose setup the
+    // character shows (Q-MN40).
+    void RenderPickers(const Data::Monsters::MonsterDefinition& monster);
+    // Show equipment, Pointed at and Light, a line for a monster that rides
+    // its helper, and Replay spawn and Replay appear. Returns the look of
+    // this frame, built once after its controls.
+    MonsterPreviewLook RenderLookControls(int slot);
+    // Replay appear: the appear's animation once from its start, then the
+    // stand, with what the scene plays of it.
+    void PlayAppear(int slot);
+    // How the view shows the monster of this frame.
+    MonsterPreviewLook BuildLook() const;
+    // The map variant whose state variants the State row lists and the look
+    // takes: the picked one once it has maps, else none (the monster's).
+    int StatesMapVariant(const Data::Monsters::MonsterDefinition& monster) const;
+    void RenderPreview(int slot);
+    void RenderCueTags(int slot, int keys, float last);
+    void RenderAddSound(int slot);
+    void RenderAddSoundPopup(int slot);
+    // The set the shown monster plays with the model in `slot`; nullptr for
+    // none.
+    const Data::Monsters::MonsterSoundSet* ShownSet(int slot) const;
+    // The sound events of the animation at the frame, then those of the
+    // moment, as the game plays them.
+    void PlaySounds(int slot, int animation, float frame, std::optional<Data::Monsters::MonsterSoundMoment> moment);
+    // The events of the drawn frame: during the animation, and once in it
+    // after each start (Q-MN88).
+    void PlayDrawnSounds(int slot);
+    void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
+    void RenderFrameSlider(int slot, int keys);
+    void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values, const MonsterPreviewLook& look);
+    void StandAfterAttack(int slot);
+    void Restart(int slot);
+    float SpeedFactor(int slot) const;
+
+    Effects::EffectPreviewCamera m_camera;
+    Effects::EffectPreviewTarget m_target;
+    MonsterPreviewScene m_scene;
+    // The monster shown in this frame (nullptr: a model only), and the
+    // preview's look choices.
+    const Data::Monsters::MonsterDefinition* m_monster = nullptr;
+    int m_pickedNumber = -1;
+    int m_mapVariant = -1;
+    // The picked state by its name (empty: Always), so a list that changes
+    // under it keeps it or goes back to Always.
+    std::string m_state;
+    bool m_showEquipment = true;
+    bool m_pointedAt = false;
+    float m_light = 1.0f;
+    // The slot the camera was framed for, and the animation shown.
+    int m_framedSlot = -1;
+    float m_framedScale = 1.0f;
+    int m_slot = -1;
+    // The ImGui frame the preview last showed m_slot animating in.
+    int m_shownFrame = -1;
+    int m_animation = 0;
+    float m_frame = 0.0f;
+    float m_turnDegrees = 0.0f;
+    bool m_playing = true;
+    // An attack Play started: the model stands when it ends.
+    bool m_once = false;
+    // A once event played since the animation started.
+    bool m_soundOncePlayed = false;
+    // The last ticks of the shown model's timers (Q-MN91).
+    GameLogic::Monsters::ModelTimers::LastTicks m_timerLastTicks{};
+    bool m_turn = false;
+    bool m_sounds = true;
+    bool m_gameFactors = true;
+    bool m_transformed = false;
+    // Add a sound at this frame: the cue it adds.
+    Data::Monsters::MonsterModelCue m_newCue;
+};
+} // namespace MuEditor::Monsters
+
+#define g_MuMonsterPreviewUI MuEditor::Monsters::MuMonsterPreviewUI::GetInstance()
+
+#endif // _EDITOR

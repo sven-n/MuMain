@@ -1,0 +1,153 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "MonsterCheckTargets.h"
+
+#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+
+#include <algorithm>
+#include <array>
+#include <charconv>
+#include <utility>
+
+namespace MuEditor::Monsters
+{
+namespace
+{
+// How the monster list's reader and checks name a field of one monster
+// (MonstersJson, MonsterDataValidation): "monster <number> <key>".
+constexpr std::string_view MonsterPrefix = "monster ";
+constexpr std::string_view Digits = "0123456789";
+constexpr char AfterNumber = ' ';
+
+// The key ends at a language ("name.de") or an index.
+constexpr std::string_view KeyEnds = ".[";
+constexpr std::string_view NameKey = "name";
+constexpr std::string_view KindKey = "kind";
+constexpr std::string_view ModelKey = "model";
+constexpr std::string_view AttacksKey = "attacks";
+// The map variants hold attacks only yet (monsters design, Q-MN65).
+constexpr std::string_view MapVariantsKey = "mapVariants";
+constexpr std::string_view SoundSetKey = "soundSet";
+constexpr std::string_view RandomVariantsKey = "randomVariants";
+// How the sound sets' problems name a field (MonsterSoundSetField): "sound
+// set <name> <key>"; a key has no space.
+constexpr std::string_view SoundSetPrefix = "sound set ";
+constexpr char IndexStart = '[';
+constexpr char IndexEnd = ']';
+
+const ToolWindowEntry* FindTool(const char* windowId)
+{
+    for (const ToolWindowEntry& entry : GetMonsterTools().tools)
+    {
+        if (std::string_view(entry.windowId) == windowId)
+        {
+            return &entry;
+        }
+    }
+    return nullptr;
+}
+} // namespace
+
+std::string_view GetMonsterField(std::string_view field)
+{
+    if (!field.starts_with(MonsterPrefix))
+    {
+        return field;
+    }
+    const std::string_view afterPrefix = field.substr(MonsterPrefix.size());
+    const size_t numberEnd = afterPrefix.find_first_not_of(Digits);
+    if (numberEnd == 0 || numberEnd == std::string_view::npos || afterPrefix[numberEnd] != AfterNumber)
+    {
+        return field;
+    }
+    return afterPrefix.substr(numberEnd + 1);
+}
+
+MonsterTool GetToolForField(std::string_view field)
+{
+    const std::string_view monsterField = GetMonsterField(field);
+    const std::string_view key = monsterField.substr(0, monsterField.find_first_of(KeyEnds));
+    if (key == NameKey)
+    {
+        return MonsterTool::Translations;
+    }
+    if (key == SoundSetKey || key == RandomVariantsKey || GetSoundSetOfField(field))
+    {
+        return MonsterTool::Sounds;
+    }
+    return key == AttacksKey || key == MapVariantsKey ? MonsterTool::Attacks : MonsterTool::Browser;
+}
+
+std::optional<std::string_view> GetSoundSetOfField(std::string_view field)
+{
+    if (!field.starts_with(SoundSetPrefix))
+    {
+        return std::nullopt;
+    }
+    const std::string_view rest = field.substr(SoundSetPrefix.size());
+    const size_t keyStart = rest.rfind(' ');
+    if (keyStart == std::string_view::npos || keyStart == 0)
+    {
+        return std::nullopt;
+    }
+    return rest.substr(0, keyStart);
+}
+
+std::optional<Data::Monsters::MonsterValueField> GetValueOfField(std::string_view field)
+{
+    using Data::Monsters::MonsterValueField;
+    const std::string_view monsterField = GetMonsterField(field);
+    const std::string_view key = monsterField.substr(0, monsterField.find_first_of(KeyEnds));
+    constexpr std::array<std::pair<std::string_view, MonsterValueField>, 7> Values{{
+        {NameKey, MonsterValueField::Names},
+        {KindKey, MonsterValueField::Kind},
+        {ModelKey, MonsterValueField::Model},
+        {SoundSetKey, MonsterValueField::SoundSet},
+        {AttacksKey, MonsterValueField::Attacks},
+        {MapVariantsKey, MonsterValueField::MapVariants},
+        {RandomVariantsKey, MonsterValueField::RandomVariants},
+    }};
+    const auto found = std::ranges::find(Values, key, &std::pair<std::string_view, MonsterValueField>::first);
+    return found != Values.end() ? std::optional(found->second) : std::nullopt;
+}
+
+std::optional<int> GetMapVariantOfField(std::string_view field)
+{
+    const std::string_view monsterField = GetMonsterField(field);
+    if (!monsterField.starts_with(MapVariantsKey) || monsterField.size() <= MapVariantsKey.size() ||
+        monsterField[MapVariantsKey.size()] != IndexStart)
+    {
+        return std::nullopt;
+    }
+    const std::string_view index = monsterField.substr(MapVariantsKey.size() + 1);
+    int variant = 0;
+    const auto [end, error] = std::from_chars(index.data(), index.data() + index.size(), variant);
+    if (error != std::errc() || end == index.data() || end == index.data() + index.size() || *end != IndexEnd)
+    {
+        return std::nullopt;
+    }
+    return variant;
+}
+
+const ToolWindowEntry& GetToolWindow(MonsterTool tool)
+{
+    const ToolWindowEntry* entry = nullptr;
+    if (tool == MonsterTool::Translations)
+    {
+        entry = FindTool(WindowIds::MonsterTranslations);
+    }
+    else if (tool == MonsterTool::Attacks)
+    {
+        entry = FindTool(WindowIds::MonsterAttacks);
+    }
+    else if (tool == MonsterTool::Sounds)
+    {
+        entry = FindTool(WindowIds::MonsterSounds);
+    }
+    return entry != nullptr ? *entry : GetMonsterTools().browser;
+}
+} // namespace MuEditor::Monsters
+
+#endif // _EDITOR

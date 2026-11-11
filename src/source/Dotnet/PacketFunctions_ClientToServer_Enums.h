@@ -13,6 +13,9 @@
 
 #pragma once
 
+#ifndef MU_PACKET_ENUMS_CLIENTTOSERVER
+#define MU_PACKET_ENUMS_CLIENTTOSERVER
+
 enum class TradeButtonState : uint32_t
 {
 Unchecked = 0, ///< Trade button is not pressed. It means that the trade is not yet accepted by the trader.
@@ -65,6 +68,21 @@ enum class GuildRequestType : uint32_t
 Undefined = 0, ///< The undefined request type.
 Join = 1, ///< The join type.
 Leave = 2, ///< The leave type.
+};
+
+enum class CastleSiegeTaxType : uint32_t
+{
+Undefined = 0, ///< No tax type is selected.
+ChaosMachine = 1, ///< The Chaos Machine tax rate.
+Store = 2, ///< The NPC store tax rate.
+HuntingZoneEntranceFee = 3, ///< The hunting-zone entrance fee.
+};
+
+enum class CastleSiegeGuildCommandType : uint32_t
+{
+Attack = 0, ///< Orders the team to attack.
+Defend = 1, ///< Orders the team to defend.
+Wait = 2, ///< Orders the team to wait.
 };
 
 enum class FruitUsage : uint32_t
@@ -128,3 +146,4 @@ AcceptQuest = 1, ///< The quest is accepted and started.
 RefuseQuest = 2, ///< The quest is refused and not started.
 };
 
+#endif // MU_PACKET_ENUMS_CLIENTTOSERVER

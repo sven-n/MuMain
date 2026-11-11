@@ -1,0 +1,135 @@
+#include "stdafx.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/NPCs/EmpireGuardianTimer.h"
+#include "I18N/All.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+CEmpireGuardianTimer::CEmpireGuardianTimer()
+{
+    m_pNewUIMng = NULL;
+    m_dTime = 600000;
+    m_iType = 1;
+    m_iDay = EG_MONDAY;//EG_DAY_MAP_LIST::EG_MONDAY;
+    m_iZone = 1;
+    m_iMonsterCount = 0;
+}
+
+CEmpireGuardianTimer::~CEmpireGuardianTimer()
+{
+    Release();
+}
+
+bool CEmpireGuardianTimer::Create(CManager* pNewUIMng)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER, this);
+
+    m_View.Build();
+
+    Show(false);
+
+    return true;
+}
+
+void CEmpireGuardianTimer::Release()
+{
+    m_View.Release();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+bool CEmpireGuardianTimer::UpdateMouseEvent()
+{
+    if (true == BtnProcess())
+        return false;
+    return true;
+}
+
+bool CEmpireGuardianTimer::UpdateKeyEvent()
+{
+    return true;
+}
+
+bool CEmpireGuardianTimer::Update()
+{
+    SyncView();
+
+    return true;
+}
+
+bool CEmpireGuardianTimer::Render()
+{
+    // Nothing native left: the frame and the texts are RmlUi (SyncView()). Kept because CObject
+    // requires the override.
+    return true;
+}
+
+void CEmpireGuardianTimer::SyncView()
+{
+    // The original's Render(): the round and zone, the standby / time-left caption, then the time
+    // and the monsters left in the big font, orange, red-orange under three minutes, red under one;
+    // every line centred on 110 units from x 7.
+    EventTimerView::Line round;
+    EventTimerView::Line caption;
+    EventTimerView::Line time;
+    if (IsVisible())
+    {
+        wchar_t szText[256] = {};
+        mu_swprintf(szText, I18N::Game::RoundDZoneD, m_iDay, m_iZone);
+        // The original set no colour for the round: it took whatever the text renderer was left
+        // in by the window drawn before it, white in every capture (the windows drawn before it
+        // reset to white). Plain here.
+        round = {szText, "plain"};
+        switch (m_iType)
+        {
+        case 0:
+        case 1:
+            caption = {I18N::Game::StandbyTime, "standby"};
+            break;
+        case 2:
+            mu_swprintf(szText, L"%ls (%ls)", I18N::Game::TimeLeft, I18N::Game::RemainingMonsters);
+            caption = {szText, "normal"};
+            break;
+        default:
+            break;
+        }
+        const int iSecond = static_cast<int>(m_dTime / 1000);
+        const int iMinute = iSecond / 60;
+        const char* timeState = caption.state;
+        if (2 < iMinute)
+            timeState = "normal";
+        else if (0 < iMinute && iMinute <= 2)
+            timeState = "closing";
+        else if (iMinute == 0)
+            timeState = "expiring";
+        mu_swprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
+        time = {szText, timeState};
+    }
+    m_View.Sync(IsVisible(), round, caption, time);
+}
+
+bool CEmpireGuardianTimer::BtnProcess()
+{
+    return false;
+}
+
+float CEmpireGuardianTimer::GetLayerDepth()
+{
+    return 1.2f;
+}
+
+void CEmpireGuardianTimer::OpenningProcess()
+{
+}
+
+void CEmpireGuardianTimer::ClosingProcess() {}

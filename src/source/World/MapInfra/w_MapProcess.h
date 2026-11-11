@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "World/MapInfra/w_BaseMap.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -20,26 +22,27 @@ public:
 public:
     bool CreateObject(OBJECT* o);
     bool MoveObject(OBJECT* o);
-    bool RenderObjectVisual(OBJECT* o, BMD* b);
-    bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    bool UpdateObjectEffects(OBJECT* o, BMD* b);
+    bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b);
+    bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     void RenderFrontSideVisual();
 
 public:
-    CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     bool MoveMonsterVisual(OBJECT* o, BMD* b);
     void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
     bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
 public:
-    bool PlayMonsterSound(OBJECT* o);
 
 public:
     bool ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer);
 
 public:
+    // cppcheck-suppress unknownMacro
     void Register(Smart_Ptr(BaseMap) pMap);
     void UnRegister(ENUM_WORLD type);
 
@@ -54,10 +57,10 @@ private:
     MapProcess();
 
 private:
-    typedef std::list< Smart_Ptr(BaseMap) >		MapList;
+    typedef std::list<Smart_Ptr(BaseMap)> MapList;
 
 private:
-    MapList				m_MapList;
+    MapList m_MapList;
 };
 
 extern MapProcessPtr g_MapProcess;

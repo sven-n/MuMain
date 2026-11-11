@@ -1,0 +1,98 @@
+/* Legacy theme for CCatapultWindow, reproducing its RenderFrame()/RenderTexts()/RenderButtons():
+   the docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the title and three
+   lines bold (220, 220, 220) centred on 190 units at y 13 / 50 / 65 / 80, the item table from
+   (12, 116), the area buttons (newui_Btn_gate 46 x 36, newui_Btn_round 77 x 47: up / over / down),
+   the chosen one and a locked Shoot tinted (100, 100, 100) with a grey label and never hovered,
+   Shoot (newui_btn_empty 108 x 29) at (41, 250), the exit button. Reference px inside #panel. */
+
+@spritesheet cp-gate-sheet
+{
+	src: "../../../newui_Btn_gate.tga";
+	cp-gate-up: 0px 0px 46px 36px;
+	cp-gate-over: 0px 36px 46px 36px;
+	cp-gate-down: 0px 72px 46px 36px;
+}
+@spritesheet cp-round-sheet
+{
+	src: "../../../newui_Btn_round.tga";
+	cp-round-up: 0px 0px 77px 47px;
+	cp-round-over: 0px 47px 77px 47px;
+	cp-round-down: 0px 94px 77px 47px;
+}
+@spritesheet cp-fire-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	cp-fire-up: 0px 0px 108px 29px;
+	cp-fire-over: 0px 29px 108px 29px;
+	cp-fire-down: 0px 58px 108px 29px;
+}
+@spritesheet cp-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; cp-edge-top: 0px 0px 1px 14px; }
+@spritesheet cp-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; cp-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet cp-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; cp-edge-left: 0px 0px 14px 1px; }
+@spritesheet cp-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; cp-edge-right: 0px 0px 14px 1px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+.cp-title { left: 0; top: 13px; font-weight: bold; color: #dcdcdc; }
+.cp-line { left: 0; font-weight: bold; color: #dcdcdc; }
+.cp-lines { position: static; }
+.cp-line:nth-child(1) { top: 50px; }
+.cp-line:nth-child(2) { top: 65px; }
+.cp-line:nth-child(3) { top: 80px; }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
+.t-edge-top { height: 14px; decorator: image(cp-edge-top); }
+.t-edge-bottom { height: 14px; decorator: image(cp-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(cp-edge-left); }
+.t-edge-right { width: 14px; decorator: image(cp-edge-right); }
+.t-corner { width: 14px; height: 14px; }
+.t-tl { decorator: image(docked-corner-tl); }
+.t-tr { decorator: image(docked-corner-tr); }
+.t-bl { decorator: image(docked-corner-bl); }
+.t-br { decorator: image(docked-corner-br); }
+
+.cp-area { display: block; position: absolute; width: 46px; height: 36px; decorator: image(cp-gate-up); pointer-events: auto; }
+.cp-area:hover { decorator: image(cp-gate-over); }
+.cp-area:active { decorator: image(cp-gate-down); }
+.cp-area.big { width: 77px; height: 47px; decorator: image(cp-round-up); }
+.cp-area.big:hover { decorator: image(cp-round-over); }
+.cp-area.big:active { decorator: image(cp-round-down); }
+.cp-area.locked, .cp-area.locked:hover, .cp-area.locked:active { decorator: image(cp-gate-up); image-color: #646464; }
+.cp-area.big.locked, .cp-area.big.locked:hover, .cp-area.big.locked:active { decorator: image(cp-round-up); image-color: #646464; }
+
+#btn_fire { display: block; position: absolute; left: 41px; top: 250px; width: 108px; height: 29px; decorator: image(cp-fire-up); pointer-events: auto; }
+#btn_fire:hover { decorator: image(cp-fire-over); }
+#btn_fire:active { decorator: image(cp-fire-down); }
+#btn_fire.locked, #btn_fire.locked:hover, #btn_fire.locked:active { decorator: image(cp-fire-up); image-color: #646464; }
+
+.cp-label { left: 0; color: #ffffff; }
+.locked .cp-label { color: #646464; }
+
+/* The two modes' own target areas (kAttackAreas / kDefenseAreas). A label is centred on its
+   button, where C++ used to measure the text and halve the remainder. */
+.cp-areas { position: static; }
+.cp-area-label { left: 0; text-align: center; }
+.cp-areas.attack .cp-area:nth-child(1) { left: 22px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(2) { left: 74px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(3) { left: 126px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(4) { left: 59px; top: 182px; }
+.cp-areas.defense .cp-area:nth-child(1) { left: 18px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(2) { left: 97px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(3) { left: 56px; top: 179px; }
+
+/* The target table's frame, the shape the original drew it as. */
+.t-tl { left: 12px; top: 116px; }
+.t-tr { left: 166px; top: 116px; }
+.t-edge-top { left: 25px; top: 116px; width: 141px; }
+.t-edge-left { left: 12px; top: 129px; height: 100px; }
+.t-edge-right { left: 166px; top: 129px; height: 100px; }
+.t-bl { left: 12px; top: 223px; }
+.t-br { left: 166px; top: 223px; }
+.t-edge-bottom { left: 25px; top: 223px; width: 141px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.cp-title { width: calc(100% * var(--root-scale)); }
+.cp-line { width: calc(100% * var(--root-scale)); }
+#btn_fire .cp-label { width: calc(108px * var(--root-scale)); }

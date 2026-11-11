@@ -3,13 +3,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
+#include "Core/Utilities/Random.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <math.h>
 #include <iterator>
+#include <vector>
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/BindState.h"
-#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
@@ -19,7 +27,25 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
+#include "Render/Terrain/TerrainHeightGrid.h"
+#include "Core/Utilities/FrameProfiler.h"
+#include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/Lighting/DynamicLightList.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Lighting/WorldDynamicLights.h"
+#include "Render/Look/LookProfileSetting.h"
+#include "Render/Terrain/TerrainLightGrid.h"
+#include "Scenes/SceneCore.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "I18N/All.h"
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <optional>
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
@@ -33,6 +59,8 @@
 #include "Camera/Frustum.h"
 #include "Camera/ConvexHull2D.h"
 #include "Engine/Object/CullingConstants.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Drawing/LegacyCalls.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -46,25 +74,7 @@ extern "C" bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outF
 static bool s_bShowTileGrid = false;
 #endif
 
-#include "Render/Core/RenderConfig.h"
-#include "Render/Shaders/TerrainShader.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/RHI/RHI.h"
-
 //-------------------------------------------------------------------------------------------------------------
-
-GLuint g_VBO_TerrainPosition = 0;
-GLuint g_EBO_Terrain = 0;
-GLuint g_VAO_Terrain = 0;
-GLuint g_VBO_TerrainLight[2] = { 0, 0 };
-GLuint g_VBO_TerrainAlpha = 0;
-int g_TerrainLightBufIdx = 0;
-
-// GLP-16: dynamic index buffer for texture-pair-bucketed terrain draws. Declared here (rather
-// than alongside the rest of the bucketing machinery near RenderTerrainFace) so DestroyTerrainVBO
-// -- defined earlier in this file -- can release it.
-static RHI::BufferHandle g_TerrainDynamicEBO;
 
 int  TerrainFlag;
 bool ActiveTerrain = false;
@@ -73,6 +83,12 @@ bool DetailLowEnable = false;
 
 char            LodBuffer[64 * 64];
 vec3_t          TerrainNormal[TERRAIN_SIZE * TERRAIN_SIZE];
+// The terrain light, one value per cell, from the map file to the frame:
+// TerrainLight: the map's painted lightmap, as loaded.
+// BackTerrainLight: the static light, the lightmap × the sun's slope shading × the light mood
+//   (CreateStaticLightCell); rebuilt when the sun or the mood changes.
+// PrimaryTerrainLight: this frame's light, the static light plus the frame's dynamic lights (game
+//   code adds them through AddTerrainLight); what the ground and the models sample.
 vec3_t          PrimaryTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          BackTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          TerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
@@ -96,6 +112,21 @@ int             CurrentLayer;
 
 float           g_fSpecialHeight = 1200.f;
 
+static_assert(Render::kTerrainSize == TERRAIN_SIZE && Render::kTerrainScale == TERRAIN_SCALE &&
+              Render::kTerrainWallHeight == TW_HEIGHT);
+
+static unsigned int s_terrainHeightVersion = 0;
+
+unsigned int TerrainHeightVersion()
+{
+    return s_terrainHeightVersion;
+}
+
+void MarkTerrainHeightsChanged()
+{
+    ++s_terrainHeightVersion;
+}
+
 #ifdef DYNAMIC_FRUSTRUM
 FrustrumMap_t	g_FrustrumMap;
 #endif //DYNAMIC_FRUSTRUM
@@ -114,7 +145,7 @@ void InitTerrainMappingLayer()
         TerrainMappingLayer1[i] = 0;
         TerrainMappingLayer2[i] = 255;
         TerrainMappingAlpha[i] = 0.0f;
-        TerrainGrassTexture[i] = static_cast<float>(rand() % 4) / 4.0f;
+        TerrainGrassTexture[i] = static_cast<float>(Random::Rand() % 4) / 4.0f;
 #ifdef ASG_ADD_MAP_KARUTAN
         g_fTerrainGrassWind1[i] = 0.0f;
 #endif
@@ -130,8 +161,8 @@ void ExitProgram()
 
 int OpenTerrainAttribute(wchar_t* FileName)
 {
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
@@ -142,23 +173,25 @@ int OpenTerrainAttribute(wchar_t* FileName)
         return (-1);
     }
     // Read file data
-    fseek(fp, 0, SEEK_END);
-    long file_size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    auto* file_data = new unsigned char[file_size];
-    fread(file_data, file_size, 1, fp);
+    std::optional<std::vector<BYTE>> file_data = DataFileIO::ReadAll(file.get());
+    file.reset();
+    if (!file_data)
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return (-1);
+    }
+    const int file_size = static_cast<int>(file_data->size());
 
     // Decrypt file data
-    int iSize = MapFileDecrypt(NULL, file_data, file_size);
-    auto* decrypted_data = new unsigned char[iSize];
-    MapFileDecrypt(decrypted_data, file_data, file_size);
-    delete[] file_data;
+    int iSize = MapFileDecrypt(NULL, file_data->data(), file_size);
+    std::vector<unsigned char> decrypted(static_cast<std::size_t>(iSize));
+    unsigned char* decrypted_data = decrypted.data();
+    MapFileDecrypt(decrypted_data, file_data->data(), file_size);
 
     // Check file size
     bool extAtt = false;
     if (iSize != (TERRAIN_SIZE * TERRAIN_SIZE + 4) && iSize != (TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD) + 4))
     {
-        delete[] decrypted_data;
         return (-1);
     }
     if (iSize == (TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD) + 4))
@@ -189,7 +222,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
         memcpy(TerrainWall, &decrypted_data[4], TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD));
     }
 
-    delete[] decrypted_data;
+    ++s_terrainHeightVersion;
 
     // Check file header
     bool Error = false;
@@ -231,7 +264,6 @@ int OpenTerrainAttribute(wchar_t* FileName)
         return (-1);
     }
 
-    fclose(fp);
     return iMap;
 }
 
@@ -268,11 +300,15 @@ void AddTerrainAttribute(int x, int y, BYTE att)
 {
     int     iIndex = (x + (y * TERRAIN_SIZE));
     TerrainWall[iIndex] |= att;
+    if ((att & TW_HEIGHT) == TW_HEIGHT)
+        ++s_terrainHeightVersion;
 }
 
 void SubTerrainAttribute(int x, int y, BYTE att)
 {
     int     iIndex = (x + (y * TERRAIN_SIZE));
+    if ((att & TW_HEIGHT) == TW_HEIGHT)
+        ++s_terrainHeightVersion;
 
     TerrainWall[iIndex] ^= (TerrainWall[iIndex] & att);
 }
@@ -297,6 +333,7 @@ void AddTerrainAttributeRange(int x, int y, int dx, int dy, BYTE att, BYTE Add)
 
 void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
 {
+    ++s_terrainHeightVersion;
     if (state == 0)
     {
         terrainIndex.clear();
@@ -321,23 +358,24 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
 
 int OpenTerrainMapping(wchar_t* FileName) {
     InitTerrainMappingLayer();
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL) {
+    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    if (!file)
+    {
         return -1;
     }
 
-    fseek(fp, 0, SEEK_END);
-    int EncBytes = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(file.get());
+    file.reset();
+    if (!EncData || EncData->empty())
+    {
+        return -1;
+    }
+    const int EncBytes = static_cast<int>(EncData->size());
 
-    auto* EncData = new unsigned char[EncBytes];
-    fread(EncData, 1, EncBytes, fp);
-    fclose(fp);
-
-    int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
-    auto* Data = new unsigned char[DataBytes];
-    MapFileDecrypt(Data, EncData, EncBytes);
-    delete[] EncData;
+    int DataBytes = MapFileDecrypt(NULL, EncData->data(), EncBytes);
+    std::vector<unsigned char> Decrypted(static_cast<std::size_t>(DataBytes));
+    unsigned char* Data = Decrypted.data();
+    MapFileDecrypt(Data, EncData->data(), EncBytes);
 
     int DataPtr = 0;
     DataPtr += 1;
@@ -356,8 +394,6 @@ int OpenTerrainMapping(wchar_t* FileName) {
         DataPtr += 1;
         TerrainMappingAlpha[i] = static_cast<float>(Alpha) / 255.f;
     }
-
-    delete[] Data;
 
     TerrainGrassEnable = true;
 
@@ -399,27 +435,29 @@ bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber)
     fclose(fp);
 
     {
-        fp = _wfopen(FileName, L"rb");
-        if (fp == NULL)
+        Core::Utilities::FileHandle plain(_wfopen(FileName, L"rb"));
+        if (!plain)
         {
             return (false);
         }
-        fseek(fp, 0, SEEK_END);
-        int EncBytes = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-        auto* EncData = new unsigned char[EncBytes];
-        fread(EncData, 1, EncBytes, fp);
-        fclose(fp);
+        std::optional<std::vector<BYTE>> EncData = DataFileIO::ReadAll(plain.get());
+        plain.reset();
+        if (!EncData)
+        {
+            return false;
+        }
+        const int EncBytes = static_cast<int>(EncData->size());
 
-        int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
-        auto* Data = new unsigned char[DataBytes];
-        MapFileEncrypt(Data, EncData, EncBytes);
-        delete[] EncData;
+        int DataBytes = MapFileEncrypt(NULL, EncData->data(), EncBytes);
+        std::vector<unsigned char> Data(static_cast<std::size_t>(DataBytes));
+        MapFileEncrypt(Data.data(), EncData->data(), EncBytes);
 
-        fp = _wfopen(FileName, L"wb");
-        fwrite(Data, DataBytes, 1, fp);
-        fclose(fp);
-        delete[] Data;
+        Core::Utilities::FileHandle encrypted(_wfopen(FileName, L"wb"));
+        if (!encrypted)
+        {
+            return false;
+        }
+        fwrite(Data.data(), DataBytes, 1, encrypted.get());
     }
     return true;
 }
@@ -514,33 +552,94 @@ void CreateTerrainNormal_Part(int xi, int yi)
     }
 }
 
+// How much of each cell keeps its Classic brightness under the light mood (its
+// bright weight, the same in all three channels so the grid sampler reads it).
+static vec3_t StaticLightBrightWeight[TERRAIN_SIZE * TERRAIN_SIZE];
+// The static light figures stand in: BackTerrainLight with the mood's figure scale instead of its base.
+static vec3_t FigureStaticTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
+
+// The static light of one cell: the baked light, shaded by the slope towards
+// the sun and darkened by the map's light mood: by its base where the baked
+// light is dark, less towards its shadow keep.
+// Per cell, the direct sunlight inside BackTerrainLight (RGBA8): what Enhanced clouds take away.
+static std::vector<std::uint8_t> s_terrainSunLight(TERRAIN_SIZE * TERRAIN_SIZE * 4, 0);
+
+static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lighting::LightMood::Scales& scales)
+{
+    float Luminosity = VectorDotProduct(TerrainNormal[Index], Sun) + 0.5f;
+    if (Luminosity < 0.f)
+        Luminosity = 0.f;
+    else if (Luminosity > 1.f)
+        Luminosity = 1.f;
+    // The sun's share: the slope term above the half Classic gives every face.
+    const float direct = std::max(Luminosity - 0.5f, 0.f);
+    vec3_t undarkened;
+    for (int i = 0; i < 3; i++)
+    {
+        undarkened[i] = TerrainLight[Index][i] * Luminosity;
+    }
+    const float luminance = 0.299f * undarkened[0] + 0.587f * undarkened[1] + 0.114f * undarkened[2];
+    const float weight = Render::Lighting::LightMood::BrightWeight(scales, luminance);
+    float factor[3];
+    Render::Lighting::LightMood::StaticFactor(scales, weight, factor);
+    for (int i = 0; i < 3; i++)
+    {
+        BackTerrainLight[Index][i] = undarkened[i] * factor[i];
+    }
+    Vector(weight, weight, weight, StaticLightBrightWeight[Index]);
+    for (int i = 0; i < 3; i++)
+    {
+        const float value = TerrainLight[Index][i] * direct * factor[i];
+        s_terrainSunLight[Index * 4 + i] = static_cast<std::uint8_t>(std::clamp(value, 0.f, 1.f) * 255.f + 0.5f);
+    }
+    VectorCopy(BackTerrainLight[Index], FigureStaticTerrainLight[Index]);
+    Render::Lighting::LightMood::CorrectFigureLight(scales, undarkened, FigureStaticTerrainLight[Index], weight);
+}
+
+void RequestFigureStaticCorrection(float xf, float yf, vec3_t correction)
+{
+    vec3_t terrainStatic;
+    Render::Terrain::LightGrid::SampleStatic(FigureStaticTerrainLight, Render::Lighting::FrameDynamicLights().Lights(),
+                                             xf, yf, correction);
+    Render::Terrain::LightGrid::SampleStatic(BackTerrainLight, Render::Lighting::FrameDynamicLights().Lights(), xf, yf,
+                                             terrainStatic);
+    for (int i = 0; i < 3; ++i)
+        correction[i] -= terrainStatic[i];
+}
+
+float RequestStaticLightBrightWeight(float xf, float yf)
+{
+    vec3_t weight;
+    Render::Terrain::LightGrid::Sample(StaticLightBrightWeight, xf, yf, weight);
+    return weight[0];
+}
+
+// The sun the slope shading leans towards: the map's baked one, following the frame's sun.
+static glm::vec3 TerrainSunVector()
+{
+    const glm::vec3 baked = gMapManager.InBattleCastle() ? glm::vec3(0.5f, -1.f, 1.f) : glm::vec3(0.5f, -0.5f, 0.5f);
+    return Render::Lighting::FollowFrameSun(baked);
+}
+
+// The vector BackTerrainLight was last built with.
+static glm::vec3 s_terrainLightSun{0.f};
+// The light mood revision the static light was last built with.
+static std::uint32_t s_bakedMoodRevision = 0;
+
 void CreateTerrainLight()
 {
-    vec3_t Light;
-    if (gMapManager.InBattleCastle())
-    {
-        Vector(0.5f, -1.f, 1.f, Light);
-    }
-    else
-    {
-        Vector(0.5f, -0.5f, 0.5f, Light);
-    }
+    s_terrainLightSun = TerrainSunVector();
+    s_bakedMoodRevision = Render::Lighting::LightMood::Revision();
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
+    const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = 0; y < TERRAIN_SIZE; y++)
     {
         for (int x = 0; x < TERRAIN_SIZE; x++)
         {
-            int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = DotProduct(TerrainNormal[Index], Light) + 0.5f;
-            if (Luminosity < 0.f)
-                Luminosity = 0.f;
-            else if (Luminosity > 1.f)
-                Luminosity = 1.f;
-            for (int i = 0; i < 3; i++)
-            {
-                BackTerrainLight[Index][i] = TerrainLight[Index][i] * Luminosity;
-            }
+            CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
+    mu::GetRenderer().SetTerrainSunLight(s_terrainSunLight);
 }
 
 void CreateTerrainLight_Part(int xi, int yi)
@@ -551,18 +650,13 @@ void CreateTerrainLight_Part(int xi, int yi)
     if (yi > TERRAIN_SIZE - 4) yi = TERRAIN_SIZE - 4;
     else if (yi < 4)         yi = 4;
 
-    vec3_t Light;
-    Vector(0.5f, -0.5f, 0.5f, Light);
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
+    const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = yi - 4; y < yi + 4; y++)
     {
         for (int x = xi - 4; x < xi + 4; x++)
         {
-            int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = DotProduct(TerrainNormal[Index], Light) + 0.5f;
-            if (Luminosity < 0.f) Luminosity = 0.f;
-            else if (Luminosity > 1.f) Luminosity = 1.f;
-            for (int i = 0; i < 3; i++)
-                BackTerrainLight[Index][i] = TerrainLight[Index][i] * Luminosity;
+            CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
 }
@@ -588,6 +682,7 @@ void OpenTerrainLight(wchar_t* FileName)
 
     CreateTerrainNormal();
     CreateTerrainLight();
+    Render::Lighting::LightMood::LogMapLight();
 
     /*
     #ifdef BATTLE_CASTLE
@@ -631,6 +726,12 @@ void CreateTerrain(wchar_t* FileName, bool bNew)
 }
 
 unsigned char BMPHeader[1080];
+
+// An .OZB is a BMP with a 4-byte prefix in front of it.
+// In every stock map the prefix is just a copy of the BMP header's first 4 bytes
+// ("BM" + 0x0438 = 1080), which is also a sane default for a save that never loaded
+// one (the OpenTerrainHeightNew path).
+unsigned char OZBPrefix[4] = { 0x42, 0x4D, 0x38, 0x04 };
 
 bool IsTerrainHeightExtMap(int iWorld)
 {
@@ -696,7 +797,7 @@ bool OpenTerrainHeight(wchar_t* filename)
         return false;
     }
 
-    if (fseek(fp, 4, SEEK_SET) != 0)
+    if (fseek(fp, 0, SEEK_SET) != 0 || fread(OZBPrefix, 1, 4, fp) != 4)
     {
         fclose(fp);
         wchar_t Text[256];
@@ -738,12 +839,13 @@ bool OpenTerrainHeight(wchar_t* filename)
             dst++;
         }
     }
+    ++s_terrainHeightVersion;
 
     delete[] Buffer;
     return true;
 }
 
-void SaveTerrainHeight(wchar_t* name)
+bool SaveTerrainHeight(wchar_t* name)
 {
     auto* Buffer = new unsigned char[256 * 256];
     for (int i = 0; i < 256; i++)
@@ -761,19 +863,48 @@ void SaveTerrainHeight(wchar_t* name)
             dst++;
         }
     }
-    FILE* fp = _wfopen(name, L"wb");
-    fwrite(BMPHeader, 1080, 1, fp);
+    // OZBPrefix is a single global last populated by whichever world's height file
+    // was most recently opened via OpenTerrainHeight - it does NOT track which
+    // world `name` actually belongs to. If the target file already exists, read
+    // its own prefix bytes fresh so a save to a different/override world number
+    // never writes another world's stale prefix; only fall back to the cached
+    // global for a brand-new file that has no prefix of its own yet.
+    unsigned char prefixToWrite[4];
+    memcpy(prefixToWrite, OZBPrefix, sizeof(prefixToWrite));
+    if (FILE* existing = _wfopen(name, L"rb"))
+    {
+        unsigned char existingPrefix[4];
+        if (fread(existingPrefix, 1, sizeof(existingPrefix), existing) == sizeof(existingPrefix))
+            memcpy(prefixToWrite, existingPrefix, sizeof(prefixToWrite));
+        fclose(existing);
+    }
 
-    for (int i = 0; i < 256; i++) fwrite(Buffer + (255 - i) * 256, 256, 1, fp);
+    FILE* fp = _wfopen(name, L"wb");
+    if (fp == NULL)
+    {
+        SAFE_DELETE_ARRAY(Buffer);
+        return false;
+    }
+
+    // The 4-byte .OZB prefix first - OpenTerrainHeight seeks past it and sizes the
+    // file as 4 + 1080 + 256*256. Without it the file is 4 bytes short and the map
+    // fails to load on the next login. Check every write: a disk-full/I/O error
+    // partway through must not be reported back to the caller as a success.
+    bool ok = fwrite(prefixToWrite, 4, 1, fp) == 1;
+    ok = ok && fwrite(BMPHeader, 1080, 1, fp) == 1;
+
+    for (int i = 0; i < 256 && ok; i++)
+        ok = fwrite(Buffer + (255 - i) * 256, 256, 1, fp) == 1;
 
     SAFE_DELETE_ARRAY(Buffer);
     fclose(fp);
+    return ok;
 }
 
 bool OpenTerrainHeightNew(const wchar_t* strFilename)
 {
     wchar_t FileName[256];
-    wchar_t NewFileName[256];
+    wchar_t NewFileName[256] = {};
 
     for (int i = 0; i < (int)wcslen(strFilename); ++i)
     {
@@ -788,8 +919,8 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     wcscat(FileName, NewFileName);
     wcscat(FileName, L"OZB");
 
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (!fp)
+    Core::Utilities::FileHandle file(_wfopen(FileName, L"rb"));
+    if (!file)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
@@ -800,13 +931,14 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
         return false;
     }
 
-    fseek(fp, 0, SEEK_END);
-    int iBytes = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    BYTE* pbyData = new BYTE[iBytes];
-    fread(pbyData, 1, iBytes, fp);
-    fclose(fp);
+    std::optional<std::vector<BYTE>> content = DataFileIO::ReadAll(file.get());
+    file.reset();
+    if (!content || content->empty())
+    {
+        DataFileIO::ReportUnusableFile(FileName, L"File corrupted.");
+        return false;
+    }
+    BYTE* pbyData = content->data();
 
     DWORD dwCurPos = 0;
     dwCurPos += 4;
@@ -834,8 +966,8 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
         BackTerrainHeight[i] = (float)dwHeight;
         BackTerrainHeight[i] += g_fMinHeight;
     }
+    ++s_terrainHeightVersion;
 
-    delete[] pbyData;
     return true;
 }
 
@@ -847,33 +979,7 @@ float RequestTerrainHeight(float xf, float yf) {
     if (xf < 0.0f || yf < 0.0f)
         return 0.0f;
 
-    xf /= TERRAIN_SCALE;
-    yf /= TERRAIN_SCALE;
-
-    unsigned int Index = TERRAIN_INDEX(xf, yf);
-
-    if (Index >= TERRAIN_SIZE * TERRAIN_SIZE)
-        return g_fSpecialHeight;
-
-    if ((TerrainWall[Index] & TW_HEIGHT) == TW_HEIGHT)
-        return g_fSpecialHeight;
-
-    int xi = static_cast<int>(xf);
-    int yi = static_cast<int>(yf);
-    float xd = xf - static_cast<float>(xi);
-    float yd = yf - static_cast<float>(yi);
-    unsigned int Index1 = TERRAIN_INDEX_REPEAT(xi, yi);
-    unsigned int Index2 = TERRAIN_INDEX_REPEAT(xi, yi + 1);
-    unsigned int Index3 = TERRAIN_INDEX_REPEAT(xi + 1, yi);
-    unsigned int Index4 = TERRAIN_INDEX_REPEAT(xi + 1, yi + 1);
-
-    if (Index1 >= TERRAIN_SIZE * TERRAIN_SIZE || Index2 >= TERRAIN_SIZE * TERRAIN_SIZE ||
-        Index3 >= TERRAIN_SIZE * TERRAIN_SIZE || Index4 >= TERRAIN_SIZE * TERRAIN_SIZE)
-        return g_fSpecialHeight;
-
-    float left = BackTerrainHeight[Index1] + (BackTerrainHeight[Index2] - BackTerrainHeight[Index1]) * yd;
-    float right = BackTerrainHeight[Index3] + (BackTerrainHeight[Index4] - BackTerrainHeight[Index3]) * yd;
-    return left + (right - left) * xd;
+    return Render::SampleTerrainHeight(BackTerrainHeight, TerrainWall, xf, yf, g_fSpecialHeight);
 }
 
 void RequestTerrainNormal(float xf, float yf, vec3_t Normal)
@@ -888,6 +994,8 @@ void RequestTerrainNormal(float xf, float yf, vec3_t Normal)
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer)
 {
     auto rf = (float)Range;
+    if (Buffer == BackTerrainHeight)
+        ++s_terrainHeightVersion;
 
     xf = xf / TERRAIN_SCALE;
     yf = yf / TERRAIN_SCALE;
@@ -947,42 +1055,92 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
     }
 }
 
-void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer)
+// A dynamic light added to the frame's terrain light gets the light mood's
+// gain; lights baked into other buffers (the editor's) do not.
+static void ApplyDynamicGain(const vec3_t Light, const vec3_t* Buffer, vec3_t Scaled)
 {
-    auto rf = (float)Range;
-
-    xf = (xf / TERRAIN_SCALE);
-    yf = (yf / TERRAIN_SCALE);
-    int   xi = (int)xf;
-    int   yi = (int)yf;
-    int   syi = yi - Range;
-    int   eyi = yi + Range;
-    auto syf = (float)(syi);
-    for (; syi <= eyi; syi++, syf += 1.f)
+    const float gain = Buffer == PrimaryTerrainLight ? Render::Lighting::LightMood::Active().dynamicGain : 1.f;
+    for (int i = 0; i < 3; i++)
     {
-        int   sxi = xi - Range;
-        int   exi = xi + Range;
-        auto sxf = (float)(sxi);
-        for (; sxi <= exi; sxi++, sxf += 1.f)
-        {
-            float xd = xf - sxf;
-            float yd = yf - syf;
-            float lf = (rf - sqrtf(xd * xd + yd * yd)) / rf;
-            if (lf > 0.f)
-            {
-                float* b = &Buffer[TERRAIN_INDEX_REPEAT(sxi, syi)][0];
-                for (int i = 0; i < 3; i++)
-                {
-                    b[i] += Light[i] * lf;
-                    if (b[i] < 0.f) b[i] = 0.f;
-                }
-            }
-        }
+        Scaled[i] = Render::Lighting::LightMood::ScaleDynamicLight(Light[i], gain);
     }
 }
 
-void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer)
+// With Enhanced dynamic lights in the world, the frame's dynamic terrain lights go through the
+// light history (smoothed map lights, fading effect lights, lights added while drawing kept).
+static bool UseLightHistory()
 {
+    return SceneFlag == MAIN_SCENE && Render::Lighting::DynamicLightsActive();
+}
+
+// The primary terrain light of the active world, for the light history.
+static Render::Terrain::LightGrid::FrameLightTarget FrameLightTarget()
+{
+    Render::Terrain::LightGrid::FrameLightTarget target;
+    target.grid = PrimaryTerrainLight;
+    target.frameLights = &Render::Lighting::FrameDynamicLights();
+    target.history = &Render::Lighting::FrameLightHistory();
+    target.world = gMapManager.WorldActive;
+    target.dynamicGain = Render::Lighting::LightMood::Active().dynamicGain;
+    target.height = RequestTerrainHeight;
+    return target;
+}
+
+void AddFrameHistoryLights()
+{
+    if (!UseLightHistory())
+    {
+        return;
+    }
+    Render::Lighting::DynamicLightHistory& history = Render::Lighting::FrameLightHistory();
+    using Clock = std::chrono::steady_clock;
+    static Clock::time_point last = Clock::now();
+    const Clock::time_point now = Clock::now();
+    static const Clock::time_point start = now;
+    static Render::Lighting::DropReporter drops;
+    if (const std::size_t dropped = drops.Due(history.Drops(), std::chrono::duration<float>(now - start).count());
+        dropped > 0)
+    {
+        mu::log::Get("render")->warn("Light history full: {} refused calls (ordered Classic fallback)", dropped);
+    }
+    constexpr float LongestStep = 0.25f;
+    const float seconds = std::clamp(std::chrono::duration<float>(now - last).count(), 0.f, LongestStep);
+    last = now;
+    Render::Terrain::LightGrid::ReplayFrameLights(FrameLightTarget(), seconds, Render::Look::LightHistorySettings());
+}
+
+// Every light added to the frame's dynamic terrain light is also a point light of the frame. The
+// light mood's gain is applied first, so the terrain and the models get the same light.
+void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    Diagnostics::DrawSpawnCheck::Note("terrain-light");
+    if (Buffer == PrimaryTerrainLight && UseLightHistory())
+    {
+        Render::Lighting::LightCall call;
+        call.x = xf;
+        call.y = yf;
+        std::copy(SourceLight, SourceLight + 3, call.color);
+        call.range = Range;
+        call.source = Render::Lighting::CurrentLightSource();
+        Render::Terrain::LightGrid::RecordFrameLight(FrameLightTarget(), call);
+        return;
+    }
+    vec3_t Light;
+    ApplyDynamicGain(SourceLight, Buffer, Light);
+    if (Buffer != PrimaryTerrainLight)
+    {
+        Render::Terrain::LightGrid::AddLight(Buffer, xf, yf, Light, Range);
+        return;
+    }
+    Render::Terrain::LightGrid::AddDynamicLight(Buffer, Render::Lighting::FrameDynamicLights(), xf, yf, Light, Range,
+                                                RequestTerrainHeight(xf, yf));
+}
+
+void AddTerrainLightClip(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
+{
+    Diagnostics::DrawSpawnCheck::Note("terrain-light");
+    vec3_t Light;
+    ApplyDynamicGain(SourceLight, Buffer, Light);
     auto rf = (float)Range;
 
     xf = (xf / TERRAIN_SCALE);
@@ -1016,210 +1174,61 @@ void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Bu
     }
 }
 
+static bool HasTerrainLight()
+{
+    return SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE && ActiveTerrain;
+}
+
 void RequestTerrainLight(float xf, float yf, vec3_t Light)
 {
-    if (SceneFlag == SERVER_LIST_SCENE
-        || SceneFlag == WEBZEN_SCENE
-        || SceneFlag == LOADING_SCENE
-        || ActiveTerrain == false)
+    if (!HasTerrainLight())
     {
         Vector(0.f, 0.f, 0.f, Light);
         return;
     }
+    Render::Terrain::LightGrid::Sample(PrimaryTerrainLight, xf, yf, Light);
+}
 
-    xf = xf / TERRAIN_SCALE;
-    yf = yf / TERRAIN_SCALE;
-    int xi = (int)xf;
-    int yi = (int)yf;
-    if (xi<0 || yi<0 || xi>TERRAIN_SIZE_MASK - 1 || yi>TERRAIN_SIZE_MASK - 1)
+void RequestBackTerrainLight(float xf, float yf, vec3_t Light)
+{
+    if (!HasTerrainLight())
     {
         Vector(0.f, 0.f, 0.f, Light);
         return;
     }
-    int Index1 = ((xi)+(yi)*TERRAIN_SIZE);
-    int Index2 = ((xi + 1) + (yi)*TERRAIN_SIZE);
-    int Index3 = ((xi + 1) + (yi + 1) * TERRAIN_SIZE);
-    int Index4 = ((xi)+(yi + 1) * TERRAIN_SIZE);
-    float xd = xf - (float)xi;
-    float yd = yf - (float)yi;
-    for (int i = 0; i < 3; i++)
+    Render::Terrain::LightGrid::Sample(BackTerrainLight, xf, yf, Light);
+}
+
+void RequestStaticTerrainLight(float xf, float yf, vec3_t Light)
+{
+    if (!HasTerrainLight())
     {
-        float left = PrimaryTerrainLight[Index1][i] + (PrimaryTerrainLight[Index4][i] - PrimaryTerrainLight[Index1][i]) * yd;
-        float right = PrimaryTerrainLight[Index2][i] + (PrimaryTerrainLight[Index3][i] - PrimaryTerrainLight[Index2][i]) * yd;
-        Light[i] = (left + (right - left) * xd);
+        Vector(0.f, 0.f, 0.f, Light);
+        return;
     }
+    Render::Terrain::LightGrid::SampleStatic(BackTerrainLight, Render::Lighting::FrameDynamicLights().Lights(), xf, yf,
+                                             Light);
 }
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_opengl.h>
-
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-
-typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(GLsizei, GLuint*);
-typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
-typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(GLenum, GLuint);
-typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(GLenum, GLsizeiptr, const void*, GLenum);
-typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(GLsizei, GLuint*);
-typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei, const GLuint*);
-typedef void (APIENTRY* PFNGLBINDVERTEXARRAYPROC)(GLuint);
-typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void*);
-typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint);
-typedef void (APIENTRY* PFNGLPUSHDEBUGGROUPPROC)(GLenum, GLuint, GLsizei, const GLchar*);
-typedef void (APIENTRY* PFNGLPOPDEBUGGROUPPROC)(void);
-
-static PFNGLGENBUFFERSPROC             fn_glGenBuffers             = nullptr;
-static PFNGLDELETEBUFFERSPROC          fn_glDeleteBuffers          = nullptr;
-static PFNGLBINDBUFFERPROC             fn_glBindBuffer             = nullptr;
-static PFNGLBUFFERDATAPROC             fn_glBufferData             = nullptr;
-static PFNGLGENVERTEXARRAYSPROC        fn_glGenVertexArrays        = nullptr;
-static PFNGLDELETEVERTEXARRAYSPROC     fn_glDeleteVertexArrays     = nullptr;
-static PFNGLVERTEXATTRIBPOINTERPROC    fn_glVertexAttribPointer    = nullptr;
-static PFNGLENABLEVERTEXATTRIBARRAYPROC fn_glEnableVertexAttribArray = nullptr;
-// GLP-16 GPU-ms investigation: profiler-only annotation, not load-bearing for anything else in
-// this file -- deliberately excluded from LoadTerrainGLFunctions()'s `loaded` gate below, so an
-// old driver/GL version missing KHR_debug still renders terrain fine, just without named groups.
-static PFNGLPUSHDEBUGGROUPPROC         fn_glPushDebugGroup         = nullptr;
-static PFNGLPOPDEBUGGROUPPROC          fn_glPopDebugGroup          = nullptr;
-
-static bool LoadTerrainGLFunctions()
+void RequestModelTerrainLight(float xf, float yf, vec3_t Light)
 {
-    static bool loaded = false;
-    if (loaded) return true;
-
-    fn_glGenBuffers              = (PFNGLGENBUFFERSPROC)SDL_GL_GetProcAddress("glGenBuffers");
-    fn_glDeleteBuffers           = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
-    fn_glBindBuffer              = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
-    fn_glBufferData              = (PFNGLBUFFERDATAPROC)SDL_GL_GetProcAddress("glBufferData");
-    fn_glGenVertexArrays         = (PFNGLGENVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glGenVertexArrays");
-    fn_glDeleteVertexArrays      = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
-    fn_glVertexAttribPointer     = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
-    fn_glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)SDL_GL_GetProcAddress("glEnableVertexAttribArray");
-    fn_glPushDebugGroup          = (PFNGLPUSHDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPushDebugGroup");
-    fn_glPopDebugGroup           = (PFNGLPOPDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPopDebugGroup");
-
-    loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glGenVertexArrays);
-    return loaded;
-}
-
-// Wraps a block of terrain draws with a named group so a GPU capture tool (RenderDoc/Nsight)
-// shows it as one filterable, labeled entry instead of requiring a manual hunt through hundreds
-// of unlabeled draw calls -- see GLP-16's task file for why this got added (three fix attempts
-// in, still couldn't cleanly isolate the terrain draws in a capture). No-ops safely if
-// glPushDebugGroup/glPopDebugGroup didn't resolve (pre-KHR_debug driver).
-static void PushTerrainDebugGroup(const char* label)
-{
-    if (fn_glPushDebugGroup) fn_glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, label);
-}
-
-static void PopTerrainDebugGroup()
-{
-    if (fn_glPopDebugGroup) fn_glPopDebugGroup();
-}
-
-void DestroyTerrainVBO()
-{
-    if (!LoadTerrainGLFunctions()) return;
-    if (g_VAO_Terrain) { fn_glDeleteVertexArrays(1, &g_VAO_Terrain); g_VAO_Terrain = 0; InvalidateVAOCache(); }
-    if (g_VBO_TerrainPosition) { fn_glDeleteBuffers(1, &g_VBO_TerrainPosition); g_VBO_TerrainPosition = 0; }
-    if (g_EBO_Terrain) { fn_glDeleteBuffers(1, &g_EBO_Terrain); g_EBO_Terrain = 0; }
-    if (g_VBO_TerrainLight[0]) { fn_glDeleteBuffers(2, g_VBO_TerrainLight); g_VBO_TerrainLight[0] = 0; g_VBO_TerrainLight[1] = 0; }
-    if (g_VBO_TerrainAlpha) { fn_glDeleteBuffers(1, &g_VBO_TerrainAlpha); g_VBO_TerrainAlpha = 0; }
-    g_TerrainLightBufIdx = 0;
-
-    // GLP-16: the dynamic bucketed-draw index buffer, if it was ever created.
-    if (g_TerrainDynamicEBO.IsValid())
+    if (Render::Lighting::DynamicLightsActive())
     {
-        RHI::DestroyBuffer(g_TerrainDynamicEBO);
-        g_TerrainDynamicEBO = {};
+        RequestStaticTerrainLight(xf, yf, Light);
+        return;
     }
+    RequestTerrainLight(xf, yf, Light);
 }
 
-void CreateTerrainVBO()
+void AddVertexLitDynamicLight(float xf, float yf, vec3_t Light)
 {
-    DestroyTerrainVBO();
-
-    std::vector<float> positions(TERRAIN_SIZE * TERRAIN_SIZE * 3);
-    for (int y = 0; y < TERRAIN_SIZE; ++y)
+    if (!Render::Lighting::DynamicLightsActive() || !HasTerrainLight())
     {
-        for (int x = 0; x < TERRAIN_SIZE; ++x)
-        {
-            int idx = TERRAIN_INDEX(x, y);
-            positions[idx * 3 + 0] = (float)x * TERRAIN_SCALE;
-            positions[idx * 3 + 1] = (float)y * TERRAIN_SCALE;
-            positions[idx * 3 + 2] = BackTerrainHeight[idx];
-        }
+        return;
     }
-
-    std::vector<GLuint> indices;
-    indices.reserve((TERRAIN_SIZE - 1) * (TERRAIN_SIZE - 1) * 6);
-    for (int y = 0; y < TERRAIN_SIZE - 1; ++y)
-    {
-        for (int x = 0; x < TERRAIN_SIZE - 1; ++x)
-        {
-            GLuint idx0 = TERRAIN_INDEX(x, y);
-            GLuint idx1 = TERRAIN_INDEX(x + 1, y);
-            GLuint idx2 = TERRAIN_INDEX(x + 1, y + 1);
-            GLuint idx3 = TERRAIN_INDEX(x, y + 1);
-
-            // Triangle 1
-            indices.push_back(idx0);
-            indices.push_back(idx1);
-            indices.push_back(idx2);
-
-            // Triangle 2
-            indices.push_back(idx0);
-            indices.push_back(idx2);
-            indices.push_back(idx3);
-        }
-    }
-
-    if (!LoadTerrainGLFunctions()) return;
-
-    fn_glGenVertexArrays(1, &g_VAO_Terrain);
-    BindVAO(g_VAO_Terrain);
-
-    // Attribute 0: Position
-    fn_glGenBuffers(1, &g_VBO_TerrainPosition);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainPosition);
-    fn_glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
-    fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    fn_glEnableVertexAttribArray(0);
-
-    // Attribute 2: Static Multi-texture Blend Alpha
-    fn_glGenBuffers(1, &g_VBO_TerrainAlpha);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainAlpha);
-    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(TerrainMappingAlpha), TerrainMappingAlpha, GL_STATIC_DRAW);
-    fn_glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
-    fn_glEnableVertexAttribArray(2);
-
-    // Double-buffered Dynamic Light VBO
-    fn_glGenBuffers(2, g_VBO_TerrainLight);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[0]);
-    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), nullptr, GL_STREAM_DRAW);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[1]);
-    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), nullptr, GL_STREAM_DRAW);
-
-    // Element Index Buffer
-    fn_glGenBuffers(1, &g_EBO_Terrain);
-    fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO_Terrain);
-    fn_glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-    BindVAO(0);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-    fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void UploadTerrainLightVBO()
-{
-    if (g_VBO_TerrainLight[0] == 0) return;
-    if (!LoadTerrainGLFunctions()) return;
-
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx]);
-    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), PrimaryTerrainLight, GL_STREAM_DRAW);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-    g_TerrainLightBufIdx ^= 1;
+    vec3_t brightening;
+    Render::Terrain::LightGrid::SampleBrightening(Render::Lighting::FrameDynamicLights().Lights(), xf, yf, brightening);
+    VectorAdd(Light, brightening, Light);
 }
 
 void CreateLodBuffer()
@@ -1343,17 +1352,14 @@ void PrefixTerrainHeight()
                     InterpolationHeight(lod, x * 4, y * 4, 2, BackTerrainHeight);
                     InterpolationWidth(lod, x * 4, y * 4, 2, BackTerrainHeight);
                 }
-                if (lod >= 2)
-                {
-                    InterpolationHeight(lod, x * 4, y * 4, 1, BackTerrainHeight);
-                    InterpolationWidth(lod, x * 4, y * 4, 1, BackTerrainHeight);
-                    InterpolationHeight(lod, x * 4, y * 4, 3, BackTerrainHeight);
-                    InterpolationWidth(lod, x * 4, y * 4, 3, BackTerrainHeight);
-                    /*InterpolationCross(1,x*4+1,y*4+1);
-                    InterpolationCross(1,x*4+1,y*4+3);
-                    InterpolationCross(1,x*4+3,y*4+1);
-                    InterpolationCross(1,x*4+3,y*4+3);*/
-                }
+                InterpolationHeight(lod, x * 4, y * 4, 1, BackTerrainHeight);
+                InterpolationWidth(lod, x * 4, y * 4, 1, BackTerrainHeight);
+                InterpolationHeight(lod, x * 4, y * 4, 3, BackTerrainHeight);
+                InterpolationWidth(lod, x * 4, y * 4, 3, BackTerrainHeight);
+                /*InterpolationCross(1,x*4+1,y*4+1);
+                InterpolationCross(1,x*4+1,y*4+3);
+                InterpolationCross(1,x*4+3,y*4+1);
+                InterpolationCross(1,x*4+3,y*4+3);*/
             }
         }
     }
@@ -1418,172 +1424,54 @@ inline void Interpolation(int mx, int my)
     }
 }
 
-inline void Vertex0()
+// The terrain light without the brightening part of the frame's pinned point lights
+// (WorldDynamicLights): the ground lit per pixel adds that part back in its shader.
+static vec3_t GroundTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
+static bool s_groundLightBuilt = false;
+// The light the ground's faces take: GroundTerrainLight inside a lit GroundLightScope.
+static vec3_t* s_faceLight = PrimaryTerrainLight;
+
+extern int FrustrumBoundMinX, FrustrumBoundMinY, FrustrumBoundMaxX, FrustrumBoundMaxY;
+
+void BuildGroundLight()
 {
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex1]);
-    glVertex3fv(TerrainVertex[0]);
+    for (int yi = FrustrumBoundMinY; yi <= FrustrumBoundMaxY + 3; ++yi)
+    {
+        for (int xi = FrustrumBoundMinX; xi <= FrustrumBoundMaxX + 3; ++xi)
+        {
+            const int index = TERRAIN_INDEX_REPEAT(xi, yi);
+            VectorCopy(PrimaryTerrainLight[index], GroundTerrainLight[index]);
+        }
+    }
+    Render::Terrain::LightGrid::RemovePinnedLights(GroundTerrainLight,
+                                                   Render::Lighting::FrameWorldDynamicLights().Selection().uniform);
+    s_groundLightBuilt = true;
 }
 
-inline void Vertex1()
+// While alive, the ground's faces take the ground light and draw lit per pixel, once the frame's
+// ground light is built and `lit` holds; otherwise they keep the terrain light.
+class GroundLightScope
 {
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex2]);
-    glVertex3fv(TerrainVertex[1]);
-}
+public:
+    explicit GroundLightScope(bool lit) : m_previous(s_faceLight)
+    {
+        if (lit && s_groundLightBuilt)
+        {
+            s_faceLight = GroundTerrainLight;
+            m_worldLit.emplace();
+        }
+    }
+    ~GroundLightScope()
+    {
+        s_faceLight = m_previous;
+    }
+    GroundLightScope(const GroundLightScope&) = delete;
+    GroundLightScope& operator=(const GroundLightScope&) = delete;
 
-inline void Vertex2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex3]);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void Vertex3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex4]);
-    glVertex3fv(TerrainVertex[3]);
-}
-
-inline void Vertex01()
-{
-    glTexCoord2f(TerrainTextureCoord01[0], TerrainTextureCoord01[1]);
-    glColor3fv(PrimaryTerrainLight[Index01]);
-    glVertex3fv(TerrainVertex01);
-}
-
-inline void Vertex12()
-{
-    glTexCoord2f(TerrainTextureCoord12[0], TerrainTextureCoord12[1]);
-    glColor3fv(PrimaryTerrainLight[Index12]);
-    glVertex3fv(TerrainVertex12);
-}
-
-inline void Vertex23()
-{
-    glTexCoord2f(TerrainTextureCoord23[0], TerrainTextureCoord23[1]);
-    glColor3fv(PrimaryTerrainLight[Index23]);
-    glVertex3fv(TerrainVertex23);
-}
-
-inline void Vertex30()
-{
-    glTexCoord2f(TerrainTextureCoord30[0], TerrainTextureCoord30[1]);
-    glColor3fv(PrimaryTerrainLight[Index30]);
-    glVertex3fv(TerrainVertex30);
-}
-
-inline void Vertex02()
-{
-    glTexCoord2f(TerrainTextureCoord02[0], TerrainTextureCoord02[1]);
-    glColor3fv(PrimaryTerrainLight[Index02]);
-    glVertex3fv(TerrainVertex02);
-}
-
-inline void VertexAlpha0()
-{
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex1][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex1]);
-    glVertex3fv(TerrainVertex[0]);
-}
-
-inline void VertexAlpha1()
-{
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex2][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex2]);
-    glVertex3fv(TerrainVertex[1]);
-}
-
-inline void VertexAlpha2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex3][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex3]);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void VertexAlpha3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex4][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex4]);
-    glVertex3fv(TerrainVertex[3]);
-}
-
-inline void VertexAlpha01()
-{
-    glTexCoord2f(TerrainTextureCoord01[0], TerrainTextureCoord01[1]);
-    float* Light = &PrimaryTerrainLight[Index01][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha01);
-    glVertex3fv(TerrainVertex01);
-}
-
-inline void VertexAlpha12()
-{
-    glTexCoord2f(TerrainTextureCoord12[0], TerrainTextureCoord12[1]);
-    float* Light = &PrimaryTerrainLight[Index12][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha12);
-    glVertex3fv(TerrainVertex12);
-}
-
-inline void VertexAlpha23()
-{
-    glTexCoord2f(TerrainTextureCoord23[0], TerrainTextureCoord23[1]);
-    float* Light = &PrimaryTerrainLight[Index23][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha23);
-    glVertex3fv(TerrainVertex23);
-}
-
-inline void VertexAlpha30()
-{
-    glTexCoord2f(TerrainTextureCoord30[0], TerrainTextureCoord30[1]);
-    float* Light = &PrimaryTerrainLight[Index30][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha30);
-    glVertex3fv(TerrainVertex30);
-}
-
-inline void VertexAlpha02()
-{
-    glTexCoord2f(TerrainTextureCoord02[0], TerrainTextureCoord02[1]);
-    float* Light = &PrimaryTerrainLight[Index02][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha02);
-    glVertex3fv(TerrainVertex02);
-}
-
-inline void VertexBlend0()
-{
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex1];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[0]);
-}
-
-inline void VertexBlend1()
-{
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex2];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[1]);
-}
-
-inline void VertexBlend2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex3];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void VertexBlend3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex4];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[3]);
-}
+private:
+    vec3_t* m_previous;
+    std::optional<mu::ScopedWorldLitGeometry> m_worldLit;
+};
 
 void RenderFace(int Texture, int mx, int my)
 {
@@ -1645,12 +1533,18 @@ void RenderFace(int Texture, int mx, int my)
         DisableAlphaBlend();
     BindTexture(BITMAP_MAPTILE + Texture);
 
-    glBegin(GL_TRIANGLE_FAN);
-    Vertex0();
-    Vertex1();
-    Vertex2();
-    Vertex3();
-    glEnd();
+    auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+    {
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
+    };
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 void RenderFace_After(int Texture, int mx, int my)
@@ -1664,52 +1558,106 @@ void RenderFace_After(int Texture, int mx, int my)
 
     BindTexture(BITMAP_MAPTILE + Texture);
 
-    // Per-tile hot path (Kanturu 3rd after-pass) — no redundant SetUseTexture(true)
-    // after IR::Begin(), same lesson as the TASK-24 grass/terrain-tile fix.
-    IR::Begin(GL_TRIANGLE_FAN);
-    IR::TexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    IR::Color3fv(PrimaryTerrainLight[TerrainIndex1]);
-    IR::Vertex3fv(TerrainVertex[0]);
-    IR::TexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    IR::Color3fv(PrimaryTerrainLight[TerrainIndex2]);
-    IR::Vertex3fv(TerrainVertex[1]);
-    IR::TexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    IR::Color3fv(PrimaryTerrainLight[TerrainIndex3]);
-    IR::Vertex3fv(TerrainVertex[2]);
-    IR::TexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    IR::Color3fv(PrimaryTerrainLight[TerrainIndex4]);
-    IR::Vertex3fv(TerrainVertex[3]);
-    IR::End();
+    auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+    {
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
+    };
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+}
+
+// The layers blended over the ground, drawn after all of it so the ground and each layer draw in runs
+// of one texture instead of alternating per tile.
+struct LayerFace
+{
+    int texture;
+    bool blend;
+    mu::Vertex3D vertices[4];
+    bool groundLit = false; // coloured by the ground light (GroundLightScope)
+};
+static std::vector<LayerFace> s_layerFaces;
+
+static void RenderLayerFaces()
+{
+    // Depth-tested without writing, so a layer stays on its own ground (same vertices, less or equal)
+    // and nearer ground drawn before it still hides it.
+    EnableDepthTest();
+    for (const LayerFace& face : s_layerFaces)
+    {
+        const GroundLightScope ground(face.groundLit);
+        if (face.blend)
+            EnableAlphaBlend();
+        else
+            EnableAlphaBlend3();
+        BindTexture(BITMAP_MAPTILE + face.texture);
+        mu::GetRenderer().RenderQuad3D(face.vertices, 0u);
+    }
+    s_layerFaces.clear();
 }
 
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    EnableAlphaTest();
-    BindTexture(BITMAP_MAPTILE + Texture);
-    glBegin(GL_TRIANGLE_FAN);
-    VertexAlpha0();
-    VertexAlpha1();
-    VertexAlpha2();
-    VertexAlpha3();
-    glEnd();
+    auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
+    {
+        const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, alpha);
+        return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                ground.normal[2], tc[0],  tc[1],  ground.color};
+    };
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1],
+                                     TerrainMappingAlpha[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2],
+                                     TerrainMappingAlpha[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3],
+                                     TerrainMappingAlpha[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4],
+                                     TerrainMappingAlpha[TerrainIndex4]);
+    s_layerFaces.push_back({Texture, false, {v0, v1, v2, v3}, s_faceLight == GroundTerrainLight});
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
 {
-    EnableAlphaBlend();
-    BindTexture(BITMAP_MAPTILE + Texture);
-    glBegin(GL_TRIANGLE_FAN);
-    VertexBlend0();
-    VertexBlend1();
-    VertexBlend2();
-    VertexBlend3();
-    glEnd();
+    auto MakeVert = [](const float* pos, const float* tc, float light) -> mu::Vertex3D
+    {
+        return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light, light, light, 1.f)};
+    };
+    const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], TerrainMappingAlpha[TerrainIndex1]);
+    const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
+    const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
+    const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
+    s_layerFaces.push_back({Texture, true, {v0, v1, v2, v3}});
+}
+
+namespace
+{
+// The Crywolf water faces the last terrain pass drew.
+std::vector<std::pair<float, float>> s_drawnCrywolfWater;
+} // namespace
+
+void UpdateTerrainWaterSpots()
+{
+    vec3_t Light, Pos;
+    Vector(0.30f, 0.40f, 0.20f, Light);
+    for (const auto& [xf, yf] : s_drawnCrywolfWater)
+    {
+        if (rand_fps_check(50))
+        {
+            float sx = xf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+            float sy = yf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+            Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
+            CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
+        }
+    }
+    s_drawnCrywolfWater.clear();
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
 {
-    vec3_t Light, Pos;
-    Vector(0.30f, 0.40f, 0.20f, Light);
     BITMAP_t* b = &Bitmaps[BITMAP_MAPTILE + Texture];
     float Width, Height;
     if (Scale)
@@ -1738,15 +1686,7 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
         float Water3 = 0.f;
         float Water4 = 0.f;
         if (gMapManager.WorldActive == WD_34CRYWOLF_1ST && Texture == 5)
-        {
-            if (rand_fps_check(50))
-            {
-                float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
-                CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
-            }
-        }
+            s_drawnCrywolfWater.emplace_back(xf, yf);
 
         if (gMapManager.WorldActive == WD_30BATTLECASTLE && Texture == 5)
             suf -= WaterMove;
@@ -1773,259 +1713,12 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
 
 int WaterTextureNumber = 0;
 
-// ---- GLP-16: texture-pair tile bucketing ----
-// RenderTerrainFace's shader branch used to issue one glDrawElements per visible tile (~8 GL
-// calls to draw two triangles, per the task file's own audit) -- roughly 1,000-3,000 times per
-// frame for a normal view. Gathering by (baseTex, overlayTex, waterFlags) and drawing once per
-// bucket collapses that to the number of distinct texture pairs on screen, typically 5-20.
-//
-// Verified before writing this: the terrain shader pass runs with DisableAlphaBlend() (see
-// RenderTerrain(), just before RenderTerrainFrustrum(EditFlag) for TerrainFlag ==
-// TERRAIN_MAP_NORMAL) -- opaque, depth-tested, alpha-TESTED only (SyncAlphaRef's discard, which
-// is order-independent) -- so reordering draws by texture pair instead of frustum-walk order is
-// safe. The grass (TERRAIN_MAP_GRASS) and dev-editor (EditFlag) fallback paths never reach this
-// branch at all (RenderTerrainFace's own `if (TerrainFlag != TERRAIN_MAP_GRASS)` / the shader
-// branch's `TerrainShader::Instance().IsCreated()` guard) -- untouched by this change.
-struct TerrainDrawBucket
-{
-    GLuint texBase = 0;
-    GLuint texOverlay = 0;
-    bool baseIsWater = false;
-    bool overlayIsWater = false;
-    // Per-texture UV scale (upstream c6603879, merged 2026-08-12). Carried on the bucket rather
-    // than applied per tile because GLP-16 moved the draw out of the tile walk. This is safe
-    // without widening the bucket key: the scale is derived purely from the two bound textures'
-    // dimensions, so it is a pure function of (texBase, texOverlay) -- every tile landing in a
-    // given bucket necessarily computes the identical value. If a future change ever derives it
-    // from anything tile-local, it must become part of the key instead.
-    float baseUVScale[2] = { 0.01f, 0.01f };
-    float overlayUVScale[2] = { 0.01f, 0.01f };
-    std::vector<GLuint> indices; // 2 triangles (6 indices) appended per gathered tile
-};
-
-// Reused across frames -- .clear()'d via g_TerrainBucketCount, never reallocated, matching
-// ImmediateRenderer.cpp's g_VertexBuffer pattern. Distinct texture pairs are few (5-20 typical)
-// so a linear scan per tile is cheap and avoids writing a custom hash for the bucket key.
-static std::vector<TerrainDrawBucket> g_TerrainBuckets;
-static int g_TerrainBucketCount = 0;
-
-// GLP-16 GPU-ms investigation: batches every bucket's indices into one shared upload per frame
-// instead of one RHI::AppendBuffer call per bucket (was ~50-70 calls/frame) -- a real reduction
-// in per-frame buffer-upload call count on its own merits. (Two earlier ideas tried alongside
-// this -- sorting tiles within a bucket for vertex-cache locality, and sorting bucket draw order
-// by texture for bind-cache locality -- were reverted after the actual GPU-ms cost this whole
-// investigation was chasing turned out to be a measurement artifact, not a real cost; see this
-// task's file for the full story. This batching step stayed because it's independently
-// worthwhile, not because it fixed anything.)
-static std::vector<GLuint> g_TerrainFlushScratch;
-
-struct TerrainFlushRange
-{
-    size_t indexOffset; // element offset into g_TerrainFlushScratch/the frame's single upload
-    size_t indexCount;
-    int bucketIndex; // index into g_TerrainBuckets, to read texBase/texOverlay/water flags back
-};
-static std::vector<TerrainFlushRange> g_TerrainFlushRanges;
-
-// g_TerrainDynamicEBO is declared near the top of this file (with the other terrain GL
-// resources) so DestroyTerrainVBO() can release it.
-
-static TerrainDrawBucket& GetTerrainBucket(GLuint texBase, GLuint texOverlay, bool baseIsWater, bool overlayIsWater)
-{
-    for (int i = 0; i < g_TerrainBucketCount; i++)
-    {
-        TerrainDrawBucket& b = g_TerrainBuckets[i];
-        if (b.texBase == texBase && b.texOverlay == texOverlay &&
-            b.baseIsWater == baseIsWater && b.overlayIsWater == overlayIsWater)
-            return b;
-    }
-    if (g_TerrainBucketCount >= (int)g_TerrainBuckets.size())
-        g_TerrainBuckets.emplace_back();
-    TerrainDrawBucket& b = g_TerrainBuckets[g_TerrainBucketCount++];
-    b.texBase = texBase;
-    b.texOverlay = texOverlay;
-    b.baseIsWater = baseIsWater;
-    b.overlayIsWater = overlayIsWater;
-    b.indices.clear();
-    return b;
-}
-
-// Called once, after RenderTerrainFrustrum's whole tile walk has gathered every visible tile
-// into a bucket -- draws each non-empty bucket with one glDrawElements. Must run with
-// g_VAO_Terrain still bound (TerrainShader's sampler/uniform state is already bound by the
-// caller too). Resets the bucket count for next frame; capacity is kept.
-static void FlushTerrainBuckets()
-{
-    if (g_TerrainBucketCount == 0) return;
-
-    if (!g_TerrainDynamicEBO.IsValid())
-    {
-        // Sized for a reasonably wide view (2000 tiles); RHI::AppendBuffer grows it on demand
-        // for wider ones, same policy PlanarShadowShader's own dynamic VBO uses.
-        g_TerrainDynamicEBO = RHI::CreateIndexBuffer(nullptr, 2000 * 6 * sizeof(GLuint), RHI::BufferUsage::Dynamic);
-    }
-
-    // Concatenate every bucket's indices into ONE flat upload instead of one AppendBuffer call
-    // per bucket.
-    g_TerrainFlushScratch.clear();
-    g_TerrainFlushRanges.clear();
-    for (int i = 0; i < g_TerrainBucketCount; i++)
-    {
-        TerrainDrawBucket& b = g_TerrainBuckets[i];
-        if (b.indices.empty()) continue;
-
-        const size_t indexOffset = g_TerrainFlushScratch.size();
-        g_TerrainFlushScratch.insert(g_TerrainFlushScratch.end(), b.indices.begin(), b.indices.end());
-        g_TerrainFlushRanges.push_back({ indexOffset, b.indices.size(), i });
-    }
-
-    if (g_TerrainFlushRanges.empty())
-    {
-        g_TerrainBucketCount = 0;
-        return;
-    }
-
-    // One upload for the whole frame's terrain geometry, then one draw per bucket out of it via
-    // DrawIndexed's firstIndex offset -- no repeated glBufferSubData+draw handoff on the same
-    // buffer within a frame.
-    const size_t byteOffset = RHI::AppendBuffer(g_TerrainDynamicEBO, g_TerrainFlushScratch.data(), g_TerrainFlushScratch.size() * sizeof(GLuint));
-    const uint32_t baseIndex = (uint32_t)(byteOffset / sizeof(GLuint));
-
-    // GLP-16 GPU-ms investigation: named group so this block shows up as one filterable "Terrain"
-    // entry in RenderDoc/Nsight instead of ~50-70 unlabeled glDrawElements calls buried among the
-    // frame's ~1,400 other draws. GpuTimerBegin/End moved here too (tightly around the real GPU
-    // submission) -- MainScene.cpp's call site now uses FRAME_PROFILE_CPU_ONLY(Terrain), which
-    // does NOT auto-time the GPU, specifically so this pair is the only one that fires. A clean
-    // Nsight capture of just this block measured <0.01ms of real GPU time; the ~3-5ms $glstats
-    // had been reporting was CPU gather/sort/flush time (before this point in the frame) leaking
-    // into the old whole-scope timer window, not real draw cost. See GLP-16's task file.
-    PushTerrainDebugGroup("Terrain");
-    FrameProfiler::GpuTimerBegin(FrameProfiler::Pass::Terrain);
-    RHI::BindIndexBuffer(g_TerrainDynamicEBO);
-    for (const TerrainFlushRange& range : g_TerrainFlushRanges)
-    {
-        TerrainDrawBucket& b = g_TerrainBuckets[range.bucketIndex];
-
-        TerrainShader::Instance().SetBaseTexture(b.texBase);
-        TerrainShader::Instance().SetOverlayTexture(b.texOverlay);
-        // Upstream c6603879's per-texture UV scale, applied once per bucket instead of once per
-        // tile -- see the gather site and TerrainDrawBucket for why bucket granularity is exact
-        // here rather than an approximation. Dirty-checked inside SetUVScale().
-        TerrainShader::Instance().SetUVScale(
-            b.baseUVScale[0], b.baseUVScale[1], b.overlayUVScale[0], b.overlayUVScale[1]);
-        TerrainShader::Instance().SetWaterFlags(b.baseIsWater, b.overlayIsWater);
-        TerrainShader::Instance().SyncAlphaRef();
-
-        RHI::DrawIndexed(RHI::Topology::TriangleList, (uint32_t)range.indexCount, baseIndex + (uint32_t)range.indexOffset);
-    }
-    FrameProfiler::GpuTimerEnd(FrameProfiler::Pass::Terrain);
-    PopTerrainDebugGroup();
-
-    g_TerrainBucketCount = 0;
-}
-
 void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 {
-    RenderTerrainVisual(xi, yi);
+    NoteDrawnTerrain(xi, yi);
 
     if (TerrainFlag != TERRAIN_MAP_GRASS)
     {
-        if (TerrainShader::Instance().IsCreated())
-        {
-            if (xi >= 0 && xi < TERRAIN_SIZE - 1 && yi >= 0 && yi < TERRAIN_SIZE - 1)
-            {
-                int tex1 = TerrainMappingLayer1[TerrainIndex1];
-                int tex2 = TerrainMappingLayer2[TerrainIndex1];
-                const int originalTex1 = tex1;
-                const int originalTex2 = tex2;
-                const bool allCornersOpaque =
-                    TerrainMappingAlpha[TerrainIndex1] >= 1.f && TerrainMappingAlpha[TerrainIndex2] >= 1.f &&
-                    TerrainMappingAlpha[TerrainIndex3] >= 1.f && TerrainMappingAlpha[TerrainIndex4] >= 1.f;
-
-                // TASK-30 phase 1/2: base-layer "Water" flag, ported from FaceTexture()'s condition —
-                // only meaningful when this tile isn't the "fully Layer2" case (Water is only ever set
-                // on the Layer1/else branch in the legacy code, matches !allCornersOpaque here).
-                const bool baseIsWater = !allCornersOpaque && (originalTex1 == 5 ||
-                    (originalTex1 == 11 && (gMapManager.IsPKField() || IsDoppelGanger2())));
-
-                // TASK-30 phase 1: Crywolf-1st base-layer water splash particles (FaceTexture's
-                // WD_34CRYWOLF_1ST && Texture==5 check specifically, not the broader baseIsWater).
-                if (!allCornersOpaque && gMapManager.WorldActive == WD_34CRYWOLF_1ST && originalTex1 == 5 && rand_fps_check(50))
-                {
-                    vec3_t Pos, Light;
-                    Vector(0.30f, 0.40f, 0.20f, Light);
-                    float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                    float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                    Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
-                    CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
-                }
-
-                // TASK-30 phase 1: Atlans/Doppelganger3 substitute the overlay with animated water
-                // whenever this tile's Layer2 is water — ported from the legacy overlay-blend special
-                // case (RenderTerrainFace, non-VBO branch). Applied before the alpha collapse below so
-                // both a full-Layer2 tile and a partially-blended tile correctly show animated water.
-                // Legacy passes Water=false explicitly for this case — the animation comes from
-                // WaterTextureNumber cycling which static bitmap is bound, not UV scroll — so
-                // overlayIsWater stays false here (no phase-2 scroll needed on top).
-                bool overlayIsWater;
-                if ((gMapManager.WorldActive == WD_7ATLANSE || IsDoppelGanger3()) && originalTex2 == 5)
-                {
-                    tex2 = BITMAP_WATER - BITMAP_MAPTILE + WaterTextureNumber;
-                    overlayIsWater = false;
-                }
-                else
-                {
-                    // TASK-30 phase 2: generic alpha-blend overlay path. Legacy's Water flag for this
-                    // pass carries over from the base's value and is only cleared if the overlay's own
-                    // texture isn't water (ZzzLodTerrain.cpp ~1794-1798) — i.e. both layers must be
-                    // water for the overlay pass to animate.
-                    overlayIsWater = baseIsWater && (originalTex2 == 5);
-                }
-
-                if (allCornersOpaque)
-                {
-                    tex1 = tex2;
-                }
-                else if (TerrainMappingAlpha[TerrainIndex1] <= 0.f && TerrainMappingAlpha[TerrainIndex2] <= 0.f &&
-                         TerrainMappingAlpha[TerrainIndex3] <= 0.f && TerrainMappingAlpha[TerrainIndex4] <= 0.f)
-                {
-                    tex2 = tex1;
-                }
-
-                BITMAP_t* b1 = &Bitmaps[BITMAP_MAPTILE + tex1];
-                BITMAP_t* b2 = &Bitmaps[BITMAP_MAPTILE + tex2];
-
-                // GLP-16: gather into a texture-pair bucket instead of drawing immediately -- the
-                // actual glDrawElements calls happen once per bucket in FlushTerrainBuckets(),
-                // called after RenderTerrainFrustrum's whole tile walk completes. TerrainIndex1-4
-                // are exactly the same 4 corner indices CreateTerrainVBO() baked into the (now
-                // superseded for this pass) static index buffer -- lodi is always 1 in the live
-                // render path (RenderTerrainBlock), so no recomputation needed, just reuse them
-                // in the same two-triangle winding (idx0,idx1,idx2 / idx0,idx2,idx3).
-                TerrainDrawBucket& bucket = GetTerrainBucket(b1->TextureNumber, b2->TextureNumber, baseIsWater, overlayIsWater);
-                bucket.indices.push_back((GLuint)TerrainIndex1);
-                bucket.indices.push_back((GLuint)TerrainIndex2);
-                bucket.indices.push_back((GLuint)TerrainIndex3);
-                bucket.indices.push_back((GLuint)TerrainIndex1);
-                bucket.indices.push_back((GLuint)TerrainIndex3);
-                bucket.indices.push_back((GLuint)TerrainIndex4);
-
-                // Upstream c6603879, adapted to GLP-16's bucketing. Matches legacy FaceTexture()'s
-                // `Width = 64.f/b->Width` exactly -- terrain tile bitmaps in this tree are not all
-                // the same resolution (64/128/256px observed), so the UV scale must be derived
-                // per-texture, not from a single shared constant. Pre-divided by TERRAIN_SCALE since
-                // a_Pos in the vertex shader is world-space, not grid-index. Recorded on the bucket
-                // and applied once per draw in FlushTerrainBuckets(); upstream applied it per tile,
-                // which this pass no longer has a draw for. Idempotent across tiles sharing a bucket
-                // -- see the note on TerrainDrawBucket for why that holds.
-                bucket.baseUVScale[0]    = (64.f / b1->Width)  / TERRAIN_SCALE;
-                bucket.baseUVScale[1]    = (64.f / b1->Height) / TERRAIN_SCALE;
-                bucket.overlayUVScale[0] = (64.f / b2->Width)  / TERRAIN_SCALE;
-                bucket.overlayUVScale[1] = (64.f / b2->Height) / TERRAIN_SCALE;
-            }
-            return;
-        }
-
         int Texture;
         bool Alpha;
         bool Water = false;
@@ -2120,24 +1813,18 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 #ifdef ASG_ADD_MAP_KARUTAN
                 }
 #endif	// ASG_ADD_MAP_KARUTAN
-                // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally —
-                // this is a hot per-tile call (every visible grass tile, every frame), so avoid the
-                // redundant second glUseProgram/glUniform1i that a duplicate SetUseTexture(true) here
-                // would cost.
-                IR::Begin(GL_QUADS);
-                IR::TexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-                IR::Color3fv(PrimaryTerrainLight[TerrainIndex1]);
-                IR::Vertex3fv(TerrainVertex[0]);
-                IR::TexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-                IR::Color3fv(PrimaryTerrainLight[TerrainIndex2]);
-                IR::Vertex3fv(TerrainVertex[1]);
-                IR::TexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-                IR::Color3fv(PrimaryTerrainLight[TerrainIndex3]);
-                IR::Vertex3fv(TerrainVertex[2]);
-                IR::TexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-                IR::Color3fv(PrimaryTerrainLight[TerrainIndex4]);
-                IR::Vertex3fv(TerrainVertex[3]);
-                IR::End();
+                const auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+                {
+                    const auto ground = Render::Terrain::LightGrid::EncodeGroundLight(light, 1.f);
+                    return {pos[0],           pos[1], pos[2], ground.normal[0], ground.normal[1],
+                            ground.normal[2], tc[0],  tc[1],  ground.color};
+                };
+                const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], s_faceLight[TerrainIndex1]);
+                const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], s_faceLight[TerrainIndex2]);
+                const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], s_faceLight[TerrainIndex3]);
+                const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], s_faceLight[TerrainIndex4]);
+                const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+                mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
                 if (gMapManager.IsPKField() || IsDoppelGanger2())
                     DisableAlphaBlend();
@@ -2206,15 +1893,23 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
             {
                 EnableAlphaTest();
                 DisableTexture();
-                IR::Begin(GL_TRIANGLE_FAN);
-                PassthroughShader::Instance().SetUseTexture(false);
+                std::uint32_t color;
                 if (4 <= path->GetClosedStatus(TerrainIndex1))
-                    IR::Color4f(0.3f, 0.3f, 1.0f, 0.5f);
+                {
+                    color = mu::PackABGR(0.3f, 0.3f, 1.0f, 0.5f);
+                }
                 else
-                    IR::Color4f(1.0f, 1.0f, 1.0f, 0.3f);
+                {
+                    color = mu::PackABGR(1.0f, 1.0f, 1.0f, 0.3f);
+                }
+
+                mu::Vertex3D vertices[4];
                 for (int i = 0; i < 4; i++)
-                    IR::Vertex3fv(TerrainVertex[i]);
-                IR::End();
+                {
+                    vertices[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
+                                   0.f, 0.f, 1.f, 0.f, 0.f, color};
+                }
+                mu::GetRenderer().RenderQuad3D(vertices, 0u);
                 DisableAlphaBlend();
             }
         }
@@ -2226,12 +1921,17 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
         if (EditFlag != EDIT_LIGHT)
         {
             DisableTexture();
-            IR::Begin(GL_LINE_STRIP);
-            PassthroughShader::Instance().SetUseTexture(false);
-            IR::Color3f(0.5f, 0.5f, 0.5f);
+            constexpr std::uint32_t lineColor = 0xFF808080u;
+            mu::Vertex3D vertices[4];
             for (int i = 0; i < 4; i++)
-                IR::Vertex3fv(TerrainVertex[i]);
-            IR::End();
+            {
+                vertices[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
+                               0.f, 0.f, 1.f, 0.f, 0.f, lineColor};
+            }
+            const mu::Vertex3D lines[6] = {
+                vertices[0], vertices[1], vertices[1], vertices[2], vertices[2], vertices[3],
+            };
+            mu::GetRenderer().RenderLines(lines, 0u);
             DisableAlphaBlend();
         }
 #endif// _DEBUG
@@ -2269,13 +1969,14 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
             EnableAlphaTest();
             DisableTexture();
 
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4f(1.f, 0.5f, 0.5f, 0.3f);
+            constexpr std::uint32_t debugColor = 0x4D8080FFu;
+            mu::Vertex3D vertices[4];
             for (int i = 0; i < 4; i++)
             {
-                glVertex3fv(TerrainVertex[i]);
+                vertices[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
+                               0.f, 0.f, 1.f, 0.f, 0.f, debugColor};
             }
-            glEnd();
+            mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
             DisableAlphaBlend();
         }
@@ -2313,7 +2014,8 @@ void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int
     }
 }
 
-void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height = 0.f, const float* FixedColor = nullptr)
+void RenderTerrainBitmapTile(int Texture, float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable,
+                             float Alpha, float Height = 0.f, std::uint32_t fallbackColor = 0xFFFFFFFFu)
 {
     int xi = (int)xf;
     int yi = (int)yf;
@@ -2330,44 +2032,36 @@ void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[
     Vector(sx + TileScale, sy + TileScale, BackTerrainHeight[TerrainIndex3] + Height, TerrainVertex[2]);
     Vector(sx, sy + TileScale, BackTerrainHeight[TerrainIndex4] + Height, TerrainVertex[3]);
 
+    const GroundLightScope ground(LightEnable);
     vec3_t Light[4];
     if (LightEnable)
     {
-        VectorCopy(PrimaryTerrainLight[TerrainIndex1], Light[0]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex2], Light[1]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex3], Light[2]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
+        VectorCopy(s_faceLight[TerrainIndex1], Light[0]);
+        VectorCopy(s_faceLight[TerrainIndex2], Light[1]);
+        VectorCopy(s_faceLight[TerrainIndex3], Light[2]);
+        VectorCopy(s_faceLight[TerrainIndex4], Light[3]);
     }
 
-    // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally — this is a
-    // hot per-tile call (ground-decal effects, grass-adjacent tiling), avoid the redundant rebind.
-    IR::Begin(GL_TRIANGLE_FAN);
+    mu::Vertex3D verts[4];
     for (int i = 0; i < 4; i++)
     {
-        if (LightEnable)
-        {
-            if (Alpha == 1.f)
-                IR::Color3fv(Light[i]);
-            else
-                IR::Color4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        }
-        else if (FixedColor)
-        {
-            // Legacy path relies on ambient glColor state set once by the caller before this
-            // tile loop (RenderTerrainAlphaBitmap). IR::Begin() resets color to white each
-            // call, so the caller must pass its intended tint through explicitly.
-            IR::Color4f(FixedColor[0], FixedColor[1], FixedColor[2], Alpha);
-        }
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex3fv(TerrainVertex[i]);
+        const auto ground = LightEnable ? Render::Terrain::LightGrid::EncodeGroundLight(Light[i], Alpha)
+                                        : Render::Terrain::LightGrid::GroundVertexLight{{0.f, 0.f, 1.f}, fallbackColor};
+        verts[i] = {TerrainVertex[i][0],
+                    TerrainVertex[i][1],
+                    TerrainVertex[i][2],
+                    ground.normal[0],
+                    ground.normal[1],
+                    ground.normal[2],
+                    c[i][0],
+                    c[i][1],
+                    ground.color};
     }
-    IR::End();
+    mu::GetRenderer().RenderQuad3D(verts, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
 {
-    glColor3f(1.f, 1.f, 1.f);
-
     vec3_t Angle;
     Vector(0.f, 0.f, Rotation, Angle);
     float Matrix[3][4];
@@ -2394,17 +2088,14 @@ void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
                 p2[i][0] += 0.5f;
                 p2[i][1] += 0.5f;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, true, 1.f);
+            RenderTerrainBitmapTile(Texture, (float)mxi + x, (float)myi + y, 1.f, 1, p2, true, 1.f);
         }
     }
 }
 
 void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height)
 {
-    if (Alpha == 1.f)
-        glColor3fv(Light);
-    else
-        glColor4f(Light[0], Light[1], Light[2], Alpha);
+    const std::uint32_t terrainBitmapColor = mu::PackABGR(Light[0], Light[1], Light[2], Alpha);
 
     vec3_t Angle;
     Vector(0.f, 0.f, Rotation, Angle);
@@ -2425,7 +2116,7 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
     float TexU = (((float)mxi - mxf) + 0.5f * Size);
     float TexV = (((float)myi - myf) + 0.5f * Size);
     float TexScaleU = 1.f / Size;
-    float TexScaleV = 1.f / Size;
+    float TexScaleV = TexScaleU;
     Size = (float)((int)Size + 1);
     float Aspect = SizeX / SizeY;
     for (float y = -Size; y <= Size; y += 1.f)
@@ -2447,7 +2138,8 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
                 p2[i][1] += 0.5f;
                 //if((p2[i][0]>=0.f && p2[i][0]<=1.f) || (p2[i][1]>=0.f && p2[i][1]<=1.f)) Clip = true;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height, Light);
+            RenderTerrainBitmapTile(Texture, (float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height,
+                                    terrainBitmapColor);
         }
     }
 }
@@ -2614,7 +2306,7 @@ static void ExpandHullOutward(float offset)
     ComputeIterationBoundsFromHull();
 }
 
-void CreateFrustrum2D(vec3_t Position)
+void CreateFrustrum2D()
 {
     CameraMode currentMode = CameraManager::Instance().GetCurrentMode();
     // Default joins the Orbital natural-hull path so the cull hull is built
@@ -2649,7 +2341,7 @@ void CreateFrustrum2D(vec3_t Position)
             }
         }
 #endif
-        // Orbital mode: build 2D hull from the ACTUAL GL modelview matrix,
+        // Orbital mode: build 2D hull from the camera's view matrix,
         // then clip against the far-clip plane at ground level (Z=0).
         //
         // The hull extends to fogEnd distance (= terrainCullRange) so terrain is only
@@ -2670,15 +2362,21 @@ void CreateFrustrum2D(vec3_t Position)
             // Viewport aspect ratio (matching BeginOpengl's calculation)
             extern unsigned int WindowWidth, WindowHeight;
             extern EGameScene SceneFlag;
-            int refWidth = GetScreenWidth();
-            int refHeight = REFERENCE_HEIGHT;
-            if (SceneFlag == MAIN_SCENE && !g_Camera.TopViewEnable)
-                refHeight = REFERENCE_HEIGHT - 48;
-            else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
-                refHeight = 430;
-            float vpW = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
-            float vpH = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
-            float aspect = vpW / vpH;
+            float aspect = 0.0f;
+            if (SceneFlag == MAIN_SCENE)
+            {
+                aspect = UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+            }
+            else
+            {
+                const int refWidth = GetScreenWidth();
+                const int refHeight = (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
+                                          ? 430
+                                          : REFERENCE_HEIGHT;
+                const float viewportWidth = static_cast<float>(refWidth * WindowWidth) / REFERENCE_WIDTH;
+                const float viewportHeight = static_cast<float>(refHeight * WindowHeight) / REFERENCE_HEIGHT;
+                aspect = viewportWidth / viewportHeight;
+            }
 
 #ifdef _EDITOR
             // DevEditor override: replace the view-cone pyramid with a user-defined
@@ -2765,7 +2463,7 @@ void CreateFrustrum2D(vec3_t Position)
             Vector(-halfW,     -halfH,     -terrainDist, viewPts[7]);
 
             // Transform to world space using the actual GL modelview matrix
-            // (g_Camera.Matrix was set by CameraProjection::GetOpenGLMatrix in BeginOpengl)
+            // (g_Camera.Matrix is the view CameraProjection::UpdateView built)
             float px[8], py[8];
             for (int i = 0; i < 8; i++)
             {
@@ -2854,7 +2552,7 @@ void CreateFrustrum2D(vec3_t Position)
 
 }
 
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
+void CreateFrustrum(float xAspect, float yAspect)
 {
     const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
     float Distance = g_Camera.ViewFar;
@@ -2872,8 +2570,6 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
-    // g_Camera.Matrix is CPU-sourced by BeginOpengl() (DXP-07c) and always fresh here -- every
-    // caller of CreateFrustrum() runs it immediately after BeginOpengl() in the same frame.
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
@@ -2900,13 +2596,13 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], FrustrumFaceNormal[2]);
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], FrustrumFaceNormal[3]);
     FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], FrustrumFaceNormal[4]);
-    FrustrumFaceD[0] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
-    FrustrumFaceD[1] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
-    FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
-    FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
-    FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
+    FrustrumFaceD[0] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
+    FrustrumFaceD[1] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
+    FrustrumFaceD[2] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
+    FrustrumFaceD[3] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
+    FrustrumFaceD[4] = -VectorDotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
 
-    CreateFrustrum2D(position);
+    CreateFrustrum2D();
 
 #ifdef _EDITOR
     // In FreeFly spectator mode, override 3D frustum planes with spectated camera's
@@ -2945,6 +2641,46 @@ void ResetFrustrumBoundsFullTerrain()
     FrustrumBoundMaxY = TERRAIN_SIZE_MASK - TERRAIN_ITERATION_TILE;
 }
 
+namespace
+{
+    void AppendDebugCircle(mu::Vertex3D* vertices, int& vertexIndex, const vec3_t center, float radius,
+                           int ring, std::uint32_t color)
+    {
+        constexpr int segments = 16;
+        constexpr float angleStep = (2.0f * Q_PI) / segments;
+        for (int segment = 0; segment < segments; ++segment)
+        {
+            const float angle = segment * angleStep;
+            const float nextAngle = ((segment + 1) % segments) * angleStep;
+            const float a0 = radius * cosf(angle);
+            const float b0 = radius * sinf(angle);
+            const float a1 = radius * cosf(nextAngle);
+            const float b1 = radius * sinf(nextAngle);
+
+            vec3_t start;
+            vec3_t end;
+            if (ring == 0)
+            {
+                Vector(center[0] + a0, center[1] + b0, center[2], start);
+                Vector(center[0] + a1, center[1] + b1, center[2], end);
+            }
+            else if (ring == 1)
+            {
+                Vector(center[0] + a0, center[1], center[2] + b0, start);
+                Vector(center[0] + a1, center[1], center[2] + b1, end);
+            }
+            else
+            {
+                Vector(center[0], center[1] + a0, center[2] + b0, start);
+                Vector(center[0], center[1] + a1, center[2] + b1, end);
+            }
+
+            vertices[vertexIndex++] = {start[0], start[1], start[2], 0.f, 0.f, 1.f, 0.f, 0.f, color};
+            vertices[vertexIndex++] = {end[0], end[1], end[2], 0.f, 0.f, 1.f, 0.f, 0.f, color};
+        }
+    }
+} // namespace
+
 /**
  * @brief Renders a wireframe sphere for debugging culling volumes
  * @param center Center position of the sphere in world space
@@ -2955,117 +2691,55 @@ void ResetFrustrumBoundsFullTerrain()
  */
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b)
 {
-    // Save OpenGL state
-    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean texture2D = GL_FALSE;
-    GLboolean lighting = GL_FALSE;
-    if (!g_CoreProfile)
-    {
-        texture2D = glIsEnabled(GL_TEXTURE_2D);
-        lighting = glIsEnabled(GL_LIGHTING);
+    constexpr int segments = 16;
+    constexpr int ringCount = 3;
+    const std::uint32_t color = mu::PackABGR(r, g, b, 1.f);
+    mu::Vertex3D vertices[segments * ringCount * 2];
+    int vertexIndex = 0;
 
-        // Disable unnecessary features
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_LIGHTING);
-    }
-    glEnable(GL_DEPTH_TEST);  // Keep depth test for proper 3D rendering
+    for (int ring = 0; ring < ringCount; ++ring)
+        AppendDebugCircle(vertices, vertexIndex, center, radius, ring, color);
 
-    glColor3f(r, g, b);
-    glLineWidth(1.0f);
-
-    // Draw three circle rings (XY, XZ, YZ planes) to represent the sphere
-    const int segments = 16;  // Number of line segments per circle
-    const float angleStep = (2.0f * Q_PI) / segments;
-
-    // XY plane circle (around Z axis)
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < segments; i++)
-    {
-        float angle = i * angleStep;
-        float x = center[0] + radius * cosf(angle);
-        float y = center[1] + radius * sinf(angle);
-        glVertex3f(x, y, center[2]);
-    }
-    glEnd();
-
-    // XZ plane circle (around Y axis)
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < segments; i++)
-    {
-        float angle = i * angleStep;
-        float x = center[0] + radius * cosf(angle);
-        float z = center[2] + radius * sinf(angle);
-        glVertex3f(x, center[1], z);
-    }
-    glEnd();
-
-    // YZ plane circle (around X axis)
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < segments; i++)
-    {
-        float angle = i * angleStep;
-        float y = center[1] + radius * cosf(angle);
-        float z = center[2] + radius * sinf(angle);
-        glVertex3f(center[0], y, z);
-    }
-    glEnd();
-
-    // Restore OpenGL state
-    if (!depthTest) glDisable(GL_DEPTH_TEST);
-    if (!g_CoreProfile)
-    {
-        if (texture2D) glEnable(GL_TEXTURE_2D);
-        if (lighting) glEnable(GL_LIGHTING);
-    }
+    const bool restoreDepthTest = !DepthTestEnable;
+    EnableDepthTest();
+    mu::GetRenderer().RenderLines(vertices, 0u);
+    if (restoreDepthTest)
+        DisableDepthTest();
 }
 
 void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, float r, float g, float b)
 {
-    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean texture2D = GL_FALSE;
-    GLboolean lighting = GL_FALSE;
-    if (!g_CoreProfile)
+    const float x0 = origin[0];
+    const float y0 = origin[1];
+    const float z0 = origin[2];
+    const float x1 = x0 + sizeX;
+    const float y1 = y0 + sizeY;
+    const float z1 = z0 + sizeZ;
+    const std::uint32_t color = mu::PackABGR(r, g, b, 1.f);
+    const auto MakeVertex = [color](float x, float y, float z) -> mu::Vertex3D
     {
-        texture2D = glIsEnabled(GL_TEXTURE_2D);
-        lighting = glIsEnabled(GL_LIGHTING);
+        return {x, y, z, 0.f, 0.f, 1.f, 0.f, 0.f, color};
+    };
+    const mu::Vertex3D vertices[] = {
+        MakeVertex(x0, y0, z0), MakeVertex(x1, y0, z0),
+        MakeVertex(x1, y0, z0), MakeVertex(x1, y1, z0),
+        MakeVertex(x1, y1, z0), MakeVertex(x0, y1, z0),
+        MakeVertex(x0, y1, z0), MakeVertex(x0, y0, z0),
+        MakeVertex(x0, y0, z1), MakeVertex(x1, y0, z1),
+        MakeVertex(x1, y0, z1), MakeVertex(x1, y1, z1),
+        MakeVertex(x1, y1, z1), MakeVertex(x0, y1, z1),
+        MakeVertex(x0, y1, z1), MakeVertex(x0, y0, z1),
+        MakeVertex(x0, y0, z0), MakeVertex(x0, y0, z1),
+        MakeVertex(x1, y0, z0), MakeVertex(x1, y0, z1),
+        MakeVertex(x1, y1, z0), MakeVertex(x1, y1, z1),
+        MakeVertex(x0, y1, z0), MakeVertex(x0, y1, z1),
+    };
 
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_LIGHTING);
-    }
-    glEnable(GL_DEPTH_TEST);
-
-    glColor3f(r, g, b);
-    glLineWidth(1.0f);
-
-    float x0 = origin[0], y0 = origin[1], z0 = origin[2];
-    float x1 = x0 + sizeX, y1 = y0 + sizeY, z1 = z0 + sizeZ;
-
-    // Bottom face
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(x0, y0, z0); glVertex3f(x1, y0, z0);
-    glVertex3f(x1, y1, z0); glVertex3f(x0, y1, z0);
-    glEnd();
-
-    // Top face
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(x0, y0, z1); glVertex3f(x1, y0, z1);
-    glVertex3f(x1, y1, z1); glVertex3f(x0, y1, z1);
-    glEnd();
-
-    // Vertical edges
-    glBegin(GL_LINES);
-    glVertex3f(x0, y0, z0); glVertex3f(x0, y0, z1);
-    glVertex3f(x1, y0, z0); glVertex3f(x1, y0, z1);
-    glVertex3f(x1, y1, z0); glVertex3f(x1, y1, z1);
-    glVertex3f(x0, y1, z0); glVertex3f(x0, y1, z1);
-    glEnd();
-
-    if (!depthTest) glDisable(GL_DEPTH_TEST);
-    if (!g_CoreProfile)
-    {
-        if (texture2D) glEnable(GL_TEXTURE_2D);
-        if (lighting) glEnable(GL_LIGHTING);
-    }
+    const bool restoreDepthTest = !DepthTestEnable;
+    EnableDepthTest();
+    mu::GetRenderer().RenderLines(vertices, 0u);
+    if (restoreDepthTest)
+        DisableDepthTest();
 }
 
 void CacheActiveFrustum()
@@ -3111,7 +2785,7 @@ bool TestFrustrum2D(float x, float y, float Range)
     return true;
 }
 
-bool TestFrustrum(vec3_t Position, float Range)
+bool TestFrustrum(const vec3_t Position, float Range)
 {
     extern EGameScene SceneFlag;
     if (SceneFlag == LOG_IN_SCENE)
@@ -3119,7 +2793,7 @@ bool TestFrustrum(vec3_t Position, float Range)
 
     for (int i = 0; i < 5; i++)
     {
-        if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
+        if (VectorDotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
         {
             return false;
         }
@@ -3155,11 +2829,11 @@ void CFrustrum::Make(vec3_t vEye, float fFov, float fAspect, float fDist)
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], m_FrustrumNorm[2]);
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], m_FrustrumNorm[3]);
     FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], m_FrustrumNorm[4]);
-    m_FrustrumD[0] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[0]);
-    m_FrustrumD[1] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[1]);
-    m_FrustrumD[2] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[2]);
-    m_FrustrumD[3] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[3]);
-    m_FrustrumD[4] = -DotProduct(FrustrumVertex[1], m_FrustrumNorm[4]);
+    m_FrustrumD[0] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[0]);
+    m_FrustrumD[1] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[1]);
+    m_FrustrumD[2] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[2]);
+    m_FrustrumD[3] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[3]);
+    m_FrustrumD[4] = -VectorDotProduct(FrustrumVertex[1], m_FrustrumNorm[4]);
 }
 
 void CFrustrum::Create(vec3_t vEye, float fFov, float fAspect, float fDist)
@@ -3177,7 +2851,7 @@ bool CFrustrum::Test(vec3_t vPos, float fRange)
     for (int i = 0; i < 5; ++i)
     {
         float fValue;
-        fValue = m_FrustrumD[i] + DotProduct(vPos, m_FrustrumNorm[i]);
+        fValue = m_FrustrumD[i] + VectorDotProduct(vPos, m_FrustrumNorm[i]);
         if (fValue < -fRange) return false;
     }
     return true;
@@ -3237,6 +2911,28 @@ extern int EnableEvent;
 
 void InitTerrainLight()
 {
+    Render::Lighting::UpdateFrameSun();
+    // The sun moved (dynamic.shadowAngle), or look values or the tint source changed the mood's scales since
+    // the last build: the static light follows.
+    const glm::vec3 sun = TerrainSunVector();
+    if (glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))) ||
+        Render::Lighting::LightMood::Revision() != s_bakedMoodRevision)
+    {
+        FRAME_PROFILE(TerrainBake);
+        CreateTerrainLight();
+    }
+    Render::Lighting::FrameDynamicLights().Clear();
+    Render::Lighting::FrameWorldDynamicLights().Clear();
+    s_groundLightBuilt = false;
+    if (UseLightHistory())
+    {
+        Render::Lighting::FrameLightHistory().BeginTick();
+    }
+    else
+    {
+        Render::Lighting::FrameLightHistory().Clear();
+    }
+
     int xi, yi;
     yi = FrustrumBoundMinY;
     for (; yi <= FrustrumBoundMaxY + 3; yi += 1)
@@ -3408,33 +3104,6 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
 
 void RenderTerrainFrustrum(bool EditFlag)
 {
-    bool useShader = (TerrainShader::Instance().IsCreated() && TerrainFlag != TERRAIN_MAP_GRASS && !EditFlag);
-    if (useShader)
-    {
-        TerrainShader::Instance().Bind();
-        // TASK-30 phase 2: WaterMove is recomputed once per frame in RenderTerrain() (map-dependent
-        // rate); set it once here rather than per-tile, matching how often the CPU value actually changes.
-        TerrainShader::Instance().SetWaterMove(WaterMove);
-        BindVAO(g_VAO_Terrain);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx ^ 1]);
-        fn_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        fn_glEnableVertexAttribArray(1);
-    }
-    else
-    {
-        // DXP-22 step 4: the tile loop below falls through to RenderFace/RenderFaceAlpha/
-        // RenderFaceBlend's raw glBegin/glEnd fixed-function fallback whenever TerrainFlag ==
-        // TERRAIN_MAP_GRASS (grass maps never take the shader branch). Previously BMD::RenderMesh()
-        // reflexively unbound its program after every single mesh, which is what happened to keep
-        // program 0 in effect here too. Now that that reflexive reset is gone (see ZzzBMD.cpp), a
-        // shader program left bound from a prior draw would silently render these FFP tiles through
-        // it instead of true fixed-function -- so force it back to 0 explicitly, once per pass
-        // (not per-tile, which would reintroduce the TASK-24-style churn this whole task exists to
-        // remove). Safe to do unconditionally here even outside the grass case: at pass entry, once
-        // per frame, ordinary cache-miss cost either way. See DXP-22-bind-state-monopoly-perf.md.
-        UnbindAllShaders();
-    }
-
     int     xi;
     int     yi = FrustrumBoundMinY;
     float   xf;
@@ -3454,19 +3123,6 @@ void RenderTerrainFrustrum(bool EditFlag)
 
             }
         }
-    }
-
-    if (useShader)
-    {
-        // GLP-16: every tile visited above was gathered into a bucket, not drawn -- draw them
-        // all now, once per distinct texture pair, while g_VAO_Terrain and TerrainShader are
-        // still bound (FlushTerrainBuckets() rebinds GL_ELEMENT_ARRAY_BUFFER to its own dynamic
-        // buffer, which is captured into g_VAO_Terrain's VAO state -- safe, since g_VAO_Terrain's
-        // static g_EBO_Terrain binding has no other consumer left after this change; verified via
-        // a tree-wide grep for g_VAO_Terrain/g_EBO_Terrain before making this change).
-        FlushTerrainBuckets();
-        BindVAO(0);
-        TerrainShader::Instance().Unbind();
     }
 }
 
@@ -3514,23 +3170,96 @@ extern int SelectMapping;
 extern void RenderCharactersClient();
 
 #ifdef _EDITOR
-// Batched tile-grid debug pass. Mirrors the same visible-tile iteration as
-// RenderTerrainFrustrum -> RenderTerrainBlock, but emits ALL line segments inside
-// a single glBegin(GL_LINES) with GL state toggled once. The previous per-tile
-// glDisable(GL_TEXTURE_2D)/glBegin/glEnd/glEnable cost ~9 GL calls + state
-// changes per visible tile and tanked FPS when the toggle was on.
+static void AppendTileGridCell(std::vector<mu::Vertex3D>& vertices, float xf, float yf, std::uint32_t color)
+{
+    const auto MakeVertex = [color](float x, float y, float z) -> mu::Vertex3D
+    {
+        return {x, y, z, 0.f, 0.f, 1.f, 0.f, 0.f, color};
+    };
+    const auto AppendLine = [&](float x0, float y0, float z0, float x1, float y1, float z1)
+    {
+        vertices.push_back(MakeVertex(x0, y0, z0));
+        vertices.push_back(MakeVertex(x1, y1, z1));
+    };
+
+    const float sx = xf * TERRAIN_SCALE;
+    const float sy = yf * TERRAIN_SCALE;
+    const float z00 = RequestTerrainHeight(sx, sy) + 2.0f;
+    const float z10 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + 2.0f;
+    const float z11 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + 2.0f;
+    const float z01 = RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + 2.0f;
+
+    AppendLine(sx, sy, z00, sx + TERRAIN_SCALE, sy, z10);
+    AppendLine(sx + TERRAIN_SCALE, sy, z10, sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11);
+    AppendLine(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11, sx, sy + TERRAIN_SCALE, z01);
+    AppendLine(sx, sy + TERRAIN_SCALE, z01, sx, sy, z00);
+}
+
+// Batched tile-grid debug pass mirrors the visible terrain iteration and emits
+// one renderer line submission for the full grid.
 static void RenderTileGridDebug()
 {
-    // Snapshot/restore GL_TEXTURE_2D + GL_LIGHTING enable state around the pass.
-    // Terrain wants texture on / lighting off; characters, objects, and effects
-    // rendered AFTER us inherit whatever we leave behind, so guessing the right
-    // post-pass state breaks somebody. Push/pop is the only safe option.
-    glPushAttrib(GL_ENABLE_BIT);
+    constexpr std::uint32_t gridColor = 0x6600FFFFu;
+    thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.clear();
+
+    int byi = FrustrumBoundMinY;
+    auto byf = static_cast<float>(byi);
+    for (; byi <= FrustrumBoundMaxY; byi += 4, byf += 4.f)
+    {
+        int bxi = FrustrumBoundMinX;
+        auto bxf = static_cast<float>(bxi);
+        for (; bxi <= FrustrumBoundMaxX; bxi += 4, bxf += 4.f)
+        {
+            if (!TestFrustrum2D(bxf + 2.f, byf + 2.f, g_fFrustumRange) && !g_Camera.TopViewEnable)
+                continue;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                for (int j = 0; j < 4; ++j)
+                {
+                    const float xf = bxf + static_cast<float>(j);
+                    const float yf = byf + static_cast<float>(i);
+                    if (!TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) && !g_Camera.TopViewEnable)
+                        continue;
+
+                    AppendTileGridCell(vertices, xf, yf, gridColor);
+                }
+            }
+        }
+    }
+
+    if (!vertices.empty())
+        mu::GetRenderer().RenderLines(vertices, 0u);
+}
+
+// Set by the Map Editor's Attribute tab: tint each tile by its TerrainWall bits so
+// you can see walkability while painting it.
+bool g_bMapEditorAttrOverlay = false;
+
+// Colour for a tile's attribute value (matches the standalone terrain_editor tool).
+// Returns false for a plain walkable tile with no special bits.
+static void AttributeTileColour(WORD attr, float& r, float& g, float& b, float& a)
+{
+    if (attr & TW_NOGROUND)       { r = 0.06f; g = 0.06f; b = 0.07f; a = 0.65f; return; }  // void
+    if (attr & TW_WATER)          { r = 0.23f; g = 0.43f; b = 0.82f; a = 0.50f; return; }  // water
+    if (attr & TW_NOMOVE)         { r = 0.85f; g = 0.20f; b = 0.20f; a = 0.50f; return; }  // blocked
+    if (attr & TW_SAFEZONE)       { r = 0.20f; g = 0.80f; b = 0.35f; a = 0.50f; return; }  // safe
+    r = 0.75f; g = 0.75f; b = 0.80f; a = 0.12f;                                             // walkable (faint)
+}
+
+static void RenderAttributeOverlay()
+{
+    // Same push/pop discipline as RenderTileGridDebug: whatever renders after us
+    // inherits the state we leave behind.
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
-    glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
-    glBegin(GL_LINES);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);   // tint on top of terrain, don't write depth
 
+    glBegin(GL_QUADS);
     int byi = FrustrumBoundMinY;
     auto byf = (float)byi;
     for (; byi <= FrustrumBoundMaxY; byi += 4, byf += 4.f)
@@ -3542,41 +3271,133 @@ static void RenderTileGridDebug()
             if (!TestFrustrum2D(bxf + 2.f, byf + 2.f, g_fFrustumRange) && !g_Camera.TopViewEnable)
                 continue;
 
-            // 4x4 sub-tile expansion mirroring RenderTerrainBlock
+            // Every interior corner in this 4x4 block is shared by up to 4 quads, so
+            // sample the block's 5x5 height grid once (25 lookups) instead of calling
+            // RequestTerrainHeight per-quad-corner (up to 64 lookups, most of them
+            // recomputing the same shared corner repeatedly).
+            float blockHeight[5][5];
+            for (int hi = 0; hi < 5; ++hi)
+                for (int hj = 0; hj < 5; ++hj)
+                    blockHeight[hi][hj] = RequestTerrainHeight((bxf + (float)hj) * TERRAIN_SCALE,
+                                                                (byf + (float)hi) * TERRAIN_SCALE);
+
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    float xf = bxf + (float)j;
-                    float yf = byf + (float)i;
+                    const float xf = bxf + (float)j;
+                    const float yf = byf + (float)i;
                     if (!TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) && !g_Camera.TopViewEnable)
                         continue;
 
-                    float sx = xf * TERRAIN_SCALE;
-                    float sy = yf * TERRAIN_SCALE;
-                    float z00 = RequestTerrainHeight(sx, sy) + 2.0f;
-                    float z10 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + 2.0f;
-                    float z11 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + 2.0f;
-                    float z01 = RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + 2.0f;
+                    const int xi = (int)xf;
+                    const int yi = (int)yf;
+                    if (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE || yi >= TERRAIN_SIZE)
+                        continue;
 
-                    // GL_LINE_LOOP expanded to GL_LINES (4 segments × 2 verts = 8 verts/tile)
-                    glVertex3f(sx, sy, z00);                                glVertex3f(sx + TERRAIN_SCALE, sy, z10);
-                    glVertex3f(sx + TERRAIN_SCALE, sy, z10);                glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11);
-                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11); glVertex3f(sx, sy + TERRAIN_SCALE, z01);
-                    glVertex3f(sx, sy + TERRAIN_SCALE, z01);                glVertex3f(sx, sy, z00);
+                    float r, g, b, a;
+                    AttributeTileColour(TerrainWall[TERRAIN_INDEX(xi, yi)], r, g, b, a);
+                    glColor4f(r, g, b, a);
+
+                    const float sx = xf * TERRAIN_SCALE;
+                    const float sy = yf * TERRAIN_SCALE;
+                    const float lift = 3.0f;   // sit just above the ground to avoid z-fighting
+                    glVertex3f(sx, sy, blockHeight[i][j] + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy, blockHeight[i][j + 1] + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, blockHeight[i + 1][j + 1] + lift);
+                    glVertex3f(sx, sy + TERRAIN_SCALE, blockHeight[i + 1][j] + lift);
                 }
             }
         }
     }
-
     glEnd();
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glDepthMask(GL_TRUE);
+    glPopAttrib();
+}
+
+// Set by the Map Editor's Texture tab while painting is enabled: the brush's tile
+// footprint under the cursor, so it can be highlighted on the ground before/while
+// you click (like a cursor), instead of only finding out where you painted after
+// the fact. Min/max are inclusive tile coordinates.
+bool g_bMapEditorBrushHighlight = false;
+int  g_MapEditorBrushMinX = 0, g_MapEditorBrushMinY = 0;
+int  g_MapEditorBrushMaxX = 0, g_MapEditorBrushMaxY = 0;
+
+static void RenderBrushHighlight()
+{
+    // Same push/pop discipline as RenderAttributeOverlay.
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_LINE_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);   // tint on top of terrain, don't write depth
+
+    const float lift = 3.5f;   // a hair above the attribute overlay's lift to avoid z-fighting with it
+
+    // Translucent fill over every tile the next click would paint.
+    glColor4f(1.0f, 0.95f, 0.25f, 0.28f);
+    glBegin(GL_QUADS);
+    for (int yi = g_MapEditorBrushMinY; yi <= g_MapEditorBrushMaxY; ++yi)
+    {
+        for (int xi = g_MapEditorBrushMinX; xi <= g_MapEditorBrushMaxX; ++xi)
+        {
+            if (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE || yi >= TERRAIN_SIZE)
+                continue;
+            const float sx = (float)xi * TERRAIN_SCALE;
+            const float sy = (float)yi * TERRAIN_SCALE;
+            glVertex3f(sx, sy, RequestTerrainHeight(sx, sy) + lift);
+            glVertex3f(sx + TERRAIN_SCALE, sy, RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + lift);
+            glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE,
+                       RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + lift);
+            glVertex3f(sx, sy + TERRAIN_SCALE, RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + lift);
+        }
+    }
+    glEnd();
+
+    // Bright outline around the whole rectangle so the footprint reads clearly at
+    // a glance, matching the "select the paint rectangle on the ground" request.
+    glLineWidth(2.5f);
+    glColor4f(1.0f, 0.95f, 0.15f, 0.9f);
+    glBegin(GL_LINE_LOOP);
+    {
+        const float x0 = (float)g_MapEditorBrushMinX * TERRAIN_SCALE;
+        const float y0 = (float)g_MapEditorBrushMinY * TERRAIN_SCALE;
+        const float x1 = (float)(g_MapEditorBrushMaxX + 1) * TERRAIN_SCALE;
+        const float y1 = (float)(g_MapEditorBrushMaxY + 1) * TERRAIN_SCALE;
+        glVertex3f(x0, y0, RequestTerrainHeight(x0, y0) + lift);
+        glVertex3f(x1, y0, RequestTerrainHeight(x1, y0) + lift);
+        glVertex3f(x1, y1, RequestTerrainHeight(x1, y1) + lift);
+        glVertex3f(x0, y1, RequestTerrainHeight(x0, y1) + lift);
+    }
+    glEnd();
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glLineWidth(1.0f);
+    glDepthMask(GL_TRUE);
     glPopAttrib();
 }
 #endif
 
+// Set by the Map Editor's minimap top-down view: force the whole terrain to
+// render (ignore the camera's 2D frustum bounds) so a top-down screenshot shows
+// the entire map, not just the window around the camera.
+bool g_bMapEditorFullTerrain = false;
+
 void RenderTerrain(bool EditFlag)
 {
-    UploadTerrainLightVBO();
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::RenderTerrain, EditFlag))
+        return;
+    if (!EditFlag)
+    {
+        // The tiles noted are this pass's: a pass drawn again replaces them.
+        s_drawnCrywolfWater.clear();
+        ForgetDrawnTerrain();
+    }
+    if (g_bMapEditorFullTerrain)
+        ResetFrustrumBoundsFullTerrain();
 
     if (!EditFlag)
     {
@@ -3598,6 +3419,8 @@ void RenderTerrain(bool EditFlag)
 
     if (!EditFlag)
     {
+        // The ground, its layers and the grass all rely on it; earlier 2D passes may leave it off.
+        EnableDepthTest();
         DisableAlphaBlend();
     }
     else
@@ -3607,11 +3430,19 @@ void RenderTerrain(bool EditFlag)
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
-    RenderTerrainFrustrum(EditFlag);
+    {
+        const GroundLightScope ground(!EditFlag);
+        RenderTerrainFrustrum(EditFlag);
+    }
+    RenderLayerFaces();
     //
     if (EditFlag && SelectFlag)
     {
         RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, EditFlag);
+#ifdef _EDITOR
+        if (g_bMapEditorBrushHighlight)
+            RenderBrushHighlight();
+#endif
     }
     if (!EditFlag)
     {
@@ -3619,11 +3450,14 @@ void RenderTerrain(bool EditFlag)
         if (TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
         {
             TerrainFlag = TERRAIN_MAP_GRASS;
+            const GroundLightScope ground(true);
             RenderTerrainFrustrum(EditFlag);
         }
 #ifdef _EDITOR
         if (s_bShowTileGrid)
             RenderTileGridDebug();
+        if (g_bMapEditorAttrOverlay)
+            RenderAttributeOverlay();
 #endif
         DisableDepthTest();
         EnableCullFace();
@@ -3638,6 +3472,7 @@ void RenderTerrain_After(bool EditFlag)
         return;
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
+    const GroundLightScope ground(!EditFlag);
     RenderTerrainFrustrum_After(EditFlag);
 }
 

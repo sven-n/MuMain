@@ -1,14 +1,15 @@
-// MapManager.cpp: implementation of the CMapManager class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapObjectSounds.h"
+#include "Audio/SoundLoads.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Data/DataHandler/LoadData.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -20,7 +21,14 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/WSclient.h"
 #include "I18N/All.h"
+#include "Core/Utilities/Log/MuLogger.h"
+#ifdef _EDITOR
+#include "Core/Utilities/WorldClearing.h"
+#endif
 
+#include <SDL3/SDL_timer.h>
+#include <chrono>
+#include <optional>
 
 CMapManager gMapManager;
 
@@ -35,6 +43,8 @@ CMapManager::~CMapManager() // OK
 
 void CMapManager::Load() // OK
 {
+    // The Sound Editor shows which map loaded a sound.
+    const Audio::SoundLoads::ScopedLoadWhere loadsFor(gMapManager.WorldActive);
     int i;
     bool Temp = true;
 
@@ -109,7 +119,7 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_BOSS_HEAD, L"Data\\Object6\\", L"BossHead", 1);
         gLoadData.AccessModel(MODEL_PRINCESS, L"Data\\Object6\\", L"Princess", 1);
         for (int i = MODEL_BIG_METEO1; i <= MODEL_PRINCESS; i++)
-            gLoadData.OpenTexture(i, L"Object6\\");
+            gLoadData.OpenTexture(i, L"Object6\\", GL_NEAREST);
         break;
     case WD_6STADIUM:
         gLoadData.AccessModel(MODEL_BUG01, L"Data\\Object7\\", L"Bug", 1);
@@ -171,7 +181,7 @@ void CMapManager::Load() // OK
             gLoadData.OpenTexture(MODEL_GATE + i, L"Monster\\");
 
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
-        LoadWaveFile(SOUND_BLOODCASTLE, L"Data\\Sound\\iBloodCastle.wav", 1);
+        LoadGameSound(SOUND_BLOODCASTLE);
     }
     break;
     case WD_34CRYWOLF_1ST:
@@ -183,69 +193,64 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Effect\\Map_Smoke2.tga", BITMAP_CHROME + 3, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Effect\\mhoujin_R.jpg", BITMAP_MAGIC_CIRCLE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        gLoadData.AccessModel(MODEL_ARROW_TANKER, L"Data\\Monster\\", L"arrowstusk");
-        gLoadData.OpenTexture(MODEL_ARROW_TANKER, L"Monster\\");
-        gLoadData.AccessModel(MODEL_ARROW_TANKER_HIT, L"Data\\Monster\\", L"arrowstusk");
-        gLoadData.OpenTexture(MODEL_ARROW_TANKER_HIT, L"Monster\\");
-
         LoadBitmap(L"Effect\\Impack03.jpg", BITMAP_EXT_LOG_IN + 2);
         LoadBitmap(L"Logo\\chasellight.jpg", BITMAP_EFFECT);
 
-        LoadWaveFile(SOUND_CRY1ST_AMBIENT, L"Data\\Sound\\w35\\crywolf_ambi.wav", 1, true);
-        LoadWaveFile(SOUND_CRY1ST_WWOLF_MOVE1, L"Data\\Sound\\w35\\ww_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_WWOLF_MOVE2, L"Data\\Sound\\w35\\ww_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_WWOLF_ATTACK1, L"Data\\Sound\\w35\\ww_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_WWOLF_ATTACK2, L"Data\\Sound\\w35\\ww_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_WWOLF_DIE, L"Data\\Sound\\w35\\ww_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT1_MOVE1, L"Data\\Sound\\w35\\ww_s1_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT1_MOVE2, L"Data\\Sound\\w35\\ww_s1_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT1_ATTACK1, L"Data\\Sound\\w35\\ww_s1_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT1_ATTACK2, L"Data\\Sound\\w35\\ww_s1_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT1_DIE, L"Data\\Sound\\w35\\ww_s1_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT2_MOVE1, L"Data\\Sound\\w35\\ww_s2_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT2_MOVE2, L"Data\\Sound\\w35\\ww_s2_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT2_ATTACK1, L"Data\\Sound\\w35\\ww_s2_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT2_ATTACK2, L"Data\\Sound\\w35\\ww_s2_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT2_DIE, L"Data\\Sound\\w35\\ww_s2_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT3_MOVE1, L"Data\\Sound\\w35\\ww_s3_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT3_MOVE2, L"Data\\Sound\\w35\\ww_s3_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT3_ATTACK1, L"Data\\Sound\\w35\\ww_s3_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT3_ATTACK2, L"Data\\Sound\\w35\\ww_s3_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SCOUT3_DIE, L"Data\\Sound\\w35\\ww_s3_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_MOVE1, L"Data\\Sound\\w35\\soram_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_MOVE2, L"Data\\Sound\\w35\\soram_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_ATTACK1, L"Data\\Sound\\w35\\soram_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_ATTACK2, L"Data\\Sound\\w35\\soram_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_DIE, L"Data\\Sound\\w35\\soram_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_MOVE1, L"Data\\Sound\\w35\\balram_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_MOVE2, L"Data\\Sound\\w35\\balram_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_ATTACK1, L"Data\\Sound\\w35\\balram_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_ATTACK2, L"Data\\Sound\\w35\\balram_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_DIE, L"Data\\Sound\\w35\\balram_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_MOVE1, L"Data\\Sound\\w35\\balga_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_MOVE2, L"Data\\Sound\\w35\\balga_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_ATTACK1, L"Data\\Sound\\w35\\balga_at1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_ATTACK2, L"Data\\Sound\\w35\\balga_at2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_DIE, L"Data\\Sound\\w35\\balga_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_SKILL1, L"Data\\Sound\\w35\\balga_skill1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALGAS_SKILL2, L"Data\\Sound\\w35\\balga_skill2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_MOVE1, L"Data\\Sound\\w35\\darkelf_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_MOVE2, L"Data\\Sound\\w35\\darkelf_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_ATTACK1, L"Data\\Sound\\w35\\darkelf_at1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_ATTACK2, L"Data\\Sound\\w35\\darkelf_at2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_DIE, L"Data\\Sound\\w35\\darkelf_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_SKILL1, L"Data\\Sound\\w35\\darkelf_skill1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DARKELF_SKILL2, L"Data\\Sound\\w35\\darkelf_skill2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_MOVE1, L"Data\\Sound\\w35\\dths_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_MOVE2, L"Data\\Sound\\w35\\dths_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_ATTACK1, L"Data\\Sound\\w35\\dths_at1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_ATTACK2, L"Data\\Sound\\w35\\dths_at2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_DIE, L"Data\\Sound\\w35\\dths_deat.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_TANKER_ATTACK1, L"Data\\Sound\\w35\\tanker_attack.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_TANKER_DIE, L"Data\\Sound\\w35\\tanker_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SUMMON, L"Data\\Sound\\w35\\spawn_single.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SUCCESS, L"Data\\Sound\\w35\\CW_win.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_FAILED, L"Data\\Sound\\w35\\CW_lose.wav", 1);
+        LoadGameSound(SOUND_CRY1ST_AMBIENT);
+        LoadGameSound(SOUND_CRY1ST_WWOLF_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_WWOLF_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_WWOLF_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_WWOLF_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_WWOLF_DIE);
+        LoadGameSound(SOUND_CRY1ST_SCOUT1_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT1_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT1_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT1_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT1_DIE);
+        LoadGameSound(SOUND_CRY1ST_SCOUT2_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT2_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT2_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT2_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT2_DIE);
+        LoadGameSound(SOUND_CRY1ST_SCOUT3_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT3_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT3_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_SCOUT3_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_SCOUT3_DIE);
+        LoadGameSound(SOUND_CRY1ST_SORAM_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_SORAM_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_SORAM_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_SORAM_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_SORAM_DIE);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_DIE);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_DIE);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_SKILL1);
+        LoadGameSound(SOUND_CRY1ST_BALGAS_SKILL2);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_DIE);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_SKILL1);
+        LoadGameSound(SOUND_CRY1ST_DARKELF_SKILL2);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_DIE);
+        LoadGameSound(SOUND_CRY1ST_TANKER_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_TANKER_DIE);
+        LoadGameSound(SOUND_CRY1ST_SUMMON);
+        LoadGameSound(SOUND_CRY1ST_SUCCESS);
+        LoadGameSound(SOUND_CRY1ST_FAILED);
     }
     break;
     case WD_30BATTLECASTLE:
@@ -254,33 +259,33 @@ void CMapManager::Load() // OK
         LoadBitmap(L"World31\\Map1.jpg", BITMAP_INTERFACE_MAP + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"World31\\Map2.jpg", BITMAP_INTERFACE_MAP + 2, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_BC_AMBIENT, L"Data\\Sound\\BattleCastle\\aSiegeAmbi.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AMBIENT_BATTLE1, L"Data\\Sound\\BattleCastle\\RanAmbi1.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AMBIENT_BATTLE2, L"Data\\Sound\\BattleCastle\\RanAmbi2.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AMBIENT_BATTLE3, L"Data\\Sound\\BattleCastle\\RanAmbi3.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AMBIENT_BATTLE4, L"Data\\Sound\\BattleCastle\\RanAmbi4.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AMBIENT_BATTLE5, L"Data\\Sound\\BattleCastle\\RanAmbi5.wav", 1, true);
-        LoadWaveFile(SOUND_BC_GUARD_STONE_DIS, L"Data\\Sound\\BattleCastle\\oGuardStoneDis.wav", 1, true);
-        LoadWaveFile(SOUND_BC_SHIELD_SPACE_DIS, L"Data\\Sound\\BattleCastle\\oProtectionDis.wav", 1, true);
-        LoadWaveFile(SOUND_BC_CATAPULT_ATTACK, L"Data\\Sound\\BattleCastle\\oSWFire.wav", 1, true);
-        LoadWaveFile(SOUND_BC_CATAPULT_HIT, L"Data\\Sound\\BattleCastle\\oSWHitG.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BC_WALL_HIT, L"Data\\Sound\\BattleCastle\\oSWHit.wav", MAX_CHANNEL, true);
+        LoadGameSound(SOUND_BC_AMBIENT);
+        LoadGameSound(SOUND_BC_AMBIENT_BATTLE1);
+        LoadGameSound(SOUND_BC_AMBIENT_BATTLE2);
+        LoadGameSound(SOUND_BC_AMBIENT_BATTLE3);
+        LoadGameSound(SOUND_BC_AMBIENT_BATTLE4);
+        LoadGameSound(SOUND_BC_AMBIENT_BATTLE5);
+        LoadGameSound(SOUND_BC_GUARD_STONE_DIS);
+        LoadGameSound(SOUND_BC_SHIELD_SPACE_DIS);
+        LoadGameSound(SOUND_BC_CATAPULT_ATTACK);
+        LoadGameSound(SOUND_BC_CATAPULT_HIT);
+        LoadGameSound(SOUND_BC_WALL_HIT);
 
-        LoadWaveFile(SOUND_BC_GATE_OPEN, L"Data\\Sound\\BattleCastle\\oCDoorMove.wav", 1, true);
-        LoadWaveFile(SOUND_BC_GUARDIAN_ATTACK, L"Data\\Sound\\BattleCastle\\mGMercAttack.wav", 1, true);
-        LoadWaveFile(SOUND_BMS_STUN, L"Data\\Sound\\BattleCastle\\sDStun.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BMS_STUN_REMOVAL, L"Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BMS_MANA, L"Data\\Sound\\BattleCastle\\sDSwllMana.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BMS_INVISIBLE, L"Data\\Sound\\BattleCastle\\sDTrans.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BMS_VISIBLE, L"Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BMS_MAGIC_REMOVAL, L"Data\\Sound\\BattleCastle\\sDMagicCancel.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_RUSH, L"Data\\Sound\\BattleCastle\\sCHaveyBlow.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_JAVELIN, L"Data\\Sound\\BattleCastle\\sCShockWave.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_DEEP_IMPACT, L"Data\\Sound\\BattleCastle\\sCFireArrow.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_DEATH_CANON, L"Data\\Sound\\BattleCastle\\sCMW.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_ONE_FLASH, L"Data\\Sound\\BattleCastle\\sCColdAttack.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_SPACE_SPLIT, L"Data\\Sound\\BattleCastle\\sCDarkAttack.wav", MAX_CHANNEL, true);
-        LoadWaveFile(SOUND_BCS_BRAND_OF_SKILL, L"Data\\Sound\\BattleCastle\\sCDarkAssist.wav", 1, true);
+        LoadGameSound(SOUND_BC_GATE_OPEN);
+        LoadGameSound(SOUND_BC_GUARDIAN_ATTACK);
+        LoadGameSound(SOUND_BMS_STUN);
+        LoadGameSound(SOUND_BMS_STUN_REMOVAL);
+        LoadGameSound(SOUND_BMS_MANA);
+        LoadGameSound(SOUND_BMS_INVISIBLE);
+        LoadGameSound(SOUND_BMS_VISIBLE);
+        LoadGameSound(SOUND_BMS_MAGIC_REMOVAL);
+        LoadGameSound(SOUND_BCS_RUSH);
+        LoadGameSound(SOUND_BCS_JAVELIN);
+        LoadGameSound(SOUND_BCS_DEEP_IMPACT);
+        LoadGameSound(SOUND_BCS_DEATH_CANON);
+        LoadGameSound(SOUND_BCS_ONE_FLASH);
+        LoadGameSound(SOUND_BCS_SPACE_SPLIT);
+        LoadGameSound(SOUND_BCS_BRAND_OF_SKILL);
         break;
 
     case WD_31HUNTING_GROUND:
@@ -292,38 +297,38 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Monster\\bosswing.tga", BITMAP_HGBOSS_WING, GL_NEAREST, GL_REPEAT);
         LoadBitmap(L"Skill\\bossrock1_R.JPG", BITMAP_FISSURE_FIRE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_BC_HUNTINGGROUND_AMBIENT, L"Data\\Sound\\w31\\aW31.wav", 1, true);
-        LoadWaveFile(SOUND_BC_AXEWARRIOR_MOVE1, L"Data\\Sound\\w31\\mAWidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_AXEWARRIOR_MOVE2, L"Data\\Sound\\w31\\mAWidle2.wav", 1);
-        LoadWaveFile(SOUND_BC_AXEWARRIOR_ATTACK1, L"Data\\Sound\\w31\\mAWattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_AXEWARRIOR_ATTACK2, L"Data\\Sound\\w31\\mAWattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_AXEWARRIOR_DIE, L"Data\\Sound\\w31\\mAWdeath.wav", 1);
-        LoadWaveFile(SOUND_BC_LIZARDWARRIOR_MOVE1, L"Data\\Sound\\w31\\mLWidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_LIZARDWARRIOR_MOVE2, L"Data\\Sound\\w31\\mLWidle2.wav", 1);
-        LoadWaveFile(SOUND_BC_LIZARDWARRIOR_ATTACK1, L"Data\\Sound\\w31\\mLWattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_LIZARDWARRIOR_ATTACK2, L"Data\\Sound\\w31\\mLWattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_LIZARDWARRIOR_DIE, L"Data\\Sound\\w31\\mLWdeath.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_MOVE1, L"Data\\Sound\\w31\\mPGidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_MOVE2, L"Data\\Sound\\w31\\mPGidle2.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_ATTACK1, L"Data\\Sound\\w31\\mPGattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_ATTACK2, L"Data\\Sound\\w31\\mPGattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_ATTACK3, L"Data\\Sound\\w31\\mPGeff1.wav", 1);
-        LoadWaveFile(SOUND_BC_POISONGOLEM_DIE, L"Data\\Sound\\w31\\mPGdeath.wav", 1);
-        LoadWaveFile(SOUND_BC_QUEENBEE_MOVE1, L"Data\\Sound\\w31\\mQBidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_QUEENBEE_MOVE2, L"Data\\Sound\\w31\\mQBidle2.wav", 1);
-        LoadWaveFile(SOUND_BC_QUEENBEE_ATTACK1, L"Data\\Sound\\w31\\mQBattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_QUEENBEE_ATTACK2, L"Data\\Sound\\w31\\mQBattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_QUEENBEE_DIE, L"Data\\Sound\\w31\\mQBdeath.wav", 1);
-        LoadWaveFile(SOUND_BC_FIREGOLEM_MOVE1, L"Data\\Sound\\w31\\mFGidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_FIREGOLEM_MOVE2, L"Data\\Sound\\w31\\mFGidle2.wav", 1);
-        LoadWaveFile(SOUND_BC_FIREGOLEM_ATTACK1, L"Data\\Sound\\w31\\mFGattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_FIREGOLEM_ATTACK2, L"Data\\Sound\\w31\\mFGattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_FIREGOLEM_DIE, L"Data\\Sound\\w31\\mFGdeath.wav", 1);
-        LoadWaveFile(SOUND_BC_EROHIM_ENTER, L"Data\\Sound\\w31\\mELOidle1.wav", 1);
-        LoadWaveFile(SOUND_BC_EROHIM_ATTACK1, L"Data\\Sound\\w31\\mELOattack1.wav", 1);
-        LoadWaveFile(SOUND_BC_EROHIM_ATTACK2, L"Data\\Sound\\w31\\mELOattack2.wav", 1);
-        LoadWaveFile(SOUND_BC_EROHIM_ATTACK3, L"Data\\Sound\\w31\\mELOeff1.wav", 1);
-        LoadWaveFile(SOUND_BC_EROHIM_DIE, L"Data\\Sound\\w31\\mELOdeath.wav", 1);
+        LoadGameSound(SOUND_BC_HUNTINGGROUND_AMBIENT);
+        LoadGameSound(SOUND_BC_AXEWARRIOR_MOVE1);
+        LoadGameSound(SOUND_BC_AXEWARRIOR_MOVE2);
+        LoadGameSound(SOUND_BC_AXEWARRIOR_ATTACK1);
+        LoadGameSound(SOUND_BC_AXEWARRIOR_ATTACK2);
+        LoadGameSound(SOUND_BC_AXEWARRIOR_DIE);
+        LoadGameSound(SOUND_BC_LIZARDWARRIOR_MOVE1);
+        LoadGameSound(SOUND_BC_LIZARDWARRIOR_MOVE2);
+        LoadGameSound(SOUND_BC_LIZARDWARRIOR_ATTACK1);
+        LoadGameSound(SOUND_BC_LIZARDWARRIOR_ATTACK2);
+        LoadGameSound(SOUND_BC_LIZARDWARRIOR_DIE);
+        LoadGameSound(SOUND_BC_POISONGOLEM_MOVE1);
+        LoadGameSound(SOUND_BC_POISONGOLEM_MOVE2);
+        LoadGameSound(SOUND_BC_POISONGOLEM_ATTACK1);
+        LoadGameSound(SOUND_BC_POISONGOLEM_ATTACK2);
+        LoadGameSound(SOUND_BC_POISONGOLEM_ATTACK3);
+        LoadGameSound(SOUND_BC_POISONGOLEM_DIE);
+        LoadGameSound(SOUND_BC_QUEENBEE_MOVE1);
+        LoadGameSound(SOUND_BC_QUEENBEE_MOVE2);
+        LoadGameSound(SOUND_BC_QUEENBEE_ATTACK1);
+        LoadGameSound(SOUND_BC_QUEENBEE_ATTACK2);
+        LoadGameSound(SOUND_BC_QUEENBEE_DIE);
+        LoadGameSound(SOUND_BC_FIREGOLEM_MOVE1);
+        LoadGameSound(SOUND_BC_FIREGOLEM_MOVE2);
+        LoadGameSound(SOUND_BC_FIREGOLEM_ATTACK1);
+        LoadGameSound(SOUND_BC_FIREGOLEM_ATTACK2);
+        LoadGameSound(SOUND_BC_FIREGOLEM_DIE);
+        LoadGameSound(SOUND_BC_EROHIM_ENTER);
+        LoadGameSound(SOUND_BC_EROHIM_ATTACK1);
+        LoadGameSound(SOUND_BC_EROHIM_ATTACK2);
+        LoadGameSound(SOUND_BC_EROHIM_ATTACK3);
+        LoadGameSound(SOUND_BC_EROHIM_DIE);
         break;
     case WD_33AIDA:
         gLoadData.AccessModel(MODEL_BUTTERFLY01, L"Data\\Object1\\", L"Butterfly", 1);
@@ -335,40 +340,9 @@ void CMapManager::Load() // OK
 
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_AIDA_AMBIENT, L"Data\\Sound\\w34\\aida_ambi.wav", 1, true);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_MOVE1, L"Data\\Sound\\w34\\bg_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_MOVE2, L"Data\\Sound\\w34\\bg_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_ATTACK1, L"Data\\Sound\\w34\\bg_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_ATTACK2, L"Data\\Sound\\w34\\bg_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_DIE, L"Data\\Sound\\w34\\bg_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_MOVE1, L"Data\\Sound\\w34\\dr_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_MOVE2, L"Data\\Sound\\w34\\dr_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_ATTACK1, L"Data\\Sound\\w34\\dr_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_ATTACK2, L"Data\\Sound\\w34\\dr_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_DIE, L"Data\\Sound\\w34\\dr_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_MOVE1, L"Data\\Sound\\w34\\dt_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_MOVE2, L"Data\\Sound\\w34\\dt_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_ATTACK1, L"Data\\Sound\\w34\\dt_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_ATTACK2, L"Data\\Sound\\w34\\dt_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_DIE, L"Data\\Sound\\w34\\dt_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_MOVE1, L"Data\\Sound\\w34\\fo_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_MOVE2, L"Data\\Sound\\w34\\fo_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_ATTACK1, L"Data\\Sound\\w34\\fo_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_ATTACK2, L"Data\\Sound\\w34\\fo_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_DIE, L"Data\\Sound\\w34\\fo_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_MOVE1, L"Data\\Sound\\w34\\hm_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_MOVE2, L"Data\\Sound\\w34\\hm_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK1, L"Data\\Sound\\w34\\hm_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK2, L"Data\\Sound\\w34\\hm_firelay.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK3, L"Data\\Sound\\w34\\hm_bloodywind.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_DIE, L"Data\\Sound\\w34\\hm_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_MOVE1, L"Data\\Sound\\w34\\wq_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_MOVE2, L"Data\\Sound\\w34\\wq_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_ATTACK1, L"Data\\Sound\\w34\\wq_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_ATTACK2, L"Data\\Sound\\w34\\wq_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_DIE, L"Data\\Sound\\w34\\wq_death.wav", 1);
-        LoadWaveFile(SOUND_CHAOS_THUNDER01, L"Data\\Sound\\eElec1.wav", 1);
-        LoadWaveFile(SOUND_CHAOS_THUNDER02, L"Data\\Sound\\eElec2.wav", 1);
+        // The monsters' sounds load with their models (their sound sets in
+        // Data/Monsters/Sounds.json); eElec1 and eElec2 load at start.
+        LoadGameSound(SOUND_AIDA_AMBIENT);
         break;
     case WD_68DOPPLEGANGER4:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -377,50 +351,9 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_BUTTERFLY01, L"Data\\Object1\\", L"Butterfly", 1);
         gLoadData.OpenTexture(MODEL_BUTTERFLY01, L"Object1\\");
 
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_WATERFALL, L"Data\\Sound\\w37\\kan_ruin_waterfall.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_ELEC, L"Data\\Sound\\w37\\kan_ruin_elec.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_WHEEL, L"Data\\Sound\\w37\\kan_ruin_wheel.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_PLANT, L"Data\\Sound\\w37\\kan_ruin_plant.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_GLOBAL, L"Data\\Sound\\w37\\kan_ruin_global.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE1, L"Data\\Sound\\w37\\ber_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE2, L"Data\\Sound\\w37\\ber_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_ATTACK1, L"Data\\Sound\\w37\\ber_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_ATTACK2, L"Data\\Sound\\w37\\ber_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_DIE, L"Data\\Sound\\w37\\ber_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_MOVE1, L"Data\\Sound\\w37\\gigan_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_ATTACK1, L"Data\\Sound\\w37\\gigan_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_ATTACK2, L"Data\\Sound\\w37\\gigan_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_DIE, L"Data\\Sound\\w37\\gigan_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_MOVE1, L"Data\\Sound\\w37\\geno_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_MOVE2, L"Data\\Sound\\w37\\geno_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_ATTACK1, L"Data\\Sound\\w37\\geno_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_ATTACK2, L"Data\\Sound\\w37\\geno_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_DIE, L"Data\\Sound\\w37\\geno_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_MOVE1, L"Data\\Sound\\w37\\kenta_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_MOVE2, L"Data\\Sound\\w37\\kenta_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_ATTACK1, L"Data\\Sound\\w37\\kenta_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_ATTACK2, L"Data\\Sound\\w37\\kenta_skill-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_DIE, L"Data\\Sound\\w37\\kenta_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_MOVE1, L"Data\\Sound\\w37\\blade_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_MOVE2, L"Data\\Sound\\w37\\blade_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_ATTACK1, L"Data\\Sound\\w37\\blade_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_ATTACK2, L"Data\\Sound\\w37\\blade_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_DIE, L"Data\\Sound\\w37\\blade_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_MOVE1, L"Data\\Sound\\w37\\sati_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_MOVE2, L"Data\\Sound\\w37\\sati_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_ATTACK1, L"Data\\Sound\\w37\\sati_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_ATTACK2, L"Data\\Sound\\w37\\sati_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_DIE, L"Data\\Sound\\w37\\sati_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_MOVE1, L"Data\\Sound\\w37\\swolf_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_MOVE2, L"Data\\Sound\\w37\\swolf_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_ATTACK1, L"Data\\Sound\\w37\\swolf_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_ATTACK2, L"Data\\Sound\\w37\\swolf_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_DIE, L"Data\\Sound\\w37\\swolf_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_MOVE1, L"Data\\Sound\\w37\\ir_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_MOVE2, L"Data\\Sound\\w37\\ir_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_ATTACK1, L"Data\\Sound\\w37\\ir_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_ATTACK2, L"Data\\Sound\\w37\\ir_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_DIE, L"Data\\Sound\\w37\\ir_death.wav", 1);
+        // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
+        // The monsters' sounds load with their models (their sound sets in
+        // Data/Monsters/Sounds.json, MNK).
         break;
     case WD_38KANTURU_2ND:
     {
@@ -436,25 +369,9 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Npc\\khs_kan2gate003.jpg", BITMAP_KANTURU_2ND_NPC2, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Npc\\khs_kan2gate004.jpg", BITMAP_KANTURU_2ND_NPC3, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_GEAR, L"Data\\Sound\\w38\\kan_relic_gear.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_INCUBATOR, L"Data\\Sound\\w38\\kan_relic_incubator.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_HOLE, L"Data\\Sound\\w38\\kan_relic_hole.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL, L"Data\\Sound\\w38\\kan_relic_global.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE1, L"Data\\Sound\\w38\\perso_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE2, L"Data\\Sound\\w38\\perso_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_ATTACK1, L"Data\\Sound\\w38\\perso_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_ATTACK2, L"Data\\Sound\\w38\\perso_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_DIE, L"Data\\Sound\\w38\\perso_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_MOVE1, L"Data\\Sound\\w38\\twin_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_MOVE2, L"Data\\Sound\\w38\\twin_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_ATTACK1, L"Data\\Sound\\w38\\twin_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_ATTACK2, L"Data\\Sound\\w38\\twin_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_DIE, L"Data\\Sound\\w38\\twin_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_MOVE1, L"Data\\Sound\\w38\\dred_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_MOVE2, L"Data\\Sound\\w38\\dred_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_ATTACK1, L"Data\\Sound\\w38\\dred_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_ATTACK2, L"Data\\Sound\\w38\\dred_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_DIE, L"Data\\Sound\\w38\\dred_death.wav", 1);
+        // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
+        // The monsters' and the gateway machine's sounds load with their models
+        // (their sound sets in Data/Monsters/Sounds.json, MNK).
     }
     break;
     case WD_39KANTURU_3RD:
@@ -488,26 +405,26 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_MAYAHANDSKILL, L"Data\\Skill\\", L"hendlight02");
         gLoadData.OpenTexture(MODEL_MAYAHANDSKILL, L"Skill\\");
 
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYA_INTRO, L"Data\\Sound\\w39\\maya_intro.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYA_END, L"Data\\Sound\\w39\\maya_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYA_STORM, L"Data\\Sound\\w39\\maya_storm.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1, L"Data\\Sound\\w39\\maya_hand_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2, L"Data\\Sound\\w39\\maya_hand_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_INTRO, L"Data\\Sound\\w39\\nightmare_intro.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_ATT1, L"Data\\Sound\\w39\\nightmare_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_ATT2, L"Data\\Sound\\w39\\nightmare_skill-01", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_ATT3, L"Data\\Sound\\w39\\nightmare_skill-02", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_ATT4, L"Data\\Sound\\w39\\nightmare_skill-03", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_DIE, L"Data\\Sound\\w39\\nightmare_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1, L"Data\\Sound\\w39\\nightmare_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_IDLE2, L"Data\\Sound\\w39\\nightmare_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_NIGHTMARE_TELE, L"Data\\Sound\\w39\\nightmare_tele.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAP_SOUND01, L"Data\\Sound\\w39\\kan_boss_crystal.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAP_SOUND02, L"Data\\Sound\\w39\\kan_boss_disfield.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAP_SOUND03, L"Data\\Sound\\w39\\kan_boss_field.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAP_SOUND04, L"Data\\Sound\\w39\\kan_boss_gear.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_MAP_SOUND05, L"Data\\Sound\\w39\\kan_boss_incubator.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_3RD_AMBIENT, L"Data\\Sound\\w39\\kan_boss_global.wav", 1);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYA_INTRO);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYA_END);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYA_STORM);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_INTRO);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_ATT1);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_ATT2);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_ATT3);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_ATT4);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_DIE);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_IDLE2);
+        LoadGameSound(SOUND_KANTURU_3RD_NIGHTMARE_TELE);
+        LoadGameSound(SOUND_KANTURU_3RD_MAP_SOUND01);
+        LoadGameSound(SOUND_KANTURU_3RD_MAP_SOUND02);
+        LoadGameSound(SOUND_KANTURU_3RD_MAP_SOUND03);
+        LoadGameSound(SOUND_KANTURU_3RD_MAP_SOUND04);
+        LoadGameSound(SOUND_KANTURU_3RD_MAP_SOUND05);
+        LoadGameSound(SOUND_KANTURU_3RD_AMBIENT);
     }
     break;
     case WD_45CURSEDTEMPLE_LV1:
@@ -528,21 +445,21 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_FALL_STONE_EFFECT, L"Data\\Object47\\", L"Stoneeffec");
         gLoadData.OpenTexture(MODEL_FALL_STONE_EFFECT, L"Object47\\");
         //game system sound
-        LoadWaveFile(SOUND_CURSEDTEMPLE_GAMESYSTEM1, L"Data\\Sound\\w47\\cursedtemple_start01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_GAMESYSTEM2, L"Data\\Sound\\w47\\cursedtemple_statue01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_GAMESYSTEM3, L"Data\\Sound\\w47\\cursedtemple_holy01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_GAMESYSTEM4, L"Data\\Sound\\w47\\cursedtemple_score01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_GAMESYSTEM5, L"Data\\Sound\\w47\\cursedtemple_end01.wav", 1);
+        LoadGameSound(SOUND_CURSEDTEMPLE_GAMESYSTEM1);
+        LoadGameSound(SOUND_CURSEDTEMPLE_GAMESYSTEM2);
+        LoadGameSound(SOUND_CURSEDTEMPLE_GAMESYSTEM3);
+        LoadGameSound(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
+        LoadGameSound(SOUND_CURSEDTEMPLE_GAMESYSTEM5);
         //moster 1 - 2 effect sound
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER1_IDLE, L"Data\\Sound\\w47\\cursedtemple_idle01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER_MOVE, L"Data\\Sound\\w47\\cursedtemple_move01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER1_DAMAGE, L"Data\\Sound\\w47\\cursedtemple_damage01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER1_DEATH, L"Data\\Sound\\w47\\cursedtemple_death01.wav", 1);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER1_IDLE);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER_MOVE);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER1_DAMAGE);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER1_DEATH);
         //moster 3 effect sound
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER2_IDLE, L"Data\\Sound\\w47\\cursedtemple_idle02.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER2_ATTACK, L"Data\\Sound\\w47\\cursedtemple_Attack01.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER2_DAMAGE, L"Data\\Sound\\w47\\cursedtemple_damage02.wav", 1);
-        LoadWaveFile(SOUND_CURSEDTEMPLE_MONSTER2_DEATH, L"Data\\Sound\\w47\\cursedtemple_death02.wav", 1);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER2_IDLE);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER2_ATTACK);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER2_DAMAGE);
+        LoadGameSound(SOUND_CURSEDTEMPLE_MONSTER2_DEATH);
     }
     break;
     case WD_41CHANGEUP3RD_1ST:
@@ -550,35 +467,35 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Effect\\firered.jpg", BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  불씨.
 
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1, L"Data\\Sound\\w42\\cage01.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE2, L"Data\\Sound\\w42\\cage02.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_VOLCANO, L"Data\\Sound\\w42\\volcano.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR, L"Data\\Sound\\w42\\firepillar.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_MOVE1, L"Data\\Sound\\w35\\balram_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_MOVE2, L"Data\\Sound\\w35\\balram_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_ATTACK1, L"Data\\Sound\\w35\\balram_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_ATTACK2, L"Data\\Sound\\w35\\balram_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_BALRAM_DIE, L"Data\\Sound\\w35\\balram_death.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_MOVE1, L"Data\\Sound\\w35\\dths_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_MOVE2, L"Data\\Sound\\w35\\dths_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_ATTACK1, L"Data\\Sound\\w35\\dths_at1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_ATTACK2, L"Data\\Sound\\w35\\dths_at2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_DEATHSPIRIT_DIE, L"Data\\Sound\\w35\\dths_deat.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_MOVE1, L"Data\\Sound\\w35\\soram_idle1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_MOVE2, L"Data\\Sound\\w35\\soram_idle2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_ATTACK1, L"Data\\Sound\\w35\\soram_attack1.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_ATTACK2, L"Data\\Sound\\w35\\soram_attack2.wav", 1);
-        LoadWaveFile(SOUND_CRY1ST_SORAM_DIE, L"Data\\Sound\\w35\\soram_death.wav", 1);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_CAGE1);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_CAGE2);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_VOLCANO);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_BALRAM_DIE);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_DEATHSPIRIT_DIE);
+        LoadGameSound(SOUND_CRY1ST_SORAM_MOVE1);
+        LoadGameSound(SOUND_CRY1ST_SORAM_MOVE2);
+        LoadGameSound(SOUND_CRY1ST_SORAM_ATTACK1);
+        LoadGameSound(SOUND_CRY1ST_SORAM_ATTACK2);
+        LoadGameSound(SOUND_CRY1ST_SORAM_DIE);
         break;
     case WD_42CHANGEUP3RD_2ND:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\firered.jpg", BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1, L"Data\\Sound\\w42\\cage01.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE2, L"Data\\Sound\\w42\\cage02.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_VOLCANO, L"Data\\Sound\\w42\\volcano.wav", 1);
-        LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR, L"Data\\Sound\\w42\\firepillar.wav", 1);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_CAGE1);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_CAGE2);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_VOLCANO);
+        LoadGameSound(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR);
         break;
     case WD_51HOME_6TH_CHAR:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -590,26 +507,13 @@ void CMapManager::Load() // OK
             gLoadData.AccessModel(MODEL_MAP_TORNADO, L"Data\\Object52\\", L"typhoonall");
             gLoadData.OpenTexture(MODEL_MAP_TORNADO, L"Object52\\");
 
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART1, L"Data\\Monster\\", L"totemhead");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART1, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART2, L"Data\\Monster\\", L"totembody");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART2, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART3, L"Data\\Monster\\", L"totemleft");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART3, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART4, L"Data\\Monster\\", L"totemright");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART4, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART5, L"Data\\Monster\\", L"totemleg");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART5, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART6, L"Data\\Monster\\", L"totemleg2");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART6, L"Monster\\");
-
-            LoadWaveFile(SOUND_ELBELAND_VILLAGEPROTECTION01, L"Data\\Sound\\w52\\SE_Obj_villageprotection01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_WATERFALLSMALL01, L"Data\\Sound\\w52\\SE_Obj_waterfallsmall01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_WATERWAY01, L"Data\\Sound\\w52\\SE_Obj_waterway01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_ENTERDEVIAS01, L"Data\\Sound\\w52\\SE_Obj_enterdevias01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_WATERSMALL01, L"Data\\Sound\\w52\\SE_Obj_watersmall01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_RAVINE01, L"Data\\Sound\\w52\\SE_Amb_ravine01.wav", 1);
-            LoadWaveFile(SOUND_ELBELAND_ENTERATLANCE01, L"Data\\Sound\\w52\\SE_Amb_enteratlance01.wav", 1);
+            LoadGameSound(SOUND_ELBELAND_VILLAGEPROTECTION01);
+            LoadGameSound(SOUND_ELBELAND_WATERFALLSMALL01);
+            LoadGameSound(SOUND_ELBELAND_WATERWAY01);
+            LoadGameSound(SOUND_ELBELAND_ENTERDEVIAS01);
+            LoadGameSound(SOUND_ELBELAND_WATERSMALL01);
+            LoadGameSound(SOUND_ELBELAND_RAVINE01);
+            LoadGameSound(SOUND_ELBELAND_ENTERATLANCE01);
         }
         break;
     case WD_66DOPPLEGANGER2:
@@ -622,17 +526,6 @@ void CMapManager::Load() // OK
     break;
     case WD_63PK_FIELD:
     {
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, L"Data\\Monster\\", L"pk_manhead_green");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, L"Data\\Monster\\", L"pk_manhead_red");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, L"Data\\Monster\\", L"assassin_dieg");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, L"Data\\Monster\\", L"assassin_dier");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, L"Monster\\");
     }
     break;
     case WD_56MAP_SWAMP_OF_QUIET:
@@ -642,78 +535,6 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Monster\\blue_shadows.jpg", BITMAP_SHADOW_KINGHT_BLUE, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Monster\\green_shadows.jpg", BITMAP_SHADOW_ROOK_GREEN, GL_LINEAR, GL_REPEAT);
 
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_BELT, L"Data\\Monster\\", L"shadow_pawn_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_CHEST, L"Data\\Monster\\", L"shadow_pawn_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_HELMET, L"Data\\Monster\\", L"shadow_pawn_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_KNEE_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_WRIST_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_knight_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_BELT, L"Data\\Monster\\", L"shadow_knight_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_CHEST, L"Data\\Monster\\", L"shadow_knight_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_HELMET, L"Data\\Monster\\", L"shadow_knight_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_KNEE_LEFT, L"Data\\Monster\\", L"shadow_knight_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_WRIST_LEFT, L"Data\\Monster\\", L"shadow_knight_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_rock_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_BELT, L"Data\\Monster\\", L"shadow_rock_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_CHEST, L"Data\\Monster\\", L"shadow_rock_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_HELMET, L"Data\\Monster\\", L"shadow_rock_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_KNEE_LEFT, L"Data\\Monster\\", L"shadow_rock_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_WRIST_LEFT, L"Data\\Monster\\", L"shadow_rock_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_ANKLE_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_ANKLE_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_BELT, L"Data\\Monster\\", L"ex01shadow_rock_7_belt");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_CHEST, L"Data\\Monster\\", L"ex01shadow_rock_7_chest");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_HELMET, L"Data\\Monster\\", L"ex01shadow_rock_7_helmet");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_KNEE_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_knee_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_KNEE_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_knee_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_WRIST_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_WRIST_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_WRIST_RIGHT, L"Monster\\");
         break;
     case WD_65DOPPLEGANGER1:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -746,7 +567,7 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_STORM2, L"Data\\SKill\\", L"boswind");
         gLoadData.OpenTexture(MODEL_STORM2, L"SKill\\");
 
-        LoadWaveFile(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2, L"Data\\Sound\\w39\\maya_hand_attack-02.wav", 1);
+        LoadGameSound(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2);
 
         vec3_t vPos, vAngle;
         if (gMapManager.WorldActive == WD_57ICECITY)
@@ -824,42 +645,11 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Effect\\flare.jpg", BITMAP_FLARE, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\Map_Smoke1.jpg", BITMAP_CHROME + 2, GL_LINEAR, GL_REPEAT);
 
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_FOG, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_STORM, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_in.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\Jelint_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Jelint_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01, L"Data\\Sound\\w69w70w71w72\\Jelint_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02, L"Data\\Sound\\w69w70w71w72\\Jelint_move02.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Jelint_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\Jelint_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\Raymond_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Raymond_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Ercanne_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\2Vermont_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02, L"Data\\Sound\\w69w70w71w72\\3Cato_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE, L"Data\\Sound\\w69w70w71w72\\3Cato_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02, L"Data\\Sound\\w69w70w71w72\\4Gallia_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\QuaterMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH, L"Data\\Sound\\w69w70w71w72\\AssassinMaster_Death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move02.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_PRIEST_STOP, L"Data\\Sound\\w69w70w71w72\\Priest_stay.wav");
+        LoadGameSound(SOUND_EMPIREGUARDIAN_WEATHER_RAIN);
+        LoadGameSound(SOUND_EMPIREGUARDIAN_WEATHER_FOG);
+        LoadGameSound(SOUND_EMPIREGUARDIAN_WEATHER_STORM);
+        LoadGameSound(SOUND_EMPIREGUARDIAN_INDOOR_SOUND);
+        LoadGameSound(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
         break;
     case WD_73NEW_LOGIN_SCENE:
     case WD_74NEW_CHARACTER_SCENE:
@@ -884,62 +674,9 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Object9\\sand02.jpg", BITMAP_CHROME + 3, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_L, L"Data\\Monster\\", L"condra_7_arm_left");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_L2, L"Data\\Monster\\", L"condra_7_arm_left_2");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_L2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_SHOULDER, L"Data\\Monster\\", L"condra_7_shoulder_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_SHOULDER, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_R, L"Data\\Monster\\", L"condra_7_arm_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_R2, L"Data\\Monster\\", L"condra_7_arm_right_2");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_R2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_CONE_L, L"Data\\Monster\\", L"condra_7_cone_left");
-        gLoadData.OpenTexture(MODEL_CONDRA_CONE_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_CONE_R, L"Data\\Monster\\", L"condra_7_cone_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_CONE_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_PELVIS, L"Data\\Monster\\", L"condra_7_pelvis");
-        gLoadData.OpenTexture(MODEL_CONDRA_PELVIS, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_STOMACH, L"Data\\Monster\\", L"condra_7_stomach");
-        gLoadData.OpenTexture(MODEL_CONDRA_STOMACH, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_NECK, L"Data\\Monster\\", L"condra_7_neck");
-        gLoadData.OpenTexture(MODEL_CONDRA_NECK, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_L, L"Data\\Monster\\", L"nar_condra_7_arm_left");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_L2, L"Data\\Monster\\", L"nar_condra_7_arm_left_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_L2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_SHOULDER_L, L"Data\\Monster\\", L"nar_condra_7_shoulder_left");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_SHOULDER_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_SHOULDER_R, L"Data\\Monster\\", L"nar_condra_7_shoulder_right");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_SHOULDER_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R, L"Data\\Monster\\", L"nar_condra_7_arm_right");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R2, L"Data\\Monster\\", L"nar_condra_7_arm_right_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R3, L"Data\\Monster\\", L"nar_condra_7_arm_right_3");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_1, L"Data\\Monster\\", L"nar_condra_7_cone_1");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_1, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_2, L"Data\\Monster\\", L"nar_condra_7_cone_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_3, L"Data\\Monster\\", L"nar_condra_7_cone_3");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_4, L"Data\\Monster\\", L"nar_condra_7_cone_4");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_4, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_5, L"Data\\Monster\\", L"nar_condra_7_cone_5");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_5, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_6, L"Data\\Monster\\", L"nar_condra_7_cone_6");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_6, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_PELVIS, L"Data\\Monster\\", L"nar_condra_7_pelvis");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_PELVIS, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_STOMACH, L"Data\\Monster\\", L"nar_condra_7_stomach");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_STOMACH, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_NECK, L"Data\\Monster\\", L"nar_condra_7_neck");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_NECK, L"Monster\\");
-
-        LoadWaveFile(SOUND_KARUTAN_DESERT_ENV, L"Data\\Sound\\Karutan\\Karutan_desert_env.wav", 1);
-        LoadWaveFile(SOUND_KARUTAN_INSECT_ENV, L"Data\\Sound\\Karutan\\Karutan_insect_env.wav", 1);
-        LoadWaveFile(SOUND_KARUTAN_KARDAMAHAL_ENV, L"Data\\Sound\\Karutan\\Kardamahal_entrance_env.wav", 1);
+        LoadGameSound(SOUND_KARUTAN_DESERT_ENV);
+        LoadGameSound(SOUND_KARUTAN_INSECT_ENV);
+        LoadGameSound(SOUND_KARUTAN_KARDAMAHAL_ENV);
         break;
 #endif	// ASG_ADD_KARUTAN_MONSTERS
     }
@@ -951,7 +688,7 @@ void CMapManager::Load() // OK
 
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_CHAOSCASTLE, L"Data\\Sound\\iChaosCastle.wav", 1);
+        LoadGameSound(SOUND_CHAOSCASTLE);
     }
 
     if (this->InHellas())
@@ -959,53 +696,25 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Object25\\water1.tga", BITMAP_MAPTILE, GL_LINEAR, GL_REPEAT, false);
         LoadBitmap(L"Object25\\water2.jpg", BITMAP_MAPTILE + 1, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
-        gLoadData.AccessModel(MODEL_CUNDUN_PART1, L"Data\\Monster\\", L"cd71a", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART1, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART2, L"Data\\Monster\\", L"cd71b", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART3, L"Data\\Monster\\", L"cd71c", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART4, L"Data\\Monster\\", L"cd71d", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART4, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART5, L"Data\\Monster\\", L"cd71e", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART5, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART6, L"Data\\Monster\\", L"cd71f", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART6, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART7, L"Data\\Monster\\", L"cd71g", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART7, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART8, L"Data\\Monster\\", L"cd71h", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART8, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_DRAGON_HEAD, L"Data\\Skill\\", L"dragonhead", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_DRAGON_HEAD, L"Skill\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PHOENIX, L"Data\\Skill\\", L"phoenix", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PHOENIX, L"Skill\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_GHOST, L"Data\\Monster\\", L"cundun_gone", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_GHOST, L"Monster\\");
-        Models[MODEL_CUNDUN_PART6].Actions[0].Loop = false;
-        Models[MODEL_CUNDUN_PART6].Actions[0].PlaySpeed = 0.13f;
-        Models[MODEL_CUNDUN_PART7].Actions[0].Loop = false;
-        Models[MODEL_CUNDUN_PART7].Actions[0].PlaySpeed = 0.13f;
-        Models[MODEL_CUNDUN_PHOENIX].Actions[0].Loop = true;
-        Models[MODEL_CUNDUN_GHOST].Actions[0].Loop = false;
+        LoadGameSound(SOUND_KALIMA_AMBIENT);
+        LoadGameSound(SOUND_KALIMA_AMBIENT2);
+        LoadGameSound(SOUND_KALIMA_AMBIENT3);
+        LoadGameSound(SOUND_KALIMA_FALLING_STONE);
+        LoadGameSound(SOUND_DEATH_BUBBLE);
 
-        LoadWaveFile(SOUND_KALIMA_AMBIENT, L"Data\\Sound\\aKalima.wav", 1);
-        LoadWaveFile(SOUND_KALIMA_AMBIENT2, L"Data\\Sound\\aKalima01.wav", 1);
-        LoadWaveFile(SOUND_KALIMA_AMBIENT3, L"Data\\Sound\\aKalima02.wav", 1);
-        LoadWaveFile(SOUND_KALIMA_WATER_FALL, L"Data\\Sound\\aKalimaWaterFall.wav", 3);
-        LoadWaveFile(SOUND_KALIMA_FALLING_STONE, L"Data\\Sound\\aKalimaStone.wav", 3);
-        LoadWaveFile(SOUND_DEATH_BUBBLE, L"Data\\Sound\\mDeathBubble.wav", 1);
+        LoadGameSound(SOUND_KUNDUN_AMBIENT1);
+        LoadGameSound(SOUND_KUNDUN_AMBIENT2);
+        LoadGameSound(SOUND_KUNDUN_ROAR);
+        LoadGameSound(SOUND_KUNDUN_SIGHT);
+        LoadGameSound(SOUND_KUNDUN_SHUDDER);
+        LoadGameSound(SOUND_KUNDUN_DESTROY);
 
-        LoadWaveFile(SOUND_KUNDUN_AMBIENT1, L"Data\\Sound\\mKundunAmbient1.wav", 1);
-        LoadWaveFile(SOUND_KUNDUN_AMBIENT2, L"Data\\Sound\\mKundunAmbient2.wav", 1);
-        LoadWaveFile(SOUND_KUNDUN_ROAR, L"Data\\Sound\\mKundunRoar.wav", 1);
-        LoadWaveFile(SOUND_KUNDUN_SIGHT, L"Data\\Sound\\mKundunSight.wav", 1);
-        LoadWaveFile(SOUND_KUNDUN_SHUDDER, L"Data\\Sound\\mKundunShudder.wav", 1);
-        LoadWaveFile(SOUND_KUNDUN_DESTROY, L"Data\\Sound\\mKundunDestory.wav", 1);
-
-        LoadWaveFile(SOUND_SKILL_SKULL, L"Data\\Sound\\eSkull.wav", 1);
-        LoadWaveFile(SOUND_GREAT_POISON, L"Data\\Sound\\eGreatPoison.wav", 1);
-        LoadWaveFile(SOUND_GREAT_SHIELD, L"Data\\Sound\\eGreatShield.wav", 1);
+        LoadGameSound(SOUND_SKILL_SKULL);
+        LoadGameSound(SOUND_GREAT_POISON);
+        LoadGameSound(SOUND_GREAT_SHIELD);
     }
+
+    Data::Monsters::ModelLoader::OpenMapParts(GetServerMap(), GetServerStage());
 
     if (this->WorldActive != WD_7ATLANSE)
     {
@@ -1099,28 +808,11 @@ void CMapManager::Load() // OK
     else
     {
         wchar_t DirName[32];
-        int iMapWorld = this->WorldActive + 1;
-
-        if (this->InBloodCastle() == true)
-        {
-            iMapWorld = WD_11BLOODCASTLE1 + 1;
-        }
-        else if (this->InChaosCastle() == true)
-        {
-            iMapWorld = WD_18CHAOS_CASTLE + 1;
-        }
-        else if (this->InHellas() == true)
-        {
-            iMapWorld = WD_24HELLAS + 1;
-        }
-        else if (gMapManager.IsCursedTemple())
-        {
-            iMapWorld = WD_45CURSEDTEMPLE_LV1 + 2;
-        }
+        const int iMapWorld = GetFilesFolder(this->WorldActive);
 
         mu_swprintf(DirName, L"Data\\Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
-            gLoadData.AccessModel(i, DirName, L"Object", i + 1);
+            gLoadData.AccessModel(i, DirName, L"Object", i + 1, true);
 
         mu_swprintf(DirName, L"Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
@@ -1173,12 +865,66 @@ void CMapManager::Load() // OK
     }
 }
 
+void CMapManager::SetServerMap(int serverMap)
+{
+    m_serverMap = serverMap;
+    WorldActive = GetLoadedWorld(serverMap);
+    m_serverMapWorld = WorldActive;
+}
+
+int CMapManager::GetServerMap() const
+{
+    return m_serverMapWorld == WorldActive ? m_serverMap : WorldActive;
+}
+
+bool CMapManager::IsServerMapLoaded(int serverMap) const
+{
+    return GetServerMap() == serverMap;
+}
+
+void CMapManager::SetServerStage(int stage)
+{
+    m_serverStage = stage;
+}
+
+int CMapManager::GetServerStage() const
+{
+    return m_serverMapWorld == WorldActive ? m_serverStage : 0;
+}
+
+int CMapManager::GetLoadedWorld(int serverMap)
+{
+    return serverMap == SecondDevilSquareMapId ? WD_9DEVILSQUARE : serverMap;
+}
+
+int CMapManager::GetFilesFolder(int serverMap)
+{
+    const int world = GetLoadedWorld(serverMap);
+    if (InBloodCastle(world))
+    {
+        return WD_11BLOODCASTLE1 + 1;
+    }
+    if (InHellas(world))
+    {
+        return WD_24HELLAS + 1;
+    }
+    if (InChaosCastle(world))
+    {
+        return WD_18CHAOS_CASTLE + 1;
+    }
+    if (IsCursedTemple(world))
+    {
+        return WD_45CURSEDTEMPLE_LV1 + 2;
+    }
+    return world + 1;
+}
+
 void CMapManager::LoadWorld(int Map)
 {
-    if (Map == 32 && this->WorldActive == 32)
-    {
-        Map = this->WorldActive = 9;
-    }
+    const auto start = std::chrono::steady_clock::now();
+    std::optional<TextureLoadBatch> textureBatch(std::in_place);
+    SetServerMap(Map);
+    Map = this->WorldActive;
 
     this->DeleteObjects();
     DeleteNpcs();
@@ -1199,27 +945,12 @@ void CMapManager::LoadWorld(int Map)
     g_Direction.m_CKanturu.m_iNightmareState = 0;
 
     this->Load();
+    // The sounds of its objects (Data/Maps/ObjectSounds.json, maps design MP1).
+    World::MapObjectSounds::LoadForMap(GetServerMap(), GetServerStage());
 
     wchar_t FileName[64];
     wchar_t WorldName[32];
-    int  iMapWorld = this->WorldActive + 1;
-
-    if (InBloodCastle(Map) == true)
-    {
-        iMapWorld = WD_11BLOODCASTLE1 + 1;
-    }
-    else if (gMapManager.InHellas(Map) == true)
-    {
-        iMapWorld = WD_24HELLAS + 1;
-    }
-    else if (InChaosCastle(Map) == true)
-    {
-        iMapWorld = WD_18CHAOS_CASTLE + 1;
-    }
-    else if (gMapManager.IsCursedTemple())
-    {
-        iMapWorld = WD_45CURSEDTEMPLE_LV1 + 2;
-    }
+    int iMapWorld = GetFilesFolder(Map);
 
     battleCastle::Init();
 
@@ -1507,15 +1238,26 @@ void CMapManager::LoadWorld(int Map)
         g_pNewUIMiniMap->LoadImages(WorldName);
     }
 
-    CreateTerrainVBO();
+    textureBatch.reset();
+    Bitmaps.LogTextureFilteringSummary("world loaded");
+    mu::log::Get("render")->info(
+        "World {} loaded in {:.0f} ms, {} ms after start", iMapWorld,
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count(), SDL_GetTicks());
 }
 
 void CMapManager::DeleteObjects()
 {
-    DestroyTerrainVBO();
-    for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+#ifdef _EDITOR
+    // The editor removes what its effect preview created while the pools
+    // still hold it.
+    Core::WorldClearing::Notify();
+#endif
+    if (Models != nullptr)
     {
-        Models[i].Release();
+        for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+        {
+            Models[i].Release();
+        }
     }
 
     for (int i = 0; i < 16; i++)
@@ -1626,9 +1368,13 @@ bool CMapManager::IsPKField()
     return (this->WorldActive == WD_63PK_FIELD) ? true : false;
 }
 
-bool CMapManager::IsCursedTemple()
+bool CMapManager::IsCursedTemple(int iMap)
 {
-    return (this->WorldActive >= WD_45CURSEDTEMPLE_LV1 && this->WorldActive <= WD_45CURSEDTEMPLE_LV6) ? true : false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
+    return iMap >= WD_45CURSEDTEMPLE_LV1 && iMap <= WD_45CURSEDTEMPLE_LV6;
 }
 
 bool CMapManager::IsEmpireGuardian1()
@@ -1678,142 +1424,106 @@ bool CMapManager::InBattleCastle(int iMap)
     return (iMap == WD_30BATTLECASTLE) ? true : false;
 }
 
+namespace
+{
+const wchar_t* EventMapName(CMapManager& maps, int mapId)
+{
+    if (maps.InBloodCastle(mapId))
+        return I18N::Game::BloodCastle;
+    if (maps.InChaosCastle(mapId))
+        return I18N::Game::ChaosCastle;
+    if (maps.InHellas(mapId))
+        return maps.InHiddenHellas(mapId) ? I18N::Game::LostKalima : I18N::Game::Kalima;
+    if (maps.IsCursedTemple(mapId))
+        return I18N::Game::IllusionTemple;
+    if (mapId >= WD_65DOPPLEGANGER1 && mapId <= WD_68DOPPLEGANGER4)
+        return I18N::Game::Doppelganger;
+    if (mapId >= WD_69EMPIREGUARDIAN1 && mapId <= WD_72EMPIREGUARDIAN4)
+        return I18N::Game::Varka;
+    return nullptr;
+}
+} // namespace
+
 const wchar_t* CMapManager::GetMapName(int iMap)
 {
-    if (iMap == WD_34CRYWOLF_1ST)
-    {
-        return(I18N::Game::CrywolfFortress);
-    }
-    else if (iMap == WD_33AIDA)
-    {
-        return(I18N::Game::Aida);
-    }
-    else if (iMap == WD_37KANTURU_1ST)
-    {
-        return(I18N::Game::Kanturu);
-    }
-    else if (iMap == WD_38KANTURU_2ND)
-    {
-        return(I18N::Game::Kanturu3);
-    }
-    else if (iMap == WD_39KANTURU_3RD)
-    {
-        return(I18N::Game::RefineryTower);
-    }
-    else if (iMap == WD_40AREA_FOR_GM)
-    {
-        return(I18N::Game::GMSummonZone);
-    }
-    else if (iMap == WD_51HOME_6TH_CHAR)
-    {
-        return(I18N::Game::Elveland);
-    }
-    else if (iMap == WD_57ICECITY)
-    {
-        return(I18N::Game::LaCleon);
-    }
-    else if (iMap == WD_58ICECITY_BOSS)
-    {
-        return(I18N::Game::Hatchery);
-    }
+    const auto* name = FindMapName(iMap);
+    return name != nullptr ? name : I18N::Game::UnknownMap;
+}
 
-    if (gMapManager.InBattleCastle(iMap) == true)
+const wchar_t* CMapManager::FindMapName(int iMap)
+{
+    // The event predicates reserve -1 for WorldActive; a name lookup uses only its argument.
+    if (iMap < 0)
+        return nullptr;
+    if (const auto* eventName = EventMapName(*this, iMap))
+        return eventName;
+
+    switch (iMap)
     {
-        return (I18N::Game::ValleyOfLoren);
-    }
-    if (iMap == WD_31HUNTING_GROUND)
-    {
-        return (I18N::Game::LandOfTrials);
-    }
-    if (InChaosCastle(iMap) == true)
-    {
-        return (I18N::Game::ChaosCastle);
-    }
-    if (InHellas(iMap) == true)
-    {
-        if (InHiddenHellas(iMap) == true)
-            return (I18N::Game::LostKalima);
-        return (I18N::Game::Kalima);
-    }
-    if (InBloodCastle(iMap) == true)
-    {
-        return (I18N::Game::BloodCastle);
-    }
-    if (iMap == WD_10HEAVEN)
-    {
-        return (I18N::Game::Lookup(55 + iMap - WD_10HEAVEN));
-    }
-    if (iMap == 32)
-    {
-        return (I18N::Game::DevilSquare);
-    }
-    if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
+    case WD_0LORENCIA:
+        return I18N::Game::Lorencia;
+    case WD_1DUNGEON:
+        return I18N::Game::Dungeon;
+    case WD_2DEVIAS:
+        return I18N::Game::Devias;
+    case WD_3NORIA:
+        return I18N::Game::Noria;
+    case WD_4LOSTTOWER:
+        return I18N::Game::LostTower;
+    case WD_5UNKNOWN:
+        return I18N::Game::APlaceOfExile;
+    case WD_6STADIUM:
+        return I18N::Game::Arena;
+    case WD_7ATLANSE:
+        return I18N::Game::Atlans;
+    case WD_8TARKAN:
+        return I18N::Game::Tarkan;
+    case WD_9DEVILSQUARE:
+    case SecondDevilSquareMapId:
+        return I18N::Game::DevilSquare;
+    case WD_10HEAVEN:
+        return I18N::Game::Icarus;
+    case WD_30BATTLECASTLE:
+        return I18N::Game::ValleyOfLoren;
+    case WD_31HUNTING_GROUND:
+        return I18N::Game::LandOfTrials;
+    case WD_33AIDA:
+        return I18N::Game::Aida;
+    case WD_34CRYWOLF_1ST:
+    case WD_35CRYWOLF_2ND:
+        return I18N::Game::CrywolfFortress;
+    case WD_37KANTURU_1ST:
+        return I18N::Game::Kanturu;
+    case WD_38KANTURU_2ND:
+        return I18N::Game::Kanturu3;
+    case WD_39KANTURU_3RD:
+        return I18N::Game::RefineryTower;
+    case WD_40AREA_FOR_GM:
+        return I18N::Game::GMSummonZone;
+    case WD_41CHANGEUP3RD_1ST:
         return I18N::Game::BalgassBarrack;
-    else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasRefugeMap())
+    case WD_42CHANGEUP3RD_2ND:
         return I18N::Game::BalgassRestingPlace;
-    if (this->IsCursedTemple())
-    {
-        return (I18N::Game::IllusionTemple);
+    case WD_51HOME_6TH_CHAR:
+        return I18N::Game::Elveland;
+    case WD_56MAP_SWAMP_OF_QUIET:
+        return I18N::Game::SwampOfPeace;
+    case WD_57ICECITY:
+        return I18N::Game::LaCleon;
+    case WD_58ICECITY_BOSS:
+        return I18N::Game::Hatchery;
+    case WD_62SANTA_TOWN:
+        return I18N::Game::SantaSVillage;
+    case WD_63PK_FIELD:
+        return I18N::Game::Vulcanus;
+    case WD_64DUELARENA:
+        return I18N::Game::Colosseum;
+    case WD_79UNITEDMARKETPLACE:
+        return I18N::Game::LorenMarket;
+    case WD_80KARUTAN1:
+    case WD_81KARUTAN2:
+        return I18N::Game::Karutan;
+    default:
+        return nullptr;
     }
-    if (iMap == WD_51HOME_6TH_CHAR)
-    {
-        return (I18N::Game::Elveland);
-    }
-    if (iMap == WD_56MAP_SWAMP_OF_QUIET)
-    {
-        return (I18N::Game::SwampOfPeace);
-    }
-    if (iMap == WD_62SANTA_TOWN)
-    {
-        return (I18N::Game::SantaSVillage);
-    }
-    if (iMap == WD_64DUELARENA)
-    {
-        return (I18N::Game::Colosseum);
-    }
-    if (iMap == WD_63PK_FIELD)
-    {
-        return (I18N::Game::Vulcanus);
-    }
-    if (iMap == WD_65DOPPLEGANGER1)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_66DOPPLEGANGER2)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_67DOPPLEGANGER3)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_68DOPPLEGANGER4)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_69EMPIREGUARDIAN1)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_70EMPIREGUARDIAN2)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_71EMPIREGUARDIAN3)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_72EMPIREGUARDIAN4)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_79UNITEDMARKETPLACE)
-    {
-        return (I18N::Game::LorenMarket);
-    }
-    if (iMap == WD_80KARUTAN1 || iMap == WD_81KARUTAN2)
-    {
-        return (I18N::Game::Karutan);
-    }
-    return (I18N::Game::Lookup(30 + iMap));
 }

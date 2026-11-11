@@ -1,0 +1,15 @@
+Checks: >
+  -*,
+  bugprone-*,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using,
+  modernize-make-unique,
+  performance-*,
+  readability-redundant-smartptr-get,
+  readability-container-size-empty,
+  misc-unused-using-decls
+
+HeaderFilterRegex: 'source/.*'
+WarningsAsErrors: '*'
+FormatStyle: file

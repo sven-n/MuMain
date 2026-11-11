@@ -8,15 +8,16 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/UsefulDef.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Social/SocialWindowBase.h"
+#include "Render/Text/CUIRenderText.h"
+#include "Render/Text/TextWrap.h"
 
 
 
 bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPixel)
 {
-    SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), lpszSrc, lstrlen(lpszSrc), &size);
-    int nSrcWidth = int(size.cx / g_fScreenRate_x);
+    const SIZE size = g_pRenderText->MeasureText(lpszSrc, lstrlen(lpszSrc));
+    const int nSrcWidth = size.cx;
 
     if (nSrcWidth <= nPixel)
     {
@@ -40,8 +41,9 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     wchar_t szWorkToken[1024];
     int nLine = 0;
 
+    const wchar_t szNewlineDelimiters[] = {szNewlineChar, L'\0'};
     wchar_t* context = nullptr;
-    wchar_t* pszToken = wcstok_s(&szWorkSrc[0], &szNewlineChar, &context);
+    wchar_t* pszToken = wcstok_s(&szWorkSrc[0], szNewlineDelimiters, &context);
 
     while (pszToken != nullptr)
     {
@@ -55,7 +57,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
             nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
 
-        pszToken = wcstok_s(nullptr, &szNewlineChar, &context);
+        pszToken = wcstok_s(nullptr, szNewlineDelimiters, &context);
     }
 
     return nLine;

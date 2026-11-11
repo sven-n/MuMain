@@ -1,0 +1,48 @@
+/* Modern theme for CDuelWatchUserListWindow: each box the modern raised surface with the frame
+   border; the geometry and the names follow the legacy theme. */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+/* The window's position is the list's bottom-left corner: the slots stack upwards from it, 18
+   apart, each a 57 x 17 box with the name centred on it, one unit down. */
+.anchor { position: absolute; width: 57px; height: 0; }
+.stack { display: block; position: absolute; left: 0; bottom: 0; width: 57px; }
+.slot { display: block; position: relative; width: 57px; height: 18px; }
+.box {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 57px;
+	height: 17px;
+	box-sizing: border-box;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+}
+
+.name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 1px;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+}
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.name { width: calc(57px * var(--root-scale)); line-height: calc(17px * var(--root-scale)); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

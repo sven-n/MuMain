@@ -6,31 +6,38 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
-namespace BoneManager {
-    void RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone);
-    void UnregisterBone(CHARACTER* pCharacter, const std::wstring& name);
-    void UnregisterBone(CHARACTER* pCharacter);
-    void UnregisterAll();
+namespace BoneManager
+{
+void RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone);
+void UnregisterBone(CHARACTER* pCharacter, const std::wstring& name);
+void UnregisterBone(CHARACTER* pCharacter);
+void UnregisterAll();
 
-    CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::wstring& name);
-    int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
-    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
-    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
-}
+CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::wstring& name);
+int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
+bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
+bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
+// The names the character has registered with their bones, in the order of
+// registering.
+std::vector<std::pair<std::wstring, int>> ListBones(const CHARACTER* pCharacter);
+} // namespace BoneManager
 
-class CBoneManager {
+class CBoneManager
+{
     struct BONEINFO
     {
         std::wstring name; // bone name
-        CHARACTER* pCharacter{ nullptr };
-        BMD* pModel{ nullptr };
-        int nBone{ -1 };
+        CHARACTER* pCharacter{nullptr};
+        BMD* pModel{nullptr};
+        int nBone{-1};
     };
     using LPBONEINFO = BONEINFO*;
     using t_bone_list = std::list<std::unique_ptr<BONEINFO>>;
@@ -49,11 +56,12 @@ public:
     int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
     bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
     bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
+    std::vector<std::pair<std::wstring, int>> ListBones(const CHARACTER* pCharacter) const;
 
     static CBoneManager* GetInstance();
 
 protected:
-    CBoneManager();		//. ban create instance
+    CBoneManager(); //. ban create instance
 
     LPBONEINFO FindBone(OBJECT* pObject, const std::wstring& name);
     t_bone_list::iterator FindBoneIterator(OBJECT* pObject, const std::wstring& name);

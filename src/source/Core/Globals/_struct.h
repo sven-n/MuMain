@@ -9,12 +9,11 @@ class OBJECT;
 class CHARACTER;
 #include "Guild/GuildConstants.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
-    class CNewUIItemMng;
+    class CItemMng;
 }
 
-#define MAX_MONSTERSKILL_NUM	10
 
 namespace info
 {
@@ -173,7 +172,6 @@ typedef struct tagITEM
     WORD  Jewel_Of_Harmony_OptionLevel;
     bool HasSkill;
     bool HasLuck;
-    BYTE  Part;
     BYTE  Class;
     bool  TwoHand;
     WORD  DamageMin;
@@ -181,7 +179,7 @@ typedef struct tagITEM
     BYTE  SuccessfulBlocking;
     WORD  Defense;
     WORD  MagicDefense;
-    BYTE  MagicPower;
+    WORD MagicPower;
     BYTE  WeaponSpeed;
     WORD  WalkSpeed;
 
@@ -193,7 +191,9 @@ typedef struct tagITEM
     WORD  RequireLevel;
     BYTE  SpecialNum;
     WORD  Special[MAX_ITEM_SPECIAL];
-    BYTE  SpecialValue[MAX_ITEM_SPECIAL];
+    WORD SpecialValue[MAX_ITEM_SPECIAL];
+    // Where each slot's option came from (GameLogic::Items::GetOptionSource): 0 for a slot the code wrote.
+    DWORD SpecialSource[MAX_ITEM_SPECIAL];
     DWORD Key;	//client olny
 
     BYTE bySelectedSlotIndex;
@@ -226,7 +226,7 @@ typedef struct tagITEM
     long	lExpireTime;
 
 private:
-    friend class SEASON3B::CNewUIItemMng;
+    friend class mu::ui::window::CItemMng;
     int   RefCount;
 } ITEM;
 #pragma pack(pop)
@@ -243,14 +243,6 @@ typedef struct
     WORD AttackRating;
     WORD SuccessfulBlocking;
 } MONSTER_ATTRIBUTE;
-
-typedef struct
-{
-    WORD				Type;
-    wchar_t				Name[MAX_MONSTER_NAME];
-    WORD				Level;
-    MONSTER_ATTRIBUTE	Attribute;
-} MONSTER_SCRIPT;
 
 typedef struct
 {
@@ -387,7 +379,6 @@ typedef struct
     WORD MagicDamageMax;
     WORD CurseDamageMin;
     WORD CurseDamageMax;
-    WORD CriticalDamage;
     WORD SuccessfulBlocking;
     WORD Defense;
     WORD MagicDefense;
@@ -483,12 +474,6 @@ typedef struct
 
 //object end
 
-typedef struct Script_Skill
-{
-    int Skill_Num[MAX_MONSTERSKILL_NUM];
-    int Slot;
-} Script_Skill;
-
 typedef struct
 {
     bool		Live;
@@ -523,9 +508,12 @@ typedef struct
 
     // Fields about the "Tails" of effects:
     bool        m_bCreateTails; // Flag, if tails are created.
-    int         NumTails; // The number of currently used tail entries. Usually this gets increased by one in every frame until the maximum is reached.
+    int NumTails; // The number of currently used tail entries. Usually this gets increased by one in every reference
+                  // frame until the maximum is reached.
     int         MaxTails; // The maximum number of tail entries to use.
-    vec3_t      Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every frame.
+    int         ReferenceMaxTails; // MaxTails as authored for one tail per reference frame.
+    vec3_t Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every reference frame.
+    float TailFrames;           // Reference frames since tails were last laid.
 } JOINT;
 //character end
 

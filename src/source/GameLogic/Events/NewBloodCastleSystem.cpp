@@ -1,18 +1,17 @@
-//////////////////////////////////////////////////////////////////////
-// NewBloodCastleSystem.cpp: implementation of the CNewBloodCastleSystem class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"
 
 #include "NewBloodCastleSystem.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewBloodCastleSystem::CNewBloodCastleSystem()
 {
@@ -31,7 +30,7 @@ void CNewBloodCastleSystem::SetMatchResult(const int iNumDevilRank, const int iM
 
     m_iNumResult = Success;
     memcpy(m_MatchResult, pMatchResult, sizeof(MatchResult));
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBloodCastleResultMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CBloodCastleResultMsgBoxLayout));
 }
 
 void CNewBloodCastleSystem::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data)
@@ -101,9 +100,9 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
         case 5:
             if (m_iMatchTime > 0)
             {
-                if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE_TIME))
+                if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE_TIME))
                 {
-                    g_pNewUISystem->Show(SEASON3B::INTERFACE_BLOODCASTLE_TIME);
+                    g_pNewUISystem->Show(mu::ui::window::INTERFACE_BLOODCASTLE_TIME);
                 }
 
                 g_pBloodCastle->SetTime(m_iMatchTime);
@@ -117,60 +116,36 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
     }
     else
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE_TIME))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE_TIME))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE_TIME);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE_TIME);
         }
     }
 }
 
-void CNewBloodCastleSystem::RenderMatchResult(void)
+void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lines) const
 {
-    int x = REFERENCE_WIDTH / 2;
-    int yPos = m_PosResult.y + 40;
-
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(128, 255, 128, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
     wchar_t lpszStr[256] = {};
 
-    if (m_iNumResult)
-    {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
-    }
-    else
-    {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
-        g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
-    }
+    auto add = [&lines](const char* role, const wchar_t* text, MatchResultCell::Font font, DWORD color)
+    { lines.push_back({role, {{text, 0, 0, font, color}}}); };
 
-    yPos += 30;
+    const DWORD green = RGBA(128, 255, 128, 255);
+    // One sentence per outcome; the theme wraps it, so every language keeps its own word order.
+    add("message", m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
+        MatchResultCell::Font::Normal, green);
 
-    MatchResult* pResult = &m_MatchResult[0];
+    const MatchResult* pResult = &m_MatchResult[0];
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(210, 255, 210, 255);
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
-    yPos += 24;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(210, 255, 210, 255));
 
     if (m_iNumResult)
     {
-        g_pRenderText->SetTextColor(255, 210, 210, 255);
         mu_swprintf(lpszStr, I18N::Game::RewardedZenD, pResult->m_iZen);
-        g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
-        yPos += 24;
+        add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(255, 210, 210, 255));
     }
 
-    g_pRenderText->SetTextColor(210, 210, 255, 255);
     mu_swprintf(lpszStr, I18N::Game::BloodCastlePointD, pResult->m_iScore);
-    g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
-
-    DisableAlphaBlend();
+    add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(210, 210, 255, 255));
 }

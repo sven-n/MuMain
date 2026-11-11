@@ -1,12 +1,11 @@
-// w_CharacterInfo.cpp: implementation of the CHARACTER class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Engine/Object/w_CharacterInfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
 
+// cppcheck-suppress uninitMemberVar
 CHARACTER::CHARACTER()
 {
     Initialize();
@@ -32,6 +31,11 @@ void CHARACTER::Initialize()
     HideShadow = false;
     m_bIsSelected = false;
     Decoy = false;
+    SoundOncePlayed = false;
+    SoundsDrawnThisFrame = false;
+    ModelTimerLastTicks.fill(0);
+    ModelTimerTicks = 0;
+    ModelTimersAsked = false;
 
     Class = CLASS_WIZARD;
     Skin = 0;
@@ -48,6 +52,7 @@ void CHARACTER::Initialize()
     m_byGensInfluence = 0;
     PK = 0;
     AttackFlag = 0;
+    ReceivedAttackTargetUnknown = false;
     AttackTime = 0;
     LastAttackEffectTime = -1;
     TargetAngle = 0;
@@ -55,6 +60,7 @@ void CHARACTER::Initialize()
     Run = 0;
     Skill = 0;
     SwordCount = 0;
+    AttackRotation = 0;
     byExtensionSkill = 0;
     m_byDieType = 0;
     StormTime = 0;
@@ -69,7 +75,7 @@ void CHARACTER::Initialize()
     m_byFriend = 0;
     MonsterSkill = 0;
 
-    for (int i = 0; i < 32; ++i) ID[i] = 0;
+    ClearDisplayName();
 
     Movement = 0;
     MovementType = 0;
@@ -113,7 +119,8 @@ void CHARACTER::Initialize()
     InitPetInfo(PET_TYPE_DARK_HORSE);
     InitPetInfo(PET_TYPE_DARK_SPIRIT);
 
-    for (int i = 0; i < 32; ++i) OwnerID[i] = 0;
+    for (int i = 0; i < 32; ++i)
+        OwnerID[i] = 0;
 
     m_pPostMoveProcess = NULL;
 
@@ -125,9 +132,12 @@ void CHARACTER::Initialize()
     GensContributionPoints = 0;
 }
 
-void CHARACTER::Destroy()
+void CHARACTER::ClearDisplayName()
 {
+    memset(ID, 0, sizeof(ID));
 }
+
+void CHARACTER::Destroy() {}
 
 void CHARACTER::InitPetInfo(int iPetType)
 {
@@ -143,7 +153,8 @@ void CHARACTER::PostMoveProcess_Active(unsigned int uiLimitCount)
 {
     if (m_pPostMoveProcess != NULL)
     {
-        delete m_pPostMoveProcess; m_pPostMoveProcess = NULL;
+        delete m_pPostMoveProcess;
+        m_pPostMoveProcess = NULL;
     }
 
     m_pPostMoveProcess = new ST_POSTMOVE_PROCESS();
@@ -156,7 +167,7 @@ unsigned int CHARACTER::PostMoveProcess_GetCurProcessCount()
     return m_pPostMoveProcess->uiProcessingCount_PostMoveEvent;
 }
 
-bool CHARACTER::PostMoveProcess_IsProcessing()
+bool CHARACTER::PostMoveProcess_IsProcessing() const
 {
     if (m_pPostMoveProcess == NULL)
     {

@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -18,6 +19,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3C;
 
@@ -40,12 +42,14 @@ void GMSwampOfQuiet::RenderBaseSmoke()
         return;
 
     EnableAlphaTest();
-    glColor3f(0.4f, 0.4f, 0.45f);
+    const DWORD smokeColor = RGBA(102, 102, 115, 255);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
     EnableAlphaBlend();
     float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
 }
 
 void GMSwampOfQuiet::CreateObject(OBJECT* pObject)
@@ -77,7 +81,7 @@ bool GMSwampOfQuiet::MoveObject(OBJECT* pObject)
     {
     case 57:
         pObject->HiddenMesh = -2;
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         break;
@@ -124,7 +128,7 @@ void GMSwampOfQuiet::PlayObjectSound(OBJECT* pObject)
     // 	}
 }
 
-bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
+bool GMSwampOfQuiet::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
@@ -198,7 +202,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool GMSwampOfQuiet::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (pObject->Type >= MODEL_SHADOW_PAWN && pObject->Type <= MODEL_SHADOW_LOOK)
     {
@@ -214,15 +218,15 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
             {
             case MODEL_SHADOW_PAWN:
                 Vector(1.0f, 0.2f, 0.2f, pModel->BodyLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
+                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
                 break;
             case MODEL_SHADOW_KNIGHT:
                 Vector(0.5f, 0.8f, 1.0f, pModel->BodyLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
+                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
                 break;
             case MODEL_SHADOW_LOOK:
                 Vector(0.5f, 1.0f, 0.5f, pModel->BodyLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi);
                 break;
             }
         }
@@ -232,31 +236,37 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
             switch (pObject->Type)
             {
             case MODEL_SHADOW_PAWN:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_PAWN_RED);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_PAWN_RED);
                 break;
             case MODEL_SHADOW_KNIGHT:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_KINGHT_BLUE);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_KINGHT_BLUE);
                 break;
             case MODEL_SHADOW_LOOK:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 0, fLumi, 0, 0, BITMAP_SHADOW_ROOK_GREEN);
-                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 0, fLumi, 0, 0, BITMAP_SHADOW_ROOK_GREEN);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, 0, 0,
+                                   BITMAP_SHADOW_ROOK_GREEN);
+                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, 0, 0,
+                                   BITMAP_SHADOW_ROOK_GREEN);
                 break;
             }
         }
@@ -267,151 +277,16 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     return true;
 }
 
-void GMSwampOfQuiet::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon0)
+void GMSwampOfQuiet::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
 {
     if (!IsCurrentMap())
         return;
 
-    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// 폭포물1,2, 수로, 회오리, 빛
+    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type ==
+    // 125 || pObject->Type == 128)	// 폭포물1,2, 수로, 회오리, 빛
     // 	{
-    // 		pModel->RenderBody(RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,pObject->HiddenMesh);
+    // 		pModel->RenderBody(RENDER_TEXTURE,look.alpha,look.blendMesh,look.blendMeshLight,look.blendMeshU,look.blendMeshV,look.hiddenMesh);
     // 	}
-}
-
-CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int PosY, int Key)
-{
-    CHARACTER* pCharacter = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_SAPIUNUS:
-        OpenMonsterModel(MONSTER_MODEL_SAPIUNUS);
-        pCharacter = CreateCharacter(Key, MODEL_SAPIUNUS, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        // 		{
-        // 	  		BMD *b = &Models[MODEL_MONSTER01+136];
-        // // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-        // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-        // 		}
-        break;
-    case MONSTER_SAPIDUO:
-        OpenMonsterModel(MONSTER_MODEL_SAPIDUO);
-        pCharacter = CreateCharacter(Key, MODEL_SAPIDUO, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        // 		{
-        // 	  		BMD *b = &Models[MODEL_MONSTER01+137];
-        // // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-        // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-        // 		}
-        break;
-    case MONSTER_SAPITRES:
-        OpenMonsterModel(MONSTER_MODEL_SAPITRES);
-        pCharacter = CreateCharacter(Key, MODEL_SAPITRES, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        // 		{
-        // 	  		BMD *b = &Models[MODEL_MONSTER01+138];
-        // // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-        // // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-        // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-        // 		}
-        break;
-    case MONSTER_SHADOW_PAWN:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW_PAWN);
-        pCharacter = CreateCharacter(Key, MODEL_SHADOW_PAWN, PosX, PosY);
-        pCharacter->Object.Scale = 1.1f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    case MONSTER_SHADOW_KNIGHT:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW_KNIGHT);
-        pCharacter = CreateCharacter(Key, MODEL_SHADOW_KNIGHT, PosX, PosY);
-        pCharacter->Object.Scale = 1.1f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    case MONSTER_SHADOW_LOOK:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW_LOOK);
-        pCharacter = CreateCharacter(Key, MODEL_SHADOW_LOOK, PosX, PosY);
-        pCharacter->Object.Scale = 1.3f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    case MONSTER_THUNDER_NAPIN:
-        OpenMonsterModel(MONSTER_MODEL_NAPIN);
-        pCharacter = CreateCharacter(Key, MODEL_NAPIN, PosX, PosY);
-        pCharacter->Object.Scale = 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_GHOST_NAPIN:
-        OpenMonsterModel(MONSTER_MODEL_GHOST_NAPIN);
-        pCharacter = CreateCharacter(Key, MODEL_GHOST_NAPIN, PosX, PosY);
-        pCharacter->Object.Scale = 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_BLAZE_NAPIN:
-        OpenMonsterModel(MONSTER_MODEL_BLAZE_NAPIN);
-        pCharacter = CreateCharacter(Key, MODEL_BLAZE_NAPIN, PosX, PosY);
-        pCharacter->Object.Scale = 0.95f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_MEDUSA:
-        OpenMonsterModel(MONSTER_MODEL_MEDUSA);
-        pCharacter = CreateCharacter(Key, MODEL_MEDUSA, PosX, PosY);
-        pCharacter->Object.Scale = 1.5f;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    case MONSTER_SAPI_QUEEN:
-    case MONSTER_SAPI_QUEEN2:
-        OpenMonsterModel(MONSTER_MODEL_SAPI_QUEEN);
-        pCharacter = CreateCharacter(Key, MODEL_SAPI_QUEEN, PosX, PosY);
-        pCharacter->Object.Scale = 1.5f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_ICE_NAPIN:
-        OpenMonsterModel(MONSTER_MODEL_ICE_NAPIN);
-        pCharacter = CreateCharacter(Key, MODEL_ICE_NAPIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.1f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        break;
-    case MONSTER_SHADOW_MASTER:
-        OpenMonsterModel(MONSTER_MODEL_SHADOW_MASTER);
-        pCharacter = CreateCharacter(Key, MODEL_SHADOW_MASTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.56f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.LifeTime = 100;
-        break;
-    }
-
-    return pCharacter;
 }
 
 bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
@@ -476,8 +351,9 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 vec3_t vSmokePosition;
                 for (int i = 0; i < 2; ++i)
                 {
-                    Vector(vPosition[0] + (rand() % 20 - 10) * 1.0f,
-                        vPosition[1] + (rand() % 20 - 10) * 1.0f, vPosition[2] + (rand() % 20 - 10) * 1.0f, vSmokePosition);
+                    Vector(vPosition[0] + (Random::Rand() % 20 - 10) * 1.0f,
+                           vPosition[1] + (Random::Rand() % 20 - 10) * 1.0f,
+                           vPosition[2] + (Random::Rand() % 20 - 10) * 1.0f, vSmokePosition);
                     CreateParticleFpsChecked(BITMAP_SMOKE, vSmokePosition, pObject->Angle, vLight, 51);
                 }
                 if (pObject->AnimationFrame < End_Frame)
@@ -533,13 +409,14 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
         switch (pObject->CurrentAction)
         {
         case MONSTER01_WALK:
-            Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], vPos);
+            Vector(pObject->Position[0] + Random::Rand() % 200 - 100, pObject->Position[1] + Random::Rand() % 200 - 100,
+                   pObject->Position[2], vPos);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, pObject->Angle, pObject->Light);
             break;
 
         case MONSTER01_ATTACK1:
         case MONSTER01_ATTACK2:
-            if (2 < pModel->CurrentAnimationFrame)
+            if (2 < (int)pObject->AnimationFrame)
             {
                 vec3_t vAngle, vRel;
                 VectorCopy(pObject->Angle, vAngle);
@@ -555,7 +432,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                     {
                         if (i == 1 && rand_fps_check(2)) continue;
 
-                        switch (rand() % 3)
+                        switch (Random::Rand() % 3)
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, vAngle, vColor, 4, pObject->Scale, pObject);
@@ -797,7 +674,7 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     }
 }
 
-bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
@@ -842,10 +719,11 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         Vector(1.0f, 0.1f, 0.1f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -885,10 +763,11 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         Vector(0.3f, 0.6f, 1.0f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -928,10 +807,11 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         Vector(0.5f, 1.0f, 0.5f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -976,11 +856,14 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateSprite(BITMAP_LIGHT, vPos, 2.2f, vLightFlare, pObject);
-            if (rand() % 3 > 0) continue;
-            Vector((rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, vRelative);
+            if (Random::Rand() % 3 > 0)
+                continue;
+            Vector((Random::Rand() % 30 - 15) * 1.0f, (Random::Rand() % 30 - 15) * 1.0f,
+                   (Random::Rand() % 30 - 15) * 1.0f, vRelative);
             pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
-            fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
-            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+            fScale = (float)(Random::Rand() % 80 + 32) * 0.01f * 1.0f;
+            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0,
+                                     fScale);
         }
     }
     break;
@@ -991,7 +874,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         for (int i = 0; i < 7; ++i)
         {
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f, pObject);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f,
+                                     pObject);
             CreateParticleFpsChecked(BITMAP_CLUD64, vPos, pObject->Angle, vLight, 6, 1.0f, pObject);
         }
     }
@@ -1011,7 +895,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
                 CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, pObject);
 
                 fScale = 0.7f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             else
@@ -1019,11 +904,12 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
                 CreateSprite(BITMAP_LIGHT, vPos, 4.0f, vLightFire, pObject);
 
-                Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
+                Vector((Random::Rand() % 20 - 10) * 1.0f, (Random::Rand() % 20 - 10) * 1.0f,
+                       (Random::Rand() % 20 - 10) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
@@ -1099,12 +985,13 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         Vector(0.25f, 1.0f, 0.0f, vColor);
         for (int i = 0; i < 3; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             if (i % 5 == 0)
             {
                 pModel->TransformByObjectBone(vPos, pObject, temp[i]);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vColor, 50, 1.0f);
-                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
             }
         }
 
@@ -1156,7 +1043,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
                 CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, pObject);
 
                 fScale = 0.7f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             else
@@ -1164,12 +1052,13 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
                 CreateSprite(BITMAP_LIGHT, vPos, 4.0f, vLightFire, pObject);
 
-                Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
+                Vector((Random::Rand() % 20 - 10) * 1.0f, (Random::Rand() % 20 - 10) * 1.0f,
+                       (Random::Rand() % 20 - 10) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             Vector(0.25f, 0.6f, 0.7f, vLight);
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
@@ -1190,10 +1079,11 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         Vector(1.0f, 1.0f, 1.f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -1232,187 +1122,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
     return false;
 }
 
-bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
-{
-    if (!IsCurrentMap())
-        return false;
-
-    float fDis_x, fDis_y;
-    fDis_x = pObject->Position[0] - Hero->Object.Position[0];
-    fDis_y = pObject->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f) return true;
-
-    switch (pObject->Type)
-    {
-    case MODEL_SAPIUNUS:
-    case MODEL_SAPIDUO:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
-            }
-        }
-        return true;
-    case MODEL_SAPITRES:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
-            }
-        }
-        return true;
-    case MODEL_SHADOW_PAWN:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
-        }
-        return true;
-    case MODEL_SHADOW_KNIGHT:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
-        }
-        return true;
-    case MODEL_SHADOW_LOOK:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
-        }
-        return true;
-    case MODEL_NAPIN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
-        }
-        return true;
-    case MODEL_GHOST_NAPIN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
-        }
-        return true;
-    case MODEL_BLAZE_NAPIN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
-        }
-        return true;
-    case MODEL_MEDUSA:
-    {
-    }
-    return true;
-    case MODEL_SAPI_QUEEN:
-    case MODEL_WOLF_STATUS:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (rand_fps_check(3))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
-            }
-        }
-        return true;
-    case MODEL_ICE_NAPIN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
-        }
-        return true;
-    case MODEL_SHADOW_MASTER:
-        if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
-        }
-        return true;
-    }
-
-    return false;
-}
-
 bool GMSwampOfQuiet::AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
@@ -1421,93 +1130,3 @@ bool GMSwampOfQuiet::AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject,
     return false;
 }
 
-bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsCurrentMap())
-        return false;
-
-    switch (pObject->Type)
-    {
-    case MODEL_MEDUSA:
-    {
-        switch (pCharacter->Skill)
-        {
-        case AT_SKILL_DECAY:
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_CHAOTIC_DISEIER:
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_GIGANTIC_STORM:
-        {
-            SetAction(pObject, MONSTER01_ATTACK3);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        case AT_SKILL_EVIL_SPIRIT:
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        default:
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        } break;
-        }
-    }
-    return true;
-    case MODEL_SAPI_QUEEN:
-    case MODEL_WOLF_STATUS:
-    {
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SAPIQUEEN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
-    case MODEL_ICE_NAPIN:
-    {
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_ICENAPIN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
-    case MODEL_SHADOW_MASTER:
-    {
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SHADOWMASTER_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-    return true;
-    default:
-        return false;
-    }
-    return false;
-}

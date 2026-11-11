@@ -1,0 +1,13 @@
+/* Modern theme for TitleSceneUI's splash-screen loading bar -- flat/gradient fill via the internal
+   `fill` element <progress> generates; same positioning as legacy. */
+
+.gauge-fill {
+	position: absolute;
+	/* left/top/width/height pushed from C++. */
+}
+/* Reuses main_frame.rcss's modern-theme AG-gauge amber gradient (literal hex, matching that
+   file's convention for gauge fills). */
+.gauge-fill fill {
+	background-color: token(resource-ag);
+	decorator: linear-gradient(to bottom, #d4a94f, token(resource-ag) 45%, #5c4118);
+}

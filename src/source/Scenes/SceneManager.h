@@ -4,6 +4,9 @@
 
 #include "Core/Platform/WinCompat.h"
 
+#include <functional>
+#include <string>
+
 //=============================================================================
 // Frame Timing State
 //=============================================================================
@@ -12,12 +15,11 @@ class FrameTimingState {
 private:
     double targetFps = -1.0;      // -1 = uncapped, >0 = specific FPS limit
     double msPerFrame = 0.0;      // 0 = no frame limiting (uncapped)
-
-public:
     double lastRenderTickCount = 0.0;
     double currentTickCount = 0.0;
     double lastWaterChange = 0.0;
 
+public:
     /**
      * Set target frames per second for frame rate limiting
      * @param fps Target FPS. Use -1 or any negative value for uncapped (unlimited) framerate.
@@ -97,6 +99,11 @@ public:
     double GetCurrentFrameTime() const {
         return currentTickCount - lastRenderTickCount;
     }
+
+    double GetLastRenderTickCount() const { return lastRenderTickCount; }
+    double GetCurrentTickCount() const { return currentTickCount; }
+    double GetLastWaterChange() const { return lastWaterChange; }
+    void SetLastWaterChange(double time) { lastWaterChange = time; }
 };
 
 // Global frame timing state
@@ -107,19 +114,55 @@ extern FrameTimingState g_frameTiming;
 //=============================================================================
 
 void UpdateSceneState();
+// Loads and scene setup for the coming frame, before it begins: a load inside a frame loses what the frame drew
+// before it.
+void PrepareSceneBeforeFrame();
 void RenderScene(HDC Hdc);
 void MainScene(HDC hDC);
+
+//=============================================================================
+// Screenshots
+//=============================================================================
+
+// Outcome of a capture, reported once the file has been written.
+struct ScreenshotOutcome
+{
+    bool saved = false;
+    std::wstring path;
+    int width = 0;
+    int height = 0;
+};
+
+using ScreenshotCompletion = std::function<void(const ScreenshotOutcome&)>;
+
+// JPEG quality of a capture: Print Screen always writes the best one.
+constexpr int BestScreenshotQuality = 100;
+
+// Captures the next rendered frame the same way Print Screen does, writing it
+// to `path` (empty: the usual `Screen(...).jpg` beside the executable) as a JPEG
+// of `quality` (1 to 100) and calling `onComplete` on the frame the file is
+// finished. Returns false when a capture is already pending or the renderer
+// refused the readback.
+bool RequestScriptedScreenshot(const std::wstring& path, int quality, ScreenshotCompletion onComplete);
+
+// Drops a scripted capture that nobody is waiting for any more: its caller
+// went away, its act was never registered, or it was interrupted. The
+// completion is forgotten without being called.
+void CancelScriptedScreenshot();
 
 // FPS management (legacy - use g_frameTiming instead)
 void SetTargetFps(double targetFps);
 double GetTargetFps();
 
-// Debug overlay controls
+// Debug overlay controls -- mutually exclusive (setting one clears the other), plain globals with
+// no GameConfig persistence, matching the $details/$fpscounter console commands' own behavior
+// (session-only, reset every launch). Getters exist only so a UI checkbox can read the live state
+// back (e.g. after the OTHER one was just toggled on).
 void SetShowDebugInfo(bool enabled);
+bool GetShowDebugInfo();
 void SetShowFpsCounter(bool enabled);
+bool GetShowFpsCounter();
 void ResetFrameStats();
 
-// GLP-01: GL call/draw/buffer counters + GPU pass timers overlay, console-toggled via
-// `$glstats on/off` (muConsoleDebug.cpp). Independent of $details/$fpscounter -- can be
-// shown alongside either.
+// SDL GPU frame counters and per-pass CPU timings. Console-toggled via `$glstats on/off`.
 void SetShowGLStats(bool enabled);

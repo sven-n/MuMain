@@ -8,7 +8,8 @@ set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
 set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
 
-set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+list(APPEND CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+list(REMOVE_DUPLICATES CMAKE_FIND_ROOT_PATH)
 
 # Prefer static GCC runtimes to avoid shipping libgcc_s_seh-1.dll / libstdc++-6.dll
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} -static-libgcc -static-libstdc++")

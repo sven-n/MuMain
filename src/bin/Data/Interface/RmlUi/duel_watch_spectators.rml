@@ -1,0 +1,23 @@
+<rml>
+<head>
+	<title>Duel spectators (CDuelWatchUserListWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="duel_watch_spectators.rcss"/>
+</head>
+<body data-model="duel_watch_spectators">
+	<!-- The spectators of the watched duel (CDuelWatchUserListWindow), shown with the spectator
+	     frame: a 57 x 17 box per name, 18 apart, stacked upwards from the window's position (the
+	     list's bottom-left corner; the first name on top). Its workspace slot places #panel
+	     there at the bottom HUD's scale; the names take their native size and cancel it. Takes no pointer events (C++ keeps the pointer over the boxes from the world). -->
+	<div class="screen">
+		<div id="panel" class="anchor">
+			<div class="stack">
+				<div class="slot" data-for="name : spectators">
+					<div class="box"></div>
+					<span class="name counter-scaled" data-style-font-size="text_px + 'px'">{{name}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

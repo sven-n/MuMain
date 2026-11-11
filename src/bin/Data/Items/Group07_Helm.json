@@ -1,0 +1,1631 @@
+{
+  "formatVersion": 1,
+  "group": 7,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Helm",
+        "de": "Bronzehelm",
+        "es": "Yelmo de Bronce",
+        "pl": "Brązowy hełm",
+        "pt": "Elmo de bronze"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 16,
+      "durability": 34,
+      "defense": 9,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Helm",
+        "de": "Drachenhelm",
+        "es": "Yelmo Dragón",
+        "pl": "Smoczy hełm",
+        "pt": "Elmo do dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 68,
+      "defense": 24,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Helm",
+        "de": "Polsterhelm",
+        "es": "Yelmo Relleno",
+        "pl": "Pikowany hełm",
+        "pt": "Elmo acolchoado"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 5,
+      "durability": 28,
+      "defense": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Helm",
+        "de": "Legendärer Helm",
+        "es": "Yelmo Legendario",
+        "pl": "Legendarny hełm",
+        "pt": "Elmo lendário"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 42,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Helm",
+        "de": "Knochenhelm",
+        "es": "Yelmo de Hueso",
+        "pl": "Kościany hełm",
+        "pt": "Elmo de osso"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 18,
+      "durability": 30,
+      "defense": 9,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Helm",
+        "de": "Lederhelm",
+        "es": "Yelmo de Cuero",
+        "pl": "Skórzany hełm",
+        "pt": "Elmo de couro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 6,
+      "durability": 30,
+      "defense": 5,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Helm",
+        "de": "Schuppenhelm",
+        "es": "Yelmo de Escamas",
+        "pl": "Łuskowy hełm",
+        "pt": "Elmo de escamas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 26,
+      "durability": 40,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Mask",
+        "de": "Sphinxmaske",
+        "es": "Máscara Esfinge",
+        "pl": "Maska Sfinksa",
+        "pt": "Máscara da esfinge"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 32,
+      "durability": 36,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Helm",
+        "de": "Messinghelm",
+        "es": "Yelmo de Metal",
+        "pl": "Mosiężny hełm",
+        "pt": "Elmo de latão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 36,
+      "durability": 44,
+      "defense": 17,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Helm",
+        "de": "Plattenhelm",
+        "es": "Yelmo de Plata",
+        "pl": "Płytowy hełm",
+        "pt": "Elmo de placa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 50,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Helm",
+        "de": "Rankenhelm",
+        "es": "Yelmo Vid",
+        "pl": "Hełm z pnączy",
+        "pt": "Elmo da vinha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 6,
+      "durability": 22,
+      "defense": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Helm",
+        "de": "Seidenhelm",
+        "es": "Yelmo de Seda",
+        "pl": "Jedwabny hełm",
+        "pt": "Elmo de seda"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 16,
+      "durability": 26,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Helm",
+        "de": "Windhelm",
+        "es": "Yelmo Viento",
+        "pl": "Hełm Wiatru",
+        "pt": "Elmo do vento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 32,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Helm",
+        "de": "Geisterhelm",
+        "es": "Yelmo Espíritu",
+        "pl": "Hełm Ducha",
+        "pt": "Elmo do espírito"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 40,
+      "durability": 38,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Helm",
+        "de": "Wächterhelm",
+        "es": "Yelmo Guardián",
+        "pl": "Hełm Strażnika",
+        "pt": "Elmo do guardião"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 53,
+      "durability": 45,
+      "defense": 23,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Helm",
+        "de": "Schwarzdrachenhelm",
+        "es": "Yelmo Dragón Negro",
+        "pl": "Hełm Czarnego Smoka",
+        "pt": "Elmo do dragão negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 82,
+      "durability": 74,
+      "defense": 30,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Helm",
+        "de": "Dunkelphönixhelm",
+        "es": "Yelmo Fénix Oscuro",
+        "pl": "Hełm Mrocznego Feniksa",
+        "pt": "Elmo da fênix negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 92,
+      "durability": 80,
+      "defense": 43,
+      "attackType": 4,
+      "requirements": {
+        "strength": 205,
+        "dexterity": 62
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Helm",
+        "de": "Großseelenhelm",
+        "es": "Yelmo Gran Alma",
+        "pl": "Hełm Wielkiej Duszy",
+        "pt": "Grande elmo da alma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 81,
+      "durability": 67,
+      "defense": 27,
+      "attackType": 4,
+      "requirements": {
+        "strength": 59,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Helm",
+        "de": "Göttlicher Helm",
+        "es": "Yelmo Divino",
+        "pl": "Boski hełm",
+        "pt": "Elmo divino"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 85,
+      "durability": 74,
+      "defense": 37,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Helm",
+        "de": "Großartiger Drachenhelm",
+        "es": "Yelmo Gran Dragón",
+        "pl": "Hełm Wielkiego Smoka",
+        "pt": "Grande elmo do dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 104,
+      "durability": 86,
+      "defense": 53,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Helm",
+        "de": "Dunkelseelenhelm",
+        "es": "Yelmo Alma Oscura",
+        "pl": "Hełm Mrocznej Duszy",
+        "pt": "Elmo da alma negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 110,
+      "durability": 75,
+      "defense": 36,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Spirit Helm",
+        "de": "Rotgeisterhelm",
+        "es": "Yelmo Espíritu Rojo",
+        "pl": "Hełm Czerwonego Ducha",
+        "pt": "Elmo do espírito vermelho"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 93,
+      "durability": 80,
+      "defense": 46,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Mask",
+        "de": "Leichtplattenmaske",
+        "es": "Máscara Plata de Luz",
+        "pl": "Lekka maska płytowa",
+        "pt": "Máscara de placa leve"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 42,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Mask",
+        "de": "Adamantmaske",
+        "es": "Máscara Adamantina",
+        "pl": "Adamantytowa maska",
+        "pt": "Máscara de adamantina"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 66,
+      "durability": 56,
+      "defense": 24,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Mask",
+        "de": "Dunkelstahlmaske",
+        "es": "Máscara Acero Oscuro",
+        "pl": "Maska z mrocznej stali",
+        "pt": "Máscara de aço negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 86,
+      "durability": 70,
+      "defense": 26,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Mask",
+        "de": "Dunkelmeistermaske",
+        "es": "Máscara Amo Oscuro",
+        "pl": "Maska Mrocznego Mistrza",
+        "pt": "Máscara do Mestre Negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 106,
+      "durability": 78,
+      "defense": 34,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Helm",
+        "de": "Drachenritterhelm",
+        "es": "Yelmo Caballero Dragón",
+        "pl": "Hełm Smoczego Rycerza",
+        "pt": "Elmo do cavaleiro dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 130,
+      "durability": 90,
+      "defense": 66,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Helm",
+        "de": "Giftnebelhelm",
+        "es": "Yelmo Bruma de Veneno",
+        "pl": "Hełm Jadowitej Mgły",
+        "pt": "Elmo da névoa de veneno"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 126,
+      "durability": 86,
+      "defense": 48,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Helm",
+        "de": "Sylphenstrahlhelm",
+        "es": "Yelmo Rayo de Sílfide",
+        "pl": "Hełm Sylphid Ray",
+        "pt": "Elmo do raio silfídico"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 126,
+      "durability": 86,
+      "defense": 57,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Mask",
+        "de": "Sonnenlichtmaske",
+        "es": "Máscara Luz Solar",
+        "pl": "Maska Słońca",
+        "pt": "Máscara da luz do sol"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 130,
+      "durability": 82,
+      "defense": 46,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Helm",
+        "de": "Aschkrähenhelm",
+        "es": "Yelmo Cuervo Ceniza",
+        "pl": "Hełm Ashcrow",
+        "pt": "Elmo de Ashcrow"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 67,
+      "durability": 72,
+      "defense": 27,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Helm",
+        "de": "Finsternishelm",
+        "es": "Yelmo Eclipse",
+        "pl": "Hełm Zaćmienia",
+        "pt": "Elmo do eclipse"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 67,
+      "durability": 54,
+      "defense": 22,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Helm",
+        "de": "Iris-Helm",
+        "es": "Yelmo Iris",
+        "pl": "Hełm Iris",
+        "pt": "Elmo de Iris"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 67,
+      "durability": 59,
+      "defense": 30,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Mask",
+        "de": "Glorreiche Maske",
+        "es": "Máscara Gloriosa",
+        "pl": "Chwalebna maska",
+        "pt": "Máscara gloriosa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 97,
+      "durability": 74,
+      "defense": 30,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Helm",
+        "de": "Sturmwindhelm",
+        "es": "Yelmo Viento Violento",
+        "pl": "Hełm Gwałtownego Wiatru",
+        "pt": "Elmo do vento violento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 36,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 31
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Helm",
+        "de": "Rotschwingenhelm",
+        "es": "Yelmo Ala Roja",
+        "pl": "Hełm Czerwonego Skrzydła",
+        "pt": "Elmo da asa vermelha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 42,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "strength": 26,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Helm",
+        "de": "Uralter Helm",
+        "es": "Yelmo Antiguo",
+        "pl": "Pradawny hełm",
+        "pt": "Elmo antigo"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 68,
+      "durability": 54,
+      "defense": 24,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Helm",
+        "de": "Dämonischer Helm",
+        "es": "Yelmo Demoníaco",
+        "pl": "Demoniczny hełm",
+        "pt": "Elmo demoníaco"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 81,
+      "durability": 67,
+      "defense": 32,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Helm",
+        "de": "Sturmblitzhelm",
+        "es": "Yelmo Ráfaga Tormentosa",
+        "pl": "Hełm Burzowego Błysku",
+        "pt": "Elmo Relâmpago de Tempestade"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 110,
+      "durability": 75,
+      "defense": 43,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 56,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Helm",
+        "de": "Ewigschwingenhelm",
+        "es": "Yelmo Ala Eterna",
+        "pl": "Hełm Wiecznego Skrzydła",
+        "pt": "Elmo da asa eterna"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 116,
+      "durability": 86,
+      "defense": 35,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan  Helm",
+        "de": "Titanenhelm",
+        "es": "Yelmo Titán",
+        "pl": "Hełm Tytana",
+        "pt": "Elmo do titã"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 111,
+      "durability": 86,
+      "defense": 63,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Helm",
+        "de": "Tapferer Helm",
+        "es": "Yelmo Valeroso",
+        "pl": "Hełm Śmiałka",
+        "pt": "Elmo do guerreiro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 107,
+      "durability": 86,
+      "defense": 51,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Helm",
+        "de": "Seraphim-Helm",
+        "es": "Yelmo Serafín",
+        "pl": "Hełm Serafina",
+        "pt": "Elmo de serafim"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 111,
+      "durability": 86,
+      "defense": 50,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Faith Helm",
+        "de": "Glaubenshelm",
+        "es": "Yelmo de Fe",
+        "pl": "Hełm Wiary",
+        "pt": "Elmo da fé"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 104,
+      "durability": 86,
+      "defense": 44,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Mask",
+        "de": "Königliche Maske",
+        "es": "Máscara Real",
+        "pl": "Królewska maska",
+        "pt": "Máscara real"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 111,
+      "durability": 86,
+      "defense": 44,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Helm",
+        "de": "Hades-Helm",
+        "es": "Yelmo Hades",
+        "pl": "Hełm Hadesa",
+        "pt": "Elmo de Hades"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 109,
+      "durability": 86,
+      "defense": 41,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 53
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Sacred Fire Helm",
+        "de": "Heiligfeuerhelm",
+        "es": "Casco de Fuego Sagrado",
+        "pl": "Hełm Świętego Ognia",
+        "pt": "Elmo de Fogo Sagrado"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 54,
+      "durability": 52,
+      "defense": 24,
+      "attackType": 2,
+      "requirements": {
+        "strength": 85,
+        "vitality": 75
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Storm Jahad Helm",
+        "de": "Sturm-Jahad-Helm",
+        "es": "Casco de Tormenta Zahard",
+        "pl": "Hełm Storm Jahad",
+        "pt": "Elmo de Tempestade Zahard"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 68,
+      "defense": 32,
+      "requirements": {
+        "strength": 100,
+        "vitality": 90
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Piercing Groove Helm",
+        "de": "Durchbohrerhelm",
+        "es": "Casco de Tallo Perforador",
+        "pl": "Hełm Piercing Groove",
+        "pt": "Elmo de Entalhe Perfurante"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 90,
+      "durability": 82,
+      "defense": 45,
+      "requirements": {
+        "strength": 115,
+        "vitality": 100
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Helm",
+        "de": "Schuppenhelm",
+        "es": "Yelmo de Escamas",
+        "pl": "Łuskowy hełm",
+        "pt": "Elmo de escamas"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 26,
+      "durability": 255,
+      "defense": 16,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Helm",
+        "de": "Seidenhelm",
+        "es": "Yelmo de Seda",
+        "pl": "Jedwabny hełm",
+        "pt": "Elmo de seda"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 16,
+      "durability": 255,
+      "defense": 11,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Helm",
+        "de": "Sphinxhelm",
+        "es": "Casco Esfinge",
+        "pl": "Hełm Sfinksa",
+        "pt": "Elmo de Esfinge"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 32,
+      "durability": 255,
+      "defense": 17,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Helm",
+        "de": "Sturmwindhelm",
+        "es": "Yelmo Viento Violento",
+        "pl": "Hełm Gwałtownego Wiatru",
+        "pt": "Elmo do vento violento"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 255,
+      "defense": 17,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Adamantine Mask",
+        "de": "Adamantmaske",
+        "es": "Máscara Adamantina",
+        "pl": "Adamantytowa maska",
+        "pt": "Máscara de adamantina"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 66,
+      "durability": 255,
+      "defense": 29,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Helm",
+        "de": "Drachenhelm",
+        "es": "Casco Dragón",
+        "pl": "Smoczy hełm",
+        "pt": "Elmo de Dragão"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 255,
+      "defense": 29,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Helm",
+        "de": "Wächterhelm",
+        "es": "Yelmo Guardián",
+        "pl": "Hełm Strażnika",
+        "pt": "Elmo de Guardião"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 53,
+      "durability": 255,
+      "defense": 28,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Helm",
+        "de": "Legendärer Helm",
+        "es": "Casco Legendario",
+        "pl": "Legendarny hełm",
+        "pt": "Elmo Lendário"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 255,
+      "defense": 23,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Helm",
+        "de": "Rotschwingenhelm",
+        "es": "Yelmo Ala Roja",
+        "pl": "Hełm Czerwonego Skrzydła",
+        "pt": "Elmo da asa vermelha"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 255,
+      "defense": 20,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Storm Jahad Helm",
+        "de": "Sturm-Jahad-Helm",
+        "es": "Casco de Tormenta Zahard",
+        "pl": "Hełm Storm Jahad",
+        "pt": "Elmo de Tempestade Zahard"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 70,
+      "durability": 255,
+      "defense": 32,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Phoenix Soul Helmet",
+        "de": "Phönixseelenhelm",
+        "es": "Casco de Alma de Fénix",
+        "pl": "Hełm Duszy Feniksa",
+        "pt": "Elmo de Alma de Fênix"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "helm",
+      "statProfile": "armor",
+      "level": 128,
+      "durability": 88,
+      "defense": 60,
+      "requirements": {
+        "level": 380,
+        "strength": 97,
+        "vitality": 85
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

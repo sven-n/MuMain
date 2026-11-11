@@ -2,11 +2,11 @@
 //
 //  npcGateSwitch.h
 //
-//  º∫πÆ Ω∫¿ßƒ° √≥∏Æ
+//  ÏÑ±Î¨∏ Ïä§ÏúÑÏπò Ï≤òÎ¶¨
 //
-//  ≥Ø  ¬• : 2004/12/09
+//  ÎÇ†  Ïßú : 2004/12/09
 //
-//  ¿€º∫¿⁄ : ¡∂±‘«œ.
+//  ÏûëÏÑ±Ïûê : Ï°∞Í∑úÌïò.
 //
 //////////////////////////////////////////////////////////////////////////
 #ifndef __NPC_GATE_SWITCH_H__
@@ -16,20 +16,20 @@
 //  INCLUDE.
 //////////////////////////////////////////////////////////////////////////
 
-namespace   npcGateSwitch
+namespace npcGateSwitch
 {
-    //////////////////////////////////////////////////////////////////////////
-    //  FUNCTION.
-    //////////////////////////////////////////////////////////////////////////
-    void    GateOpen(CHARACTER* c, OBJECT* o);
-    void    GateClose(CHARACTER* c, OBJECT* o);
-    void    DoInterfaceOpen(int Key);
-    void    ProcessState(int Key, BYTE GateOnOff, BYTE State);
+//////////////////////////////////////////////////////////////////////////
+//  FUNCTION.
+//////////////////////////////////////////////////////////////////////////
+void GateOpen(CHARACTER* c, OBJECT* o);
+void GateClose(CHARACTER* c, OBJECT* o);
+void DoInterfaceOpen(int Key);
+void ProcessState(int Key, BYTE GateOnOff, BYTE State);
 
-    void	SendToggleGate();	// º∫πÆ ¥›±‚/ø≠±‚ ∆–≈∂ ¿¸º€
-    bool	IsGateOpened();		// º∫πÆ¿Ã ø≠∑¡ ¿÷≥™
-};
+void SendToggleGate(); // ÏÑ±Î¨∏ Îã´Í∏∞/Ïó¥Í∏∞ Ìå®ÌÇ∑ Ï†ÑÏÜ°
+bool IsGateOpened();   // ÏÑ±Î¨∏Ïù¥ Ïó¥Î†§ ÏûàÎÇò
+}; // namespace npcGateSwitch
 
 using namespace npcGateSwitch;
 
-#endif// __NPC_GATE_SWITCH_H__
+#endif // __NPC_GATE_SWITCH_H__

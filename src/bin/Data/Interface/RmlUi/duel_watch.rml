@@ -1,0 +1,47 @@
+<rml>
+<head>
+	<title>Duel Watch</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="duel_watch.rcss"/>
+</head>
+<body>
+	<!-- Doorkeeper Titus's colosseum list (CDuelWatchWindow), docked right: four colosseums, each
+	     with its duel (or "No duel on.") and a Watch button, enabled only for a duel open to
+	     spectators. The workspace slot places and scales #panel; everything inside is
+	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
+	     C++ keeps the rooms (g_DuelMgr), Escape and the join request; a Watch
+	     click is queued with duelwatch_join. -->
+	<div id="panel" data-model="duel_watch">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="bold_text_px + 'px'">{{title}}</span>
+		<span class="sharp-text" id="subtitle" data-style-font-size="subtitle_px + 'px'">{{subtitle}}</span>
+
+		<div class="lines"><div class="line"></div><div class="line"></div><div class="line"></div></div>
+
+		<!-- One block per colosseum, always all four; the theme puts each on its own row, counting
+		     them inside their own container. The index stays because it is what the join request
+		     names, not where the row sits. -->
+		<div class="rooms">
+			<div class="room" data-for="room : rooms">
+			<span class="sharp-text room-heading" data-style-font-size="bold_text_px + 'px'">{{room.heading}}</span>
+			<span class="sharp-text room-vs" data-if="room.running" data-style-font-size="text_px + 'px'">{{vs_text}}</span>
+			<span class="sharp-text room-player room-player-1" data-if="room.running"
+			      data-style-font-size="room.player1_px + 'px'">{{room.player1}}</span>
+			<span class="sharp-text room-player room-player-2" data-if="room.running"
+			      data-style-font-size="room.player2_px + 'px'">{{room.player2}}</span>
+			<span class="sharp-text room-empty" data-if="!room.running" data-style-font-size="text_px + 'px'">{{no_duel_text}}</span>
+			<div class="watch-btn" data-class-enabled="room.joinable" data-event-click="duelwatch_join(room.index)">
+				<span class="sharp-text sharp-middle watch-label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'">{{watch_text}}</span>
+			</div>
+		</div>
+		</div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+	</div>
+</body>
+</rml>

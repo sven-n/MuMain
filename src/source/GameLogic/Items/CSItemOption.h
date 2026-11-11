@@ -1,12 +1,20 @@
 #pragma once
+#include "Core/Globals/_define.h"
+#include "Core/Globals/_enum.h"
 #include "Core/Utilities/Singleton.h"
+#include "UI/Inventory/ItemOptionTooltipModel.h"
 
 #include <array>
 #include <cstdint>
 #include <map>
+#include <span>
+
+struct tagITEM;
+typedef struct tagITEM ITEM;
 
 constexpr std::uint8_t MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
-constexpr std::uint8_t MASTERY_OPTION = 24; // A mastery option increases a specific skill
+// The first mastery option; the mastery options increase the damage of one element's skills.
+constexpr std::uint8_t MASTERY_OPTION = 29;
 
 // Each item can be part of up to 2 ancient sets. The following are their identifier.
 constexpr std::uint8_t EXT_A_SET_OPTION = 1;
@@ -63,7 +71,6 @@ struct SET_OPTION
     bool IsActive;
     bool IsFullOption;
     bool IsExtOption;
-    bool FulfillsClassRequirement; // If the option requires a specific class and the character fulfills that. //m_bySetOptionList[x][1]
     std::uint8_t OptionNumber; // m_bySetOptionList[x][0]
     int Value; //m_iSetOptionListValue
 };
@@ -104,8 +111,9 @@ private:
     MAP_EQUIPPEDSETITEMNAME	            m_mapEquippedSetItemName;
     MAP_EQUIPPEDSETITEMNAME::iterator   m_iterESIN;
 
-    static bool isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass);
-    static void TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass);
+    static void TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set,
+                                const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
+                                bool isExtOption, int firstClass, int secondClass);
 
     static bool getExplainText(wchar_t* text, std::uint8_t option, int value);
     static std::uint8_t RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, std::uint8_t textIndex, bool bIsEquippedItem, bool bShowInactive);
@@ -139,28 +147,61 @@ public:
     std::uint16_t    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;
 
+    // The active set options' value of an AT_SET_OPTION_* effect, added up over the worn sets.
+    int GetSetOptionValue(int Special) const;
     void	PlusSpecial(std::uint16_t* Value, int Special) const;
     void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
-    void	PlusSpecialLevel(std::uint16_t* Value, std::uint16_t SrcValue, int Special) const;
     void    PlusMastery(int* Value, std::uint8_t MasteryType) const;
 
-    
+    // Adds the options of `setOptions` to `set`: its standard options, ext options and full options,
+    // each marked active once enough of the set's items are worn (set.ItemCount of
+    // set.CompleteSetItemCount; the full options need the complete set). `firstClass` is the
+    // wearer's base class, `secondClass` whether it has reached its second class.
+    static void AddSetOptions(SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, int firstClass,
+                              int secondClass);
+    // What the active mastery options of `set` add to the damage of a skill of mastery type
+    // `masteryType` (SKILL_ATTRIBUTE::MasteryType, the skill's element).
+    static int GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t masteryType);
 
     static int     GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value);
     static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
+    // The format a set option's value is described with (`option` counts from
+    // AT_SET_OPTION_IMPROVE_STRENGTH); nullptr for a number that is no supported set option.
+    static const wchar_t* GetSetOptionFormat(std::uint8_t option);
+
     static bool    IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill);
     void	CheckItemSetOptions(void);
     void	MoveSetOptionList(const int StartX, const int StartY);
     void	RenderSetOptionButton(const int StartX, const int StartY);
-    void	RenderSetOptionList(const int StartX, const int StartY);
+
+    // RmlUi port (CMyInventory) of the former RenderSetOptionList(StartX, StartY) --
+    // same content resolution (per-active-set standard/ext/full option lines via the static
+    // RenderSetOptionList(SET_SEARCH_RESULT_OPT&, ...) helper below, unchanged and still shared
+    // with RenderSetOptionListInItem's own item-tooltip use), no drawing. Returns false (and
+    // leaves outModel untouched) when m_SetSearchResultCount == 0 -- hover gating is the caller's
+    // job now (CMyInventory::SyncRmlModel(), driven by RmlUi's own mouseover/mouseout), unlike the
+    // old native version which also gated on its own m_bViewOptionList flag.
+    // CMyInventory::SyncRmlModel() is the only caller.
+    bool    BuildSetOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel);
 
     int     RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem = false);
 
     void    ClearOptionHelper(void) { m_byRenderOptionList = 0; }
+    // Opens the option table of the set a chat text "/<set name>" names (see FindSetByName).
     void    CheckRenderOptionHelper(const wchar_t* FilterName);
-    void    RenderOptionHelper(void);
+    // The index in `sets` of the set `typed` (the chat text after the /) names, -1 for none.
+    // Capitals and the apostrophe (' or the typographic U+2019) don't matter, and the trailing s is
+    // optional: "warrior", "Warriors" and "Warrior's" name "Warrior's". A set whose name is typed
+    // as it is wins over one that only matches without its apostrophe or s; among equal matches the
+    // first set wins.
+    static int FindSetByName(const wchar_t* typed, std::span<const ITEM_SET_OPTION> sets);
+    // The set's option table, written to the TextList globals without drawing (CSetItemExplanation
+    // draws it through RmlUi); returns the line count, 0 for none.
+    int BuildOptionHelperTextList();
+    // The option table of `setOption`, as BuildOptionHelperTextList() writes it; returns the line count.
+    static int BuildSetOptionTextList(const ITEM_SET_OPTION& setOption);
 
     bool IsAncientSetEquipped() const { return m_SetSearchResultCount > 0; }
 
@@ -173,4 +214,3 @@ public:
 };
 
 #define g_csItemOption CSItemOption::GetSingleton ()
-

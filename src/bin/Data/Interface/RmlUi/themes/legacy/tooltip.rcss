@@ -1,0 +1,78 @@
+/* Shared tooltip document -- see RmlTooltip.h's own comment. Its z-index (above every window,
+   under the message boxes) comes from the stacking table, UI/RmlBridge/RmlStackingOrder.cpp.
+   RmlTooltip.cpp sets #tooltip_panel's width explicitly in
+   C++ (measured against this file's own font) -- see its own comment for why shrink-to-fit isn't
+   used here. */
+body {
+	position: absolute;
+	pointer-events: none;
+}
+
+/* RenderTipTextList() with a background: a black box at 80% opacity inside a 1-unit opaque black
+   frame, no rounding and no vertical padding. Frame width, side padding, text size and row
+   heights/gaps are bound per show in tooltip.rml (native metrics under the caller's transform).
+   Position (body's data-style-left/top) is px, computed in C++. */
+#tooltip_panel {
+	position: absolute;
+	pointer-events: none;
+	background-color: rgba(0, 0, 0, 204);
+	border-color: #000000;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* A button's hover text (CNewUIButton::Render()): no frame (border_px 0), black at 180/255. */
+#tooltip_panel.tt-button-hint { background-color: rgba(0, 0, 0, 180); }
+
+/* display:block required -- RmlUi's default `display` is inline, not block, even for a <div>. */
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+.tt-line.bold { font-weight: bold; }
+
+/* RenderTipTextList()'s rows: one line height tall, the next row 1.1 of them below; a spacer row
+   takes that whole advance, a half spacer half of it. */
+.tt-line {
+	height: var(--line-px, 0px);
+	line-height: var(--line-px, 0px);
+	margin-bottom: calc(var(--line-px, 0px) * 0.1);
+}
+.tt-line.bold {
+	height: var(--bold-line-px, 0px);
+	line-height: var(--bold-line-px, 0px);
+	margin-bottom: calc(var(--bold-line-px, 0px) * 0.1);
+}
+.tt-line.tt-full-spacer { height: calc(var(--line-px, 0px) * 1.1); margin-bottom: 0px; }
+.tt-line.tt-half-spacer { height: calc(var(--line-px, 0px) * 0.55); margin-bottom: 0px; }
+.tt-line.bold.tt-full-spacer { height: calc(var(--bold-line-px, 0px) * 1.1); }
+.tt-line.bold.tt-half-spacer { height: calc(var(--bold-line-px, 0px) * 0.55); }
+
+/* config.textAlign == Center (RmlTooltip.h) -- matches RenderTipTextList()'s own default
+   RT3_SORT_CENTER (item/pet tooltips) and CTooltip::Render()'s own RT3_SORT_CENTER (button
+   tooltip). Targeted at .tt-line directly rather than relying on inherited text-align from
+   #tooltip_panel. */
+#tooltip_panel.tt-centered .tt-line { text-align: center; }
+
+/* Foreground colors -- exact RGB values from RenderTipTextList()'s own TEXT_COLOR_* switch
+   (ZzzInventory.cpp), so this can't visually drift from what every native tooltip already used. */
+.tt-line.tt-blue { color: #80b3ff; }
+.tt-line.tt-gray { color: #666666; }
+.tt-line.tt-red { color: #ff331a; }
+.tt-line.tt-yellow { color: #ffcc1a; }
+.tt-line.tt-green { color: #1aff80; }
+.tt-line.tt-purple { color: #ff1aff; }
+.tt-line.tt-redpurple { color: #cc80cc; }
+.tt-line.tt-violet { color: #b366ff; }
+.tt-line.tt-orange { color: #e66b0a; }
+
+/* Background-highlight variants -- text stays white except GreenBlue's own green, matching
+   RenderTipTextList()'s SetBgColor()/SetTextColor() pairing exactly. */
+.tt-line.tt-hl-darkred { color: #ffffff; background-color: rgba(160, 0, 0, 255); }
+.tt-line.tt-hl-darkblue { color: #ffffff; background-color: rgba(0, 0, 160, 255); }
+.tt-line.tt-hl-darkyellow { color: #ffffff; background-color: rgba(160, 102, 0, 255); }
+.tt-line.tt-hl-greenblue { color: #00ff00; background-color: rgba(60, 60, 200, 255); }
+
+/* Spacer lines render no text; their height is bound like every other row's. */

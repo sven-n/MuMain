@@ -1,0 +1,115 @@
+<rml>
+	<!-- bound-geometry: an item warning badge sits on its item's slot and is as wide as the item -->
+<head>
+	<title>Trade</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
+	<link type="text/rcss" href="trade.rcss"/>
+</head>
+<body data-model="trade">
+	<!-- CTrade (Trade.h): the frame, title, both nickname displays, gold strips and confirm
+	     checkboxes, divider, buttons and both item grids; C++ draws the items, the partner's
+	     guild mark (RenderGuildMark()) and the warning arrow's animated glyph (RenderWarningArrow())
+	     live into #item_view. The arrow's "Warning" text badge (item_warning_badges below) is
+	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
+	     grid cells. -->
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+		<!-- The frame. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
+		<!-- The partner_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="partner_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : partner_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="partner_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : partner_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
+
+		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
+		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible" data-style-font-size="text_px + 'px'">{{your_guild_name}}</span>
+		<span id="your_id_text" class="sharp-text id-text id-text-your" data-style-font-size="big_text_px + 'px'"><span class="native-fit">{{your_id_text}}</span></span>
+		<span id="your_level_text" class="sharp-text level-text" data-style-font-size="text_px + 'px'"
+		      data-class-level-bucket-10="your_level_bucket == 10"
+		      data-class-level-bucket-50="your_level_bucket == 50"
+		      data-class-level-bucket-100="your_level_bucket == 100"
+		      data-class-level-bucket-200="your_level_bucket == 200"
+		      data-class-level-bucket-300="your_level_bucket == 300"
+		      data-class-level-bucket-400="your_level_bucket == 400">{{your_level_text}}</span>
+
+		<div id="your_gold_bg" class="gold-bg gold-bg-your"></div>
+		<span id="your_gold_text" class="sharp-text gold-text gold-text-your gold-amount" data-style-font-size="text_px + 'px'"
+		      data-class-gold-base="your_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="your_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="your_gold_tier == 'million'"
+		      data-class-gold-ten-million="your_gold_tier == 'ten-million'">{{your_gold_text}}</span>
+
+		<div id="divider"></div>
+
+		<div id="my_nick_bg" class="nick-bg nick-bg-my"></div>
+		<span id="my_id_text" class="sharp-text id-text id-text-my" data-style-font-size="text_px + 'px'">{{my_id_text}}</span>
+
+		<div id="my_gold_bg" class="gold-bg gold-bg-my"></div>
+		<span id="my_gold_text" class="sharp-text gold-text gold-text-my gold-amount" data-style-font-size="text_px + 'px'"
+		      data-class-gold-base="my_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="my_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="my_gold_tier == 'million'"
+		      data-class-gold-ten-million="my_gold_tier == 'ten-million'">{{my_gold_text}}</span>
+
+		<div id="my_confirm" class="checkbox-row confirm-my"
+		     data-class-waiting="my_confirm_waiting" data-event-click="trade_my_confirm_click">
+			<div class="checkbox-box" data-class-checked="my_confirm_checked"></div>
+		</div>
+
+		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click" data-attr-data-hint="close_tooltip"></div>
+
+		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click" data-attr-data-hint="zen_tooltip"></div>
+
+		<div id="trade_help" class="sharp-text sharp-flow" data-style-font-size="text_px + 'px'">
+			<div id="your_confirm" class="checkbox-row confirm-your">
+				<div class="checkbox-box" data-class-checked="your_confirm_checked"></div>
+			</div>
+			<span id="warning_label" class="warning-label" data-style-opacity="warning_opacity">{{warning_label}}</span>
+			<span id="notice_line1" class="notice-line">{{notice_line1}}</span>
+			<span id="notice_line2" class="notice-line">{{notice_line2}}</span>
+			<span id="notice_line3" class="notice-line">{{notice_line3}}</span>
+		</div>
+
+		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
+		<div class="sharp-text item-warning-badge" data-for="w : item_warning_badges"
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style---badge-width="w.width + 'px'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
+	</div>
+</body>
+</rml>

@@ -9,12 +9,15 @@ namespace StringUtils
     inline std::string WideToNarrow(const wchar_t* wstr)
     {
         if (!wstr) return "";
-        size_t len = wcslen(wstr);
-        if (len == 0) return "";
+        return mu_wchar_to_utf8(wstr);
+    }
 
-        int size = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)len, NULL, 0, NULL, NULL);
-        std::string result(size, 0);
-        WideCharToMultiByte(CP_UTF8, 0, wstr, (int)len, &result[0], size, NULL, NULL);
-        return result;
+    // Convert narrow string (UTF-8) to wide string (UTF-16 on Windows, UTF-32 elsewhere) --
+    // symmetric counterpart to WideToNarrow above. Added for the RmlUi port
+    // (RmlUiRenderInterface::LoadTexture needs it for CGlobalBitmap::LoadImage's
+    // std::wstring-based API).
+    inline std::wstring NarrowToWide(const std::string& str)
+    {
+        return mu_utf8_to_wchar(str);
     }
 }

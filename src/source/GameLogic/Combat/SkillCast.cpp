@@ -1,11 +1,13 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Combat/SkillCast.h"
+#include "Audio/SoundPlaces.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "GameLogic/Social/MonkSystem.h" // g_CMonkSystem
 
 // Includes mirror ZzzInterface.cpp, the unit these were extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -34,20 +36,20 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern void SetPlayerBow(CHARACTER* c);
@@ -132,7 +134,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
         || Skill == AT_SKILL_DEATHSTAB
         || Skill == AT_SKILL_DEATHSTAB_STR
-        || (Skill == AT_SKILL_IMPALE && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+        || (Skill == AT_SKILL_IMPALE && GameLogic::Items::IsRideableMountModel(Hero->Helper.Type))
         || Skill == AT_SKILL_FORCE
         || Skill == AT_SKILL_FORCE_WAVE
         || Skill == AT_SKILL_FORCE_WAVE_STR
@@ -147,24 +149,25 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         switch (Skill)
         {
         case AT_SKILL_IMPALE:
-            if (!(o->Type == MODEL_PLAYER && Hero->Weapon[0].Type != -1 &&
-                (Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)))
+            if (!(o->Type == MODEL_PLAYER && GameLogic::Items::IsSpearModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_DEATHSTAB:
         case AT_SKILL_DEATHSTAB_STR:
-            if (!(Hero->Weapon[0].Type != -1 && (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)))
+            if (!(Hero->Weapon[0].Type != -1 && !GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type)))
             {
                 return false;
             }
             break;
         case AT_SKILL_SPIRAL_SLASH:
-            if (Hero->Weapon[0].Type < MODEL_SWORD || Hero->Weapon[0].Type >= MODEL_SWORD + MAX_ITEM_INDEX)
+            if (!GameLogic::Items::IsSwordOrGloveModel(Hero->Weapon[0].Type))
             {
                 return false;
             }
+            break;
+        default:
             break;
         }
         int iMana, iSkillMana;
@@ -228,6 +231,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 else
                     SetPlayerAttack(c);
                 SendRequestMagic(Skill, Hero->Key);
+                c->SkillSuccess = true;
                 Success = true;
                 break;
             case AT_SKILL_FALLING_SLASH:
@@ -243,6 +247,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
             case AT_SKILL_RIDER:
                 if (CheckAttack())
                     Success = CastWarriorSkill(c, o, p, Skill);
+                break;
+            default:
                 break;
             }
         }
@@ -284,6 +290,9 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
 
 void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 {
+    // The skill's sounds play for the caster (Q-SM13).
+    std::optional<Audio::ScopedSoundPlace> casterPlace;
+    Audio::PlaceCharacter(casterPlace, *c);
     auto Skill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : static_cast<ActionSkillType>(g_MovementSkill.m_iSkill);
     LetHeroStop();
     c->Movement = false;
@@ -372,7 +381,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         )
     {
         CreateParticle(BITMAP_SHINY + 2, o->Position, o->Angle, Light, 0, 0.f, o);
-        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
+        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2));
     }
 
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -477,11 +486,13 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEATHSTAB:
     case AT_SKILL_DEATHSTAB_STR:
         return;
+    default:
+        break;
     }
 
     if (Skill == AT_SKILL_DEATH_CANNON)
     {
-        if (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)
+        if (!GameLogic::Items::IsStaffOrBookModel(Hero->Weapon[0].Type))
             return;
     }
 
@@ -531,6 +542,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     SetPlayerMagic(c);
     LetHeroStop();
     break;
+    default:
+        break;
     }
 
     c->SkillSuccess = true;
@@ -746,6 +759,9 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 {
+    // The skill's sounds play for the caster (Q-SM13).
+    std::optional<Audio::ScopedSoundPlace> casterPlace;
+    Audio::PlaceCharacter(casterPlace, *pCha);
     int iSkill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
 
     ITEM* pLeftRing = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];

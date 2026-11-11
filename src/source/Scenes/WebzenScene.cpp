@@ -3,14 +3,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "WebzenScene.h"
 #include "SceneCore.h"
+#include "Core/Platform/ScopedSystemCursor.h"
+#include "Core/Utilities/StagedLoad.h"
+#include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIMng.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "Scenes/TitleSceneUI.h"
+#include "UI/Core/WindowSystem.h"
+
+#include <SDL3/SDL_timer.h>
+
+#include <algorithm>
+#include <chrono>
+#include <optional>
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -40,7 +51,7 @@ enum class BackgroundTheme
  */
 static BackgroundTheme SelectBackgroundTheme()
 {
-    int roll = rand() % BACKGROUND_SELECTION_PERCENTAGE;
+    int roll = Random::Rand() % BACKGROUND_SELECTION_PERCENTAGE;
     return (roll <= CLASSIC_BACKGROUND_PROBABILITY) ? BackgroundTheme::Classic : BackgroundTheme::Season5;
 }
 
@@ -99,39 +110,102 @@ static void UnloadTitleBitmaps()
     }
 }
 
+namespace
+{
+// Load work per frame: the title screen redraws at about 30 fps while the data loads.
+constexpr std::chrono::milliseconds StartupStepBudget{33};
+
+// The startup load, across frames; it holds what the load needs for as long as it runs.
+struct StartupLoad
+{
+    explicit StartupLoad(std::vector<Core::StagedLoad::Step> steps) : steps(std::move(steps)) {}
+
+    // The game draws no cursor while it loads.
+    Core::Platform::ScopedSystemCursor cursor;
+    TextureLoadBatch textureBatch;
+    Core::StagedLoad steps;
+    Uint64 longestPassMs = 0;
+};
+
+std::optional<StartupLoad> s_load;
+// The title screen is up; it goes before the first frame that no longer draws it.
+bool s_titleShown = false;
+} // namespace
+
+// Loads the startup data a few steps at a time, before the frame begins, then hands over to login.
+void PumpWebzenScene()
+{
+    if (SceneFlag != WEBZEN_SCENE)
+    {
+        return;
+    }
+
+    if (!s_load)
+    {
+        if (!OpenFont())
+        {
+            return;
+        }
+        ClearInput();
+
+        LoadCommonTitleBitmaps();
+        BackgroundTheme theme = SelectBackgroundTheme();
+        LoadBackgroundTheme(theme);
+
+        TitleSceneUI::CreateSceneUI();
+        s_titleShown = true;
+
+        FogEnable = false;
+
+        ::EnableAlphaTest();
+
+        std::vector<Core::StagedLoad::Step> steps = OpenBasicDataSteps();
+        steps.emplace_back([] { g_pNewUISystem->LoadMainSceneInterface(); });
+        s_load.emplace(std::move(steps));
+        // The title draws once before the loading starts, as soon as the window shows.
+        return;
+    }
+
+    const Uint64 passStart = SDL_GetTicks();
+    const bool done = s_load->steps.Pump(StartupStepBudget);
+    s_load->longestPassMs = std::max(s_load->longestPassMs, SDL_GetTicks() - passStart);
+    if (!done)
+    {
+        return;
+    }
+
+    const Uint64 longestPassMs = s_load->longestPassMs;
+    // Ends the texture batch and gives the cursor back.
+    s_load.reset();
+    Bitmaps.LogTextureFilteringSummary("startup");
+    mu::log::Get("render")->info(
+        "Startup data loaded {} ms after start; the longest frame of loading spent {} ms on it", SDL_GetTicks(),
+        longestPassMs);
+    g_ErrorReport.Write(L"> Loading ok.\r\n");
+    // Login draws from this frame on, with no empty frame between; the title is released before it begins.
+    SceneFlag = LOG_IN_SCENE;
+}
+
 /**
- * @brief Webzen title/intro scene - displays loading screen and transitions to login.
+ * @brief Webzen title/intro scene - draws the startup load's progress; PumpWebzenScene does the loading.
  * @param hDC Device context for rendering
  */
 void WebzenScene(HDC hDC)
 {
-    CUIMng& rUIMng = CUIMng::Instance();
-
-    if (!OpenFont())
+    if (s_load)
     {
-        return;
+        TitleSceneUI::RenderSceneUI(hDC, static_cast<DWORD>(s_load->steps.Done()),
+                                    static_cast<DWORD>(s_load->steps.Total()));
     }
-    ClearInput();
+}
 
-    LoadCommonTitleBitmaps();
-    BackgroundTheme theme = SelectBackgroundTheme();
-    LoadBackgroundTheme(theme);
-
-    rUIMng.CreateTitleSceneUI();
-
-    FogEnable = true;
-
-    ::EnableAlphaTest();
-    OpenBasicData(hDC);
-
-    g_pNewUISystem->LoadMainSceneInterface();
-
-    CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
-
-    rUIMng.ReleaseTitleSceneUI();
-    UnloadTitleBitmaps();
-
-    g_ErrorReport.Write(L"> Loading ok.\r\n");
-
-    SceneFlag = LOG_IN_SCENE;
+void EndWebzenScene()
+{
+    s_load.reset();
+    if (s_titleShown)
+    {
+        s_titleShown = false;
+        TitleSceneUI::ReleaseSceneUI();
+        UnloadTitleBitmaps();
+    }
 }

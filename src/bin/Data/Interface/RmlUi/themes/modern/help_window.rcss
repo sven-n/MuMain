@@ -1,0 +1,45 @@
+/* Modern theme for CHelpWindow -- the key and chat help pages in the modern tooltip's surface
+   (themes/modern/tooltip.rcss): same fill, frame, radius and text tokens. The box keeps the
+   original's place and row metrics; reference px on the .stage. */
+
+#panel { pointer-events: none; }
+
+#help_panel {
+	position: absolute;
+	left: 0px;
+	top: 1px;
+	padding: calc(3px * var(--root-scale)) calc(6px * var(--root-scale));
+	border-width: calc(1px * var(--root-scale));
+	border-color: token(border-frame);
+	border-radius: calc(token(radius-sm)px * var(--root-scale));
+	background-color: token(surface-tooltip);
+}
+
+/* RenderTipTextList()'s rows: one line height, the next row 1.1 of them below; a half spacer
+   takes half of that advance. Physical px, in the counter-scaled box. */
+.help-line {
+	display: block;
+	height: calc(var(--line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--line-height, 0px) * 0.1 * var(--root-scale));
+}
+.help-line.heading {
+	height: calc(var(--bold-line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--bold-line-height, 0px) * 0.1 * var(--root-scale));
+}
+.help-line.half-spacer {
+	height: calc(var(--line-height, 0px) * 0.55 * var(--root-scale));
+	margin-bottom: 0px;
+}
+.help-text {
+	display: block;
+	white-space: nowrap;
+	line-height: calc(var(--line-height, 0px) * var(--root-scale));
+	text-align: center;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+}
+.help-line.heading .help-text {
+	line-height: calc(var(--bold-line-height, 0px) * var(--root-scale));
+	color: token(text-warm);
+	font-weight: bold;
+}

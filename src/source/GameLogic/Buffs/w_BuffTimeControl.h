@@ -30,13 +30,13 @@ private:
     struct BuffTimeInfo
     {
         eBuffState s_BuffType;
-        DWORD    s_CurBuffTime;
-        DWORD    s_EventBuffTime;
+        DWORD s_CurBuffTime;
+        DWORD s_EventBuffTime;
 
         BuffTimeInfo() : s_BuffType(eBuffNone), s_CurBuffTime(0), s_EventBuffTime(0) {}
     };
-    typedef std::map<DWORD, BuffTimeInfo>		BuffTimeInfoMap;
+    typedef std::map<DWORD, BuffTimeInfo> BuffTimeInfoMap;
 
 private:
-    BuffTimeInfoMap		m_BuffTimeList;
+    BuffTimeInfoMap m_BuffTimeList;
 };

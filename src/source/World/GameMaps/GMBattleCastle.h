@@ -6,6 +6,8 @@
 
 #include "Render/Models/ZzzBMD.h"
 
+#include <optional>
+
 namespace   battleCastle
 {
     inline  bool    InBattleCastle2(vec3_t Position) { return (Position[0] >= 16100.f && Position[0] <= 19000.f && Position[1] >= 18900.f && Position[1] <= 21700.f); }
@@ -26,10 +28,9 @@ namespace   battleCastle
     void    CollisionTempCharacter(vec3_t Position, float Range, int AniType);
     bool    CollisionEffectToObject(OBJECT* eff, float Range, float RangeZ, bool bCollisionGround, bool bRealCollision = false);
     void    SetCastleGate_Attribute(int x, int y, BYTE Operator, bool bAllClear = false);
-    void    RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light);
+    void RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, const vec3_t light);
     void    SetBuildTimeLocation(OBJECT* o);
     void    RenderBuildTimes(void);
-    void    RenderBuffMagicIcon(CHARACTER* c);
     void    InitEtcSetting(void);
     void    StartFog(vec3_t Color);
     void    EndFog(void);
@@ -39,20 +40,39 @@ namespace   battleCastle
     bool    MoveBattleCastleObject(OBJECT* o, int& object, int& visibleObject);
     bool    CreateBattleCastleObject(OBJECT* o);
     bool    MoveBattleCastleVisual(OBJECT* o);
-    bool    RenderBattleCastleVisual(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b);
-    void    MoveFlyBigStone(OBJECT* o);
-    CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
-    bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type);
+    bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b);
+    bool RenderBattleCastleObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+    void MoveFlyBigStone(OBJECT* o);
+    // Castle Gate 1 counts its attacks from 0 again when it appears.
+    void ResetCastleGateAttackCount(CHARACTER* c, int Type);
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o);
+    // A castle gate's animations, opened and closed by its buff (Q-MN38c):
+    // its entry's gate; nullopt for a character that is no gate. A gate
+    // without an entry (the switch's) plays these.
+    struct GateLooks
+    {
+        int closed = 0;
+        int opening = 1;
+        int open = 2;
+        bool arrivalOpening = true;
+    };
+    std::optional<GateLooks> GateLooksOf(const CHARACTER& c);
+    // A gate that comes into view (0x13, 0x68), as its buff says: open, it
+    // plays its arrival animation and frees the tiles under it; closed, it
+    // plays closed and blocks them (0x68: only a gate with no buffs at all).
+    void ShowGateOnArrival(CHARACTER& c, const GateLooks& gate, int x, int y, bool closeOnlyWithoutBuffs);
     bool    MoveBattleCastleMonster(CHARACTER* c, OBJECT* o);
-    bool    SetCurrentAction_BattleCastleMonster(CHARACTER* c, OBJECT* o);
+    // A guard that attacks takes its attack state; its animation is data.
+    void SetGuardAttackState(OBJECT* o);
     bool    AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool    MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
-    bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b);
-    void    RenderMonsterHitEffect(OBJECT* o);
+    bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select);
+    // The vertex spawns and state changes of RenderBattleCastleObjectMesh, for an object the last frame drew.
+    void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
+    void SpawnMonsterHitEffect(OBJECT* o);
 }
 
 using namespace battleCastle;

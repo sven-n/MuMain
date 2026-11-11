@@ -2,8 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Core/RenderConfig.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -13,54 +13,40 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
+#include "EffectBlurs.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
 
+using Render::Effects::Blur;
+using Render::Effects::g_blurs;
+using Render::Effects::g_objectBlurs;
+using Render::Effects::MAX_BLUR_TAILS;
+using Render::Effects::MAX_BLURS;
+using Render::Effects::MAX_OBJECT_BLUR_TAILS;
+using Render::Effects::MAX_OBJECT_BLURS;
+using Render::Effects::ObjectBlur;
+
+namespace Render::Effects
+{
+std::array<Blur, MAX_BLURS> g_blurs{};
+std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
+} // namespace Render::Effects
+
 namespace
 {
-constexpr int MAX_BLURS = 100;
-constexpr int MAX_BLUR_TAILS = 30;
 constexpr int MAX_BLUR_LIFETIME = 30;
-
-constexpr int MAX_OBJECT_BLURS = 1000;
-constexpr int MAX_OBJECT_BLUR_TAILS = 600;
 constexpr int MAX_OBJECT_BLUR_LIFETIME = 30;
 
 constexpr int FLAG_WIDTH = 7;
 constexpr int FLAG_HEIGHT = 10;
 constexpr float FLAG_SCALE = 10.f;
-
-struct Blur
-{
-    bool Live = false;
-    int Type = 0;
-    int LifeTime = 0;
-    CHARACTER* Owner = nullptr;
-    int Number = 0;
-    vec3_t Light{};
-    std::array<vec3_t, MAX_BLUR_TAILS> P1{};
-    std::array<vec3_t, MAX_BLUR_TAILS> P2{};
-    int SubType = 0;
-};
-
-struct ObjectBlur
-{
-    bool Live = false;
-    int Type = 0;
-    int LifeTime = 0;
-    OBJECT* Owner = nullptr;
-    int Number = 0;
-    vec3_t Light{};
-    int LimitLifeTime = 0;
-    std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P1{};
-    std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P2{};
-    int SubType = 0;
-};
 
 struct physics_vertex
 {
@@ -87,10 +73,60 @@ struct physics_boundbox
     physics_vertex vtx[8];
 };
 
-std::array<Blur, MAX_BLURS> g_blurs{};
-std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
 std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
+
+template <typename BlurType>
+void DescribeBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight,
+                         Render::EffectDrawing::EffectDrawer& out)
+{
+    const float firstU = segment / static_cast<float>(blur.Number);
+    const float secondU = (segment + 1) / static_cast<float>(blur.Number);
+    const std::uint32_t firstColor =
+        mu::PackABGR(blur.Light[0] * firstLight, blur.Light[1] * firstLight, blur.Light[2] * firstLight, 1.f);
+    const std::uint32_t secondColor =
+        mu::PackABGR(blur.Light[0] * secondLight, blur.Light[1] * secondLight, blur.Light[2] * secondLight, 1.f);
+
+    const mu::Vertex3D firstTop = {blur.P1[segment][0], blur.P1[segment][1], blur.P1[segment][2],
+                                   0.f, 0.f, 1.f, firstU, 1.f, firstColor};
+    const mu::Vertex3D firstBottom = {blur.P2[segment][0], blur.P2[segment][1], blur.P2[segment][2],
+                                      0.f, 0.f, 1.f, firstU, 0.f, firstColor};
+    const mu::Vertex3D secondBottom = {blur.P2[segment + 1][0], blur.P2[segment + 1][1], blur.P2[segment + 1][2],
+                                       0.f, 0.f, 1.f, secondU, 0.f, secondColor};
+    const mu::Vertex3D secondTop = {blur.P1[segment + 1][0], blur.P1[segment + 1][1], blur.P1[segment + 1][2],
+                                    0.f, 0.f, 1.f, secondU, 1.f, secondColor};
+    const mu::Vertex3D vertices[4] = {
+        firstTop, firstBottom, secondBottom, secondTop,
+    };
+    out.DrawQuads({vertices, 0u});
+}
+
+// Callers submit several interpolated poses per frame. Only a reference frame ages the trail, so until
+// then each frame's poses replace the previous frame's instead of piling up behind them.
+template <typename BlurType> void AddBlurSample(BlurType& blur, vec3_t p1, vec3_t p2, int maxTails)
+{
+    if (blur.Frame != RENDERED_FRAME)
+    {
+        const int replaced = blur.FrameSamples;
+        for (int i = 0; i + replaced < blur.Number; ++i)
+        {
+            VectorCopy(blur.P1[i + replaced], blur.P1[i]);
+            VectorCopy(blur.P2[i + replaced], blur.P2[i]);
+        }
+        blur.Number -= replaced;
+        blur.Frame = RENDERED_FRAME;
+        blur.FrameSamples = 0;
+    }
+    for (int i = blur.Number - 1; i >= 0; --i)
+    {
+        VectorCopy(blur.P1[i], blur.P1[i + 1]);
+        VectorCopy(blur.P2[i], blur.P2[i + 1]);
+    }
+    VectorCopy(p1, blur.P1[0]);
+    VectorCopy(p2, blur.P2[0]);
+    blur.Number = std::min<int>(blur.Number + 1, maxTails - 1);
+    blur.FrameSamples = std::min<int>(blur.FrameSamples + 1, blur.Number);
+}
 
 } // namespace
 
@@ -98,18 +134,12 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_BLUR_TAILS);
 }
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("blur");
     Blur* freeBlur = nullptr;
     for (auto& blur : g_blurs)
     {
@@ -136,6 +166,7 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         freeBlur->LifeTime = Short ? 15 : MAX_BLUR_LIFETIME;
         freeBlur->SubType = SubType;
         AddBlur(freeBlur, p1, p2, Light, Type);
@@ -144,6 +175,10 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
 
 void MoveBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_blurs)
     {
         if (!blur.Live)
@@ -151,6 +186,7 @@ void MoveBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 
@@ -174,6 +210,8 @@ void MoveBlurs()
 
 void RenderBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_blurs)
     {
@@ -199,11 +237,11 @@ void RenderBlurs()
         }
         if (blur.Owner->Level == 0 && (Type <= 3 || (Type >= 5 && Type <= 10)))
         {
-            EnableAlphaBlend();
+            out.SetState({.blend = Blend::Glow});
         }
         else
         {
-            EnableAlphaBlendMinus();
+            out.SetState({.blend = Blend::Subtract});
         }
 
         if (Type > 2)
@@ -212,33 +250,20 @@ void RenderBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
-                IR::Begin(GL_TRIANGLE_FAN);
-                float Light;
-                float TexU;
+                float firstLight;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - j) / static_cast<float>(blur.Number);
+                    firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j]);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j]);
+                    firstLight = 1.f;
+                float secondLight;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                    secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j + 1]);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j + 1]);
-                IR::End();
+                    secondLight = 1.f;
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }
@@ -257,19 +282,12 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_OBJECT_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_OBJECT_BLUR_TAILS);
 }
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
 {
+    Diagnostics::DrawSpawnCheck::Note("object-blur");
     ObjectBlur* freeBlur = nullptr;
     for (auto& blur : g_objectBlurs)
     {
@@ -296,6 +314,7 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         if (iLimitLifeTime > -1)
         {
             freeBlur->LifeTime = iLimitLifeTime;
@@ -314,6 +333,10 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
 
 void MoveObjectBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_objectBlurs)
     {
         if (!blur.Live)
@@ -321,6 +344,7 @@ void MoveObjectBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 
@@ -341,6 +365,8 @@ void MoveObjectBlurs()
 
 void RenderObjectBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_objectBlurs)
     {
@@ -364,7 +390,7 @@ void RenderObjectBlurs()
             nTexture = BITMAP_LAVA;
         }
 
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
 
         if (Type > 2)
         {
@@ -372,7 +398,7 @@ void RenderObjectBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
                 const float Data = 300.f;
@@ -385,22 +411,9 @@ void RenderObjectBlurs()
                     }
                 }
 
-                IR::Begin(GL_TRIANGLE_FAN);
-                float Light = (blur.Number - j) / static_cast<float>(blur.Number);
-                float TexU = (j) / static_cast<float>(blur.Number);
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j]);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j]);
-                Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j + 1]);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j + 1]);
-                IR::End();
+                const float firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
+                const float secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }
@@ -581,7 +594,7 @@ void AnimationFlag()
 
                 vec3_t DeltaV;
                 VectorSubtract(v1->v, v2->v, DeltaV);
-                float Dterm = (DotProduct(DeltaV, DeltaP) * Kd) / dist;
+                float Dterm = (VectorDotProduct(DeltaV, DeltaP) * Kd) / dist;
 
                 vec3_t SpringForce;
                 VectorScale(DeltaP, 1.f / dist, SpringForce);
@@ -607,99 +620,3 @@ void AnimationFlag()
     }
 }
 
-void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
-{
-    int n = 4;
-    float su = (float)x / 6.f;
-    float sv = (float)y / 9.f;
-    float TexCoord[4][2];
-    TexCoord[0][0] = su;
-    TexCoord[0][1] = sv;
-    TexCoord[1][0] = su;
-    TexCoord[1][1] = sv + 1.f / 9.f;
-    TexCoord[2][0] = su + 1.f / 6.f;
-    TexCoord[2][1] = sv + 1.f / 9.f;
-    TexCoord[3][0] = su + 1.f / 6.f;
-    TexCoord[3][1] = sv;
-
-    float minz = 65536.f; //louis
-    physics_face* f = &g_flagFaces[y * (FLAG_WIDTH - 1) + x];
-
-    for (int i = 0; i < n; i++)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        v->light = (-v->normal[0] + v->normal[1]) * 0.5f + 0.5f;
-    }
-
-    BindTexture(Tex2);
-    IR::Begin(GL_QUADS);
-    for (int i = 0; i < n; i++)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        IR::Vertex3f(Position[0], Position[1], Position[2]);
-    }
-    IR::End();
-
-    BindTexture(Tex1);
-    IR::Begin(GL_QUADS);
-    for (int i = n - 1; i >= 0; i--)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        IR::Vertex3f(Position[0], Position[1], Position[2]);
-    }
-    IR::End();
-}
-
-void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)
-{
-    for (int y = 0; y < FLAG_HEIGHT - 1; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH - 1; x++)
-        {
-            physics_face* f = &g_flagFaces[y * (FLAG_WIDTH - 1) + x];
-            FaceNormalize(g_flagVertices[f->vlist[0]].p,
-                g_flagVertices[f->vlist[1]].p,
-                g_flagVertices[f->vlist[2]].p,
-                f->normal);
-        }
-    }
-    for (int y = 0; y < FLAG_HEIGHT; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH; x++)
-        {
-            physics_vertex* v = &g_flagVertices[y * FLAG_WIDTH + x];
-            float num = 0.f;
-            if (y < FLAG_HEIGHT - 1 && x < FLAG_WIDTH - 1)
-            {
-                VectorCopy(g_flagFaces[y * (FLAG_WIDTH - 1) + x].normal, v->normal);
-            }
-            else
-            {
-                v->normal[0] = 0.f;
-                v->normal[1] = 0.f;
-                v->normal[2] = 0.f;
-            }
-        }
-    }
-
-    for (int y = 0; y < FLAG_HEIGHT - 1; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH - 1; x++)
-        {
-            RenderFlagFace(o, x, y, Light, Tex1, Tex2);
-        }
-    }
-}

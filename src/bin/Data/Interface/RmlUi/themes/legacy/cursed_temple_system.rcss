@@ -1,0 +1,156 @@
+/* Legacy theme for CCursedTempleSystem, reproducing its Render() at the 640x480 reference positions
+   on .screen's HUD board: the frames, the score effect's banners and digits, the digit runs and
+   the tutorial step's rows and the buttons are here; C++ still places the projected mini-map
+   markers. */
+
+body { pointer-events: none; }
+
+.screen {
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+.sprite { position: absolute; }
+/* The mini map's markers: C++ projects them from the original's (464, 299). */
+#mini_map_markers { position: absolute; left: 464px; top: 299px; }
+
+.tutorial-line {
+	display: block;
+	position: absolute;
+	left: 140px;
+	transform-origin: left top;
+	white-space: nowrap;
+}
+
+/* The HUD's own frames, in the original's places. */
+@spritesheet ct-hud-sheet
+{
+	src: "../../../newui_ctgametimeframe.tga";
+	ct-game-time-frame: 0px 0px 134px 37px;
+}
+@spritesheet ct-dot-sheet { src: "../../../dot.tga"; ct-dot: 0px 0px 3px 9px; }
+@spritesheet ct-skill-frame-sheet { src: "../../../newui_ctskillframe.tga"; ct-skill-frame: 0px 0px 128px 53px; }
+@spritesheet ct-minmap-sheet { src: "../../../newui_ctminmap.jpg"; ct-minmap: 0px 0px 128px 128px; }
+@spritesheet ct-minmap-frame-sheet { src: "../../../newui_ctminmapframe.tga"; ct-minmap-frame: 0px 0px 128px 165px; }
+
+.panels, .score, .tutorial { position: static; }
+#corner { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+
+#game_time_frame { position: absolute; left: 506px; top: 393px; width: 134px; height: 37px;
+                   decorator: image(ct-game-time-frame); }
+#game_time_dot { position: absolute; left: 574.5px; top: 407.5px; width: 3px; height: 9px; decorator: image(ct-dot); }
+#skill_frame { position: absolute; left: 512px; top: 179px; width: 128px; height: 53px;
+               decorator: image(ct-skill-frame); }
+#mini_map { position: absolute; left: 512px; top: 263px; width: 128px; height: 128px; decorator: image(ct-minmap); }
+#mini_map_frame { position: absolute; left: 512px; top: 232px; width: 128px; height: 165px;
+                  decorator: image(ct-minmap-frame); }
+
+/* The digit runs, each starting half its digit count's width left of its x: RenderNumber() at
+   scale 1 (8.4-unit digits 6.72 apart) and 1.1 (9.6-unit digits 7.68 apart) in newui_number1,
+   RenderNumber2D() in FontTest (8-unit digits 5.6 apart). */
+.ct-digit { position: absolute; }
+.ct-digit.blank { visibility: hidden; }
+.ct-time-minutes .ct-digit, .ct-time-seconds .ct-digit { top: 404.5px; width: 9.6px; height: 12.8px; }
+.ct-time-minutes .ct-digit { left: calc(559.5px - var(--n) * 4.8px + var(--i) * 7.68px); }
+.ct-time-seconds .ct-digit { left: calc(594.5px - var(--n) * 4.8px + var(--i) * 7.68px); }
+#ct_alpha .ct-digit, #ct_allied .ct-digit, #ct_illusion .ct-digit { top: 246px; width: 8px; height: 8px; }
+#ct_alpha .ct-digit { left: calc(532px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_allied .ct-digit { left: calc(583px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_illusion .ct-digit { left: calc(627px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_kills_needed .ct-digit, #ct_kills .ct-digit { top: 208px; width: 8.4px; height: 11.2px; }
+#ct_kills_needed .ct-digit { left: calc(594px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#ct_kills .ct-digit { left: calc(616px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#skill_icon { position: absolute; left: 539px; top: 200px; width: 20px; height: 28px; }
+
+/* The panels' area, which holds the pointer, and the skill panel's hover zones (the original's
+   18 x 24 boxes over the skill, the kill points it needs and the ones the hero has). */
+#ct_hud_area { position: absolute; left: 512px; top: 179px; width: 128px; height: 255px; }
+.ct-hint { position: absolute; top: 203px; width: 18px; height: 24px; }
+#ct_hint_skill { left: 540px; }
+#ct_hint_kills_needed { left: 595px; }
+#ct_hint_kills { left: 617px; }
+
+/* The buttons: the original's art, its up, over and down frames stacked. */
+@spritesheet ct-alpha-btn-sheet
+{
+	src: "../../../newui_Bt_clearness_illusion.jpg";
+	ct-alpha-btn-up: 0px 0px 38px 24px;
+	ct-alpha-btn-over: 0px 24px 38px 24px;
+	ct-alpha-btn-down: 0px 48px 38px 24px;
+}
+@spritesheet ct-skill-up-btn-sheet
+{
+	src: "../../../newui_ctskillup.jpg";
+	ct-skill-up-btn-up: 0px 0px 15px 13px;
+	ct-skill-up-btn-over: 0px 13px 15px 13px;
+	ct-skill-up-btn-down: 0px 26px 15px 13px;
+}
+@spritesheet ct-skill-down-btn-sheet
+{
+	src: "../../../newui_ctskilldown.jpg";
+	ct-skill-down-btn-up: 0px 0px 15px 13px;
+	ct-skill-down-btn-over: 0px 13px 15px 13px;
+	ct-skill-down-btn-down: 0px 26px 15px 13px;
+}
+.ct-btn { position: absolute; cursor: pointer; pointer-events: auto; }
+#ct_btn_alpha { left: 513px; top: 238px; width: 38px; height: 24px; decorator: image(ct-alpha-btn-up); }
+#ct_btn_alpha:hover { decorator: image(ct-alpha-btn-over); }
+#ct_btn_alpha:active { decorator: image(ct-alpha-btn-down); }
+#ct_btn_skill_up { left: 562px; top: 201px; width: 15px; height: 13px; decorator: image(ct-skill-up-btn-up); }
+#ct_btn_skill_up:hover { decorator: image(ct-skill-up-btn-over); }
+#ct_btn_skill_up:active { decorator: image(ct-skill-up-btn-down); }
+#ct_btn_skill_down { left: 562px; top: 214px; width: 15px; height: 13px; decorator: image(ct-skill-down-btn-up); }
+#ct_btn_skill_down:hover { decorator: image(ct-skill-down-btn-over); }
+#ct_btn_skill_down:active { decorator: image(ct-skill-down-btn-down); }
+
+/* The score effect's banners and digits. */
+@spritesheet ct-score-colon-sheet { src: "../../../newui_ctscorevs1.tga"; ct-score-colon: 0px 0px 20px 45px; }
+@spritesheet ct-score-vs-sheet { src: "../../../newui_ctscorevs0.tga"; ct-score-vs: 0px 0px 49px 27px; }
+@spritesheet ct-score-allied-sheet
+{
+	src: "../../../newui_ctscorealliedgaail.tga";
+	ct-score-allied-badge: 0px 0px 40px 36px;
+}
+@spritesheet ct-score-illusion-sheet
+{
+	src: "../../../newui_ctscoreillsiongaail.tga";
+	ct-score-illusion-badge: 0px 0px 40px 36px;
+}
+@spritesheet ct-score-left-sheet { src: "../../../newui_ctscoreleft.tga"; ct-score-left: 0px 0px 67px 125px; }
+@spritesheet ct-score-right-sheet { src: "../../../newui_ctscoreright.tga"; ct-score-right: 0px 0px 67px 125px; }
+
+#score_allied_tens, #score_allied_ones, #score_illusion_tens, #score_illusion_ones {
+	position: absolute;
+	top: 160px;
+	width: 56px;
+	height: 66px;
+}
+#score_allied_tens { left: 196px; }
+#score_allied_ones { left: 224px; }
+#score_allied_ones.wide { left: 253px; }
+#score_illusion_tens { left: 331px; }
+#score_illusion_ones { left: 358px; }
+#score_illusion_ones.wide { left: 388px; }
+#score_colon { position: absolute; left: 310px; top: 168px; width: 20px; height: 45px;
+               decorator: image(ct-score-colon); }
+#score_allied_badge { position: absolute; left: 232px; top: 115px; width: 40px; height: 36px;
+                      decorator: image(ct-score-allied-badge); }
+#score_vs { position: absolute; left: 292px; top: 123px; width: 49px; height: 27px; decorator: image(ct-score-vs); }
+#score_illusion_badge { position: absolute; left: 367px; top: 115px; width: 40px; height: 36px;
+                        decorator: image(ct-score-illusion-badge); }
+#score_left_banner { position: absolute; left: 133px; top: 115px; width: 67px; height: 125px;
+                     decorator: image(ct-score-left); }
+#score_right_banner { position: absolute; left: 445px; top: 115px; width: 67px; height: 125px;
+                      decorator: image(ct-score-right); }
+
+/* RenderTutorialStep()'s own rows: the step's title at y 50 and its three lines 14 units apart,
+   with the second row left empty as the original left it. */
+.tutorial-line { color: #ffffff; }
+.tutorial-line.title { color: #ffb049; }
+.tutorial-line:nth-child(1) { top: 50px; }
+.tutorial-line:nth-child(2) { top: 78px; }
+.tutorial-line:nth-child(3) { top: 92px; }
+.tutorial-line:nth-child(4) { top: 106px; }
+
+/* The data-for template row has no index of its own; it inherits this one. */
+.ct-run { --i: 0; }

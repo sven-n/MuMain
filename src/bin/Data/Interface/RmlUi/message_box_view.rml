@@ -1,0 +1,56 @@
+<rml>
+	<!-- bound-geometry: the progress bar is a gauge length, the fraction of the wait elapsed -->
+<head>
+	<title>Message Box</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="message_box_view.rcss"/>
+</head>
+<body>
+	<!-- A native message box drawn by RmlUi (UI/Dialogs/MessageBoxView.h): the box art, its text
+	     lines, its buttons or its progress bar. The box keeps its callbacks; a click is queued with
+	     message_box_button(n). #panel carries the box's kind (data-kind): the theme places the box on
+	     the 640x480 .stage, spaces and aligns its lines by their roles, and places its buttons, all
+	     by that kind. Everything inside is reference px from the box's top-left; text is at the
+	     native size in one counter-scaled .sharp-flow. -->
+	<div id="stage" class="stage" data-model="message_box_view">
+		<div id="panel" data-attr-data-kind="kind">
+			<div id="back"></div>
+			<!-- The frame's strips stack in flow inside #frame, which gives the box its height; only
+			     their order comes from C++. -->
+			<div id="frame">
+				<div id="box_top"></div>
+				<div data-for="p : strips" data-attr-class="'box-strip box-strip--' + p.kind"></div>
+				<div id="box_bottom"></div>
+			</div>
+			<div id="separators"><div class="box-separator"></div><div class="box-separator"></div><div class="box-separator"></div><div class="box-separator"></div></div>
+
+			<div id="progress_back" data-if="progress_shown"></div>
+			<div id="progress_bar" data-if="progress_shown" data-style-width="progress_width + 'px'"></div>
+
+			<div id="lines" class="sharp-text sharp-flow" data-style---line-height="line_height + 'px'"
+			     data-style---bold-line-height="bold_line_height + 'px'">
+				<div data-for="l : lines" data-attr-class="'box-line box-line--' + l.role" data-class-bold="l.bold"><span
+				     class="box-cell" data-for="c : l.cells" data-class-bold="c.bold" data-style-color="c.color"
+				     data-style-font-size="(c.text_px > 0 ? c.text_px : (c.bold ? bold_text_px : text_px)) + 'px'">{{c.text}}</span></div>
+			</div>
+
+			<div id="buttons">
+				<div class="box-btn" data-for="b : buttons" data-class-disabled="!b.enabled" data-class-ok-art="b.ok_art"
+				     data-event-click="message_box_button(b.index)">
+					<span class="sharp-text sharp-middle sharp-centre box-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+				</div>
+			</div>
+
+	        <div id="list_box" data-if="list_shown"></div>
+	        <div id="list" class="scroll-pane counter-scaled" data-if="list_shown"
+	             data-style-font-size="text_px + 'px'">
+	            <div class="list-row" data-for="r : list_rows" data-class-selected="r.selected"
+	                 data-event-click="message_box_list_row(r.index)">
+	                <div class="list-row-back"></div>
+	                <span class="list-row-text">{{r.text}}</span>
+	            </div>
+	        </div>
+		</div>
+	</div>
+</body>
+</rml>

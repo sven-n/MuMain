@@ -1,6 +1,8 @@
 #ifndef __ZZZINTERFACE_H__
 #define __ZZZINTERFACE_H__
 
+#include <string>
+
 #define TRADELIMITLEVEL		( 6 )
 
 extern bool WhisperEnable;
@@ -29,11 +31,9 @@ extern int  InputLength[12];
 extern char InputTextHide[12];
 extern wchar_t MacroText[10][256];
 extern uint64_t  RemainingMacroCooldownTime;
-extern int  FontHeight;
 extern int  ItemHelp;
 extern bool DontMove;
 extern int  EditFlag;
-extern int  SelectMonster;
 extern int  SelectModel;
 extern int  SelectMapping;
 extern bool DebugEnable;
@@ -62,7 +62,9 @@ bool PressKey(int Key);
 void MoveHero();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
-void RenderSwichState();
+// The crown switch holders' lines, one per switch (empty while unheld); leaving the switches'
+// area forgets them.
+void CollectCrownSwitchLines(std::wstring (&lines)[2]);
 
 
 //  HotKey
@@ -72,7 +74,6 @@ void RenderInputText(int x, int y, int Index, int Hide = 0);
 void RenderDebugWindow();
 void RenderTipText(int sx, int sy, const wchar_t* Text);
 
-extern int g_iWidthEx;
 
 void RenderInterface(bool);
 void MoveInterface();
@@ -89,7 +90,8 @@ bool CheckCommand(wchar_t* Text, bool bMacroText = false);
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);
 void RenderOutSides();
-void RenderTimes();
+// While a chat macro cools down: true, and how much of the cooldown is left (1 to 0).
+bool MacroCooldownFraction(float& fraction);
 void RenderPartyHP();
 
 void SendMove(CHARACTER* c, OBJECT* o);
@@ -99,9 +101,9 @@ bool CheckAttack();
 bool CheckAttack_Fenrir(CHARACTER* c);
 int	 getTargetCharacterKey(CHARACTER* c, int selected);
 
-void MoveTournamentInterface();
+// A battle soccer goal's flare around the scoring team (GUILD_WAR_EVENT only).
+void MoveBattleSoccerGoalEffect();
 void MoveBattleSoccerEffect(CHARACTER* c);
-void RenderTournamentInterface();
 
 void GetTime(DWORD time, std::wstring& timeText, bool isSecond = true);
 

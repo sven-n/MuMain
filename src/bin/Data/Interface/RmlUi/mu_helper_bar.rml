@@ -1,0 +1,29 @@
+<rml>
+<head>
+	<title>MU Helper Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mu_helper_bar.rcss"/>
+</head>
+<body class="native-text" data-model="mu_helper_bar">
+	<!-- MU Helper mini control bar + hero position readout. Fixed dp size, anchored top-left. -->
+	<div id="panel" class="anchor-top-left">
+		<div id="seg_a"></div>
+		<div id="seg_b"></div>
+		<div id="seg_c"></div>
+		<div id="text">{{position_text}}</div>
+
+		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click" data-attr-data-hint="config_hint">
+			<div class="dot"></div>
+		</div>
+		<!-- Start/Stop share one screen position, mutually exclusive by mu_helper_active. -->
+		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="mu_helper_toggle_click"
+		     data-attr-data-hint="start_hint">
+			<div class="dot"></div>
+		</div>
+		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="mu_helper_toggle_click"
+		     data-attr-data-hint="stop_hint">
+			<div class="dot"></div>
+		</div>
+	</div>
+</body>
+</rml>

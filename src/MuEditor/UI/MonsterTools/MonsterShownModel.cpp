@@ -1,0 +1,174 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "MonsterShownModel.h"
+
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
+
+#include "MonsterEdits.h"
+#include "MonsterSelection.h"
+
+#include "Core/Globals/_enum.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "I18N/All.h"
+#include "World/MapInfra/MapManager.h"
+#include "imgui.h"
+
+#include <set>
+#include <string>
+#include <string_view>
+
+namespace MuEditor::Monsters::ShownModel
+{
+namespace
+{
+// The slots asked for on this map and with this model table: two windows
+// that show two models whose files are missing ask once each, not by turns
+// each frame. A new map or a changed table asks again.
+std::set<int> g_askedSlots;
+int g_askedWorld = -1;
+int g_askedVersion = -1;
+
+// The monster whose variant is shown, and the variant.
+int g_variantMonster = -1;
+int g_shownVariant = -1;
+} // namespace
+
+std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster)
+{
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(monster.model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+    {
+        return std::nullopt;
+    }
+    return slot;
+}
+
+int GetShownVariant(const Data::Monsters::MonsterDefinition& monster)
+{
+    if (monster.number != g_variantMonster || g_shownVariant < 0 ||
+        g_shownVariant >= static_cast<int>(monster.randomVariants.size()))
+    {
+        return -1;
+    }
+    return g_shownVariant;
+}
+
+void SetShownVariant(int number, int variant)
+{
+    g_variantMonster = number;
+    g_shownVariant = variant;
+}
+
+std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monster)
+{
+    const int variant = GetShownVariant(monster);
+    if (variant < 0)
+    {
+        return FindSlot(monster);
+    }
+    const std::optional<int> slot =
+        Data::Monsters::FindMonsterModelReference(monster.randomVariants[static_cast<size_t>(variant)].model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+    {
+        return std::nullopt;
+    }
+    return slot;
+}
+
+std::optional<int> FindUnknownLookSlot(int number, const Data::Monsters::MonsterDefinition* monster)
+{
+    using Data::Monsters::UnknownReason;
+    if (number < 0)
+        return std::nullopt;
+    const Data::Monsters::UnknownMonsterLook& look = g_MonsterDatabase.GetUnknownLook();
+    const bool noEntry = monster == nullptr;
+    const bool noModel = !noEntry && !Data::Monsters::FindMonsterModelReference(monster->model);
+    if (!(noEntry && Data::Monsters::IsFor(look, UnknownReason::NoEntry)) &&
+        !(noModel && Data::Monsters::IsFor(look, UnknownReason::NoModel)))
+        return std::nullopt;
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(look.model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+        return std::nullopt;
+    return slot;
+}
+
+bool IsOpen(int slot)
+{
+    return Data::Monsters::ModelLoader::IsOpen(slot);
+}
+
+void OpenWhenShown(int slot)
+{
+    if (gMapManager.WorldActive != g_askedWorld || g_MonsterModelDatabase.GetVersion() != g_askedVersion)
+    {
+        g_askedSlots.clear();
+        g_askedWorld = gMapManager.WorldActive;
+        g_askedVersion = g_MonsterModelDatabase.GetVersion();
+    }
+    if (IsOpen(slot) || !g_askedSlots.insert(slot).second)
+    {
+        return;
+    }
+    g_MonsterDataHandler.OpenModelForTools(slot);
+}
+
+void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster, bool wholeMonster)
+{
+    if (monster == nullptr)
+    {
+        ImGui::TextDisabled("%s", number == MonsterSelection::NoMonster ? I18N::Editor::NoMonsterIsSelected
+                                                                        : I18N::Editor::NoMonsterAtThisNumber);
+        return;
+    }
+    if (wholeMonster)
+    {
+        const std::string count = std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size());
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheValuesThe0NumbersOf1Share,
+                                            {count, monster->names.Get(I18N::GetCurrentLocale())})
+                                   .c_str());
+        return;
+    }
+    // The name is an argument, never the format: names may hold a "%".
+    ImGui::Text("%d %s", number, monster->names.Get(I18N::GetCurrentLocale()).c_str());
+}
+
+void RenderWhyNoModel(const Data::Monsters::MonsterDefinition& monster)
+{
+    ImGui::PushTextWrapPos(0.0f);
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(monster.model);
+    if (monster.model.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheMonsterNamesNoModel);
+    }
+    else if (slot == MODEL_PLAYER)
+    {
+        // CreateMonster makes it a player character (MODEL_PLAYER), the
+        // skeletons with their body as its skin (SubType).
+        ImGui::TextDisabled("%s", I18N::Editor::MonsterModelPlayerNote);
+    }
+    else if (monster.model.starts_with(Data::Monsters::MapObjectPrefix))
+    {
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::MonsterModelMapObjectNote,
+                                               {monster.model.substr(Data::Monsters::MapObjectPrefix.size())})
+                                      .c_str());
+    }
+    else if (slot && !Data::Monsters::IsMonsterRangeSlot(*slot) && !Data::Monsters::IsNpcRangeSlot(*slot))
+    {
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::MonsterModelOtherAreaNote, {monster.model}).c_str());
+    }
+    else
+    {
+        ImGui::TextDisabled(
+            "%s", I18N::Format(I18N::Editor::TheMonsterAppearsWith0WhichIsNotInTheModelList, {monster.model}).c_str());
+    }
+    ImGui::PopTextWrapPos();
+}
+} // namespace MuEditor::Monsters::ShownModel
+
+#endif // _EDITOR

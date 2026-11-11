@@ -1,0 +1,87 @@
+/* The foreground of a letter being written: its own chrome, content and buttons, all in the main
+   context like every other window of this family.
+
+   font-size: 1rem, never dp -- this theme declares NativeTextSize and window_shell's body carries
+   `native-text`, so the root size is already the original's text size. */
+
+@spritesheet lw-size-sheet { src: "../../../win_size.jpg"; lw-minimize: 0px 0px 9px 9px; lw-close: 0px 9px 9px 9px; }
+@spritesheet lw-button-sheet { src: "../../../win_button.tga"; lw-button: 0px 0px 49px 16px; lw-button-inner: 6px 4px 37px 8px; }
+
+/* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
+   two single-class selectors decide by link order. */
+#panel { transform: none; }
+#panel { width: 370dp; height: 272dp; min-width: 330dp; min-height: 220dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); }
+
+/* window_shell.rcss draws its caps with image(), correct at the 230dp the dialogs are locked to
+   and distorting the border art at any other width. Same assets, stretch-safe inner rects, drawn
+   as ninepatches. Scoped to this document. */
+@spritesheet lx-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    lx-cap-top:    0px 0px 230px 67px; lx-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet lx-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; lx-cap-middle: 0px 0px 230px 15px; lx-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet lx-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; lx-cap-bottom: 0px 0px 230px 50px; lx-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet lx-back-sheet       { src: "../../../newui_msgbox_back.jpg";   lx-back:       0px 0px 222px 250px; lx-back-inner:       8px  8px 206px 234px; }
+@spritesheet lx-banner-sheet     { src: "../../../newui_Message_03.tga";    lx-banner:     0px 0px 230px 67px; lx-banner-inner:     20px 12px 190px 43px; }
+
+.window-shell-sprite-top    { height: 46dp; decorator: ninepatch(lx-cap-top, lx-cap-top-inner); }
+.window-shell-sprite-bottom { height: 40dp; decorator: ninepatch(lx-cap-bottom, lx-cap-bottom-inner); }
+.window-shell-header-rail   { height: 46dp; decorator: ninepatch(lx-banner, lx-banner-inner); }
+/* Full width: the portrait composites after the main context now, so the panel no longer has to
+   leave its column open for it. */
+.window-shell-sprite-back   { decorator: ninepatch(lx-back, lx-back-inner); }
+.window-shell-sprite-middle { top: 46dp; bottom: 40dp; decorator: ninepatch(lx-cap-middle, lx-cap-middle-inner); }
+/* This theme needs no extra fill: the layers above are the panel. */
+#frame_fill { display: none; }
+/* Only this strip drags. The rail's own 67dp is the banner art's height and reaches down over the
+   content, so a press on a label would otherwise drag the window from there. */
+#drag_strip { position: absolute; left: -12dp; right: -12dp; top: 0; height: 28dp; pointer-events: auto; }
+
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 22dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); cursor: pointer; pointer-events: auto; }
+
+#window_controls { position: absolute; right: -4dp; top: 8dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 5dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(lw-minimize); }
+#btn_close_x { decorator: image(lw-close); }
+
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 16dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: ninepatch(lw-button, lw-button-inner); }
+.btn:hover { image-color: rgba(255, 255, 255, 220); }
+.btn.disabled { pointer-events: none; image-color: rgba(255, 255, 255, 120); }
+
+/* Receiver and title, a label column then the field, as InitControls() measured and placed them. */
+#rows { position: absolute; left: 0; right: 124dp; top: 48dp; pointer-events: auto; }
+.row { display: flex; height: 15dp; margin-bottom: 1dp; white-space: nowrap; }
+.row .label { flex: 0 0 52dp; height: 15dp; line-height: 15dp; overflow: hidden; }
+.row .text-field { flex: 1 1 auto; box-sizing: border-box; width: auto; height: 15dp; pointer-events: auto; }
+
+/* The field fills a positioned box rather than being positioned itself: a textarea takes its own
+   width from cols/rows, so left/right offsets alone leave it at its intrinsic size. */
+#body_wrap { position: absolute; left: 0; right: 124dp; top: 82dp; bottom: 22dp; }
+#body_field { width: 100%; height: 100%; box-sizing: border-box; pointer-events: auto; }
+
+/* The sender's well, which #photo_image fills. Clear of both caps, so neither paints over it. */
+#photo_slot { position: absolute; right: 0; width: 119dp; top: 48dp; bottom: 22dp; background-color: rgba(0, 0, 0, 179); pointer-events: auto; cursor: move; }
+/* The viewer's render target: the character drawn into a texture exactly this box's size, so it is
+   shown 1:1 and stands at this panel's depth. Webzen's logo takes its place at the original's 80x62. */
+#photo_image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+#photo_slot.webzen #photo_image { left: 50%; top: 50%; width: 80dp; height: 62dp; margin-left: -40dp; margin-top: -31dp; }
+/* The "?" in the well's bottom-left corner, drawn a pixel smaller and inset while its help is open --
+   the original's pressed look. Webzen's letter had none. */
+@spritesheet photo-help-sheet { src: "../../../win_question.tga"; photo-help: 0px 0px 16px 16px; photo-help-pressed: 0px 0px 15px 15px; }
+#photo_help { position: absolute; left: 1dp; bottom: 1dp; width: 16dp; height: 16dp; pointer-events: auto; cursor: pointer; decorator: image(photo-help); }
+#photo_help.active { left: 2dp; width: 15dp; height: 15dp; decorator: image(photo-help-pressed); }
+#photo_slot.webzen #photo_help { display: none; }
+
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 18dp; white-space: nowrap; }
+#footer .btn { width: 20%; margin-right: 1%; }
+#footer .btn.pose { width: 28%; }
+

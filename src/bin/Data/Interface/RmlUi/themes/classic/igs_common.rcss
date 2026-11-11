@@ -1,0 +1,34 @@
+/* Classic theme for what the cash shop's documents share (legacy's, below): the button is the
+   Season 2 client's Buy (Classic/s2 buy0, buy1 under the mouse, buy2 pressed; 72 x 30, which the
+   S6 Ingame_Bt03 resamples), at the S6 button's size. */
+
+/* What the cash shop's documents share (in_game_shop.rml and its igs_* dialogs): the
+   Ingame_Bt03 button with its label, the dimmed screen behind a dialog, and the counter-scaled
+   text layer. */
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+
+/* CMessageBoxBase::RenderMsgBackColor(): black at half alpha over the whole screen. It also takes
+   the clicks the shop under the dialog would otherwise get. */
+.igs-dim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 128); pointer-events: auto; }
+
+/* Up, over and pressed frames; the label drops a unit while pressed. A disabled button is greyed
+   and its label dim (CMessageBoxButton::Render()). */
+@spritesheet igs-btn-sheet { src: "../../../InGameShop/Ingame_Bt03.tga"; igs-btn-up: 0px 0px 52px 26px; igs-btn-over: 0px 26px 52px 26px; igs-btn-down: 0px 52px 52px 26px; }
+.igs-btn { position: absolute; width: 52px; height: 26px; decorator: image(igs-btn-up); pointer-events: auto; }
+.igs-btn:hover { decorator: image(igs-btn-over); }
+.igs-btn:active { decorator: image(igs-btn-down); }
+.igs-btn-label { color: #ffffff; margin-top: -1px; }
+/* A centred label sits at margin-left -1000px (base.rcss's .sharp-centre); a unit right is -999px. */
+.igs-btn:active .igs-btn-label { margin-left: -999px; margin-top: 0; }
+.igs-btn.disabled, .igs-btn.disabled:hover { decorator: image(igs-btn-up); image-color: rgba(204, 204, 204, 230); pointer-events: none; }
+.igs-btn.disabled .igs-btn-label { color: #808080; }
+
+/* --- Classic: the Season 2 button -------------------------------------------------------------- */
+@spritesheet igs-classic-buy0-sheet { src: ../../../Classic/s2/buy0.tga; igs-classic-btn-up: 0px 0px 72px 30px; }
+@spritesheet igs-classic-buy1-sheet { src: ../../../Classic/s2/buy1.tga; igs-classic-btn-over: 0px 0px 72px 30px; }
+@spritesheet igs-classic-buy2-sheet { src: ../../../Classic/s2/buy2.tga; igs-classic-btn-down: 0px 0px 72px 30px; }
+.igs-btn { decorator: image(igs-classic-btn-up fill); }
+.igs-btn:hover { decorator: image(igs-classic-btn-over fill); }
+.igs-btn:active { decorator: image(igs-classic-btn-down fill); }
+.igs-btn.disabled, .igs-btn.disabled:hover { decorator: image(igs-classic-btn-up fill); }

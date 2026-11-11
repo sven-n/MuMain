@@ -43,6 +43,7 @@ internal static class CppEmitter
             ["ru"]    = "Русский",
             ["tl"]    = "Tagalog",
             ["uk"]    = "Українська",
+            ["zh-CN"] = "简体中文",
             ["zh-TW"] = "繁體中文",
         };
 
@@ -95,24 +96,6 @@ internal static class CppEmitter
 
             """);
 
-        if (HasLegacyIds(group))
-        {
-            sb.Append($$"""
-
-                // Resolves a legacy integer ID (from the pre-migration GlobalText[N]
-                // contract) to the corresponding string in the active locale. Returns
-                // a non-null empty literal for unknown IDs.
-                const {{charType}}* Lookup(int legacyId) noexcept;
-
-                // Slot variant of Lookup: returns a pointer to the runtime
-                // I18N slot rather than its current value. Useful for widgets
-                // that take a const T* const* and refresh themselves on
-                // locale change. Returns nullptr for unknown IDs.
-                const {{charType}}* const* LookupSlot(int legacyId) noexcept;
-
-                """);
-        }
-
         sb.Append($$"""
 
             }  // namespace {{RootNamespace}}::{{group.Name}}
@@ -130,10 +113,15 @@ internal static class CppEmitter
         sb.Append($$"""
             #include "{{group.Name}}.h"
 
-            #include <algorithm>
-            #include <cstring>
-            #include <iterator>
-
+            """);
+        if (group.NamesItems)
+        {
+            sb.AppendLine($"#include \"{MasterFileName}.h\"");
+            sb.AppendLine();
+            sb.AppendLine("#include <span>");
+            sb.AppendLine();
+        }
+        sb.Append($$"""
             namespace {{RootNamespace}}::{{group.Name}} {
 
             namespace {
@@ -151,11 +139,10 @@ internal static class CppEmitter
         WriteSlotTable(sb, group, masterLocales);
         sb.AppendLine();
         WriteApplyLocale(sb);
-
-        if (HasLegacyIds(group))
+        if (group.NamesItems)
         {
             sb.AppendLine();
-            WriteLegacyLookup(sb, group);
+            WriteItemTexts(sb, group, masterLocales);
         }
 
         sb.Append($$"""
@@ -174,6 +161,7 @@ internal static class CppEmitter
 
         sb.AppendLine("#pragma once");
         sb.AppendLine();
+        sb.AppendLine("#include <cstdint>");
         sb.AppendLine("#include <initializer_list>");
         sb.AppendLine("#include <span>");
         sb.AppendLine("#include <string>");
@@ -231,6 +219,39 @@ internal static class CppEmitter
             // is not currently registered.
             void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
 
+            // A text of an item text group (ResxGen --item-text-groups) that names
+            // an item with {item:group,number} in at least one locale
+            // (docs/translation-system.md, "Texts that name items").
+            struct ItemText
+            {
+                const char* group;             // "Game"
+                const char* key;               // the .resx key, UTF-8
+                const wchar_t** slot;          // the key's runtime pointer, e.g. &Game::JewelOfBless
+                const wchar_t* const* values;  // one per locale in GetAvailableLocales order; the
+                                               // English text where a locale has none of its own
+                std::uint32_t ownLocales;      // bit i: locale i has a text of its own
+            };
+
+            // Every text that names an item, group by group in file order. The
+            // span backs static storage and is valid for the program's lifetime.
+            std::span<const ItemText> GetItemTexts() noexcept;
+
+            // Returns `text` with its item references replaced by item names, or
+            // `text` itself. `textLocaleIndex` is the locale whose text it is: the
+            // current one, or the default locale when the current locale has no
+            // text of its own. The returned string must stay valid for the
+            // program's lifetime: copies of the old pointer may still be read.
+            using ItemTextExpander = const wchar_t* (*)(const wchar_t* text, int textLocaleIndex) noexcept;
+
+            // Sets the expander that ExpandItemTexts uses; null shows the texts as
+            // written. Set by the item data once its names are known.
+            void SetItemTextExpander(ItemTextExpander expander) noexcept;
+
+            // Points every text that names an item at its expansion in the current
+            // locale. SetLocale does this before it calls the observers. Returns
+            // true when a text changed.
+            bool ExpandItemTexts() noexcept;
+
             }  // namespace {{RootNamespace}}
 
             """);
@@ -251,6 +272,16 @@ internal static class CppEmitter
             #include <vector>
 
             namespace {{RootNamespace}} {
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"namespace {g.Name} {{ std::span<const ItemText> ItemTexts() noexcept; }}");
+        }
+
+        sb.Append($$"""
+
             namespace {
 
             """);
@@ -261,6 +292,8 @@ internal static class CppEmitter
 
             constexpr int kDefaultLocaleIndex = 0;
             const char* g_currentLocale = kLocales[kDefaultLocaleIndex];
+            int g_currentLocaleIndex = kDefaultLocaleIndex;
+            ItemTextExpander g_itemTextExpander = nullptr;
 
             struct ObserverEntry { LocaleObserver cb; void* ctx; };
 
@@ -291,6 +324,7 @@ internal static class CppEmitter
                 int idx = LocaleIndex(locale);
                 if (idx < 0) idx = kDefaultLocaleIndex;
                 g_currentLocale = kLocales[idx];
+                g_currentLocaleIndex = idx;
 
             """);
 
@@ -301,6 +335,9 @@ internal static class CppEmitter
 
         sb.Append($$"""
 
+                // Item names in texts first: observers copy texts.
+                ExpandItemTexts();
+
                 // Snapshot the registry so observers that unregister themselves
                 // (e.g. via a destructor triggered as a side effect of the
                 // callback) don't shift indices mid-iteration.
@@ -309,6 +346,49 @@ internal static class CppEmitter
                 {
                     if (entry.cb != nullptr) entry.cb(entry.ctx);
                 }
+            }
+
+            std::span<const ItemText> GetItemTexts() noexcept
+            {
+                static const std::vector<ItemText> texts = [] {
+                    std::vector<ItemText> all;
+
+            """);
+
+        foreach (var g in groups.Where(g => g.NamesItems))
+        {
+            sb.AppendLine($"        const std::span<const ItemText> {CamelCase(g.Name)}Texts = {g.Name}::ItemTexts();");
+            sb.AppendLine($"        all.insert(all.end(), {CamelCase(g.Name)}Texts.begin(), {CamelCase(g.Name)}Texts.end());");
+        }
+
+        sb.Append($$"""
+                    return all;
+                }();
+                return texts;
+            }
+
+            void SetItemTextExpander(ItemTextExpander expander) noexcept
+            {
+                g_itemTextExpander = expander;
+            }
+
+            bool ExpandItemTexts() noexcept
+            {
+                bool changed = false;
+                for (const ItemText& text : GetItemTexts())
+                {
+                    const wchar_t* written = text.values[g_currentLocaleIndex];
+                    const bool own = ((text.ownLocales >> g_currentLocaleIndex) & 1u) != 0;
+                    const int textLocale = own ? g_currentLocaleIndex : kDefaultLocaleIndex;
+                    const wchar_t* shown = g_itemTextExpander != nullptr ? g_itemTextExpander(written, textLocale) : written;
+                    if (shown == nullptr) shown = written;
+                    if (*text.slot != shown)
+                    {
+                        *text.slot = shown;
+                        changed = true;
+                    }
+                }
+                return changed;
             }
 
             void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
@@ -520,6 +600,43 @@ internal static class CppEmitter
         sb.AppendLine("}  // namespace");
     }
 
+    /// Emits the group's texts that name items (ItemReferenceSyntax) as `ItemTexts()`, the table
+    /// I18N::GetItemTexts joins: per text its key, runtime pointer, its kSlots row's values (one per
+    /// master locale, with the same fallback) and a bit per locale with a text of its own.
+    private static void WriteItemTexts(StringBuilder sb, ResourceGroup group, IReadOnlyList<string> masterLocales)
+    {
+        var rows = group.Entries
+            .Select((entry, row) => (entry, row))
+            .Where(e => e.entry.Translations.Values.Any(ItemReferenceSyntax.HasReference))
+            .ToList();
+
+        sb.AppendLine("namespace {");
+        if (rows.Count > 0)
+        {
+            sb.AppendLine($"constexpr {RootNamespace}::ItemText kItemTexts[] = {{");
+            foreach (var (entry, row) in rows)
+            {
+                uint own = 0;
+                for (var i = 0; i < masterLocales.Count; i++)
+                {
+                    if (entry.Translations.ContainsKey(masterLocales[i])) own |= 1u << i;
+                }
+                sb.AppendLine($"    {{ {Naming.EscapeCppString(group.Name)}, {Naming.EscapeCppString(entry.Key)}, &{entry.Identifier}, " +
+                              $"kSlots[{row}].values, 0x{own:X}u }},");
+            }
+            sb.AppendLine("};");
+        }
+        sb.AppendLine("}  // namespace");
+        sb.AppendLine();
+        sb.AppendLine($"std::span<const {RootNamespace}::ItemText> ItemTexts() noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine(rows.Count > 0 ? "    return kItemTexts;" : "    return {};");
+        sb.AppendLine("}");
+    }
+
+    /// "Game" -> "game", for local variable names in the emitted code.
+    private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];
+
     private static void WriteApplyLocale(StringBuilder sb)
     {
         sb.AppendLine("void ApplyLocale(int localeIndex) noexcept");
@@ -541,70 +658,6 @@ internal static class CppEmitter
         return entry.Translations.TryGetValue(ResxLoader.DefaultLocale, out var defaultValue)
             ? defaultValue
             : entry.Key;
-    }
-
-    private static bool HasLegacyIds(ResourceGroup group)
-    {
-        return group.Entries.Any(e => e.LegacyIds.Count > 0);
-    }
-
-    private static void WriteLegacyLookup(StringBuilder sb, ResourceGroup group)
-    {
-        var charType = group.IsWide ? "wchar_t" : "char";
-
-        // Flatten (legacyId, identifier) pairs and sort by id for binary search.
-        var rows = group.Entries
-                        .SelectMany(e => e.LegacyIds.Select(id => (id, ident: e.Identifier)))
-                        .OrderBy(r => r.id)
-                        .ToList();
-
-        sb.AppendLine("namespace {");
-        sb.AppendLine($"struct LegacyEntry {{ int id; const {charType}* const* slot; }};");
-        sb.AppendLine("constexpr LegacyEntry kLegacyTable[] = {");
-        foreach (var (id, ident) in rows)
-        {
-            sb.AppendLine($"    {{ {id}, &{ident} }},");
-        }
-        sb.AppendLine("};");
-        sb.AppendLine($"constexpr {(group.IsWide ? "wchar_t" : "char")} kLegacyFallback[] = {(group.IsWide ? "L\"\"" : "\"\"")};");
-        sb.AppendLine();
-        sb.AppendLine("// Compile-time guard: the lookup uses std::lower_bound and assumes");
-        sb.AppendLine("// strictly-increasing IDs. ResxGen already rejects duplicate");
-        sb.AppendLine("// legacy_id entries at generation time; this assert protects against");
-        sb.AppendLine("// the generated file being hand-edited out of sync.");
-        sb.AppendLine("constexpr bool LegacyTableStrictlySorted() noexcept");
-        sb.AppendLine("{");
-        sb.AppendLine("    for (std::size_t i = 1; i < std::size(kLegacyTable); ++i)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        if (kLegacyTable[i - 1].id >= kLegacyTable[i].id) return false;");
-        sb.AppendLine("    }");
-        sb.AppendLine("    return true;");
-        sb.AppendLine("}");
-        sb.AppendLine($"static_assert(LegacyTableStrictlySorted(),");
-        sb.AppendLine($"    \"Duplicate or unsorted legacy_id in I18N::{group.Name}::kLegacyTable; \"");
-        sb.AppendLine($"    \"Lookup(int) requires unique IDs. Check tools/ResxGen output.\");");
-        sb.AppendLine();
-        sb.AppendLine("const LegacyEntry* FindLegacyEntry(int legacyId) noexcept");
-        sb.AppendLine("{");
-        sb.AppendLine("    const auto* const end = std::end(kLegacyTable);");
-        sb.AppendLine("    const auto* it = std::lower_bound(std::begin(kLegacyTable), end, legacyId,");
-        sb.AppendLine("        [](const LegacyEntry& e, int id) { return e.id < id; });");
-        sb.AppendLine("    if (it != end && it->id == legacyId) return it;");
-        sb.AppendLine("    return nullptr;");
-        sb.AppendLine("}");
-        sb.AppendLine("}  // namespace");
-        sb.AppendLine();
-        sb.AppendLine($"const {charType}* Lookup(int legacyId) noexcept");
-        sb.AppendLine("{");
-        sb.AppendLine("    const LegacyEntry* entry = FindLegacyEntry(legacyId);");
-        sb.AppendLine("    return entry != nullptr ? *entry->slot : kLegacyFallback;");
-        sb.AppendLine("}");
-        sb.AppendLine();
-        sb.AppendLine($"const {charType}* const* LookupSlot(int legacyId) noexcept");
-        sb.AppendLine("{");
-        sb.AppendLine("    const LegacyEntry* entry = FindLegacyEntry(legacyId);");
-        sb.AppendLine("    return entry != nullptr ? entry->slot : nullptr;");
-        sb.AppendLine("}");
     }
 
     private static void AppendBanner(StringBuilder sb)

@@ -1,5 +1,7 @@
 #pragma once
 
+// Relative path lets standalone cppcheck resolve the pointer macros without global header analysis.
+#include "../../Core/Globals/_define.h"
 #include "w_PetAction.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Time/Timer.h"
@@ -36,7 +38,9 @@ public:
     bool Create(int itemType, int modelType, vec3_t Position, CHARACTER* Owner, int SubType, int LinkBone);
     void Release();
     void Update(bool bForceRender = false);
-    void Render(bool bForceRender = false);
+    // Whether the frame's view shows it; part of CullWorld.
+    void Cull();
+    void Render(bool bForceRender = false) const;
 
 private:
     bool UpdateMove(double tick, bool bForceRender = false);

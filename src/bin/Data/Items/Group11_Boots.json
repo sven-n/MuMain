@@ -1,0 +1,1877 @@
+{
+  "formatVersion": 1,
+  "group": 11,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Boots",
+        "de": "Bronzestiefel",
+        "es": "Botas de Bronce",
+        "pl": "Brązowe buty",
+        "pt": "Botas de bronze"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 12,
+      "durability": 34,
+      "defense": 4,
+      "walkSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Boots",
+        "de": "Drachenstiefel",
+        "es": "Botas Dragón",
+        "pl": "Smocze buty",
+        "pt": "Botas do dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 54,
+      "durability": 68,
+      "defense": 15,
+      "walkSpeed": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Boots",
+        "de": "Polsterstiefel",
+        "es": "Botas Rellenas",
+        "pl": "Pikowane buty",
+        "pt": "Botas acolchoadas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 4,
+      "durability": 28,
+      "defense": 3,
+      "walkSpeed": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 20
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Boots",
+        "de": "Legendäre Stiefel",
+        "es": "Botas Legendarias",
+        "pl": "Legendarne buty",
+        "pt": "Botas lendárias"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 42,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Boots",
+        "de": "Knochenstiefel",
+        "es": "Botas de Hueso",
+        "pl": "Kościane buty",
+        "pt": "Botas de osso"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 16,
+      "durability": 30,
+      "defense": 6,
+      "walkSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Boots",
+        "de": "Lederstiefel",
+        "es": "Botas de Cuero",
+        "pl": "Skórzane buty",
+        "pt": "Botas de couro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 5,
+      "durability": 30,
+      "defense": 2,
+      "walkSpeed": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Boots",
+        "de": "Schuppenstiefel",
+        "es": "Botas de Escamas",
+        "pl": "Łuskowe buty",
+        "pt": "Botas de escamas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 22,
+      "durability": 40,
+      "defense": 8,
+      "walkSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Boots",
+        "de": "Sphinxstiefel",
+        "es": "Botas Esfinge",
+        "pl": "Buty Sfinksa",
+        "pt": "Botas da esfinge"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 30,
+      "durability": 36,
+      "defense": 9,
+      "walkSpeed": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Boots",
+        "de": "Messingstiefel",
+        "es": "Botas de Metal",
+        "pl": "Mosiężne buty",
+        "pt": "Botas de latão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 32,
+      "durability": 44,
+      "defense": 10,
+      "walkSpeed": 6,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Boots",
+        "de": "Plattenstiefel",
+        "es": "Botas de Plata",
+        "pl": "Płytowe buty",
+        "pt": "Botas de placa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 42,
+      "durability": 50,
+      "defense": 12,
+      "walkSpeed": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Boots",
+        "de": "Rankenstiefel",
+        "es": "Botas Vid",
+        "pl": "Buty z pnączy",
+        "pt": "Botas da vinha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 5,
+      "durability": 22,
+      "defense": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Boots",
+        "de": "Seidenstiefel",
+        "es": "Botas de Seda",
+        "pl": "Jedwabne buty",
+        "pt": "Botas de seda"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 15,
+      "durability": 26,
+      "defense": 4,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Boots",
+        "de": "Windstiefel",
+        "es": "Botas Viento",
+        "pl": "Buty Wiatru",
+        "pt": "Botas do vento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 27,
+      "durability": 32,
+      "defense": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Boots",
+        "de": "Geisterstiefel",
+        "es": "Botas Espíritu",
+        "pl": "Buty Ducha",
+        "pt": "Botas do espírito"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 40,
+      "durability": 38,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Boots",
+        "de": "Wächterstiefel",
+        "es": "Botas Guardián",
+        "pl": "Buty Strażnika",
+        "pt": "Botas do guardião"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 52,
+      "durability": 45,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Storm Crow Boots",
+        "de": "Sturmkrähenstiefel",
+        "es": "Botas Cuervo de Tormenta",
+        "pl": "Buty Burzowej Wrony",
+        "pt": "Botas do corvo da tempestade"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 72,
+      "durability": 80,
+      "defense": 22,
+      "walkSpeed": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Boots",
+        "de": "Schwarzdrachenstiefel",
+        "es": "Botas Dragón Negro",
+        "pl": "Buty Czarnego Smoka",
+        "pt": "Botas do dragão negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 78,
+      "durability": 74,
+      "defense": 24,
+      "walkSpeed": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Boots",
+        "de": "Dunkelphönixstiefel",
+        "es": "Botas Fénix Oscuro",
+        "pl": "Buty Mrocznego Feniksa",
+        "pt": "Botas da fênix negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 93,
+      "durability": 80,
+      "defense": 40,
+      "walkSpeed": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 198,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Boots",
+        "de": "Großseelenstiefel",
+        "es": "Botas Gran Alma",
+        "pl": "Buty Wielkiej Duszy",
+        "pt": "Botas da grande alma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 76,
+      "durability": 67,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 59,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Boots",
+        "de": "Göttliche Stiefel",
+        "es": "Botas Divinas",
+        "pl": "Boskie buty",
+        "pt": "Botas divinas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 81,
+      "durability": 74,
+      "defense": 30,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Thunder Hawk Boots",
+        "de": "Donnerfalkenstiefel",
+        "es": "Botas Halcón de Trueno",
+        "pl": "Buty Gromowego Jastrzębia",
+        "pt": "Botas de Thunder Hawk"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 92,
+      "durability": 82,
+      "defense": 37,
+      "walkSpeed": 2,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Boots",
+        "de": "Großartige Drachenstiefel",
+        "es": "Botas Gran Dragón",
+        "pl": "Buty Wielkiego Smoka",
+        "pt": "Botas do grande dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 98,
+      "durability": 86,
+      "defense": 50,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Boots",
+        "de": "Dunkelseelenstiefel",
+        "es": "Botas Alma Oscura",
+        "pl": "Buty Mrocznej Duszy",
+        "pt": "Botas da alma negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 95,
+      "durability": 75,
+      "defense": 31,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Hurricane Boots",
+        "de": "Orkanstiefel",
+        "es": "Botas Huracán",
+        "pl": "Buty Huraganu",
+        "pt": "Botas do furacão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 110,
+      "durability": 90,
+      "defense": 50,
+      "attackType": 4,
+      "requirements": {
+        "strength": 162,
+        "dexterity": 66
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Spirit Boots",
+        "de": "Rotgeisterstiefel",
+        "es": "Botas Espíritu Rojo",
+        "pl": "Buty Czerwonego Ducha",
+        "pt": "Botas do espírito vermelho"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 87,
+      "durability": 80,
+      "defense": 40,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Boots",
+        "de": "Leichtplattenstiefel",
+        "es": "Botas Plata de Luz",
+        "pl": "Lekkie buty płytowe",
+        "pt": "Botas de placa leve"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 45,
+      "durability": 42,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Boots",
+        "de": "Adamantstiefel",
+        "es": "Botas Adamantinas",
+        "pl": "Adamantytowe buty",
+        "pt": "Botas de adamantina"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 60,
+      "durability": 56,
+      "defense": 20,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Boots",
+        "de": "Dunkelstahlstiefel",
+        "es": "Botas Acero Oscuro",
+        "pl": "Buty z mrocznej stali",
+        "pt": "Botas de aço negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 83,
+      "durability": 70,
+      "defense": 25,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Boots",
+        "de": "Dunkelmeisterstiefel",
+        "es": "Botas Amo Oscuro",
+        "pl": "Buty Mrocznego Mistrza",
+        "pt": "Botas do Mestre negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 95,
+      "durability": 78,
+      "defense": 33,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Boots",
+        "de": "Drachenritterstiefel",
+        "es": "Botas Caballero Dragón",
+        "pl": "Buty Smoczego Rycerza",
+        "pt": "Botas do cavaleiro dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 119,
+      "durability": 90,
+      "defense": 63,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Boots",
+        "de": "Giftnebelstiefel",
+        "es": "Botas Bruma de Veneno",
+        "pl": "Buty Jadowitej Mgły",
+        "pt": "Botas da névoa de veneno"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 119,
+      "durability": 86,
+      "defense": 47,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Boots",
+        "de": "Sylphenstrahlstiefel",
+        "es": "Botas Rayo de Sílfide",
+        "pl": "Buty Sylphid Ray",
+        "pt": "Botas do raio silfídico"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 119,
+      "durability": 86,
+      "defense": 53,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Volcano Boots",
+        "de": "Vulkanstiefel",
+        "es": "Botas Volcán",
+        "pl": "Buty Wulkanu",
+        "pt": "Botas do vulcão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 131,
+      "durability": 95,
+      "defense": 61,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 145,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Boots",
+        "de": "Sonnenlichtstiefel",
+        "es": "Botas Luz Solar",
+        "pl": "Buty Słońca",
+        "pt": "Botas da luz do sol"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 121,
+      "durability": 82,
+      "defense": 44,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Boots",
+        "de": "Aschkrähenstiefel",
+        "es": "Botas Cuervo Ceniza",
+        "pl": "Buty Ashcrow",
+        "pt": "Botas de Ashcrow"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 68,
+      "durability": 72,
+      "defense": 19,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Boots",
+        "de": "Finsternisstiefel",
+        "es": "Botas Eclipse",
+        "pl": "Buty Zaćmienia",
+        "pt": "Botas do eclipse"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 68,
+      "durability": 54,
+      "defense": 17,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Boots",
+        "de": "Iris-Stiefel",
+        "es": "Botas Iris",
+        "pl": "Buty Iris",
+        "pt": "Botas de Iris"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 68,
+      "durability": 59,
+      "defense": 23,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Valiant Boots",
+        "de": "Kühne Stiefel",
+        "es": "Botas Valientes",
+        "pl": "Waleczne buty",
+        "pt": "Botas do valor"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 98,
+      "durability": 81,
+      "defense": 29,
+      "requirements": {
+        "strength": 155,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Boots",
+        "de": "Glorreiche Stiefel",
+        "es": "Botas Gloriosas",
+        "pl": "Chwalebne buty",
+        "pt": "Botas gloriosas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 98,
+      "durability": 74,
+      "defense": 29,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Boots",
+        "de": "Sturmwindstiefel",
+        "es": "Botas Viento Violento",
+        "pl": "Buty Gwałtownego Wiatru",
+        "pt": "Botas do vento violento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 26,
+      "durability": 36,
+      "defense": 11,
+      "attackType": 4,
+      "requirements": {
+        "strength": 27
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Boots",
+        "de": "Rotschwingenstiefel",
+        "es": "Botas Ala Roja",
+        "pl": "Buty Czerwonego Skrzydła",
+        "pt": "Botas da asa vermelha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 42,
+      "defense": 15,
+      "attackType": 4,
+      "requirements": {
+        "strength": 25,
+        "dexterity": 4
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Boots",
+        "de": "Uralte Stiefel",
+        "es": "Botas Antiguas",
+        "pl": "Pradawne buty",
+        "pt": "Botas antigas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 65,
+      "durability": 54,
+      "defense": 21,
+      "attackType": 4,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Boots",
+        "de": "Dämonische Stiefel",
+        "es": "Botas Demoníacas",
+        "pl": "Demoniczne buty",
+        "pt": "Botas demoníacas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 76,
+      "durability": 67,
+      "defense": 28,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 10
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Boots",
+        "de": "Sturmblitzstiefel",
+        "es": "Botas Ráfaga Tormentosa",
+        "pl": "Buty Burzowego Błysku",
+        "pt": "Botas Relâmpago de Tempest."
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 95,
+      "durability": 75,
+      "defense": 38,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 57,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Boots",
+        "de": "Ewigschwingenstiefel",
+        "es": "Botas Ala Eterna",
+        "pl": "Buty Wiecznego Skrzydła",
+        "pt": "Botas da asa eterna"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 99,
+      "durability": 86,
+      "defense": 32,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan Boots",
+        "de": "Titanenstiefel",
+        "es": "Botas Titán",
+        "pl": "Buty Tytana",
+        "pt": "Botas do titã"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 96,
+      "durability": 86,
+      "defense": 57,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Boots",
+        "de": "Tapfere Stiefel",
+        "es": "Botas Valerosas",
+        "pl": "Buty Śmiałka",
+        "pt": "Botas da coragem"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 93,
+      "durability": 86,
+      "defense": 45,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Phantom Boots",
+        "de": "Phantom-Stiefel",
+        "es": "Botas Fantasma",
+        "pl": "Buty Widma",
+        "pt": "Botas do fantasma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 97,
+      "durability": 86,
+      "defense": 54,
+      "requirements": {
+        "level": 380,
+        "strength": 212,
+        "dexterity": 57
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Destroy Boots",
+        "de": "Zerstörerstiefel",
+        "es": "Botas Destructoras",
+        "pl": "Buty Zniszczenia",
+        "pt": "Botas da destruição"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 94,
+      "durability": 86,
+      "defense": 44,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 19,
+        "energy": 165
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Boots",
+        "de": "Seraphim-Stiefel",
+        "es": "Botas Serafín",
+        "pl": "Buty Serafina",
+        "pt": "Botas do serafim"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 97,
+      "durability": 86,
+      "defense": 42,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Faith Boots",
+        "de": "Glaubensstiefel",
+        "es": "Botas de Fe",
+        "pl": "Buty Wiary",
+        "pt": "Botas da fé"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 92,
+      "durability": 86,
+      "defense": 35,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Boots",
+        "de": "Königliche Stiefel",
+        "es": "Botas Reales",
+        "pl": "Królewskie buty",
+        "pt": "Botas reais"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 98,
+      "durability": 86,
+      "defense": 38,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Boots",
+        "de": "Hades-Stiefel",
+        "es": "Botas Hades",
+        "pl": "Buty Hadesa",
+        "pt": "Botas de Hades"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 94,
+      "durability": 86,
+      "defense": 34,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 53
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Sacred Fire Boots",
+        "de": "Heiligfeuerstiefel",
+        "es": "Botas de Fuego Sagrado",
+        "pl": "Buty Świętego Ognia",
+        "pt": "Botas de Fogo Sagrado"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 50,
+      "durability": 52,
+      "defense": 20,
+      "attackType": 2,
+      "requirements": {
+        "strength": 85,
+        "vitality": 75
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Storm Jahad Boots",
+        "de": "Sturm-Jahad-Stiefel",
+        "es": "Botas de Tormenta Zahard",
+        "pl": "Buty Storm Jahad",
+        "pt": "Botas de Tempestade Zahard"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 62,
+      "durability": 68,
+      "defense": 28,
+      "requirements": {
+        "strength": 100,
+        "vitality": 90
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Piercing Groove Boots",
+        "de": "Durchbohrerstiefel",
+        "es": "Botas de Tallo Perforador",
+        "pl": "Buty Piercing Groove",
+        "pt": "Botas de Entalhe Perfurante"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 82,
+      "durability": 82,
+      "defense": 36,
+      "requirements": {
+        "strength": 115,
+        "vitality": 100
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Boots",
+        "de": "Schuppenstiefel",
+        "es": "Botas de Escamas",
+        "pl": "Łuskowe buty",
+        "pt": "Botas de escamas"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 22,
+      "durability": 255,
+      "defense": 12,
+      "walkSpeed": 8,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Boots",
+        "de": "Seidenstiefel",
+        "es": "Botas de Seda",
+        "pl": "Jedwabne buty",
+        "pt": "Botas de seda"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 15,
+      "durability": 255,
+      "defense": 7,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Boots",
+        "de": "Sphinxstiefel",
+        "es": "Botas Esfinge",
+        "pl": "Buty Sfinksa",
+        "pt": "Botas de Esfinge"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 30,
+      "durability": 255,
+      "defense": 13,
+      "walkSpeed": 8,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Boots",
+        "de": "Sturmwindstiefel",
+        "es": "Botas Viento Violento",
+        "pl": "Buty Gwałtownego Wiatru",
+        "pt": "Botas do vento violento"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 26,
+      "durability": 255,
+      "defense": 15,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Adamantine Boots",
+        "de": "Adamantstiefel",
+        "es": "Botas Adamantinas",
+        "pl": "Adamantytowe buty",
+        "pt": "Botas de adamantina"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 60,
+      "durability": 255,
+      "defense": 25,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Boots",
+        "de": "Drachenstiefel",
+        "es": "Botas Dragón",
+        "pl": "Smocze buty",
+        "pt": "Botas de Dragão"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 54,
+      "durability": 255,
+      "defense": 20,
+      "walkSpeed": 2,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Boots",
+        "de": "Wächterstiefel",
+        "es": "Botas Guardián",
+        "pl": "Buty Strażnika",
+        "pt": "Botas de Guardião"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 52,
+      "durability": 255,
+      "defense": 23,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Boots",
+        "de": "Legendäre Stiefel",
+        "es": "Botas Legendarias",
+        "pl": "Legendarne buty",
+        "pt": "Botas Lendárias"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 255,
+      "defense": 17,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Boots",
+        "de": "Rotschwingenstiefel",
+        "es": "Botas Ala Roja",
+        "pl": "Buty Czerwonego Skrzydła",
+        "pt": "Botas da asa vermelha"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 46,
+      "durability": 255,
+      "defense": 17,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Atlans Boots",
+        "de": "Atlans-Stiefel",
+        "es": "Botas Cuervo de Tormenta",
+        "pl": "Buty Atlans",
+        "pt": "Botas do corvo da tempestade"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 72,
+      "durability": 255,
+      "defense": 27,
+      "walkSpeed": 2,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Storm Jahad Boots",
+        "de": "Sturm-Jahad-Stiefel",
+        "es": "Botas de Tormenta Zahard",
+        "pl": "Buty Storm Jahad",
+        "pt": "Botas de Tempestade Zahard"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 62,
+      "durability": 255,
+      "defense": 20,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Phoenix Soul Boots",
+        "de": "Phönixseelenstiefel",
+        "es": "Botas de Alma de Fénix",
+        "pl": "Buty Duszy Feniksa",
+        "pt": "Botas de Alma de Fênix"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "boots",
+      "statProfile": "armor",
+      "level": 119,
+      "durability": 88,
+      "defense": 57,
+      "requirements": {
+        "level": 380,
+        "strength": 97,
+        "vitality": 85
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

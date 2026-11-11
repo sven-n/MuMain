@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Dark Wizard" xml:space="preserve">
+    <value>魔法师</value>
+  </data>
+  <data name="Dark Knight" xml:space="preserve">
+    <value>剑士</value>
+  </data>
+  <data name="Elf" xml:space="preserve">
+    <value>弓箭手</value>
+  </data>
+  <data name="Magic Gladiator" xml:space="preserve">
+    <value>魔剑士</value>
+  </data>
+  <data name="Dark Lord" xml:space="preserve">
+    <value>圣导师</value>
+  </data>
+  <data name="Soul Master" xml:space="preserve">
+    <value>魔导师</value>
+  </data>
+  <data name="Blade Knight" xml:space="preserve">
+    <value>骑士</value>
+  </data>
+  <data name="Muse Elf" xml:space="preserve">
+    <value>圣射手</value>
+  </data>
+  <data name="Cannot be equipped by %s" xml:space="preserve">
+    <value>%s 无法装备</value>
+    <comment>legacy_id=60</comment>
+  </data>
+  <data name="Can be equipped by %s" xml:space="preserve">
+    <value>适用职业：%s</value>
+  </data>
+  <data name="Purchase Price: %s" xml:space="preserve">
+    <value>购买价格：%s</value>
+    <comment>legacy_id=62</comment>
+  </data>
+  <data name="Selling Price: %s" xml:space="preserve">
+    <value>出售价格：%s</value>
+    <comment>legacy_id=63</comment>
+  </data>
+  <data name="Attack speed: %d" xml:space="preserve">
+    <value>攻击速度：%d</value>
+    <comment>legacy_id=64</comment>
+  </data>
+  <data name="Defense: %d" xml:space="preserve">
+    <value>防御力：%d</value>
+    <comment>legacy_id=65,209</comment>
+  </data>
+  <data name="Defense rate: %d" xml:space="preserve">
+    <value>防御率：%d</value>
+    <comment>legacy_id=67,2045</comment>
+  </data>
+  <data name="Durability: [%d/%d]" xml:space="preserve">
+    <value>耐久：[%d/%d]</value>
+    <comment>legacy_id=71</comment>
+  </data>
+  <data name="Strength Requirement: %d" xml:space="preserve">
+    <value>需求力量：%d</value>
+    <comment>legacy_id=73</comment>
+  </data>
+  <data name="(lacking %d)" xml:space="preserve">
+    <value>（还差 %d）</value>
+    <comment>legacy_id=74</comment>
+  </data>
+  <data name="Agility Requirement: %d" xml:space="preserve">
+    <value>需求敏捷：%d</value>
+    <comment>legacy_id=75</comment>
+  </data>
+  <data name="Minimum Level Requirement: %d" xml:space="preserve">
+    <value>需求等级：%d</value>
+    <comment>legacy_id=76</comment>
+  </data>
+  <data name="Energy Requirement: %d" xml:space="preserve">
+    <value>需求智力：%d</value>
+    <comment>legacy_id=77</comment>
+  </data>
+  <data name="I,V : Inventory" xml:space="preserve">
+    <value>I、V：背包</value>
+    <comment>legacy_id=127</comment>
+  </data>
+  <data name="STR" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="AGI" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="ENG" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="STA" xml:space="preserve">
+    <value>体力</value>
+  </data>
+  <data name="Inventory" xml:space="preserve">
+    <value>背包</value>
+    <comment>legacy_id=223,3425,3453</comment>
+  </data>
+  <data name="Close (I,V)" xml:space="preserve">
+    <value>关闭（I、V）</value>
+    <comment>legacy_id=225</comment>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Repair (L)" xml:space="preserve">
+    <value>修理（L）</value>
+    <comment>legacy_id=233</comment>
+  </data>
+  <data name="Repair all (A)" xml:space="preserve">
+    <value>全部修理（A）</value>
+    <comment>legacy_id=237</comment>
+  </data>
+  <data name="Repairing cost: %s" xml:space="preserve">
+    <value>修理费用：%s</value>
+    <comment>legacy_id=238</comment>
+  </data>
+  <data name="Repair all" xml:space="preserve">
+    <value>全部修理</value>
+    <comment>legacy_id=239</comment>
+  </data>
+  <data name="close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="You are not allowed to drop this expensive item" xml:space="preserve">
+    <value>无法丢弃此贵重物品。</value>
+    <comment>legacy_id=269</comment>
+  </data>
+  <data name="Arrows: %d (%d)" xml:space="preserve">
+    <value>箭：%d（%d）</value>
+    <comment>legacy_id=351</comment>
+  </data>
+  <data name="Bolts: %d (%d)" xml:space="preserve">
+    <value>弩箭：%d（%d）</value>
+    <comment>legacy_id=352</comment>
+  </data>
+  <data name="Inventory (I,V)" xml:space="preserve">
+    <value>背包（I、V）</value>
+    <comment>legacy_id=363</comment>
+  </data>
+  <data name="Inventory is full." xml:space="preserve">
+    <value>背包已满。</value>
+    <comment>legacy_id=375</comment>
+  </data>
+  <data name="Exit Game" xml:space="preserve">
+    <value>退出游戏</value>
+  </data>
+  <data name="Select Server" xml:space="preserve">
+    <value>选择服务器</value>
+  </data>
+  <data name="Switch Character" xml:space="preserve">
+    <value>切换角色</value>
+  </data>
+  <data name="Option385" xml:space="preserve">
+    <value>选项</value>
+  </data>
+  <data name="Automatic Attack" xml:space="preserve">
+    <value>自动攻击</value>
+  </data>
+  <data name="Beep sound for whispering" xml:space="preserve">
+    <value>密语提示音</value>
+  </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>音效音量</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>音乐音量</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>完整特效</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>分辨率</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>翻译物品名称</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>窗口模式</value>
+  </data>
+  <data name="Enhanced graphics" xml:space="preserve">
+    <value>增强画面</value>
+  </data>
+  <data name="Gameplay" xml:space="preserve">
+    <value>游戏</value>
+  </data>
+  <data name="Audio" xml:space="preserve">
+    <value>音频</value>
+  </data>
+  <data name="Graphics" xml:space="preserve">
+    <value>画质</value>
+  </data>
+  <data name="Display" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="Interface" xml:space="preserve">
+    <value>界面</value>
+  </data>
+  <data name="Quality" xml:space="preserve">
+    <value>质量</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>特效</value>
+  </data>
+  <data name="Shadows" xml:space="preserve">
+    <value>阴影</value>
+  </data>
+  <data name="Enhanced Lighting" xml:space="preserve">
+    <value>增强光照</value>
+  </data>
+  <data name="Dynamic Lights" xml:space="preserve">
+    <value>动态光照</value>
+  </data>
+  <data name="Light Mood" xml:space="preserve">
+    <value>地图暗调光照</value>
+  </data>
+  <data name="Bloom And Colour Grading" xml:space="preserve">
+    <value>泛光与色彩调整</value>
+  </data>
+  <data name="Tuning Directional Light" xml:space="preserve">
+    <value>定向光照</value>
+  </data>
+  <data name="Tuning Directional Light Help" xml:space="preserve">
+    <value>太阳照亮角色、怪物或 NPC 朝阳一面的强度。</value>
+  </data>
+  <data name="Tuning Rim Intensity" xml:space="preserve">
+    <value>轮廓光强度</value>
+  </data>
+  <data name="Tuning Rim Intensity Help" xml:space="preserve">
+    <value>沿模型边缘的光照，使模型与背景区分开。</value>
+  </data>
+  <data name="Tuning Metallic Shine" xml:space="preserve">
+    <value>金属光泽</value>
+  </data>
+  <data name="Tuning Metallic Shine Help" xml:space="preserve">
+    <value>具有光泽效果的金属铠甲套装上的高光。</value>
+  </data>
+  <data name="Tuning Ambient Fill" xml:space="preserve">
+    <value>环境补光</value>
+  </data>
+  <data name="Tuning Ambient Fill Help" xml:space="preserve">
+    <value>模型各面接收的光照，包括背向太阳的一面。</value>
+  </data>
+  <data name="Tuning Minimum Light" xml:space="preserve">
+    <value>最低亮度</value>
+  </data>
+  <data name="Tuning Minimum Light Help" xml:space="preserve">
+    <value>模型阴影面的最低亮度。</value>
+  </data>
+  <data name="Tuning Highlight Knee" xml:space="preserve">
+    <value>高光过渡阈值</value>
+  </data>
+  <data name="Tuning Highlight Knee Help" xml:space="preserve">
+    <value>模型亮部颜色开始逐渐趋向白色的阈值，避免直接变为纯白。数值越低，过渡越柔和。</value>
+  </data>
+  <data name="Tuning Rim Concentration" xml:space="preserve">
+    <value>轮廓光集中度</value>
+  </data>
+  <data name="Tuning Rim Concentration Help" xml:space="preserve">
+    <value>轮廓光的收窄程度。数值越高，轮廓光越细。</value>
+  </data>
+  <data name="Tuning Shine Concentration" xml:space="preserve">
+    <value>高光集中度</value>
+  </data>
+  <data name="Tuning Shine Concentration Help" xml:space="preserve">
+    <value>金属高光的收缩程度。数值越高，高光越小、越锐利。</value>
+  </data>
+  <data name="Tuning Skill Intensity" xml:space="preserve">
+    <value>技能光照强度</value>
+  </data>
+  <data name="Tuning Skill Intensity Help" xml:space="preserve">
+    <value>技能和特效投射到模型及地面的光照亮度，并非技能精灵本身的亮度：设为 0 仅移除其光照。地图光照和地图暗调光照也会影响总亮度。</value>
+  </data>
+  <data name="Tuning Skill Radius" xml:space="preserve">
+    <value>技能光照半径</value>
+  </data>
+  <data name="Tuning Skill Radius Help" xml:space="preserve">
+    <value>技能光照范围相对于原始半径的倍率。最终范围受技能光照最大半径限制。</value>
+  </data>
+  <data name="Tuning Skill Fade" xml:space="preserve">
+    <value>技能光照淡出</value>
+  </data>
+  <data name="Tuning Skill Fade Help" xml:space="preserve">
+    <value>技能结束后光照淡出所需的秒数。选择立即则立刻结束。</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap" xml:space="preserve">
+    <value>叠加光照上限</value>
+  </data>
+  <data name="Tuning Overlapping Light Cap Help" xml:space="preserve">
+    <value>多个重叠技能光照可叠加的最大亮度。无限制允许自由叠加，不会关闭技能光照。</value>
+  </data>
+  <data name="Tuning Light Wrap" xml:space="preserve">
+    <value>光照包裹</value>
+  </data>
+  <data name="Tuning Light Wrap Help" xml:space="preserve">
+    <value>烛光、火光或技能光照绕向模型侧面的程度。</value>
+  </data>
+  <data name="Tuning Map Light Smoothing" xml:space="preserve">
+    <value>地图光照平滑</value>
+  </data>
+  <data name="Tuning Map Light Smoothing Help" xml:space="preserve">
+    <value>闪烁的烛光、火光和角色光照过渡到新亮度所需的秒数。选择立即则跟随每次闪烁。</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius" xml:space="preserve">
+    <value>技能光照最大半径</value>
+  </data>
+  <data name="Tuning Maximum Skill Radius Help" xml:space="preserve">
+    <value>应用技能光照半径倍率后允许的最大范围，以地形格为单位。无限制会取消范围限制，不会关闭技能光照。</value>
+  </data>
+  <data name="Tuning Mood Strength" xml:space="preserve">
+    <value>暗调强度</value>
+  </data>
+  <data name="Tuning Mood Strength Help" xml:space="preserve">
+    <value>各地图暗调光照的应用程度。设为 0 % 时使用地图原始光照，其他增强画面效果仍保留。此设置也会调整暗调光照对烛光、火光和技能光照的增强程度。</value>
+  </data>
+  <data name="Tuning Bloom Intensity" xml:space="preserve">
+    <value>泛光强度</value>
+  </data>
+  <data name="Tuning Bloom Intensity Help" xml:space="preserve">
+    <value>明亮特效周围光晕的强度。设为 0 可移除光晕。</value>
+  </data>
+  <data name="Tuning Bloom Spread" xml:space="preserve">
+    <value>泛光范围</value>
+  </data>
+  <data name="Tuning Bloom Spread Help" xml:space="preserve">
+    <value>明亮特效周围光晕的扩散范围。</value>
+  </data>
+  <data name="Tuning Colour Grading Strength" xml:space="preserve">
+    <value>色彩调整强度</value>
+  </data>
+  <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
+    <value>地图色彩调整的应用程度。设为 0 % 时不应用色彩调整，但保留泛光。</value>
+  </data>
+  <data name="Tuning More Settings" xml:space="preserve">
+    <value>更多设置</value>
+  </data>
+  <data name="Tuning Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Tuning Reset Group" xml:space="preserve">
+    <value>重置这些设置</value>
+  </data>
+  <data name="Tuning Reset All" xml:space="preserve">
+    <value>重置全部画质微调</value>
+  </data>
+  <data name="Tuning Map Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="Tuning Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Tuning Not Saved" xml:space="preserve">
+    <value>未保存</value>
+  </data>
+  <data name="Tuning No Cap" xml:space="preserve">
+    <value>无限制</value>
+  </data>
+  <data name="Tuning Immediate" xml:space="preserve">
+    <value>立即</value>
+  </data>
+  <data name="Tuning Seconds Unit" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="Tuning Cells Unit" xml:space="preserve">
+    <value>格</value>
+  </data>
+  <data name="Tuning Locked Classic" xml:space="preserve">
+    <value>启用增强画面后可调整这些设置。已保留当前数值。</value>
+  </data>
+  <data name="Tuning Locked Off" xml:space="preserve">
+    <value>开启此功能后可调整这些设置。已保留当前数值。</value>
+  </data>
+  <data name="Tuning Locked Needs Lighting" xml:space="preserve">
+    <value>需要启用增强光照。已保留当前数值。</value>
+  </data>
+  <data name="Tuning Locked Unavailable" xml:space="preserve">
+    <value>当前图形设备不支持。</value>
+  </data>
+  <data name="Tuning Locked Session" xml:space="preserve">
+    <value>已被开发者命令在本次运行中关闭。</value>
+  </data>
+  <data name="Tuning Locked Session Value" xml:space="preserve">
+    <value>已被开发者命令在本次运行中设定。</value>
+  </data>
+  <data name="Tuning Save Failed" xml:space="preserve">
+    <value>无法保存画质微调；更改已显示，但未保存：</value>
+  </data>
+  <data name="VSync" xml:space="preserve">
+    <value>垂直同步</value>
+  </data>
+  <data name="FPS Limit" xml:space="preserve">
+    <value>帧率上限</value>
+  </data>
+  <data name="Disable Effects" xml:space="preserve">
+    <value>关闭特效</value>
+  </data>
+  <data name="Disable Particles" xml:space="preserve">
+    <value>关闭粒子效果</value>
+  </data>
+  <data name="Disable Skill Effect Models" xml:space="preserve">
+    <value>关闭技能特效</value>
+  </data>
+  <data name="Disable Ambient Wildlife" xml:space="preserve">
+    <value>关闭环境生物</value>
+  </data>
+  <data name="Disable Wing Shadow" xml:space="preserve">
+    <value>关闭翅膀阴影</value>
+  </data>
+  <data name="Disable Shadows" xml:space="preserve">
+    <value>关闭阴影</value>
+  </data>
+  <data name="Show FPS Counter" xml:space="preserve">
+    <value>显示帧率</value>
+  </data>
+  <data name="Show Debug Info" xml:space="preserve">
+    <value>显示调试信息</value>
+  </data>
+  <data name="UI Theme" xml:space="preserve">
+    <value>界面主题</value>
+  </data>
+  <data name="UI Scale" xml:space="preserve">
+    <value>界面缩放</value>
+  </data>
+  <data name="UI Scale Tooltip" xml:space="preserve">
+    <value>在自动适应窗口大小的基础上应用的缩放倍率</value>
+  </data>
+  <data name="Texture Pack" xml:space="preserve">
+    <value>纹理包</value>
+  </data>
+  <data name="Original Textures" xml:space="preserve">
+    <value>原始纹理</value>
+  </data>
+  <data name="Texture Pack Tooltip" xml:space="preserve">
+    <value>纹理包位于 Data/TexturePacks；更改后需重启游戏才能生效</value>
+  </data>
+  <data name="Uncapped" xml:space="preserve">
+    <value>无限制</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Anti-aliasing" xml:space="preserve">
+    <value>抗锯齿</value>
+  </data>
+  <data name="Anti-aliasing Tooltip" xml:space="preserve">
+    <value>平滑增强画面模式下的边缘；经典画面模式始终关闭此功能</value>
+  </data>
+  <data name="Anisotropic filtering" xml:space="preserve">
+    <value>各向异性过滤</value>
+  </data>
+  <data name="Anisotropic Filtering Tooltip" xml:space="preserve">
+    <value>保持倾斜视角下的纹理清晰：增强画面模式下作用于场景纹理，两种模式下均作用于放大后的纹理</value>
+  </data>
+  <data name="Close388" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Type more than 4 letters" xml:space="preserve">
+    <value>名称至少需要 4 个字符。</value>
+  </data>
+  <data name="Cannot use symbols." xml:space="preserve">
+    <value>不能使用特殊符号。</value>
+  </data>
+  <data name="No more characters can be created." xml:space="preserve">
+    <value>无法创建更多角色。</value>
+  </data>
+  <data name="You cannot delete characters" xml:space="preserve">
+    <value>无法删除角色。</value>
+  </data>
+  <data name="The password you have entered is incorrect." xml:space="preserve">
+    <value>输入的密码错误。</value>
+  </data>
+  <data name="Enter your account" xml:space="preserve">
+    <value>请输入账号</value>
+  </data>
+  <data name="Enter your password" xml:space="preserve">
+    <value>请输入密码</value>
+  </data>
+  <data name="Password is incorrect" xml:space="preserve">
+    <value>密码错误</value>
+  </data>
+  <data name="Your account is invalid" xml:space="preserve">
+    <value>账号无效</value>
+  </data>
+  <data name="Your account is already connected" xml:space="preserve">
+    <value>该账号已登录</value>
+  </data>
+  <data name="This account is blocked" xml:space="preserve">
+    <value>该账号已被封停</value>
+  </data>
+  <data name="Please enter your WEBZEN.COM password." xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码。</value>
+  </data>
+  <data name="This is a blocked character" xml:space="preserve">
+    <value>该角色已被封停。</value>
+  </data>
+  <data name="This account is item blocked." xml:space="preserve">
+    <value>该账号的物品已被锁定。</value>
+  </data>
+  <data name="Please check on http://muonline.webzen.com site" xml:space="preserve">
+    <value>请访问 http://muonline.webzen.com 查看详情。</value>
+  </data>
+  <data name="You cannot remove your character since the guild cannot be removed" xml:space="preserve">
+    <value>战盟无法解散，因此无法删除该角色。</value>
+  </data>
+  <data name="The character is item blocked" xml:space="preserve">
+    <value>该角色的物品已被锁定。</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>账号</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="LoginRememberUsername" xml:space="preserve">
+    <value>记住账号</value>
+    <comment>Login screen: remember-username checkbox label.</comment>
+  </data>
+  <data name="LoginRememberPassword" xml:space="preserve">
+    <value>记住密码</value>
+    <comment>Login screen: remember-password checkbox label.</comment>
+  </data>
+  <data name="LoginTrustWarning" xml:space="preserve">
+    <value>仅在可信任的电脑上保存密码。</value>
+    <comment>Login screen: warning under the remember-password checkbox.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningTitle" xml:space="preserve">
+    <value>安全提示</value>
+    <comment>Remember-password confirmation dialog: header.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningBody" xml:space="preserve">
+    <value>保存密码后，任何使用这台电脑的人都可以登录你的账号。请仅在可信任的电脑上保存密码。是否保存密码？</value>
+    <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="Please wait" xml:space="preserve">
+    <value>请稍候</value>
+  </data>
+  <data name="Verifying your account" xml:space="preserve">
+    <value>正在验证账号</value>
+  </data>
+  <data name="Commoner" xml:space="preserve">
+    <value>平民</value>
+  </data>
+  <data name="These items cannot be traded." xml:space="preserve">
+    <value>这些物品无法交易。</value>
+    <comment>legacy_id=494,668</comment>
+  </data>
+  <data name="An expensive item!" xml:space="preserve">
+    <value>这是贵重物品！</value>
+    <comment>legacy_id=536</comment>
+  </data>
+  <data name="Check the item please" xml:space="preserve">
+    <value>请确认要出售的物品。</value>
+    <comment>legacy_id=537</comment>
+  </data>
+  <data name="Are you sure you want to sell it?" xml:space="preserve">
+    <value>确定要出售吗？</value>
+    <comment>legacy_id=538</comment>
+  </data>
+  <data name="Increase %d%% of Damage" xml:space="preserve">
+    <value>伤害提高 %d%%</value>
+    <comment>legacy_id=577</comment>
+  </data>
+  <data name="Absorb %d%% of Damage" xml:space="preserve">
+    <value>伤害吸收 %d%%</value>
+    <comment>legacy_id=578</comment>
+  </data>
+  <data name="Increase speed" xml:space="preserve">
+    <value>移动速度提高</value>
+    <comment>legacy_id=579</comment>
+  </data>
+  <data name="Exit game after closing the Chaos interface." xml:space="preserve">
+    <value>请先关闭合成界面，再进行此操作。</value>
+  </data>
+  <data name="Charisma Requirement: %d" xml:space="preserve">
+    <value>需求统率：%d</value>
+    <comment>legacy_id=698</comment>
+  </data>
+  <data name="Cannot be traded." xml:space="preserve">
+    <value>无法交易。</value>
+    <comment>legacy_id=732</comment>
+  </data>
+  <data name="Leave at least one empty slot in your inventory." xml:space="preserve">
+    <value>请在背包中至少留出一个空位。</value>
+    <comment>legacy_id=896</comment>
+  </data>
+  <data name="Slide Help" xml:space="preserve">
+    <value>滚动帮助提示</value>
+  </data>
+  <data name="Set option" xml:space="preserve">
+    <value>套装属性</value>
+    <comment>legacy_id=989</comment>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Open personal store(S)" xml:space="preserve">
+    <value>打开个人商店（S）</value>
+    <comment>legacy_id=1125</comment>
+  </data>
+  <data name="Close personal store(S)" xml:space="preserve">
+    <value>关闭个人商店（S）</value>
+    <comment>legacy_id=1127</comment>
+  </data>
+  <data name="Can't be used in the safe zone" xml:space="preserve">
+    <value>无法在安全区内使用。</value>
+    <comment>legacy_id=1238</comment>
+  </data>
+  <data name="Master" xml:space="preserve">
+    <value>盟主</value>
+  </data>
+  <data name="Assist. M." xml:space="preserve">
+    <value>副盟主</value>
+  </data>
+  <data name="Battle M." xml:space="preserve">
+    <value>战斗队长</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>战盟成员</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="Purchasing price: %s(%s)" xml:space="preserve">
+    <value>购买价格：%s（%s）</value>
+    <comment>legacy_id=1620</comment>
+  </data>
+  <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
+    <value>无法删除已加入战盟的角色。</value>
+  </data>
+  <data name="Blade Master" xml:space="preserve">
+    <value>神骑士</value>
+  </data>
+  <data name="Grand Master" xml:space="preserve">
+    <value>神导师</value>
+  </data>
+  <data name="High Elf" xml:space="preserve">
+    <value>神射手</value>
+  </data>
+  <data name="Dual Master" xml:space="preserve">
+    <value>剑圣</value>
+  </data>
+  <data name="Lord Emperor" xml:space="preserve">
+    <value>祭祀</value>
+  </data>
+  <data name="Summoner" xml:space="preserve">
+    <value>召唤术师</value>
+  </data>
+  <data name="Bloody Summoner" xml:space="preserve">
+    <value>召唤导师</value>
+  </data>
+  <data name="Dimension Master" xml:space="preserve">
+    <value>召唤巫师</value>
+  </data>
+  <data name="StrongMentalityAndExcellentInsightCreates" xml:space="preserve">
+    <value>凭借强大精神力与敏锐洞察力施展诅咒，召唤异界生物，以巫术打击敌人。</value>
+  </data>
+  <data name="Create a character" xml:space="preserve">
+    <value>创建角色</value>
+  </data>
+  <data name="Strength" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="Agility" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="Vitality" xml:space="preserve">
+    <value>体力</value>
+  </data>
+  <data name="Energy" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="KingdomOfWizardsDescendantOfArka" xml:space="preserve">
+    <value>魔法王国 Arka 的后裔。体质较弱，却拥有强大魔力，能自如施展攻击魔法。</value>
+  </data>
+  <data name="KingdomOfKnightsDescendantOfLorencia" xml:space="preserve">
+    <value>来自骑士王国勇者大陆的后裔。力量强大，剑术精湛，擅长使用各种近战武器。</value>
+  </data>
+  <data name="KingdomOfElvesDescendantsOfNoria" xml:space="preserve">
+    <value>来自仙踪林的精灵后裔。精通弓箭，也能施展多种魔法。</value>
+  </data>
+  <data name="ComplexCharacterThatHasACharacteristics" xml:space="preserve">
+    <value>兼具剑士与魔法师特点的职业。既精通近身战斗，也能自如施展魔法。</value>
+  </data>
+  <data name="CharismaticCharacterThatCanCommandThe" xml:space="preserve">
+    <value>富有领袖魅力，能够统率部队，并驾驭天鹰与黑王马。</value>
+  </data>
+  <data name="Character level above %d cannot be deleted." xml:space="preserve">
+    <value>等级超过 %d 的角色无法删除。</value>
+  </data>
+  <data name="Would you like to delete %s character?" xml:space="preserve">
+    <value>确定要删除角色 %s 吗？</value>
+  </data>
+  <data name="Character was deleted successfully." xml:space="preserve">
+    <value>角色删除成功。</value>
+  </data>
+  <data name="It contains prohibited words." xml:space="preserve">
+    <value>名称包含禁用词语。</value>
+  </data>
+  <data name="Incorrect character name was entered or same character name exists." xml:space="preserve">
+    <value>角色名称无效，或该名称已被使用。</value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>统率</value>
+  </data>
+  <data name="Inventory space is insufficient." xml:space="preserve">
+    <value>背包空间不足。</value>
+    <comment>legacy_id=1815</comment>
+  </data>
+  <data name="+Effect limitation" xml:space="preserve">
+    <value>+效果限制</value>
+  </data>
+  <data name="Decrease" xml:space="preserve">
+    <value>减少</value>
+  </data>
+  <data name="It can be used with item removed." xml:space="preserve">
+    <value>卸下装备后方可使用。</value>
+  </data>
+  <data name="This item cannot be dropped." xml:space="preserve">
+    <value>无法丢弃此物品。</value>
+    <comment>legacy_id=1915</comment>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>职业</value>
+  </data>
+  <data name="Incorrect item" xml:space="preserve">
+    <value>物品不正确。</value>
+    <comment>legacy_id=2089</comment>
+  </data>
+  <data name="Reinforced item can't be dropped." xml:space="preserve">
+    <value>无法丢弃强化过的物品。</value>
+    <comment>legacy_id=2217</comment>
+  </data>
+  <data name="Can't wear item." xml:space="preserve">
+    <value>无法装备此物品。</value>
+    <comment>legacy_id=2285</comment>
+  </data>
+  <data name="You can only use this in a safe zone." xml:space="preserve">
+    <value>只能在安全区内使用。</value>
+    <comment>legacy_id=2330</comment>
+  </data>
+  <data name=" You cannot use this item while the Potion effects remain active." xml:space="preserve">
+    <value>药水效果持续期间无法使用此物品。</value>
+    <comment>legacy_id=2530</comment>
+  </data>
+  <data name="You cannot use the item at certain applicable locations." xml:space="preserve">
+    <value>无法在此地点使用该物品。</value>
+    <comment>legacy_id=2608</comment>
+  </data>
+  <data name="This item cannot be used along with an item that's already in use." xml:space="preserve">
+    <value>无法与正在使用的物品同时使用。</value>
+    <comment>legacy_id=2610</comment>
+  </data>
+  <data name="Socket option" xml:space="preserve">
+    <value>镶嵌属性</value>
+    <comment>legacy_id=2651</comment>
+  </data>
+  <data name="Open Inventory (I/V) Window" xml:space="preserve">
+    <value>打开背包（I/V）</value>
+    <comment>legacy_id=2820</comment>
+  </data>
+  <data name="Rage Fighter" xml:space="preserve">
+    <value>格斗家</value>
+  </data>
+  <data name="Fist Master" xml:space="preserve">
+    <value>格斗大师</value>
+  </data>
+  <data name="LegitimateBearersOfTheKarutanRoyal" xml:space="preserve">
+    <value>卡伦特皇家骑士的正统传人，体魄强健、精通格斗，也能施展辅助技能帮助队友。</value>
+  </data>
+  <data name="Open Expanded Inventory (K)" xml:space="preserve">
+    <value>打开扩展背包（K）</value>
+    <comment>legacy_id=3322</comment>
+  </data>
+  <data name="Expanded Inventory" xml:space="preserve">
+    <value>扩展背包</value>
+    <comment>legacy_id=3323,3451</comment>
+  </data>
+  <data name="Insufficient space in the expanded inventory" xml:space="preserve">
+    <value>扩展背包空间不足。</value>
+    <comment>legacy_id=3341</comment>
+  </data>
+  <data name="Please log in to game again to use the expanded inventory/vault." xml:space="preserve">
+    <value>请重新登录游戏后使用扩展背包或仓库。</value>
+    <comment>legacy_id=3349</comment>
+  </data>
+  <data name="Use this to expand your inventory." xml:space="preserve">
+    <value>用于扩展背包。</value>
+    <comment>legacy_id=3352</comment>
+  </data>
+  <data name="System Menu" xml:space="preserve">
+    <value>系统菜单</value>
+  </data>
+  <data name="You must purchase Expanded Inventory first." xml:space="preserve">
+    <value>请先购买扩展背包。</value>
+    <comment>legacy_id=3452</comment>
+  </data>
+  <data name="Repair Item" xml:space="preserve">
+    <value>修理物品</value>
+    <comment>legacy_id=3518</comment>
+  </data>
+  <data name="Loading character list" xml:space="preserve">
+    <value>正在加载角色列表</value>
+  </data>
+  <data name="Font" xml:space="preserve">
+    <value>字体</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
+    <value>在天空之城，必须保留至少一件翅膀或飞行坐骑。</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Base Attributes" xml:space="preserve">
+    <value>基础属性</value>
+  </data>
+  <data name="Critical damage rate: %d%%" xml:space="preserve">
+    <value>暴击伤害率：%d%%</value>
+  </data>
+  <data name="Critical damage rate: %d%% (+%d%%)" xml:space="preserve">
+    <value>暴击伤害率：%d%% (+%d%%)</value>
+  </data>
+  <data name="Critical damage rate" xml:space="preserve">
+    <value>暴击伤害率</value>
+  </data>
+  <data name="Luck (×%d): %d%%" xml:space="preserve">
+    <value>幸运 (×%d)：%d%%</value>
+  </data>
+  <data name="Set options: %d%%" xml:space="preserve">
+    <value>套装属性：%d%%</value>
+  </data>
+  <data name="Socket options: %d%%" xml:space="preserve">
+    <value>镶嵌属性：%d%%</value>
+  </data>
+  <data name="Total: %d%%" xml:space="preserve">
+    <value>合计：%d%%</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>伤害</value>
+  </data>
+  <data name="Normal hit: %d~%d" xml:space="preserve">
+    <value>普通攻击：%d~%d</value>
+  </data>
+  <data name="Critical hit: %d" xml:space="preserve">
+    <value>暴击：%d</value>
+  </data>
+  <data name="Excellent hit: %d" xml:space="preserve">
+    <value>卓越攻击：%d</value>
+  </data>
+  <data name="before the target's defense" xml:space="preserve">
+    <value>未计算目标防御</value>
+  </data>
+  <data name="Critical damage" xml:space="preserve">
+    <value>暴击伤害</value>
+  </data>
+  <data name="Critical damage from set options: +%d" xml:space="preserve">
+    <value>套装属性：+%d</value>
+  </data>
+  <data name="Critical damage from harmony options: +%d" xml:space="preserve">
+    <value>再生属性：+%d</value>
+  </data>
+  <data name="Critical damage from socket options: +%d" xml:space="preserve">
+    <value>镶嵌属性：+%d</value>
+  </data>
+  <data name="Critical damage total: +%d" xml:space="preserve">
+    <value>合计：+%d</value>
+  </data>
+</root>

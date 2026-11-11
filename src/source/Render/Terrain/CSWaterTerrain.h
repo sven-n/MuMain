@@ -28,7 +28,8 @@ private:
     void    calcWave(void);
 
     void    CreateTerrain(int x, int y);
-    void    RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height = 0.f);
+    void    RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable,
+                                  float Alpha, float Height, std::uint32_t fallbackColor);
 
     void    SpawnAmbientWave(double currentTimeMs);
 

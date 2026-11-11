@@ -7,9 +7,10 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include <cmath>
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "CameraDebugLog.h"
+#include "Render/Text/CUIRenderText.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -455,51 +456,13 @@ bool OrbitalCamera::Update()
         }
     }
 
-#ifdef _EDITOR
-    // Debug text rendering to verify camera values (editor only)
-    {
-        g_pRenderText->SetFont(g_hFixFont);
-        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
-        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
-
-        wchar_t debugText[256];
-        int yPos = 10;
-        const int lineHeight = 15;
-
-        // Camera type and scene
-        swprintf(debugText, 256, L"Camera: OrbitalCamera | Scene: %d", (int)SceneFlag);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // State values
-        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Near plane and culling
-        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
-                 m_Config.nearPlane, m_Config.terrainCullRange);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Orbital-specific values
-        swprintf(debugText, 256, L"Radius: %.0f | DeltaYaw: %.1f | DeltaPitch: %.1f",
-                 m_Radius, m_DeltaYaw, m_DeltaPitch);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Rendering value (what BeginOpengl actually uses)
-        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
-        g_pRenderText->RenderText(10, yPos, debugText);
-    }
-#endif
-
     return false; // Camera not locked
+}
+
+bool OrbitalCamera::DescribeState(wchar_t* text, std::size_t textSize) const
+{
+    swprintf(text, textSize, L"Orbit: distance %.0f, turned yaw %.1f, pitch %.1f", m_Radius, m_DeltaYaw, m_DeltaPitch);
+    return true;
 }
 
 void OrbitalCamera::HandleInput()
@@ -824,28 +787,15 @@ void OrbitalCamera::UpdateFrustum()
     up[1] = ca0 * ca2;
     up[2] = -sa0;
 
-    // Build frustum using the same viewport aspect ratio that BeginOpengl() will use.
-    // BeginOpengl() scales reference coords (640×480) to actual window pixels.
-    // MainScene uses height=432 (480-48 for UI bar), CharacterScene uses 430, etc.
+    // Build the frustum with the same aspect ratio as the active projection.
+    // MainScene's BeginOpenglPhysical() and WorldViewportAspect() both use the full physical window.
     extern unsigned int WindowWidth;
     extern unsigned int WindowHeight;
     extern EGameScene SceneFlag;
-    extern int GetScreenWidth();
 
-    int refWidth = REFERENCE_WIDTH;
-    int refHeight = REFERENCE_HEIGHT;
+    float aspectRatio = static_cast<float>(WindowWidth) / WindowHeight;
     if (SceneFlag == MAIN_SCENE)
-    {
-        refWidth = GetScreenWidth();
-        refHeight = g_Camera.TopViewEnable ? REFERENCE_HEIGHT : (REFERENCE_HEIGHT - 48);
-    }
-    else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
-    {
-        refHeight = 430;
-    }
-    float viewportWidth = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
-    float viewportHeight = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
-    float aspectRatio = viewportWidth / viewportHeight;
+        aspectRatio = UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
 
     // Override was already applied at the top of this function (if enabled).
     float effectiveFarPlane = m_Config.farPlane;

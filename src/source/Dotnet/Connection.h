@@ -1,92 +1,83 @@
 #pragma once
 
 #include "stdafx.h"
+// Flow Code: VS1-NET-CONNECTION-XPLAT
+// Story: 3.1.2 - Connection.h Cross-Platform Updates
+// Flow Code: VS1-NET-CHAR16T-ENCODING
+// Story: 3.2.1 - char16_t Encoding at .NET Interop Boundary
 
+#include <atomic>
 #include <coreclr_delegates.h>
+#include <filesystem>
+#include <memory>
 
-#include "PacketFunctions_ChatServer.h"
-#include "PacketFunctions_ConnectServer.h"
-#include "PacketFunctions_ClientToServer.h"
+#include "Core/Platform/PlatformLibrary.h"
 
-#include <cwchar>
+class PacketFunctions_ChatServer;
+class PacketFunctions_ConnectServer;
+class PacketFunctions_ClientToServer;
 
-#ifdef _WIN32
-#include "Core/Platform/WinCompat.h"
-#define symLoad GetProcAddress
-#else
-#include "dlfcn.h"
-#include <unistd.h>   // readlink
-#include <string>
-#define symLoad dlsym
-#endif
-
-// Construct-on-first-use: the library handle is loaded lazily on first access.
-// The inline dotnet_* symbol globals (defined in other translation units) load
-// through this handle during their own dynamic initialization, so a plain inline
-// global here would risk a static-initialization-order fiasco. A function-local
-// static is initialized on first call instead, which is well-defined. The macro
-// keeps every existing call site (`munique_client_library_handle`) unchanged.
-#ifdef _WIN32
-inline HINSTANCE get_munique_client_library_handle()
+// MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so".
+// POSIX loaders do not search the executable directory for a bare filename, so resolve the
+// library beside the running executable. Windows keeps its native executable-directory search.
+inline std::string ManagedLibraryPath()
 {
-    static const HINSTANCE handle = LoadLibrary(L"MUnique.Client.Library.dll");
-    return handle;
-}
+    const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
+#ifdef _WIN32
+    return libraryName;
 #else
-inline void* get_munique_client_library_handle()
-{
-    // Native AOT emits a platform-native shared object on Linux (.so), not the
-    // Windows .dll, and the build copies it next to the executable. Resolve the
-    // executable's real directory (via /proc/self/exe) and load by absolute
-    // path, so it works regardless of the working directory the client was
-    // launched from; fall back to the loader search path.
-    // Not const-qualified return: dlsym() takes a non-const void* handle.
-    static void* const handle = []() -> void* {
-        char exe[4096];
-        const ssize_t n = ::readlink("/proc/self/exe", exe, sizeof(exe) - 1);
-        if (n > 0)
-        {
-            std::string path(exe, static_cast<size_t>(n));
-            const std::string::size_type slash = path.find_last_of('/');
-            if (slash != std::string::npos)
-            {
-                path.resize(slash + 1);
-                path += "MUnique.Client.Library.so";
-                if (void* h = dlopen(path.c_str(), RTLD_LAZY))
-                    return h;
-            }
-        }
-        return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
-    }();
-    return handle;
-}
+    constexpr DWORD executablePathCapacity = 4096;
+    wchar_t executablePath[executablePathCapacity] = {};
+    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
+    {
+        return libraryName;
+    }
+
+    return (std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / libraryName).string();
 #endif
-#define munique_client_library_handle get_munique_client_library_handle()
+}
+
+// Null until LoadManagedLibrary, and after it when the library is missing.
+extern mu::platform::LibraryHandle munique_client_library_handle;
+
+// Loads the network library once, at startup after the client has chosen its folders; later calls do nothing.
+void LoadManagedLibrary();
 
 namespace DotNetBridge
 {
-void ReportDotNetError(const char* detail);
+// AC-2: Distinguishes library-not-found from symbol-not-found errors.
+// Used as second parameter to ReportDotNetError() so callers can be explicit
+// about which failure mode occurred (Option A from Dev Notes §Key Design Decisions).
+enum class DotNetErrorKind
+{
+    LibraryNotFound,
+    SymbolNotFound
+};
+
+void ReportDotNetError(const char* detail, DotNetErrorKind kind = DotNetErrorKind::LibraryNotFound);
 bool IsManagedLibraryAvailable();
 
-template<typename T>
-T LoadManagedSymbol(const char* name)
+template <typename T> T LoadManagedSymbol(const char* name)
 {
     if (!IsManagedLibraryAvailable())
     {
         return nullptr;
     }
 
-    const auto symbol = reinterpret_cast<T>(symLoad(munique_client_library_handle, name));
+    const auto symbol = reinterpret_cast<T>(mu::platform::GetSymbol(munique_client_library_handle, name));
     if (!symbol)
     {
-        ReportDotNetError(name);
+        ReportDotNetError(name, DotNetErrorKind::SymbolNotFound);
     }
 
     return symbol;
 }
-}
+} // namespace DotNetBridge
 
 using DotNetBridge::LoadManagedSymbol;
+
+// Register native services required by the managed bridge.
+void InitializeDotNetBridge();
 
 class Connection
 {
@@ -94,27 +85,56 @@ private:
     static void OnPacketReceivedS(int32_t handle, int32_t size, BYTE* data);
     static void OnDisconnectedS(int32_t handle);
 
-    PacketFunctions_ChatServer* _chatServer = { };
-    PacketFunctions_ConnectServer* _connectServer = { };
-    PacketFunctions_ClientToServer* _gameServer = { };
+    std::unique_ptr<PacketFunctions_ChatServer> _chatServer;
+    std::unique_ptr<PacketFunctions_ConnectServer> _connectServer;
+    std::unique_ptr<PacketFunctions_ClientToServer> _gameServer;
 
-    int32_t _handle;
-    void(*_packetHandler)(int32_t, const BYTE*, int32_t);
+    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    std::atomic<int32_t> _handle = 0;
+    int32_t _id = 0;
+    void (*_packetHandler)(int32_t, const BYTE*, int32_t);
+    bool _firstPacketLogged = false;
 
+    void Unregister();
     void OnDisconnected();
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
 public:
-    Connection(const wchar_t* host, int32_t port, bool isEncrypted, void(*packetHandler)(int32_t, const BYTE*, int32_t));
+    Connection(const char16_t* host, int32_t port, bool isEncrypted,
+               void (*packetHandler)(int32_t, const BYTE*, int32_t));
     ~Connection();
+
+    // The handle is registered for this object; a copy would unregister it when destroyed.
+    Connection(const Connection&) = delete;
+    Connection& operator=(const Connection&) = delete;
 
     bool IsConnected();
     void Send(const BYTE* data, const int32_t length);
     void Close();
 
-    int32_t GetHandle() const { return _handle; }
+    int32_t GetHandle() const
+    {
+        return _handle.load();
+    }
 
-    PacketFunctions_ChatServer* ToChatServer() const { return _chatServer; }
-    PacketFunctions_ConnectServer* ToConnectServer() const { return _connectServer; }
-    PacketFunctions_ClientToServer* ToGameServer() const { return _gameServer; }
+    // The handle its packets are queued under. Unlike GetHandle() it outlives a close by the
+    // server, so what the server sent right before closing (e.g. why) is still handled; Close()
+    // ends it, since the client wants nothing more from a connection it closed itself.
+    int32_t GetId() const
+    {
+        return _id;
+    }
+
+    PacketFunctions_ChatServer* ToChatServer() const
+    {
+        return _chatServer.get();
+    }
+    PacketFunctions_ConnectServer* ToConnectServer() const
+    {
+        return _connectServer.get();
+    }
+    PacketFunctions_ClientToServer* ToGameServer() const
+    {
+        return _gameServer.get();
+    }
 };

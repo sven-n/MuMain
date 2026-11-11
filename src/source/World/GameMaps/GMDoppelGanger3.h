@@ -1,6 +1,8 @@
 // GMDoppelGanger3.h: interface for the GMDoppelGanger3 class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
+
+#include "Render/Models/DrawLook.h"
 #include "World/MapInfra/w_BaseMap.h"
 
 SmartPointer(CGMDoppelGanger3);
@@ -10,36 +12,34 @@ public:
     static CGMDoppelGanger3Ptr Make();
     virtual ~CGMDoppelGanger3();
 
-public:	// Object
-    // ¿ÀºêÁ§Æ® »ı¼º
+public: // Object
+    // ì˜¤ë¸Œì íŠ¸ ìƒì„±
     virtual bool CreateObject(OBJECT* o);
-    // ¿ÀºêÁ§Æ® ÇÁ·Î¼¼¼­
+    // ì˜¤ë¸Œì íŠ¸ í”„ë¡œì„¸ì„œ
     virtual bool MoveObject(OBJECT* o);
-    // ¿ÀºêÁ§Æ® ÀÌÆåÆ®
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-    // ¿ÀºêÁ§Æ® ·£´õ
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    // ¸Ê °ü·Ã ¿ÀºêÁ§Æ® ÀÌÆåÆ®
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    // ì˜¤ë¸Œì íŠ¸ ì´í™íŠ¸
+    virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
+    // ì˜¤ë¸Œì íŠ¸ ëœë”
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    // ë§µ ê´€ë ¨ ì˜¤ë¸Œì íŠ¸ ì´í™íŠ¸
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
-public:	// Character
-    // ¸ó½ºÅÍ »ı¼º
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
-    // ¸ó½ºÅÍ(NPC) ÇÁ·Î¼¼¼­
+public: // Character
+    // ëª¬ìŠ¤í„°(NPC) í”„ë¡œì„¸ì„œ
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ½ºÅ³ ºí·¯ ÀÌÆåÆ®
+    // ëª¬ìŠ¤í„° ìŠ¤í‚¬ ë¸”ëŸ¬ ì´í™íŠ¸
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ÀÌÆåÆ® ( ÀÏ¹İ )
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ÀÌÆåÆ® ( ½ºÅ³ )
+    // ëª¬ìŠ¤í„° ì´í™íŠ¸ ( ì¼ë°˜ )
+    virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
+    virtual bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
+    // ëª¬ìŠ¤í„° ì´í™íŠ¸ ( ìŠ¤í‚¬ )
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
-    // ½ºÅ³ ¾Ö´Ï¸ŞÀÌ¼Ç °ü·Ã ÇÔ¼ö
+    // ìŠ¤í‚¬ ì• ë‹ˆë©”ì´ì…˜ ê´€ë ¨ í•¨ìˆ˜
     virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
 public: // Sound
-    // ¸ó½ºÅÍ »ç¿îµå
-    virtual bool PlayMonsterSound(OBJECT* o);
-    // ¿ÀºêÁ§Æ® »ç¿îµå
+    // ëª¬ìŠ¤í„° ì‚¬ìš´ë“œ
+    // ì˜¤ë¸Œì íŠ¸ ì‚¬ìš´ë“œ
     virtual void PlayObjectSound(OBJECT* o);
 
 public:

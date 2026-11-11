@@ -1,26 +1,18 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: StringMethod.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "StringMethod.h"
 
-CStringMethod::CStringMethod() // OK
-{
-}
+CStringMethod::CStringMethod() {}
 
-CStringMethod::~CStringMethod() // OK
-{
-}
+CStringMethod::~CStringMethod() {}
 
-void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata) // OK
+void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata)
 {
     if (strdata.length() >= 4)
     {

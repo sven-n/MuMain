@@ -5,7 +5,8 @@
 #include "MuInputBlockerCore.h"
 
 #include "imgui.h"
-#include "UI/NewUI/NewUICommon.h"
+#include "Core/Input/SyntheticInput.h"
+#include "UI/Core/WindowCommon.h"
 
 CMuInputBlockerCore& CMuInputBlockerCore::GetInstance()
 {
@@ -18,9 +19,11 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // Block game input ONLY when hovering UI
     ImGuiIO& io = ImGui::GetIO();
 
-    // Only block when hovering or when keyboard input is wanted
-    bool shouldBlockInput = io.WantCaptureMouse || io.WantCaptureKeyboard;
-    
+    // Only block when hovering or when keyboard input is wanted. A key or
+    // click the control socket injects never went through ImGui, whatever the
+    // real pointer hovers.
+    bool shouldBlockInput = (io.WantCaptureMouse || io.WantCaptureKeyboard) && !Core::Input::Synthetic::IsInjecting();
+
     if (!shouldBlockInput)
         return;
 
@@ -43,8 +46,8 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // Block Enter key when hovering UI or when keyboard input is wanted
     // This prevents chat from opening when pressing Enter in input fields
     // We need to set EnterPressed flag to true to prevent ScanAsyncKeyState from clearing it
-    SEASON3B::CNewKeyInput* pKeyInput = SEASON3B::CNewKeyInput::GetInstance();
-    pKeyInput->SetKeyState(VK_RETURN, SEASON3B::CNewKeyInput::KEY_NONE);
+    mu::ui::window::CNewKeyInput* pKeyInput = mu::ui::window::CNewKeyInput::GetInstance();
+    pKeyInput->SetKeyState(VK_RETURN, mu::ui::window::CNewKeyInput::KEY_NONE);
     SetEnterPressed(true); // Prevent ScanAsyncKeyState from clearing VK_RETURN state
 
     // Only clear all keyboard input when ImGui wants to capture it (text fields, etc.)
@@ -53,7 +56,7 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     {
         for (int key = 0; key < 256; key++)
         {
-            pKeyInput->SetKeyState(key, SEASON3B::CNewKeyInput::KEY_NONE);
+            pKeyInput->SetKeyState(key, mu::ui::window::CNewKeyInput::KEY_NONE);
         }
     }
 }

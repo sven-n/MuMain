@@ -2,6 +2,9 @@
 
 #include "Core/Utilities/SpinLock.h"
 
+#include <array>
+#include <cstdint>
+
 typedef struct _PATH_t
 {
     unsigned char CurrentPath;
@@ -111,12 +114,13 @@ public:
 
 public:
     void			Initialize();
+    void            ClearDisplayName();
     void			Destroy();
     void			InitPetInfo(int iPetType);
     PET_INFO* GetEquipedPetInfo(int iPetType);
     void			PostMoveProcess_Active(unsigned int uiLimitCount);
     unsigned int	PostMoveProcess_GetCurProcessCount();
-    bool			PostMoveProcess_IsProcessing();
+    bool PostMoveProcess_IsProcessing() const;
     bool			PostMoveProcess_Process();
     bool			Blood;
     bool			Ride;
@@ -128,6 +132,20 @@ public:
     bool			HideShadow;
     bool			m_bIsSelected;
     bool			Decoy;
+    // The flag of the sound events once in an animation (Q-MN85, Q-MN87): a
+    // once event played since the character last stood.
+    bool SoundOncePlayed;
+    // SoundEvents::PlayDrawn ran this frame (a map's monster effects called
+    // it), so FinishDrawnFrame does not play the frame again.
+    bool SoundsDrawnThisFrame;
+    // The last ticks of its model's timers (Q-MN91), from when the character
+    // was made, as the draw code kept Twintail's in OBJECT::m_dwTime: a
+    // character that appears again keeps them.
+    std::array<std::uint32_t, 4> ModelTimerLastTicks;
+    // The model timers that tick in this drawn frame (bit i: timer i), and
+    // whether the frame asked them already (GameLogic::Monsters::ModelTimers).
+    std::uint32_t ModelTimerTicks;
+    bool ModelTimersAsked;
     CLASS_TYPE			Class;
     CLASS_SKIN_INDEX            SkinIndex;
     BYTE			Skin; // What is this good for?
@@ -149,11 +167,15 @@ public:
     char		PKPartyLevel;
 #endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
     BYTE        AttackFlag;
-    
+    bool ReceivedAttackTargetUnknown;
+
     BYTE        TargetAngle;
     float        Dead; // Number of reference frames after death
     WORD		Skill;
     BYTE        SwordCount;
+    // The attacks a monster's rotation (its attacks' `otherwise`, Q-MN69)
+    // played since the monster was created.
+    int AttackRotation;
     BYTE		byExtensionSkill;
     WORD		m_byDieType;
     BYTE        TargetX;

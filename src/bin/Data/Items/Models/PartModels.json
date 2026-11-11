@@ -1,0 +1,71 @@
+{
+  "formatVersion": 1,
+  "partModels": [
+    {
+      "name": "grade15ArmLeft",
+      "file": "Data/Item/class15_armleft.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15ArmRight",
+      "file": "Data/Item/class15_armright.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15BodyLeft",
+      "file": "Data/Item/class15_bodyleft.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15BodyRight",
+      "file": "Data/Item/class15_bodyright.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15BootLeft",
+      "file": "Data/Item/class15_bootleft.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15BootRight",
+      "file": "Data/Item/class15_bootright.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15Head",
+      "file": "Data/Item/class15_head.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15PantLeft",
+      "file": "Data/Item/class15_pantleft.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "grade15PantRight",
+      "file": "Data/Item/class15_pantright.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "grade15Decoration"
+    },
+    {
+      "name": "phoenixSoulArmorInventory",
+      "file": "Data/Player/ArmorMale74_inven.bmd",
+      "textureFolders": ["Player"],
+      "renderStyle": "phoenixSoulArmorInventory"
+    },
+    {
+      "name": "phoenixSoulStarWing",
+      "file": "Data/Item/sword36wing.bmd",
+      "textureFolders": ["Item"],
+      "renderStyle": "phoenixSoulStar"
+    }
+  ]
+}

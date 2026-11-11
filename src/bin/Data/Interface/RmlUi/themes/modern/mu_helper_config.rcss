@@ -1,0 +1,208 @@
+/* Modern layout for CMuHelperConfigWindow -- the legacy theme's structure in this theme's plain
+   reference px, fifty units wider: below the header, the tabs and one scroll pane of native's group boxes flow in
+   #mhc_main, each box starting at native's own rectangle and growing, and each label wrapping, only
+   when its text needs the room. The pieces' look comes from this theme's mu_helper_common.rcss.
+   Controls a class doesn't have are hidden in the RML from UI::MuHelper::ResolveClassFeatures(),
+   never here. */
+
+/* Fifty units wider than native's 190, so labels wrap less; the dock makes room from #panel's size. */
+#panel { width: 240px; }
+#title { width: 240px; }
+#mhc_main { position: absolute; left: 10px; top: 48px; width: 218px; height: 366px; display: flex; flex-direction: column; }
+
+/* --- Tabs: three cells sharing the row; a label wraps rather than leaving its tab -------------- */
+#mhc_tabs { display: flex; flex-direction: row; flex-shrink: 0; margin-bottom: 3px; }
+#mhc_tabs .mhc-tab-cell {
+	position: relative;
+	flex: 1 1 0;
+	min-width: 0;
+	min-height: 22px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+#mhc_tabs .mh-tab { left: 0; right: 0; top: 0; bottom: 0; width: auto; height: auto; }
+#mhc_tabs .mh-tab-label {
+	position: relative;
+	left: 0;
+	top: 0;
+	width: auto;
+	height: auto;
+	padding: 2px 2px;
+	line-height: 1.1;
+	white-space: normal;
+	word-break: break-word;
+}
+
+/* --- The pages: native's group boxes, in order, in one scroll pane ----------------------------- */
+#mhc_body { position: relative; flex: 1 1 0; min-height: 0; margin: 0 1px 0 2px; }
+/* Outranks every display rule below, so a control a class doesn't have stays hidden. */
+#panel #mhc_main .hidden, #panel .hidden { display: none; }
+.mhc-page { display: block; position: relative; }
+/* Native's boxes share their edges: each sits three units into the one above, five into its left. */
+.mhc-page > * + * { margin-top: -3px; }
+.mhc-pair { display: flex; flex-direction: row; position: relative; }
+.mhc-pair > .mhc-range { flex: 0 0 68px; }
+.mhc-pair > * + * { flex: 1 1 0; min-width: 0; margin-left: -5px; }
+
+#mhc_body .mh-box { position: relative; left: auto; top: auto; display: block; pointer-events: none; }
+.mhc-content { position: relative; padding: 5px 6px 7px 6px; }
+.mhc-content > * + * { margin-top: 2px; }
+
+/* Each box starts at native's own height and grows with its content. */
+#box_h_range, #box_h_recovery, #box_o_range, #box_o_repair, #box_x_accept { min-height: 50px; }
+#box_h_movement { min-height: 39px; }
+#box_h_skills { min-height: 135px; }
+#box_h_buffs { min-height: 69px; }
+#box_o_mode { min-height: 30px; }
+#box_o_items { min-height: 195px; }
+#box_x_defend { min-height: 222px; }
+#box_extension { min-height: 46px; }
+
+/* --- Text: in flow, wrapping inside whatever width its row leaves ------------------------------ */
+#mhc_body .mh-text {
+	position: relative;
+	left: auto;
+	top: auto;
+	white-space: normal;
+	word-break: break-word;
+}
+
+/* --- Checkbox rows: the box, then its label taking the rest of the row ------------------------- */
+#mhc_body .mh-check {
+	position: relative;
+	left: auto;
+	top: auto;
+	width: auto;
+	height: auto;
+	min-height: 15px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+#mhc_body .mh-check .checkbox-box { position: relative; left: auto; top: auto; flex: 0 0 auto; }
+#mhc_body .mh-check .checkbox-label { flex: 1 1 auto; margin-left: 2px; }
+
+/* --- Buttons: the art fills a box that grows to its label -------------------------------------- */
+#panel .mhc-btn {
+	position: relative;
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 38px;
+	min-height: 24px;
+}
+#panel .mhc-btn-igs { min-width: 0; min-height: 26px; }
+#panel .mhc-btn .mh-btn-setting, #panel .mhc-btn .mh-btn-igs {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: auto;
+	height: auto;
+}
+#panel .mhc-btn .mh-btn-label {
+	position: relative;
+	left: auto;
+	top: auto;
+	width: auto;
+	height: auto;
+	margin-top: -1px;
+	padding: 0 3px;
+	line-height: 1.1;
+	white-space: normal;
+	word-break: break-word;
+}
+
+/* --- Rows that wrap: a checkbox, then its field or button, which drops below when they don't fit */
+.mhc-wrap { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; }
+/* A checkbox keeps its natural width, so what follows it drops to the next line instead of
+   squeezing it; alone on a line, it wraps inside it. */
+.mhc-wrap > .mh-check { flex: 1 0 auto; max-width: 100%; }
+.mhc-wrap > .mhc-inline, .mhc-wrap > .mhc-btn { margin-left: auto; }
+.mhc-inline { display: flex; flex-direction: row; align-items: center; flex: 0 0 auto; }
+.mhc-inline > * + * { margin-left: 2px; }
+
+/* Numeric field: the plate under a transparent field, wide enough for two digits. */
+.mhc-number { position: relative; flex: 0 0 auto; width: 20px; min-width: 1.9em; height: 15px; min-height: 1.3em; }
+#mhc_body .mhc-number .mh-number-plate,
+#mhc_body .mhc-string .mh-string-plate { position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: auto; height: auto; }
+/* An input keeps its intrinsic width under left/right, so the field fills the plate by percentage. */
+#mhc_body .mhc-number .mh-field,
+#mhc_body .mhc-string .mh-field {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 1px 1px 0 2px;
+}
+
+/* --- Range: the label over the value, the steppers beside them --------------------------------- */
+.mhc-range .mhc-content { display: flex; flex-direction: row; align-items: flex-start; padding-right: 3px; }
+.mhc-range .mhc-content > * + * { margin-top: 0; }
+.mhc-range-value { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; }
+#mhc_body .mhc-range-label { align-self: stretch; padding-bottom: 1px; border-bottom-width: 1px; border-color: token(text-muted); }
+#mhc_body .mhc-range-value .mh-range-digit { position: relative; left: auto; top: auto; margin-top: 3px; }
+.mhc-steps { flex: 0 0 auto; display: flex; flex-direction: column; margin-left: 2px; }
+#mhc_body .mhc-steps > * { position: relative; left: auto; top: auto; }
+.mhc-steps > * + * { margin-top: 4px; }
+
+/* --- Recovery: the checks, with Setting beside them (below, when there's no room) -------------- */
+.mhc-split { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; }
+.mhc-col { flex: 1 1 45px; }
+.mhc-col > * + * { margin-top: 2px; }
+.mhc-split > .mhc-btn { margin-left: auto; }
+
+/* --- Movement --------------------------------------------------------------------------------- */
+#box_h_movement .mhc-content { padding-top: 2px; }
+#box_h_movement .mhc-content > * + * { margin-top: 0; }
+
+/* --- Skills: slot columns, their options beside them; the class's own options on the left ------ */
+.mhc-skill-row { display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+.mhc-skill-row + .mhc-skill-row { margin-top: 4px; }
+.mhc-slot-col { flex: 0 1 auto; min-width: 42px; display: flex; flex-direction: column; align-items: flex-start; }
+#mhc_body .mh-slot { position: relative; left: auto; top: auto; flex: 0 0 auto; }
+.mhc-skill-row > * + * { margin-left: 4px; }
+.mhc-slot-col .mh-slot { margin-top: 1px; }
+.mhc-opts { flex: 3 1 45px; display: flex; flex-direction: column; padding-top: 10px; }
+.mhc-opts > * + * { margin-top: 2px; }
+.mhc-class-col { flex: 1 1 42px; display: flex; flex-direction: column; align-items: flex-start; }
+.mhc-class-col > * + * { margin-top: 2px; }
+.mhc-radios { display: flex; flex-direction: row; flex-wrap: wrap; padding-left: 12px; }
+.mhc-radios > .mh-check { flex: 0 1 auto; margin-right: 6px; }
+/* Native's order: Auto and Together on the left, Cease to the right of Auto. */
+#rb_raven_auto { order: 1; }
+#rb_raven_cease { order: 2; }
+#rb_raven_together { order: 3; }
+#cb_fallback { margin-top: 6px; }
+
+/* --- Buffs ------------------------------------------------------------------------------------ */
+.mhc-slot-row { display: flex; flex-direction: row; padding-left: 3px; }
+.mhc-slot-row > * + * { margin-left: 2px; }
+
+/* --- Item pick-up ------------------------------------------------------------------------------ */
+#box_o_mode .mhc-content { padding-top: 3px; }
+.mhc-grid { display: flex; flex-direction: row; flex-wrap: wrap; padding-left: 5px; }
+#mhc_body .mhc-grid > .mh-check { flex: 0 0 50%; }
+#cb_pick_extra { margin-left: 5px; }
+.mhc-entry { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; padding-left: 16px; }
+.mhc-entry > .mhc-btn { margin-left: auto; }
+.mhc-string { position: relative; flex: 1 1 auto; min-width: 40px; height: 15px; min-height: 1.3em; margin-right: 4px; }
+#box_o_list { min-height: 75px; margin: 3px -2px 0 -2px; }
+#box_o_list .mhc-content { padding: 3px 1px 3px 4px; }
+#extra_list { position: relative; left: auto; top: auto; width: auto; height: 70px; }
+#panel .mh-extra-row { height: auto; min-height: 13px; padding: 1px 0 1px 8px; white-space: normal; word-break: break-word; }
+.mhc-end { display: flex; flex-direction: row; justify-content: flex-end; }
+
+/* --- Footer: Initialization and Save sharing native's 107 units right of the exit button; a
+   wrapped label takes its height from the pane above, not from below the frame. */
+#mhc_footer { display: flex; flex-direction: row; flex-shrink: 0; margin: 2px 6px 0 55px; }
+#mhc_footer .mhc-btn { flex: 1 1 0; min-width: 0; }
+#mhc_footer .mhc-btn + .mhc-btn { margin-left: 3px; }
+
+/* --- Piece offsets ----------------------------------------------------------------------------- */
+#mhc_body .mh-check .checkbox-box { margin: 1px; }

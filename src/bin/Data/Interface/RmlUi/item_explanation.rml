@@ -1,0 +1,28 @@
+<rml>
+<head>
+	<title>CItemExplanationWindow</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_help.rcss"/>
+</head>
+<body>
+	<!-- The item help box (/<item> in chat, CItemExplanationWindow, UI/Inventory/ItemHelpView.h): the
+	     item's name, its levels table and the classes that can equip it. #panel is the original's screen
+	     (.stage); the box is one counter-scaled layer at the native text size, as wide as its
+	     content. Nothing here is interactive. -->
+	<div id="panel" class="stage" data-model="item_explanation">
+		<div id="tip_box" class="sharp-text" data-style---line-height="line_height + 'px'"
+		     data-style---bold-line-height="bold_line_height + 'px'">
+			<div data-for="l : lines" data-attr-class="'tip-line tip-line--' + (l.spacer != '' ? l.spacer : l.color)"
+			     data-class-bold="l.bold" data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"><span>{{l.text}}</span></div>
+			<div class="tip-table" data-if="columns.size > 0" data-style-font-size="text_px + 'px'">
+				<div class="tip-column" data-for="c : columns">
+					<div class="tip-cell tip-cell--head">{{c.heading}}</div>
+					<div class="tip-cell" data-for="v : c.cells" data-class-cannot-equip="!v.can_equip">{{v.text}}</div>
+				</div>
+			</div>
+			<div data-for="l : tail_lines" data-attr-class="'tip-line tip-line--' + (l.spacer != '' ? l.spacer : l.color)"
+			     data-class-bold="l.bold" data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"><span>{{l.text}}</span></div>
+		</div>
+	</div>
+</body>
+</rml>

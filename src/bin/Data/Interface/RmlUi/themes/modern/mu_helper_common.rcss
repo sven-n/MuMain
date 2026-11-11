@@ -1,0 +1,222 @@
+/* Modern pieces the MU Helper config window and its detail panel share. The shell, groove and
+   header rail come from docked_panel_frame.rcss and base.rcss, as for every right-dock neighbour
+   (party_info, character_info); this file states the MU Helper's own controls in the same
+   forged-metal language. Plain reference px -- #panel carries transform: scale(root_scale), and
+   modern text scales with it like its neighbours' does, so nothing here is counter-scaled. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+}
+
+/* The MU Helper's close sits beside its Save/Initialization row, not at the docked family's 13. */
+#btn_exit { left: 20px; top: 388px; }
+
+.mh-text {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	color: token(text-primary);
+	pointer-events: none;
+}
+/* .mh-text's display:block has the same specificity as base.rcss's .hidden and comes later, so a
+   data-class-hidden page header or tab label would stay on screen over its sibling. */
+.mh-text.hidden { display: none; }
+.mh-text.mh-center { text-align: center; }
+.mh-text.mh-bold { font-weight: bold; }
+
+.mh-title {
+	left: 0;
+	top: 12px;
+	width: 190px;
+	font-size: 12px;
+	color: token(text-warm);
+	font-effect: shadow(0px 1px #000000);
+}
+
+/* Tabbed pane: a raised header tab on a recessed body, the flat equivalent of native's table-sprite
+   pane. Two childless pieces; the header text is a sibling. */
+.mh-pane { position: absolute; width: 165px; pointer-events: none; }
+.mh-pane .p { position: absolute; pointer-events: none; }
+.mh-pane .p-tab {
+	left: 0;
+	top: 0;
+	width: 65px;
+	height: 19px;
+	background-color: token(surface-raised);
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-bottom-width: 0;
+	border-radius: token(radius-sm)px token(radius-sm)px 0 0;
+}
+.mh-pane .p-body {
+	left: 0;
+	top: 18px;
+	width: 165px;
+	height: 45px;
+	background-color: token(surface-panel);
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-radius: 0 token(radius-sm)px token(radius-sm)px token(radius-sm)px;
+}
+.mh-pane-h70 .p-body { height: 70px; }
+.mh-pane .mh-text { left: 9px; top: 4px; color: token(text-secondary); font-weight: bold; }
+
+/* Threshold gauge: base.rcss's .level-gauge at native's size. Native's hit rectangle began 7
+   units before the rail and ended 1 unit after it. */
+.mh-gauge { position: absolute; width: 124px; height: 16px; }
+.mh-gauge-hit { left: -7px; right: -1px; }
+.mh-gauge-fill { height: 16px; }
+
+/* Checkbox / radio -- base.rcss's .modern-checkbox-px, boxed at native's 15-unit square with a
+   1-unit inset. Only the box takes the click, as natively. */
+.mh-check .checkbox-box {
+	left: 1px;
+	top: 1px;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.mh-check.mh-radio .checkbox-box { border-radius: 7px; }
+.mh-check .checkbox-label {
+	left: 18px;
+	top: 1px;
+	color: token(text-secondary);
+}
+
+/* Buttons -- base.rcss's .modern-btn-px at native's own sizes: the 52x26 footer pair and the 38x24
+   "Setting" / "Add" / "Delete". The label is a sibling laid over the button, and lets the mouse
+   through to it. */
+.mh-btn-igs { width: 52px; height: 26px; }
+.mh-btn-setting { width: 38px; height: 24px; }
+.mh-btn-label { margin-top: -1px; }
+.mh-btn-label-igs { width: 52px; height: 26px; line-height: 26px; }
+.mh-btn-label-setting { width: 38px; height: 24px; line-height: 24px; }
+
+/* Numeric field: a recessed well where native had the MacroUI number plate. */
+.mh-number-plate {
+	position: absolute;
+	width: 20px;
+	height: 15px;
+	background-color: token(surface-recessed);
+	border-width: 1px;
+	border-color: token(border-inner);
+	border-radius: token(radius-sm)px;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+.mh-field {
+	position: absolute;
+	width: 17px;
+	height: 12px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	color: token(text-primary);
+	background-color: transparent;
+	border-width: 0;
+	border-radius: 0;
+	padding: 0;
+}
+
+.mh-string-plate {
+	position: absolute;
+	width: 94px;
+	height: 15px;
+	background-color: token(surface-recessed);
+	border-width: 1px;
+	border-color: token(border-inner);
+	border-radius: token(radius-sm)px;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+#item_name { width: 88px; }
+
+/* Plain group box: one recessed panel, where legacy draws native's table sprites. */
+.mh-box { position: absolute; pointer-events: none; }
+.mh-box .b-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: token(surface-panel);
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}
+
+/* Tabs -- the same raised/selected language as the docked family's own tab rows. */
+.mh-tab {
+	position: absolute;
+	top: 48px;
+	width: 55px;
+	height: 22px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-raised);
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-radius: token(radius-sm)px token(radius-sm)px 0 0;
+	box-sizing: border-box;
+}
+.mh-tab:hover { border-color: token(border-hover); }
+.mh-tab.active { background-color: token(accent-steel); border-color: token(border-selected); }
+.mh-tab-label { top: 48px; width: 56px; height: 22px; line-height: 22px; color: token(text-muted); }
+.mh-tab-label.active { color: token(text-primary); font-weight: bold; }
+#tab_0, #tab_0_label { left: 10px; }
+#tab_1, #tab_1_label { left: 66px; }
+#tab_2, #tab_2_label { left: 122px; }
+
+/* Range steppers: small px buttons carrying a glyph. */
+.mh-btn-plus, .mh-btn-minus { width: 16px; height: 15px; line-height: 13px; }
+.mh-glyph { font-family: "token(font-body)"; font-size: 12px; font-weight: bold; pointer-events: none; }
+
+/* The range as a number, where legacy uses CryWolf's rank-number art. */
+.mh-range-digit {
+	width: 15px;
+	height: 19px;
+	line-height: 19px;
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
+	color: token(text-warm);
+}
+
+/* Skill slot -- base.rcss's .slot/.slot--filled, at native's 32x38 with the icon 6 in, 6 down. */
+.mh-slot {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	border-width: 1px;
+	box-sizing: border-box;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.mh-slot:hover { border-color: token(border-hover); }
+.mh-slot-icon { position: absolute; left: 5px; top: 5px; width: 20px; height: 28px; pointer-events: none; }
+
+/* The extension note's second line -- a warning tone, as native's orange was. */
+.mh-orange { color: token(semantic-warning); }
+
+/* Extra-item list: 13-unit rows, the selected one on a gold wash. */
+.mh-extra-row {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 13px;
+	padding: 1px 0 0 8px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	white-space: nowrap;
+	color: token(text-secondary);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.mh-extra-row:hover { color: token(text-primary); }
+.mh-extra-row.selected { background-color: rgba(180, 138, 50, 60); color: token(text-warm); }

@@ -2,7 +2,8 @@
 //  npcGateSwitch.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "UI/Legacy/UIManager.h"
+#include "Network/Server/WSclient.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -17,9 +18,10 @@ namespace npcGateSwitch
     static          bool   g_isCurrentGateopen = false;
     static          int     g_iNpcCharacterKey = 0;
 
+    // The gate's opening and closed animations are its entry's (Q-MN38c).
     void GateOpen(CHARACTER* c, OBJECT* o)
     {
-        SetAction(o, 1);
+        SetAction(o, battleCastle::GateLooksOf(*c).value_or(battleCastle::GateLooks{}).opening);
 
         g_CharacterRegisterBuff(o, eBuff_CastleGateIsOpen);
 
@@ -30,7 +32,7 @@ namespace npcGateSwitch
 
     void GateClose(CHARACTER* c, OBJECT* o)
     {
-        SetAction(o, 0);
+        SetAction(o, battleCastle::GateLooksOf(*c).value_or(battleCastle::GateLooks{}).closed);
 
         g_CharacterClearBuff(o);
 

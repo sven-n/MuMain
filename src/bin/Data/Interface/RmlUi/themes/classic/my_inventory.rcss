@@ -1,0 +1,162 @@
+/* Classic (0.97) inventory: Item_Back01 (190x256) over Item_Back02 (190x177), the equipment slots
+   on the 0.97 art at their 0.97 places, the 8x8 grid at (15, 200), the Zen bar and the Close /
+   Repair buttons. From the 0.97 client; positions are the window's own units (#panel's
+   left/top/scale come from C++). CMyInventory reads the slot and grid boxes back for its hit tests,
+   so moving a box here moves where it is clicked. */
+
+@spritesheet classic-inv-back1-sheet { src: ../../../Classic/Item_back01.jpg; classic-inv-back1: 0px 0px 190px 256px; }
+@spritesheet classic-inv-back2-sheet { src: ../../../Classic/Item_Back02.jpg; classic-inv-back2: 0px 0px 190px 177px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom { position: absolute; pointer-events: none; }
+.bg-top  { left: 0; top: 0;     width: 190px; height: 256px; decorator: image(classic-inv-back1); }
+.bg-fill { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(classic-inv-back2); }
+.bg-left, .bg-right { display: none; }
+
+.native-text { white-space: nowrap; pointer-events: none; }
+
+/* The title, centred in the dark band at the top (0.97: a 120-wide box at x 35, y 12). */
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	height: 15px;
+	cursor: move;
+}
+.title-text {
+	display: block;
+	width: 190px;
+	text-align: center;
+	transform-origin: center top;
+	color: #ffffff;
+	font-weight: bold;
+}
+
+/* 0.97 has no set / socket options. */
+.option-labels, .option-hover { display: none; }
+
+/* Zen: the label at (20, 371) on its dark box (drawn by .bg-bottom, which the 0.97 frame does not
+   need), the bar Item_Money (113x18) at (50, 368) and the amount at (60, 371), coloured by size:
+   pale yellow, green from 100 000, orange from 1 000 000, red from 10 000 000. */
+@spritesheet classic-inv-money-sheet { src: ../../../Classic/Item_money.jpg; classic-inv-money: 0px 0px 113px 18px; }
+.bg-bottom {
+	left: 20px;
+	top: 370px;
+	width: 22px;
+	height: 13px;
+	background-color: #282828;
+	font-size: 11px;
+	font-weight: bold;
+	decorator: text("Zen" #ffdc96 center center);
+}
+#gold_bg {
+	position: absolute;
+	left: 50px;
+	top: 368px;
+	width: 113px;
+	height: 18px;
+	decorator: image(classic-inv-money);
+	pointer-events: none;
+}
+#gold_text {
+	position: absolute;
+	left: 60px;
+	top: 371px;
+	transform-origin: left top;
+	font-weight: bold;
+	color: #ffdc96;
+}
+#gold_text.gold-hundred-thousand { color: #00c918; }
+#gold_text.gold-million { color: #ff9600; }
+#gold_text.gold-ten-million { color: #ff0000; }
+
+/* Close and Repair, 24x24 at (20, 395) and (48, 395), where the Season 1 client draws them beside
+   its personal shop button (0.97, without it: 25 and 60); the second image while pressed. */
+@spritesheet classic-inv-exit-sheet    { src: ../../../Classic/Exit_01.jpg;   classic-inv-exit: 0px 0px 24px 24px; }
+@spritesheet classic-inv-exit2-sheet   { src: ../../../Classic/Exit_02.jpg;   classic-inv-exit-pressed: 0px 0px 24px 24px; }
+@spritesheet classic-inv-repair-sheet  { src: ../../../Classic/Repair_01.jpg; classic-inv-repair: 0px 0px 24px 24px; }
+@spritesheet classic-inv-repair2-sheet { src: ../../../Classic/Repair_02.jpg; classic-inv-repair-pressed: 0px 0px 24px 24px; }
+.inv-btn {
+	position: absolute;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.inv-btn.hidden { display: none; }
+.inv-btn-exit   { left: 20px; decorator: image(classic-inv-exit); }
+.inv-btn-exit:active { decorator: image(classic-inv-exit-pressed); }
+.inv-btn-repair { left: 48px; decorator: image(classic-inv-repair); }
+.inv-btn-repair:active { decorator: image(classic-inv-repair-pressed); }
+
+/* The Season 1 client's personal shop button (005c76d0): btn_pshop (24x24) at (76, 395),
+   btn_pshop2 while the shop is open. Dimmed while it cannot be used. */
+@spritesheet classic-inv-pshop-sheet  { src: ../../../Classic/s1/btn_pshop.jpg;  classic-inv-pshop: 0px 0px 24px 24px; }
+@spritesheet classic-inv-pshop2-sheet { src: ../../../Classic/s1/btn_pshop2.jpg; classic-inv-pshop-open: 0px 0px 24px 24px; }
+#btn_myshop { left: 76px; decorator: image(classic-inv-pshop); }
+#btn_myshop.close-mode { decorator: image(classic-inv-pshop-open); }
+#btn_myshop.locked { filter: brightness(0.6); }
+
+/* The extended inventory's button has no 0.97 or Season 1 counterpart: it keeps legacy's own art
+   (newui_expansion_btn, 36x29) after the Season 1 buttons, on the row's centre, until the classic
+   theme has art for it. */
+@spritesheet classic-inv-expand-sheet { src: "../../../newui_expansion_btn.tga"; classic-inv-expand: 0px 0px 36px 29px; }
+#btn_expand { display: block; left: 108px; top: 393px; width: 36px; height: 29px; decorator: image(classic-inv-expand); }
+#btn_expand:hover { filter: brightness(1.25); }
+
+/* Equipment: each slot is its 0.97 background at its 0.97 place (the box is also where the slot
+   is clicked and the item drawn). */
+@spritesheet classic-slot-fairy-sheet    { src: ../../../Classic/Item_fairy.jpg;    classic-slot-fairy: 0px 0px 40px 40px; }
+@spritesheet classic-slot-cap-sheet      { src: ../../../Classic/Item_cap.jpg;      classic-slot-cap: 0px 0px 40px 40px; }
+@spritesheet classic-slot-wing-sheet     { src: ../../../Classic/Item_wing.jpg;     classic-slot-wing: 0px 0px 60px 40px; }
+@spritesheet classic-slot-weapon1-sheet  { src: ../../../Classic/Item_weapon01.jpg; classic-slot-weapon1: 0px 0px 40px 60px; }
+@spritesheet classic-slot-upper-sheet    { src: ../../../Classic/Item_upper.jpg;    classic-slot-upper: 0px 0px 40px 60px; }
+@spritesheet classic-slot-weapon2-sheet  { src: ../../../Classic/Item_weapon02.jpg; classic-slot-weapon2: 0px 0px 40px 60px; }
+@spritesheet classic-slot-gloves-sheet   { src: ../../../Classic/Item_gloves.jpg;   classic-slot-gloves: 0px 0px 40px 40px; }
+@spritesheet classic-slot-lower-sheet    { src: ../../../Classic/Item_lower.jpg;    classic-slot-lower: 0px 0px 40px 40px; }
+@spritesheet classic-slot-boots-sheet    { src: ../../../Classic/Item_boots.jpg;    classic-slot-boots: 0px 0px 40px 40px; }
+@spritesheet classic-slot-necklace-sheet { src: ../../../Classic/Item_necklace.jpg; classic-slot-necklace: 0px 0px 20px 20px; }
+@spritesheet classic-slot-ring-sheet     { src: ../../../Classic/Item_ring.jpg;     classic-slot-ring: 0px 0px 20px 20px; }
+
+.native-anchor { position: absolute; pointer-events: none; }
+#slot_helper       { left: 15px;  top: 46px;  width: 40px; height: 40px; decorator: image(classic-slot-fairy); }
+#slot_helm         { left: 75px;  top: 46px;  width: 40px; height: 40px; decorator: image(classic-slot-cap); }
+#slot_wing         { left: 115px; top: 46px;  width: 60px; height: 40px; decorator: image(classic-slot-wing); }
+#slot_weapon_right { left: 15px;  top: 89px;  width: 40px; height: 60px; decorator: image(classic-slot-weapon1); }
+#slot_armor        { left: 75px;  top: 89px;  width: 40px; height: 60px; decorator: image(classic-slot-upper); }
+#slot_weapon_left  { left: 134px; top: 89px;  width: 40px; height: 60px; decorator: image(classic-slot-weapon2); }
+#slot_amulet       { left: 55px;  top: 89px;  width: 20px; height: 20px; decorator: image(classic-slot-necklace); }
+#slot_gloves       { left: 15px;  top: 152px; width: 40px; height: 40px; decorator: image(classic-slot-gloves); }
+#slot_pants        { left: 75px;  top: 152px; width: 40px; height: 40px; decorator: image(classic-slot-lower); }
+#slot_boots        { left: 134px; top: 152px; width: 40px; height: 40px; decorator: image(classic-slot-boots); }
+#slot_ring_right   { left: 55px;  top: 152px; width: 20px; height: 20px; decorator: image(classic-slot-ring); }
+#slot_ring_left    { left: 115px; top: 152px; width: 20px; height: 20px; decorator: image(classic-slot-ring); }
+
+/* A slot's state tints its background as 0.97 did: wear 0.8 0.7 0 / 0.8 0.5 0 / 0.8 0.3 0.3, red
+   when broken, red-orange when the hero cannot use the item; while the item on the cursor cannot
+   go in, the S6 red wash. No art where the class wears nothing (Magic Gladiator's helm). */
+.equip-slot.no-art { decorator: none; }
+.equip-slot.durability-50 { image-color: #ccb300; }
+.equip-slot.durability-30 { image-color: #cc8000; }
+.equip-slot.durability-20 { image-color: #cc4d4d; }
+.equip-slot.broken { image-color: #ff0000; }
+.equip-slot.unequipable { image-color: #ff331a; }
+.equip-slot-item { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.equip-slot.refused .equip-slot-item { background-color: rgba(230, 26, 26, 102); }
+
+#item_grid, #item_grid_counts { left: 15px; top: 200px; width: calc(8 * var(--item-cell)); height: calc(8 * var(--item-cell)); }
+#item_view { height: 473px; }
+#option_tooltip_anchor { left: 95px; top: 40px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rule, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }

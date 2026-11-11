@@ -36,4 +36,4 @@ bool Toggle(const std::wstring& command)
     GameConfig::GetInstance().SetChatCommandFavourites(favourites);
     return isFavouriteNow;
 }
-}
+} // namespace GameLogic::Commands::Favourites

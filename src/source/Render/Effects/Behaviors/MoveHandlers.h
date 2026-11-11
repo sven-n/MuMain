@@ -168,6 +168,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_MANA_RUNE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_JAVELIN(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ARROW_IMPACT(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_JOINT_FORCE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SWORD_FORCE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_PROTECTGUILD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MOVE_TARGETPOSITION_EFFECT(OBJECT* o, int index, float Luminosity);

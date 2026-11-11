@@ -1,0 +1,302 @@
+#pragma once
+
+#include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/Shines.h"
+#include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
+#include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
+#include "Data/GameData/ItemData/ItemOptionDefinition.h"
+#include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
+#include "Data/GameData/ItemData/OptionRule.h"
+#include "Data/GameData/ItemData/PartModel.h"
+#include "Data/GameData/ItemData/SharedItemModel.h"
+
+#include <bitset>
+#include <filesystem>
+#include <span>
+#include <string>
+#include <vector>
+
+// Reads and writes the item data folder (Data/Items): one JSON file per
+// item group, see ItemJsonFormat.h, and the item model folder
+// (Data/Items/Models).
+namespace Data::Items
+{
+struct ItemDataLoadResult
+{
+    std::vector<ItemDefinition> items;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items, relative to the client folder.
+std::filesystem::path GetItemDataDirectory();
+
+// "Group00_Sword.json" ... "Group15_Etc.json".
+std::string GetItemGroupFileName(int group);
+
+// Reads every *.json file in the folder and validates the items.
+ItemDataLoadResult LoadItemDataDirectory(const std::filesystem::path& directory);
+
+struct ItemModelDataLoadResult
+{
+    // With the file, texture folders and none-blend meshes of their shared
+    // model filled in.
+    std::vector<ItemModelDefinition> models;
+    std::vector<SharedItemModel> sharedModels;
+    // PartModels.json (design L28).
+    std::vector<PartModel> partModels;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Models: the item model files, see ItemModelJsonFormat.h. They
+// use the same file names as the item data files.
+std::filesystem::path GetItemModelDataDirectory();
+
+// Reads every *.json file in the folder (the group files and the shared
+// models, SharedModels.json) and validates the models.
+ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory);
+
+struct ItemStatsLoadResult
+{
+    ItemStatFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Stats/ItemStats.json, relative to the client folder: what the
+// + level, excellent options, ancient sets and option level add to the item
+// stats and requirements, see
+// ItemStatsJson.h. It is in a folder of its own because every *.json file in
+// Data/Items is read as an item group file.
+std::filesystem::path GetItemStatsFile();
+
+ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file);
+
+struct ItemTooltipLoadResult
+{
+    ItemTooltipFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/Tooltip.json, relative to the client folder: the shared texts and the layouts of the item
+// tooltips, see ItemTooltipLayouts.h. In a folder of its own like the stat file.
+std::filesystem::path GetItemTooltipFile();
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
+
+struct ItemOptionsLoadResult
+{
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Options, relative to the client folder: the option definitions, one *.json file per option group (see
+// ItemOptionsJson.h), and the option rules (OptionRules.json, see OptionRulesJson.h). In a folder of its own like the
+// stat file.
+std::filesystem::path GetItemOptionsDirectory();
+
+// Reads every *.json file of the folder but the option rules. The problems name each file as "Options/<file>".
+ItemOptionsLoadResult LoadItemOptionsDirectory(const std::filesystem::path& directory);
+
+struct OptionTextsLoadResult
+{
+    ItemOptionTexts texts;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/OptionTexts.json, relative to the client folder: the texts of the options' tooltip lines, see
+// OptionTextsJson.h. Next to the tooltip file.
+std::filesystem::path GetOptionTextsFile();
+
+OptionTextsLoadResult LoadOptionTextsFile(const std::filesystem::path& file);
+
+struct OptionRulesLoadResult
+{
+    std::vector<OptionRule> rules;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Options/OptionRules.json, relative to the client folder: which definitions an item's data gives it. Only
+// the editor and the data test read it.
+std::filesystem::path GetOptionRulesFile();
+
+OptionRulesLoadResult LoadOptionRulesFile(const std::filesystem::path& file);
+
+// The option files as the game reads them at start, with the option rules when `withRules` (only the editor reads
+// them), and the checks across them; `uiLocales` are the languages the game has texts in. Empty with fatal problems.
+// Which definitions the items link is checked with the items (ValidateItemOptionLinks, ValidateOptionDefinitionUse).
+ItemOptionDatabase LoadItemOptionFiles(bool withRules, std::span<const char* const> uiLocales,
+                                       std::vector<ItemDataIssue>& issues);
+
+struct GroundLabelsLoadResult
+{
+    GroundLabelFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/GroundLabels.json, relative to the client folder: the looks of the item names on the ground, see
+// ItemGroundLabels.h. Next to the tooltip file.
+std::filesystem::path GetGroundLabelsFile();
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
+
+struct ItemNameCasesLoadResult
+{
+    ItemNameCases cases;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/NameCases.json, relative to the client folder: the cases each language declines item names in,
+// see ItemNameCases.h. Next to the tooltip file; a client without it declines no names.
+std::filesystem::path GetItemNameCasesFile();
+
+ItemNameCasesLoadResult LoadItemNameCasesFile(const std::filesystem::path& file);
+
+struct GlowColorsLoadResult
+{
+    std::vector<Effects::GlowColor> colors;
+    std::vector<Colors::ColorFolder> folders;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Effects/GlowColors.json, relative to the client folder: the named
+// colors of the item glow, see GlowColors.h.
+std::filesystem::path GetGlowColorsFile();
+
+GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file);
+
+struct ShinesLoadResult
+{
+    std::vector<Effects::Shine> shines;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Effects/Shines.json, relative to the client folder: the shines below +3 that the item glows name, see Shines.h.
+std::filesystem::path GetShinesFile();
+
+ShinesLoadResult LoadShinesFile(const std::filesystem::path& file);
+
+enum class ItemDataSaveResult
+{
+    Saved,
+    // Validation found errors; nothing was written.
+    InvalidData,
+    // The data is valid, but a file could not be written or replaced.
+    WriteFailed,
+};
+
+// Item groups by number, e.g. the groups whose model files a save writes.
+using ItemGroupSet = std::bitset<MAX_ITEM_TYPE>;
+
+// Validates the items and, when there are no fatal problems, writes one file per
+// group. Each changed file is written to a temporary file first; only when
+// all of them could be written do they replace the old files, so a full disk
+// or a folder that cannot be written leaves every file as it was. Files
+// whose content did not change are not touched.
+ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
+                                         std::vector<ItemDataIssue>& issues);
+
+// Writes `text` to `file` as the saves do: by a temporary file that replaces it, so a failed
+// write leaves the old file. An unchanged file is not touched.
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues);
+
+// The item models a save writes with the items.
+// A look file to write, and its text.
+struct LookFileToSave
+{
+    std::filesystem::path file;
+    std::string text;
+};
+
+struct ItemModelSave
+{
+    std::filesystem::path directory;
+    // The slots of the item model database.
+    std::span<const ItemModelDefinition> models;
+    // The groups whose model files are written.
+    ItemGroupSet groups;
+    // Written to SharedModels.json when sharedModelsChanged.
+    std::span<const SharedItemModel> sharedModels;
+    bool sharedModelsChanged = false;
+    // Written to PartModels.json when partModelsChanged.
+    std::span<const PartModel> partModels;
+    bool partModelsChanged = false;
+    // Written to glowColorsFile (GetGlowColorsFile) when glowColorsChanged.
+    std::filesystem::path glowColorsFile;
+    std::span<const Effects::GlowColor> glowColors;
+    std::span<const Colors::ColorFolder> glowColorFolders;
+    bool glowColorsChanged = false;
+#ifdef _EDITOR
+    // Written to statsFile (GetItemStatsFile) when statsChanged.
+    std::filesystem::path statsFile;
+    const ItemStatFile* stats = nullptr;
+    bool statsChanged = false;
+    // Written to groundLabelsFile (GetGroundLabelsFile) when groundLabelsChanged.
+    std::filesystem::path groundLabelsFile;
+    const GroundLabelFile* groundLabels = nullptr;
+    bool groundLabelsChanged = false;
+    // The look files the Style Editor changed (Data/Effects/RenderStyles.json, ItemEffects.json), with their text.
+    std::vector<LookFileToSave> lookFiles;
+    // Other files written with them, all or none: the monster list with the
+    // item references a move changed (D60). Written when their text differs.
+    std::span<const TextFileToWrite> alsoWrite;
+    // Written to nameCasesFile (GetItemNameCasesFile) when nameCasesChanged.
+    std::filesystem::path nameCasesFile;
+    const ItemNameCases* nameCases = nullptr;
+    bool nameCasesChanged = false;
+#endif
+};
+
+// Like SaveItemDataDirectory, and the models are checked and written with the
+// items: one model file for each of the groups, and the shared model file when
+// it changed. A failed write leaves the item files and the model files as
+// they were.
+ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                   std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                   std::vector<ItemDataIssue>& issues);
+
+// Like SaveItemAndModelDataDirectories without the checks, for data that was
+// already checked; a failed write is reported in `issues`.
+ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,
+                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
+                                                    std::vector<ItemDataIssue>& issues);
+
+// The rules the model file reader applies to a value (scales above 0,
+// specular 0 to 1, glow levels, mesh lists, file and folder paths, names):
+// writes the models of every group as the save would and reads them back, so
+// a value the next start would refuse is an error now. The problems name the
+// group file.
+void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// The same for the shared models: the group files name them only, so their
+// file, texture folders and meshes are read back from SharedModels.json as the
+// save would write it.
+void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedModels,
+                                       std::vector<ItemDataIssue>& issues);
+
+// The same for the glow colors (a name or value the item editor gave one),
+// read back from GlowColors.json as the save would write it.
+void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
+
+#ifdef _EDITOR
+// The same for the item stat file (the changes of Item Formulas), read back
+// from ItemStats.json as the save would write it.
+void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues);
+// The same for the ground label file (the styles the Colors window changed),
+// read back from GroundLabels.json as the save would write it.
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues);
+#endif
+
+// A model file that is not in the client folder (relative to the working
+// directory): a warning for each model, since the game starts without it and
+// draws nothing for the item.
+void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// A part model file that is not there: a warning for each part model, since the game draws nothing in its slot.
+void ValidatePartModelFilesExist(std::span<const PartModel> parts, std::vector<ItemDataIssue>& issues);
+} // namespace Data::Items

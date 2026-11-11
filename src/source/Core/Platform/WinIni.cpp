@@ -7,6 +7,7 @@
 #include "Core/Platform/PathResolve.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cwchar>
 #include <string>
@@ -161,12 +162,20 @@ BOOL WritePrivateProfileStringW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWSTR lp
     const std::string app = Narrow(lpAppName);
     std::vector<Section> sections = Load(path);
 
-    // Null key: delete the whole section.
+    // Null key: delete the whole section. As on Windows, a section that is not there leaves the file as
+    // it is: GameConfig::Load removes its obsolete keys at every start, and rewriting the file for them
+    // dropped its comments and could put back an older copy over another process's write.
     if (!lpKeyName)
     {
         for (size_t i = 0; i < sections.size(); ++i)
-            if (IEquals(sections[i].name, app)) { sections.erase(sections.begin() + i); break; }
-        return Store(path, sections) ? TRUE : FALSE;
+        {
+            if (IEquals(sections[i].name, app))
+            {
+                sections.erase(sections.begin() + i);
+                return Store(path, sections) ? TRUE : FALSE;
+            }
+        }
+        return TRUE;
     }
 
     const std::string key = Narrow(lpKeyName);
@@ -175,13 +184,18 @@ BOOL WritePrivateProfileStringW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWSTR lp
     for (Section& s : sections)
         if (IEquals(s.name, app)) { sec = &s; break; }
 
-    // Null value: delete the key (if its section exists).
+    // Null value: delete the key; a key that is not there leaves the file as it is (see above).
     if (!lpString)
     {
-        if (sec)
-            for (size_t i = 0; i < sec->entries.size(); ++i)
-                if (IEquals(sec->entries[i].key, key)) { sec->entries.erase(sec->entries.begin() + i); break; }
-        return Store(path, sections) ? TRUE : FALSE;
+        for (size_t i = 0; sec && i < sec->entries.size(); ++i)
+        {
+            if (IEquals(sec->entries[i].key, key))
+            {
+                sec->entries.erase(sec->entries.begin() + i);
+                return Store(path, sections) ? TRUE : FALSE;
+            }
+        }
+        return TRUE;
     }
 
     if (!sec)

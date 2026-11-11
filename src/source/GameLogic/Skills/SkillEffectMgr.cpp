@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "SkillEffectMgr.h"
+#include "Audio/SoundPlaces.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Render/Models/ZzzBMD.h"
@@ -21,9 +22,7 @@ CSkillEffectMgr::CSkillEffectMgr()
     DeleteAllEffects();
 }
 
-CSkillEffectMgr::~CSkillEffectMgr()
-{
-}
+CSkillEffectMgr::~CSkillEffectMgr() {}
 
 OBJECT* CSkillEffectMgr::GetEffect(int iIndex)
 {
@@ -32,9 +31,9 @@ OBJECT* CSkillEffectMgr::GetEffect(int iIndex)
     return m_SkillEffects + iIndex;
 }
 
-BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle,
-    vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum,
-    float Scale, short int sTargetIndex)
+BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner,
+                                    short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale,
+                                    short int sTargetIndex)
 {
     if (Owner != &Hero->Object)
         return FALSE;
@@ -47,16 +46,20 @@ BOOL CSkillEffectMgr::IsSkillEffect(int Type, vec3_t Position, vec3_t Angle,
     case BITMAP_SWORD_FORCE:
         return TRUE;
     case MODEL_SKILL_INFERNO:
-        if (SubType < 2) return TRUE;
+        if (SubType < 2)
+            return TRUE;
         break;
     case MODEL_CIRCLE:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
     case BITMAP_FLAME:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
     case MODEL_STORM:
-        if (SubType == 0) return TRUE;
+        if (SubType == 0)
+            return TRUE;
         break;
 
         //     case MODEL_ARROW_DOUBLE:
@@ -185,6 +188,9 @@ void CSkillEffectMgr::MoveEffects()
         OBJECT* o = &m_SkillEffects[i];
         if (o->Live)
         {
+            // Its sounds are marked at it, typed by its maker (Q-SM13).
+            std::optional<Audio::ScopedSoundPlace> place;
+            Audio::PlaceEffect(place, o, o->Type, o->Position);
             MoveEffect(o, i);
         }
     }

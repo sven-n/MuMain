@@ -1,0 +1,175 @@
+{
+  "formatVersion": 1,
+  "models": [
+    {
+      "name": "capeOfFighter",
+      "file": "Data/Item/Wing50.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "capeOfLord",
+      "file": "Data/Item/DarkLordRobe.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "chaosCard",
+      "file": "Data/Item/partCharge3/juju.bmd",
+      "textureFolders": ["Item/partCharge3"]
+    },
+    {
+      "name": "characterCard",
+      "file": "Data/Item/Ingameshop/charactercard.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "name": "darkLordScroll",
+      "file": "Data/Item/skillScroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "eliteHealingPotion",
+      "file": "Data/Item/partCharge2/EPotionR.bmd",
+      "textureFolders": ["Item/partCharge2"]
+    },
+    {
+      "name": "gemstone",
+      "file": "Data/Item/rs.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "goldenBox",
+      "file": "Data/Item/Ingameshop/itembox_gold.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "name": "higherRefiningStone",
+      "file": "Data/Item/HighRefineStone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jackOLanternScroll",
+      "file": "Data/Item/hellowinscroll.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfBless",
+      "file": "Data/Item/Jewel01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfChaos",
+      "file": "Data/Item/Jewel15.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfCreation",
+      "file": "Data/Item/jewel22.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfGuardian",
+      "file": "Data/Item/suho.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfHarmony",
+      "file": "Data/Item/jos.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfLife",
+      "file": "Data/Item/Jewel03.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "jewelOfSoul",
+      "file": "Data/Item/Jewel02.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "lowerRefiningStone",
+      "file": "Data/Item/LowRefineStone.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "luckyTicketGreen",
+      "file": "Data/Item/LuckyItem/LuckyCardgreen.bmd",
+      "textureFolders": ["Item/LuckyItem"]
+    },
+    {
+      "name": "luckyTicketRed",
+      "file": "Data/Item/LuckyItem/LuckyCardred.bmd",
+      "textureFolders": ["Item/LuckyItem"]
+    },
+    {
+      "name": "membershipItem",
+      "file": "Data/Item/Ingameshop/primium_membership_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "name": "packageBox",
+      "file": "Data/Item/Ingameshop/package_money_item.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "name": "secromiconFragment",
+      "file": "Data/Item/secromicon_piece.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "seedSphere1",
+      "file": "Data/Item/s30_sphere01.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "name": "seedSphere2",
+      "file": "Data/Item/s30_sphere02.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "name": "seedSphere3",
+      "file": "Data/Item/s30_sphere03.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "name": "seedSphere4",
+      "file": "Data/Item/s30_sphere04.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "name": "seedSphere5",
+      "file": "Data/Item/s30_sphere05.bmd",
+      "textureFolders": ["Item", "Effect"]
+    },
+    {
+      "name": "silverBox",
+      "file": "Data/Item/Ingameshop/itembox_silver.bmd",
+      "textureFolders": ["Item/Ingameshop"]
+    },
+    {
+      "name": "skillCrystal",
+      "file": "Data/Item/Gem06.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "skillParchment",
+      "file": "Data/Item/rollofpaper.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "socketSeed",
+      "file": "Data/Item/s30_seed.bmd",
+      "textureFolders": ["Effect"]
+    },
+    {
+      "name": "transformationRing",
+      "file": "Data/Item/Ring01.bmd",
+      "textureFolders": ["Item"]
+    },
+    {
+      "name": "wizardScroll",
+      "file": "Data/Item/Book18.bmd",
+      "textureFolders": ["Item"]
+    }
+  ]
+}

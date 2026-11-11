@@ -1,0 +1,70 @@
+<rml>
+<head>
+	<title>Illusion Temple Result</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="cursed_temple_result.rcss"/>
+</head>
+<body>
+	<!-- The Illusion Temple result window (CCursedTempleResult): a message-box frame with the
+	     "Hero List" title, the column headings, the MU Alliance rows from y 65 and the Illusion
+	     Sorcery rows from y 140 (the hero's on a red text box), the reward notice, Close, and the
+	     victory / defeat banner fading in above the window. The workspace slot places and scales
+	     #panel; everything inside is reference px; text is .sharp-text at the native size,
+	     counter-scaled out of the panel. C++ keeps the result packet, Escape and
+	     the reward request; a click is queued with result_close. -->
+	<div id="panel" data-model="cursed_temple_result">
+		<div id="back"></div>
+		<div id="frame_top"></div>
+		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
+		<div id="frame_bottom"></div>
+		<div class="line line-lower"></div>
+		<div class="line line-upper"></div>
+
+		<div class="result-banner success" data-if="banner == 1"
+		     data-style-opacity="banner_alpha"></div>
+		<div class="result-banner failure" data-if="banner == 2"
+		     data-style-opacity="banner_alpha"></div>
+
+		<span id="ct_hero_list" class="sharp-text result-line"
+		      data-style-font-size="hero_list_label.text_px + 'px'">{{hero_list_label.text}}</span>
+		<span id="ct_column_header" class="sharp-text result-line"
+		      data-style-font-size="column_header.text_px + 'px'">{{column_header.text}}</span>
+		<!-- The same headings over each column, for a theme that lays the columns out itself. -->
+		<span class="sharp-text marquee column-label label-team" data-style-font-size="text_px + 'px'">{{camp_label}}</span>
+		<span class="sharp-text marquee column-label label-name" data-style-font-size="text_px + 'px'">{{character_label}}</span>
+		<span class="sharp-text marquee column-label label-class-name" data-style-font-size="text_px + 'px'">{{class_label}}</span>
+		<span class="sharp-text marquee column-label label-added-exp" data-style-font-size="text_px + 'px'">{{exp_label}}</span>
+		<span class="sharp-text marquee column-label label-point" data-style-font-size="text_px + 'px'">{{point_label}}</span>
+		<span id="ct_reward_hint" class="sharp-text marquee result-line"
+		      data-style-font-size="reward_hint.text_px + 'px'">{{reward_hint.text}}</span>
+
+		<!-- The two teams' rows. The theme puts each block on its own row and colours it; a cell
+		     given a width keeps to it, a longer value ending in ".." and scrolling on hover. -->
+		<div class="result-rows rows-allied">
+			<div class="result-row" data-for="r : allied_rows" data-class-hero="r.hero">
+				<div class="hero-row" data-if="r.hero" data-style---line-height="line_height_px + 'px'"></div>
+				<span class="sharp-text marquee result-cell cell-team" data-style-font-size="text_px + 'px'">{{r.team}}</span>
+				<span class="sharp-text marquee result-cell cell-name" data-style-font-size="text_px + 'px'">{{r.name}}</span>
+				<span class="sharp-text marquee result-cell cell-class-name" data-style-font-size="text_px + 'px'">{{r.class_name}}</span>
+				<span class="sharp-text marquee result-cell cell-added-exp" data-style-font-size="text_px + 'px'">{{r.added_exp}}</span>
+				<span class="sharp-text marquee result-cell cell-point" data-style-font-size="text_px + 'px'">{{r.point}}</span>
+			</div>
+		</div>
+		<div class="result-rows rows-illusion">
+			<div class="result-row" data-for="r : illusion_rows" data-class-hero="r.hero">
+				<div class="hero-row" data-if="r.hero" data-style---line-height="line_height_px + 'px'"></div>
+				<span class="sharp-text marquee result-cell cell-team" data-style-font-size="text_px + 'px'">{{r.team}}</span>
+				<span class="sharp-text marquee result-cell cell-name" data-style-font-size="text_px + 'px'">{{r.name}}</span>
+				<span class="sharp-text marquee result-cell cell-class-name" data-style-font-size="text_px + 'px'">{{r.class_name}}</span>
+				<span class="sharp-text marquee result-cell cell-added-exp" data-style-font-size="text_px + 'px'">{{r.added_exp}}</span>
+				<span class="sharp-text marquee result-cell cell-point" data-style-font-size="text_px + 'px'">{{r.point}}</span>
+			</div>
+		</div>
+
+		<div class="result-btn" id="btn_close" data-event-click="result_close">
+			<span class="sharp-text sharp-middle result-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{close_text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

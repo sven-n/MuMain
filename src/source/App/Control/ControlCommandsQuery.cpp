@@ -1,0 +1,1189 @@
+#include "stdafx.h"
+#include "App/Control/ControlCommands.h"
+
+#include "App/Control/ControlEvents.h"
+#include "App/Control/ControlObjects.h"
+#include "App/Control/ControlState.h"
+#include "Core/Input/SyntheticInput.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Data/GameData/EffectData/EffectTypeSymbols.h"
+#include "Render/Effects/ZzzEffect.h"
+#include "Core/Utilities/Benchmark/BenchRecorder.h"
+#include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Data/GameData/ItemData/ItemType.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Inventory/ItemMng.h"
+#include "Network/Server/WSclient.h"
+#include "Scenes/SceneCore.h"
+#include "Scenes/SceneManager.h"
+#include "Scenes/SceneNames.h"
+
+#include "MuGitCommit.h"
+#include "json.hpp"
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <memory>
+#include <optional>
+#include <utility>
+#include <vector>
+
+namespace
+{
+using App::Control::Act;
+using App::Control::ErrorCode;
+using App::Control::Request;
+using nlohmann::json;
+
+// Reported when the executable carries no version resource, which is the
+// ordinary case outside Windows: the compile stamp still tells two builds
+// of the same source tree apart.
+constexpr const char* UnversionedBuildIdentifier = __DATE__ " " __TIME__;
+constexpr const char* UnknownVersion = "unknown";
+
+// Two frames are enough for the readback; the allowance covers a stalled
+// GPU queue without letting a caller wait indefinitely.
+constexpr std::chrono::milliseconds ScreenshotDeadline{5000};
+
+// `wait-for` without a timeout of its own.
+constexpr double DefaultWaitForSeconds = 30.0;
+// Longest wait a caller may ask for. An hour is far past any scenario step,
+// and a bound is what keeps the conversion below defined: a deadline is
+// milliseconds in a `long long`, and a double that no such count can hold
+// converts to nothing meaningful.
+constexpr double MaxWaitForSeconds = 3600.0;
+// The widest window pixel a click may name. Far past any resolution, and
+// small enough that the cast to `float` is exact.
+constexpr double MaxWindowPixel = 100000.0;
+
+// An injected click spans about seven rendered frames until it answers (idle,
+// two hover frames, press, held, release, idle), a key three. The allowance
+// covers a client drawing a frame every two seconds without letting a caller hang.
+constexpr std::chrono::milliseconds SyntheticInputDeadline{15000};
+
+// One recorded event as the protocol reports it.
+json EventObject(const App::Control::Events::Record& record)
+{
+    json event = json::parse(record.fields, nullptr, false);
+    if (event.is_discarded() || !event.is_object())
+    {
+        event = json::object();
+    }
+    event["seq"] = record.seq;
+    event["time"] = record.utc;
+    event["event"] = record.name;
+    return event;
+}
+
+// Every `key=value` of `--match` compared against the event's own fields,
+// as text, so a caller can match a name or a number the same way.
+bool EventMatches(const json& event, const std::map<std::string, std::string>& match)
+{
+    for (const auto& [key, expected] : match)
+    {
+        if (!event.contains(key))
+        {
+            return false;
+        }
+
+        const json& field = event.at(key);
+        const std::string actual = field.is_string() ? field.get<std::string>() : field.dump();
+        if (actual != expected)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// events --follow: streams new events as they are recorded, one line each,
+// until the caller disconnects.
+class EventStreamAct : public Act
+{
+public:
+    explicit EventStreamAct(std::uint64_t since) : m_since(since) {}
+
+    [[nodiscard]] std::string_view Name() const override
+    {
+        return "events";
+    }
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
+    }
+    // A follower runs until its caller goes away: no deadline at all.
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
+    {
+        return std::nullopt;
+    }
+
+    [[nodiscard]] Status Tick(std::string& response) override
+    {
+        if (m_delivered == m_pending.size())
+        {
+            // Visiting the ring costs its whole capacity, so take everything
+            // that is new in one pass and hand it out from there; the ring is
+            // only visited again once this batch has been delivered.
+            m_pending.clear();
+            App::Control::Events::ForEachSince(m_since,
+                                               [this](const App::Control::Events::Record& record)
+                                               {
+                                                   m_pending.push_back(record);
+                                                   return true;
+                                               });
+            m_delivered = 0;
+            if (m_pending.empty())
+            {
+                return Status::Running;
+            }
+            m_since = m_pending.back().seq;
+        }
+
+        json result;
+        result["event"] = EventObject(m_pending[m_delivered]);
+        ++m_delivered;
+        response = App::Control::EncodeResult(EncodedId(), result.dump());
+        // One line at a time keeps the order and the framing simple; the
+        // dispatcher asks again in the same frame while a backlog is left.
+        return Status::Emitted;
+    }
+
+private:
+    std::uint64_t m_since;
+    std::vector<App::Control::Events::Record> m_pending;
+    std::size_t m_delivered = 0;
+};
+
+// wait-for: watches the ring until a matching event arrives.
+class WaitForAct : public Act
+{
+public:
+    WaitForAct(std::string wanted, std::map<std::string, std::string> match, std::uint64_t since,
+               std::chrono::milliseconds timeout)
+        : m_wanted(std::move(wanted)), m_match(std::move(match)), m_since(since), m_timeout(timeout)
+    {
+    }
+
+    [[nodiscard]] std::string_view Name() const override
+    {
+        return "wait-for";
+    }
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
+    }
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
+    {
+        return m_timeout;
+    }
+
+    [[nodiscard]] std::string ProgressObject() const override
+    {
+        json progress;
+        progress["event"] = m_wanted;
+        progress["last_seq"] = App::Control::Events::LastSequence();
+        return progress.dump();
+    }
+
+    [[nodiscard]] Status Tick(std::string& response) override
+    {
+        // A `wait-for` is pending for seconds at a time and usually finds
+        // nothing, so it visits the ring rather than copying it: no
+        // allocation per frame, and it stops at its match.
+        bool matched = false;
+        App::Control::Events::ForEachSince(m_since,
+                                           [this, &matched, &response](const App::Control::Events::Record& record)
+                                           {
+                                               m_since = record.seq;
+                                               if (record.name != m_wanted)
+                                               {
+                                                   return true;
+                                               }
+
+                                               const json event = EventObject(record);
+                                               if (!EventMatches(event, m_match))
+                                               {
+                                                   return true;
+                                               }
+
+                                               json result;
+                                               result["event"] = event;
+                                               response = App::Control::EncodeResult(EncodedId(), result.dump());
+                                               matched = true;
+                                               return false;
+                                           });
+
+        return matched ? Status::Finished : Status::Running;
+    }
+
+private:
+    std::string m_wanted;
+    std::map<std::string, std::string> m_match;
+    std::uint64_t m_since;
+    std::chrono::milliseconds m_timeout;
+};
+
+std::string& MutableBuildIdentifier()
+{
+    static std::string identifier = UnversionedBuildIdentifier;
+    return identifier;
+}
+
+// Absolute path for a caller-given one, so the answer names a file the
+// caller can open regardless of the client's working directory. Used by every
+// command that writes a file (`screenshot`, `tooltip-snapshot`, `item-name-snapshot`).
+std::filesystem::path ResolveScreenshotPath(const std::string& requested)
+{
+    // Through the wide form: a std::string given to std::filesystem::path is
+    // decoded with the process code page on Windows, which is not UTF-8 for
+    // this client, and a path with non-ASCII characters would come out wrong.
+    const std::filesystem::path given(Core::Text::FromUtf8(requested));
+    std::error_code failure;
+    const std::filesystem::path absolute = std::filesystem::absolute(given, failure);
+    return failure ? given : absolute;
+}
+
+// Capture in flight. Shared with the completion callback so an act that is
+// interrupted or times out cannot be written to after it is gone.
+struct ScreenshotState
+{
+    bool finished = false;
+    ScreenshotOutcome outcome;
+};
+
+class ScreenshotAct : public Act
+{
+public:
+    explicit ScreenshotAct(std::shared_ptr<ScreenshotState> state) : m_state(std::move(state)) {}
+
+    // Destroyed before its capture finished — the reader table was full, the
+    // caller went away, the deadline passed: the capture is dropped rather
+    // than left in flight, where it would block the next one and report into
+    // state nobody reads.
+    ~ScreenshotAct() override
+    {
+        if (!m_state->finished)
+        {
+            CancelScriptedScreenshot();
+        }
+    }
+
+    [[nodiscard]] std::string_view Name() const override
+    {
+        return "screenshot";
+    }
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
+    }
+
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
+    {
+        return ScreenshotDeadline;
+    }
+
+    [[nodiscard]] Status Tick(std::string& response) override
+    {
+        if (!m_state->finished)
+        {
+            return Status::Running;
+        }
+
+        const ScreenshotOutcome& outcome = m_state->outcome;
+        // Absolute either way: a generated name is relative to the client's
+        // working directory, which the caller does not know.
+        const std::string path =
+            Core::Text::ToUtf8(ResolveScreenshotPath(Core::Text::ToUtf8(outcome.path.c_str())).wstring().c_str());
+        if (!outcome.saved)
+        {
+            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed,
+                                                 "the frame could not be written to `" + path + "`");
+            return Status::Finished;
+        }
+
+        json result;
+        result["path"] = path;
+        result["width"] = outcome.width;
+        result["height"] = outcome.height;
+        response = App::Control::EncodeResult(EncodedId(), result.dump());
+        return Status::Finished;
+    }
+
+private:
+    std::shared_ptr<ScreenshotState> m_state;
+};
+
+// hotkey / click-ui / type: answers once the injected press has been released,
+// so the caller's next command sees the UI after the game reacted to it.
+class SyntheticInputAct : public Act
+{
+public:
+    SyntheticInputAct(std::string_view name, std::string encodedResult)
+        : m_name(name), m_encodedResult(std::move(encodedResult)),
+          m_generation(Core::Input::Synthetic::CurrentGeneration())
+    {
+    }
+
+    // Timed out, interrupted, or its caller went away: forget the injection
+    // instead of letting it reach the game after its command was answered.
+    // Only its own: several of these run at once, so the injector may already
+    // be carrying the next caller's press.
+    ~SyntheticInputAct() override
+    {
+        if (IsStillMine())
+        {
+            Core::Input::Synthetic::Reset();
+        }
+        Core::Input::Synthetic::ForgetOutcome(m_generation);
+    }
+
+    [[nodiscard]] std::string_view Name() const override
+    {
+        return m_name;
+    }
+    // An injected key or click observes the single act slot rather than
+    // taking it: opening the inventory does not cancel a walk. A second
+    // injection is still refused, by the idleness check in the handler.
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
+    }
+
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
+    {
+        return SyntheticInputDeadline;
+    }
+
+    [[nodiscard]] Status Tick(std::string& response) override
+    {
+        // A failed owner can be superseded before this reader ticks. Its outcome
+        // survives newer schedules until this act retires.
+        const auto failure = Core::Input::Synthetic::FailureFor(m_generation);
+        if (failure != Core::Input::Synthetic::DeliveryFailure::None)
+        {
+            const char* message = failure == Core::Input::Synthetic::DeliveryFailure::PhysicalOverlap
+                                      ? "physical mouse press cancelled scripted click"
+                                      : "input delivery target disappeared";
+            response = App::Control::EncodeError(EncodedId(), ErrorCode::Failed, message);
+        }
+        else if (IsStillMine() && !Core::Input::Synthetic::IsIdle())
+            return Status::Running;
+        else
+            response = App::Control::EncodeResult(EncodedId(), m_encodedResult);
+        return Status::Finished;
+    }
+
+private:
+    [[nodiscard]] bool IsStillMine() const
+    {
+        return Core::Input::Synthetic::CurrentGeneration() == m_generation;
+    }
+
+    std::string_view m_name;
+    std::string m_encodedResult;
+    std::uint64_t m_generation;
+};
+
+} // namespace
+
+namespace App::Control::Commands
+{
+std::string_view CurrentSceneName()
+{
+    return Scenes::NamesOf(SceneFlag).id;
+}
+
+void SetBuildIdentifier(std::string identifier)
+{
+    if (identifier.empty() || identifier == UnknownVersion)
+    {
+        return;
+    }
+    MutableBuildIdentifier() = std::move(identifier);
+}
+
+const std::string& BuildIdentifier()
+{
+    return MutableBuildIdentifier();
+}
+
+std::string Ping(const Request& request, std::unique_ptr<Act>&)
+{
+    json result;
+    result["build"] = BuildIdentifier();
+    // The git commit the client was built from; `commit_changed` when tracked
+    // files differed from it, so the client is not exactly that commit.
+    result["commit"] = MU_GIT_COMMIT;
+    result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
+    result["scene"] = CurrentSceneName();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// A benchmark run's progress; `$bench run ...` through `console` starts one.
+std::string Bench(const Request& request, std::unique_ptr<Act>&)
+{
+    const Core::Benchmark::Recorder& recorder = Core::Benchmark::Recorder::Instance();
+    json result;
+    result["running"] = recorder.IsRunning();
+    result["status"] = recorder.StatusText();
+    result["last_run"] = recorder.LastOutputPath();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// How render's bones compare with the character pre-pass; `start` clears the counts and begins checking.
+std::string Bones(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        g_PrepassBoneCheck = PrepassBoneCheck{};
+        g_PrepassBoneCheck.enabled = true;
+    }
+    json result;
+    result["checked"] = g_PrepassBoneCheck.checked;
+    result["players"] = g_PrepassBoneCheck.players;
+    result["mismatched"] = g_PrepassBoneCheck.mismatched;
+    result["rebuilt"] = g_PrepassBoneCheck.rebuilt;
+    result["parts_reused"] = g_PrepassBoneCheck.partsReused;
+    result["parts_drawn_unadvanced"] = g_PrepassBoneCheck.partsDrawnUnadvanced;
+    result["max_delta"] = g_PrepassBoneCheck.maxDelta;
+    result["characters"] = g_LastActiveCharacterCount;
+    result["parallel"] = g_LastAnimationWasParallel;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// What the draw spawned or animated since `start`, by the spawn function's callers; the update should own all of it.
+std::string DrawSpawns(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawSpawnCheck::Start();
+    }
+    int draws = 0;
+    json sites = json::array();
+    for (const Diagnostics::DrawSpawnCheck::Site& site : Diagnostics::DrawSpawnCheck::Report(draws))
+    {
+        sites.push_back({{"kind", site.kind}, {"callers", site.callers}, {"count", site.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["sites"] = sites;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawPurity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawPurityCheck::Start();
+    }
+    int draws = 0;
+    json changes = json::array();
+    for (const Diagnostics::DrawPurityCheck::Change& change : Diagnostics::DrawPurityCheck::Report(draws))
+    {
+        changes.push_back({{"what", change.what}, {"count", change.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["changes"] = changes;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
+{
+    bool on = Render::Drawing::DrawsWorldLater();
+    if (request.Has("on") && !request.GetBool("on", on))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "on must be a boolean");
+    }
+    Render::Drawing::SetDrawsWorldLater(on);
+    json result;
+    result["on"] = on;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawParity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    bool later = true;
+    if (request.Has("later") && !request.GetBool("later", later))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "later must be a boolean");
+    }
+    if (start)
+    {
+        Render::Drawing::RequestDrawParity(later);
+    }
+    const Render::Drawing::DrawParityReport& report = Render::Drawing::LastDrawParityReport();
+    json result;
+    result["done"] = report.done;
+    result["later"] = report.later;
+    result["at_once_calls"] = report.atOnceCalls;
+    result["later_calls"] = report.laterCalls;
+    result["first_difference"] = report.firstDifference;
+    result["first"] = {{"at_once", report.first.first}, {"later", report.first.second}};
+    result["only_at_once"] = report.onlyAtOnce;
+    result["only_later"] = report.onlyLater;
+    result["only_at_once_examples"] = report.onlyAtOnceExamples;
+    result["only_later_examples"] = report.onlyLaterExamples;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string SpawnEffect(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string kindText = "effect";
+    if (request.Has("kind") && !request.GetString("kind", kindText))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` must be a string");
+    }
+    Data::Effects::EffectKind kind;
+    if (kindText == "effect")
+        kind = Data::Effects::EffectKind::Effect;
+    else if (kindText == "particle")
+        kind = Data::Effects::EffectKind::Particle;
+    else if (kindText == "joint")
+        kind = Data::Effects::EffectKind::Joint;
+    else
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` is effect, particle or joint");
+
+    const auto symbols = Data::Effects::GetEffectTypeSymbols(kind);
+    std::string code;
+    if (!request.GetString("type", code))
+    {
+        // Without a type, the types of the kind, for a sweep to go through.
+        json types = json::array();
+        for (const Data::Effects::EffectTypeSymbol& symbol : symbols)
+            types.push_back({{"code", std::string(symbol.code)}, {"type", symbol.type}});
+        json result;
+        result["types"] = types;
+        return EncodeResult(request.EncodedId(), result.dump());
+    }
+    const auto symbol = std::ranges::find(symbols, code, &Data::Effects::EffectTypeSymbol::code);
+    if (symbol == symbols.end())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "no " + kindText + " type `" + code + "`");
+    }
+    int subType = 0;
+    if (request.Has("subtype") && !request.GetInt("subtype", subType))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`subtype` must be a number");
+    }
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
+    // At the hero, owned by and aimed at the hero, as most skills create them.
+    OBJECT* o = &Hero->Object;
+    vec3_t light = {1.f, 1.f, 1.f};
+    switch (kind)
+    {
+    case Data::Effects::EffectKind::Effect:
+        CreateEffect(symbol->type, o->Position, o->Angle, light, subType, o);
+        break;
+    case Data::Effects::EffectKind::Particle:
+        CreateParticle(symbol->type, o->Position, o->Angle, light, subType, 1.f, o);
+        break;
+    default:
+        CreateJoint(symbol->type, o->Position, o->Position, o->Angle, subType, o);
+        break;
+    }
+    json result;
+    result["kind"] = kindText;
+    result["type"] = code;
+    result["subtype"] = subType;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string Scene(const Request& request, std::unique_ptr<Act>&)
+{
+    json result;
+    result["scene"] = CurrentSceneName();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string State(const Request& request, std::unique_ptr<Act>&)
+{
+    json result;
+    result["scene"] = CurrentSceneName();
+    // The account is known from the moment the login is sent; before that
+    // it is reported as empty rather than omitted, so a caller can read
+    // the same field on every scene.
+    result["account"] = Core::Text::ToUtf8(LogInID);
+
+    if (SceneFlag != MAIN_SCENE)
+    {
+        // No character fields before the world is entered, by design: a
+        // caller reads `scene` to know which other fields to expect.
+        return EncodeResult(request.EncodedId(), result.dump());
+    }
+
+    return EncodeResult(request.EncodedId(), WorldStateObject());
+}
+
+namespace
+{
+// Reads the integer `key` into `value` when the request has it; false when it is not a number from 0 to `max`.
+bool ReadBounded(const Request& request, const char* key, int max, int& value)
+{
+    return !request.Has(key) || (request.GetInt(key, value) && value >= 0 && value <= max);
+}
+
+// The answer to a request that names an item number no item uses: it would get the lines of an empty item.
+std::string NoSuchItem(const Request& request, int group, int number)
+{
+    return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                       "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+}
+
+// Reads the item a request names into `params`: `group` and `number`, and the fields `level`, `durability`, `luck`,
+// `skill`, `option`, `excellent`, `ancient`, `harmony` and `harmony_level`, as the server would send them (left out:
+// 0, and full durability for the item as made). Returns the `bad_request` to answer when a field is missing or can't
+// be held, or no item uses the number; empty when the item is read.
+std::string ReadItemParameters(const Request& request, const std::string& command, ItemCreationParams& params)
+{
+    int group = -1;
+    int number = -1;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`" + command + "` needs `group` and `number` of an item");
+    }
+
+    // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
+    // not a wrapped one. Checked before the item is made from the item data. -1: left out.
+    int level = -1;
+    int durability = -1;
+    int option = 0;
+    int excellent = 0;
+    int ancient = 0;
+    int harmony = 0;
+    int harmonyLevel = -1;
+    if (!ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level) ||
+        !ReadBounded(request, "durability", 255, durability) || !ReadBounded(request, "option", 15, option) ||
+        !ReadBounded(request, "excellent", 63, excellent) || !ReadBounded(request, "ancient", 255, ancient) ||
+        !ReadBounded(request, "harmony", 15, harmony) || !ReadBounded(request, "harmony_level", 15, harmonyLevel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`level`, `option`, `harmony` and `harmony_level` are 0 to 15, `excellent` the excellent "
+                           "options' bits 0 to 63, `durability` and `ancient` 0 to 255");
+    }
+    // A harmony level counts only with a harmony option; alone it would be ignored.
+    if (harmonyLevel >= 0 && harmony == 0)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`harmony_level` needs `harmony`, the Jewel of Harmony option");
+    }
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return NoSuchItem(request, group, number);
+    }
+
+    params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+    if (level >= 0)
+        params.Level = static_cast<BYTE>(level);
+    bool flag = false;
+    if (request.GetBool("luck", flag))
+        params.WithLuck = flag;
+    if (request.GetBool("skill", flag))
+        params.WithSkill = flag;
+    if (option > 0)
+    {
+        params.WithOption = true;
+        params.OptionLevel = static_cast<BYTE>(option);
+    }
+    if (excellent > 0)
+    {
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = static_cast<BYTE>(excellent);
+    }
+    if (ancient > 0)
+    {
+        params.IsAncient = true;
+        params.AncientDiscriminator = static_cast<BYTE>(ancient);
+    }
+    if (harmony > 0)
+    {
+        params.HasHarmonyOption = true;
+        params.HarmonyOptionType = static_cast<BYTE>(harmony);
+        if (harmonyLevel >= 0)
+            params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
+    }
+    // The full durability grows with the level and the options, so it is taken once they are set.
+    params.Durability =
+        durability >= 0 ? static_cast<BYTE>(durability) : Engine::Items::TooltipSnapshot::FullDurability(params);
+    return {};
+}
+} // namespace
+
+std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    ItemCreationParams params{};
+    if (std::string refusal = ReadItemParameters(request, "tooltip", params); !refusal.empty())
+    {
+        return refusal;
+    }
+
+    const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
+
+    json result;
+    result["lines"] = json::array();
+    for (const ItemTooltipLine& line : lines)
+    {
+        result["lines"].push_back(
+            {{"text", Core::Text::ToUtf8(line.text.c_str())}, {"color", line.color}, {"bold", line.bold}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`tooltip-snapshot` needs `out`, the file to write");
+    }
+
+    // One group per request keeps the frame that builds them short. Checked before `out` is opened: opening it
+    // empties it, and a mistyped request must not wipe a recorded snapshot.
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    const int tooltips = Engine::Items::TooltipSnapshot::WriteItemTooltipSnapshot(out, onlyGroup);
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["tooltips"] = tooltips;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemName(const Request& request, std::unique_ptr<Act>&)
+{
+    int group = -1;
+    int number = -1;
+    int level = 0;
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX ||
+        !ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name` needs `group` and `number` of an item, and a `level` of 0 to 15");
+    }
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return NoSuchItem(request, group, number);
+    }
+
+    json result;
+    result["name"] = Core::Text::ToUtf8(App::Control::ItemDisplayName(group * MAX_ITEM_INDEX + number, level).c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string path;
+    if (!request.GetString("out", path) || path.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`item-name-snapshot` needs `out`, the file to write");
+    }
+    int onlyGroup = -1;
+    if (request.Has("group") && (!request.GetInt("group", onlyGroup) || onlyGroup < 0 || onlyGroup >= MAX_ITEM_TYPE))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
+    }
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
+    }
+
+    int names = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists() || (onlyGroup >= 0 && definition.group != onlyGroup))
+        {
+            continue;
+        }
+        const int type = definition.group * MAX_ITEM_INDEX + definition.number;
+        for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+        {
+            out << definition.group << '/' << definition.number << " +" << level << ' '
+                << Core::Text::ToUtf8(App::Control::ItemDisplayName(type, level).c_str()) << '\n';
+            ++names;
+        }
+    }
+    // A full disk or a failed write leaves the file short: not a snapshot.
+    out.flush();
+    if (!out)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written completely");
+    }
+
+    json result;
+    result["names"] = names;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string RepairTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    ItemCreationParams params{};
+    if (std::string refusal = ReadItemParameters(request, "repair-tooltip", params); !refusal.empty())
+    {
+        return refusal;
+    }
+    ITEM item;
+    FillItemFromParameters(item, params);
+    const RepairInfoText repair = BuildRepairInfoText(&item);
+
+    json result;
+    result["lines"] = json::array();
+    for (int line = 0; line < repair.lineCount; ++line)
+    {
+        result["lines"].push_back({{"text", Core::Text::ToUtf8(TextList[line])},
+                                   {"color", TextListColor[line]},
+                                   {"bold", TextBold[line] != 0}});
+    }
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string Nearby(const Request& request, std::unique_ptr<Act>&)
+{
+    json result;
+    result["nearby"] = NearbyArray();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string EventsSince(const Request& request, std::unique_ptr<Act>& act)
+{
+    int since = 0;
+    if (request.Has("since") && (!request.GetInt("since", since) || since < 0))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`since` is a sequence number, 0 or more");
+    }
+
+    bool follow = false;
+    if (request.Has("follow") && !request.GetBool("follow", follow))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`follow` is true or false");
+    }
+
+    if (follow)
+    {
+        act = std::make_unique<EventStreamAct>(static_cast<std::uint64_t>(std::max(since, 0)));
+        return {};
+    }
+
+    json events = json::array();
+    for (const Events::Record& record : Events::Since(static_cast<std::uint64_t>(std::max(since, 0))))
+    {
+        events.push_back(EventObject(record));
+    }
+
+    json result;
+    result["events"] = std::move(events);
+    result["last_seq"] = Events::LastSequence();
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string WaitFor(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string wanted;
+    if (!request.GetString("event", wanted) || wanted.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`wait-for` needs an event name");
+    }
+
+    // Omitted means "from now"; given, it is read as strictly as every
+    // other argument, because silently watching from the latest sequence
+    // drops exactly the events the caller asked to replay.
+    int since = static_cast<int>(Events::LastSequence());
+    if (request.Has("since") && (!request.GetInt("since", since) || since < 0))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`since` is a sequence number, 0 or more");
+    }
+
+    // `timeout` takes the same treatment as every integer argument: out of
+    // range or not a number at all is a `bad_request`, not a silent default.
+    // A negative one would expire before the watcher's first idle tick, and
+    // an enormous one has no defined conversion to a millisecond count.
+    double timeoutSeconds = DefaultWaitForSeconds;
+    if (request.Has("timeout") && (!request.GetDouble("timeout", timeoutSeconds) ||
+                                   !(timeoutSeconds > 0.0 && timeoutSeconds <= MaxWaitForSeconds)))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`timeout` is a positive number of seconds, at most " +
+                               std::to_string(static_cast<int>(MaxWaitForSeconds)));
+    }
+
+    // A malformed `match` is refused rather than dropped: watching for an
+    // event with no filter at all is not what the caller asked for, and it
+    // answers on the first event of that name.
+    std::map<std::string, std::string> match;
+    if (request.Has("match") && !request.GetStringMap("match", match))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`match` is an object of field names to values");
+    }
+
+    act = std::make_unique<WaitForAct>(std::move(wanted), std::move(match),
+                                       static_cast<std::uint64_t>(std::max(since, 0)),
+                                       std::chrono::milliseconds(static_cast<long long>(timeoutSeconds * 1000)));
+    return {};
+}
+
+std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string requestedPath;
+    std::wstring targetPath;
+    if (request.Has("out") && (!request.GetString("out", requestedPath) || requestedPath.empty()))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`out` is a path; omit it to name the capture");
+    }
+    if (!requestedPath.empty())
+    {
+        targetPath = ResolveScreenshotPath(requestedPath).wstring();
+    }
+
+    int quality = BestScreenshotQuality;
+    if (request.Has("quality") &&
+        (!request.GetInt("quality", quality) || quality < 1 || quality > BestScreenshotQuality))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`quality` is the JPEG quality, 1 to 100");
+    }
+
+    auto state = std::make_shared<ScreenshotState>();
+    if (!RequestScriptedScreenshot(targetPath, quality,
+                                   [state](const ScreenshotOutcome& outcome)
+                                   {
+                                       state->outcome = outcome;
+                                       state->finished = true;
+                                   }))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another screenshot is already being captured");
+    }
+
+    act = std::make_unique<ScreenshotAct>(std::move(state));
+    return {};
+}
+
+std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string name;
+    if (!request.GetString("key", name) || name.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`hotkey` needs a key name");
+    }
+
+    const std::optional<int> virtualKey = Core::Input::Synthetic::VirtualKeyFromName(name);
+    if (!virtualKey)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "unknown key `" + name + "`; known: " + std::string(Core::Input::Synthetic::KeyNames()));
+    }
+
+    if (!Core::Input::Synthetic::PressKey(*virtualKey))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["key"] = name;
+    act = std::make_unique<SyntheticInputAct>("hotkey", result.dump());
+    return {};
+}
+
+std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double windowX = 0.0;
+    double windowY = 0.0;
+    if (!request.GetDouble("x", windowX) || !request.GetDouble("y", windowY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`click-ui` needs `x` and `y` window pixels");
+    }
+
+    // Bounded for the same reason `Request::GetInt` bounds its own reads:
+    // the coordinates are cast to `float` below, and a double outside the
+    // range of one has no defined conversion.
+    if (!(std::abs(windowX) <= MaxWindowPixel && std::abs(windowY) <= MaxWindowPixel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are window pixels, at most " +
+                               std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+    }
+
+    std::string buttonName = "left";
+    if (request.Has("button") && !request.GetString("button", buttonName))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`button` is `left` or `right`");
+    }
+    const std::optional<Core::Input::Synthetic::MouseButton> button =
+        Core::Input::Synthetic::MouseButtonFromName(buttonName);
+    if (!button)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "unknown button `" + buttonName + "`; known: left, right");
+    }
+
+    if (!Core::Input::Synthetic::Click(static_cast<float>(windowX), static_cast<float>(windowY), *button))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = windowX;
+    result["y"] = windowY;
+    result["button"] = buttonName;
+    act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
+    return {};
+}
+std::string HoverUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double windowX = 0.0;
+    double windowY = 0.0;
+    if (!request.GetDouble("x", windowX) || !request.GetDouble("y", windowY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`hover-ui` needs `x` and `y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    if (!(std::abs(windowX) <= MaxWindowPixel && std::abs(windowY) <= MaxWindowPixel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are window pixels, at most " +
+                               std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+    }
+
+    if (!Core::Input::Synthetic::Move(static_cast<float>(windowX), static_cast<float>(windowY)))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = windowX;
+    result["y"] = windowY;
+    act = std::make_unique<SyntheticInputAct>("hover-ui", result.dump());
+    return {};
+}
+
+std::string DragUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double fromX = 0.0;
+    double fromY = 0.0;
+    double toX = 0.0;
+    double toY = 0.0;
+    if (!request.GetDouble("x", fromX) || !request.GetDouble("y", fromY) || !request.GetDouble("to_x", toX) ||
+        !request.GetDouble("to_y", toY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`drag-ui` needs `x`, `y`, `to_x` and `to_y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    for (const double value : {fromX, fromY, toX, toY})
+    {
+        if (!(std::abs(value) <= MaxWindowPixel))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                               "coordinates are window pixels, at most " +
+                                   std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+        }
+    }
+
+    std::string buttonName = "left";
+    if (request.Has("button") && !request.GetString("button", buttonName))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`button` is `left` or `right`");
+    }
+    const std::optional<Core::Input::Synthetic::MouseButton> button =
+        Core::Input::Synthetic::MouseButtonFromName(buttonName);
+    if (!button)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "unknown button `" + buttonName + "`; known: left, right");
+    }
+
+    if (!Core::Input::Synthetic::Drag(static_cast<float>(fromX), static_cast<float>(fromY), static_cast<float>(toX),
+                                      static_cast<float>(toY), *button))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = fromX;
+    result["y"] = fromY;
+    result["to_x"] = toX;
+    result["to_y"] = toY;
+    result["button"] = buttonName;
+    act = std::make_unique<SyntheticInputAct>("drag-ui", result.dump());
+    return {};
+}
+
+std::string Type(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string text;
+    if (!request.GetString("text", text) || !Core::Input::Synthetic::ValidText(text))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`type` needs printable UTF-8 text (1-256 bytes)");
+
+    bool enter = false;
+    if (request.Contains("enter") && !request.GetStrictBool("enter", enter))
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`enter` must be boolean");
+
+    if (!Core::Input::Synthetic::TypeText(text, enter))
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+
+    json result;
+    result["bytes"] = text.size();
+    result["enter"] = enter;
+    act = std::make_unique<SyntheticInputAct>("type", result.dump());
+    return {};
+}
+} // namespace App::Control::Commands

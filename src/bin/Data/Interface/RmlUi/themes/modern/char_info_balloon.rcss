@@ -1,0 +1,50 @@
+/* Modern theme for the character-select scene's per-character name/guild/level tags -- flat,
+   semi-transparent rounded backing instead of legacy sprite art. */
+
+.balloon {
+	position: absolute;
+	width: 118px;
+	height: 54px;
+	pointer-events: none;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+}
+.balloon-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 118px;
+	height: 54px;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1px token(border-frame);
+	border-radius: 2px;
+}
+
+.balloon-name, .balloon-guild, .balloon-class {
+	position: absolute;
+	left: 0;
+	width: 118px;
+	text-align: center;
+	white-space: nowrap;
+	font-size: 12px;
+	font-family: "token(font-body)";
+}
+.balloon-name {
+	top: 6px;
+	font-weight: bold;
+	color: token(text-primary);
+}
+.balloon-guild {
+	top: 22px;
+	color: token(text-primary);
+}
+.balloon-class {
+	top: 38px;
+	color: token(accent-gold);
+}
+
+/* Name by control status (BalloonNameStatus; the RML toggles .name-<key>). The original
+   client's colors; a normal name keeps the .balloon-name color. */
+.balloon-name.name-blocked-character { color: #00ffff; }
+.balloon-name.name-blocked-items     { color: #ffd927; }
+.balloon-name.name-operator          { color: #ff0000; }

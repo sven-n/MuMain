@@ -1,0 +1,78 @@
+<rml>
+<head>
+	<title>NPC Shop</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
+	<link type="text/rcss" href="npc_shop.rcss"/>
+</head>
+<body data-model="npc_shop">
+	<!-- CNPCShop (NPCShop.h): the frame, the item grid, the items C++ draws live into #item_view,
+	     the stack counts, title, tax-rate line, repair buttons and repair-money strip. No exit button
+	     here -- the frame's corner "X" closes it. -->
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+		<!-- The frame. -->
+		<div class="bg-panel">
+			<div class="inv-shell-edge"></div>
+			<div class="inv-groove"></div>
+			<!-- Header rail's fill and accent; the title is the rail below. -->
+			<div class="rail-fill">
+				<div class="rail-accent"></div>
+			</div>
+		</div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<!-- Header rail: text centered (RT3_SORT_CENTER), and sized for a two-line title+tax-rate
+		     block, unlike the single-title reference windows. -->
+		<div class="modern-header-rail-px shop-header-rail">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px shop-header-text-px">
+				<div id="title" class="modern-header-title-px">{{title}}</div>
+				<!-- Repurposes the (otherwise-unused) eyebrow style as a line BELOW the title, not
+				     above it -- matches this window's own native layout (title above, tax-rate
+				     line below), unlike the class's originally envisioned "category label above
+				     the title" usage (see base.rcss). -->
+				<div id="tax_rate" class="modern-header-eyebrow-px shop-tax-rate-px">{{tax_rate_text}}</div>
+			</div>
+		</div>
+
+		<div id="btn_repair" class="modern-icon-btn-px shop-btn-repair" data-class-hidden="!repair_visible"
+		     data-event-click="npc_shop_repair_click" data-attr-data-hint="repair_tooltip">
+			<span class="modern-icon-btn-glyph-px">&#9099;</span>
+		</div>
+
+		<div id="btn_repair_all" class="modern-icon-btn-px shop-btn-repair-all" data-class-hidden="!repair_visible"
+		     data-event-click="npc_shop_repair_all_click" data-attr-data-hint="repair_all_tooltip">
+			<span class="modern-icon-btn-glyph-px">&#9099;</span>
+		</div>
+
+		<!-- Repair-money strip: base.rcss's shared .modern-wallet-px family (generalized from
+		     CMyInventory's gold strip), showing AllRepairGold instead of the character's own gold. -->
+		<div id="repair_wallet" class="modern-wallet-px shop-repair-wallet" data-class-hidden="!repair_visible">
+			<div class="modern-wallet-coin-px"></div>
+			<span class="modern-wallet-label-px">{{repair_all_label}}</span>
+		</div>
+		<span id="repair_gold_text" class="modern-wallet-value-px shop-repair-value gold-amount" data-class-hidden="!repair_visible"
+		      data-class-gold-base="repair_gold_tier == 'base'"
+		      data-class-gold-hundred-thousand="repair_gold_tier == 'hundred-thousand'"
+		      data-class-gold-million="repair_gold_tier == 'million'"
+		      data-class-gold-ten-million="repair_gold_tier == 'ten-million'">{{repair_gold_text}}</span>
+	</div>
+</body>
+</rml>

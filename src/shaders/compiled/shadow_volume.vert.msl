@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct MVP
+{
+    float4x4 mvp;
+};
+
+struct main0_out
+{
+    float4 gl_Position [[position]];
+};
+
+struct main0_in
+{
+    float3 input_pos [[attribute(0)]];
+};
+
+vertex main0_out main0(main0_in in [[stage_in]], constant MVP& _28 [[buffer(0)]])
+{
+    main0_out out = {};
+    out.gl_Position = _28.mvp * float4(in.input_pos, 1.0);
+    return out;
+}
+

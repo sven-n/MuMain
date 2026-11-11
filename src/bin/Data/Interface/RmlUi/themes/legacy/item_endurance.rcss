@@ -1,0 +1,125 @@
+/* Legacy theme for CItemEnduranceInfo, reproducing its Render(). Left column (#pets, the screen's
+   stretch, reference px): each pet / summon HP frame is a rgba(0, 0, 0, 179) fill
+   (0xB3000000) inset 2, the 57 x 23 frame art and the left part of the 49 x 3 health bar at
+   (4, 16); its name in the normal font, white, centred on the frame 5 below its top. The elf's
+   arrow count is orange (255, 160, 0) on a rgba(0, 0, 0, 180) box sized to the text. Right
+   (#icons, on the dock, reference px): 23 x 23 icons, tinted by durability band with
+   RenderColorQuadARGB()'s ARGB words (0x80FFFF00, 0x80FF8000, 0x80FF3300, 0x80FF0000). The
+   hovered icon's tooltip is bold on a rgba(0, 0, 0, 128) box, coloured by band. */
+
+@spritesheet endurance-pet-back-sheet { src: "../../../newui_Pet_Back.tga"; endurance-pet-back: 0px 0px 57px 23px; }
+@spritesheet endurance-boots-sheet { src: "../../../newui_durable_boots.tga"; endurance-boots: 0px 0px 23px 23px; }
+@spritesheet endurance-cap-sheet { src: "../../../newui_durable_cap.tga"; endurance-cap: 0px 0px 23px 23px; }
+@spritesheet endurance-gloves-sheet { src: "../../../newui_durable_gloves.tga"; endurance-gloves: 0px 0px 23px 23px; }
+@spritesheet endurance-lower-sheet { src: "../../../newui_durable_lower.tga"; endurance-lower: 0px 0px 23px 23px; }
+@spritesheet endurance-necklace-sheet { src: "../../../newui_durable_necklace.tga"; endurance-necklace: 0px 0px 23px 23px; }
+@spritesheet endurance-ring-sheet { src: "../../../newui_durable_ring.tga"; endurance-ring: 0px 0px 23px 23px; }
+@spritesheet endurance-shield-sheet { src: "../../../newui_durable_shield.tga"; endurance-shield: 0px 0px 23px 23px; }
+@spritesheet endurance-upper-sheet { src: "../../../newui_durable_upper.tga"; endurance-upper: 0px 0px 23px 23px; }
+@spritesheet endurance-weapon-sheet { src: "../../../newui_durable_weapon.tga"; endurance-weapon: 0px 0px 23px 23px; }
+@spritesheet endurance-wing-sheet { src: "../../../newui_durable_wing.tga"; endurance-wing: 0px 0px 23px 23px; }
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+#pets, #icons { position: absolute; width: 0; height: 0; transform-origin: left top; pointer-events: none; }
+/* The left column in the screen's stretch, at the original's (2, 26) in it; its texts are scaled
+   back out of the stretch (base.rcss's .counter-scaled-xy). */
+#pets {
+	left: 0;
+	top: 0;
+	transform: scale(var(--overlay-scale-x, 1), var(--overlay-scale-y, 1));
+	--root-scale: var(--overlay-scale-x, 1);
+	--root-scale-y: var(--overlay-scale-y, 1);
+}
+#pet_column { position: absolute; left: 2px; top: 26px; }
+/* The icons on the dock: the column's first cell two dock units clear of the uncovered world's
+   right edge, 140 below the dock's top (the bottom HUD's top less the dock's 432 units). */
+#icons {
+	left: calc(var(--world-right, 100%) - 25px * var(--dock-scale, 1));
+	top: calc(100% - 51px * var(--hud-scale, 1) - 292px * var(--dock-scale, 1));
+	transform: scale(var(--dock-scale, 1));
+}
+
+/* The original's stack: the elf's arrow line 11 high, then the frames 24 apart. */
+.pet { position: relative; width: 57px; height: 23px; margin-bottom: 1px; }
+.pet-fill { position: absolute; left: 2px; top: 2px; width: 53px; height: 13px; background-color: rgba(0, 0, 0, 179); }
+.pet-frame { position: absolute; left: 0; top: 0; width: 57px; height: 23px; decorator: image(endurance-pet-back); }
+/* An <img> whose source rect is its width (item_endurance.rml): the texture's left part, unstretched. */
+.pet-bar { position: absolute; left: 4px; top: 16px; height: 3px; }
+
+.icon { position: absolute; width: 23px; height: 23px; }
+.icon-art { position: absolute; left: 0; top: 0; width: 23px; height: 23px; }
+.icon-art--boots { decorator: image(endurance-boots); }
+.icon-art--cap { decorator: image(endurance-cap); }
+.icon-art--gloves { decorator: image(endurance-gloves); }
+.icon-art--lower { decorator: image(endurance-lower); }
+.icon-art--necklace { decorator: image(endurance-necklace); }
+.icon-art--ring { decorator: image(endurance-ring); }
+.icon-art--shield { decorator: image(endurance-shield); }
+.icon-art--upper { decorator: image(endurance-upper); }
+.icon-art--weapon { decorator: image(endurance-weapon); }
+.icon-art--wing { decorator: image(endurance-wing); }
+.icon-tint { position: absolute; top: 0; height: 23px; }
+.icon-tint--half { background-color: rgba(255, 255, 0, 128); }
+.icon-tint--third { background-color: rgba(255, 128, 0, 128); }
+.icon-tint--fifth { background-color: rgba(255, 51, 0, 128); }
+.icon-tint--zero { background-color: rgba(255, 0, 0, 128); }
+
+.text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
+#arrows_row { height: 11px; white-space: nowrap; pointer-events: none; }
+
+/* The name centred on the frame, 5 below its top. */
+.pet-name-box { position: absolute; left: 0; top: 5px; width: 57px; height: 0; }
+.pet-name {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 2000px;
+	margin-left: -1000px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	transform-origin: center top;
+}
+#arrows {
+	display: inline-block;
+	white-space: nowrap;
+	color: rgb(255, 160, 0);
+	background-color: rgba(0, 0, 0, 180);
+	transform-origin: left top;
+}
+
+.durability-tip { display: inline-block; white-space: nowrap; font-weight: bold; background-color: rgba(0, 0, 0, 128); }
+.durability-tip--half { color: rgb(255, 255, 0); }
+.durability-tip--third { color: rgb(255, 168, 0); }
+.durability-tip--fifth { color: rgb(255, 83, 0); }
+.durability-tip--zero { color: rgb(255, 0, 0); }
+
+/* The icon column: two cells per column, filling downwards then leftwards, as the original's own
+   counter stepped them. */
+#icon_column { position: absolute; left: 0; top: 0; }
+.icon.cell-0 { left: 0px; top: 0px; }
+.icon.cell-1 { left: 0px; top: 25px; }
+.icon.cell-2 { left: -25px; top: 0px; }
+.icon.cell-3 { left: -25px; top: 25px; }
+.icon.cell-4 { left: -50px; top: 0px; }
+.icon.cell-5 { left: -50px; top: 25px; }
+.icon.cell-6 { left: -75px; top: 0px; }
+.icon.cell-7 { left: -75px; top: 25px; }
+.icon.cell-8 { left: -100px; top: 0px; }
+.icon.cell-9 { left: -100px; top: 25px; }
+.icon.cell-10 { left: -125px; top: 0px; }
+.icon.cell-11 { left: -125px; top: 25px; }
+
+/* Whole icon, or one half each when both rings warn at once (the original halved 23 to 11). */
+.icon-tint { left: 0; width: 23px; }
+.icon-tint.half-left { left: 0; width: 11px; }
+.icon-tint.half-right { left: 11px; width: 11px; }

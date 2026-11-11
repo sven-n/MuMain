@@ -13,13 +13,9 @@ PetActionStandPtr PetActionStand::Make()
     return temp;
 }
 
-PetActionStand::PetActionStand()
-{
-}
+PetActionStand::PetActionStand() {}
 
-PetActionStand::~PetActionStand()
-{
-}
+PetActionStand::~PetActionStand() {}
 
 bool PetActionStand::Release(OBJECT* obj, CHARACTER* Owner)
 {
@@ -80,7 +76,8 @@ bool PetActionStand::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double
     VectorCopy(obj->Position, b->BodyOrigin);
     Vector(0.f, 0.f, 0.f, vRelativePos);
 
-    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle, obj->HeadAngle);
+    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle,
+                 obj->HeadAngle);
 
     Vector(0.7f, 0.2f, 0.6f, Light);
     b->TransformPosition(BoneTransform[3], vRelativePos, Position, false);
@@ -92,7 +89,7 @@ bool PetActionStand::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double
     Position[2] -= 25.0f;
     CreateEffect(MODEL_FEATHER_FOREIGN, Position, obj->Angle, Light, 4, NULL, -1, 0, 0, 0, 0.3f);
 
-    int temp[] = { 45, 42, 48, 54, 51, 57, 25, 26, 27, 38, 32 };
+    int temp[] = {45, 42, 48, 54, 51, 57, 25, 26, 27, 38, 32};
 
     for (int i = 0; i < 11; ++i)
     {

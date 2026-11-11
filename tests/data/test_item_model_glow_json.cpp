@@ -1,0 +1,336 @@
+#include "doctest.h"
+
+#include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/Shines.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+using namespace Data::Items;
+
+namespace
+{
+const std::string Source = "Group00_Sword.json";
+
+struct ReadResult
+{
+    std::vector<ItemModelDefinition> models;
+    std::vector<ItemDataIssue> issues;
+};
+
+ReadResult ReadModel(const std::string& fields)
+{
+    ReadResult result;
+    const std::string text =
+        R"({"formatVersion": 1, "group": 0, "models": [{"number": 0, "file": "Data/Item/Sword01.bmd", )" + fields +
+        "}]}";
+    ReadItemModelGroupJson(text, Source, result.models, result.issues);
+    return result;
+}
+
+bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& field)
+{
+    return std::any_of(issues.begin(), issues.end(),
+                       [&](const ItemDataIssue& issue) { return issue.severity == severity && issue.field == field; });
+}
+
+bool HasFatalIssue(const std::string& fields, const std::string& field)
+{
+    return HasIssue(ReadModel(fields).issues, ItemDataIssueSeverity::Fatal, field);
+}
+
+bool Contains(const std::string& text, const std::string& part)
+{
+    return text.find(part) != std::string::npos;
+}
+
+ItemModelDefinition MakeGlowingModel()
+{
+    ItemModelDefinition model;
+    model.group = 0;
+    model.number = 0;
+    model.file = "Data/Item/Sword01.bmd";
+    ItemGlow& glow = model.glow;
+    glow.levels.emplace();
+    glow.levels->fill(8);
+    glow.color = "ice";
+    glow.meshes.only = {0, 2};
+    glow.glowAgainInWhite = 1;
+    glow.shineColor = "orange";
+    glow.shineWhite = true;
+    glow.shineMeshes.hidden = 1;
+    glow.shineBelowPlus3 = "seal";
+    glow.ancientColor = "gold";
+    glow.excellent = false;
+    glow.excellentMesh = 1;
+    glow.excellentMeshWithoutSkin = 2;
+    return model;
+}
+} // namespace
+
+TEST_CASE("Item model glow values are kept through write and read [data][items]")
+{
+    const std::vector<ItemModelDefinition> models{MakeGlowingModel()};
+
+    ReadResult result;
+    ReadItemModelGroupJson(WriteItemModelGroupJson(0, models), Source, result.models, result.issues);
+
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0] == models[0]);
+}
+
+TEST_CASE("An item model can glow like another level for each item level [data][items]")
+{
+    ItemModelDefinition arrows = MakeGlowingModel();
+    arrows.glow.levels = {{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31}};
+    const std::vector<ItemModelDefinition> models{arrows};
+
+    const std::string text = WriteItemModelGroupJson(0, models);
+    CHECK(Contains(text, R"("level": [0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31])"));
+
+    ReadResult result;
+    ReadItemModelGroupJson(text, Source, result.models, result.issues);
+    CHECK(result.issues.empty());
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].glow.levels == arrows.glow.levels);
+}
+
+TEST_CASE("Item model glow values are written compactly [data][items]")
+{
+    const std::vector<ItemModelDefinition> models{MakeGlowingModel()};
+
+    const std::string text = WriteItemModelGroupJson(0, models);
+
+    CHECK(Contains(text, R"("level": 8)"));
+    CHECK(Contains(text, R"("color": "ice")"));
+    CHECK(Contains(text, R"("meshes": [0, 2])"));
+    CHECK(Contains(text, R"("shineColor": "orange")"));
+    CHECK(Contains(text, R"("shineHiddenMesh": 1)"));
+    CHECK(Contains(text, R"("glowAgainInWhite": 1)"));
+    CHECK(Contains(text, R"("shineBelowPlus3": "seal")"));
+    CHECK(Contains(text, R"("ancientColor": "gold")"));
+    CHECK(Contains(text, R"("excellent": false)"));
+}
+
+TEST_CASE("Item model glow defaults are left out [data][items]")
+{
+    ItemModelDefinition plain;
+    plain.file = "Data/Item/Sword02.bmd";
+    const std::vector<ItemModelDefinition> models{plain};
+
+    CHECK_FALSE(Contains(WriteItemModelGroupJson(0, models), "glow"));
+
+    const ReadResult result = ReadModel(R"("glow": {})");
+    REQUIRE(result.models.size() == 1);
+    CHECK(result.models[0].glow == ItemGlow{});
+    CHECK(result.models[0].glow.excellent);
+    CHECK(result.models[0].glow.meshes.only.empty());
+    CHECK_FALSE(result.models[0].glow.meshes.hidden.has_value());
+}
+
+TEST_CASE("An item model's shine below +3 is in the shine list (design L30) [data][items]")
+{
+    ItemModelDefinition model = MakeGlowingModel();
+    const std::vector<Data::Effects::Shine> shines{{.name = "seal", .light = 0.9, .passes = {{}}}};
+    std::vector<ItemDataIssue> issues;
+    ValidateItemModelShines(std::vector{model}, shines, issues);
+    CHECK(issues.empty());
+
+    model.glow.shineBelowPlus3 = "sparkle";
+    ValidateItemModelShines(std::vector{model}, shines, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "glow.shineBelowPlus3"));
+
+    CHECK(HasFatalIssue(R"("glow": {"shineBelowPlus3": "two words"})", "glow.shineBelowPlus3"));
+    CHECK(HasFatalIssue(R"("glow": {"glowAgainInWhite": -1})", "glow.glowAgainInWhite"));
+}
+
+TEST_CASE("Item model glow values are checked [data][items]")
+{
+    CHECK(HasFatalIssue(R"("glow": [])", "glow"));
+    CHECK(HasFatalIssue(R"("glow": {"level": 32})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": -1})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": 2.5})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": [0, 1, 2]})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 32]})",
+                        "glow.level[15]"));
+    CHECK(HasFatalIssue(R"("glow": {"color": [1, 0.5, 0]})", "glow.color"));
+    CHECK(HasFatalIssue(R"("glow": {"color": ""})", "glow.color"));
+    CHECK(HasFatalIssue(R"("glow": {"shineColor": "light blue"})", "glow.shineColor"));
+    CHECK(HasFatalIssue(R"("glow": {"ancientColor": 3})", "glow.ancientColor"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": []})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": [0, -1]})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": [1], "hiddenMesh": 0})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"shineHiddenMesh": "all"})", "glow.shineHiddenMesh"));
+    CHECK(HasFatalIssue(R"("glow": {"shineWhite": 1})", "glow.shineWhite"));
+    CHECK(HasFatalIssue(R"("glow": {"excellent": "no"})", "glow.excellent"));
+    CHECK(HasFatalIssue(R"("glow": {"excellentMesh": -2})", "glow.excellentMesh"));
+    CHECK(ReadModel(R"("glow": {"level": 0, "hiddenMesh": 1, "shineMeshes": [0], "excellent": true})").issues.empty());
+}
+
+TEST_CASE("Unknown item model glow fields are warnings [data][items]")
+{
+    const ReadResult result = ReadModel(R"("glow": {"sparkle": 3})");
+
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "glow.sparkle"));
+    CHECK(result.models.size() == 1);
+}
+
+TEST_CASE("The glow color list names colors [data][effects]")
+{
+    std::vector<Data::Effects::GlowColor> colors;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadGlowColorsJson(
+        R"({"formatVersion": 1, "colors": {"orange": [1, 0.5, 0], "gold": [1, 0.7, 0.2]}})", "GlowColors.json", colors,
+        issues);
+
+    CHECK(issues.empty());
+    const std::vector<Data::Effects::GlowColor> expected{{"orange", {1, 0.5, 0}}, {"gold", {1, 0.7, 0.2}}};
+    CHECK(colors == expected);
+}
+
+TEST_CASE("The glow color list is written as it is read [data][effects]")
+{
+    const std::vector<Data::Effects::GlowColor> colors{{"orange", {1, 0.5, 0}}, {"sage", {0.47, 0.67, 0.6}}};
+    const std::string text = Data::Effects::WriteGlowColorsJson(colors);
+    // One color a line, whole numbers without a fraction, in the list's order.
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"colors\": {\n"
+                  "    \"orange\": [1, 0.5, 0],\n"
+                  "    \"sage\": [0.47, 0.67, 0.6]\n"
+                  "  }\n"
+                  "}\n");
+
+    std::vector<Data::Effects::GlowColor> readBack;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadGlowColorsJson(text, "GlowColors.json", readBack, issues);
+    CHECK(issues.empty());
+    CHECK(readBack == colors);
+
+    readBack.clear();
+    Data::Effects::ReadGlowColorsJson(Data::Effects::WriteGlowColorsJson({}), "GlowColors.json", readBack, issues);
+    CHECK(issues.empty());
+    CHECK(readBack.empty());
+}
+
+TEST_CASE("The glow color list is checked [data][effects]")
+{
+    const auto errorsOf = [](const std::string& text)
+    {
+        std::vector<Data::Effects::GlowColor> colors;
+        std::vector<ItemDataIssue> issues;
+        Data::Effects::ReadGlowColorsJson(text, "GlowColors.json", colors, issues);
+        return issues;
+    };
+
+    CHECK(HasIssue(errorsOf(R"({"colors": {}})"), ItemDataIssueSeverity::Fatal, "formatVersion"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1})"), ItemDataIssueSeverity::Fatal, "colors"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"light blue": [0, 0, 1]}})"),
+                   ItemDataIssueSeverity::Fatal, "colors.light blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 0, 2]}})"), ItemDataIssueSeverity::Fatal,
+                   "colors.blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 1]}})"), ItemDataIssueSeverity::Fatal,
+                   "colors.blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {}, "shades": 3})"), ItemDataIssueSeverity::Warning,
+                   "shades"));
+    // The JSON reader would keep only the last of two equal names.
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"gold": [1, 0.7, 0.2], "gold": [1, 1, 0]}})"),
+                   ItemDataIssueSeverity::Fatal, "colors.gold"));
+    // Repeated keys elsewhere are no color names.
+    const std::vector<ItemDataIssue> notes =
+        errorsOf(R"({"formatVersion": 1, "colors": {}, "notes": {"a": 1, "a": 2}})");
+    CHECK(HasIssue(notes, ItemDataIssueSeverity::Warning, "notes"));
+    CHECK_FALSE(HasFatal(notes));
+}
+
+TEST_CASE("Item model glow colors must be in the glow color list [data][items]")
+{
+    const std::vector<Data::Effects::GlowColor> colors{
+        {"orange", {1, 0.5, 0}}, {"white", {1, 1, 1}}, {"azure", {0.1, 0.6, 1}}, {"gold", {1, 0.7, 0.2}}};
+    ItemModelDefinition model;
+    model.file = "Data/Item/Sword01.bmd";
+    model.glow.ancientColor = "gold";
+
+    std::vector<ItemDataIssue> issues;
+    ValidateItemModelGlowColors(std::vector<ItemModelDefinition>{model}, colors, issues);
+    CHECK(issues.empty());
+
+    model.glow.color = "teal";
+    ValidateItemModelGlowColors(std::vector<ItemModelDefinition>{model}, colors, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "glow.color"));
+
+    // The default colors must be in the list.
+    issues.clear();
+    ValidateItemModelGlowColors({}, std::vector<Data::Effects::GlowColor>{{"orange", {1, 0.5, 0}}}, issues);
+    CHECK(issues.size() == 2);
+}
+
+TEST_CASE("The shine list names shines below +3 (design L30) [data][effects]")
+{
+    const std::string text = R"({"formatVersion": 1, "shines": [
+      {"name": "seal", "light": 0.9, "passes": [
+        {"kind": "reflection", "motion": "fastSweep", "opacity": 1.5, "brightness": 1.5},
+        {"kind": "reflection"}]},
+      {"name": "water", "passes": [{"kind": "texture", "opacity": 0.5}]}]})";
+    std::vector<Data::Effects::Shine> shines;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadShinesJson(text, "Shines.json", shines, issues);
+    CHECK(issues.empty());
+    REQUIRE(shines.size() == 2);
+    CHECK(shines[0].name == "seal");
+    CHECK(shines[0].light == 0.9);
+    REQUIRE(shines[0].passes.size() == 2);
+    CHECK(shines[0].passes[0].reflection);
+    CHECK(shines[0].passes[0].motion == Data::Looks::Motion::FastSweep);
+    CHECK(shines[0].passes[0].opacity == 1.5);
+    CHECK(shines[0].passes[0].brightness == 1.5);
+    CHECK(shines[0].passes[1].motion == Data::Looks::Motion::SlowDrift);
+    CHECK(shines[0].passes[1].opacity == 1.0);
+    CHECK_FALSE(shines[1].light.has_value());
+    CHECK_FALSE(shines[1].passes[0].reflection);
+    CHECK(shines[1].passes[0].brightness == 1.0);
+
+    // Written as read, defaults left out.
+    std::vector<Data::Effects::Shine> again;
+    Data::Effects::ReadShinesJson(Data::Effects::WriteShinesJson(shines), "Shines.json", again, issues);
+    CHECK(issues.empty());
+    CHECK(again == shines);
+    CHECK(Contains(Data::Effects::WriteShinesJson(shines),
+                   R"({"kind": "reflection", "motion": "fastSweep", "opacity": 1.5, "brightness": 1.5})"));
+    CHECK(Contains(Data::Effects::WriteShinesJson(shines), R"({"kind": "reflection"})"));
+}
+
+TEST_CASE("The shine list is checked [data][effects]")
+{
+    const auto fatalAt = [](const std::string& shine, const std::string& field)
+    {
+        std::vector<Data::Effects::Shine> shines;
+        std::vector<ItemDataIssue> issues;
+        Data::Effects::ReadShinesJson(R"({"formatVersion": 1, "shines": [)" + shine + "]}", "Shines.json", shines,
+                                      issues);
+        INFO(shine);
+        return HasIssue(issues, ItemDataIssueSeverity::Fatal, field) && shines.empty();
+    };
+    CHECK(fatalAt(R"({"passes": []})", "shines[0].name"));
+    CHECK(fatalAt(R"({"name": "a"})", "shines[0].passes"));
+    CHECK(fatalAt(R"({"name": "a", "light": -1, "passes": []})", "shines[0].light"));
+    CHECK(fatalAt(R"({"name": "a", "passes": [{"kind": "glow"}]})", "shines[0].passes[0].kind"));
+    CHECK(
+        fatalAt(R"({"name": "a", "passes": [{"kind": "texture", "motion": "swirl"}]})", "shines[0].passes[0].motion"));
+    CHECK(fatalAt(R"({"name": "a", "passes": [{"kind": "reflection", "motion": "wobble"}]})",
+                  "shines[0].passes[0].motion"));
+    CHECK(fatalAt(R"({"name": "a", "passes": [{"kind": "reflection", "opacity": "full"}]})",
+                  "shines[0].passes[0].opacity"));
+
+    std::vector<Data::Effects::Shine> shines;
+    std::vector<ItemDataIssue> issues;
+    Data::Effects::ReadShinesJson(R"({"formatVersion": 1, "shines": [{"name": "a", "passes": []},
+        {"name": "a", "passes": []}]})",
+                                  "Shines.json", shines, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "shines[1].name"));
+    CHECK(shines.size() == 1);
+}

@@ -12,45 +12,55 @@
 class CSIPartsMDL
 {
 protected:
-    OBJECT  m_pObj;
-    int     m_iBoneNumber;
-    vec3_t  m_vOffset;
+    OBJECT m_pObj;
+    int m_iBoneNumber;
+    vec3_t m_vOffset;
 
 public:
     CSIPartsMDL(void) : m_iBoneNumber(-1) {};
     virtual ~CSIPartsMDL() = default;
-    virtual void    IRender(CHARACTER* c) = 0;
-    inline OBJECT* GetObject() { return &m_pObj; }
+    // Places and animates the part on its character, and spawns what it shows.
+    virtual void IUpdate(CHARACTER* c) = 0;
+    virtual void IRender(const CHARACTER* c) = 0;
+    inline OBJECT* GetObject()
+    {
+        return &m_pObj;
+    }
 };
 
 class CSParts : public CSIPartsMDL
 {
 private:
-
 public:
-    CSParts(int Type, int BoneNumber, bool bBillBoard = false, float x = 0.f, float y = 0.f, float z = 0.f, float ax = 0.f, float ay = 0.f, float az = 0.f);
-    virtual void    IRender(CHARACTER* c);
+    CSParts(int Type, int BoneNumber, bool bBillBoard = false, float x = 0.f, float y = 0.f, float z = 0.f,
+            float ax = 0.f, float ay = 0.f, float az = 0.f);
+    virtual void IUpdate(CHARACTER* c);
+    virtual void IRender(const CHARACTER* c);
 };
 
 class CSAnimationParts : public CSIPartsMDL
 {
 private:
-
 public:
-    CSAnimationParts(int Type, int BoneNumber, bool bBillBoard = false, float x = 0.f, float y = 0.f, float z = 0.f, float ax = 0.f, float ay = 0.f, float az = 0.f);
-    void    Animation(CHARACTER* c);
-    virtual void    IRender(CHARACTER* c);
+    CSAnimationParts(int Type, int BoneNumber, bool bBillBoard = false, float x = 0.f, float y = 0.f, float z = 0.f,
+                     float ax = 0.f, float ay = 0.f, float az = 0.f);
+    void Animation(CHARACTER* c);
+    virtual void IUpdate(CHARACTER* c);
+    virtual void IRender(const CHARACTER* c);
 };
 
 class CSParts2D : public CSIPartsMDL
 {
 public:
     CSParts2D(int Type, int SubType, int BoneNumber, float x = 0.f, float y = 0.f, float z = 0.f);
-    virtual void    IRender(CHARACTER* c);
+    virtual void IUpdate(CHARACTER* c);
+    virtual void IRender(const CHARACTER* c);
 };
 
-void    CreatePartsFactory(CHARACTER* c);
-void    RenderParts(CHARACTER* c);
-void    DeleteParts(CHARACTER* c);
+void CreatePartsFactory(CHARACTER* c);
+// Creates, places and animates a player's parts for the next draw; once per update, for a player the last frame drew.
+void UpdateParts(CHARACTER* c);
+void RenderParts(const CHARACTER* c);
+void DeleteParts(CHARACTER* c);
 
-#endif// __CSPARTS_H__
+#endif // __CSPARTS_H__

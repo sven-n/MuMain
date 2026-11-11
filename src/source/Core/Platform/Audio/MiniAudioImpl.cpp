@@ -1,0 +1,27 @@
+// Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
+//
+// MiniAudioImpl.cpp — miniaudio + stb_vorbis implementation translation unit.
+//
+// IMPORTANT: This file MUST NOT use the precompiled header.
+// It defines MINIAUDIO_IMPLEMENTATION which expands the entire library inline.
+// Compiling with PCH would cause duplicate symbol errors.
+//
+// CMakeLists.txt must have:
+//   set_source_files_properties(MiniAudioImpl.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+
+#define STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.c" // NOLINT — intentional .c include for single-file library
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+#if !defined(MU_MINIAUDIO_STREAM_LOAD_PATCHED)
+// cppcheck runs without the build's include paths, so it never sees the patched copy.
+// cppcheck-suppress preprocessorErrorDirective
+#error "miniaudio.h lacks the stream load patch (cmake/patches); a failed music load could hang"
+#endif
+
+// Include stb_vorbis implementation after miniaudio.
+// The header-only include above provides declarations; this provides definitions.
+// Without this, native macOS/Linux builds get unresolved stb_vorbis symbols.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+#undef STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.c" // NOLINT — intentional .c include for single-file library implementation

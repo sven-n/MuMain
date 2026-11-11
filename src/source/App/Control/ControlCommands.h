@@ -1,0 +1,87 @@
+// The control socket's command implementations, one file per family:
+// Session (login/select-char/logout/quit), World (movement, combat, chat,
+// party) and Query (state/nearby/scene/screenshot/hotkey/click-ui).
+//
+// Every handler answers with an encoded response line, or takes over the
+// dispatcher's single act slot for a command that needs several frames.
+#pragma once
+
+#include "App/Control/ControlDispatcher.h"
+
+#include <memory>
+#include <string>
+#include <string_view>
+
+namespace App::Control::Commands
+{
+// Scene name as the protocol reports it: server_list, webzen, login,
+// loading, character_list, world or unknown.
+[[nodiscard]] std::string_view CurrentSceneName();
+
+// Build identifier reported by `ping`, set once at start-up.
+void SetBuildIdentifier(std::string identifier);
+[[nodiscard]] const std::string& BuildIdentifier();
+
+// Query family.
+std::string Ping(const Request& request, std::unique_ptr<Act>& act);
+std::string Bench(const Request& request, std::unique_ptr<Act>& act);
+std::string Scene(const Request& request, std::unique_ptr<Act>& act);
+std::string Bones(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawSpawns(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawPurity(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawLater(const Request& request, std::unique_ptr<Act>& act);
+std::string DrawParity(const Request& request, std::unique_ptr<Act>& act);
+std::string SpawnEffect(const Request& request, std::unique_ptr<Act>& act);
+std::string State(const Request& request, std::unique_ptr<Act>& act);
+std::string Nearby(const Request& request, std::unique_ptr<Act>& act);
+std::string EventsSince(const Request& request, std::unique_ptr<Act>& act);
+std::string WaitFor(const Request& request, std::unique_ptr<Act>& act);
+std::string Screenshot(const Request& request, std::unique_ptr<Act>& act);
+std::string Hotkey(const Request& request, std::unique_ptr<Act>& act);
+// The lines of an item's information tooltip, built for an item the command makes (as the server sends one) and the
+// hero as it is, without drawing them.
+std::string ItemTooltip(const Request& request, std::unique_ptr<Act>& act);
+// Writes the tooltip lines of every item at every level, in a few variants, to a text file (`out`): a snapshot to
+// compare the tooltip code before and after a change with.
+std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>& act);
+// An item's name at a level, as the windows, messages and quests name it.
+std::string ItemName(const Request& request, std::unique_ptr<Act>& act);
+// Writes the name of every item at every level to a text file (`out`), to compare before and after a change.
+std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>& act);
+// The lines of an item's repair tooltip, built for an item the command makes, without drawing them.
+std::string RepairTooltip(const Request& request, std::unique_ptr<Act>& act);
+std::string ClickUi(const Request& request, std::unique_ptr<Act>& act);
+std::string HoverUi(const Request& request, std::unique_ptr<Act>& act);
+std::string DragUi(const Request& request, std::unique_ptr<Act>& act);
+std::string Type(const Request& request, std::unique_ptr<Act>& act);
+// Runs one `$` developer command as if typed into the chat box, without
+// opening it, so nothing typed shows up in the frame.
+std::string Console(const Request& request, std::unique_ptr<Act>& act);
+
+// Ui family: where the open item windows are.
+std::string Ui(const Request& request, std::unique_ptr<Act>& act);
+std::string SlotPixel(const Request& request, std::unique_ptr<Act>& act);
+
+// Session family.
+std::string Login(const Request& request, std::unique_ptr<Act>& act);
+std::string SelectCharacter(const Request& request, std::unique_ptr<Act>& act);
+std::string Logout(const Request& request, std::unique_ptr<Act>& act);
+std::string Quit(const Request& request, std::unique_ptr<Act>& act);
+
+// World family.
+std::string Move(const Request& request, std::unique_ptr<Act>& act);
+std::string Warp(const Request& request, std::unique_ptr<Act>& act);
+std::string Teleport(const Request& request, std::unique_ptr<Act>& act);
+std::string Attack(const Request& request, std::unique_ptr<Act>& act);
+std::string Skill(const Request& request, std::unique_ptr<Act>& act);
+std::string Pickup(const Request& request, std::unique_ptr<Act>& act);
+std::string UseItem(const Request& request, std::unique_ptr<Act>& act);
+std::string EquipItem(const Request& request, std::unique_ptr<Act>& act);
+std::string Say(const Request& request, std::unique_ptr<Act>& act);
+std::string Whisper(const Request& request, std::unique_ptr<Act>& act);
+std::string Party(const Request& request, std::unique_ptr<Act>& act);
+std::string Halt(const Request& request, std::unique_ptr<Act>& act);
+
+// Trade family.
+std::string Trade(const Request& request, std::unique_ptr<Act>& act);
+} // namespace App::Control::Commands

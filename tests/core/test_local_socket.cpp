@@ -1,0 +1,689 @@
+// doctest unit tests for the local stream socket transport, on Windows and
+// Linux alike.
+//
+// The listener is exercised against a real socket file in a temporary
+// directory; the "client" is a plain socket created by the test, so nothing
+// here needs a window, a renderer or the game's globals.
+//
+// Run: ctest --test-dir <build directory> --build-config Release -R "\[core\]\[local-socket\]"
+
+#include "doctest.h"
+
+// <windows.h> arrives through the Winsock shim below, and its min/max macros
+// would eat the std::min calls in this file. The game's own stdafx.h does the
+// same before it includes the header.
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
+#include "Core/Platform/LocalSocket.h"
+#include "Core/Platform/NonBlockingSocket.h"
+
+#include "Core/Platform/WinSock.h" // SOCKET, closesocket, WSAStartup (no-ops on POSIX)
+
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <thread>
+
+#ifdef _WIN32
+#include <afunix.h> // sockaddr_un
+#include <process.h>
+#else
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <unistd.h>
+#endif
+
+namespace
+{
+// Bytes the send loops below hand the socket in one call: twice macOS's
+// default AF_UNIX buffer, so a partial send is the normal case there.
+constexpr std::size_t ChunkBytes = 16 * 1024;
+
+// Send buffer asked for on a LargeWriteClient: less than one chunk on every
+// platform (Linux doubles what it is given).
+constexpr int ClientSendBufferBytes = 4 * 1024;
+
+// How long a send loop waits for a client that cannot get a byte out before
+// it gives up, instead of spinning until ctest stops the case.
+constexpr std::chrono::milliseconds StallTimeout{5000};
+
+// Pause between two polls of a socket that had nothing to offer.
+constexpr std::chrono::milliseconds PollInterval{2};
+
+// How long a writer has to stay held off before the pacing case takes the
+// connection as paused: a connection that is still reading lets it send
+// again on the very next pass.
+constexpr std::chrono::milliseconds PauseSettleTimeout{200};
+
+// Winsock has to be started before the first socket call; the shim makes both
+// calls no-ops on POSIX.
+void EnsureSocketLibrary()
+{
+    static const bool started = []
+    {
+        WSADATA data{};
+        return WSAStartup(MAKEWORD(2, 2), &data) == 0;
+    }();
+    (void)started;
+}
+
+int CurrentProcessId()
+{
+#ifdef _WIN32
+    return ::_getpid();
+#else
+    return ::getpid();
+#endif
+}
+
+// A bound AF_UNIX socket file is a reparse point on Windows, which
+// std::filesystem::exists() cannot stat; ask the file system for the
+// attributes instead. Elsewhere the plain query is the right one.
+bool SocketFileExists(const std::string& path)
+{
+#ifdef _WIN32
+    return ::GetFileAttributesA(path.c_str()) != INVALID_FILE_ATTRIBUTES;
+#else
+    return std::filesystem::exists(path);
+#endif
+}
+
+// A socket path unique to the running test binary, short enough for
+// sockaddr_un on every platform.
+std::filesystem::path MakeSocketDirectory()
+{
+    const auto directory =
+        std::filesystem::temp_directory_path() / ("mu-local-socket-" + std::to_string(CurrentProcessId()));
+    std::filesystem::remove_all(directory);
+    std::filesystem::create_directories(directory);
+    return directory;
+}
+
+// Client side, standing in for a test script. It blocks, which suits only
+// payloads the kernel buffers whole: the connection is read on this same
+// thread, so a send() that has to wait for it never returns. Larger payloads
+// need ConnectForLargeWrites.
+SOCKET ConnectTo(const std::string& path)
+{
+    EnsureSocketLibrary();
+
+    const SOCKET handle = ::socket(AF_UNIX, SOCK_STREAM, 0);
+    if (handle == INVALID_SOCKET)
+    {
+        return INVALID_SOCKET;
+    }
+
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    // sun_path is 108 bytes on Linux and 104 with afunix.h: a longer path
+    // would be copied past the end of the address, and the test would be
+    // reporting a corrupted stack rather than the socket's behaviour.
+    REQUIRE(path.size() < sizeof(address.sun_path));
+    std::memcpy(address.sun_path, path.c_str(), path.size());
+    if (::connect(handle, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != 0)
+    {
+        closesocket(handle);
+        return INVALID_SOCKET;
+    }
+    return handle;
+}
+
+// A client that may send more than the socket buffer holds. Only
+// ConnectForLargeWrites makes one, and only SendWhileServing takes one, so
+// a large payload cannot go out through a blocking client by mistake.
+struct LargeWriteClient
+{
+    SOCKET handle = INVALID_SOCKET;
+};
+
+// Non-blocking, because a send() that had to wait for the connection would
+// wait for a read that can only run on this thread. With a send buffer
+// smaller than one chunk, so every platform takes the partial sends that
+// macOS's 8 KiB default forces, not only macOS.
+LargeWriteClient ConnectForLargeWrites(const std::string& path)
+{
+    const SOCKET handle = ConnectTo(path);
+    REQUIRE(handle != INVALID_SOCKET);
+    const int bufferBytes = ClientSendBufferBytes;
+    REQUIRE(::setsockopt(handle, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const char*>(&bufferBytes),
+                         static_cast<int>(sizeof(bufferBytes))) == 0);
+    REQUIRE(Core::Platform::NonBlockingSocket::Enable(handle));
+    return LargeWriteClient{handle};
+}
+
+// One send() call, which may take only part of the payload. send()/recv()
+// take an int length on Winsock and a size_t on POSIX.
+int SendOnce(SOCKET handle, std::string_view payload)
+{
+    return ::send(handle, payload.data(), static_cast<int>(payload.size()), 0);
+}
+
+// Bytes a non-blocking client's send() took: 0 while the socket buffer is
+// full, until the connection reads from it; -1 when the socket failed.
+int SendWhatFits(const LargeWriteClient& client, std::string_view payload)
+{
+    const int sent = SendOnce(client.handle, payload);
+    if (sent < 0 && Core::Platform::NonBlockingSocket::WouldBlock(WSAGetLastError()))
+    {
+        return 0;
+    }
+    return sent;
+}
+
+// The listener is non-blocking, so a connection may not be queued yet when
+// Accept() is first called; poll briefly instead of sleeping a fixed time.
+std::unique_ptr<Core::Platform::LocalSocketConnection> AcceptWithin(Core::Platform::LocalSocketListener& listener,
+                                                                    std::chrono::milliseconds timeout)
+{
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        if (auto connection = listener.Accept())
+        {
+            return connection;
+        }
+        std::this_thread::sleep_for(PollInterval);
+    }
+    return nullptr;
+}
+
+// Takes every complete line already buffered on the connection.
+std::size_t TakeBufferedLines(Core::Platform::LocalSocketConnection& connection)
+{
+    std::size_t taken = 0;
+    std::string line;
+    while (connection.TakeLine(line))
+    {
+        ++taken;
+    }
+    return taken;
+}
+
+// Whether SendWhileServing takes the lines it buffers as they arrive.
+enum class Drain
+{
+    Lines,   // a frame loop that keeps up
+    Nothing, // a frame loop that has fallen behind
+};
+
+// How far SendWhileServing got.
+struct Delivery
+{
+    std::size_t bytesSent = 0;
+    std::size_t linesTaken = 0;
+};
+
+// Sends a payload in chunks with the connection reading between them: how a
+// pipelining script and the frame loop interleave. Stops once the payload is
+// out, when the socket fails or the connection closes, or when the client
+// has not got a byte out for `stallTimeout`: a connection that stopped
+// reading, which would otherwise keep this loop going forever.
+Delivery SendWhileServing(const LargeWriteClient& client, Core::Platform::LocalSocketConnection& connection,
+                          std::string_view payload, Drain drain, std::chrono::milliseconds stallTimeout = StallTimeout)
+{
+    Delivery delivery;
+    auto lastProgress = std::chrono::steady_clock::now();
+    while (delivery.bytesSent < payload.size())
+    {
+        const std::size_t size = std::min(ChunkBytes, payload.size() - delivery.bytesSent);
+        const int sent = SendWhatFits(client, payload.substr(delivery.bytesSent, size));
+        if (sent < 0)
+        {
+            break;
+        }
+        delivery.bytesSent += static_cast<std::size_t>(sent);
+        if (!connection.ReadAvailable())
+        {
+            break;
+        }
+        if (drain == Drain::Lines)
+        {
+            delivery.linesTaken += TakeBufferedLines(connection);
+        }
+
+        const auto now = std::chrono::steady_clock::now();
+        if (sent > 0)
+        {
+            lastProgress = now;
+            continue;
+        }
+        if (now - lastProgress >= stallTimeout)
+        {
+            break;
+        }
+        std::this_thread::sleep_for(PollInterval);
+    }
+    return delivery;
+}
+
+// Takes lines until `expected` have arrived, the connection closes or the
+// timeout passes: the end of a stream may still be on its way when the last
+// send() returns.
+std::size_t TakeLinesWithin(Core::Platform::LocalSocketConnection& connection, std::size_t expected,
+                            std::chrono::milliseconds timeout)
+{
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    std::size_t taken = 0;
+    while (true)
+    {
+        const bool open = connection.ReadAvailable();
+        taken += TakeBufferedLines(connection);
+        if (taken >= expected || !open || std::chrono::steady_clock::now() >= deadline)
+        {
+            return taken;
+        }
+        std::this_thread::sleep_for(PollInterval);
+    }
+}
+
+bool ReadLineWithin(Core::Platform::LocalSocketConnection& connection, std::string& line,
+                    std::chrono::milliseconds timeout)
+{
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        const bool open = connection.ReadAvailable();
+        if (connection.TakeLine(line))
+        {
+            return true;
+        }
+        if (!open)
+        {
+            // The peer is gone: waiting out the timeout would report "no
+            // line yet" for a connection that can never produce one.
+            return false;
+        }
+        std::this_thread::sleep_for(PollInterval);
+    }
+    return false;
+}
+} // namespace
+
+TEST_CASE("Local socket serves a line round-trip [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "round-trip.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+    REQUIRE(error.empty());
+    REQUIRE(listener.IsListening());
+    REQUIRE(SocketFileExists(path));
+
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+    REQUIRE(connection->IsOpen());
+
+    const std::string request = R"({"cmd":"ping"})"
+                                "\n";
+    REQUIRE(SendOnce(client, request) == static_cast<int>(request.size()));
+
+    std::string line;
+    REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
+    CHECK(line == R"({"cmd":"ping"})");
+
+    REQUIRE(connection->Write(R"({"ok":true})"
+                              "\n"));
+
+    // A stream, not a message queue: read until the terminator rather than
+    // assuming one recv() carries the whole line.
+    std::string received;
+    while (received.find('\n') == std::string::npos)
+    {
+        char chunk[64] = {};
+        const int count = ::recv(client, chunk, static_cast<int>(sizeof(chunk)), 0);
+        REQUIRE(count > 0);
+        received.append(chunk, static_cast<std::size_t>(count));
+    }
+    CHECK(received == R"({"ok":true})"
+                      "\n");
+
+    closesocket(client);
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket splits and preserves partial lines [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "framing.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // Two complete lines (one with a CRLF terminator) plus an unterminated tail.
+    const std::string payload = "first\r\nsecond\nthi";
+    REQUIRE(SendOnce(client, payload) == static_cast<int>(payload.size()));
+
+    std::string line;
+    REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
+    CHECK(line == "first");
+    // The payload is one send(), but a stream may still deliver it in
+    // pieces: wait for the second line rather than assume it is already
+    // buffered, and only then assert that the tail is not a line yet.
+    REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
+    CHECK(line == "second");
+    CHECK_FALSE(connection->TakeLine(line));
+
+    const std::string rest = "rd\n";
+    REQUIRE(SendOnce(client, rest) == static_cast<int>(rest.size()));
+    REQUIRE(ReadLineWithin(*connection, line, std::chrono::milliseconds(500)));
+    CHECK(line == "third");
+
+    closesocket(client);
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket file is owner-only and replaces a stale file [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "stale.sock").string();
+
+    // A socket file left behind by a crashed client: bound by a socket that
+    // then went away without unlinking it, which is what a crash leaves.
+    {
+        // This is the first socket call of the case, and ctest runs each case
+        // in its own process: without the start-up Winsock answers
+        // WSANOTINITIALISED here. The helpers below do it for themselves.
+        EnsureSocketLibrary();
+
+        const SOCKET stale = ::socket(AF_UNIX, SOCK_STREAM, 0);
+        REQUIRE(stale != INVALID_SOCKET);
+        sockaddr_un address{};
+        address.sun_family = AF_UNIX;
+        REQUIRE(path.size() < sizeof(address.sun_path));
+        std::memcpy(address.sun_path, path.c_str(), path.size());
+        REQUIRE(::bind(stale, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) == 0);
+        closesocket(stale);
+    }
+    REQUIRE(SocketFileExists(path));
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+    REQUIRE(error.empty());
+
+#ifndef _WIN32
+    struct stat status = {};
+    REQUIRE(::stat(path.c_str(), &status) == 0);
+    CHECK((status.st_mode & 07777) == 0600);
+    CHECK(S_ISSOCK(status.st_mode));
+#endif
+
+    // The replaced file still serves connections.
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    CHECK(AcceptWithin(listener, std::chrono::milliseconds(500)) != nullptr);
+    closesocket(client);
+
+    listener.Close();
+    CHECK_FALSE(SocketFileExists(path));
+
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket leaves a path that is not a socket alone [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "notasocket").string();
+
+    {
+        FILE* file = std::fopen(path.c_str(), "wb");
+        REQUIRE(file != nullptr);
+        std::fputs("not a socket", file);
+        std::fclose(file);
+    }
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    CHECK_FALSE(listener.Listen(path, error));
+    CHECK(error.find("not a socket") != std::string::npos);
+    // The file is still there: a mistyped path costs a refusal, not the file.
+    CHECK(SocketFileExists(path));
+
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket rejects an impossible path and unlinks on demand [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+
+    const std::string tooLong =
+        (directory / std::string(Core::Platform::LocalSocketListener::MaxPathLength(), 'x')).string();
+    CHECK_FALSE(listener.Listen(tooLong, error));
+    CHECK_FALSE(error.empty());
+    CHECK_FALSE(listener.IsListening());
+
+    error.clear();
+    const std::string missingDirectory = (directory / "no-such-directory" / "x.sock").string();
+    CHECK_FALSE(listener.Listen(missingDirectory, error));
+    CHECK_FALSE(error.empty());
+    CHECK_FALSE(SocketFileExists(missingDirectory));
+
+    // Unlink removes the file of a listener that is no longer running.
+    const std::string path = (directory / "unlink.sock").string();
+    REQUIRE(listener.Listen(path, error));
+    REQUIRE(SocketFileExists(path));
+    listener.Close();
+    Core::Platform::LocalSocketListener::Unlink(path);
+    CHECK_FALSE(SocketFileExists(path));
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket refuses a path another listener is serving [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "taken.sock").string();
+
+    Core::Platform::LocalSocketListener first;
+    std::string error;
+    REQUIRE(first.Listen(path, error));
+
+    // A second client of the same name must not unlink the live socket and
+    // bind its own: the first would keep an open socket nobody can reach.
+    Core::Platform::LocalSocketListener second;
+    CHECK_FALSE(second.Listen(path, error));
+    CHECK(error.find("already listening") != std::string::npos);
+    CHECK_FALSE(second.IsListening());
+
+    // The first listener still serves — and serves *this* connection, not
+    // the refused listener's probe: the accepted peer has to answer with
+    // the line this test sends, which a probe never would.
+    CHECK(first.IsListening());
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    const std::string probe = "{\"cmd\":\"ping\"}\n";
+    REQUIRE(SendOnce(client, probe) == static_cast<int>(probe.size()));
+
+    std::string line;
+    std::unique_ptr<Core::Platform::LocalSocketConnection> served;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        auto accepted = AcceptWithin(first, std::chrono::milliseconds(100));
+        if (accepted != nullptr && ReadLineWithin(*accepted, line, std::chrono::milliseconds(200)))
+        {
+            served = std::move(accepted);
+            break;
+        }
+    }
+    REQUIRE(served != nullptr);
+    CHECK(line == "{\"cmd\":\"ping\"}");
+    closesocket(client);
+
+    // Once it is gone the path is free again, stale file and all.
+    first.Close();
+    Core::Platform::LocalSocketListener third;
+    CHECK(third.Listen(path, error));
+    third.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket reports a closed peer [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "closed.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // Nothing to read yet, but the connection is healthy.
+    CHECK(connection->ReadAvailable());
+    CHECK(connection->IsOpen());
+
+    closesocket(client);
+
+    // The shutdown is reported, not acted on: whoever owns the connection
+    // decides when to let go, because an act the peer started may still owe
+    // it an answer.
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+    while (!connection->PeerClosed() && std::chrono::steady_clock::now() < deadline)
+    {
+        connection->ReadAvailable();
+        std::this_thread::sleep_for(PollInterval);
+    }
+    CHECK(connection->PeerClosed());
+    CHECK_FALSE(connection->HasLine());
+    CHECK(connection->IsOpen());
+
+    connection->Close();
+    CHECK_FALSE(connection->IsOpen());
+
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "cap.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const LargeWriteClient client = ConnectForLargeWrites(path);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // More complete lines than the cap holds in bytes, queued before any of
+    // them is served. A batch of valid commands is not abuse: the connection
+    // stays open and every line survives in order.
+    const std::string command = "{\"cmd\":\"ping\"}\n";
+    const std::size_t lines = (Core::Platform::LocalSocketConnection::MaxPendingInputBytes / command.size()) + 64;
+    std::string batch;
+    batch.reserve(command.size() * lines);
+    for (std::size_t index = 0; index < lines; ++index)
+    {
+        batch += command;
+    }
+    REQUIRE(batch.size() > Core::Platform::LocalSocketConnection::MaxPendingInputBytes);
+
+    // Served as it arrives, the way a frame loop that keeps up does: the
+    // batch is taken in many passes, and its complete lines never count
+    // against the cap on an unterminated one.
+    const Delivery delivery = SendWhileServing(client, *connection, batch, Drain::Lines);
+    REQUIRE(delivery.bytesSent == batch.size());
+    const std::size_t taken =
+        delivery.linesTaken + TakeLinesWithin(*connection, lines - delivery.linesTaken, std::chrono::milliseconds(500));
+    CHECK(connection->IsOpen());
+    CHECK(taken == lines);
+
+    // A peer that never terminates its line is still cut off.
+    // Comfortably past the cap: crossing it on the last byte of the payload
+    // would depend on that byte having arrived before ReadAvailable() runs.
+    const std::string blob(Core::Platform::LocalSocketConnection::MaxPendingInputBytes + (64 * 1024), 'x');
+    const Delivery cutOff = SendWhileServing(client, *connection, blob, Drain::Nothing);
+    CHECK(cutOff.bytesSent < blob.size());
+    CHECK_FALSE(connection->IsOpen());
+
+    closesocket(client.handle);
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket paces a peer that outruns the drain rate [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "flood.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const LargeWriteClient client = ConnectForLargeWrites(path);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // Valid commands arriving faster than they are served are not abuse:
+    // reading pauses once more than a frame's worth is waiting, so the
+    // buffer stays bounded and the rest of the batch waits in the kernel
+    // instead of the connection being dropped for it.
+    const std::string command = "{\"cmd\":\"ping\"}\n";
+    std::string batch;
+    while (batch.size() <= Core::Platform::LocalSocketConnection::ReadPauseBytes * 2)
+    {
+        batch += command;
+    }
+
+    const std::size_t lines = batch.size() / command.size();
+
+    // Nothing is served at first, like a frame loop that has fallen behind.
+    // The connection reads up to the pause mark and stops there; the kernel
+    // buffer fills behind it and the writer is held off, not dropped.
+    const Delivery behind = SendWhileServing(client, *connection, batch, Drain::Nothing, PauseSettleTimeout);
+    CHECK(connection->IsOpen());
+    REQUIRE(behind.bytesSent < batch.size());
+
+    // What is buffered reached the pause mark, and stopped within one read
+    // of it.
+    const std::size_t pausedLines = TakeBufferedLines(*connection);
+    const std::size_t pausedBytes = pausedLines * command.size();
+    CHECK(pausedBytes >= Core::Platform::LocalSocketConnection::ReadPauseBytes);
+    CHECK(pausedBytes < Core::Platform::LocalSocketConnection::ReadPauseBytes +
+                            Core::Platform::LocalSocketConnection::ReadChunkBytes);
+
+    // Served again, it picks up where it paused: the rest of the batch goes
+    // out, every line arrives and the connection is still open.
+    const std::string_view rest = std::string_view(batch).substr(behind.bytesSent);
+    const Delivery caughtUp = SendWhileServing(client, *connection, rest, Drain::Lines);
+    REQUIRE(caughtUp.bytesSent == rest.size());
+    const std::size_t served = pausedLines + caughtUp.linesTaken;
+    const std::size_t taken = served + TakeLinesWithin(*connection, lines - served, std::chrono::milliseconds(500));
+    CHECK(taken == lines);
+    CHECK(connection->IsOpen());
+
+    closesocket(client.handle);
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}

@@ -9,9 +9,9 @@
 // offers. They belong to the installation, not to a character.
 namespace GameLogic::Commands::Favourites
 {
-    bool Contains(const std::wstring& command);
+bool Contains(const std::wstring& command);
 
-    // Marks the command when it isn't marked yet and unmarks it otherwise.
-    // Returns whether it is a favourite afterwards.
-    bool Toggle(const std::wstring& command);
-}
+// Marks the command when it isn't marked yet and unmarks it otherwise.
+// Returns whether it is a favourite afterwards.
+bool Toggle(const std::wstring& command);
+} // namespace GameLogic::Commands::Favourites

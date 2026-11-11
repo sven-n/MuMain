@@ -1,0 +1,275 @@
+/* Modern theme for CGuildInfoWindow: docked_panel_frame.rcss's forged panel (linked first), flat
+   tabs, tables and scroll tracks in the modern tokens, modern buttons. Geometry is the legacy one
+   (reference px under the dock transform). */
+
+#panel { pointer-events: none; }
+
+#tab_list { position: absolute; left: 12px; top: 68px; width: 166px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+#tab_point { position: absolute; top: 68px; width: 56px; height: 22px; background-color: token(surface-raised); border: 1px token(accent-steel); border-radius: token(radius-sm)px; }
+#tab_point.tab-0 { left: 12px; }
+#tab_point.tab-1 { left: 68px; }
+#tab_point.tab-2 { left: 124px; }
+#tab_head { position: absolute; left: 11px; top: 237px; width: 63px; height: 25px; background-color: token(surface-raised); }
+
+.t-edge-top, .t-edge-bottom { position: absolute; height: 1px; margin-top: 6px; background-color: token(border-frame); }
+.t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
+.t-corner { display: none; }
+.fill { position: absolute; }
+
+#guild_mark { position: absolute; left: 74px; top: 106px; width: 39px; height: 39px; }
+.mark-cell { float: left; width: 4.875px; height: 4.875px; }
+.line-mark { position: absolute; width: calc(8px * var(--root-scale)); height: calc(8px * var(--root-scale)); }
+.line-mark-cell { float: left; width: 1px; height: 1px; }
+
+.s-top, .s-bottom { display: none; }
+.s-mid { position: absolute; width: 3px; height: 15px; margin-left: 2px; background-color: token(surface-recessed); }
+.thumb { position: absolute; width: 9px; height: 30px; margin-left: 3px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
+
+/* A row's backdrop: the selected line, and a member holding an office. */
+.gi-row.selected .gi-row-back, .gi-row.officer .gi-row-back { background-color: token(accent-steel); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
+
+.gi-btn {
+	display: block;
+	position: absolute;
+	width: 64px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.gi-btn:hover { border-color: token(accent-steel-hover); }
+.gi-btn:active { background-color: token(surface-recessed); }
+.gi-label { left: 0; text-align: center; color: token(text-primary); }
+
+#btn_exit {
+	position: absolute;
+	left: 13px;
+	top: 392px;
+	width: 36px;
+	height: 28px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+#btn_exit:hover { border-color: token(accent-steel-hover); }
+
+/* Every piece below came out of a style attribute in the shared RML, which the inline-property
+   rule made un-overridable. The geometry is the original's own Render_*() walk. */
+.gi-page { position: static; }
+.gi-line, .gi-note, .gi-figure, .gi-header { position: absolute; }
+.gi-line { text-align: center; }
+
+#gi_hint_title { left: 0; top: 15px; font-weight: bold; }
+#gi_hint_1 { left: 25px; top: 46px; }
+#gi_hint_2 { left: 25px; top: 61px; }
+#gi_hint_3 { left: 25px; top: 76px; }
+
+#gi_title { left: 0; top: 12px; }
+#gi_name { left: 35px; top: 48px; }
+/* The three tab labels, one TAB_WIDTH apart from TAB_START_X + 1. */
+.gi-tab-label { top: 76px; }
+#gi_tab_info { left: 13px; }
+#gi_tab_members { left: 69px; }
+#gi_tab_union { left: 125px; }
+
+#gi_notice_label { left: 22px; top: 249px; }
+#gi_created { left: 22px; top: 169px; }
+#gi_score { left: 22px; top: 182px; }
+#gi_member_count { left: 22px; top: 195px; }
+#gi_rival { left: 22px; top: 208px; }
+
+#gi_hdr_name { left: 24px; top: 112px; }
+#gi_hdr_position { left: 89px; top: 112px; }
+#gi_hdr_server { left: 126px; top: 112px; }
+#gi_hdr_union_name { left: 34px; top: 115px; }
+#gi_hdr_union_members { left: 140px; top: 115px; }
+
+/* The guild mark's own table. */
+.mark-edge-top { left: 73px; top: 104px; width: 42px; }
+.mark-edge-bottom { left: 73px; top: 138px; width: 42px; }
+.mark-edge-left { left: 70px; top: 104px; height: 42px; }
+.mark-edge-right { left: 105px; top: 104px; height: 42px; }
+.mark-corner-tl { left: 70px; top: 104px; }
+.mark-corner-tr { left: 105px; top: 104px; }
+.mark-corner-bl { left: 70px; top: 138px; }
+.mark-corner-br { left: 105px; top: 138px; }
+
+/* The figures table, and the announcement box under it. */
+.figures-edge-top { left: 12px; top: 159px; width: 166px; }
+.figures-edge-bottom { left: 12px; top: 215px; width: 166px; }
+.figures-edge-left { left: 10px; top: 159px; height: 65px; }
+.figures-edge-right { left: 167px; top: 159px; height: 65px; }
+.figures-corner-tl { left: 10px; top: 159px; }
+.figures-corner-tr { left: 167px; top: 159px; }
+.figures-corner-bl { left: 10px; top: 215px; }
+.figures-corner-br { left: 167px; top: 215px; }
+.notice-fill { left: 11px; top: 260px; width: 165px; height: 84px; }
+.notice-edge-top { left: 12px; top: 260px; width: 165px; }
+.notice-edge-bottom { left: 12px; top: 334px; width: 165px; }
+.notice-edge-left { left: 10px; top: 260px; height: 82px; }
+.notice-edge-right { left: 167px; top: 260px; height: 82px; }
+.notice-corner-tr { left: 167px; top: 260px; }
+.notice-corner-bl { left: 10px; top: 334px; }
+.notice-corner-br { left: 167px; top: 334px; }
+
+/* The member list's table. */
+.members-fill { left: 12px; top: 125px; width: 165px; height: 232px; }
+.members-head-fill { left: 12px; top: 105px; width: 165px; height: 20px; }
+.members-edge-top { left: 12px; top: 105px; width: 165px; }
+.members-edge-bottom { left: 12px; top: 347px; width: 165px; }
+.members-edge-left { left: 8px; top: 105px; height: 251px; }
+.members-edge-right { left: 168px; top: 105px; height: 251px; }
+.members-corner-tl { left: 8px; top: 105px; }
+.members-corner-tr { left: 168px; top: 105px; }
+.members-corner-bl { left: 8px; top: 347px; }
+.members-corner-br { left: 168px; top: 347px; }
+
+/* The alliance list's table. */
+.union-fill { left: 12px; top: 125px; width: 165px; height: 85px; }
+.union-head-fill { left: 12px; top: 110px; width: 165px; height: 15px; }
+.union-edge-top { left: 12px; top: 109px; width: 166px; }
+.union-edge-bottom { left: 12px; top: 201px; width: 166px; }
+.union-edge-left { left: 10px; top: 109px; height: 100px; }
+.union-edge-right { left: 167px; top: 109px; height: 100px; }
+.union-corner-tl { left: 10px; top: 109px; }
+.union-corner-tr { left: 167px; top: 109px; }
+.union-corner-bl { left: 10px; top: 201px; }
+.union-corner-br { left: 167px; top: 201px; }
+
+/* Each tab's scroll track. Its own top was bound although both are constants; only the thumb's
+   offset inside it still is. */
+.gi-scroll { position: absolute; }
+.gi-scroll > div { position: absolute; }
+
+/* A list row. Its own top follows the native list box's scroll position; everything else about it
+   is placed here. A backgrounded element with children paints an unclosed box in this build, so
+   the backdrop is a childless leaf (engine-findings.md). */
+.gi-rows { position: static; }
+.gi-row { position: absolute; width: 148px; height: 13px; }
+.gi-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
+.gi-cell { position: absolute; top: 3px; }
+
+/* The alliance explanation's own rows: the original advanced its y by 15, 25 or 20 per line. */
+.gi-alliance-note { position: static; }
+.gi-alliance-line { position: absolute; left: 25px; }
+.gi-alliance-line:nth-child(1) { top: 106px; }
+.gi-alliance-line:nth-child(2) { top: 121px; }
+.gi-alliance-line:nth-child(3) { top: 136px; }
+.gi-alliance-line:nth-child(4) { top: 151px; }
+.gi-alliance-line:nth-child(5) { top: 166px; }
+.gi-alliance-line:nth-child(6) { top: 191px; }
+.gi-alliance-line:nth-child(7) { top: 206px; }
+.gi-alliance-line:nth-child(8) { top: 221px; }
+.gi-alliance-line:nth-child(9) { top: 241px; }
+.gi-alliance-line:nth-child(10) { top: 256px; }
+.gi-alliance-line:nth-child(11) { top: 271px; }
+
+#btn_guild_out { left: 100px; top: 350px; }
+#btn_get_position { left: 3px; top: 360px; }
+#btn_free_position { left: 64px; top: 360px; }
+#btn_get_out { left: 125px; top: 360px; }
+#btn_union_create { left: 30px; top: 230px; }
+#btn_union_out { left: 100px; top: 230px; }
+
+.gi-line, .gi-note, .gi-figure, .gi-header, .gi-cell { color: token(text-primary); }
+#gi_name { color: token(semantic-success); }
+#gi_notice_label { color: token(accent-gold); }
+.gi-cell { color: token(text-secondary); }
+.cell-member-server { color: token(accent-gold); }
+.gi-row.selected .gi-cell { color: token(text-primary); }
+.notice-fill, .members-fill, .union-fill { background-color: token(surface-recessed); }
+.members-head-fill, .union-head-fill { background-color: token(surface-raised); }
+
+/* The announcement list: base.rcss's .scroll-pane, counter-scaled out of #panel's transform so
+   its net render transform is identity and the text inside stays at the native renderer's own
+   physical size. The scrollbar therefore keeps .scroll-pane's dp width rather than a
+   reference-px one, same as every other pane consumer (component-catalog.md). */
+#gi_notice_list {
+	position: absolute;
+	left: 15px;
+	top: 264px;
+	transform-origin: left top;
+	/* Native drew the announcement's track at every list length, also when every line fits. */
+	overflow: hidden scroll;
+}
+
+/* display: block is explicit, not incidental: a data-for <div> is inline without it in this
+   build and every row then lands on the same line. */
+.gi-pane-row { position: relative; display: block; }
+.gi-pane-cell { position: absolute; left: 2.740%; top: 0; white-space: nowrap; }
+
+/* The member list, same .scroll-pane recipe as the announcement: 18 rows of 13 units, which is
+   the native box's own m_iNumRenderLine times its line step. Cell positions are percentages of
+   the row's bound width, so they need no binding of their own and hold at every scale. */
+#gi_member_list {
+	position: absolute;
+	left: 13px;
+	top: 123px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+}
+
+.gi-member-row { pointer-events: auto; }
+.gi-pane-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.gi-member-row.selected .gi-pane-row-back,
+.gi-member-row.officer .gi-pane-row-back { background-color: rgb(106, 97, 88); }
+.gi-member-row.selected .gi-pane-cell { color: #000000; }
+
+.cell-member-name { left: 5.369%; }
+.cell-member-role { left: 59.060%; transform: translateX(-50%); }
+.cell-member-server { right: 12.752%; text-align: right; }
+
+/* The alliance list: 6 rows of 13 units, the native box's own m_iNumRenderLine times its line
+   step. Its mark is art rather than text, so the cells are eighths of a bound 8-unit box and
+   keep scaling with the panel, unlike the glyphs beside them. */
+#gi_union_list {
+	position: absolute;
+	left: 15px;
+	top: 130px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+}
+
+.gi-union-row { pointer-events: auto; }
+.gi-union-row.selected .gi-pane-row-back { background-color: rgb(106, 97, 88); }
+.gi-union-row.selected .gi-pane-cell { color: #000000; }
+
+.gi-union-row .line-mark { position: absolute; left: 2.721%; top: 0; }
+.gi-union-row .line-mark-cell { float: left; width: 12.5%; height: 12.5%; }
+
+.cell-union-name { left: 10.884%; }
+.cell-union-count { right: 3.401%; text-align: right; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#gi_hint_title { width: calc(100% * var(--root-scale)); }
+#gi_title { width: calc(100% * var(--root-scale)); }
+#gi_name { width: calc(120px * var(--root-scale)); }
+#gi_tab_info { width: calc(56px * var(--root-scale)); }
+#gi_tab_members { width: calc(56px * var(--root-scale)); }
+#gi_tab_union { width: calc(56px * var(--root-scale)); }
+#gi_notice_label { width: calc(40px * var(--root-scale)); }
+#gi_created { width: calc(40px * var(--root-scale)); }
+#gi_score { width: calc(80px * var(--root-scale)); }
+#gi_member_count { width: calc(80px * var(--root-scale)); }
+#gi_notice_list { width: calc(161px * var(--root-scale)); height: calc(80px * var(--root-scale)); }
+.gi-pane-row { width: calc(146px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+.gi-label { width: calc(64px * var(--root-scale)); }
+#gi_hdr_name { width: calc(40px * var(--root-scale)); }
+#gi_hdr_position { width: calc(40px * var(--root-scale)); }
+#gi_hdr_server { width: calc(40px * var(--root-scale)); }
+#gi_member_list { width: calc(164px * var(--root-scale)); height: calc(234px * var(--root-scale)); }
+.gi-pane-row.gi-member-row { width: calc(149px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+#gi_hdr_union_name { width: calc(40px * var(--root-scale)); }
+#gi_hdr_union_members { width: calc(40px * var(--root-scale)); }
+#gi_union_list { width: calc(162px * var(--root-scale)); height: calc(78px * var(--root-scale)); }
+.gi-pane-row.gi-union-row { width: calc(147px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The tabs' hit areas (guild_info_tab): the original's columns, 56 wide from x 12, over the top 90. */
+.gi-tab-hit { position: absolute; top: 0; width: 56px; height: 90px; pointer-events: auto; cursor: pointer; }
+#gi_tab_hit_0 { left: 12px; }
+#gi_tab_hit_1 { left: 68px; }
+#gi_tab_hit_2 { left: 124px; }

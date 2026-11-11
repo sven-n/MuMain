@@ -4,7 +4,11 @@
 #pragma once
 
 #include "Dotnet/Connection.h"
+#include "Dotnet/PacketFunctions_ChatServer.h"
+#include "Dotnet/PacketFunctions_ClientToServer.h"
+#include "Dotnet/PacketFunctions_ConnectServer.h"
 #include "Network/Server/CSMapServer.h"
+#include "UI/Combat/CastleSiegePhase.h"
 #include <span>
 #include <typeinfo>
 
@@ -80,6 +84,13 @@
 #define PACKET_ATTACK       0x11
 
 extern int CurrentProtocolState;
+// Account the last login request was sent for.
+extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
+
+inline uint16_t ntoh16(uint16_t value)
+{
+    return static_cast<uint16_t>(((value & 0x00FFU) << 8) | ((value & 0xFF00U) >> 8));
+}
 
 inline uint64_t ntoh64(uint64_t value)
 {
@@ -396,6 +407,12 @@ typedef struct
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 #pragma pack(pop)
 
+// The stage OpenMU sends the extended client when it enters the world: the
+// discriminator of the map (monsters design, D67), one byte after the struct,
+// so that a character which lost its connection in Devil Square rejoins its
+// stage. 0 for a packet too short to have one.
+int GetJoinMapServerStage(std::span<const BYTE> packet);
+
 #pragma pack(push, 1)
 typedef struct
 {
@@ -422,33 +439,33 @@ typedef struct {
 } PRECEIVE_INVENTORY_EXTENDED, * LPPRECEIVE_INVENTORY_EXTENDED;
 
 /// <summary>
-    /// Layout:
-    ///   Group:  4 bit
-    ///   Number: 12 bit
-    ///   Level:  8 bit
-    ///   Dura:   8 bit
-    ///   OptFlags: 8 bit
-    ///     HasOpt
-    ///     HasLuck
-    ///     HasSkill
-    ///     HasExc
-    ///     HasAnc
-    ///     HasGuardian
-    ///     HasHarmony
-    ///     HasSockets
-    ///   Optional, depending on Flags:
-    ///     Opt_Lvl 4 bit
-    ///     Opt_Typ 4 bit
-    ///     Exc:    8 bit
-    ///     Anc_Dis 4 bit
-    ///     Anc_Bon 4 bit
-    ///     Harmony 8 bit
-    ///     Soc_Bon 4 bit
-    ///     Soc_Cnt 4 bit
-    ///     Sockets n * 8 bit
-    ///   
-    ///  Total: 5 ~ 15 bytes.
-    /// </summary>
+/// Layout:
+///   Group:  4 bit
+///   Number: 12 bit
+///   Level:  8 bit
+///   Dura:   8 bit
+///   OptFlags: 8 bit
+///     HasOpt
+///     HasLuck
+///     HasSkill
+///     HasExc
+///     HasAnc
+///     HasHarmony
+///     HasGuardian (no byte of its own)
+///     HasSockets
+///   Optional, depending on Flags:
+///     Opt_Lvl 4 bit
+///     Opt_Typ 4 bit
+///     Exc:    8 bit
+///     Anc_Dis 4 bit
+///     Anc_Bon 4 bit
+///     Harmony 8 bit
+///     Soc_Bon 4 bit
+///     Soc_Cnt 4 bit
+///     Sockets n * 8 bit
+///
+///  Total: 5 ~ 15 bytes.
+/// </summary>
 #pragma pack(push, 1)
 typedef struct {
     WORD            GroupAndNumber;
@@ -457,6 +474,10 @@ typedef struct {
     ItemOptionFlags OptionFlags;
 } PITEM_EXTENDED_BASE, * LPPITEM_EXTENDED_BASE;
 #pragma pack(pop)
+
+// The length of an item in the layout above, read from its option flags: where the next item of a packet starts.
+// Never more than the buffer holds: an item cut short (logged) gets the bytes that are there.
+int CalcItemLength(std::span<const BYTE> ReceiveBuffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // trade
@@ -915,7 +936,16 @@ typedef struct {
     BYTE         PositionX;
     BYTE         PositionY;
     BYTE         Angle;
+    BYTE Unused[5];
+    // Only in OpenMU's MapChangedExtended to the extended client, one byte
+    // longer than MapChanged: the discriminator of the map, the stage of Devil
+    // Square (1 to 7).
+    BYTE MapDiscriminator;
 } PRECEIVE_TELEPORT_POSITION, * LPPRECEIVE_TELEPORT_POSITION;
+
+// The stage OpenMU sends the extended client with the map (monsters design,
+// D67); 0 for a packet too short to have one.
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet);
 
 //receive damage
 typedef struct {
@@ -1131,15 +1161,6 @@ typedef struct
 typedef struct
 {
     PBMSG_HEADER	Header;
-    GuildRelationshipType			byRelationShipType;
-    GuildRequestType			byRequestType;
-    BYTE			byTargetUserIndexH;
-    BYTE			byTargetUserIndexL;
-} PMSG_GUILD_RELATIONSHIP, * LPPMSG_GUILD_RELATIONSHIP;
-
-typedef struct
-{
-    PBMSG_HEADER	Header;
     BYTE			byRelationShipType;
     BYTE			byRequestType;
     BYTE			byResult;
@@ -1181,6 +1202,7 @@ typedef struct
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
+    BYTE Reserved;
     WORD         Time;
 } PRECEIVE_SOCCER_TIME, * LPPRECEIVE_SOCCER_TIME;
 
@@ -1718,11 +1740,20 @@ typedef struct tagGETPSHOPITEMLIST_HEADER {
 #pragma pack(push, 1) // just to get the actual length by sizeof...
 typedef struct tagGETPSHOPITEM_DATA {
     INT		MoneyPrice;
-    WORD    PriceItemType; // not yet used
-    WORD    RequiredItemAmount; // not yet used
+    WORD PriceItemType;
+    WORD RequiredItemAmount;
     BYTE	ItemSlot;
     BYTE	Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
 } GETPSHOPITEM_DATAINFO, * LPGETPSHOPITEM_DATAINFO;
+
+// The price types which the server allows for prices in personal shops, in
+// addition to zen (C1 3F 0A). The price item types (WORD) follow it.
+typedef struct tagPSHOP_PRICETYPES_HEADER
+{
+    PBMSG_HEADER Header;
+    BYTE bySubcode;
+    BYTE Count;
+} PSHOP_PRICETYPES_HEADERINFO, *LPPSHOP_PRICETYPES_HEADERINFO;
 #pragma pack(pop)
 
 typedef struct tagCLOSEPSHOP_RESULT {
@@ -1745,6 +1776,7 @@ typedef struct tagPURCHASEITEM_RESULT {
         LackOfMoney = 7,
         MoneyOverflowOrNotEnoughSpace = 8,
         ItemBlock = 9,
+        LackOfPriceCurrency = 10,
     };
 
     PBMSG_HEADER	Header;
@@ -2005,21 +2037,6 @@ typedef struct
     PBMSG_HEADER    m_Header;
     MServerInfo     m_vSvrInfo;
 }PHEADER_MAP_CHANGESERVER_INFO, * LPPHEADER_MAP_CHANGESERVER_INFO;
-
-enum CASTLESIEGE_STATE
-{
-    CASTLESIEGE_STATE_NONE = -1,
-    CASTLESIEGE_STATE_IDLE_1 = 0,
-    CASTLESIEGE_STATE_REGSIEGE = 1,
-    CASTLESIEGE_STATE_IDLE_2 = 2,
-    CASTLESIEGE_STATE_REGMARK = 3,
-    CASTLESIEGE_STATE_IDLE_3 = 4,
-    CASTLESIEGE_STATE_NOTIFY = 5,
-    CASTLESIEGE_STATE_READYSIEGE = 6,
-    CASTLESIEGE_STATE_STARTSIEGE = 7,
-    CASTLESIEGE_STATE_ENDSIEGE = 8,
-    CASTLESIEGE_STATE_ENDCYCLE = 9,
-};
 
 //----------------------------------------------------------------------------
 // GC [0xB2][0x00]
@@ -2788,7 +2805,7 @@ typedef struct
     char		GameId[MAX_USERNAME_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
-    SERVER_CLASS_TYPE		btClass;
+    BYTE btClass; // OpenMU evolution:line nibbles; see DecodeIllusionTempleClass.
     int			nAddExp;
 } PMSG_CURSED_TEMPLE_USER_ADD_EXP, * LPPMSG_CURSED_TEMPLE_USER_ADD_EXP;
 
@@ -3275,37 +3292,36 @@ typedef struct
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lBuyItemPackageSeq;
-    long				lBuyItemDisplaySeq;
-    long				lBuyItemPriceSeq;
-    WORD				wItemCode;
-}PMSG_CASHSHOP_BUYITEM_REQ, * LPPMSG_CASHSHOP_BUYITEM_REQ;
+    int32_t lBuyItemPackageSeq;
+    int32_t lBuyItemDisplaySeq;
+    int32_t lBuyItemPriceSeq;
+    WORD wItemCode;
+} PMSG_CASHSHOP_BUYITEM_REQ, *LPPMSG_CASHSHOP_BUYITEM_REQ;
 
 //----------------------------------------------------------------------------
 // Cash shop item purchase response (0xD2)(0x03)
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    BYTE				byResultCode;
-    long				lItemLeftCount;
-}PMSG_CASHSHOP_BUYITEM_ANS, * LPPMSG_CASHSHOP_BUYITEM_ANS;
-
+    BYTE byResultCode;
+    int32_t lItemLeftCount;
+} PMSG_CASHSHOP_BUYITEM_ANS, *LPPMSG_CASHSHOP_BUYITEM_ANS;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    BYTE				byResultCode;
-    long				lItemLeftCount;
-    double				dLimitedCash;
-}PMSG_CASHSHOP_GIFTSEND_ANS, * LPPMSG_CASHSHOP_GIFTSEND_ANS;
+    BYTE byResultCode;
+    int32_t lItemLeftCount;
+    double dLimitedCash;
+} PMSG_CASHSHOP_GIFTSEND_ANS, *LPPMSG_CASHSHOP_GIFTSEND_ANS;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x05)
@@ -3334,35 +3350,35 @@ typedef struct
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lStorageIndex;
-    long				lItemSeq;
-    long				lStorageGroupCode;
-    long				lProductSeq;
-    long				lPriceSeq;
-    double				dCashPoint;
-    char				chItemType;
-}PMSG_CASHSHOP_STORAGELIST, * LPPMSG_CASHSHOP_STORAGELIST;
+    int32_t lStorageIndex;
+    int32_t lItemSeq;
+    int32_t lStorageGroupCode;
+    int32_t lProductSeq;
+    int32_t lPriceSeq;
+    double dCashPoint;
+    char chItemType;
+} PMSG_CASHSHOP_STORAGELIST, *LPPMSG_CASHSHOP_STORAGELIST;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x0E)
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lStorageIndex;
-    long				lItemSeq;
-    long				lStorageGroupCode;
-    long				lProductSeq;
-    long				lPriceSeq;
-    double				dCashPoint;
-    char				chItemType;
+    int32_t lStorageIndex;
+    int32_t lItemSeq;
+    int32_t lStorageGroupCode;
+    int32_t lProductSeq;
+    int32_t lPriceSeq;
+    double dCashPoint;
+    char chItemType;
 
-    char				chSendUserName[MAX_USERNAME_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
-}PMSG_CASHSHOP_GIFTSTORAGELIST, * LPPMSG_CASHSHOP_GIFTSTORAGELIST;
+    char chSendUserName[MAX_USERNAME_SIZE + 1];
+    char chMessage[MAX_GIFT_MESSAGE_SIZE];
+} PMSG_CASHSHOP_GIFTSTORAGELIST, *LPPMSG_CASHSHOP_GIFTSTORAGELIST;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x07)
@@ -3403,33 +3419,33 @@ typedef struct
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lPackageSeq;
-}PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ, * LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ;
+    int32_t lPackageSeq;
+} PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ, *LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x09)
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lPackageSeq;
-    long				lLeftCount;
-}PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS, * LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS;
+    int32_t lPackageSeq;
+    int32_t lLeftCount;
+} PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS, *LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x0A)
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lStorageSeq;
-    long				lStorageItemSeq;
-    char				chStorageItemType;
-}PMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ, * LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ;
+    int32_t lStorageSeq;
+    int32_t lStorageItemSeq;
+    char chStorageItemType;
+} PMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ, *LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x0A)
@@ -3446,14 +3462,14 @@ typedef struct
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    long				lStorageSeq;
-    long				lStorageItemSeq;
+    int32_t lStorageSeq;
+    int32_t lStorageItemSeq;
 
-    WORD				wItemCode;
-    char				chStorageItemType;
-}PMSG_CASHSHOP_STORAGE_ITEM_USE_REQ, * LPPMSG_CASHSHOP_STORAGE_ITEM_USE_REQ;
+    WORD wItemCode;
+    char chStorageItemType;
+} PMSG_CASHSHOP_STORAGE_ITEM_USE_REQ, *LPPMSG_CASHSHOP_STORAGE_ITEM_USE_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x0B)
@@ -3482,10 +3498,10 @@ typedef struct
 //----------------------------------------------------------------------------
 typedef struct
 {
-    PBMSG_HEADER2			h;
+    PBMSG_HEADER2 h;
 
-    long				lEventCategorySeq;
-}PMSG_CASHSHOP_EVENTITEM_REQ, * LPPMSG_CASHSHOP_EVENTITEM_REQ;
+    int32_t lEventCategorySeq;
+} PMSG_CASHSHOP_EVENTITEM_REQ, *LPPMSG_CASHSHOP_EVENTITEM_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x13)
@@ -3499,10 +3515,10 @@ typedef struct
 
 typedef struct
 {
-    PBMSG_HEADER2			h;
+    PBMSG_HEADER2 h;
 
-    long				lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
-}PMSG_CASHSHOP_EVENTITEM_LIST, * LPPMSG_CASHSHOP_EVENTITEM_LIST;
+    int32_t lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
+} PMSG_CASHSHOP_EVENTITEM_LIST, *LPPMSG_CASHSHOP_EVENTITEM_LIST;
 
 typedef struct
 {
@@ -3528,12 +3544,12 @@ typedef struct
 
 typedef struct
 {
-    PBMSG_HEADER2		h;
+    PBMSG_HEADER2 h;
 
-    WORD				wItemCode;
-    WORD				wItemSlotIndex;
-    long				lExpireDate;
-}PMSG_PERIODITEMEX_ITEMLIST, * LPPMSG_PERIODITEMEX_ITEMLIST;
+    WORD wItemCode;
+    WORD wItemSlotIndex;
+    int32_t lExpireDate;
+} PMSG_PERIODITEMEX_ITEMLIST, *LPPMSG_PERIODITEMEX_ITEMLIST;
 
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
@@ -3581,18 +3597,32 @@ extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// The connect server listens on 44288-44543 (0xAD00-0xADFF) and talks unencrypted; every other
+// port is a game server's, whose connection is encrypted. CreateSocket connects accordingly.
+bool IsGameServerPort(unsigned short Port);
+// Closes and deletes the connection (SocketClient is null afterwards).
 void DeleteSocket();
+// Closes the connection there is (DeleteSocket) and connects for a fresh login: the
+// server greets the new connection as a new client
+// (the connect server with its list, a game server with its join answer), not as a
+// map server change. Which of the two it is follows from the port (IsGameServerPort).
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port);
 
 // Tears the live game session down to a clean login-scene state (matching the
 // in-game logout path). Used by the auto-reconnect flow before it replays login.
 void ResetClientToLoginScene();
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
+void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer);
 
 struct PacketInfo
 {
     std::unique_ptr<BYTE[]> ReceiveBuffer;
+    int32_t ConnectionHandle = 0;
     int32_t Size;
+    std::chrono::steady_clock::time_point EnqueuedAt;
+    bool Superseded = false;
+    bool SuppressOptionalPresentation = false;
 };
 void ProcessPacketCallback(const PacketInfo* Packet);
 

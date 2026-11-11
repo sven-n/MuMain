@@ -1,9 +1,7 @@
-// w_BuffTimeControl.cpp: implementation of the BuffTimeControl class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffTimeControl.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -58,7 +56,7 @@ DWORD BuffTimeControl::GetBuffMaxTime(eBuffState bufftype, DWORD curbufftime)
     {
         const BuffInfo& buffinfo = g_BuffInfo(bufftype);
 
-        if (buffinfo.s_ItemType == 255)
+        if (!buffinfo.HasItem())
         {
             return -1;
         }

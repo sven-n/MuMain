@@ -21,6 +21,7 @@ namespace Core::Time
         using Callback = std::function<void()>;
 
         static FrameTimerScheduler& Instance();
+        static FrameTimerScheduler* TryInstance();
 
         // Register or replace a repeating timer firing every intervalMs.
         void SetRepeating(TimerId id, unsigned intervalMs, Callback callback);
@@ -33,6 +34,7 @@ namespace Core::Time
 
     private:
         FrameTimerScheduler() = default;
+        ~FrameTimerScheduler();
 
         struct Timer
         {

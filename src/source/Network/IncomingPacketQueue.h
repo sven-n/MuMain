@@ -1,8 +1,11 @@
 #pragma once
 
+#include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <deque>
 #include <memory>
 #include <mutex>
-#include <queue>
 
 struct PacketInfo;
 
@@ -21,6 +24,16 @@ namespace Network
     public:
         using Processor = void (*)(const PacketInfo*);
 
+        struct Stats
+        {
+            std::size_t depth = 0;
+            std::size_t highWaterMark = 0;
+            std::size_t lastDrainedCount = 0;
+            std::uint64_t coalescedActionCount = 0;
+            double oldestPacketAgeMs = 0.0;
+            double lastDrainDurationMs = 0.0;
+        };
+
         static IncomingPacketQueue& Instance();
 
         // Enqueue a received packet. Called from the network thread.
@@ -36,12 +49,14 @@ namespace Network
         // reconnect) so packets for the old session are not processed against
         // freed world data.
         void Clear();
+        Stats GetStats() const;
 
     private:
         IncomingPacketQueue() = default;
         ~IncomingPacketQueue();
 
-        std::mutex m_mutex;
-        std::queue<std::unique_ptr<PacketInfo>> m_queue;
+        mutable std::mutex m_mutex;
+        std::deque<std::unique_ptr<PacketInfo>> m_queue;
+        Stats m_stats;
     };
 }

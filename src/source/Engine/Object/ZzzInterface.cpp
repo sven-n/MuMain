@@ -1,12 +1,17 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <exception>
+#include "Core/Text/Utf8.h"
+#include "Guild/GuildTypes.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Widgets/TextSearch.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -37,22 +42,25 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Social/SocialWindowBase.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
@@ -60,9 +68,10 @@
 
 #include "Camera/CameraProjection.h"
 #include "Scenes/SceneCommon.h"
+#include "Render/Text/CUIRenderText.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
+#include <iterator>
+
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
@@ -111,7 +120,6 @@ int   InputFrame = 0;
 int   EditFlag = EDIT_NONE;
 wchar_t  ColorTable[][10] = { L"White", L"Black", L"Red", L"Yellow", L"Green", L"Cyan", L"Blue", L"Magenta" };
 
-int   SelectMonster = 0;
 int   SelectModel = 0;
 int   SelectMapping = 0;
 int   SelectColor = 0;
@@ -143,8 +151,6 @@ int   TargetType;
 int TargetX;
 int TargetY;
 float TargetAngle;
-int   FontHeight;
-
 OBJECT* TradeNpc = NULL;
 
 bool  DontMove = false;
@@ -251,17 +257,6 @@ void ClearInput(BOOL bClearWhisperTarget)
         InputTextHide[i] = 0;
     }
 
-    if (g_iChatInputType == 1)
-    {
-        if (g_pSingleTextInputBox != nullptr)
-        {
-            g_pSingleTextInputBox->SetText(nullptr);
-        }
-        if (g_pSinglePasswdInputBox != nullptr)
-        {
-            g_pSinglePasswdInputBox->SetText(nullptr);
-        }
-    }
 }
 
 void RenderInputText(int x, int y, int Index, int Gold)
@@ -333,22 +328,22 @@ extern int  AlphaBlendType;
 
 void RenderTipText(int sx, int sy, const wchar_t* Text)
 {
-    SIZE TextSize = { 0, 0 };
     g_pRenderText->SetFont(g_hFont);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
+    const SIZE TextSize = g_pRenderText->MeasureText(Text, lstrlen(Text));
 
     int BackupAlphaBlendType = AlphaBlendType;
     EnableAlphaTest();
-    glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-    RenderColor((float)sx - 2, (float)sy - 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);	// 위
-    RenderColor((float)sx - 2, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);	// 좌
-    RenderColor((float)sx - 2 + TextSize.cx / g_fScreenRate_x + 3, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);
-    RenderColor((float)sx - 2, (float)sy - 3 + TextSize.cy / g_fScreenRate_y + 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);
-
-    glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-    RenderColor((float)sx - 1, (float)sy - 2, (float)TextSize.cx / g_fScreenRate_x + 2, (float)TextSize.cy / g_fScreenRate_y + 2);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    EnableTexture2D();
+    constexpr unsigned int borderColor = 0xFF000000u;
+    constexpr unsigned int backgroundColor = 0xCC000000u;
+    const float textWidth = static_cast<float>(TextSize.cx);
+    const float textHeight = static_cast<float>(TextSize.cy);
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, textWidth + 4, 1.f, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) + textWidth + 1, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) + textHeight, textWidth + 4, 1.f, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 1, static_cast<float>(sy) - 2, textWidth + 2, textHeight + 2,
+        backgroundColor);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(sx, sy, Text);
@@ -396,7 +391,6 @@ int RenderDebugText(int y)
         int  SizeByte = 1;
         for (int j = 0; j < DebugTextLength[i]; j++)
         {
-            glColor3f(0.6f, 0.6f, 0.6f);
             if (j == 0)
             {
                 if (DebugText[i][j] == 0xc2) SizeByte = 2;
@@ -406,7 +400,6 @@ int RenderDebugText(int y)
                 if (SizeByte == 1)
                 {
                     Type = DebugText[i][j];
-                    glColor3f(1.f, 1.f, 1.f);
                     if (DebugText[i][j] == 0x00)
                     {
                         x = Width * 4;
@@ -418,7 +411,6 @@ int RenderDebugText(int y)
                 if (SizeByte == 2)
                 {
                     Type = DebugText[i][j];
-                    glColor3f(1.f, 1.f, 1.f);
                 }
             }
 
@@ -538,7 +530,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
 
 bool CheckAttack_Fenrir(CHARACTER* c)
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -699,7 +691,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
 
 bool CheckAttack()
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -938,7 +930,7 @@ bool CheckAttack()
 
 int	getTargetCharacterKey(CHARACTER* c, int selected)
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return -1;
     }
@@ -1165,7 +1157,7 @@ void ReloadArrow()
 
         bool Success = false;
 
-        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
         {
             rp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
             lp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -1177,25 +1169,25 @@ void ReloadArrow()
             if ((gCharacterManager.GetEquipedBowType(lp) == BOWTYPE_BOW) && (rp->Type == -1))
             {
                 ITEM* pItem = g_pMyInventory->FindItem(Index);
-                SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                 if (pItem)
                 {
                     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);
                 }
                 g_pMyInventory->DeleteItem(Index);
-                g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             else
                 if ((gCharacterManager.GetEquipedBowType(rp) == BOWTYPE_CROSSBOW) && (lp->Type == -1))
                 {
                     ITEM* pItem = g_pMyInventory->FindItem(Index);
-                    SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                    mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                     if (pItem)
                     {
                         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);
                     }
                     g_pMyInventory->DeleteItem(Index);
-                    g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
         }
     }
@@ -1203,7 +1195,7 @@ void ReloadArrow()
     {
         if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::NoMoreArrows) == FALSE)
         {
-            g_pSystemLogBox->AddText(I18N::Game::NoMoreArrows, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::NoMoreArrows, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
     }
 }
@@ -1251,7 +1243,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
         int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-        if (Right >= ITEM_SPEAR && Right < ITEM_SPEAR + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsSpearType(Right))
         {
             Range = 2.2f;
         }
@@ -1457,6 +1449,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             break;
         case AT_SKILL_TWISTING_SLASH:
         case AT_SKILL_TWISTING_SLASH_STR:
+        case AT_SKILL_TWISTING_SLASH_STR_MG:
         case AT_SKILL_TWISTING_SLASH_MASTERY:
         case AT_SKILL_FIRE_SLASH:
         case AT_SKILL_FIRE_SLASH_STR:
@@ -1496,6 +1489,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
         }
         break;
+        default:
+            break;
         }
     }
     break;
@@ -1519,7 +1514,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             wchar_t Text[256];
             mu_swprintf(Text, I18N::Game::InventoryIsFull);
 
-            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
             OBJECT* pItem = &(Items[ItemKey].Object);
             pItem->Position[2] = RequestTerrainHeight(pItem->Position[0], pItem->Position[1]) + 3.f;
@@ -1557,7 +1552,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				{
 					wchar_t text[100];
 					mu_swprintf(text, I18N::Game::OnlyLevelAboveDCanDoTheChaosCombination, CHAOS_MIX_LEVEL);
-					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					g_pSystemLogBox->AddText(text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 					break;
 				}
 
@@ -1571,8 +1566,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 				g_pNPCShop->SetRepairShop(isRepairNpc);
 
-				if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
-					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
+				if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST))
+					g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
 
 				if (g_csQuest.IsInit())
 					SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
@@ -1591,13 +1586,54 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 						if (isElf && !altarActive)
 						{
 							if (state > 0)
-								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
+							{
+								extern int Button_Down;
+								extern int BackUp_Key;
+								BackUp_Key = CharactersClient[TargetNpc].Key;
+
+								wchar_t szCryWolfText[256];
+								mu_swprintf(szCryWolfText, I18N::Game::ContractCanBeMadeForDTimes, state);
+								mu::ui::window::GenericDialogConfig cfg;
+								cfg.showCancel = true;
+								cfg.lines = {
+									{ szCryWolfText, false },
+									{ I18N::Game::WouldYouLikeToProceedWithTheContract, false },
+								};
+								cfg.onPrimary = []
+								{
+									if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+									{
+										mu::ui::window::GenericDialogConfig dontCfg;
+										dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
+										mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
+									}
+									else
+									{
+										Button_Down = 2;
+										SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
+									}
+								};
+								cfg.onCancel = []
+								{
+									Button_Down = 1;
+									mu::ui::window::GenericDialogConfig needGuardianCfg;
+									needGuardianCfg.lines.push_back({ I18N::Game::WeNeedAGuardianToProtectTheWolf, false });
+									mu::ui::window::g_pGenericConfirmDialog->Show(std::move(needGuardianCfg));
+								};
+								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+							}
 							else
-								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
+							{
+								mu::ui::window::GenericDialogConfig cfg;
+								cfg.lines.push_back({ I18N::Game::FurtherContractCanTBeDoneSinceTheAltarHasBeenDestroyed, false });
+								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+							}
 						}
 						else if (isElf && altarActive)
 						{
-							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
+							mu::ui::window::GenericDialogConfig cfg;
+							cfg.lines.push_back({ I18N::Game::ContractIsOngoingThereforeDualCompactIsNotPossible, false });
+							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 						}
 						else
 						{
@@ -1614,7 +1650,33 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
 					{
 						if (objectType == MODEL_NPC_QUARREL)
-							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
+						{
+							mu::ui::window::GenericDialogConfig cfg;
+							cfg.lines = {
+								{ I18N::Game::WerewolfGuardsman, true },
+								{ I18N::Game::DoYouEvenKnowAboutMe, false },
+								{ I18N::Game::IfYouHavePassedThroughThe, false },
+								{ I18N::Game::YouMustBeLocatedCloselyTogether, false },
+								{ I18N::Game::InOrderToReceiveHelpFrom, false },
+							};
+							cfg.onPrimary = []
+							{
+								// Original visually disabled (LockOkButton) the OK button in this
+								// quest state instead of gating inside the callback -- the new
+								// primitive has no disabled-button concept yet, so this guard
+								// substitutes for that (functionally equivalent, cosmetically not).
+								BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_2);
+								if (QUEST_ING != byQuestState && QUEST_END != byQuestState)
+									return;
+
+								DWORD dwGold = CharacterMachine->Gold;
+								if (dwGold >= 3000000)
+									SocketClient->ToGameServer()->SendEnterOnWerewolfRequest();
+								else
+									g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
+							};
+							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+						}
 
 						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 					}
@@ -1622,7 +1684,25 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
 				{
 					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
+
+					{
+						mu::ui::window::GenericDialogConfig cfg;
+						cfg.lines = {
+							{ I18N::Game::Gatekeeper, true },
+							{ I18N::Game::HmmWhoAreYouIMConfusedAreYouEvenApprovedOfBalgass, false },
+							{ I18N::Game::LugadrS12ApostlesAreHelping, false },
+							{ I18N::Game::ApostleDevinSThirdMissionRequest, false },
+						};
+						cfg.onPrimary = []
+						{
+							// Same disabled-OK-button substitution as the Werewolf dialog above.
+							BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_3);
+							if (QUEST_ING != byQuestState)
+								return;
+							SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest();
+						};
+						mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+					}
 				}
 				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
 				{
@@ -1634,7 +1714,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
 						mu_swprintf(temp, I18N::Game::ManaHasBeenRecoveredOf100, 100);
 
-					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					g_pSystemLogBox->AddText(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 				}
 				else if (monsterIndex == MONSTER_DELGADO || monsterIndex == MONSTER_LUGARD ||
 					monsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA || monsterIndex == MONSTER_DAVID)
@@ -1646,7 +1726,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (M38Kanturu2nd::Is_Kanturu2nd())
 					{
 						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+						{
+							// Talking to another NPC replaces the gate dialog: release
+							// the server dialog BEFORE the new Talk request so packet
+							// order stays Close(old) then Talk(new). A Close sent later
+							// (e.g. from the new dialog's Show path) would clear the
+							// just-opened dialog instead.
+							if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC))
+							{
+								g_pKanturu2ndEnterNpc->ClosingProcess();
+							}
 							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
 					}
 					else if (gMapManager.IsCursedTemple())
 					{
@@ -1822,7 +1913,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 if (Sit)
                 {
-                    if ((!c->SafeZone) && (c->Helper.Type == MODEL_HORN_OF_FENRIR || c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT || c->Helper.Type == MODEL_DARK_HORSE_ITEM))
+                    if ((!c->SafeZone) && GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                         return;
 
                     if (!gCharacterManager.IsFemale(c->Class))
@@ -1840,9 +1931,9 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 void CloseNPCGMWindow()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_NPCGUILDMASTER))
+    if (!g_pUIManager->IsOpen(MUTEX_NPCGUILDMASTER))
         return;
-    g_pUIManager->Close(INTERFACE_NPCGUILDMASTER);
+    g_pUIManager->Close(MUTEX_NPCGUILDMASTER);
 }
 
 void SendMove(CHARACTER* c, OBJECT* o)
@@ -1947,7 +2038,28 @@ bool CheckMacroLimit(wchar_t* Text)
 
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
-    if (g_ConsoleDebug->CheckCommand(Text) == true)
+    ConsoleCommandResult result;
+    try
+    {
+        result = g_ConsoleDebug->CheckCommand(Text);
+    }
+    catch (const std::exception& exception)
+    {
+        // A command that throws must not close the client; report the failure in the chat
+        // instead, like the control-socket console does. The commands report a bad argument
+        // themselves, so this only catches an unforeseen failure.
+        const std::wstring message = L"command failed: " + Core::Text::FromUtf8(exception.what());
+        g_pSystemLogBox->AddText(message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (result.status == ConsoleCommandStatus::BadArgument)
+    {
+        g_pSystemLogBox->AddText(result.message.c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
+
+    if (result.status == ConsoleCommandStatus::Handled)
     {
         return true;
     }
@@ -1963,20 +2075,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
         Name[iTextSize] = 0;
 
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
         {
             if (wcscmp(Name, I18N::Game::Exchange) == 0 || wcscmp(Name, I18N::Game::Trade259) == 0 || wcsicmp(Text, L"/trade") == 0)
             {
                 if (gMapManager.InChaosCastle() == true)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
                     return false;
                 }
 
                 if (::IsStrifeMap(gMapManager.WorldActive))
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     return false;
                 }
 
@@ -1984,7 +2096,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
                 if (level < TRADELIMITLEVEL)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     return true;
                 }
 
@@ -2003,14 +2115,14 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
                             return true;
                         }
 
                         SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                         wchar_t message[100]{};
                         mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
-                        g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     }
                 }
                 else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2024,7 +2136,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                             return true;
                         }
 
@@ -2034,7 +2146,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                             wchar_t message[100]{};
                             mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
-                            g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
                     }
@@ -2052,20 +2164,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             int level = CharacterAttribute->Level;
             if (level >= 6)
             {
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
             }
             else
             {
                 wchar_t szError[48] = L"";
                 mu_swprintf(szError, I18N::Game::OnlyAboveLevelDCanUse, 6);
-                g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(szError, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             return true;
         }
@@ -2073,25 +2185,25 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (::IsStrifeMap(gMapManager.WorldActive))
             {
-                g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (
-                g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+                g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
                 )
             {
-                g_pSystemLogBox->AddText(I18N::Game::StoreCanTBeOpened, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::StoreCanTBeOpened, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             wchar_t szCmd[24];
@@ -2104,7 +2216,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 OBJECT* o = &c->Object;
                 if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change))
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                 }
             }
             else
@@ -2116,7 +2228,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (wcscmp(c->ID, szId) == 0)
                         {
-                            SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                         }
                     }
                     else
@@ -2128,7 +2240,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                                 break;
                             }
                         }
@@ -2142,20 +2254,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         if (wcscmp(Text, I18N::Game::ViewStoreOn) == 0)
         {
             ShowShopTitles();
-            g_pSystemLogBox->AddText(I18N::Game::CanViewPersonalStoreWindow, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanViewPersonalStoreWindow, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
 
         if (wcscmp(Text, I18N::Game::ViewStoreOff) == 0)
         {
             HideShopTitles();
-            g_pSystemLogBox->AddText(I18N::Game::CannotViewPersonalStoreWindow, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CannotViewPersonalStoreWindow, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         if (wcscmp(Text, I18N::Game::DuelChallenge) == 0 || wcsicmp(Text, L"/duelstart") == 0)
         {
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// UILD_WAR_EVENT
@@ -2166,7 +2278,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 {
                     wchar_t szError[48] = L"";
                     mu_swprintf(szError, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
-                    g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(szError, mu::ui::window::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
                 else
@@ -2177,7 +2289,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change) &&
                             abs((c->PositionX) - (Hero->PositionX)) <= 1 &&
                             abs((c->PositionY) - (Hero->PositionY)) <= 1) {
-                            SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, MU_C16(c->ID));
                         }
                     }
                     else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2193,7 +2305,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, MU_C16(c->ID));
                                 break;
                             }
                         }
@@ -2201,7 +2313,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             else
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
         if (wcscmp(Text, I18N::Game::DuelCancel) == 0 || wcsicmp(Text, L"/duelend") == 0)
@@ -2209,7 +2321,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// GUILD_WAR_EVENT
@@ -2222,12 +2334,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus != G_NONE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2243,7 +2355,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                     wchar_t Text[100];
                     mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2263,7 +2375,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                         wchar_t Text[100];
                         mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
-                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -2276,12 +2388,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus == G_NONE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::DoNotBelongToTheGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::DoNotBelongToTheGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2351,12 +2463,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2370,7 +2482,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                     wchar_t Text[100];
                     mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2387,7 +2499,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                         wchar_t Text[100];
                         mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
-                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -2417,13 +2529,16 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     return  false;
                 }
 
-                int iTextSize = 0;
-                for (int j = 3; j <= (int)wcslen(Text); j++)
+                // The macro text follows the "/N " prefix. "/N" alone gives
+                // an empty macro; a long text is cut to fit.
+                constexpr size_t MacroPrefixLength = 3;
+                const size_t textLength = wcslen(Text);
+                size_t macroLength = 0;
+                for (size_t j = MacroPrefixLength; j < textLength && macroLength + 1 < std::size(MacroText[i]); j++)
                 {
-                    MacroText[i][j - 3] = Text[j];
-                    iTextSize = j;
+                    MacroText[i][macroLength++] = Text[j];
                 }
-                MacroText[i][iTextSize - 3] = 0;
+                MacroText[i][macroLength] = 0;
                 PlayBuffer(SOUND_CLICK01);
                 return true;
             }
@@ -2476,7 +2591,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             {
                 g_csItemOption.ClearOptionHelper();
 
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_ITEM_EXPLANATION);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
 
                 ItemHelp = i;
                 PlayBuffer(SOUND_CLICK01);
@@ -2500,56 +2615,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
 bool FindText(const wchar_t* Text, const wchar_t* Token, bool First)
 {
-    int LengthToken = (int)wcslen(Token);
-    int Length = (int)wcslen(Text) - LengthToken;
-    if (First)
-        Length = 0;
-    if (Length < 0)
-        return false;
-
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
-    {
-        bool Success = true;
-        for (int j = 0; j < LengthToken; j++)
-        {
-            if (Text[i + j] != Token[j])
-            {
-                Success = false;
-                break;
-            }
-        }
-        if (Success)
-            return true;
-    }
-    return false;
+    return UI::TextSearch::Contains(Text, Token, First);
 }
 
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First)
 {
-    int LengthToken = (int)wcslen(Token);
-    int Length = (int)wcslen(Text) - LengthToken;
-    if (First)
-        Length = 0;
-    if (Length < 0)
-        return false;
-
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
-    {
-        bool Success = true;
-        for (int j = 0; j < LengthToken; j++)
-        {
-            if (Text[i + j] != Token[j])
-            {
-                Success = false;
-                break;
-            }
-        }
-        if (Success)
-            return true;
-    }
-    return false;
+    return UI::TextSearch::Contains(Text, Token, First);
 }
 
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType)
@@ -2583,7 +2654,10 @@ bool SkillKeyPush(int Skill)
 
 void Attack(CHARACTER* c)
 {
-    if ((MouseOnWindow || !SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429)) && MouseLButtonPush)
+    const bool mouseOnHud = g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud();
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as
+    // the duplicate check in Input/Selection.cpp's SelectObjects(), kept in sync with it.
+    if ((MouseOnWindow || mouseOnHud || Core::Input::IsMouseOverUI()) && MouseLButtonPush)
     {
         MouseRButtonPop = false;
         MouseRButtonPush = false;
@@ -2602,7 +2676,7 @@ void Attack(CHARACTER* c)
 
     if (o->Teleport == TELEPORT_BEGIN)
     {
-        o->Alpha -= 0.1f;
+        o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
         if (o->Alpha < 0.1f)
         {
             o->Teleport = TELEPORT;
@@ -2645,7 +2719,7 @@ void Attack(CHARACTER* c)
                 Hero->Object.m_bySkillCount = 0;
                 Skill = AT_SKILL_NOVA_BEGIN;
             }
-            SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             MouseRButtonPush = false;
             Success = true;
         }
@@ -2709,7 +2783,7 @@ DWORD g_dwLatestZoneMoving = 0;
 
 void CheckGate()
 {
-    if ((g_pMyInventory->IsItem(ITEM_POTION + 64, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_POTION + 64, false)))
+    if ((g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, false)))
     {
         return;
     }
@@ -2746,39 +2820,31 @@ void CheckGate()
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
                             ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
-                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM
-                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD
-                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_DINORANT
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_FENRIR
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING_OF_STORM && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING_OF_DIMENSION)
-                                || (ITEM_WING + 130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 134)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
+                            !GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER], &CharacterMachine->Equipment[EQUIPMENT_WING]))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_ERROR_MESSAGE);
 
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
                                 mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
-                                g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                                g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_ERROR_MESSAGE);
                             }
                         }
 
                         else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_UNIRIA))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotWarpWhileRidingOnAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotWarpWhileRidingOnAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
                         else if (CharacterAttribute->Level < Level)
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
                             mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
-                            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
                         else
@@ -2863,6 +2929,19 @@ namespace
     }
 }
 
+namespace
+{
+void FillAddFriendName()
+{
+    if (MouseRButtonPush && !::IsStrifeMap(gMapManager.WorldActive) &&
+        SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
+    {
+        g_pWindowMgr->Dialogs().SetAddFriendName(CharactersClient[SelectedCharacter].ID);
+    }
+
+}
+}
+
 void MoveHero()
 {
     CHARACTER* c = Hero;
@@ -2917,20 +2996,7 @@ void MoveHero()
         return;
     }
 
-    if (g_pWindowMgr->GetAddFriendWindow() > 0)
-    {
-        if (MouseRButtonPush)
-        {
-            if (!::IsStrifeMap(gMapManager.WorldActive))
-            {
-                auto* pWindow = (CUITextInputWindow*)g_pWindowMgr->GetWindow(g_pWindowMgr->GetAddFriendWindow());
-                if (pWindow != NULL)
-                {
-                    pWindow->SetText(CharactersClient[SelectedCharacter].ID);
-                }
-            }
-        }
-    }
+    FillAddFriendName();
 
     int HeroX = GetScreenWidth() / 2;
     int HeroY = 180;
@@ -3059,7 +3125,14 @@ void MoveHero()
 
     CheckGate();
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse())
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as the duplicate
+    // check in Attack() above and Input/Selection.cpp's SelectObjects(): MouseOnWindow/
+    // CheckMouseUse() alone don't reliably know about RmlUi-rendered content (an RmlUi-migrated
+    // window's own legacy CObject-level mouse-claim bookkeeping can lag or miss entirely), so a
+    // click landing on one -- COptionWindow being the concrete case that surfaced this -- fell
+    // through and moved the character instead of being consumed by the window. IsMouseOverUI()
+    // queries RmlUi's own hover chain directly, sidestepping that per-window bookkeeping.
+    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         bool Success = false;
         if (MouseUpdateTime >= MouseUpdateTimeMax && !s_bIgnoreHeldClickAfterNpcTalk)
@@ -3138,13 +3211,10 @@ void MoveHero()
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-            SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+            mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
 
             if (!pPickedItem && RightType == -1 &&
-                ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
-                    || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !(LeftType >= ITEM_BOOK_OF_SAHAMUTT && LeftType <= ITEM_STAFF + 29)
-                        )))
+                (GameLogic::Items::IsSwordAxeMaceOrGloveType(LeftType) || GameLogic::Items::IsStaffType(LeftType)))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
                 {
@@ -3215,7 +3285,9 @@ void MoveHero()
                     }
                 }
             }
-            else if (SelectedOperate != -1 && (c->SafeZone || (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM || c->Helper.Type != MODEL_HORN_OF_FENRIR)))
+            // Riders can operate objects too: the rider check here (as in the Season 6
+            // client) was always true.
+            else if (SelectedOperate != -1)
             {
                 TargetX = (int)(Operates[SelectedOperate].Owner->Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Operates[SelectedOperate].Owner->Position[1] / TERRAIN_SCALE);
@@ -3234,8 +3306,8 @@ void MoveHero()
                     }
             }
             else if (SelectedNpc != -1
-                && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-                && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
+                && !g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+                && !g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
                 )
             {
                 // Talking to an NPC opens a window (dialogue/quest/shop). The physical button is
@@ -3366,6 +3438,47 @@ void MoveHero()
 }
 
 
+// The battle master's guild skill: Shift swaps it in for the current skill while the kill
+// count allows it, and releasing Shift restores what was selected before. Lived in
+// UIGuildInfo.cpp until that widget was retired; its only caller is just below.
+static void UseBattleMasterSkill(void)
+{
+    if (!(Hero->EtcPart == PARTS_ATTACK_TEAM_MARK
+        || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK2
+        || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK3
+        || Hero->EtcPart == PARTS_DEFENSE_TEAM_MARK))
+    {
+        return;
+    }
+
+    if (Hero->GuildStatus == G_PERSON)
+    {
+        return;
+    }
+
+    int MaxKillCount = SkillAttribute[Hero->GuildSkill].KillCount;
+
+    if (Hero->GuildMasterKillCount >= MaxKillCount)
+    {
+        if (Core::Input::IsKeyDown(VK_SHIFT))
+        {
+            if (Hero->BackupCurrentSkill == 255)
+            {
+                Hero->BackupCurrentSkill = Hero->CurrentSkill;
+            }
+            Hero->CurrentSkill = FindHotKey(Hero->GuildSkill);
+        }
+        else
+        {
+            if (Hero->BackupCurrentSkill != 255)
+            {
+                Hero->CurrentSkill = Hero->BackupCurrentSkill;
+                Hero->BackupCurrentSkill = 255;
+            }
+        }
+    }
+}
+
 int FindHotKey(int Skill)
 {
     int SkillIndex = 0;
@@ -3390,7 +3503,10 @@ void SendMacroChat(wchar_t* Text)
 {
     if (!CheckCommand(Text, true))
     {
-        if ((Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_DARK_HORSE_ITEM) || Hero->SafeZone)
+        // Not while riding, outside the safe zone; the Horn of Fenrir was never in this check.
+        const bool riding =
+            GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+        if (!riding || Hero->SafeZone)
         {
             // Send animation for specific texts
             UI::Chat::CheckChatText(Text);
@@ -3405,7 +3521,7 @@ void SendMacroChat(wchar_t* Text)
         //    SendChat(Text);
         //}
 
-        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, Text);
+        SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(Text));
 
         LastMacroTime = GetTickCount64();
     }
@@ -3445,11 +3561,6 @@ void MoveInterface()
                 }
             }
         }
-    }
-
-    if (Hero->Dead == 0)
-    {
-        g_pMainFrame->UseHotKeyItemRButton();
     }
 
     if (g_pUIManager->IsInputEnable())
@@ -3535,10 +3646,6 @@ bool CheckSkillUseCondition(OBJECT* o, int Type)
     return true;
 }
 
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-
 void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 {
     wchar_t buff[100];
@@ -3605,33 +3712,21 @@ void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disa
     }
 
     EnableAlphaTest();
-    glColor4f(0.f, 0.f, 0.f, 0.5f);
-    RenderColor(x + 1, y + 1, Width + 4, Height + 4);
+    RenderColorQuadARGB(x + 1, y + 1, Width + 4, Height + 4, 0x80000000u);
 
     EnableAlphaBlend();
-    if (Disabled)
-        glColor3f(0.2f, 0.0f, 0.0f);
-    else
-        glColor3f(0.f, 0.2f, 0.2f);
-    RenderColor(x, y, Width + 4, Height + 4);
-    if (Disabled)
-        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-    else
-        glColor3f(0.f / 255.f, 50 / 255.f, 50.f / 255.f);
-    RenderColor(x + 2, y + 2, Width, Height);
-    if (Disabled)
-        glColor3f(200.f / 255.f, 50 / 255.f, 0.f);
-    else
-        glColor3f(0.f / 255.f, 200 / 255.f, 50.f / 255.f);
-    RenderColor(x + 2, y + 2, Bar, Height);
+    const unsigned int frameColor = Disabled ? 0xFF330000u : 0xFF003333u;
+    const unsigned int trackColor = Disabled ? 0xFF320A00u : 0xFF003232u;
+    const unsigned int barColor = Disabled ? 0xFFC83200u : 0xFF00C832u;
+    RenderColorQuadARGB(x, y, Width + 4, Height + 4, frameColor);
+    RenderColorQuadARGB(x + 2, y + 2, Width, Height, trackColor);
+    RenderColorQuadARGB(x + 2, y + 2, Bar, Height, barColor);
 
     DisableAlphaBlend();
 }
 
-void RenderSwichState()
+void CollectCrownSwitchLines(std::wstring (&lines)[2])
 {
-    wchar_t Buff[300];
-
     if (Switch_Info == NULL)
         return;
 
@@ -3648,11 +3743,11 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
-            mu_swprintf(Buff, L"%ls%d / %ls / %ls", I18N::Game::CrownSwitch, i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
-            g_pRenderText->SetFont(g_hFont);
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->SetBgColor(0);
-            g_pRenderText->RenderText(0, REFERENCE_HEIGHT - 85 + (i * 15), Buff, REFERENCE_WIDTH, 0, RT3_SORT_CENTER);
+            wchar_t Buff[300];
+            wchar_t szSwitch[64]{};
+            _snwprintf_s(szSwitch, std::size(szSwitch), _TRUNCATE, I18N::Game::CrownSwitchD, i + 1);
+            mu_swprintf(Buff, L"%ls / %ls / %ls", szSwitch, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            lines[i].assign(Buff);
         }
     }
 }
@@ -3662,16 +3757,19 @@ void RenderInterface(bool Render)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     RenderOutSides();
-    RenderPartyHP();
-
-    RenderSwichState();
-    battleCastle::RenderBuildTimes();
+    // The overlays below are recorded into the world-label layer instead when it is available
+    // (CNameWindow::PrepareFrame()).
+    const bool overlaysRecorded = g_pNameWindow != nullptr && g_pNameWindow->RecordsInterfaceOverlays();
+    if (!overlaysRecorded)
+    {
+        RenderPartyHP();
+        battleCastle::RenderBuildTimes();
+    }
 
     g_pUIMapName->Render();		// rozy
 
-    //	M34CryWolf1st::Render_Mvp_Interface();
-    M39Kanturu3rd::RenderKanturu3rdinterface();
-    //	M34CryWolf1st::Sub_Interface();
+    if (!overlaysRecorded)
+        M39Kanturu3rd::RenderKanturu3rdinterface();
 }
 
 void RenderOutSides()
@@ -3679,22 +3777,22 @@ void RenderOutSides()
     if (gMapManager.WorldActive == WD_8TARKAN)
     {
         EnableAlphaTest();
-        glColor4f(1.f, 1.f, 1.f, 0.5f);
         EnableAlphaBlend();
-        glColor3f(0.3f, 0.3f, 0.25f);
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.001f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f);
     }
 #ifdef ASG_ADD_MAP_KARUTAN
     else if (IsKarutanMap())
     {
         EnableAlphaTest();
         EnableAlphaBlend();
-        glColor3f(0.3f, 0.3f, 0.25f);
         float fWindX = (float)((int)WorldTime % 100000) * 0.004f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, fWindX, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), fWindX, 0.f, 3.f, 2.f);
     }
 #endif	// ASG_ADD_MAP_KARUTAN
     else if (WD_34CRYWOLF_1ST == gMapManager.WorldActive)
@@ -3719,28 +3817,10 @@ void RenderOutSides()
     }
     TheMapProcess().RenderFrontSideVisual();
 
-    glColor3f(1.f, 1.f, 1.f);
 }
 
-void MoveTournamentInterface()
+void MoveBattleSoccerGoalEffect()
 {
-    static unsigned int s_effectCount = 0;
-    int Width = 70, Height = 20;
-    int WindowX = (REFERENCE_WIDTH - Width) / 2;
-    int WindowY = (REFERENCE_HEIGHT - Height) / 2 + 50;
-    if (MouseLButtonPush)
-    {
-        float wRight = WindowX + Width;
-        float wBottom = WindowY + Height;
-
-        if (WindowY <= MouseY && MouseY <= WindowY + Height &&
-            WindowX <= MouseX && MouseX <= WindowX + Width)
-        {
-            g_wtMatchResult.Clear();
-            g_wtMatchTimeLeft.m_Time = 0;
-        }
-    }
-
     if (g_iGoalEffect)
     {
         for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -3795,147 +3875,6 @@ void MoveBattleSoccerEffect(CHARACTER* c)
     }
 }
 
-void RenderTournamentInterface()
-{
-    int Width = 300, Height = 2 * 5 + 6 * 30;
-    int WindowX = (REFERENCE_WIDTH - Width) / 2;
-    int WindowY = 120 + 0;
-    float x = 0.0f, y = 0.0f;
-    wchar_t t_Str[20];
-    wcscpy(t_Str, L"");
-
-    if (g_wtMatchTimeLeft.m_Time)
-    {
-        int t_valueSec = g_wtMatchTimeLeft.m_Time % 60;
-        int t_valueMin = g_wtMatchTimeLeft.m_Time / 60;
-        if (t_valueMin <= 10)
-        {
-            g_pRenderText->SetFont(g_hFontBig);
-            g_pRenderText->SetTextColor(255, 10, 10, 255);
-            g_pRenderText->SetBgColor(0);
-
-            if (g_wtMatchTimeLeft.m_Type == 3)
-            {
-                g_pRenderText->SetTextColor(255, 255, 10, 255);
-                mu_swprintf(t_Str, I18N::Game::ItWillStartAfterDSeconds, t_valueSec);
-            }
-            else
-            {
-                if (g_wtMatchTimeLeft.m_Time < 60)
-                {
-                    g_pRenderText->SetTextColor(255, 255, 10, 255);
-                }
-                if (t_valueSec < 10)
-                {
-                    mu_swprintf(t_Str, I18N::Game::RemainingHoursD0D, t_valueMin, t_valueSec);
-                }
-                else
-                {
-                    mu_swprintf(t_Str, I18N::Game::RemainingSecondsDD, t_valueMin, t_valueSec);
-                }
-            }
-            x += (float)GetScreenWidth() / 2; y += 350;
-            g_pRenderText->RenderText((int)x, (int)y, t_Str, 0, 0, RT3_WRITE_CENTER); x++; y++;
-
-            g_pRenderText->SetTextColor(0xffffffff);
-            g_pRenderText->RenderText((int)x, (int)y, t_Str, 0, 0, RT3_WRITE_CENTER);
-
-            g_pRenderText->SetFont(g_hFont);
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-        }
-    }
-
-    if (!wcscmp(g_wtMatchResult.m_MatchTeamName1, L""))
-    {
-        return;
-    }
-
-    Width = 300; Height = 2 * 5 + 5 * 40; WindowX = (REFERENCE_WIDTH - Width) / 2; WindowY = 120 + 0;
-    int yPos = WindowY;
-    RenderBitmap(BITMAP_INTERFACE + 22, (float)WindowX, (float)yPos, (float)Width, (float)5, 0.f, 0.f, Width / 512.f, 5.f / 8.f);
-    yPos += 5;
-
-    for (int i = 0; i < 5; ++i)
-    {
-        RenderBitmap(BITMAP_INTERFACE + 21, WindowX, (float)yPos,
-            Width, 40.f, 0.f, 0.0f, 213.f / 256.f, 40.f / 64.f);
-        yPos += 40.f;
-    }
-    RenderBitmap(BITMAP_INTERFACE + 22, (float)WindowX, (float)yPos, (float)Width, (float)5, 0.f, 0.f, Width / 512.f, 5.f / 8.f);
-
-    EnableAlphaBlend();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->SetTextColor(200, 240, 255, 255);
-    mu_swprintf(t_Str, I18N::Game::TournamentResult);
-    g_pRenderText->RenderText(WindowX + Width / 2 - 50, WindowY + 20, t_Str);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-
-    mu_swprintf(t_Str, I18N::Game::VS);
-    g_pRenderText->SetTextColor(255, 255, 10, 255);
-    g_pRenderText->RenderText(WindowX + Width / 2 - 13, WindowY + 50, t_Str);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-
-    float t_temp = 0.0f;
-    mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName1);
-    t_temp = (MAX_USERNAME_SIZE - wcslen(t_Str)) * 5;
-    g_pRenderText->RenderText(WindowX + 10 + t_temp, WindowY + 50, t_Str);
-    mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName2);
-    t_temp = (MAX_USERNAME_SIZE - wcslen(t_Str)) * 5;
-    g_pRenderText->RenderText(WindowX + Width - 120 + t_temp, WindowY + 50, t_Str);
-
-    mu_swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);
-    g_pRenderText->RenderText(WindowX + 45, WindowY + 75, t_Str);
-    mu_swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score2);
-    g_pRenderText->RenderText(WindowX + Width - 85, WindowY + 75, t_Str);
-
-    if (g_wtMatchResult.m_Score1 == g_wtMatchResult.m_Score2)
-    {
-        g_pRenderText->SetFont(g_hFontBig);
-        g_pRenderText->SetTextColor(255, 255, 10, 255);
-        mu_swprintf(t_Str, I18N::Game::Tie);
-        g_pRenderText->RenderText(WindowX + Width / 2 - 35, WindowY + 115, t_Str);
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-    }
-    else if (g_wtMatchResult.m_Score1 > g_wtMatchResult.m_Score2)
-    {
-        g_pRenderText->SetFont(g_hFontBig);
-        g_pRenderText->SetTextColor(255, 255, 10, 10);
-        mu_swprintf(t_Str, I18N::Game::Win);
-        g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
-        g_pRenderText->SetTextColor(255, 10, 10, 255);
-        mu_swprintf(t_Str, I18N::Game::Lose);
-        g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
-        g_pRenderText->SetFont(g_hFont);
-    }
-    else
-    {
-        g_pRenderText->SetFont(g_hFontBig);
-        g_pRenderText->SetTextColor(255, 255, 10, 10);
-        mu_swprintf(t_Str, I18N::Game::Lose);
-        g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
-        g_pRenderText->SetTextColor(255, 10, 10, 255);
-        mu_swprintf(t_Str, I18N::Game::Win);
-        g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
-        g_pRenderText->SetFont(g_hFont);
-    }
-    g_pRenderText->SetFont(g_hFont);
-
-    Width = 70; Height = 20; x = (REFERENCE_WIDTH - Width) / 2; y = (REFERENCE_HEIGHT - Height) / 2 + 50;
-    if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height)
-    {
-        RenderBitmap(BITMAP_INTERFACE + 12, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, Width / 128.f, Height / 32.f);
-    }
-    else
-    {
-        RenderBitmap(BITMAP_INTERFACE + 11, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, Width / 128.f, Height / 32.f);
-    }
-
-    glColor3f(1.f, 1.f, 1.f);
-    DisableAlphaBlend();
-}
-
 void RenderPartyHP()
 {
     if (PartyNumber <= 0) return;
@@ -3949,8 +3888,8 @@ void RenderPartyHP()
 
         if (p->index <= -1) continue;
 
-        CHARACTER* c = &CharactersClient[p->index];
-        OBJECT* o = &c->Object;
+        const CHARACTER* c = &CharactersClient[p->index];
+        const OBJECT* o = &c->Object;
         vec3_t      Position;
         int         ScreenX, ScreenY;
 
@@ -3966,51 +3905,36 @@ void RenderPartyHP()
         }
 
         EnableAlphaTest();
-        glColor4f(0.f, 0.f, 0.f, 0.5f);
-        RenderColor((float)(ScreenX + 1), (float)(ScreenY + 1), Width + 4.f, 5.f);
+        RenderColorQuadARGB(static_cast<float>(ScreenX + 1), static_cast<float>(ScreenY + 1), Width + 4.f, 5.f,
+            0x80000000u);
 
         EnableAlphaBlend();
-        glColor3f(0.2f, 0.0f, 0.0f);
-        RenderColor((float)ScreenX, (float)ScreenY, Width + 4.f, 5.f);
-
-        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-        RenderColor((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f);
+        RenderColorQuadARGB(static_cast<float>(ScreenX), static_cast<float>(ScreenY), Width + 4.f, 5.f, 0xFF330000u);
+        RenderColorQuadARGB(static_cast<float>(ScreenX + 2), static_cast<float>(ScreenY + 2), Width, 1.f,
+            0xFF320A00u);
 
         int stepHP = std::min<int>(10, p->stepHP);
 
-        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
         for (int k = 0; k < stepHP; ++k)
         {
-            RenderColor((float)(ScreenX + 2 + (k * 4)), (float)(ScreenY + 2), 3.f, 2.f);
+            RenderColorQuadARGB(static_cast<float>(ScreenX + 2 + (k * 4)), static_cast<float>(ScreenY + 2), 3.f, 2.f,
+                0xFFFA0A00u);
         }
         DisableAlphaBlend();
     }
     DisableAlphaBlend();
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 
-void RenderTimes()
+bool MacroCooldownFraction(float& fraction)
 {
     const uint64_t currentTickCount = GetTickCount64();
-    if (LastMacroTime > currentTickCount - MacroCooldownMs)
-    {
-        constexpr float width = 50;
-        constexpr float height = 2;
-        constexpr int y = REFERENCE_HEIGHT - 48 - 40;
-        const float x = (static_cast<float>(GetScreenWidth()) - width) / 2.0f;
+    if (LastMacroTime <= currentTickCount - MacroCooldownMs)
+        return false;
 
-        const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
-        const float progressValue = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs * width;
-
-        EnableAlphaTest();
-        g_pRenderText->RenderText(static_cast<int>(x), y, L"Macro Time");
-        RenderBar(x, y + 12, width, height, (float)progressValue);
-    }
-
-    glColor3f(1.f, 1.f, 1.f);
-
-    matchEvent::RenderTime();
+    const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
+    fraction = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs;
+    return true;
 }
 
 extern int g_iKeyPadEnable;
@@ -4020,8 +3944,10 @@ void RenderCursor()
     if (!g_bRenderGameCursor)
         return;
 
+    // The sprites below are placed in units around the pointer; drawn at one scale, not stretched to the window.
+    const UI::Scaling::ScopedPointerUnits pointerUnits(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
+                                                       g_fWindowMouseX, g_fWindowMouseY, MouseX, MouseY);
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
 
     float u = 0.f;
     float v = 0.f;
@@ -4074,7 +4000,7 @@ void RenderCursor()
         else
             RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND))
     {
         if (g_pCommandWindow->GetMouseCursor() == CURSOR_IDSELECT)
         {
@@ -4089,10 +4015,10 @@ void RenderCursor()
             RenderBitmap(BITMAP_CURSOR + 1, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
         }
     }
-    else if (((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT))
+    else if (((g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT))
         && g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON)
-        || (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-            && g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR)
+        || (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+            && g_pNPCShop->GetShopState() == mu::ui::window::CNPCShop::SHOP_STATE_REPAIR)
         )
     {
         if (MouseLButton == false)
@@ -4155,9 +4081,6 @@ void ForwardSelectModel()
     }
 }
 
-extern int  EditMonsterNumber;
-
-extern int MonsterKey;
 
 
 int TotalPacketSize = 0;
@@ -4185,10 +4108,6 @@ void RenderDebugWindow()
         int sy = 0;
         for (int i = 0; i < 14; i++)
         {
-            if (i == SelectMapping)
-                glColor3f(1.f, 1.f, 1.f);
-            else
-                glColor3f(0.8f, 0.8f, 0.8f);
             RenderBitmap(BITMAP_MAPTILE + i, (float)(sx), (float)(sy + i * 30), 30.f, 30.f);
         }
         if (CurrentLayer == 0)
@@ -4198,35 +4117,16 @@ void RenderDebugWindow()
         mu_swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, sy + 11, Text);
     }
-    glColor3f(1.f, 1.f, 1.f);
     if (EditFlag == EDIT_OBJECT)
     {
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, 0, L"Garbage");
         CMultiLanguage::ConvertFromUtf8(Text, Models[SelectModel].Name, sizeof Models[SelectModel].Name);
         g_pRenderText->RenderText(0, 0, Text);
     }
-    if (EditFlag == EDIT_MONSTER)
-    {
-        for (int i = 0; i < EditMonsterNumber; i++)
-        {
-            if (i == SelectMonster)
-                glColor3f(1.f, 0.8f, 0.f);
-            else
-                glColor3f(1.f, 1.f, 1.f);
-
-            mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
-            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, i * 10, Text);
-        }
-    }
     if (EditFlag == EDIT_LIGHT)
     {
         for (int i = 0; i < 8; i++)
         {
-            if (i == SelectColor)
-                glColor3f(1.f, 0.8f, 0.f);
-            else
-                glColor3f(1.f, 1.f, 1.f);
-
             g_pRenderText->RenderText(REFERENCE_WIDTH - 64, i * 10, ColorTable[i]);
         }
     }
@@ -4272,10 +4172,9 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     short pEquipedRightRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT])->Type;
     short pEquipedLeftRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_LEFT])->Type;
     short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
-    short pEquipedWingType = (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 
-    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HORN_OF_DINORANT &&
-        pEquipedHelperType != ITEM_HORN_OF_FENRIR && pEquipedHelperType != ITEM_DARK_HORSE_ITEM) ||
+    if (!GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER],
+                                              &CharacterMachine->Equipment[EQUIPMENT_WING]) ||
         pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
     {
         bCantFly = true;
@@ -4325,13 +4224,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 
     if (bCantSwim && bMoveAtlans)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 
     if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 

@@ -1,0 +1,108 @@
+/* Modern theme for CCursedTempleResult: the modern panel surface instead of the message-box art,
+   a modern Close button, the hero's row in the steel accent; the banner art stays. Geometry is
+   reference px under the Dialog transform. The original's columns were laid out for strings far
+   shorter than the English ones and overlap; modern drops the camp column (each team's block has
+   its own place and colour), gives the name and class room, and right-aligns the numbers. */
+
+@spritesheet result-success-sheet { src: "../../../illusion_success.tga"; result-success: 0px 0px 351px 115px; }
+@spritesheet result-failure-sheet { src: "../../../illusion_failure.tga"; result-failure: 0px 0px 351px 115px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 282px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_top, .frame-middle, #frame_bottom { display: none; }
+.line { position: absolute; left: 10px; width: 210px; height: 1px; margin-top: 10px; background-color: token(border-frame); }
+
+.result-banner { position: absolute; left: calc(50% - 180px); top: -110px; width: 351px; height: 115px; pointer-events: none; }
+.result-banner.success { decorator: image(result-success); }
+.result-banner.failure { decorator: image(result-failure); }
+
+.hero-row { position: absolute; left: 2px; width: 220px; background-color: token(accent-steel); pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: pre; text-align: center; pointer-events: none; transform-origin: left top; }
+.result-text.cell { text-align: left; }
+
+.result-btn {
+	display: block;
+	position: absolute;
+	left: 88px;
+	top: 245px;
+	width: 54px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.result-btn:hover { border-color: token(accent-steel-hover); }
+.result-btn:active { background-color: token(surface-recessed); }
+.result-label { left: 0; color: token(text-primary); }
+
+/* RenderText()'s own rows: the title, the column heading and the reward notice centred on the
+   window, then one 15-unit row per player in each team's block. */
+.frame-middles, .result-rows { position: static; }
+.result-line { position: absolute; left: 0; text-align: center; }
+#ct_hero_list { top: 13px; }
+#ct_column_header { top: 38px; }
+#ct_reward_hint { top: 227px; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
+.frame-middles .frame-middle:nth-child(11) { top: 217px; }
+.line-upper { top: 45px; }
+.line-lower { top: 205px; }
+
+.result-row { position: absolute; left: 0; width: 230px; height: 15px; }
+.result-row:nth-child(1) { top: 0px; }
+.result-row:nth-child(2) { top: 15px; }
+.result-row:nth-child(3) { top: 30px; }
+.result-row:nth-child(4) { top: 45px; }
+.result-row:nth-child(5) { top: 60px; }
+.result-row:nth-child(6) { top: 75px; }
+.result-row:nth-child(7) { top: 90px; }
+.result-row:nth-child(8) { top: 105px; }
+.result-row:nth-child(9) { top: 120px; }
+.result-row:nth-child(10) { top: 135px; }
+.result-row:nth-child(11) { top: 150px; }
+.result-row:nth-child(12) { top: 165px; }
+.rows-allied .result-row { margin-top: 65px; }
+.rows-illusion .result-row { margin-top: 140px; }
+.result-cell { position: absolute; top: 0; }
+#ct_column_header, .cell-team, .label-team { display: none; }
+.column-label { position: absolute; top: 38px; }
+.cell-name, .label-name { left: 10px; }
+.cell-class-name, .label-class-name { left: 74px; }
+/* Anchored by the right edge: the counter-scale turns about it, so it needs no width. */
+.cell-added-exp, .label-added-exp { right: 36px; transform-origin: right top; text-align: right; }
+.cell-point, .label-point { right: 10px; transform-origin: right top; text-align: right; }
+.hero-row { top: 0; }
+.result-row.hero .result-cell { color: token(text-primary); }
+
+#ct_hero_list, .column-label { color: token(accent-gold); }
+#ct_reward_hint { color: token(semantic-danger); }
+.rows-allied .result-cell { color: token(accent-steel); }
+.rows-illusion .result-cell { color: token(accent-gold); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#ct_hero_list { width: calc(230px * var(--root-scale)); }
+#ct_column_header { width: calc(230px * var(--root-scale)); }
+#ct_reward_hint { width: calc(230px * var(--root-scale)); }
+.result-label { width: calc(54px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.hero-row { height: calc(var(--line-height) / var(--root-scale)); }

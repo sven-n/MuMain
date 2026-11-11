@@ -44,10 +44,12 @@ BOOL    PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 void    PostQuitMessage(int nExitCode);
 
 // Window / cursor queries, backed by SDL. The engine reads the cursor as
-// GetCursorPos followed by ScreenToClient(window); SDL_GetMouseState already
-// returns window-relative coordinates, so GetCursorPos yields those directly and
-// ScreenToClient is the identity. GetActiveWindow reports the focused window (so
-// `== NULL` means the game is unfocused). Implemented in WinUser.cpp.
+// GetCursorPos followed by ScreenToClient(window); GetCursorPos already returns
+// the position relative to the game window (in editor builds also while the
+// mouse is in one of the editor's own windows), so ScreenToClient is the
+// identity. SetCursorPos warps in the window the mouse is in. GetActiveWindow
+// reports the focused window (so `== NULL` means the game is unfocused).
+// Implemented in WinUser.cpp.
 BOOL GetCursorPos(LPPOINT lpPoint);
 BOOL ScreenToClient(HWND hWnd, LPPOINT lpPoint);
 HWND GetActiveWindow();
@@ -91,7 +93,7 @@ inline HWND     SetFocus(HWND hWnd)                                  { return hW
 inline BOOL     SetForegroundWindow(HWND)                            { return TRUE; }
 inline BOOL     SetWindowPos(HWND, HWND, int, int, int, int, UINT)   { return TRUE; }
 inline LONG_PTR SetWindowLongPtr(HWND, int, LONG_PTR)                { return 0; }
-inline BOOL     SetCursorPos(int, int)                              { return TRUE; }
+BOOL            SetCursorPos(int x, int y);
 inline BOOL     AdjustWindowRect(LPRECT, DWORD, BOOL)               { return TRUE; }
 inline BOOL     ShowWindow(HWND, int)                              { return TRUE; }
 inline LONG     ChangeDisplaySettings(DEVMODE*, DWORD)             { return DISP_CHANGE_SUCCESSFUL; }

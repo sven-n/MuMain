@@ -1,0 +1,141 @@
+/* Legacy theme for the friends shell. The panel frame, the title banner and the drag anchor come
+   from the shared window_shell template; this file re-slices that chrome so it survives a window
+   the player resizes, then dresses the shell's own parts in the win_* art the original window used
+   (win_size, win_resize, win_button, win_check, win_mail). RmlUi owns layout and scrolling; only
+   the usable viewport height is bound. */
+
+/* window_shell.rcss draws its caps with image(), which is correct at the 230dp the dialogs are
+   locked to and distorts the left/right border art at any other width. Same assets, re-declared
+   with stretch-safe inner rects (spritesheets are per-document) and drawn as ninepatches, which
+   this build scales correctly in both directions. Scoped to this document, so the dialogs and the
+   options window keep window_shell.rcss's own rule untouched. */
+@spritesheet fs-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    fs-cap-top:    0px 0px 230px 67px; fs-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet fs-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; fs-cap-middle: 0px 0px 230px 15px; fs-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet fs-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; fs-cap-bottom: 0px 0px 230px 50px; fs-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet fs-back-sheet       { src: "../../../newui_msgbox_back.jpg";   fs-back:       0px 0px 222px 250px; fs-back-inner:       8px  8px 206px 234px; }
+@spritesheet fs-banner-sheet     { src: "../../../newui_Message_03.tga";    fs-banner:     0px 0px 230px 67px; fs-banner-inner:     20px 12px 190px 43px; }
+
+.window-shell-sprite-back   { decorator: ninepatch(fs-back, fs-back-inner); }
+.window-shell-sprite-top    { height: 46dp; decorator: ninepatch(fs-cap-top, fs-cap-top-inner); }
+.window-shell-sprite-middle { top: 46dp; bottom: 40dp; decorator: ninepatch(fs-cap-middle, fs-cap-middle-inner); }
+.window-shell-sprite-bottom { height: 40dp; decorator: ninepatch(fs-cap-bottom, fs-cap-bottom-inner); }
+.window-shell-header-rail   { height: 46dp; decorator: ninepatch(fs-banner, fs-banner-inner); }
+
+/* The window's own art: the three title-bar buttons share one 18x18 sheet, the grip and the
+   action buttons their own. */
+@spritesheet fs-size-sheet
+{
+	src: "../../../win_size.jpg";
+	fs-minimize: 0px 0px 9px 9px;
+	fs-maximize: 9px 0px 9px 9px;
+	fs-restore:  9px 9px 9px 9px;
+	fs-close:    0px 9px 9px 9px;
+}
+@spritesheet fs-resize-sheet { src: "../../../win_resize.tga"; fs-resize-grip: 0px 0px 9px 9px; }
+@spritesheet fs-button-sheet { src: "../../../win_button.tga"; fs-button: 0px 0px 49px 16px; fs-button-inner: 6px 4px 37px 8px; }
+@spritesheet fs-check-sheet  { src: "../../../win_check.tga";  fs-check-mark: 0px 0px 5px 5px; }
+@spritesheet fs-mail-sheet   { src: "../../../win_mail.tga";   fs-mail-unread: 0px 0px 13px 9px; fs-mail-read: 0px 9px 13px 10px; }
+
+/* window_shell's body carries base.rcss's .center-both, whose transform:translate(-50%,-50%) the
+   template cancels through a .window-shell-positioned class toggle. Two single-class selectors
+   decide that by link order, which is too fragile to leave a whole window resting on: a leftover
+   transform moves where the panel is drawn without moving the boxes its children hit-test
+   against, so everything without a stacking context of its own stops taking clicks. An id beats
+   both classes outright. */
+#panel { transform: none; }
+/* Sized from CUIFriendWindow::Init()'s own SetSize(250, 170) / SetLimitSize(250, 150), given back
+   the height this shell's caps take that native's 21px title bar did not: 46dp of banner and 40dp
+   of bottom cap (the dialog's own 67/50 re-cut above -- a window carrying a list does not need a
+   sentence-sized frame). 1dp is one of those reference pixels until the dp ceiling (2.0) and the
+   floating workspace's (2.25) part company.
+
+   font-size: 1rem, never dp. This theme declares NativeTextSize and window_shell's body carries
+   `native-text`, so the root size is already the original's text size, which grows about half as
+   fast as the rest of the UI; dp text would come out about 1.5x too large at 1024x768. Same rule
+   the other two window_shell consumers follow. */
+#panel { width: 300dp; height: 212dp; min-width: 270dp; min-height: 180dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); }
+
+/* Full-bleed the content well horizontally so a five-column mail row has room: the template's own
+   32dp dialog margins are for centred prose. top:0 makes every child's own top panel-relative,
+   which the banner clearance below is measured in; the 30dp bottom keeps the action row clear of
+   the bottom cap's art, the same clearance the menu dialog gives its own buttons.
+
+   pointer-events must go back to none here. base.rcss gives `body` none and window_shell.rcss
+   makes this well the one `auto` region, which is right for a dialog whose well sits below the
+   banner -- but this well now covers the whole panel, so leaving it `auto` puts it on top of the
+   title rail and the window stops being draggable. Each interactive part opts back in instead. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 22dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); cursor: pointer; pointer-events: auto; }
+
+/* Reaches back out over the banner to the panel's own top-right corner. z-index because the rail
+   behind it is a drag handle that claims pointer events of its own. */
+#window_controls { position: absolute; right: -4dp; top: 8dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 5dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(fs-minimize); }
+#btn_maximize { decorator: image(fs-maximize); }
+#btn_maximize.restore { decorator: image(fs-restore); }
+#btn_close { decorator: image(fs-close); }
+
+/* Clear of the banner's title text (top:10dp), inside the rest of its fade -- the same place
+   option_window.rcss starts its own tab row. */
+/* Native's own strip: three 53x19 tabs from the left, the refuse-chat box right-aligned on the
+   same row. */
+#tabs { position: absolute; left: 0; right: 0; top: 26dp; white-space: nowrap; }
+#tabs .btn { width: 24%; margin-right: 1%; }
+#tabs .btn:hover { color: #ffffff; }
+#reject { position: absolute; right: 0; top: 26dp; height: 16dp; line-height: 16dp; padding: 0; background-color: transparent; }
+
+/* base.rcss's .btn is the absolute 108x30 hero button. A row of them needs an in-flow box, and
+   `position` has to be reset explicitly or every button here stacks at the same spot. border-box
+   because this engine is content-box by default, where a percentage width plus padding overflows
+   the row and drops the last button out of the window. */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 16dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: ninepatch(fs-button, fs-button-inner); }
+.btn:hover { image-color: rgba(255, 255, 255, 220); }
+#tabs .selected, .headers .sorted { color: token(accent-gold); }
+
+.check { display: inline-block; width: 7dp; height: 7dp; margin-right: 3dp; margin-top: 4dp; box-sizing: border-box; background-color: rgb(106, 97, 88); border: 1dp rgb(146, 134, 121); }
+.checked .check { decorator: image(fs-check-mark); }
+
+.page { position: absolute; left: 0; right: 0; top: 48dp; bottom: 0; }
+.headers { position: absolute; left: 0; right: 0; top: 0; height: 15dp; line-height: 15dp; white-space: nowrap; background-color: rgb(106, 97, 88); }
+.headers button { display: inline-block; box-sizing: border-box; height: 15dp; padding: 0 2dp; line-height: 15dp; text-align: left; overflow: hidden; background-color: transparent; }
+.scroll-pane { position: absolute; left: 0; right: 0; top: 16dp; bottom: 22dp; overflow: hidden scroll; background-color: rgba(0, 0, 0, 179); pointer-events: auto; }
+
+.row { height: 13dp; line-height: 13dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.row:hover { background-color: rgb(106, 97, 88); }
+.row.selected { background-color: rgb(146, 134, 121); color: rgb(0, 0, 0); }
+.row span { display: inline-block; vertical-align: top; overflow: hidden; }
+.row .check { margin-top: 3dp; }
+.unread { font-weight: bold; }
+.row .read_state { height: 9dp; margin-top: 2dp; decorator: image(fs-mail-unread); }
+.row .read_state.read { decorator: image(fs-mail-read); }
+
+.friend_columns .name { width: 62%; }
+.friend_columns .server { width: 38%; }
+.mail_columns .check_column { display: inline-block; box-sizing: border-box; width: 7%; height: 13dp; padding: 0; vertical-align: top; background-color: transparent; }
+.mail_columns .sender { width: 24%; }
+.mail_columns .date { width: 24%; }
+.mail_columns .subject { width: 34%; }
+.mail_columns .read_state { width: 11%; }
+
+.actions { position: absolute; left: 0; right: 0; bottom: 0; height: 20dp; white-space: nowrap; }
+/* Four across, deliberately short of 100%: an inline row that totals exactly the container width
+   wraps its last button out of sight. The .rml also keeps these tags adjacent, since collapsed
+   whitespace between inline-blocks counts toward the line too. */
+.actions .btn { width: 23%; margin-right: 1%; }
+.actions .btn.wide { width: 47%; }
+
+/* Reaches back out to the panel's own bottom-right corner, over the bottom cap. */
+#resize { display: block; position: absolute; right: -4dp; bottom: -14dp; width: 9dp; height: 9dp; z-index: 10; pointer-events: auto; decorator: image(fs-resize-grip); cursor: resize; }
+

@@ -1,0 +1,284 @@
+#include "stdafx.h"
+
+#include "MonsterSoundValidation.h"
+
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
+#include "Data/GameData/MonsterData/MonsterSoundsJson.h"
+
+#include <algorithm>
+#include <cctype>
+#include <map>
+#include <optional>
+#include <set>
+
+namespace Data::Monsters
+{
+namespace
+{
+using Items::ItemDataIssue;
+using Items::ItemDataIssueSeverity;
+
+bool NamesSoundOfSet(const MonsterSoundSet& set, const std::string& value)
+{
+    return std::any_of(set.sounds.begin(), set.sounds.end(),
+                       [&](const MonsterSound& sound) { return SoundNameOf(sound) == value; });
+}
+
+void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& source,
+              int monster, const std::string& field, const std::string& message)
+{
+    issues.push_back({severity, source, ItemDataIssue::NoItem, monster, field, message});
+}
+
+std::string MonsterField(int number, const std::string& key)
+{
+    return "monster " + std::to_string(number) + " " + key;
+}
+
+// A file as the loader finds it: the client's folders take any case.
+std::string FileKey(const std::string& file)
+{
+    std::string key = file;
+    std::transform(key.begin(), key.end(), key.begin(),
+                   [](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+    return key;
+}
+
+// Two sounds of the set with one name, which events name them by: an event
+// could not tell them apart.
+void ValidateSoundNames(const MonsterSoundSet& set, const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t i = 0; i < set.sounds.size(); ++i)
+    {
+        const std::string& name = SoundNameOf(set.sounds[i]);
+        for (size_t other = 0; other < i; ++other)
+        {
+            if (SoundNameOf(set.sounds[other]) == name)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "sounds[" + std::to_string(i) + "]"),
+                         "has the name \"" + name + "\" of sounds[" + std::to_string(other) +
+                             "] (its id, or its file when it has none): an event could not tell them apart");
+                break;
+            }
+        }
+    }
+}
+
+// A SOUND_ id that sets load from different files: the game plays one file
+// for the id, the one of the model that opened last.
+void ValidateSharedIds(std::span<const MonsterSoundSet> sets, const std::string& source,
+                       std::vector<ItemDataIssue>& issues)
+{
+    struct FirstLoad
+    {
+        std::string set;
+        std::string file;
+    };
+    std::map<std::string, FirstLoad, std::less<>> firstLoads;
+    for (const MonsterSoundSet& set : sets)
+    {
+        for (size_t i = 0; i < set.sounds.size(); ++i)
+        {
+            const MonsterSound& sound = set.sounds[i];
+            if (sound.id.empty())
+            {
+                continue;
+            }
+            const auto [first, added] = firstLoads.try_emplace(sound.id, FirstLoad{set.name, sound.file});
+            // Within a set, two sounds with one id are fatal already.
+            if (!added && first->second.set != set.name && FileKey(first->second.file) != FileKey(sound.file))
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "sounds[" + std::to_string(i) + "].id"),
+                         "\"" + sound.id + "\" is " + first->second.file + " in the set " + first->second.set +
+                             ": the game plays one file for an id, the one of the model that opened last");
+            }
+        }
+    }
+}
+
+// The sets the monsters play, with each monster and the slot it plays it on.
+struct SetUser
+{
+    int monster = 0;
+    std::optional<int> slot;
+};
+} // namespace
+
+void ValidateMonsterSoundSetNames(std::span<const MonsterSoundSet> sets, const std::string& source,
+                                  std::vector<ItemDataIssue>& issues)
+{
+    for (const MonsterSoundSet& set : sets)
+    {
+        for (size_t i = 0; i < set.sounds.size(); ++i)
+        {
+            const std::string& id = set.sounds[i].id;
+            if (!id.empty() && !FindMonsterSoundId(id))
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "sounds[" + std::to_string(i) + "].id"),
+                         "\"" + id + "\" is not a SOUND_ id that code plays a monster sound by");
+            }
+        }
+        ValidateSoundNames(set, source, issues);
+        for (size_t event = 0; event < set.soundEvents.size(); ++event)
+        {
+            const std::vector<std::string>& sounds = set.soundEvents[event].sounds;
+            for (size_t i = 0; i < sounds.size(); ++i)
+            {
+                if (NamesSoundOfSet(set, sounds[i]) || FindMonsterSoundId(sounds[i]))
+                {
+                    continue;
+                }
+                AddIssue(issues, ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "soundEvents[" + std::to_string(event) + "].sounds[" +
+                                                            std::to_string(i) + "]"),
+                         "\"" + sounds[i] +
+                             "\" is no sound of the set (its id, or its file when it has none) and no SOUND_ id");
+            }
+        }
+    }
+    ValidateSharedIds(sets, source, issues);
+}
+
+void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
+                               std::span<const MonsterModelDefinition> models, std::span<const MonsterSoundSet> sets,
+                               const std::string& monstersSource, const std::string& soundsSource,
+                               std::vector<ItemDataIssue>& issues)
+{
+    std::vector<const MonsterDefinition*> monsterEntries;
+    for (const MonsterDefinition& monster : monsters)
+    {
+        monsterEntries.push_back(&monster);
+    }
+    std::vector<const MonsterModelDefinition*> modelEntries;
+    for (const MonsterModelDefinition& model : models)
+    {
+        modelEntries.push_back(&model);
+    }
+    ValidateMonsterSoundLinks(monsterEntries, modelEntries, sets, monstersSource, soundsSource, issues);
+}
+
+void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monsters,
+                               std::span<const MonsterModelDefinition* const> models,
+                               std::span<const MonsterSoundSet> sets, const std::string& monstersSource,
+                               const std::string& soundsSource, std::vector<ItemDataIssue>& issues)
+{
+    std::map<std::string, const MonsterSoundSet*, std::less<>> byName;
+    for (const MonsterSoundSet& set : sets)
+    {
+        byName.emplace(set.name, &set);
+    }
+    std::map<int, const MonsterModelDefinition*> bySlot;
+    for (const MonsterModelDefinition* model : models)
+    {
+        if (const std::optional<int> slot = FindMonsterModelSlot(model->slot))
+        {
+            bySlot.emplace(*slot, model);
+        }
+    }
+    std::map<std::string, std::vector<SetUser>, std::less<>> users;
+    const auto use = [&](const std::string& name, const std::string& field, int number, const std::string& model)
+    {
+        if (!byName.contains(name))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Error, monstersSource, number, MonsterField(number, field),
+                     "\"" + name + "\" is no sound set of Sounds.json; the monster plays no sounds there");
+            return;
+        }
+        const std::optional<int> slot = FindMonsterModelReference(model);
+        // A model loads the sounds of its monsters' sets when it opens; the
+        // game opens no other one (the player model, a map object).
+        if ((!slot || !bySlot.contains(*slot)) && !byName.at(name)->sounds.empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, monstersSource, number, MonsterField(number, field),
+                     model + " is no model of the model list, which loads the sounds of \"" + name +
+                         "\": only the SOUND_ ids that the game loads play");
+        }
+        users[name].push_back({number, slot});
+    };
+    for (const MonsterDefinition* entry : monsters)
+    {
+        const MonsterDefinition& monster = *entry;
+        if (!monster.soundSet.empty())
+        {
+            use(monster.soundSet, "soundSet", monster.number, monster.model);
+        }
+        for (size_t i = 0; i < monster.randomVariants.size(); ++i)
+        {
+            const MonsterRandomVariant& variant = monster.randomVariants[i];
+            const std::string key = "randomVariants[" + std::to_string(i) + "]";
+            if (variant.soundSet)
+            {
+                use(*variant.soundSet, key + ".soundSet", monster.number, variant.model);
+            }
+            else if (byName.contains(monster.soundSet))
+            {
+                // The look plays the entry's set on its own model.
+                users[monster.soundSet].push_back({monster.number, FindMonsterModelReference(variant.model)});
+            }
+        }
+        // A map variant's model plays the entry's set on its maps.
+        for (const MonsterMapVariant& variant : monster.mapVariants)
+        {
+            if (variant.model && byName.contains(monster.soundSet))
+                users[monster.soundSet].push_back({monster.number, FindMonsterModelReference(*variant.model)});
+        }
+    }
+    for (const MonsterSoundSet& set : sets)
+    {
+        const auto found = users.find(set.name);
+        if (found == users.end())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
+                     MonsterSoundSetField(set.name, "name"), "no monster plays the set");
+            continue;
+        }
+        for (size_t event = 0; event < set.soundEvents.size(); ++event)
+        {
+            const auto& soundEvent = set.soundEvents[event];
+            // The cues or timers the event names, which the models must have.
+            const bool onTimers = !soundEvent.timers.empty();
+            const bool drawn = !soundEvent.duringCues.empty();
+            const std::vector<std::string>& names =
+                onTimers ? soundEvent.timers : (drawn ? soundEvent.duringCues : soundEvent.cues);
+            for (const std::string& cue : names)
+            {
+                std::set<int> lacking;
+                for (const SetUser& user : found->second)
+                {
+                    const auto model = user.slot ? bySlot.find(*user.slot) : bySlot.end();
+                    const bool has =
+                        model != bySlot.end() &&
+                        (onTimers
+                             ? std::any_of(model->second->timers.begin(), model->second->timers.end(),
+                                           [&](const MonsterModelTimer& timer) { return timer.name == cue; })
+                             : std::any_of(model->second->cues.begin(), model->second->cues.end(),
+                                           [&](const MonsterModelCue& candidate) { return candidate.name == cue; }));
+                    if (!has)
+                    {
+                        lacking.insert(user.monster);
+                    }
+                }
+                if (lacking.empty())
+                {
+                    continue;
+                }
+                std::string numbers;
+                for (const int number : lacking)
+                {
+                    numbers += (numbers.empty() ? "" : ", ") + std::to_string(number);
+                }
+                AddIssue(
+                    issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
+                    MonsterSoundSetField(set.name, "soundEvents[" + std::to_string(event) +
+                                                       (onTimers ? "].timers" : (drawn ? "].duringCues" : "].cues"))),
+                    "the model of monster " + numbers + " has no " + (onTimers ? "timer" : "cue") + " \"" + cue +
+                        "\": the event never plays for it");
+            }
+        }
+    }
+}
+} // namespace Data::Monsters

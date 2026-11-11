@@ -20,20 +20,21 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
+#include "GameLogic/Items/ItemOptionSlots.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern  bool    SkillEnable;
-extern	wchar_t TextList[50][100];
-extern	int     TextListColor[50];
-extern	int     TextBold[50];
 extern  int     CheckX;
 extern  int     CheckY;
 extern  int     CheckSkill;
@@ -45,6 +46,26 @@ namespace
     constexpr std::size_t kTooltipBufferCapacity = 100;
     constexpr int kPetCommandCount = AT_PET_COMMAND_END - AT_PET_COMMAND_DEFAULT;
     constexpr int kTooltipLineLimit = 50;
+
+    // The pet command names, in PET_COMMAND order.
+    const wchar_t* const* const kPetCommandNames[] = {
+        &I18N::Game::BasicAction,
+        &I18N::Game::RandomAutomaticAttack,
+        &I18N::Game::AttackWithOwner,
+        &I18N::Game::AttackTarget,
+    };
+    static_assert(std::size(kPetCommandNames) == PET_CMD_END, "one name per pet command");
+
+    // The name of pet command `command` (a PET_COMMAND); empty for any other number.
+    const wchar_t* GetPetCommandName(int command)
+    {
+        if (command < PET_CMD_DEFAULT || command >= PET_CMD_END)
+        {
+            return L"";
+        }
+
+        return *kPetCommandNames[command];
+    }
 
     std::wstring SanitizeWideStringFormat(const wchar_t* format)
     {
@@ -148,7 +169,7 @@ namespace
         return CInput::Instance().IsKeyDown(virtualKey);
     }
 
-    CSPetSystem* ResolvePetSystem(CHARACTER* character)
+    CSPetSystem* ResolvePetSystem(const CHARACTER* character)
     {
         return HasActivePet(character) ? static_cast<CSPetSystem*>(character->m_pPet) : nullptr;
     }
@@ -164,7 +185,9 @@ namespace
 
 namespace giPetManager
 {
-    static std::uint8_t g_tabBar = 0;
+PET_INFO gs_PetInfo{};
+
+static std::uint8_t g_tabBar = 0;
     static std::uint32_t g_renderItemIndexBackup = 0;
     static ITEM g_renderItemInfoBackup {};
 
@@ -203,22 +226,32 @@ namespace giPetManager
         }
     }
 
-    void RenderPet(CHARACTER* c)
+    void CullPet(CHARACTER* c)
+    {
+        if (auto* petSystem = ResolvePetSystem(c))
+            petSystem->CullPet();
+    }
+
+    void RenderPet(const CHARACTER* c)
+    {
+        const OBJECT* o = &c->Object;
+        if (auto* petSystem = ResolvePetSystem(c))
+        {
+            petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking) ? 10 : 0);
+        }
+    }
+
+    void UpdatePetEffects(CHARACTER* c)
     {
         OBJECT* o = &c->Object;
         if (auto* petSystem = ResolvePetSystem(c))
         {
-            if (g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                petSystem->RenderPet(10);
-            }
-            else
+            if (!g_isCharacterBuff(o, eBuff_Cloaking))
             {
                 ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-                PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
-                petSystem->SetPetInfo(pPetInfo);
-                petSystem->RenderPet();
+                petSystem->SetPetInfo(giPetManager::GetPetInfo(pEquipmentItemSlot));
             }
+            petSystem->UpdatePetEffects();
         }
     }
 
@@ -339,40 +372,44 @@ namespace giPetManager
         }
     }
 
-    bool RenderPetCmdInfo(int sx, int sy, int Type)
+    bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)
     {
         if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
+        if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD) return false;
 
-        int  TextNum = 0;
-        int  SkipNum = 0;
+        using UI::Skills::Tooltip::Line;
+        using UI::Skills::Tooltip::LineColor;
 
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+        const int cmdType = Type - AT_PET_COMMAND_DEFAULT;
+
+        // The original's TextNum/SkipNum bookkeeping exactly -- every line here (including the two
+        // blanks AND the body line) incremented SkipNum, so outModel.skipCount must match 1:1 or
+        // Render()'s own height math would drift.
+        auto pushLine = [&outModel](const wchar_t* text, LineColor color, bool bold, bool blank)
         {
-            int cmdType = Type - AT_PET_COMMAND_DEFAULT;
+            if (outModel.count >= UI::Skills::Tooltip::MAX_TOOLTIP_LINES) return;
+            Line& l = outModel.lines[outModel.count++];
+            wcsncpy(l.text, text, UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+            l.text[UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+            l.color = color;
+            l.isBold = bold;
+            l.isBlank = blank;
+            ++outModel.skipCount;
+        };
 
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            mu_swprintf(TextList[TextNum], I18N::Game::Lookup(1219 + cmdType)); TextNum++; SkipNum++;
+        pushLine(GetPetCommandName(cmdType), LineColor::Blue, true, false);
+        pushLine(L"\n", LineColor::White, false, true);
+        pushLine(L"\n", LineColor::White, false, true);
 
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            switch (cmdType)
-            {
-            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], I18N::Game::FollowAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], I18N::Game::AttackAnyMonstersAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterTogetherWithTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterSelectedByTheCharacter); TextNum++; SkipNum++; break;
-            }
-
-            SIZE TextSize = { 0, 0 };
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-            int Height = (int)(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
-            sy -= Height;
-
-            RenderTipTextList(sx, sy, TextNum, 0);
-            return true;
+        switch (cmdType)
+        {
+        case PET_CMD_DEFAULT: pushLine(I18N::Game::FollowAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_RANDOM: pushLine(I18N::Game::AttackAnyMonstersAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_OWNER: pushLine(I18N::Game::AttackTheMonsterTogetherWithTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_TARGET: pushLine(I18N::Game::AttackTheMonsterSelectedByTheCharacter, LineColor::White, false, false); break;
         }
-        return false;
+
+        return true;
     }
 
     void DeletePet(CHARACTER* c)
@@ -501,7 +538,7 @@ namespace giPetManager
         std::memcpy(&gs_PetInfo, pPetinfo, sizeof(PET_INFO));
     }
 
-    PET_INFO* GetPetInfo(ITEM* pItem)
+    PET_INFO* GetPetInfo(const ITEM* pItem)
     {
         if (pItem == &CharacterMachine->Equipment[EQUIPMENT_HELPER])
         {
@@ -545,27 +582,9 @@ namespace giPetManager
     {
         if (ip->Type == ITEM_DARK_HORSE_ITEM)
         {
-            int Index = 0;
-            for (int i = 0; i < ip->SpecialNum; ++i)
-            {
-                if (ip->Special[i] == AT_SET_OPTION_IMPROVE_DEFENCE)
-                {
-                    Index = i;
-                    break;
-                }
-            }
-
-            if (Index == 0)
-            {
-                ip->SpecialValue[ip->SpecialNum] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
-                ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE;
-                ip->SpecialNum++;
-            }
-            else
-            {
-                ip->SpecialValue[Index] = static_cast<std::uint8_t>((5 + (CharacterAttribute->Dexterity / 20) + pPetInfo->m_wLevel * 2) & 0xFF);
-                ip->Special[Index] = AT_SET_OPTION_IMPROVE_DEFENCE;
-            }
+            const int agility = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+            const int defense = 5 + (agility / 20) + pPetInfo->m_wLevel * 2;
+            GameLogic::Items::SetOptionSlot(*ip, AT_SET_OPTION_IMPROVE_DEFENCE, defense);
         }
     }
 
@@ -592,7 +611,7 @@ namespace giPetManager
         return gold;
     }
 
-    bool RenderPetItemInfo(int sx, int sy, ITEM* pItem, int iInvenType)
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* pItem, int iInvenType)
     {
         PET_INFO* pPetInfo = GetPetInfo(pItem);
 
@@ -603,6 +622,7 @@ namespace giPetManager
 
         int TextNum = 0;
         int SkipNum = 0;
+        ClearTooltipRows();
         int RequireLevel = 0;
         int RequireCharisma = 0;
         const std::wstring priceFormat = SanitizeWideStringFormat(I18N::Game::SellingPriceS);
@@ -630,7 +650,7 @@ namespace giPetManager
             appendLine(TEXT_COLOR_WHITE, false, true, L"\n");
         };
 
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             wchar_t textBuffer[kTooltipBufferCapacity] {};
             std::uint32_t gold = GetPetItemValue(&giPetManager::gs_PetInfo) / 3u;
@@ -640,14 +660,24 @@ namespace giPetManager
             appendLine(TEXT_COLOR_WHITE, true, false, priceFormat.c_str(), textBuffer);
             appendEmptyLine();
         }
-        else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
+        else if ((iInvenType == mu::ui::window::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
-            int price = 0;
+            GameLogic::PersonalShop::ItemPrice itemPrice;
             const int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
             wchar_t textBuffer[kTooltipBufferCapacity] {};
 
-            if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
+            const bool hasPrice = GetPersonalItemPrice(indexInv, itemPrice, g_IsPurchaseShop);
+            if (hasPrice && itemPrice.Kind != GameLogic::PersonalShop::PriceKind::Zen)
             {
+                // The server tells the player when the jewels or coins are not enough.
+                std::swprintf(textBuffer, kTooltipBufferCapacity, L"%d %ls", itemPrice.Amount,
+                              GameLogic::PersonalShop::GetCurrencyName(itemPrice));
+                appendLine(TEXT_COLOR_YELLOW, true, false, priceFormat.c_str(), textBuffer);
+                appendEmptyLine();
+            }
+            else if (hasPrice)
+            {
+                const int price = itemPrice.Amount;
                 ConvertGold(price, textBuffer);
 
                 int priceColor = TEXT_COLOR_WHITE;
@@ -735,14 +765,25 @@ namespace giPetManager
         const int ownershipColor = (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD) ? TEXT_COLOR_WHITE : TEXT_COLOR_DARKRED;
         appendLine(ownershipColor, false, true, ownershipFormat.c_str(), I18N::Game::DarkLord);
 
-        for (int i = 0; i < pItem->SpecialNum; ++i)
+        // The defense option a Dark Horse gives is shown from a copy; the tooltip leaves the item as it is.
+        ITEM shown = *pItem;
+        SetPetItemConvert(&shown, &gs_PetInfo);
+        for (int i = 0; i < shown.SpecialNum; ++i)
         {
-            SetPetItemConvert(pItem, &gs_PetInfo);
-            GetSpecialOptionText(pItem->Type, TextList[TextNum], pItem->Special[i], pItem->SpecialValue[i], 0);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            ++TextNum;
-            ++SkipNum;
+            // An option of the option definitions (an item file may give the pets luck) writes its own lines.
+            if (const std::optional<int> rows = WriteDefinitionOptionLines(shown, i, TextNum, kTooltipLineLimit))
+            {
+                TextNum += *rows;
+                SkipNum += *rows;
+            }
+            else
+            {
+                GetSpecialOptionText(TextList[TextNum], shown.Special[i], shown.SpecialValue[i], 0);
+                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                TextBold[TextNum] = false;
+                ++TextNum;
+                ++SkipNum;
+            }
 
             if (TextNum >= kTooltipLineLimit)
             {
@@ -756,15 +797,16 @@ namespace giPetManager
             appendLine(TEXT_COLOR_BLUE, false, false, I18N::Game::IncreaseDPossibleAttackDistance, 2);
         }
 
-        SIZE TextSize = { 0, 0 };
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-        int Height = static_cast<int>(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
+        g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+        const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+        int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
         if (sy - Height >= 0)
         {
             sy -= Height;
         }
 
-        RenderTipTextList(sx, sy, TextNum, 0);
+        UI::Tooltip::ShowLegacyTextList(TextNum, UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+                                        UI::Scaling::PositionY(screen, static_cast<float>(sy)));
         return true;
     }
 }

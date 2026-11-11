@@ -1,0 +1,18 @@
+/* Legacy theme for TitleSceneUI's splash-screen loading bar -- RmlUi's own <progress> element, the
+   last CGaugeBar consumer. left/top/width/height are pushed from C++ rather than set as dp here:
+   the still-native background sprites around this bar scale via fScaleX/fScaleY (800x600-
+   reference, unclamped per axis), which doesn't match dp's own formula (640x480-reference, one
+   clamped/damped factor) except at the 640x480 reference size. */
+
+/* lo_lo.jpg is a 4x15px tileable strip the legacy renderer stretched via GL_REPEAT -- fill-image
+   stretching it the same way matches main_frame.rcss's own tiny gauge-fill textures. */
+@spritesheet title-gauge-fill-sheet { src: "../../../lo_lo.jpg"; title-gauge-fill: 0px 0px 4px 15px; }
+
+/* position:absolute is load-bearing, not just placement -- unstyled elements default to
+   `display:inline` (which ignores width/height) in this engine; position:absolute forces
+   block-level sizing regardless. */
+.gauge-fill {
+	position: absolute;
+	/* left/top/width/height pushed from C++ -- see this file's own header comment. */
+	fill-image: title-gauge-fill;
+}

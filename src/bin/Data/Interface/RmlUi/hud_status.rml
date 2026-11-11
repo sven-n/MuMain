@@ -1,0 +1,40 @@
+<rml>
+	<!-- bound-geometry: the macro cooldown's bar is a gauge length, the fraction of the cooldown left,
+	     and the cooldown centres on the world the open docks leave uncovered -->
+<head>
+	<title>HUD Status</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="hud_status.rcss"/>
+</head>
+<body data-model="hud_status">
+	<!-- The status texts over the world above the HUD (UI::Hud::StatusTexts): the siege crown
+	     switches' holders, a chat macro's cooldown and an event's entry countdown. Drawn on the HUD
+	     board: #screen is the 640x480 reference screen at the bottom HUD's scale, centred like the
+	     HUD, and the theme places each line on it. C++ fills the texts and the cooldown's fraction.
+
+	     Each text takes the native text renderer's physical size (text_px) and cancels the scale
+	     (.sharp-text), so its glyphs rasterise at the original's size. -->
+	<div id="screen" class="hud-board">
+		<div class="status-line" id="switch_first" data-if="switch_first != ''">
+			<div class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{switch_first}}</div>
+		</div>
+		<div class="status-line" id="switch_second" data-if="switch_second != ''">
+			<div class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{switch_second}}</div>
+		</div>
+
+		<div id="macro" data-if="macro_visible" data-style-left="world_centre + 'px'">
+			<div class="sharp-text macro-label" data-style-font-size="text_px + 'px'">Macro Time</div>
+			<div class="macro-shadow"></div>
+			<div class="macro-bar">
+				<div class="macro-track">
+					<div class="macro-fill" data-style-width="(macro_fraction * 100) + '%'"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="status-line" id="countdown" data-if="countdown != ''">
+			<div class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"><span class="countdown-text">{{countdown}}</span></div>
+		</div>
+	</div>
+</body>
+</rml>

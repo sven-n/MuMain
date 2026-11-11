@@ -5,57 +5,57 @@
 
 #include "Network/Server/WSclient.h"
 
-#define QM_MAX_ND_ANSWER	10
-#define QM_MAX_ANSWER		5
-#define QM_MAX_REQUEST_REWARD_TEXT_LEN	64
+#define QM_MAX_ND_ANSWER 10
+#define QM_MAX_ANSWER 5
+#define QM_MAX_REQUEST_REWARD_TEXT_LEN 64
 
 struct SNPCDialogue
 {
-    int		m_nNPCWords;
-    int		m_anAnswer[QM_MAX_ND_ANSWER * 2];
+    int m_nNPCWords;
+    int m_anAnswer[QM_MAX_ND_ANSWER * 2];
 };
 
 #pragma pack(push, 1)
 struct SQuestProgress
 {
-    BYTE	m_byUIType;
-    int		m_nNPCWords;
-    int		m_nPlayerWords;
-    int		m_anAnswer[QM_MAX_ANSWER];
-    int		m_nSubject;
-    int		m_nSummary;
+    BYTE m_byUIType;
+    int m_nNPCWords;
+    int m_nPlayerWords;
+    int m_anAnswer[QM_MAX_ANSWER];
+    int m_nSubject;
+    int m_nSummary;
 };
 #pragma pack(pop)
 
 struct SQuestRequest
 {
-    DWORD	m_dwType;
-    WORD	m_wIndex;
-    DWORD	m_dwValue;
+    DWORD m_dwType;
+    WORD m_wIndex;
+    DWORD m_dwValue;
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-    DWORD	m_dwCurValue;
-#else	// ASG_ADD_TIME_LIMIT_QUEST
-    WORD	m_wCurValue;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST
+    DWORD m_dwCurValue;
+#else  // ASG_ADD_TIME_LIMIT_QUEST
+    WORD m_wCurValue;
+#endif // ASG_ADD_TIME_LIMIT_QUEST
     ITEM* m_pItem;
 };
 
 struct SQuestReward
 {
-    DWORD	m_dwType;
-    WORD	m_wIndex;
-    DWORD	m_dwValue;
+    DWORD m_dwType;
+    WORD m_wIndex;
+    DWORD m_dwValue;
     ITEM* m_pItem;
 };
 
 struct SQuestRequestReward
 {
-    BYTE	m_byRequestCount;
-    BYTE	m_byGeneralRewardCount;
-    BYTE	m_byRandRewardCount;
-    BYTE	m_byRandGiveCount;
-    SQuestRequest	m_aRequest[5];
-    SQuestReward	m_aReward[5];
+    BYTE m_byRequestCount;
+    BYTE m_byGeneralRewardCount;
+    BYTE m_byRandRewardCount;
+    BYTE m_byRandGiveCount;
+    SQuestRequest m_aRequest[5];
+    SQuestReward m_aReward[5];
 };
 
 enum REQUEST_REWARD_CLASSIFY
@@ -65,14 +65,26 @@ enum REQUEST_REWARD_CLASSIFY
     RRC_REWARD = 2
 };
 
+// What a requirement/reward text line is, so the UI can style it (the original client colored
+// headings green, unmet requirements red, random rewards violet and everything else gold).
+enum REQUEST_REWARD_TEXT_KIND
+{
+    RRTK_HEADING = 0,
+    RRTK_REQUIREMENT = 1,
+    RRTK_REQUIREMENT_UNMET = 2,
+    RRTK_REWARD = 3,
+    RRTK_RANDOM_REWARD = 4
+};
+
 struct SRequestRewardText
 {
-    HFONT	m_hFont;
-    DWORD	m_dwColor;
-    wchar_t	m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
-    REQUEST_REWARD_CLASSIFY	m_eRequestReward;		//
-    DWORD	m_dwType;
-    WORD	m_wIndex;
+    HFONT m_hFont;
+    REQUEST_REWARD_TEXT_KIND m_eKind;
+    DWORD m_dwColor; // m_eKind's color, as the native quest-contents list drew it
+    wchar_t m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
+    REQUEST_REWARD_CLASSIFY m_eRequestReward; //
+    DWORD m_dwType;
+    WORD m_wIndex;
     ITEM* m_pItem;
 };
 
@@ -85,18 +97,18 @@ typedef std::list<DWORD> DWordList;
 class CQuestMng
 {
 protected:
-    NPCDialogueMap			m_mapNPCDialogue;
-    QuestProgressMap		m_mapQuestProgress;
-    QuestWordsMap			m_mapQuestWords;
-    QuestRequestRewardMap	m_mapQuestRequestReward;
+    NPCDialogueMap m_mapNPCDialogue;
+    QuestProgressMap m_mapQuestProgress;
+    QuestWordsMap m_mapQuestWords;
+    QuestRequestRewardMap m_mapQuestRequestReward;
 
-    std::map<WORD, bool>			m_mapEPRequestRewardState;
+    std::map<WORD, bool> m_mapEPRequestRewardState;
 
-    int		m_nNPCIndex;
+    int m_nNPCIndex;
     const wchar_t* m_szNPCName; // [MAX_MONSTER_NAME] ;
 
-    DWordList				m_listQuestIndexByEtc;
-    DWordList				m_listCurQuestIndex;
+    DWordList m_listQuestIndexByEtc;
+    DWordList m_listCurQuestIndex;
 
 public:
     CQuestMng();
@@ -108,6 +120,14 @@ public:
 
     void SetNPC(int nNPCIndex);
     int GetNPCIndex();
+#ifdef _EDITOR
+    // The NPC dialogues by NPC number * 0x10000 + dialogue state, for the
+    // editor's monster tools.
+    const NPCDialogueMap& GetNPCDialogues() const
+    {
+        return m_mapNPCDialogue;
+    }
+#endif
     const wchar_t* GetNPCName();
 
     void SetCurQuestProgress(DWORD dwQuestIndex);
@@ -127,12 +147,12 @@ public:
     bool IsEPRequestRewardState(DWORD dwQuestIndex);
     bool IsQuestByEtc(DWORD dwQuestIndex);
 
-    void SetQuestIndexByEtcList(DWORD* adwSrcQuestIndex, int nIndexCount);
+    void SetQuestIndexByEtcList(const DWORD* adwSrcQuestIndex, int nIndexCount);
     bool IsQuestIndexByEtcListEmpty();
     void SendQuestIndexByEtcSelection();
     void DelQuestIndexByEtcList(DWORD dwQuestIndex);
 
-    void SetCurQuestIndexList(DWORD* adwCurQuestIndex, int nIndexCount);
+    void SetCurQuestIndexList(const DWORD* adwCurQuestIndex, int nIndexCount);
     void AddCurQuestIndexList(DWORD dwQuestIndex);
     void RemoveCurQuestIndexList(DWORD dwQuestIndex);
     bool IsIndexInCurQuestIndexList(DWORD dwQuestIndex);

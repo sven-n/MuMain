@@ -1,0 +1,41 @@
+/* Modern theme for the texts and buttons of the right-docked entry windows with a 3D item preview
+   (CDoppelGangerWindow, CEmpireGuardianNPC): modern buttons, locked ones dimmed, over
+   docked_panel_frame.rcss's forged panel (linked first) and a thin separator where the legacy line
+   sits. Geometry is the legacy one (reference px under the dock transform). */
+
+.entry-line { position: absolute; left: 10px; top: 230px; width: 170px; height: 1px; background-color: token(border-frame); }
+
+/* The live 3D preview: the panel and a margin around it, since the original drew the lucky coin
+   from 20 left of the panel. */
+.entry-item { position: absolute; left: -60px; top: -30px; width: 310px; height: 489px; pointer-events: none; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+.entry-texts, .entry-buttons { position: static; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; transform-origin: left top; }
+
+.entry-btn {
+	display: block;
+	position: absolute;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.entry-btn:hover { border-color: token(accent-steel-hover); }
+.entry-btn:active { background-color: token(surface-recessed); }
+.entry-btn.locked, .entry-btn.locked:hover { background-color: token(surface-recessed); border-color: token(border-frame); }
+/* A line's box: the panel's width unless its row rule says otherwise. Its text centres on it. */
+.entry-text { display: block; position: absolute; width: 190px; }
+.entry-label { color: token(text-primary); }
+.entry-btn.locked .entry-label { color: token(text-muted); }

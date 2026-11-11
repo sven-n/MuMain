@@ -1,0 +1,45 @@
+/* The personal-shop notice (my_shop, purchase_shop): the warning heading and the native rows, each
+   its own wrapping block, flowed in one pane between the item grid and the buttons. The rows keep
+   native's three groups; text that cannot fit scrolls. Colours stay in each window's stylesheet. */
+
+.shop-notice {
+	position: absolute;
+	left: 14px;
+	top: 214px;
+	width: 158px;
+	height: 170px;
+	/* Room for a glyph's overhang, such as a J's hook, inside the clip. */
+	padding: 0 2px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	line-height: 1.15;
+}
+.notice-line {
+	display: block;
+	white-space: normal;
+	word-break: break-word;
+	pointer-events: none;
+}
+.notice-group { display: block; }
+.notice-group + .notice-group { margin-top: 7px; }
+.notice-warning { font-weight: bold; }
+
+/* "Still opening", centred between the grid and the notice, wrapping when it must. */
+.shop-still-opening {
+	position: absolute;
+	left: 6px;
+	top: 172px;
+	width: 178px;
+	height: 42px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	line-height: 1.15;
+	text-align: center;
+	white-space: normal;
+	word-break: break-word;
+	font-weight: bold;
+	pointer-events: none;
+}

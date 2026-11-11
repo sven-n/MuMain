@@ -4,6 +4,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -12,6 +13,10 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/AI/BirdLanding.h"
+#include "Engine/AI/BoidSteering.h"
+#include "GameLogic/Combat/AttackTarget.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -19,8 +24,10 @@
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Scenes/MainScene.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "Render/Renderer/MuRenderer.h"
 
 int EnableEvent = 0;
 
@@ -28,6 +35,10 @@ static  const   BYTE    BOID_FLY = 0;
 static  const   BYTE    BOID_DOWN = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
+
+// Actions of the bird and crow models.
+static const int BIRD_ACTION_FLY = 0;
+static const int BIRD_ACTION_GROUND = 1;
 
 void DeleteMount(OBJECT* Owner)
 {
@@ -53,8 +64,7 @@ bool IsMount(ITEM* pItem)
         || pItem->Type == ITEM_IMP
         || pItem->Type == ITEM_HORN_OF_UNIRIA
         || pItem->Type == ITEM_HORN_OF_DINORANT
-        || pItem->Type == ITEM_DARK_HORSE_ITEM
-        || pItem->Type == ITEM_DARK_RAVEN_ITEM
+        || GameLogic::Items::IsDarkLordPet(pItem)
         || pItem->Type == ITEM_HORN_OF_FENRIR
         )
     {
@@ -114,15 +124,14 @@ bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int Sub
             break;
         case MODEL_HELPER:
             o->BlendMesh = 1;
-            Vector(Owner->Position[0] + (float)(rand() % 512 - 256),
-                Owner->Position[1] + (float)(rand() % 512 - 256),
-                Owner->Position[2] + (float)(rand() % 128 + 128), o->Position);
+            Vector(Owner->Position[0] + (float)(Random::Rand() % 512 - 256),
+                   Owner->Position[1] + (float)(Random::Rand() % 512 - 256),
+                   Owner->Position[2] + (float)(Random::Rand() % 128 + 128), o->Position);
             break;
         case MODEL_IMP:
-            Vector(Owner->Position[0] + (float)(rand() % 128 - 64),
-                Owner->Position[1] + (float)(rand() % 128 - 64),
-                Owner->Position[2], o->Position);
-            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 100);
+            Vector(Owner->Position[0] + (float)(Random::Rand() % 128 - 64),
+                   Owner->Position[1] + (float)(Random::Rand() % 128 - 64), Owner->Position[2], o->Position);
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(Random::Rand() % 100);
             break;
         }
 
@@ -172,6 +181,12 @@ bool MoveMount(OBJECT* o, bool bForceRender)
         vec3_t  Light, Position;
         vec3_t  TargetPosition;
         BMD* b = &Models[o->Type];
+        // The mount's own world pose, for the spawns below; the shared bones hold whatever was posed last.
+        const auto bones = [o, b]
+        {
+            PlaceObjectModel(o, b);
+            return Engine::Object::Pose::World(o, b);
+        };
 
         VectorCopy(o->Owner->Position, TargetPosition);
         switch (o->Type)
@@ -188,7 +203,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
             if (o->Owner->Teleport == TELEPORT_BEGIN || o->Owner->Teleport == TELEPORT)
             {
-                o->Alpha -= 0.1f;
+                // *FPS_ANIMATION_FACTOR -- was a fixed 0.1/call fade with no time basis, so the
+                // teleport fade-out vanished N times faster at high/uncapped FPS than the ~10
+                // frames it was tuned to take.
+                o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->Alpha < 0) o->Alpha = 0.f;
             }
             else
@@ -278,13 +296,13 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
                     if (o->AnimationFrame > 1.f && o->AnimationFrame < 1.2f)
                     {
-                        b->TransformPosition(BoneTransform[22], p, Position);	// R Hand
+                        b->TransformPosition(bones()[22], p, Position); // R Hand
                         Position[0] += 40.f;
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.0f)
                     {
-                        b->TransformPosition(BoneTransform[44], p, Position);	// R Foot
+                        b->TransformPosition(bones()[44], p, Position); // R Foot
                         Position[0] += 40.f;
                         Position[2] += 700.f;
                         bWave = true;
@@ -295,11 +313,11 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                         Vector(Position[0], Position[1], Position[2], p);
                         CreateEffect(BITMAP_SHOCK_WAVE, p, o->Angle, Light, 1);
 
-                        for (int i = 0; i < rand() % 5 + 5; ++i)
+                        for (int i = 0; i < Random::Rand() % 5 + 5; ++i)
                         {
-                            Vector(Position[0] + (float)(rand() % 50 - 25),
-                                Position[1] + (float)(rand() % 50 - 25),
-                                Position[2] + (float)(rand() % 16 - 8) - 10, p);
+                            Vector(Position[0] + (float)(Random::Rand() % 50 - 25),
+                                   Position[1] + (float)(Random::Rand() % 50 - 25),
+                                   Position[2] + (float)(Random::Rand() % 16 - 8) - 10, p);
                             CreateParticle(BITMAP_SMOKE, p, o->Angle, Light);
                         }
                     }
@@ -308,9 +326,9 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 {
                     if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                     {
-                        Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                            o->Position[1] + (float)(rand() % 64 - 32),
-                            o->Position[2] + (float)(rand() % 32 - 16), Position);
+                        Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                               o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                               o->Position[2] + (float)(Random::Rand() % 32 - 16), Position);
                         if (gMapManager.WorldActive == WD_2DEVIAS)
                             CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light);
                         else if (gMapManager.WorldActive != WD_10HEAVEN)
@@ -348,41 +366,40 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 if (gMapManager.WorldActive == WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene())
                 {
                     bool   bWave = false;
-                    vec3_t p = { 120.f, 0.f, rand() % 64 - 32.f };
+                    vec3_t p = {120.f, 0.f, Random::Rand() % 64 - 32.f};
 
                     if (o->AnimationFrame > 1.f && o->AnimationFrame < 1.2f)
                     {
-                        b->TransformPosition(BoneTransform[19], p, Position);
+                        b->TransformPosition(bones()[19], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.1f && o->AnimationFrame < 1.4f)
                     {
-                        b->TransformPosition(BoneTransform[25], p, Position);
+                        b->TransformPosition(bones()[25], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.3f && o->AnimationFrame < 1.6f)
                     {
-                        b->TransformPosition(BoneTransform[32], p, Position);
+                        b->TransformPosition(bones()[32], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.5f && o->AnimationFrame <= 1.8f)
                     {
-                        b->TransformPosition(BoneTransform[38], p, Position);
+                        b->TransformPosition(bones()[38], p, Position);
                         bWave = true;
                     }
 
                     if (bWave)
                     {
-                        Vector(Position[0] + (float)(rand() % 16 - 8),
-                            Position[1] + (float)(rand() % 16 - 8),
-                            Position[2], p);
+                        Vector(Position[0] + (float)(Random::Rand() % 16 - 8),
+                               Position[1] + (float)(Random::Rand() % 16 - 8), Position[2], p);
                         CreateEffect(BITMAP_SHOCK_WAVE, p, o->Angle, Light, 1);
 
-                        for (int i = 0; i < rand() % 5 + 5; ++i)
+                        for (int i = 0; i < Random::Rand() % 5 + 5; ++i)
                         {
-                            Vector(Position[0] + (float)(rand() % 50 - 25),
-                                Position[1] + (float)(rand() % 50 - 25),
-                                Position[2] + (float)(rand() % 16 - 8) - 10, p);
+                            Vector(Position[0] + (float)(Random::Rand() % 50 - 25),
+                                   Position[1] + (float)(Random::Rand() % 50 - 25),
+                                   Position[2] + (float)(Random::Rand() % 16 - 8) - 10, p);
                             CreateParticle(BITMAP_SMOKE, p, o->Angle, Light);
                         }
                     }
@@ -392,9 +409,9 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                     if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                     {
                         // Smoke at the back feet of the horse.
-                        Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                            o->Position[1] + (float)(rand() % 64 - 32),
-                            o->Position[2] + (float)(rand() % 32 - 16), Position);
+                        Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                               o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                               o->Position[2] + (float)(Random::Rand() % 32 - 16), Position);
 
                         if (gMapManager.WorldActive == WD_2DEVIAS)
                             CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light);
@@ -435,7 +452,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                     if (rand_fps_check(3))
                     {
                         vec3_t p = { 50.f, -4.f, 0.f };
-                        b->TransformPosition(BoneTransform[27], p, Position);
+                        b->TransformPosition(bones()[27], p, Position);
 
                         if (gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_67DOPPLEGANGER3)
                         {
@@ -456,14 +473,14 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 Vector(60.f, 0.f, 0.f, Pos1);
                 Vector(0.f, 0.f, 0.f, Pos2);
                 Vector(1.f, 1.f, 1.f, Light);
-                b->TransformPosition(BoneTransform[9], Pos1, p);
-                b->TransformPosition(BoneTransform[9], Pos2, p2);
+                b->TransformPosition(bones()[9], Pos1, p);
+                b->TransformPosition(bones()[9], Pos2, p2);
                 CreateBlur(Hero, p, p2, Light, 0);
             }
 
             if (o->CurrentAction == 3)
             {
-                RenderDarkHorseSkill(o, b);
+                UpdateDarkHorseSkill(o, b);
             }
 
             if (o->Owner->ExtState == 1)
@@ -504,7 +521,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
             if (o->Owner->Teleport == TELEPORT_BEGIN || o->Owner->Teleport == TELEPORT)
             {
-                o->Alpha -= 0.1f;
+                // *FPS_ANIMATION_FACTOR -- was a fixed 0.1/call fade with no time basis, so the
+                // teleport fade-out vanished N times faster at high/uncapped FPS than the ~10
+                // frames it was tuned to take.
+                o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->Alpha < 0) o->Alpha = 0.f;
             }
             else
@@ -546,9 +566,9 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                         if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                         {
                             Vector(1.f, 1.f, 1.f, Light);
-                            Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                                o->Position[1] + (float)(rand() % 64 - 32),
-                                o->Position[2] + (float)(rand() % 32 - 16), Position);
+                            Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                                   o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                                   o->Position[2] + (float)(Random::Rand() % 32 - 16), Position);
                             if (gMapManager.WorldActive == 2)
                                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light);
                             else
@@ -612,7 +632,8 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 {
                     for (j = 0; j < 4; j++)
                     {
-                        Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+                        Vector((float)(Random::Rand() % 16 - 8), (float)(Random::Rand() % 16 - 8),
+                               (float)(Random::Rand() % 16 - 8), Position);
                         VectorAdd(Position, o->Position, Position);
                         CreateParticle(BITMAP_SPARK, Position, o->Angle, Light, 1);
                     }
@@ -640,23 +661,25 @@ bool MoveMount(OBJECT* o, bool bForceRender)
             vec3_t Direction;
             VectorRotate(o->Direction, o->Matrix, Direction);
             VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
-            o->Position[2] += (float)(rand() % 16 - 8);
+            o->Position[2] += (float)(Random::Rand() % 16 - 8);
             if (rand_fps_check(32))
             {
                 float Speed = 0;
                 if (Distance >= FlyRange * FlyRange)
-                    Speed = -(float)(rand() % 64 + 128) * 0.1f;
+                    Speed = -(float)(Random::Rand() % 64 + 128) * 0.1f;
                 else
                 {
-                    Speed = -(float)(rand() % 64 + 16) * 0.1f;
-                    o->Angle[2] = (float)(rand() % 360);
+                    Speed = -(float)(Random::Rand() % 64 + 16) * 0.1f;
+                    o->Angle[2] = (float)(Random::Rand() % 360);
                 }
                 o->Direction[0] = 0.f;
                 o->Direction[1] = Speed;
-                o->Direction[2] = (float)(rand() % 64 - 32) * 0.1f;
+                o->Direction[2] = (float)(Random::Rand() % 64 - 32) * 0.1f;
             }
-            if (o->Position[2] < o->Owner->Position[2] + 100.f) o->Direction[2] += 1.5f;
-            if (o->Position[2] > o->Owner->Position[2] + 200.f) o->Direction[2] -= 1.5f;
+            if (o->Position[2] < o->Owner->Position[2] + 100.f)
+                o->Direction[2] += 1.5f * FPS_ANIMATION_FACTOR;
+            if (o->Position[2] > o->Owner->Position[2] + 200.f)
+                o->Direction[2] -= 1.5f * FPS_ANIMATION_FACTOR;
         }
     }
     return TRUE;
@@ -670,53 +693,57 @@ void MoveMounts()
     }
 }
 
-bool RenderMount(OBJECT* o, bool bForceRender)
+static unsigned int s_mountCullFrame = 0;
+
+// Whether the mount draws at all, for its rider.
+static bool IsMountDrawn(const OBJECT* o)
 {
-    if (o->Live)
+    return o->Owner->Type == MODEL_PLAYER || o->Type == MODEL_HELPER;
+}
+
+void CullMounts()
+{
+    ++s_mountCullFrame;
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        o->Visible = (bForceRender == FALSE ? TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f) : true);
+        OBJECT* o = &Mounts[i];
+        if (!o->Live)
+            continue;
+        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+        if (!o->Visible || !IsMountDrawn(o))
+            continue;
 
-        if (o->Visible)
-        {
-            if (o->Owner->Type != MODEL_PLAYER && o->Type != MODEL_HELPER)
-                return TRUE;
-
-            if (bForceRender)
-                o->Scale = o->Scale;
-            else if (SceneFlag == CHARACTER_SCENE)
-                o->Scale = 1.2f;
-            else if (o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED
-                && o->Type != MODEL_FENRIR_GOLD
-                )
-                o->Scale = 1.0f;
-
-            int State = 0;
-            if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
-            {
-                State = 10;
-            }
-
-            RenderObject(o, false, 0, State);
-
-            vec3_t Light;
-            float  Luminosity = (float)(rand() % 30 + 70) * 0.01f;
-            switch (o->Type)
-            {
-            case MODEL_HELPER:
-                Vector(Luminosity * 0.5f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
-                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
-                break;
-            }
-        }
+        if (SceneFlag == CHARACTER_SCENE)
+            o->Scale = 1.2f;
+        else if (o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED &&
+                 o->Type != MODEL_FENRIR_GOLD)
+            o->Scale = 1.0f;
+        o->DrawnFrame = s_mountCullFrame;
     }
+}
+
+bool RenderMount(const OBJECT* o, bool bForceRender)
+{
+    // A forced mount (a preview's) draws wherever it stands, at the scale its owner gave it.
+    if (!o->Live || (!bForceRender && !o->Visible) || !IsMountDrawn(o))
+        return TRUE;
+
+    int State = 0;
+    if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
+    {
+        State = 10;
+    }
+    RenderObject(o, false, 0, State);
     return TRUE;
 }
 
 void RenderMount()
 {
+    // Like their riders, mounts keep their Classic look: no bloom from them.
+    const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Mounts[i];
+        const OBJECT* o = &Mounts[i];
         if (RenderMount(o) == FALSE)
         {
             return;
@@ -724,16 +751,51 @@ void RenderMount()
     }
 }
 
+void UpdateMountEffects()
+{
+    // Spawns once per culled frame, for the mounts that frame drew, as when the draw spawned them.
+    static unsigned int updatedFrame = 0;
+    if (updatedFrame == s_mountCullFrame)
+        return;
+    updatedFrame = s_mountCullFrame;
+
+    for (int i = 0; i < MAX_MOUNTS; i++)
+    {
+        OBJECT* o = &Mounts[i];
+        if (!o->Live || o->DrawnFrame != s_mountCullFrame)
+            continue;
+        UpdateDrawnMountEffects(o);
+    }
+}
+
+void UpdateDrawnMountEffects(OBJECT* o)
+{
+    UpdateDrawnObjectHold(o);
+    // Like their draws, the mounts' sprites stay out of the bloom.
+    const mu::ScopedBloomExclusion classicMounts;
+    if (o->Type == MODEL_HELPER)
+    {
+        vec3_t Light;
+        const float Luminosity = (float)(Random::Rand() % 30 + 70) * 0.01f;
+        Vector(Luminosity * 0.5f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
+        CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
+    }
+    // A cloaked rider's mount draws only as a faint outline (Draw_RenderObject's ExtraMon 10), with no effects.
+    if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
+        return;
+    PlaceObjectModel(o, &Models[o->Type]);
+    UpdateRenderObjectEffects(o);
+}
+
 constexpr float HorseEffectInterval = 10 * (1000.f / 25.f); // every 10 frames on a 25fps basis (400 ms)
 
-void RenderDarkHorseSkill(OBJECT* o, BMD* b)
+void UpdateDarkHorseSkill(OBJECT* o, BMD* b)
 {
     if (o == NULL)	return;
     if (b == NULL)	return;
 
-    // The weapon level is misused here to count how many frames have been rendered
-    // for this effect...
-    o->WeaponLevel++;
+    // The weapon level is misused here to count the reference frames of this effect.
+    o->WeaponLevel += REFERENCE_FRAME_STEP;
 
     if (o->LastHorseWaveEffect < WorldTime - HorseEffectInterval)
     {
@@ -743,12 +805,12 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
 
     if (o->AnimationFrame >= 8.f && o->AnimationFrame <= 9.5f)
     {
-        if (rand_fps_check(2))
+        if (REFERENCE_FRAME_STEP > 0 && (o->WeaponLevel % 2) == 1)
         {
             float  Matrix[3][4];
             vec3_t Angle, p, Position;
-            Vector(0.f, 150.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 150.f * (o->WeaponLevel / 2), 0.f, p);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
             for (int i = 0; i < 6; ++i)
             {
                 Angle[2] += 60.f;
@@ -756,19 +818,19 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(o->Position, Position, Position);
 
-                CreateEffect(MODEL_GROUND_STONE + rand() % 2, Position, o->Angle, o->Light);
+                CreateEffect(MODEL_GROUND_STONE + Random::Rand() % 2, Position, o->Angle, o->Light);
             }
         }
-        EarthQuake = (rand() % 3 - 3) * 0.7f;
+        SetEarthQuakeAt(o->Position, (Random::Rand() % 3 - 3) * 0.7f);
     }
-    else if (o->WeaponLevel == (BYTE)(19.f / FPS_ANIMATION_FACTOR))
+    else if (o->WeaponLevel == 19)
     {
         CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 2);
         o->WeaponLevel = -3;
     }
 }
 
-void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
+void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 {
     if (c == NULL)	return;
     if (o == NULL)	return;
@@ -776,34 +838,40 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 
     float  Matrix[3][4];
     vec3_t Angle, p, Position;
-    OBJECT& TargetO = CharactersClient[c->TargetCharacter].Object;
+    // The stones and the strike land on the target; without one only the local shake remains.
+    OBJECT* target = GameLogic::Combat::AttackTargetObject(*c);
 
+    // The weapon level counts reference frames; each value lasts one of them.
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     o->WeaponLevel++;
 
     //if ( o->WeaponLevel >= 6 && o->WeaponLevel <= 8 )
-    if (o->WeaponLevel == iMaxSkill - 2 ||
-        o->WeaponLevel == iMaxSkill - 1 ||
-        o->WeaponLevel == iMaxSkill - 0)
+    if (target != nullptr &&
+        (o->WeaponLevel == iMaxSkill - 2 || o->WeaponLevel == iMaxSkill - 1 || o->WeaponLevel == iMaxSkill - 0))
     {
-        Vector(0.f, 40.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
-        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+        Vector(0.f, 40.f * (o->WeaponLevel / 2), 0.f, p);
+        Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
         for (int i = 0; i < 6; ++i)
         {
             Angle[2] += 60.f;
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
-            VectorAdd(TargetO.Position, Position, Position);
+            VectorAdd(target->Position, Position, Position);
 
             int iCurrentStone = MODEL_GROUND_STONE;
 
-            CreateEffect(iCurrentStone + 1, Position, TargetO.Angle, TargetO.Light);
+            CreateEffect(iCurrentStone + 1, Position, target->Angle, target->Light);
         }
     }
 
     if (o->WeaponLevel == iMaxSkill - 1)
     {
-        EarthQuake = (rand() % 3 - 3) * 0.7f;
-        CreateEffect(MODEL_SKILL_FURY_STRIKE, TargetO.Position, TargetO.Angle, TargetO.Light, 0, o, -1, 0, 2);
+        SetEarthQuakeAt(o->Position, (Random::Rand() % 3 - 3) * 0.7f);
+        if (target != nullptr)
+            CreateEffect(MODEL_SKILL_FURY_STRIKE, target->Position, target->Angle, target->Light, 0, o, -1, 0, 2);
     }
 
     if (o->WeaponLevel > iMaxSkill)
@@ -830,24 +898,24 @@ int CreateDragon(OBJECT* o, int index)
         o->Live = true;
         OpenMonsterModel(MONSTER_MODEL_DRAGON);
         o->Type = MODEL_DRAGON_;
-        o->Scale = (float)(rand() % 3 + 6) * 0.05f;
+        o->Scale = (float)(Random::Rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
-        o->Velocity = (float)(rand() % 10 + 10) * 0.02f;
-        o->Gravity = (float)(rand() % 10 + 10) * 0.05f;
+        o->Velocity = (float)(Random::Rand() % 10 + 10) * 0.02f;
+        o->Gravity = (float)(Random::Rand() % 10 + 10) * 0.05f;
         o->LightEnable = true;
         o->AlphaEnable = false;
         o->SubType = 0;
         o->HiddenMesh = -1;
         o->BlendMesh = -1;
-        //o->LifeTime    = 128+rand()%128;
-        //o->Timer       = (float)(rand()%10)*0.1f;
+        // o->LifeTime    = 128+Random::Rand()%128;
+        // o->Timer       = (float)(Random::Rand()%10)*0.1f;
         o->CurrentAction = MONSTER01_DIE + 1;
         SetAction(o, o->CurrentAction);
-        Vector(0.f, 0.f, (float)(rand() % 360), o->Angle);
-        Vector(Hero->Object.Position[0] + (float)(rand() % 4000 - 2000),
-            Hero->Object.Position[1] + (float)(rand() % 4000 - 2000),
-            Hero->Object.Position[2] - 600.f, o->Position);
+        Vector(0.f, 0.f, (float)(Random::Rand() % 360), o->Angle);
+        Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 4000 - 2000),
+               Hero->Object.Position[1] + (float)(Random::Rand() % 4000 - 2000), Hero->Object.Position[2] - 600.f,
+               o->Position);
     }
     else
     {
@@ -863,10 +931,9 @@ int CreateDragon(OBJECT* o, int index)
         o->ShadowScale = 10.f;
         o->HiddenMesh = -1;
         o->BlendMesh = -1;
-        o->Timer = (float)(rand() % 314) * 0.01f;
-        Vector(Hero->Object.Position[0] + (float)(rand() % 1024 - 512),
-            Hero->Object.Position[1] + (float)(rand() % 1024 - 512),
-            Hero->Object.Position[2], o->Position);
+        o->Timer = (float)(Random::Rand() % 314) * 0.01f;
+        Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1024 - 512),
+               Hero->Object.Position[1] + (float)(Random::Rand() % 1024 - 512), Hero->Object.Position[2], o->Position);
 
         o->Position[2] = Hero->Object.Position[2];
         if (gMapManager.InBloodCastle() == true)
@@ -878,7 +945,7 @@ int CreateDragon(OBJECT* o, int index)
             CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 1, o, 25.0f);
         }
         Vector(0.f, 0.f, 0.f, o->Angle);
-        o->Angle[2] = (float)(rand() % 360);
+        o->Angle[2] = (float)(Random::Rand() % 360);
     }
     return 1;
 }
@@ -890,15 +957,15 @@ int CreateAtlanseFish(OBJECT* o)
 
     if (Hero->Object.Position[1] * 0.01f < 128)
     {
-        o->Type = MODEL_FISH01 + 1 + rand() % 2;
+        o->Type = MODEL_FISH01 + 1 + Random::Rand() % 2;
         o->Gravity = 15;
         o->AlphaEnable = true;
         o->Scale = 0.8f;
         o->ShadowScale = 10.f;
         o->HiddenMesh = -1;
         o->BlendMesh = -1;
-        o->Timer = (float)(rand() % 314) * 0.01f;
-        if (rand() % 100 < 90)
+        o->Timer = (float)(Random::Rand() % 314) * 0.01f;
+        if (Random::Rand() % 100 < 90)
         {
             o->Velocity = 0.3f;
         }
@@ -909,11 +976,10 @@ int CreateAtlanseFish(OBJECT* o)
         o->LightEnable = false;
         Vector(0.f, 0.f, 0.f, o->Angle);
         Vector(1.f, 1.f, 1.f, o->Light);
-        Vector(Hero->Object.Position[0] + (float)(rand() % 1024 - 512),
-            Hero->Object.Position[1] + (float)(rand() % 1024 - 512),
-            Hero->Object.Position[2], o->Position);
+        Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1024 - 512),
+               Hero->Object.Position[1] + (float)(Random::Rand() % 1024 - 512), Hero->Object.Position[2], o->Position);
 
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 200 + 150);
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(Random::Rand() % 200 + 150);
     }
     else
     {
@@ -933,10 +999,10 @@ void MoveButterFly(OBJECT* o)
 {
     if (rand_fps_check(32))
     {
-        o->Angle[2] = (float)(rand() % 360);
-        o->Direction[2] = (float)(rand() % 15 - 7) * 1.f;
+        o->Angle[2] = (float)(Random::Rand() % 360);
+        o->Direction[2] = (float)(Random::Rand() % 15 - 7) * 1.f;
     }
-    o->Direction[2] += (float)(rand() % 15 - 7) * 0.2f * FPS_ANIMATION_FACTOR;
+    o->Direction[2] += (float)(Random::Rand() % 15 - 7) * 0.2f * FPS_ANIMATION_FACTOR;
     float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
     if (o->Position[2] < Height + 50.f)
     {
@@ -948,7 +1014,29 @@ void MoveButterFly(OBJECT* o)
         o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
         o->Direction[2] -= 1.f * FPS_ANIMATION_FACTOR;
     }
-    o->Position[2] += (float)(rand() % 15 - 7) * 0.3f;
+    o->Position[2] += (float)(Random::Rand() % 15 - 7) * 0.3f;
+}
+
+static void LandBird(OBJECT* o, float height)
+{
+    o->Position[2] = height;
+    o->AI = BOID_GROUND;
+    SetAction(o, BIRD_ACTION_GROUND);
+}
+
+static void TakeOffBird(OBJECT* o)
+{
+    o->AI = BOID_UP;
+    o->Velocity = 1.1f;
+    o->Direction[2] = 20.f;
+    SetAction(o, BIRD_ACTION_FLY);
+}
+
+// A hero in a monster form (a Transformation Ring) has that monster's model and actions.
+static bool HeroStandsStill()
+{
+    const OBJECT& hero = Hero->Object;
+    return Engine::AI::BirdLanding::IsHeroStill(hero.CurrentAction, hero.Type == MODEL_PLAYER);
 }
 
 void MoveBird(OBJECT* o)
@@ -968,7 +1056,7 @@ void MoveBird(OBJECT* o)
             }
         }
         o->Velocity = 1.f;
-        o->Position[2] += (float)(rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
+        o->Position[2] += (float)(Random::Rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
         if (o->Position[2] < 200.f) o->Direction[2] = 10.f;
         else if (o->Position[2] > 600.f) o->Direction[2] = -10.f;
     }
@@ -979,25 +1067,30 @@ void MoveBird(OBJECT* o)
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
-            o->AI = BOID_UP;
-            o->Velocity = 1.1f;
-            o->Direction[2] = 20.f;
-            o->CurrentAction = 0;
+            // Land and stay until the hero moves or a random take-off (BOID_GROUND below). Where a bird
+            // cannot sit, or while the hero moves, it bounces back up and keeps flapping.
+            const int Index =
+                TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
+            if (Engine::AI::BirdLanding::CanLandOn(TerrainWall[Index]) && HeroStandsStill())
+            {
+                LandBird(o, Height);
+            }
+            else
+            {
+                TakeOffBird(o);
+            }
         }
     }
     if (o->AI == BOID_GROUND)
     {
-        if (Hero->Object.CurrentAction >= PLAYER_WALK_MALE || rand_fps_check(256))
+        if (!HeroStandsStill() || rand_fps_check(256))
         {
-            o->AI = BOID_UP;
-            o->Velocity = 1.1f;
-            o->Direction[2] = 20.f;
-            o->CurrentAction = 0;
+            TakeOffBird(o);
         }
     }
     if (o->AI == BOID_UP)
     {
-        o->Position[2] += (float)(rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
+        o->Position[2] += (float)(Random::Rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
         o->Velocity -= 0.005f * FPS_ANIMATION_FACTOR;
         if (o->Velocity <= 1.f)
         {
@@ -1115,7 +1208,7 @@ void MoveTornado(OBJECT* o)
     o->Scale = 1.0f;
     if (rand_fps_check(500))
     {
-        o->HeadAngle[0] = (rand() % 314) / 100.0f;
+        o->HeadAngle[0] = (Random::Rand() % 314) / 100.0f;
     }
     o->Position[0] += sinf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
     o->Position[1] += cosf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
@@ -1132,9 +1225,11 @@ void MoveBoidGroup(OBJECT* o, int index)
 
     if (o->AI != BOID_GROUND)
     {
-        if (o->Type != MODEL_BUTTERFLY01 || rand_fps_check(4))
+        const float steerFrames =
+            Engine::AI::BoidSteering::SteerFrames(o->Type == MODEL_BUTTERFLY01, FPS_ANIMATION_FACTOR);
+        if (steerFrames > 0.f)
         {
-            MoveBoid(o, index, Boids, MAX_BOIDS);
+            MoveBoid(o, index, Boids, MAX_BOIDS, steerFrames);
         }
 
         AngleMatrix(o->Angle, o->Matrix);
@@ -1145,17 +1240,17 @@ void MoveBoidGroup(OBJECT* o, int index)
             {
                 if (index < 35)
                 {
-                    Vector(o->Velocity * (float)(rand() % 16 + 8), 0.f, o->Direction[2], Direction);
+                    Vector(o->Velocity * (float)(Random::Rand() % 16 + 8), 0.f, o->Direction[2], Direction);
                 }
                 else
                 {
-                    Vector(o->Velocity * (float)(rand() % 16 + 16), 0.f, o->Direction[2], Direction);
+                    Vector(o->Velocity * (float)(Random::Rand() % 16 + 16), 0.f, o->Direction[2], Direction);
                 }
                 o->Gravity = 15;
             }
             else
             {
-                Vector(o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
+                Vector(o->Velocity * (float)(Random::Rand() % 32 + 32), 0.f, o->Direction[2], Direction);
                 o->Gravity = 5;
             }
             o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
@@ -1173,27 +1268,93 @@ void MoveBoidGroup(OBJECT* o, int index)
         o->Direction[0] = o->Position[0] + 3.f * p[0];
         o->Direction[1] = o->Position[1] + 3.f * p[1];
 
-        float dx = o->Position[0] - Hero->Object.Position[0];
-        float dy = o->Position[1] - Hero->Object.Position[1];
-        float Range = sqrtf(dx * dx + dy * dy);
-        float FlyDistance = 1500.f;
-        if (o->Type == MODEL_DRAGON_)
+        if (o->Type != MODEL_DRAGON_ && o->Type != MODEL_BAHAMUT && gMapManager.WorldActive != WD_51HOME_6TH_CHAR &&
+            rand_fps_check(512))
         {
-            FlyDistance = 4000.f;
+            o->Live = false;
         }
-        else if (o->Type == MODEL_BAHAMUT)
+    }
+
+    // A grounded boid (a landed bird) skips the flight above, but still goes away when the hero leaves it behind.
+    float dx = o->Position[0] - Hero->Object.Position[0];
+    float dy = o->Position[1] - Hero->Object.Position[1];
+    float Range = sqrtf(dx * dx + dy * dy);
+    float FlyDistance = 1500.f;
+    if (o->Type == MODEL_DRAGON_)
+    {
+        FlyDistance = 4000.f;
+    }
+    else if (o->Type == MODEL_BAHAMUT)
+    {
+        FlyDistance = 3000.f;
+    }
+    if (Range >= FlyDistance)
+    {
+        o->Live = false;
+    }
+}
+
+// The sparks, glows and smoke of the boids the last frame drew, posed as their draw poses them.
+static void UpdateDrawnBoidEffects()
+{
+    for (int i = 0; i < MAX_BOIDS; i++)
+    {
+        OBJECT* o = &Boids[i];
+        if (!o->Live || !o->Visible || o->Type == MODEL_SPEARSKILL)
+            continue;
+        // The draw turns a boid a quarter for its model.
+        const float angle = o->Angle[2];
+        o->Angle[2] += 90.f;
+        BMD* b = &Models[o->Type];
+        const auto bones = [o, b]
         {
-            FlyDistance = 3000.f;
-        }
-        else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-            );
-        else
+            PlaceObjectModel(o, b);
+            return Engine::Object::Pose::World(o, b);
+        };
+        vec3_t p, Position, Light;
+        switch (o->Type)
         {
-            if (rand_fps_check(512))
-                o->Live = false;
+        case MODEL_DRAGON_:
+            if (EnableEvent != 0)
+            {
+                Vector(0.f, -50.f, 0.f, p);
+                b->TransformPosition(bones()[11], p, Position);
+                Vector(1.f, 0.f, 0.f, Light);
+                CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
+                Vector(1.f, 1.f, 1.f, Light);
+                CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
+            }
+            break;
+
+        case MODEL_BUTTERFLY01:
+        {
+            float Luminosity = (float)(Random::Rand() % 32 + 64) * 0.01f;
+
+            Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.4f, Light);
+            CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
         }
-            if (Range >= FlyDistance)
-                o->Live = false;
+        break;
+
+        case MODEL_MAP_TORNADO:
+        {
+            CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
+        }
+        break;
+
+        case MODEL_CROW:
+            Vector(-5.f, 0.f, 0.f, p);
+            b->TransformPosition(bones()[1], p, Position);
+
+            float Luminosity = (float)(Random::Rand() % 32 + 128) * 0.01f;
+            Vector(Luminosity * 1.f, Luminosity * 0.2f, 0.f, Light);
+            CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
+
+            Vector(5.f, 0.f, 0.f, p);
+            b->TransformPosition(bones()[1], p, Position);
+            CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
+            break;
+        }
+        o->Angle[2] = angle;
     }
 }
 
@@ -1210,10 +1371,9 @@ void MoveBoids()
         vec3_t Position, Angle, Light;
         if (rand_fps_check(40))
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 200) * FPS_ANIMATION_FACTOR,
-                Hero->Object.Position[1] + (float)(rand() % 400 + 200) * FPS_ANIMATION_FACTOR,
-                Hero->Object.Position[2] + 300.f * FPS_ANIMATION_FACTOR,
-                Position);
+            Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 600 - 200) * FPS_ANIMATION_FACTOR,
+                   Hero->Object.Position[1] + (float)(Random::Rand() % 400 + 200) * FPS_ANIMATION_FACTOR,
+                   Hero->Object.Position[2] + 300.f * FPS_ANIMATION_FACTOR, Position);
             Vector(0.f, 0.f, 0.f, Angle);
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_FIRE, Position, Angle, Light, 3);
@@ -1252,7 +1412,7 @@ void MoveBoids()
                 {
                     bOut = true;
                 }
-                if ((rand() % 10))
+                if ((Random::Rand() % 10))
                 {
                     bCreate = false;
                 }
@@ -1279,7 +1439,7 @@ void MoveBoids()
                     o->Live = true;
                     OpenMonsterModel(MONSTER_MODEL_DRAGON);
                     o->Type = MODEL_DRAGON_;
-                    o->Scale = (float)(rand() % 3 + 6) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 3 + 6) * 0.1f;
                     o->Alpha = 1.f;
                     o->AlphaTarget = 1.f;
                     o->Velocity = 0.5f;
@@ -1288,17 +1448,16 @@ void MoveBoids()
                     o->SubType = 0;
                     o->HiddenMesh = -1;
                     o->BlendMesh = -1;
-                    o->LifeTime = 128 + rand() % 128;
-                    o->Timer = (float)(rand() % 10) * 0.1f;
+                    o->LifeTime = 128 + Random::Rand() % 128;
+                    o->Timer = (float)(Random::Rand() % 10) * 0.1f;
                     Vector(0.f, 0.f, -90.f, o->Angle);
                     if (EnableEvent == 3)
                     {
                         o->SubType = 1;
                     }
-                    Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 100),
-                        Hero->Object.Position[1] + (float)(rand() % 400 + 200),
-                        Hero->Object.Position[2] + 300.f,
-                        o->Position);
+                    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 600 - 100),
+                           Hero->Object.Position[1] + (float)(Random::Rand() % 400 + 200),
+                           Hero->Object.Position[2] + 300.f, o->Position);
                 }
             }
             else if (gMapManager.WorldActive == WD_0LORENCIA
@@ -1314,6 +1473,7 @@ void MoveBoids()
             {
                 int iCreateBoid = 0;
 
+                Engine::Object::Pose::Release(o);
                 o->Initialize();
 
                 o->Live = true;
@@ -1348,7 +1508,7 @@ void MoveBoids()
                     o->Type = MODEL_MAP_TORNADO;
                     o->Velocity = 0.0f;
                     o->BlendMeshLight = 0.0f;
-                    o->HeadAngle[0] = (rand() % 314) / 100.0f;
+                    o->HeadAngle[0] = (Random::Rand() % 314) / 100.0f;
                     o->Position[1] += 5.0f;
                     o->m_bRenderAfterCharacter = true;
                 }
@@ -1374,11 +1534,12 @@ void MoveBoids()
                     o->ShadowScale = 10.f;
                     o->HiddenMesh = -1;
                     o->BlendMesh = -1;
-                    o->Timer = (float)(rand() % 314) * 0.01f;
-                    Vector(Hero->Object.Position[0] + (float)(rand() % 1024 - 512),
-                        Hero->Object.Position[1] + (float)(rand() % 1024 - 512),
-                        Hero->Object.Position[2], o->Position);
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 200 + 150);
+                    o->Timer = (float)(Random::Rand() % 314) * 0.01f;
+                    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1024 - 512),
+                           Hero->Object.Position[1] + (float)(Random::Rand() % 1024 - 512), Hero->Object.Position[2],
+                           o->Position);
+                    o->Position[2] =
+                        RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(Random::Rand() % 200 + 150);
                     Vector(0.f, 0.f, 0.f, o->Angle);
                 }
             }
@@ -1505,6 +1666,22 @@ void MoveBoids()
             Alpha(o);
         }
     }
+    UpdateDrawnBoidEffects();
+}
+
+void CullBoids()
+{
+    const auto cull = [](OBJECT* objects, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            OBJECT* o = &objects[i];
+            if (o->Live)
+                o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+        }
+    };
+    cull(Boids, MAX_BOIDS);
+    cull(Fishs, MAX_FISHS);
 }
 
 void RenderBoids(bool bAfterCharacter)
@@ -1516,101 +1693,51 @@ void RenderBoids(bool bAfterCharacter)
 
     for (int i = 0; i < MAX_BOIDS; i++)
     {
-        OBJECT* o = &Boids[i];
-        if (o->m_bRenderAfterCharacter != bAfterCharacter) continue;
-        if (MODEL_SPEARSKILL != o->Type)
+        const OBJECT& boid = Boids[i];
+        if (boid.m_bRenderAfterCharacter != bAfterCharacter)
+            continue;
+        if (boid.Live)
         {
-            o->Angle[2] += 90.f;
-        }
-        if (o->Live)
-        {
-            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
-            if (o->Visible)
+            if (boid.Visible)
             {
-                if (MODEL_SPEARSKILL == o->Type)
+                if (MODEL_SPEARSKILL == boid.Type)
                 {
                     continue;
                 }
+                // Drawn a quarter turn round, from a copy.
+                OBJECT turned = boid;
+                const Random::DrawnAs drawnAs(&turned, &boid);
+                turned.Angle[2] += 90.f;
+                const OBJECT* o = &turned;
                 RenderObject(o, true);
 
                 BMD* b = &Models[o->Type];
-                vec3_t p, Position, Light;
-                switch (o->Type)
+                vec3_t Position;
+                if (o->Type == MODEL_DRAGON_ && o->SubType == 1)
                 {
-                case MODEL_DRAGON_:
-                    if (o->SubType == 1)
-                    {
-                        float Bright = 1.0f;
-                        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, Bright);
-                        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT, Bright);
-                    }
-                    if (EnableEvent != 0)
-                    {
-                        Vector(0.f, -50.f, 0.f, p);
-                        b->TransformPosition(BoneTransform[11], p, Position);
-                        Vector(1.f, 0.f, 0.f, Light);
-                        CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
-                        Vector(1.f, 1.f, 1.f, Light);
-                        CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
-                    }
-                    break;
-
-                case MODEL_BUTTERFLY01:
-                {
-                    float  Luminosity = (float)(rand() % 32 + 64) * 0.01f;
-
-                    Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.4f, Light);
-                    CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
-                }
-                break;
-
-                case MODEL_MAP_TORNADO:
-                {
-                    CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
-                }
-                break;
-
-                case MODEL_CROW:
-                    Vector(-5.f, 0.f, 0.f, p);
-                    b->TransformPosition(BoneTransform[1], p, Position, true);
-
-                    float Luminosity = (float)(rand() % 32 + 128) * 0.01f;
-                    Vector(Luminosity * 1.f, Luminosity * 0.2f, 0.f, Light);
-                    CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
-
-                    Vector(5.f, 0.f, 0.f, p);
-                    b->TransformPosition(BoneTransform[1], p, Position, true);
-                    CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
-                    break;
+                    float Bright = 1.0f;
+                    RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT,
+                                              Bright);
+                    RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
+                                              Bright);
                 }
                 if (gMapManager.WorldActive != WD_10HEAVEN)
                 {
                     EnableAlphaTest();
-                    if (o->Type == MODEL_EAGLE)
-                    {
-                        if (o->ShadowScale == 0)
-                            glColor4f(0.f, 0.f, 0.f, 0.0f);
-                        else
-                            glColor4f(0.f, 0.f, 0.f, 1.0f);
-                    }
-                    else
-                        glColor4f(0.f, 0.f, 0.f, 0.2f);
-
                     if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && o->Type == MODEL_MAP_TORNADO);
                     else
                     {
+                        const float shadowAlpha = o->Type == MODEL_EAGLE
+                            ? (o->ShadowScale == 0 ? 0.f : 1.f)
+                            : 0.2f;
                         VectorCopy(o->Position, Position);
                         Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                         VectorCopy(Position, b->BodyOrigin);
 
-                        b->RenderBodyShadow();
+                        b->RenderBodyShadow(-1, -1, -1, -1, nullptr, 0, shadowAlpha);
                     }
                 }
             }
-        }
-        if (MODEL_SPEARSKILL != o->Type)
-        {
-            o->Angle[2] -= 90.f;
         }
     }
 }
@@ -1624,13 +1751,16 @@ void RenderFishs()
 
     for (int i = 0; i < MAX_FISHS; i++)
     {
-        OBJECT* o = &Fishs[i];
-        o->Angle[2] += 90.f;
-        if (o->Live)
+        const OBJECT& fish = Fishs[i];
+        if (fish.Live)
         {
-            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
-            if (o->Visible && o->Type != -1)
+            if (fish.Visible && fish.Type != -1)
             {
+                // Drawn a quarter turn round, from a copy.
+                OBJECT turned = fish;
+                const Random::DrawnAs drawnAs(&turned, &fish);
+                turned.Angle[2] += 90.f;
+                const OBJECT* o = &turned;
                 RenderObject(o);
 
                 if (o->Type == MODEL_FISH01 + 7 || o->Type == MODEL_FISH01 + 8)
@@ -1641,18 +1771,16 @@ void RenderFishs()
                     if (gMapManager.WorldActive != WD_10HEAVEN)
                     {
                         EnableAlphaTest();
-                        glColor4f(0.f, 0.f, 0.f, 0.2f);
                         BMD* b = &Models[o->Type];
                         vec3_t Position;
                         VectorCopy(o->Position, Position);
                         Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                         VectorCopy(Position, b->BodyOrigin);
-                        b->RenderBodyShadow();
+                        b->RenderBodyShadow(-1, -1, -1, -1, nullptr, 0, 0.2f);
                     }
                 }
             }
         }
-        o->Angle[2] -= 90.f;
     }
 }
 
@@ -1677,9 +1805,9 @@ void MoveFishs()
         OBJECT* o = &Fishs[i];
         if (!o->Live)
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 1024 - 512),
-                Hero->Object.Position[1] + (float)(rand() % 1024 - 512),
-                Hero->Object.Position[2], o->Position);
+            Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1024 - 512),
+                   Hero->Object.Position[1] + (float)(Random::Rand() % 1024 - 512), Hero->Object.Position[2],
+                   o->Position);
             int Index = TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
             if ((gMapManager.WorldActive == WD_0LORENCIA && TerrainMappingLayer1[Index] == 5) ||
                 (gMapManager.WorldActive == WD_1DUNGEON && TerrainWall[Index] < TW_NOGROUND) ||
@@ -1704,15 +1832,15 @@ void MoveFishs()
                 o->AlphaEnable = true;
                 o->SubType = 0;
                 o->HiddenMesh = -1;
-                o->LifeTime = rand() % 128;
-                o->Scale = (float)(rand() % 4 + 4) * 0.1f;
+                o->LifeTime = Random::Rand() % 128;
+                o->Scale = (float)(Random::Rand() % 4 + 4) * 0.1f;
                 o->Gravity = 13;
                 o->bBillBoard = true;
                 switch (gMapManager.WorldActive)
                 {
                 case WD_0LORENCIA:
                     o->Type = MODEL_FISH01;
-                    o->AlphaTarget = (float)(rand() % 2 + 2) * 0.1f;
+                    o->AlphaTarget = (float)(Random::Rand() % 2 + 2) * 0.1f;
                     o->Velocity = 0.6f / o->Scale;
                     break;
                 case WD_1DUNGEON:
@@ -1726,7 +1854,7 @@ void MoveFishs()
                 case WD_33AIDA:
                 case WD_8TARKAN:
                     o->Type = MODEL_BUG01 + 1;
-                    o->Scale = (float)(rand() % 4 + 8) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 4 + 8) * 0.1f;
                     o->Velocity = 2.5f / o->Scale;
                     o->Gravity = 9;
                     o->LifeTime = 100;
@@ -1737,8 +1865,8 @@ void MoveFishs()
                     if (Hero->SafeZone != true)
                     {
                         o->Type = MODEL_SCOLPION;
-                        o->Scale = (float)(rand() % 4 + 8) * 0.1f;
-                        o->Velocity = (((rand() % 8 + 1)) * 0.1f) / o->Scale;
+                        o->Scale = (float)(Random::Rand() % 4 + 8) * 0.1f;
+                        o->Velocity = (((Random::Rand() % 8 + 1)) * 0.1f) / o->Scale;
                         VectorCopy(o->Position, o->EyeLeft);
                         o->Gravity = 1;
                         o->LifeTime = 100;
@@ -1749,10 +1877,10 @@ void MoveFishs()
                     break;
                 case WD_7ATLANSE:
                 case WD_67DOPPLEGANGER3:
-                    o->Scale = (float)(rand() % 2 + 8) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 2 + 8) * 0.1f;
                     if (Hero->Object.Position[1] * 0.01f < 128)
                     {
-                        o->Type = MODEL_FISH01 + 1 + 2 + rand() % 4;
+                        o->Type = MODEL_FISH01 + 1 + 2 + Random::Rand() % 4;
                         o->Velocity = 1.f / o->Scale;
                         if (rand_fps_check(2))
                             o->Gravity = 2;
@@ -1761,7 +1889,7 @@ void MoveFishs()
                     }
                     else
                     {
-                        o->Type = MODEL_FISH01 + 1 + 6 + rand() % 2;
+                        o->Type = MODEL_FISH01 + 1 + 6 + Random::Rand() % 2;
                         if (o->Type == MODEL_FISH01 + 7 || o->Type == MODEL_FISH01 + 8)
                         {
                             o->BlendMesh = 0;
@@ -1773,15 +1901,16 @@ void MoveFishs()
                         else
                             o->Gravity = 2;
                     }
-                    o->Timer = (float)(rand() % 32) * 0.1f;
-                    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 150 + 50);
+                    o->Timer = (float)(Random::Rand() % 32) * 0.1f;
+                    o->Position[2] =
+                        RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(Random::Rand() % 150 + 50);
                     break;
                 }
 
                 if (gMapManager.InHellas())
                 {
                     o->Type = -1;
-                    o->Scale = (float)(rand() % 4 + 8) * 0.1f;
+                    o->Scale = (float)(Random::Rand() % 4 + 8) * 0.1f;
                     o->Velocity = 2.5f / o->Scale;
                     o->Gravity = 9;
                     o->LifeTime = 70;
@@ -1813,10 +1942,10 @@ void MoveFishs()
                     SetAction(o, 1);
                 else
                     SetAction(o, 0);
-                MoveBoid(o, i, Fishs, MAX_FISHS);
+                MoveBoid(o, i, Fishs, MAX_FISHS, FPS_ANIMATION_FACTOR);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
-                Vector(o->Velocity * (float)(rand() % 4 + 6), 0.f, 0.f, Position);
+                Vector(o->Velocity * (float)(Random::Rand() % 4 + 6), 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
                 VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
                 if (gMapManager.WorldActive != 7 || gMapManager.InHellas() == false || gMapManager.WorldActive != WD_67DOPPLEGANGER3)
@@ -1890,7 +2019,7 @@ void MoveFishs()
                 else
                 {
                     if (rand_fps_check(64))
-                        o->LifeTime = rand() % 128;
+                        o->LifeTime = Random::Rand() % 128;
                 }
             }
             Alpha(o);

@@ -3,28 +3,25 @@
 
 //. soyaviper
 
-namespace M31HuntingGround {		//. ∞¯º∫ ªÁ≥…≈Õ
+namespace M31HuntingGround {		//. Í≥µÏÑ± ÏÇ¨ÎÉ•ÌÑ∞
     bool IsInHuntingGround();
     bool IsInHuntingGroundSection2(const vec3_t Position);
 
-    //. ø¿∫Í¡ß∆Æ
+    //. Ïò§Î∏åÏ†ùÌä∏
     bool CreateHuntingGroundObject(OBJECT* pObject);
     bool MoveHuntingGroundObject(OBJECT* pObject);
-    bool RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pModel);
-    bool RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
+    bool UpdateHuntingGroundObjectEffects(OBJECT* pObject, BMD* pModel);
+    bool RenderHuntingGroundObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
-    //. ∏ÛΩ∫≈Õ
-    CHARACTER* CreateHuntingGroundMonster(int iType, int PosX, int PosY, int Key);
-
+    //. Î™¨Ïä§ÌÑ∞
     bool MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pModel);
     void MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-    bool RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon);
-    bool RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
+    bool RenderHuntingGroundMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon);
+    bool UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
     bool AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-    bool SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
-    //. »≠∏È √≥∏Æ
+    //. ÌôîÎ©¥ Ï≤òÎ¶¨
     bool CreateMist(PARTICLE* pParticleObj);
 }
 

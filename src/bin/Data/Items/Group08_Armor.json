@@ -1,0 +1,1860 @@
+{
+  "formatVersion": 1,
+  "group": 8,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Bronze Armor",
+        "de": "Bronzerüstung",
+        "es": "Armadura de Bronce",
+        "pl": "Brązowa zbroja",
+        "pt": "Armadura de bronze"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 18,
+      "durability": 34,
+      "defense": 14,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Dragon Armor",
+        "de": "Drachenrüstung",
+        "es": "Armadura Dragón",
+        "pl": "Smocza zbroja",
+        "pt": "Armadura do dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 59,
+      "durability": 68,
+      "defense": 37,
+      "attackType": 4,
+      "requirements": {
+        "strength": 120,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Pad Armor",
+        "de": "Polsterrüstung",
+        "es": "Armadura Rellena",
+        "pl": "Pikowana zbroja",
+        "pt": "Armadura acolchoada"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 10,
+      "durability": 28,
+      "defense": 7,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Legendary Armor",
+        "de": "Legendäre Rüstung",
+        "es": "Armadura Legendaria",
+        "pl": "Legendarna zbroja",
+        "pt": "Armadura lendária"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 56,
+      "durability": 42,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Bone Armor",
+        "de": "Knochenrüstung",
+        "es": "Armadura de Hueso",
+        "pl": "Kościana zbroja",
+        "pt": "Armadura de osso"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 22,
+      "durability": 30,
+      "defense": 13,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Leather Armor",
+        "de": "Lederrüstung",
+        "es": "Armadura de Cuero",
+        "pl": "Skórzana zbroja",
+        "pt": "Armadura de couro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 10,
+      "durability": 30,
+      "defense": 10,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Scale Armor",
+        "de": "Schuppenrüstung",
+        "es": "Armadura de Escamas",
+        "pl": "Łuskowa zbroja",
+        "pt": "Armadura de escamas"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 40,
+      "defense": 18,
+      "attackType": 4,
+      "requirements": {
+        "strength": 110
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Sphinx Armor",
+        "de": "Sphinxrüstung",
+        "es": "Armadura Esfinge",
+        "pl": "Zbroja Sfinksa",
+        "pt": "Armadura da esfinge"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 38,
+      "durability": 36,
+      "defense": 17,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Brass Armor",
+        "de": "Messingrüstung",
+        "es": "Armadura de Metal",
+        "pl": "Mosiężna zbroja",
+        "pt": "Armadura de latão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 38,
+      "durability": 44,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 100,
+        "dexterity": 30
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Plate Armor",
+        "de": "Plattenrüstung",
+        "es": "Armadura de Plata",
+        "pl": "Płytowa zbroja",
+        "pt": "Armadura de placa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 48,
+      "durability": 50,
+      "defense": 30,
+      "attackType": 4,
+      "requirements": {
+        "strength": 130
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Vine Armor",
+        "de": "Rankenrüstung",
+        "es": "Armadura Vid",
+        "pl": "Zbroja z pnączy",
+        "pt": "Armadura da vinha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 10,
+      "durability": 22,
+      "defense": 8,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Silk Armor",
+        "de": "Seidenrüstung",
+        "es": "Armadura de Seda",
+        "pl": "Jedwabna zbroja",
+        "pt": "Armadura de seda"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 20,
+      "durability": 26,
+      "defense": 12,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Wind Armor",
+        "de": "Windrüstung",
+        "es": "Armadura Viento",
+        "pl": "Zbroja Wiatru",
+        "pt": "Armadura do vento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 32,
+      "durability": 32,
+      "defense": 16,
+      "attackType": 4,
+      "requirements": {
+        "strength": 30,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Spirit Armor",
+        "de": "Geisterrüstung",
+        "es": "Armadura Espíritu",
+        "pl": "Zbroja Ducha",
+        "pt": "Armadura do espírito"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 44,
+      "durability": 38,
+      "defense": 21,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Guardian Armor",
+        "de": "Wächterrüstung",
+        "es": "Armadura Guardián",
+        "pl": "Zbroja Strażnika",
+        "pt": "Armadura do guardião"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 45,
+      "defense": 29,
+      "attackType": 4,
+      "requirements": {
+        "strength": 40,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Storm Crow Armor",
+        "de": "Sturmkrähenrüstung",
+        "es": "Armadura Cuervo de Tormenta",
+        "pl": "Zbroja Burzowej Wrony",
+        "pt": "Arm. do Corvo da Tempestade"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 80,
+      "durability": 80,
+      "defense": 44,
+      "attackType": 4,
+      "requirements": {
+        "strength": 150,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Black Dragon Armor",
+        "de": "Schwarzdrachenrüstung",
+        "es": "Armadura Dragón Negro",
+        "pl": "Zbroja Czarnego Smoka",
+        "pt": "Armadura do dragão negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 90,
+      "durability": 74,
+      "defense": 48,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Dark Phoenix Armor",
+        "de": "Dunkelphönixrüstung",
+        "es": "Armadura Fénix Oscuro",
+        "pl": "Zbroja Mrocznego Feniksa",
+        "pt": "Armadura da fênix negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 100,
+      "durability": 80,
+      "defense": 63,
+      "attackType": 4,
+      "requirements": {
+        "strength": 214,
+        "dexterity": 65
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Grand Soul Armor",
+        "de": "Großseelenrüstung",
+        "es": "Armadura Gran Alma",
+        "pl": "Zbroja Wielkiej Duszy",
+        "pt": "Armadura da grande alma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 91,
+      "durability": 67,
+      "defense": 33,
+      "attackType": 4,
+      "requirements": {
+        "strength": 59,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Divine Armor",
+        "de": "Göttliche Rüstung",
+        "es": "Armadura Divina",
+        "pl": "Boska zbroja",
+        "pt": "Armadura divina"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 92,
+      "durability": 74,
+      "defense": 44,
+      "attackType": 4,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 110
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Thunder Hawk Armor",
+        "de": "Donnerfalkenrüstung",
+        "es": "Armadura Halcón de Trueno",
+        "pl": "Zbroja Gromowego Jastrzębia",
+        "pt": "Armadura de Thunder Hawk"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 107,
+      "durability": 82,
+      "defense": 60,
+      "attackType": 4,
+      "requirements": {
+        "strength": 170,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Great Dragon Armor",
+        "de": "Großartige Drachenrüstung",
+        "es": "Armadura Gran Dragón",
+        "pl": "Zbroja Wielkiego Smoka",
+        "pt": "Armadura do grande dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 126,
+      "durability": 86,
+      "defense": 75,
+      "attackType": 4,
+      "requirements": {
+        "strength": 200,
+        "dexterity": 58
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Dark Soul Armor",
+        "de": "Dunkelseelenrüstung",
+        "es": "Armadura Gran Oscura",
+        "pl": "Zbroja Mrocznej Duszy",
+        "pt": "Armadura da alma negra"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 122,
+      "durability": 75,
+      "defense": 43,
+      "attackType": 4,
+      "requirements": {
+        "strength": 55,
+        "dexterity": 18
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Hurricane Armor",
+        "de": "Orkanrüstung",
+        "es": "Armadura Huracán",
+        "pl": "Zbroja Huraganu",
+        "pt": "Armadura do furacão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 128,
+      "durability": 90,
+      "defense": 73,
+      "attackType": 4,
+      "requirements": {
+        "strength": 162,
+        "dexterity": 66
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Red Sprit Armor",
+        "de": "Rotgeisterrüstung",
+        "es": "Armadura Espíritu Rojo",
+        "pl": "Zbroja Czerwonego Ducha",
+        "pt": "Armadura do espírito vermelho"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 109,
+      "durability": 80,
+      "defense": 55,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 115
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Light Plate Armor",
+        "de": "Leichtplattenrüstung",
+        "es": "Armadura Plata de Luz",
+        "pl": "Lekka zbroja płytowa",
+        "pt": "Armadura de placa leve"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 62,
+      "durability": 42,
+      "defense": 25,
+      "attackType": 4,
+      "requirements": {
+        "strength": 70,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Adamantine Armor",
+        "de": "Adamantrüstung",
+        "es": "Armadura Adamantina",
+        "pl": "Adamantytowa zbroja",
+        "pt": "Armadura de adamantina"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 78,
+      "durability": 56,
+      "defense": 36,
+      "attackType": 4,
+      "requirements": {
+        "strength": 77,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 27,
+      "name": {
+        "en": "Dark Steel Armor",
+        "de": "Dunkelstahlrüstung",
+        "es": "Armadura Acero Oscuro",
+        "pl": "Zbroja z mrocznej stali",
+        "pt": "Armadura de aço negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 96,
+      "durability": 70,
+      "defense": 43,
+      "attackType": 4,
+      "requirements": {
+        "strength": 84,
+        "dexterity": 22
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Dark Master Armor",
+        "de": "Dunkelmeisterrüstung",
+        "es": "Armadura Amo Oscuro",
+        "pl": "Zbroja Mrocznego Mistrza",
+        "pt": "Armadura do Mestre negro"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 117,
+      "durability": 78,
+      "defense": 51,
+      "attackType": 4,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Dragon Knight Armor",
+        "de": "Drachenritterrüstung",
+        "es": "Armadura Caballero Dragón",
+        "pl": "Zbroja Smoczego Rycerza",
+        "pt": "Armadura do cavaleiro dragão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 140,
+      "durability": 90,
+      "defense": 88,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 170,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "darkKnight": 2
+      }
+    },
+    {
+      "number": 30,
+      "name": {
+        "en": "Venom Mist Armor",
+        "de": "Giftnebelrüstung",
+        "es": "Armadura Bruma de Veneno",
+        "pl": "Zbroja Jadowitej Mgły",
+        "pt": "Armadura da névoa de veneno"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 146,
+      "durability": 86,
+      "defense": 57,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 44,
+        "dexterity": 15
+      },
+      "classRequirements": {
+        "darkWizard": 2
+      }
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Sylphid Ray Armor",
+        "de": "Sylphenstrahlrüstung",
+        "es": "Armadura Rayo de Sílfide",
+        "pl": "Zbroja Sylphid Ray",
+        "pt": "Armadura do raio silfídico"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 146,
+      "durability": 86,
+      "defense": 68,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 38,
+        "dexterity": 80
+      },
+      "classRequirements": {
+        "fairyElf": 2
+      }
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Volcano Armor",
+        "de": "Vulkanrüstung",
+        "es": "Armadura Volcán",
+        "pl": "Zbroja Wulkanu",
+        "pt": "Armadura do vulcão"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 147,
+      "durability": 95,
+      "defense": 86,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 145,
+        "dexterity": 60
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Sunlight Armor",
+        "de": "Sonnenlichtrüstung",
+        "es": "Armadura Luz Solar",
+        "pl": "Zbroja Słońca",
+        "pt": "Armadura da luz do sol"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 147,
+      "durability": 82,
+      "defense": 64,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Ashcrow Armor",
+        "de": "Aschkrähenrüstung",
+        "es": "Armadura Cuervo Ceniza",
+        "pl": "Zbroja Ashcrow",
+        "pt": "Armadura de Ashcrow"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 75,
+      "durability": 72,
+      "defense": 42,
+      "requirements": {
+        "strength": 160,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Eclipse Armor",
+        "de": "Finsternisrüstung",
+        "es": "Armadura Eclipse",
+        "pl": "Zbroja Zaćmienia",
+        "pt": "Armadura do eclipse"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 75,
+      "durability": 54,
+      "defense": 27,
+      "requirements": {
+        "strength": 53,
+        "dexterity": 12
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "Iris Armor",
+        "de": "Iris-Rüstung",
+        "es": "Armadura Iris",
+        "pl": "Zbroja Iris",
+        "pt": "Armadura de Iris"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 75,
+      "durability": 59,
+      "defense": 36,
+      "requirements": {
+        "strength": 50,
+        "dexterity": 70
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Valiant Armor",
+        "de": "Kühne Rüstung",
+        "es": "Armadura Valiente",
+        "pl": "Waleczna zbroja",
+        "pt": "Armadura do valor"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 105,
+      "durability": 81,
+      "defense": 52,
+      "requirements": {
+        "strength": 155,
+        "dexterity": 50
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Glorious Armor",
+        "de": "Glorreiche Rüstung",
+        "es": "Armadura Gloriosa",
+        "pl": "Chwalebna zbroja",
+        "pt": "Armadura gloriosa"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 105,
+      "durability": 74,
+      "defense": 47,
+      "requirements": {
+        "strength": 80,
+        "dexterity": 21
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Violent Wind Armor",
+        "de": "Sturmwindrüstung",
+        "es": "Armadura Viento Violento",
+        "pl": "Zbroja Gwałtownego Wiatru",
+        "pt": "Armadura do vento violento"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 34,
+      "durability": 36,
+      "defense": 22,
+      "attackType": 4,
+      "requirements": {
+        "strength": 39
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Red Wing Armor",
+        "de": "Rotschwingenrüstung",
+        "es": "Armadura Ala Roja",
+        "pl": "Zbroja Czerwonego Skrzydła",
+        "pt": "Armadura da asa vermelha"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 56,
+      "durability": 42,
+      "defense": 28,
+      "attackType": 4,
+      "requirements": {
+        "strength": 35,
+        "dexterity": 8
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Ancient Armor",
+        "de": "Uralte Rüstung",
+        "es": "Armadura Antigua",
+        "pl": "Pradawna zbroja",
+        "pt": "Armadura antiga"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 75,
+      "durability": 54,
+      "defense": 35,
+      "attackType": 4,
+      "requirements": {
+        "strength": 52,
+        "dexterity": 16
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Demonic Armor",
+        "de": "Dämonische Rüstung",
+        "es": "Armadura Demoníaca",
+        "pl": "Demoniczna zbroja",
+        "pt": "Armadura demoníaca"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 91,
+      "durability": 67,
+      "defense": 45,
+      "requirements": {
+        "strength": 60,
+        "dexterity": 20
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Storm Blitz Armor",
+        "de": "Sturmblitzrüstung",
+        "es": "Armadura Ráfaga Tormentosa",
+        "pl": "Zbroja Burzowego Błysku",
+        "pt": "Arm. Relâmpago de Tempestade"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 122,
+      "durability": 75,
+      "defense": 56,
+      "excellentRaisesLevel": false,
+      "requirements": {
+        "level": 380,
+        "strength": 57,
+        "dexterity": 19
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Eternal Wing Armor",
+        "de": "Ewigschwingenrüstung",
+        "es": "Armadura Ala Eterna",
+        "pl": "Zbroja Wiecznego Skrzydła",
+        "pt": "Armadura da asa eterna"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 131,
+      "durability": 86,
+      "defense": 49,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 20,
+        "energy": 170
+      },
+      "classRequirements": {
+        "summoner": 2
+      }
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Titan  Armor",
+        "de": "Titanenrüstung",
+        "es": "Armadura Titán",
+        "pl": "Zbroja Tytana",
+        "pt": "Armadura do titã"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 132,
+      "durability": 86,
+      "defense": 81,
+      "requirements": {
+        "level": 380,
+        "strength": 222,
+        "dexterity": 32
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Brave Armor",
+        "de": "Tapfere Rüstung",
+        "es": "Armadura Valerosa",
+        "pl": "Zbroja Śmiałka",
+        "pt": "Armadura da coragem"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 128,
+      "durability": 86,
+      "defense": 62,
+      "requirements": {
+        "level": 380,
+        "strength": 74,
+        "dexterity": 162
+      },
+      "classRequirements": {
+        "darkKnight": 1
+      }
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Phantom  Armor",
+        "de": "Phantom-Rüstung",
+        "es": "Armadura Fantasma",
+        "pl": "Zbroja Widma",
+        "pt": "Armadura do fantasma"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 131,
+      "durability": 86,
+      "defense": 80,
+      "requirements": {
+        "level": 380,
+        "strength": 212,
+        "dexterity": 57
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Destroy Armor",
+        "de": "Zerstörerrüstung",
+        "es": "Armadura Destructora",
+        "pl": "Zbroja Zniszczenia",
+        "pt": "Armadura da destruição"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 125,
+      "durability": 86,
+      "defense": 66,
+      "requirements": {
+        "level": 380,
+        "strength": 62,
+        "dexterity": 19,
+        "energy": 165
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Seraphim Armor",
+        "de": "Seraphim-Rüstung",
+        "es": "Armadura Serafín",
+        "pl": "Zbroja Serafina",
+        "pt": "Armadura do serafim"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 129,
+      "durability": 86,
+      "defense": 60,
+      "requirements": {
+        "level": 380,
+        "strength": 55,
+        "dexterity": 197
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Faith Armor",
+        "de": "Glaubensrüstung",
+        "es": "Armadura de Fe",
+        "pl": "Zbroja Wiary",
+        "pt": "Armadura da fé"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 122,
+      "durability": 86,
+      "defense": 52,
+      "requirements": {
+        "level": 380,
+        "strength": 32,
+        "dexterity": 29,
+        "energy": 138
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Royal Armor",
+        "de": "Königliche Rüstung",
+        "es": "Armadura Real",
+        "pl": "Królewska zbroja",
+        "pt": "Armadura real"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 132,
+      "durability": 86,
+      "defense": 58,
+      "requirements": {
+        "level": 380,
+        "strength": 105,
+        "dexterity": 38
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "Hades Armor",
+        "de": "Hades-Rüstung",
+        "es": "Armadura Hades",
+        "pl": "Zbroja Hadesa",
+        "pt": "Armadura de Hades"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 129,
+      "durability": 86,
+      "defense": 50,
+      "requirements": {
+        "level": 380,
+        "strength": 60,
+        "dexterity": 15,
+        "energy": 181
+      },
+      "classRequirements": {
+        "darkWizard": 1
+      }
+    },
+    {
+      "number": 53
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Sacred Fire Armor",
+        "de": "Heiligfeuerrüstung",
+        "es": "Armadura de Fuego Sagrado",
+        "pl": "Zbroja Świętego Ognia",
+        "pt": "Armadura de Fogo Sagrado"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 66,
+      "durability": 52,
+      "defense": 43,
+      "attackType": 1,
+      "requirements": {
+        "strength": 85,
+        "vitality": 75
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Storm Jahad Armor",
+        "de": "Sturm-Jahad-Rüstung",
+        "es": "Armadura de Tormenta Zahard",
+        "pl": "Zbroja Storm Jahad",
+        "pt": "Armadura de Tempestade Zahard"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 82,
+      "durability": 68,
+      "defense": 51,
+      "requirements": {
+        "strength": 100,
+        "vitality": 90
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Piercing Groove Armor",
+        "de": "Durchbohrerrüstung",
+        "es": "Armadura de Tallo Perforador",
+        "pl": "Zbroja Piercing Groove",
+        "pt": "Armadura de Entalhe Perfurante"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 101,
+      "durability": 82,
+      "defense": 59,
+      "requirements": {
+        "strength": 115,
+        "vitality": 100
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Scale Armor",
+        "de": "Schuppenrüstung",
+        "es": "Armadura de Escamas",
+        "pl": "Łuskowa zbroja",
+        "pt": "Armadura de escama"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 28,
+      "durability": 255,
+      "defense": 21,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1,
+        "darkLord": 1,
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Silk Armor",
+        "de": "Seidenrüstung",
+        "es": "Armadura de Seda",
+        "pl": "Jedwabna zbroja",
+        "pt": "Armadura de seda"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 20,
+      "durability": 255,
+      "defense": 14,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Sphinx Armor",
+        "de": "Sphinxrüstung",
+        "es": "Armadura Esfinge",
+        "pl": "Zbroja Sfinksa",
+        "pt": "Armadura de Esfinge"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 38,
+      "durability": 255,
+      "defense": 19,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Violent Wind Armor",
+        "de": "Sturmwindrüstung",
+        "es": "Armadura Viento Violento",
+        "pl": "Zbroja Gwałtownego Wiatru",
+        "pt": "Armadura do vento violento"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 34,
+      "durability": 255,
+      "defense": 26,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 1
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Adamantine Armor",
+        "de": "Adamantrüstung",
+        "es": "Armadura Adamantina",
+        "pl": "Adamantytowa zbroja",
+        "pt": "Armadura de adamantina"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 78,
+      "durability": 255,
+      "defense": 39,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkLord": 1
+      }
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dragon Armor",
+        "de": "Drachenrüstung",
+        "es": "Armadura Dragón",
+        "pl": "Smocza zbroja",
+        "pt": "Armadura de Dragão"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 59,
+      "durability": 255,
+      "defense": 42,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkKnight": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Guardian Armor",
+        "de": "Wächterrüstung",
+        "es": "Armadura Guardián",
+        "pl": "Zbroja Strażnika",
+        "pt": "Armadura de Guardião"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 57,
+      "durability": 255,
+      "defense": 29,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "fairyElf": 1
+      }
+    },
+    {
+      "number": 69,
+      "name": {
+        "en": "Legendary Armor",
+        "de": "Legendäre Rüstung",
+        "es": "Armadura Legendaria",
+        "pl": "Legendarna zbroja",
+        "pt": "Armadura Lendária"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 56,
+      "durability": 255,
+      "defense": 24,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "darkWizard": 1,
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Red Wing Armor",
+        "de": "Rotschwingenrüstung",
+        "es": "Armadura Ala Roja",
+        "pl": "Zbroja Czerwonego Skrzydła",
+        "pt": "Armadura da asa vermelha"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 2,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 56,
+      "durability": 255,
+      "defense": 31,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "summoner": 1
+      }
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Atlans Armor",
+        "de": "Atlans-Rüstung",
+        "es": "Armadura Cuervo de Tormenta",
+        "pl": "Zbroja Atlans",
+        "pt": "Armadura do corvo da tempestade"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 80,
+      "durability": 255,
+      "defense": 47,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "magicGladiator": 1
+      }
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Storm Jahad Armor",
+        "de": "Sturm-Jahad-Rüstung",
+        "es": "Armadura de Tormenta Zahard",
+        "pl": "Zbroja Storm Jahad",
+        "pt": "Armadura de Tempestade Zahard"
+      },
+      "tags": ["luckyItem"],
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 82,
+      "durability": 255,
+      "defense": 43,
+      "excellentRaisesLevel": false,
+      "attackType": 4,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "requirements": {
+        "level": 150
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Phoenix Soul Armor",
+        "de": "Phönixseelenrüstung",
+        "es": "Armadura de Alma de Fénix",
+        "pl": "Zbroja Duszy Feniksa",
+        "pt": "Armadura de Alma de Fênix"
+      },
+      "options": ["luck", "defenseOption"],
+      "width": 2,
+      "height": 3,
+      "slot": "armor",
+      "statProfile": "armor",
+      "level": 143,
+      "durability": 88,
+      "defense": 78,
+      "requirements": {
+        "level": 380,
+        "strength": 97,
+        "vitality": 85
+      },
+      "classRequirements": {
+        "rageFighter": 1
+      }
+    }
+  ]
+}

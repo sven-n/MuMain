@@ -1,0 +1,67 @@
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct FSInput
+{
+    float4 pos;
+    float2 uv;
+    float4 color;
+};
+
+struct FogUniforms
+{
+    uint coverageMode;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    uint alphaToCoverage;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+};
+
+static inline __attribute__((always_inline))
+float Dither(thread const float2& position)
+{
+    return fract(52.98291778564453125 * fract(dot(position, float2(0.067110560834407806396484375, 0.005837149918079376220703125))));
+}
+
+static inline __attribute__((always_inline))
+void _main(thread const FSInput& _input, texture2d<float> tex, sampler s, constant FogUniforms& _55)
+{
+    float4 texel = tex.sample(s, _input.uv) * _input.color;
+    if (_55.coverageMode == 0u)
+    {
+        if (((_55.alphaDiscardEnabled != 0u) || (_55.alphaToCoverage != 0u)) && (texel.w <= _55.alphaThreshold))
+        {
+            discard_fragment();
+        }
+        return;
+    }
+    float coverage = (_55.coverageMode == 1u) ? texel.w : (fast::max(texel.x, fast::max(texel.y, texel.z)) * texel.w);
+    float2 param = _input.pos.xy;
+    if (coverage <= Dither(param))
+    {
+        discard_fragment();
+    }
+}
+
+fragment void main0(main0_in in [[stage_in]], constant FogUniforms& _55 [[buffer(0)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]], float4 gl_FragCoord [[position]])
+{
+    FSInput _input;
+    _input.pos = gl_FragCoord;
+    _input.uv = in.input_uv;
+    _input.color = in.input_color;
+    FSInput param = _input;
+    _main(param, tex, s, _55);
+}
+

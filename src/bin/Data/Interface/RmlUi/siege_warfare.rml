@@ -1,0 +1,92 @@
+<rml>
+	<!-- bound-geometry: the hero, the other characters' dots and each command's icon sit at their
+	     projected map points, and the pointer's chosen command follows the mouse -->
+<head>
+	<title>Siege Warfare</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="siege_warfare.rcss"/>
+</head>
+<body data-model="siege_warfare">
+	<!-- The castle siege HUD on the Valley of Loren (CSiegeWarfare): the mini map in its frame with
+	     the transparency button and the time frame, the dots of the hero and of everyone in view,
+	     the teams' commands and, for a commander, the team and command buttons; a guild master /
+	     battle master gets the battle-skill frame above it. Drawn on the HUD board: .screen is the
+	     640x480 reference screen at the bottom HUD's scale, centred like the HUD, and the theme
+	     places #siege_hud, the frame's top-left, on it; every position inside is the original's,
+	     from that corner, in reference px. Each text value takes the native text size and
+	     cancels the scale. The transparency value fades what the original faded (not
+	     the other characters' dots). The buttons take the pointer and report their clicks; C++
+	     keeps the state and hit-tests the frames, the skill icon and the map where they are drawn.
+	     Image paths are relative to themes/<theme>/, where the themed document is loaded from. -->
+	<div id="screen" class="screen hud-board">
+		<div id="siege_hud">
+			<div id="frame" data-style-opacity="alpha">
+				<img id="map" src="../../../../World31/Map1.jpg" data-attr-rect="map_rect"/>
+				<div id="frame_art"></div>
+				<div id="time_frame"></div>
+				<!-- The map's zoom: the frame art's own button, 13 x 12 at (134, 7). -->
+				<div id="scale_button" data-event-click="siege_scale_click"></div>
+				<span id="time" class="text big counter-scaled" data-if="time_visible" data-style-font-size="big_text_px + 'px'">{{time_text}}</span>
+			</div>
+
+			<div class="dot" data-for="dot : dots" data-style-left="dot.left + 'px'" data-style-top="dot.top + 'px'"></div>
+
+			<div class="cursor" data-if="cursor_visible" data-style-left="cursor_left + 'px'" data-style-top="cursor_top + 'px'">
+				<span class="text bold cursor-team counter-scaled" data-style-font-size="bold_text_px + 'px'">{{cursor_team}}</span>
+				<img class="cursor-icon attack" src="../../../i_attack.tga" data-if="cursor_command == 0"/>
+				<img class="cursor-icon defence" src="../../../i_defense.tga" data-if="cursor_command == 1"/>
+				<img class="cursor-icon wait" src="../../../i_wait.tga" data-if="cursor_command == 2"/>
+			</div>
+
+			<div class="command" data-for="c : commands" data-style-left="c.left + 'px'" data-style-top="c.top + 'px'"
+			     data-style-opacity="alpha">
+				<span class="text bold command-team counter-scaled" data-style-color="c.color" data-style-font-size="bold_text_px + 'px'">{{c.team}}</span>
+				<img class="command-icon" src="../../../i_attack.tga" rect="0 0 12 12" data-if="c.command == 0" data-style-image-color="c.color"/>
+				<img class="command-icon" src="../../../i_defense.tga" rect="0 0 17 14" data-if="c.command == 1" data-style-image-color="c.color"/>
+				<img class="command-icon" src="../../../i_wait.tga" rect="0 0 10 11" data-if="c.command == 2" data-style-image-color="c.color"/>
+			</div>
+
+			<!-- The team buttons' column, and the command buttons the theme places beside the chosen
+			     team (chosen-0 .. chosen-6). -->
+			<div id="teams">
+				<div class="team" data-for="t : teams" data-class-selected="t.selected" data-style-opacity="alpha"
+				     data-event-click="siege_team_click(it_index)">
+					<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
+				</div>
+			</div>
+
+			<div id="orders" data-if="orders_visible" data-attr-class="'chosen-' + chosen_team">
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(0)"></div>
+					<div class="order-icon attack"></div>
+				</div>
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(1)"></div>
+					<div class="order-icon defence"></div>
+				</div>
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(2)"></div>
+					<div class="order-icon wait"></div>
+				</div>
+			</div>
+
+			<div id="hero" data-style-left="hero_left + 'px'" data-style-top="hero_top + 'px'" data-style-opacity="alpha"></div>
+
+			<div id="skill" data-if="skill_visible" data-style-opacity="alpha">
+				<div id="skill_frame"></div>
+				<!-- The icon reddens until the hero has the kills the skill needs; the theme owns both. -->
+				<img id="skill_icon" src="../../../newui_skill2.jpg" data-attr-rect="skill_rect"
+				     data-class-unaffordable="!skill_affordable"/>
+				<span class="text big kills kills-needed counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills_needed}}</span>
+				<span class="text big kills kills-now counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills}}</span>
+				<div class="scroll scroll-up" data-event-click="siege_scroll_up_click"></div>
+				<div class="scroll scroll-down" data-event-click="siege_scroll_down_click"></div>
+			</div>
+
+			<div id="alpha_button" data-style-opacity="alpha" data-event-click="siege_alpha_click">
+				<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{alpha_label}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

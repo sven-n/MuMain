@@ -7,7 +7,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -36,21 +36,21 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern MovementSkill g_MovementSkill;
@@ -187,6 +187,35 @@ bool CheckMana(CHARACTER* c, int Skill)
     return true;
 }
 
+bool IsSkillActionReady(const CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    if (o->Type == MODEL_PLAYER)
+    {
+        if (o->CurrentAction < PLAYER_STOP_MALE ||
+            o->CurrentAction > PLAYER_STOP_RIDE_WEAPON && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO &&
+                o->CurrentAction != PLAYER_SKILL_HELL_BEGIN && o->CurrentAction != PLAYER_DARKLORD_STAND &&
+                o->CurrentAction != PLAYER_STOP_RIDE_HORSE && o->CurrentAction != PLAYER_FENRIR_STAND &&
+                o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD &&
+                o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT &&
+                !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND &&
+                  o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT) &&
+                o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
@@ -198,7 +227,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         return 0;
     }
 
-    int iSkillIndex = g_pSkillList->GetSkillIndex(Skill);
+    int iSkillIndex = gSkillManager.FindSkillIndex(Skill);
     if (iSkillIndex == -1)
     {
         return 0;
@@ -284,32 +313,11 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         }
     }
 
-    if (o->Type == MODEL_PLAYER)
+    if (!IsSkillActionReady(c))
     {
-        if (o->CurrentAction < PLAYER_STOP_MALE
-            || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON
-            && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
-            && o->CurrentAction != PLAYER_SKILL_HELL_BEGIN
-            && o->CurrentAction != PLAYER_DARKLORD_STAND
-            && o->CurrentAction != PLAYER_STOP_RIDE_HORSE
-            && o->CurrentAction != PLAYER_FENRIR_STAND
-            && o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD
-            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT
-            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT
-            && !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-            && o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT
-            && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
-        {
+        if (o->Type == MODEL_PLAYER)
             MouseRButtonPress = 0;
-            return 0;
-        }
-    }
-    else
-    {
-        if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
-        {
-            return 0;
-        }
+        return 0;
     }
 
     if (ClassIndex != CLASS_WIZARD)
@@ -326,11 +334,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     || ClassIndex == CLASS_RAGEFIGHTER)
                 {
                     bool bOk = false;
-                    if (c->Helper.Type != MODEL_HORN_OF_UNIRIA
-                        && c->Helper.Type != MODEL_HORN_OF_DINORANT
-                        && c->Helper.Type != MODEL_DARK_HORSE_ITEM
-                        && c->Helper.Type != MODEL_HORN_OF_FENRIR
-                        )
+                    if (!GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                     {
                         bOk = true;
                     }
@@ -358,6 +362,8 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                         case AT_SKILL_FIRE_SCREAM:
                         case AT_SKILL_FIRE_SCREAM_STR:
                             bOk = true;
+                            break;
+                        default:
                             break;
                         }
                     }

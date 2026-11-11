@@ -8,14 +8,18 @@ namespace MuMain.Tools.ResxGen;
 ///
 /// `IsWide` flips emission from const char* / "..." to const wchar_t* / L"...";
 /// it is opt-in per group via the --wide-groups CLI flag.
+///
+/// `NamesItems` marks a group whose texts may name items with {item:group,number}
+/// (--item-text-groups): ResxGen checks their syntax and lists the texts that have one,
+/// so the game can expand them (ItemReferenceSyntax, CppEmitter.WriteItemTexts).
 internal sealed record ResourceGroup(
     string Name,
     IReadOnlyList<string> Locales,
     IReadOnlyList<ResourceEntry> Entries,
-    bool IsWide = false);
+    bool IsWide = false,
+    bool NamesItems = false);
 
 internal sealed record ResourceEntry(
     string Key,                                          // resx name attribute, = English text
     string Identifier,                                   // PascalCase C++ identifier
-    IReadOnlyDictionary<string, string> Translations,    // locale -> translated text
-    IReadOnlyList<int> LegacyIds);                       // optional legacy integer IDs from <comment>legacy_id=...</comment>
+    IReadOnlyDictionary<string, string> Translations);   // locale -> translated text

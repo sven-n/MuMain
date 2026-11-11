@@ -1,29 +1,26 @@
-// MoveCommandData.cpp: implementation of the CMoveCommandData class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "MoveCommandData.h"
-
-
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #pragma pack(push, 1)
 typedef struct
 {
-    int		index;
-    char	szMainMapName[32];
-    char	szSubMapName[32];
-    int		iReqLevel;
-    int		m_iReqMaxLevel;
-    int		iReqZen;
-    int		iGateNum;
+    int index;
+    char szMainMapName[32];
+    char szSubMapName[32];
+    int iReqLevel;
+    int m_iReqMaxLevel;
+    int iReqZen;
+    int iGateNum;
 } MOVEREQINFO_FILE;
 #pragma pack(pop)
 
-CMoveCommandData::CMoveCommandData()
-{
-}
+CMoveCommandData::CMoveCommandData() {}
 
 CMoveCommandData::~CMoveCommandData()
 {
@@ -38,30 +35,40 @@ CMoveCommandData* CMoveCommandData::GetInstance()
 
 bool CMoveCommandData::Create(const std::wstring& filename)
 {
-    FILE* fp = _wfopen(filename.c_str(), L"rb");
-    if (fp == NULL) return false;
+    Core::Utilities::FileHandle fp(_wfopen(filename.c_str(), L"rb"));
+    if (!fp)
+        return false;
 
     int count = 0;
-    fread(&count, sizeof(int), 1, fp);
+    if (!DataFileIO::ReadExact(fp.get(), &count, sizeof(int)))
+    {
+        return false;
+    }
 
     for (int i = 0; i < count; i++)
     {
-        auto* pMoveInfoData = new MOVEINFODATA;
         MOVEREQINFO_FILE moveReqInfo{};
-        fread(&moveReqInfo, sizeof moveReqInfo, 1, fp);
+        if (!DataFileIO::ReadExact(fp.get(), &moveReqInfo, sizeof moveReqInfo))
+        {
+            return false;
+        }
+        // Value-initialised: the flags stay false until the move window sets them.
+        auto* pMoveInfoData = new MOVEINFODATA{};
 
+        // cppcheck-suppress dangerousTypeCast
         BuxConvert((BYTE*)&moveReqInfo, sizeof moveReqInfo);
         pMoveInfoData->_ReqInfo.index = moveReqInfo.index;
         pMoveInfoData->_ReqInfo.iGateNum = moveReqInfo.iGateNum;
         pMoveInfoData->_ReqInfo.iReqLevel = moveReqInfo.iReqLevel;
         pMoveInfoData->_ReqInfo.iReqZen = moveReqInfo.iReqZen;
         pMoveInfoData->_ReqInfo.m_iReqMaxLevel = moveReqInfo.m_iReqMaxLevel;
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName, sizeof moveReqInfo.szMainMapName);
-        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName, sizeof moveReqInfo.szSubMapName);
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName,
+                                        sizeof moveReqInfo.szMainMapName);
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName,
+                                        sizeof moveReqInfo.szSubMapName);
 
         m_listMoveInfoData.push_back(pMoveInfoData);
     }
-    fclose(fp);
 
     return true;
 }

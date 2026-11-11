@@ -6,10 +6,26 @@
 
 namespace Core::Time
 {
+    namespace
+    {
+        FrameTimerScheduler* g_activeScheduler = nullptr;
+    }
+
     FrameTimerScheduler& FrameTimerScheduler::Instance()
     {
         static FrameTimerScheduler instance;
+        g_activeScheduler = &instance;
         return instance;
+    }
+
+    FrameTimerScheduler* FrameTimerScheduler::TryInstance()
+    {
+        return g_activeScheduler;
+    }
+
+    FrameTimerScheduler::~FrameTimerScheduler()
+    {
+        g_activeScheduler = nullptr;
     }
 
     std::uint64_t FrameTimerScheduler::NowMs()

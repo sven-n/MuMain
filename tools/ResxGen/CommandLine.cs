@@ -3,18 +3,21 @@ namespace MuMain.Tools.ResxGen;
 internal sealed record CommandLineOptions(
     string InputDir,
     string OutputDir,
-    IReadOnlySet<string> WideGroups);
+    IReadOnlySet<string> WideGroups,
+    IReadOnlySet<string> ItemTextGroups);
 
 internal static class CommandLine
 {
     public const string Usage =
-        "Usage: ResxGen --input <dir> --output <dir> [--wide-groups <CommaSeparatedList>]";
+        "Usage: ResxGen --input <dir> --output <dir> [--wide-groups <CommaSeparatedList>] " +
+        "[--item-text-groups <CommaSeparatedList>]";
 
     public static bool TryParse(string[] args, out CommandLineOptions options, out string error)
     {
         string? inputDir = null;
         string? outputDir = null;
         string? wideGroupsRaw = null;
+        string? itemTextGroupsRaw = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -44,6 +47,14 @@ internal static class CommandLine
                     }
                     break;
 
+                case "--item-text-groups":
+                    if (!TryReadValue(args, ref i, out itemTextGroupsRaw, out error))
+                    {
+                        options = default!;
+                        return false;
+                    }
+                    break;
+
                 default:
                     options = default!;
                     error = $"Unknown argument: {args[i]}";
@@ -66,8 +77,9 @@ internal static class CommandLine
         }
 
         var wideGroups = ParseGroupList(wideGroupsRaw);
+        var itemTextGroups = ParseGroupList(itemTextGroupsRaw);
 
-        options = new CommandLineOptions(inputDir, outputDir, wideGroups);
+        options = new CommandLineOptions(inputDir, outputDir, wideGroups, itemTextGroups);
         error = string.Empty;
         return true;
     }

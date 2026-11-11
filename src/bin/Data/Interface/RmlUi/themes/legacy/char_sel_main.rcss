@@ -1,0 +1,120 @@
+/* Character-selection controls retain their anchors and click targets. Shared blank frames
+   and fitted captions support translated labels in the existing scene-bar dimensions. */
+
+@spritesheet charsel-orange-sheet
+{
+	src: "../../../op1_b_all.tga";
+	charsel-btn-orange: 0px 90px 108px 30px;
+}
+@spritesheet charsel-deco-sheet
+{
+	src: "../../../deco.tga";
+	charsel-deco-image: 0px 0px 189px 103px;
+}
+
+/* Full-width positioning container, not a bar-shaped box -- every child anchors directly to its
+   bottom edge (the original's anchor line) or a corner. */
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 94.5vh;
+	pointer-events: none;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54rem;
+	height: 30rem;
+	bottom: 11rem;
+	decorator: image(legacy-btn-idle);
+	cursor: pointer;
+	pointer-events: auto;
+}
+#btn_create { left: 22rem; }
+#btn_menu   { left: 77rem; }
+#btn_connect { right: 77rem; }
+#btn_delete  { right: 22rem; }
+#btn_create, #btn_connect { decorator: image(charsel-btn-orange); }
+#btn_create.disabled, #btn_connect.disabled { decorator: image(legacy-btn-idle); }
+
+.btn-icon.disabled {
+	pointer-events: none;
+	cursor: default;
+}
+.btn-icon:hover { decorator: image(legacy-btn-hover); }
+.btn-icon:active { decorator: image(legacy-btn-active); }
+.btn-icon-label { display: none; }
+.btn-icon-item { font-family: "token(font-body)"; font-size: 12rem; }
+
+/* Reuse the same caption as modern, placed over its button without intercepting clicks. */
+.btn-icon-caption {
+	position: absolute;
+	display: block;
+	width: 54rem;
+	height: 30rem;
+	bottom: 11rem;
+	line-height: 30rem;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffe273;
+	font-weight: bold;
+	font-effect: outline(1px black);
+	pointer-events: none;
+}
+#btn_create_item .btn-icon-caption { left: 22rem; }
+#btn_menu_item .btn-icon-caption { left: 77rem; color: #ffd063; }
+#btn_connect_item .btn-icon-caption { right: 77rem; }
+#btn_delete_item .btn-icon-caption { right: 22rem; color: #ffc741; }
+#btn_create_item .btn-icon-caption.disabled,
+#btn_connect_item .btn-icon-caption.disabled,
+#btn_delete_item .btn-icon-caption.disabled { color: #d6d6d6; }
+
+/* Flat, semi-transparent backing strip behind the (rarely shown) account-block message. */
+.info-bar {
+	position: absolute;
+	left: 133rem;
+	right: 133rem;
+	bottom: 15rem;
+	height: 21rem;
+	background-color: token(surface-overlay);
+	pointer-events: none;
+}
+
+/* Decorative flourish over the Connect/Delete buttons' top-right corner -- paints behind them
+   (declared first in char_sel_main.rml). */
+.deco {
+	position: absolute;
+	width: 189rem;
+	height: 103rem;
+	right: 0rem;
+	bottom: -3rem;
+	pointer-events: none;
+	decorator: image(charsel-deco-image);
+}
+
+/* Centered around a fixed screen X unrelated to this window's own position. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330rem;
+	width: 640rem;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18rem;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+	white-space: nowrap;
+	padding: 0 2rem;
+}
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+#btn_create, #btn_menu, #btn_delete { click-sound: menu; }
+#btn_connect { click-sound: confirm; }

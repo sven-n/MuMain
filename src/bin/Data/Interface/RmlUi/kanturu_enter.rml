@@ -1,0 +1,42 @@
+<rml>
+<head>
+	<title>Kanturu</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="kanturu_enter.rcss"/>
+</head>
+<body>
+	<!-- Kanturu's entry window (CKanturu2ndEnterNpc): a message-box frame with the state subject,
+	     the state texts and the Refresh / Enter / Close buttons. The workspace slot places and
+	     scales #panel; everything inside is reference px; text is .sharp-text at the native size,
+	     counter-scaled out of the panel. C++ keeps the texts, the
+	     button locks, the equipment checks, Escape and the requests; a click is queued with
+	     kanturu_refresh / kanturu_enter / kanturu_close. -->
+	<div id="panel" data-model="kanturu_enter">
+		<div id="back"></div>
+		<div id="frame_top"></div>
+		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
+		<div id="frame_bottom"></div>
+
+		<!-- The wrapped lines, stacked by the theme; what each one is, the theme styles. -->
+		<div id="kanturu_lines" class="sharp-text sharp-flow">
+			<div class="kanturu-line" data-for="line : lines"
+			     data-class-tone-subject="line.kind == 'subject'" data-class-tone-state="line.kind == 'state'"
+			     data-class-tone-note="line.kind == 'note'" data-class-group-start="line.group_start"
+			     data-style-font-size="line.text_px + 'px'">{{line.text}}</div>
+		</div>
+
+		<div class="kanturu-btn" id="btn_refresh" data-class-locked="refresh_locked" data-event-click="kanturu_refresh">
+			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{refresh_text}}</span>
+		</div>
+		<div class="kanturu-btn" id="btn_enter" data-class-locked="enter_locked" data-event-click="kanturu_enter">
+			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{enter_text}}</span>
+		</div>
+		<div class="kanturu-btn" id="btn_close" data-event-click="kanturu_close">
+			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{close_text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

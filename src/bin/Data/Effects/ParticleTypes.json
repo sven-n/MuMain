@@ -1,0 +1,398 @@
+{
+  "formatVersion": 1,
+  "kind": "particle",
+  "types": [
+    {
+      "name": "advSmoke",
+      "code": "BITMAP_ADV_SMOKE"
+    },
+    {
+      "name": "advSmoke2",
+      "code": "BITMAP_ADV_SMOKE+1"
+    },
+    {
+      "name": "agAdditionEffect",
+      "code": "BITMAP_AG_ADDITION_EFFECT"
+    },
+    {
+      "name": "blood",
+      "code": "BITMAP_BLOOD"
+    },
+    {
+      "name": "blood2",
+      "code": "BITMAP_BLOOD+1"
+    },
+    {
+      "name": "blueBlur",
+      "code": "BITMAP_BLUE_BLUR"
+    },
+    {
+      "name": "bubble",
+      "code": "BITMAP_BUBBLE"
+    },
+    {
+      "name": "cherryBlossomEventFlower",
+      "code": "BITMAP_CHERRYBLOSSOM_EVENT_FLOWER"
+    },
+    {
+      "name": "cherryBlossomEventPetal",
+      "code": "BITMAP_CHERRYBLOSSOM_EVENT_PETAL"
+    },
+    {
+      "name": "chrome2",
+      "code": "BITMAP_CHROME2"
+    },
+    {
+      "name": "chromeEnergy2",
+      "code": "BITMAP_CHROME_ENERGY2"
+    },
+    {
+      "name": "cloud",
+      "code": "BITMAP_CLOUD"
+    },
+    {
+      "name": "cloud64",
+      "code": "BITMAP_CLUD64"
+    },
+    {
+      "name": "cursedTempleEffectMasker",
+      "code": "BITMAP_CURSEDTEMPLE_EFFECT_MASKER"
+    },
+    {
+      "name": "damage1",
+      "code": "BITMAP_DAMAGE1"
+    },
+    {
+      "name": "damage2",
+      "code": "BITMAP_DAMAGE2"
+    },
+    {
+      "name": "dsEffect",
+      "code": "BITMAP_DS_EFFECT"
+    },
+    {
+      "name": "effect",
+      "code": "BITMAP_EFFECT"
+    },
+    {
+      "name": "energy",
+      "code": "BITMAP_ENERGY"
+    },
+    {
+      "name": "explosion",
+      "code": "BITMAP_EXPLOTION"
+    },
+    {
+      "name": "explosion2",
+      "code": "BITMAP_EXPLOTION+1"
+    },
+    {
+      "name": "explosionMono",
+      "code": "BITMAP_EXPLOTION_MONO"
+    },
+    {
+      "name": "fire",
+      "code": "BITMAP_FIRE"
+    },
+    {
+      "name": "fire2",
+      "code": "BITMAP_FIRE+1"
+    },
+    {
+      "name": "fire3",
+      "code": "BITMAP_FIRE+2"
+    },
+    {
+      "name": "fire5",
+      "code": "BITMAP_FIRE+3"
+    },
+    {
+      "name": "fireCursedLich",
+      "code": "BITMAP_FIRE_CURSEDLICH"
+    },
+    {
+      "name": "fireHik1",
+      "code": "BITMAP_FIRE_HIK1"
+    },
+    {
+      "name": "fireHik1Mono",
+      "code": "BITMAP_FIRE_HIK1_MONO"
+    },
+    {
+      "name": "fireHik2Mono",
+      "code": "BITMAP_FIRE_HIK2_MONO"
+    },
+    {
+      "name": "fireHik3",
+      "code": "BITMAP_FIRE_HIK3"
+    },
+    {
+      "name": "fireHik3Mono",
+      "code": "BITMAP_FIRE_HIK3_MONO"
+    },
+    {
+      "name": "fireRed",
+      "code": "BITMAP_FIRE_RED"
+    },
+    {
+      "name": "firecracker",
+      "code": "BITMAP_FIRECRACKER"
+    },
+    {
+      "name": "flame",
+      "code": "BITMAP_FLAME"
+    },
+    {
+      "name": "flare",
+      "code": "BITMAP_FLARE"
+    },
+    {
+      "name": "flare2",
+      "code": "BITMAP_FLARE+1"
+    },
+    {
+      "name": "flareBlue",
+      "code": "BITMAP_FLARE_BLUE"
+    },
+    {
+      "name": "flareRed",
+      "code": "BITMAP_FLARE_RED"
+    },
+    {
+      "name": "flower1",
+      "code": "BITMAP_FLOWER01"
+    },
+    {
+      "name": "flower2",
+      "code": "BITMAP_FLOWER01+1"
+    },
+    {
+      "name": "flower3",
+      "code": "BITMAP_FLOWER01+2"
+    },
+    {
+      "name": "ghostCloud1",
+      "code": "BITMAP_GHOST_CLOUD1"
+    },
+    {
+      "name": "ghostCloud2",
+      "code": "BITMAP_GHOST_CLOUD2"
+    },
+    {
+      "name": "glitter",
+      "code": "BITMAP_LIGHT+2"
+    },
+    {
+      "name": "gmAurora",
+      "code": "BITMAP_GM_AURORA"
+    },
+    {
+      "name": "hole",
+      "code": "BITMAP_HOLE"
+    },
+    {
+      "name": "impact1",
+      "code": "BITMAP_LIGHT+3"
+    },
+    {
+      "name": "impact3",
+      "code": "BITMAP_LIGHT+1"
+    },
+    {
+      "name": "leafTotemGolem",
+      "code": "BITMAP_LEAF_TOTEMGOLEM"
+    },
+    {
+      "name": "light",
+      "code": "BITMAP_LIGHT"
+    },
+    {
+      "name": "lightning",
+      "code": "BITMAP_LIGHTNING"
+    },
+    {
+      "name": "lightning2",
+      "code": "BITMAP_LIGHTNING+1"
+    },
+    {
+      "name": "lightningMega1",
+      "code": "BITMAP_LIGHTNING_MEGA1"
+    },
+    {
+      "name": "lightningMega2",
+      "code": "BITMAP_LIGHTNING_MEGA2"
+    },
+    {
+      "name": "lightningMega3",
+      "code": "BITMAP_LIGHTNING_MEGA3"
+    },
+    {
+      "name": "magic",
+      "code": "BITMAP_MAGIC"
+    },
+    {
+      "name": "magicGround2",
+      "code": "BITMAP_MAGIC+1"
+    },
+    {
+      "name": "orora",
+      "code": "BITMAP_ORORA"
+    },
+    {
+      "name": "pinLight",
+      "code": "BITMAP_PIN_LIGHT"
+    },
+    {
+      "name": "plus",
+      "code": "BITMAP_PLUS"
+    },
+    {
+      "name": "poundingBall",
+      "code": "BITMAP_POUNDING_BALL"
+    },
+    {
+      "name": "rainCircle",
+      "code": "BITMAP_RAIN_CIRCLE"
+    },
+    {
+      "name": "rainCircle2",
+      "code": "BITMAP_RAIN_CIRCLE+1"
+    },
+    {
+      "name": "raklionClouds",
+      "code": "BITMAP_RAKLION_CLOUDS"
+    },
+    {
+      "name": "ring",
+      "code": "BITMAP_SHINY+4"
+    },
+    {
+      "name": "sbumb",
+      "code": "BITMAP_SBUMB"
+    },
+    {
+      "name": "shiny",
+      "code": "BITMAP_SHINY"
+    },
+    {
+      "name": "shiny2",
+      "code": "BITMAP_SHINY+1"
+    },
+    {
+      "name": "shiny3",
+      "code": "BITMAP_SHINY+2"
+    },
+    {
+      "name": "shiny5",
+      "code": "BITMAP_SHINY+6"
+    },
+    {
+      "name": "shockWave",
+      "code": "BITMAP_SHOCK_WAVE"
+    },
+    {
+      "name": "smoke",
+      "code": "BITMAP_SMOKE"
+    },
+    {
+      "name": "smoke2",
+      "code": "BITMAP_SMOKE+1"
+    },
+    {
+      "name": "smoke3",
+      "code": "BITMAP_SMOKE+2"
+    },
+    {
+      "name": "smoke4",
+      "code": "BITMAP_SMOKE+3"
+    },
+    {
+      "name": "smoke5",
+      "code": "BITMAP_SMOKE+4"
+    },
+    {
+      "name": "smokeLine1",
+      "code": "BITMAP_SMOKELINE1"
+    },
+    {
+      "name": "smokeLine2",
+      "code": "BITMAP_SMOKELINE2"
+    },
+    {
+      "name": "smokeLine3",
+      "code": "BITMAP_SMOKELINE3"
+    },
+    {
+      "name": "snowEffect1",
+      "code": "BITMAP_SNOW_EFFECT_1"
+    },
+    {
+      "name": "snowEffect2",
+      "code": "BITMAP_SNOW_EFFECT_2"
+    },
+    {
+      "name": "spark",
+      "code": "BITMAP_SPARK"
+    },
+    {
+      "name": "spark3",
+      "code": "BITMAP_SPARK+1"
+    },
+    {
+      "name": "sparks",
+      "code": "BITMAP_SPARK+2"
+    },
+    {
+      "name": "spotWater",
+      "code": "BITMAP_SPOT_WATER"
+    },
+    {
+      "name": "summonSahamuttExplosion",
+      "code": "BITMAP_SUMMON_SAHAMUTT_EXPLOSION"
+    },
+    {
+      "name": "swordEffectMono",
+      "code": "BITMAP_SWORD_EFFECT_MONO"
+    },
+    {
+      "name": "swordForce",
+      "code": "BITMAP_SWORD_FORCE"
+    },
+    {
+      "name": "torchFire",
+      "code": "BITMAP_TORCH_FIRE"
+    },
+    {
+      "name": "trueBlue",
+      "code": "BITMAP_TRUE_BLUE"
+    },
+    {
+      "name": "trueFire",
+      "code": "BITMAP_TRUE_FIRE"
+    },
+    {
+      "name": "twinTailWater",
+      "code": "BITMAP_TWINTAIL_WATER"
+    },
+    {
+      "name": "waterfall1",
+      "code": "BITMAP_WATERFALL_1"
+    },
+    {
+      "name": "waterfall2",
+      "code": "BITMAP_WATERFALL_2"
+    },
+    {
+      "name": "waterfall3",
+      "code": "BITMAP_WATERFALL_3"
+    },
+    {
+      "name": "waterfall4",
+      "code": "BITMAP_WATERFALL_4"
+    },
+    {
+      "name": "waterfall5",
+      "code": "BITMAP_WATERFALL_5"
+    }
+  ]
+}

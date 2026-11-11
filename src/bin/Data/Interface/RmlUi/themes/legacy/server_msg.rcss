@@ -1,0 +1,37 @@
+/* Legacy theme for CServerMsgWin, reproducing its five sprites and Render(): the centre
+   (server_ex03, flat black at alpha 143) inset 3 px, the 512 x 6 top and bottom strips
+   (server_ex01, rows 0-5 and 6-11), the 3 px side pieces (server_ex02 columns 0-2 and 3-5)
+   stretched to the line count, the lines white in the fixed font (Cousine) at (11, 12 + 20 i).
+   Real pixels inside #panel. */
+
+@spritesheet server-msg-strip-sheet
+{
+	src: "../../../server_ex01.tga";
+	server-msg-top: 0px 0px 512px 6px;
+	server-msg-bottom: 0px 6px 512px 6px;
+}
+@spritesheet server-msg-side-sheet
+{
+	src: "../../../server_ex02.jpg";
+	server-msg-left: 0px 0px 3px 4px;
+	server-msg-right: 3px 0px 3px 4px;
+}
+
+#panel { position: absolute; transform-origin: left top; width: 512px; pointer-events: none; }
+#centre { position: absolute; left: 3px; top: 3px; width: 506px; background-color: rgba(0, 0, 0, 143); }
+#top { position: absolute; left: 0; top: 0; width: 512px; height: 6px; decorator: image(server-msg-top); }
+#bottom { position: absolute; left: 0; width: 512px; height: 6px; decorator: image(server-msg-bottom); }
+#left { position: absolute; left: 0; top: 6px; width: 3px; decorator: image(server-msg-left); }
+#right { position: absolute; left: 509px; top: 6px; width: 3px; decorator: image(server-msg-right); }
+
+.sharp-text { display: block; position: absolute; white-space: pre; pointer-events: none; }
+.server-line { left: 11px; font-family: Cousine; color: #ffffff; }
+
+/* RenderContents()'s own rows: the message lines 20 units apart from y 12, up to
+   SMW_MSG_LINE_MAX of them. */
+.server-lines { position: static; }
+.server-line:nth-child(1) { top: 12px; }
+.server-line:nth-child(2) { top: 32px; }
+.server-line:nth-child(3) { top: 52px; }
+.server-line:nth-child(4) { top: 72px; }
+.server-line:nth-child(5) { top: 92px; }

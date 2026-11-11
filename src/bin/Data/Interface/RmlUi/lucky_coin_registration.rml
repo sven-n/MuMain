@@ -1,0 +1,46 @@
+<rml>
+<head>
+	<title>Delgado's lucky coin registration (CRegistrationLuckyCoin)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="event_item_entry.rcss"/>
+	<link type="text/rcss" href="lucky_coin.rcss"/>
+	<link type="text/rcss" href="lucky_coin_registration_rows.rcss"/>
+</head>
+<body>
+	<!-- Delgado's lucky coin registration (CRegistrationLuckyCoin), docked right: its texts and buttons over the
+	     docked frame and the live 3D coin (UI/Events/EventItemEntryView.h).
+	     the workspace slot places and scales #panel; everything inside is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ keeps the
+	     corner close, Escape, the locks and the requests; a click is queued with item_entry_press. -->
+	<div id="panel" data-model="lucky_coin_registration">
+		<!-- The docked frame. -->
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+		<!-- The live 3D preview, drawn by C++ at its original place over the frame. -->
+		<img id="entry_item" class="entry-item"/>
+		<div id="entry_item_box" class="entry-item-box"></div>
+		<!-- The rows these land on are the theme's: this document's own _rows.rcss gives one
+		     :nth-child rule per line and per button. Each repeated set has its own container so
+		     the count starts at the first one. -->
+		<div class="entry-texts">
+			<div class="entry-text" data-for="t : texts">
+				<span class="sharp-text sharp-centre"
+				      data-style-font-size="t.text_px + 'px'">{{t.text}}</span>
+			</div>
+		</div>
+
+		<div class="entry-buttons">
+			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
+			     data-event-click="item_entry_press(i)" data-attr-data-hint="b.hint">
+				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
+				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
+				      data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
+			</div>
+		</div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+	</div>
+</body>
+</rml>

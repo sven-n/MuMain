@@ -1,0 +1,36 @@
+/* Modern theme for a guild war's or battle soccer's time and result: the legacy geometry (see the
+   legacy theme) on the modern panel surface, OK as a modern button. */
+
+body { pointer-events: none; }
+#hud, #stage { pointer-events: none; font-family: "token(font-body)"; }
+
+#countdown { position: absolute; top: 350px; width: 0; height: 0; }
+#countdown .sharp-text { position: absolute; top: 0; white-space: nowrap; }
+.countdown-shadow { color: token(semantic-danger); }
+#countdown.soon .countdown-shadow { color: token(semantic-warning); }
+.countdown-face { margin-top: 1px; padding-left: 2px; color: token(text-primary); }
+
+#result { position: absolute; left: 170px; top: 120px; width: 300px; height: 210px; }
+#result_back { position: absolute; left: 0; top: 0; width: 300px; height: 210px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-md)px; }
+#result .sharp-text { position: absolute; top: 0; white-space: nowrap; color: token(text-primary); }
+.result-line { position: absolute; left: 0; width: 300px; height: 0; }
+.result-cell { position: absolute; height: 0; }
+#result_title { top: 20px; }
+#result_title .sharp-text { color: token(accent-gold); }
+#result_vs { top: 50px; }
+#result_vs .sharp-text { color: token(text-secondary); }
+#result_team1 { left: 0; top: 50px; width: 65px; }
+#result_team2 { left: 170px; top: 50px; width: 65px; }
+#result_team1 .sharp-right, #result_team2 .sharp-right { right: 0; }
+#result_score1 { left: 45px; top: 75px; }
+#result_score2 { left: 215px; top: 75px; }
+#result_outcome1 { left: 47px; top: 115px; }
+#result_outcome2 { left: 218px; top: 115px; }
+#result_outcome1 .sharp-text, #result_outcome2 .sharp-text { color: token(semantic-danger); }
+#result_outcome1.win .sharp-text, #result_outcome2.win .sharp-text { color: token(semantic-warning); }
+#result_tie { top: 115px; }
+#result_tie .sharp-text { color: token(semantic-warning); }
+
+#result_ok { position: absolute; left: 115px; top: 160px; width: 70px; height: 20px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); pointer-events: auto; cursor: pointer; }
+#result_ok:hover { background-color: token(accent-steel-hover); }
+#result_ok .ok-label { top: 50%; color: token(text-primary); }

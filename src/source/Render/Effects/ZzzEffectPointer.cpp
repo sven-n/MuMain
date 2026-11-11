@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -15,10 +17,11 @@
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
 
-PARTICLE  Pointers[MAX_POINTERS];
+PARTICLE Pointers[MAX_POINTERS];
 
 void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float Scale)
 {
+    Diagnostics::DrawSpawnCheck::Note("pointer");
     PARTICLE* Select = NULL;
     int MinLifeTime = 9999;
     for (int i = 0; i < MAX_POINTERS; i++)
@@ -52,6 +55,7 @@ void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float S
             }
         }
     }
+    // cppcheck-suppress nullPointer
     Select->Live = false;
 }
 
@@ -67,7 +71,8 @@ void MovePointers()
             {
             case BITMAP_CURSOR + 5:
                 o->Scale -= 0.05f * FPS_ANIMATION_FACTOR;
-                if (o->Scale < 0.1f) o->Live = false;
+                if (o->Scale < 0.1f)
+                    o->Live = false;
                 break;
             case BITMAP_BLOOD:
             case BITMAP_BLOOD + 1:
@@ -77,8 +82,10 @@ void MovePointers()
                     o->Scale += 0.004f * FPS_ANIMATION_FACTOR;
                 }
                 Vector(0.1f, 0.f, 0.f, o->Light);
-                if (o->LifeTime <= 0) o->Live = false;
-                if (o->LifeTime < 50) o->Alpha = o->LifeTime * 0.02f;
+                if (o->LifeTime <= 0)
+                    o->Live = false;
+                if (o->LifeTime < 50)
+                    o->Alpha = o->LifeTime * 0.02f;
                 break;
             }
         }
@@ -87,17 +94,17 @@ void MovePointers()
 
 void RenderPointers()
 {
-    EnableAlphaBlend();
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
+    out.SetState({.blend = Blend::Glow});
     for (int i = 0; i < MAX_POINTERS; i++)
     {
-        PARTICLE* o = &Pointers[i];
+        const PARTICLE* o = &Pointers[i];
         if (o->Live)
         {
-            if (Bitmaps[o->Type].Components == 3)
-                EnableAlphaBlend();
-            else
-                EnableAlphaTest();
-            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2], o->Alpha);
+            out.SetState({.blend = Bitmaps[o->Type].Components == 3 ? Blend::Glow : Blend::AlphaTest});
+            out.DrawDecal(Render::EffectDrawing::Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                                       o->Light, -o->Angle[2], o->Alpha));
         }
     }
 }

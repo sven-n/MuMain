@@ -1,17 +1,19 @@
 ﻿#include "stdafx.h"
 #include "GameLogic/Items/CComGem.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
+#include "GameLogic/Events/Cinematic/DirectionTurning.h"
 
 #include "Audio/DSPlaySound.h"
 
 #include "World/MapInfra/MapManager.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,35 +23,21 @@ static CDirection Direction;
 
 namespace
 {
-    constexpr float kPi = 3.14159265358979323846f;
-    constexpr float kRadToDeg = 180.0f / kPi;
-
-    float UnwindDegrees360(float degrees)
-    {
-        degrees = std::fmod(degrees, 360.0f);
-        if (degrees < 0.0f)
-            degrees += 360.0f;
-        return degrees;
-    }
-
-    CHARACTER* FindLiveCharacterByKey(int key)
-    {
-        auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
-        auto* const it = std::find_if(CharactersClient, end, [key](const CHARACTER& c) {
-            return c.Object.Live && c.Key == key;
-        });
-        return (it != end) ? it : nullptr;
-    }
+CHARACTER* FindLiveCharacterByKey(int key)
+{
+    auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
+    auto* const it =
+        std::find_if(CharactersClient, end, [key](const CHARACTER& c) { return c.Object.Live && c.Key == key; });
+    return (it != end) ? it : nullptr;
 }
+} // namespace
 
 CDirection::CDirection()
 {
     Init();
 }
 
-CDirection::~CDirection()
-{
-}
+CDirection::~CDirection() {}
 
 void CDirection::Init()
 {
@@ -84,7 +72,7 @@ void CDirection::Init()
 
 void CDirection::CloseAllWindows()
 {
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
     g_pNewUISystem->HideAll();
 }
 
@@ -137,7 +125,8 @@ bool CDirection::DirectionCameraMove()
 
         VectorScale(m_vResult, m_fCount, vTemp);
         VectorAdd(m_v1stPosition, vTemp, m_vCameraPosition);
-        m_fCount += m_fCameraSpeed;
+        // The camera speed is the distance per frame at the reference fps.
+        m_fCount += m_fCameraSpeed * FPS_ANIMATION_FACTOR;
 
         if (m_fLength <= VectorLength(vTemp))
         {
@@ -155,6 +144,16 @@ bool CDirection::DirectionCameraMove()
 
 void CDirection::DeleteMonster()
 {
+    // Every monster of the model walks at its own speed again (P27); a model
+    // released since keeps its new data.
+    for (const auto& [model, speed] : m_savedWalkSpeeds)
+    {
+        BMD& walking = Models[model];
+        if (walking.Actions != nullptr && walking.NumActions > MONSTER01_WALK)
+            walking.Actions[MONSTER01_WALK].PlaySpeed = speed;
+    }
+    m_savedWalkSpeeds.clear();
+
     const int count = static_cast<int>(stl_Monster.size());
     if (count == 0)
         return;
@@ -167,26 +166,17 @@ void CDirection::DeleteMonster()
 
 float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 {
-    vec3_t vTemp, vTemp2, vResult;
-    float fx = (float)(x * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-    float fy = (float)(y * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-
-    Vector(fx, fy, 0.0f, vTemp);
-    Vector(c->Object.Position[0], c->Object.Position[1], 0.0f, vTemp2);
-
-    VectorSubtract(vTemp2, vTemp, vResult);
-    Vector(0.0f, 1.0f, 0.0f, vTemp2);
-
-    VectorNormalize(vResult);
-
-    const float yawFromPositiveY = std::atan2(vResult[0], vResult[1]) * kRadToDeg;
-    return UnwindDegrees360(yawFromPositiveY);
+    return GameLogic::Cinematic::CalculateAngleToTile(c->Object.Position[0], c->Object.Position[1], x, y,
+                                                      TERRAIN_SCALE);
 }
 
-void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni, float AniSpeed)
+void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni,
+                                     float AniSpeed)
 {
     CHARACTER* c = nullptr;
-    DirectionMonster DMonster = { 0, };
+    DirectionMonster DMonster = {
+        0,
+    };
 
     DMonster.m_Index = stl_Monster.size();
     DMonster.m_bAngleCheck = true;
@@ -201,24 +191,19 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
     c->Weapon[1].Type = -1;
     c->Object.Alpha = 0.0f;
 
-    int Index = 0;
+    // The walk speed of the model the monster's entry gave it (MN4), until the
+    // cutscene removes its monsters (P27).
+    // A model without a walk (an empty one, or one whose file is missing) has
+    // none to change.
+    BMD* b = &Models[c->Object.Type];
 
-    switch (Type)
+    if (AniSpeed >= 0.0f && b->Actions != nullptr && b->NumActions > MONSTER01_WALK)
     {
-    case 344: Index = MODEL_BALRAM;	break;
-    case 341: Index = MODEL_SORAM;	break;
-    case 440:
-    case 340: Index = MODEL_DARK_ELF_1;	break;
-    case 345: Index = MODEL_DEATH_SPIRIT;	break;
-    case 348: Index = MODEL_BALLISTA;	break;
-    case 349: Index = MODEL_BALGASS;	break;
-    case 361: Index = MODEL_DARK_SKULL_SOLDIER_5;	break;
-    }
-
-    BMD* b = &Models[Index];
-
-    if (AniSpeed >= 0.0f)
+        const int model = c->Object.Type;
+        if (std::ranges::none_of(m_savedWalkSpeeds, [&](const auto& saved) { return saved.first == model; }))
+            m_savedWalkSpeeds.emplace_back(model, b->Actions[MONSTER01_WALK].PlaySpeed);
         b->Actions[MONSTER01_WALK].PlaySpeed = AniSpeed;
+    }
 
     if (SummonAni)
     {
@@ -241,10 +226,10 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -258,7 +243,8 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
         }
     }
 
-    if (NextCheck) m_iCheckTime++;
+    if (NextCheck)
+        m_iCheckTime++;
 }
 
 bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Speed)
@@ -273,45 +259,31 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
     int PresentX = (int)(c->Object.Position[0]) / TERRAIN_SCALE;
     int PresentY = (int)(c->Object.Position[1]) / TERRAIN_SCALE;
 
-    if (PresentX == x && PresentY == y) bNext = true;
+    if (PresentX == x && PresentY == y)
+        bNext = true;
 
     if (!bNext)
     {
-        int iResult = 0;
-
         if (stl_Monster[Index].m_bAngleCheck)
         {
-            int	iAngle1 = (int)CalculateAngle(c, x, y, Angle);
-            int iAngle2 = (int)c->Object.Angle[2];
+            // The monster turns towards its target first. When it's aligned, its heading is exactly the direction
+            // to the target, so that it arrives at the target tile at any frame rate.
+            const float targetAngle = CalculateAngle(c, x, y, Angle);
+            const float turnStep = GameLogic::Cinematic::kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR;
+            if (!GameLogic::Cinematic::TurnTowards(c->Object.Angle[2], targetAngle, turnStep))
+            {
+                c->Blood = false;
+                SetAction(&c->Object, MONSTER01_STOP1);
+                return false;
+            }
 
-            if ((iAngle1 - Angle) > 180)
-                iAngle1 = iAngle1 - 360;
-
-            iResult = iAngle1 - iAngle2;
-            c->Blood = false;
-        }
-
-        if (iResult <= 3 && iResult >= -3)
-        {
-            c->Blood = true;
             stl_Monster[Index].m_bAngleCheck = false;
         }
 
-        if (c->Blood)
-        {
-            c->MoveSpeed = Speed;
-            SetAction(&c->Object, MONSTER01_WALK);
-            MoveCharacterPosition(c);
-        }
-        else
-        {
-            if (iResult > 3 && iResult <= 180)
-                c->Object.Angle[2] += 3.0f;
-            else
-                c->Object.Angle[2] -= 3.0f;
-
-            SetAction(&c->Object, MONSTER01_STOP1);
-        }
+        c->Blood = true;
+        c->MoveSpeed = Speed;
+        SetAction(&c->Object, MONSTER01_WALK);
+        MoveCharacterPosition(c);
     }
     else
     {
@@ -335,7 +307,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
     if (c == nullptr)
         return false;
 
-    if (stl_Monster[Index].m_iActionCheck == Count) bNext = true;
+    if (stl_Monster[Index].m_iActionCheck == Count)
+        bNext = true;
 
     if (!bNext)
     {
@@ -346,7 +319,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
             stl_Monster[Index].m_iActionCheck++;
 
             if (TankerAttack)
-                CreateEffect(MODEL_ARROW_TANKER, c->Object.Position, c->Object.Angle, c->Object.Light, 1, &c->Object, c->Object.PKKey);
+                CreateEffect(MODEL_ARROW_TANKER, c->Object.Position, c->Object.Angle, c->Object.Light, 1, &c->Object,
+                             c->Object.PKKey);
         }
     }
     else
@@ -357,7 +331,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
             m_iCheckTime++;
         }
 
-        if (c->Object.AnimationFrame >= 8.0f) return true;
+        if (c->Object.AnimationFrame >= 8.0f)
+            return true;
     }
 
     return false;
@@ -392,18 +367,18 @@ void CDirection::HeroFallingDownDirection()
 void CDirection::FaillingEffect()
 {
     vec3_t Pos, Light;
-    float Scale = 1.3f + rand() % 10 / 30.0f;
+    float Scale = 1.3f + Random::Rand() % 10 / 30.0f;
     Vector(0.05f, 0.05f, 0.08f, Light);
 
-    Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
+    Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[2] = Hero->Object.Position[2] - Random::Rand() % 200 - 500.0f;
 
     CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
 
-    Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
+    Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[2] = Hero->Object.Position[2] - Random::Rand() % 200 - 500.0f;
 
     Vector(0.05f, 0.05f, 0.05f, Light);
     CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
@@ -421,7 +396,8 @@ void CDirection::HeroFallingDownInit()
 
 void CDirection::CameraLevelUp()
 {
-    if (m_CameraLevel < 4) m_CameraLevel++;
+    if (m_CameraLevel < 4)
+        m_CameraLevel++;
 }
 
 void CDirection::SetNextDirectionPosition(int x, int y, int z, float Speed)

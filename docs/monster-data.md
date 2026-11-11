@@ -1,0 +1,1157 @@
+# Monster data
+
+The monster list gives every monster and NPC number the client knows its
+names, its kind and the model it appears with. A monster can have several
+numbers that share its values (the Kalima levels' copies, the Blood Castle
+knights); each number keeps what it has differently. It lives in
+`src/bin/Data/Monsters/Monsters.json` and is loaded once at startup into a
+table by number. It replaces the original client's name files
+(`Data/Local/<Language>/NpcName_<Language>.txt`), which the repository no
+longer ships.
+
+The models are a list of their own, `src/bin/Data/Monsters/Models.json`: the
+file, textures, animation speeds and sounds of each monster and NPC model
+(see [Models](#models)). Which model a monster gets is still chosen by code
+when it appears (its creator); a monster's `model` names the model the code
+chooses, and a test checks that they agree. Its setup when it appears and its
+attacks are still code, chosen by its number; later phases move them into the
+monster data. The number and the names are what OpenMU calls a monster's
+`Number` and `Designation`, so they can later be exchanged with the server.
+
+Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-monsters-design.md).
+
+---
+
+## Files
+
+| File | What |
+|---|---|
+| `Monsters.json` | The monsters and NPCs: their numbers, names, kind, model, sound set and attacks |
+| `Models.json` | The monster and NPC models, see [Models](#models) |
+| `Sounds.json` | The sound sets the monsters play, see [Sounds](#sounds) |
+
+```json
+{
+  "formatVersion": 2,
+  "monsters": [
+    {
+      "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
+      "kind": "monster",
+      "model": "MONSTER_MODEL_BUDGE_DRAGON",
+      "soundSet": "Budge Dragon",
+      "numbers": [
+        {"number": 2}
+      ]
+    },
+    {
+      "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
+      "kind": "monster",
+      "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
+      "attacks": {
+        "skills": {"1": "attack2", "17": "attack2"},
+        "otherwise": "attack1",
+        "clearSkill": "never"
+      },
+      "numbers": [
+        {"number": 145},
+        {"number": 336, "attacks": {"otherwise": "generic", "clearSkill": "never"}}
+      ]
+    }
+  ]
+}
+```
+
+- A monster lists its `numbers`, 0–1023: the numbers the server sends when a
+  monster or NPC appears (packet 0x13 has 10 bits for them). A number is in
+  one monster, once; a monster has at least one.
+- The monster's fields are the values its numbers share. A number lists only
+  what it has differently, its own values, in the same fields: above, 336
+  (Death Centurion of Kalima 7) has no attack data of its own and plays the
+  generic pattern. Any field may be a number's own; an own value replaces the
+  whole field (an own `name` all languages, own `attacks` all of them). Where
+  the monster has a value and the number has none, the number says so with an
+  empty one: `"model": ""`, `"soundSet": ""`, `"attacks": null`,
+  `"mapVariants": []`, `"randomVariants": []`.
+- A monster with one number shares all its values with it, so that number
+  never has own values.
+- The shipped list has 423 monsters for its 547 numbers: the numbers with the
+  same English name, kind and model are one monster, so 36 monsters have
+  several (160 numbers in all, e.g. a Kalima monster's seven levels). Inside
+  them only attacks differ: the copies without attack data of Kalima 7,
+  Devil Square 7 and the second Ice Walker (531) play the generic pattern
+  as their own `attacks` (P26 of the design), and Dark Elf 440, Balram 344
+  and Soram 341 have attacks of their own.
+- Every monster has `name`, `kind` and `numbers`; `model` may be left out
+  (every shipped monster has it), and so may `soundSet`, `attacks` and the
+  variants.
+- Monsters are sorted by their first number, their numbers by number, and the
+  fields always come in the same order, so saving unchanged data gives the
+  same file (a test checks that the shipped file is written this way).
+- The file is UTF-8 with LF line endings. `formatVersion` is 2; a file with a
+  newer version stops the start. A file of version 1, which listed each
+  number with its values (`"number"` next to `"name"`), is read as a monster
+  for each entry, and saving writes version 2.
+
+### Fields
+
+| Field | Meaning |
+|---|---|
+| `numbers` | The monster's numbers, 0–1023, each `{"number": …}` with its own values |
+| `maps` | Of a number: the maps it appears on, by the server's map numbers (as in [map variants](#map-variants)). Filled from where OpenMU's Season 6 data places the number: its maps' spawns, with the event waves of Kanturu and Raklion, and the spawn lists of Crywolf, the Imperial Guardian and the Castle Siege (430 of the 547 numbers; Devil Square's stages are their map, 9 or 32). The others have none: the server's plug-ins place them (the golden invasions, Doppelganger), a player calls them up (the Kalima gates, summons), or no server sends them. Only the editor uses them; a monster has no `maps`, only its numbers |
+| `name` | The names by language, see [Names and translations](#names-and-translations) |
+| `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
+| `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), `mapObject <number>` (a map object, a trap), or `none` (no body, no sounds: the Imperial Guardian's traps 523, which only hit). The monster appears with it (MN4) |
+| `soundSet` | The [sound set](#sounds) it plays; left out: none |
+| `attacks` | Which animation the monster plays for the skill it attacks with, see [Attacks](#attacks); left out: attack 1, attack 2, attack 2 |
+| `randomVariants` | Other looks the game draws when the monster appears, each with its `model` and what it changes: `[{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard", "equipment": {"weapons": [{"group": 5, "number": 5}]}}]`. The game draws one of the entry's look and its variants, each as likely, as the old code drew it (the ranged Chaos Castle soldiers 163, 165 … 427 appear as the elf with a crossbow or the wizard with a staff). The look plays its `soundSet` and wears its `equipment` (left out: the entry's). |
+| setup fields | What the monster's character gets when it appears: scale, equipment, glow, spawn effects and more, see [Setup at spawn](#setup-at-spawn) |
+
+### Names and translations
+
+`name` holds the monster's names by language: `en` (English) first, then the
+translations sorted by language code. The codes are the same as for the UI
+texts (`de`, `pt`, `es`, …). A plain text (`"name": "Hound"`) is read as the
+English name only; saving writes the object form. The shipped list has
+English names and, for most monsters, Portuguese and Spanish ones from the
+original client's name files.
+
+- The game shows the name in the UI language (options window → language).
+  A monster without a name in that language shows the English one; an empty
+  translation counts as none. The original client took the names from the
+  `[LOGIN] Language` folder instead, so a player whose two settings differ
+  now sees the names in the UI language.
+- Switching the language renames the monsters and NPCs on screen at once.
+  Summons ("Budge Dragon of <owner>") and the Kalima gates keep the name they
+  appeared with until they appear again. Transformed players show the
+  player's name.
+- **Translate item names** does not change monster names. Only the monster
+  name inside a transformation ring's item name follows it, as the rest of
+  the item name does.
+- The game holds up to 64 characters of a name (UTF-16 units: an emoji
+  counts as two). A longer name is cut, and loading warns about it.
+- 252 has an empty English name, so the game shows no name for it; loading
+  warns about it. It keeps its entry.
+- The Kalima gates (152–158) have plain names (`Gate to Kalima 1` …). In the
+  game a gate shows "Magic stone of <owner>", which is the UI text
+  `MagicStoneOfOwner` of the `Game` group, not a monster name.
+- 658–668 (Cursed Statue and the Captured Stone Statues) have OpenMU's
+  English names. The original client had no names for them.
+- The editor names a monster as `<English name> (<number>)`, e.g.
+  `Budge Dragon (2)`, never by a translation.
+
+How to change and translate names is described in
+[translation-system.md → Monster and NPC names](translation-system.md#monster-and-npc-names).
+
+## Kinds
+
+The kind decides what the game does with a monster or NPC. It becomes the
+character's kind when the character appears:
+
+| Kind | In the game |
+|---|---|
+| `monster` | A click attacks it (where the game allows an attack). While the mouse is over it, it has a red outline, and its name and health bar show at the top of the screen. F8 turns health bars above the monsters on and off. **Auto attack** (options window) and the MU Helper attack only monsters, and skills that pick their targets in the client (the Fenrir's Plasma Storm) take only monsters |
+| `npc` | A click walks to it and talks to it (with the talk cursor). While the mouse is over it, it has a green outline and its name shows above it. Its speech bubbles never get a player killer's colour, and some NPCs say a line from time to time |
+| `trap` | Cannot be clicked: no outline, no name. It casts no shadow, and the client's path finding walks over its tile (other characters block theirs) |
+| `other` | Cannot be clicked: it is neither attacked nor talked to. In the shipped list only the Cherry Blossom Tree (451) has it |
+
+Summons, the Kalima gates (152–158) and transformed players are players in
+the game, whatever their entry says: the server's packets that create them
+make them players. They keep their monster number (the control socket reports
+it).
+
+The original client decided the kind by the number alone. The shipped list
+has those kinds, except for Mercenary Guild Manager Tercia (566) and
+Priestess Veina (567), which are NPCs (the old rules made them monsters).
+
+### Numbers without an entry
+
+The server may send a number the list has no entry for (a monster the
+server has and the list has not, or one you removed). The game then does
+what the original client did, and writes a warning for each such number once
+to `MuError.log`:
+
+- The kind comes from the old number rules:
+
+  | Numbers | Kind |
+  |---|---|
+  | 0–99 | monster |
+  | 100–110 | trap |
+  | 111–200 | monster |
+  | 201–259 | NPC |
+  | 260 and up | monster |
+
+  Except: 451 is `other`, and 368–370 and a list of 49 numbers from 367 to
+  579 are NPCs (e.g. Apostle Devin, 406, and Wandering Merchant Zyro, 568).
+  The list is in `src/source/Data/GameData/MonsterData/LegacyMonsterKind.cpp`.
+- No name comes from the list: the windows that name a monster by its number
+  (the quest windows) show `()`, and a character of that number that appears
+  is "Unknown monster {number}" (with the unknown monsters' look, below) or
+  has no name. A character already on screen whose entry is removed in the
+  editor keeps its name until it appears again.
+- Its look is the unknown monsters' look ([Unknown monsters](#unknown-monsters)).
+
+## Setup at spawn
+
+When a monster appears, its character gets the values of its entry's setup
+fields (monsters design, D63). They sit flat beside the monster's other
+values, and each can be a number's own value; a number's `null` clears one
+its monster has. A field the entry does not name stays as the game sets up
+any character.
+
+```json
+{ "name": "Magic Skeleton", "kind": "monster", "model": "MONSTER_MODEL_MAGIC_SKELETON",
+  "scale": 1.2,
+  "equipment": {"weapons": [{"group": 5, "number": 0, "level": 11}]},
+  "numbers": [{"number": 89}, {"number": 95}] }
+```
+
+| Field | What the character gets |
+|---|---|
+| `scale` | Its size, or `"character"`: the size a player has with its equipment |
+| `outline` | The thickness of its outline when pointed at |
+| `subType` | Its skin |
+| `lookLevel` | Its render tier (the glow of higher levels), 0 to 65535 |
+| `glowMesh`, `glowLight` | The mesh that glows, and its light |
+| `hiddenMesh` | A mesh that is not drawn (-2: none drawn) |
+| `shadow` | `false`: no shadow |
+| `hideShadow` | The character's own shadow flag (the Kalima gates set it to `false`) |
+| `alphaTarget` | How see-through it becomes (0.4: the Shadow, the Ghost) |
+| `light` | `false`: drawn without the scene's light (the Ice Queen) |
+| `pkColor` | The name colour of a player of that standing: `hero2`, `hero1`, `neutral`, `caution`, `murderer1`, `murderer2` |
+| `helperPlate` | The plate armor lights of the helper NPCs |
+| `selectable` | `false`: the mouse does not point at it, nor can it be clicked (the Battle Castle Shield) |
+| `appear` | How it comes in when the server has just spawned it (packets 0x13 and 0x1F with their new flag, Q-MN38c): `{"action": "stop2", "fadeIn": false, "sound": "SOUND_MONSTER_BULLATTACK1"}` (the Golden Dragon). `action` the animation it plays, by the attacks' names (`blend: true`: its first frame blends from the one before, the Maya hands), `startFrame` its frame (the Kalima gates' 0), `fadeIn` whether it fades in or shows at once, `appearTime` the frames of the golden monsters' sparkle (60), `sound` a `SOUND_` name and `effects` joints, effects and particles as in `spawnEffects`, made where it comes in, in the world. What it leaves out is the model's way: a player-shaped monster plays its rise and shows at once, any other fades in. The Kalima gates' appear runs for a gate the server sends as a summon (0x1F), as before, and also for one it sends by 0x13 |
+| `teleport` | What a monster shows when the server says it teleported (0x13's teleport flag): the fields of `appear`, with no model's way for what it leaves out. The Nightmare 361: `{"effects": [{"effect": "BITMAP_SPARK+1", "color": [1, 1, 1], "count": 2}], "sound": "SOUND_KANTURU_3RD_NIGHTMARE_TELE"}` |
+| `gate` | It is a castle gate, opened and closed by its buff "gate is open" (the Castle Siege's gate rule, Q-MN38c): `{"closed": "stop1", "opening": "stop2", "open": "walk", "arrival": "opening"}` (Castle Gate 277), the animations by the attacks' names. The gate switch plays `opening` or `closed`; a gate that comes into view (0x13, the siege preview 0x68) plays `opening` when open (`"arrival": "open"`: it stands open at once) or `closed`; when one of its animations ends it stands `open` and cannot be clicked, or `closed`. The tiles under it, clicking it and the gate's sound stay the rule's code; the waves of a closed gate are looks |
+| `facing`, `facingStep`, `facingByTile` | How it faces when the server sends it (0x13, Q-MN38): `facing` a fixed angle, whatever the direction the server sends (the Little Santas' 90); else the server's direction (1 to 8, minus 1) times `facingStep` (45 when absent), or the step of the last of its `facingByTile` rows whose tile it stands on: `[{"tileY": 90, "facingStep": 0}, {"tileX": 62, "facingStep": -135}]` (the Ballista) |
+| `class`, `classStep` | A player-shaped monster's class, as the items name the classes (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`), and its step: 0 the class, 1 its second class (the PK Dark Knight is a Blade Knight), 2 its third |
+| `equipment` | `weapons` (up to two, `null` for an empty hand), `helm`, `armor`, `pants`, `gloves`, `boots`, `wings` and `helper`, each an item `{"group", "number", "level", "excellent"}`, or a body that is no item, `{"part": "MODEL_MERCHANT_MAN_UPPER+1"}`: a part model of its own model or a player body (`"MODEL_BODY_HELM+15"`, the Doppelganger Magic Gladiator's bare head). A Dark Horse `helper` brings its horse; `"mountLook": "doppelganger"` gives it the Doppelganger look (Q-MN57). An item the item list does not have is an error in Data Checks, and the monster wears nothing there; the item tools list the monsters that wear an item, and a move can update them (D60, see [item-data.md](item-data.md)) |
+| `spawnEffects` | What appears with it, in this order: `{"joint": "BITMAP_JOINT_ENERGY", "subType": 2, "scale": 30}` (a trail of light on it, by the code's joint names; `"color": [1.5, 0.01, 0]` gives it a colour, `key` the code's PKKey, Daesuler's four rings 0 to 3), `{"effect": "MODEL_AURORA", "key": 120}` (an effect on it, the Life Stone's aurora; `key` is the code's PKKey), `{"particle": "BITMAP_BLUE_BLUR", "subType": 1}` (a particle, by the code's particle names; `scale` its size), `{"object": "MODEL_BC_BOX"}` (an object beside it, Pamela's and Angela's supply box; `"angle": 90` faces it, else it faces as the monster) or `{"eyes": [16, 17]}` (its eyes put on bones: right, left and up to two more pairs, which the eye trails after it follow). A joint, effect or particle takes `"count": 5` (that many), `"color"` (an effect's or particle's light; else the monster's), `"offset": [20, 20, 0]` (beside the monster), a joint `"targetOffset": [0, 0, 120]` (its end beside its start), `"scaleRandom": 10` (a random 0 to 9 more scale, each one drawn as the code drew it) and `"bone": 27`: it is made at that bone, in the world rather than on the monster, at the monster's first frame on screen, when its bones have a pose (the Dark Elf 412's crater, blue blurs and red shock waves) |
+| `spawnBuffs` | Buffs it has from the start: `["poison"]` |
+| `spawnSound` | The sound it plays when it appears, by its `SOUND_` name: `"SOUND_BC_EROHIM_ENTER"` |
+| `randomLook` | Skins drawn at spawn: one of the list, as the code draws it (`[10, 11]`) |
+| `randomStart` | `true`: the glow ring of the Maya battle monsters starts at a random point |
+| `positionOffset` | `[x, y]` in world units beside its tile (the Gateway Machine's `[-20, -200]`) |
+| `keepGroundHeight` | `true`: the ground height it starts on is kept for the map's code, which raises it there (the Battle Castle crown switches) |
+| `heightOffset` | How high above the ground it stands (Oracle Layla, Priestess Veina) |
+| `height` | The height it stands at, whatever the ground (Selupan's 1000 while he waits) |
+| `tileOffset` | `[x, y]` tiles beside the one the server names (the Smelting NPC) |
+| `boundingBox` | `{"min": [x, y, z], "max": [x, y, z]}`: its own box over the model's, either or both |
+| `startAction`, `startFrame` | The animation and frame it starts in (the Kalima gates start at frame 10) |
+| `deathEffect` | The death effect armed (100) |
+| `live` | `false`: dropped at spawn (the Wolf Status, P24): not drawn, not clickable, and later packets for it find nothing; a warning in Data Checks |
+| `noTurnOnHit` | Does not turn towards magic that hits it |
+| `moveSpeed` | Its walk speed, 0 to 65535 |
+| `noBloodPool` | Leaves no blood pool when it dies |
+| `hooks` | Code of the maps it hands over to when it appears, with the values that code fixed (Q-MN36d): `[{"hook": "EmpireGuardianRageReset", "boss": "Raymond"}]`. The hooks: `RaklionBossDrop` (Selupan drops down from where he waits), `Kanturu2ndEntrance` (Kanturu's entrance window takes the Gateway Machine, whose animations and the way in it runs), `EmpireGuardianRageReset` with `boss` `Raymond`, `Ercanne`, `Daesuler`, `Gallia`, `Bermont`, `Kato`, `Gaion` or `Jerint` (a new boss starts without the rage before it), `IllusionTempleStorageReset` with `storage` `allied` or `illusion` (a new storage shows no point effect its team had). A hook or value the maps do not know is an Error and does nothing |
+| `stateVariants` | Fields that are other while a state of the game is on, each replacing the monster's: `[{"state": "castleSiegeNotRunning", "heightOffset": -100}]`. The states: `castleSiegeRunning`, `castleSiegeNotRunning`, `raklionBossWaiting` (Selupan above the map, from standby to ready), `playerTransformed` (a player transformed into the monster comes into view, packet 0x45: the Giant is smaller then), `crywolfReady` (Crywolf's battle is about to start: its monsters come in at once, without the thunder). A state variant changes fields and clears none, and has no state variants of its own. A map variant's `stateVariants` replace the monster's on its maps |
+
+A value of the wrong kind is fatal; a joint, object, buff or standing the code
+does not have is an Error, and the character appears without it.
+
+Every monster of the list comes from its entry (MN4), on every map: the
+creators in the code that made them are gone (`CreateMonster`'s own switch,
+the map creators, the player-shaped monsters and merchants, and the lines of
+the packets that changed a monster after them). A number without an entry,
+an entry without a model and a model whose file is missing have the unknown
+monsters' look ([Unknown monsters](#unknown-monsters)). Before the old
+code went, the monster recorder compared each number's data with it on each
+map its entry names, with each state its state variants name on and off,
+in a new slot, a slot another character left and the slot of a living
+character with its key, through the packets and the cutscenes.
+
+### Unknown monsters
+
+A monster the game cannot show as itself gets a bug look instead of the Bull
+Fighter's body (D64), so the missing piece shows in the game. The section
+`unknownMonsters` of `Monsters.json` holds it (a file without it has these
+defaults):
+
+```json
+"unknownMonsters": {
+  "model": "MONSTER_MODEL_GHOST",
+  "scale": 1,
+  "glow": [1, 0.15, 0.1],
+  "marks": true,
+  "messageSeconds": 10,
+  "for": ["noEntry", "noModel", "missingFile"]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `model`, `scale` | Its body, as a monster's `model` names one, and its size. A model the list lacks is an Error, and the Ghost stays |
+| `glow` | The colour of its pulsing glow, and of its marks |
+| `marks` | X marks rising from it (`Data/Effect/UnknownMonsterMark.OZT`, a white X the glow's colour tints) |
+| `messageSeconds` | It says "I am a bug: {number}" in a chat bubble when it first is on screen and again every so many seconds; 0: only the first time |
+| `for` | Who gets it: `noEntry` a number the list has no entry for (its name is "Unknown monster {number}"), `noModel` an entry that names no model (76, 252, 296, 585), `missingFile` a model whose file is missing (Molt 68). One left out keeps the Bull Fighter's body, and one with a missing file no body |
+
+The texts are game texts (`Game.resx`). The game writes one log line for
+each number it shows with the bug look. In the editor, the section
+**Unknown monsters** of Monster Setup edits the look (each change an undo
+step, saved with the monster list); living monsters with the look show a
+new glow, marks and message at once, a new body at their next spawn.
+**Preview as** a number and **Show in Monster Preview** select it: Monster
+Preview shows the look's body for a number without an entry or an entry
+without a model (the glow, marks and message only in the game).
+
+## Models
+
+`Models.json` has one entry per model slot of the monster and NPC models.
+
+```json
+{
+  "formatVersion": 2,
+  "models": [
+    {
+      "slot": "MONSTER_MODEL_BULL_FIGHTER",
+      "file": "Data/Monster/Monster01.bmd",
+      "textureFolders": ["Monster"],
+      "headBone": 20,
+      "linkBones": [42, 33]
+    },
+    {
+      "slot": "MONSTER_MODEL_RAYMOND",
+      "file": "Data/Monster/Monster167.bmd",
+      "textureFolders": ["Monster"],
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
+    }
+  ]
+}
+```
+
+- `slot` names the model slot by the code's symbol. The **monster range**
+  has the `MONSTER_MODEL_*` types (slot `MODEL_MONSTER01` + type): its
+  models are opened when a monster with them appears and released when the
+  map changes. The **NPC range** has the `MODEL_*` slots from `MODEL_NPC_BEGIN`
+  on (`MODEL_SMITH`, `MODEL_MERCHANT_FEMALE_HEAD+1`). The code treats the
+  two ranges differently, see [What the code adds](#what-the-code-adds).
+- Models are sorted by slot and written in one way, as `Monsters.json`; a
+  test checks that the shipped file is written this way, that every file and
+  texture folder is there with exactly that spelling, and that each model's
+  textures are in its folders.
+- Files are `Data/...` paths in their spelling on disk; the game finds them
+  in any case on Linux too.
+
+### Model fields
+
+| Field | Meaning |
+|---|---|
+| `slot` | The model slot, see above |
+| `file` | The `.bmd` file |
+| `textureFolders` | The folders below `Data/` its textures are searched in, in this order; at least one |
+| `mapTextureFolders` | Other folders on some maps: `[{"maps": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
+| `textureNames` | A texture name that replaces the file's, by mesh: `{"0": "xmassanta1.jpg"}` (the Little Santas share one file) |
+| `animations` | The speeds that differ from the range's defaults, in frames per game frame, by animation: `stop1`, `stop2`, `walk`, `attack1`, `attack2`, `shock`, `die`, `appear`, `attack3`, `attack4`, `run`, `attack5`, then the number (`"12"`). The monster range plays stop1 at 0.25, stop2 at 0.2, walk at 0.34, attack1 and attack2 at 0.33, shock at 0.5, die at 0.55 and the others at 0; the NPC range plays all at 0.25 |
+| `holdLastFrame` | The animations that stop at their last frame instead of starting again. Without it: die in the monster range, none in the NPC range |
+| `headBone` | The bone the head turns with; without it as the file has it |
+| `streamMesh` | The mesh drawn as a stream; without it as the file has it |
+| `noneBlendMeshes` | Meshes drawn without blending |
+| `cues` | Named points of its animations that [sound events](#sound-events) play on: `name` (unique in the model), `animation`, and `frames`, from the first to below the second (the game checks the frame each game frame): where Raymond's feet land in the walk |
+| `timers` | Up to 4 timers of its animations (Q-MN91): `name` (unique in the model), `animation`, and `everyMs`, 1 to 60000; one ticks while the character is in the animation, each time more than `everyMs` passed since its last tick. The map's code for the model may ask for one by name (Twintail's `hair swing`, which swings its hair) and sound events play on it (`timers`), on the same tick. The timers the code asks for are listed in `CodeModelTimers` (`MonsterModelDefinition.h`): a model without its timer is an error of the model list |
+| `namedBones` | Names for bones that the game's code finds by name, registered in this order when one of its monsters appears (Q-MN37): `{"Rabbit_1": 3, "Rabbit_2": 16}`. The Lunar Rabbit's lights, the Golden Stone Golem's arms and Twin Tail's hair use theirs |
+| `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
+| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
+| `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
+| `linkBones` | The bones the weapons hang on, right then left; without it 33 and 42. One bone sets the right hand's only |
+
+Maps are the numbers the server sends (`mapTextureFolders`, a sound set's
+`maps`, a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
+Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
+A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
+Square 2. OpenMU sends the extended client the stage with the map
+(`MapChangedExtended`) and when it enters the world
+(`CharacterInformationExtended`, so a character which logs in again in Devil
+Square keeps its stage); a number names all of its stages, and with another
+server every stage is 0. The lists' older names (`worldTextureFolders`,
+`worlds`) are fatal problems that name the new ones.
+
+### The map picker
+
+The monster tools pick maps in one picker: a button that names the chosen
+maps opens a list of the maps a server sends, each with its server number
+and the `Data/World<n>` folder it loads. The levels of an event are one row
+under the event's name: Devil Square 1–7, Blood Castle 1–8, Chaos Castle
+1–7, Kalima 1–7, Illusion Temple 1–6, Doppelganger 1–4, Empire Guardian 1–4
+and Karutan 1–2; its box picks all levels, its arrow shows them one by one.
+Most levels are maps of their own; Devil Square's are the stages 1–4 of map
+9 and 5–7 of map 32, and a map whose every stage is picked is written as its
+number. A list that has all levels of an event names the event.
+
+A model has no sounds: they are in the [sound sets](#sounds) of its
+monsters. `sounds`, `soundEvents`, `soundEventMaps` and the `soundSlots` of
+format 1 in a model are fatal problems that say so.
+
+### What the code adds
+
+On top of the model list the code does (the Monster Model and Monster
+Preview tools show it):
+
+- **Monster range**: a character of the model dies with a blood pool and
+  stays dead, goes back to stop1 after stop2, shock and attacks 1 to 5 (and
+  after appear for Maya's hands and Selupan), and lands the hit of attacks
+  1 and 2 at frame 5.
+- **NPC range**: some NPCs pick their next animation in code (among them the
+  Smith, the wedding NPC, Silvia and Rhea).
+- **Speed factors**: a player transformed into a monster plays attacks 1 and
+  2 at 1.5 times their speed; the Illusion of Kundun plays die 4 times as
+  fast after frame 6; Erohim plays die at half its speed.
+
+A model whose file is missing has no body: the monster appears without one
+and the game keeps running; the file is logged and listed by Data Checks.
+Molt's `Data/Monster/Monster50.bmd` is missing, here and in the original
+client (OpenMU has no monster 68).
+
+## Sounds
+
+`Sounds.json` has the sound sets: what monsters play, each set named and
+named by the monsters that play it (`soundSet`, and a random variant's). A
+set holds its sound files, its sound events and the maps they play on.
+Monsters with one model can play different sets (the Rogue and the Death
+Centurion), and monsters of different models can play one (the Goblin and
+the Evil Goblin).
+
+```json
+{
+  "formatVersion": 1,
+  "soundSets": [
+    {
+      "name": "Bull Fighter",
+      "sounds": [
+        {"file": "Data/Sound/mBull1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ]
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | The set's name, unique; monsters name it |
+| `sounds` | The sound files: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
+| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model, at moments, each frame it is drawn or once until it stands, see [Sound events](#sound-events) |
+| `maps` | The maps the sound events play on; without it every map |
+
+Sets are sorted by name and written in one way, as the other files; a test
+checks that the shipped file is written this way.
+
+A model loads the sounds of the sets its monsters play with it (their own,
+and a random variant's with that model) when it opens, that is when the
+first monster of it appears; the map loads only its ambient sounds. A sound
+that another set or the map already loaded from the same file, with the same
+channels and 3D setting, is not loaded again, so sets that share a sound
+list it alike (a test checks both).
+
+A sound without an `id` gets a number of its own when it is first loaded,
+after the `SOUND_*` list; the same file keeps the same number for the
+session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
+name, or when an event of another set names it: an event plays the sound of
+its number, whichever set loaded it (the Giant Ogre's attack plays the Dark
+Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some events that
+were sound slots name numbers that no set loads, as in the original client;
+they play nothing (a test lists them).
+
+### Sound events
+
+`soundEvents` are sounds the game plays for a monster of the set. An event
+names when: `animations`, played while the character is in one of them, when
+it starts an attack, is hit or dies, at each step of a walk and at the end of
+each loop of stop1 and stop2; `cues`, played while the character is in the
+frames of one of the named [cues](#model-fields) of its model (the Empire
+Guardian and Karutan monsters' steps); `during`, played each frame the
+character is drawn in one of the animations (on screen; the `chance` draws
+each frame); `once`, played the first frame the character is drawn in one of
+them, after which none of the set's once events plays until it is drawn in
+stop1, stop2 or walk (Q-MN89: the maps' draw code cleared its flag in stop1
+and stop2, in Kanturu Relics also in walk, for some Kanturu monsters never; a
+death right after an attack, with no stand or walk between, is silent);
+`duringCues`, played each frame the character is drawn in the frames of one of
+the named cues of its model (Q-MN90: Kanturu Relics' Dreadfear in the first
+frames of its second attack; the once flag stays as it is); `timers`, played in
+a drawn frame where one of the named timers of its model ticks (Q-MN91:
+Twintail's walk sound with its hair swing); or `on`
+moments, played where the game reaches them, whatever the animation:
+
+| Moment | Where the game plays it |
+|---|---|
+| `attack` | An attack starts (SetPlayerAttack), whatever animation the attack plays |
+| `hit` | The character is hit (SetPlayerShock) |
+| `death` | The character dies (SetPlayerDie), also in Chaos Castle, next to its explosion |
+| `stand` | The character is set to stand: a walk ends, the server stops it (SetPlayerStop) |
+| `walk` | Each step of a walk (SetPlayerWalk) without a mount's sound; for the hero (a player transformed into the monster) one time in 64, which the game draws in place of the events' chance, as the original client did |
+
+Every character whose monster names a set plays its moments, a player-shaped
+monster (model `player`) too. Only a model of the model list loads a set's
+sound files when it opens, so a set on a monster of another model (`player`,
+a map object) plays only the `SOUND_*` ids the game loads; Data Checks warns.
+
+An event is heard only within 500 units of the hero and on the set's `maps`,
+unless it is `heardAnywhere`:
+
+```json
+"soundEvents": [
+  {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+  {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+  {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
+  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]},
+  {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LSDEATH"]}
+],
+"maps": [69, 70, 71, 72]
+```
+
+| Field | Meaning |
+|---|---|
+| `animations` | The animations it plays in |
+| `during` | The animations it plays in each drawn frame, instead of animations |
+| `once` | The animations it plays once in until the character stands or walks, instead of animations; once events of one frame all play (the Witch Queen's thunder and attack). In stop1, stop2 or walk it would play each frame (a warning) |
+| `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `duringCues` | The cues of the monster's model it plays in each drawn frame, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `timers` | The timers of the monster's model it plays on, in a drawn frame where one ticks, instead of animations; a model without the timer plays nothing for it (Data Checks warns) |
+| `on` | The moments it plays at, instead of animations |
+| `deathEffectArmed` | Only while the character's death effect is armed |
+| `heardAnywhere` | Heard at any distance from the hero and on every map |
+| `atMonster` | Played with the character as the sound's object: a sound that still plays is not started again |
+| `chance` | Plays with a chance of one in `oneIn`, drawn as `draw` says: `rand` (`rand() % oneIn == 0`) or `randFps` (the original client's `rand_fps_check`, whose chance depends on the frame rate) |
+| `pick` | Plays the first sound when a draw of one in two comes up, else the second, or none with one sound (`rand` or `randFps`) |
+| `sounds` | The sounds, played together (one of them with `pick`), each a sound of the set (its `id`, or its `file` when it has none) or any `SOUND_*` number |
+
+One call can play several events, in their order; their draws come in that
+order too. A character plays the set its monster names for the model it
+appears with; a player, or a monster shown with a model that is neither its
+own nor one of its random variants', plays none. The `subType`, `notSubType`
+and `frames` of the events before the sound sets are fatal problems that
+name what replaced them: the monsters' own sets, and the cues.
+
+Not all monster sounds are data yet: the monsters of Crywolf, the Kanturu
+tower, the Hunting Ground, the Balgass barracks, Illusion Temple and a few
+others (among them 340 to 349, 361 to 365, 386 to 403 and 409 to 412) play
+their sounds from their map's per-frame monster effects, and their maps load
+them; they name no sound set. They move into sound events with the monsters'
+looks (design, MN8). The monsters of Kanturu Ruins and Kanturu Relics and
+Relics' gateway machine play theirs from their sets (MNK): walks as `during`
+events and attacks as `once` events, heard anywhere as their map's code
+played them, and each death when it starts, also right after an attack
+(animation events, Q-MN93); Dreadfear's
+second attack on a cue of its first frames (`duringCues`), Twintail's walk on
+its model's 500 ms timer, which also swings its hair (`timers`), and Blade
+Hunter's walk smoke comes with its step sound (Q-MN92). The Aida monsters'
+walk sounds are `during` events of their sets; their monster effects play
+them where they played their sounds (`SoundEvents::PlayDrawn`), and for every
+other character `UpdateDrawnCharacterEffects` plays them after the maps'
+monster effects. Like those effects they run in the update for the characters
+the last frame drew, so they start one frame after a monster comes into view
+([ADR 0003](adr/0003-draw-does-not-change-game-state.md)). Their attacks and
+deaths are animation events, as regular monsters' (Q-MN86): each attack and
+death plays when it starts, heard anywhere as their walks (Q-MN94); the
+original draw code played them once until the monster stood, so an attack
+right after another or a death right after an attack was silent.
+
+## Attacks
+
+A monster entry's `attacks` say which animation the monster plays for the
+skill it attacks with (Selupan's):
+
+```json
+"attacks": {
+  "monsterSkills": {"34": "attack2", "35": "attack1", "36": "attack3", "37": "appear", "41": "none"},
+  "otherwise": "attack4",
+  "clearSkill": "afterAttack"
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `monsterSkills` | The monster skills (packet 0x69) and the animation each plays |
+| `skills` | The player skills (packets 0x19 and 0x1E) and the animation each plays |
+| `otherwise` | What any other skill, a stale skill or a normal attack plays: one animation, a list of two or more played in turn (a rotation), or `generic` (the generic pattern, as a monster without attacks plays it); `attack1` when left out |
+| `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
+| `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (the skill plays only the attack its packet starts and stays while that attack plays; it is cleared when the animation ends, when a hit's shock ends attack 3 to 5 or appear early, at once when the entry plays `none`, and by any other attack, which is a normal one also while the skill's attack plays) |
+| `sound` | A `SOUND_*` sound the attacks play each time they play (the traps') |
+| `soundAtMonster` | The sound plays at the monster (3D) instead of everywhere alike |
+
+An animation is a name of the model's animations (`attack1` to `attack5`,
+`appear`, `shock`, `stop2`, …) or `none`: the animation that plays goes on.
+The monster skill's entry comes first, then the player skill's, else
+`otherwise`. The player skill is never cleared.
+
+A rotation, `"otherwise": ["attack1", "attack3"]`, plays attack 1, attack 3,
+attack 1, … : each monster counts its own from its creation, and a skill
+entry that plays does not move it on. `"otherwise": "generic"` plays the
+generic pattern (below) with the count it uses.
+
+### Map variants
+
+What a monster does differently on some maps is a map variant of its entry.
+On the variant's maps its `attacks` replace the monster's, as a whole (the
+Fire Golem is Devil Square 5's boss and plays the generic pattern there):
+
+```json
+"mapVariants": [
+  { "maps": [32], "attacks": { "otherwise": "generic" } }
+]
+```
+
+`maps` are one or more maps by the server's numbers or stages of them (see
+[Models](#model-fields): Devil Square 5–7 is 32, `{"map": 9, "stage": 2}` is
+Devil Square 2). A map or stage in two variants of a monster is a fatal
+problem, and a variant without `attacks` or a setup field changes nothing
+(a warning). A monster without `attacks` of its own plays the variant's on
+its maps and the generic pattern elsewhere.
+
+A variant's [setup fields](#setup-at-spawn) replace the monster's one by one
+on its maps; the monster's other fields stay (the Cursed Wizard has a
+player's size, and 1.0 in Devil Square):
+
+```json
+"scale": "character",
+"mapVariants": [
+  { "maps": [9], "scale": 1.0 }
+]
+```
+
+A variant's `model` gives the monster another body on its maps (Balram on
+Crywolf 2nd, 35); its named bones are that model's. A variant changes fields
+and clears none: `null` in a variant is a fatal problem.
+
+### When the game plays an attack
+
+What the server sends:
+
+- **0x18** (a normal attack) plays an attack.
+- **0x69** (a monster skill) stores the monster skill and plays an attack
+  for the skills 1 to 77 (`ATMON_SKILL_END`); others it only stores.
+- **0x19** (a player skill) stores the player skill and plays an attack only
+  for some skills (200 to 202, the Lightning to Flame group, Fire Slash,
+  Party Teleport, Chaotic Diseier). Heals and buffs play attack 1, attack 2,
+  attack 2 without the attacks; other skills play nothing. A player skill's
+  entry then plays on the next 0x18, which reads the stored skill.
+- **0x1E** (an area skill) stores the player skill and plays an attack.
+
+Playing an attack (`SetPlayerAttack`) for a monster:
+
+1. A player-shaped monster (model `player`) plays a player attack chosen
+   from its equipment; its `attacks` do nothing.
+2. The traps (`mapObject 39`, `40` and `51`) play their `attacks` and their
+   effects.
+3. Else the map code that is no choice of animation runs: the Battle Castle
+   guards take their attack state (by model), Maya plays her scene in
+   Kanturu 3rd, Selupan his height, sounds and effects in Raklion, and the
+   Empire Guardian bosses their rage (the Berserker skill starts it; in a
+   rage a boss plays appear). Maya, Selupan and the bosses play their
+   `attacks` there.
+4. Else the monster plays its `attacks`, or its map variant's on the
+   variant's maps, on every map.
+5. A monster without `attacks` plays the generic pattern: attack 1,
+   attack 2, attack 2 by a count of the character (`SwordCount`: attack 1
+   when it divides by 3; each attack and spell adds 1 to it, the pattern 1
+   more).
+
+Before the attacks PR, map handlers chose the animation for numbers they
+listed, each on its maps; on other maps those monsters played the generic
+pattern. Where the server places them, they play the same now: the Fire
+Golem is Devil Square 5's boss and keeps the generic pattern there by a map
+variant, and Erkanne stands still in Loren Market by hers.
+
+The game counts only attack 1 and attack 2 as attacks: a hit plays shock
+over any other animation, and only they have a hit frame. After appear, only
+Maya's hands and Selupan go back to stop1; other models play it again
+until their next action. Data Checks warns about both.
+
+## Loading and errors
+
+At startup `Data/Monsters/Monsters.json` is read and checked, after the
+effect catalogue `Data/Monsters/Models.json`, then `Data/Monsters/Sounds.json`.
+
+Problems have three levels, the same in every data area and editor tool:
+**fatal** ones make the data unusable, **errors** name something that is
+missing (the game runs without it), **warnings** are worth knowing.
+
+**Fatal problems** stop the start with a message ("Monster data error")
+that names the file, the monster and the field. All problems are also written
+to `MuError.log`. Fatal problems are:
+
+- a file that cannot be read, invalid JSON, a missing or unsupported
+  `formatVersion`, no `monsters` list
+- a monster that is not an object or has no `numbers` list of one or more
+  numbers; a number that is not an object, or whose `number` is missing or
+  not a whole number from 0 to 1023
+- a number that is in the list more than once, in one monster or in two
+- a number's own model that is one of the looks (`randomVariants`) it shares
+
+A problem in a monster's shared values leaves the monster out, one in a
+number's own values that number; both stop the start.
+- a missing `name`, a name that is not a text or an object of texts, or a
+  translation that is not a text (e.g. `"pt": 5`)
+- a missing `kind`, or one that is not `monster`, `npc`, `trap` or `other`
+- a name containing `||`
+- a language code that is empty or has other characters than letters,
+  digits and `-` (e.g. `"p=t"`)
+
+**Warnings** are logged, and the game starts anyway:
+
+- unknown fields (they are ignored)
+- an empty English name (also a name object without `en`): the game shows no
+  name in a language without a translation
+- a name longer than 64 characters: the game shows it cut
+- a name in a language the game has no UI texts for (it is never shown)
+
+In the model list, fatal problems (they stop the start with "Monster data
+error" too, naming the model list) are a
+value of the wrong form (each names the model and the field), a slot that is
+no model slot of the two ranges or is there twice, a cue name that is there
+twice, a sound field (`sounds`, `soundSlots`, `soundEvents`,
+`soundEventMaps`), a bitmap slot or
+part slot that does not exist, and a part `effect` that is not an effect
+type. Unknown fields and a model or part file that is not in the client
+folder are warnings; the shipped list has one, Molt's file.
+
+In the sound sets, fatal problems are a value of the wrong form (each names
+the set and the field), a name that is there twice, two sounds of a set with
+one name (the same `id`, or the same `file` without one), a sound event that
+names no sound of the set and no `SOUND_*` number, and a sound `id` that does
+not exist. A `SOUND_*` id that two sets load from different files is an
+error: the game plays one file for the id, the one of the model that opened
+last. What the files name of each other is checked last: a monster or a
+random variant that names a set that is not there, and a random variant
+whose look the code never draws, are errors (the monster plays no sounds
+there, the variant does nothing); an event's cue that the model of a monster
+that plays the set lacks (also the model of a random variant without a set of
+its own, which plays the entry's), and a set that no monster plays, are
+warnings.
+
+An automated test loads the shipped monster list (it expects only the
+warning about 252), the shipped model list (only Molt's file) and the
+shipped sound sets (no problem, also in what the files name of each other),
+so a pull request with broken monster data fails its checks. With a test build (`-DBUILD_TESTING=ON`):
+
+```bash
+ctest --test-dir <build folder> --build-config Debug -R monster --output-on-failure
+```
+
+## Editing monsters (MuEditor)
+
+The monster tools (editor builds, F12, **Windows → Monsters**) edit the
+monsters of the running game: **Monster Browser**, **Monster Setup**,
+**Monster Equipment**, **Monster Model**, **Monster Preview**, **Monster
+Attacks** and **Monster Translations**; their
+problems are listed in **Data Checks**
+([dev-editor.md → Data Checks](dev-editor.md#data-checks)). They
+share one selected monster: selecting it in one tool shows it in the others.
+In the first layout (also after **Windows > Reset Layout**) the Monster
+Browser is a tab beside the Item Browser and the others are tabs beside the
+item tools.
+
+- **Monster Browser**: the monsters with their numbers, their name in the UI
+  language, their kind and their maps, with a search (the whole number, or a
+  part of a name in any language; A to Z in either case) and filters: a
+  kind, and the monsters without a name in a language. **Clear filters**
+  clears them. A monster with several numbers is one row ("3 numbers") with
+  an arrow that opens it to its numbers; a search or filter opens the
+  monsters to the numbers it finds. The monster's row shows and changes the
+  values its numbers share (D61): selecting it shows them in the other tools
+  ("The values the 3 numbers of Death Centurion share"), and its kind combo
+  sets the kind of every number that shares it. On a number's row a shared
+  name or kind is grey and its kind locked, an own one yellow (see
+  **Shared and own values** below). The **Maps** column says
+  where each number appears, as OpenMU's Season 6 data places it; its button
+  opens the map picker, one undo step per change (Q-MN98). The maps are a
+  label for the tools: the server decides where monsters appear. A monster
+  or number selected in another tool is scrolled to, its monster opened; the
+  search and filters are cleared when they hide it. The buttons above the
+  list act on the selection, a right click on a row on that row. It has
+  **Save Monsters** and **Revert**, and:
+  - **Add monster**: a new monster with one number 0–1023 (the first free one to start with;
+    **Next free** finds the next), the English name and the kind. A number
+    with an entry is never free, also 252 with its empty name. The kind
+    follows the old rules of the number (see
+    [Numbers without an entry](#numbers-without-an-entry)) until you pick
+    one. It names no model yet, so it appears with the unknown monsters'
+    look ([Unknown monsters](#unknown-monsters)) until it has one.
+  - **Add number**: a free number in the selected monster (the next free
+    one after its last number), with the values its numbers share and no
+    maps. A monster of one number becomes a monster of two.
+  - **Copy monster**: a new monster with one number: the values the selected
+    monster's numbers share, with its English name and kind, at the next free
+    number after it, without the translations and maps (Q-MN99).
+  - **Copy number**: a new number in the same monster with the number's
+    values, its own ones included, without maps.
+  - **Move number to...**: the number into another monster (a search lists
+    them with their numbers). Its values stay, so nothing changes in the
+    game: those equal to the new monster's are shared there, the others its
+    own (Q-MN97). For numbers that belong together, such as a new stage
+    version that came as a monster of its own.
+  - **Split number out**: the number becomes a monster of its own, with its
+    values.
+  - **Remove number** and **Remove monster**: removes the number's entry, or
+    the entries of all numbers of a monster with several. The dialog says what the game
+    then does with the number (the kind of the old rules, no name from the
+    list) and lists what still uses it and stays there: the quests of the
+    quest window whose NPC it is or that ask to kill it, how many dialogue
+    states the quest system's NPC dialogues have for it, and the source
+    lines that name it (read from the sources the editor was built from;
+    without them that part is not known). A source line names it by its `MONSTER_` constant of the
+    monster number list, by its number compared with a variable whose name
+    ends in `MonsterIndex` (`c->MonsterIndex == 495`), or by a range check
+    around it (`78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL`).
+    Code that uses the number in other ways is not found: a `case` label, a
+    function argument (`getMonsterName(236)`), a variable with another name.
+  - **Kind**: each row has a combo with the monster's kind; picking another
+    kind changes it (one undo step) and selects the monster. A monster row's
+    combo changes the kind its numbers share.
+- **Shared and own values** (Q-MN95, Q-MN96): with a number of a monster
+  with several numbers selected, Monster Attacks and Monster Sounds say over
+  each field whether the number shares it ("Attacks: Shared by the 3 numbers
+  of Death Centurion", grey, locked) or has its own ("Attacks: 336's own
+  value", yellow). **Make it this number's own** unlocks a shared field; the
+  number has its own value once the field differs from the monster's. The
+  file stores only differences: a value set back to the monster's is shared
+  again, also after an edit of the monster row. **Back to...** gives an own
+  field the monster's value or another number's own one, picked from a list.
+  In the Monster Browser a right click on a number's row does the same for
+  its name and kind; a name made the number's own is edited in Monster
+  Translations. A field made a number's own stays so while the number is in
+  that monster: moved into another, it is locked there. Locked attacks still
+  play with **Play** and **Play next attack**. Each change is one undo step.
+  Monster Model and Monster Preview always show one number: for a monster
+  selected as a whole, the number of its row.
+- **Monster Translations**: the names in all languages, with **Save
+  Monsters**, **Import names from NpcName txt** and **Export as NpcName
+  txt**. A monster with several numbers is one row for the names its numbers
+  share ("145 (3)"), followed by a row for each of its numbers with names of
+  its own or made its own; a search for any of its numbers finds the
+  monster's row; see
+  [translation-system.md → In the monster editor](translation-system.md#in-the-monster-editor)
+  and [Import and export of NpcName txt](#import-and-export-of-npcname-txt).
+- **Monster Model**: the model of the selected monster, from the model list:
+  its slot and range (hover over the range for what the code does with it),
+  the monsters with the model (a click selects one), and
+  - **Model file**: the file, with a search over the `.bmd` files below
+    `Data/Monster` and `Data/NPC` and in the other folders the model list
+    uses. Picking one changes the file; a model whose texture folder was its
+    file's folder takes the new file's folder.
+  - **Texture folders**: remove one (not the last) or add one.
+  - **Animations**: one row per animation of the model: its speed (drag it;
+    **Default** gives back the range's), whether it holds its last frame, and
+    what the game adds in game (a speed factor, the next animation, the hit
+    frame).
+  - **Sounds**: the sound set the selected monster plays with the model,
+    with **Open in Monster Sounds**.
+  - **Cues**: the model's cues, each with its animation and frames; they are
+    edited on their events in Monster Sounds. **Remove** removes a cue that no
+    sound event of the model's monsters plays on any more.
+  - **More of the model entry**: the values the tool shows but does not edit
+    (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
+    are edited in the file.
+
+  A model is shown once the game has it open; the tool opens it when it
+  shows it (as if a monster of it had appeared). A monster whose model is
+  outside the model list (`player`, a map object) says so. For a monster
+  with random variants it shows the look Monster Preview shows.
+- **Monster Sounds**: the [sound set](#sounds) the selected monster plays,
+  picked from the sets (or none), with **Open**; for a monster with random
+  variants, a row per look with its model and its set (**the entry's**, or
+  another). Beside the list of sets, each with the number of monsters that
+  play it, **Add a sound set**, **Copy** and **Remove** (not a set that
+  monsters play), and the set shown:
+  - its **Name** (a rename gives the monsters that play the set the new
+    name, in the same undo step) and the monsters that play it (a click
+    selects one);
+  - **Sound files**: each with **Play** and **Remove** (not a file an event
+    plays), and a row to add a file with its `SOUND_*` id (optional),
+    channels and 3D;
+  - **Sound events**: a row per [sound event](#sound-events): **When**, its
+    moments, animations, animations of **Each frame in** (`during`) or
+    **Once until it stands** (`once`), or cues of the shown look's model
+    (one or more;
+    picking one of another kind makes the event one of it; **New cue at the
+    preview's frame** adds a cue to the model there), on a cue's event the
+    cue's animation and frames, which change the model's cue for all its
+    monsters, and **Use the preview's frame**, which moves the cue to the
+    frame Monster Preview shows; whether the death effect must be armed,
+    whether it is heard **Anywhere** and played **At monster**, a chance of one
+    in n, a pick of one of two sounds (or of one sound and none), and its
+    sounds, picked from the set's own; **Play** plays them, **Remove** removes
+    the event (when no other event plays on its cue, it asks whether the cue
+    goes too). **Add a sound event** adds one for attack1 with the set's
+    first sound (a set without sounds cannot have events). **Maps** picks the
+    maps the events play on in the [map picker](#the-map-picker) (none:
+    every map).
+- **Monster Preview**: the selected monster's model, turning if you like,
+  with the item preview's camera: drag to turn it, the middle button moves
+  the picture, the wheel zooms, a double click puts it back. Pick any
+  animation; **Play**, **Pause**, **From the start**, and a frame slider to go
+  frame by frame. The speeds are those of Monster Model, also while one is
+  being dragged there. The [sound events](#sound-events) of the monster's set
+  play as the game plays them: those of the animation and its cues when it
+  starts, at each loop of stop1 and stop2 and frame by frame in a walk, then
+  those of its moment (stand for stop1 and stop2, attack for the attacks, hit
+  for the shock, death, and walk at each frame of a walk); `during` events
+  at each frame of their animations and `once` events on the first frame
+  after each start of the animation; on any map and at any distance, with
+  the death effect counted as armed. The hit frame of
+  attacks 1 and 2 is marked on the slider, and the line under it says what
+  the game adds. The model's cues of the animation are tags under the
+  slider: hovering one says its frames and what it plays, a click shows its
+  event in Monster Sounds. **Add a sound at this frame** adds a cue at the
+  frame shown and an event on it to the monster's set (one undo step), then
+  Monster Sounds shows the event to pick its sound. A monster with random
+  variants gets a **Variant** choice: the entry's look or a variant's, with
+  its model and its set. A monster with map variants gets a **Map** row (all
+  maps, or a variant's maps with its model and its setup), one with state
+  variants a **State** row (always, or a state with its fields). **Show
+  equipment** draws it as the game draws the monster, with the items and
+  the look of that setup (scale, outline, glow, PK colour, ...); **Pointed
+  at** draws it as when the mouse is on it; **Light** sets the light on it.
+  The game's shadows are left out (they fall by the map's sun onto its
+  ground): a setup's `shadow` and `hideShadow` show in the game only, as
+  the preview says.
+  Drawn so, it has what the game's tick adds to a monster (its eyes, the
+  particles of its kind) and the spawn effects (`spawnEffects`, [Setup at spawn](#setup-at-spawn)) a spawn
+  makes, in the game's effects, which the preview draws with its camera.
+  **Replay spawn** makes the spawn effects again, **Replay appear** plays
+  its appear: the animation once, the fade-in, the effects and the sound
+  (with Play the sounds). Neither makes the objects a row puts beside the
+  monster, as they would go into the map. A player-shaped monster is the player model with its equipment, at the
+  player's own animation speeds (Monster Model has no player model); one
+  that rides a Dark Horse shows without the horse. **The game's speed
+  factors** plays them (**As a transformed player** too). The preview is
+  only in the editor's window.
+- **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
+  the map code that runs with them (the guards' state, Maya's scene,
+  Selupan, the Empire Guardian bosses' rage, the traps' effects). **Add
+  attacks** gives a monster without them attacks that play attack 1;
+  **Remove the attacks** gives it the generic pattern again. **Map** shows
+  **All maps** or one of the monster's [map variants](#map-variants), named
+  by their maps; **Add a map variant** adds one with the monster's attacks,
+  whose maps **Plays on** picks in the [map picker](#the-map-picker) (Save
+  refuses a variant without maps); the tables then edit the variant's
+  attacks, and **Remove the map variant** removes it. Each table
+  (monster skills, player skills) has a row per skill with its animation,
+  **Play** and **Remove**, and a number field with **Add**; a monster skill
+  that 0x69 plays no attack for is marked. **Play** plays the animation once
+  in Monster Preview (and opens it), with the model's attack sounds (its
+  sound events) and the attacks' sound, then the model stands; skill effects do not play. A
+  Monster Preview that is a tab beside Monster Attacks moves to the right
+  half of their place, so both show. **Any other attack** is an animation, a
+  rotation (its animations in turn, with **Remove** and **Add an
+  animation**), the generic pattern or a draw, and **Clear the monster skill** says when the skill is cleared.
+  **Play next attack** plays what the monster's next such attack plays and
+  says which: the rotation in turn, the generic pattern and the draws as the
+  game counts them for one monster from its creation; **From the start**
+  starts the counts again.
+  **Sound of the attacks** is a `SOUND_*` id they play each time (the traps'),
+  **At the monster (3D)** plays it there; a name the monster data does not
+  know is not stored, and the field says so. The
+  animations offered are those of the open model with a speed above 0 (the
+  tool opens it); while it is not open, stop1 to attack5. Each change is one
+  undo step and reaches the monsters' next attack. A player-shaped monster
+  shows a note instead.
+- **Monster Setup**: what the selected monster's character gets when it
+  appears ([Setup at spawn](#setup-at-spawn)): the model, then the setup
+  fields in collapsing sections, **Look** (open), **Spawn** (with the
+  facing), **Appear and teleport**, **Behaviour** and **Gate and hooks**.
+  **Map** shows **All maps** or one of the monster's map variants (**Add a
+  map variant**, its maps, **Remove the map variant**: it also holds the
+  attacks of those maps), **State** shows **Always** or one of the state
+  variants of what **Map** shows: the monster's, or the map variant's own
+  (**Add a state variant** of a state it has none of, **Remove the state
+  variant**). A map variant's own state variants replace the monster's on
+  its maps: while it has none, the monster's apply there (the row says
+  which), and its first one starts from them, so they keep applying. From
+  then on its list is its own: a change of the monster's state variants
+  does not reach those maps (under **All maps** the row names the map
+  variants that have their own). On a
+  variant a field it does not change shows the monster's
+  value, grey (a map variant's state variant: the map variant's, else the
+  monster's): **Set** gives the variant that value to change, **x** takes
+  it again. On the monster **Set**
+  gives a field a value and **x** leaves it to the game. The bounding box
+  has a box per corner: unticked, the corner is the model's ("as the
+  model's") and is not written; ticked on, or with **Set**, it starts from
+  the model's box. Each field says
+  when living monsters take a change: **at once** (their look, equipment,
+  speed and turning, a fixed facing; a field taken away goes back to the
+  game's value) or at the **next spawn**; a next-spawn field that living
+  monsters do not show yet says how many wait (**waiting: 3**), the model
+  too. **Respawn live monsters (n)** makes the living monsters of the
+  selection again for a test: the same key, slot, tile and turn, what their
+  last spawn attached (spawn effect joints and effects, part models, pet,
+  cloth) removed first; the buffs they show stay (an open castle gate's)
+  except their last spawn's setup buffs that the server did not also give,
+  which go, so a player's poison on a monster that spawns poisoned stays;
+  their build time, health and shield bars stay too.
+  Their hooks and the objects a row put beside them are not run or made
+  again; with **Play appear** they come in as the server's new monsters do.
+  The server is not told. A Dark Horse helper's horse comes or goes at
+  once. A number's field shared by its
+  monster's numbers is grey; a right-click makes it the number's own. A
+  line on top names the maps the selection appears on. The lists are edited
+  row by row under their label: the spawn effects (each opened to its kind,
+  type, sub type, scale, count, key, bone, colour and offsets, with **Move
+  up**, **Move down**, **x** and **Add an effect**; a new row and one
+  switched to another kind start with the kind's first type; a switched row
+  keeps its count and offset where the new kind has them (a joint, an effect
+  or a particle) and none of the old kind's other fields; an Eyes row is red until it has 2, 4 or 6 bones), the
+  spawn buffs, the
+  random skins (a comma list), the facing by tile and the hooks (with **Show
+  code**: what the map code runs). **Appear** and **Teleport** (the
+  animation, blend, start frame, fade in, appear time, sound and the effects
+  where it comes in, which are joints, effects or particles only) and the
+  **Castle gate** (its closed, opening and open
+  animations, and whether an open gate coming into view plays its opening)
+  are edited under their label once set. The equipment shows its count
+  and **Open Monster Equipment**. Below them, always shown, the section
+  **Unknown monsters** edits the bug look of every monster the game cannot
+  show as itself ([Unknown monsters](#unknown-monsters)).
+- **Monster Equipment**: what the selected monster holds and wears, laid
+  out as the game's character window (helm and wings on top; weapon 1,
+  armor, weapon 2 and helper; gloves, pants and boots). A click on a slot
+  picks it; below, **Empty**, **Item** (a search of the items of the
+  slot's groups, the level and the excellent flags; the helper's **Horse
+  look**, normal or doppelganger) or **Body** (a part model such as
+  `MODEL_BODY_HELM+15`, for helm, armor, pants, gloves and boots). A slot
+  naming an item the item list does not have is red ("No item at 7/2").
+  On a monster model only the weapon slots take items (on its model's
+  `linkBones`); its other slots take a body (the merchants' part models) or
+  nothing, as the game hangs an item there at a random place: **Item** is
+  off there, and an item already there is red. A player-shaped monster takes
+  items in every slot.
+  **Map**, **State** and **Look** rows (when the monster has map or state
+  variants or random looks) pick whose equipment is shown, the **State** row
+  the state variants of the picked map variant or the monster's; one that has
+  none shows the monster's grey (a map variant's state variant the map
+  variant's, if it has some), **Set** gives it its own copy and **Use
+  the monster value** the monster's again. Living monsters wear a change
+  at once.
+- In **Data Checks**, the areas Monsters and Monster models: the checks of
+  loading and saving, run on the monsters and models as they are now: a name
+  with `||` or a language code that is not one (fatal), an empty English
+  name, a name longer than 64 characters and a
+  name in a language the game has no UI texts for (warnings), and the checks
+  of the model list's load (a model or part file that is not in the client
+  folder is a warning), and the checks of the attacks (warnings): attacks
+  of a player-shaped monster, a monster skill that
+  0x69 plays no attack for, and each animation the attacks can play that the
+  open model lacks, whose speed is 0, after which the model does not go back
+  to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)); and the
+  checks of the monsters with their numbers (warnings): a number whose own
+  attacks are the generic pattern while its monster has attacks (P26), and
+  a map variant on maps where its numbers do not appear (a shared variant
+  where none of the monster's numbers does, a number's own one where that
+  number does not; numbers without maps are not checked); an item a monster
+  wears that the item list does not have (error, D60); and a setup that
+  drops the monster when it appears, `live` false (warning, P24). With the
+  shipped lists it shows warnings only: 252's empty name, Molt's missing
+  file, 48 of the attacks (the bosses' appear and attack 3, Bali's draw, the
+  Battle Castle guards' shock and the like), the 13 numbers of P26, the map
+  variants on maps where OpenMU does not place them (Erkanne's on map 79,
+  the Crywolf bodies of world 35) and the Wolf Status (204), which is
+  dropped when it appears. The checks run when
+  the window is first shown and on **Check**; after a change the window says
+  that the monsters changed since the last check. Errors come first, and
+  each kind can be hidden with its box. A click on a problem selects the
+  monster and opens the tool of its field (Monster Translations for a name,
+  Monster Attacks for the attacks), the monster as a whole when the number
+  shares the value with its monster's other numbers (a shared map variant);
+  an arrow key onto it only selects the monster. There is no check of the
+  kind: a kind that differs from the old rules (566, 567) is not a problem.
+
+In the browser and Monster Translations, the arrow keys move
+the selection (see [dev-editor.md](dev-editor.md)).
+
+How changes work:
+
+- **Every change goes into the monster table right away**, and the game
+  uses it at once. Monsters and NPCs of that number on screen get a changed
+  name at once, also after Add and Undo (not summons and Kalima gates, see
+  [Names and translations](#names-and-translations)). Their kind stays until
+  they appear again: a kind change, Add and Remove reach the monsters and
+  NPCs that appear after it. After Remove, the ones on screen keep their name
+  and kind until they appear again.
+- A name or a speed is stored when you leave its field after a change, a
+  kind, a file, a folder, a held last frame, a sound set or a sound event
+  right away. A changed model is opened again before the next frame, with its
+  textures and sounds (a changed set's sounds load for the open models that
+  use it), and the characters of the model keep playing (an animation it no
+  longer has goes back to the first). Each is one step of **Undo** and **Redo** (in the editor's bar, see
+  [dev-editor.md](dev-editor.md); also Ctrl+Z and Ctrl+Y while a monster
+  tool has the focus and no field is being typed in): the last 256 steps,
+  for the whole session and across saves. Undo and Redo select the monster
+  they change, as a whole for a change of the values its numbers share. A step is not undone when the monster changed in a way the
+  history did not record; the console says so. The Monster Browser's title
+  has a `*` while there are changes that are not saved.
+- **Save Monsters** (in the Monster Browser and Monster Translations) runs
+  the checks and writes `Data/Monsters/Monsters.json`,
+  `Data/Monsters/Models.json` and `Data/Monsters/Sounds.json` next to the
+  game. With
+  fatal problems nothing is written, and the problems are listed under the
+  button;
+  warnings do not stop it. The new file takes the old one's place only when
+  it was written whole.
+- **Revert** reads the three files again: the changes since they were saved are
+  lost, and so is the undo history. A file with fatal problems is not taken; its
+  monsters or models stay as they are and the problems are listed.
+
+The game runs from the build folder, which has a copy of `src/bin/Data`.
+To keep your changes, copy `<build folder>/Data/Monsters/Monsters.json`,
+`Models.json` and `Sounds.json` to `src/bin/Data/Monsters` and commit them.
+
+### Import and export of NpcName txt
+
+The repository does not ship the original client's name files; the monster
+list is the only monster name data. The import is there to bring in names
+from your own old files. Both buttons are in Monster Translations, and both
+work on `Data/Local/<Eng|Por|Spn>/NpcName_<Eng|Por|Spn>.txt` next to the game
+(English, Portuguese and Spanish). The console names each file with its
+whole path.
+
+- **Import names from NpcName txt** sets the names of each file's language
+  on the monsters that have an entry, by number. The whole import is one
+  undo step.
+  - Numbers without an entry are skipped with a warning; the import adds no
+    monsters (Add monster in the Monster Browser does).
+  - The Kalima gates (152–158) are skipped: their names in the old files
+    were formats for the owner's name, which the game now builds from a UI
+    text.
+  - An empty name removes that language's translation. An empty English name
+    and a name with `||` are skipped with a warning.
+  - A name equal to the English one stays missing where the monster has no
+    name of its own in that language, since the export writes the English
+    name there. So an export followed by an import changes nothing.
+  - A missing file is reported and skipped. A line that is not a name, a
+    number outside 0–1023, a name that is not UTF-8 and a number that is in
+    the file twice (the first name counts, as in the original client) are
+    skipped with a warning. Names longer than 64 characters are cut, with a
+    warning.
+  - The console lists per language how many names were read, changed,
+    skipped and cut.
+- **Export as NpcName txt** writes the three files with the names of every
+  monster with an entry, sorted by number, in English where a language has
+  no name of its own (the console counts them). The Kalima gates are written
+  with their plain names. A name containing `"` or a line break cannot be
+  written: it is left out with a warning. A file that already has these names is not
+  written; a file that changes is backed up first. A file that cannot be
+  backed up is not written (an error in the console); the other languages
+  are still written.
+
+## Control socket
+
+The [control socket](control-socket.md) reports each character's monster
+number as `monster` (in `nearby` and in the objects of the `hit`, `killed`
+and `view_*` events) and the kinds of this list (`monster`, `npc`, `trap`,
+`other`; summons, Kalima gates and transformed players are `player`). A
+`target` can be `{"monster": <number>}`, the nearest living monster or NPC
+of that number (traps, `other` objects and players are not found by it).
+Since monster and NPC names follow the UI language, scripts find NPCs by
+their number, not by their name.

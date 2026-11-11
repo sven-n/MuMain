@@ -15,20 +15,25 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "CameraDebugLog.h"
+#include "Render/Text/CUIRenderText.h"
 
 // External variable declarations
 extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
+extern EGameScene SceneFlag;
 
 #ifdef _EDITOR
 // DevEditor per-camera config override (global scope required for extern "C").
@@ -386,44 +391,6 @@ bool DefaultCamera::Update()
         UpdateFrustum();
     }
 
-#ifdef _EDITOR
-    // Debug text rendering to verify camera values (editor only)
-    {
-        g_pRenderText->SetFont(g_hFixFont);
-        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
-        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
-
-        wchar_t debugText[256];
-        int yPos = 10;
-        const int lineHeight = 15;
-
-        // Camera type and scene
-        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d", (int)SceneFlag);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // State values
-        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Near plane and culling
-        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
-                 m_Config.nearPlane, m_Config.terrainCullRange);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Rendering value (what BeginOpengl actually uses)
-        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
-        g_pRenderText->RenderText(10, yPos, debugText);
-    }
-#endif
-
     // Phase 5: Sync camera state to legacy g_Camera global
     // This is needed because BeginOpengl() still uses g_Camera.FOV for perspective setup
     VectorCopy(m_State.Position, g_Camera.Position);
@@ -697,7 +664,13 @@ void DefaultCamera::SetCameraAngle()
         m_State.Angle[0] = -48.5f;
     }
 
-    m_State.Angle[0] += EarthQuake;
+    // Effects roll a new shake every rendered frame; take one per reference frame, as at 25 FPS.
+    static float s_earthQuake = 0.f;
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        s_earthQuake = EarthQuake;
+    }
+    m_State.Angle[0] += s_earthQuake;
 }
 
 void DefaultCamera::UpdateCustomCameraDistance()
@@ -708,18 +681,22 @@ void DefaultCamera::UpdateCustomCameraDistance()
 
     int iIndex = TERRAIN_INDEX((Hero->PositionX), (Hero->PositionY));
 
+    // *FPS_ANIMATION_FACTOR -- this ramp used to advance a fixed 10 units per Update() call, with
+    // no time basis (Update() runs once per rendered frame, not on a fixed timestep), so it ramped
+    // N times faster at high/uncapped FPS than at the ~25fps this was tuned against.
+    extern float FPS_ANIMATION_FACTOR;
     if ((TerrainWall[iIndex] & TW_CAMERA_UP) == TW_CAMERA_UP)
     {
         if (m_State.CustomDistance <= CUSTOM_CAMERA_DISTANCE1)
         {
-            m_State.CustomDistance += 10;
+            m_State.CustomDistance += 10.f * FPS_ANIMATION_FACTOR;
         }
     }
     else
     {
         if (m_State.CustomDistance > 0)
         {
-            m_State.CustomDistance -= 10;
+            m_State.CustomDistance -= 10.f * FPS_ANIMATION_FACTOR;
         }
     }
 }
@@ -774,7 +751,14 @@ void DefaultCamera::UpdateCameraDistance()
     if (m_FramesSinceActivation < 2)
         m_State.Distance = m_State.DistanceTarget;
     else
-        m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;
+    {
+        // *FPS_ANIMATION_FACTOR -- this approach-to-target fraction (1/3 per call) had no time
+        // basis, so it converged in a fixed number of CALLS rather than a fixed amount of real
+        // time; at high/uncapped FPS the zoom would snap to target in a single visible instant
+        // instead of gliding, since many more 1/3-steps happen per real second.
+        extern float FPS_ANIMATION_FACTOR;
+        m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3.f * FPS_ANIMATION_FACTOR;
+    }
 }
 
 void DefaultCamera::SetCameraFOV()
@@ -844,9 +828,9 @@ void DefaultCamera::HandleEditorMode()
         if (IsHeroValid())
         {
             // Apply rotation and movement
-            vec3_t z_angle = { 0.f, 0.f, -m_State.Angle[2] };
+            const vec3_t yaw = {0.f, 0.f, -m_State.Angle[2]};
             float Matrix[3][4];
-            AngleMatrix(z_angle, Matrix);
+            AngleMatrix(yaw, Matrix);
             VectorRotate(p1, Matrix, p2);
             VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
         }
@@ -906,9 +890,7 @@ void DefaultCamera::UpdateFrustum()
     VectorNormalize(up);
 
     // Build frustum from current configuration
-    extern unsigned int WindowWidth;
-    extern unsigned int WindowHeight;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
 
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
     // (Override was already applied at the top of this function.)
@@ -983,9 +965,7 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     // Check aspect ratio change (window resize / runtime resolution switch).
     // Frustum width depends on aspect; without this the cache would stay valid
     // through a resize and culling at the screen edges would go stale.
-    extern unsigned int WindowWidth;
-    extern unsigned int WindowHeight;
-    const float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
     if (fabs(aspectRatio - m_FrustumCache.AspectRatio) > EPSILON)
     {
         return true;

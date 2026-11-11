@@ -52,6 +52,11 @@ namespace SEASON3A
         BYTE m_bySocketSeedID[MAX_SOCKETS];
         BYTE m_bySocketSphereLv[MAX_SOCKETS];
         BYTE m_bySeedSphereID;
+
+    private:
+        // The three wing flags from the item's wing tier; a wing does not count as an excellent
+        // item in the recipes.
+        void SetWingFlags(int itemType);
     };
 
     class CMixItemInventory
@@ -169,6 +174,10 @@ namespace SEASON3A
         int m_iNumMixSoruces;
     } MIX_RECIPE;
 
+    // The text of a number in a recipe's m_iMixName, m_iMixDesc or m_iMixAdvice (as mix.bmd
+    // stores them); empty for a number mix.bmd does not use.
+    const wchar_t* GetMixRecipeText(int textId);
+
     enum _MIX_SOURCE_STATUS { MIX_SOURCE_ERROR, MIX_SOURCE_NO, MIX_SOURCE_PARTIALLY, MIX_SOURCE_YES };
 
     class CMixRecipes
@@ -263,10 +272,10 @@ namespace SEASON3A
         {
             m_iMixSubType = 0;
             m_btPlusChaosRate = 0;
-            OpenRecipeFile(L"Data\\Local\\Mix.bmd");
         }
         virtual ~CMixRecipeMgr() {}
 
+        void LoadData();
         void SetMixType(int iMixType) { this->m_iMixType = iMixType; }
         int GetMixInventoryType();
         STORAGE_TYPE GetMixInventoryEquipmentIndex();

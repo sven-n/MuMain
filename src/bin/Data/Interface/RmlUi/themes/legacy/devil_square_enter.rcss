@@ -1,0 +1,6 @@
+/* Preserve the first level band's position and the footer; extra content scrolls. */
+.entry-lines { height: calc(90px * var(--root-scale)); }
+.entry-buttons {
+    top: 155px;
+    height: calc(230px * var(--root-scale));
+}

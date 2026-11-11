@@ -3,13 +3,10 @@
 
 static CTimeCheck CTime;
 
-CTimeCheck::CTimeCheck()
-{
-}
+// cppcheck-suppress uninitMemberVar
+CTimeCheck::CTimeCheck() {}
 
-CTimeCheck::~CTimeCheck()
-{
-}
+CTimeCheck::~CTimeCheck() {}
 
 int CTimeCheck::CheckIndex(int index)
 {

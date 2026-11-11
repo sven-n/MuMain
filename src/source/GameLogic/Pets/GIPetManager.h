@@ -9,33 +9,45 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "CSPetSystem.h"
+#include "UI/HUD/Skills/SkillTooltipModel.h"
+#include "UI/Scaling/UITransform.h"
 
 namespace giPetManager
 {
-    static PET_INFO	gs_PetInfo;
+    extern PET_INFO gs_PetInfo;
     void    InitPetManager(void);
     void    CreatePetDarkSpirit(CHARACTER* c);
     void    CreatePetDarkSpirit_Now(CHARACTER* c);
 
     void    MovePet(CHARACTER* c);
-    void    RenderPet(CHARACTER* c);
+    void CullPet(CHARACTER* c);
+    void RenderPet(const CHARACTER* c);
+    // The pet's draw effects and state, for a character the last frame drew.
+    void UpdatePetEffects(CHARACTER* c);
     void    DeletePet(CHARACTER* c);
 
     void    InitItemBackup(void);
     void SetPetInfo(std::uint8_t InvType, std::uint8_t InvPos, PET_INFO* pPetinfo);
-    PET_INFO* GetPetInfo(ITEM* pItem);
+    PET_INFO* GetPetInfo(const ITEM* pItem);
     void CalcPetInfo(PET_INFO* pPetInfo);
     void SetPetItemConvert(ITEM* ip, PET_INFO* pPetInfo);
     std::uint32_t GetPetItemValue(PET_INFO* pPetInfo);
     bool RequestPetInfo(int sx, int sy, ITEM* pItem);
-    bool RenderPetItemInfo(int sx, int sy, ITEM* pItem, int iInvenType);
+    // (sx, sy) in the screen's 640x480 stretch, `screen`.
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* pItem, int iInvenType);
 
     bool    SelectPetCommand(void);
     void    MovePetCommand(CHARACTER* c);
     bool    SendPetCommand(CHARACTER* c, int Index);
     void    SetPetCommand(CHARACTER* c, int Key, std::uint8_t Cmd);
     void    SetAttack(CHARACTER* c, int Key, int attackType);
-    bool    RenderPetCmdInfo(int sx, int sy, int Type);
+
+    // The Dark Lord's pet-command tooltip content, with no drawing -- lets
+    // UI::Skills::Tooltip::BuildModelForSlot() (SkillTooltip.cpp) fold it into the same RmlUi-
+    // bindable Model the regular skill tooltip uses. Returns false for a Type outside the
+    // pet-command range, or when the hero isn't a Dark Lord -- the caller falls through to the
+    // normal skill-tooltip path.
+    bool    BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel);
 }
 
 using namespace giPetManager;

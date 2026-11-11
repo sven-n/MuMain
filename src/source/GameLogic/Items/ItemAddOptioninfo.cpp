@@ -1,10 +1,9 @@
-// ItemAddOptioninfo.cpp: implementation of the ItemAddOptioninfo class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/ItemAddOptioninfo.h"
@@ -20,14 +19,10 @@ ItemAddOptioninfo* ItemAddOptioninfo::MakeInfo()
 
 ItemAddOptioninfo::ItemAddOptioninfo()
 {
-    bool Result = true;
-
-    Result = OpenItemAddOptionInfoFile(ITEMADDOPTION_DATA_FILE);
-
-    if (!Result)
+    if (const wchar_t* problem = OpenItemAddOptionInfoFile(ITEMADDOPTION_DATA_FILE))
     {
         wchar_t szMessage[256];
-        ::mu_swprintf(szMessage, L"%ls file not found.\r\n", ITEMADDOPTION_DATA_FILE);
+        ::mu_swprintf(szMessage, L"%ls %ls\r\n", ITEMADDOPTION_DATA_FILE, problem);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -38,20 +33,24 @@ ItemAddOptioninfo::~ItemAddOptioninfo()
 {
 }
 
-const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::wstring& filename)
+const wchar_t* ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::wstring& filename)
 {
     FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
     {
         int nSize = sizeof(ITEM_ADD_OPTION) * MAX_ITEM;
 
-        ::fread(m_ItemAddOption, nSize, 1, fp);
-        ::BuxConvert((BYTE*)m_ItemAddOption, nSize);
+        const bool complete = DataFileIO::ReadExact(fp, m_ItemAddOption, nSize);
         ::fclose(fp);
+        if (!complete)
+        {
+            return L"file corrupted.";
+        }
+        ::BuxConvert(reinterpret_cast<BYTE*>(m_ItemAddOption), nSize);
 
-        return true;
+        return nullptr;
     }
-    return false;
+    return L"file not found.";
 }
 
 void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::wstring>& outtextlist, int type)

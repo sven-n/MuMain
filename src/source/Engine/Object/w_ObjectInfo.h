@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "Core/Math/ZzzMathLib.h"
+#include "Engine/Object/ObjectPose.h"
 #include "GameLogic/Buffs/w_Buff.h"
 
 class	CInterpolateContainer
@@ -128,6 +129,8 @@ public:
     bool	      Visible;
     bool	      AlphaEnable;
     bool          EnableBoneMatrix;
+    // BoneTransform was allocated by Engine::Object::Pose::World, which DeleteObject releases.
+    bool OwnsBoneTransform;
     bool		  ContrastEnable;
     bool          ChromeEnable;
 
@@ -211,9 +214,16 @@ public:
     vec3_t		  EyeRight2;
     vec3_t		  EyeLeft3;
     vec3_t		  EyeRight3;
+    // Where a +15 set's trails (joints 55 and 56) end; item effects keep the Eye* slots.
+    vec3_t SetTrailLeft;
+    vec3_t SetTrailRight;
+
 public:
     vec34_t	 	  Matrix;
     vec34_t* BoneTransform;
+    Engine::Object::PoseInputs Pose;
+    // The RenderObjects call that last drew this map object.
+    unsigned int DrawnFrame;
 
 public:
     OBB_t		  OBB;

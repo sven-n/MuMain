@@ -1,0 +1,47 @@
+/* Modern theme for the login scene lines: the logo is the game's own artwork and the lines are
+   the original's, so the modern theme keeps the legacy geometry, fade and colours (see the legacy
+   theme). */
+
+/* The original's 640x480 screen, stretched over the window: positions are its fractions. */
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+/* RenderColorBitmap() at (320 - 102.4, 25), 204.8 x 102.4. */
+#logo { position: absolute; left: 34%; top: 5.2083%; width: 32%; height: 21.3333%; pointer-events: none; }
+#logo-glow {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	decorator: additive-image(#ffffff ../../../../Logo/MU-logo_g.jpg);
+}
+#logo-image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+/* RenderText() at (335 - width, 480 - height - 1), (335, ...) and (0, ...): the lines end one
+   unit above the bottom edge, the copyright right-aligned on x 335 and the rights after it, each
+   scaled down around that edge. */
+.line {
+	position: absolute;
+	left: 0;
+	bottom: 0.2083%;
+	white-space: nowrap;
+	pointer-events: none;
+	transform-origin: left bottom;
+}
+.line--copyright { width: 52.3438%; text-align: right; transform-origin: right bottom; }
+.line--rights { left: 52.3438%; }
+
+.line-text {
+	display: inline-block;
+	white-space: pre;
+	color: rgb(255, 255, 255);
+	background-color: rgba(0, 0, 0, 128);
+}

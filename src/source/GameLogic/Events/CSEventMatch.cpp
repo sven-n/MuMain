@@ -2,7 +2,6 @@
 //  CSEventMatch.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -10,9 +9,11 @@
 #include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
 #include "I18N/All.h"
+#include "Core/Text/WideFormat.h"
 
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Core/WindowSystem.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 #include <chrono>
@@ -24,6 +25,81 @@ extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 namespace
 {
 constexpr std::chrono::seconds kMatchCountdownDuration{30};
+
+// The server's Blood Castle "Congratulations" countdown, the number after TYPE_MATCH_CASTLE_END.
+constexpr int kMatchCastleCongratulations = TYPE_MATCH_CASTLE_END + 1;
+
+// Each event's countdown lines, in MATCH_TYPE order from its first countdown type.
+const wchar_t* const* const kDevilSquareCountdownFormats[] = {
+    &I18N::Game::YouWillEnterDevilSquareDSecondsFromNow,
+    &I18N::Game::TheGateOfDevilSquareWillCloseDownInDSeconds,
+    &I18N::Game::TheGateOfDevilSquareIsClosingDownDSecondsRemaining,
+};
+const wchar_t* const* const kBloodCastleCountdownFormats[] = {
+    &I18N::Game::SClosingInDSeconds,
+    &I18N::Game::SInfiltrationInDSeconds,
+    &I18N::Game::SEventEndsInDSeconds,
+    &I18N::Game::SEventShutsDownInDSeconds,
+};
+const wchar_t* const* const kChaosCastleCountdownFormats[] = {
+    &I18N::Game::SClosingInDSeconds,
+    &I18N::Game::SPenetrationInDSeconds,
+    &I18N::Game::SEventEndsInDSeconds,
+    &I18N::Game::SEventShutsDownInDSeconds,
+};
+const wchar_t* const* const kCursedTempleCountdownFormats[] = {
+    &I18N::Game::AdvanceToTheTempleAfterDSeconds,
+    &I18N::Game::BattleBeginsInDSeconds,
+};
+const wchar_t* const* const kDoppelgangerCountdownFormats[] = {
+    &I18N::Game::EntranceToDoppelgangerWillCloseInDSeconds,
+    &I18N::Game::DoppelgangerWillBeginInDSeconds,
+    &I18N::Game::DSecondsLeftToEliminateIceWalker,
+    &I18N::Game::DSecondsLeftUntilTheEndOfDoppelganger,
+};
+static_assert(std::size(kDevilSquareCountdownFormats) == TYPE_MATCH_DEVIL_CLOSE - TYPE_MATCH_DEVIL_ENTER_START + 1,
+              "one format per Devil Square countdown type");
+static_assert(std::size(kBloodCastleCountdownFormats) == TYPE_MATCH_CASTLE_END - TYPE_MATCH_CASTLE_ENTER_CLOSE + 1,
+              "one format per Blood Castle countdown type");
+static_assert(std::size(kChaosCastleCountdownFormats) == TYPE_MATCH_CHAOS_END - TYPE_MATCH_CHAOS_ENTER_START + 1,
+              "one format per Chaos Castle countdown type");
+static_assert(std::size(kCursedTempleCountdownFormats) ==
+                  TYPE_MATCH_CURSEDTEMPLE_GAME_START - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE + 1,
+              "one format per Illusion Temple countdown type");
+static_assert(std::size(kDoppelgangerCountdownFormats) ==
+                  TYPE_MATCH_DOPPELGANGER_CLOSE - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE + 1,
+              "one format per Doppelganger countdown type");
+
+// The countdown line's format for countdown type `matchType`, a MATCH_TYPE or the server's Blood
+// Castle "Congratulations" (the number after TYPE_MATCH_CASTLE_END); empty for any other number.
+const wchar_t* GetMatchCountdownFormat(int matchType)
+{
+    if (matchType >= TYPE_MATCH_DEVIL_ENTER_START && matchType <= TYPE_MATCH_DEVIL_CLOSE)
+    {
+        return *kDevilSquareCountdownFormats[matchType - TYPE_MATCH_DEVIL_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CASTLE_END)
+    {
+        return *kBloodCastleCountdownFormats[matchType - TYPE_MATCH_CASTLE_ENTER_CLOSE];
+    }
+    if (matchType == kMatchCastleCongratulations)
+    {
+        return I18N::Game::Congratulations;
+    }
+    if (matchType >= TYPE_MATCH_CHAOS_ENTER_START && matchType <= TYPE_MATCH_CHAOS_END)
+    {
+        return *kChaosCastleCountdownFormats[matchType - TYPE_MATCH_CHAOS_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CURSEDTEMPLE_GAME_START)
+    {
+        return *kCursedTempleCountdownFormats[matchType - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE];
+    }
+    if (matchType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && matchType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
+    {
+        return *kDoppelgangerCountdownFormats[matchType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE];
+    }
+    return L"";
+}
 
 template <std::size_t N>
 void ClearWideBuffer(wchar_t (&buffer)[N])
@@ -42,23 +118,6 @@ void WriteWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
 
     std::swprintf(buffer, static_cast<std::size_t>(N), format, args...);
 }
-
-template <std::size_t N, typename... Args>
-void AppendWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
-{
-    if (format == nullptr)
-    {
-        return;
-    }
-
-    const std::size_t currentLength = std::wcslen(buffer);
-    if (currentLength >= N)
-    {
-        return;
-    }
-
-    std::swprintf(buffer + currentLength, static_cast<std::size_t>(N - currentLength), format, args...);
-}
 } // namespace
 
 void CSBaseMatch::clearMatchInfo(void)
@@ -68,7 +127,6 @@ void CSBaseMatch::clearMatchInfo(void)
     m_iMatchTime = -1;
     m_iMaxKillMonster = -1;
     m_iKillMonster = -1;
-    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
 bool CSBaseMatch::getEqualMonster(int addV)
@@ -97,16 +155,13 @@ void CSBaseMatch::SetMatchInfo(const std::uint8_t byType, const int iMaxTime, co
     m_iMatchTime = iTime;
     m_iMaxKillMonster = iMaxMonster;
     m_iKillMonster = iKillMonster;
-    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
-void CSBaseMatch::RenderTime(void)
+std::wstring CSBaseMatch::CountdownText(void)
 {
-    float x, y;
-
     if (m_iMatchCountDownType <= TYPE_MATCH_NONE || m_iMatchCountDownType >= TYPE_MATCH_END)
     {
-        return;
+        return {};
     }
 
     const auto now = MatchClock::now();
@@ -114,83 +169,27 @@ void CSBaseMatch::RenderTime(void)
     if (elapsedSeconds >= kMatchCountdownDuration)
     {
         m_iMatchCountDownType = TYPE_MATCH_NONE;
-        return;
+        return {};
     }
-
-    DisableAlphaBlend();
-    EnableAlphaTest(false);
-
-    x = 10.0f;
-    y = (float)REFERENCE_HEIGHT - 70.0f;
-    g_pRenderText->SetTextColor(128, 128, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 128);
 
     const int remainingSeconds = static_cast<int>((kMatchCountdownDuration - elapsedSeconds).count());
     wchar_t lpszStr[256]{0};
 
+    const wchar_t* format = GetMatchCountdownFormat(m_iMatchCountDownType);
     if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
     {
-        const int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::BloodCastle, remainingSeconds);
+        WriteWide(lpszStr, format, I18N::Game::BloodCastle, remainingSeconds);
     }
     else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
     {
-        int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CHAOS_ENTER_START;
-        if (textNum == 825)
-        {
-            textNum = 828;
-        }
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::ChaosCastle, remainingSeconds);
-    }
-    else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
-        || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
-    {
-        int textNum = (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) ? 2386 : 2384;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
-    }
-    else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
-    {
-        const int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
+        WriteWide(lpszStr, format, I18N::Game::ChaosCastle, remainingSeconds);
     }
     else
     {
-        const int textNum = 640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
+        WriteWide(lpszStr, format, remainingSeconds);
     }
 
-    g_pRenderText->RenderText(REFERENCE_WIDTH / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
-}
-
-void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
-{
-    wchar_t lpszStr[256]{0};
-    const int iMinute = MatchTime / 60;
-    const int iSecondTime = MatchTime - (iMinute * 60);
-
-    WriteWide(lpszStr, L" %.2d :", iMinute);
-
-    if (iSecondTime >= 0)
-    {
-        AppendWide(lpszStr, L" %.2d", iSecondTime);
-    }
-
-    if (iMinute < 5)
-    {
-        g_pRenderText->SetTextColor(255, 32, 32, 255);
-    }
-    if (iMinute < 15)
-    {
-        AppendWide(lpszStr, L": %.2d", static_cast<int>(WorldTime) % 60);
-    }
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText(static_cast<int>(x), static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
-}
-
-void CSBaseMatch::SetPosition(int ix, int iy)
-{
-    m_PosResult.x = ix;
-    m_PosResult.y = iy;
+    return lpszStr;
 }
 
 void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success)
@@ -205,8 +204,8 @@ void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 
     memcpy(m_MatchResult, pMatchResult, m_iNumResult * sizeof(MatchResult));
 
-    SEASON3B::TMsgBoxLayoutContainer<SEASON3B::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
-    SEASON3B::CreateMessageBox(msgBoxLayout);
+    mu::ui::window::TMsgBoxLayoutContainer<mu::ui::window::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
+    mu::ui::window::CreateMessageBox(msgBoxLayout);
 }
 
 void CSDevilSquareMatch::RenderMatchTimes(void)
@@ -219,109 +218,56 @@ void CSDevilSquareMatch::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE d
     return;
 }
 
-void CSDevilSquareMatch::RenderMatchResult(void)
+void CSDevilSquareMatch::CollectMatchResult(std::vector<MatchResultLine>& lines) const
 {
-    int xPos[6] = { m_PosResult.x, };
-    xPos[1] = xPos[0] + 15;
-    xPos[2] = xPos[1] + 15;
-    xPos[3] = xPos[2] + 60;
-    xPos[4] = xPos[3] + 50;
-    xPos[5] = xPos[4] + 38;
-
-    int yPos = m_PosResult.y + 40;
-
-    g_pRenderText->SetBgColor(0);
-
     wchar_t lpszStr[256] { 0 };
+    // The font is the one left set (the original sets none).
+    auto cell = [](const wchar_t* text, DWORD color, int boxWidth = 0, int boxHeight = 0)
+    { return MatchResultCell{text, boxWidth, boxHeight, MatchResultCell::Font::Unchanged, color}; };
 
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Congratulations);
-    yPos += 16;
+    const DWORD white = RGBA(255, 255, 255, 255);
+    lines.push_back({"message", {cell(I18N::Game::Congratulations, white)}});
     WriteWide(lpszStr, I18N::Game::SYourBraveryIsProvenInDevilSquare, Hero->ID);
-    g_pRenderText->RenderText((xPos[2]), yPos, lpszStr);
-    yPos += 24;
+    lines.push_back({"message", {cell(lpszStr, white)}});
 
-    g_pRenderText->SetTextColor(0, 255, 0, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Rank, xPos[3] - xPos[1], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[3], yPos, I18N::Game::Point, xPos[4] - xPos[3], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[4], yPos, I18N::Game::EXP, xPos[5] - xPos[4], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[5], yPos, I18N::Game::Reward, (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
-    yPos += 20;
+    // The headers pass their column's width as the box width and RT3_SORT_CENTER as its height,
+    // which shrinks them.
+    const DWORD green = RGBA(0, 255, 0, 255);
+    lines.push_back({"header",
+                     {cell(I18N::Game::Rank, green, 75, RT3_SORT_CENTER), cell(I18N::Game::Point, green, 50, RT3_SORT_CENTER),
+                      cell(I18N::Game::EXP, green, 38, RT3_SORT_CENTER),
+                      cell(I18N::Game::Reward, green, 32, RT3_SORT_CENTER)}});
 
-    int yStartPos = yPos;
-
-    for (int i = 0; i < m_iNumResult; ++i)
+    auto row = [&](const char* role, int rank, const MatchResult& result, DWORD color)
     {
-        MatchResult* pResult = &m_MatchResult[i];
+        MatchResultLine line{role, {}};
+        WriteWide(lpszStr, L"%2d", rank);
+        line.cells.push_back(cell(lpszStr, color));
 
-        // Highlight "my result" with a different color
-        if (i == m_iMyResult - 1)
-        {
-            g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color for "my result"
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(255, 255, 0, 255); // Normal color for others
-        }
-
-        // Render rank number (index + 1 for display)
-        WriteWide(lpszStr, L"%2d", i + 1);
-        g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
-
-        // Render player ID
         std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(pResult->m_lpID), MAX_USERNAME_SIZE);
-        g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<const char*>(result.m_lpID), MAX_USERNAME_SIZE);
+        line.cells.push_back(cell(lpszStr, color));
 
-        // Render score
-        WriteWide(lpszStr, L"%10lu", pResult->m_iScore);
-        g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
+        WriteWide(lpszStr, L"%10lu", result.m_iScore);
+        line.cells.push_back(cell(lpszStr, color));
 
-        // Render experience
-        WriteWide(lpszStr, L"%6lu", pResult->m_dwExp);
-        g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
+        WriteWide(lpszStr, L"%6lu", result.m_dwExp);
+        line.cells.push_back(cell(lpszStr, color));
 
-        // Render Zen
-        WriteWide(lpszStr, L"%6lu", pResult->m_iZen);
-        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
+        WriteWide(lpszStr, L"%6lu", result.m_iZen);
+        line.cells.push_back(cell(lpszStr, color));
+        lines.push_back(std::move(line));
+    };
 
-        // Increment yPos for the next row
-        yPos += 16;
-    }
+    const DWORD myColor = RGBA(200, 120, 0, 255); // "my result"
+    for (int i = 0; i < m_iNumResult; ++i)
+        row("row", i + 1, m_MatchResult[i], i == m_iMyResult - 1 ? myColor : RGBA(255, 255, 0, 255));
 
-    // Render a special section for "my result"
+    // A section for "my result" at a fixed place under the table.
     if (m_iMyResult > 0 && m_iMyResult <= m_iNumResult)
     {
-        int myIndex = m_iMyResult - 1; // Convert to zero-based index
-        MatchResult* myResult = &m_MatchResult[myIndex];
-
-        yPos = yStartPos + 16 * 10; // Fixed position for the special section
-        g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color
-
-        // "My Ranking" label
-        g_pRenderText->RenderText(xPos[0], yPos, I18N::Game::MyInfo, 230, 0, RT3_SORT_CENTER);
-        yPos += 20;
-
-        // Render my rank
-        WriteWide(lpszStr, L"%2d", m_iMyResult);
-        g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
-
-        // Render my ID
-        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(myResult->m_lpID), MAX_USERNAME_SIZE);
-        g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
-
-        // Render my score
-        WriteWide(lpszStr, L"%10lu", myResult->m_iScore);
-        g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
-
-        // Render my experience
-        WriteWide(lpszStr, L"%6lu", myResult->m_dwExp);
-        g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
-
-        // Render my Zen
-        WriteWide(lpszStr, L"%6lu", myResult->m_iZen);
-        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
+        lines.push_back({"my-info", {cell(I18N::Game::MyInfo, myColor, 230, 0)}});
+        row("my-row", m_iMyResult, m_MatchResult[m_iMyResult - 1], myColor);
     }
 }
 
@@ -336,11 +282,6 @@ void CCursedTempleMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 }
 
 void CCursedTempleMatch::RenderMatchTimes()
-{
-    return;
-}
-
-void CCursedTempleMatch::RenderMatchResult()
 {
     return;
 }

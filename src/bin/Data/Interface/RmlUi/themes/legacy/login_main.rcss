@@ -1,0 +1,75 @@
+/* Legacy theme for the login-scene menu/credit button bar (CLoginMainWin). Only the idle frame of
+   each button is reproduced. Sizes are the original's pixels in rem (login_main.rml's body is
+   "scene-window-scale": 1rem = one original pixel, growing like the native text, RmlNativeText.h). */
+
+@spritesheet login-main-menu-sheet
+{
+	src: "../../../server_menu_b_all.tga";
+	login-main-menu-icon: 0px 0px 54px 30px;
+}
+@spritesheet login-main-credit-sheet
+{
+	src: "../../../server_credit_b_all.tga";
+	login-main-credit-icon: 0px 0px 54px 30px;
+}
+@spritesheet login-main-deco-sheet
+{
+	src: "../../../deco.tga";
+	login-main-deco-image: 0px 0px 189px 103px;
+}
+
+#panel {
+	position: absolute;
+	/* Width/height pushed from C++ -- the bar spans (screen width - 60px), screen-size dependent. */
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54rem;
+	height: 30rem;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.btn-icon-menu {
+	left: 0;
+	top: 0;
+	decorator: image(login-main-menu-icon);
+}
+/* right:0rem replaces a C++-pushed `left` -- anchors to #panel's own right edge so it tracks
+   .btn-icon's width automatically instead of needing a C++ recompute on resize. */
+.btn-icon-credit {
+	top: 0;
+	right: 0rem;
+}
+
+/* Stands in for the original decorative sprite -- painted behind the credit button, which is
+   declared first so its icon layer paints on top. */
+.btn-credit-deco {
+	position: absolute;
+	left: -105rem;
+	top: -59rem;
+	width: 189rem;
+	height: 103rem;
+	pointer-events: none;
+	decorator: image(login-main-deco-image);
+}
+
+.btn-credit-icon {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 54rem;
+	height: 30rem;
+	pointer-events: none;
+	decorator: image(login-main-credit-icon);
+}
+
+.btn-icon-label {
+	display: none;
+}
+
+/* modern-only caption below the button -- legacy has no text label here; left unstyled so it
+   stays a zero-height pass-through. */
+.btn-icon-caption {
+	display: none;
+}

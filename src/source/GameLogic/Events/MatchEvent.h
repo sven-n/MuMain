@@ -44,12 +44,13 @@ namespace matchEvent
             g_csMatchInfo->SetMatchGameCommand(data);
         }
     }
-    inline  void    RenderTime(void)
+    inline  std::wstring CountdownText(void)
     {
         if (g_csMatchInfo != NULL)
         {
-            g_csMatchInfo->RenderTime();
+            return g_csMatchInfo->CountdownText();
         }
+        return {};
     }
     inline  void    RenderMatchTimes(void)
     {
@@ -65,18 +66,11 @@ namespace matchEvent
             g_csMatchInfo->SetMatchResult(iNumResult, iMyResult, pResult, Success);
         }
     }
-    inline  void    RenderResult(void)
+    inline void CollectResult(std::vector<MatchResultLine>& lines)
     {
         if (g_csMatchInfo != NULL)
         {
-            g_csMatchInfo->RenderMatchResult();
-        }
-    }
-    inline void SetPosition(int ix, int iy)
-    {
-        if (g_csMatchInfo != NULL)
-        {
-            g_csMatchInfo->SetPosition(ix, iy);
+            g_csMatchInfo->CollectMatchResult(lines);
         }
     }
 }

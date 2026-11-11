@@ -1,0 +1,39 @@
+<rml>
+<head>
+    <title>Devil Square entry</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="docked_panel_frame.rcss"/>
+    <link type="text/rcss" href="event_entry.rcss"/>
+    <link type="text/rcss" href="devil_square_enter.rcss"/>
+</head>
+<body>
+    <!-- The workspace places the frame. Each text pane counter-scales once; its children
+         flow at the native readable size. The theme bounds descriptions and level lists
+         independently, keeping the exit controls outside both scroll regions. -->
+    <div id="panel" data-model="devil_square_enter">
+        <div class="frame-piece frame-top"></div>
+        <div class="frame-piece frame-left"></div>
+        <div class="frame-piece frame-right"></div>
+        <div class="frame-piece frame-bottom"></div>
+
+        <span class="sharp-text sharp-flow" id="title" data-style-font-size="bold_text_px + 'px'">{{title_text}}</span>
+
+        <div class="sharp-text sharp-flow scroll-pane entry-lines" id="entry_description" data-style-font-size="text_px + 'px'">
+            <span class="entry-line" data-for="line : lines">{{line.text}}</span>
+        </div>
+
+        <div class="sharp-text sharp-flow scroll-pane entry-buttons" id="entry_levels" data-style-font-size="bold_text_px + 'px'">
+            <div class="entry-btn" data-for="b, i : buttons" data-class-enabled="b.enabled"
+                 data-event-click="entry_press(i)">
+                <div class="entry-btn-art"></div>
+                <span class="entry-label">{{b.label}}</span>
+            </div>
+        </div>
+
+        <div id="btn_exit" class="modern-icon-btn-px" data-event-click="entry_exit" data-attr-data-hint="exit_tooltip">
+            <span class="modern-icon-btn-glyph-px entry-exit-glyph">&#215;</span>
+        </div>
+        <div id="frame_corner_close" data-event-click="entry_exit"></div>
+    </div>
+</body>
+</rml>

@@ -5,10 +5,16 @@
 #include <imagehlp.h>
 #endif
 
+#include <algorithm>
+#include <array>
+#include <cstdlib>
+
 #include "GameConfigConstants.h"
+#include "GameConfigValidation.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
-#include "Core/Platform/Dpapi.h"   // DPAPI credential crypto (no-op off Windows)
+#include "Core/Platform/Dpapi.h"   // Legacy credential format migration
+#include "Core/Platform/PlatformCrypto.h"
 
 GameConfig& GameConfig::GetInstance()
 {
@@ -42,8 +48,12 @@ GameConfig::GameConfig()
         *(lastSlash + 1) = L'\0';  // Keep the trailing separator
     }
 
-    m_configPath = exePath;
-    m_configPath += L"config.ini";
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const char* overridePath = std::getenv(CfgFiles::CfgEnvConfigPath);
+#else
+    const char* overridePath = nullptr;
+#endif
+    m_configPath = GameConfigValidation::ResolveConfigPath(exePath, overridePath);
 
     Load();
 }
@@ -67,16 +77,49 @@ void GameConfig::Load()
     m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
     m_encryptedPassword = ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
 
-    m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
-    m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+    m_serverIP = GameConfigValidation::ValidateServerIP(
+        ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP), CfgDefaultServerIP);
+    m_serverPort = GameConfigValidation::ValidateServerPort(
+        ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort), CfgDefaultServerPort);
 
     m_chatCommandFavourites = ReadStringList(L"ChatCommands", L"Favourite");
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
+    m_translateItemNames = ReadBool(CfgSectionUI, CfgKeyTranslateItemNames, CfgDefaultTranslateItemNames);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
+    m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
+    m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
+                                  CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+    m_enableAnimationTaskPool =
+        ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
+    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
+    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_look = ReadLookPreset(m_configPath);
+    m_anisotropy =
+        GameConfigValidation::ValidateAnisotropy(ReadInt(CfgSectionRender, CfgKeyAnisotropy, CfgDefaultAnisotropy));
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(
+        ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
+    m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
+    m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
+    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
+    m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
+    m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
+
+    m_renderBackend = GameConfigValidation::ValidateRenderBackend(
+        ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
+    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
+    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
+    m_disableSkillEffectModels =
+        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
+    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
+    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
+    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
+    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
+    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -88,6 +131,7 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteKey(CfgSectionRender,   L"CoreProfile");    // OpenGL context flag, unused since SDL GPU
     RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }
@@ -117,9 +161,38 @@ void GameConfig::Save()
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
+    WriteBool(CfgSectionUI, CfgKeyTranslateItemNames, m_translateItemNames);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
+    WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
+    WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
+    WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+    WriteString(CfgSectionRender, CfgKeyLook, GameConfigValidation::FormatLook(m_look));
+    WriteInt(CfgSectionRender, CfgKeyAnisotropy, m_anisotropy);
+    WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
+    WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
+    WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
+    WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);
+    WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
+    WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
+    WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
+    WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
+    WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
+    WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
+    WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
+    WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
+    WriteString(CfgSectionRender, CfgKeyTexturePack, m_texturePack);
+    WriteBool(CfgSectionRender, CfgKeyUseS6PlayerModels, m_useS6PlayerModels);
+}
+
+LookPreset ReadLookPreset(const std::filesystem::path& configFile)
+{
+    std::array<wchar_t, 32> buffer{};
+    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyLook, L"", buffer.data(),
+                             static_cast<DWORD>(buffer.size()), configFile.wstring().c_str());
+    return GameConfigValidation::ValidateLook(buffer.data());
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -138,7 +211,8 @@ std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, con
     return result;
 }
 
-void GameConfig::WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values)
+void GameConfig::WriteStringList(const wchar_t* section, const wchar_t* keyPrefix,
+                                 const std::vector<std::wstring>& values)
 {
     WriteInt(section, (std::wstring(keyPrefix) + L"Count").c_str(), static_cast<int>(values.size()));
     for (size_t i = 0; i < values.size(); ++i)
@@ -180,6 +254,66 @@ void GameConfig::SetMusicVolume(int level)
     m_musicVolume = level;
 }
 
+void GameConfig::SetVSyncEnabled(bool enabled)
+{
+    m_vsyncEnabled = enabled;
+}
+
+void GameConfig::SetLook(LookPreset look)
+{
+    m_look = look;
+}
+
+void GameConfig::SetAnisotropy(int anisotropy)
+{
+    m_anisotropy = GameConfigValidation::ValidateAnisotropy(anisotropy);
+}
+
+void GameConfig::SetAntialiasing(int samples)
+{
+    m_antialiasing = GameConfigValidation::ValidateAntialiasing(samples);
+}
+
+void GameConfig::SetDisableEffects(bool disabled)
+{
+    m_disableEffects = disabled;
+}
+
+void GameConfig::SetDisableParticles(bool disabled)
+{
+    m_disableParticles = disabled;
+}
+
+void GameConfig::SetDisableSkillEffectModels(bool disabled)
+{
+    m_disableSkillEffectModels = disabled;
+}
+
+void GameConfig::SetDisableBoids(bool disabled)
+{
+    m_disableBoids = disabled;
+}
+
+void GameConfig::SetDisableWingShadow(bool disabled)
+{
+    m_disableWingShadow = disabled;
+}
+
+void GameConfig::SetDisableBodyShadows(bool disabled)
+{
+    m_disableBodyShadows = disabled;
+}
+
+void GameConfig::SetFpsCap(int fps)
+{
+    m_fpsCap = fps;
+}
+
+void GameConfig::SetTexturePack(const std::wstring& pack)
+{
+    m_texturePack = pack;
+}
+
 void GameConfig::SetRememberMe(bool remember)
 {
     m_rememberMe = remember;
@@ -208,9 +342,27 @@ void GameConfig::SetUILocale(const std::wstring& locale)
     m_uiLocale = locale;
 }
 
+void GameConfig::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
+}
+
 void GameConfig::SetFontSelection(const std::wstring& font)
 {
     m_fontSelection = font;
+}
+
+void GameConfig::SetRmlTheme(const std::wstring& theme)
+{
+    m_rmlTheme = theme;
+}
+
+void GameConfig::SetUIScalePercent(int percent)
+{
+    // Clamped, not validated-and-rejected: every writer (the options window's UI-scale row, the
+    // console command) is a user-facing dial, and silently keeping the previous value would look
+    // like the control did nothing. See CfgMinUIScalePercent's own comment for the bounds.
+    m_uiScalePercent = std::clamp(percent, CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)
@@ -225,12 +377,12 @@ void GameConfig::SetEncryptedPassword(const std::wstring& encryptedPassword)
 
 void GameConfig::SetServerIP(const std::wstring& ip)
 {
-    m_serverIP = ip;
+    m_serverIP = GameConfigValidation::ValidateServerIP(ip, CfgDefaults::CfgDefaultServerIP);
 }
 
 void GameConfig::SetServerPort(int port)
 {
-    m_serverPort = port;
+    m_serverPort = GameConfigValidation::ValidateServerPort(port, CfgDefaults::CfgDefaultServerPort);
 }
 
 void GameConfig::SetZoom(int zoom)
@@ -310,7 +462,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 }
 
 // Helper functions using Windows INI API
-int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
+int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.wstring().c_str());
 }
@@ -323,7 +475,7 @@ void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
     WritePrivateProfileStringW(section, key, buffer, m_configPath.wstring().c_str());
 }
 
-bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
+bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.wstring().c_str()) != 0;
 }
@@ -372,19 +524,23 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     std::vector<BYTE> encryptedData = HexToBinary(hexInput);
     if (encryptedData.empty()) return L"";
 
-    DATA_BLOB dataIn, dataOut;
-    dataIn.pbData = encryptedData.data();
-    dataIn.cbData = static_cast<DWORD>(encryptedData.size());
-
-    // Decrypt using Windows DPAPI
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    std::vector<std::uint8_t> decryptedData;
+    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData))
     {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData); // Safety: Windows allocated this, we free it
-        // The decrypted string might contain the null terminator, let's remove it if it exists.
+        std::wstring result(reinterpret_cast<const wchar_t*>(decryptedData.data()), decryptedData.size() / sizeof(wchar_t));
         if (!result.empty() && result.back() == L'\0') {
             result.pop_back();
         }
+        return result;
+    }
+
+    DATA_BLOB dataIn = { static_cast<DWORD>(encryptedData.size()), encryptedData.data() };
+    DATA_BLOB dataOut = {};
+    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    {
+        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
+        LocalFree(dataOut.pbData);
+        if (!result.empty() && result.back() == L'\0') result.pop_back();
         return result;
     }
 
@@ -395,15 +551,11 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 {
     if (!input || wcslen(input) == 0) return L"";
 
-    DATA_BLOB dataIn, dataOut;
-    dataIn.cbData = static_cast<DWORD>((wcslen(input) + 1) * sizeof(wchar_t));
-    dataIn.pbData = reinterpret_cast<BYTE*>(const_cast<wchar_t*>(input));
-
-    if (CryptProtectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    const std::size_t inputSize = (wcslen(input) + 1) * sizeof(wchar_t);
+    std::vector<std::uint8_t> encryptedData;
+    if (mu_encrypt_blob(input, inputSize, encryptedData))
     {
-        std::wstring hexResult = BinaryToHex(dataOut.pbData, dataOut.cbData);
-        LocalFree(dataOut.pbData);
-        return hexResult;
+        return BinaryToHex(encryptedData.data(), static_cast<DWORD>(encryptedData.size()));
     }
     return L"";
 }
@@ -423,7 +575,13 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     // any previously stored password so it never lingers in config.ini.
     if (m_savePassword)
     {
-        SetEncryptedPassword(EncryptSetting(pass));
+        std::wstring encryptedPassword = EncryptSetting(pass);
+        if (encryptedPassword.empty())
+        {
+            g_ErrorReport.Write(L"Failed to encrypt saved credentials.\r\n");
+            return;
+        }
+        SetEncryptedPassword(encryptedPassword);
     }
     else
     {
@@ -431,4 +589,9 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     }
 
     Save(); // Actually write to the .ini file
+}
+
+void GameConfig::SetUseS6PlayerModels(bool useOriginal)
+{
+    m_useS6PlayerModels = useOriginal;
 }

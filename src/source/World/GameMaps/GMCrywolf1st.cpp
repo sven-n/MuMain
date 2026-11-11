@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -15,18 +16,88 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "I18N/All.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
+#include "Render/Effects/EffectDraw.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
 
-extern bool LogOut;
+namespace
+{
+// The ready-state notice board: four pages of four lines, turned every ten seconds, starting one
+// page before the first (kNoticeFirstPage) until the page timer first turns it.
+constexpr int kNoticePageCount = 4;
+constexpr int kNoticeLinesPerPage = 4;
+constexpr int kNoticeFirstPage = -1;
+
+const wchar_t* const kNoNoticeText = L"";
+
+// One line of the notice board; a format string ("10%% ...") is printed before it is shown.
+struct NoticeLine
+{
+    const wchar_t* const* text;
+    bool isFormat;
+};
+
+// The board's lines, page by page from kNoticeFirstPage; that page shows the guardian contract
+// messages, as the original did.
+const NoticeLine kNoticeLines[] = {
+    {&I18N::Game::YouHaveBeenRegisteredToBeAGuardianToProtectTheWolf, false},
+    {&I18N::Game::YourRoleAsAGuardianWillBeCancelledWhenYouWarp, false},
+    {&I18N::Game::YouHaveBeenDisqualifiedToBeAGuardian, false},
+    {&I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false},
+
+    {&I18N::Game::MissionPoint1DefendTheWolfStatue, false},
+    {&I18N::Game::MakeAContractWithTheAltarToProtectTheWolfStatue, false},
+    {&I18N::Game::OnlyTheElfCanBeAGuardianToGivePowerToTheWolfStatue, false},
+    {&I18N::Game::YouHaveToProtectElvesWhenTheContractIsBeingMade, false},
+
+    {&I18N::Game::MissionPoint2DefeatBalgass, false},
+    {&I18N::Game::FortressOfCrywolfWillNotBeSafeUnlessBalgassIsDefeated, false},
+    {&I18N::Game::BalgassCanOnlyShowUpFor5MinutesAroundTheFortressOfCrywolf, false},
+    {&I18N::Game::DefeatBalgassWithinTheGivenTime, false},
+
+    {&I18N::Game::SuccessReparation, false},
+    {&I18N::Game::_10MonsterStrengthDecreaseMaintainDuringTheEvent, true},
+    {&I18N::Game::_5DecreaseInCastleAndArenaInvitationCombineRate, true},
+    {&I18N::Game::AboveReparationIsValidTillTheNextCrywolfBattle, false},
+
+    {&I18N::Game::FailurePenalty, false},
+    {&I18N::Game::DeleteAllTheNPCWithinCrywolf, false},
+    {&kNoNoticeText, false},
+    {&I18N::Game::AbovePenaltyIsValidTillTheNextCrywolfBattle, false},
+};
+static_assert(std::size(kNoticeLines) == (kNoticePageCount - kNoticeFirstPage) * kNoticeLinesPerPage,
+              "four lines on each notice page");
+
+// Line `line` (0 to 3) of notice page `page` (-1, the page before the first turn, to 3) as
+// AdvanceNoticeTexts shows it; empty for any other page or line.
+std::wstring NoticeText(int page, int line)
+{
+    if (page < kNoticeFirstPage || page >= kNoticePageCount || line < 0 || line >= kNoticeLinesPerPage)
+    {
+        return {};
+    }
+
+    const NoticeLine& notice = kNoticeLines[(page - kNoticeFirstPage) * kNoticeLinesPerPage + line];
+    if (!notice.isFormat)
+    {
+        return *notice.text;
+    }
+
+    // A format string ("10%% ..."): printed, like the original did.
+    wchar_t szText[256];
+    mu_swprintf(szText, *notice.text);
+    return szText;
+}
+} // namespace
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
-#include "UI/Legacy/UIControls.h"
 
 
 bool	View_Bal = false;
@@ -113,7 +184,7 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 
     if (m_CrywolfState >= CRYWOLF_STATE_READY && m_CrywolfState < CRYWOLF_STATE_ENDCYCLE)
     {
-        g_pNewUISystem->Show(SEASON3B::INTERFACE_CRYWOLF);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_CRYWOLF);
     }
 
     if (m_CrywolfState == CRYWOLF_STATE_START)
@@ -222,17 +293,12 @@ void M34CryWolf1st::DoTankerFireFixStartPosition(int SourceX, int SourceY, int P
     }
 }
 
-void M34CryWolf1st::RenderNoticesCryWolf()
+bool M34CryWolf1st::AdvanceNoticeTexts(std::wstring (&texts)[4])
 {
     if (m_CrywolfState != CRYWOLF_STATE_READY)
     {
-        return;
+        return false;
     }
-
-    int iTemp = 0;
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0, 0, 0, 170);
 
     if (GetTimeCheck(10000))
     {
@@ -240,10 +306,23 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         if (iNextNotice >= 4)
             iNextNotice = 0;
     }
-    iTemp = 4 * iNextNotice;
+    for (int i = 0; i < kNoticeLinesPerPage; i++)
+    {
+        texts[i] = NoticeText(iNextNotice, i);
+    }
+    return true;
+}
 
-    wchar_t szText[256];
-    int nText = 0;
+void M34CryWolf1st::RenderNoticesCryWolf()
+{
+    std::wstring texts[4];
+    if (!AdvanceNoticeTexts(texts))
+    {
+        return;
+    }
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 170);
 
     for (int i = 0; i < 4; i++)
     {
@@ -255,14 +334,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         {
             g_pRenderText->SetTextColor(100, 150, 255, 255);
         }
-        nText = 1957 + i + iTemp;
-        if (1966 == nText || 1967 == nText)
-        {
-            mu_swprintf(szText, I18N::Game::Lookup(nText));
-            g_pRenderText->RenderText(190, 63 + i * 13, szText);
-        }
-        else
-            g_pRenderText->RenderText(190, 63 + i * 13, I18N::Game::Lookup(nText));
+        g_pRenderText->RenderText(190, 63 + i * 13, texts[i].c_str());
     }
 }
 
@@ -355,7 +427,7 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
     case 71:
     case 57:
     {
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
     }
@@ -372,13 +444,14 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
     return true;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st())
         return false;
 
     vec3_t Light, p;
-    float Scale;//,Luminosity;
+    float Scale;
+    float Luminosity;
     Vector(0.f, 0.f, 0.f, p);
     static int Change_weather = 0;
 
@@ -386,7 +459,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
 
     if (Change_weather > 70000)
     {
-        weather = rand() % 3;
+        weather = Random::Rand() % 3;
         Change_weather = 0;
     }
     switch (o->Type)
@@ -413,6 +486,93 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
         CreateSprite(BITMAP_FLARE, p, Scale, Light, o, Ro);
     }
     break;
+    case 56:
+    {
+        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
+        {
+            float Color = (int)Random::Rand() % 10000 * 0.0001f;
+
+            Vector(Color, Color, Color, Light);
+
+            if (rand_fps_check(3))
+                CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 3, o, 4.0f);
+        }
+    }
+    break;
+    case 57:
+    {
+        if (rand_fps_check(3))
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
+        }
+    }
+    break;
+    case 71:
+    {
+        if (rand_fps_check(3))
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
+        }
+    }
+    break;
+    case 72:
+    {
+        if (rand_fps_check(10))
+        {
+            vec3_t Position;
+            VectorCopy(o->Position, Position);
+            Position[2] += 50.0f;
+            Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
+            Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
+            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 33, o->Scale);
+        }
+    }
+    break;
+    case 73:
+    {
+        if (weather == 0)
+            ashies = true;
+    }
+    break;
+    case 74:
+    {
+        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
+        }
+    }
+    break;
+    case 77:
+    {
+        if (rand_fps_check(6))
+        {
+            //	Vector(0.02f,0.02f,0.03f,Light);
+            Vector(0.02f, 0.03f, 0.02f, Light);
+            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
+        }
+    }
+    break;
+    case 78:
+    {
+        if (rand_fps_check(6))
+        {
+            Vector(0.03f, 0.06f, 0.05f, Light);
+            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
+        }
+    }
+    break;
+    case 81:
+    {
+        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_WAR)
+        {
+            o->Scale = 1.03f;
+        }
+    }
+    break;
     case 37:
     {
     }
@@ -428,7 +588,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
 
     return true;
 }
-bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     if (!IsCyrWolf1st())
     {
@@ -445,105 +605,41 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
         if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
-    return true;
+        return true;
     case 56:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
-        {
-            float Color = (int)rand() % 10000 * 0.0001f;
-
-            Vector(Color, Color, Color, Light);
-
-            if (rand_fps_check(3))
-                CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 3, o, 4.0f);
-        }
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
-    return true;
+        return true;
     case 41:
         Vector(0.2f, 0.7f, 0.f, Light);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
+    // Fires, smoke and mist only: UpdateCryWolf1stObjectEffects spawns them.
     case 57:
-    {
-        if (rand_fps_check(3))
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
-        }
-    }
-    return true;
     case 71:
-    {
-        if (rand_fps_check(3))
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
-        }
-    }
-    return true;
     case 72:
-    {
-        if (rand_fps_check(10))
-        {
-            vec3_t Position;
-            VectorCopy(o->Position, Position);
-            Position[2] += 50.0f;
-            Luminosity = (float)(rand() % 4 + 3) * 0.1f;
-            Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 33, o->Scale);
-        }
-    }
-    return true;
     case 73:
-    {
-        if (weather == 0)
-            ashies = true;
-    }
-    return true;
     case 74:
-    {
-        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
-        }
-    }
-    return true;
     case 77:
-    {
-        if (rand_fps_check(6))
-        {
-            //	Vector(0.02f,0.02f,0.03f,Light);
-            Vector(0.02f, 0.03f, 0.02f, Light);
-            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
-        }
-    }
-    return true;
     case 78:
-    {
-        if (rand_fps_check(6))
-        {
-            Vector(0.03f, 0.06f, 0.05f, Light);
-            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
-        }
-    }
-    return true;
+        return true;
     case 81:
     {
         if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_WAR)
         {
-            o->Scale = 1.03f;
-
             float fTemp = 0.1f;
 
             if (m_StatueHP <= 10) fTemp = 1.0f;
@@ -552,173 +648,27 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
             b->BodyLight[2] = m_StatueHP / 20.0f - 0.5f;
 
             b->StreamMesh = 0;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
 
             b->StreamMesh = 1;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
         }
     }
-    return true;
+        return true;
     case MODEL_SKILL_FURY_STRIKE:
     {
         Vector(0.0f, 0.0f, 0.9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     return true;
     }
 
-    return RenderCryWolf1stMonsterObjectMesh(o, b, ExtraMon);
-}
-
-CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
-{
-    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
-        return NULL;
-
-    CHARACTER* c = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_HAMMER_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SCOUT);
-        c = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_LANCE_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SOLAM);
-        c = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_BOW_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_VALAM);
-        c = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster96_Top", 27);
-        BoneManager::RegisterBone(c, L"Monster96_Center", 28);
-        BoneManager::RegisterBone(c, L"Monster96_Bottom", 29);
-    }
-    break;
-    case MONSTER_WEREWOLF:
-    {
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
-        c = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Object.SubType = 0;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
-    }
-    break;
-    case MONSTER_SCOUTHERO:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SCOUT);
-        c = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
-        c->Object.Scale = 1.6f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_WEREWOLFHERO:
-    {
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
-        c = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
-        c->Object.Scale = 1.65f;
-        c->Object.SubType = 1;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
-    }
-    break;
-    case MONSTER_VALAM:
-    case MONSTER_BALRAM:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALRAM);
-        c = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_SOLAM:
-    case MONSTER_SORAM:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SORAM);
-        c = CreateCharacter(Key, MODEL_SORAM, PosX, PosY);
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_BALGASS:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALGASS);
-        c = CreateCharacter(Key, MODEL_BALGASS, PosX, PosY);
-        c->Object.Scale = 2.f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 2, &c->Object, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 3, &c->Object, 30.f);
-    }
-    break;
-    case MONSTER_DEATH_SPIRIT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT);
-        c = CreateCharacter(Key, MODEL_DEATH_SPIRIT, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster94_zx", 27);
-        BoneManager::RegisterBone(c, L"Monster94_zx01", 28);
-    }
-    break;
-    case MONSTER_DARK_ELF:
-    case MONSTER_DARKELF:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_ELF_1);
-        c = CreateCharacter(Key, MODEL_DARK_ELF_1, PosX, PosY);
-        c->Object.Scale = 1.5f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, L"Left_Hand", 17);
-    }
-    break;
-    case MONSTER_BALLISTA:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALLISTA);
-        c = CreateCharacter(Key, MODEL_BALLISTA, PosX, PosY, 180);
-        c->Object.Scale = 1.0f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        if (PosY == 90)
-        {
-        }
-        if (PosX == 62)
-            c->Object.Angle[2] = 90.0f;
-        if (PosX == 183)
-            c->Object.Angle[2] = 90.0f;
-    }
-    break;
-    }
-
-    return c;
+    return RenderCryWolf1stMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
 bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
@@ -935,7 +885,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;
@@ -1052,7 +1002,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             int Hand = 0;
             if (i >= 3) Hand = 1;
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
 
             if (to != NULL)
             {
@@ -1071,7 +1021,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             int Hand = 0;
             if (i >= 2) Hand = 1;
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
             if (to != NULL)
                 CreateJointFpsChecked(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
             CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, o->Light);
@@ -1141,21 +1091,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
                 o->Angle[2] -= 18;//
 
-                Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                Vector((float)(Random::Rand() % 60 + 60 - 90), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
                 VectorAdd(Angle, o->Angle, Angle);
                 VectorCopy(p2, Position);
-                //					Position[0] += rand()%20-10;
-                //					Position[1] += rand()%20-10;
+                //					Position[0] += Random::Rand()%20-10;
+                //					Position[1] += Random::Rand()%20-10;
 
-                                    /*
-                                    b->TransformPosition(BoneTransform[39],StartRelative,StartPos,false);
-                                    b->TransformPosition(BoneTransform[41],EndRelative,EndPos,false);
-                                    CreateBlur(c,StartPos,EndPos,Light,3,true,24);
+                /*
+                b->TransformPosition(BoneTransform[39],StartRelative,StartPos,false);
+                b->TransformPosition(BoneTransform[41],EndRelative,EndPos,false);
+                CreateBlur(c,StartPos,EndPos,Light,3,true,24);
 
-                                    b->TransformPosition(BoneTransform[43],StartRelative,StartPos,false);
-                                    b->TransformPosition(BoneTransform[45],EndRelative,EndPos,false);
-                                    CreateBlur(c,StartPos,EndPos,Light,3,true,25);
-                */
+                b->TransformPosition(BoneTransform[43],StartRelative,StartPos,false);
+                b->TransformPosition(BoneTransform[45],EndRelative,EndPos,false);
+                CreateBlur(c,StartPos,EndPos,Light,3,true,25);
+*/
                 fAnimationFrame += fSpeedPerFrame;
             }
             VectorCopy(TempAngle, o->Angle);
@@ -1235,11 +1185,11 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                                     VectorRotate(EndPos,Matrix,Position);
                                     VectorAdd(Position,o->Position,p2);
                 //					o->Angle[2] -= 18;//
-                                    Vector((float)(rand()%60+60-90),0.f,(float)(rand()%30+90),Angle);
+                                    Vector((float)(Random::Rand()%60+60-90),0.f,(float)(Random::Rand()%30+90),Angle);
                                     VectorAdd(Angle,o->Angle,Angle);
                                     VectorCopy(p2,Position);
-                                    Position[0] += rand()%20-10;
-                                    Position[1] += rand()%20-10;
+                                    Position[0] += Random::Rand()%20-10;
+                                    Position[1] += Random::Rand()%20-10;
                                     if(o->AnimationFrame > 3.5f && o->AnimationFrame < 4.5f)
                                     CreateJoint(BITMAP_JOINT_SPARK,Position,Position,Angle);
                 */
@@ -1324,20 +1274,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame > 4.5f && o->AnimationFrame < 5.0f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
-                vec3_t Angle = { 0.f, 0.f, o->Angle[2] };
-                vec3_t Pos = { 0.f, 0.f, (to->BoundingBoxMax[2] / 1.f) };
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle = {0.f, 0.f, o->Angle[2]};
+                    vec3_t Pos = {0.f, 0.f, (to->BoundingBoxMax[2] / 1.f)};
 
-                Vector(80.f, 0.f, 20.f, p);
-                b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                Position[2] += 50.0f;
-                Angle[2] = o->Angle[2] + 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
-                Angle[2] = o->Angle[2] - 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Vector(80.f, 0.f, 20.f, p);
+                    b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                    Position[2] += 50.0f;
+                    Angle[2] = o->Angle[2] + 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Angle[2] = o->Angle[2] - 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                }
             }
         }
     }
@@ -1408,15 +1359,16 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_SORAM:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->BeginRender(look.alpha);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         b->EndRender();
         return true;
     }
@@ -1424,11 +1376,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BALGASS:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME3);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME3);
         }
         b->EndRender();
         return true;
@@ -1436,13 +1390,14 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     break;
     case MODEL_BALRAM:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         return true;
     }
     break;
     case MODEL_DEATH_SPIRIT:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         static float aaa = 0.f;
         aaa += 0.1f;
         if (aaa > 1.0f)
@@ -1451,22 +1406,23 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         {
             if (i == 2)
             {
-                if (o->Alpha > 0.3f)
-                    o->Alpha = 0.3f;
+                if (look.alpha > 0.3f)
+                    look.alpha = 0.3f;
 
-                o->BlendMesh = -2;
+                look.blendMesh = -2;
                 b->EndRender();
-                b->BeginRender(o->Alpha);
+                b->BeginRender(look.alpha);
                 Models[o->Type].StreamMesh = i;
             }
             else
-                o->BlendMesh = -1;
+                look.blendMesh = -1;
 
-            o->BlendMeshTexCoordU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         b->EndRender();
-        o->Alpha = 1.0f;
+        look.alpha = 1.0f;
         return true;
     }
     break;
@@ -1475,16 +1431,19 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.6f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
@@ -1493,27 +1452,32 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.8f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
     case MODEL_TANTALLOS:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1522,11 +1486,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BLOODY_WOLF:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1535,11 +1501,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BEAM_KNIGHT:	//318
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1548,11 +1516,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_DRAGON_:	//319
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1562,7 +1532,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     return false;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
         return false;
@@ -1574,54 +1544,20 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     case MODEL_CRYWOLF_ALTAR3:
     case MODEL_CRYWOLF_ALTAR4:
     case MODEL_CRYWOLF_ALTAR5:
-    {
-        vec3_t Light;
-        float fRotation1, fRotation2;
-        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
-        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
-
-        EnableAlphaBlend();
-
         if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
         {
-            Vector(Luminosity2, Luminosity2, 0.05f, Light);
-            fRotation1 = WorldTime * 0.01f;
-            fRotation2 = -WorldTime * 0.01f;
             Vector(0.09f, 0.09f, 0.04f, o->Light);
 
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
         }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
-        {
-            fRotation1 = WorldTime * 0.01f;
-            Vector(0.15f, 0.15f, Luminosity, Light);
-        }
-
-        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
-
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1);
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2);
-        DisableAlphaBlend();
-
-        if (fRotation1 >= 360.0f) fRotation1 = 0.0f;
-        if (fRotation2 >= 360.0f) fRotation2 = 0.0f;
-    }
-    break;
+        break;
     case MODEL_BALGASS:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALGAS_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALGAS_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1668,7 +1604,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1736,7 +1672,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1764,9 +1700,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
 
         vec3_t Position, Light;
-        int dummy = rand() % 14;
+        int dummy = Random::Rand() % 14;
         auto Data = (float)((float)dummy / (float)100);
-        auto Rot = (float)(rand() % 360);
+        auto Rot = (float)(Random::Rand() % 360);
         Vector(1.0f, 1.0f, 1.0f, Light);
         BoneManager::GetBonePosition(o, L"Monster94_zx", Position);
         CreateSprite(BITMAP_DS_EFFECT, Position, 1.5f, Light, o);
@@ -1779,7 +1715,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         BoneManager::GetBonePosition(o, L"Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
-        if (rand_fps_check(2))
+        if (Random::Rand() % 2 == 0)
         {
             Vector(0.7f, 0.7f, 1.0f, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360.f - Rot);
@@ -1793,7 +1729,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1825,7 +1761,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1874,7 +1810,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_WWOLF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_WWOLF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1917,7 +1853,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT2_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT2_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1948,7 +1884,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;
@@ -1972,7 +1908,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT3_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT3_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -2005,7 +1941,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT1_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT1_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -2036,6 +1972,64 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     return false;
 }
 
+bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
+{
+    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
+        return false;
+
+    switch (o->Type)
+    {
+    case MODEL_CRYWOLF_ALTAR1:
+    case MODEL_CRYWOLF_ALTAR2:
+    case MODEL_CRYWOLF_ALTAR3:
+    case MODEL_CRYWOLF_ALTAR4:
+    case MODEL_CRYWOLF_ALTAR5:
+    {
+        vec3_t Light;
+        float fRotation1, fRotation2;
+        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
+        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
+
+        EnableAlphaBlend();
+
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
+        {
+            Vector(Luminosity2, Luminosity2, 0.05f, Light);
+            fRotation1 = WorldTime * 0.01f;
+            fRotation2 = -WorldTime * 0.01f;
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
+        {
+            fRotation1 = WorldTime * 0.01f;
+            Vector(0.15f, 0.15f, Luminosity, Light);
+        }
+
+        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
+
+        Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+            BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1));
+        Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+            BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2));
+        DisableAlphaBlend();
+
+        if (fRotation1 >= 360.0f)
+            fRotation1 = 0.0f;
+        if (fRotation2 >= 360.0f)
+            fRotation2 = 0.0f;
+    }
+    break;
+    }
+    return false;
+}
+
 bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
 {
     if (!IsCyrWolf1st())
@@ -2047,39 +2041,39 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
         int ff = 200.0f;
 
         vec3_t TargetPosition = { 0.f, 0.f, 400.f }, TargetAngle = { 0.f, 0.f, 0.f };
-        switch (rand() % 8)
+        switch (Random::Rand() % 8)
         {
         case 0:
-            TargetPosition[0] = Hero->Object.Position[0] + (300 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (300 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (300 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (300 - ff + Random::Rand() % 250);
             break;
         case 1:
-            TargetPosition[0] = Hero->Object.Position[0] + (250 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (250 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (250 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (250 - ff + Random::Rand() % 250);
             break;
         case 2:
-            TargetPosition[0] = Hero->Object.Position[0] - (200 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (200 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (200 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (200 - ff + Random::Rand() % 250);
             break;
         case 3:
-            TargetPosition[0] = Hero->Object.Position[0] - (300 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (300 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (300 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (300 - ff + Random::Rand() % 250);
             break;
         case 4:
-            TargetPosition[0] = Hero->Object.Position[0] + (400 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (400 - ff + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 5:
-            TargetPosition[0] = Hero->Object.Position[0] - (400 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (400 - ff + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 6:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] + (400 - ff + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (400 - ff + Random::Rand() % 250);
             break;
         case 7:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] - (400 - ff + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (400 - ff + Random::Rand() % 250);
             break;
         }
 
@@ -2090,9 +2084,9 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
+            VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand_fps_check(2)))
+        if (Hero->Movement || (Random::Rand() % 2 == 0))
         {
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }
@@ -2108,12 +2102,14 @@ void M34CryWolf1st::RenderBaseSmoke(void)
 {
     EnableAlphaTest();
 
-    glColor3f(0.4f, 0.4f, 0.45f);
+    const DWORD smokeColor = RGBA(102, 102, 115, 255);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
     EnableAlphaBlend();
     float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
 }
 
 bool M34CryWolf1st::Get_State()
@@ -2164,214 +2160,6 @@ void M34CryWolf1st::Check_AltarState(int Num, int State)
     m_AltarState[Num - 1] = State;
 }
 
-void M34CryWolf1st::Set_Message_Box(int Str, int Num, int Key, int ObjNum)
-{
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false || LogOut)
-        return;
-
-    if (Str == 56)
-    {
-        BYTE State = (m_AltarState[ObjNum] & 0x0f);
-        mu_swprintf(Box_String[Num], I18N::Game::Lookup(1950 + Str), State);
-    }
-    else
-        wcscpy(Box_String[Num], I18N::Game::Lookup(1950 + Str));
-    if (Str == 56 || Str == 57)
-        Message_Box = 1;
-    else
-        Message_Box = 2;
-    if (Num == 0)
-        Box_String[Num + 1][0] = 0;
-
-    BackUp_Key = Key;
-}
-
-void M34CryWolf1st::MoveMvp_Interface()
-{
-    int Yes = 250;
-    int No = 330;
-
-    if (M34CryWolf1st::IsCyrWolf1st() == false)
-        return;
-    /*
-    int AltarContract_Loc[5][2] = {{125,27},{126,35},{120,38},{115,35},{117,27}};
-
-    for(int i = 0; i < 5; i++)
-    {
-        int Key = 205+i;
-        if((Hero->PositionX) == AltarContract_Loc[i][0] && (Hero->PositionY) == AltarContract_Loc[i][1] && Key != BackUp_Key)
-        {
-            Set_Message_Box(0,0,Key);
-            break;
-        }
-    }
-*/
-    if (View_End_Result == true)
-    {
-        if (MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300 + 30)
-        {
-            if (MouseLButton == true)
-            {
-                CryWolfMVPInit();
-                Button_Down = 5;
-            }
-        }
-        if (MouseLButton == true)
-        {
-            MouseLButton = false;
-            MouseLButtonPush = false;
-        }
-    }
-
-    if (Message_Box == 1)
-    {
-        if (MouseX > No && MouseX < No + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (MouseLButton == true)
-            {
-                Button_Down = 1;
-                Set_Message_Box(2, 0, 0);
-            }
-        }
-        if (MouseX > Yes && MouseX < Yes + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (MouseLButton == true)
-            {
-                if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA
-                    || Hero->Helper.Type == MODEL_HORN_OF_DINORANT
-                    || Hero->Helper.Type == MODEL_HORN_OF_FENRIR
-                    )
-                {
-                    Set_Message_Box(6, 0, 0);
-                }
-                else
-                {
-                    Button_Down = 2;
-                    SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
-                }
-            }
-        }
-        if (MouseLButton == true)
-        {
-            MouseLButton = false;
-            MouseLButtonPush = false;
-        }
-    }
-    else
-        if (Message_Box == 2)
-        {
-            if (MouseX > 290 && MouseX < 290 + 54 && MouseY > 250 && MouseY < 250 + 30)
-            {
-                if (MouseLButton == true)
-                {
-                    MouseLButton = false;
-                    MouseLButtonPush = false;
-                    Button_Down = 3;
-                }
-            }
-        }
-}
-
-void M34CryWolf1st::Sub_Interface()
-{
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
-        return;
-
-    int Yes = 250;
-    int No = 330;
-
-    g_pRenderText->SetTextColor(255, 148, 21, 255);
-    g_pRenderText->SetBgColor(0x00000000);
-
-    if (Message_Box == 1)
-    {
-        g_pCryWolfInterface->Render(212, 206, 209, 80, 0.f, 0.f, 207.f / 256.f, 77.f / 128.f, 22);
-        if (MouseX > No && MouseX < No + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (Button_Down == 1)
-            {
-                g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 15);
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 14);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(No, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 13);
-        }
-
-        if (MouseX > Yes && MouseX < Yes + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (Button_Down == 2)
-            {
-                g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 21);
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 20);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(Yes, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 19);
-        }
-
-        if (Box_String[0][0] != 0)
-        {
-            int Y_loc = 239;
-            if (Box_String[1][0] != 0)
-                Y_loc = 227;
-            g_pRenderText->RenderText(317, Y_loc, Box_String[0], 0, 0, RT3_WRITE_CENTER);
-        }
-        if (Box_String[1][0] != 0)
-            g_pRenderText->RenderText(317, 238, Box_String[1], 0, 0, RT3_WRITE_CENTER);
-    }
-    else if (Message_Box == 2)
-    {
-        g_pCryWolfInterface->Render(212, 206, 209, 80, 0.f, 0.f, 207.f / 256.f, 77.f / 128.f, 22);
-
-        if (MouseX > 290 && MouseX < 290 + 54 && MouseY > 250 && MouseY < 250 + 30)
-        {
-            if (Button_Down == 3)
-            {
-                g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 18);
-
-                Message_Box = 0;
-                Button_Down = 0;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 17);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(290, 250, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 16);
-        }
-
-        if (Box_String[0][0] != 0)
-        {
-            int Y_loc = 239;
-            if (Box_String[1][0] != 0)
-                Y_loc = 227;
-            g_pRenderText->RenderText(317, Y_loc, Box_String[0], 0, 0, RT3_WRITE_CENTER);
-        }
-        if (Box_String[1][0] != 0)
-            g_pRenderText->RenderText(317, 238, Box_String[1], 0, 0, RT3_WRITE_CENTER);
-    }
-}
-
-void M34CryWolf1st::Set_Hp(int State)
-{
-    m_StatueHP = State;
-}
-
 void M34CryWolf1st::Set_Val_Hp(int State)
 {
     Val_Hp = State;
@@ -2385,337 +2173,6 @@ bool M34CryWolf1st::Get_AltarState_State(int Num)
         return true;
     else
         return false;
-}
-
-bool M34CryWolf1st::Render_Mvp_Interface()
-{
-    if (M34CryWolf1st::IsCyrWolf1st() == false)
-        return false;
-
-    EnableAlphaTest();
-
-    wchar_t Text[300];
-
-    float Main[] = { 518.f,278.f,122.f,119.f,120.f / 128.f,118.f / 128.f };
-    float Number[5][6] = { {565.f,280.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {582.f,282.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {598.f,286.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {613.f,294.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
-                            {625.f,306.f,13.f,13.f,12.f / 16.f,12.f / 16.f} };
-    float bar[] = { 0.f,98.f,97.f,21.f,97.f / 128.f,21.f / 32.f };
-    float Dark_Elf_Icon[] = { 623.f,358.f,15.f,15.f,14.f / 16.f,14.f / 16.f };
-    float Val_Icon[] = { 4.f,101.f,15.f,15.f,14.f / 16.f,14.f / 16.f };
-
-    int TotDelay = 400;
-
-    if (View_End_Result == true)
-    {
-        g_pCryWolfInterface->Render(200, 110, 252, 240, 0.f, 0.f, 252.f / 256.f, 323.f / 512.f, 44);
-        g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->SetTextColor(255, 148, 21, 255);
-        g_pRenderText->SetBgColor(0x00000000);
-
-        mu_swprintf(Text, L"%ls", I18N::Game::Rank);
-        g_pRenderText->RenderText(240, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", I18N::Game::Character);
-        g_pRenderText->RenderText(285, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", I18N::Game::Class);
-        g_pRenderText->RenderText(333, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", I18N::Game::Score);
-        g_pRenderText->RenderText(387, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->SetBgColor(0x00000000);
-
-        int icntIndex = 0;
-        for (int i = 0; i < 5; i++)
-        {
-            icntIndex = i;
-            if (HeroScore[i] == -1)
-                continue;
-
-            mu_swprintf(Text, L"%d", i + 1);
-            g_pRenderText->RenderText(240, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            mu_swprintf(Text, L"%ls", HeroName[i]);
-            g_pRenderText->RenderText(285, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-
-            mu_swprintf(Text, L"%ls", gCharacterManager.GetCharacterClassText(HeroClass[i]));
-
-            g_pRenderText->RenderText(335, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            mu_swprintf(Text, L"%d", HeroScore[i]);
-            g_pRenderText->RenderText(385, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-        }
-
-        g_pRenderText->SetTextColor(255, 0, 255, 255);
-        g_pRenderText->SetBgColor(0);
-
-        if (View_Suc_Or_Fail == 1)
-        {
-            g_pRenderText->RenderText(330, 175 + icntIndex * 17, I18N::Game::MonsterStrengthDecreased10, 0, 0, RT3_WRITE_CENTER); icntIndex++;
-            g_pRenderText->RenderText(328, 175 + icntIndex * 17, I18N::Game::_5IncreaseInCastleAndArenaInvitationCombineRate, 0, 0, RT3_WRITE_CENTER);
-        }
-        else
-        {
-            g_pRenderText->RenderText(330, 175 + icntIndex * 17, I18N::Game::AllNPCsInCrywolfHaveBeenDeleted, 0, 0, RT3_WRITE_CENTER);
-        }
-
-        if (MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300 + 30)
-        {
-            if (Button_Down == 5)
-            {
-                g_pCryWolfInterface->Render(300, 300, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 21);
-                Message_Box = 0;
-                Button_Down = 0;
-                View_End_Result = false;
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(300, 300, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 20);
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(300, 300, 54, 30, 0.f, 0.f, 54.f / 64.f, 30.f / 32.f, 19);
-        }
-    }
-
-    if (Suc_Or_Fail == 1)
-    {
-        Delay++;
-        if (Delay >= TotDelay)
-        {
-            Delay = 0;
-            Suc_Or_Fail = 0;
-        }
-    }
-
-    if (Suc_Or_Fail >= 0)
-    {
-        float A_Value = 0.f;
-        int aa = (Delay * 2) % 140;
-
-        if (aa > 70)
-            A_Value = 1.f - ((aa - 70) * 0.01f);
-        else
-            A_Value = 0.3f + (aa * 0.01f);
-
-        if (Delay_Add_inter <= 0)
-            Delay_Add_inter = 0;
-        else
-            Delay_Add_inter -= 15;
-
-        if ((Delay * 15) > 479)
-        {
-            g_pCryWolfInterface->Render(150, 50, 329, 94, 0.f, 0.f, 328.f / 512.f, 93.f / 128.f, Add_Num, false, false, A_Value);
-        }
-        else if (Suc_Or_Fail == 0)
-        {
-            g_pCryWolfInterface->Render(150 + (Delay * 15), 50, 329, 94, 0.f, 0.f, 329.f / 512.f, 94.f / 128.f, Add_Num, false, false, A_Value);
-
-            Delay++;
-            if ((Delay * 15) > 479)
-            {
-                Delay = 0;
-                Suc_Or_Fail = -1;
-
-                Delay_Add_inter = 390;
-                View_End_Result = true;
-            }
-        }
-        else
-        {
-            g_pCryWolfInterface->Render(-329 + (Delay * 15), 50, 329, 94, 0.f, 0.f, 329.f / 512.f, 94.f / 128.f, Add_Num, false, false, A_Value);
-        }
-
-        g_pCryWolfInterface->Render(230, 150, 196, 141, 0.f, 0.f, 195.f / 256.f, 140.f / 256.f, 26);
-        g_pCryWolfInterface->Render(250 + Delay_Add_inter, 188, 110, 28, 0.f, 0.f, 110.f / 128.f, 27.f / 32.f, 27);
-
-        if (Delay_Add_inter == 0)
-        {
-            int Exp_val[9] = { 0,0,0,0,0,0,0,0,0 }, Exp_Dummy = 0, Val = 0;
-
-            g_pCryWolfInterface->Render(250 + 120, 188, 29, 28, 0.f, 0.f, 29.f / 32.f, 27.f / 32.f, 28 + Rank);
-
-            for (int i = 0; i < 9; i++)
-            {
-                if (Exp >= Val)
-                {
-                    if (Val > 0)
-                    {
-                        Exp_Dummy = Exp / Val;
-                        Exp_val[8 - i] = Exp_Dummy % 10;
-                    }
-                    else
-                    {
-                        Exp_val[8 - i] = Exp % 10;
-                        Val = 1;
-                    }
-                }
-                else
-                    break;
-
-                Val *= 10;
-            }
-            int Move_X = 29;
-            g_pCryWolfInterface->Render(200 + Move_X, 235, 60, 19, 0.f, 0.f, 60.f / 64.f, 19.f / 32.f, 43);
-            g_pCryWolfInterface->Render(250 + 130 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[8]);
-            g_pCryWolfInterface->Render(250 + 115 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[7]);
-            g_pCryWolfInterface->Render(250 + 100 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[6]);
-            g_pCryWolfInterface->Render(250 + 85 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[5]);
-            g_pCryWolfInterface->Render(250 + 70 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[4]);
-            g_pCryWolfInterface->Render(250 + 55 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[3]);
-            g_pCryWolfInterface->Render(250 + 40 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[2]);
-            g_pCryWolfInterface->Render(250 + 25 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[1]);
-            g_pCryWolfInterface->Render(250 + 10 + Move_X, 235, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f, 33 + Exp_val[0]);
-        }
-    }
-
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
-        return false;
-
-    g_pCryWolfInterface->Render(Main[0], Main[1], Main[2], Main[3], 0.f, 0.f, Main[4], Main[5], 3);
-
-    for (int ia = 0; ia < 5; ia++)
-    {
-        BYTE Use = (m_AltarState[ia] & 0xf0) >> 4;
-        BYTE State = (m_AltarState[ia] & 0x0f);
-        if (Use == CRYWOLF_ALTAR_STATE_CONTRACTED)
-        {
-            if (State == 1)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 23);
-            }
-            else if (State == 2)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 24);
-            }
-            else
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 25);
-            }
-        }
-        else
-        {
-            if (State == 1)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 7);
-            }
-            else if (State == 2)
-            {
-                g_pCryWolfInterface->Render(Number[ia][0], Number[ia][1], Number[ia][2], Number[ia][3], 0.f, 0.f, Number[ia][4], Number[ia][5], 8);
-            }
-        }
-    }
-
-    if (Dark_elf_Num == 0)
-    {
-        g_pCryWolfInterface->Render(Dark_Elf_Icon[0], Dark_Elf_Icon[1], Dark_Elf_Icon[2], Dark_Elf_Icon[3], 0.f, 0.f, Dark_Elf_Icon[4], Dark_Elf_Icon[5], 6);
-    }
-    else
-    {
-        g_pCryWolfInterface->Render(Dark_Elf_Icon[0], Dark_Elf_Icon[1], Dark_Elf_Icon[2], Dark_Elf_Icon[3], 0.f, 0.f, Dark_Elf_Icon[4], Dark_Elf_Icon[5], 5);
-    }
-
-    g_pCryWolfInterface->Render(538, 392, 104, 37, 0.f, 0.f, 104.f / 128.f, 36.f / 64.f, 12);
-    glColor3f(1.f, 0.6f, 0.3f);
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 148, 21, 255);
-    g_pRenderText->SetBgColor(0);
-    mu_swprintf(Text, I18N::Game::DarkElfD12, Dark_elf_Num);
-    g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
-
-    if (View_Bal == true)
-    {
-        if (Deco_Insert < 21.f)
-            Deco_Insert += 1.f;
-        else
-        {
-            g_pCryWolfInterface->Render(bar[0], bar[1], bar[2], bar[3], 0.f, 0.f, bar[4], bar[5], 0);
-            g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
-            mu_swprintf(Text, I18N::Game::Balgass);
-            g_pRenderText->RenderText(38, 101, Text, 0, 0, RT3_WRITE_CENTER);
-
-            float Hp = ((67.f / 100.f) * (float)Val_Hp);
-            float nx = ((68.f / 100.f) * (float)Val_Hp);
-            g_pCryWolfInterface->Render(25, 109, nx, 8, 0.f, 0.f, Hp / 128.f, 8.f / 8.f, 1);
-        }
-    }
-    if (View_Bal == false)
-    {
-        if (Deco_Insert > 0.f)
-            Deco_Insert -= 1.f;
-    }
-
-    if (TimeStart = true)
-    {
-        int nPastHour = m_iHour;
-        int nPastMinute;
-
-        if (m_iMinute > 0)
-        {
-            int Time_Add = 0;
-            float Tim = GetTickCount() - m_dwSyncTime;
-            nPastMinute = m_iMinute - (GetTickCount() - m_dwSyncTime) / 60000;
-
-            Time_Add = (Tim / 60000) * 60;
-
-            if (BackUpTick != Time_Add)
-            {
-                BackUpTick = Time_Add;
-                nPastTick++;
-                if (nPastTick >= 60)
-                    nPastTick = 0;
-            }
-        }
-        else nPastMinute = 0;
-
-        if (nPastMinute < 0)
-        {
-            nPastMinute = nPastMinute + 60;
-            --nPastHour;
-        }
-
-        if (BackUpMin != nPastMinute)
-        {
-            BackUpMin = nPastMinute;
-            nPastTick = 0;
-        }
-        if (View_Bal == false)
-            glColor3f(1.f, 1.0f, 1.0f);
-        else
-            glColor3f(1.f, 0.3f, 0.3f);
-        RenderNumber2D(510 + 60, 384 + 18, nPastMinute, 14, 14);
-        if (nPastTick == 0)
-            RenderNumber2D(520 + 87, 384 + 18, nPastTick, 14, 14);
-        else
-            RenderNumber2D(520 + 87, 384 + 18, 60 - nPastTick, 14, 14);
-    }
-
-    float Hp = ((88.f / 100.f) * (float)m_StatueHP);
-    float nx = ((89.f / 100.f) * (float)m_StatueHP);
-
-    g_pCryWolfInterface->Render(548 + (89.f - nx), 323, nx, 30, (Hp / 128.f), 0.f, Hp / 128.f, 29.f / 32.f, 9);
-
-    RenderNoticesCryWolf();
-    DisableAlphaBlend();
-    return true;
-}
-
-bool M34CryWolf1st::SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o)
-{
-    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_DARK_ELF:
-    case MONSTER_DARKELF:
-    case MONSTER_BALRAM:
-    case MONSTER_DEATH_SPIRIT:
-    case MONSTER_SORAM:
-    case MONSTER_BALGASS:
-        return CheckMonsterSkill(c, o);
-    }
-    return false;
 }
 
 void M34CryWolf1st::Set_MyRank(BYTE MyRank, int GettingExp)

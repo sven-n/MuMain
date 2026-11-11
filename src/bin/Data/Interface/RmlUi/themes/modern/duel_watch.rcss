@@ -1,0 +1,57 @@
+/* Modern theme for CDuelWatchWindow: docked_panel_frame.rcss's forged panel (linked first), the
+   Watch buttons as modern buttons, locked ones dimmed. Geometry is the legacy one (reference px
+   under the dock transform). */
+
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+
+#title { left: 15px; top: 13px; font-weight: bold; color: token(text-warm); }
+#subtitle { left: 0; top: 50px; font-weight: bold; color: token(text-primary); }
+
+.line { position: absolute; left: 10px; width: 170px; height: 1px; margin-top: 10px; background-color: token(border-frame); }
+
+.room { display: block; position: absolute; left: 0; width: 190px; height: 90px; }
+.room-heading { left: 0; top: 70px; font-weight: bold; color: token(accent-gold); }
+.room-vs { left: 0; top: 85px; color: #ff3232; }
+.room-player { top: 85px; color: token(text-primary); }
+.room-player-1 { left: 20px; }
+.room-player-2 { left: 100px; }
+.room-empty { left: 0; top: 85px; color: token(text-primary); }
+
+.watch-btn {
+	display: block;
+	position: absolute;
+	left: 68px;
+	top: 100px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-recessed);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.watch-btn.enabled { background-color: token(surface-raised); }
+.watch-btn.enabled:hover { border-color: token(accent-steel-hover); }
+.watch-label { left: 0; color: token(text-muted); }
+.watch-btn.enabled .watch-label { color: token(text-primary); }
+
+/* The three separators and the four colosseum blocks, 90 units apart as the original drew them. */
+.lines, .rooms { position: static; }
+.lines .line:nth-child(1) { top: 130px; }
+.lines .line:nth-child(2) { top: 220px; }
+.lines .line:nth-child(3) { top: 310px; }
+.room:nth-child(1) { top: 0; }
+.room:nth-child(2) { top: 90px; }
+.room:nth-child(3) { top: 180px; }
+.room:nth-child(4) { top: 270px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+#subtitle { width: calc(190px * var(--root-scale)); }
+.room-heading { width: calc(190px * var(--root-scale)); }
+.room-vs { width: calc(190px * var(--root-scale)); }
+.room-player.room-player-1 { width: calc(70px * var(--root-scale)); }
+.room-player.room-player-2 { width: calc(70px * var(--root-scale)); }
+.room-empty { width: calc(190px * var(--root-scale)); }
+.watch-label { width: calc(53px * var(--root-scale)); }

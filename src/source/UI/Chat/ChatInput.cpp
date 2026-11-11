@@ -1,9 +1,10 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Chat/ChatInput.h"
 
-// Includes mirror ZzzInterface.cpp, the unit this was extracted from.
+// Includes mirror ZzzInterface.cpp.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -32,15 +33,14 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
@@ -192,8 +192,8 @@ void CheckChatText(wchar_t* Text)
         {
             if (o->CurrentAction != PLAYER_SANTA_1 && o->CurrentAction != PLAYER_SANTA_2)
             {
-                int i = rand() % 3;
-                if (rand() % 2)
+                int i = Random::Rand() % 3;
+                if (Random::Rand() % 2)
                 {
                     SetAction(o, PLAYER_SANTA_1);
                     SendRequestAction(Hero->Object, AT_SANTA1_1 + i);

@@ -13,10 +13,13 @@
 #include "Camera/CameraMove.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Render/Look/LookTuning.h"
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/MuEditorLayout.h"
 
 // External C functions
-extern "C" CameraManager& CameraManager_Instance();
+CameraManager& CameraManager_Instance();
 extern "C" OrbitalCamera* GetOrbitalCameraInstance();
 
 // External camera state
@@ -87,11 +90,15 @@ void CDevEditorUI::Render(bool* p_open)
         return;
 
     ImGui::SetNextWindowSize(ImVec2(450, 500), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(I18N::Editor::DevEditor, p_open))
+    char title[MuEditor::WindowIds::TitleCapacity];
+    MuEditor::Layout::PrepareToolWindow();
+    if (!ImGui::Begin(MuEditor::WindowIds::Title(title, I18N::Editor::DevEditor, MuEditor::WindowIds::DevEditor),
+                      p_open, MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::DevEditor)))
     {
         ImGui::End();
         return;
     }
+    MuEditor::Layout::RenderToolWindowBar();
 
     // Tab bar
     if (ImGui::BeginTabBar("DevEditorTabs"))
@@ -576,6 +583,60 @@ void CDevEditorUI::RenderGraphicsTab()
     ImGui::Separator();
 
     RenderGraphicsDebugInfo();
+
+    ImGui::Spacing();
+    RenderLookPanel();
+}
+
+// The look profile and the light mood, live: a slider per value in its range, applied to the
+// default profile or the current map's entry (the same values as `$look set`).
+void CDevEditorUI::RenderLookPanel()
+{
+    if (!ImGui::CollapsingHeader(I18N::Editor::LookProfile))
+    {
+        return;
+    }
+    ImGui::Text("%s: %s", I18N::Editor::LookLoadedFrom, Render::Look::LiveSource().c_str());
+    ImGui::RadioButton(I18N::Editor::LookScopeDefault, &m_LookScopeMap, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton(I18N::Editor::LookScopeCurrentMap, &m_LookScopeMap, 1);
+    if (ImGui::Button(I18N::Editor::LookResetAll))
+    {
+        (void)Render::Look::ResetLive(std::nullopt);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::LookSave))
+    {
+        (void)Render::Look::SaveLive();
+    }
+    ImGui::Separator();
+
+    for (const Render::Look::LookValueState& state : Render::Look::DescribeLive())
+    {
+        ImGui::PushID(state.name.c_str());
+        float value = m_LookEditedName == state.name ? m_LookEditedValue : static_cast<float>(state.value);
+        ImGui::SetNextItemWidth(220.0f);
+        if (ImGui::SliderFloat("##value", &value, static_cast<float>(state.min), static_cast<float>(state.max), "%.3f"))
+        {
+            m_LookEditedName = state.name;
+            m_LookEditedValue = value;
+        }
+        // One edit per drag: a mood value rebuilds the static map light.
+        if (ImGui::IsItemDeactivatedAfterEdit())
+        {
+            const Render::Look::LookEdit edit{state.name, value};
+            (void)Render::Look::SetLive(std::span<const Render::Look::LookEdit>(&edit, 1), m_LookScopeMap != 0);
+            m_LookEditedName.clear();
+        }
+        ImGui::SameLine();
+        ImGui::Text("%s (%s)", state.name.c_str(), Render::Look::ToString(state.source));
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::LookReset))
+        {
+            (void)Render::Look::ResetLive(state.name);
+        }
+        ImGui::PopID();
+    }
 }
 
 void CDevEditorUI::RenderGraphicsDebugInfo()
@@ -676,7 +737,6 @@ extern "C"
     // an independent override state in the DevEditor UI.
     bool DevEditor_IsCameraOverrideEnabled(const char* cameraName)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cameraName) return false;
         if (strcmp(cameraName, "Default") == 0) return g_DevEditorUI.GetDefaultOverride().enabled;
         if (strcmp(cameraName, "Orbital") == 0) return g_DevEditorUI.GetOrbitalOverride().enabled;
@@ -685,7 +745,6 @@ extern "C"
 
     void DevEditor_ApplyCameraOverride(const char* cameraName, CameraConfig* cfg)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cfg || !cameraName) return;
         if (strcmp(cameraName, "Default") == 0) g_DevEditorUI.ApplyDefaultOverrideToConfig(*cfg);
         else if (strcmp(cameraName, "Orbital") == 0) g_DevEditorUI.ApplyOrbitalOverrideToConfig(*cfg);
@@ -693,7 +752,6 @@ extern "C"
 
     bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cameraName) return false;
         if (strcmp(cameraName, "Default") == 0)
         {
@@ -748,7 +806,6 @@ extern "C"
     // Return identity/zero when override disabled or not in MAIN_SCENE.
     void DevEditor_GetDefaultCameraOffset(float* outX, float* outY, float* outZ)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetDefaultOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (outX) *outX = active ? ov.offsetX : 0.0f;
@@ -762,7 +819,6 @@ extern "C"
     bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outFarWidth,
                                            float* outNearDist, float* outNearWidth)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetOrbitalOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (!active) return false;
@@ -775,7 +831,6 @@ extern "C"
 
     void DevEditor_GetDefaultTrapezoidMultipliers(float* outNearMul, float* outFarMul)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetDefaultOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (outNearMul) *outNearMul = active ? ov.widthNearMul : 1.0f;

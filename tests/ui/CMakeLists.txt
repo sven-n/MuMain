@@ -1,0 +1,404 @@
+# RmlLayoutFixture.cpp loads the themes and fonts for the tests that lay out RmlUi documents, here and in
+# tests/data: compiled once for all of them.
+mu_add_test_objects(NAME mu_test_rml_layout_fixture SOURCES RmlLayoutFixture.cpp LINK_LIBS mu_test_main MuClient)
+target_compile_definitions(mu_test_rml_layout_fixture PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
+mu_add_test(
+    NAME map_name_tests
+    SOURCES
+        test_map_name.cpp
+        test_map_name_ornament.cpp
+        test_text_fit.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient Freetype::Freetype mu_test_rml_layout_fixture
+)
+
+target_compile_definitions(map_name_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+)
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(map_name_tests test_map_name.cpp)
+
+mu_add_test(
+    NAME cursed_temple_skill_tests
+    SOURCES
+        test_cursed_temple_skill.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
+)
+target_compile_definitions(cursed_temple_skill_tests PRIVATE
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+)
+
+mu_add_test(
+    NAME rml_render_target_lifetime_tests
+    SOURCES
+        test_rml_render_target_lifetime.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_image_crop_tests
+    SOURCES test_rml_image_crop.cpp
+    LINK_LIBS RmlUi::Core
+)
+
+mu_add_test(
+    NAME guard_guild_lists_tests
+    SOURCES
+        test_guard_guild_lists.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Combat/GuardGuildLists.cpp
+)
+
+mu_add_test(
+    NAME jewel_unmix_selection_tests
+    SOURCES
+        test_jewel_unmix_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Items/JewelUnmixSelection.cpp
+)
+
+mu_add_test(
+    NAME buy_option_selection_tests
+    SOURCES
+        test_buy_option_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameShop/BuyOptionSelection.cpp
+)
+
+mu_add_test(
+    NAME storage_item_selection_tests
+    SOURCES
+        test_storage_item_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameShop/StorageItemSelection.cpp
+)
+
+mu_add_test(
+    NAME shop_script_list_tests
+    SOURCES
+        test_shop_script_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME item_grid_geometry_tests
+    SOURCES
+        test_item_grid_geometry.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/ItemGridGeometry.cpp
+)
+
+mu_add_test(
+    NAME tooltip_placement_tests
+    SOURCES
+        test_tooltip_placement.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/RmlBridge/RmlTooltipPlacement.cpp
+)
+
+mu_add_test(
+    NAME socket_list_selection_tests
+    SOURCES
+        test_socket_list_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/SocketListSelection.cpp
+)
+
+mu_add_test(
+    NAME experience_text_tests
+    SOURCES test_experience_text.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME help_pages_tests
+    SOURCES test_help_pages.cpp
+    LINK_LIBS MuClient
+)
+
+# The options window's tuning rows of the Enhanced look, and their markup in both bundled themes.
+mu_add_test(
+    NAME tuning_rows_tests
+    SOURCES test_tuning_rows.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(tuning_rows_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+)
+
+mu_add_test(
+    NAME guild_mark_palette_tests
+    SOURCES
+        test_guild_mark_palette.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Guild/GuildMarkPalette.cpp
+)
+
+mu_add_test(
+    NAME rml_premultiply_tests
+    SOURCES
+        test_rml_premultiply.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/RmlUi/RmlPremultiply.cpp
+)
+
+mu_add_test(
+    NAME mini_map_layout_tests
+    SOURCES
+        test_mini_map_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/MiniMapLayout.cpp
+)
+
+mu_add_test(
+    NAME rml_stacking_order_tests
+    SOURCES
+        test_rml_stacking_order.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/RmlBridge/RmlStackingOrder.cpp
+)
+target_compile_definitions(rml_stacking_order_tests PRIVATE
+    MU_CLIENT_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
+)
+
+mu_add_test(
+    NAME character_class_step_tests
+    SOURCES test_character_class_step.cpp
+)
+
+mu_add_test(
+    NAME party_list_layout_tests
+    SOURCES
+        test_party_list_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Party/PartyListLayout.cpp
+)
+
+mu_add_test(
+    NAME text_search_tests
+    SOURCES
+        test_text_search.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Widgets/TextSearch.cpp
+)
+
+mu_add_test(
+    NAME npc_name_storage_tests
+    SOURCES
+        test_npc_name_storage.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/WideString.cpp
+)
+
+mu_add_test(
+    NAME monster_health_bar_tests
+    SOURCES
+        test_monster_health_bar.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Combat/MonsterHealthBar.cpp
+)
+
+mu_add_test(
+    NAME ui_scaling_tests
+    SOURCES
+        test_ui_scaling.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/ExecutableConfigFile.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+    # Saves the config.ini beside the executable, as theme_file_interface_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
+)
+
+mu_add_test(
+    NAME mu_helper_tests
+    SOURCES
+        test_mu_helper.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME character_name_lifecycle_tests
+    SOURCES test_character_name_lifecycle.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME window_geometry_tests
+    SOURCES test_window_geometry.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME master_skill_tree_layout_tests
+    SOURCES
+        test_master_skill_tree_layout.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
+)
+
+mu_add_test(
+    NAME skill_icon_atlas_tests
+    SOURCES
+        test_skill_icon_atlas.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/SkillIconAtlas.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
+)
+
+mu_add_test(
+    NAME rml_draggable_tests
+    SOURCES test_rml_draggable.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME window_placement_layout_tests
+    SOURCES test_window_placement_layout.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(window_placement_layout_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi")
+
+mu_add_test(
+    NAME rml_model_binder_tests
+    SOURCES test_rml_model_binder.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_themed_view_tests
+    SOURCES
+        test_rml_themed_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME world_label_layer_tests
+    SOURCES
+        test_world_label_layer.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_counter_scale_tests
+    SOURCES
+        test_rml_counter_scale.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_slot_placement_tests
+    SOURCES
+        test_rml_slot_placement.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_party_trade_layout_tests
+    SOURCES
+        test_rml_party_trade_layout.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
+)
+target_compile_definitions(rml_party_trade_layout_tests PRIVATE
+    MU_LOCALIZATION_DIR="${CMAKE_SOURCE_DIR}/src/Localization"
+)
+
+mu_add_test(
+    NAME item_grid_px_tests
+    SOURCES
+        test_item_grid_px.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_scale_inputs_tests
+    SOURCES
+        test_rml_scale_inputs.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_runtime_scale_tests
+    SOURCES
+        test_rml_runtime_scale.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME theme_file_interface_tests
+    SOURCES
+        test_theme_file_interface.cpp
+        test_theme_inheritance.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+    # Choosing a theme saves the config.ini beside the executable, as ui_scaling_tests does.
+    RESOURCE_LOCK ui_executable_config_ini
+)
+target_compile_definitions(theme_file_interface_tests PRIVATE
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+)
+
+mu_add_test(
+    NAME rml_friend_window_identity_tests
+    SOURCES test_rml_friend_window_identity.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME generic_dialog_lifetime_tests
+    SOURCES
+        test_generic_dialog_lifetime.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME rml_document_scene_tests
+    SOURCES
+        test_rml_document_scene.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+add_executable(rml_text_layout_tests
+    test_rml_text_layout.cpp
+    RmlTextLayoutAudit.cpp
+)
+target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main mu_test_winmain mu_test_rml_layout_fixture)
+target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+if(MSVC)
+    target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
+endif()
+mu_test_use_pch(rml_text_layout_tests)
+add_test(
+    NAME rml_text_layout_baseline
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/prepare_rml_text_layout.py"
+        --repo "${CMAKE_SOURCE_DIR}"
+        --generated "${CMAKE_BINARY_DIR}/Generated"
+        --executable "$<TARGET_FILE:rml_text_layout_tests>"
+        --output "${CMAKE_BINARY_DIR}/text-layout-baseline"
+)
+
+mu_add_test(
+    NAME rml_styling_regression_tests
+    SOURCES
+        test_rml_styling_regressions.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
+)
+target_compile_definitions(rml_styling_regression_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
+mu_add_test(
+    NAME rml_click_sound_tests
+    SOURCES
+        test_rml_click_sounds.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
+)

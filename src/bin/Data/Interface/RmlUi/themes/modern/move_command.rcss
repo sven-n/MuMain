@@ -1,0 +1,139 @@
+/* Modern theme for CMoveCommandWindow -- the left-docked warp list.
+
+   This window is the only left-docked screen in the game, so it has no dock neighbours to
+   match; what it does sit beside, always, is main_frame's bottom HUD. It therefore
+   borrows docked_panel_frame.rcss's forged-panel vocabulary (gradient body, border-frame edge,
+   inset shell highlight) without linking it: that partial is a 190x429 dialog frame with a header
+   rail, and this is a slim full-height rail whose native form had no frame art at all -- one flat
+   translucent rectangle. Same material, smaller construction.
+
+   Coordinates are plain reference px, not dp: #panel is placed at its slot's scale (see
+   move_command.rml's header comment). Row/cell colours come from what C++ binds as MEANING
+   (can_move, level_unmet, zen_unmet), never from a colour pushed in from C++. */
+
+/* The dock's height less its top unit (the original's window started at y 1). */
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 431px;
+	border-radius: token(radius-sm)px;
+	background-color: token(surface-deep);
+	decorator: linear-gradient(to bottom, token(surface-panel) 0%, token(surface-deep) 100%);
+	border-width: 1px;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11px 30px rgba(0, 0, 0, 158),
+		inset 0 0 0 1px token(metal-outer);
+	font-family: "token(font-body)";
+	/* The panel must claim the cursor: native consumed every event inside its own rectangle, so a
+	   click on the list never reached the world underneath. */
+	pointer-events: auto;
+}
+
+#title {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 4px;
+	text-align: center;
+	transform-origin: center top;
+	color: token(text-warm);
+	font-weight: bold;
+}
+
+#head {
+	position: absolute;
+	left: 2px;
+	top: 24px;
+	transform-origin: left top;
+	color: token(text-muted);
+}
+
+/* The scrollbar keeps .scroll-pane's own dp width rather than a reference-px one. #list's net
+   render transform is identity (#panel's scale times #list's counter-scale), so everything inside
+   it is already laid out in real pixels -- a scrollbar sized in reference units would be the one
+   part of this window that grew with the panel while its neighbours did not. It follows the
+   player's UI-scale setting instead, same as every other .scroll-pane consumer. */
+/* Between the header (native's kListOffsetY) and the close bar. */
+#list_box {
+	position: absolute;
+	left: 2px;
+	right: 3px;
+	top: 38px;
+	bottom: 22px;
+}
+#list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform-origin: left top;
+	overflow: hidden scroll;
+}
+
+/* Native gives each row's text the TOP of its slot (RenderText(x, itemY)), so the row carries a
+   height and the cells sit at its top -- a line-height would split the slack above and below
+   instead. Kept identical to legacy: this is layout, not presentation. */
+.mc-row {
+	position: relative;
+	/* Explicit, not incidental: a data-for <div> is inline without it in this build, and every row
+	   then lands on the same line. .quest-row/.party-row/.chat-line all declare it for the same
+	   reason. */
+	display: block;
+	color: token(text-disabled);
+	pointer-events: auto;
+}
+/* A row is its text's line height plus 2 reference px, as native's rows were. */
+.mc-strut { display: inline; }
+.mc-row.can-move { color: token(text-primary); }
+
+/* Each cell reproduces RT3_WRITE_CENTER: centred on a point, natural width, no box to overflow.
+   The four points are native's own 20/62/119/159 relative to the panel, restated against the
+   row's own left edge (panel + 2) as a fraction of row_width. */
+.col {
+	position: absolute;
+	top: 0;
+	white-space: nowrap;
+	transform: translateX(-50%);
+}
+.col-strife { left: 8.654%; }
+.col-map    { left: 28.846%; }
+.col-level  { left: 56.250%; }
+.col-zen    { left: 75.481%; }
+
+/* Only a reachable destination highlights, matching native's own `if (_bCanMove)` guard. */
+.mc-row.can-move:hover {
+	background-color: token(surface-raised);
+	color: token(text-warm);
+}
+
+/* An unmet requirement is called out on the cell that is unmet, and only on a row that is already
+   unreachable -- a reachable row has no unmet cell to report. */
+.mc-row .col.unmet { color: token(semantic-danger); }
+.mc-row.can-move .col.unmet { color: token(text-primary); }
+
+/* The only action this window offers, so it takes the crimson hero treatment -- which also keeps
+   native's own red close bar. */
+#close_bar {
+	position: absolute;
+	left: 2px;
+	right: 3px;
+	bottom: 6px;
+	height: 16px;
+	border-radius: token(radius-sm)px;
+	background-color: token(accent-crimson);
+	pointer-events: auto;
+	cursor: pointer;
+}
+#close_bar:hover { background-color: token(accent-crimson-hover); }
+#close_label { position: absolute; white-space: nowrap; color: token(text-primary); }
+
+/* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
+#panel.fill-placement { box-sizing: border-box; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. The rows
+   leave 17 reference px at the pane's right for the scrollbar; #head spans the rows' width. */
+#title { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#head { width: calc(100% * var(--root-scale) - 22px * var(--root-scale)); }
+#list { width: calc(100% * var(--root-scale)); height: calc(100% * var(--root-scale)); }
+.mc-row { width: calc(100% - 17px * var(--root-scale)); padding-bottom: calc(2px * var(--root-scale)); }

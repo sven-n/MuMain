@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "I18N/All.h"
 #include "Core/Platform/PathResolve.h"
+#include "Data/Translation/ItemTextExpansion.h"
 
 #include <algorithm>
 #include <array>
@@ -15,7 +16,7 @@
 #include <iterator>
 #include <vector>
 
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -29,9 +30,10 @@
 #include "CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "Core/Utilities/UsefulDef.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
+#include "Render/Text/CUIRenderText.h"
 
 bool bCheckNPC = false;
 extern  int  g_iMessageTextStart;
@@ -153,14 +155,18 @@ namespace
 }
 
 CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
-m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(REFERENCE_WIDTH - 190), m_iStartY(0)
+m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST)
 {
     I18N::RegisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
+    // The dialog's lines are copies, so they also follow the item names its texts show (Translate item names, the
+    // editor's name edits).
+    Data::Translation::ItemTexts::RegisterTextsChangedObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 CSQuest::~CSQuest(void)
 {
     I18N::UnregisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
+    Data::Translation::ItemTexts::UnregisterTextsChangedObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 bool CSQuest::IsInit(void)
@@ -283,13 +289,9 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
 
 void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
-    if (Class != -1)
-    {
-        m_bOnce = true;
-        bCheckNPC = false;
-
-        m_byClass = gCharacterManager.GetBaseClass(Class);
-    }
+    m_bOnce = true;
+    bCheckNPC = false;
+    m_byClass = gCharacterManager.GetBaseClass(Class);
 
     m_byQuestList.fill(0);
     if (byList != nullptr)
@@ -521,13 +523,10 @@ std::uint8_t CSQuest::getQuestState2(int questIndex)
 
 std::uint8_t CSQuest::CheckQuestState(std::uint8_t state)
 {
-    if (Hero->Class != -1)
+    if (m_bOnce)
     {
-        if (m_bOnce)
-        {
-            m_bOnce = false;
-            m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
-        }
+        m_bOnce = false;
+        m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
     }
 
     QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
@@ -576,7 +575,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    const wchar_t* text = I18N::Dialog::Lookup(iDialogIndex);
+    const wchar_t* text = GameLogic::Quests::Dialog::GetText(iDialogIndex);
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(
         text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
@@ -589,8 +588,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < entry.numAnswer; ++i)
     {
-        const wchar_t* answerText = I18N::Dialog::Lookup(
-            GameLogic::Quests::Dialog::DialogAnswerLegacyId(iDialogIndex, i));
+        const wchar_t* answerText = GameLogic::Quests::Dialog::GetAnswerText(iDialogIndex, i);
         mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
@@ -701,7 +699,7 @@ bool CSQuest::BeQuestItem(void)
 
 int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
-    SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
     int nItemsInInven = pInvenCtrl->GetNumberOfItems();
     ITEM* pItem = nullptr;
@@ -766,34 +764,3 @@ void CSQuest::SetKillMobInfo(const int* anKillMobInfo)
     }
 }
 
-void CSQuest::RenderDevilSquare(void)
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(230, 230, 230, 255);
-    g_pRenderText->SetBgColor(20, 20, 20, 255);
-    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, I18N::Game::DevilSquare, 120, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(200, 220, 255, 255);
-    //	RenderText ( m_iStartX+95-73, m_iStartY+22, m_Quest[m_byCurrQuestIndex].strQuestName, 150*WindowWidth/640, true );
-}
-
-void CSQuest::RenderBloodCastle(void)
-{
-    wchar_t Text[100] {};
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(230, 230, 230, 255);
-    g_pRenderText->SetBgColor(20, 20, 20, 255);
-    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, I18N::Game::BloodCastle, 120, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(223, 191, 103, 255);
-    g_pRenderText->SetBgColor(0);
-    mu_swprintf_s(Text, std::size(Text), I18N::Game::DSSSchedule, BLOODCASTLE_QUEST_NUM, I18N::Game::BloodCastle, I18N::Game::Quest);
-    g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->SetTextColor(255, 230, 210, 255);
-    g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, I18N::Game::Lookup(877), 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, I18N::Game::Lookup(878), 0, 0, RT3_WRITE_CENTER);
-
-    g_pRenderText->SetFont(g_hFontBig);
-    mu_swprintf_s(Text, std::size(Text), I18N::Game::EntranceIsAllowedForDTimes, m_byEventCount[m_byQuestType]);
-    g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
-}

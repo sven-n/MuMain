@@ -1,0 +1,109 @@
+/* Modern theme for the login-scene credits screen -- flat programmatic styling, no legacy art;
+   same structure and positioning as legacy's credit_win.rcss. */
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: token(surface-deep);
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+/* Same illustration art as legacy (no flat-vector substitute for photographic art); decorator/opacity
+   pushed from CreditWin.cpp's SyncRmlModel(). Spritesheets duplicated here (theme-local, not shared). */
+@spritesheet illust-im1-1-sheet { src: "../../../im1_1.jpg"; illust-im1-1: 0px 0px 400px 400px; }
+@spritesheet illust-im1-2-sheet { src: "../../../im1_2.jpg"; illust-im1-2: 0px 0px 400px 400px; }
+@spritesheet illust-im2-1-sheet { src: "../../../im2_1.jpg"; illust-im2-1: 0px 0px 400px 400px; }
+@spritesheet illust-im2-2-sheet { src: "../../../im2_2.jpg"; illust-im2-2: 0px 0px 400px 400px; }
+@spritesheet illust-im3-1-sheet { src: "../../../im3_1.jpg"; illust-im3-1: 0px 0px 400px 400px; }
+@spritesheet illust-im3-2-sheet { src: "../../../im3_2.jpg"; illust-im3-2: 0px 0px 400px 400px; }
+@spritesheet illust-im4-1-sheet { src: "../../../im4_1.jpg"; illust-im4-1: 0px 0px 400px 400px; }
+@spritesheet illust-im4-2-sheet { src: "../../../im4_2.jpg"; illust-im4-2: 0px 0px 400px 400px; }
+@spritesheet illust-im5-1-sheet { src: "../../../im5_1.jpg"; illust-im5-1: 0px 0px 400px 400px; }
+@spritesheet illust-im5-2-sheet { src: "../../../im5_2.jpg"; illust-im5-2: 0px 0px 400px 400px; }
+@spritesheet illust-im6-1-sheet { src: "../../../im6_1.jpg"; illust-im6-1: 0px 0px 400px 400px; }
+@spritesheet illust-im6-2-sheet { src: "../../../im6_2.jpg"; illust-im6-2: 0px 0px 400px 400px; }
+@spritesheet illust-im7-1-sheet { src: "../../../im7_1.jpg"; illust-im7-1: 0px 0px 400px 400px; }
+@spritesheet illust-im7-2-sheet { src: "../../../im7_2.jpg"; illust-im7-2: 0px 0px 400px 400px; }
+@spritesheet illust-im8-1-sheet { src: "../../../im8_1.jpg"; illust-im8-1: 0px 0px 400px 400px; }
+@spritesheet illust-im8-2-sheet { src: "../../../im8_2.jpg"; illust-im8-2: 0px 0px 400px 400px; }
+
+.illust {
+	position: absolute;
+	top: 21%;
+	width: 50%;
+	height: 66.6667%;
+	pointer-events: none;
+}
+.illust-left { left: 0%; }
+.illust-right { left: 50%; }
+
+/* No flat-art substitute reads well for either, so both are dropped. */
+.logo, .deco {
+	display: none;
+}
+
+.btn-close {
+	position: absolute;
+	right: 13dp;
+	bottom: 83dp;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-md)dp;
+	text-align: center;
+	line-height: 30dp;
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 14dp;
+}
+.btn-close:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+
+/* font-family/size redeclared directly (not inherited from #panel) -- data-model binding silently
+   breaks property inheritance for this text in this RmlUi build. */
+.btn-close-label {
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+.credit-label {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+	font-weight: bold;
+	color: token(text-primary);
+	pointer-events: none;
+}
+.credit-department { top: 20dp; }
+.credit-team { top: 46dp; }
+
+.credit-names {
+	position: absolute;
+	left: 0;
+	top: 72dp;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+}
+.credit-name {
+	font-family: "token(font-body)";
+	font-size: 14dp;
+	font-weight: bold;
+	color: token(accent-gold-hover);
+	white-space: nowrap;
+	margin-left: 20dp;
+	margin-right: 20dp;
+}

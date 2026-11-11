@@ -2,6 +2,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Platform/ErrorDialog.h"
+#include "Core/Text/Utf8.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include <setjmp.h>
 #include <array>
 #include <cstdio>
@@ -9,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "ZzzTexture.h"
+#include "TextureFailure.h"
 
 #include "Network/Server/WSclient.h"
 #include "turbojpeg.h"
@@ -17,14 +22,26 @@ CGlobalBitmap Bitmaps;
 
 bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality, bool bottomUp)
 {
-    const auto fileCloser = [](FILE* fp) { if (fp != nullptr) { fclose(fp); } };
+    const auto fileCloser = [](FILE* fp)
+    {
+        if (fp != nullptr)
+        {
+            fclose(fp);
+        }
+    };
     std::unique_ptr<FILE, decltype(fileCloser)> outfile(_wfopen(filename, L"wb"), fileCloser);
     if (!outfile)
     {
         return false;
     }
 
-    const auto jpegDestroyer = [](tjhandle handle) { if (handle != nullptr) { tjDestroy(handle); } };
+    const auto jpegDestroyer = [](tjhandle handle)
+    {
+        if (handle != nullptr)
+        {
+            tjDestroy(handle);
+        }
+    };
     std::unique_ptr<void, decltype(jpegDestroyer)> handle(tjInitCompress(), jpegDestroyer);
     if (!handle)
     {
@@ -35,8 +52,9 @@ bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, 
     std::vector<unsigned char> outputBuffer(maxSize);
     unsigned long jpegSize = maxSize;
     unsigned char* jpegPtr = outputBuffer.data();
-    const int flags = (bottomUp ? TJFLAG_BOTTOMUP : 0) | TJFLAG_NOREALLOC;
-    const auto result = tjCompress2(handle.get(), Buffer, Width, 0, Height, TJPF_RGB, &jpegPtr, &jpegSize, TJSAMP_444, quality, flags);
+    const int flags = TJFLAG_BOTTOMUP | TJFLAG_NOREALLOC;
+    const auto result =
+        tjCompress2(handle.get(), Buffer, Width, 0, Height, TJPF_RGB, &jpegPtr, &jpegSize, TJSAMP_444, quality, flags);
 
     if (result != 0)
     {
@@ -77,7 +95,13 @@ void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer,
     {
         std::wstring openFileName = L"Data2\\";
         openFileName += filename;
-        const auto fileCloser = [](FILE* f) { if (f != nullptr) { fclose(f); } };
+        const auto fileCloser = [](FILE* f)
+        {
+            if (f != nullptr)
+            {
+                fclose(f);
+            }
+        };
         std::unique_ptr<FILE, decltype(fileCloser)> fp(_wfopen(openFileName.c_str(), L"rb"), fileCloser);
         if (!fp)
         {
@@ -112,14 +136,20 @@ void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer,
     const auto dotPos = newFileName.find_last_of(L'.');
     if (dotPos != std::wstring::npos)
     {
-        newFileName = newFileName.substr(0, dotPos);
+        newFileName.resize(dotPos);
     }
     newFileName += normalizedExt;
 
     std::wstring saveFileName = L"Data\\";
     saveFileName += newFileName;
 
-    const auto fileCloser = [](FILE* f) { if (f != nullptr) { fclose(f); } };
+    const auto fileCloser = [](FILE* f)
+    {
+        if (f != nullptr)
+        {
+            fclose(f);
+        }
+    };
     std::unique_ptr<FILE, decltype(fileCloser)> fp(_wfopen(saveFileName.c_str(), L"wb"), fileCloser);
     if (!fp)
     {
@@ -145,7 +175,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     const auto dotPos = newFileName.find_last_of(L'.');
     if (dotPos != std::wstring::npos)
     {
-        newFileName = newFileName.substr(0, dotPos);
+        newFileName.resize(dotPos);
     }
     std::wstring fileName = L"Data\\";
     fileName += newFileName;
@@ -156,8 +186,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", fileName.c_str());
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("render")->error("{} - File not exist.", mu_wchar_to_utf8(fileName.c_str()));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -174,8 +203,12 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     fseek(compressedFile, 24, SEEK_SET);
     const auto jpegSize = fileSize - 24;
     std::vector<unsigned char> jpegBuf(static_cast<size_t>(jpegSize));
-    fread(jpegBuf.data(), 1, jpegBuf.size(), compressedFile);
+    const bool complete = DataFileIO::ReadExact(compressedFile, jpegBuf.data(), jpegBuf.size());
     fclose(compressedFile);
+    if (!complete)
+    {
+        return false;
+    }
 
     int jpegWidth = 0;
     int jpegHeight = 0;
@@ -188,7 +221,8 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
         return false;
     }
 
-    auto result = tjDecompressHeader3(tjhandle, jpegBuf.data(), jpegBuf.size(), &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
+    auto result = tjDecompressHeader3(tjhandle, jpegBuf.data(), jpegBuf.size(), &jpegWidth, &jpegHeight, &jpegSubsamp,
+                                      &jpegColorspace);
     if (result != 0)
     {
         tjDestroy(tjhandle);
@@ -197,7 +231,8 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
 
     const auto bufferSize = static_cast<size_t>(jpegWidth) * static_cast<size_t>(jpegHeight) * 3;
     std::vector<unsigned char> buffer(bufferSize);
-    result = tjDecompress2(tjhandle, jpegBuf.data(), jpegBuf.size(), buffer.data(), jpegWidth, 0, jpegHeight, TJPF_RGB, TJFLAG_BOTTOMUP);
+    result = tjDecompress2(tjhandle, jpegBuf.data(), jpegBuf.size(), buffer.data(), jpegWidth, 0, jpegHeight, TJPF_RGB,
+                           TJFLAG_BOTTOMUP);
     tjDestroy(tjhandle);
     if (result != 0)
     {
@@ -212,13 +247,39 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     return true;
 }
 
+namespace
+{
+void ReportBitmapLoadFailure(const wchar_t* path)
+{
+    wchar_t szErrorMsg[256] = {
+        0,
+    };
+    mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", path);
+#ifdef FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg);
+#else  // FOR_WORK
+    PopUpErrorCheckMsgBox(szErrorMsg, true);
+#endif // FOR_WORK
+}
+
+bool LoadDataBitmap(const wchar_t* szFullPath, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
+                    bool keepPixels)
+{
+    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode, true, false, keepPixels,
+                             bCheck ? &ReportBitmapLoadFailure : nullptr);
+}
+} // namespace
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck, bool bFullPath)
-#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck,
+                bool bFullPath)
+#else  // KJH_ADD_INGAMESHOP_UI_SYSTEM
 bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
-    wchar_t szFullPath[256] = { 0, };
+    wchar_t szFullPath[256] = {
+        0,
+    };
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     if (bFullPath == true)
     {
@@ -229,26 +290,21 @@ bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilte
         wcscpy(szFullPath, L"Data\\");
         wcscat(szFullPath, szFileName);
     }
-#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#else  // KJH_ADD_INGAMESHOP_UI_SYSTEM
     wcscpy(szFullPath, L"Data\\");
     wcscat(szFullPath, szFileName);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    if (bCheck)
-    {
-        if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
-        {
-            wchar_t szErrorMsg[256] = { 0, };
-            mu_swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
-#ifdef FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg);
-#else // FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg, true);
-#endif // FOR_WORK
-            return false;
-        }
-        return true;
-    }
-    return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode);
+    return LoadDataBitmap(szFullPath, uiTextureIndex, uiFilter, uiWrapMode, bCheck, false);
+}
+
+bool LoadCanvasBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode)
+{
+    wchar_t szFullPath[256] = {
+        0,
+    };
+    wcscpy(szFullPath, L"Data\\");
+    wcscat(szFullPath, szFileName);
+    return LoadDataBitmap(szFullPath, uiTextureIndex, uiFilter, uiWrapMode, true, true);
 }
 void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 {
@@ -256,29 +312,31 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 }
 void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    wchar_t szMsg[1024] = { 0, };
-    wcscpy(szMsg, szErrorMsg);
+    PopUpErrorCheckMsgBox("Error", Core::Text::ToUtf8(szErrorMsg), !bForceDestroy);
+}
 
-    if (bForceDestroy)
+void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message, bool canContinue)
+{
+    if (const Render::Textures::TextureErrorCollector collector = Render::Textures::GetTextureErrorCollector())
     {
-        MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
+        collector(message);
+        return;
     }
-    else
-    {
-        int iResult = MessageBox(g_hWnd, szMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
-        if (IDYES == iResult)
+    const Render::Textures::TextureErrorActions actions{
+        [](const std::string& dialogTitle, const std::string& dialogMessage, bool forceDestroy)
         {
-            return;
-        }
-    }
-
-    if (SocketClient != nullptr)
-    {
-        SocketClient->Close();
-    }
-
-    KillGLWindow();
-    DestroySound();
-    DestroyWindow();
-    ExitProcess(0);
+            using Core::Platform::ErrorDialog::Choice;
+            return Core::Platform::ErrorDialog::Show(dialogTitle, dialogMessage, !forceDestroy) == Choice::Continue;
+        },
+        []()
+        {
+            if (SocketClient != nullptr)
+            {
+                SocketClient->Close();
+            }
+        },
+        []() { DestroySound(); },
+        []() { DestroyWindow(); },
+    };
+    Render::Textures::DispatchTextureError(title, message, !canContinue, actions);
 }

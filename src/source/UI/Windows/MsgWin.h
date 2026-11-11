@@ -3,13 +3,20 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/Widgets/Win.h"
-#include "UI/Widgets/Button.h"
+#include "UI/Core/WindowObject.h"
+#include "Render/Sprites/Sprite.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
-#define	MW_MSG_LINE_MAX		2
-#define	MW_MSG_ROW_MAX		52
+#include <string>
 
-class CMsgWin : public CWin
+#define MW_MSG_LINE_MAX 2
+#define MW_MSG_ROW_MAX 52
+
+namespace Rml { class ElementDocument; }
+
+// Generic message/confirm dialog (hybrid CWin+RmlUi), shown from the login and character scenes.
+// The panel is centered via base.rcss's `.center-both` utility class, not a C++-pushed rect.
+class CMsgWin : public mu::ui::window::CObject
 {
 protected:
     enum MSG_WIN_TYPE
@@ -21,33 +28,99 @@ protected:
         MWT_STR_INPUT,
     };
 
-    CSprite			m_sprBack;
-    CSprite			m_sprInput;
-    CButton			m_aBtn[2];
-    wchar_t			m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
-    int				m_nMsgLine;
-    int				m_nMsgCode;
-    MSG_WIN_TYPE	m_eType;
-    short			m_nGameExit;
-    double			m_dDeltaTickSum;
+    CSprite m_sprBack;
+    wchar_t m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
+    int m_nMsgLine;
+    int m_nMsgCode;
+    MSG_WIN_TYPE m_eType;
 
 public:
     CMsgWin();
-    virtual ~CMsgWin();
+    ~CMsgWin() override;
     void Create();
+    void Release(); // Called explicitly at scene transitions.
     void SetPosition(int nXCoord, int nYCoord);
-    void Show(bool bShow);
-    bool CursorInWin(int nArea);
+    void Show(bool bShow) override;
     void PopUp(int nMsgCode, wchar_t* pszMsg = nullptr);
 
+    // Set by RmlUi click bindings; polled and cleared in Update().
+    void RmlClickOk() { m_bRmlOkClicked = true; }
+    void RmlClickCancel() { m_bRmlCancelClicked = true; }
+
+    // mu::ui::window::IObject
+    bool Render() override;
+    bool Update() override;
+    // Unconditionally claims clicks while shown; no rect check needed.
+    bool UpdateMouseEvent() override
+    {
+        return !IsVisible();
+    }
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    // Below CCreditWin's full-screen-exclusive layer; the two are not expected to coexist.
+    float GetLayerDepth() override
+    {
+        return 50.0f;
+    }
+
+    // The message code currently on screen, or -1 when the window is hidden.
+    // Automation reads it because several results — a refused login above all —
+    // reach the player only as a message box.
+    [[nodiscard]] int PendingMessageCode() const;
+
+    // Confirms the message the way the OK button does, so the game's own
+    // state restoration runs. False, and the box is left standing, for the
+    // codes whose confirmation ends the process (a version mismatch, a lost
+    // server): a scripted caller asked about a login, not to quit.
+    bool DismissMessage();
+
 protected:
-    void PreRelease();
-    void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
+    void ApplyInputLimit();
     void SetCtrlPosition();
     void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = L"");
     void ManageOKClick();
     void ManageCancelClick();
     void InitResidentNumInput();
+
+public:
+    // The resident password the player typed, for the delete-character request. Empty unless the
+    // MESSAGE_DELETE_CHARACTER_RESIDENT prompt is (or just was) open.
+    std::wstring GetResidentPasswordInput() const;
+
+private:
     void RequestDeleteCharacter();
+
+private:
+    struct MsgWinRmlModel
+    {
+        Rml::String line1, line2;
+        bool line2Hidden = true;
+        bool noButtons = true;
+        // Mutually exclusive; mirror MSG_WIN_TYPE. Drive button visibility/layout in msg_win.rcss.
+        bool modeCancelOnly = false;
+        bool modeOkOnly = false;
+        bool modeBoth = false;
+        bool modeInput = false;
+        bool ownCaptions = false; // the buttons say more than OK/Cancel; themes draw them as text
+        Rml::String okLabel, cancelLabel;
+
+        // MWT_STR_INPUT's resident-password entry, two-way bound to #msgwin_input. RmlUi owns the
+        // edit buffer/caret/masking; this carries the committed value that RequestDeleteCharacter()
+        // and CCharSelMainWin's delete flow read.
+        Rml::String residentPassword;
+    };
+    void BindRmlModel(Rml::DataModelConstructor& c, MsgWinRmlModel& model);
+    UI::RmlBridge::ThemedView<MsgWinRmlModel> m_RmlView{"msg_win",
+        [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/msg_win.rml"}},
+        {.afterBuild = [this] { ApplyInputLimit(); }}};
+
+    bool m_bRmlOkClicked = false;
+    bool m_bRmlCancelClicked = false;
+
+    void SyncRmlModel();
 };
+
+extern CMsgWin g_MsgWin;

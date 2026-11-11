@@ -1,6 +1,10 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <optional>
+#include <string>
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -19,24 +23,8 @@ enum _COLUMN_TYPE
     _COLUMN_TYPE_B_SET,
     _COLUMN_TYPE_REQCHA,
     _COLUMN_TYPE_REQVIT,
-    _COLUMN_TYPE_REQNLV
-};
-
-enum ITEMSETOPTION
-{
-    eITEM_PERSONALSHOP = 0,
-    eITEM_STORE,
-    eITEM_TRADE,
-    eITEM_DROP,
-    eITEM_SELL,
-    eITEM_REPAIR,
-    eITEM_END
-};
-
-struct sItemAct
-{
-    int		s_nItemIndex;
-    bool	s_bType[eITEM_END];
+    _COLUMN_TYPE_REQNLV,
+    _COLUMN_TYPE_COUNT
 };
 
 enum SKILL_TOOLTIP_RENDER_POINT
@@ -53,12 +41,31 @@ enum SKILL_TOOLTIP_RENDER_POINT
     STRP_BOOTOMRIGHT
 };
 
-// ¼¼À²Á¤º¸
+// ì„¸ìœ¨ì •ë³´
 
 extern int		g_nTaxRate;
 extern int		g_nChaosTaxRate;
 
-extern const int iMaxLevel;
+// The item help table (/<item name> in the chat): ComputeItemInfo fills a row for each + level of
+// the item it is given, with a column for each _COLUMN_TYPE.
+inline constexpr int iMaxLevel = 15;
+extern int g_iItemInfo[iMaxLevel + 1][_COLUMN_TYPE_COUNT];
+
+// The hero's level and stats, the stats with the bonuses of items and buffs: what the item help
+// table compares with each level's requirements.
+struct ItemInfoHeroStats
+{
+    WORD level;
+    WORD strength;
+    WORD dexterity;
+    WORD energy;
+    WORD vitality;
+    WORD charisma;
+
+    bool operator==(const ItemInfoHeroStats&) const = default;
+};
+
+ItemInfoHeroStats GetItemInfoHeroStats();
 
 ///////////////////////////////////////////////////////////////////////////////
 // guild
@@ -77,12 +84,55 @@ extern int			GuildTotalScore;
 extern int AllRepairGold;
 
 //////////////////////////////////////////////////////////////////////////
-// text °ü·Ã
+// text ê´€ë ¨
 //////////////////////////////////////////////////////////////////////////
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
-extern SIZE Size[50];
+// The rows an item's description may write into a tooltip, on top of the original client's 50: the description
+// gets rows of its own, so it never takes the room the rest of the tooltip needs.
+constexpr int MaxItemDescriptionRows = 32;
+// The rows of the lines an item adds to its tooltip layout itself ("tooltipLayoutChanges"), written as its
+// description lines are: rows of their own too, so they take neither the description's room nor the rest's.
+constexpr int MaxItemAddedLineRows = 16;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows + MaxItemAddedLineRows;
+
+extern wchar_t TextList[MaxTextListRows][100];
+extern int TextListColor[MaxTextListRows];
+extern int TextBold[MaxTextListRows];
+extern SIZE Size[MaxTextListRows];
+// Starts a list of tooltip rows: every one of the MaxTextListRows rows empty, white and not bold. The rows are shared
+// by all tooltips, and a row that sets only its text (the Horn of Fenrir's colour lines) or its text and colour would
+// otherwise keep the bold or colour of the tooltip drawn before.
+void ClearTooltipRows();
+
+namespace Data::Items
+{
+struct ItemDefinition;
+}
+struct ItemTooltipValues;
+
+// The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
+// equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
+// tooltip's storage.
+struct PetInfoRequest
+{
+    PetType pet;
+    StorageType storage;
+    BYTE slot;
+};
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype);
+
+// How wide a text is in the tooltip's text units.
+using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item (`values`,
+// and the stat file's tables at `level`), into TextList, TextListColor and TextBold from TextNum on: the lines of that
+// level whose conditions hold (a line may be a shared text of the tooltip file), each wrapped to the tooltip's width
+// and at its line breaks, the pieces in the line's color (its first color rule that holds) and style, a blank line or
+// piece as the tooltip's own blank rows. At
+// most `rowsLeft` rows, which it lowers by the rows it wrote: a tooltip's description, both its parts together, has
+// MaxItemDescriptionRows. `afterOptions` picks the lines drawn after the item's options ("after": "options") or
+// the others.
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
+                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
+                               ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -104,7 +154,6 @@ extern ITEM g_PersonalShopInven[MAX_PERSONALSHOP_INVEN];
 extern ITEM g_PersonalShopBackup[MAX_PERSONALSHOP_INVEN];
 extern bool g_bEnablePersonalShop;
 extern int g_iPShopWndType;
-extern POINT g_ptPersonalShop;
 extern int g_iPersonalShopMsgType;
 extern wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1];
 extern CHARACTER g_PersonalShopSeller;
@@ -121,7 +170,6 @@ extern int  RepairEnable;
 extern int AskYesOrNo;
 extern char OkYesOrNo;
 
-extern int  SommonTable[];
 extern int  StorageGoldFlag;
 extern ITEM* SrcInventory;
 extern int  SrcInventoryIndex;
@@ -165,52 +213,104 @@ void OpenPersonalShop(int iType);
 void ClosePersonalShop();
 void ClearPersonalShop();
 bool IsExistUndecidedPrice();
-void OpenPersonalShopMsgWnd(int iMsgType);
-bool IsCorrectShopTitle(const wchar_t* szShopTitle);
 
 void CreateGuildMark(int nMarkIndex, bool blend = true);
-void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
 void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 
+namespace UI::Items
+{
+bool ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, bool renderingPickedItem);
+}
+
+// The box in window pixels; the item animates while the pointer is over it.
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp = false);
+// For a slot that already knows whether it is hovered -- an RmlUi element -- instead of testing the
+// legacy mouse globals against the rectangle, which need not be where the item is shown.
+void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool hovered);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
-void GetItemName(int iType, int iLevel, wchar_t* Text);
+// The item's name in the item names' language (the UI's, or English with "Translate item names" off), as windows,
+// messages and ground labels write it: the text of the first of its
+// name lines whose levels and conditions hold (the item data's nameLines), else its name with " +level" above +0.
+// Without `item`, one of the type at the level, whose durability and options are 0.
+std::wstring GetItemNameText(int type, int level, const ITEM* item = nullptr);
+// Writes GetItemNameText into a buffer of `textSize` characters, cut short to fit.
+void GetItemName(int iType, int iLevel, wchar_t* Text, size_t textSize);
+template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
+{
+    GetItemName(iType, iLevel, Text, N);
+}
+std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
-void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
-void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
-void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
+void GetSpecialOptionText(wchar_t* Text, WORD Option, WORD Value, int iMana);
+// The tooltip lines of the item's option slot `slot` when its option comes from an option definition: its texts with
+// its value, blue and not bold, from row `textNum` on and before row `rowLimit`. The rows written (a text the option
+// texts lack has none), or nothing for a slot the code wrote, whose line the caller writes (GetSpecialOptionText).
+std::optional<int> WriteDefinitionOptionLines(const ITEM& item, int slot, int textNum, int rowLimit);
+// The item's information and repair tooltips, anchored in window pixels: their layout runs in the
+// screen's 640x480 stretch, the space the original computed it in, whichever window asks.
+void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype = 0,
+                        bool bItemTextListBoxUse = false);
+// One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
+// TEXT_COLOR_* and whether it is bold.
+struct ItemTooltipLine
+{
+    std::wstring text;
+    int color = 0;
+    bool bold = false;
+};
+// The name row of an item's tooltip (always bold): its text in the item names' language, its TEXT_COLOR_*, and the name
+// line of the item data that gives them (its index in nameLines; none for the standard name and color).
+struct ItemTooltipNameRow
+{
+    std::wstring text;
+    int color = 0;
+    std::optional<size_t> nameLine;
+};
+// The name row the tooltip of `item` writes (MuEditor's Item Tooltip shows it).
+ItemTooltipNameRow DescribeItemTooltipName(const ITEM& item);
+// How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
+// a measure of its own, which needs no font; nullptr puts the font back.
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
+                                                   bool bItemTextListBoxUse = false);
+void RenderRepairInfoAtPx(float x, float y, const ITEM* ip, bool Sell);
+// What BuildRepairInfoText built: the count of lines, and what a click on the item does in repair mode.
+struct RepairInfoText
+{
+    // 0 when the item shows no repair tooltip.
+    int lineCount = 0;
+    // RepairEnable for the drawn tooltip: 2 a click repairs the item, 1 it has nothing to repair; none: as it was.
+    std::optional<int> repairEnable;
+};
+// Fills TextList, TextListColor and TextBold with the repair tooltip's lines for the item, as RenderRepairInfoAtPx
+// shows them; leaves RepairEnable to the caller that draws them.
+RepairInfoText BuildRepairInfoText(const ITEM* ip);
+// A drop's name on the ground (Alt, or the pointer over it): its text, colors and whether its font is bold.
+struct GroundItemLabel
+{
+    std::wstring text;
+    DWORD textColor;
+    DWORD backgroundColor;
+    bool bold;
+    // The ground label style it took: the item's own rule's or the first standard rule's that holds; "" for none.
+    std::string style;
+};
+GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, const ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
-bool IsRequireClassRenderItem(const short sType);
 unsigned int getGoldColor(DWORD Gold);
 
-bool IsPartChargeItem(ITEM* pItem);
-bool IsHighValueItem(ITEM* pItem);
-bool IsPersonalShopBan(ITEM* pItem);
-bool IsTradeBan(ITEM* pItem);
-bool IsDropBan(ITEM* pItem);
-bool IsStoreBan(ITEM* pItem);
-bool IsSellingBan(ITEM* pItem);
-bool IsRepairBan(ITEM* pItem);
-bool IsWingItem(ITEM* pItem);
-bool IsJewelItem(ITEM* pItem);
 bool IsExcellentItem(ITEM* pItem);
 bool IsAncientItem(ITEM* pItem);
 bool IsMoneyItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
-void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
-void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText = NULL, int Pos_y = 0, int iType = 0);
 void SetGroundItemLabelBuildBudget(int buildBudget);
-void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
+void RenderItemName(int i, const OBJECT* o, const ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
-
-bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false);
-bool Check_LuckyItem(int _nIndex, int _nType = 0);
-sItemAct Set_ItemActOption(int _nIndex, int _nOption);
-
-bool IsLuckySetItem(int iType);
 
 #endif //__ZZZINVENTORY_H__

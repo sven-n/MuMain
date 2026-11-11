@@ -7,10 +7,8 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
-#include "Camera/CameraState.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Platform/IPlatformAudio.h"
+#include "Render/Renderer/MuRenderer.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -30,30 +28,29 @@ int& SelectedHero = g_characterSelection.GetLegacyReference();
 SceneInitializationState g_sceneInit;
 
 // Legacy global references (for backward compatibility)
-bool& InitLogIn = g_sceneInit.GetInitLogIn();
-bool& InitLoading = g_sceneInit.GetInitLoading();
-bool& InitCharacterScene = g_sceneInit.GetInitCharacterScene();
-bool& InitMainScene = g_sceneInit.GetInitMainScene();
-bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
+bool& InitLogIn = g_sceneInit.LegacyRefInitLogIn();
+bool& InitLoading = g_sceneInit.LegacyRefInitLoading();
+bool& InitCharacterScene = g_sceneInit.LegacyRefInitCharacterScene();
+bool& InitMainScene = g_sceneInit.LegacyRefInitMainScene();
+bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 
 //=============================================================================
 // Scene Common Utilities
 //=============================================================================
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "GameLogic/Items/CComGem.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];
@@ -61,7 +58,6 @@ extern wchar_t AbuseNameFilter[][20];
 extern int AbuseFilterNumber;
 extern int AbuseNameFilterNumber;
 extern wchar_t InputText[12][256];
-extern int InputGold;
 extern int AskYesOrNo;
 extern ITEM PickItem;
 extern ITEM TargetItem;
@@ -69,18 +65,12 @@ extern int ErrorMessage;
 extern bool MouseLButtonPush;
 extern int MouseUpdateTime;
 extern int MouseUpdateTimeMax;
-extern SKILL_ATTRIBUTE* SkillAttribute;
 extern bool g_bEnterPressed;
 
 // External variables from ZzzScene.cpp
 extern int g_iMessageTextStart;
 extern char g_cMessageTextCurrNum;
 extern char g_cMessageTextNum;
-extern int g_iNumLineMessageBoxCustom;
-extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
-extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
-extern int g_iCustomMessageBoxButton_Cancel[NUM_PAR_BUTTON_CMB];
-extern int g_iCancelSkillTarget;
 extern bool g_bTimeCheck;
 extern int g_iBackupTime;
 extern EGameScene SceneFlag;
@@ -162,19 +152,6 @@ bool CheckName()
 // UI Utility Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
-{
-    if (CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
-    {
-        MouseLButtonPush = false;
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-        if (bPlayClickSound == TRUE) PlayBuffer(SOUND_CLICK01);
-        return TRUE;
-    }
-    return FALSE;
-}
-
 // SeparateTextIntoLines lives in src/source/Core/Text/TextLineWrap.cpp so it can be
 // unit-tested without dragging in the full scene/UI translation unit.
 
@@ -184,19 +161,14 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 
 void SetEffectVolumeLevel(int level)
 {
-    if (level > 9)
-        level = 9;
+    if (level > 10)
+        level = 10;
     if (level < 0)
         level = 0;
 
-    if (level == 0)
+    if (g_platformAudio != nullptr)
     {
-        SetMasterVolume(-10000);
-    }
-    else
-    {
-        long vol = -2000 * log10(10.f / float(level));
-        SetMasterVolume(vol);
+        g_platformAudio->SetSFXVolume(static_cast<float>(level) / 10.0f);
     }
 }
 
@@ -204,334 +176,16 @@ void SetEffectVolumeLevel(int level)
 // Rendering Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-// DXP-07d increment 1's shadow-compare diagnostic validated RenderInfomation3D()'s proj/view closed
-// form and post-pop GlobalUBO restore across multiple soaks; DXP-08a deleted the diagnostic and the
-// FFP matrix-stack calls it was validating (see RenderInfomation3D()'s own comments below).
-static float s_PreInfo3DProj[16];
-static float s_PreInfo3DView[16];
-
-void RenderInfomation3D()
-{
-    bool Success = false;
-
-    if (((ErrorMessage == MESSAGE_TRADE_CHECK || ErrorMessage == MESSAGE_CHECK) && AskYesOrNo == 1)
-        || ErrorMessage == MESSAGE_USE_STATE
-        || ErrorMessage == MESSAGE_USE_STATE2)
-    {
-        Success = true;
-    }
-
-    if (ErrorMessage == MESSAGE_TRADE_CHECK && AskYesOrNo == 5)
-    {
-        Success = true;
-    }
-    if (ErrorMessage == MESSAGE_PERSONALSHOP_WARNING)
-    {
-        Success = true;
-    }
-
-    if (Success)
-    {
-        // DXP-07d increment 1, stage 1: snapshot the pre-panel GlobalUBO proj/view (already the
-        // CPU source of truth per DXP-07a/b) so the post-pop restore below can be checked for
-        // symmetry, before this panel overwrites them.
-        memcpy(s_PreInfo3DProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreInfo3DProj));
-        memcpy(s_PreInfo3DView, GlobalUBO::Instance().GetView(), sizeof(s_PreInfo3DView));
-
-        SaveCameraPerspective();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
-        // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic
-        // are deleted — DXP-07d already proved this closed form matches bit-for-bit, and
-        // GlobalUBO is the only consumer. This panel's projection is a plain
-        // gluPerspective(1.f deg, aspect, ViewNear, ViewFar) closed form (same formula DXP-07b
-        // already validated for the main camera, different args), and its view is identity.
-        {
-            float aspect = (float)WindowWidth / (float)WindowHeight;
-            float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-            float f = 1.0f / tanf(fovRad);
-            float zNear = g_Camera.ViewNear;
-            float zFar  = g_Camera.ViewFar;
-            float cpuProj[16];
-            BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
-            float cpuView[16] = {
-                1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-            };
-
-            GlobalUBO::Instance().SetProj(cpuProj);
-            GlobalUBO::Instance().SetView(cpuView);
-
-            // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used
-            // to produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
-            static const float s_IdentityCameraMatrix[3][4] = {
-                {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-            };
-            memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-        }
-        EnableDepthTest();
-        EnableDepthMask();
-
-        float Width, Height;
-        float x = (REFERENCE_WIDTH - 150) / 2;
-        float y;
-        if (ErrorMessage == MESSAGE_TRADE_CHECK)
-        {
-            y = 60 + 55;
-        }
-        else
-        {
-            y = 60 + 55;
-        }
-
-        Width = 40.f; Height = 60.f;
-        int iRenderType = ErrorMessage;
-        if (AskYesOrNo == 5)
-            iRenderType = MESSAGE_USE_STATE;
-        switch (iRenderType)
-        {
-        case MESSAGE_USE_STATE:
-        case MESSAGE_USE_STATE2:
-        case MESSAGE_PERSONALSHOP_WARNING:
-            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.ExcellentFlags, TargetItem.AncientDiscriminator, true);
-            break;
-
-        default:
-            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.ExcellentFlags, PickItem.AncientDiscriminator, true);
-            break;
-        }
-
-        UpdateMousePositionn();
-
-        // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry
-        // shadow-compare are deleted — GlobalUBO is restored directly from the pre-panel snapshot
-        // taken at entry (same shape as DXP-07a's EndBitmap() restore).
-        RestoreCameraPerspective();
-        GlobalUBO::Instance().SetProj(s_PreInfo3DProj);
-        GlobalUBO::Instance().SetView(s_PreInfo3DView);
-    }
-}
-
 void RenderInfomation()
 {
     UI::Notices::Render();
 
-    CUIMng::Instance().Render();
+    CSceneUICoordinator::Instance().Render();
 
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        RenderCursor();
-    }
-
-    RenderInfomation3D();
-}
-
-/**
- * @brief Handles item use confirmation dialogs (fruits, consumables).
- */
-static void SetupItemUseStateMessage(int num, int index, int message)
-{
-    wchar_t Name[50] = { 0, };
-    if (TargetItem.Type == ITEM_FRUITS)
-    {
-        switch (TargetItem.Level)
-        {
-        case 0:swprintf_s(Name, 50, L"%ls", I18N::Game::ENG); break;
-        case 1:swprintf_s(Name, 50, L"%ls", I18N::Game::STA); break;
-        case 2:swprintf_s(Name, 50, L"%ls", I18N::Game::AGI); break;
-        case 3:swprintf_s(Name, 50, L"%ls", I18N::Game::STR); break;
-        case 4:swprintf_s(Name, 50, L"%ls", I18N::Game::Command); break;
-        }
-    }
-
-    if (message == MESSAGE_USE_STATE2)
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls%ls )", Name, I18N::Game::Fruit);
-    else
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls )", Name);
-
-    num++;
-    for (int i = 1; i < num; ++i)
-    {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Handles personal shop price confirmation dialog.
- */
-static void SetupPersonalShopWarningMessage(int num, int index)
-{
-    wchar_t szGold[256];
-    ConvertGold(InputGold, szGold);
-    swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, I18N::Game::Lookup(index), szGold);
-
-    for (int i = 1; i < num; ++i)
-    {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Handles Chaos Castle entry confirmation with text wrapping.
- */
-static void SetupChaosCastleCheckMessage(int num, int index)
-{
-    g_iNumLineMessageBoxCustom = 0;
-    for (int i = 0; i < num; ++i)
-    {
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(I18N::Game::Lookup(index + i),
-            g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], NUM_LINE_CMB, MAX_LENGTH_CMB);
-    }
-}
-
-/**
- * @brief Handles gem combination/integration confirmation dialog.
- */
-static void SetupGemIntegrationMessage()
-{
-    wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    wchar_t tLines[2][30];
-    for (int t = 0; t < 2; ++t) memset(tLines[t], 0, 20);
-    g_iNumLineMessageBoxCustom = 0;
-
-    if (COMGEM::isComMode())
-    {
-        if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-        else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
-            tLines[g_iNumLineMessageBoxCustom], 2, 30);
-
-        for (int t = 0; t < 2; ++t)
-            wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
-
-        swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        ++g_iNumLineMessageBoxCustom;
-    }
-    else
-    {
-        int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-        if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfBless, t_GemLevel);
-        else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfSoul, t_GemLevel);
-
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
-            tLines[g_iNumLineMessageBoxCustom], 2, 30);
-
-        for (int t = 0; t < 2; ++t)
-            wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
-
-        swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
-        ++g_iNumLineMessageBoxCustom;
-    }
-}
-
-/**
- * @brief Handles skill cancellation confirmation dialog.
- */
-static void SetupCancelSkillMessage(int index)
-{
-    wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, L"%ls%ls", SkillAttribute[index].Name, I18N::Game::WouldYouLikeToCancel);
-    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
-    g_iCancelSkillTarget = index;
-}
-
-/**
- * @brief Handles generic message box with simple text lines.
- */
-static void SetupGenericMessage(int num, int index)
-{
-    for (int i = 0; i < num; ++i)
-    {
-        wcscpy_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Configures button layout based on message type.
- */
-static void ConfigureMessageBoxButtons(int message)
-{
-    ZeroMemory(g_iCustomMessageBoxButton, NUM_BUTTON_CMB * NUM_PAR_BUTTON_CMB * sizeof(int));
-
-    int iOkButton[5] = { 1,  21, 90, 70, 21 };
-    int iCancelButton[5] = { 3, 120, 90, 70, 21 };
-
-    if (message == MESSAGE_USE_STATE2)
-    {
-        iOkButton[1] = 22;
-        iOkButton[2] = 92;
-        iOkButton[3] = 49;
-        iOkButton[4] = 16;
-
-        iCancelButton[1] = 82;
-        iCancelButton[2] = 92;
-        iCancelButton[3] = 49;
-        iCancelButton[4] = 16;
-
-        g_iCustomMessageBoxButton_Cancel[0] = 5;
-        g_iCustomMessageBoxButton_Cancel[1] = 142;
-        g_iCustomMessageBoxButton_Cancel[2] = 92;
-        g_iCustomMessageBoxButton_Cancel[3] = 49;
-        g_iCustomMessageBoxButton_Cancel[4] = 16;
-    }
-
-    if (message == MESSAGE_CHAOS_CASTLE_CHECK)
-    {
-        iOkButton[2] = 120;
-        iCancelButton[2] = 120;
-    }
-
-    memcpy(g_iCustomMessageBoxButton[0], iOkButton, 5 * sizeof(int));
-    memcpy(g_iCustomMessageBoxButton[1], iCancelButton, 5 * sizeof(int));
-}
-
-/**
- * @brief Displays a custom message box with OK/Cancel buttons based on message type.
- * @param num Number of text lines
- * @param index Text index in GlobalText array
- * @param message Message type (MESSAGE_USE_STATE, MESSAGE_PERSONALSHOP_WARNING, etc.)
- * @return Always returns TRUE
- */
-BOOL ShowCheckBox(int num, int index, int message)
-{
-    if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
-    {
-        SetupItemUseStateMessage(num, index, message);
-    }
-    else if (message == MESSAGE_PERSONALSHOP_WARNING)
-    {
-        SetupPersonalShopWarningMessage(num, index);
-    }
-    else if (message == MESSAGE_CHAOS_CASTLE_CHECK)
-    {
-        SetupChaosCastleCheckMessage(num, index);
-    }
-    else if (message == MESSAGE_GEM_INTEGRATION3)
-    {
-        SetupGemIntegrationMessage();
-    }
-    else if (message == MESSAGE_CANCEL_SKILL)
-    {
-        SetupCancelSkillMessage(index);
-    }
-    else
-    {
-        SetupGenericMessage(num, index);
-    }
-
-    ConfigureMessageBoxButtons(message);
-
-    return true;
+    // The login/character-scene cursor render that used to happen here moved to
+    // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render
+    // pass -- RmlUi always renders after this point in the frame, so drawing the cursor here
+    // (before it) let an opaque RmlUi panel visually cover it.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

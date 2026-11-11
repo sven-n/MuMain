@@ -1,0 +1,54 @@
+#pragma once
+
+#ifdef _EDITOR
+
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
+
+#include <optional>
+
+// The model of the selected monster, as the Monster Model and Monster
+// Preview tools show it.
+namespace MuEditor::Monsters::ShownModel
+{
+// The slot of the monster's model in the model list; nullopt when the
+// monster names no model, or one outside the list ("player", a map object)
+// or a slot without an entry.
+std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster);
+
+// The look the tools show of a monster with random variants (Q-MN83): -1 for
+// the entry's model, else the index of the variant whose model is shown. It
+// goes back to the entry when another monster is selected (MonsterSelection::
+// Select forgets it) or the variant is gone.
+int GetShownVariant(const Data::Monsters::MonsterDefinition& monster);
+void SetShownVariant(int number, int variant);
+
+// The slot of the look shown (FindSlot for the entry's look, else the shown
+// variant's model), with the same conditions as FindSlot.
+std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monster);
+
+// The slot of the unknown monsters' body (D64) for a number the game shows
+// with it: one without an entry (`monster` nullptr), or an entry without a
+// model, while the look is for that; nullopt otherwise.
+std::optional<int> FindUnknownLookSlot(int number, const Data::Monsters::MonsterDefinition* monster);
+
+// The tools show the animations of an open model: a model the game does not
+// have open (no monster of it appeared on this map) is opened between frames
+// (MonsterDataHandler::OpenModelForTools). Called each frame the slot is
+// shown, it asks once per slot, map and model table, so a model whose file
+// is missing is not tried again each frame.
+void OpenWhenShown(int slot);
+
+// Whether the game has the slot's model open now.
+bool IsOpen(int slot);
+
+// "2 Budge Dragon", or that no monster is selected. A tool that shows the
+// values a monster's numbers share passes `wholeMonster`: "The values the 3
+// numbers of Death Centurion share" (D61).
+void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster, bool wholeMonster);
+
+// Why the monster's model is not shown: it names none, or one outside the
+// model list.
+void RenderWhyNoModel(const Data::Monsters::MonsterDefinition& monster);
+} // namespace MuEditor::Monsters::ShownModel
+
+#endif // _EDITOR

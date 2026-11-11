@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MuEditorConfig.h"
+#include <charconv>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -67,13 +68,29 @@ void CMuEditorConfig::Load()
                     m_language = value;
                 }
             }
-            else if (currentSection == "ColumnVisibility")
-            {
-                m_columnVisibility[key] = (value == "1" || value == "true");
-            }
             else if (currentSection == "SkillEditorColumnVisibility")
             {
                 m_skillEditorColumnVisibility[key] = (value == "1" || value == "true");
+            }
+            else if (currentSection == "OpenMU")
+            {
+                if (key == "AdminPanelUrl")
+                {
+                    m_openMUAdminPanelUrl = value;
+                }
+            }
+            else if (currentSection == "ServerList")
+            {
+                if (key == "ShowOfflineServers")
+                {
+                    m_showOfflineServers = value == "1" || value == "true";
+                }
+                else if (key == "OfflineServerLoad")
+                {
+                    int load = m_offlineServerLoad;
+                    std::from_chars(value.data(), value.data() + value.size(), load);
+                    m_offlineServerLoad = load;
+                }
             }
         }
     }
@@ -98,20 +115,22 @@ void CMuEditorConfig::Save()
     file << "[General]\n";
     file << "Language=" << m_language << "\n\n";
 
-    // Write [ColumnVisibility] section
-    file << "[ColumnVisibility]\n";
-    for (const auto& col : m_columnVisibility)
-    {
-        file << col.first << "=" << (col.second ? "1" : "0") << "\n";
-    }
-    file << "\n";
-
     // Write [SkillEditorColumnVisibility] section
     file << "[SkillEditorColumnVisibility]\n";
     for (const auto& col : m_skillEditorColumnVisibility)
     {
         file << col.first << "=" << (col.second ? "1" : "0") << "\n";
     }
+
+    // [OpenMU]: the server of the Item Sync window's Update from server. Its API key is not
+    // kept here (MU_OPENMU_API_KEY).
+    file << "\n[OpenMU]\n";
+    file << "AdminPanelUrl=" << m_openMUAdminPanelUrl << "\n";
+
+    // [ServerList]: the Server List window's preview of the servers the connect server didn't send.
+    file << "\n[ServerList]\n";
+    file << "ShowOfflineServers=" << (m_showOfflineServers ? "1" : "0") << "\n";
+    file << "OfflineServerLoad=" << m_offlineServerLoad << "\n";
 
     file.close();
 }
@@ -126,17 +145,14 @@ void CMuEditorConfig::SetLanguage(const std::string& language)
     m_language = language;
 }
 
-bool CMuEditorConfig::GetColumnVisibility(const std::string& columnName, bool defaultValue) const
+const std::string& CMuEditorConfig::GetOpenMUAdminPanelUrl() const
 {
-    auto it = m_columnVisibility.find(columnName);
-    if (it != m_columnVisibility.end())
-        return it->second;
-    return defaultValue;
+    return m_openMUAdminPanelUrl;
 }
 
-void CMuEditorConfig::SetColumnVisibility(const std::string& columnName, bool visible)
+void CMuEditorConfig::SetOpenMUAdminPanelUrl(const std::string& url)
 {
-    m_columnVisibility[columnName] = visible;
+    m_openMUAdminPanelUrl = url;
 }
 
 #endif // _EDITOR

@@ -17,6 +17,7 @@
 
 // Include X-macro field definitions
 #include "SkillFieldDefs.h"
+#include "Data/Translation/MultiLanguage.h"
 
 // Legacy file format structure (32-byte name)
 // Used for backward compatibility with old BMD files
@@ -59,7 +60,6 @@ typedef struct
     } while(0)
 
 // Helper template to copy from file structure to runtime structure
-// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TSource>
 inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& source)
 {
@@ -68,7 +68,6 @@ inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& s
 }
 
 // Helper template to copy from runtime structure to file structure
-// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TDest>
 inline void CopySkillAttributeToDestination(TDest& dest, const SKILL_ATTRIBUTE& source)
 {

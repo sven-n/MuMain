@@ -1,17 +1,44 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
+#include "Data/DataHandler/DataFileIO.h"
+#include "Core/Utilities/FileHandle.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "WSclient.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Social/SocialWindowBase.h"
 #include "Character/CharacterManager.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
+
+#include <algorithm>
+#include <cwchar>
 
 using namespace SEASON4A;
 
+namespace
+{
+// The socket option categories' names (a seed's element), in category order from SOC_IMPROVE_ATTACK.
+const wchar_t* const* const kSocketCategoryNames[] = {
+    &I18N::Game::Fire,      &I18N::Game::Water, &I18N::Game::Ice,    &I18N::Game::Wind,
+    &I18N::Game::Lightning, &I18N::Game::Earth, &I18N::Game::Unique,
+};
+static_assert(std::size(kSocketCategoryNames) == MAX_SOCKET_OPTION_CATEGORY - SOC_IMPROVE_ATTACK,
+              "one name per socket option category");
 
+// The name of socket option category `iCategory` (SOC_IMPROVE_ATTACK to SOC_UNIQUE_OPTION, also a
+// seed's element); empty for any other number.
+const wchar_t* GetSocketCategoryName(int iCategory)
+{
+    if (iCategory < SOC_IMPROVE_ATTACK || iCategory >= MAX_SOCKET_OPTION_CATEGORY)
+    {
+        return L"";
+    }
+    return *kSocketCategoryNames[iCategory - SOC_IMPROVE_ATTACK];
+}
+} // namespace
 
 CSocketItemMgr g_SocketItemMgr;
 
@@ -33,7 +60,12 @@ BOOL CSocketItemMgr::IsSocketItem(const ITEM* pItem)
 
 BOOL CSocketItemMgr::IsSocketItem(const OBJECT* pObject)
 {
-    return IsSocketItem(pObject->Type - MODEL_SWORD);
+    return IsSocketItem(Data::Items::ToItemType(pObject->Type));
+}
+
+bool CSocketItemMgr::AreSocketOptionsActive(const ITEM* pItem)
+{
+    return IsSocketItem(pItem) && pItem->Durability != 0;
 }
 
 BOOL CSocketItemMgr::IsSocketItem(int iItemType)
@@ -81,7 +113,7 @@ int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
 {
     BYTE bySocketSeedID = SOCKET_EMPTY;
 
-    if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
+    if (GameLogic::Items::IsSocketSeedSphere(pItem))
     {
         int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
         int iLevel = pItem->Level;
@@ -210,7 +242,8 @@ void CSocketItemMgr::CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID,
 
     CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
-    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", I18N::Game::Lookup(2640 + pInfo->m_iOptionCategory - 1), pInfo->m_szOptionName, szOptionValueText);
+    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", GetSocketCategoryName(pInfo->m_iOptionCategory), pInfo->m_szOptionName,
+                szOptionValueText);
 }
 
 extern int SkipNum;
@@ -278,10 +311,10 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
 {
     SOCKET_OPTION_INFO* pInfo = NULL;
 
-    if (pItem->Type >= ITEM_SEED_FIRE && pItem->Type <= ITEM_SEED_EARTH)
+    if (GameLogic::Items::IsSocketSeed(pItem))
     {
         int iCategoryIndex = pItem->Type - (ITEM_SEED_FIRE) + 1;
-        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, GetSocketCategoryName(iCategoryIndex));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -317,7 +350,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
-    else if (pItem->Type >= ITEM_SPHERE_MONO && pItem->Type <= ITEM_SPHERE_5)
+    else if (GameLogic::Items::IsSocketSphere(pItem))
     {
         int iSphereLevel = pItem->Type - (ITEM_SPHERE_MONO) + 1;
         mu_swprintf(TextList[iTextNum], I18N::Game::LevelD, iSphereLevel);
@@ -325,10 +358,10 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
-    else if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
+    else if (GameLogic::Items::IsSocketSeedSphere(pItem))
     {
         int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
-        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, GetSocketCategoryName(iCategoryIndex));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -380,46 +413,53 @@ BOOL CSocketItemMgr::IsSocketSetOptionEnabled()
     return (!m_EquipSetBonusList.empty());
 }
 
-void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
+bool CSocketItemMgr::BuildSocketOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel)
 {
-    if (IsSocketSetOptionEnabled())
+    if (!IsSocketSetOptionEnabled())
+        return false;
+
+    BYTE TextNum = 0;
+
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+
+    mu_swprintf(TextList[TextNum], I18N::Game::SocketPackageOption);
+    TextListColor[TextNum] = TEXT_COLOR_PURPLE;
+    TextBold[TextNum] = true;
+    TextNum++;
+
+    wchar_t szOptionValueText[16] = { 0, };
+    SOCKET_OPTION_INFO* pInfo = NULL;
+    for (std::deque<DWORD>::iterator iter = m_EquipSetBonusList.begin(); iter != m_EquipSetBonusList.end(); ++iter)
     {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->SetBgColor(100, 0, 0, 0);
-
-        int PosX, PosY;
-
-        PosX = iPos_x + 95;//+60;
-        PosY = iPos_y + 40;
-
-        BYTE TextNum = 0;
-        BYTE SkipNum = 0;
-        BYTE setIndex = 0;
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::SocketPackageOption);
-        TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-        TextBold[TextNum] = true;
+        pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
+        CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
+        mu_swprintf(TextList[TextNum], L"%ls %ls", pInfo->m_szOptionName, szOptionValueText);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextBold[TextNum] = false;
         TextNum++;
-
-        wchar_t szOptionText[64] = { 0, };
-        wchar_t szOptionValueText[16] = { 0, };
-        SOCKET_OPTION_INFO* pInfo = NULL;
-        for (std::deque<DWORD>::iterator iter = m_EquipSetBonusList.begin(); iter != m_EquipSetBonusList.end(); ++iter)
-        {
-            pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
-            CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-            mu_swprintf(TextList[TextNum], L"%ls %ls", pInfo->m_szOptionName, szOptionValueText);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-
-        RenderTipTextList(PosX, PosY, TextNum, 140, RT3_SORT_CENTER);
     }
+
+    outModel.Reset();
+    outModel.count = std::min<int>(TextNum, UI::Inventory::Tooltip::MAX_TOOLTIP_LINES);
+    for (int i = 0; i < outModel.count; ++i)
+    {
+        UI::Inventory::Tooltip::Line& line = outModel.lines[i];
+        wcsncpy(line.text, TextList[i], UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+        line.text[UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+        switch (TextListColor[i])
+        {
+        case TEXT_COLOR_BLUE:   line.color = UI::Inventory::Tooltip::LineColor::Blue;   break;
+        case TEXT_COLOR_YELLOW: line.color = UI::Inventory::Tooltip::LineColor::Yellow; break;
+        case TEXT_COLOR_GREEN:  line.color = UI::Inventory::Tooltip::LineColor::Green;  break;
+        case TEXT_COLOR_PURPLE: line.color = UI::Inventory::Tooltip::LineColor::Purple; break;
+        default:                line.color = UI::Inventory::Tooltip::LineColor::White;  break;
+        }
+        line.isBold = TextBold[i] != 0;
+    }
+
+    return true;
 }
 
 void CSocketItemMgr::CheckSocketSetOption()
@@ -433,6 +473,9 @@ void CSocketItemMgr::CheckSocketSetOption()
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
         pItem = &CharacterMachine->Equipment[i];
+        if (!AreSocketOptionsActive(pItem))
+            continue;
+
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
             if (pItem->SocketSeedID[j] != SOCKET_EMPTY)
@@ -485,7 +528,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
     {
         pItem = &CharacterMachine->Equipment[i];
 
-        if (!IsSocketItem(pItem)) continue;
+        if (!AreSocketOptionsActive(pItem))
+            continue;
 
         for (int j = 0; j < pItem->SocketCount; ++j)
         {
@@ -538,6 +582,15 @@ void CSocketItemMgr::CalcSocketStatusBonus()
                 case SOPT_ENERGY_BONUS:
                     m_StatusBonus.m_iEnergyBonus += iBonus;
                     break;
+                case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageRateBonus += iBonus;
+                    break;
+                case SOPT_CRITICAL_DAMAGE_BONUS:
+                    m_StatusBonus.m_iCriticalDamageBonus += iBonus;
+                    break;
+                case SOPT_EXCELLENT_DAMAGE_BONUS:
+                    m_StatusBonus.m_iExcellentDamageBonus += iBonus;
+                    break;
                 }
             }
         }
@@ -571,8 +624,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
 {
-    FILE* fp = _wfopen(szFileName, L"rb");
-    if (fp == NULL)
+    Core::Utilities::FileHandle fp(_wfopen(szFileName, L"rb"));
+    if (!fp)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
@@ -588,8 +641,12 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
         {
             SOCKET_OPTION_INFO_FILE current;
-            fread(&current, iSize, 1, fp);
-            BuxConvert((BYTE*)&current, iSize);
+            if (!DataFileIO::ReadExact(fp.get(), &current, iSize))
+            {
+                DataFileIO::ReportUnusableFile(szFileName, L"File corrupted.");
+                return;
+            }
+            BuxConvert(reinterpret_cast<BYTE*>(&current), iSize);
 
             auto target = &m_SocketOptionInfo[j][i];
             target->m_iOptionCategory = current.m_iOptionCategory;
@@ -611,7 +668,7 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         }
     }
 
-    fclose(fp);
+    fp.reset();
 
     for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
     {

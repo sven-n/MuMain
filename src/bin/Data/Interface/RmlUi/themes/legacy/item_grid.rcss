@@ -1,0 +1,69 @@
+/* Native item grids (CInventoryCtrl), drawn from the window's model (UI/Inventory/ItemGridModel.h),
+   reproducing CInventoryCtrl::Render(): each occupied cell tinted by its item's state, the
+   newui_item_box square over every cell, the newui_item_table frame around the grid, the drop
+   preview over the cells under the item on the cursor. The items are 3D, drawn into the window's
+   .item-view image over all of it; the stack counts (.item-grid-counts) sit over the items.
+   Reference px under the window's root transform. The cell pitch is --item-cell, the original's
+   20; CInventoryCtrl::FollowGrid() reads it back for the hit tests and the items' boxes. A window
+   places and sizes each grid by its id: width and height are its columns and rows times it. */
+
+@spritesheet item-cell-sheet { src: "../../../newui_item_box.tga"; item-cell-art: 0px 0px 21px 21px; }
+@spritesheet ig-tl-sheet { src: "../../../newui_item_table01(L).tga"; ig-tl: 0px 0px 14px 14px; }
+@spritesheet ig-tr-sheet { src: "../../../newui_item_table01(R).tga"; ig-tr: 0px 0px 14px 14px; }
+@spritesheet ig-bl-sheet { src: "../../../newui_item_table02(L).tga"; ig-bl: 0px 0px 14px 14px; }
+@spritesheet ig-br-sheet { src: "../../../newui_item_table02(R).tga"; ig-br: 0px 0px 14px 14px; }
+@spritesheet ig-t-sheet { src: "../../../newui_item_table03(Up).tga"; ig-t: 0px 0px 1px 14px; }
+@spritesheet ig-b-sheet { src: "../../../newui_item_table03(Dw).tga"; ig-b: 0px 0px 1px 14px; }
+@spritesheet ig-l-sheet { src: "../../../newui_item_table03(L).tga"; ig-l: 0px 0px 14px 1px; }
+@spritesheet ig-r-sheet { src: "../../../newui_item_table03(R).tga"; ig-r: 0px 0px 14px 1px; }
+
+body { --item-cell: 20px; }
+
+.item-grid, .item-grid-counts { position: absolute; pointer-events: none; }
+.item-grid-cells, .item-grid-counts { display: flex; flex-wrap: wrap; }
+.item-grid-cells { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+.item-cell, .item-count { position: relative; flex: 0 0 var(--item-cell); width: var(--item-cell); height: var(--item-cell); }
+/* The original's tints: translucent teal, then yellow, amber, orange and red with wear, and
+   red-orange for an item that cannot be traded. */
+.item-cell.tint-normal { background-color: rgba(80, 128, 128, 153); }
+.item-cell.tint-durability-50 { background-color: rgba(255, 255, 0, 102); }
+.item-cell.tint-durability-70 { background-color: rgba(255, 168, 0, 102); }
+.item-cell.tint-durability-80 { background-color: rgba(255, 84, 0, 102); }
+.item-cell.tint-durability-100 { background-color: rgba(255, 0, 0, 102); }
+.item-cell.tint-untradeable { background-color: rgba(255, 51, 26, 102); }
+/* The square is a pixel larger than the pitch: each overlaps its neighbour by a pixel, as drawn. */
+.item-cell-art { position: absolute; left: 0; top: 0; width: calc(var(--item-cell) + 1px); height: calc(var(--item-cell) + 1px); decorator: image(item-cell-art); }
+.item-cell-drop { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.item-cell.drop-free .item-cell-drop { background-color: rgba(26, 102, 204, 102); }
+.item-cell.drop-blocked .item-cell-drop, .item-cell.drop-invalid .item-cell-drop { background-color: rgba(255, 51, 51, 102); }
+.item-cell.drop-valid .item-cell-drop { background-color: rgba(51, 102, 51, 102); }
+
+/* The table frame, drawn from 4 left and 3 above the first cell to 5 right and 6 below the last. */
+.item-grid-frame { position: absolute; left: -4px; top: -3px; right: -5px; bottom: -6px; }
+.igf { position: absolute; }
+.igf-tl { left: 0; top: 0; width: 14px; height: 14px; decorator: image(ig-tl); }
+.igf-tr { right: 0; top: 0; width: 14px; height: 14px; decorator: image(ig-tr); }
+.igf-bl { left: 0; bottom: 0; width: 14px; height: 14px; decorator: image(ig-bl); }
+.igf-br { right: 0; bottom: 0; width: 14px; height: 14px; decorator: image(ig-br); }
+.igf-t { left: 14px; right: 14px; top: 0; height: 14px; decorator: image(ig-t); }
+.igf-b { left: 14px; right: 14px; bottom: 0; height: 14px; decorator: image(ig-b); }
+.igf-l { left: 0; top: 14px; bottom: 14px; width: 14px; decorator: image(ig-l); }
+.igf-r { right: 0; top: 14px; bottom: 14px; width: 14px; decorator: image(ig-r); }
+
+/* A stack count, centred 6 in from its item's right edge and 1 below its top, in bold white with
+   a black edge where the original drew newui_number1 digits. Counter-scaled text layer: it turns
+   about its top-right corner. */
+.item-count-text {
+	position: absolute;
+	right: 0;
+	top: 1px;
+	transform-origin: right top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #ffffff;
+	font-effect: outline(1px #000000);
+}
+
+/* The window's live items: the panel and a margin round it, for a model reaching past its slot. */
+.item-view { position: absolute; left: -20px; top: -20px; width: 230px; height: 469px; pointer-events: none; }

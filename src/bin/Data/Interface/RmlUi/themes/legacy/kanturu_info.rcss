@@ -1,0 +1,47 @@
+/* Legacy theme for CKanturuInfoWindow, reproducing its Render(): newui_Figure_kantru (99 x 78) at
+   the window's position; the characters at (10, 15) and the monsters or the boss at (10, 35), the
+   blinking colon at (48, 57), all in the bold font, (134, 134, 199); the minutes centred on x 35
+   and the seconds on x 65 at y 55 in newui_number1 digits. Reference px relative to the window's
+   top-left, under .screen's W/640 x H/480 stretch. */
+
+@spritesheet kanturu-info-back-sheet { src: "../../../newui_Figure_kantru.tga"; kanturu-info-back: 0px 0px 99px 78px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 99px; height: 78px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 99px; height: 78px; decorator: image(kanturu-info-back); }
+
+.info-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #8686c7;
+}
+#users { left: 10px; top: 15px; }
+#monsters { left: 10px; top: 35px; }
+#colon { left: 48px; top: 57px; }
+
+.digit { position: absolute; top: 55px; width: 8.4px; height: 11.2px; }
+.digit.blank { visibility: hidden; }
+/* RenderNumber(): 8.4-unit digits 6.72 apart, the run starting half its digit count's width left
+   of its x. */
+#minutes .digit { left: calc(35px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#seconds .digit { left: calc(65px - var(--n) * 4.2px + var(--i) * 6.72px); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }
+
+/* The data-for template row has no index of its own; it inherits this one. */
+.run { --i: 0; }

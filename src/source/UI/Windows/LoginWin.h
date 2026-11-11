@@ -3,52 +3,143 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/Widgets/Win.h"
+#include "UI/Core/WindowObject.h"
 
-#include "UI/Widgets/Button.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
-class CUITextInputBox;
+namespace Rml { class ElementDocument; }
 
-class CLoginWin : public CWin
+// The login dialog: RmlUi (login.rml) renders everything, username/password entry included -- the
+// two fields are stock <input> elements (#input_account/#input_password) bound to
+// LoginRmlModel::username/password. External error-recovery code asks for focus through
+// FocusUsername()/FocusPassword() rather than reaching in for a widget pointer.
+class CLoginWin : public mu::ui::window::CObject
 {
 protected:
-    CSprite		m_asprInputBox[2];
-    CButton		m_aBtn[2];
-    CButton     m_aBtnRememberMe;
-    CButton     m_aBtnSavePassword;
-    CUITextInputBox* m_pUsernameInputBox, * m_pPasswordInputBox;
+    bool m_bRememberMeChecked = false;
+    bool m_bSavePasswordChecked = false;
 
-    // Snapshot of the field contents, used to detect that the player edited the
-    // username or password so the stored credentials can be dropped.
-    wchar_t     m_prevUsername[MAX_USERNAME_SIZE + 1] = {};
-    wchar_t     m_prevPassword[MAX_PASSWORD_SIZE + 1] = {};
+    // Snapshot used to detect that the player edited the username/password, so stored
+    // credentials can be dropped.
+    wchar_t m_prevUsername[MAX_USERNAME_SIZE + 1] = {};
+    wchar_t m_prevPassword[MAX_PASSWORD_SIZE + 1] = {};
+
+    // This window's own bounding box (no shared rect facility on the CObject side).
+    POINT m_ptPos = {};
+    SIZE m_Size = {};
 
 public:
     CLoginWin();
-    virtual ~CLoginWin();
+    ~CLoginWin() override;
     void Create();
+    void Release();
     void SetPosition(int nXCoord, int nYCoord);
-    void Show(bool bShow);
-    bool CursorInWin(int nArea);
+    void Show(bool bShow) override;
 
-    void ConnectConnectionServer();
+    // Sends a login without touching the text boxes or the remembered
+    // credentials in config.ini. The manual path calls it after validating
+    // what the player typed; automation calls it directly.
+    void SubmitCredentials(const wchar_t* pszUsername, const wchar_t* pszPassword);
 
-    CUITextInputBox* GetUsernameInputBox() const { return m_pUsernameInputBox; }
-    CUITextInputBox* GetPasswordInputBox() const { return m_pPasswordInputBox; }
+    // Error-recovery focus redirection (WSclient.cpp on connect, MsgWin.cpp per login-failure
+    // reason). selectAll reproduces the native GiveFocus(TRUE) that pre-selected the text so a
+    // retry overwrites it in one keystroke.
+    void FocusUsername(bool selectAll = false);
+    void FocusPassword(bool selectAll = false);
+    int GetWidth() const
+    {
+        return m_Size.cx;
+    }
+    void RefreshLayout();
+    int GetHeight() const
+    {
+        return m_Size.cy;
+    }
 
-private:
-    int FirstLoad = 0;
+    // Bound to the RmlUi login document's click callbacks. Act immediately rather than setting a
+    // flag for UpdateWhileActive() to consume later: this fires from the SDL event pump, always
+    // before CSceneUICoordinator::Update() runs the same frame. Each re-checks the "remember
+    // password" prompt's Pending state directly since these run before UpdateWhileShown()'s Tick().
+    void RmlClickOk();
+    void RmlClickCancel();
+    void RmlToggleRememberMe();
+    void RmlToggleSavePassword();
+
+    // mu::ui::window::IObject
+    bool Render() override;
+    // Rebuilds this window's RmlUi document/model for the active theme. No-op if never opened.
+    // Claims clicks within its own bounding box only -- not modal, world/credits/system-menu stay
+    // reachable around it. Depth 20.0f is below the full-screen-claiming overlays (CSysMenuWin/
+    // CMsgWin/CCreditWin), so no explicit modal check is needed here.
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    float GetLayerDepth() override
+    {
+        return 20.0f;
+    }
 
 protected:
-    void PreRelease();
-    void UpdateWhileActive(double dDeltaTick);
-    void UpdateWhileShow(double dDeltaTick);
-    void RenderControls();
+    // Runs each enabled frame, including while hidden. Keeps the Remember-Password prompt ticking;
+    // login input is active only while this window is visible and no higher-depth modal owns it.
+    bool UpdateWhileShown() override;
+    // Runs only while also active -- OK/Cancel/Enter/Esc submit handling.
+    bool UpdateWhileActive() override;
+
     void RequestLogin();
     void CancelLogin();
 
     // "Remember me" credential handling, split out of the update loop.
-    void UpdateRememberCheckboxes();
     void ApplyRememberPasswordChoice();
     void RevokeSavedCredentialsIfEdited();
+
+private:
+    int FirstLoad = 0;
+
+    // Shared by the immediate RmlUi callbacks and UpdateWhileActive()'s keyboard polling; each
+    // re-checks the "remember password" prompt's live Pending state itself.
+    void SubmitLogin();
+    void SubmitCancel();
+    // Plays the click sound of the button a key stands for (a selector of the login document).
+    void PlayKeyClick(const char* button);
+    void ApplyRememberMeChange();
+    void ApplySavePasswordChange();
+
+    struct LoginRmlModel
+    {
+        bool rememberMeChecked = false;
+        bool savePasswordChecked = false;
+        Rml::String serverName;
+        // Synced from I18N::Game::* slots to keep these localization-correct.
+        Rml::String accountLabel;
+        Rml::String passwordLabel;
+        Rml::String rememberMeLabel;
+        Rml::String savePasswordLabel;
+        Rml::String trustWarning;
+        Rml::String okLabel;
+        Rml::String cancelLabel;
+
+        // Two-way bound to #input_account/#input_password. RmlUi owns the edit buffers, caret,
+        // selection, masking and IME; these carry the committed values that SubmitCredentials()
+        // and the edit-detection snapshot read.
+        Rml::String username;
+        Rml::String password;
+    };
+    UI::RmlBridge::ThemedView<LoginRmlModel> m_RmlView{"login",
+        [this](Rml::DataModelConstructor& c, LoginRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/login.rml"}},
+        {.afterBuild = [this] { ApplyCredentialLimits(); }, .afterReload = [this] { OnRmlReloaded(); }}};
+
+    void SyncRmlModel();
+    void BindRmlModel(Rml::DataModelConstructor& c, LoginRmlModel& model);
+    void OnRmlReloaded();
+    // Pushes MAX_USERNAME_SIZE/MAX_PASSWORD_SIZE onto the two fields, so the caps stay one C++ rule
+    // rather than a literal duplicated per theme.
+    void ApplyCredentialLimits();
+    // Shared by FocusUsername()/FocusPassword().
+    void FocusCredentialField(const char* elementId, bool selectAll);
 };
+
+extern CLoginWin g_LoginWin;

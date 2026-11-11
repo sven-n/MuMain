@@ -16,22 +16,19 @@
 #include "Engine/Physics/PhysicsManager.h"
 
 #include "GameLogic/Quests/CSQuest.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "Core/Time/Timer.h"
-#include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include <chrono>
 #include <thread>
 
 #include "Camera/CameraUtility.h"
 #include "Scenes/SceneManager.h"
+#include "Core/Input/ImeInput.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
@@ -96,9 +93,6 @@ extern wchar_t m_ExeVersion[11];
 
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);
 
-extern DWORD g_dwBKConv;
-extern DWORD g_dwBKSent;
-extern BOOL g_bIMEBlock;
 
 bool MoveMainCamera();
 
@@ -114,7 +108,6 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 float g_Luminosity;
 
 extern int g_iNoMouseTime;
-extern GLvoid KillGLWindow(GLvoid);
 
 void WaitForNextActivity(bool usePreciseSleep)
 {

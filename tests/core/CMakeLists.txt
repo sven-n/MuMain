@@ -1,0 +1,194 @@
+mu_add_test(
+    NAME test_mu_timer
+    SOURCES
+        test_mu_timer.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_ground_truth
+    SOURCES
+        test_ground_truth.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_windows_console
+    SOURCES
+        test_windows_console.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_server_port
+    SOURCES
+        test_server_port.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_version_files
+    SOURCES
+        test_version_files.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_reading_language_log
+    SOURCES
+        test_reading_language_log.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_narrow_path
+    SOURCES
+        test_narrow_path.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_scene_state
+    SOURCES
+        test_scene_state.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_scene_names
+    SOURCES
+        test_scene_names.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_audio_playback
+    SOURCES
+        test_audio_playback.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_platform_crypto
+    SOURCES
+        test_platform_crypto.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_teardown_stack
+    SOURCES
+        test_teardown_stack.cpp
+)
+
+mu_add_test(
+    NAME test_staged_load
+    SOURCES
+        test_staged_load.cpp
+)
+
+mu_add_test(
+    NAME test_mu_logger
+    SOURCES
+        test_mu_logger_static_init.cpp
+        test_mu_logger_doctest.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# The local-socket transport exists only in builds with the control socket.
+if(ENABLE_CONTROL_SOCKET)
+    mu_add_test(
+        NAME test_local_socket
+        SOURCES
+            test_local_socket.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/LocalSocket.cpp
+        # The transport and the test's own client side are Winsock calls on
+        # Windows; on POSIX they come from libc.
+        LINK_LIBS
+            $<$<BOOL:${WIN32}>:ws2_32>
+    )
+endif()
+
+mu_add_test(
+    NAME test_automation_ranges
+    SOURCES
+        test_automation_ranges.cpp
+)
+
+# The injected input paths in Winmain exist only in builds with the control
+# socket, like the transport above.
+if(ENABLE_CONTROL_SOCKET)
+    mu_add_test(
+        NAME test_synthetic_input
+        SOURCES
+            test_synthetic_input.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
+    # The tooltip commands' argument checks, which return before they need item data.
+    mu_add_test(
+        NAME test_control_tooltip_commands
+        SOURCES
+            test_control_tooltip_commands.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
+    # The item commands' argument checks, which return before they need item data.
+    mu_add_test(
+        NAME test_control_item_commands
+        SOURCES
+            test_control_item_commands.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+endif()
+
+mu_add_test(
+    NAME test_frame_profiler
+    SOURCES
+        test_frame_profiler.cpp
+)
+
+mu_add_test(
+    NAME test_cpu_usage_math
+    SOURCES
+        test_cpu_usage_math.cpp
+)
+
+mu_add_test(
+    NAME gold_amount_tier_tests
+    SOURCES
+        test_gold_amount_tier.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Items/GoldAmountTier.cpp
+)
+
+mu_add_test(
+    NAME zen_amount_tests
+    SOURCES
+        test_zen_amount.cpp
+)
+
+mu_add_test(
+    NAME number_parse_tests
+    SOURCES
+        test_number_parse.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Text/NumberParse.cpp
+)

@@ -17,10 +17,13 @@ public:
     CBannerListManager();
     virtual ~CBannerListManager();
 
-    CBannerInfoList* GetListPtr() { return m_BannerInfoList; };
+    CBannerInfoList* GetListPtr()
+    {
+        return m_BannerInfoList;
+    };
 
 private:
     CBannerInfoList* m_BannerInfoList;
 
-    WZResult			LoadScript(bool bDonwLoad);
+    WZResult LoadScript(bool bDonwLoad);
 };

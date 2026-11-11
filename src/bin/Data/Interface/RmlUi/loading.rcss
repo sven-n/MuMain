@@ -1,0 +1,26 @@
+/* Loading screen: 4-tile 800x600 background reproduced with percentage sizing so it scales with
+   the real window automatically. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background-color: #000000;
+}
+
+#bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.tile {
+	position: absolute;
+}
+
+.tile-top-left     { left: 0%;  top: 0%;       width: 50%; height: 85.3333%; }
+.tile-top-right    { left: 50%; top: 0%;       width: 50%; height: 85.3333%; }
+.tile-bottom-left  { left: 0%;  top: 85.3333%; width: 50%; height: 14.6667%; }
+.tile-bottom-right { left: 50%; top: 85.3333%; width: 50%; height: 14.6667%; }

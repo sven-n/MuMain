@@ -1,0 +1,22 @@
+<rml>
+<head>
+	<title>CSetItemExplanation</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_help.rcss"/>
+</head>
+<body>
+	<!-- The set help box (/<set> in chat, CSetItemExplanation, UI/Inventory/ItemHelpView.h): the set's
+	     options, as the inventory tooltip lists them. #panel is the original's screen
+	     (.stage); the box is one counter-scaled layer at the native text size, as wide as its
+	     content. Nothing here is interactive. -->
+	<div id="panel" class="stage" data-model="set_item_explanation">
+		<div id="tip_box" class="sharp-text" data-style---line-height="line_height + 'px'"
+		     data-style---bold-line-height="bold_line_height + 'px'">
+			<div data-for="l : lines" data-attr-class="'tip-line tip-line--' + (l.spacer != '' ? l.spacer : l.color)"
+			     data-class-bold="l.bold" data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"><span>{{l.text}}</span></div>
+			<div data-for="l : tail_lines" data-attr-class="'tip-line tip-line--' + (l.spacer != '' ? l.spacer : l.color)"
+			     data-class-bold="l.bold" data-style-font-size="(l.bold ? bold_text_px : text_px) + 'px'"><span>{{l.text}}</span></div>
+		</div>
+	</div>
+</body>
+</rml>

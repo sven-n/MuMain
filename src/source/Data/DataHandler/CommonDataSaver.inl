@@ -298,7 +298,7 @@ bool CommonDataSaver::SaveData(const SaveConfig<TRuntime, TFile>& config)
     {
         if (config.outChangeLog)
         {
-            *config.outChangeLog = "No changes detected.\n";
+            *config.outChangeLog = NoChangesMessage;
         }
         return false;
     }

@@ -5,7 +5,7 @@
 #include "SkillTooltipEditor.h"
 
 #include "Core/Utilities/StringUtils.h"
-#include "UI/NewUI/HUD/Skills/SkillTooltipModel.h"
+#include "UI/HUD/Skills/SkillTooltipModel.h"
 #include "imgui.h"
 
 #include <string>

@@ -1,12 +1,15 @@
 /**************************************************************************************************
 
-½ºÅ©¸³Æ® ¸ñ·Ï ÃÖ »óÀ§ °´Ã¼
+ìŠ¤í¬ë¦½íŠ¸ ëª©ë¡ ìµœ ìƒìœ„ ê°ì²´
 
-Ä«Å×°í¸® ¸ñ·Ï, ÆĞÅ°Áö ¸ñ·Ï, »óÇ°(¼Ó¼º) ¸ñ·ÏÀ» °¡Áö°í ÀÖ´Ù.
+ì¹´í…Œê³ ë¦¬ ëª©ë¡, íŒ¨í‚¤ì§€ ëª©ë¡, ìƒí’ˆ(ì†ì„±) ëª©ë¡ì„ ê°€ì§€ê³  ìˆë‹¤.
 
 **************************************************************************************************/
 
 #pragma once
+
+#include <iosfwd>
+#include <string>
 
 #include "ShopPackage.h"
 #include "ShopProduct.h"
@@ -25,9 +28,18 @@ public:
     WZResult LoadPackage(const wchar_t* szFilePath);
     WZResult LoadProduct(const wchar_t* szFilePath);
 
-    CShopCategoryList* GetCategoryListPtr() { return m_CategoryListPtr; };	// Ä«Å×°í¸® ¸ñ·Ï °¡Á®¿Â´Ù.
-    CShopPackageList* GetPackageListPtr() { return m_PackageListPtr; };		// ÆĞÅ°Áö ¸ñ·Ï °¡Á®¿Â´Ù.
-    CShopProductList* GetProductListPtr() { return m_ProductListPtr; };		// »óÇ°(¼Ó¼º) ¸ñ·Ï °¡Á®¿Â´Ù.
+    CShopCategoryList* GetCategoryListPtr()
+    {
+        return m_CategoryListPtr;
+    }; // ì¹´í…Œê³ ë¦¬ ëª©ë¡ ê°€ì ¸ì˜¨ë‹¤.
+    CShopPackageList* GetPackageListPtr()
+    {
+        return m_PackageListPtr;
+    }; // íŒ¨í‚¤ì§€ ëª©ë¡ ê°€ì ¸ì˜¨ë‹¤.
+    CShopProductList* GetProductListPtr()
+    {
+        return m_ProductListPtr;
+    }; // ìƒí’ˆ(ì†ì„±) ëª©ë¡ ê°€ì ¸ì˜¨ë‹¤.
 
     void SetCategoryListPtr(CShopCategoryList* CategoryListPtr);
     void SetPackageListPtr(CShopPackageList* PackagePtr);
@@ -39,5 +51,7 @@ private:
     CShopProductList* m_ProductListPtr;
 
     FILE_ENCODE IsFileEncodingUtf8(const wchar_t* szFilePath);
+    // The next line of a script in the encoding, without its line break and byte order mark; false at the end.
+    bool ReadLine(std::istream& stream, FILE_ENCODE encode, std::wstring& line);
     std::wstring GetDecodedString(const char* buffer, FILE_ENCODE encode);
 };

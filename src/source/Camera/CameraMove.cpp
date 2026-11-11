@@ -2,6 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
+#include "Core/Utilities/FileHandle.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -11,14 +13,13 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <vector>
 
 #include "Camera/CameraMove.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
 #include "World/MapInfra/MapManager.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // Forward declaration for LoginScene offset helper
 static void ApplyLoginSceneOffset(float& x, float& y, float& z);
@@ -47,6 +48,8 @@ namespace
     constexpr float kMinTourAccel = 0.1f;
     constexpr float kMaxTourAccel = 100.0f;
     constexpr float kFullCircleDegrees = 360.0f;
+    constexpr float kWaypointRenderOffset = 50.0f;
+    constexpr float kWaypointRenderHalfSize = 10.0f;
     constexpr float kTourCameraZPosition = -300.0f;
 
     template <typename T>
@@ -184,7 +187,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
 {
     UnLoadCameraWalkScript();
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"rb"), &fclose);
+    Core::Utilities::FileHandle fileHandle(_wfopen(filename.c_str(), L"rb"));
     if (!fileHandle)
     {
         return false;
@@ -232,7 +235,7 @@ bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
         return false;
     }
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"wb"), &fclose);
+    Core::Utilities::FileHandle fileHandle(_wfopen(filename.c_str(), L"wb"));
     if (!fileHandle)
     {
         return false;
@@ -524,6 +527,55 @@ DWORD CCameraMove::GetCameraWalkState() const
     return m_dwCameraWalkState;
 }
 
+void CCameraMove::RenderWayPoint()
+{
+    DisableDepthTest();
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(false);
+
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.clear();
+    vertices.reserve(m_listWayPoint.size() * 4);
+    constexpr std::uint32_t waypointColor = 0xCC0000FFu;
+    for (const auto& waypoint : m_listWayPoint)
+    {
+        const float minX = waypoint->fCameraX + kWaypointRenderOffset - kWaypointRenderHalfSize;
+        const float maxX = waypoint->fCameraX + kWaypointRenderOffset + kWaypointRenderHalfSize;
+        const float minY = waypoint->fCameraY + kWaypointRenderOffset - kWaypointRenderHalfSize;
+        const float maxY = waypoint->fCameraY + kWaypointRenderOffset + kWaypointRenderHalfSize;
+        const float z = waypoint->fCameraZ;
+        const mu::Vertex3D v0 = {minX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v1 = {maxX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v2 = {maxX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v3 = {minX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        vertices.insert(vertices.end(), {v0, v1, v2, v3});
+    }
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+
+    vertices.clear();
+    if (m_listWayPoint.size() >= 2)
+        vertices.reserve((m_listWayPoint.size() - 1) * 2);
+    constexpr std::uint32_t lineColor = 0x80FFFFFFu;
+    mu::Vertex3D previous{};
+    bool hasPrevious = false;
+    for (const auto& waypoint : m_listWayPoint)
+    {
+        const mu::Vertex3D current = {waypoint->fCameraX + 50.f, waypoint->fCameraY + 50.f, waypoint->fCameraZ,
+                                      0.f, 0.f, 1.f, 0.f, 0.f, lineColor};
+        if (hasPrevious)
+        {
+            vertices.push_back(previous);
+            vertices.push_back(current);
+        }
+        previous = current;
+        hasPrevious = true;
+    }
+    mu::GetRenderer().RenderLines(vertices, 0u);
+
+    EnableDepthTest();
+    mu::GetRenderer().SetAlphaTest(true);
+    mu::GetRenderer().SetTexture2D(true);
+}
 void CCameraMove::SetSelectedTile(int iTileIndex)
 {
     m_iSelectedTile = -1;
@@ -615,7 +667,7 @@ BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int index)
 
     if (bRandomStart)
     {
-        m_dwCurrentIndex = static_cast<DWORD>(std::rand() % waypointCount);
+        m_dwCurrentIndex = static_cast<DWORD>(Random::Rand() % waypointCount);
     }
     else
     {

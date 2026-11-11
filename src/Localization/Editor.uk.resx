@@ -79,6 +79,9 @@
   <data name="Error: Index {0} already in use!" xml:space="preserve">
     <value>Помилка: Індекс {0} вже використовується!</value>
   </data>
+  <data name="Error: Index {0} has its own model!" xml:space="preserve">
+    <value>Помилка: Індекс {0} має власну модель!</value>
+  </data>
   <data name="Search:" xml:space="preserve">
     <value>Пошук:</value>
   </data>

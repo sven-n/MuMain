@@ -3,6 +3,8 @@
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/FileHandle.h"
+#include "Data/DataHandler/DataFileIO.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -11,11 +13,12 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Social/SocialWindowBase.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 #include <array>
@@ -23,33 +26,103 @@
 #include <cstdio>
 #include <cstring>
 #include <cwchar>
+#include <cwctype>
 #include <memory>
 #include <iterator>
 #include <string>
+#include <string_view>
 #include <vector>
 
-extern	wchar_t TextList[50][100];
-extern	int  TextListColor[50];
-extern	int  TextBold[50];
 
 namespace
 {
 constexpr std::uint8_t EMPTY_OPTION = 0xFF;
+constexpr int SET_OPTION_COUNT = AT_SET_OPTION_WATER_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH + 1;
+// The first set option after AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE: 24 to 28 are not supported.
+constexpr int FIRST_UNSUPPORTED_SET_OPTION =
+    AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE - AT_SET_OPTION_IMPROVE_STRENGTH + 1;
 
-using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
-
-FilePtr OpenBinaryFile(const wchar_t* filename)
+// Whether the client applies set option `option` (counted from AT_SET_OPTION_IMPROVE_STRENGTH): 0 to
+// 23 and the mastery options; 24 to 28 (class bonuses that grew with a stat) are not supported.
+constexpr bool IsSupportedSetOption(int option)
 {
-    return FilePtr(_wfopen(filename, L"rb"), &std::fclose);
+    return (option >= 0 && option < FIRST_UNSUPPORTED_SET_OPTION) ||
+           (option >= MASTERY_OPTION && option < SET_OPTION_COUNT);
 }
 
-void ReportFileIssue(const wchar_t* filename, const wchar_t* issue)
+// The format each set option's value is described with, in AT_SET_OPTION order from
+// AT_SET_OPTION_IMPROVE_STRENGTH, so a set option's number is its index.
+constexpr const wchar_t* const* kSetOptionFormats[] = {
+    // AT_SET_OPTION_IMPROVE_STRENGTH to AT_SET_OPTION_IMPROVE_MAGIC_POWER
+    &I18N::Game::IncreaseStrengthD,
+    &I18N::Game::IncreaseAgilityD,
+    &I18N::Game::IncreaseEnergyD,
+    &I18N::Game::IncreaseStaminaD,
+    &I18N::Game::IncreaseCommandD,
+    &I18N::Game::IncreaseMinDamageD,
+    &I18N::Game::IncreaseMaxDamageD,
+    &I18N::Game::IncreaseWizardryDmgD,
+    // AT_SET_OPTION_IMPROVE_DAMAGE to AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE
+    &I18N::Game::IncreaseDamageD957,
+    &I18N::Game::IncreaseDamageSuccessRateD,
+    &I18N::Game::IncreaseDefensiveSkillD,
+    &I18N::Game::IncreaseMaxLifeD,
+    &I18N::Game::IncreaseMaxManaD,
+    &I18N::Game::IncreaseMaxAGD,
+    &I18N::Game::IncreaseAGIncreaseRateD,
+    &I18N::Game::IncreaseCriticalDamageRateD,
+    &I18N::Game::IncreaseCriticalDamageD,
+    &I18N::Game::IncreaseExcellentDamageRateD,
+    &I18N::Game::IncreaseExcellentDamageD,
+    &I18N::Game::IncreaseSkillAttackingRateD,
+    &I18N::Game::DoubleDamageRateD,
+    &I18N::Game::IgnoreEnemiesDefensiveSkillD,
+    &I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD,
+    &I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD,
+    // 24 to 28 are not supported (see AT_SET_OPTION_ICE_MASTERY)
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    // AT_SET_OPTION_ICE_MASTERY to AT_SET_OPTION_WATER_MASTERY
+    &I18N::Game::IceAttributeSkillIncreaseDamageD,
+    &I18N::Game::PoisonAttributeSkillIncreaseDamageD,
+    &I18N::Game::LightningAttributeSkillIncreaseDamageD,
+    &I18N::Game::FireAttributeSkillIncreaseDamageD,
+    &I18N::Game::EarthAttributeSkillIncreaseDamageD,
+    &I18N::Game::WindAttributeSkillIncreaseDamageD,
+    &I18N::Game::WaterAttributeSkillIncreaseDamageD,
+};
+static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one slot per set option");
+
+constexpr bool DescribesExactlyTheSupportedSetOptions()
 {
-    wchar_t text[256]{};
-    std::swprintf(text, std::size(text), L"%ls - %ls.", filename, issue);
-    g_ErrorReport.Write(text);
-    MessageBox(g_hWnd, text, nullptr, MB_OK);
-    SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    for (int option = 0; option < SET_OPTION_COUNT; ++option)
+    {
+        if ((kSetOptionFormats[option] != nullptr) != IsSupportedSetOption(option))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+static_assert(DescribesExactlyTheSupportedSetOptions(), "a description for each supported set option, none for others");
+static_assert(MASTERY_OPTION == AT_SET_OPTION_ICE_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH,
+              "the mastery options start at MASTERY_OPTION");
+
+// Whether a wearer of base class `firstClass` gets the set's class-bound options (the mastery
+// options), like in the original client: the set's byRequireClass names the class, 1 for the class
+// as it is, 2 only once it has its second class (`secondClass`).
+bool FulfillsClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass)
+{
+    const int requirement = setOptions.byRequireClass[firstClass];
+    return requirement != 0 && secondClass >= requirement - 1;
+}
+
+Core::Utilities::FileHandle OpenBinaryFile(const wchar_t* filename)
+{
+    return Core::Utilities::FileHandle(_wfopen(filename, L"rb"));
 }
 }
 
@@ -87,7 +160,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     auto file = OpenBinaryFile(filename);
     if (!file)
     {
-        ReportFileIssue(filename, L"File does not exist.");
+        DataFileIO::ReportUnusableFile(filename, L"File does not exist.");
         return false;
     }
 
@@ -95,20 +168,20 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     std::vector<std::uint8_t> buffer(entrySize * MAX_ITEM);
     if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read content.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
     if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read checksum.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;
     }
 
     if (checksum != GenerateCheckSum2(buffer.data(), static_cast<int>(buffer.size()), 0xE5F1))
     {
-        ReportFileIssue(filename, L"File corrupted.");
+        DataFileIO::ReportUnusableFile(filename, L"File corrupted.");
         return false;
     }
 
@@ -128,7 +201,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     auto file = OpenBinaryFile(filename);
     if (!file)
     {
-        ReportFileIssue(filename, L"File does not exist.");
+        DataFileIO::ReportUnusableFile(filename, L"File does not exist.");
         return false;
     }
 
@@ -136,20 +209,20 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     std::vector<std::uint8_t> buffer(entrySize * MAX_SET_OPTION);
     if (std::fread(buffer.data(), buffer.size(), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read content.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read content.");
         return false;
     }
 
     std::uint32_t checksum{};
     if (std::fread(&checksum, sizeof(checksum), 1, file.get()) != 1)
     {
-        ReportFileIssue(filename, L"Failed to read checksum.");
+        DataFileIO::ReportUnusableFile(filename, L"Failed to read checksum.");
         return false;
     }
 
     if (checksum != GenerateCheckSum2(buffer.data(), static_cast<int>(buffer.size()), 0xA2F1))
     {
-        ReportFileIssue(filename, L"File corrupted.");
+        DataFileIO::ReportUnusableFile(filename, L"File corrupted.");
         return false;
     }
 
@@ -277,39 +350,20 @@ void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType,
     }
 }
 
-
-bool CSItemOption::isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, const int firstClass, int secondClass)
+void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set,
+                                   const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
+                                   bool isExtOption, int firstClass, int secondClass)
 {
-    bool RequireClass = false;
-    for (int i = CLASS_WIZARD; i <= CLASS_RAGEFIGHTER; i++)
-    {
-        if (setOptions.byRequireClass[i] == 1 && firstClass == i)
-        {
-            RequireClass = true;
-        }
-
-        if (setOptions.byRequireClass[i] == 2 && firstClass == i && secondClass)
-        {
-            RequireClass = true;
-        }
-    }
-
-    return RequireClass;
-}
-
-void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass)
-{
-    if (option == EMPTY_OPTION
-        || value == 0
-        || (option >= MASTERY_OPTION 
-            && (setOptions.byRequireClass[firstClass] && secondClass >= setOptions.byRequireClass[firstClass] - 1)))
+    // An empty slot (EMPTY_OPTION) or an option the client doesn't support adds nothing, and a
+    // mastery option only counts for the class the set names.
+    if (!IsSupportedSetOption(option) || value == 0 ||
+        (option >= MASTERY_OPTION && !FulfillsClassRequirement(setOptions, firstClass, secondClass)))
     {
         return;
     }
 
     const auto setOption = &set.SetOption[set.SetOptionCount];
     setOption->OptionNumber = option;
-    setOption->FulfillsClassRequirement = fulfillsClassRequirement;
     setOption->Value = value;
     setOption->IsActive = isThisSetComplete || optionIndex < set.ItemCount - 1;
     setOption->IsFullOption = isFullOption;
@@ -349,107 +403,63 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
     for (int i = 0; i < m_SetSearchResultCount; ++i)
     {
         auto& set = m_SetSearchResult[i];
-
-        const ITEM_SET_OPTION& setOptions = m_ItemSetOption[set.SetNumber];
-        bool isThisSetComplete = false;
         if (set.CompleteSetItemCount <= set.ItemCount)
         {
             Hero->ExtendState = 1;
-            isThisSetComplete = true;
         }
 
-        const auto requireClass = isClassRequirementFulfilled(setOptions, firstClass, secondClass);
-        const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
-        for (int o = 0; o < standardOptionCount; ++o)
-        {
-            for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
-            {
-                TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set, setOptions, isThisSetComplete, false, false, requireClass, firstClass, secondClass);
-            }
-        }
+        AddSetOptions(set, m_ItemSetOption[set.SetNumber], firstClass, secondClass);
+    }
+}
 
-        for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
-        {
-            TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions, isThisSetComplete, false, true, requireClass, firstClass, secondClass);
-        }
+void CSItemOption::AddSetOptions(SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, int firstClass,
+                                 int secondClass)
+{
+    const bool isThisSetComplete = set.CompleteSetItemCount <= set.ItemCount;
 
-        for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+    const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+    for (int o = 0; o < standardOptionCount; ++o)
+    {
+        for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
         {
-            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions, isThisSetComplete, true, false, requireClass, firstClass, secondClass);
+            TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set,
+                            setOptions, isThisSetComplete, false, false, firstClass, secondClass);
         }
     }
+
+    for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
+    {
+        TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions,
+                        isThisSetComplete, false, true, firstClass, secondClass);
+    }
+
+    for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+    {
+        TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions,
+                        isThisSetComplete, true, false, firstClass, secondClass);
+    }
+}
+
+const wchar_t* CSItemOption::GetSetOptionFormat(std::uint8_t option)
+{
+    if (!IsSupportedSetOption(option))
+    {
+        return nullptr;
+    }
+
+    return *kSetOptionFormats[option];
 }
 
 bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
 {
-    if (option == EMPTY_OPTION)
+    const wchar_t* format = GetSetOptionFormat(option);
+    if (format == nullptr)
     {
         return false;
     }
 
-    switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
-    {
-    case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
-        mu_swprintf(text, I18N::Game::IncreaseWizardryDmgD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_STRENGTH:
-    case AT_SET_OPTION_IMPROVE_DEXTERITY:
-    case AT_SET_OPTION_IMPROVE_ENERGY:
-    case AT_SET_OPTION_IMPROVE_VITALITY:
-    case AT_SET_OPTION_IMPROVE_CHARISMA:
-    case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
-    case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
-        mu_swprintf(text, I18N::Game::Lookup(950 + option), value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT:
-    case AT_SET_OPTION_IMPROVE_DEFENCE:
-    case AT_SET_OPTION_IMPROVE_MAX_LIFE:
-    case AT_SET_OPTION_IMPROVE_MAX_MANA:
-    case AT_SET_OPTION_IMPROVE_MAX_AG:
-    case AT_SET_OPTION_IMPROVE_ADD_AG:
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT:
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE_PERCENT:
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
-    case AT_SET_OPTION_DOUBLE_DAMAGE:
-        mu_swprintf(text, I18N::Game::Lookup(949 + option), value);
-        return true;
-
-    case AT_SET_OPTION_DISABLE_DEFENCE:
-        mu_swprintf(text, I18N::Game::IgnoreEnemiesDefensiveSkillD, value);
-        return true;
-
-    case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
-        mu_swprintf(text, I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
-        mu_swprintf(text, I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_ATTACK_1:
-    case AT_SET_OPTION_IMPROVE_ATTACK_2:
-    case AT_SET_OPTION_IMPROVE_MAGIC:
-        //	case AT_SET_OPTION_IMPROVE_DEFENCE_1:
-        //	case AT_SET_OPTION_IMPROVE_DEFENCE_2:
-    case AT_SET_OPTION_IMPROVE_DEFENCE_3:
-    case AT_SET_OPTION_IMPROVE_DEFENCE_4:
-    case AT_SET_OPTION_FIRE_MASTERY:
-    case AT_SET_OPTION_ICE_MASTERY:
-    case AT_SET_OPTION_THUNDER_MASTERY:
-    case AT_SET_OPTION_POSION_MASTERY:
-    case AT_SET_OPTION_WATER_MASTERY:
-    case AT_SET_OPTION_WIND_MASTERY:
-    case AT_SET_OPTION_EARTH_MASTERY:
-        mu_swprintf(text, I18N::Game::Lookup(971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)), value);
-        return true;
-    default:
-        return false;
-    }
+    mu_swprintf(text, format, value);
+    return true;
 }
 
 int CSItemOption::AggregateOptionValue(int optionNumber) const
@@ -474,11 +484,14 @@ int CSItemOption::AggregateOptionValue(int optionNumber) const
     return result;
 }
 
+int CSItemOption::GetSetOptionValue(int Special) const
+{
+    return AggregateOptionValue(Special - AT_SET_OPTION_IMPROVE_STRENGTH);
+}
+
 void CSItemOption::PlusSpecial(std::uint16_t* Value, int Special) const
 {
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-
-    if (const int optionValue = AggregateOptionValue(Special))
+    if (const int optionValue = GetSetOptionValue(Special))
     {
         *Value += optionValue;
     }
@@ -486,40 +499,9 @@ void CSItemOption::PlusSpecial(std::uint16_t* Value, int Special) const
 
 void CSItemOption::PlusSpecialPercent(std::uint16_t* Value, int Special) const
 {
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-
-    if (const int optionValue = AggregateOptionValue(Special))
+    if (const int optionValue = GetSetOptionValue(Special))
     {
         *Value += ((*Value) * optionValue) / 100;
-    }
-}
-
-void CSItemOption::PlusSpecialLevel(std::uint16_t* Value, std::uint16_t SrcValue, int Special) const
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    int count = 0;
-
-    for (int i = 0; i < m_SetSearchResultCount; i++)
-    {
-        const auto& set = m_SetSearchResult[i];
-        for (int j = 0; j < set.SetOptionCount; j++)
-        {
-            const auto& option = set.SetOption[j];
-            if (option.IsActive
-                && option.OptionNumber == Special
-                && option.Value != 0)
-            {
-                optionValue += option.Value;
-                count++;
-            }
-        }
-    }
-
-    if (optionValue)
-    {
-        optionValue = SrcValue * optionValue / 100;
-        *Value += (optionValue * count);
     }
 }
 
@@ -529,24 +511,28 @@ void CSItemOption::PlusMastery(int* Value, std::uint8_t MasteryType) const
 
     for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        const auto& set = m_SetSearchResult[i];
-        for (int j = 0; j < set.SetOptionCount; j++)
-        {
-            const auto& option = set.SetOption[j];
-            if (option.IsActive
-                && option.OptionNumber >= MASTERY_OPTION
-                && (option.OptionNumber - MASTERY_OPTION - 5) == MasteryType
-                && option.Value != 0)
-            {
-                optionValue += option.Value;
-            }
-        }
+        optionValue += GetMasteryBonus(m_SetSearchResult[i], MasteryType);
     }
 
     if (optionValue)
     {
         *Value += optionValue;
     }
+}
+
+int CSItemOption::GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t masteryType)
+{
+    int bonus = 0;
+    for (int j = 0; j < set.SetOptionCount; j++)
+    {
+        const auto& option = set.SetOption[j];
+        if (option.IsActive && option.OptionNumber >= MASTERY_OPTION &&
+            (option.OptionNumber - MASTERY_OPTION) == masteryType && option.Value != 0)
+        {
+            bonus += option.Value;
+        }
+    }
+    return bonus;
 }
 
 int CSItemOption::GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value)
@@ -917,142 +903,161 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 }
 
-void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
+bool CSItemOption::BuildSetOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel)
 {
-    if (m_bViewOptionList && m_SetSearchResultCount > 0)
+    // Hover gating is the caller's responsibility now (CMyInventory::SyncRmlModel(), driven by
+    // RmlUi's own mouseover/mouseout on the Set Option label) -- this only needs to know whether
+    // there's anything to show.
+    if (m_SetSearchResultCount == 0)
+        return false;
+
+    std::uint8_t TextNum = 0;
+
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+
+    for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->SetBgColor(100, 0, 0, 0);
+        const auto& set = m_SetSearchResult[i];
 
-        int PosX, PosY;
+        // print set name:
+        mu_swprintf(TextList[TextNum], L"%ls %ls", set.SetName, I18N::Game::Set);
+        TextListColor[TextNum] = TEXT_COLOR_YELLOW;
+        TextBold[TextNum] = true;
+        TextNum++;
 
-        PosX = StartX + 95;
-        PosY = StartY + 40;
+        TextNum = RenderSetOptionList(set, TextNum, true, false);
+    }
 
-        std::uint8_t TextNum = 0;
-        std::uint8_t SkipNum = 0;
-        std::uint8_t setIndex = 0;
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-
-        int		iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
-
-        for (int i = 0; i < m_SetSearchResultCount; i++)
+    outModel.Reset();
+    outModel.count = std::min<int>(TextNum, UI::Inventory::Tooltip::MAX_TOOLTIP_LINES);
+    for (int i = 0; i < outModel.count; ++i)
+    {
+        UI::Inventory::Tooltip::Line& line = outModel.lines[i];
+        wcsncpy(line.text, TextList[i], UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+        line.text[UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+        switch (TextListColor[i])
         {
-            const auto& set = m_SetSearchResult[i];
+        case TEXT_COLOR_BLUE:   line.color = UI::Inventory::Tooltip::LineColor::Blue;   break;
+        case TEXT_COLOR_YELLOW: line.color = UI::Inventory::Tooltip::LineColor::Yellow; break;
+        case TEXT_COLOR_GREEN:  line.color = UI::Inventory::Tooltip::LineColor::Green;  break;
+        case TEXT_COLOR_PURPLE: line.color = UI::Inventory::Tooltip::LineColor::Purple; break;
+        default:                line.color = UI::Inventory::Tooltip::LineColor::White;  break;
+        }
+        line.isBold = TextBold[i] != 0;
+    }
 
-            // print set name:
-            mu_swprintf(TextList[TextNum], L"%ls %ls", set.SetName, I18N::Game::Set);
-            TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-            TextBold[TextNum] = true;
-            TextNum++;
+    return true;
+}
 
-            TextNum = RenderSetOptionList(set, TextNum, true, false);
+namespace
+{
+// Some English set names write their possessive with the typographic apostrophe U+2019 (Chrono, Semeden).
+constexpr wchar_t kTypographicApostrophe = L'\u2019';
+constexpr std::wstring_view kPossessiveSuffix = L"'s";
+
+// `text` in lower case, with U+2019 as '.
+std::wstring FoldSetName(std::wstring_view text)
+{
+    std::wstring folded;
+    folded.reserve(text.size());
+    for (const wchar_t c : text)
+    {
+        folded.push_back(c == kTypographicApostrophe ? L'\'' : static_cast<wchar_t>(std::towlower(c)));
+    }
+    return folded;
+}
+
+// `folded` without its apostrophes.
+std::wstring WithoutApostrophes(std::wstring_view folded)
+{
+    std::wstring result;
+    result.reserve(folded.size());
+    for (const wchar_t c : folded)
+    {
+        if (c != L'\'')
+        {
+            result.push_back(c);
+        }
+    }
+    return result;
+}
+
+enum class SetNameMatch
+{
+    None,
+    // The name as it is, apart from capitals and the apostrophe's form.
+    Exact,
+    // Also without the apostrophe, with or without the name's trailing s.
+    Loose,
+};
+
+SetNameMatch MatchSetName(std::wstring_view typed, std::wstring_view setName)
+{
+    const std::wstring typedFolded = FoldSetName(typed);
+    if (typedFolded.empty())
+    {
+        return SetNameMatch::None;
+    }
+
+    const std::wstring nameFolded = FoldSetName(setName);
+    if (typedFolded == nameFolded)
+    {
+        return SetNameMatch::Exact;
+    }
+
+    std::wstring_view nameBase = nameFolded;
+    if (nameBase.size() > kPossessiveSuffix.size() && nameBase.ends_with(kPossessiveSuffix))
+    {
+        nameBase.remove_suffix(kPossessiveSuffix.size());
+    }
+    const std::wstring typedLoose = WithoutApostrophes(typedFolded);
+    const std::wstring baseLoose = WithoutApostrophes(nameBase);
+    return (typedLoose == baseLoose || typedLoose == baseLoose + L's') ? SetNameMatch::Loose : SetNameMatch::None;
+}
+} // namespace
+
+int CSItemOption::FindSetByName(const wchar_t* typed, std::span<const ITEM_SET_OPTION> sets)
+{
+    int looseMatch = -1;
+    for (int i = 0; i < static_cast<int>(sets.size()); ++i)
+    {
+        if (sets[i].byOptionCount >= 255)
+        {
+            continue;
         }
 
-        RenderTipTextList(PosX, PosY, TextNum, 120, RT3_SORT_CENTER);
-        m_bViewOptionList = false;
+        const SetNameMatch match = MatchSetName(typed, sets[i].strSetName);
+        if (match == SetNameMatch::Exact)
+        {
+            return i;
+        }
+        if (match == SetNameMatch::Loose && looseMatch < 0)
+        {
+            looseMatch = i;
+        }
     }
+    return looseMatch;
 }
 
 void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
 {
-    wchar_t Name[256];
+    if (FilterName[0] != '/')
+        return;
 
-    if (FilterName[0] != '/') return;
-
-    const auto Length1 = wcslen(FilterName);
-    for (int i = 0; i < MAX_SET_OPTION; ++i)
+    m_byRenderOptionList = 0;
+    const int setIndex = FindSetByName(FilterName + 1, m_ItemSetOption);
+    if (setIndex < 0)
     {
-        ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
-        if (setOption.byOptionCount < 255)
-        {
-            mu_swprintf(Name, L"/%ls", setOption.strSetName);
-
-            const auto Length2 = wcslen(Name);
-
-            m_byRenderOptionList = 0;
-            if (wcsncmp(FilterName, Name, Length1) == 0 && wcsncmp(FilterName, Name, Length2) == 0)
-            {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_SETITEM_EXPLANATION);
-
-                m_byRenderOptionList = static_cast<std::uint8_t>(i + 1);
-                return;
-            }
-        }
-    }
-}
-
-void CSItemOption::RenderOptionHelper(void)
-{
-    if (m_byRenderOptionList == 0) return;
-
-    int TextNum = 0;
-    int sx = 0, sy = 0;
-    std::fill(std::begin(TextListColor), std::end(TextListColor), 0);
-    for (int i = 0; i < 30; i++)
-    {
-        TextList[i][0] = L'\0';
-    }
-
-    ITEM_SET_OPTION& setOption = m_ItemSetOption[m_byRenderOptionList - 1];
-    if (setOption.byOptionCount >= 255)
-    {
-        m_byRenderOptionList = 0;
         return;
     }
 
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-    mu_swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, I18N::Game::Set, I18N::Game::ItemOptionInfo);
-    TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-    TextNum++;
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_SETITEM_EXPLANATION);
 
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-
-    for (int o = 0; o < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++o)
-    {
-        for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
-        {
-            if (getExplainText(TextList[TextNum], setOption.byStandardOption[o][n], setOption.byStandardOptionValue[o][n]))
-            {
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-                TextBold[TextNum] = false;
-                TextNum++;
-            }
-        }
-    }
-
-    for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
-    {
-        if (getExplainText(TextList[TextNum], setOption.byExtOption[o], setOption.byExtOption[o]))
-        {
-            TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-
-    for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
-    {
-        if (getExplainText(TextList[TextNum], setOption.byFullOption[o], setOption.byFullOption[o]))
-        {
-            TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-
-    SIZE TextSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-    RenderTipTextList(sx, sy, TextNum, 0);
+    m_byRenderOptionList = static_cast<std::uint8_t>(setIndex + 1);
 }
 
 int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem)
@@ -1119,11 +1124,6 @@ std::uint8_t  CSItemOption::RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set
             if (!bIsEquippedItem || !option.IsActive)
             {
                 TextListColor[textIndex] = TEXT_COLOR_GRAY;
-            }
-            else if (option.OptionNumber >= AT_SET_OPTION_IMPROVE_ATTACK_1 && !option.FulfillsClassRequirement)
-            {
-                // Mastery
-                TextListColor[textIndex] = TEXT_COLOR_RED;
             }
             else
             {

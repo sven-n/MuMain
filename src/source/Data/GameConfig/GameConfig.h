@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Core/Platform/WinCompat.h"
+#include "Data/GameConfig/GameConfigValidation.h"
 
 class GameConfig
 {
@@ -12,6 +13,13 @@ public:
 
     void Load();
     void Save();
+
+    // config.ini beside the executable. Its [EnhancedTuning] section is read and written on its own
+    // (Data/GameConfig/PersonalTuning.h); Save() leaves it as it is.
+    const std::filesystem::path& GetConfigPath() const
+    {
+        return m_configPath;
+    }
 
     // Window
     int  GetWindowWidth()  const { return m_windowWidth; }
@@ -64,22 +72,130 @@ public:
     std::wstring GetUILocale() const { return m_uiLocale; }
     void SetUILocale(const std::wstring& locale);
 
+    // Whether item names are shown in the UI language (GetUILocale); off keeps them English
+    // while the rest of the UI stays translated.
+    bool GetTranslateItemNames() const
+    {
+        return m_translateItemNames;
+    }
+    void SetTranslateItemNames(bool translate);
+
     // UI font family name (GDI face name). Empty = platform default.
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
 
+    // Active RmlUi theme name ("legacy"/"modern") -- see UI::RmlBridge::RmlTheme.
+    std::wstring GetRmlTheme() const { return m_rmlTheme; }
+    void SetRmlTheme(const std::wstring& theme);
+
+    // Global RmlUi UI scale, as a percentage (100 = normal). Drives RmlUiRuntime's
+    // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds. The
+    // setter clamps to [CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent];
+    // a value read from disk is taken as-is, so a hand-edited config.ini stays authoritative
+    // until something writes the setting back.
+    int GetUIScalePercent() const { return m_uiScalePercent; }
+    void SetUIScalePercent(int percent);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
-    const std::vector<std::wstring>& GetChatCommandFavourites() const { return m_chatCommandFavourites; }
+    const std::vector<std::wstring>& GetChatCommandFavourites() const
+    {
+        return m_chatCommandFavourites;
+    }
     void SetChatCommandFavourites(const std::vector<std::wstring>& favourites);
 
-    const std::vector<std::wstring>& GetChatCommandTemplates() const { return m_chatCommandTemplates; }
+    const std::vector<std::wstring>& GetChatCommandTemplates() const
+    {
+        return m_chatCommandTemplates;
+    }
     void SetChatCommandTemplates(const std::vector<std::wstring>& templates);
 
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
+
+    // Render
+    bool GetSortParticleDraws() const { return m_sortParticleDraws; }
+    bool GetVSyncEnabled() const { return m_vsyncEnabled; }
+    void SetVSyncEnabled(bool enabled);
+    // The look preset ([Render] Look).
+    LookPreset GetLook() const
+    {
+        return m_look;
+    }
+    void SetLook(LookPreset look);
+    int GetAnisotropy() const
+    {
+        return m_anisotropy;
+    }
+    void SetAnisotropy(int anisotropy);
+    // Samples per pixel: 0 (off), 2, 4 or 8.
+    int GetAntialiasing() const
+    {
+        return m_antialiasing;
+    }
+    void SetAntialiasing(int samples);
+    bool GetEnhancedLighting() const { return m_enhancedLighting; }
+    void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
+    bool GetDynamicLights() const { return m_dynamicLights; }
+    void SetDynamicLights(bool enabled) { m_dynamicLights = enabled; }
+    bool GetSunlight() const
+    {
+        return m_sunlight;
+    }
+    void SetSunlight(bool enabled)
+    {
+        m_sunlight = enabled;
+    }
+    bool GetLightMood() const { return m_lightMood; }
+    void SetLightMood(bool enabled) { m_lightMood = enabled; }
+    bool GetPostProcessing() const { return m_postProcessing; }
+    void SetPostProcessing(bool enabled) { m_postProcessing = enabled; }
+
+    // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
+    // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
+    // SetDisableEffects/SetDisableParticles/SetDisableSkillEffectModels/SetDisableBoids/
+    // SetDisableWingShadow for what each one actually gates.
+    bool GetDisableEffects() const { return m_disableEffects; }
+    void SetDisableEffects(bool disabled);
+    bool GetDisableParticles() const { return m_disableParticles; }
+    void SetDisableParticles(bool disabled);
+    bool GetDisableSkillEffectModels() const { return m_disableSkillEffectModels; }
+    void SetDisableSkillEffectModels(bool disabled);
+    bool GetDisableBoids() const { return m_disableBoids; }
+    void SetDisableBoids(bool disabled);
+    bool GetDisableWingShadow() const { return m_disableWingShadow; }
+    void SetDisableWingShadow(bool disabled);
+    bool GetDisableBodyShadows() const { return m_disableBodyShadows; }
+    void SetDisableBodyShadows(bool disabled);
+
+    // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
+    // above, this time for the console-only `$fps <N>` diagnostic (SceneManager::SetTargetFps).
+    int GetFpsCap() const { return m_fpsCap; }
+    void SetFpsCap(int fps);
+
+    // Active texture pack (a folder in Data/TexturePacks), empty for the original textures. The
+    // loader reads it once at startup, so a change takes effect after a restart.
+    std::wstring GetTexturePack() const
+    {
+        return m_texturePack;
+    }
+    void SetTexturePack(const std::wstring& pack);
+
+    // Checked means original S6 bodies; unchecked means updated bodies. Read at startup.
+    bool GetUseS6PlayerModels() const
+    {
+        return m_useS6PlayerModels;
+    }
+    void SetUseS6PlayerModels(bool useOriginal);
+
+    // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
+    // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
+    std::wstring GetRenderBackend() const { return m_renderBackend; }
+
+    // [UI] EnableAnimationTaskPool: manual config.ini edit only, like the two above.
+    bool GetEnableAnimationTaskPool() const { return m_enableAnimationTaskPool; }
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -115,14 +231,38 @@ private:
     int m_serverPort;
 
     std::wstring m_uiLocale;
+    bool m_translateItemNames;
     std::wstring m_fontSelection;
+    std::wstring m_rmlTheme;
+    int m_uiScalePercent;
+    bool m_enableAnimationTaskPool;
 
     int m_zoom;
+    bool m_sortParticleDraws;
+    bool m_vsyncEnabled;
+    LookPreset m_look;
+    int m_anisotropy;
+    int m_antialiasing;
+    bool m_enhancedLighting;
+    bool m_dynamicLights;
+    bool m_sunlight;
+    bool m_lightMood;
+    bool m_postProcessing;
+    std::wstring m_renderBackend;
+    bool m_disableEffects;
+    bool m_disableParticles;
+    bool m_disableSkillEffectModels;
+    bool m_disableBoids;
+    bool m_disableWingShadow;
+    bool m_disableBodyShadows;
+    int m_fpsCap;
+    std::wstring m_texturePack;
+    bool m_useS6PlayerModels;
 
-    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
+    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
 
-    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue);
+    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const;
     void WriteBool(const wchar_t* section, const wchar_t* key, bool value);
 
     std::vector<std::wstring> ReadStringList(const wchar_t* section, const wchar_t* keyPrefix);
@@ -136,3 +276,6 @@ private:
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);
 };
+
+// The [Render] Look of a config.ini as GameConfig::Load reads it.
+LookPreset ReadLookPreset(const std::filesystem::path& configFile);

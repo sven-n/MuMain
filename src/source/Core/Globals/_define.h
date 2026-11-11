@@ -77,6 +77,7 @@ enum EPathNodeState : BYTE
     PATH_END = (0x04),
 };
 
+// cppcheck-suppress unknownMacro ; Windows macro (winnt.h), unknown to cppcheck
 DEFINE_ENUM_FLAG_OPERATORS(EPathNodeState)
 
 enum EPathDirection
@@ -187,25 +188,6 @@ enum struct STORAGE_TYPE
     LUCKYITEM_REFINERY = 16,
 };
 
-// Lucky Set armor constants - verified as indices 62-72 (Phoenix Soul is at 73)
-constexpr int LUCKY_SET_ARMOR_START_INDEX = 62;
-constexpr int LUCKY_SET_ARMOR_COUNT = 11;  // Indices 62-72
-
-// Restricted ITEM_HELPER special items starting at local index 135.
-// Exact item-name coverage may vary across older client logic.
-constexpr int RESTRICTED_SPECIAL_MISC_START_INDEX = 135;
-constexpr int RESTRICTED_SPECIAL_MISC_COUNT = 12;  // 135..146
-
-// Restricted ITEM_POTION special jewels starting at local index 160.
-// Exact item-name coverage may vary across older client logic.
-constexpr int RESTRICTED_SPECIAL_JEWEL_START_INDEX = 160;
-constexpr int RESTRICTED_SPECIAL_JEWEL_COUNT = 2;   // 160..161
-
-// Item action restriction types for Check_ItemAction
-// Index into nItemOption array: [PERSONALSHOP, STORE, TRADE, DROP, SELL, REPAIR]
-constexpr int ITEM_ACTION_BLOCK_STORAGE_TRADE = 0;  // 0,1,1,0,0,0 - Blocks storage & trade
-constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell only
-
 #define EQUIPMENT_WEAPON_RIGHT 0
 #define EQUIPMENT_WEAPON_LEFT  1
 #define EQUIPMENT_HELM         2
@@ -279,7 +261,6 @@ constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell
 #define EDIT_HEIGHT  4
 #define EDIT_LIGHT   5
 #define EDIT_SOUND   6
-#define EDIT_MONSTER 7
 
 #define IME_CONVERSIONMODE  1
 #define IME_SENTENCEMODE    2
@@ -319,7 +300,6 @@ constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell
 
 #define CHAR_DEL_LIMIT_LV	300
 
-#define MAX_TEXTS               3000
 #define MAX_GLOBAL_TEXT_STRING	300
 #define MAX_FILTERS 1000
 
@@ -347,7 +327,7 @@ constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell
 
 #define MAX_MINIMAP_NAME    100
 
-#define MAX_MONSTER_NAME    40
+#define MAX_MONSTER_NAME    64
 
 constexpr int MAX_ITEM_TYPE = 16;
 
@@ -359,7 +339,7 @@ constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 
 #define	MAX_MASTER		   24
 
-#define MAX_ITEM_SPECIAL   8
+#define MAX_ITEM_SPECIAL 16
 #define ITEM_LEVEL_NORMAL  4
 #define MAX_QUEST_ITEM     64
 #define MAX_EVENT_ITEM     35
@@ -628,8 +608,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 /////////////////////////////////////_cdirection end_////////////////////////////////////////////////////
 /////////////////////////////////////_ccomgem start_////////////////////////////////////////////////////
 
-#define INDEX_COMPILED_CELE		ITEM_WING+30
-#define INDEX_COMPILED_SOUL		ITEM_WING+31
 #define MODEL_COMPILED_CELE		MODEL_WING+30
 #define MODEL_COMPILED_SOUL		MODEL_WING+31
 #define MAX_LINE_UNMIXLIST		8

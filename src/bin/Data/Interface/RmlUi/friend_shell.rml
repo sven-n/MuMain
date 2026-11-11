@@ -1,0 +1,62 @@
+<rml>
+<head>
+    <title>Friends</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="friend_shell.rcss"/>
+    <link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- Handlers are data-event-*, never on*: on* is RmlUi's inline script event and this build has no
+     script interpreter, so those bind to nothing at all and fail silently. A BindEventCallback is
+     reached through data-event-click / data-event-dblclick.
+
+     Frame, header rail, title and drag anchor all come from the shared window_shell template, the
+     same chrome the menu dialog and the options window wear. Everything below is spliced into that
+     template's #content, so a position here is relative to the content well, not the panel: the
+     window buttons and the resize grip reach back out to the panel corners with negative offsets
+     each theme supplies for its own chrome. -->
+<body template="window_shell" data-model="friend_shell">
+    <div id="window_controls">
+        <button id="btn_minimize" data-event-click="shell_action('minimize')"></button>
+        <button id="btn_maximize" data-class-restore="maximized" data-event-click="shell_action('maximize')"></button>
+        <button id="btn_close" data-event-click="shell_action('close')"></button>
+    </div>
+    <div id="tabs">
+        <button class="btn" data-class-selected="active_tab == 0" data-event-click="shell_action('tab', 0)">{{friends_label}}</button><button class="btn" data-class-selected="active_tab == 1" data-event-click="shell_action('tab', 1)">{{mail_label}}</button><button class="btn" data-class-selected="active_tab == 2" data-event-click="shell_action('tab', 2)">{{windows_label}}</button>
+    </div>
+    <button id="reject" class="toggle" data-class-checked="reject_chat" data-event-click="shell_action('reject')"><span class="check"></span>{{reject_label}}</button>
+    <div class="page" data-if="active_tab == 0">
+        <div class="headers friend_columns">
+            <button class="name" data-class-sorted="friend_sort == 0" data-event-click="shell_action('friend_sort', 0)">{{name_label}}</button><button class="server" data-class-sorted="friend_sort == 1" data-event-click="shell_action('friend_sort', 1)">{{server_label}}</button>
+        </div>
+        <div id="friends_pane" class="scroll-pane" tabindex="0">
+            <div class="row friend_columns" data-for="friend : friends" data-class-selected="friend.name == selected_friend" data-event-click="shell_action('friend_select', friend.name)" data-event-dblclick="shell_action('friend_open', friend.name)">
+                <span class="name">{{friend.name}}</span><span class="server">{{friend.server_label}}</span>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn" data-event-click="shell_action('add')">{{add_label}}</button><button class="btn" data-event-click="shell_action('delete_friend')">{{delete_friend_label}}</button><button class="btn" data-event-click="shell_action('chat')">{{chat_label}}</button><button class="btn" data-event-click="shell_action('write_friend')">{{write_label}}</button>
+        </div>
+    </div>
+    <div class="page" data-if="active_tab == 1">
+        <div class="headers mail_columns">
+            <button class="check_column toggle" data-class-checked="check_all" data-event-click="shell_action('check_all')"><span class="check"></span></button><button class="sender" data-class-sorted="letter_sort == 1" data-event-click="shell_action('letter_sort', 1)">{{sender_label}}</button><button class="date" data-class-sorted="letter_sort == 2" data-event-click="shell_action('letter_sort', 2)">{{date_label}}</button><button class="subject" data-class-sorted="letter_sort == 3" data-event-click="shell_action('letter_sort', 3)">{{title_label}}</button><button class="read_state" data-class-sorted="letter_sort == 0" data-event-click="shell_action('letter_sort', 0)">{{read_label}}</button>
+        </div>
+        <div id="mail_pane" class="scroll-pane" tabindex="0">
+            <div class="row mail_columns" data-for="letter : letters" data-class-selected="letter.id == selected_letter" data-class-unread="!letter.read" data-event-click="shell_action('letter_select', letter.id)" data-event-dblclick="shell_action('letter_open', letter.id)">
+                <button class="check_column toggle" data-class-checked="letter.checked" data-event-click="shell_action('check', letter.id)" data-event-dblclick="shell_action('noop')"><span class="check"></span></button><span class="sender">{{letter.sender}}</span><span class="date">{{letter.date}}</span><span class="subject">{{letter.title}}</span><span class="read_state" data-class-read="letter.read"></span>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn" data-event-click="shell_action('write')">{{write_label}}</button><button class="btn" data-event-click="shell_action('read')">{{read_label}}</button><button class="btn" data-event-click="shell_action('reply')">{{reply_label}}</button><button class="btn" data-event-click="shell_action('delete_mail')">{{delete_label}}</button>
+        </div>
+    </div>
+    <div class="page" data-if="active_tab == 2">
+        <div class="headers"><button class="window_name" data-class-sorted="true">{{window_label}}</button></div>
+        <div id="windows_pane" class="scroll-pane" tabindex="0">
+            <div class="row" data-for="window : windows" data-class-selected="window.id == selected_window" data-event-click="shell_action('window_select', window.id)" data-event-dblclick="shell_action('window_open', window.id)">{{window.title}}</div>
+        </div>
+        <div class="actions"><button class="btn wide" data-event-click="shell_action('hide_all')">{{hide_all_label}}</button></div>
+    </div>
+    <handle id="resize" size_target="#document" edge_margin="0px"/>
+</body>
+</rml>

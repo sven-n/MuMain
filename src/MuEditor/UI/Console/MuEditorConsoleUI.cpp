@@ -15,6 +15,8 @@
 #include <algorithm>
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
@@ -86,40 +88,47 @@ std::streambuf::int_type ConsoleStreamBuf::overflow(int_type c)
 {
     if (c != EOF)
     {
-        m_buffer += static_cast<char>(c);
-
-        // If we hit a newline, flush the buffer
-        if (c == '\n')
-        {
-            std::lock_guard<std::mutex> lock(g_consoleMutex);
-
-            // Remove trailing newline for our buffer
-            std::string line = m_buffer;
-            if (!line.empty() && line.back() == '\n')
-                line.pop_back();
-
-            // Send to ImGui console
-            if (!line.empty())
-            {
-                g_MuEditorConsoleUI.LogGame(line);
-            }
-
-            // Also write to original stream
-            m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
-
-            m_buffer.clear();
-        }
+        std::lock_guard<std::mutex> lock(m_mutex);
+        Put(static_cast<char>(c));
     }
     return c;
 }
 
 std::streamsize ConsoleStreamBuf::xsputn(const char* s, std::streamsize n)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     for (std::streamsize i = 0; i < n; ++i)
     {
-        overflow(s[i]);
+        Put(s[i]);
     }
     return n;
+}
+
+void ConsoleStreamBuf::Put(char c)
+{
+    m_buffer += c;
+
+    // If we hit a newline, flush the buffer
+    if (c == '\n')
+    {
+        // Remove trailing newline for our buffer
+        std::string line = m_buffer;
+        if (!line.empty() && line.back() == '\n')
+            line.pop_back();
+
+        // Send to ImGui console. LogGame takes the console mutex itself, so
+        // it is not held here: std::mutex is not recursive on Linux and
+        // macOS, and holding it twice deadlocked on the first line written.
+        if (!line.empty())
+        {
+            g_MuEditorConsoleUI.LogGame(line);
+        }
+
+        // Also write to original stream
+        m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
+
+        m_buffer.clear();
+    }
 }
 
 CMuEditorConsoleUI::CMuEditorConsoleUI()
@@ -285,23 +294,19 @@ void CMuEditorConsoleUI::LogGame(const std::string& message)
     WriteToLogFile("[GAME] " + message);
 }
 
-
-void CMuEditorConsoleUI::Render()
+void CMuEditorConsoleUI::Render(bool* open)
 {
-    ImGuiIO& io = ImGui::GetIO();
-    ImVec2 bottom_pos = ImVec2(0, io.DisplaySize.y - 200);
-    ImVec2 bottom_size = ImVec2(io.DisplaySize.x, 200);
-
-    ImGui::SetNextWindowPos(bottom_pos, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(bottom_size, ImGuiCond_Always);
-
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+    // Docked along the bottom of the editor window at first; movable like the
+    // other tool windows.
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
 
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.9f));
 
-    if (ImGui::Begin("Console", nullptr, flags))
+    MuEditor::Layout::PrepareToolWindow();
+    if (ImGui::Begin(MuEditor::WindowIds::Console, open,
+                     flags | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::Console)))
     {
+        MuEditor::Layout::RenderToolWindowBar();
         // Check if hovering this window or any of its children
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {

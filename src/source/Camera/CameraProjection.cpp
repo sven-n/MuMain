@@ -2,8 +2,11 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
-#include "Render/RHI/RHI.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "UI/Scaling/UITransform.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -12,51 +15,85 @@ extern int OpenglWindowX;
 extern int OpenglWindowY;
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
+extern EGameScene SceneFlag;
 
-// Actual viewport dimensions (distinct from OpenglWindowWidth/Height which are full window)
-static int s_ViewportWidth = 0;
-static int s_ViewportHeight = 0;
-
-void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
-                                          float zNear, float zFar)
+void CameraProjection::UpdateView(CameraState& state, int x, int y, int width, int height)
 {
-    // GL perspective is fed to GlobalUBO from a CPU closed form by BeginOpengl() (DXP-07b) --
-    // this function only maintains the CPU screen-center/perspective-factor cache below.
+    width = std::max(width, 1);
+    height = std::max(height, 1);
 
-    // Use actual viewport dimensions (set by SetViewport) for screen center and
-    // perspective. This accounts for the game viewport being narrower/shorter than
-    // the full window when UI panels (inventory, NPC shop, etc.) are open.
-    int vpWidth = s_ViewportWidth > 0 ? s_ViewportWidth : OpenglWindowWidth;
-    int vpHeight = s_ViewportHeight > 0 ? s_ViewportHeight : OpenglWindowHeight;
+    // The ops the renderer's matrix stack applied, so the view matches what it built bit for bit.
+    glm::mat4 view(1.f);
+    view = glm::rotate(view, glm::radians(state.Angle[1]), glm::vec3(0.f, 1.f, 0.f));
+    if (state.TopViewEnable == false)
+        view = glm::rotate(view, glm::radians(state.Angle[0]), glm::vec3(1.f, 0.f, 0.f));
+    view = glm::rotate(view, glm::radians(state.Angle[2]), glm::vec3(0.f, 0.f, 1.f));
+    view = glm::translate(view, glm::vec3(-state.Position[0], -state.Position[1], -state.Position[2]));
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            state.Matrix[i][j] = view[j][i];
+        }
+    }
 
-    state.ScreenCenterX = OpenglWindowX + vpWidth / 2;
-    state.ScreenCenterY = OpenglWindowY + vpHeight / 2;
+    state.ScreenCenterX = x + width / 2;
+    state.ScreenCenterY = y + height / 2;
     state.ScreenCenterYFlip = WindowHeight - state.ScreenCenterY;
 
-    float fovRad = fov * 0.5f * Q_PI / 180.0f;
-    state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
-    state.PerspectiveY = tanf(fovRad) / (float)(vpHeight / 2);
+    const float aspect = static_cast<float>(width) / height;
+    const float fovRad = state.FOV * 0.5f * Q_PI / 180.0f;
+    state.PerspectiveX = tanf(fovRad) / (float)(width / 2) * aspect;
+    state.PerspectiveY = tanf(fovRad) / (float)(height / 2);
+}
+
+void CameraProjection::ApplyView(const CameraState& state, int width, int height)
+{
+    width = std::max(width, 1);
+    height = std::max(height, 1);
+
+    auto& renderer = mu::GetRenderer();
+    renderer.SetMatrixMode(GL_PROJECTION);
+    renderer.LoadIdentity();
+    gluPerspective(state.FOV, static_cast<float>(width) / height, state.ViewNear,
+                   state.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+
+    float view[16] = {};
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            view[j * 4 + i] = state.Matrix[i][j];
+        }
+    }
+    view[15] = 1.f;
+    renderer.SetMatrixMode(GL_MODELVIEW);
+    renderer.LoadMatrix(view);
+}
+
+float CameraProjection::WorldAspectRatio()
+{
+    if (SceneFlag == MAIN_SCENE)
+        return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    return static_cast<float>(WindowWidth) / WindowHeight;
 }
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)
 {
     OpenglWindowX = x;
     OpenglWindowY = y;
-    s_ViewportWidth = width;
-    s_ViewportHeight = height;
 
-    // GL's viewport origin is bottom-left, so glViewport needs y flipped to
-    // WindowHeight-(y+height).
-    const int flippedY = WindowHeight - (y + height);
-    glViewport(x, flippedY, width, height);
+    mu::GetRenderer().SetViewport(x, y, width, height);
+    mu::GetRenderer().SetScissor(x, y, width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
                                          vec3_t outTarget, bool bFixView)
 {
-    // Convert reference coordinates to actual pixels
-    sx = sx * WindowWidth / REFERENCE_WIDTH;
-    sy = sy * WindowHeight / REFERENCE_HEIGHT;
+    // Convert active logical coordinates to window pixels. World picking uses
+    // the screen-overlay transform; panel item previews use the panel transform.
+    sx = static_cast<int>(static_cast<float>(sx) * g_fScreenRate_x + g_fScreenOffset_x);
+    sy = static_cast<int>(static_cast<float>(sy) * g_fScreenRate_y + g_fScreenOffset_y);
 
     vec3_t p1, p2;
 
@@ -89,6 +126,20 @@ void CameraProjection::WorldToScreen(const CameraState& state, const vec3_t worl
     *outY = *outY * REFERENCE_HEIGHT / (int)WindowHeight;
 }
 
+bool CameraProjection::WorldToWindowPixel(const CameraState& state, const vec3_t worldPos, float* outX, float* outY)
+{
+    vec3_t transformPos;
+    VectorTransform(worldPos, state.Matrix, transformPos);
+    if (transformPos[2] >= 0.0f)
+    {
+        return false;
+    }
+
+    *outX = static_cast<float>(state.ScreenCenterX) - transformPos[0] / (state.PerspectiveX * transformPos[2]);
+    *outY = static_cast<float>(state.ScreenCenterY) + transformPos[1] / (state.PerspectiveY * transformPos[2]);
+    return true;
+}
+
 void CameraProjection::TransformPosition(const CameraState& state, const vec3_t position,
                                           vec3_t outWorldPosition, int* outX, int* outY)
 {
@@ -115,9 +166,9 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
         return false;
     }
 
-    // Read depth buffer
-    GLfloat depth;
-    RHI::ReadDepthPixel(x, y, &depth);
+    // Backends without depth readback leave the far-depth fallback unchanged.
+    GLfloat depth = 1.f;
+    mu::GetRenderer().ReadPixels(x, y, 1, 1, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
@@ -135,7 +186,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])
 {
     float openglMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, openglMatrix);
+    mu::GetRenderer().GetMatrix(GL_MODELVIEW_MATRIX, openglMatrix);
 
     // Convert from OpenGL 4×4 to our 3×4 format
     for (int i = 0; i < 3; i++)

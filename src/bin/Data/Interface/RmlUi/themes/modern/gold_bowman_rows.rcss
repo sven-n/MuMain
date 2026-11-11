@@ -1,0 +1,17 @@
+/* Where gold_bowman.rml's own lines and buttons sit. CGoldBowmanWindow's RenderTexts(): every line centred on the 190-unit window, the example number green, the registered gift's name last at y 330.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 0px; top: 15px; color: token(text-primary); }
+.entry-text:nth-child(2) { left: 0px; top: 80px; color: token(text-primary); }
+.entry-text:nth-child(3) { left: 0px; top: 95px; color: token(text-primary); }
+.entry-text:nth-child(4) { left: 0px; top: 110px; color: token(text-primary); }
+.entry-text:nth-child(5) { left: 0px; top: 125px; color: token(text-primary); }
+.entry-text:nth-child(6) { left: 0px; top: 180px; color: token(text-primary); }
+.entry-text:nth-child(7) { left: 0px; top: 195px; color: token(semantic-success); }
+.entry-text:nth-child(8) { left: 0px; top: 210px; color: token(text-primary); }
+.entry-text:nth-child(9) { left: 0px; top: 225px; color: token(text-primary); }
+.entry-text:nth-child(10) { left: 0px; top: 330px; color: token(accent-steel); }
+
+.entry-btn:nth-child(1) { left: 45px; top: 285px; width: 108px; height: 29px; }
+
+.entry-btn:nth-child(2) { left: 13px; top: 392px; width: 36px; height: 29px; }

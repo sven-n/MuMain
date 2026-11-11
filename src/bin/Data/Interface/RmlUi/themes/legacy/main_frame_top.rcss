@@ -1,0 +1,3 @@
+/* Legacy theme for main_frame_top.rml: the original keeps its corner buttons in the bottom row
+   (main_frame.rml's #buttons), so the top-right panel is hidden. */
+#top_right_row { display: none; }

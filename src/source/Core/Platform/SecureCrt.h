@@ -60,6 +60,24 @@ inline errno_t wcsncpy_s(wchar_t* dst, size_t count, const wchar_t* src, size_t 
 }
 template <size_t N> inline errno_t wcsncpy_s(wchar_t (&dst)[N], const wchar_t* src, size_t n) { return wcsncpy_s(dst, N, src, n); }
 
+// ---- strncpy_s (supports _TRUNCATE) ------------------------------------------
+inline errno_t strncpy_s(char* dst, size_t count, const char* src, size_t n)
+{
+    if (dst == nullptr || count == 0) return mu__einval();
+    if (src == nullptr) { dst[0] = '\0'; return (n == 0) ? 0 : mu__einval(); }
+    const size_t srclen = strlen(src);
+    size_t tocopy = (n == _TRUNCATE) ? srclen : (n < srclen ? n : srclen);
+    if (tocopy + 1 > count)
+    {
+        if (n == _TRUNCATE) { tocopy = count - 1; }   // truncation explicitly allowed
+        else { dst[0] = '\0'; return mu__erange(); }
+    }
+    memcpy(dst, src, tocopy);
+    dst[tocopy] = '\0';
+    return 0;
+}
+template <size_t N> inline errno_t strncpy_s(char (&dst)[N], const char* src, size_t n) { return strncpy_s(dst, N, src, n); }
+
 // ---- wcscat_s ----------------------------------------------------------------
 inline errno_t wcscat_s(wchar_t* dst, size_t count, const wchar_t* src)
 {
@@ -95,7 +113,16 @@ inline int _vsnwprintf_s(wchar_t* buf, size_t count, size_t maxcount, const wcha
     if (buf == nullptr || count == 0 || fmt == nullptr) return -1;
     const size_t lim = (maxcount == _TRUNCATE || maxcount + 1 > count) ? count : maxcount + 1;
     const int r = vswprintf(buf, lim, fmt, argptr);
-    if (r < 0) { if (maxcount != _TRUNCATE) buf[0] = L'\0'; return -1; }
+    if (r < 0)
+    {
+        // MSVC truncates and terminates with _TRUNCATE; vswprintf leaves the
+        // buffer unterminated on overflow, so terminate it here the same way.
+        if (maxcount == _TRUNCATE)
+            buf[lim - 1] = L'\0';
+        else
+            buf[0] = L'\0';
+        return -1;
+    }
     return r;
 }
 

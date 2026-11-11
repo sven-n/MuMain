@@ -3,6 +3,7 @@
 
 #include "GameLogic/Combat/CombatTarget.h"
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "SummonSystem.h"
 
 #include "Audio/DSPlaySound.h"
@@ -12,12 +13,11 @@
 #include "World/MapInfra/MapManager.h"
 #include "SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 CSummonSystem g_SummonSystem;
 
-CSummonSystem::CSummonSystem()
-{
-}
+CSummonSystem::CSummonSystem() {}
 
 CSummonSystem::~CSummonSystem()
 {
@@ -26,7 +26,7 @@ CSummonSystem::~CSummonSystem()
 
 void CSummonSystem::MoveEquipEffect(CHARACTER* pCharacter, int iItemType, int iItemLevel, int iItemOption1)
 {
-    if (iItemType >= MODEL_BOOK_OF_SAHAMUTT && iItemType <= MODEL_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBookModel(iItemType))
     {
         CreateEquipEffect_WristRing(pCharacter, iItemType, iItemLevel, iItemOption1);
         CreateEquipEffect_Summon(pCharacter, iItemType, iItemLevel, iItemOption1);
@@ -63,13 +63,16 @@ void CSummonSystem::SetPlayerSummon(CHARACTER* pCharacter, OBJECT* pObject)
     }
 }
 
-void CSummonSystem::CastSummonSkill(int iSkill, CHARACTER* pCharacter, OBJECT* pObject, int iTargetPos_X, int iTargetPos_Y)
+void CSummonSystem::CastSummonSkill(int iSkill, CHARACTER* pCharacter, OBJECT* pObject, int iTargetPos_X,
+                                    int iTargetPos_Y)
 {
-    pObject->Angle[2] = CreateAngle(pObject->Position[0], pObject->Position[1], (float)iTargetPos_X * TERRAIN_SCALE, (float)iTargetPos_Y * TERRAIN_SCALE);
+    pObject->Angle[2] = CreateAngle(pObject->Position[0], pObject->Position[1], (float)iTargetPos_X * TERRAIN_SCALE,
+                                    (float)iTargetPos_Y * TERRAIN_SCALE);
     SetPlayerSummon(pCharacter, pObject);
     CreateCastingEffect(pObject->Position, pObject->Angle, iSkill);
     RemoveEquipEffect_Summon(pCharacter);
-    CreateSummonObject(iSkill, pCharacter, pObject, (float)iTargetPos_X * TERRAIN_SCALE, (float)iTargetPos_Y * TERRAIN_SCALE);
+    CreateSummonObject(iSkill, pCharacter, pObject, (float)iTargetPos_X * TERRAIN_SCALE,
+                       (float)iTargetPos_Y * TERRAIN_SCALE);
 }
 
 float RequestTerrainHeight(float xf, float yf);
@@ -107,26 +110,31 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER* pCharacter, OB
     {
         if (iTargetKey != -1)
         {
-            SendRequestMagicContinue(iSkill, (BYTE)(pCharacter->TargetPosition[0] / TERRAIN_SCALE), (BYTE)(pCharacter->TargetPosition[1] / TERRAIN_SCALE),
-                (BYTE)(pObject->Angle[2] / 360.f * 256.f), 0, 0, (WORD)iTargetKey, 0);
+            SendRequestMagicContinue(iSkill, (BYTE)(pCharacter->TargetPosition[0] / TERRAIN_SCALE),
+                                     (BYTE)(pCharacter->TargetPosition[1] / TERRAIN_SCALE),
+                                     (BYTE)(pObject->Angle[2] / 360.f * 256.f), 0, 0, (WORD)iTargetKey, 0);
         }
         else
         {
-            SendRequestMagicContinue(iSkill, (BYTE)TargetX, (BYTE)TargetY,
-                (BYTE)(pObject->Angle[2] / 360.f * 256.f), 0, 0, 0, 0);
+            SendRequestMagicContinue(iSkill, (BYTE)TargetX, (BYTE)TargetY, (BYTE)(pObject->Angle[2] / 360.f * 256.f), 0,
+                                     0, 0, 0);
         }
         CastSummonSkill(iSkill, pCharacter, pObject, TargetX, TargetY);
     }
     return FALSE;
 }
 
-void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT* pObject, float fTargetPos_X, float fTargetPos_Y)
+void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT* pObject, float fTargetPos_X,
+                                       float fTargetPos_Y)
 {
     PART_t* pWeapon = &pCharacter->Weapon[1];
     int iSummonLevel = pWeapon->Level;
-    if (iSummonLevel >= 11) iSummonLevel = 2;
-    else if (iSummonLevel >= 7) iSummonLevel = 1;
-    else iSummonLevel = 0;
+    if (iSummonLevel >= 11)
+        iSummonLevel = 2;
+    else if (iSummonLevel >= 7)
+        iSummonLevel = 1;
+    else
+        iSummonLevel = 0;
 
     switch (iSkill)
     {
@@ -134,10 +142,14 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT
     {
         vec3_t vPos;
         VectorCopy(pObject->Position, vPos);
-        if (rand_fps_check(2)) vPos[0] += rand() % 300 + 150;
-        else vPos[0] -= rand() % 250 + 150;
-        if (rand_fps_check(2)) vPos[1] += rand() % 300 + 150;
-        else vPos[1] -= rand() % 250 + 150;
+        if (Random::Rand() % 2 == 0)
+            vPos[0] += Random::Rand() % 300 + 150;
+        else
+            vPos[0] -= Random::Rand() % 250 + 150;
+        if (Random::Rand() % 2 == 0)
+            vPos[1] += Random::Rand() % 300 + 150;
+        else
+            vPos[1] -= Random::Rand() % 250 + 150;
 
         vec3_t vTargetPos;
         Vector(fTargetPos_X, fTargetPos_Y, RequestTerrainHeight(fTargetPos_X, fTargetPos_Y), vTargetPos);
@@ -174,7 +186,7 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT
         Vector(1.0f, 1.0f, 1.0f, vAngle);
         CreateEffect(MODEL_SUMMONER_SUMMON_LAGUL, vTargetPos, vAngle, vLight, 0, NULL, iSummonLevel);
 
-        int anRargle[3] = { 1, 2, 4 };
+        int anRargle[3] = {1, 2, 4};
         for (int i = 0; i < anRargle[iSummonLevel]; ++i)
         {
             Vector(0.f, 0.f, i * 90.f, vAngle);
@@ -194,38 +206,70 @@ void CSummonSystem::CreateCastingEffect(vec3_t vPosition, vec3_t vAngle, int iSu
     CreateEffect(BITMAP_MAGIC, vPosition, vAngle, vLight, 10);
     switch (iSubType)
     {
-    case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.6f, 0.4f, vLight); break;
-    case AT_SKILL_SUMMON_REQUIEM:	Vector(0.7f, 0.7f, 1.0f, vLight); break;
-    case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.6f, 0.9f, vLight); break;
-    default: Vector(0.7f, 0.7f, 1.0f, vLight); break;
+    case AT_SKILL_SUMMON_EXPLOSION:
+        Vector(1.0f, 0.6f, 0.4f, vLight);
+        break;
+    case AT_SKILL_SUMMON_REQUIEM:
+        Vector(0.7f, 0.7f, 1.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_POLLUTION:
+        Vector(0.6f, 0.6f, 0.9f, vLight);
+        break;
+    default:
+        Vector(0.7f, 0.7f, 1.0f, vLight);
+        break;
     }
     CreateEffect(BITMAP_MAGIC, vPosition, vAngle, vLight, 9);
     switch (iSubType)
     {
-    case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.5f, 0.0f, vLight); break;
-    case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f, 0.7f, 1.0f, vLight); break;
-    case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.3f, 0.9f, vLight); break;
-    default: Vector(0.0f, 0.7f, 1.0f, vLight); break;
+    case AT_SKILL_SUMMON_EXPLOSION:
+        Vector(1.0f, 0.5f, 0.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_REQUIEM:
+        Vector(0.0f, 0.7f, 1.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_POLLUTION:
+        Vector(0.6f, 0.3f, 0.9f, vLight);
+        break;
+    default:
+        Vector(0.0f, 0.7f, 1.0f, vLight);
+        break;
     }
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT1, vPosition, vAngle, vLight);
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT11, vPosition, vAngle, vLight);
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT111, vPosition, vAngle, vLight);
     switch (iSubType)
     {
-    case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.5f, 0.0f, vLight); break;
-    case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f, 0.0f, 1.0f, vLight); break;
-    case AT_SKILL_SUMMON_POLLUTION:	Vector(0.8f, 0.1f, 0.6f, vLight); break;
-    default: Vector(0.0f, 0.0f, 1.0f, vLight); break;
+    case AT_SKILL_SUMMON_EXPLOSION:
+        Vector(1.0f, 0.5f, 0.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_REQUIEM:
+        Vector(0.0f, 0.0f, 1.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_POLLUTION:
+        Vector(0.8f, 0.1f, 0.6f, vLight);
+        break;
+    default:
+        Vector(0.0f, 0.0f, 1.0f, vLight);
+        break;
     }
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT2, vPosition, vAngle, vLight);
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT22, vPosition, vAngle, vLight);
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT222, vPosition, vAngle, vLight);
     switch (iSubType)
     {
-    case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.5f, 0.8f, vLight); break;
-    case AT_SKILL_SUMMON_REQUIEM:	Vector(0.8f, 0.5f, 1.0f, vLight); break;
-    case AT_SKILL_SUMMON_POLLUTION:	Vector(0.9f, 0.1f, 1.0f, vLight); break;
-    default: Vector(0.8f, 0.5f, 1.0f, vLight); break;
+    case AT_SKILL_SUMMON_EXPLOSION:
+        Vector(1.0f, 0.5f, 0.8f, vLight);
+        break;
+    case AT_SKILL_SUMMON_REQUIEM:
+        Vector(0.8f, 0.5f, 1.0f, vLight);
+        break;
+    case AT_SKILL_SUMMON_POLLUTION:
+        Vector(0.9f, 0.1f, 1.0f, vLight);
+        break;
+    default:
+        Vector(0.8f, 0.5f, 1.0f, vLight);
+        break;
     }
     CreateEffect(MODEL_SUMMONER_CASTING_EFFECT4, vPosition, vAngle, vLight);
 }
@@ -241,12 +285,32 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
 
     switch (iItemLevel)
     {
-    case 0: case 1: case 2:		Vector(1.0f, 1.0f, 0.0f, vLight);	break;
-    case 3: case 4:				Vector(0.5f, 1.0f, 0.5f, vLight);	break;
-    case 5: case 6:				Vector(0.5f, 0.1f, 1.0f, vLight);	break;
-    case 7: case 8:				Vector(1.0f, 0.5f, 0.0f, vLight);	break;
-    case 9: case 10:			Vector(1.0f, 0.2f, 0.2f, vLight);	break;
-    case 11: case 12: case 13:	Vector(0.3f, 0.5f, 1.0f, vLight);	break;
+    case 0:
+    case 1:
+    case 2:
+        Vector(1.0f, 1.0f, 0.0f, vLight);
+        break;
+    case 3:
+    case 4:
+        Vector(0.5f, 1.0f, 0.5f, vLight);
+        break;
+    case 5:
+    case 6:
+        Vector(0.5f, 0.1f, 1.0f, vLight);
+        break;
+    case 7:
+    case 8:
+        Vector(1.0f, 0.5f, 0.0f, vLight);
+        break;
+    case 9:
+    case 10:
+        Vector(1.0f, 0.2f, 0.2f, vLight);
+        break;
+    case 11:
+    case 12:
+    case 13:
+        Vector(0.3f, 0.5f, 1.0f, vLight);
+        break;
     }
 
     if (!SearchJoint(MODEL_SPEARSKILL, pObject, 14))
@@ -254,7 +318,7 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
         for (int i = 0; i < 4; ++i)
         {
             CreateJoint(MODEL_SPEARSKILL, vPos, vPos, pObject->Angle, 14, pObject, 18.0f, -1, 0, 0,
-                pCharacter->TargetCharacter, vLight);
+                        pCharacter->TargetCharacter, vLight);
         }
 
         if (iItemLevel >= 12)
@@ -277,7 +341,7 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
     }
     if (iItemLevel >= 13)
     {
-        if (rand() % 4)
+        if (Random::Rand() % 4)
         {
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
         }
@@ -295,12 +359,11 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
 {
     OBJECT* pObject = &pCharacter->Object;
 
-    if (
-        gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-        ) return;
+    if (gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
+        return;
 
-    if (pObject->CurrentAction == PLAYER_SKILL_SUMMON || pObject->CurrentAction == PLAYER_SKILL_SUMMON_UNI
-        || pObject->CurrentAction == PLAYER_SKILL_SUMMON_DINO || pObject->CurrentAction == PLAYER_SKILL_SUMMON_FENRIR)
+    if (pObject->CurrentAction == PLAYER_SKILL_SUMMON || pObject->CurrentAction == PLAYER_SKILL_SUMMON_UNI ||
+        pObject->CurrentAction == PLAYER_SKILL_SUMMON_DINO || pObject->CurrentAction == PLAYER_SKILL_SUMMON_FENRIR)
     {
         return;
     }
@@ -312,7 +375,7 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
     auto iter = m_EquipEffectRandom.find(pCharacter->Key);
     if (iter == m_EquipEffectRandom.end())
     {
-        byRandom = rand() % 256;
+        byRandom = Random::Rand() % 256;
         m_EquipEffectRandom.insert(std::pair<SHORT, BYTE>(pCharacter->Key, byRandom));
     }
     else
@@ -323,21 +386,27 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
     switch (iItemType)
     {
     case MODEL_BOOK_OF_SAHAMUTT:
-        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
+        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 0) && !pCharacter->SafeZone &&
+            sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
-            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
+            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, vLight, 0, pObject, -1,
+                         byRandom);
         }
         break;
     case MODEL_BOOK_OF_NEIL:
-        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
+        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 0) && !pCharacter->SafeZone &&
+            sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
-            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
+            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1,
+                         byRandom);
         }
         break;
     case MODEL_BOOK_OF_LAGLE:
-        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
+        if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject, 0) && !pCharacter->SafeZone &&
+            sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
-            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
+            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1,
+                         byRandom);
         }
         break;
     default:
@@ -360,13 +429,15 @@ void CSummonSystem::CreateDamageOfTimeEffect(int iSkill, OBJECT* pObject)
     case AT_SKILL_SUMMON_EXPLOSION:
         if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 1))
         {
-            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, -1);
+            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, pObject->Light, 1,
+                         pObject, -1);
         }
         break;
     case AT_SKILL_SUMMON_REQUIEM:
         if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 1))
         {
-            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, -1);
+            CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, pObject->Light, 1, pObject,
+                         -1);
         }
         break;
     }
