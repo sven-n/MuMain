@@ -9101,10 +9101,10 @@
     <value>Tingkat serangan (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>Kerusakan Dark Raven: +%d~%d</value>
+    <value>Kerusakan gagak gelap: +%d~%d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
-    <value>Kecepatan serangan Dark Raven: +%d</value>
+    <value>Kecepatan serangan gagak gelap: +%d</value>
   </data>
   <data name="Guild members as guild master: %d" xml:space="preserve">
     <value>Anggota guild sebagai master guild: %d</value>

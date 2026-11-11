@@ -9502,10 +9502,10 @@
     <value>Celność (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>Obrażenia Mrocznego Kruka: +%d~%d</value>
+    <value>Obrażenia {item:13,5:gen}: +%d~%d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
-    <value>Szybkość ataku Mrocznego Kruka: +%d</value>
+    <value>Szybkość ataku {item:13,5:gen}: +%d</value>
   </data>
   <data name="Guild members as guild master: %d" xml:space="preserve">
     <value>Członkowie gildii jako mistrz gildii: %d</value>

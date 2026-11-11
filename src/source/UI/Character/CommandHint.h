@@ -18,8 +18,8 @@ std::vector<UI::RmlBridge::Tooltip::Line> BuildCommandHint(const GameLogic::Char
 class CommandHintTexts
 {
 public:
-    // Formats the hint again when the effects or the language differ from what it was built from; returns whether it
-    // did.
+    // Formats the hint again when the effects, the language or the Dark Raven's item name differ from what it was built
+    // from; returns whether it did.
     bool Update(const GameLogic::Character::CommandEffects& effects, const std::string& locale);
 
     const std::vector<UI::RmlBridge::Tooltip::Line>& Lines() const
@@ -30,6 +30,8 @@ public:
 private:
     std::optional<GameLogic::Character::CommandEffects> m_BuiltEffects;
     std::string m_BuiltLocale;
+    // The Dark Raven's item name the hint was built with.
+    std::wstring m_RavenName;
     std::vector<UI::RmlBridge::Tooltip::Line> m_Lines;
 };
 } // namespace UI::Character

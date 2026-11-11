@@ -24,12 +24,16 @@ std::vector<Line> BuildCommandHint(const GameLogic::Character::CommandEffects& e
 
 bool CommandHintTexts::Update(const GameLogic::Character::CommandEffects& effects, const std::string& locale)
 {
-    if (m_BuiltEffects == effects && m_BuiltLocale == locale)
+    // The hint names the Dark Raven by its item name ({item:13,5}), which changes with "Translate item names", the
+    // editors and a reload of the data, without a change of language.
+    const wchar_t* ravenName = TableItemName(ITEM_DARK_RAVEN_ITEM);
+    if (m_BuiltEffects == effects && m_BuiltLocale == locale && m_RavenName == ravenName)
     {
         return false;
     }
     m_BuiltEffects = effects;
     m_BuiltLocale = locale;
+    m_RavenName = ravenName;
     m_Lines = BuildCommandHint(effects);
     return true;
 }

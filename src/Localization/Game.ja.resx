@@ -7730,10 +7730,10 @@
     <value>攻撃成功率 (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>ダークレイヴンの攻撃力: +%d~%d</value>
+    <value>ダークスピリットの攻撃力: +%d~%d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
-    <value>ダークレイヴンの攻撃速度: +%d</value>
+    <value>ダークスピリットの攻撃速度: +%d</value>
   </data>
   <data name="Guild members as guild master: %d" xml:space="preserve">
     <value>ギルドマスター時のギルド人数: %d</value>

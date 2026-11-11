@@ -9101,10 +9101,10 @@
     <value>攻擊成功率 (PvM): +%d</value>
   </data>
   <data name="Dark Raven damage: +%d~%d" xml:space="preserve">
-    <value>暗黑烏鴉攻擊力: +%d~%d</value>
+    <value>暗鴉攻擊力: +%d~%d</value>
   </data>
   <data name="Dark Raven attack speed: +%d" xml:space="preserve">
-    <value>暗黑烏鴉攻擊速度: +%d</value>
+    <value>暗鴉攻擊速度: +%d</value>
   </data>
   <data name="Guild members as guild master: %d" xml:space="preserve">
     <value>作為公會會長的成員上限: %d</value>
