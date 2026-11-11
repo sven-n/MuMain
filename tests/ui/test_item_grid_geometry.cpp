@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "UI/Inventory/ItemGridGeometry.h"
 
+#include <initializer_list>
+
 using UI::Items::AnchoredTopLeft;
 using UI::Items::GridGeometry;
 using UI::Items::PickupAnchor;
@@ -135,4 +137,29 @@ TEST_CASE("a dropped item a few pixels off the grid's edge lands on its first ce
     grid.ItemCellOf(89.f, 200.f, column, row);
     CHECK(column == -1);
     CHECK(row == 0);
+}
+
+TEST_CASE("a dropped item lands by each axis's own pitch in a grid of non-square cells")
+{
+    const GridGeometry grid{0.f, 0.f, 24.f, 30.f, 8, 4};
+    int column = -1;
+    int row = -1;
+
+    // Column 2 starts at 48 and row 1 at 30: a box up to just under half a cell before or after lands there.
+    const float halfX = grid.PitchX() / 2.f;
+    const float halfY = grid.PitchY() / 2.f;
+    for (const float dx : {-halfX + 0.1f, halfX - 0.1f})
+    {
+        for (const float dy : {-halfY + 0.1f, halfY - 0.1f})
+        {
+            REQUIRE(grid.ItemCellAt(48.f + dx, 30.f + dy, column, row));
+            CHECK(column == 2);
+            CHECK(row == 1);
+        }
+    }
+
+    // 13 px down is under half a row (15) but over half a column (12): only the column moves on.
+    REQUIRE(grid.ItemCellAt(48.f + 13.f, 30.f + 13.f, column, row));
+    CHECK(column == 3);
+    CHECK(row == 1);
 }

@@ -99,6 +99,11 @@ namespace mu::ui::window
         void GetRect(RECT& rcBox);
         // The item's top-left in `grid`'s space, with the pointer at (pointerX, pointerY) there.
         POINT TopLeftIn(const CInventoryCtrl* grid, int pointerX, int pointerY) const;
+        // The item's top-left in `grid`'s space, at the pointer.
+        POINT TopLeftAtPointer(const CInventoryCtrl* grid) const;
+        // The cell the item lands on in `grid`, at the pointer: the one under its first cell's centre, also outside
+        // the grid (GridGeometry::ItemCellOf). The drop and the drop preview both use it.
+        void TargetCellIn(const CInventoryCtrl* grid, int& column, int& row) const;
         // The item's size in `grid`'s cells.
         SIZE SizeIn(const CInventoryCtrl* grid) const;
 

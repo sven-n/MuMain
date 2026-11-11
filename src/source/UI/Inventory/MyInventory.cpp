@@ -626,7 +626,7 @@ bool CMyInventory::UpdateMouseEvent()
     if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
 
-    if (true == EquipmentWindowProcess())
+    if (!PickedItemLandsInGrid() && EquipmentWindowProcess())
         return false;
     if (true == InventoryProcess())
         return false;
@@ -1593,6 +1593,13 @@ bool CMyInventory::CheckTakeOff(int equipmentSlot) const
 
     g_pSystemLogBox->AddText(I18N::Game::KeepFlightEquipmentInIcarus, TYPE_ERROR_MESSAGE);
     return false;
+}
+
+bool CMyInventory::PickedItemLandsInGrid() const
+{
+    CPickedItem* pickedItem = CInventoryCtrl::GetPickedItem();
+    return pickedItem != nullptr && m_pNewInventoryCtrl != nullptr &&
+           pickedItem->GetTargetLinealPos(m_pNewInventoryCtrl) >= 0;
 }
 
 bool CMyInventory::InventoryProcess() const

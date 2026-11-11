@@ -53,6 +53,10 @@ namespace mu::ui::window
         void BuildRmlUi();
         void SyncRmlModel();
 
+        // The grid a press or release goes to: with an item held, the one the item lands in (its first cell's
+        // centre can be in a grid while the pointer is in the gap beside it), otherwise the one under the pointer.
+        CInventoryCtrl* TargetExtension() const;
+
     public:
         CInventoryExtension();
         virtual ~CInventoryExtension();
