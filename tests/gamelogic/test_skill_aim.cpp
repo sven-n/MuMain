@@ -12,7 +12,7 @@
 #include <cmath>
 #include <memory>
 
-extern int SelectedCharacter, TargetX, TargetY;
+extern int SelectedCharacter, TargetX, TargetY, Attacking;
 
 using GameLogic::Combat::CheckTarget;
 using GameLogic::Combat::SkillAim::IsAimedByDirection;
@@ -46,6 +46,7 @@ struct SelectionFixture
     int previousSelected = SelectedCharacter;
     int previousTargetX = TargetX;
     int previousTargetY = TargetY;
+    int previousAttacking = Attacking;
 
     SelectionFixture()
     {
@@ -62,6 +63,7 @@ struct SelectionFixture
         SelectedCharacter = previousSelected;
         TargetX = previousTargetX;
         TargetY = previousTargetY;
+        Attacking = previousAttacking;
     }
 
     // Places a monster, or an NPC that can't be attacked, `tiles` east of the hero.
@@ -163,4 +165,29 @@ TEST_CASE("Other skills and attackable characters keep the selected character as
     fixture.Select(9.0f, true);
     REQUIRE(CheckTarget(Hero, AT_SKILL_EVIL_SPIRIT, Range));
     CHECK_FALSE(CheckTile(Hero, &Hero->Object, Range));
+}
+
+TEST_CASE("Auto-attack repeats a skill only while the character under the cursor can be attacked "
+          "[gamelogic][skills]")
+{
+    SelectionFixture fixture;
+    Attacking = 2;
+
+    fixture.Select(3.0f, true);
+    CHECK(RepeatsAutoAttack(true));
+    CHECK_FALSE(RepeatsAutoAttack(false));
+
+    // A party member or NPC under the cursor, near or beyond the range, stops the repeat.
+    fixture.Select(3.0f, false);
+    CHECK_FALSE(RepeatsAutoAttack(true));
+    fixture.Select(12.0f, false);
+    CHECK_FALSE(RepeatsAutoAttack(true));
+
+    fixture.Select(3.0f, true);
+    Attacking = -1;
+    CHECK_FALSE(RepeatsAutoAttack(true));
+
+    Attacking = 2;
+    SelectedCharacter = -1;
+    CHECK_FALSE(RepeatsAutoAttack(true));
 }

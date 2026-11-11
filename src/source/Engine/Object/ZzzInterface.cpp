@@ -2652,6 +2652,12 @@ bool SkillKeyPush(int Skill)
     return false;
 }
 
+bool RepeatsAutoAttack(bool autoAttackOn)
+{
+    return autoAttackOn && gMapManager.WorldActive != WD_6STADIUM && !gMapManager.InChaosCastle() && Attacking == 2 &&
+           CheckAttack();
+}
+
 void Attack(CHARACTER* c)
 {
     const bool mouseOnHud = g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud();
@@ -2723,12 +2729,7 @@ void Attack(CHARACTER* c)
             MouseRButtonPush = false;
             Success = true;
         }
-        if (
-            g_pOption->IsAutoAttack()
-            && gMapManager.WorldActive != WD_6STADIUM
-            && gMapManager.InChaosCastle() == false
-            && Attacking == 2
-            && SelectedCharacter != -1)
+        if (RepeatsAutoAttack(g_pOption->IsAutoAttack()))
         {
             Success = true;
         }
