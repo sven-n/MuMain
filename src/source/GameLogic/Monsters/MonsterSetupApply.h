@@ -9,6 +9,7 @@
 #include <vector>
 
 class CHARACTER;
+class OBJECT;
 
 namespace Data::Maps
 {
@@ -136,12 +137,25 @@ void CountWaiting(int number, const SpawnWorld& world, WaitingCounts& waiting);
 // it before it makes the character again.
 void RemoveSpawnAttachments(CHARACTER& character);
 
+// A living character got a buff by WSclient's RegisterBuff (the buff lists
+// of 0x13, 0x1F and 0x45, 0x07's add, also for a buff it shows already from
+// its spawn's setup) or lost one by its UnRegisterBuff (0x07's clear, the
+// skill ends of 0x1B, and a few client paths such as stun and sleep ending).
+// Respawn keeps a setup buff noted so. Characters that are no living
+// monsters are left alone.
+void NoteServerBuff(const OBJECT& object, int buff, bool given);
+
 // What the server gave a living character, which CreateCharacter clears:
-// its buffs (not those its last spawn's setup gave it), build time and health
-// and shield bars. Respawn keeps them across making it again.
+// the buffs it shows except its last spawn's setup buffs that the server did
+// not give too (NoteServerBuff), and its build time and health and shield
+// bars.
+// Respawn keeps them across making it again.
 struct ServerState
 {
-    std::map<int, unsigned long> buffs;
+    std::vector<int> buffs;
+    // Those of `buffs` NoteServerBuff noted, noted again on the new
+    // character; a note of a buff it no longer shows is not carried over.
+    std::vector<int> serverBuffs;
     unsigned char buildTime = 0;
     float health = -1.0f;
     float shield = -1.0f;

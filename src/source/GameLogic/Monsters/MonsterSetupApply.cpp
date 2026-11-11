@@ -360,6 +360,8 @@ struct LiveStart
     int number = 0;
     int key = 0;
     int variant = -1;
+    // The buffs the server gave it since (NoteServerBuff).
+    std::set<int> serverBuffs;
     // What it appeared with: the setup and the model.
     MonsterSetup spawned;
     std::string model;
@@ -773,19 +775,49 @@ void RemoveSpawnAttachments(CHARACTER& character)
     DeleteParts(&character);
 }
 
+void NoteServerBuff(const OBJECT& object, int buff, bool given)
+{
+    // Players (the hero among them) are no living monsters: no list search
+    // for each of their buffs.
+    if (object.Kind == KIND_PLAYER || g_live.empty())
+        return;
+    const auto found =
+        std::ranges::find_if(g_live, [&](const LiveStart& live) { return &live.character->Object == &object; });
+    if (found == g_live.end())
+        return;
+    if (given)
+        found->serverBuffs.insert(buff);
+    else
+        found->serverBuffs.erase(buff);
+}
+
 ServerState KeepServerState(const CHARACTER& character)
 {
     ServerState state;
-    for (const auto& [buff, count] : character.Object.m_BuffMap.m_Buff)
-        state.buffs[static_cast<int>(buff)] = count;
+    // Every buff it shows stays except its last spawn's setup buffs that the
+    // server did not give too, which go: many server paths register buffs by
+    // the macro (the gate switch's open gate, the Crywolf altars' states), so
+    // only the setup's own are taken off.
     const auto found = std::ranges::find(g_live, &character, &LiveStart::character);
+    std::set<int> setupOnly;
     if (found != g_live.end())
     {
-        for (const std::string& buff : found->spawned.spawnBuffs)
+        for (const std::string& name : found->spawned.spawnBuffs)
         {
-            if (const std::optional<int> type = Data::Monsters::FindMonsterBuff(buff))
-                state.buffs.erase(*type);
+            const std::optional<int> buff = Data::Monsters::FindMonsterBuff(name);
+            if (buff && !found->serverBuffs.contains(*buff))
+                setupOnly.insert(*buff);
         }
+    }
+    for (const auto& [buff, count] : character.Object.m_BuffMap.m_Buff)
+    {
+        const int kept = static_cast<int>(buff);
+        if (setupOnly.contains(kept))
+            continue;
+        state.buffs.push_back(kept);
+        // A note of a buff it no longer shows is stale: it ends here.
+        if (found != g_live.end() && found->serverBuffs.contains(kept))
+            state.serverBuffs.push_back(kept);
     }
     state.buildTime = character.Object.m_byBuildTime;
     state.health = character.HealthStatus;
@@ -795,8 +827,11 @@ ServerState KeepServerState(const CHARACTER& character)
 
 void RestoreServerState(CHARACTER& character, const ServerState& state)
 {
-    for (const auto& [buff, count] : state.buffs)
-        character.Object.m_BuffMap.m_Buff.try_emplace(static_cast<eBuffState>(buff), count);
+    // Beside the new spawn's own buffs; those the server gave still noted.
+    for (const int buff : state.buffs)
+        g_CharacterRegisterBuff((&character.Object), static_cast<eBuffState>(buff));
+    for (const int buff : state.serverBuffs)
+        NoteServerBuff(character.Object, buff, true);
     character.Object.m_byBuildTime = state.buildTime;
     character.HealthStatus = state.health;
     character.ShieldStatus = state.shield;

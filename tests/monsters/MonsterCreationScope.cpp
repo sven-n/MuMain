@@ -31,6 +31,8 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer);
 void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer);
 void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer);
 void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer);
+void ReceiveSkillStatus(const BYTE* ReceiveBuffer);
+void ReceiveMagicFinish(const BYTE* ReceiveBuffer);
 
 namespace MonsterRecorder
 {
@@ -290,6 +292,25 @@ CHARACTER* CreationScope::Create(int number)
 void CreationScope::SetPacketBuffs(std::vector<int> buffs)
 {
     g_packetBuffs = std::move(buffs);
+}
+
+void CreationScope::SendBuffState(const CHARACTER& character, int buff, bool add)
+{
+    PMSG_VIEWSKILLSTATE packet{};
+    packet.State = add ? 1 : 0;
+    packet.KeyH = static_cast<BYTE>((character.Key >> 8) & 0x7F);
+    packet.KeyL = static_cast<BYTE>(character.Key & 0xFF);
+    packet.BuffIndex = static_cast<BYTE>(buff);
+    ReceiveSkillStatus(reinterpret_cast<const BYTE*>(&packet));
+}
+
+void CreationScope::SendMagicFinish(const CHARACTER& character, int skill)
+{
+    PHEADER_DEFAULT_VALUE_KEY packet{};
+    packet.Value = static_cast<BYTE>(skill);
+    packet.KeyH = static_cast<BYTE>((character.Key >> 8) & 0x7F);
+    packet.KeyL = static_cast<BYTE>(character.Key & 0xFF);
+    ReceiveMagicFinish(reinterpret_cast<const BYTE*>(&packet));
 }
 
 int CreationScope::KeyOf(CreationPath path)

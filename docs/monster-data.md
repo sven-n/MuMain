@@ -987,12 +987,14 @@ item tools.
   too. **Respawn live monsters (n)** makes the living monsters of the
   selection again for a test: the same key, slot, tile and turn, what their
   last spawn attached (spawn effect joints and effects, part models, pet,
-  cloth) removed first; what the server gave them stays (their buffs, not
-  those of their last spawn's setup, an open castle gate standing open,
-  build time, health and shield bars), and their hooks and the objects a
-  row put beside them are not run or made again; with **Play appear** they
-  come in as the server's new monsters do. The server is not told. A Dark
-  Horse helper's horse comes or goes at once. A number's field shared by its
+  cloth) removed first; the buffs they show stay (an open castle gate's)
+  except their last spawn's setup buffs that the server did not also give,
+  which go, so a player's poison on a monster that spawns poisoned stays;
+  their build time, health and shield bars stay too.
+  Their hooks and the objects a row put beside them are not run or made
+  again; with **Play appear** they come in as the server's new monsters do.
+  The server is not told. A Dark Horse helper's horse comes or goes at
+  once. A number's field shared by its
   monster's numbers is grey; a right-click makes it the number's own. A
   line on top names the maps the selection appears on. The lists are edited
   row by row under their label: the spawn effects (each opened to its kind,
