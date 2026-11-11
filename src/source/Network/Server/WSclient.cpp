@@ -124,6 +124,7 @@ using namespace mu::ui::window;
 #include "Network/Server/GuildRelationshipRequest.h"
 #include "Network/Server/GuildRelationshipCodes.h"
 #include "Network/Server/GuildRelationshipResult.h"
+#include "Guild/GuildRelationshipResultText.h"
 #include "Network/Server/RemoveAllianceGuildResult.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -7904,97 +7905,15 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
+    const wchar_t* text = UI::Guild::RelationshipResultText(*change);
+    if (text == nullptr)
+    {
+        assert(!"Packet (0xE6)");
+        text = L"Invalid GuildRelationShipResult";
+    }
+    UI::Chat::PostSystem(text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+
     namespace GR = Network::Packets::GuildRelationship;
-    wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildRelationShipResult";
-    if (change->result == GR::Success)
-    {
-        if (change->relationshipType == GR::Alliance)
-        {
-            if (change->requestType == GR::Join)
-            {
-                wcscpy(szTemp, I18N::Game::GuildAllianceRegistrationIsSuccessful);
-            }
-            else if (change->requestType == GR::Leave)
-            {
-                wcscpy(szTemp, I18N::Game::GuildAllianceWithdrawalIsSuccessful);
-            }
-            else if (change->requestType == GR::DisbandAlliance)
-            {
-                wcscpy(szTemp, I18N::Game::DisbandOfAllianceGuildOrRequest);
-            }
-        }
-        else
-        {
-            if (change->requestType == GR::Join)
-                wcscpy(szTemp, I18N::Game::HostileGuildIsConnected);
-            else
-                wcscpy(szTemp, I18N::Game::HostileGuildIsDisconnected);
-        }
-    }
-    else if (change->result == GR::Failed)
-    {
-        wcscpy(szTemp, I18N::Game::Failed);
-    }
-    else
-    {
-        switch (change->result)
-        {
-        case GUILD_ANS_UNIONFAIL_BY_CASTLE:
-            wcscpy(szTemp, I18N::Game::AllianceFunctionWillBeRestrictedDueToTheCastleSiege);
-            break;
-        case GUILD_ANS_NOTEXIST_PERMISSION:
-            wcscpy(szTemp, I18N::Game::NoAuthorization);
-            break;
-        case GUILD_ANS_EXIST_RELATIONSHIP_UNION:
-            wcscpy(szTemp, I18N::Game::AllianceGuild);
-            break;
-        case GUILD_ANS_EXIST_RELATIONSHIP_RIVAL:
-            wcscpy(szTemp, I18N::Game::HostileGuild);
-            break;
-        case GUILD_ANS_EXIST_UNION:
-            wcscpy(szTemp, I18N::Game::GuildAllianceExists);
-            break;
-        case GUILD_ANS_EXIST_RIVAL:
-            wcscpy(szTemp, I18N::Game::HostileGuildExists);
-            break;
-        case GUILD_ANS_NOTEXIST_UNION:
-            wcscpy(szTemp, I18N::Game::GuildAllianceDoesNotExist);
-            break;
-        case GUILD_ANS_NOTEXIST_RIVAL:
-            wcscpy(szTemp, I18N::Game::HostileGuildDoesNotExist);
-            break;
-        case GUILD_ANS_NOT_UNION_MASTER:
-            wcscpy(szTemp, I18N::Game::NotAMasterOfGuildAlliance);
-            break;
-        case GUILD_ANS_NOT_GUILD_RIVAL:
-            wcscpy(szTemp, I18N::Game::Income);
-            break;
-        case GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD:
-            wcscpy(szTemp, I18N::Game::IncompleteRequirementsForCreatingAGuildAlliance);
-            break;
-        case GUILD_ANS_EXCEED_MAX_UNION_MEMBER:
-            wcscpy(szTemp, I18N::Game::MaximumNoOfGuildAllianceIs7);
-            break;
-        case GUILD_ANS_CANCEL_REQUEST:
-            wcscpy(szTemp, I18N::Game::RequestHasBeenCancelled);
-            break;
-#ifdef ASG_ADD_GENS_SYSTEM
-        case GUILD_ANS_UNION_MASTER_NOT_GENS:
-            wcscpy(szTemp, I18N::Game::TheAllianceMasterHasNotJoinedTheGens);
-            break;
-        case GUILD_ANS_GUILD_MASTER_NOT_GENS:
-            wcscpy(szTemp, I18N::Game::TheGuildMasterHasNotJoinedTheGens);
-            break;
-        case GUILD_ANS_UNION_MASTER_DISAGREE_GENS:
-            wcscpy(szTemp, I18N::Game::YouAreWithADifferentGensThanTheAllianceMaster);
-            break;
-#endif // ASG_ADD_GENS_SYSTEM
-        default:
-            assert(!"Packet (0xE6)");
-            break;
-        }
-    }
-    UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
     if (change->characterKey == HeroKey && change->result == GR::Success && change->relationshipType == GR::Alliance &&
         change->requestType == GR::Leave)

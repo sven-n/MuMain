@@ -34,6 +34,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_guild_relationship_result_text
+    SOURCES
+        test_guild_relationship_result_text.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_remove_alliance_guild_result
     SOURCES
         test_remove_alliance_guild_result.cpp
