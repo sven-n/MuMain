@@ -14,6 +14,7 @@
 
 extern int SelectedCharacter, TargetX, TargetY, Attacking;
 
+using GameLogic::Combat::AimAtGround;
 using GameLogic::Combat::CheckTarget;
 using GameLogic::Combat::SkillAim::IsAimedByDirection;
 using GameLogic::Combat::SkillAim::PullIntoRange;
@@ -125,6 +126,24 @@ TEST_CASE("A ground point within the range is left where it is [gamelogic][skill
 
     float tooShortRange[2] = {9000.0f, 9000.0f};
     CHECK_FALSE(PullIntoRange(origin, tooShortRange, 1.0f, Tile));
+}
+
+TEST_CASE("A direction skill held on the ground beyond its range is aimed within it [gamelogic][skills]")
+{
+    SelectionFixture fixture;
+    constexpr float Range = 6.0f;
+    const float ground[3] = {Hero->Object.Position[0] - 4.0f * Tile, Hero->Object.Position[1] + 11.0f * Tile, 0.0f};
+
+    AimAtGround(Hero, AT_SKILL_EVIL_SPIRIT, Range, ground);
+    CHECK(CheckTile(Hero, &Hero->Object, Range));
+    CHECK(Hero->TargetPosition[0] < Hero->Object.Position[0]);
+    CHECK(Hero->TargetPosition[1] > Hero->Object.Position[1]);
+
+    // A skill cast on a chosen spot keeps the far point, so the hero walks there first.
+    AimAtGround(Hero, AT_SKILL_DECAY, Range, ground);
+    CHECK_FALSE(CheckTile(Hero, &Hero->Object, Range));
+    CHECK(Hero->TargetPosition[0] == ground[0]);
+    CHECK(Hero->TargetPosition[1] == ground[1]);
 }
 
 TEST_CASE("A direction skill aimed at a character that can't be attacked beyond its range is pulled into range "

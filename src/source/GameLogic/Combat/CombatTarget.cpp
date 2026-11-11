@@ -90,9 +90,14 @@ bool CheckTarget(CHARACTER* c, int skill, float distance)
     {
         return false;
     }
-    VectorCopy(CollisionPosition, c->TargetPosition);
+    AimAtGround(c, skill, distance, CollisionPosition);
+    return true;
+}
+
+void AimAtGround(CHARACTER* c, int skill, float distance, const float ground[3])
+{
+    VectorCopy(ground, c->TargetPosition);
     PullDirectionAimIntoRange(c, skill, distance);
     SetTargetTile(c);
-    return true;
 }
 }
