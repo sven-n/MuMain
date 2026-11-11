@@ -1667,6 +1667,10 @@ MSG MainLoop()
                 // The player's Mood strength, at most one map light rebuild per frame however often
                 // it moved (options open or closed).
                 Render::Look::ApplyPendingTuning();
+                if (SceneFlag == WEBZEN_SCENE)
+                {
+                    WebzenScene(g_hDC);
+                }
                 RenderProfiledFrame();
 #ifdef _EDITOR
                 // The editor's own windows, now that the game's frame went to the GPU.

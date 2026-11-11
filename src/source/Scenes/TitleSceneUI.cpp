@@ -18,7 +18,7 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
-// #define	UIM_TS_BG_BLACK		0
+// #define  UIM_TS_BG_BLACK     0
 #define UIM_TS_BACK0 0
 #define UIM_TS_BACK1 1
 #define UIM_TS_121518 3
@@ -145,14 +145,7 @@ void TitleSceneUI::ReleaseSceneUI()
 
 void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
-    // Each loading update gets its own frame so the progress bar is visible.
-    // When called inside the game loop, temporarily close the caller frame,
-    // present this loading update, then reopen the caller frame.
-    const bool wasFrameActive = mu::GetRenderer().IsFrameActive();
-    if (!wasFrameActive)
-    {
-        mu::GetRenderer().BeginFrame();
-    }
+    mu::GetRenderer().BeginFrame();
 
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
@@ -184,9 +177,4 @@ void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 #endif
 
     mu::GetRenderer().EndFrame();
-
-    if (wasFrameActive)
-    {
-        mu::GetRenderer().BeginFrame();
-    }
 }
