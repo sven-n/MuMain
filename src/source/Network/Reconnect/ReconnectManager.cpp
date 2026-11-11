@@ -12,6 +12,8 @@
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
 #include "UI/Windows/LoginWin.h"       // g_LoginWin
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
+#include "UI/Chat/ChatMessages.h"
+#include "I18N/All.h"
 
 // Timing (milliseconds). WorldTime is the wall-clock ms timer the rest of the
 // client uses for timeouts (see ZzzAI.cpp).
@@ -330,6 +332,8 @@ void ReconnectManager::UpdateJoining()
             m_muHelperWasActive = false;
         }
 
+        // The dialog can be up for a fraction of a second; this line stays in the chat to say what happened.
+        UI::Chat::PostSystem(I18N::Game::ReconnectedAfterConnectionLost, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         m_active = false;
         m_phase = Phase::Idle;
         return;

@@ -22,7 +22,6 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Network/MoveCommandData.h"
-#include "Scenes/TitleSceneUI.h"
 #include "Data/DataHandler/LoadData.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
@@ -1715,12 +1714,14 @@ static void OpenItemDataAndShowModelProblems()
     }
 }
 
-void OpenBasicData(HDC hDC)
+static void OpenBasicDataStep0()
 {
     // Before the first LoadGameSound: the duel sounds below.
     OpenSoundData();
-    TitleSceneUI::RenderSceneUI(hDC, 0, 11);
+}
 
+static void OpenBasicDataStep1()
+{
     LoadBitmap(L"Interface\\Cursor.tga", BITMAP_CURSOR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Interface\\CursorPush.tga", BITMAP_CURSOR + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Interface\\CursorAttack.tga", BITMAP_CURSOR + 2, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -2035,9 +2036,10 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP_TO_EDGE);
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 1, 11);
-
+static void OpenBasicDataStep2()
+{
     ::LoadBitmap(L"Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -2147,30 +2149,43 @@ void OpenBasicData(HDC hDC)
     g_ErrorReport.Write(L"> First Load Files OK.\r\n");
 
     OpenPlayers();
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 2, 11);
-
+static void OpenBasicDataStep3()
+{
     OpenPlayerTextures();
-    TitleSceneUI::RenderSceneUI(hDC, 3, 11);
+}
 
+static void OpenBasicDataStep4()
+{
     OpenItems();
     OpenEffectTypeData();
     OpenModelFileData();
-    TitleSceneUI::RenderSceneUI(hDC, 4, 11);
+}
 
+static void OpenBasicDataStep5()
+{
     OpenItemTextures();
     Render::Items::Looks::PrepareTextures();
-    TitleSceneUI::RenderSceneUI(hDC, 5, 11);
+}
 
+static void OpenBasicDataStep6()
+{
     OpenSkills();
-    TitleSceneUI::RenderSceneUI(hDC, 6, 11);
+}
 
+static void OpenBasicDataStep7()
+{
     OpenImages();
-    TitleSceneUI::RenderSceneUI(hDC, 7, 11);
+}
 
+static void OpenBasicDataStep8()
+{
     OpenSounds();
-    TitleSceneUI::RenderSceneUI(hDC, 8, 11);
+}
 
+static void OpenBasicDataStep9()
+{
     wchar_t Text[100];
 
     OpenServerList();
@@ -2216,9 +2231,10 @@ void OpenBasicData(HDC hDC)
 
     g_pMasterLevelInterface->OpenMasterSkillTreeData(L"Data\\Local\\MasterSkillTreeData.bmd");
     g_pMasterLevelInterface->OpenMasterSkillTooltip(L"Data\\Local\\Eng\\MasterSkillTooltip_eng.bmd");
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 9, 11);
-
+static void OpenBasicDataStep10()
+{
     LoadGameSound(SOUND_TITLE01);
     LoadGameSound(SOUND_MENU01);
     LoadGameSound(SOUND_CLICK01);
@@ -2235,8 +2251,14 @@ void OpenBasicData(HDC hDC)
     LoadGameSound(SOUND_RING_EVENT_READY);
     LoadGameSound(SOUND_RING_EVENT_START);
     LoadGameSound(SOUND_RING_EVENT_END);
+}
 
-    TitleSceneUI::RenderSceneUI(hDC, 10, 11);
+// The startup data, a step at a time: the title screen draws its progress between steps.
+std::vector<std::function<void()>> OpenBasicDataSteps()
+{
+    return {&OpenBasicDataStep0, &OpenBasicDataStep1, &OpenBasicDataStep2, &OpenBasicDataStep3,
+            &OpenBasicDataStep4, &OpenBasicDataStep5, &OpenBasicDataStep6, &OpenBasicDataStep7,
+            &OpenBasicDataStep8, &OpenBasicDataStep9, &OpenBasicDataStep10};
 }
 
 void ReleaseMainData()

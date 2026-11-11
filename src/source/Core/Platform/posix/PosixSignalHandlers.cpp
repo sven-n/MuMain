@@ -155,7 +155,7 @@ void InstallSignalHandlers()
     // FIX H-1: Guard against double-install. A second call would overwrite s_old* with
     // the CrashHandler pointer itself (the handler installed by the first call), causing
     // recursive CrashHandler invocation on signal delivery (stack overflow).
-    // WinMain() (Winmain.cpp) calls this once; the guard makes it safe regardless.
+    // StartClient() (Winmain.cpp) calls this once; the guard makes it safe regardless.
     static bool s_installed = false;
     if (s_installed)
     {

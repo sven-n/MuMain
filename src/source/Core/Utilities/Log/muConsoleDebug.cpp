@@ -244,7 +244,9 @@ ConsoleCommandResult BadArgument(std::wstring message)
 // The names of the commands handled below. The argument offset comes from the literal, so a
 // renamed command cannot leave a stale length behind.
 constexpr std::wstring_view FpsCommand = L"$fps";
-constexpr std::wstring_view WinMsgCommand = L"$winmsg";
+constexpr std::wstring_view PauseCommand = L"$pause";
+// Long enough to outlast the server's two-minute idle limit; the client is frozen meanwhile.
+constexpr int MaxPauseSeconds = 600;
 
 // How a command text relates to one command name.
 enum class CommandForm
@@ -253,7 +255,7 @@ enum class CommandForm
     WithoutArgument,
     WithArgument,
     // Starts with the name, but the next character is neither the end nor a space: "$fps30",
-    // "$fpscounter", "$winmsgx". A typo of the command, not a chat line; the caller shows the
+    // "$fpscounter". A typo of the command, not a chat line; the caller shows the
     // usage hint.
     MalformedArgument,
 };
@@ -328,7 +330,7 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     }
 
     // "$win <name>" toggles a window, "$win list" names them. Temporary; see kDebugWindows above.
-    if (strCommand.compare(0, 4, L"$win") == 0 && strCommand.compare(0, 7, L"$winmsg") != 0)
+    if (strCommand.compare(0, 4, L"$win") == 0)
     {
         std::wstring argument = strCommand.size() > 5 ? strCommand.substr(5) : std::wstring();
         if (argument.empty() || argument == L"list")
@@ -485,6 +487,18 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         SetTargetFps(*targetFps);
         return Handled();
     }
+    else if (const CommandForm form = FormOfCommand(strCommand, PauseCommand); form != CommandForm::NotThisCommand)
+    {
+        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, PauseCommand);
+        const std::optional<double> seconds = argument ? Core::Text::TryParseDouble(*argument) : std::nullopt;
+        if (!seconds || !(*seconds >= 1.0 && *seconds <= MaxPauseSeconds))
+        {
+            return BadArgument(L"usage: $pause <seconds>, 1 to " + std::to_wstring(MaxPauseSeconds));
+        }
+
+        PauseFrames(static_cast<unsigned int>(*seconds));
+        return Handled();
+    }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
         MuSetVSyncPreference(true);
@@ -636,18 +650,6 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
     else if (strCommand.compare(L"$effects wingextralayers on") == 0)
     {
         SetDisableWingExtraLayers(false);
-        return Handled();
-    }
-    else if (const CommandForm form = FormOfCommand(strCommand, WinMsgCommand); form != CommandForm::NotThisCommand)
-    {
-        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, WinMsgCommand);
-        const std::optional<int> messageLimit = argument ? Core::Text::TryParseInt(*argument) : std::nullopt;
-        if (!messageLimit || *messageLimit == 0)
-        {
-            return BadArgument(L"usage: $winmsg <count>, 1 or more, or -1 for unlimited");
-        }
-
-        SetMaxMessagePerCycle(*messageLimit);
         return Handled();
     }
     // Runtime theme selection is session-only; the Options window persists its choice.

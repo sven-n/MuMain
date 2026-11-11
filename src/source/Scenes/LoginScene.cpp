@@ -343,11 +343,9 @@ void PlayLogInSceneMusic()
 
 void NewMoveLogInScene()
 {
+    // PrepareSceneBeforeFrame creates the scene, between frames.
     if (!InitLogIn)
-    {
-        InitLogIn = true;
-        CreateLogInScene();
-    }
+        return;
 
     PlayLogInSceneMusic();
 
