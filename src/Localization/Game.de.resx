@@ -8937,6 +8937,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Neuer Versuch in %d Sekunden...</value>
   </data>
+  <data name="Reconnected after connection lost" xml:space="preserve">
+    <value>Wieder verbunden: Die Verbindung zum Server war unterbrochen.</value>
+  </data>
   <data name="Reconnect" xml:space="preserve">
     <value>Erneut verbinden</value>
   </data>

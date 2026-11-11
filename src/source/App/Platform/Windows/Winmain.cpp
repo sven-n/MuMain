@@ -1585,6 +1585,13 @@ bool HandleClientEvent(SDL_Event& event)
 // One frame, as SDL_AppIterate calls it after handing over the frame's events; false once the client should quit.
 bool IterateClient()
 {
+    // Nothing runs, not even the packets or the timers; the events still arrive, so the window can close.
+    if (FramesPaused())
+    {
+        SDL_Delay(10);
+        return !Destroy;
+    }
+
     // Process server packets handed over from the network thread. Replaces
     // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
     Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);

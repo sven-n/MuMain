@@ -244,6 +244,9 @@ ConsoleCommandResult BadArgument(std::wstring message)
 // The names of the commands handled below. The argument offset comes from the literal, so a
 // renamed command cannot leave a stale length behind.
 constexpr std::wstring_view FpsCommand = L"$fps";
+constexpr std::wstring_view PauseCommand = L"$pause";
+// Long enough to outlast the server's two-minute idle limit; the client is frozen meanwhile.
+constexpr int MaxPauseSeconds = 600;
 
 // How a command text relates to one command name.
 enum class CommandForm
@@ -482,6 +485,18 @@ ConsoleCommandResult CmuConsoleDebug::CheckCommand(const std::wstring& strComman
         }
 
         SetTargetFps(*targetFps);
+        return Handled();
+    }
+    else if (const CommandForm form = FormOfCommand(strCommand, PauseCommand); form != CommandForm::NotThisCommand)
+    {
+        const std::optional<std::wstring_view> argument = CommandArgument(form, strCommand, PauseCommand);
+        const std::optional<double> seconds = argument ? Core::Text::TryParseDouble(*argument) : std::nullopt;
+        if (!seconds || !(*seconds >= 1.0 && *seconds <= MaxPauseSeconds))
+        {
+            return BadArgument(L"usage: $pause <seconds>, 1 to " + std::to_wstring(MaxPauseSeconds));
+        }
+
+        PauseFrames(static_cast<unsigned int>(*seconds));
         return Handled();
     }
     else if (strCommand.compare(L"$vsync on") == 0)

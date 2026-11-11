@@ -16,6 +16,7 @@
 #include <cmath>
 #include <iterator>
 #include <thread>
+#include <SDL3/SDL_timer.h>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
@@ -233,6 +234,21 @@ void SetTargetFps(double targetFps)
     }
 
     g_frameTiming.SetTargetFps(targetFps);
+}
+
+namespace
+{
+Uint64 s_framesPausedUntilMs = 0;
+} // namespace
+
+void PauseFrames(unsigned int seconds)
+{
+    s_framesPausedUntilMs = SDL_GetTicks() + seconds * Uint64{1000};
+}
+
+bool FramesPaused()
+{
+    return SDL_GetTicks() < s_framesPausedUntilMs;
 }
 
 double GetTargetFps()

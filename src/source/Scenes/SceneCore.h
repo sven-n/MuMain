@@ -31,6 +31,9 @@ extern bool CheckName();
 void    StartGame();
 void SetTargetFps(double targetFps);
 double GetTargetFps();
+// `$pause`: no frames run for a while, as for a mobile or browser client in the background.
+void PauseFrames(unsigned int seconds);
+bool FramesPaused();
 
 int	SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize);
 

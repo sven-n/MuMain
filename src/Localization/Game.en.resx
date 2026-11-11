@@ -9321,6 +9321,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Retrying in %d seconds...</value>
   </data>
+  <data name="Reconnected after connection lost" xml:space="preserve">
+    <value>Reconnected: the connection to the server was lost.</value>
+  </data>
   <data name="Reconnect" xml:space="preserve">
     <value>Reconnect</value>
   </data>
