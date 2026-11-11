@@ -11,7 +11,7 @@
 #include "App/Control/DrawPurityCheck.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Text/Utf8.h"
-#include "WebzenScene.h"
+#include "Scenes/WebzenScene.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
 
