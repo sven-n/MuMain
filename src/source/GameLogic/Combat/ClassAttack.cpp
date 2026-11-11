@@ -794,7 +794,9 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
                         CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0, o->m_bySkillSerialNum);
                     }
-                    if (c == Hero && SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
+                    // The impact plays on the target only; a party member or NPC under the cursor just gave the
+                    // direction.
+                    if (c == Hero && CheckAttack())
                     {
                         vec3_t Pos;
                         CHARACTER* sc = &CharactersClient[SelectedCharacter];
