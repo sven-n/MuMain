@@ -1,17 +1,17 @@
 #include "Network/Server/GuildRelationshipRequest.h"
 
+#include "Network/Server/FixedC1Packet.h"
+
 namespace Network::Packets
 {
 std::optional<GuildRelationshipRequest> ParseGuildRelationshipRequest(std::span<const std::uint8_t> packet)
 {
-    constexpr std::size_t SizeOffset = 1;
+    constexpr std::uint8_t HeadCode = 0xE5;
     constexpr std::size_t RelationshipTypeOffset = 3;
     constexpr std::size_t RequestTypeOffset = 4;
-    constexpr std::size_t KeyHighOffset = 5;
-    constexpr std::size_t KeyLowOffset = 6;
-    constexpr std::size_t PacketSize = 7;
+    constexpr std::size_t KeyOffset = 5;
 
-    if (packet.size() < PacketSize || packet[SizeOffset] < PacketSize)
+    if (!IsFixedC1Packet(packet, HeadCode, GuildRelationshipRequest::PacketSize))
     {
         return std::nullopt;
     }
@@ -19,7 +19,7 @@ std::optional<GuildRelationshipRequest> ParseGuildRelationshipRequest(std::span<
     return GuildRelationshipRequest{
         packet[RelationshipTypeOffset],
         packet[RequestTypeOffset],
-        static_cast<std::uint16_t>((packet[KeyHighOffset] << 8) | packet[KeyLowOffset]),
+        ReadBigEndianU16(packet, KeyOffset),
     };
 }
 } // namespace Network::Packets

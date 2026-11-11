@@ -14,10 +14,38 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_fixed_c1_packet
+    SOURCES
+        test_fixed_c1_packet.cpp
+)
+
+mu_add_test(
     NAME test_guild_relationship_request
     SOURCES
         test_guild_relationship_request.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Network/Server/GuildRelationshipRequest.cpp
+)
+
+mu_add_test(
+    NAME test_guild_relationship_result
+    SOURCES
+        test_guild_relationship_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/GuildRelationshipResult.cpp
+)
+
+mu_add_test(
+    NAME test_guild_relationship_result_text
+    SOURCES
+        test_guild_relationship_result_text.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_remove_alliance_guild_result
+    SOURCES
+        test_remove_alliance_guild_result.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Network/Server/RemoveAllianceGuildResult.cpp
 )
 
 mu_add_test(

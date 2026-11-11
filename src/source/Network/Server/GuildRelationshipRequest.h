@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <span>
@@ -10,12 +11,15 @@ namespace Network::Packets
 // One byte per field; the requester's character key is big-endian.
 struct GuildRelationshipRequest
 {
+    static constexpr std::size_t PacketSize = 7;
+
     std::uint8_t relationshipType;
     std::uint8_t requestType;
     std::uint16_t requesterKey;
 };
 
-// Returns nullopt when the span or the size declared in the header is shorter than the 7-byte packet.
+// Returns nullopt unless it's a C1 packet with this packet's codes and both the span and the declared size
+// hold PacketSize bytes.
 [[nodiscard]] std::optional<GuildRelationshipRequest>
 ParseGuildRelationshipRequest(std::span<const std::uint8_t> packet);
 } // namespace Network::Packets
