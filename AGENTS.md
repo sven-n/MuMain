@@ -61,6 +61,8 @@ Quick references:
   reviewer only has to read what changed. Don't amend, squash or force-push. The
   one exception is a rebase that resolves merge conflicts; say so on the PR when
   you do it.
+- After the PR is approved, you may rewrite the commit history (e.g. squash it
+  into one commit) only if the final diff is identical to the approved one.
 - Reply to each review comment in its own thread rather than in one long summary
   comment. Update the PR title and description when the scope changes.
 
