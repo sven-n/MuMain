@@ -7885,8 +7885,8 @@ void ReceiveGuildRelationShip(std::span<const BYTE> ReceiveBuffer)
     const auto request = Network::Packets::ParseGuildRelationshipRequest(ReceiveBuffer);
     if (!request)
     {
-        LogSafeCastSizeMismatch("GuildRelationshipRequest", ReceiveBuffer.size(),
-                                Network::Packets::GuildRelationshipRequest::PacketSize);
+        mu::log::Get("network")->warn("NET: Invalid E5 guild relationship request packet dropped ({} bytes)",
+                                      ReceiveBuffer.size());
         return;
     }
 
@@ -7898,8 +7898,8 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
     const auto pData = Network::Packets::ParseGuildRelationshipResult(ReceiveBuffer);
     if (!pData)
     {
-        LogSafeCastSizeMismatch("GuildRelationshipResult", ReceiveBuffer.size(),
-                                Network::Packets::GuildRelationshipResult::PacketSize);
+        mu::log::Get("network")->warn("NET: Invalid E6 guild relationship result packet dropped ({} bytes)",
+                                      ReceiveBuffer.size());
         return;
     }
 
@@ -8004,8 +8004,8 @@ void ReceiveBanUnionGuildResult(std::span<const BYTE> ReceiveBuffer)
     const auto pData = Network::Packets::ParseRemoveAllianceGuildResult(ReceiveBuffer);
     if (!pData)
     {
-        LogSafeCastSizeMismatch("RemoveAllianceGuildResult", ReceiveBuffer.size(),
-                                Network::Packets::RemoveAllianceGuildResult::PacketSize);
+        mu::log::Get("network")->warn("NET: Invalid EB 01 remove-alliance-guild result packet dropped ({} bytes)",
+                                      ReceiveBuffer.size());
         return;
     }
 
