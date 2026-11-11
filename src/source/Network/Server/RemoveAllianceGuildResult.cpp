@@ -1,6 +1,7 @@
 #include "Network/Server/RemoveAllianceGuildResult.h"
 
 #include "Network/Server/FixedC1Packet.h"
+#include "Network/Server/GuildRelationshipCodes.h"
 
 namespace Network::Packets
 {
@@ -15,6 +16,6 @@ std::optional<RemoveAllianceGuildResult> ParseRemoveAllianceGuildResult(std::spa
         return std::nullopt;
     }
 
-    return RemoveAllianceGuildResult{packet[ResultOffset] == 0x01};
+    return RemoveAllianceGuildResult{packet[ResultOffset] == GuildRelationship::Success};
 }
 } // namespace Network::Packets

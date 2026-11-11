@@ -122,6 +122,7 @@ using namespace mu::ui::window;
 #include "Network/Server/ServerListManager.h"
 #include "Network/Server/ServerMessageTexts.h"
 #include "Network/Server/GuildRelationshipRequest.h"
+#include "Network/Server/GuildRelationshipCodes.h"
 #include "Network/Server/GuildRelationshipResult.h"
 #include "Network/Server/RemoveAllianceGuildResult.h"
 #include "GameLogic/Items/ItemCategories.h"
@@ -7895,47 +7896,48 @@ void ReceiveGuildRelationShip(std::span<const BYTE> ReceiveBuffer)
 
 void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
 {
-    const auto pData = Network::Packets::ParseGuildRelationshipResult(ReceiveBuffer);
-    if (!pData)
+    const auto change = Network::Packets::ParseGuildRelationshipResult(ReceiveBuffer);
+    if (!change)
     {
         mu::log::Get("network")->warn("NET: Invalid E6 guild relationship result packet dropped ({} bytes)",
                                       ReceiveBuffer.size());
         return;
     }
 
+    namespace GR = Network::Packets::GuildRelationship;
     wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildRelationShipResult";
-    if (pData->result == 0x01)
+    if (change->result == GR::Success)
     {
-        if (pData->relationshipType == 0x01)
+        if (change->relationshipType == GR::Alliance)
         {
-            if (pData->requestType == 0x01)
+            if (change->requestType == GR::Join)
             {
                 wcscpy(szTemp, I18N::Game::GuildAllianceRegistrationIsSuccessful);
             }
-            else if (pData->requestType == 0x02)
+            else if (change->requestType == GR::Leave)
             {
                 wcscpy(szTemp, I18N::Game::GuildAllianceWithdrawalIsSuccessful);
             }
-            else if (pData->requestType == 0x10)
+            else if (change->requestType == GR::DisbandAlliance)
             {
                 wcscpy(szTemp, I18N::Game::DisbandOfAllianceGuildOrRequest);
             }
         }
         else
         {
-            if (pData->requestType == 0x01)
+            if (change->requestType == GR::Join)
                 wcscpy(szTemp, I18N::Game::HostileGuildIsConnected);
             else
                 wcscpy(szTemp, I18N::Game::HostileGuildIsDisconnected);
         }
     }
-    else if (pData->result == 0)
+    else if (change->result == GR::Failed)
     {
         wcscpy(szTemp, I18N::Game::Failed);
     }
     else
     {
-        switch (pData->result)
+        switch (change->result)
         {
         case GUILD_ANS_UNIONFAIL_BY_CASTLE:
             wcscpy(szTemp, I18N::Game::AllianceFunctionWillBeRestrictedDueToTheCastleSiege);
@@ -7994,22 +7996,22 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
     }
     UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    if (pData->characterKey == HeroKey && pData->result == 0x01 && pData->relationshipType == 0x01 &&
-        pData->requestType == 0x02)
+    if (change->characterKey == HeroKey && change->result == GR::Success && change->relationshipType == GR::Alliance &&
+        change->requestType == GR::Leave)
         GuildMark[Hero->GuildMarkIndex].UnionName[0] = 0;
 }
 
 void ReceiveBanUnionGuildResult(std::span<const BYTE> ReceiveBuffer)
 {
-    const auto pData = Network::Packets::ParseRemoveAllianceGuildResult(ReceiveBuffer);
-    if (!pData)
+    const auto removal = Network::Packets::ParseRemoveAllianceGuildResult(ReceiveBuffer);
+    if (!removal)
     {
         mu::log::Get("network")->warn("NET: Invalid EB 01 remove-alliance-guild result packet dropped ({} bytes)",
                                       ReceiveBuffer.size());
         return;
     }
 
-    if (pData->succeeded)
+    if (removal->succeeded)
     {
         if (UI::Guild::AllianceGuildCount() > 2)
         {
