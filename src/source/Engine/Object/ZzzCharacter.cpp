@@ -10757,11 +10757,9 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame < 2.f)
             {
-                if (PartyNumber > 0 /*&& rand_fps_check(2)*/)
+                // Only a party member's flash links the party; the rest of the update still runs for anyone else.
+                if (PartyNumber > 0 && g_pPartyManager->IsPartyMemberChar(c))
                 {
-                    if (g_pPartyManager->IsPartyMemberChar(c) == false)
-                        return;
-
                     for (int i = 0; i < PartyNumber; ++i)
                     {
                         PARTY_t* p = &Party[i];
