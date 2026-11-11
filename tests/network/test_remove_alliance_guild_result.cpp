@@ -30,3 +30,9 @@ TEST_CASE("a short EB 01 packet is rejected [network][guild]")
     constexpr std::array<std::uint8_t, 7> declaredShort{0xC1, 0x05, 0xEB, 0x01, 0x01, 0x02, 0x01};
     CHECK_FALSE(ParseRemoveAllianceGuildResult(declaredShort).has_value());
 }
+
+TEST_CASE("a packet with another subcode is not read as EB 01 [network][guild]")
+{
+    constexpr std::array<std::uint8_t, 7> packet{0xC1, 0x07, 0xEB, 0x02, 0x01, 0x02, 0x01};
+    CHECK_FALSE(ParseRemoveAllianceGuildResult(packet).has_value());
+}

@@ -29,3 +29,9 @@ TEST_CASE("a short E5 packet is rejected [network][guild]")
     constexpr std::array<std::uint8_t, 7> declaredShort{0xC1, 0x06, 0xE5, 0x02, 0x02, 0x12, 0x34};
     CHECK_FALSE(ParseGuildRelationshipRequest(declaredShort).has_value());
 }
+
+TEST_CASE("a packet with another head code is not read as E5 [network][guild]")
+{
+    constexpr std::array<std::uint8_t, 7> packet{0xC1, 0x07, 0xE6, 0x01, 0x01, 0x12, 0x34};
+    CHECK_FALSE(ParseGuildRelationshipRequest(packet).has_value());
+}

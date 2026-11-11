@@ -1,14 +1,16 @@
 #include "Network/Server/RemoveAllianceGuildResult.h"
 
+#include "Network/Server/FixedC1Packet.h"
+
 namespace Network::Packets
 {
 std::optional<RemoveAllianceGuildResult> ParseRemoveAllianceGuildResult(std::span<const std::uint8_t> packet)
 {
-    constexpr std::size_t SizeOffset = 1;
+    constexpr std::uint8_t HeadCode = 0xEB;
+    constexpr std::uint8_t SubCode = 0x01;
     constexpr std::size_t ResultOffset = 4;
-    constexpr std::size_t PacketSize = 7;
 
-    if (packet.size() < PacketSize || packet[SizeOffset] < PacketSize)
+    if (!IsFixedC1Packet(packet, HeadCode, SubCode, RemoveAllianceGuildResult::PacketSize))
     {
         return std::nullopt;
     }

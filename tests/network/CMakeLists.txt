@@ -14,6 +14,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_fixed_c1_packet
+    SOURCES
+        test_fixed_c1_packet.cpp
+)
+
+mu_add_test(
     NAME test_guild_relationship_request
     SOURCES
         test_guild_relationship_request.cpp
