@@ -2,9 +2,9 @@
 
 #ifdef _EDITOR
 
-#include "ItemEffectsRoot.h"
+#include "LookEdits.h"
 #include "LookParts.h"
-#include "RenderStylesRoot.h"
+#include "LooksRoot.h"
 
 #include "../MuEditor/UI/Common/NamedTree.h"
 #include "../MuEditor/UI/ItemTools/ItemModelPreview.h"
@@ -32,6 +32,19 @@
 // moving, an eye per effect or layer (for the edited one) and "Draw as: doppelganger". Apply asks what the change is
 // for (L36): all the items that use the look, which it lists (D26), only the picked item (as a copy of the look) or a
 // new item. The changes are item edits (L39): one undo history with the item tools, and Save Items writes the file.
+namespace MuEditor::Looks
+{
+// A look ForItem made for the preview, kept with what it was made from, so it is made again only when that changes.
+struct ItemPreviewLook
+{
+    std::optional<Data::Looks::LookDefinition> from;
+    Data::Looks::LookKind kind = Data::Looks::LookKind::RenderStyle;
+    int itemType = -1;
+    int modelsVersion = -1;
+    std::optional<Data::Looks::LookDefinition> forItem;
+};
+} // namespace MuEditor::Looks
+
 class CMuStyleEditorUI
 {
 public:
@@ -40,6 +53,8 @@ public:
     void Render(bool* open);
     // Opens the window on the render style of that name, in the file or in code, and brings it to the front.
     void ShowRenderStyle(const std::string& name);
+    // The same for an item effect.
+    void ShowItemEffect(const std::string& name);
     // Between frames: the preview's texture can only be released then.
     void BeforeFrame()
     {
@@ -58,7 +73,8 @@ public:
     }
     // Whether the look has changes not applied yet, which stay with it while another look is picked; the tree marks
     // its row.
-    [[nodiscard]] bool HasUnappliedChanges(const std::string& name) const;
+    [[nodiscard]] bool HasUnappliedChanges(const std::string& name,
+                                           Data::Looks::LookKind kind = Data::Looks::LookKind::RenderStyle) const;
     // No draft, picked or kept, as before a look was first picked: for a test that brings looks of its own.
     void ForgetDraftsForTest();
     // The picked row of the parts list: a mesh, MuEditor::Looks::EveryPart or BasePart.
@@ -97,7 +113,12 @@ private:
     CMuStyleEditorUI();
 
     [[nodiscard]] bool IsRenderStylesPicked() const;
-    // The picked look of the file, or nullptr (a root, a folder, a look in code, an item effect).
+    // The kind of the picked root's looks, its root and the edits of its file.
+    [[nodiscard]] Data::Looks::LookKind PickedKind() const;
+    [[nodiscard]] MuEditor::Looks::LooksRoot& RootOf(Data::Looks::LookKind kind);
+    [[nodiscard]] const MuEditor::Looks::LooksRoot& RootOf(Data::Looks::LookKind kind) const;
+    [[nodiscard]] static MuEditor::Looks::LookEdits& EditsOf(Data::Looks::LookKind kind);
+    // The picked look of the file, or nullptr (a root, a folder, a look in code).
     [[nodiscard]] const Data::Looks::LookDefinition* GetPickedFileLook() const;
     void RenderFileBar();
     void RenderToolbar();
@@ -115,6 +136,9 @@ private:
     [[nodiscard]] std::string UnusedLookName(const std::string& base) const;
     void RenderLayers();
     void RenderLayerToolbar();
+    // An item effect: its entries before the drawing in their order, then the object's light, and the picked line's
+    // fields.
+    void RenderItemEffect();
     void RenderParts();
     void RenderPartRow(const char* label, int part, const std::vector<std::size_t>& layers);
     void RenderEffectChip(std::size_t layer, int part);
@@ -147,8 +171,8 @@ private:
     void Apply();
     void ApplyCopy(ApplyTo to, const std::string& copyName, int itemType, int newItemType, const std::string& itemName);
 
-    MuEditor::Looks::RenderStylesRoot m_renderStyles;
-    MuEditor::Looks::ItemEffectsRoot m_itemEffects;
+    MuEditor::Looks::LooksRoot m_renderStyles{Data::Looks::LookKind::RenderStyle};
+    MuEditor::Looks::LooksRoot m_itemEffects{Data::Looks::LookKind::ItemEffect};
     MuEditor::NamedTree m_tree;
     MuEditor::Items::CItemModelPreview m_preview;
 
@@ -156,8 +180,9 @@ private:
     Data::Looks::LookDefinition m_draft;
     Data::Looks::LookDefinition m_draftLoaded;
     std::string m_draftOf;
+    Data::Looks::LookKind m_draftKind = Data::Looks::LookKind::RenderStyle;
     int m_draftVersion = -1;
-    // The drafts with changes not applied of the looks picked before, by name.
+    // The drafts with changes not applied of the looks picked before, by kind and name (DraftKey).
     struct KeptDraft
     {
         Data::Looks::LookDefinition draft;
@@ -180,6 +205,9 @@ private:
     // The layers the preview leaves out (the eyes), by layer: 1 for one left out. As many as the draft's layers: they
     // change together (LoadDraft, InsertLayer, RemoveLayer, SwapLayers).
     std::vector<std::uint8_t> m_hiddenLayers;
+    // The looks the preview draws as the picked item has them: as applied and as edited.
+    MuEditor::Looks::ItemPreviewLook m_appliedForItem;
+    MuEditor::Looks::ItemPreviewLook m_editedForItem;
     bool m_showLayers = false;
     bool m_allFields = false;
     int m_part = MuEditor::Looks::EveryPart;
@@ -188,6 +216,7 @@ private:
     // The problems of the draft, as checked last, and what they were checked for.
     std::vector<Data::Items::ItemDataIssue> m_draftIssues;
     Data::Looks::LookDefinition m_checkedDraft;
+    Data::Looks::LookKind m_checkedKind = Data::Looks::LookKind::RenderStyle;
     int m_checkedModels = -1;
     bool m_checked = false;
 
@@ -211,5 +240,21 @@ private:
 };
 
 #define g_MuStyleEditorUI CMuStyleEditorUI::GetInstance()
+
+namespace MuEditor::Looks
+{
+// The look as the item of that type draws it in the game, for the preview: with the item's values when the item names
+// the look and sets values of it (design L12); nullopt when it draws the look as the look has it.
+std::optional<Data::Looks::LookDefinition> ForItem(const Data::Looks::LookDefinition& look, Data::Looks::LookKind kind,
+                                                   int itemType);
+// ForItem, kept in `kept` while the look, its kind, the item and the item models are the same; the textures the made
+// look names are found when it is made. nullptr when the item draws the look as the look has it.
+const Data::Looks::LookDefinition* ForItemKept(ItemPreviewLook& kept, const Data::Looks::LookDefinition& look,
+                                               Data::Looks::LookKind kind, int itemType);
+// The look without the layers whose eye is off (`hidden` non-zero), all else as it is: Only when, Not for, Draws alone,
+// the item values.
+Data::Looks::LookDefinition WithoutHiddenLayers(const Data::Looks::LookDefinition& look,
+                                                const std::vector<std::uint8_t>& hidden);
+} // namespace MuEditor::Looks
 
 #endif // _EDITOR

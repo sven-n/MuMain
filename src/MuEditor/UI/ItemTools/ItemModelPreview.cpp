@@ -72,6 +72,11 @@ std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPrevie
 // with another model (the Box of Luck's levels, (14,12) at +0 and +2), which has none of the listed meshes.
 const BMD* ListedModelInView(int itemType, int level)
 {
+    // A part model's view (RenderModelSlot) has no item.
+    if (!Data::Items::IsValidItemType(itemType))
+    {
+        return nullptr;
+    }
     const int listed = Data::Items::ToModelSlot(itemType);
     if (MuEditor::Effects::GetPreviewItemModels(itemType, level).model != listed)
     {
@@ -93,6 +98,18 @@ void CItemModelPreview::Render(int itemType)
     const float width = ImGui::GetContentRegionAvail().x;
     // The width without the vertical scrollbar, so the height does not make
     // the scrollbar show and hide by turns (as the effect browser's view).
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float widthInWindow = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
+    RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);
+}
+
+void CItemModelPreview::RenderModelSlot(int modelSlot)
+{
+    RenderControls();
+    // An item type no item has, one per slot, so the camera frames each slot on its own.
+    MuEditor::Effects::EffectPreviewRequest request = MakeRequest(-2 - modelSlot);
+    request.modelSlot = modelSlot;
+    const float width = ImGui::GetContentRegionAvail().x;
     const ImGuiStyle& style = ImGui::GetStyle();
     const float widthInWindow = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
     RenderView(request, m_views[0], "##ModelView", width, ViewHeight(widthInWindow), nullptr);

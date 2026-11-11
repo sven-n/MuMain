@@ -17,6 +17,7 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/LookData/LookJson.h"
 
+#include <array>
 #include <optional>
 #endif
 
@@ -97,6 +98,9 @@ public:
     // name, and its items name the new one. The items that use it take its
     // file, texture folders and none-blend meshes, and are opened again.
     void SetSharedModel(const Data::Items::SharedItemModel& sharedModel, std::string_view previousName = {});
+    // Sets the part models (PartModels.json, design L28, L50); Save writes the file. A part model whose file, texture
+    // folders or none-blend meshes changed is opened again by ReopenChangedModels.
+    void SetPartModels(std::vector<Data::Items::PartModel> parts);
     // Removes a shared model that no item uses; false while one does.
     bool RemoveSharedModel(std::string_view name);
     // Adds a glow color or changes the value of the one of its name; the
@@ -109,35 +113,73 @@ public:
     void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
     // The folders MuEditor sorts the glow colors in (D69); Save writes them with the colors.
     void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
-    // The render style file as the editor has it (Data/Effects/RenderStyles.json, design L39): its looks, sorted by
-    // name, which the game draws (g_LookStore), and the Style Editor's folders. Read from the file when first asked
-    // for, and the game draws the file's looks from then on (the file may have changed since the game started; the
-    // caller loads their textures); a read with a fatal problem keeps the game's looks and no folders, and Save leaves
-    // the file alone then.
-    const Data::Looks::RenderStylesFile& GetRenderStyles();
+    // A look file as the editor has it (Data/Effects/RenderStyles.json or ItemEffects.json, design L39): its looks,
+    // sorted by name, which the game draws (g_LookStore), and the Style Editor's folders. Read from the file when first
+    // asked for, and the game draws the file's looks from then on (the file may have changed since the game started;
+    // the caller loads their textures); a read with a fatal problem keeps the game's looks and no folders, and Save
+    // leaves the file alone then.
+    const Data::Looks::LookFile& GetLookFile(Data::Looks::LookKind kind);
     // The looks and folders; the game draws the looks at once, and Save writes the file. The caller loads the
     // textures a look names (Render::Items::Looks::PrepareTextures).
-    void SetRenderStyles(Data::Looks::RenderStylesFile file);
+    void SetLookFile(Data::Looks::LookKind kind, Data::Looks::LookFile file);
     // The problems of the file's read.
-    const std::vector<Data::Items::ItemDataIssue>& GetRenderStyleReadIssues();
+    const std::vector<Data::Items::ItemDataIssue>& GetLookReadIssues(Data::Looks::LookKind kind);
     // Whether the read had no fatal problem, so Save may write the file.
-    bool CanSaveRenderStyles();
-    // Counts the changes of the render styles, for what the Style Editor keeps between frames.
+    bool CanSaveLooks(Data::Looks::LookKind kind);
+    // Counts the changes of the file's looks, for what the Style Editor keeps between frames.
+    int GetLooksVersion(Data::Looks::LookKind kind) const
+    {
+        return m_lookFiles[static_cast<std::size_t>(kind)].version;
+    }
+    // A test's looks, as if read from the file, unchanged since.
+    void ResetLooksForTest(Data::Looks::LookKind kind, Data::Looks::LookFile file);
+    // As before the first read, after a test: the file is read again when next asked for.
+    void ForgetLooksForTest(Data::Looks::LookKind kind);
+
+    // The render style file (the kind functions above for Data::Looks::LookKind::RenderStyle).
+    const Data::Looks::RenderStylesFile& GetRenderStyles()
+    {
+        return GetLookFile(Data::Looks::LookKind::RenderStyle);
+    }
+    void SetRenderStyles(Data::Looks::RenderStylesFile file)
+    {
+        SetLookFile(Data::Looks::LookKind::RenderStyle, std::move(file));
+    }
+    const std::vector<Data::Items::ItemDataIssue>& GetRenderStyleReadIssues()
+    {
+        return GetLookReadIssues(Data::Looks::LookKind::RenderStyle);
+    }
+    bool CanSaveRenderStyles()
+    {
+        return CanSaveLooks(Data::Looks::LookKind::RenderStyle);
+    }
     int GetRenderStylesVersion() const
     {
-        return m_renderStylesVersion;
+        return GetLooksVersion(Data::Looks::LookKind::RenderStyle);
     }
-    // A test's render styles, as if read from the file, unchanged since.
-    void ResetRenderStylesForTest(Data::Looks::RenderStylesFile file);
-    // As before the first read, after a test: the file is read again when next asked for.
-    void ForgetRenderStylesForTest();
+    void ResetRenderStylesForTest(Data::Looks::RenderStylesFile file)
+    {
+        ResetLooksForTest(Data::Looks::LookKind::RenderStyle, std::move(file));
+    }
+    // Both look files, as before the first read.
+    void ForgetRenderStylesForTest()
+    {
+        ForgetLooksForTest(Data::Looks::LookKind::RenderStyle);
+        ForgetLooksForTest(Data::Looks::LookKind::ItemEffect);
+    }
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>
     ReopenChangedModels(const Data::Items::ModelLoader::LookNames& lookNames);
     bool HasModelsToReopen() const
     {
-        return !m_modelsToReopen.empty();
+        return !m_modelsToReopen.empty() || !m_partModelsToReopen.empty();
+    }
+    // For tests, which open no models: drops the models a change left to open again.
+    void ForgetModelsToReopenForTest()
+    {
+        m_modelsToReopen.clear();
+        m_partModelsToReopen.clear();
     }
     // What keeps or rebuilds data of opened model slots (the cloth of worn
     // pants, the cloth grid of the Grand Soul pants) is game code, so the
@@ -307,6 +349,7 @@ private:
     Data::Items::ItemGroupSet m_changedModelGroups;
     // Whether the editor changed a shared model since LoadModels.
     bool m_sharedModelsChanged = false;
+    bool m_partModelsChanged = false;
     // Whether the editor changed the glow color list since LoadModels.
     bool m_glowColorsChanged = false;
     // The item stat file as Load read it, and whether the editor changed it since.
@@ -314,19 +357,25 @@ private:
     bool m_statFileChanged = false;
     // Whether the editor changed the ground label styles since Load.
     bool m_groundLabelsChanged = false;
-    void ReadRenderStylesOnce();
-    // The render style file (GetRenderStyles), whether it was read and could be, its problems, whether the editor
-    // changed it since, and a count of its changes.
-    Data::Looks::RenderStylesFile m_renderStyles;
-    bool m_renderStylesRead = false;
-    bool m_renderStylesComplete = true;
-    std::vector<Data::Items::ItemDataIssue> m_renderStyleIssues;
-    bool m_renderStylesChanged = false;
-    int m_renderStylesVersion = 0;
+    // A look file (GetLookFile), whether it was read and could be, its problems, whether the editor changed it since,
+    // and a count of its changes.
+    struct LookFileState
+    {
+        Data::Looks::LookFile file;
+        bool read = false;
+        bool complete = true;
+        std::vector<Data::Items::ItemDataIssue> issues;
+        bool changed = false;
+        int version = 0;
+    };
+    LookFileState& ReadLookFileOnce(Data::Looks::LookKind kind);
+    std::array<LookFileState, 2> m_lookFiles;
     // Whether the editor changed the name cases since Load.
     bool m_nameCasesChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
+    // The slots of the part models to open again.
+    std::vector<int> m_partModelsToReopen;
     OpenedModelHooks m_openedModelHooks;
 
     struct LookNames

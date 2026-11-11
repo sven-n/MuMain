@@ -122,7 +122,6 @@ void CMonkSystem::LoadModelItem()
     gLoadData.AccessModel(MODEL_ARMORINVEN_60, L"Data\\player\\", L"Armor_inventory60");
     gLoadData.AccessModel(MODEL_ARMORINVEN_61, L"Data\\player\\", L"ArmorMale61_inventory");
     gLoadData.AccessModel(MODEL_ARMORINVEN_62, L"Data\\player\\", L"ArmorMale62_inventory");
-    gLoadData.AccessModel(MODEL_ARMORINVEN_74, L"Data\\player\\", L"ArmorMale74_inven");
 }
 
 void CMonkSystem::LoadModelItemTexture()
@@ -144,7 +143,6 @@ void CMonkSystem::LoadModelItemTexture()
     gLoadData.OpenTexture(MODEL_ARMORINVEN_60, L"player\\");
     gLoadData.OpenTexture(MODEL_ARMORINVEN_61, L"player\\");
     gLoadData.OpenTexture(MODEL_ARMORINVEN_62, L"player\\");
-    gLoadData.OpenTexture(MODEL_ARMORINVEN_74, L"player\\");
 }
 
 int CMonkSystem::GetSubItemType(int _Type, int _Left)

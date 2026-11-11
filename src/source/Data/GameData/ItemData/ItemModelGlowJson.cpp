@@ -19,6 +19,7 @@ constexpr const char* HiddenMeshKey = "hiddenMesh";
 constexpr const char* ShineColorKey = "shineColor";
 constexpr const char* ShineWhiteKey = "shineWhite";
 constexpr const char* ShineHiddenMeshKey = "shineHiddenMesh";
+constexpr const char* GlowAgainInWhiteKey = "glowAgainInWhite";
 constexpr const char* AncientColorKey = "ancientColor";
 constexpr const char* ExcellentKey = "excellent";
 constexpr const char* ExcellentMeshKey = "excellentMesh";
@@ -54,6 +55,10 @@ OrderedJson WriteGlow(const ItemGlow& glow)
         json[ColorKey] = glow.color;
     }
     WriteMeshes(glow.meshes, MeshesKey, HiddenMeshKey, json);
+    if (glow.glowAgainInWhite)
+    {
+        json[GlowAgainInWhiteKey] = *glow.glowAgainInWhite;
+    }
     if (glow.shineColor != ItemGlow::DefaultShineColor)
     {
         json[ShineColorKey] = glow.shineColor;
@@ -63,6 +68,10 @@ OrderedJson WriteGlow(const ItemGlow& glow)
         json[ShineWhiteKey] = true;
     }
     WriteMeshes(glow.shineMeshes, ShineMeshesKey, ShineHiddenMeshKey, json);
+    if (!glow.shineBelowPlus3.empty())
+    {
+        json[ShineBelowPlus3Key] = glow.shineBelowPlus3;
+    }
     if (glow.ancientColor != ItemGlow::DefaultAncientColor)
     {
         json[AncientColorKey] = glow.ancientColor;
@@ -145,6 +154,7 @@ void ForEachMesh(const ItemGlow& glow, const std::function<void(const std::strin
     };
 
     visitMeshes(MeshesKey, HiddenMeshKey, glow.meshes);
+    visitIndex(GlowAgainInWhiteKey, glow.glowAgainInWhite);
     visitMeshes(ShineMeshesKey, ShineHiddenMeshKey, glow.shineMeshes);
     visitIndex(ExcellentMeshKey, glow.excellentMesh);
     visitIndex(ExcellentMeshWithoutSkinKey, glow.excellentMeshWithoutSkin);
@@ -163,9 +173,11 @@ void Read(const OrderedJson& json, ItemModelDefinition& model, const ModelJson::
     ReadLevels(reader, glow.levels);
     reader.ReadName(ColorKey, glow.color);
     ReadMeshes(reader, MeshesKey, HiddenMeshKey, glow.meshes);
+    ReadOptionalIndex(reader, GlowAgainInWhiteKey, glow.glowAgainInWhite, MaxMesh);
     reader.ReadName(ShineColorKey, glow.shineColor);
     reader.ReadBool(ShineWhiteKey, glow.shineWhite);
     ReadMeshes(reader, ShineMeshesKey, ShineHiddenMeshKey, glow.shineMeshes);
+    reader.ReadName(ShineBelowPlus3Key, glow.shineBelowPlus3);
     reader.ReadName(AncientColorKey, glow.ancientColor);
     reader.ReadBool(ExcellentKey, glow.excellent);
     ReadOptionalIndex(reader, ExcellentMeshKey, glow.excellentMesh, MaxMesh);

@@ -31,6 +31,7 @@
 #include "World/MapInfra/w_MapProcess.h"
 
 #include "../data/ItemModelDatabaseScope.h"
+#include "ShippedLooksScope.h"
 #include "RepeatedDraws.h"
 
 #include <algorithm>
@@ -924,6 +925,9 @@ TEST_CASE("Drawing an item's effect or style again and again leaves the look on 
 {
     FenrirScope scope;
     ItemModelDatabaseScope restoreModels;
+    // The Devil's Eye's effect and the Blood Bone's style are data.
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     Data::Items::ItemModelDefinition eye;
     eye.group = 14;
     eye.number = 17;
@@ -996,6 +1000,9 @@ TEST_CASE("A cycling item look comes from the clock: every pass of a frame shows
 
     FenrirScope scope;
     ItemModelDatabaseScope restoreModels;
+    // Both styles are data.
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
     Data::Items::ItemModelDefinition storm;
     storm.group = 12;
     storm.number = 36;

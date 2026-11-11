@@ -178,13 +178,16 @@ public:
         }
     }
 
-    // The shipped glow color list, which the item models name their colors
+    // The shipped glow color list and shine list, which the item models name their colors and shines below +3
     // from.
-    void CopyShippedGlowColors() const
+    void CopyShippedGlowLists() const
     {
-        const std::filesystem::path file = m_directory / GetGlowColorsFile();
-        std::filesystem::create_directories(file.parent_path());
-        std::filesystem::copy_file(ShippedClientDirectory / GetGlowColorsFile(), file);
+        for (const std::filesystem::path& list : {GetGlowColorsFile(), GetShinesFile()})
+        {
+            const std::filesystem::path file = m_directory / list;
+            std::filesystem::create_directories(file.parent_path());
+            std::filesystem::copy_file(ShippedClientDirectory / list, file);
+        }
     }
 
 private:
@@ -1686,7 +1689,7 @@ TEST_CASE("Changing an opened item model drops the cloth the characters wear [da
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -1817,7 +1820,7 @@ TEST_CASE("A bmd import keeps the size and slot of the held items that had data 
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2135,13 +2138,98 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     }
 }
 
+// Save Items writes the look files the Style Editor changed, each only when it changed (design L39).
+TEST_CASE("Saving writes ItemEffects.json when the item effects changed, and RenderStyles.json only when its looks did "
+          "[data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowLists();
+    const std::filesystem::path effects = folder.Directory() / "Data" / "Effects";
+    for (const char* file : {"RenderStyles.json", "ItemEffects.json"})
+    {
+        std::filesystem::copy_file(ShippedClientDirectory / "Data" / "Effects" / file, effects / file);
+    }
+    std::ofstream(effects / "RenderStyles.json", std::ios::binary | std::ios::app) << "\n";
+    const std::string renderStylesText = TestFiles::ReadWholeFile(effects / "RenderStyles.json");
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    // The game's looks again afterwards: the editor's read gives the game the folder's.
+    const LookEditsScope looks(std::vector<Data::Looks::LookDefinition>(
+        Data::Looks::g_LookStore.GetRenderStyles().begin(), Data::Looks::g_LookStore.GetRenderStyles().end()));
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    g_ItemDataHandler.ForgetRenderStylesForTest();
+
+    Data::Looks::LookFile file = g_ItemDataHandler.GetLookFile(Data::Looks::LookKind::ItemEffect);
+    REQUIRE_FALSE(file.looks.empty());
+    file.looks[0].objectLight = std::array<Data::Looks::Number, 3>{0.25f, 0.5f, 0.75f};
+    g_ItemDataHandler.SetLookFile(Data::Looks::LookKind::ItemEffect, file);
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    Data::Looks::LookFile saved;
+    std::vector<ItemDataIssue> readIssues;
+    Data::Looks::ReadLookFile(TestFiles::ReadWholeFile(effects / "ItemEffects.json"), "ItemEffects.json",
+                              Data::Looks::LookKind::ItemEffect, saved, readIssues);
+    CHECK_FALSE(HasFatal(readIssues));
+    CHECK(saved.looks == file.looks);
+    CHECK(TestFiles::ReadWholeFile(effects / "RenderStyles.json") == renderStylesText);
+}
+
+// The part models are edited in the Item Model window (design L50): a change is an undo step, and Save writes
+// PartModels.json.
+TEST_CASE("A part model's change is an item edit, and saving writes PartModels.json [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowLists();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    g_ItemEdits.GetHistory().Clear();
+    REQUIRE(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing") != nullptr);
+
+    std::vector<PartModel> parts(g_ItemModelDatabase.GetPartModels().begin(),
+                                 g_ItemModelDatabase.GetPartModels().end());
+    const auto wing = std::ranges::find(parts, std::string("phoenixSoulStarWing"),
+                                        [](const PartModel& part) { return part.model.name; });
+    REQUIRE(wing != parts.end());
+    const std::string before = wing->renderStyle;
+    wing->renderStyle = "chromeMesh0";
+    wing->model.textureFolders = {"Item", "Effect"};
+    g_ItemEdits.SetPartModels("Part model", parts);
+    CHECK(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing")->renderStyle == "chromeMesh0");
+    // Its folders changed: it is opened again between frames.
+    CHECK(g_ItemDataHandler.HasModelsToReopen());
+    CHECK(g_ItemEdits.Undo());
+    CHECK(g_ItemModelDatabase.FindPartModel("phoenixSoulStarWing")->renderStyle == before);
+    CHECK(g_ItemEdits.Redo());
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+    const ItemModelDataLoadResult saved = LoadItemModelDataDirectory(folder.Directory() / GetItemModelDataDirectory());
+    CHECK_FALSE(HasFatal(saved.issues));
+    const auto savedWing = std::ranges::find(saved.partModels, std::string("phoenixSoulStarWing"),
+                                             [](const PartModel& part) { return part.model.name; });
+    REQUIRE(savedWing != saved.partModels.end());
+    CHECK(savedWing->renderStyle == "chromeMesh0");
+    CHECK(savedWing->model.textureFolders == std::vector<std::string>{"Item", "Effect"});
+    g_ItemEdits.GetHistory().Clear();
+    // The test opens no models: the next test starts with none left to open.
+    g_ItemDataHandler.ForgetModelsToReopenForTest();
+}
+
 // The item editor moves an item's model with the item, and saving writes the
 // model files of the moved models.
 TEST_CASE("A moved item takes its model along, and saving writes it [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     // A model file the save must not touch: no model of its group moves.
     const std::filesystem::path axeModels = folder.Directory() / GetItemModelDataDirectory() / GetItemGroupFileName(1);
     std::ofstream(axeModels, std::ios::binary | std::ios::app) << "\n";
@@ -2186,7 +2274,7 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2226,7 +2314,7 @@ TEST_CASE("A bmd import puts a moved entry without a name back with its model [d
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2259,7 +2347,7 @@ TEST_CASE("After a bmd import every number with a model has an entry [data][item
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     I18N::SetLocale("en");
@@ -2305,7 +2393,7 @@ TEST_CASE("Export as bmd and Import from bmd keep the orbs', crystals' and scrol
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2395,7 +2483,7 @@ TEST_CASE("A bmd import keeps the entries without a name as they are and does no
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2531,7 +2619,7 @@ TEST_CASE("The item tools add, remove and move items with their models [data][it
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2607,7 +2695,7 @@ TEST_CASE("The item tools change models and shared models [data][items][editor]"
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2704,7 +2792,7 @@ TEST_CASE("The item tools' changes can be undone and redone [data][items][editor
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2801,7 +2889,7 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -2878,7 +2966,7 @@ TEST_CASE("An item move can update the monsters that wear it, and the item Save 
     }
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     const std::filesystem::path monstersFile = folder.Directory() / Data::Monsters::GetMonstersFile();
     std::filesystem::create_directories(monstersFile.parent_path());
     std::ofstream(monstersFile, std::ios::binary) << R"({ "formatVersion": 2, "monsters": [
@@ -2979,7 +3067,7 @@ TEST_CASE("A number that is not free names what takes it [data][items][editor]")
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -3016,7 +3104,7 @@ TEST_CASE("An entry without a name moves and goes as an item does [data][items][
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     std::string errorMessage;
@@ -3050,7 +3138,7 @@ TEST_CASE("Apply for only this item or a new item makes a copy of the look, whic
     using Data::Looks::LookDefinition;
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     std::string errorMessage;
@@ -3257,7 +3345,7 @@ TEST_CASE("The item tools draw their frames without ImGui errors [data][items][e
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -3554,7 +3642,7 @@ TEST_CASE("Add item without copying makes an item without a slot [data][items][e
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -3852,7 +3940,7 @@ TEST_CASE("A click in the shared model warning's list keeps the warning open [da
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -3898,7 +3986,7 @@ TEST_CASE("The shared model form follows an undo of meshes typed without spaces 
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     TestModelSlots slots;
@@ -4260,7 +4348,7 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -4698,7 +4786,7 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope restoreModels;
     I18N::SetLocale("en");
@@ -5221,7 +5309,7 @@ TEST_CASE("A description placeholder that names no table stops the save [editor]
 {
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
-    folder.CopyShippedGlowColors();
+    folder.CopyShippedGlowLists();
     ClientDataScope client(folder.Directory());
     ItemModelDatabaseScope models;
     std::string errorMessage;

@@ -4,6 +4,13 @@
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemType.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Models/ZzzBMD.h"
+#include "ShippedLooksScope.h"
+#include "../data/ItemModelDatabaseScope.h"
 
 #include <functional>
 #include <latch>
@@ -221,6 +228,24 @@ TEST_CASE("Threads drawing at the same time each count every call [random]")
 
 TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gameplay sequences [random]")
 {
+    // The shimmer is the item effect's (design L27): its random scroll is drawn from the draw's own randomness.
+    const ShippedLooksScope looks;
+    REQUIRE(looks.IsComplete());
+    const ItemModelDatabaseScope restoreModels;
+    const auto model = [](int group, int number, const char* effect)
+    {
+        Data::Items::ItemModelDefinition entry;
+        entry.group = group;
+        entry.number = number;
+        entry.file = "Data/Item/Sword01.bmd";
+        entry.itemEffect = effect;
+        return entry;
+    };
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{model(6, 14, "shimmeringGlow"),
+                                                                            model(5, 5, "shimmeringGlow"),
+                                                                            model(5, 7, "flickeringGlow"),
+                                                                            model(0, 14, "shimmeringPulse")},
+                              Data::Effects::GlowColorList{});
     const LegacyStateScope legacy;
     const std::uint32_t legacyBefore = Random::RandState();
     const std::mt19937 engineBefore = Random::Snapshot();
@@ -231,12 +256,18 @@ TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gamepl
         CAPTURE(type);
         OBJECT item;
         item.Type = type;
+        DrawLook look = DrawLook::Of(item);
+        float alpha = 1.f;
+        int level = 0;
         {
             // The inventory view and a held part set the item up like this in every pass.
             const DrawScope drawing;
             ItemObjectAttribute(&item);
+            // A model of its own: this program opens no model slots.
+            BMD model;
+            Render::Items::ItemEffects::Apply(&model, &item, look, type, alpha, level);
         }
-        CHECK(item.BlendMesh >= 1);
+        CHECK(look.blendMesh >= 1);
     }
     CHECK(Violations() == 0);
     CHECK(Random::RandState() == legacyBefore);

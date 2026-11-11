@@ -14,6 +14,9 @@ struct DrawLook
     float blendMeshU = 0.f;
     float blendMeshV = 0.f;
     int hiddenMesh = -1;
+    // The level the item is drawn like, for the conditions of its look (design L11): its glow level, as the render
+    // level option caps it and its item effect leaves it. Read only.
+    int level = 0;
 
     static DrawLook Of(const OBJECT& o);
 };

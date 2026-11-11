@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/Shines.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
@@ -8,6 +9,7 @@
 #include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -107,6 +109,10 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                                  std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
 
+// Checks that the shine below +3 each model names is in the shine list (Shines.h). Appends the problems to `issues`.
+void ValidateItemModelShines(std::span<const ItemModelDefinition> models, std::span<const Effects::Shine> shines,
+                             std::vector<ItemDataIssue>& issues);
+
 // Whether a look of this name exists; the looks are drawing code
 // (Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists).
 using LookNameExists = bool (*)(std::string_view name);
@@ -116,6 +122,12 @@ using LookNameExists = bool (*)(std::string_view name);
 // same when it opens the models).
 void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
                             LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues);
+
+// The part models (PartModels.json, design L28): a warning for an entry whose name is no part model slot (the game
+// draws nothing of it), for a render style no look has (the model is drawn plainly; not checked when
+// `renderStyleExists` is null) and, when there are entries, for a slot without one (the game draws nothing there).
+void ValidatePartModels(std::span<const PartModel> parts, LookNameExists renderStyleExists,
+                        std::vector<ItemDataIssue>& issues);
 
 // A .bmd file that several model entries name themselves instead of through
 // a shared model: a warning for each of them, since each opens the file again

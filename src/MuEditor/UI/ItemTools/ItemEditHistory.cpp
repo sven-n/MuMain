@@ -205,8 +205,15 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             }
             break;
         case ItemEditStep::Kind::RenderStyles:
-            if (m_hooks.readRenderStyles &&
-                m_hooks.readRenderStyles() != *(undoing ? step.renderStylesAfter : step.renderStylesBefore))
+            if (m_hooks.readRenderStyles && m_hooks.readRenderStyles(step.lookKind) !=
+                                                *(undoing ? step.renderStylesAfter : step.renderStylesBefore))
+            {
+                return false;
+            }
+            break;
+        case ItemEditStep::Kind::PartModels:
+            if (m_hooks.readPartModels &&
+                m_hooks.readPartModels() != (undoing ? step.partModelsAfter : step.partModelsBefore))
             {
                 return false;
             }
@@ -281,6 +288,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::RenderStyles:
         case ItemEditStep::Kind::MonsterItems:
         case ItemEditStep::Kind::NameCases:
+        case ItemEditStep::Kind::PartModels:
             break;
         }
     }
@@ -365,7 +373,13 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
     case ItemEditStep::Kind::RenderStyles:
         if (m_hooks.restoreRenderStyles)
         {
-            m_hooks.restoreRenderStyles(*(undoing ? step.renderStylesBefore : step.renderStylesAfter));
+            m_hooks.restoreRenderStyles(step.lookKind, *(undoing ? step.renderStylesBefore : step.renderStylesAfter));
+        }
+        break;
+    case ItemEditStep::Kind::PartModels:
+        if (m_hooks.restorePartModels)
+        {
+            m_hooks.restorePartModels(undoing ? step.partModelsBefore : step.partModelsAfter);
         }
         break;
     case ItemEditStep::Kind::MonsterItems:
