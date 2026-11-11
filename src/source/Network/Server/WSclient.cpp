@@ -15533,22 +15533,9 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
     case eDeBuff_AttackDown:
-    {
-        vec3_t vLight;
-        Vector(1.4f, 0.2f, 0.2f, vLight);
-        CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
-        CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
-    }
-    break;
-
     case eDeBuff_DefenseDown:
-    {
-        vec3_t vLight;
-        Vector(0.25f, 1.0f, 0.7f, vLight);
-        CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
-        CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
-    }
-    break;
+        CreateStatDownDebuffLights(o, buff);
+        break;
     case eBuff_Berserker:
     {
         vec3_t vLight[2];
@@ -15748,13 +15735,8 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     break;
 
     case eDeBuff_AttackDown:
-        DeleteEffect(BITMAP_SHINY + 6, o, 1);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
-        break;
-
     case eDeBuff_DefenseDown:
-        DeleteEffect(BITMAP_SHINY + 6, o, 2);
-        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
+        DeleteStatDownDebuffLights(o, buff);
         break;
     case eBuff_Berserker:
     {
