@@ -43,6 +43,7 @@
 #include "GameLogic/Items/ItemStats.h"
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Render/Items/LookDrawing.h"
 #include <chrono>
 #include <cstring>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
@@ -3148,6 +3149,8 @@ constexpr float SelectedItemTurnSpeed = 0.45f;
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target,
                         int Select, bool PickUp)
 {
+    // A look's layers can be only for the inventory.
+    const Render::Items::Looks::InventoryDrawing inventory;
     int Level = ItemLevel;
     vec3_t Direction, Position;
 

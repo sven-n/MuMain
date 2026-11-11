@@ -1,0 +1,104 @@
+{
+  "formatVersion": 1,
+  "kind": "itemEffect",
+  "looks": [
+    {
+      "name": "devilsEye",
+      "itemValuesBefore": [
+        {"glowMesh": 1, "glowStrength": {"shape": "wave", "from": 5.65, "to": 25.65, "seconds": 3.14159265}, "scrollV": {"shape": "ramp", "from": 0, "to": 1, "seconds": 2}, "drawingOpacity": 2}
+      ],
+      "objectLight": [{"shape": "wave", "from": 1.13, "to": 5.13, "seconds": 3.14159265}, {"shape": "wave", "from": 1.13, "to": 5.13, "seconds": 3.14159265}, {"shape": "wave", "from": 1.13, "to": 5.13, "seconds": 3.14159265}]
+    },
+    {
+      "name": "divineSet",
+      "itemValuesBefore": [
+        {"glowStrength": 1}
+      ]
+    },
+    {
+      "name": "flickeringGlow",
+      "itemValuesBefore": [
+        {"glowMesh": 1, "glowStrength": {"shape": "random", "from": 0, "to": 1, "step": 0.1}}
+      ]
+    },
+    {
+      "name": "glowingMesh",
+      "itemValuesBefore": [
+        {"glowMesh": {"eachItem": "glowMesh", "default": 1}}
+      ]
+    },
+    {
+      "name": "hiddenMeshByLevel",
+      "itemValuesBefore": [
+        {"onlyWhen": {"level": [0, 0]}, "hiddenMesh": 1},
+        {"onlyWhen": {"level": [1, 1]}, "hiddenMesh": 0}
+      ]
+    },
+    {
+      "name": "hideMesh1",
+      "itemValuesBefore": [
+        {"hiddenMesh": 1}
+      ]
+    },
+    {
+      "name": "hideMesh2",
+      "itemValuesBefore": [
+        {"hiddenMesh": 2}
+      ]
+    },
+    {
+      "name": "potion",
+      "itemValuesBefore": [
+        {"onlyWhen": {"level": [1, 15]}, "glowsLikeLevel": 7}
+      ]
+    },
+    {
+      "name": "pulsingGlow",
+      "itemValuesBefore": [
+        {"glowMesh": {"eachItem": "glowMesh", "default": 1}, "glowStrength": {"eachItem": "glowStrength", "default": {"shape": "wave", "from": 0.4, "to": 1, "seconds": 1.5707963}}}
+      ]
+    },
+    {
+      "name": "redSpirit",
+      "itemValuesBefore": [
+        {"glowStrength": {"shape": "wave", "from": 0.2, "to": 1, "seconds": 6.283185}}
+      ]
+    },
+    {
+      "name": "scrollingDown",
+      "itemValuesBefore": [
+        {"scrollV": {"shape": "ramp", "from": 0, "to": -1, "seconds": 2}}
+      ]
+    },
+    {
+      "name": "shimmeringGlow",
+      "itemValuesBefore": [
+        {"glowMesh": {"eachItem": "glowMesh", "default": 1}, "scrollU": {"shape": "random", "from": 0, "to": 0.9, "step": 0.1}, "scrollV": {"shape": "random", "from": 0, "to": 0.9, "step": 0.1}}
+      ]
+    },
+    {
+      "name": "shimmeringPulse",
+      "itemValuesBefore": [
+        {"glowMesh": 1, "glowStrength": {"shape": "wave", "from": 0.4, "to": 1, "seconds": 1.5707963}, "scrollU": {"shape": "random", "from": 0, "to": 0.9, "step": 0.1}}
+      ]
+    },
+    {
+      "name": "staffOfKundun",
+      "itemValuesBefore": [
+        {"glowMesh": 2, "glowStrength": {"shape": "wave", "from": 0.4, "to": 1, "seconds": 1.5707963}}
+      ]
+    },
+    {
+      "name": "wingsOfDragon",
+      "itemValuesBefore": [
+        {"glowStrength": {"shape": "wave", "from": 0, "to": 0.5, "seconds": 6.283185}}
+      ]
+    },
+    {
+      "name": "wingsOfSoul",
+      "itemValuesBefore": [
+        {"glowStrength": {"shape": "wave", "from": 0.1, "to": 2.1, "seconds": 6.283185}}
+      ]
+    }
+  ]
+}

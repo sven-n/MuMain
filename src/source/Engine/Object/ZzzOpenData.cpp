@@ -472,6 +472,14 @@ static bool OpenItemModelData()
     return true;
 }
 
+// Opens a part model from its entry in Data/Items/Models/PartModels.json (design L28) into its slot, with its
+// textures; the code decides where it is drawn.
+static void OpenPartModel(int modelType)
+{
+    Data::Items::ModelLoader::OpenPartModel(modelType,
+                                            {Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+}
+
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
@@ -501,17 +509,18 @@ static void OpenItemEffectModels()
     gLoadData.AccessModel(MODEL_EVENT + 22, L"Data\\Item\\", L"obox02");
     gLoadData.AccessModel(MODEL_EVENT + 23, L"Data\\Item\\", L"blue01");
 
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Data\\Item\\", L"class15_armleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Data\\Item\\", L"class15_armright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Data\\Item\\", L"class15_bodyleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Data\\Item\\", L"class15_bodyright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Data\\Item\\", L"class15_bootleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Data\\Item\\", L"class15_bootright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Data\\Item\\", L"class15_head");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Data\\Item\\", L"class15_pantleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Data\\Item\\", L"class15_pantright");
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_HEAD);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT);
 
     g_CMonkSystem.LoadModelItem();
+    OpenPartModel(MODEL_ARMORINVEN_74);
 
     Models[MODEL_EVENT + 9].Meshs[1].NoneBlendMesh = true;
 }
@@ -541,14 +550,18 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
-// Loads the render styles that are data (Data/Effects/RenderStyles.json), before the item models are opened, which
-// check the names of their looks.
+// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// opened, which check the names of their looks.
 static void OpenRenderStyleData()
 {
     std::string errorMessage;
     if (!Data::Looks::LoadRenderStyles(errorMessage))
     {
         StopOnDataError("Render style data error", errorMessage);
+    }
+    if (!Data::Looks::LoadItemEffects(errorMessage))
+    {
+        StopOnDataError("Item effect data error", errorMessage);
     }
 }
 
@@ -592,16 +605,6 @@ static void OpenItemEffectModelTextures()
     gLoadData.OpenTexture(MODEL_EVENT + 21, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 22, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 23, L"Item\\");
-
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Item\\");
 
     g_CMonkSystem.LoadModelItemTexture();
 }
@@ -1194,8 +1197,7 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_WINDSPIN03, L"Data\\Effect\\", L"wind_spin03");
     gLoadData.OpenTexture(MODEL_WINDSPIN03, L"Effect\\");
 
-    gLoadData.AccessModel(MODEL_SWORD_35_WING, L"Data\\Item\\", L"sword36wing");
-    gLoadData.OpenTexture(MODEL_SWORD_35_WING, L"Item\\");
+    OpenPartModel(MODEL_SWORD_35_WING);
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // 콘드라 돌조각

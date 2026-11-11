@@ -611,7 +611,8 @@
         "shineColor": "orange",
         "excellentMeshWithoutSkin": 2
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [2]}
     },
     {
       "number": 40,
@@ -634,7 +635,8 @@
         "shineColor": "orange",
         "excellentMeshWithoutSkin": 1
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [1]}
     },
     {
       "number": 41,
@@ -657,7 +659,8 @@
         "shineColor": "orange",
         "excellentMeshWithoutSkin": 0
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [0]}
     },
     {
       "number": 42,
@@ -680,7 +683,8 @@
         "shineColor": "orange",
         "excellentMeshWithoutSkin": 2
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [2]}
     },
     {
       "number": 43,
@@ -703,7 +707,8 @@
         "shineColor": "blue",
         "excellentMeshWithoutSkin": 1
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [1]}
     },
     {
       "number": 44,
@@ -726,7 +731,8 @@
         "shineWhite": true,
         "excellentMeshWithoutSkin": 2
       },
-      "renderStyle": "violentWindToEternalWingHelm"
+      "renderStyle": "violentWindToEternalWingHelm",
+      "renderStyleValues": {"inventoryMesh": [2]}
     },
     {
       "number": 45,
@@ -979,7 +985,8 @@
         "rotation": [250, 180, 45],
         "bodyHeight": -160
       },
-      "renderStyle": "luckyItem"
+      "renderStyle": "luckyItem",
+      "renderStyleValues": {"inventoryMeshes": [2], "meshes": [2]}
     },
     {
       "number": 66,
@@ -1055,7 +1062,8 @@
         "rotation": [250, 180, 45],
         "bodyHeight": -160
       },
-      "renderStyle": "luckyItem"
+      "renderStyle": "luckyItem",
+      "renderStyleValues": {"inventoryMeshes": [1], "meshes": [1]}
     },
     {
       "number": 72,

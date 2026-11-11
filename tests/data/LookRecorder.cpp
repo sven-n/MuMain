@@ -4,6 +4,7 @@
 
 #include "TestModelSlots.h"
 
+#include "Core/Globals/_enum.h"
 #include "Core/Utilities/Random.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
@@ -11,9 +12,12 @@
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Data/GameData/LookData/LookStore.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Items/LookDrawing.h"
 #include "Render/Drawing/DrawCallLog.h"
 #include "Render/Models/ModelDraw.h"
@@ -34,6 +38,7 @@
 #include <iterator>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -73,6 +78,14 @@ std::vector<Field> FieldsOf(const MeshDraw& draw)
     // BMD::DrawMesh reads the texture bit only for a pass without a reflection, and the light map bit only for one
     // with a reflection.
     flags &= (flags & ReflectionFlags) != 0 ? ~RENDER_TEXTURE : ~RENDER_LIGHTMAP;
+    // Nor for a pass on its glow mesh (ResolveMaterial draws it so before it reads the bit): such a pass counts as one
+    // with the bit.
+    const bool onGlowMesh = (flags & (ReflectionFlags | RENDER_COLOR)) == 0 && draw.model != nullptr &&
+                            (draw.blendMesh <= -2 || draw.model->Meshs[draw.mesh].Texture == draw.blendMesh);
+    if (onGlowMesh)
+    {
+        flags |= RENDER_TEXTURE;
+    }
     return {
         {"mesh", std::to_string(draw.mesh)},
         {"flags", Hex(static_cast<unsigned>(flags))},
@@ -238,6 +251,22 @@ std::string Situation::Describe() const
     {
         text += ", excellent";
     }
+    if (infinityArrow)
+    {
+        text += ", infinity arrow";
+    }
+    if (turn != 0.f)
+    {
+        text += ", turned " + Number(turn, 3);
+    }
+    if (light != 1.f)
+    {
+        text += ", lit " + Number(light, 3);
+    }
+    if (inInventory)
+    {
+        text += ", in the inventory";
+    }
     return text;
 }
 
@@ -279,6 +308,88 @@ std::vector<Situation> Situations()
     return situations;
 }
 
+std::vector<Situation> SituationsFor(std::string_view renderStyle, Data::Looks::LookKind kind)
+{
+    std::vector<Situation> situations = Situations();
+    const Data::Looks::LookDefinition* look = Data::Looks::g_LookStore.Find(kind, renderStyle);
+    if (look == nullptr)
+    {
+        return situations;
+    }
+    // The conditions of the layers and of the item values before the drawing.
+    std::vector<Data::Looks::OnlyWhen> conditions;
+    for (const Data::Looks::Layer& layer : look->layers)
+    {
+        conditions.push_back(layer.onlyWhen);
+    }
+    for (const Data::Looks::ItemValuesBefore& entry : look->itemValuesBefore)
+    {
+        conditions.push_back(entry.onlyWhen);
+    }
+    const auto any = [&conditions](auto&& condition) { return std::ranges::any_of(conditions, condition); };
+    const Situation plain = situations.front();
+    if (any([](const Data::Looks::OnlyWhen& when) { return when.buff || when.withoutBuff; }))
+    {
+        Situation buffed = plain;
+        buffed.infinityArrow = true;
+        situations.push_back(buffed);
+        buffed.level = 9;
+        situations.push_back(buffed);
+    }
+    // A value of the turning angle: the item also turned a sixth and two thirds round.
+    const auto turns = [](const Data::Looks::Value& value)
+    {
+        const auto* shape = std::get_if<Data::Looks::Shape>(&value);
+        return shape != nullptr && shape->kind == Data::Looks::ShapeKind::Turn;
+    };
+    if (std::ranges::any_of(look->layers,
+                            [&turns](const Data::Looks::Layer& layer)
+                            {
+                                return turns(layer.opacity) || turns(layer.glowStrength) || turns(layer.scrollU) ||
+                                       turns(layer.scrollV);
+                            }))
+    {
+        for (const float turn : {60.f, 240.f})
+        {
+            Situation turned = plain;
+            turned.turn = turn;
+            situations.push_back(turned);
+        }
+    }
+    const bool inventoryOrGround =
+        any([](const Data::Looks::OnlyWhen& when)
+            { return when.place == Data::Looks::Place::Inventory || when.place == Data::Looks::Place::Ground; });
+    if (inventoryOrGround)
+    {
+        for (const int level : {0, 1, 3, 7})
+        {
+            Situation inventory = plain;
+            inventory.level = level;
+            inventory.hideSkin = true;
+            inventory.inInventory = true;
+            situations.push_back(inventory);
+        }
+    }
+    if (any([](const Data::Looks::OnlyWhen& when) { return when.level || when.hiddenMesh; }))
+    {
+        for (int level = 1; level <= 6; ++level)
+        {
+            Situation s = plain;
+            s.level = level;
+            situations.push_back(s);
+        }
+    }
+    if (inventoryOrGround)
+    {
+        // Only the inventory draws in white light.
+        for (Situation& situation : situations)
+        {
+            situation.light = situation.inInventory ? 1.f : 0.8f;
+        }
+    }
+    return situations;
+}
+
 struct ShippedItems::State
 {
     TestModelSlots slots;
@@ -294,11 +405,16 @@ ShippedItems::ShippedItems() : m_state(new State)
     Data::Effects::GlowColorList glowColors;
     glowColors.Build(colors.colors);
     g_ItemModelDatabase.Build(ShippedModels().models, glowColors);
+    g_ItemModelDatabase.SetPartModels(ShippedModels().partModels);
+    // The shines below +3 the glow of the models names.
+    g_Shines.Build(Data::Items::LoadShinesFile(Data::Items::GetShinesFile()).shines);
 }
 
 ShippedItems::~ShippedItems()
 {
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+    g_ItemModelDatabase.SetPartModels({});
+    g_Shines.Build({});
     Data::Items::ModelLoader::TakeProblemMessage();
     Render::Sprites::SetGpuUploadsSkipped(false);
     std::filesystem::current_path(m_state->previousDirectory);
@@ -317,11 +433,35 @@ struct BasicTexture
 constexpr BasicTexture BasicTextures[] = {
     {L"Effect\\Chrome01.jpg", BITMAP_CHROME, GL_REPEAT},
     {L"Effect\\bab2.jpg", BITMAP_CHROME + 1, GL_REPEAT},
+    {L"Effect\\Chrome06.jpg", BITMAP_CHROME6, GL_CLAMP_TO_EDGE},
+    {L"Effect\\Chrome07.jpg", BITMAP_CHROME7, GL_CLAMP_TO_EDGE},
+    {L"Effect\\energy01.jpg", BITMAP_CHROME_ENERGY, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale40.tga", BITMAP_INVEN_ARMOR, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale41.tga", BITMAP_INVEN_ARMOR + 1, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale42.tga", BITMAP_INVEN_ARMOR + 2, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale43.tga", BITMAP_INVEN_ARMOR + 3, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale44.tga", BITMAP_INVEN_ARMOR + 4, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenArmorMale45.tga", BITMAP_INVEN_ARMOR + 5, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale40.tga", BITMAP_INVEN_PANTS, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale41.tga", BITMAP_INVEN_PANTS + 1, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale42.tga", BITMAP_INVEN_PANTS + 2, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale43.tga", BITMAP_INVEN_PANTS + 3, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale44.tga", BITMAP_INVEN_PANTS + 4, GL_CLAMP_TO_EDGE},
+    {L"Player\\InvenPantsMale45.tga", BITMAP_INVEN_PANTS + 5, GL_CLAMP_TO_EDGE},
+    {L"Player\\Item312_Armoritem.tga", BITMAP_SKIN_ARMOR_DEVINE, GL_CLAMP_TO_EDGE},
+    {L"Player\\Item312_Pantitem.tga", BITMAP_SKIN_PANTS_DEVINE, GL_CLAMP_TO_EDGE},
+    {L"Player\\SkinClass706_upperitem.tga", BITMAP_SKIN_ARMOR_SUCCUBUS, GL_CLAMP_TO_EDGE},
+    {L"Player\\SkinClass706_loweritem.tga", BITMAP_SKIN_PANTS_SUCCUBUS, GL_CLAMP_TO_EDGE},
+    {L"Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_CLAMP_TO_EDGE},
+    {L"Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_CLAMP_TO_EDGE},
     {L"Effect\\Lava.jpg", BITMAP_LAVA, GL_CLAMP_TO_EDGE},
     {L"Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_CLAMP_TO_EDGE},
+    {L"Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_CLAMP_TO_EDGE},
     {L"Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_CLAMP_TO_EDGE},
@@ -348,7 +488,20 @@ constexpr BasicTexture BasicTextures[] = {
 
 void ShippedItems::Open(std::span<const int> itemTypes)
 {
-    Data::Items::ModelLoader::ReopenModels(itemTypes, {});
+    std::vector<int> items;
+    for (const int drawn : itemTypes)
+    {
+        if (drawn >= 0)
+        {
+            items.push_back(drawn);
+        }
+        else
+        {
+            Data::Items::ModelLoader::OpenPartModel(
+                PartModelDrawn(drawn), {Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+        }
+    }
+    Data::Items::ModelLoader::ReopenModels(items, {});
     // As the game loads them before the looks find theirs: the textures of OpenBasicData and the item effect textures
     // at their indices, which looks in code name; then the textures the looks in data name.
     static const bool effectTexturesLoaded = []
@@ -364,43 +517,67 @@ void ShippedItems::Open(std::span<const int> itemTypes)
     Render::Items::Looks::PrepareTextures();
 }
 
-std::vector<int> ItemsUsing(std::string_view renderStyle)
+std::vector<int> ItemsUsing(std::string_view renderStyle, Data::Looks::LookKind kind)
 {
     std::vector<int> items;
     for (const Data::Items::ItemModelDefinition& model : ShippedModels().models)
     {
-        if (model.renderStyle == renderStyle)
+        if ((kind == Data::Looks::LookKind::ItemEffect ? model.itemEffect : model.renderStyle) == renderStyle)
         {
             items.push_back(Data::Items::MakeItemType(model.group, model.number));
         }
     }
     std::ranges::sort(items);
+    if (kind == Data::Looks::LookKind::RenderStyle)
+    {
+        for (const Data::Items::PartModelSlot& slot : Data::Items::PartModelSlots)
+        {
+            const auto part = std::ranges::find_if(ShippedModels().partModels, [&](const Data::Items::PartModel& entry)
+                                                   { return entry.model.name == slot.name; });
+            if (part != ShippedModels().partModels.end() && part->renderStyle == renderStyle)
+            {
+                items.push_back(PartModelDrawn(slot.modelType));
+            }
+        }
+    }
     return items;
 }
 
 std::string DescribeItem(int itemType)
 {
+    if (itemType < 0)
+    {
+        return "(" + std::string(Data::Items::PartModelNameOf(PartModelDrawn(itemType)).value_or("?")) + ")";
+    }
     return "(" + std::to_string(itemType / MAX_ITEM_INDEX) + "," + std::to_string(itemType % MAX_ITEM_INDEX) + ")";
 }
 
 Record RecordItem(int itemType, const Situation& situation)
 {
-    const int slot = Data::Items::ToModelSlot(itemType);
+    const int slot = itemType >= 0 ? Data::Items::ToModelSlot(itemType) : PartModelDrawn(itemType);
     BMD& model = Models[slot];
     OBJECT& object = DrawnObject();
-    object.Initialize();
-    object.Type = slot;
-    ItemObjectAttribute(&object);
-    object.Alpha = situation.alpha;
-
-    // Each drawing starts from the scrolling mesh the model loads with: a look that leaves one would otherwise draw the
-    // next drawing differently.
-    model.StreamMesh = -1;
     // Random::DrawRand keys on the object's address, which changes from run to run: the object is keyed as a fixed
     // address, so the baseline holds the same random values in every run (and no draw frame starts in these tests).
     const Random::DrawnAs fixedKey(&object, FixedDrawKey());
     const double previousWorldTime = WorldTime;
     WorldTime = situation.worldTime;
+    // Set up at the pinned clock and key, as a held, worn or inventory item is for each drawing: its glow values
+    // (ItemObjectAttribute) read both.
+    object.Initialize();
+    object.Type = slot;
+    ItemObjectAttribute(&object);
+    object.Alpha = situation.alpha;
+    object.Angle[1] = situation.turn;
+    object.m_BuffMap.ClearBuff();
+    if (situation.infinityArrow)
+    {
+        object.m_BuffMap.RegisterBuff(eBuff_InfinityArrow);
+    }
+
+    // Each drawing starts from the scrolling mesh the model loads with: a look that leaves one would otherwise draw the
+    // next drawing differently.
+    model.StreamMesh = -1;
     model.Animation(BoneTransform, 0.f, 0.f, 0, object.Angle, object.HeadAngle, false, false);
 
     RecordingDrawer drawer;
@@ -409,7 +586,12 @@ Record RecordItem(int itemType, const Situation& situation)
     mu::SetRendererOverride(&log);
     Render::Drawing::ResetLegacyState();
     log.calls.clear();
-    const vec3_t light = {1.f, 1.f, 1.f};
+    const vec3_t light = {situation.light, situation.light, situation.light};
+    std::optional<Render::Items::Looks::InventoryDrawing> inventory;
+    if (situation.inInventory)
+    {
+        inventory.emplace();
+    }
     RenderPartObject(&object, slot, nullptr, light, situation.alpha, situation.level, situation.excellent ? 1 : 0, 0,
                      true, situation.hideSkin, false, 0, situation.renderType);
     log.NoteFinalState();
@@ -428,17 +610,18 @@ Record RecordItem(int itemType, const Situation& situation)
     return record;
 }
 
-Record RecordItemWithCode(int itemType, const Situation& situation, std::string_view renderStyle)
+Record RecordItemWithCode(int itemType, const Situation& situation, std::string_view renderStyle,
+                          Data::Looks::LookKind kind)
 {
     using Data::Looks::g_LookStore;
-    const std::vector<Data::Looks::LookDefinition> looks(g_LookStore.GetRenderStyles().begin(),
-                                                         g_LookStore.GetRenderStyles().end());
+    const std::vector<Data::Looks::LookDefinition> looks(g_LookStore.GetLooks(kind).begin(),
+                                                         g_LookStore.GetLooks(kind).end());
     std::vector<Data::Looks::LookDefinition> withoutStyle;
     std::ranges::copy_if(looks, std::back_inserter(withoutStyle),
                          [renderStyle](const Data::Looks::LookDefinition& look) { return look.name != renderStyle; });
-    g_LookStore.SetRenderStyles(std::move(withoutStyle));
+    g_LookStore.SetLooks(kind, std::move(withoutStyle));
     Record record = RecordItem(itemType, situation);
-    g_LookStore.SetRenderStyles(looks);
+    g_LookStore.SetLooks(kind, looks);
     return record;
 }
 

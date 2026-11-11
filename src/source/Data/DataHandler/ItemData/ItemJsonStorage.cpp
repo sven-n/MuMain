@@ -33,11 +33,10 @@ constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
     "Sword", "Axe",   "Mace",   "Spear", "Bow",  "Staff",  "Shield", "Helm",
     "Armor", "Pants", "Gloves", "Boots", "Wing", "Helper", "Potion", "Etc"};
 
-// The shared model file, whatever the case of its name: Windows does not
-// tell them apart, so "sharedModels.json" is the same file there.
-bool IsSharedItemModelsFile(std::string_view fileName)
+// Whether the file is the one of this name, whatever the case of its name: Windows does not tell them apart, so
+// "sharedModels.json" is the shared model file there.
+bool IsFileNamed(std::string_view fileName, std::string_view expected)
 {
-    const std::string_view expected = SharedItemModelsFileName;
     return std::equal(
         fileName.begin(), fileName.end(), expected.begin(), expected.end(), [](char left, char right)
         { return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right)); });
@@ -192,6 +191,10 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
     }
+    if (models.partModelsChanged)
+    {
+        files.push_back({models.directory / PartModelsFileName, WritePartModelsJson(models.partModels)});
+    }
     if (models.glowColorsChanged)
     {
         files.push_back(
@@ -206,9 +209,9 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
     }
-    if (models.renderStylesChanged)
+    for (const LookFileToSave& lookFile : models.lookFiles)
     {
-        files.push_back({models.renderStylesFile, models.renderStylesText});
+        files.push_back({lookFile.file, lookFile.text});
     }
     if (models.nameCasesChanged && models.nameCases != nullptr)
     {
@@ -250,9 +253,13 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     ReadJsonFiles(directory, "no item model files found", result.issues,
                   [&](std::string_view text, const std::string& source)
                   {
-                      if (IsSharedItemModelsFile(source))
+                      if (IsFileNamed(source, SharedItemModelsFileName))
                       {
                           ReadSharedItemModelsJson(text, source, result.sharedModels, result.issues);
+                      }
+                      else if (IsFileNamed(source, PartModelsFileName))
+                      {
+                          ReadPartModelsJson(text, source, result.partModels, result.issues);
                       }
                       else
                       {
@@ -468,6 +475,25 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetShinesFile()
+{
+    return std::filesystem::path(Effects::ShinesFile);
+}
+
+ShinesLoadResult LoadShinesFile(const std::filesystem::path& file)
+{
+    ShinesLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    Effects::ReadShinesJson(*text, source, result.shines, result.issues);
+    return result;
+}
+
 ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
                                          std::vector<ItemDataIssue>& issues)
 {
@@ -563,6 +589,22 @@ void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<Item
 }
 #endif
 
+namespace
+{
+// Whether a model file of the data is in the client folder.
+bool ModelFileExists(const std::string& file)
+{
+#ifdef _WIN32
+    const std::filesystem::path path = Core::Text::PathFromUtf8(file);
+#else
+    // The data does not always spell the files in the case they have on disk.
+    const std::filesystem::path path = MuResolvePath(file.c_str());
+#endif
+    std::error_code ignored;
+    return std::filesystem::is_regular_file(path, ignored);
+}
+} // namespace
+
 void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     for (const ItemModelDefinition& model : models)
@@ -571,18 +613,24 @@ void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, st
         {
             continue;
         }
-#ifdef _WIN32
-        const std::filesystem::path path = Core::Text::PathFromUtf8(model.file);
-#else
-        // The data does not always spell the files in the case they have on disk.
-        const std::filesystem::path path = MuResolvePath(model.file.c_str());
-#endif
-        std::error_code ignored;
-        if (!std::filesystem::is_regular_file(path, ignored))
+        if (!ModelFileExists(model.file))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, GetItemGroupFileName(model.group), model.group,
                               model.number, "file",
                               model.file + " is not in the client folder; the item is drawn without a model"});
+        }
+    }
+}
+
+void ValidatePartModelFilesExist(std::span<const PartModel> parts, std::vector<ItemDataIssue>& issues)
+{
+    for (const PartModel& part : parts)
+    {
+        if (!part.model.file.empty() && !ModelFileExists(part.model.file))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, PartModelsFileName, ItemDataIssue::NoItem,
+                              ItemDataIssue::NoItem, part.model.name + ".file",
+                              part.model.file + " is not in the client folder; the part model is not drawn"});
         }
     }
 }

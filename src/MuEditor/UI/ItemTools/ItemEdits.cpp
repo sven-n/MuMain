@@ -75,6 +75,17 @@ void RestoreSharedModel(const std::string& name, const std::optional<SharedItemM
     }
 }
 
+std::vector<Data::Items::PartModel> ReadPartModels()
+{
+    const std::span<const Data::Items::PartModel> parts = g_ItemModelDatabase.GetPartModels();
+    return {parts.begin(), parts.end()};
+}
+
+void RestorePartModels(const std::vector<Data::Items::PartModel>& parts)
+{
+    g_ItemDataHandler.SetPartModels(parts);
+}
+
 std::vector<Data::Effects::GlowColor> ReadGlowColors()
 {
     const std::span<const Data::Effects::GlowColor> colors = g_GlowColors.GetColors();
@@ -128,16 +139,16 @@ void RestoreColorFolders(std::string_view root, std::span<const Data::Colors::Co
     }
 }
 
-Data::Looks::RenderStylesFile ReadRenderStyles()
+Data::Looks::LookFile ReadLookFile(Data::Looks::LookKind kind)
 {
-    return g_ItemDataHandler.GetRenderStyles();
+    return g_ItemDataHandler.GetLookFile(kind);
 }
 
 // The game draws the looks at once, with the textures they name.
-void RestoreRenderStyles(const Data::Looks::RenderStylesFile& file)
+void RestoreLookFile(Data::Looks::LookKind kind, const Data::Looks::LookFile& file)
 {
-    g_ItemDataHandler.SetRenderStyles(file);
-    for (const Data::Looks::LookDefinition& look : g_ItemDataHandler.GetRenderStyles().looks)
+    g_ItemDataHandler.SetLookFile(kind, file);
+    for (const Data::Looks::LookDefinition& look : g_ItemDataHandler.GetLookFile(kind).looks)
     {
         Render::Items::Looks::PrepareTextures(look);
     }
@@ -174,18 +185,33 @@ ItemEdits& ItemEdits::GetInstance()
 }
 
 ItemEdits::ItemEdits()
-    : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
-                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
-                 &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
-                 &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
-                 &RestoreColorFolders, &ReadRenderStyles, &RestoreRenderStyles, [](int number) { return g_MonsterDataHandler.ReadMonster(number); },
+    : m_history({&ItemEdits::ReadSlot,
+                 &RestoreSlots,
+                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); },
+                 &ReadSharedModel,
+                 &RestoreSharedModel,
+                 &IsHeldByCharacter,
+                 &ReadGlowColors,
+                 &RestoreGlowColors,
+                 &ReadStatFile,
+                 &RestoreStatFile,
+                 &ReadGroundLabelStyles,
+                 &RestoreGroundLabelStyles,
+                 &ReadColorFolders,
+                 &RestoreColorFolders,
+                 &ReadLookFile,
+                 &RestoreLookFile,
+                 [](int number) { return g_MonsterDataHandler.ReadMonster(number); },
                  [](std::span<const Data::Monsters::MonsterSnapshot> snapshots)
                  { g_MonsterDataHandler.RestoreMonsters(snapshots); },
                  [](int id) { return g_MonsterDataHandler.ReadGroup(id); },
                  [](std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)
                  { g_MonsterDataHandler.RestoreGroups(snapshots); },
                  [this](const ItemEditStep& step, bool undoing) { NoteMonsterItems(step, undoing); },
-                 &ReadNameCases, &RestoreNameCases})
+                 &ReadNameCases,
+                 &RestoreNameCases,
+                 &ReadPartModels,
+                 &RestorePartModels})
 {
 }
 
@@ -585,19 +611,39 @@ void ItemEdits::SetColorFolders(std::string label, std::string_view root,
 
 void ItemEdits::SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file)
 {
+    SetLookFile(std::move(label), Data::Looks::LookKind::RenderStyle, std::move(file));
+}
+
+void ItemEdits::SetLookFile(std::string label, Data::Looks::LookKind kind, Data::Looks::LookFile file)
+{
     // Compared as the item data keeps the file, its looks sorted by name: a file as it is changes nothing, so it
     // neither marks the file for Save nor counts as a change of the looks.
     std::ranges::sort(file.looks, {}, &Data::Looks::LookDefinition::name);
-    auto before = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
+    auto before = std::make_shared<const Data::Looks::LookFile>(ReadLookFile(kind));
     if (*before == file)
     {
         return;
     }
-    RestoreRenderStyles(file);
-    auto after = std::make_shared<const Data::Looks::RenderStylesFile>(ReadRenderStyles());
+    RestoreLookFile(kind, file);
+    auto after = std::make_shared<const Data::Looks::LookFile>(ReadLookFile(kind));
     ItemEditStep step{ItemEditStep::Kind::RenderStyles};
+    step.lookKind = kind;
     step.renderStylesBefore = std::move(before);
     step.renderStylesAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+}
+
+void ItemEdits::SetPartModels(std::string label, std::vector<Data::Items::PartModel> parts)
+{
+    std::vector<Data::Items::PartModel> before = ReadPartModels();
+    if (parts == before)
+    {
+        return;
+    }
+    RestorePartModels(parts);
+    ItemEditStep step{ItemEditStep::Kind::PartModels};
+    step.partModelsBefore = std::move(before);
+    step.partModelsAfter = ReadPartModels();
     Record({std::move(label), {std::move(step)}});
 }
 
@@ -785,7 +831,8 @@ void ItemEdits::Record(ItemEditEntry entry)
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
                         step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
                         step.kind == ItemEditStep::Kind::GroundLabelStyles ||
-                        step.kind == ItemEditStep::Kind::RenderStyles ||
+                        (step.kind == ItemEditStep::Kind::RenderStyles && grouped.lookKind == step.lookKind) ||
+                        step.kind == ItemEditStep::Kind::PartModels ||
                         (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
@@ -811,6 +858,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::RenderStyles)
         {
             same->renderStylesAfter = std::move(step.renderStylesAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::PartModels)
+        {
+            same->partModelsAfter = std::move(step.partModelsAfter);
         }
         else
         {

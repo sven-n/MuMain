@@ -25,6 +25,7 @@ namespace Keys
 {
 using namespace Json::Keys;
 constexpr const char* Models = "models";
+constexpr const char* PartModels = "partModels";
 constexpr const char* Model = "model";
 constexpr const char* Name = "name";
 constexpr const char* File = "file";
@@ -33,6 +34,8 @@ constexpr const char* NoneBlendMeshes = "noneBlendMeshes";
 constexpr const char* MeshNames = "meshNames";
 constexpr const char* RenderStyle = "renderStyle";
 constexpr const char* ItemEffect = "itemEffect";
+constexpr const char* RenderStyleValues = "renderStyleValues";
+constexpr const char* ItemEffectValues = "itemEffectValues";
 } // namespace Keys
 
 // The fields of a model entry and of a shared model; others are warned about.
@@ -48,9 +51,13 @@ const std::set<std::string, std::less<>> ItemModelKeys{Keys::Number,
                                                        GlowJson::GlowKey,
                                                        MaterialJson::MaterialKey,
                                                        Keys::RenderStyle,
-                                                       Keys::ItemEffect};
+                                                       Keys::RenderStyleValues,
+                                                       Keys::ItemEffect,
+                                                       Keys::ItemEffectValues};
 const std::set<std::string, std::less<>> SharedModelKeys{Keys::Name, Keys::File, Keys::TextureFolders,
                                                          Keys::NoneBlendMeshes, Keys::MeshNames};
+const std::set<std::string, std::less<>> PartModelKeys{
+    Keys::Name, Keys::File, Keys::TextureFolders, Keys::NoneBlendMeshes, Keys::MeshNames, Keys::RenderStyle};
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 using Data::Paths::FindPathProblem;
@@ -102,10 +109,25 @@ OrderedJson WriteModel(const ItemModelDefinition& model)
     {
         json[Keys::RenderStyle] = model.renderStyle;
     }
+    const auto putValues = [&json](const char* key, const std::map<std::string, std::string>& values)
+    {
+        if (values.empty())
+        {
+            return;
+        }
+        OrderedJson written = OrderedJson::object();
+        for (const auto& [name, value] : values)
+        {
+            written[name] = OrderedJson::parse(value, nullptr, false);
+        }
+        json[key] = std::move(written);
+    };
+    putValues(Keys::RenderStyleValues, model.renderStyleValues);
     if (!model.itemEffect.empty())
     {
         json[Keys::ItemEffect] = model.itemEffect;
     }
+    putValues(Keys::ItemEffectValues, model.itemEffectValues);
     return json;
 }
 
@@ -120,6 +142,8 @@ std::string DumpModelFile(const OrderedJson& root)
         text = Json::PutListsOnOneLine(text, key);
     }
     text = Json::PutObjectsOnOneLine(text, Keys::MeshNames);
+    text = Json::PutObjectsOnOneLine(text, Keys::RenderStyleValues);
+    text = Json::PutObjectsOnOneLine(text, Keys::ItemEffectValues);
     return text + "\n";
 }
 
@@ -138,8 +162,12 @@ public:
     // `index`: the position in the list, which names the entry until its
     // name is read.
     bool ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model);
+    // A part model: a shared model's fields and a render style.
+    bool ReadPart(const OrderedJson& json, size_t index, PartModel& part);
 
 private:
+    bool ReadNamedModel(const OrderedJson& json, const std::string& position, SharedItemModel& model,
+                        const std::set<std::string, std::less<>>& knownKeys);
     void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
     void AddFatal(const std::string& field, const std::string& message)
     {
@@ -150,6 +178,7 @@ private:
     void ReadNoneBlendMeshes(const OrderedJson& json, std::vector<int>& meshes);
     void ReadMeshNames(const OrderedJson& json, std::map<int, std::string>& names);
     void ReadLookName(const OrderedJson& json, const char* key, std::string& name);
+    void ReadLookValues(const OrderedJson& json, const char* key, std::map<std::string, std::string>& values);
     void WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys);
 
     const std::string& m_source;
@@ -307,6 +336,32 @@ void ItemModelReader::ReadLookName(const OrderedJson& json, const char* key, std
     name = field->get<std::string>();
 }
 
+// The values an item sets for its look (design L12): names of letters and digits, each with a value the look reads
+// when the item is drawn (and Data Checks checks there).
+void ItemModelReader::ReadLookValues(const OrderedJson& json, const char* key,
+                                     std::map<std::string, std::string>& values)
+{
+    const auto field = json.find(key);
+    if (field == json.end())
+    {
+        return;
+    }
+    if (!field->is_object())
+    {
+        AddFatal(key, "must be an object of the look's value names and the item's values, e.g. {\"color\": [1, 0, 0]}");
+        return;
+    }
+    for (const auto& [name, value] : field->items())
+    {
+        if (!Json::IsName(name))
+        {
+            AddFatal(std::string(key) + "." + name, "must be the name of a value of letters and digits");
+            continue;
+        }
+        values[name] = value.dump();
+    }
+}
+
 void ItemModelReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys)
 {
     Json::WarnAboutUnknownKeys(json, knownKeys, "", [this](const std::string& field, const std::string& message)
@@ -357,17 +412,35 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     GlowJson::Read(json, model, report);
     MaterialJson::Read(json, model, report);
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
+    ReadLookValues(json, Keys::RenderStyleValues, model.renderStyleValues);
     ReadLookName(json, Keys::ItemEffect, model.itemEffect);
+    ReadLookValues(json, Keys::ItemEffectValues, model.itemEffectValues);
     WarnAboutUnknownKeys(json, ItemModelKeys);
     return !m_hasFatal;
 }
 
 bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model)
 {
-    const std::string position = std::string(Keys::Models) + "[" + std::to_string(index) + "]";
+    return ReadNamedModel(json, std::string(Keys::Models) + "[" + std::to_string(index) + "]", model, SharedModelKeys);
+}
+
+bool ItemModelReader::ReadPart(const OrderedJson& json, size_t index, PartModel& part)
+{
+    if (!ReadNamedModel(json, std::string(Keys::PartModels) + "[" + std::to_string(index) + "]", part.model,
+                        PartModelKeys))
+    {
+        return false;
+    }
+    ReadLookName(json, Keys::RenderStyle, part.renderStyle);
+    return !m_hasFatal;
+}
+
+bool ItemModelReader::ReadNamedModel(const OrderedJson& json, const std::string& position, SharedItemModel& model,
+                                     const std::set<std::string, std::less<>>& knownKeys)
+{
     if (!json.is_object())
     {
-        AddFatal(position, "a shared model must be an object");
+        AddFatal(position, "must be an object");
         return false;
     }
 
@@ -386,7 +459,7 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedIt
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
     ReadMeshNames(json, model.meshNames);
-    WarnAboutUnknownKeys(json, SharedModelKeys);
+    WarnAboutUnknownKeys(json, knownKeys);
     return !m_hasFatal;
 }
 
@@ -496,6 +569,67 @@ std::string WriteSharedItemModelsJson(std::span<const SharedItemModel> models)
         json[Keys::Name] = model->name;
         WriteModelFile(model->file, model->textureFolders, model->noneBlendMeshes, model->meshNames, json);
         root[Keys::Models].push_back(std::move(json));
+    }
+    return DumpModelFile(root);
+}
+
+void ReadPartModelsJson(std::string_view text, const std::string& source, std::vector<PartModel>& parts,
+                        std::vector<ItemDataIssue>& issues)
+{
+    OrderedJson root;
+    if (!Json::ReadFileVersion(text, source, ItemModelJsonFormatVersion, root, issues))
+    {
+        return;
+    }
+    const auto list = root.find(Keys::PartModels);
+    if (list == root.end() || !list->is_array())
+    {
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::PartModels, "missing or not a list");
+        return;
+    }
+    std::set<std::string, std::less<>> names;
+    for (size_t index = 0; index < list->size(); ++index)
+    {
+        PartModel part;
+        ItemModelReader reader(source, ItemDataIssue::NoItem, issues);
+        if (!reader.ReadPart((*list)[index], index, part))
+        {
+            continue;
+        }
+        if (!names.insert(part.model.name).second)
+        {
+            Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, part.model.name + "." + Keys::Name,
+                               "is in the list more than once");
+            continue;
+        }
+        parts.push_back(std::move(part));
+    }
+}
+
+std::string WritePartModelsJson(std::span<const PartModel> parts)
+{
+    std::vector<const PartModel*> sorted;
+    for (const PartModel& part : parts)
+    {
+        sorted.push_back(&part);
+    }
+    std::sort(sorted.begin(), sorted.end(),
+              [](const PartModel* left, const PartModel* right) { return left->model.name < right->model.name; });
+
+    OrderedJson root;
+    root[Keys::FormatVersion] = ItemModelJsonFormatVersion;
+    root[Keys::PartModels] = OrderedJson::array();
+    for (const PartModel* part : sorted)
+    {
+        OrderedJson json;
+        json[Keys::Name] = part->model.name;
+        WriteModelFile(part->model.file, part->model.textureFolders, part->model.noneBlendMeshes, part->model.meshNames,
+                       json);
+        if (!part->renderStyle.empty())
+        {
+            json[Keys::RenderStyle] = part->renderStyle;
+        }
+        root[Keys::PartModels].push_back(std::move(json));
     }
     return DumpModelFile(root);
 }

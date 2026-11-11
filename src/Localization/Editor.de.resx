@@ -607,6 +607,9 @@
   <data name="A look name of letters and digits that no other render style has" xml:space="preserve">
     <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Darstellungsstil hat, weder in der Datei noch im Code.</value>
   </data>
+  <data name="A look name of letters and digits that no other item effect has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Item-Effekt hat</value>
+  </data>
   <data name="Only a look no item uses can be renamed or removed." xml:space="preserve">
     <value>Nur ein Look, den kein Gegenstand nutzt, kann umbenannt oder entfernt werden.</value>
   </data>
@@ -614,7 +617,7 @@
     <value>Noch Zeichencode (Render/Items/ItemRenderStyles.cpp): Du siehst den Look und seine Gegenstände hier, kannst ihn aber nicht ändern. Er kommt in einem späteren Schritt in die Look-Datei.</value>
   </data>
   <data name="Item effects root note" xml:space="preserve">
-    <value>Gegenstandseffekte wirken, bevor ein Gegenstand gezeichnet wird. Sie sind alle noch Zeichencode (Render/Items/ItemEffects.cpp): Du siehst jeden und seine Gegenstände hier, kannst sie aber nicht ändern.</value>
+    <value>Die Item-Effekte von {0} und die noch als Zeichencode vorhandenen, markiert mit (Code). Ein Item-Effekt setzt Item-Werte, bevor das Item gezeichnet wird, und kann ein Licht auf das Objekt des Items legen.</value>
   </data>
   <data name="Render styles root note" xml:space="preserve">
     <value>Die Darstellungsstile aus {0} und die, die noch Zeichencode sind, markiert mit (Code).</value>
@@ -649,6 +652,18 @@
   <data name="Layer motion tooltip" xml:space="preserve">
     <value>Wie die Spiegelung über die Teile wandert: treibend, wischend, wirbelnd, in Streifen oder still.</value>
   </data>
+  <data name="Where" xml:space="preserve">
+    <value>Wo</value>
+  </data>
+  <data name="Over the texture" xml:space="preserve">
+    <value>Über der Textur</value>
+  </data>
+  <data name="Under the holes" xml:space="preserve">
+    <value>Unter den Löchern</value>
+  </data>
+  <data name="Layer where tooltip" xml:space="preserve">
+    <value>Wo die Spiegelung liegt: über der Textur, oder unter einer Textur mit Löchern, vor ihr gezeichnet, deckend und auf beiden Seiten, so dass sie die Löcher füllt und die Textur den Rest deckt (die Sets des Magic Gladiator). Auf einem Teil ohne Löcher, einem leuchtenden und einem durchsichtigen Gegenstand liegt sie mit ihrer Überblendung über der Textur.</value>
+  </data>
   <data name="Layer blend tooltip" xml:space="preserve">
     <value>Wie sich die Ebene mit dem mischt, was vor ihr gezeichnet wurde.</value>
   </data>
@@ -662,7 +677,7 @@
     <value>Überblendet, wie die Zeichnung des Gegenstands es wählt, wie seine eigene Textur.</value>
   </data>
   <data name="Layer meshes tooltip" xml:space="preserve">
-    <value>Auf welchen Teilen des Modells die Ebene zeichnet: auf jedem Teil, nur auf den angehakten oder auf jedem außer den angehakten.</value>
+    <value>Auf welchen Teilen des Modells die Ebene zeichnet: auf jedem Teil, nur auf den angehakten, auf jedem außer den angehakten oder auf keinem (eine Ebene, der die Werte mancher Gegenstände Teile geben).</value>
   </data>
   <data name="Layer hidden mesh tooltip" xml:space="preserve">
     <value>Zeichnet auch auf dem Teil, den der Gegenstand verbirgt und den seine eigene Zeichnung auslässt.</value>
@@ -684,6 +699,9 @@
   </data>
   <data name="Layer light tooltip" xml:space="preserve">
     <value>Die Farbe, in der die Ebene gezeichnet wird: das Licht davor (wie der Gegenstand beleuchtet ist), eine eigene Farbe oder eine Tönung des Lichts des Gegenstands.</value>
+  </data>
+  <data name="Left light tooltip" xml:space="preserve">
+    <value>Das Licht des Modells nach dem Look, für das, was danach gezeichnet wird, etwa das Stufenleuchten: eine eigene Farbe oder eine Tönung des Lichts des Gegenstands.</value>
   </data>
   <data name="Color" xml:space="preserve">
     <value>Farbe</value>
@@ -738,6 +756,18 @@
   </data>
   <data name="Ramp tooltip" xml:space="preserve">
     <value>Steigt in Sekunden von Von bis Bis und beginnt dann von vorn.</value>
+  </data>
+  <data name="Zigzag" xml:space="preserve">
+    <value>Zickzack</value>
+  </data>
+  <data name="Zigzag tooltip" xml:space="preserve">
+    <value>Steigt in Sekunden von Von bis Bis und geht in derselben Zeit gerade wieder hinunter.</value>
+  </data>
+  <data name="Turning angle" xml:space="preserve">
+    <value>Drehwinkel</value>
+  </data>
+  <data name="Turning angle tooltip" xml:space="preserve">
+    <value>Folgt, wie weit sich der Gegenstand gedreht hat: Von ohne Drehung, Bis bei einer Vierteldrehung, wieder Von bei einer halben Drehung und über die andere Hälfte. Die Kurve zeigt keine Zeit.</value>
   </data>
   <data name="Frames tooltip" xml:space="preserve">
     <value>Springt alle Sekunden je Bild um Schritt weiter, Anzahl Mal, und beginnt dann von vorn: eine Textur aus Bildern.</value>
@@ -802,6 +832,9 @@
   <data name="Reflection" xml:space="preserve">
     <value>Spiegelung</value>
   </data>
+  <data name="Flat color" xml:space="preserve">
+    <value>Flache Farbe</value>
+  </data>
   <data name="Motion" xml:space="preserve">
     <value>Bewegung</value>
   </data>
@@ -841,6 +874,9 @@
   <data name="Every mesh" xml:space="preserve">
     <value>Jedes Mesh</value>
   </data>
+  <data name="No mesh" xml:space="preserve">
+    <value>Kein Mesh</value>
+  </data>
   <data name="These meshes" xml:space="preserve">
     <value>Diese Meshes</value>
   </data>
@@ -867,6 +903,15 @@
   </data>
   <data name="Tint of the item light" xml:space="preserve">
     <value>Eine Tönung des Gegenstandslichts</value>
+  </data>
+  <data name="The item light at a brightness" xml:space="preserve">
+    <value>Das Gegenstandslicht in einer Helligkeit</value>
+  </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>Helligkeit</value>
+  </data>
+  <data name="Light brightness tooltip" xml:space="preserve">
+    <value>Das Licht des Gegenstands wird so skaliert, dass sein hellster Kanal diesen Wert hat: 1 ist voll, 0 schwarz. Ein schwarzes Licht wird zu einem Grau davon.</value>
   </data>
   <data name="Red" xml:space="preserve">
     <value>Rot</value>
@@ -900,6 +945,126 @@
   </data>
   <data name="Kept from the model" xml:space="preserve">
     <value>Die des Modells</value>
+  </data>
+  <data name="Only when" xml:space="preserve">
+    <value>Nur wenn</value>
+  </data>
+  <data name="Only when tooltip" xml:space="preserve">
+    <value>Wann diese Ebene zeichnet: jede gesetzte Bedingung muss gelten, sonst wird die Ebene übersprungen. Nichts gesetzt: immer.</value>
+  </data>
+  <data name="Place" xml:space="preserve">
+    <value>Ort</value>
+  </data>
+  <data name="Place tooltip" xml:space="preserve">
+    <value>Wo das Item gezeichnet wird: getragen oder gehalten (mit der Haut der Figur), im Inventar oder am Boden (Haut verborgen), oder nur an einem der beiden.</value>
+  </data>
+  <data name="Anywhere" xml:space="preserve">
+    <value>Überall</value>
+  </data>
+  <data name="Worn" xml:space="preserve">
+    <value>Getragen</value>
+  </data>
+  <data name="In the inventory or on the ground" xml:space="preserve">
+    <value>Im Inventar oder am Boden</value>
+  </data>
+  <data name="Level from" xml:space="preserve">
+    <value>Stufe von</value>
+  </data>
+  <data name="Level from tooltip" xml:space="preserve">
+    <value>Nur auf diesen Stufen: die Stufe, wie die das Item leuchtet, von und bis, beide eingeschlossen.</value>
+  </data>
+  <data name="Only when hidden mesh tooltip" xml:space="preserve">
+    <value>Nur wenn das Item in dieser Zeichnung dieses Mesh verbirgt (sein verborgenes Mesh, das Item-Effekte setzen können) oder keines.</value>
+  </data>
+  <data name="No hidden mesh" xml:space="preserve">
+    <value>Kein verborgenes Mesh</value>
+  </data>
+  <data name="Buff" xml:space="preserve">
+    <value>Buff</value>
+  </data>
+  <data name="Buff tooltip" xml:space="preserve">
+    <value>Nur wenn die Figur diesen Buff hat.</value>
+  </data>
+  <data name="Without buff" xml:space="preserve">
+    <value>Ohne Buff</value>
+  </data>
+  <data name="Without buff tooltip" xml:space="preserve">
+    <value>Nur wenn die Figur diesen Buff nicht hat.</value>
+  </data>
+  <data name="Infinity Arrow" xml:space="preserve">
+    <value>Infinity Arrow</value>
+  </data>
+  <data name="Times the item value" xml:space="preserve">
+    <value>Mal den Wert des Items</value>
+  </data>
+  <data name="Times the item value tooltip" xml:space="preserve">
+    <value>Der eigene Wert des Items mal der Form, wie die Phoenix-Soul-Items ihre Deckkraft und Leuchtstärke pulsieren lassen. Aus: die Form allein.</value>
+  </data>
+  <data name="Not for doppelgangers" xml:space="preserve">
+    <value>Nicht für Doppelgänger</value>
+  </data>
+  <data name="Not for doppelgangers tooltip" xml:space="preserve">
+    <value>Ein Item eines Doppelgängers wird schlicht gezeichnet, wie ein Item ohne Look.</value>
+  </data>
+  <data name="Only in monster hands" xml:space="preserve">
+    <value>Nur in Monsterhänden</value>
+  </data>
+  <data name="Only in monster hands tooltip" xml:space="preserve">
+    <value>Jede Zeichnung außer in Monsterhänden zeichnet das Item schlicht; die Ebenen, die wie die Zeichnung zeichnen, zeichnen dann ohne die Monster-Markierung.</value>
+  </data>
+  <data name="Draws alone" xml:space="preserve">
+    <value>Zeichnet allein</value>
+  </data>
+  <data name="Draws alone tooltip" xml:space="preserve">
+    <value>Direkt nach dem Item-Effekt des Items gezeichnet, im eigenen Licht des Objekts, ohne alles, was der Zeichencode danach tut: kein Stufenlicht ab +3, kein Stufenleuchten ab +7, kein Exzellent-Leuchten, keine Buff-Tönung.</value>
+  </data>
+  <data name="Before drawing" xml:space="preserve">
+    <value>Vor dem Zeichnen</value>
+  </data>
+  <data name="Before drawing note" xml:space="preserve">
+    <value>Jeder Eintrag, dessen Nur-wenn gilt, setzt seine Item-Werte, bevor das Item gezeichnet wird, in dieser Reihenfolge: eine Bedingung kann die Stufe lesen, die ein Eintrag darüber gesetzt hat.</value>
+  </data>
+  <data name="Object light" xml:space="preserve">
+    <value>Objektlicht</value>
+  </data>
+  <data name="Object light tooltip" xml:space="preserve">
+    <value>Das Licht, das das Update auf das Objekt des Items legt, Rot, Grün und Blau, jeweils eine Zahl oder Form; die nächste Zeichnung eines Items am Boden addiert es zu seinem Licht (das Pulsieren des Devil's Eye).</value>
+  </data>
+  <data name="Drawing opacity" xml:space="preserve">
+    <value>Deckkraft der Zeichnung</value>
+  </data>
+  <data name="Drawing opacity tooltip" xml:space="preserve">
+    <value>Die Deckkraft, die die Zeichnung dem Look übergibt und die die Deckkraft "Zeichnung" einer Ebene liest: das Devil's Eye zeichnet mit 2.</value>
+  </data>
+  <data name="Glows like level" xml:space="preserve">
+    <value>Leuchtet wie Stufe</value>
+  </data>
+  <data name="Glows like level tooltip" xml:space="preserve">
+    <value>Die Stufe, wie die das Item ab diesem Eintrag leuchtet; auch die Stufenbedingungen der Looks lesen sie: Tränke über +0 leuchten wie +7.</value>
+  </data>
+  <data name="Each item sets" xml:space="preserve">
+    <value>Jedes Item setzt</value>
+  </data>
+  <data name="Each item sets tooltip" xml:space="preserve">
+    <value>Felder, die jedes Item, das den Look nutzt, unter einem Wertnamen in seinem Modelleintrag selbst setzen kann (Werte für dieses Item im Fenster Item-Modell). Der Wert des Feldes hier ist die Vorgabe für Items, die keinen setzen.</value>
+  </data>
+  <data name="Value name" xml:space="preserve">
+    <value>Wertname</value>
+  </data>
+  <data name="Value name tooltip" xml:space="preserve">
+    <value>Der Name, unter dem Items diesen Wert setzen, aus Buchstaben und Ziffern; mehrere Felder können sich einen teilen.</value>
+  </data>
+  <data name="Values for this item" xml:space="preserve">
+    <value>Werte für dieses Item</value>
+  </data>
+  <data name="Values for this item tooltip" xml:space="preserve">
+    <value>Die Werte, die dieses Item für seinen Look setzt, geschrieben wie in der Modelldatei, z. B. [0.9, 0.1, 0.2] oder 2; null lässt das Feld des Looks weg. Leer: die Vorgabe des Looks.</value>
+  </data>
+  <data name="The look default" xml:space="preserve">
+    <value>Vorgabe des Looks</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Zurücksetzen</value>
   </data>
   <data name="From the item" xml:space="preserve">
     <value>Die des Gegenstands</value>
@@ -1861,6 +2026,12 @@
   <data name="Glow meshes" xml:space="preserve">
     <value>Leucht-Meshes</value>
   </data>
+  <data name="Glow again in white on mesh" xml:space="preserve">
+    <value>Erneut weiß leuchten auf Mesh</value>
+  </data>
+  <data name="Glow again in white tooltip" xml:space="preserve">
+    <value>Das Leuchten ab +7 zeichnet dieses Mesh nach den anderen noch einmal in weißem Licht, und was danach gezeichnet wird, leuchtet auf diesem Mesh (der Deadly Staff).</value>
+  </data>
   <data name="All meshes but this one" xml:space="preserve">
     <value>Alle Meshes außer diesem</value>
   </data>
@@ -1872,6 +2043,12 @@
   </data>
   <data name="Shine meshes" xml:space="preserve">
     <value>Schimmer-Meshes</value>
+  </data>
+  <data name="Shine below +3" xml:space="preserve">
+    <value>Glanz unter +3</value>
+  </data>
+  <data name="Shine below +3 tooltip" xml:space="preserve">
+    <value>Wie das Item bei +0 bis +2 glänzt: ein Glanz aus der Glanzliste (Data/Effects/Shines.json), nach dem Item in seiner Glanzfarbe auf seinen Glanz-Meshes gezeichnet. Keiner: unter +3 wird das Item schlicht gezeichnet.</value>
   </data>
   <data name="Ancient color" xml:space="preserve">
     <value>Ancient-Farbe</value>
@@ -3180,6 +3357,12 @@
   </data>
   <data name="Part models" xml:space="preserve">
     <value>Teilmodelle</value>
+  </data>
+  <data name="Part model note" xml:space="preserve">
+    <value>Ein Teilmodell: wird mit Items gezeichnet, dort, wo der Spielcode es hinsetzt (die Verzierungen der +15-Rüstungen, der Flügel des Phoenix Soul Star, die Phoenix-Soul-Rüstung im Inventar). Sein Eintrag in Data/Items/Models/PartModels.json enthält Datei, Texturordner und Darstellungsstil; es hat kein Inventar, keinen Boden, kein Leuchten und keinen Item-Effekt. Wähle ein Item, um wieder Items zu sehen.</value>
+  </data>
+  <data name="The part model {0} has no entry" xml:space="preserve">
+    <value>Das Teilmodell {0} hat keinen Eintrag in PartModels.json.</value>
   </data>
   <data name="Play animation" xml:space="preserve">
     <value>Abspielen</value>

@@ -50,6 +50,8 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+# The shipped looks, which the item looks that are data draw with (ShippedLooksScope.h).
+target_compile_definitions(test_character_effects_phase PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
 
 # The draw guard on the gameplay random sequences: no control socket code, so it builds and runs without the socket.
 mu_add_test(
@@ -60,6 +62,7 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+target_compile_definitions(test_draw_random_guard PRIVATE MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data")
 
 mu_add_test(
     NAME test_repeated_draws

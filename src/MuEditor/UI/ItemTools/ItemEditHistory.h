@@ -9,6 +9,7 @@
 #include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 #include "Data/GameData/LookData/LookJson.h"
 
@@ -60,7 +61,7 @@ struct ItemEditStep
         // The folders of the Colors window's root `folderRoot` (ItemEdits::GlowFolders, ...) went from
         // `foldersBefore` to `foldersAfter`.
         ColorFolders,
-        // The render style file (its looks and folders, design L39) went from `renderStylesBefore` to
+        // The look file of `lookKind` (its looks and folders, design L39) went from `renderStylesBefore` to
         // `renderStylesAfter`.
         RenderStyles,
         // The monsters that wear a moved item went from `monstersBefore` to `monstersAfter`, and the monsters with
@@ -69,6 +70,8 @@ struct ItemEditStep
         MonsterItems,
         // The cases the languages decline item names in went from `casesBefore` to `casesAfter`.
         NameCases,
+        // The part models went from `partModelsBefore` to `partModelsAfter` (design L50).
+        PartModels,
     };
 
     Kind kind = Kind::Slot;
@@ -97,6 +100,9 @@ struct ItemEditStep
     std::vector<Data::Monsters::MonsterGroupSnapshot> monsterGroupsAfter;
     Data::Items::ItemNameCases casesBefore;
     Data::Items::ItemNameCases casesAfter;
+    Data::Looks::LookKind lookKind = Data::Looks::LookKind::RenderStyle;
+    std::vector<Data::Items::PartModel> partModelsBefore;
+    std::vector<Data::Items::PartModel> partModelsAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -150,9 +156,9 @@ public:
         std::function<std::vector<Data::Colors::ColorFolder>(std::string_view root)> readColorFolders;
         std::function<void(std::string_view root, std::span<const Data::Colors::ColorFolder> folders)>
             restoreColorFolders;
-        // The render style file, and putting one back (the game draws its looks). Optional.
-        std::function<Data::Looks::RenderStylesFile()> readRenderStyles;
-        std::function<void(const Data::Looks::RenderStylesFile& file)> restoreRenderStyles;
+        // A look file, and putting one back (the game draws its looks). Optional.
+        std::function<Data::Looks::LookFile(Data::Looks::LookKind kind)> readRenderStyles;
+        std::function<void(Data::Looks::LookKind kind, const Data::Looks::LookFile& file)> restoreRenderStyles;
         // The monster table's entries and monsters with several numbers, and putting them back (a move that
         // updated the monsters that wear the item). Optional; without them no step names monsters.
         std::function<std::optional<Data::Monsters::MonsterDefinition>(int number)> readMonster;
@@ -164,6 +170,9 @@ public:
         // The name cases, and putting them back. Optional.
         std::function<Data::Items::ItemNameCases()> readNameCases;
         std::function<void(const Data::Items::ItemNameCases& cases)> restoreNameCases;
+        // The part models, and putting them back. Optional.
+        std::function<std::vector<Data::Items::PartModel>()> readPartModels;
+        std::function<void(const std::vector<Data::Items::PartModel>& parts)> restorePartModels;
     };
 
     // Why the last Undo or Redo did nothing.

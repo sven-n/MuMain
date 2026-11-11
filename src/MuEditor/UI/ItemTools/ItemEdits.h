@@ -74,6 +74,10 @@ public:
     // The render style file (CItemDataHandler::SetRenderStyles) and the textures its looks name, as one step (design
     // L39); nothing when it is as it was.
     void SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file);
+    // The same for the look file of `kind`: the render styles or the item effects.
+    void SetLookFile(std::string label, Data::Looks::LookKind kind, Data::Looks::LookFile file);
+    // The part models (CItemDataHandler::SetPartModels), as one step; nothing when they are as they were.
+    void SetPartModels(std::string label, std::vector<Data::Items::PartModel> parts);
     // Puts the glow colors or the label styles in this order (the same names), as one step.
     void SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors);
     void SetGroundLabelStyleOrder(std::string label, std::span<const Data::Items::GroundLabelStyle> styles);

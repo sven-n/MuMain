@@ -3,7 +3,7 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 
-// Empties the item model database and its shared models when the test ends,
+// Empties the item model database, its shared models and its part models when the test ends,
 // so the next test starts without the models this one built.
 class ItemModelDatabaseScope
 {
@@ -13,6 +13,7 @@ public:
     {
         g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
         g_ItemModelDatabase.SetSharedModels({});
+        g_ItemModelDatabase.SetPartModels({});
     }
 
     ItemModelDatabaseScope(const ItemModelDatabaseScope&) = delete;

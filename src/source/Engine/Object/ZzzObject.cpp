@@ -6124,79 +6124,9 @@ void ItemObjectAttribute(OBJECT* o)
     g_CharacterClearBuff(o);
     if (o->Type >= MODEL_SPEAR && o->Type <= MODEL_PLATINA_STAFF)
         o->Scale = 0.7f;
+    // The glow values of item types are their item effects (Data/Effects/ItemEffects.json, design L27).
     switch (o->Type)
     {
-    case MODEL_SAINT_CROSSBOW:
-        o->BlendMesh = -2;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.2f + 0.9f;
-        break;
-    case MODEL_STAFF_OF_DESTRUCTION:
-        o->BlendMesh = -2;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.2f + 0.9f;
-        //o->BlendMeshTexCoordU = (float)((int)(WorldTime)%2000)*0.0005f;
-        break;
-    case MODEL_CHAOS_LIGHTNING_STAFF:
-        o->BlendMesh = 1;
-        o->BlendMeshLight = (float)(Random::DrawRand(o, 1) % 11) * 0.1f;
-        break;
-    case MODEL_STAFF_OF_RESURRECTION:
-        o->BlendMesh = -2;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_CHAOS_NATURE_BOW:
-    case MODEL_BLUEWING_CROSSBOW:
-    case MODEL_AQUAGOLD_CROSSBOW:
-        o->BlendMesh = -2;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_RED_SPIRIT_PANTS:
-    case MODEL_RED_SPIRIT_HELM:
-        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
-        break;
-    case MODEL_STAFF_OF_KUNDUN:
-        o->BlendMesh = 2;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_CRYSTAL_MORNING_STAR:
-        o->BlendMesh = 1;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.2f + 0.8f;
-        break;
-    case MODEL_CRYSTAL_SWORD:
-        o->BlendMesh = 0;
-        break;
-    case MODEL_CHAOS_DRAGON_AXE:
-        o->BlendMesh = 1;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_BILL_OF_BALROG:
-        o->BlendMeshTexCoordV = -(float)((int)(WorldTime) % 2000) * 0.0005f;
-        break;
-    case MODEL_LEGENDARY_SHIELD:
-        o->BlendMesh = 1;
-        // Draws set this up for every pass, so the shimmer comes from the frame, not from the update's sequence.
-        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(Random::DrawRand(o, 2) % 10) * 0.1f;
-        break;
-    case MODEL_ELEMENTAL_SHIELD:
-        o->HiddenMesh = 2;
-        break;
-    case MODEL_ELEMENTAL_MACE:
-        o->HiddenMesh = 2;
-        break;
-    case MODEL_RUNE_BLADE:
-        o->HiddenMesh = 2;
-        break;
-    case MODEL_DRAGON_SPEAR:
-        o->HiddenMesh = 1;
-        break;
-    case MODEL_DRAGON_SOUL_STAFF:
-        o->BlendMesh = 1;
-        break;
-    case MODEL_LEGENDARY_STAFF:
-        o->BlendMesh = 2;
-        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(Random::DrawRand(o, 2) % 10) * 0.1f;
-        break;
     case MODEL_ETC:
         o->Scale = 0.7f;
         break;
@@ -6204,50 +6134,8 @@ void ItemObjectAttribute(OBJECT* o)
         o->Scale = 1.f;
         break;
     case MODEL_RENA:
-        o->Scale = 0.5f;
-        break;
-    case MODEL_LIGHTING_SWORD:
-        o->BlendMesh = 1;
-        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_LIGHT_SABER:
-    case MODEL_SPEAR:
-        o->BlendMesh = 1;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-        break;
-    case MODEL_BLADE:
-    case MODEL_DOUBLE_BLADE:
-        o->BlendMesh = 1;
-        break;
-    case MODEL_STAFF:
-        o->BlendMesh = 2;
-        break;
-    case MODEL_HELPER:
-        o->BlendMesh = 1;
-        break;
     case MODEL_WINGS_OF_SPIRITS:
         o->Scale = 0.5f;
-        o->BlendMesh = 0;
-        break;
-    case MODEL_WINGS_OF_SOUL:
-    case MODEL_WINGS_OF_DRAGON:
-    case MODEL_WINGS_OF_DARKNESS:
-        break;
-    case MODEL_WING:
-    case MODEL_ORB_OF_HEALING:
-    case MODEL_ORB_OF_GREATER_DEFENSE:
-    case MODEL_ORB_OF_GREATER_DAMAGE:
-    case MODEL_ORB_OF_SUMMONING:
-    case MODEL_WING + 20:
-    case MODEL_SMALL_WINGS_OF_ELF:
-        o->BlendMesh = 0;
-        break;
-    case MODEL_SERPENT_SHIELD:
-    case MODEL_BRONZE_SHIELD:
-    case MODEL_DRAGON_SHIELD:
-        o->BlendMesh = 1;
-        o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
         break;
     }
 }
@@ -6721,63 +6609,12 @@ void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
     Vector(color[0], color[1], color[2], Light);
 }
 
-// The models RenderPartObjectBody draws without a render style: a few that
-// are not items, and the plain drawing.
-static void RenderModelWithoutStyle(BMD* b, const OBJECT* o, const DrawLook& look, int Type, float Alpha,
-                                    int RenderType)
+// The models RenderPartObjectBody draws without a render style: plainly. The part models (the +15 armor
+// decorations, the Phoenix Soul Star's wing and the Phoenix Soul Armor's inventory model) draw with the render style
+// of their entry in PartModels.json (design L28).
+static void RenderModelWithoutStyle(BMD* b, const DrawLook& look, float Alpha, int RenderType)
 {
-    if (o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_HEAD || o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTLEFT ||
-        o->Type == MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT)
-    {
-        float fLight, texCoordU;
-
-        fLight = 0.8f - absf(sinf(WorldTime * 0.0018f) * 0.5f);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLight - 0.1f, look.blendMeshU,
-                      look.blendMeshV);
-        texCoordU = absf(sinf(WorldTime * 0.0005f));
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLight - 0.3f, texCoordU, look.blendMeshV,
-                      BITMAP_RGB_MIX);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_CHROME4, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-    }
-    else if (Type == MODEL_SWORD_35_WING)
-    {
-        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        b->RenderMesh(0, RENDER_BRIGHT, look.alpha * fLumi, 0, look.blendMeshLight * fLumi, look.blendMeshU,
-                      look.blendMeshV, BITMAP_PHOENIXSOULWING);
-
-        Vector(.15f, 1.f, .25f, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                      look.blendMeshU, look.blendMeshV);
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, look.alpha, 1, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
-        Vector(1.f, 1.f, 1.f, b->BodyLight);
-    }
-    else if (Type == MODEL_ARMORINVEN_74)
-    {
-        vec3_t Light;
-        VectorCopy(b->BodyLight, Light);
-        float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV, -1);
-        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
-                      (double)(-int(WorldTime) % 1000) * 0.00009f, look.blendMeshV, -1);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha * fLumi, look.blendMesh, look.blendMeshLight * fLumi,
-                      (double)(-int(WorldTime) % 1000) * 0.00009f, look.blendMeshV, -1);
-        VectorCopy(Light, b->BodyLight);
-    }
-    else
-    {
-        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
-    }
+    b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 }
 
 // Draws the cloth UpdateTransformSkinEffects simulates.
@@ -7208,7 +7045,7 @@ void RenderPartObjectBody(BMD* b, const OBJECT* o, DrawLook& look, int Type, flo
         // sword-form gloves with the look of the transformation.
         if (!Render::Items::Styles::Render(b, o, look, Type, Alpha, RenderType))
         {
-            RenderModelWithoutStyle(b, o, look, Type, Alpha, RenderType);
+            RenderModelWithoutStyle(b, look, Alpha, RenderType);
         }
     }
 }
@@ -7612,8 +7449,22 @@ void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float
     }
     BMD* b = &Models[Type];
 
+    // The level the item glows like, at most what the render level draws.
+    Level = Render::Items::Glow::GetLevel(Type, Level);
+    if (renderLevel < 4)
+    {
+        Level = std::min<int>(Level, renderLevel * 2 + 5);
+    }
+
     if (DrawsShadow(o))
     {
+        // The item effect's values first, as the drawing has them (design L49): a mesh it hides stays out of the
+        // shadow.
+        {
+            float shadowAlpha = Alpha;
+            int shadowLevel = Level;
+            Render::Items::ItemEffects::Apply(b, o, look, Type, shadowAlpha, shadowLevel);
+        }
         if (gMapManager.WorldActive == 7)
         {
             EnableAlphaTest();
@@ -7662,14 +7513,15 @@ void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float
         return;
     }
 
-    Level = Render::Items::Glow::GetLevel(Type, Level);
-
-    if (renderLevel < 4)
-    {
-        Level = std::min<int>(Level, renderLevel * 2 + 5);
-    }
-
     if (ApplyPartObjectEffect(b, o, look, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
+    {
+        return;
+    }
+    // The level the look's conditions read.
+    look.level = Level;
+    // A render style that draws alone draws here, as the item effects that drew the model did (design L47): in the
+    // object's own light, with nothing of the drawing below after it.
+    if (Render::Items::Styles::DrawsAlone(Type) && Render::Items::Styles::Render(b, o, look, Type, Alpha, RenderType))
     {
         return;
     }
@@ -7722,24 +7574,25 @@ void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float
         }
         else if (Level < 3)
         {
-            // Some items shine below +3; their render style says how.
-            const Render::Items::Styles::ShineBelowPlus3* shine = Render::Items::Styles::FindShineBelowPlus3(Type);
+            // Some items shine below +3; their glow names the shine (design L30).
+            const Data::Effects::Shine* shine = Render::Items::Glow::FindShineBelowPlus3(Type);
             if (shine == nullptr)
             {
                 VectorCopy(Light, b->BodyLight);
             }
             else if (shine->light)
             {
-                const float factor = *shine->light;
+                const auto factor = static_cast<float>(*shine->light);
                 Vector(Light[0] * factor, Light[1] * factor, Light[2] * factor, b->BodyLight);
             }
             RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
             if (shine != nullptr)
             {
-                for (const Render::Items::Styles::ShineBelowPlus3::Pass& pass : shine->passes)
+                for (const Data::Effects::ShinePass& pass : shine->passes)
                 {
-                    RenderPartObjectBodyColor2(b, o, look, Type, pass.alpha,
-                                               pass.renderType | (RenderType & RENDER_EXTRA), pass.bright);
+                    RenderPartObjectBodyColor2(b, o, look, Type, static_cast<float>(pass.opacity),
+                                               Render::Items::Glow::RenderTypeOf(pass) | (RenderType & RENDER_EXTRA),
+                                               static_cast<float>(pass.brightness));
                 }
             }
         }

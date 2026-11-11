@@ -60,7 +60,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "pulsingGlow",
+      "itemEffectValues": {"glowStrength": {"shape": "wave", "from": 0.6, "to": 1, "seconds": 1.5707963}}
     },
     {
       "number": 5,
@@ -72,7 +74,9 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 6,
@@ -85,7 +89,8 @@
       },
       "ground": {
         "rotation": [0, 270, -45]
-      }
+      },
+      "itemEffect": "pulsingGlow"
     },
     {
       "number": 7,
@@ -101,7 +106,8 @@
       "glow": {
         "hiddenMesh": 2
       },
-      "renderStyle": "elementalMace"
+      "renderStyle": "elementalMace",
+      "itemEffect": "hideMesh2"
     },
     {
       "number": 8,

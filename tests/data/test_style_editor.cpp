@@ -6,6 +6,7 @@
 // and are undo steps, the window on a look of the file or one still in code, and Data Checks opening it.
 #ifdef _EDITOR
 
+#include "ItemModelDatabaseScope.h"
 #include "LookEditsScope.h"
 #include "TestImGuiContext.h"
 #include "ToolWindowsScope.h"
@@ -33,9 +34,11 @@
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
@@ -104,6 +107,81 @@ TEST_CASE("The Style Editor's changes of a look reach the game at once and are i
     CHECK(GameLook("brightBladeGold") == nullptr);
 }
 
+TEST_CASE("Item effects are edited like render styles: a change reaches the game and is an item edit [editor][looks]")
+{
+    LookDefinition effect{"pulse"};
+    effect.itemValuesBefore.push_back({.values = {.glowMesh = 1}});
+    // A render style of the same name stays apart.
+    const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
+    LookDefinition changed = effect;
+    changed.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
+
+    g_ItemEffectEdits.SetLook("Change an item effect", "pulse", changed);
+    REQUIRE(Data::Looks::g_LookStore.FindItemEffect("pulse") != nullptr);
+    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK(GameLook("pulse")->layers.size() == 1);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == "Change an item effect");
+    CHECK(g_ItemEdits.Undo());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+
+    // A render style's change in the same group is a step of its own kind, undone with it.
+    g_ItemEdits.BeginGroup("Both");
+    g_ItemEffectEdits.SetLook("Both", "pulse", changed);
+    g_LookEdits.SetLook("Both", "pulse", LookDefinition{"pulse", {Layer{}, Layer{}}});
+    g_ItemEdits.EndGroup();
+    CHECK(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK(GameLook("pulse")->layers.size() == 2);
+    CHECK(g_ItemEdits.Undo());
+    CHECK_FALSE(Data::Looks::g_LookStore.FindItemEffect("pulse")->objectLight.has_value());
+    CHECK(GameLook("pulse")->layers.size() == 1);
+}
+
+TEST_CASE("The Style Editor opens on an item effect with its entries before drawing (design L13, L45) [editor][looks]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    g_ItemSelection.Select(MuEditor::Items::ItemSelection::NoItem);
+    LookDefinition effect{"pulse"};
+    effect.itemValuesBefore.push_back(
+        {.onlyWhen = {.level = std::pair{1, 15}}, .values = {.glowMesh = 1}, .glowsLikeLevel = 7});
+    effect.objectLight = std::array<Data::Looks::Number, 3>{0.5f, 0.5f, 0.5f};
+    const LookEditsScope looks({Plain("pulse")}, {}, std::vector{effect});
+
+    g_MuStyleEditorUI.ShowItemEffect("pulse");
+    CHECK(g_MuEditorCore.GetToolWindows().styleEditor);
+    RenderStyleEditor();
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetPickedLook() == "pulse");
+    CHECK(g_MuStyleEditorUI.GetDraft() == effect);
+
+    // The render style of the same name has a draft of its own.
+    g_MuStyleEditorUI.ShowRenderStyle("pulse");
+    RenderStyleEditor();
+    CHECK(g_MuStyleEditorUI.GetDraft() == Plain("pulse"));
+    CHECK_FALSE(g_MuStyleEditorUI.HasUnappliedChanges("pulse", Data::Looks::LookKind::ItemEffect));
+
+    // An entry's line describes it.
+    CHECK(MuEditor::Looks::Fields::DescribeItemValuesBefore(effect.itemValuesBefore[0]).find(I18N::Editor::OnlyWhen) ==
+          0);
+
+    // The fields of an entry and of the object's light draw without changing them.
+    Data::Looks::ItemValuesBefore entry = effect.itemValuesBefore[0];
+    std::optional<std::array<Data::Looks::Number, 3>> light = effect.objectLight;
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 900.0f));
+        ImGui::Begin("Fields");
+        CHECK_FALSE(MuEditor::Looks::Fields::ItemValuesBeforeEntry(entry));
+        CHECK_FALSE(MuEditor::Looks::Fields::ObjectLight(light));
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    }
+    CHECK(entry == effect.itemValuesBefore[0]);
+    CHECK(light == effect.objectLight);
+}
+
 TEST_CASE("A change of the looks that leaves the file as it is records no step and leaves the file alone [editor]"
           "[looks]")
 {
@@ -169,10 +247,10 @@ TEST_CASE("The Style Editor opens on a look of the file with its fields, and on 
     CHECK(g_MuStyleEditorUI.GetDraft() == look);
 
     // A look still in code is picked too, to be seen.
-    REQUIRE(Render::Items::Styles::ExistsInCode("characterCard"));
-    g_MuStyleEditorUI.ShowRenderStyle("characterCard");
+    REQUIRE(Render::Items::Styles::ExistsInCode("helperNpcPlate"));
+    g_MuStyleEditorUI.ShowRenderStyle("helperNpcPlate");
     RenderStyleEditor();
-    CHECK(g_MuStyleEditorUI.GetPickedLook() == "characterCard");
+    CHECK(g_MuStyleEditorUI.GetPickedLook() == "helperNpcPlate");
 
     // The draft follows an undo while it is not changed.
     LookDefinition plain = Plain("brightBlade");
@@ -264,6 +342,7 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
     TestImGuiContext context;
     Layer shaped;
     shaped.kind = Data::Looks::LayerKind::Reflection;
+    shaped.where = Data::Looks::Where::UnderHoles;
     shaped.meshes.meshes = {2, 0};
     shaped.light = LayerLight{
         .color = {0.4f, Shape{.kind = ShapeKind::Wave, .from = 0.27, .to = 0.33, .seconds = 4.1887902}, 0.8f}};
@@ -273,6 +352,16 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
     shaped.scrollU = Shape{.kind = ShapeKind::Scroll, .perSecond = 0.8};
     shaped.scrollV = Shape{.kind = ShapeKind::Frames, .seconds = 0.1, .step = 0.25, .count = 4};
     shaped.scrollingMesh = 1;
+    // Only when and the item's value times a shape (design L11, L16).
+    shaped.onlyWhen = {.place = Data::Looks::Place::Inventory,
+                       .level = std::pair{3, 7},
+                       .hiddenMesh = 1,
+                       .buff = Data::Looks::LookBuff::InfinityArrow};
+    Layer pulsing;
+    pulsing.opacity = Shape{.kind = ShapeKind::Wave, .from = 0.4, .to = 1.0, .seconds = 2.0943951, .timesItem = true};
+    pulsing.onlyWhen = {.hiddenMesh = -1, .withoutBuff = Data::Looks::LookBuff::InfinityArrow};
+    // Fields each item sets (design L12).
+    pulsing.eachItem = {{"light", "color"}, {"meshes", "chromeMeshes"}};
     Layer numbers;
     numbers.meshes = {{1, 7}, true, false};
     numbers.texture = "Item/Deye_R.jpg";
@@ -286,17 +375,22 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
                             .scrollU = 0.0f,
                             .scrollV = 0.0f,
                             .hiddenMesh = 1,
-                            .scrollingMesh = 1};
+                            .scrollingMesh = 1,
+                            .light = LayerLight{.tint = true, .color = {1.f, 0.5f, 0.5f}}};
     const std::vector<MuEditor::Looks::LookPart> parts{{0, "Crystal", ""}, {1, "", "wand44_R.jpg"}};
+    Layer nothing;
+    nothing.meshes.none = true;
     for (const std::vector<MuEditor::Looks::LookPart>& offered : {parts, std::vector<MuEditor::Looks::LookPart>{}})
     {
-        for (const Layer& original : {shaped, numbers, Layer{}})
+        for (const Layer& original : {shaped, pulsing, numbers, nothing, Layer{}})
         {
             CAPTURE(offered.size());
             CAPTURE(MuEditor::Looks::Fields::DescribeLayer(original));
             Layer asLayer = original;
             Layer asEffect = original;
             ItemValues left = values;
+            Data::Looks::LookDefinition look{.name = "look", .notFor = {.doppelganger = true}, .drawsAlone = true};
+            const Data::Looks::LookDefinition lookBefore = look;
             for (int frame = 0; frame < 3; ++frame)
             {
                 ImGui::NewFrame();
@@ -312,6 +406,7 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
                 ImGui::PushID("Values");
                 CHECK_FALSE(MuEditor::Looks::Fields::ItemValues(left, offered));
                 ImGui::PopID();
+                CHECK_FALSE(MuEditor::Looks::Fields::LookOptions(look));
                 ImGui::End();
                 ImGui::Render();
                 CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
@@ -320,6 +415,7 @@ TEST_CASE("Every field of a look draws, as drag fields, part checkboxes and drop
             CHECK(asLayer == original);
             CHECK(asEffect == original);
             CHECK(left == values);
+            CHECK(look == lookBefore);
         }
     }
 }
@@ -354,6 +450,58 @@ TEST_CASE("A field of a look says what it does while the mouse rests on it (desi
     CHECK(shown);
 }
 
+TEST_CASE("The preview draws a look with the values of the picked item that names it, and keeps Not for and Draws "
+          "alone when it hides layers (design L12, L41) [editor][looks]")
+{
+    using Data::Looks::LookKind;
+    const ItemModelDatabaseScope restoreModels;
+    const auto model = [](int number, const char* style)
+    {
+        Data::Items::ItemModelDefinition entry;
+        entry.group = 0;
+        entry.number = number;
+        entry.file = "Data/Item/Sword01.bmd";
+        entry.renderStyle = style;
+        entry.renderStyleValues = {{"parts", "[1, 2]"}};
+        return entry;
+    };
+    g_ItemModelDatabase.Build(
+        std::vector<Data::Items::ItemModelDefinition>{model(0, "partsPerItem"), model(1, "other")},
+        Data::Effects::GlowColorList{});
+    const LookDefinition look{.name = "partsPerItem",
+                              .layers = {Layer{.meshes = {{0}}, .eachItem = {{"meshes", "parts"}}}, Layer{}},
+                              .notFor = {.doppelganger = true},
+                              .drawsAlone = true};
+
+    const std::optional<LookDefinition> forItem =
+        MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0));
+    REQUIRE(forItem.has_value());
+    CHECK(forItem->layers[0].meshes.meshes == std::vector<int>{1, 2});
+    // An item that names another look, or looks at the item effects, draws this look as it is.
+    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 1)).has_value());
+    CHECK_FALSE(MuEditor::Looks::ForItem(look, LookKind::ItemEffect, Data::Items::MakeItemType(0, 0)).has_value());
+
+    // The preview keeps the look it made while nothing it was made from changes.
+    MuEditor::Looks::ItemPreviewLook kept;
+    const LookDefinition* first =
+        MuEditor::Looks::ForItemKept(kept, look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0));
+    REQUIRE(first != nullptr);
+    CHECK(MuEditor::Looks::ForItemKept(kept, look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0)) == first);
+    CHECK(first->layers[0].meshes.meshes == std::vector<int>{1, 2});
+    LookDefinition changedLook = look;
+    changedLook.layers.pop_back();
+    const LookDefinition* again =
+        MuEditor::Looks::ForItemKept(kept, changedLook, LookKind::RenderStyle, Data::Items::MakeItemType(0, 0));
+    REQUIRE(again != nullptr);
+    CHECK(again->layers.size() == 1);
+    CHECK(MuEditor::Looks::ForItemKept(kept, look, LookKind::RenderStyle, Data::Items::MakeItemType(0, 1)) == nullptr);
+
+    const LookDefinition shown = MuEditor::Looks::WithoutHiddenLayers(look, {0, 1});
+    CHECK(shown.layers.size() == 1);
+    CHECK(shown.notFor.doppelganger);
+    CHECK(shown.drawsAlone);
+}
+
 TEST_CASE("A shape's curve shows ten seconds of the preview's clock with fixed axes and marks the time (design L43) "
           "[editor][looks]")
 {
@@ -382,6 +530,10 @@ TEST_CASE("A shape's curve shows ten seconds of the preview's clock with fixed a
     CHECK(later.start == 1230.0);
     CHECK(later.now == doctest::Approx(4.5));
     CHECK(CurveValueAt(wave, later, 4.5) == doctest::Approx(MuEditor::Looks::Fields::ShapeValueAt(wave, 1234.5)));
+
+    // The curve is the game's own shape math, a falling zigzag too.
+    const Shape falling{.kind = ShapeKind::Zigzag, .from = 0.0, .to = -1.0, .seconds = 2.0};
+    CHECK(MuEditor::Looks::Fields::ShapeValueAt(falling, 2.5) == doctest::Approx(-0.75));
 
     // A scroll starts where the window starts and grows over its ten seconds.
     const Shape scroll{.kind = ShapeKind::Scroll, .perSecond = 0.8};
@@ -461,6 +613,72 @@ TEST_CASE("A look's changes that are not applied stay while another look is pick
     CHECK(g_MuStyleEditorUI.GetDraft().layers.size() == 2);
     // The game draws the look as applied until Apply.
     CHECK(GameLook("brightBlade")->layers.size() == 1);
+}
+
+TEST_CASE("A look's Not for and Draws alone are checkboxes above its parts (design L11, L47) [editor][looks]")
+{
+    TestImGuiContext context;
+    Data::Looks::LookDefinition look{.name = "look"};
+    bool changed = false;
+    const auto frame = [&look, &changed]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 200.0f));
+        ImGui::Begin("Options");
+        changed = MuEditor::Looks::Fields::LookOptions(look);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName("Options");
+    REQUIRE(window != nullptr);
+    for (const char* label :
+         {I18N::Editor::NotForDoppelgangers, I18N::Editor::OnlyInMonsterHands, I18N::Editor::DrawsAlone})
+    {
+        ImGui::ActivateItemByID(ImGui::GetIDWithSeed(label, nullptr, window->ID));
+        frame();
+        frame();
+    }
+    CHECK(look.notFor.doppelganger);
+    CHECK(look.notFor.outsideMonsterHands);
+    CHECK(look.drawsAlone);
+}
+
+TEST_CASE("Each item sets: a field's checkbox lets each item set it under a value name (design L12) [editor][looks]")
+{
+    TestImGuiContext context;
+    Layer layer;
+    // A field already set opens the box.
+    layer.eachItem = {{"light", "color"}};
+    const auto frame = [&layer]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 1400.0f));
+        ImGui::Begin("Fields");
+        MuEditor::Looks::Fields::Layer(layer);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName("Fields");
+    REQUIRE(window != nullptr);
+    // The box's tree node, then the field's scope, then its checkbox.
+    const ImGuiID box = ImGui::GetIDWithSeed(I18N::Editor::EachItemSets, nullptr, window->ID);
+    const ImGuiID texture = ImGui::GetIDWithSeed("texture", nullptr, box);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::Texture, nullptr, texture));
+    frame();
+    frame();
+    // The value is named after the field until it is named otherwise.
+    CHECK(layer.eachItem == Data::Looks::EachItemFields{{"light", "color"}, {"texture", "texture"}});
+    const ImGuiID light = ImGui::GetIDWithSeed("light", nullptr, box);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::Light, nullptr, light));
+    frame();
+    frame();
+    CHECK(layer.eachItem == Data::Looks::EachItemFields{{"texture", "texture"}});
 }
 
 TEST_CASE("A layer's texture changes when its field is left after typing, not with each key [editor][looks]")

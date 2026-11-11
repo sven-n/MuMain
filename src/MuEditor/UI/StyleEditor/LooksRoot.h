@@ -4,6 +4,7 @@
 
 #include "../MuEditor/UI/Common/NamedTreeRoot.h"
 #include "../MuEditor/UI/ItemTools/ItemLookUseCounts.h"
+#include "Data/GameData/LookData/LookDefinition.h"
 
 #include <functional>
 #include <string>
@@ -11,16 +12,21 @@
 
 namespace MuEditor::Looks
 {
-// A look's row in the Style Editor's tree: "chromeMesh0 (12)", with " (code)" for one still in code; the item
-// effects' rows too.
+// A look's row in the Style Editor's tree: "chromeMesh0 (12)", with " (code)" for one still in code.
 std::string LookRowLabel(const std::string& name, int users, bool code);
 
-// The Style Editor's root of the render styles (design L31): the looks of Data/Effects/RenderStyles.json (g_LookEdits)
-// and the ones still in code, sorted by name. Only looks in the file go into its folders; one in code stays under the
-// root, marked "(code)".
-class RenderStylesRoot final : public NamedTreeRoot
+// A root of the Style Editor's tree (design L31): the render styles, or the item effects. Its looks are those of the
+// look file of its kind (Data/Effects/RenderStyles.json or ItemEffects.json, LookEdits::Of) and the ones still in code,
+// sorted by name. Only looks in the file go into its folders; one in code stays under the root, marked "(code)".
+class LooksRoot final : public NamedTreeRoot
 {
 public:
+    explicit LooksRoot(Data::Looks::LookKind kind) : m_kind(kind) {}
+
+    [[nodiscard]] Data::Looks::LookKind GetKind() const
+    {
+        return m_kind;
+    }
     const char* GetRootName() const override;
     int GetVersion() const override;
     std::size_t GetCount() const override;
@@ -39,7 +45,8 @@ public:
     void SetOrder(const char* step, std::span<const std::string> names) override;
     bool CanMoveEntry(const std::string& name) const override;
 
-    // Whether the look is still code (Render/Items/ItemRenderStyles.cpp): no look of the file has its name.
+    // Whether the look is still code (Render/Items/ItemRenderStyles.cpp, ItemEffects.cpp): no look of the file has its
+    // name.
     [[nodiscard]] bool IsCode(const std::string& name) const;
     int CountUsers(const std::string& name);
     // Whether a look has changes the Style Editor has not applied yet; its row is marked "*".
@@ -51,6 +58,7 @@ public:
 private:
     void Update() const;
 
+    Data::Looks::LookKind m_kind;
     mutable std::vector<std::string> m_names;
     mutable int m_version = -1;
     Items::ItemLookUseCounts m_counts;
