@@ -149,12 +149,10 @@ void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
     // When called inside the game loop, temporarily close the caller frame,
     // present this loading update, then reopen the caller frame.
     const bool wasFrameActive = mu::GetRenderer().IsFrameActive();
-    if (wasFrameActive)
+    if (!wasFrameActive)
     {
-        mu::GetRenderer().EndFrame();
+        mu::GetRenderer().BeginFrame();
     }
-
-    mu::GetRenderer().BeginFrame();
 
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
