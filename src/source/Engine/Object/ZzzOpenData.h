@@ -1,12 +1,16 @@
 #pragma once
 
+#include <functional>
+#include <vector>
+
 void DeleteNpcs();
 void OpenNpc(int Type);
 void DeleteMonsters();
 void OpenMonsterModel(EMonsterModelType Type);
 
 void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...);
-void OpenBasicData(HDC hDC);
+// The startup data load, as steps for the title screen to run across frames.
+std::vector<std::function<void()>> OpenBasicDataSteps();
 void ReleaseMainData();
 bool OpenFont();
 void OpenLogoSceneData();

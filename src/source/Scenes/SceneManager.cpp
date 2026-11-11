@@ -1278,6 +1278,8 @@ void RenderScene(HDC hDC)
     try
     {
         g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
+        if (SceneFlag != WEBZEN_SCENE)
+            EndWebzenScene();
         switch (SceneFlag)
         {
         case WEBZEN_SCENE:

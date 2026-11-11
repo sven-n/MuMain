@@ -46,6 +46,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/WebzenScene.h"
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
@@ -594,6 +595,9 @@ extern PATH* path;
 
 void DestroyWindow()
 {
+    // A quit during startup: the load's texture batch must end while the renderer is still up.
+    EndWebzenScene();
+
     // Save game configuration to config.ini
     GameConfig::GetInstance().SetSoundVolume(g_pOption->GetVolumeLevel());
     GameConfig::GetInstance().Save();
@@ -1635,6 +1639,11 @@ bool IterateClient()
             // The player's Mood strength, at most one map light rebuild per frame however often
             // it moved (options open or closed).
             Render::Look::ApplyPendingTuning();
+            // Load work runs here, between frames: a load inside a frame loses what the frame drew before it.
+            PumpWebzenScene();
+            // The first frame has something to draw now.
+            if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
+                SDL_ShowWindow(g_sdlWindow);
             RenderProfiledFrame();
 #ifdef _EDITOR
             // The editor's own windows, now that the game's frame went to the GPU.
@@ -2117,7 +2126,9 @@ bool StartClient(char* szCmdLine)
     SetWorkingDirectoryToBasePath();
 #endif
 
-    const SDL_WindowFlags windowFlags = Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false);
+    // Hidden until the first frame is about to draw (IterateClient), so the setup below shows no black window.
+    const SDL_WindowFlags windowFlags =
+        Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false) | SDL_WINDOW_HIDDEN;
 
     g_sdlWindow =
         SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
@@ -2270,8 +2281,6 @@ bool StartClient(char* szCmdLine)
         });
 
     g_ErrorReport.WriteSoundCardInfo();
-
-    // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
     // The options window and the editor's language box switch it later.

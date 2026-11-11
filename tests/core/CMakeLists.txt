@@ -94,6 +94,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_staged_load
+    SOURCES
+        test_staged_load.cpp
+)
+
+mu_add_test(
     NAME test_mu_logger
     SOURCES
         test_mu_logger_static_init.cpp
