@@ -20,16 +20,6 @@ class PacketFunctions_ClientToServer;
 // MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so".
 // POSIX loaders do not search the executable directory for a bare filename, so resolve the
 // library beside the running executable. Windows keeps its native executable-directory search.
-// Defined in Connection.cpp (not anonymous namespace) to prevent per-TU copies if ever
-// included by a second translation unit. (Story 3.4.1 MEDIUM-4 fix)
-//
-// SIOF mitigation (Story 3.3.1 MEDIUM-3): both g_dotnetLibPath and
-// munique_client_library_handle are declared `extern` here and defined in Connection.cpp,
-// after the #include of this header. C++ guarantees initialization order within a single
-// translation unit follows definition order, so g_dotnetLibPath is fully initialized
-// before munique_client_library_handle calls Load(). An `inline` handle variable would
-// initialize at the point of #include "Connection.h" in Connection.cpp — before
-// g_dotnetLibPath is defined — causing dlopen("") and a NULL handle.
 inline std::string ManagedLibraryPath()
 {
     const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
@@ -47,8 +37,11 @@ inline std::string ManagedLibraryPath()
 #endif
 }
 
-extern const std::string g_dotnetLibPath;
-extern const mu::platform::LibraryHandle munique_client_library_handle;
+// Null until LoadManagedLibrary, and after it when the library is missing.
+extern mu::platform::LibraryHandle munique_client_library_handle;
+
+// Loads the network library once, at startup after the client has chosen its folders; later calls do nothing.
+void LoadManagedLibrary();
 
 namespace DotNetBridge
 {

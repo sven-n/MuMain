@@ -10,13 +10,14 @@
 #include <string>
 #include <vector>
 
+#include "Dotnet/Connection.h"
+
 #ifndef _WIN32
 #include <filesystem>
 #include <string>
 
 #include "Core/Platform/SecureCrt.h"
 #include "Core/Platform/WinApiShims.h"
-#include "Dotnet/Connection.h"
 #endif
 
 TEST_CASE("Connection library loader handles missing libraries [network][dotnet]")
@@ -93,6 +94,27 @@ TEST_CASE("A symbol the library lacks is found as null without an error line [ne
         CHECK(log.Text().find(kMissingSymbol) != std::string::npos);
     }
     mu::platform::Unload(handle);
+}
+
+TEST_CASE("The network library loads at startup, once, not during static initialisation [network][dotnet]")
+{
+    // Nothing in this test binary loads it before this line.
+    CHECK(munique_client_library_handle == nullptr);
+
+    std::string firstLog;
+    {
+        const PlatformLogCapture log;
+        LoadManagedLibrary();
+        firstLog = log.Text();
+    }
+    const auto handle = munique_client_library_handle;
+    // Loaded, or its failure logged: the test binary may not have the library beside it.
+    CHECK((handle != nullptr || !firstLog.empty()));
+
+    const PlatformLogCapture log;
+    LoadManagedLibrary();
+    CHECK(munique_client_library_handle == handle);
+    CHECK(log.Text().empty());
 }
 
 #ifndef _WIN32

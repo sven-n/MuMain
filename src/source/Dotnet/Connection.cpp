@@ -21,15 +21,16 @@
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
-// MEDIUM-4 fix: g_dotnetLibPath defined here (not in anonymous namespace in header) to prevent
-// per-TU copies if Connection.h is ever included by a second translation unit.
-// Declaration (extern) remains in Connection.h; only Connection.cpp includes Connection.h today.
-const std::string g_dotnetLibPath = ManagedLibraryPath();
+mu::platform::LibraryHandle munique_client_library_handle = nullptr;
 
-// Defined after g_dotnetLibPath so C++ TU initialization order guarantees the path is
-// fully constructed before Load() is called. (SIOF fix — was inline in Connection.h)
-const mu::platform::LibraryHandle munique_client_library_handle =
-    mu::platform::Load(g_dotnetLibPath.c_str());
+void LoadManagedLibrary()
+{
+    static bool attempted = false;
+    if (attempted)
+        return;
+    attempted = true;
+    munique_client_library_handle = mu::platform::Load(ManagedLibraryPath().c_str());
+}
 
 namespace
 {
@@ -87,6 +88,7 @@ void WriteLibraryVersion()
 
 void InitializeDotNetBridge()
 {
+    LoadManagedLibrary();
     if (!munique_client_library_handle)
     {
         mu::log::Get("dotnet")->error("NET: InitializeDotNetBridge -- library not loaded, skipping");
@@ -151,7 +153,7 @@ void ReportDotNetError(const char* detail, DotNetErrorKind kind)
     if (kind == DotNetErrorKind::LibraryNotFound)
     {
         // AC-1: Library not found — include resolved path and platform
-        msg = FormatLibraryNotFoundMessage(g_dotnetLibPath, platformName);
+        msg = FormatLibraryNotFoundMessage(ManagedLibraryPath(), platformName);
     }
     else
     {
@@ -175,7 +177,7 @@ bool IsManagedLibraryAvailable()
         return true;
     }
 
-    // AC-1: Pass library path; ReportDotNetError will use g_dotnetLibPath and platform name
+    // AC-1: ReportDotNetError names the library path and platform
     ReportDotNetError(nullptr, DotNetErrorKind::LibraryNotFound);
     return false;
 }
