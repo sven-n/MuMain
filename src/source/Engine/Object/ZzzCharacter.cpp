@@ -10857,7 +10857,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
         {
-            Vector(0.25f, 1.0f, 0.7f, Light);
+            Vector(0.25f, 1.0f, 0.7f, vLight);
         }
 
         if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
