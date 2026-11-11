@@ -5,7 +5,11 @@
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/ItemOptionsJson.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
+#include "Data/GameData/ItemData/OptionRulesJson.h"
+#include "Data/GameData/ItemData/OptionTextsJson.h"
 
 #include <algorithm>
 #include <array>
@@ -29,11 +33,10 @@ constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
     "Sword", "Axe",   "Mace",   "Spear", "Bow",  "Staff",  "Shield", "Helm",
     "Armor", "Pants", "Gloves", "Boots", "Wing", "Helper", "Potion", "Etc"};
 
-// The shared model file, whatever the case of its name: Windows does not
-// tell them apart, so "sharedModels.json" is the same file there.
-bool IsSharedItemModelsFile(std::string_view fileName)
+// Whether the file is the one of this name, whatever the case of its name: Windows does not tell them apart, so
+// "sharedModels.json" is the shared model file there.
+bool IsFileNamed(std::string_view fileName, std::string_view expected)
 {
-    const std::string_view expected = SharedItemModelsFileName;
     return std::equal(
         fileName.begin(), fileName.end(), expected.begin(), expected.end(), [](char left, char right)
         { return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right)); });
@@ -188,6 +191,10 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     {
         files.push_back({models.directory / SharedItemModelsFileName, WriteSharedItemModelsJson(models.sharedModels)});
     }
+    if (models.partModelsChanged)
+    {
+        files.push_back({models.directory / PartModelsFileName, WritePartModelsJson(models.partModels)});
+    }
     if (models.glowColorsChanged)
     {
         files.push_back(
@@ -201,6 +208,14 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     if (models.groundLabelsChanged && models.groundLabels != nullptr)
     {
         files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
+    }
+    for (const LookFileToSave& lookFile : models.lookFiles)
+    {
+        files.push_back({lookFile.file, lookFile.text});
+    }
+    if (models.nameCasesChanged && models.nameCases != nullptr)
+    {
+        files.push_back({models.nameCasesFile, WriteItemNameCasesJson(*models.nameCases)});
     }
 #endif
 }
@@ -238,9 +253,13 @@ ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& 
     ReadJsonFiles(directory, "no item model files found", result.issues,
                   [&](std::string_view text, const std::string& source)
                   {
-                      if (IsSharedItemModelsFile(source))
+                      if (IsFileNamed(source, SharedItemModelsFileName))
                       {
                           ReadSharedItemModelsJson(text, source, result.sharedModels, result.issues);
+                      }
+                      else if (IsFileNamed(source, PartModelsFileName))
+                      {
+                          ReadPartModelsJson(text, source, result.partModels, result.issues);
                       }
                       else
                       {
@@ -298,6 +317,102 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetItemOptionsDirectory()
+{
+    return GetItemDataDirectory() / "Options";
+}
+
+ItemOptionsLoadResult LoadItemOptionsDirectory(const std::filesystem::path& directory)
+{
+    ItemOptionsLoadResult result;
+    std::vector<std::filesystem::path> files = FindJsonFiles(directory);
+    std::erase_if(files, [](const std::filesystem::path& file) { return file.filename() == OptionRulesFileName; });
+    if (files.empty())
+    {
+        AddFatal(result.issues, directory.generic_string(), "no option definition files found");
+        return result;
+    }
+    for (const std::filesystem::path& file : files)
+    {
+        const std::string fileName = file.filename().string();
+        const std::string source = "Options/" + fileName;
+        const std::optional<std::string> text = ReadTextFile(file);
+        if (!text)
+        {
+            AddFatal(result.issues, source, "could not be read");
+            continue;
+        }
+        ReadItemOptionsJson(*text, source, fileName, result.definitions, result.issues);
+    }
+    return result;
+}
+
+std::filesystem::path GetOptionTextsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / OptionTextsFileName;
+}
+
+OptionTextsLoadResult LoadOptionTextsFile(const std::filesystem::path& file)
+{
+    OptionTextsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadOptionTextsJson(*text, source, result.texts, result.issues);
+    return result;
+}
+
+std::filesystem::path GetOptionRulesFile()
+{
+    return GetItemOptionsDirectory() / OptionRulesFileName;
+}
+
+OptionRulesLoadResult LoadOptionRulesFile(const std::filesystem::path& file)
+{
+    OptionRulesLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadOptionRulesJson(*text, source, result.rules, result.issues);
+    return result;
+}
+
+ItemOptionDatabase LoadItemOptionFiles(bool withRules, std::span<const char* const> uiLocales,
+                                       std::vector<ItemDataIssue>& issues)
+{
+    ItemOptionsLoadResult definitions = LoadItemOptionsDirectory(GetItemOptionsDirectory());
+    OptionTextsLoadResult texts = LoadOptionTextsFile(GetOptionTextsFile());
+    const std::string textsSource = GetOptionTextsFile().generic_string();
+    ValidateOptionTextLocales(texts.texts, uiLocales, textsSource, texts.issues);
+    issues.insert(issues.end(), definitions.issues.begin(), definitions.issues.end());
+    issues.insert(issues.end(), texts.issues.begin(), texts.issues.end());
+    std::vector<OptionRule> rules;
+    if (withRules)
+    {
+        OptionRulesLoadResult ruleFile = LoadOptionRulesFile(GetOptionRulesFile());
+        issues.insert(issues.end(), ruleFile.issues.begin(), ruleFile.issues.end());
+        if (!HasFatal(ruleFile.issues) && !HasFatal(definitions.issues))
+        {
+            ValidateOptionRules(ruleFile.rules, definitions.definitions, GetOptionRulesFile().generic_string(), issues);
+        }
+        rules = std::move(ruleFile.rules);
+    }
+    if (HasFatal(definitions.issues) || HasFatal(texts.issues))
+    {
+        return {};
+    }
+    ValidateItemOptions(definitions.definitions, texts.texts, textsSource, issues);
+    return ItemOptionDatabase(std::move(definitions.definitions), std::move(texts.texts), std::move(rules));
+}
+
 std::filesystem::path GetGroundLabelsFile()
 {
     return GetItemDataDirectory() / "Tooltips" / GroundLabelsFileName;
@@ -317,6 +432,30 @@ GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetItemNameCasesFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / ItemNameCasesFileName;
+}
+
+ItemNameCasesLoadResult LoadItemNameCasesFile(const std::filesystem::path& file)
+{
+    ItemNameCasesLoadResult result;
+    std::error_code error;
+    if (!std::filesystem::exists(file, error))
+    {
+        return result;
+    }
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemNameCasesJson(*text, source, result.cases, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);
@@ -333,6 +472,25 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
         return result;
     }
     Effects::ReadGlowColorsJson(*text, source, result.colors, result.folders, result.issues);
+    return result;
+}
+
+std::filesystem::path GetShinesFile()
+{
+    return std::filesystem::path(Effects::ShinesFile);
+}
+
+ShinesLoadResult LoadShinesFile(const std::filesystem::path& file)
+{
+    ShinesLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    Effects::ReadShinesJson(*text, source, result.shines, result.issues);
     return result;
 }
 
@@ -370,6 +528,12 @@ ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path&
     std::vector<FileToSave> files;
     AddItemGroupFiles(itemDirectory, GetItemEntries(items), files);
     AddItemModelFiles(models, files);
+#ifdef _EDITOR
+    for (const TextFileToWrite& file : models.alsoWrite)
+    {
+        files.push_back({file.path, std::string(file.text)});
+    }
+#endif
     return WriteChangedFiles(files, issues);
 }
 
@@ -425,6 +589,22 @@ void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<Item
 }
 #endif
 
+namespace
+{
+// Whether a model file of the data is in the client folder.
+bool ModelFileExists(const std::string& file)
+{
+#ifdef _WIN32
+    const std::filesystem::path path = Core::Text::PathFromUtf8(file);
+#else
+    // The data does not always spell the files in the case they have on disk.
+    const std::filesystem::path path = MuResolvePath(file.c_str());
+#endif
+    std::error_code ignored;
+    return std::filesystem::is_regular_file(path, ignored);
+}
+} // namespace
+
 void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues)
 {
     for (const ItemModelDefinition& model : models)
@@ -433,18 +613,24 @@ void ValidateItemModelFilesExist(std::span<const ItemModelDefinition> models, st
         {
             continue;
         }
-#ifdef _WIN32
-        const std::filesystem::path path = Core::Text::PathFromUtf8(model.file);
-#else
-        // The data does not always spell the files in the case they have on disk.
-        const std::filesystem::path path = MuResolvePath(model.file.c_str());
-#endif
-        std::error_code ignored;
-        if (!std::filesystem::is_regular_file(path, ignored))
+        if (!ModelFileExists(model.file))
         {
             issues.push_back({ItemDataIssueSeverity::Warning, GetItemGroupFileName(model.group), model.group,
                               model.number, "file",
                               model.file + " is not in the client folder; the item is drawn without a model"});
+        }
+    }
+}
+
+void ValidatePartModelFilesExist(std::span<const PartModel> parts, std::vector<ItemDataIssue>& issues)
+{
+    for (const PartModel& part : parts)
+    {
+        if (!part.model.file.empty() && !ModelFileExists(part.model.file))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, PartModelsFileName, ItemDataIssue::NoItem,
+                              ItemDataIssue::NoItem, part.model.name + ".file",
+                              part.model.file + " is not in the client folder; the part model is not drawn"});
         }
     }
 }

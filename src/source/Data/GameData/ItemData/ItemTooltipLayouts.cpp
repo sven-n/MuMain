@@ -6,6 +6,7 @@
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 #include "ItemTooltipConditionsJson.h"
+#include "ItemTooltipLines.h"
 
 #include <algorithm>
 #include <array>
@@ -21,7 +22,7 @@ namespace Keys
 {
 constexpr const char* FormatVersion = "formatVersion";
 constexpr const char* Texts = "texts";
-constexpr const char* Layouts = "layouts";
+constexpr const char* Layouts = TooltipLayoutsKey;
 constexpr const char* Name = "name";
 constexpr const char* Lines = "lines";
 constexpr const char* Section = "section";
@@ -249,20 +250,6 @@ template <typename TLine> std::string CheckLineClassOnlyValues(const TLine& line
     return {};
 }
 
-std::string ListNames(const std::set<std::string>& names)
-{
-    if (names.empty())
-    {
-        return "none";
-    }
-    std::string list;
-    for (const std::string& name : names)
-    {
-        list += (list.empty() ? "{" : ", {") + name + "}";
-    }
-    return list;
-}
-
 class ItemTooltipReader
 {
 public:
@@ -340,27 +327,9 @@ bool ItemTooltipReader::ReadText(const OrderedJson& json, const std::string& fie
 // The braces of every language, and the translations have the English text's placeholders.
 void ItemTooltipReader::CheckPlaceholders(const LocalizedString& text, const std::string& field)
 {
-    const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
-    if (!english.error.empty())
+    for (const auto& [problemField, message] : CheckTextPlaceholders(text, field))
     {
-        AddFatal(field, english.error);
-        return;
-    }
-    const std::set<std::string> englishNames(english.names.begin(), english.names.end());
-    for (const auto& [locale, translation] : text.GetTranslations())
-    {
-        const PlaceholderScan scan = ScanPlaceholders(translation);
-        if (!scan.error.empty())
-        {
-            AddFatal(field + "." + locale, scan.error);
-            continue;
-        }
-        const std::set<std::string> names(scan.names.begin(), scan.names.end());
-        if (names != englishNames)
-        {
-            AddFatal(field + "." + locale,
-                     "has the placeholders " + ListNames(names) + ", the English text " + ListNames(englishNames));
-        }
+        AddFatal(problemField, message);
     }
 }
 
@@ -483,7 +452,8 @@ void ItemTooltipReader::CheckLinePlaceholders(const TooltipLayoutLine& line, con
     std::set<std::string> reported;
     for (const std::string& name : scan.names)
     {
-        if (std::find(known.begin(), known.end(), name) != known.end() || !reported.insert(name).second)
+        if (std::find(known.begin(), known.end(), name) != known.end() || IsItemReferencePlaceholder(name) ||
+            !reported.insert(name).second)
         {
             continue;
         }
@@ -995,24 +965,9 @@ void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const cha
     {
         warn(text, std::string(Keys::Texts) + "." + name);
     }
-    // Named as the reader names them: by the layout's place in the list.
-    for (size_t layout = 0; layout < file.layouts.size(); ++layout)
+    for (const auto& [line, field] : TooltipFileLinesOf(file))
     {
-        const std::string field = std::string(Keys::Layouts) + "[" + std::to_string(layout) + "]";
-        const std::vector<TooltipLayoutLine>& lines = file.layouts[layout].lines;
-        for (size_t index = 0; index < lines.size(); ++index)
-        {
-            warn(lines[index].text, field + ".lines[" + std::to_string(index) + "].text");
-        }
-        const std::vector<TooltipLayoutAddition>& additions = file.layouts[layout].add;
-        for (size_t addition = 0; addition < additions.size(); ++addition)
-        {
-            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-            {
-                warn(additions[addition].lines[index].text,
-                     field + ".add[" + std::to_string(addition) + "].lines[" + std::to_string(index) + "].text");
-            }
-        }
+        warn(line->text, field + ".text");
     }
 }
 

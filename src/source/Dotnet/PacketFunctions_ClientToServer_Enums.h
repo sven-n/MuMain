@@ -13,6 +13,9 @@
 
 #pragma once
 
+#ifndef MU_PACKET_ENUMS_CLIENTTOSERVER
+#define MU_PACKET_ENUMS_CLIENTTOSERVER
+
 enum class TradeButtonState : uint32_t
 {
 Unchecked = 0, ///< Trade button is not pressed. It means that the trade is not yet accepted by the trader.
@@ -143,3 +146,4 @@ AcceptQuest = 1, ///< The quest is accepted and started.
 RefuseQuest = 2, ///< The quest is refused and not started.
 };
 
+#endif // MU_PACKET_ENUMS_CLIENTTOSERVER

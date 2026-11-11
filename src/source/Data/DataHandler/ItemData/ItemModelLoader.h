@@ -52,6 +52,10 @@ void SwapOpenedModels(int firstItemType, int secondItemType);
 // TakeProblemMessage. Nothing happens before the game has its model slots.
 std::vector<ItemModelProblem> ReopenModels(std::span<const int> itemTypes, const LookNames& lookNames);
 
+// Opens the part model of the slot's name (PartModelSlots.h, design L28) from its entry into the slot, and loads its
+// textures; a missing entry, model file or texture is logged. `lookNames` checks its render style.
+void OpenPartModel(int modelType, const LookNames& lookNames);
+
 // The message for the player about the missing model files and textures
 // that OpenModels and OpenTextures found (all problems are already in the
 // log), or an empty text when there are none. Called once the item data is

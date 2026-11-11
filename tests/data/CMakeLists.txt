@@ -9,6 +9,7 @@ mu_add_test(
         test_item_edit_history.cpp
         test_item_ground_labels.cpp
         test_item_json.cpp
+        test_item_references.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
         test_item_model_display_json.cpp
@@ -17,6 +18,8 @@ mu_add_test(
         test_item_model_problems.cpp
         test_item_model_tool.cpp
         test_item_names.cpp
+        test_item_option_links.cpp
+        test_item_options_json.cpp
         test_item_stat_file_change.cpp
         test_item_stats_json.cpp
         test_item_users.cpp
@@ -34,6 +37,19 @@ mu_add_test(
         MuClient
 )
 target_compile_definitions(light_mood_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# The buffs (Data/Buffs/Buffs.json, buffs design): reader, writer, checks, the
+# table and the game's buff info.
+mu_add_test(
+    NAME buff_data_tests
+    SOURCES
+        test_buffs.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(buff_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
@@ -135,11 +151,15 @@ mu_add_test(
         test_monster_data_users.cpp
         test_monster_database.cpp
         test_monster_edit_history.cpp
+        test_monster_grouped_edits.cpp
+        test_monster_grouped_tools.cpp
+        test_monster_item_references.cpp
         test_monster_json.cpp
         test_monster_list_model.cpp
         test_monster_model_files.cpp
         test_monster_model_values.cpp
         test_monster_models_json.cpp
+        test_monster_setup_json.cpp
         test_monster_sound_files.cpp
         test_monster_sounds_json.cpp
         test_monster_names.cpp
@@ -156,6 +176,8 @@ mu_add_test(
 target_compile_definitions(monster_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(monster_data_tests test_monster_npc_name_files.cpp)
 
 # The look profile of the Enhanced rendering features (Data/Render/Look.json) and the player's own
 # tuning of it ([EnhancedTuning] of config.ini).
@@ -179,12 +201,16 @@ mu_add_test(
     SOURCES
         test_helper_pickup_filters.cpp
         test_colors_window.cpp
+        test_critical_damage_rate.cpp
+        test_style_editor.cpp
         test_dark_lord_pet_tooltip.cpp
+        test_item_bytes.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
         test_item_exchange_file.cpp
         test_item_mesh_list.cpp
         test_item_model_files.cpp
+        test_item_option_slots.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
         test_item_set_chrome.cpp
@@ -193,13 +219,14 @@ mu_add_test(
         test_item_sync_diff.cpp
         test_item_sync_server.cpp
         test_item_tooltip_text.cpp
+        test_item_texts.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
-        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
-        ${CMAKE_SOURCE_DIR}/tests/ui/RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
+        mu_test_rml_layout_fixture
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
         MuCryptopp
 )
@@ -207,15 +234,18 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_TOOLTIP_SNAPSHOT="${CMAKE_CURRENT_SOURCE_DIR}/item_tooltip_snapshot.txt"
     MU_TEST_CHAIN_TEXTS_BEFORE="${CMAKE_CURRENT_SOURCE_DIR}/item_chain_texts_before.json"
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
-# Animates the shipped player model the way the character pre-pass does.
+# Animates the shipped player model the way the character pre-pass does, and
+# reads the shipped player body parts and their textures through the game's
+# loaders.
 mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_player_body_models.cpp
+        ClientFolderScope.cpp
+        PlayerTextureScope.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -253,10 +283,10 @@ mu_add_test(
         test_effect_call_sites.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
-        ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+        mu_test_effect_data
 )
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
@@ -289,4 +319,37 @@ mu_add_test(
 target_compile_definitions(model_files_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_ENUM_HEADER="${CMAKE_SOURCE_DIR}/src/source/Core/Globals/_enum.h"
+)
+
+mu_add_test(
+    NAME player_model_selector_tests
+    SOURCES test_player_model_selector.cpp
+        ClientFolderScope.cpp
+        ExecutableConfigFile.cpp
+        PlayerTextureScope.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(player_model_selector_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
+# Render styles as data (docs/item-data.md, "Render styles and item effects"): the look file, the layers' drawing
+# and the comparison of each moved look with its old code, on the item models of the test data.
+mu_add_test(
+    NAME render_style_tests
+    SOURCES
+        test_look_files.cpp
+        test_look_checks.cpp
+        test_look_effects.cpp
+        test_look_drawing.cpp
+        test_look_recorder.cpp
+        LookRecorder.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(render_style_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_RENDER_STYLE_BASELINE="${CMAKE_CURRENT_SOURCE_DIR}/baseline/RenderStyleDraws.txt"
 )

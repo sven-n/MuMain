@@ -15,7 +15,9 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Data/GameData/LookData/LookJson.h"
 
+#include <array>
 #include <optional>
 #endif
 
@@ -31,7 +33,8 @@ public:
 
     // Whether item names follow the UI locale; off shows them in English. The
     // game sets it from [UI] TranslateItemNames at start and when the option
-    // changes. Once items are loaded, the names change at once.
+    // changes. Once items are loaded, the names change at once, also in the
+    // texts that name items ({item:14,25}).
     void SetTranslateItemNames(bool translate);
     bool GetTranslateItemNames() const
     {
@@ -95,6 +98,9 @@ public:
     // name, and its items name the new one. The items that use it take its
     // file, texture folders and none-blend meshes, and are opened again.
     void SetSharedModel(const Data::Items::SharedItemModel& sharedModel, std::string_view previousName = {});
+    // Sets the part models (PartModels.json, design L28, L50); Save writes the file. A part model whose file, texture
+    // folders or none-blend meshes changed is opened again by ReopenChangedModels.
+    void SetPartModels(std::vector<Data::Items::PartModel> parts);
     // Removes a shared model that no item uses; false while one does.
     bool RemoveSharedModel(std::string_view name);
     // Adds a glow color or changes the value of the one of its name; the
@@ -107,13 +113,73 @@ public:
     void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
     // The folders MuEditor sorts the glow colors in (D69); Save writes them with the colors.
     void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
+    // A look file as the editor has it (Data/Effects/RenderStyles.json or ItemEffects.json, design L39): its looks,
+    // sorted by name, which the game draws (g_LookStore), and the Style Editor's folders. Read from the file when first
+    // asked for, and the game draws the file's looks from then on (the file may have changed since the game started;
+    // the caller loads their textures); a read with a fatal problem keeps the game's looks and no folders, and Save
+    // leaves the file alone then.
+    const Data::Looks::LookFile& GetLookFile(Data::Looks::LookKind kind);
+    // The looks and folders; the game draws the looks at once, and Save writes the file. The caller loads the
+    // textures a look names (Render::Items::Looks::PrepareTextures).
+    void SetLookFile(Data::Looks::LookKind kind, Data::Looks::LookFile file);
+    // The problems of the file's read.
+    const std::vector<Data::Items::ItemDataIssue>& GetLookReadIssues(Data::Looks::LookKind kind);
+    // Whether the read had no fatal problem, so Save may write the file.
+    bool CanSaveLooks(Data::Looks::LookKind kind);
+    // Counts the changes of the file's looks, for what the Style Editor keeps between frames.
+    int GetLooksVersion(Data::Looks::LookKind kind) const
+    {
+        return m_lookFiles[static_cast<std::size_t>(kind)].version;
+    }
+    // A test's looks, as if read from the file, unchanged since.
+    void ResetLooksForTest(Data::Looks::LookKind kind, Data::Looks::LookFile file);
+    // As before the first read, after a test: the file is read again when next asked for.
+    void ForgetLooksForTest(Data::Looks::LookKind kind);
+
+    // The render style file (the kind functions above for Data::Looks::LookKind::RenderStyle).
+    const Data::Looks::RenderStylesFile& GetRenderStyles()
+    {
+        return GetLookFile(Data::Looks::LookKind::RenderStyle);
+    }
+    void SetRenderStyles(Data::Looks::RenderStylesFile file)
+    {
+        SetLookFile(Data::Looks::LookKind::RenderStyle, std::move(file));
+    }
+    const std::vector<Data::Items::ItemDataIssue>& GetRenderStyleReadIssues()
+    {
+        return GetLookReadIssues(Data::Looks::LookKind::RenderStyle);
+    }
+    bool CanSaveRenderStyles()
+    {
+        return CanSaveLooks(Data::Looks::LookKind::RenderStyle);
+    }
+    int GetRenderStylesVersion() const
+    {
+        return GetLooksVersion(Data::Looks::LookKind::RenderStyle);
+    }
+    void ResetRenderStylesForTest(Data::Looks::RenderStylesFile file)
+    {
+        ResetLooksForTest(Data::Looks::LookKind::RenderStyle, std::move(file));
+    }
+    // Both look files, as before the first read.
+    void ForgetRenderStylesForTest()
+    {
+        ForgetLooksForTest(Data::Looks::LookKind::RenderStyle);
+        ForgetLooksForTest(Data::Looks::LookKind::ItemEffect);
+    }
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>
     ReopenChangedModels(const Data::Items::ModelLoader::LookNames& lookNames);
     bool HasModelsToReopen() const
     {
-        return !m_modelsToReopen.empty();
+        return !m_modelsToReopen.empty() || !m_partModelsToReopen.empty();
+    }
+    // For tests, which open no models: drops the models a change left to open again.
+    void ForgetModelsToReopenForTest()
+    {
+        m_modelsToReopen.clear();
+        m_partModelsToReopen.clear();
     }
     // What keeps or rebuilds data of opened model slots (the cloth of worn
     // pants, the cloth grid of the Grand Soul pants) is game code, so the
@@ -157,6 +223,9 @@ public:
     bool RemoveGroundLabelStyle(std::string_view name);
     // Makes the ground label styles these (an undo); the standard rules stay as they are.
     void RestoreGroundLabelStyles(std::span<const Data::Items::GroundLabelStyle> styles);
+    // The cases each language declines item names in (also an undo); the texts that name items show the forms of
+    // these. Save writes Data/Items/Tooltips/NameCases.json.
+    void SetNameCases(const Data::Items::ItemNameCases& cases);
     // The folders MuEditor sorts the ground label styles in (D69); Save writes them with the styles.
     void SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
@@ -180,8 +249,10 @@ public:
     // with the model files of Data/Items/Models whose models changed (moved,
     // edited) since they were loaded, SharedModels.json when a shared model
     // changed and Stats/ItemStats.json when the item stat file changed. Nothing is written when the data has fatal
-    // problems, and no file is replaced when one of them cannot be written.
-    Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues);
+    // problems, and no file is replaced when one of them cannot be written; `alsoWrite` are written with them, all
+    // or none (the monster list with the item references a move changed, D60).
+    Data::Items::ItemDataSaveResult Save(std::vector<Data::Items::ItemDataIssue>& issues,
+                                         std::span<const Data::TextFileToWrite> alsoWrite = {});
 
     // Replaces all items with the legacy Item_<language>.bmd files. Items the
     // English file lacks keep their current English name. The imported items
@@ -205,6 +276,11 @@ public:
     bool ExportToCsv(wchar_t* fileName);
 #endif
 
+    // Expands the texts that name items again when item names changed since the
+    // last time (the editor's name edits, undo and revert). Called every frame
+    // by the editor; cheap while nothing changed.
+    void RefreshItemTextsIfNamesChanged();
+
     // Data Access
     ITEM_ATTRIBUTE* GetItemAttributes();
     ITEM_ATTRIBUTE* GetItemAttribute(int index);
@@ -222,6 +298,9 @@ private:
     void RefreshItemNames();
     void RegisterLocaleObserver();
     static void OnLocaleChanged(void* context) noexcept;
+    // Lets the texts that name items take their names from the item data, and expands them.
+    void ConnectItemTexts();
+    void RefreshItemTexts();
 
 #ifdef _EDITOR
     // Gives imported items without an English name the one the item has now.
@@ -270,6 +349,7 @@ private:
     Data::Items::ItemGroupSet m_changedModelGroups;
     // Whether the editor changed a shared model since LoadModels.
     bool m_sharedModelsChanged = false;
+    bool m_partModelsChanged = false;
     // Whether the editor changed the glow color list since LoadModels.
     bool m_glowColorsChanged = false;
     // The item stat file as Load read it, and whether the editor changed it since.
@@ -277,8 +357,25 @@ private:
     bool m_statFileChanged = false;
     // Whether the editor changed the ground label styles since Load.
     bool m_groundLabelsChanged = false;
+    // A look file (GetLookFile), whether it was read and could be, its problems, whether the editor changed it since,
+    // and a count of its changes.
+    struct LookFileState
+    {
+        Data::Looks::LookFile file;
+        bool read = false;
+        bool complete = true;
+        std::vector<Data::Items::ItemDataIssue> issues;
+        bool changed = false;
+        int version = 0;
+    };
+    LookFileState& ReadLookFileOnce(Data::Looks::LookKind kind);
+    std::array<LookFileState, 2> m_lookFiles;
+    // Whether the editor changed the name cases since Load.
+    bool m_nameCasesChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
+    // The slots of the part models to open again.
+    std::vector<int> m_partModelsToReopen;
     OpenedModelHooks m_openedModelHooks;
 
     struct LookNames
@@ -291,6 +388,8 @@ private:
 
     bool m_localeObserverRegistered = false;
     bool m_translateItemNames = true;
+    // The item database's name version when the texts that name items were last expanded.
+    int m_itemTextsNameVersion = -1;
     // Load succeeded once: there are item names to show.
     bool m_loaded = false;
 

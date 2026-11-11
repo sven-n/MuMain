@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
@@ -47,8 +48,12 @@ GameConfig::GameConfig()
         *(lastSlash + 1) = L'\0';  // Keep the trailing separator
     }
 
-    m_configPath = exePath;
-    m_configPath += L"config.ini";
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    const char* overridePath = std::getenv(CfgFiles::CfgEnvConfigPath);
+#else
+    const char* overridePath = nullptr;
+#endif
+    m_configPath = GameConfigValidation::ResolveConfigPath(exePath, overridePath);
 
     Load();
 }
@@ -99,6 +104,7 @@ void GameConfig::Load()
         ReadInt(CfgSectionRender, CfgKeyAntialiasing, CfgDefaultAntialiasing));
     m_enhancedLighting = ReadBool(CfgSectionRender, CfgKeyEnhancedLighting, CfgDefaultEnhancedLighting);
     m_dynamicLights = ReadBool(CfgSectionRender, CfgKeyDynamicLights, CfgDefaultDynamicLights);
+    m_sunlight = ReadBool(CfgSectionRender, CfgKeySunlight, CfgDefaultSunlight);
     m_lightMood = ReadBool(CfgSectionRender, CfgKeyLightMood, CfgDefaultLightMood);
     m_postProcessing = ReadBool(CfgSectionRender, CfgKeyPostProcessing, CfgDefaultPostProcessing);
 
@@ -113,6 +119,7 @@ void GameConfig::Load()
     m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
     m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
+    m_useS6PlayerModels = ReadBool(CfgSectionRender, CfgKeyUseS6PlayerModels, CfgDefaultUseS6PlayerModels);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -166,6 +173,7 @@ void GameConfig::Save()
     WriteInt(CfgSectionRender, CfgKeyAntialiasing, m_antialiasing);
     WriteBool(CfgSectionRender, CfgKeyEnhancedLighting, m_enhancedLighting);
     WriteBool(CfgSectionRender, CfgKeyDynamicLights, m_dynamicLights);
+    WriteBool(CfgSectionRender, CfgKeySunlight, m_sunlight);
     WriteBool(CfgSectionRender, CfgKeyLightMood, m_lightMood);
     WriteBool(CfgSectionRender, CfgKeyPostProcessing, m_postProcessing);
     WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
@@ -176,6 +184,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
     WriteString(CfgSectionRender, CfgKeyTexturePack, m_texturePack);
+    WriteBool(CfgSectionRender, CfgKeyUseS6PlayerModels, m_useS6PlayerModels);
 }
 
 LookPreset ReadLookPreset(const std::filesystem::path& configFile)
@@ -580,4 +589,9 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     }
 
     Save(); // Actually write to the .ini file
+}
+
+void GameConfig::SetUseS6PlayerModels(bool useOriginal)
+{
+    m_useS6PlayerModels = useOriginal;
 }

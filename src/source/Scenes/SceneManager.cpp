@@ -105,7 +105,7 @@ namespace
         MouseLButtonPush = false;
         MouseRButtonPush = false;
         MouseMButtonPush = false;
-        Core::Input::ClearLeftMouseButtonPressEdge();
+        Core::Input::ClearPressEdges();
     }
 }
 

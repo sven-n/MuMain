@@ -5,8 +5,8 @@ caches, one for each compiler).
 ci.yml names a cache after what it holds: the compiler caches after the commit, the library and vcpkg caches after the
 files that pick their content. A run that saves under a new name leaves the older entries behind. GitHub keeps them
 until they go unused for 7 days, or until the repository's caches pass 10 GB; then it deletes the least recently used
-entries first, which can be the newest entry of a cache that only the nightly run reads. Run it after the jobs that
-save caches, with `actions: write` and the token in GH_TOKEN:
+entries first, and those can be the newest entries that the next PRs and main pushes would start from. Run it after
+the jobs that save caches, with `actions: write` and the token in GH_TOKEN:
 
     python3 scripts/ci_cache_prune.py
 """
@@ -24,14 +24,22 @@ from ci_job_annotations import REQUEST_ATTEMPTS, REQUEST_ERRORS, api_headers, ge
 # A job that found an entry may still be downloading it, and deleting the entry then would fail that restore with a
 # warning, which fails CI Required. GitHub sets last_accessed_at when a restore finds the entry, and actions/cache gives
 # up on a download after 10 minutes (SEGMENT_DOWNLOAD_TIMEOUT_MINS); an entry read less than this long ago is left for
-# a later run to delete.
+# a later run to delete, unless its last read was this run's own: the jobs that restore them pass when their restores
+# ended (CACHES_READ_AT_<JOB>), and the entry a build started from is otherwise always read within the last few minutes.
 IN_USE = timedelta(minutes=15)
+SYSTEMS = ("linux", "macos", "windows")
+# Kinds that another job than their system's build job restores: Quality Gates reads its cppcheck.
+READ_BY = {"apt-cppcheck-linux-x64-": "quality"}
+READERS = (*SYSTEMS, *READ_BY.values())
 
 # The kinds of entry ci.yml saves, by the start of their key. Each keeps its newest entry; the workflow contract test
 # checks that every cache ci.yml's build jobs restore by a key prefix is one of them.
 KINDS = (
+    "apt-cppcheck-linux-x64-",
+    "apt-linux-x64-",
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
+    "ccache-windows-x64-",
     "linux-x64-release-dep-sources-",
     "macos-arm64-release-dep-sources-",
     "windows-x64-release-dep-sources-",
@@ -40,10 +48,13 @@ KINDS = (
 # Kinds whose restore step only reads entries of its own compiler, the part of the key after the kind: while GitHub
 # moves the runners to a new image, jobs land on both images, and one with another compiler cannot use the newest
 # entry of the kind. These keep the newest entry of each compiler; GitHub drops a compiler's last entry 7 days after
-# its last use.
+# its last use. The apt caches name the runner image there instead, and read that image's entries first.
 PER_COMPILER = (
+    "apt-cppcheck-linux-x64-",
+    "apt-linux-x64-",
     "ccache-linux-x64-",
     "ccache-macos-arm64-",
+    "ccache-windows-x64-",
 )
 
 
@@ -60,6 +71,12 @@ def timestamp(text):
     return datetime.fromisoformat(text)
 
 
+def reader(kind):
+    """The job whose restores read a kind: the one READ_BY names, else the build job of the system its key names, or
+    None."""
+    return READ_BY.get(kind) or next((name for name in SYSTEMS if name in kind), None)
+
+
 def newest(entries):
     """The entry saved last, or None when there is none."""
     return max(entries, key=lambda entry: (timestamp(entry["created_at"]), entry["id"]), default=None)
@@ -69,11 +86,14 @@ def describe(entry):
     return f"{entry['key']} ({entry['size_in_bytes'] / 1e6:.0f} MB, created {entry['created_at']})"
 
 
-def prune(kinds, list_kind, delete, now):
-    """Deletes all but the newest entry of each group (see group()), except entries read within IN_USE before `now`,
-    and returns the bytes that frees."""
+def prune(kinds, list_kind, delete, now, read_at=None):
+    """Deletes all but the newest entry of each group (see group()), except entries read within IN_USE before `now` by
+    a job other than this run's, and returns the bytes that frees. `read_at` maps a job (see reader()) to when this
+    run's job ended its restores; a job missing from it did not run or restore."""
+    read_at = read_at or {}
     freed = 0
     for kind in kinds:
+        ours = read_at.get(reader(kind))
         groups = {}
         for entry in list_kind(kind):
             if entry["key"].startswith(kind):
@@ -83,7 +103,8 @@ def prune(kinds, list_kind, delete, now):
             for entry in entries:
                 if entry is kept:
                     continue
-                if now - timestamp(entry["last_accessed_at"]) < IN_USE:
+                last_read = timestamp(entry["last_accessed_at"])
+                if now - last_read < IN_USE and (ours is None or last_read > ours):
                     print(f"Left {describe(entry)} for a later run: a job read it at {entry['last_accessed_at']}.")
                     continue
                 delete(entry)
@@ -122,8 +143,10 @@ def main():
         query = urllib.parse.urlencode({"key": kind, "ref": ref})
         return get_pages(f"{caches}?{query}#actions_caches", token)
 
+    read_at = {name: timestamp(os.environ[f"CACHES_READ_AT_{name.upper()}"]) for name in READERS
+               if os.environ.get(f"CACHES_READ_AT_{name.upper()}")}
     freed = prune(KINDS, list_kind, lambda entry: delete_entry(f"{caches}/{entry['id']}", token),
-                  datetime.now(timezone.utc))
+                  datetime.now(timezone.utc), read_at)
     print(f"Freed {freed / 1e9:.2f} GB on {ref}.")
     return 0
 

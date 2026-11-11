@@ -25,6 +25,17 @@
 namespace Data::Colors
 {
 inline constexpr const char* ColorFoldersKey = "colorFolders";
+
+// The keys a file writes its folders with, and the word for what they hold in the problems: the colors' folders
+// above; the Style Editor's looks keep theirs the same way ("lookFolders": [{"name": "Shines", "looks": [...]}]).
+struct FolderKeys
+{
+    const char* list;
+    const char* entries;
+    const char* entry;
+};
+inline constexpr FolderKeys ColorFolderKeys{ColorFoldersKey, "colors", "color"};
+inline constexpr FolderKeys LookFolderKeys{"lookFolders", "looks", "look"};
 // How deep folders go: a folder in a folder in a folder ... at most this many.
 inline constexpr std::size_t MaxColorFolderDepth = 8;
 // A folder's name in UTF-16 units.
@@ -39,15 +50,17 @@ bool IsColorFolderName(std::string_view name);
 // a color that isn't one of the file's (`isColor`) or that an earlier folder holds already.
 std::vector<ColorFolder> ReadColorFolders(const Items::Json::OrderedJson& root, const std::string& source,
                                           const std::function<bool(std::string_view)>& isColor,
-                                          std::vector<Items::ItemDataIssue>& issues);
+                                          std::vector<Items::ItemDataIssue>& issues,
+                                          const FolderKeys& keys = ColorFolderKeys);
 
 // The "colorFolders" value for the folders, with only the colors `isColor` knows (a folder can hold the name of a
 // color that is gone: an undo puts it back). A folder writes "folders" and "colors" only when it has some.
 Items::Json::OrderedJson WriteColorFolders(std::span<const ColorFolder> folders,
-                                           const std::function<bool(std::string_view)>& isColor);
+                                           const std::function<bool(std::string_view)>& isColor,
+                                           const FolderKeys& keys = ColorFolderKeys);
 
 // Puts each folder of the "colorFolders" list on a line of its own, with the folders in it.
-std::string PutColorFoldersOnLines(const std::string& text);
+std::string PutColorFoldersOnLines(const std::string& text, const FolderKeys& keys = ColorFolderKeys);
 
 // The folder at the path, or nullptr; nullptr also for the empty path (the root has no ColorFolder).
 ColorFolder* FindColorFolder(std::vector<ColorFolder>& folders, std::span<const std::size_t> path);

@@ -13,8 +13,6 @@ namespace M33Aida {
     bool RenderAidaObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
     //. 몬스터
-    CHARACTER* CreateAidaMonster(int iType, int PosX, int PosY, int Key);
-
     bool MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel);
     void MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
     bool RenderAidaMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon);

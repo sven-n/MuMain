@@ -6,7 +6,9 @@
 
 #include "MonsterCheckTargets.h"
 #include "MonsterChecks.h"
+#include "MonsterOwnValues.h"
 #include "MonsterSelection.h"
+#include "MonsterShownValues.h"
 #include "MuMonsterAttacksUI.h"
 #include "MuMonsterSoundsUI.h"
 
@@ -76,12 +78,22 @@ void MonsterCheckArea::Open(const ItemDataIssue& issue, bool clicked)
         }
         return;
     }
-    g_MonsterSelection.Select(issue.number);
+    // A value the number shares with its monster's other numbers is changed
+    // on the monster as a whole (D61): a shared map variant, a shared name.
+    const std::optional<Data::Monsters::MonsterValueField> value = GetValueOfField(issue.field);
+    if (value && OwnValues::SharesValue(issue.number, *value))
+    {
+        g_MonsterSelection.SelectMonster(issue.number);
+    }
+    else
+    {
+        g_MonsterSelection.Select(issue.number);
+    }
     const MonsterTool toolForField = GetToolForField(issue.field);
     if (toolForField == MonsterTool::Attacks)
     {
         // The attacks the problem is about: of all maps or of a map variant.
-        g_MuMonsterAttacksUI.ShowMapVariant(issue.number, GetMapVariantOfField(issue.field));
+        g_MuMonsterAttacksUI.ShowMapVariant(ShownValues::GetSelectedKey(), GetMapVariantOfField(issue.field));
     }
     if (!clicked)
     {

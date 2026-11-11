@@ -6,7 +6,10 @@
 
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 
+#include <algorithm>
+#include <array>
 #include <charconv>
+#include <utility>
 
 namespace MuEditor::Monsters
 {
@@ -21,6 +24,8 @@ constexpr char AfterNumber = ' ';
 // The key ends at a language ("name.de") or an index.
 constexpr std::string_view KeyEnds = ".[";
 constexpr std::string_view NameKey = "name";
+constexpr std::string_view KindKey = "kind";
+constexpr std::string_view ModelKey = "model";
 constexpr std::string_view AttacksKey = "attacks";
 // The map variants hold attacks only yet (monsters design, Q-MN65).
 constexpr std::string_view MapVariantsKey = "mapVariants";
@@ -88,6 +93,24 @@ std::optional<std::string_view> GetSoundSetOfField(std::string_view field)
         return std::nullopt;
     }
     return rest.substr(0, keyStart);
+}
+
+std::optional<Data::Monsters::MonsterValueField> GetValueOfField(std::string_view field)
+{
+    using Data::Monsters::MonsterValueField;
+    const std::string_view monsterField = GetMonsterField(field);
+    const std::string_view key = monsterField.substr(0, monsterField.find_first_of(KeyEnds));
+    constexpr std::array<std::pair<std::string_view, MonsterValueField>, 7> Values{{
+        {NameKey, MonsterValueField::Names},
+        {KindKey, MonsterValueField::Kind},
+        {ModelKey, MonsterValueField::Model},
+        {SoundSetKey, MonsterValueField::SoundSet},
+        {AttacksKey, MonsterValueField::Attacks},
+        {MapVariantsKey, MonsterValueField::MapVariants},
+        {RandomVariantsKey, MonsterValueField::RandomVariants},
+    }};
+    const auto found = std::ranges::find(Values, key, &std::pair<std::string_view, MonsterValueField>::first);
+    return found != Values.end() ? std::optional(found->second) : std::nullopt;
 }
 
 std::optional<int> GetMapVariantOfField(std::string_view field)

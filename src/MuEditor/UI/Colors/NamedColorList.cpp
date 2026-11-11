@@ -39,15 +39,9 @@ void RenderUsers(const char* id, const std::vector<NamedColorUser>& users)
 }
 } // namespace
 
-std::vector<std::string> GetNames(const NamedColorSource& source)
+std::string NamedColorSource::GetRowLabel(const std::string& name)
 {
-    std::vector<std::string> names;
-    names.reserve(source.GetCount());
-    for (std::size_t index = 0; index < source.GetCount(); ++index)
-    {
-        names.push_back(source.GetName(index));
-    }
-    return names;
+    return name + " (" + std::to_string(CountUsers(name)) + ")";
 }
 
 std::vector<NamedColorUser> MakeItemUsers(std::span<const int> itemTypes)

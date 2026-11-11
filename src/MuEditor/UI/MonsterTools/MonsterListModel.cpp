@@ -14,8 +14,9 @@ namespace MuEditor::Monsters
 namespace
 {
 using Data::Monsters::MonsterDefinition;
+} // namespace
 
-bool Lists(const MonsterDefinition& monster, const MonsterListModel::Filter& filter)
+bool MatchesMonsterFilter(const MonsterDefinition& monster, const MonsterListModel::Filter& filter)
 {
     if (!MatchesMonsterSearch(monster, filter.search))
     {
@@ -27,7 +28,6 @@ bool Lists(const MonsterDefinition& monster, const MonsterListModel::Filter& fil
     }
     return !filter.kind || monster.kind == *filter.kind;
 }
-} // namespace
 
 bool MatchesMonsterSearch(const MonsterDefinition& monster, std::string_view search)
 {
@@ -75,7 +75,7 @@ const std::vector<int>& MonsterListModel::GetNumbers(const Filter& filter)
     for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
     {
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        if (monster != nullptr && Lists(*monster, filter))
+        if (monster != nullptr && MatchesMonsterFilter(*monster, filter))
         {
             m_numbers.push_back(number);
         }

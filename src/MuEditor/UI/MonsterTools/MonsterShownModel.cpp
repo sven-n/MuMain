@@ -4,6 +4,10 @@
 
 #include "MonsterShownModel.h"
 
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
+
+#include "MonsterEdits.h"
 #include "MonsterSelection.h"
 
 #include "Core/Globals/_enum.h"
@@ -16,6 +20,7 @@
 #include "imgui.h"
 
 #include <set>
+#include <string>
 #include <string_view>
 
 namespace MuEditor::Monsters::ShownModel
@@ -76,6 +81,23 @@ std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monste
     return slot;
 }
 
+std::optional<int> FindUnknownLookSlot(int number, const Data::Monsters::MonsterDefinition* monster)
+{
+    using Data::Monsters::UnknownReason;
+    if (number < 0)
+        return std::nullopt;
+    const Data::Monsters::UnknownMonsterLook& look = g_MonsterDatabase.GetUnknownLook();
+    const bool noEntry = monster == nullptr;
+    const bool noModel = !noEntry && !Data::Monsters::FindMonsterModelReference(monster->model);
+    if (!(noEntry && Data::Monsters::IsFor(look, UnknownReason::NoEntry)) &&
+        !(noModel && Data::Monsters::IsFor(look, UnknownReason::NoModel)))
+        return std::nullopt;
+    const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(look.model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+        return std::nullopt;
+    return slot;
+}
+
 bool IsOpen(int slot)
 {
     return Data::Monsters::ModelLoader::IsOpen(slot);
@@ -96,12 +118,20 @@ void OpenWhenShown(int slot)
     g_MonsterDataHandler.OpenModelForTools(slot);
 }
 
-void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster)
+void RenderSelectedMonster(int number, const Data::Monsters::MonsterDefinition* monster, bool wholeMonster)
 {
     if (monster == nullptr)
     {
         ImGui::TextDisabled("%s", number == MonsterSelection::NoMonster ? I18N::Editor::NoMonsterIsSelected
                                                                         : I18N::Editor::NoMonsterAtThisNumber);
+        return;
+    }
+    if (wholeMonster)
+    {
+        const std::string count = std::to_string(g_MonsterEdits.ReadMonsterNumbers(number).size());
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheValuesThe0NumbersOf1Share,
+                                            {count, monster->names.Get(I18N::GetCurrentLocale())})
+                                   .c_str());
         return;
     }
     // The name is an argument, never the format: names may hold a "%".

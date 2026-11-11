@@ -68,6 +68,7 @@ namespace CfgKeys
     // The Enhanced look's features the player keeps on; Classic ignores them.
     inline constexpr wchar_t CfgKeyEnhancedLighting[] = L"EnhancedLighting";
     inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
+    inline constexpr wchar_t CfgKeySunlight[] = L"Sunlight";
     inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
     inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
 
@@ -89,6 +90,7 @@ namespace CfgKeys
     // Active texture pack, a folder in Data/TexturePacks; empty = the original textures. Read once
     // at startup -- see Render::Textures::TexturePack.
     inline constexpr wchar_t CfgKeyTexturePack[] = L"TexturePack";
+    inline constexpr wchar_t CfgKeyUseS6PlayerModels[] = L"UseS6PlayerModels";
 }
 
 namespace CfgDefaults
@@ -150,6 +152,7 @@ namespace CfgDefaults
     inline constexpr int CfgDefaultAntialiasing = 4;
     inline constexpr bool CfgDefaultEnhancedLighting = true;
     inline constexpr bool CfgDefaultDynamicLights = true;
+    inline constexpr bool CfgDefaultSunlight = true;
     inline constexpr bool CfgDefaultLightMood = true;
     inline constexpr bool CfgDefaultPostProcessing = true;
 
@@ -161,6 +164,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultDisableBodyShadows = false;
     inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
     inline constexpr wchar_t CfgDefaultTexturePack[] = L""; // The original textures
+    inline constexpr bool CfgDefaultUseS6PlayerModels = true;
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
@@ -168,3 +172,11 @@ namespace CfgDefaults
     // platform, falling back to auto-pick with a warning log if it's unavailable.
     inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
 }
+
+namespace CfgFiles
+{
+inline constexpr wchar_t CfgFileName[] = L"config.ini";
+// Developer builds (the control socket): the config file to use instead of the one beside the
+// executable, so a scripted client runs with settings of its own and leaves the player's alone.
+inline constexpr char CfgEnvConfigPath[] = "MU_CONFIG_PATH";
+} // namespace CfgFiles

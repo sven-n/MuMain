@@ -13,6 +13,9 @@
 
 #pragma once
 
+#ifndef MU_PACKET_ENUMS_COMMONENUMS
+#define MU_PACKET_ENUMS_COMMONENUMS
+
 enum class ItemStorageKind : uint32_t
 {
 Inventory = 0, ///< The inventory storage.
@@ -100,3 +103,4 @@ IllusionTemple = 5, ///< The illusion temple mini game.
 Doppelganger = 6, ///< The doppelgänger mini game.
 };
 
+#endif // MU_PACKET_ENUMS_COMMONENUMS

@@ -15,7 +15,7 @@ namespace Core::Benchmark
 {
 // Upper bound on the pass/counter dimensions copied out of FrameProfiler. Static-asserted
 // against the real enum sizes in BenchRecorder.cpp, which is the only file that knows both.
-inline constexpr int kMaxPasses = 32;
+inline constexpr int kMaxPasses = 40;
 inline constexpr int kMaxCounters = 32;
 
 // Name of the segment every run starts and ends with, so drift across the run is measurable
@@ -117,7 +117,7 @@ struct EnvironmentInfo
     std::string buildCompiler;
     std::string buildArch;
     std::string buildTimestamp;
-    std::string gitDescribe; // empty when not baked in
+    std::string gitDescribe; // MU_GIT_COMMIT: the commit, "unknown" for a build without git; empty until captured
     bool gitDirty = false;
 
     int windowWidth = 0;

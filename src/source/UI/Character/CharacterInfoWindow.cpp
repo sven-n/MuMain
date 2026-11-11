@@ -25,6 +25,9 @@
 #include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Character/CriticalDamageRateLine.h"
+#include "GameLogic/Combat/CriticalDamageBonus.h"
+#include "GameLogic/Combat/CriticalDamageRate.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -158,11 +161,13 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
     auto statLine = c.RegisterStruct<StatLine>();
     statLine.RegisterMember("text", &StatLine::text);
     statLine.RegisterMember("source", &StatLine::source);
+    statLine.RegisterMember("hint", &StatLine::hint);
     c.RegisterArray<std::vector<StatLine>>();
     c.Bind("str_lines", &model.strLines);
     c.Bind("agi_lines", &model.agiLines);
     c.Bind("vit_lines", &model.vitLines);
     c.Bind("ene_lines", &model.eneLines);
+    c.Bind("critical_damage_rate_line", &model.criticalDamageRateLine);
 
     c.Bind("master_level_enabled", &model.masterLevelEnabled);
 
@@ -184,6 +189,14 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPet(); });
     c.BindEventCallback("chainfo_click_masterlevel",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMasterLevel(); });
+    c.BindEventCallback("chainfo_line_hover",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_LineHint.Enter(event, arguments[0].Get<int>(NoLineHint));
+                        });
+    c.BindEventCallback("chainfo_line_leave", [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        { m_LineHint.Leave(event); });
     model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
     model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
     model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
@@ -208,6 +221,7 @@ void mu::ui::window::CCharacterInfoWindow::Release()
 {
     UnloadImages();
 
+    m_LineHint.Hide();
     m_RmlView.Release();
 
     if (m_pNewUIMng)
@@ -230,7 +244,10 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
             m_RmlView.Document()->Show();
         }
         else
+        {
+            m_LineHint.Hide();
             m_RmlView.Document()->Hide();
+        }
     }
 }
 
@@ -411,6 +428,42 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     BuildSubjectTexts();
     BuildTableTexts();
     BuildAttributeLines();
+    BuildCriticalHits();
+}
+
+void mu::ui::window::CCharacterInfoWindow::BuildCriticalHits()
+{
+    const UI::Character::CriticalHitTexts::Parts parts{
+        GameLogic::Combat::GetHeroCriticalDamageRate(), GameLogic::Combat::GetHeroCriticalDamageBonus(),
+        GameLogic::Combat::GetHeroExcellentDamageBonus(), m_DamageRange, I18N::GetCurrentLocale()};
+    m_CriticalHitTexts.Update(parts);
+    const UI::Character::CriticalDamageRateLine& line = m_CriticalHitTexts.RateLine();
+
+    auto& model = m_RmlView.GetModel();
+    // A theme reload makes a new model, so the line is compared with the model's, not with what was built.
+    if (model.criticalDamageRateLine.text != line.text || model.criticalDamageRateLine.source != line.source)
+    {
+        model.criticalDamageRateLine = {line.text, line.source, CriticalDamageRateHint};
+        m_RmlView.MarkDirty("critical_damage_rate_line");
+    }
+    // BuildAttributeLines writes the damage line every frame; it takes the buffs' colour here.
+    if (parts.bonus.Buff() > 0 && !model.strLines.empty())
+    {
+        model.strLines.front().source = "buffed";
+    }
+
+    switch (m_LineHint.Hovered())
+    {
+    case DamageHint:
+        m_LineHint.Show(m_CriticalHitTexts.DamageHintLines());
+        break;
+    case CriticalDamageRateHint:
+        m_LineHint.Show(m_CriticalHitTexts.RateHintLines());
+        break;
+    default:
+        m_LineHint.Hide();
+        break;
+    }
 }
 
 void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
@@ -867,8 +920,11 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
         attackDamageSource = "buffed";
     }
 
+    // The damage the line shows (only the maximum when the minimum reaches it), for its hint.
+    const int shownMaximum = iAttackDamageMax + iMaxIndex;
+    m_DamageRange = {std::min(iAttackDamageMin + iMinIndex, shownMaximum), shownMaximum};
     model.strLines.clear();
-    model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageSource });
+    model.strLines.push_back({StringUtils::WideToNarrow(strAttakMamage), attackDamageSource, DamageHint});
 
     if (iAttackRatingPK > 0)
     {

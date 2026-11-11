@@ -8,13 +8,20 @@
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Render/Items/LookDrawing.h"
+
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 #include <algorithm>
+#include <memory>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -68,6 +75,17 @@ void RestoreSharedModel(const std::string& name, const std::optional<SharedItemM
     }
 }
 
+std::vector<Data::Items::PartModel> ReadPartModels()
+{
+    const std::span<const Data::Items::PartModel> parts = g_ItemModelDatabase.GetPartModels();
+    return {parts.begin(), parts.end()};
+}
+
+void RestorePartModels(const std::vector<Data::Items::PartModel>& parts)
+{
+    g_ItemDataHandler.SetPartModels(parts);
+}
+
 std::vector<Data::Effects::GlowColor> ReadGlowColors()
 {
     const std::span<const Data::Effects::GlowColor> colors = g_GlowColors.GetColors();
@@ -77,6 +95,16 @@ std::vector<Data::Effects::GlowColor> ReadGlowColors()
 void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
 {
     g_ItemDataHandler.RestoreGlowColors(colors);
+}
+
+Data::Items::ItemNameCases ReadNameCases()
+{
+    return g_ItemDatabase.GetNameCases();
+}
+
+void RestoreNameCases(const Data::Items::ItemNameCases& cases)
+{
+    g_ItemDataHandler.SetNameCases(cases);
 }
 
 std::vector<Data::Items::GroundLabelStyle> ReadGroundLabelStyles()
@@ -111,6 +139,21 @@ void RestoreColorFolders(std::string_view root, std::span<const Data::Colors::Co
     }
 }
 
+Data::Looks::LookFile ReadLookFile(Data::Looks::LookKind kind)
+{
+    return g_ItemDataHandler.GetLookFile(kind);
+}
+
+// The game draws the looks at once, with the textures they name.
+void RestoreLookFile(Data::Looks::LookKind kind, const Data::Looks::LookFile& file)
+{
+    g_ItemDataHandler.SetLookFile(kind, file);
+    for (const Data::Looks::LookDefinition& look : g_ItemDataHandler.GetLookFile(kind).looks)
+    {
+        Render::Items::Looks::PrepareTextures(look);
+    }
+}
+
 Data::Items::ItemStatFile ReadStatFile()
 {
     return g_ItemDataHandler.GetStatFile();
@@ -142,11 +185,33 @@ ItemEdits& ItemEdits::GetInstance()
 }
 
 ItemEdits::ItemEdits()
-    : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
-                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
-                 &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
-                 &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
-                 &RestoreColorFolders})
+    : m_history({&ItemEdits::ReadSlot,
+                 &RestoreSlots,
+                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); },
+                 &ReadSharedModel,
+                 &RestoreSharedModel,
+                 &IsHeldByCharacter,
+                 &ReadGlowColors,
+                 &RestoreGlowColors,
+                 &ReadStatFile,
+                 &RestoreStatFile,
+                 &ReadGroundLabelStyles,
+                 &RestoreGroundLabelStyles,
+                 &ReadColorFolders,
+                 &RestoreColorFolders,
+                 &ReadLookFile,
+                 &RestoreLookFile,
+                 [](int number) { return g_MonsterDataHandler.ReadMonster(number); },
+                 [](std::span<const Data::Monsters::MonsterSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreMonsters(snapshots); },
+                 [](int id) { return g_MonsterDataHandler.ReadGroup(id); },
+                 [](std::span<const Data::Monsters::MonsterGroupSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreGroups(snapshots); },
+                 [this](const ItemEditStep& step, bool undoing) { NoteMonsterItems(step, undoing); },
+                 &ReadNameCases,
+                 &RestoreNameCases,
+                 &ReadPartModels,
+                 &RestorePartModels})
 {
 }
 
@@ -254,7 +319,7 @@ bool ItemEdits::RemoveItem(std::string label, int itemType)
     return removed;
 }
 
-bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
+bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType, bool updateMonsters)
 {
     if (IsHeldByCharacter(fromItemType))
     {
@@ -265,10 +330,163 @@ bool ItemEdits::MoveItem(std::string label, int fromItemType, int toItemType)
     {
         return false;
     }
-    Record({std::move(label),
-            {{ItemEditStep::Kind::Move, fromItemType, toItemType, std::move(before), ReadSlot(toItemType), std::nullopt,
-              std::nullopt}}});
+    ItemEditEntry entry{std::move(label),
+                        {{ItemEditStep::Kind::Move, fromItemType, toItemType, std::move(before), ReadSlot(toItemType),
+                          std::nullopt, std::nullopt}}};
+    if (updateMonsters)
+    {
+        if (std::optional<ItemEditStep> monsters = UpdateMonsterItems(fromItemType, toItemType))
+        {
+            entry.steps.push_back(std::move(*monsters));
+        }
+    }
+    Record(std::move(entry));
     return true;
+}
+
+std::optional<ItemEditStep> ItemEdits::UpdateMonsterItems(int fromItemType, int toItemType)
+{
+    ItemEditStep step{ItemEditStep::Kind::MonsterItems};
+    std::set<int> groups;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+        if (monster == nullptr)
+        {
+            continue;
+        }
+        Data::Monsters::MonsterDefinition changed = *monster;
+        if (Data::Monsters::ReplaceItemReferences(changed, fromItemType, toItemType) == 0)
+        {
+            continue;
+        }
+        step.monstersBefore.push_back({number, *monster});
+        step.monstersAfter.push_back({number, std::move(changed)});
+        if (const std::optional<int> group = g_MonsterDataHandler.FindGroupOf(number))
+        {
+            groups.insert(*group);
+        }
+    }
+    if (step.monstersBefore.empty())
+    {
+        return std::nullopt;
+    }
+    for (const int id : groups)
+    {
+        std::optional<Data::Monsters::MonsterGroupLayout> group = g_MonsterDataHandler.ReadGroup(id);
+        if (!group)
+        {
+            continue;
+        }
+        Data::Monsters::MonsterGroupLayout changed = *group;
+        if (Data::Monsters::ReplaceItemReferences(changed.shared, fromItemType, toItemType) == 0)
+        {
+            continue;
+        }
+        step.monsterGroupsBefore.push_back({id, std::move(group)});
+        step.monsterGroupsAfter.push_back({id, std::move(changed)});
+    }
+    g_MonsterDataHandler.RestoreMonsters(step.monstersAfter);
+    g_MonsterDataHandler.RestoreGroups(step.monsterGroupsAfter);
+    NoteMonsterItems(step, false);
+    return step;
+}
+
+void ItemEdits::NoteMonsterItems(const ItemEditStep& step, bool undoing)
+{
+    using Data::Monsters::MonsterItemChange;
+    using Data::Monsters::MonsterItemPlace;
+    // The places in their order; a step changes only the items' numbers, so
+    // both sides have the same places.
+    const auto itemsOf = [](const std::optional<Data::Monsters::MonsterDefinition>& monster)
+    {
+        std::vector<std::pair<MonsterItemPlace, int>> items;
+        if (monster)
+        {
+            Data::Monsters::ForEachMonsterItem(
+                *monster, [&](const Data::Monsters::MonsterItem& item, const MonsterItemPlace& place)
+                { items.emplace_back(place, Data::Items::MakeItemType(item.group, item.number)); });
+        }
+        return items;
+    };
+    for (size_t i = 0; i < step.monstersBefore.size() && i < step.monstersAfter.size(); ++i)
+    {
+        const auto before = itemsOf(step.monstersBefore[i].monster);
+        const auto after = itemsOf(step.monstersAfter[i].monster);
+        const int number = step.monstersBefore[i].number;
+        for (size_t place = 0; place < before.size() && place < after.size(); ++place)
+        {
+            if (before[place].first != after[place].first || before[place].second == after[place].second)
+            {
+                continue;
+            }
+            const int from = undoing ? after[place].second : before[place].second;
+            const int to = undoing ? before[place].second : after[place].second;
+            const auto pending =
+                std::ranges::find_if(m_monsterItems, [&](const MonsterItemChange& change)
+                                     { return change.number == number && change.place == before[place].first; });
+            if (pending == m_monsterItems.end())
+            {
+                m_monsterItems.push_back({number, before[place].first, from, to});
+            }
+            else if (pending->saved == to)
+            {
+                m_monsterItems.erase(pending);
+            }
+            else
+            {
+                pending->current = to;
+            }
+        }
+    }
+}
+
+Data::Items::ItemDataSaveResult ItemEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
+{
+    // The places the table still names as the moves left them.
+    std::vector<Data::Monsters::MonsterItemChange> changes;
+    for (const Data::Monsters::MonsterItemChange& change : m_monsterItems)
+    {
+        const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(change.number);
+        if (monster != nullptr && Data::Monsters::FindItemAt(*monster, change.place) == change.current)
+        {
+            changes.push_back(change);
+        }
+    }
+    std::optional<std::string> monsters;
+    if (!changes.empty())
+    {
+        bool changed = false;
+        const size_t first = issues.size();
+        monsters = g_MonsterDataHandler.MakeMonstersFileWith(
+            [&](std::vector<Data::Monsters::MonsterGroup>& groups)
+            {
+                changed = Data::Monsters::ApplyMonsterItemChanges(groups, changes);
+                return changed;
+            },
+            issues);
+        // The file cannot be read, or would not read back: no file is written,
+        // so the items and the monsters stay alike.
+        const bool failed = std::any_of(issues.begin() + static_cast<std::ptrdiff_t>(first), issues.end(),
+                                        [](const Data::Items::ItemDataIssue& issue)
+                                        { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+        if (failed || (changed && !monsters))
+        {
+            return Data::Items::ItemDataSaveResult::InvalidData;
+        }
+    }
+    std::vector<Data::TextFileToWrite> alsoWrite;
+    if (monsters)
+    {
+        alsoWrite.push_back({Data::Monsters::GetMonstersFile(), *monsters});
+    }
+    const Data::Items::ItemDataSaveResult result = g_ItemDataHandler.Save(issues, alsoWrite);
+    if (result == Data::Items::ItemDataSaveResult::Saved)
+    {
+        m_history.MarkSaved();
+        m_monsterItems.clear();
+    }
+    return result;
 }
 
 void ItemEdits::SetItemModel(std::string label, const ItemModelDefinition& model)
@@ -391,6 +609,44 @@ void ItemEdits::SetColorFolders(std::string label, std::string_view root,
     Record(std::move(entry));
 }
 
+void ItemEdits::SetRenderStyles(std::string label, Data::Looks::RenderStylesFile file)
+{
+    SetLookFile(std::move(label), Data::Looks::LookKind::RenderStyle, std::move(file));
+}
+
+void ItemEdits::SetLookFile(std::string label, Data::Looks::LookKind kind, Data::Looks::LookFile file)
+{
+    // Compared as the item data keeps the file, its looks sorted by name: a file as it is changes nothing, so it
+    // neither marks the file for Save nor counts as a change of the looks.
+    std::ranges::sort(file.looks, {}, &Data::Looks::LookDefinition::name);
+    auto before = std::make_shared<const Data::Looks::LookFile>(ReadLookFile(kind));
+    if (*before == file)
+    {
+        return;
+    }
+    RestoreLookFile(kind, file);
+    auto after = std::make_shared<const Data::Looks::LookFile>(ReadLookFile(kind));
+    ItemEditStep step{ItemEditStep::Kind::RenderStyles};
+    step.lookKind = kind;
+    step.renderStylesBefore = std::move(before);
+    step.renderStylesAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+}
+
+void ItemEdits::SetPartModels(std::string label, std::vector<Data::Items::PartModel> parts)
+{
+    std::vector<Data::Items::PartModel> before = ReadPartModels();
+    if (parts == before)
+    {
+        return;
+    }
+    RestorePartModels(parts);
+    ItemEditStep step{ItemEditStep::Kind::PartModels};
+    step.partModelsBefore = std::move(before);
+    step.partModelsAfter = ReadPartModels();
+    Record({std::move(label), {std::move(step)}});
+}
+
 void ItemEdits::SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors)
 {
     std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
@@ -427,6 +683,20 @@ void ItemEdits::AddFolderStep(ItemEditEntry& entry, std::string_view root,
     step.foldersBefore = std::move(before);
     step.foldersAfter = std::move(after);
     entry.steps.push_back(std::move(step));
+}
+
+void ItemEdits::SetNameCases(std::string label, const Data::Items::ItemNameCases& cases)
+{
+    Data::Items::ItemNameCases before = ReadNameCases();
+    if (before == cases)
+    {
+        return;
+    }
+    g_ItemDataHandler.SetNameCases(cases);
+    ItemEditStep step{ItemEditStep::Kind::NameCases};
+    step.casesBefore = std::move(before);
+    step.casesAfter = cases;
+    Record({std::move(label), {std::move(step)}});
 }
 
 void ItemEdits::SetGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style)
@@ -521,7 +791,7 @@ void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& 
 
 void ItemEdits::BeginGroup(std::string label)
 {
-    if (!m_group)
+    if (m_groupDepth++ == 0)
     {
         m_group = ItemEditEntry{std::move(label), {}};
     }
@@ -529,6 +799,10 @@ void ItemEdits::BeginGroup(std::string label)
 
 void ItemEdits::EndGroup()
 {
+    if (m_groupDepth == 0 || --m_groupDepth > 0)
+    {
+        return;
+    }
     if (m_group)
     {
         ItemEditEntry entry = std::move(*m_group);
@@ -557,6 +831,8 @@ void ItemEdits::Record(ItemEditEntry entry)
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
                         step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
                         step.kind == ItemEditStep::Kind::GroundLabelStyles ||
+                        (step.kind == ItemEditStep::Kind::RenderStyles && grouped.lookKind == step.lookKind) ||
+                        step.kind == ItemEditStep::Kind::PartModels ||
                         (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
@@ -578,6 +854,14 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::StatFile)
         {
             same->statFileAfter = std::move(step.statFileAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::RenderStyles)
+        {
+            same->renderStylesAfter = std::move(step.renderStylesAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::PartModels)
+        {
+            same->partModelsAfter = std::move(step.partModelsAfter);
         }
         else
         {

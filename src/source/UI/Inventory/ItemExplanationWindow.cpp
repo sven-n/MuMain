@@ -123,6 +123,7 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
 
     // The original's heading: "Item info" and the item's name, between half lines.
     TextNum = 0;
+    ClearTooltipRows();
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
     wcscpy(TextList[TextNum], I18N::Game::ItemInfo);
@@ -141,6 +142,7 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
 
     // Under the table: which classes can equip it, and the closing half line.
     TextNum = 0;
+    ClearTooltipRows();
     RequireClass(p);
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;

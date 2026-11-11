@@ -35,6 +35,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "Guild/GuildCache.h"
 #include "UI/HUD/UIMapName.h"
@@ -145,6 +146,8 @@ static bool ShouldRenderLeaves()
 static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
+    // The character's key configuration arrives after the selection below.
+    SetKeyConfigurationReceived(false);
 
     MU_LOG_INFO(mu::log::Get("scenes"), "Character selected: slot {}", SelectedHero + 1);
 
@@ -363,6 +366,7 @@ static void UpdateMainSceneView()
     CullWorld();
     // The frame's lights, from every light the update added; the draw only shows them.
     AddFrameHistoryLights();
+    Scenes::Lighting::PinWorldDynamicLights();
 }
 
 /**
@@ -527,6 +531,10 @@ bool IsBodyShadowsDisabledDebug()
 {
     return g_bDisableBodyShadowsDebug;
 }
+bool ModelShadowsEnabled()
+{
+    return (g_pOption == nullptr || g_pOption->GetRenderAllEffects()) && !IsBodyShadowsDisabledDebug();
+}
 
 static bool g_bDisableJointsDebug = false;
 void SetDisableJoints(bool disabled)
@@ -591,7 +599,10 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+            {
+                FRAME_PROFILE(Terrain);
+                RenderTerrain(false);
+            }
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
@@ -601,11 +612,22 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
                     FRAME_PROFILE(Objects);
                     Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
                     Render::Drawing::ScopedReorderableDraws reorderable;
+                    std::optional<Render::Drawing::ScopedNoSunCasters> objectsCastNone;
+                    if (!ModelShadowsEnabled())
+                        objectsCastNone.emplace();
                     RenderObjects();
                 }
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                {
+                    FRAME_PROFILE(Terrain);
+                    RenderTerrain(false);
+                }
             }
     }
+
+    // Past the terrain, which keeps casting: what the switches take the shadows of casts none in the sun's map either.
+    std::optional<Render::Drawing::ScopedNoSunCasters> modelsCastNone;
+    if (!ModelShadowsEnabled())
+        modelsCastNone.emplace();
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
     {
@@ -621,7 +643,11 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         RenderBoids();
     }
 
-    { FRAME_PROFILE(Characters); RenderCharactersClient(); }
+    {
+        FRAME_PROFILE(Characters);
+        Render::Drawing::ScopedCharacterDraws characterDraws;
+        RenderCharactersClient();
+    }
 
     if (EditFlag != EDIT_NONE && renderTerrain)
     {
@@ -675,6 +701,7 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
     EndSprite();
 
     RenderAfterEffects();
+    modelsCastNone.reset();
     if (later)
         later->Flush();
 
@@ -689,6 +716,8 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         if (Render::Drawing::DrawsWorldLater())
             waterLater.emplace();
         RenderWaterTerrain();
+        if (!ModelShadowsEnabled())
+            modelsCastNone.emplace();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
         BeginSprite();
@@ -701,6 +730,7 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
         RenderPoints(byWaterMap);
 
         EndSprite();
+        modelsCastNone.reset();
         if (waterLater)
             waterLater->Flush();
         EndOpengl();

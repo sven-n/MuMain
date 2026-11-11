@@ -6,6 +6,8 @@
 
 #include "Render/Models/ZzzBMD.h"
 
+#include <optional>
+
 namespace   battleCastle
 {
     inline  bool    InBattleCastle2(vec3_t Position) { return (Position[0] >= 16100.f && Position[0] <= 19000.f && Position[1] >= 18900.f && Position[1] <= 21700.f); }
@@ -40,11 +42,25 @@ namespace   battleCastle
     bool    MoveBattleCastleVisual(OBJECT* o);
     bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b);
     bool RenderBattleCastleObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
-    void    MoveFlyBigStone(OBJECT* o);
-    CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
+    void MoveFlyBigStone(OBJECT* o);
     // Castle Gate 1 counts its attacks from 0 again when it appears.
     void ResetCastleGateAttackCount(CHARACTER* c, int Type);
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o);
+    // A castle gate's animations, opened and closed by its buff (Q-MN38c):
+    // its entry's gate; nullopt for a character that is no gate. A gate
+    // without an entry (the switch's) plays these.
+    struct GateLooks
+    {
+        int closed = 0;
+        int opening = 1;
+        int open = 2;
+        bool arrivalOpening = true;
+    };
+    std::optional<GateLooks> GateLooksOf(const CHARACTER& c);
+    // A gate that comes into view (0x13, 0x68), as its buff says: open, it
+    // plays its arrival animation and frees the tiles under it; closed, it
+    // plays closed and blocks them (0x68: only a gate with no buffs at all).
+    void ShowGateOnArrival(CHARACTER& c, const GateLooks& gate, int x, int y, bool closeOnlyWithoutBuffs);
     bool    MoveBattleCastleMonster(CHARACTER* c, OBJECT* o);
     // A guard that attacks takes its attack state; its animation is data.
     void SetGuardAttackState(OBJECT* o);

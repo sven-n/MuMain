@@ -195,12 +195,14 @@ The active locale is selected through the Option window's language dropdown
 (the single source of truth for the active locale; on startup
 `GameLogic/Config/GameConfig` re-applies it).
 
-`SetLocale` does three things:
+`SetLocale` does four things:
 
 1. Resolves `locale` to a `LocaleIndex` (unknown -> default 0).
 2. Calls each group's generated `ApplyLocale(int)` (a data-driven `kSlots`
    table that overwrites every `extern` pointer in the group).
-3. Fires every registered `LocaleObserver`.
+3. Points the texts that name items at their expansion
+   ([Texts that name items](#texts-that-name-items)).
+4. Fires every registered `LocaleObserver`.
 
 Most rendering picks up the change for free, because text is read straight
 from the now-updated `I18N::<Group>::Name` slot on the next frame. Widgets
@@ -317,9 +319,10 @@ names stay English; items that teach a skill name it after a colon
    menu lists every locale from `GetAvailableLocales` by itself.
 4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
-5. To show item, monster and NPC names in the new language, add them to the
-   item data and the monster list; see [Item names](#item-names) and
-   [Monster and NPC names](#monster-and-npc-names).
+5. To show item, monster and NPC names and buff names and descriptions in the
+   new language, add them to the item data, the monster list and the buffs;
+   see [Item names](#item-names), [Monster and NPC names](#monster-and-npc-names)
+   and [Buff names](#buff-names).
 
 ## Item names
 
@@ -394,6 +397,13 @@ language, English first.
 **Item Basics** edits the English name. Each name change is one step of
 the item tools' Undo and Redo.
 
+Above the grid, **Name forms** shows the selected item's forms for the texts that
+name it with a case ([Texts that name items](#texts-that-name-items)): a row for
+its name and one for each name of a level, per language that declines names,
+with a field per case. An empty field shows the name it falls back to, greyed;
+each change is a step of Undo. The line above the table counts the texts that
+name the item; hover it for the list.
+
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
@@ -425,6 +435,62 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Texts that name items
+
+A text names an item by its number instead of spelling its name, and the game
+puts the item's name in when it shows the text:
+
+| Written | Shows (English, German) |
+|---|---|
+| `{item:14,13}` | Jewel of Bless, Juwel des Segens |
+| `{item:13,20+3}` | the name of item 13,20 at level 3: Ring of glory |
+| `{item:14,25:acc}` | the accusative of the name, where the language has one |
+| `{item:14,21+2:gen}` | both |
+
+The numbers are the item's group and number, as the editor shows them (`14,13`
+in Item Translations, `Jewel of Bless (14,13)` in logs). `+level` picks the
+item's name at that level (its name line, [item-data.md](item-data.md#name-lines)),
+for items whose name changes with the level, such as Box of Kundun +1 (`14,11+8`).
+
+- **Where:** the `Game` and `Dialog` texts (`ResxGen --item-text-groups`), and
+  the item data's own texts: description lines, name lines, and the shared texts
+  and layout lines of `Tooltips/Tooltip.json`. Not the editor's texts.
+- **Which name:** the item name language, so the names follow **Translate item
+  names**: with it off a Polish text shows `Jewel of Bless`, as the inventory
+  does, while the rest of the text stays Polish. A language whose file has no
+  text of its own for the key shows the English text, and names the items in
+  English like it; so does an item data text without a translation of its own.
+- **When:** a text is expanded when the language switches, when the item data
+  is loaded, when Translate item names changes and when the editor changes a
+  name; the text's pointer then shows the expansion, so the code that shows a
+  text needs nothing. Code that keeps a copy of a text (an NPC dialog's lines)
+  registers with `ItemTexts::RegisterTextsChangedObserver` as well as with
+  `RegisterLocaleObserver`: a change of names calls only the first, since the
+  language stayed. Before the item data is loaded a text shows `{item:...}`
+  as written (no such text is shown that early). A number no item has, or a
+  level above +15, stays as written, and the rest of the text is still filled
+  in; so does a name with `%` in a Game or Dialog text, a printf format that
+  would read it as a conversion.
+- **Grammar:** languages that decline names (German, Polish) can ask for a form
+  with `:gen`, `:dat`, `:acc`, `:ins` or `:loc`. The forms are part of the item
+  data (`nameForms`, [item-data.md](item-data.md#name-forms)) and edited in Item
+  Translations; `Tooltips/NameCases.json` gives each language its cases. A
+  missing form shows the name itself. English has no forms.
+- **Translations** of an item's own text must name the same items as the English
+  text; the case may differ (`{item:14,25}` in English, `{item:14,25:acc}` in
+  Polish). The UI texts may spell a name in a language that has no item names
+  yet (Russian, Japanese, ...): a reference there would show the English name.
+
+A malformed reference in a `.resx` file (`{item:14;13}`, an unknown case) stops
+the build with the file, key and text, and so does a reference in the texts of
+another group (the editor's), which the game would show as written. In the
+editor, **Data Checks** lists the texts under **Texts**: a number or a level no
+item has, a level whose name needs game values (a skill's or monster's name), a
+level without a name of its own, a missing form, a translation that names other
+items than the English text, and one that still spells the names the English
+text writes by number, in a language the item data has those names in. A click selects the item and opens Item
+Translations (or the tool of an item's own text).
 
 ## Simplified Chinese (`zh-CN`)
 
@@ -472,6 +538,13 @@ the selected language. Class descriptions also refresh while the window is open.
 Character names require at least four characters. Fruit names, attribute names
 and descriptions are translated; enable **Translate item names** to display the
 translated item names.
+
+The inventory and expanded inventory controls, common item-use restrictions,
+selling confirmations and repair prices are translated. Equipment tooltips show
+Chinese damage, defense, durability, resistance and requirement labels, including
+missing attribute amounts. These shared tooltips also appear in shops and other
+item windows. Item names still depend on **Translate item names** and the item's
+available name translations.
 
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
@@ -525,7 +598,10 @@ Each monster's `name` lists its names by language code, as an item's does
 
 The **Monster Translations** window (editor builds, **Windows → Monsters →
 Monster Translations**) shows the monster names as a grid: one row per
-monster number, one column per UI language, English first. It works like
+monster, one column per UI language, English first. A monster with several
+numbers has one row for the names they share ("145 (3)": its first number
+and how many it has), and a row for each of its numbers with names of its
+own or made its own in the Monster Browser. It works like
 [Item Translations](#in-the-item-editor):
 
 - Each language's column header says how many monsters have no name of
@@ -535,11 +611,13 @@ monster number, one column per UI language, English first. It works like
   name. An empty cell shows the English name it falls back to, greyed.
 - Right-click a cell: **Same as English** writes the English name for a name
   that is the same in that language; **Remove translation** removes it.
-- The search finds a monster by its number or by any of its names (A to Z in
-  either case). Clicking the number selects the monster in the other monster
-  tools and shows the **Monster Browser**. The monster the tools show is
-  marked, and a monster selected in another tool is scrolled to (the search
-  and filter are cleared when they hide it).
+- The search finds a monster by any of its numbers or by any of its names (A
+  to Z in either case). Clicking the number selects the monster in the other
+  monster tools (a monster's row: the monster as a whole) and shows the
+  **Monster Browser**. The monster the tools show is marked, a number that
+  shares its monster's names on the monster's row, and a monster selected in
+  another tool is scrolled to (the search and filter are cleared when they
+  hide it).
 - A name cannot contain `||`, and the English name cannot be emptied (252,
   whose English name is empty, stays so). Names are stored whole, also when
   they are longer than the 64 characters the game shows.
@@ -558,6 +636,13 @@ export writes the names of every monster, in English where a language has
 none. Names in other languages exist only in the monster list. The rules
 are in
 [monster-data.md → Import and export of NpcName txt](monster-data.md#import-and-export-of-npcname-txt).
+
+## Buff names
+
+Buff names and descriptions are not in the `.resx` files either. They are in
+`src/bin/Data/Buffs/Buffs.json` ([buff-data.md](buff-data.md)): each buff's
+`displayName` and `description` hold the texts by language code. The game
+shows them in the UI language and falls back to English.
 
 ## Migration history
 

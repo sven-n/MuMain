@@ -1,10 +1,14 @@
 #pragma once
 
+#include "Data/GameData/Common/LocalizedString.h"
+
 #include <functional>
 #include <optional>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace Data::Items
@@ -74,6 +78,14 @@ enum class TooltipValue : unsigned char
 std::optional<TooltipValue> FindBuiltInPlaceholder(std::string_view name);
 std::string_view GetBuiltInPlaceholderName(TooltipValue value);
 
+// "item:<group>,<number>" (with "+<level>" and ":<case>") names an item, whose name the text shows: the item reference
+// of the UI texts (Data/Translation/ItemReference.h, docs/translation-system.md), written without its braces.
+bool IsItemReferencePlaceholder(std::string_view name);
+
+// The placeholders a translation must have for the English text's `names`: each once, and an item reference without
+// its case, which a translation may add or change ({item:14,25} in English, {item:14,25:acc} in Polish).
+std::set<std::string> ToParityPlaceholders(std::span<const std::string> names);
+
 // "table:<name>" names a level bonus table.
 inline constexpr std::string_view TablePlaceholderPrefix = "table:";
 // The placeholder of the table (without its braces): "table:<table>".
@@ -107,6 +119,12 @@ struct PlaceholderScan
     std::string error; // empty when the text is fine
 };
 PlaceholderScan ScanPlaceholders(std::string_view text);
+
+// The problems of a text's placeholders, each a field and its message: braces that are no placeholders, in English
+// (`field`) or a translation (`field` and its language), and a translation without the English text's placeholders
+// (ToParityPlaceholders: an item reference's case may differ).
+std::vector<std::pair<std::string, std::string>> CheckTextPlaceholders(const LocalizedString& text,
+                                                                       const std::string& field);
 
 // The placeholders of a text with where each is (from its "{" to past its "}"), up to the first problem of its braces:
 // `stop` is where that problem starts, or npos when the whole text was read. FillPlaceholders leaves the text as

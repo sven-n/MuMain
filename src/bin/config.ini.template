@@ -23,6 +23,8 @@ UIScalePercent=100
 [Camera]
 Zoom=1735
 [Render]
+; Original S6 bodies when 1, improved bodies when 0. Restart required.
+UseS6PlayerModels=1
 VSync=1
 Look=Classic
 Anisotropy=8

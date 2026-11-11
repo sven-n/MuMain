@@ -3014,7 +3014,7 @@ else Angle[2] = TurnAngle2(Angle[2],0.f,FarAngle(Angle[2],0.f)*0.5f);
 
 //LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-void MoveJoint(JOINT* o, int iIndex)
+static void MoveJoint(JOINT* o, int iIndex)
 {
     float Height;
     vec3_t Light;
@@ -3822,7 +3822,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 if ((int)o->LifeTime % 15 == 0)
                 {
                     if (o->Target == &Hero->Object)
-                        AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey, o->m_bySkillSerialNum);
+                        SpinMonstersInTornado(o->Position, 150.f);
                 }
 #endif // CSK_EVIL_SKILL
             }
@@ -6989,18 +6989,35 @@ void MoveJoint(JOINT* o, int iIndex)
     {
         o->Live = false;
     }
-    else if (0 != (((int)o->LifeTime) % 12))
+}
+
+// The spear flares (Impale's and Death Stab's, which the Raklion Iron Knights use too) move again within a frame until
+// their life time reaches a multiple of SPEAR_FLARE_LIFE_STEP. Each move takes FPS_ANIMATION_FACTOR off it, so a very
+// short frame asks for thousands of moves: MoveJoint used to call itself for each and overflowed the stack. The repeats
+// are a loop now, capped at MAX_SPEAR_FLARE_MOVES; a frame needs at most SPEAR_FLARE_LIFE_STEP / FPS_ANIMATION_FACTOR
+// of them, so the cap only binds above ~530 FPS.
+static constexpr int SPEAR_FLARE_LIFE_STEP = 12;
+static constexpr int IMPALE_FLARE_SUBTYPE = 4;
+static constexpr int DEATH_STAB_FLARE_SUBTYPE = 12;
+
+static bool IsSpearFlare(const JOINT* o)
+{
+    return (o->Type == BITMAP_FLARE || o->Type == BITMAP_FLARE_BLUE) &&
+           (o->SubType == IMPALE_FLARE_SUBTYPE || o->SubType == DEATH_STAB_FLARE_SUBTYPE);
+}
+
+static bool MovesAgainThisFrame(const JOINT* o)
+{
+    return o->Live && IsSpearFlare(o) && static_cast<int>(o->LifeTime) % SPEAR_FLARE_LIFE_STEP != 0;
+}
+
+// A joint's moves for one frame: one, or for a live spear flare as many as reach its next life time step.
+static void MoveJointForFrame(JOINT* o, int iIndex)
+{
+    MoveJoint(o, iIndex);
+    for (int moves = 1; moves < MAX_SPEAR_FLARE_MOVES && MovesAgainThisFrame(o); ++moves)
     {
-        switch (o->Type)
-        {
-        case BITMAP_FLARE:
-        case BITMAP_FLARE_BLUE:
-            if (o->SubType == 4 || o->SubType == 12)
-            {
-                MoveJoint(o, iIndex);
-            }
-            break;
-        }
+        MoveJoint(o, iIndex);
     }
 }
 
@@ -7096,7 +7113,7 @@ void MoveJoints()
             // its maker (Charon's energy sparks reaching her hand).
             std::optional<Audio::ScopedSoundPlace> place;
             Audio::PlaceEffect(place, o, o->Type, o->Position);
-            MoveJoint(o, i);
+            MoveJointForFrame(o, i);
         }
     }
     UpdateDrawnJointEffects();

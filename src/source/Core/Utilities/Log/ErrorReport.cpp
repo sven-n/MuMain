@@ -4,25 +4,36 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#ifdef _WIN32
-#include <ddraw.h>
-#include <dinput.h>
-#include <dmusicc.h>
-#include <eh.h>
-#include <imagehlp.h>
-#endif
 #include "ErrorReport.h"
 #include "Core/Platform/Audio/AudioDeviceNames.h"
+#include "Core/Utilities/BuildInfo.h"
+#include "Core/Utilities/PlatformInfo.h"
+#include "Core/Utilities/VersionFiles.h"
+#include "MuGitCommit.h"
 #include "Render/Renderer/MuRenderer.h"
 
 #include <string>
+#include <thread>
 
 CErrorReport g_ErrorReport;
 
-void DeleteSocket();
-
 namespace
 {
+const char* OrUnknown(const char* text)
+{
+    return (text != nullptr && *text != '\0') ? text : "unknown";
+}
+
+// When the executable was linked. __DATE__ and __TIME__ are only when this file was compiled, which an incremental
+// build skips while the commit and its "local changes" mark stay the same; they are the fallback.
+std::string DescribeBuildTime()
+{
+    const std::string written = Core::Build::DescribeFileTime(Core::Platform::GetExecutablePath());
+    if (!written.empty())
+        return "built " + written;
+    return std::string("compiled ") + Core::Build::kDate + " " + Core::Build::kTime;
+}
+
 std::string WideToUtf8(const wchar_t* value)
 {
     if (value == nullptr)
@@ -111,21 +122,41 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
     }
 }
 
-void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
+// Which client a report came from: the release download, the commit it was built from (so an old build is easy
+// to spot), how it was built, and whether the installed data belongs to it.
+void CErrorReport::WriteBuildInfo(void)
 {
-    Write(L"<System information>\r\n");
-    Write(L"OS \t\t\t: %ls\r\n", si->m_lpszOS);
-    Write(L"CPU \t\t\t: %ls\r\n", si->m_lpszCPU);
-    Write(L"RAM \t\t\t: %lldMB\r\n", static_cast<long long>(1 + (si->m_iMemorySize / 1024 / 1024)));
-    AddSeparator();
-    Write(L"GPU Backend \t\t: %ls\r\n", si->m_lpszGpuBackend);
+    const std::string release =
+        Core::Build::DescribeRelease(Core::Build::ReadVersionFile(Core::Build::kReleaseVersionFile));
+    Write(L"Release \t\t: %hs\r\n", release.c_str());
+
+    const bool hasLocalChanges = MU_GIT_COMMIT_CHANGED != 0;
+    Write(L"Build commit \t\t: %hs%ls\r\n", MU_GIT_COMMIT, hasLocalChanges ? L" (with local changes)" : L"");
+    Write(L"Build \t\t\t: %hs %hs %hs %hs, %hs\r\n", Core::Build::kConfiguration, Core::Build::kEditor,
+          Core::Build::kCompiler, Core::Build::kArchitecture, DescribeBuildTime().c_str());
+
+    const std::string data =
+        Core::Build::DescribeData(Core::Build::ReadVersionFile(Core::Build::kDataVersionFile), MU_DATA_ASSET_ID);
+    Write(L"Data \t\t\t: %hs\r\n", data.c_str());
 }
 
-void CErrorReport::WriteOpenGLInfo(void)
+void CErrorReport::WriteSystemInfo(void)
 {
-    Write(L"<Renderer information>\r\n");
-    Write(L"API\t\t: SDL_gpu\r\n");
-    Write(L"Driver\t\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
+    Write(L"<System information>\r\n");
+    Write(L"OS \t\t\t: %ls\r\n", Core::Platform::GetOSVersionDetails().c_str());
+    Write(L"CPU \t\t\t: %hs (%u threads)\r\n", OrUnknown(Core::Platform::GetProcessorName().c_str()),
+          std::thread::hardware_concurrency());
+    Write(L"RAM \t\t\t: %d MB\r\n", Core::Platform::GetSystemMemoryMB());
+}
+
+// Once the renderer is up: the GPU, the graphics API SDL picked, and the driver version where the API reports
+// one (Vulkan and Direct3D 12 do, Metal doesn't).
+void CErrorReport::WriteGpuInfo(void)
+{
+    const auto& renderer = mu::GetRenderer();
+    Write(L"GPU \t\t\t: %hs\r\n", OrUnknown(renderer.GetGPUDeviceName()));
+    Write(L"GPU API \t\t: %hs\r\n", OrUnknown(renderer.GetGPUDriverName()));
+    Write(L"GPU driver \t\t: %hs\r\n", OrUnknown(renderer.GetGPUDriverVersion()));
 }
 
 void CErrorReport::WriteFontInfo(void)
@@ -160,10 +191,9 @@ void CErrorReport::WriteFontInfo(void)
 #endif
 }
 
-// ---- Win32 crash-report system info -----------------------------------------
-// IME / sound-card / OS / CPU / DirectX details for the crash log. These pull in
-// DirectX and other Win32 APIs and are only invoked from the Windows entry point
-// (Winmain), so guard the whole section off on non-Windows (issue #462).
+// ---- Win32 crash-report details -----------------------------------------------
+// IME and sound-card details for the crash log. The Windows versions use Win32
+// types, so they are split from the other platforms' (issue #462).
 #ifdef _WIN32
 
 void CErrorReport::WriteImeInfo(SDL_Window* /*window*/)
@@ -217,419 +247,7 @@ void CErrorReport::WriteSoundCardInfo(void)
     for (const auto& name : names) Write(L"Description \t\t: %hs\r\n", name.c_str());
 }
 
-void GetOSVersion(ER_SystemInfo* si)
-{
-    const wchar_t* lpszUnknown = L"Unknown";
-    wchar_t lpszTemp[256];
-
-    OSVERSIONINFO osiOne;
-    osiOne.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osiOne);
-
-    int iBuildNumberType = 0;
-    mu_swprintf(si->m_lpszOS, L"%ls %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
-
-    switch (osiOne.dwMajorVersion)
-    {
-    case 3:	// NT 3.51
-        switch (osiOne.dwMinorVersion)
-        {
-        case 51:
-            wcscpy(si->m_lpszOS, L"Windows NT 3.51");
-            break;
-        }
-        break;
-    case 4:
-        switch (osiOne.dwMinorVersion)
-        {
-        case 0:
-            switch (osiOne.dwPlatformId)
-            {
-            case VER_PLATFORM_WIN32_WINDOWS:
-                wcscpy(si->m_lpszOS, L"Windows 95 ");
-                if (osiOne.szCSDVersion[1] == 'C' || osiOne.szCSDVersion[1] == 'B')
-                {
-                    wcscat(si->m_lpszOS, L"OSR2");
-                }
-                iBuildNumberType = 1;
-                break;
-            case VER_PLATFORM_WIN32_NT:
-                wcscpy(si->m_lpszOS, L"Windows NT 4.0 ");
-                break;
-            }
-            break;
-        case 10:
-            wcscpy(si->m_lpszOS, L"Windows 98 ");
-            if (osiOne.szCSDVersion[1] == 'A')
-            {
-                wcscat(si->m_lpszOS, L"SE ");
-            }
-            iBuildNumberType = 1;
-            break;
-        case 90:
-            wcscpy(si->m_lpszOS, L"Windows Me ");
-            iBuildNumberType = 1;
-            break;
-        }
-        break;
-    case 5:
-        switch (osiOne.dwMinorVersion)
-        {
-        case 0:
-            wcscpy(si->m_lpszOS, L"Windows 2000 ");
-            {
-                HKEY hKey;
-                DWORD dwBufLen;
-                if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\ProductOptions",
-                    0, KEY_QUERY_VALUE, &hKey))
-                {
-                    if (ERROR_SUCCESS == RegQueryValueEx(hKey, L"ProductType", NULL, NULL, (LPBYTE)lpszTemp, &dwBufLen))
-                    {
-                        if (0 == lstrcmpi(L"WINNT", lpszTemp))
-                        {
-                            wcscat(si->m_lpszOS, L"Professional ");
-                        }
-                        if (0 == lstrcmpi(L"LANMANNT", lpszTemp))
-                        {
-                            wcscat(si->m_lpszOS, L"Server ");
-                        }
-                        if (0 == lstrcmpi(L"SERVERNT", lpszTemp))
-                        {
-                            wcscat(si->m_lpszOS, L"Advanced Server ");
-                        }
-                    }
-
-                    RegCloseKey(hKey);
-                }
-            }
-            break;
-        case 1:
-            wcscpy(si->m_lpszOS, L"Windows XP ");
-            break;
-        case 2:
-            wcscpy(si->m_lpszOS, L"Windows 2003 family ");
-            break;
-        }
-        break;
-    }
-    switch (iBuildNumberType)
-    {
-    case 0:
-        mu_swprintf(lpszTemp, L"Build %d ", osiOne.dwBuildNumber);
-        break;
-    case 1:
-        mu_swprintf(lpszTemp, L"Build %d.%d.%d ", HIBYTE(HIWORD(osiOne.dwBuildNumber)), LOBYTE(HIWORD(osiOne.dwBuildNumber)), LOWORD(osiOne.dwBuildNumber));
-        break;
-    }
-    wcscat(si->m_lpszOS, lpszTemp);
-    mu_swprintf(lpszTemp, L"(%ls)", osiOne.szCSDVersion);
-    wcscat(si->m_lpszOS, lpszTemp);
-}
-
-// NOTE:
-// The original implementation of GetCPUFrequency and GetCPUInfo relied on
-// MSVC inline assembly (cpuid/rdtsc) and 32-bit affinity mask types, which
-// are not portable and fail to compile under MinGW/GCC. For the purposes of
-// error reporting on this toolchain, a simplified, portable implementation
-// is sufficient.
-
-__int64 GetCPUFrequency(unsigned int uiMeasureMSecs)
-{
-    (void)uiMeasureMSecs; // unused on this platform
-
-    // High‑resolution CPU frequency measurement is handled elsewhere
-    // (see Utilities/CpuUsage.cpp). Here we return 0 to indicate that
-    // a specific CPU MHz value is not available in this build.
-    return 0;
-}
-
-void GetCPUInfo(ER_SystemInfo* si)
-{
-    if (si == nullptr || si->m_lpszCPU == nullptr)
-        return;
-
-    wcscpy(si->m_lpszCPU, L"Unknown CPU");
-}
-
-typedef HRESULT(WINAPI* DIRECTDRAWCREATE)(GUID*, LPDIRECTDRAW*, IUnknown*);
-typedef HRESULT(WINAPI* DIRECTDRAWCREATEEX)(GUID*, VOID**, REFIID, IUnknown*);
-typedef HRESULT(WINAPI* DIRECTINPUTCREATE)(HINSTANCE, DWORD, LPDIRECTINPUT*,
-    IUnknown*);
-
-DWORD GetDXVersion()
-{
-    DIRECTDRAWCREATE     DirectDrawCreate = NULL;
-    DIRECTDRAWCREATEEX   DirectDrawCreateEx = NULL;
-    DIRECTINPUTCREATE    DirectInputCreate = NULL;
-    HINSTANCE            hDDrawDLL = NULL;
-    HINSTANCE            hDInputDLL = NULL;
-    HINSTANCE            hD3D8DLL = NULL;
-    HINSTANCE			 hD3D9DLL = NULL;
-    LPDIRECTDRAW         pDDraw = NULL;
-    LPDIRECTDRAW2        pDDraw2 = NULL;
-    LPDIRECTDRAWSURFACE  pSurf = NULL;
-    LPDIRECTDRAWSURFACE3 pSurf3 = NULL;
-    LPDIRECTDRAWSURFACE4 pSurf4 = NULL;
-    DWORD                dwDXVersion = 0;
-    HRESULT              hr;
-
-    // First see if DDRAW.DLL even exists.
-    hDDrawDLL = LoadLibrary(L"DDRAW.DLL");
-    if (hDDrawDLL == NULL)
-    {
-        dwDXVersion = 0;
-        return dwDXVersion;
-    }
-
-    // See if we can create the DirectDraw object.
-    DirectDrawCreate = (DIRECTDRAWCREATE)GetProcAddress(hDDrawDLL, "DirectDrawCreate");
-    if (DirectDrawCreate == NULL)
-    {
-        dwDXVersion = 0;
-        FreeLibrary(hDDrawDLL);
-
-        __TraceF(TEXT("===> Couldn't LoadLibrary DDraw\r\n"));
-        return dwDXVersion;
-    }
-
-    hr = DirectDrawCreate(NULL, &pDDraw, NULL);
-    if (FAILED(hr))
-    {
-        dwDXVersion = 0;
-        FreeLibrary(hDDrawDLL);
-        __TraceF(TEXT("===> Couldn't create DDraw\r\n"));
-        return dwDXVersion;
-    }
-
-    // So DirectDraw exists.  We are at least DX1.
-    dwDXVersion = 0x100;
-
-    // Let's see if IID_IDirectDraw2 exists.
-    hr = pDDraw->QueryInterface(IID_IDirectDraw2, (VOID**)&pDDraw2);
-    if (FAILED(hr))
-    {
-        // No IDirectDraw2 exists... must be DX1
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        __TraceF(TEXT("===> Couldn't QI DDraw2\r\n"));
-        return dwDXVersion;
-    }
-
-    // IDirectDraw2 exists. We must be at least DX2
-    pDDraw2->Release();
-    dwDXVersion = 0x200;
-
-    //-------------------------------------------------------------------------
-    // DirectX 3.0 Checks
-    //-------------------------------------------------------------------------
-
-    // DirectInput was added for DX3
-    hDInputDLL = LoadLibrary(L"DINPUT.DLL");
-    if (hDInputDLL == NULL)
-    {
-        // No DInput... must not be DX3
-        __TraceF(TEXT("===> Couldn't LoadLibrary DInput\r\n"));
-        pDDraw->Release();
-        return dwDXVersion;
-    }
-
-    DirectInputCreate = (DIRECTINPUTCREATE)GetProcAddress(hDInputDLL,
-        "DirectInputCreateA");
-    if (DirectInputCreate == NULL)
-    {
-        // No DInput... must be DX2
-        FreeLibrary(hDInputDLL);
-        FreeLibrary(hDDrawDLL);
-        pDDraw->Release();
-        __TraceF(TEXT("===> Couldn't GetProcAddress DInputCreate\r\n"));
-        return dwDXVersion;
-    }
-
-    // DirectInputCreate exists. We are at least DX3
-    dwDXVersion = 0x300;
-    FreeLibrary(hDInputDLL);
-
-    // Can do checks for 3a vs 3b here
-
-    //-------------------------------------------------------------------------
-    // DirectX 5.0 Checks
-    //-------------------------------------------------------------------------
-
-    // We can tell if DX5 is present by checking for the existence of
-    // IDirectDrawSurface3. First, we need a surface to QI off of.
-    DDSURFACEDESC ddsd;
-    ZeroMemory(&ddsd, sizeof(ddsd));
-    ddsd.dwSize = sizeof(ddsd);
-    ddsd.dwFlags = DDSD_CAPS;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-
-    hr = pDDraw->SetCooperativeLevel(NULL, DDSCL_NORMAL);
-    if (FAILED(hr))
-    {
-        // Failure. This means DDraw isn't properly installed.
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        dwDXVersion = 0;
-        __TraceF(TEXT("===> Couldn't Set coop level\r\n"));
-        return dwDXVersion;
-    }
-
-    hr = pDDraw->CreateSurface(&ddsd, &pSurf, NULL);
-    if (FAILED(hr))
-    {
-        // Failure. This means DDraw isn't properly installed.
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        dwDXVersion = 0;
-        __TraceF(TEXT("===> Couldn't CreateSurface\r\n"));
-        return dwDXVersion;
-    }
-
-    // Query for the IDirectDrawSurface3 interface
-    if (FAILED(pSurf->QueryInterface(IID_IDirectDrawSurface3,
-        (VOID**)&pSurf3)))
-    {
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // QI for IDirectDrawSurface3 succeeded. We must be at least DX5
-    dwDXVersion = 0x500;
-
-    //-------------------------------------------------------------------------
-    // DirectX 6.0 Checks
-    //-------------------------------------------------------------------------
-
-    // The IDirectDrawSurface4 interface was introduced with DX 6.0
-    if (FAILED(pSurf->QueryInterface(IID_IDirectDrawSurface4,
-        (VOID**)&pSurf4)))
-    {
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // IDirectDrawSurface4 was create successfully. We must be at least DX6
-    dwDXVersion = 0x600;
-    pSurf->Release();
-    pDDraw->Release();
-
-    //-------------------------------------------------------------------------
-    // DirectX 6.1 Checks
-    //-------------------------------------------------------------------------
-
-    // Check for DMusic, which was introduced with DX6.1
-    LPDIRECTMUSIC pDMusic = NULL;
-    CoInitialize(NULL);
-    hr = CoCreateInstance(CLSID_DirectMusic, NULL, CLSCTX_INPROC_SERVER,
-        IID_IDirectMusic, (VOID**)&pDMusic);
-    if (FAILED(hr))
-    {
-        __TraceF(TEXT("===> Couldn't create CLSID_DirectMusic\r\n"));
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // DirectMusic was created successfully. We must be at least DX6.1
-    dwDXVersion = 0x601;
-    pDMusic->Release();
-    CoUninitialize();
-
-    //-------------------------------------------------------------------------
-    // DirectX 7.0 Checks
-    //-------------------------------------------------------------------------
-
-    // Check for DirectX 7 by creating a DDraw7 object
-    LPDIRECTDRAW7 pDD7;
-    DirectDrawCreateEx = (DIRECTDRAWCREATEEX)GetProcAddress(hDDrawDLL,
-        "DirectDrawCreateEx");
-    if (NULL == DirectDrawCreateEx)
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    if (FAILED(DirectDrawCreateEx(NULL, (VOID**)&pDD7, IID_IDirectDraw7,
-        NULL)))
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // DDraw7 was created successfully. We must be at least DX7.0
-    dwDXVersion = 0x700;
-    pDD7->Release();
-
-    //-------------------------------------------------------------------------
-    // DirectX 8.0 Checks
-    //-------------------------------------------------------------------------
-
-    // Simply see if D3D8.dll exists.
-    hD3D8DLL = LoadLibrary(L"D3D8.DLL");
-    if (hD3D8DLL == NULL)
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // D3D8.dll exists. We must be at least DX8.0
-    dwDXVersion = 0x800;
-
-    //-------------------------------------------------------------------------
-    // DirectX 9.0 Checks
-    //-------------------------------------------------------------------------
-    hD3D9DLL = LoadLibrary(L"D3D9.DLL");
-    if (hD3D9DLL == NULL)
-    {
-        FreeLibrary(hDDrawDLL);
-        FreeLibrary(hD3D8DLL);
-        return dwDXVersion;
-    }
-    dwDXVersion = 0x900;
-
-    //-------------------------------------------------------------------------
-    // End of checking for versions of DirectX
-    //-------------------------------------------------------------------------
-
-    // Close open libraries and return
-    FreeLibrary(hDDrawDLL);
-    FreeLibrary(hD3D8DLL);
-    FreeLibrary(hD3D9DLL);
-
-    return dwDXVersion;
-}
-
-void MuGetSystemInfo(ER_SystemInfo* si)
-{
-    ZeroMemory(si, sizeof(ER_SystemInfo));
-
-    // CPU
-    GetCPUInfo(si);
-
-    // Memory
-    MEMORYSTATUS ms;
-    ms.dwLength = sizeof(MEMORYSTATUS);
-    GlobalMemoryStatus(&ms);
-    si->m_iMemorySize = ms.dwTotalPhys;
-
-    // OS
-    GetOSVersion(si);
-
-    // DX
-    MultiByteToWideChar(CP_UTF8, 0, mu::GetRenderer().GetGPUDriverName(), -1,
-        si->m_lpszGpuBackend, MAX_GPU_BACKEND_LEN);
-}
-
 #else  // ---- non-Windows ----------------------------------------------------
-
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <climits>
-#include <cstdio>
-#include <cstring>
-#include <string>
-#include "Core/Utilities/PlatformInfo.h"   // Core::Platform::GetOSDistroName
 
 // IME is a Windows input service; there is nothing to report elsewhere.
 void CErrorReport::WriteImeInfo(SDL_Window* /*window*/)
@@ -651,68 +269,4 @@ void CErrorReport::WriteSoundCardInfo(void)
     for (const auto& name : names) Write(L"Description \t\t: %hs\r\n", name.c_str());
 }
 
-void MuGetSystemInfo(ER_SystemInfo* si)
-{
-    ZeroMemory(si, sizeof(ER_SystemInfo));
-
-    // CPU: the first "model name" entry of /proc/cpuinfo.
-    mu_swprintf(si->m_lpszCPU, L"Unknown");
-    if (FILE* f = std::fopen("/proc/cpuinfo", "r"))
-    {
-        char line[256];
-        while (std::fgets(line, sizeof(line), f))
-        {
-            if (std::strncmp(line, "model name", 10) != 0)
-                continue;
-            const char* value = std::strchr(line, ':');
-            if (value)
-            {
-                ++value;
-                while (*value == ' ' || *value == '\t') ++value;
-                char name[MAX_LENGTH_CPUNAME] = { 0 };
-                std::strncpy(name, value, sizeof(name) - 1);
-                if (char* nl = std::strchr(name, '\n')) *nl = '\0';
-                MultiByteToWideChar(CP_UTF8, 0, name, -1, si->m_lpszCPU, MAX_LENGTH_CPUNAME);
-            }
-            break;
-        }
-        std::fclose(f);
-    }
-
-    // Memory: physical RAM in bytes, clamped like the DWORD->int path on Windows.
-    const long long pages    = ::sysconf(_SC_PHYS_PAGES);
-    const long long pageSize = ::sysconf(_SC_PAGE_SIZE);
-    if (pages > 0 && pageSize > 0)
-    {
-        si->m_iMemorySize = pages * pageSize;
-    }
-
-    // OS: distro (if any) plus the full kernel name and release, e.g.
-    // "Ubuntu 24.04.3 LTS (Linux 6.18.33-...)". The distro tells a dev which
-    // distribution the report came from; the full release keeps WSL/variant
-    // suffixes that uname carries.
-    struct utsname un {};
-    if (::uname(&un) == 0)
-    {
-        // Room for both names, so only the OS line below cuts the text to MAX_LENGTH_OSINFO.
-        char kernel[sizeof(un.sysname) + sizeof(un.release)] = {0};
-        std::snprintf(kernel, sizeof(kernel), "%s %s", un.sysname, un.release);
-        wchar_t kernelW[sizeof(kernel)] = {0};
-        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, static_cast<int>(std::size(kernelW)));
-
-        const std::wstring distro = Core::Platform::GetOSDistroName();
-        const std::wstring osLine = distro.empty()
-            ? std::wstring(kernelW)
-            : distro + L" (" + kernelW + L")";
-        wcsncpy(si->m_lpszOS, osLine.c_str(), MAX_LENGTH_OSINFO - 1);
-        si->m_lpszOS[MAX_LENGTH_OSINFO - 1] = L'\0';
-    }
-    else
-    {
-        mu_swprintf(si->m_lpszOS, L"Unknown");
-    }
-
-    MultiByteToWideChar(CP_UTF8, 0, mu::GetRenderer().GetGPUDriverName(), -1,
-        si->m_lpszGpuBackend, MAX_GPU_BACKEND_LEN);
-}
-#endif // _WIN32 (Win32 crash-report system info)
+#endif // _WIN32 (Win32 crash-report details)

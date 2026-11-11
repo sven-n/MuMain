@@ -107,3 +107,20 @@ that check with a message; CI still enforces it. `git push --no-verify` skips th
    rest of the game (no `stdafx.h`, no scene globals). If a function isn't
    isolated, extract it to its own `.cpp` first (see
    `src/source/Core/Text/TextLineWrap.cpp` for the pattern).
+5. A file that another test compiles already is compiled once, in an object
+   library: `mu_add_test_objects(NAME mu_test_<unit> SOURCES <files> [LINK_LIBS <libs>])`
+   in the module's `CMakeLists.txt`, and each test lists `mu_test_<unit>` in
+   `LINK_LIBS` instead of the files. A test that links `MuClient` takes the
+   game's files from it and compiles only its own.
+6. In a test that links `MuClient`, the test files that include `stdafx.h`
+   use a precompiled copy of it, as the game's files do; include it first.
+   `mu_add_test` sets this up, and `CMAKE_DISABLE_PRECOMPILE_HEADERS=ON` turns
+   it off. With the precompiled header, GCC 13 (Ubuntu 24.04) reports a false
+   `-Wstringop-overflow` for some string concatenations, such as
+   `"..." + std::to_string(n)`, and `MU_WARNINGS_AS_ERRORS=ON` turns it into an
+   error. CI builds with GCC 15, which does not report it, and with the
+   precompiled header only in its release runs. So add a file that gets it to
+   `mu_allow_gcc13_stringop_overflow(<test> <file>...)` in the module's
+   `CMakeLists.txt`, below the test's `mu_add_test` (`<test>` is its `NAME`)
+   ([`cmake/StdafxPrecompiledHeader.cmake`](../../cmake/StdafxPrecompiledHeader.cmake)):
+   there it stays a warning with GCC older than 15.

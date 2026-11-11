@@ -81,6 +81,7 @@ it found when it ends or is stopped.
 | `look.texfilter.off` | Enhanced texture filtering: mipmaps and anisotropy on world textures. |
 | `look.lighting.off` | Enhanced per-pixel model lighting, and the dynamic lights that need it. |
 | `look.dynlights.off` | Dynamic model lights from candles, fires and spells. |
+| `look.sun.off` | The sun: its shadows, clouds and sky-blue shade. |
 | `look.mood.off` | The light mood: the map's baked light as Classic has it. |
 | `look.post.off` | Bloom and colour grading. |
 | `aa.off` | Multisample anti-aliasing. |
@@ -151,7 +152,6 @@ tagged `look`, `textures`, `antialiasing`, `order` or `culling` are exempt: they
 
 ## 4. Recording which commit a run came from
 
-A build with the control socket (`ENABLE_CONTROL_SOCKET`) records the commit it was built from,
-and whether tracked files differed from it; the report carries both and warns about the second,
-because a run of uncommitted code cannot be reproduced from the commit alone. Other builds can
-define `MU_GIT_DESCRIBE` (and `MU_GIT_DIRTY`); without either the field reads `(unknown)`.
+Every build records the commit it was built from, and whether tracked files differed from it;
+the report carries both and warns about the second, because a run of uncommitted code cannot be
+reproduced from the commit alone. A build without git (a source archive) reads `unknown`.

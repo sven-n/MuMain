@@ -14,191 +14,104 @@
 #include "UI/Dialogs/ConfirmRequest.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Data/GameData/BuffData/BuffDatabase.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <algorithm>
-#include <iterator>
+#include <array>
+#include <span>
+#include <vector>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
 namespace
 {
-    // Picks the highest tier of each buff family; buffs sort to the front, debuffs to the back.
-    eBuffState NormalizeBuffState(eBuffState raw)
+// Picks what the strip shows of the hero's buffs (Data/Buffs/Buffs.json): the highest tier of each family, without
+// hidden effects; buffs sort to the front, debuffs to the back.
+void BuffSort(std::list<eBuffState>& buffstate)
+{
+    OBJECT* pHeroObject = &Hero->Object;
+    const int iBuffSize = std::min(static_cast<int>(g_CharacterBuffSize(pHeroObject)), static_cast<int>(eBuff_Count));
+    std::array<int, eBuff_Count> active{};
+    size_t count = 0;
+    for (int i = 0; i < iBuffSize; ++i)
     {
-        switch (raw)
-        {
-        case EFFECT_GREATER_LIFE_ENHANCED:
-        case EFFECT_GREATER_LIFE_MASTERED:
-            return eBuff_Life;
-        case EFFECT_MAGIC_CIRCLE_IMPROVED:
-        case EFFECT_MAGIC_CIRCLE_ENHANCED:
-            return eBuff_SwellOfMagicPower;
-        case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
-        case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
-            return eBuff_AddCriticalDamage;
-        case EFFECT_INFINITY_ARROW_IMPROVED:
-            return eBuff_InfinityArrow;
-        case EFFECT_BLIND_IMPROVED:
-            return eDeBuff_Blind;
-        case EFFECT_POISON_ARROW_IMPROVED:
-            return EFFECT_POISON_ARROW;
-        case EFFECT_BLESS_IMPROVED:
-            return EFFECT_BLESS;
-        case EFFECT_IRON_DEFENSE_IMPROVED:
-            return EFFECT_IRON_DEFENSE;
-        case EFFECT_BLOOD_HOWLING_IMPROVED:
-            return EFFECT_BLOOD_HOWLING;
-        default:
-            return raw;
-        }
+        const eBuffState buf = g_CharacterBuff(pHeroObject, i);
+        if (buf != eBuffNone)
+            active[count++] = static_cast<int>(buf);
     }
 
-    int BuffTier(eBuffState buf)
+    std::array<bool, eBuff_Count> shown{};
+    g_BuffDatabase.PickShownOnStrip(std::span<const int>(active.data(), count), std::span<bool>(shown.data(), count));
+    for (size_t i = 0; i < count; ++i)
     {
-        switch (buf)
-        {
-        case EFFECT_GREATER_LIFE_ENHANCED:
-        case EFFECT_MAGIC_CIRCLE_IMPROVED:
-        case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
-        case EFFECT_INFINITY_ARROW_IMPROVED:
-        case EFFECT_BLIND_IMPROVED:
-        case EFFECT_POISON_ARROW_IMPROVED:
-        case EFFECT_BLESS_IMPROVED:
-        case EFFECT_IRON_DEFENSE_IMPROVED:
-        case EFFECT_BLOOD_HOWLING_IMPROVED:
-            return 1;
-        case EFFECT_GREATER_LIFE_MASTERED:
-        case EFFECT_MAGIC_CIRCLE_ENHANCED:
-        case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
-            return 2;
-        default:
-            return 0;
-        }
-    }
-
-    bool SetDisableRenderBuff(const eBuffState& _BuffState)
-    {
-        switch (_BuffState)
-        {
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-        case eDeBuff_MoveCommandWin:
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-        case eDeBuff_FlameStrikeDamage:
-        case eDeBuff_GiganticStormDamage:
-        case eDeBuff_LightningShockDamage:
-        case eDeBuff_Discharge_Stamina:
-            return true;
-        default:
-            return false;
-        }
-        return false;
-    }
-
-    void BuffSort(std::list<eBuffState>& buffstate)
-    {
-        OBJECT* pHeroObject = &Hero->Object;
-        int iBuffSize = g_CharacterBuffSize(pHeroObject);
-
-        eBuffState top[eBuff_Count] = {};
-
-        for (int i = 0; i < iBuffSize; ++i)
-        {
-            eBuffState buf = g_CharacterBuff(pHeroObject, i);
-            if (buf == eBuffNone)
-                continue;
-            if (SetDisableRenderBuff(buf))
-                continue;
-
-            eBuffState base = NormalizeBuffState(buf);
-            if (top[base] == eBuffNone || BuffTier(buf) > BuffTier(top[base]))
-                top[base] = buf;
-        }
-
-        for (int i = 0; i < iBuffSize; ++i)
-        {
-            eBuffState buf = g_CharacterBuff(pHeroObject, i);
-            if (buf == eBuffNone)
-                continue;
-            if (SetDisableRenderBuff(buf))
-                continue;
-
-            eBuffState base = NormalizeBuffState(buf);
-            if (buf != top[base])
-                continue;
-
-            eBuffClass eBuffClassType = g_IsBuffClass(buf);
-            if (eBuffClassType == eBuffClass_Buff)
-                buffstate.push_front(buf);
-            else if (eBuffClassType == eBuffClass_DeBuff)
-                buffstate.push_back(buf);
-        }
-    }
-
-    // One @spritesheet rect per 20x28 tile, 10 columns wide (generated in buff_strip.rcss). The
-    // real art is 200x224 (10x8 tiles) padded to a 256x256 texture, so tile indices are clamped to
-    // 89 (rows 0-8) -- ids beyond that already go out of UV [0,1] range in the original too.
-    const int kMaxTileIndex = 89; // rows 0-8, 10 cols
-    Rml::String BuildIconDecorator(eBuffState buff)
-    {
-        const int buffId = static_cast<int>(buff);
-        const bool isAtlas1 = (buffId < 81); // eBuff_Berserker, matches RenderBuffIcon()'s own branch
-        const int rawIndex = isAtlas1 ? (buffId - 1) : (buffId - 81);
-        const int tileIndex = std::min(std::max(rawIndex, 0), kMaxTileIndex);
-        return "image(" + Rml::String(isAtlas1 ? "atlas1-" : "atlas2-") + std::to_string(tileIndex) + ")";
-    }
-
-    // The skill whose buff a right-click offers to cancel; 0 if it can't be cancelled.
-    int CancellableSkill(eBuffState buff)
-    {
-        switch (buff)
-        {
-        case eBuff_InfinityArrow:
-            return AT_SKILL_INFINITY_ARROW;
-        case eBuff_SwellOfMagicPower:
-            return AT_SKILL_EXPANSION_OF_WIZARDRY;
-        default:
-            return 0;
-        }
-    }
-
-    // The original's tooltip rows (RenderBuffTooltip()): the buff's name in bold blue, its
-    // description lines, then the remaining duration in purple if it has one.
-    std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff)
-    {
-        using UI::RmlBridge::Tooltip::LineColor;
-        std::vector<UI::RmlBridge::Tooltip::Line> lines;
-        std::list<std::wstring> tooltipinfo;
-        g_BuffToolTipString(tooltipinfo, buff);
-        bool first = true;
-        for (const std::wstring& text : tooltipinfo)
-        {
-            UI::RmlBridge::Tooltip::Line line;
-            line.text = StringUtils::WideToNarrow(text.c_str());
-            if (first)
-            {
-                line.color = LineColor::Blue;
-                line.bold = true;
-            }
-            first = false;
-            lines.push_back(std::move(line));
-        }
-
-        std::wstring bufftime;
-        g_BuffStringTime(buff, bufftime);
-        if (!bufftime.empty())
-        {
-            wchar_t durLine[128] = {};
-            mu_swprintf(durLine, I18N::Game::DurationPeriodS, bufftime.c_str());
-            UI::RmlBridge::Tooltip::Line line;
-            line.text = StringUtils::WideToNarrow(durLine);
-            line.color = LineColor::Purple;
-            lines.push_back(std::move(line));
-        }
-        return lines;
+        if (!shown[i])
+            continue;
+        const auto buff = static_cast<eBuffState>(active[i]);
+        if (g_BuffDatabase.Find(active[i])->kind == Data::Buffs::BuffKind::Debuff)
+            buffstate.push_back(buff);
+        else
+            buffstate.push_front(buff);
     }
 }
+
+// One @spritesheet rect per 20x28 tile, 10 columns wide (generated in buff_strip.rcss). The
+// real art is 200x224 (10x8 tiles) padded to a 256x256 texture, so tile indices are clamped to
+// 89 (rows 0-8) -- ids beyond that already go out of UV [0,1] range in the original too.
+const int kMaxTileIndex = 89; // rows 0-8, 10 cols
+Rml::String BuildIconDecorator(eBuffState buff)
+{
+    const int buffId = static_cast<int>(buff);
+    const bool isAtlas1 = (buffId < 81); // eBuff_Berserker, matches RenderBuffIcon()'s own branch
+    const int rawIndex = isAtlas1 ? (buffId - 1) : (buffId - 81);
+    const int tileIndex = std::min(std::max(rawIndex, 0), kMaxTileIndex);
+    return "image(" + Rml::String(isAtlas1 ? "atlas1-" : "atlas2-") + std::to_string(tileIndex) + ")";
+}
+
+// The skill whose buff a right-click offers to cancel (Data/Buffs/Buffs.json); 0 if it can't be cancelled.
+int CancellableSkill(eBuffState buff)
+{
+    const Data::Buffs::BuffDefinition* definition = g_BuffDatabase.Find(buff);
+    return definition != nullptr ? definition->cancelSkill : 0;
+}
+
+// The original's tooltip rows (RenderBuffTooltip()): the buff's name in bold blue, its
+// description lines, then the remaining duration in purple if it has one.
+std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff)
+{
+    using UI::RmlBridge::Tooltip::LineColor;
+    std::vector<UI::RmlBridge::Tooltip::Line> lines;
+    std::list<std::wstring> tooltipinfo;
+    g_BuffToolTipString(tooltipinfo, buff);
+    bool first = true;
+    for (const std::wstring& text : tooltipinfo)
+    {
+        UI::RmlBridge::Tooltip::Line line;
+        line.text = StringUtils::WideToNarrow(text.c_str());
+        if (first)
+        {
+            line.color = LineColor::Blue;
+            line.bold = true;
+        }
+        first = false;
+        lines.push_back(std::move(line));
+    }
+
+    std::wstring bufftime;
+    g_BuffStringTime(buff, bufftime);
+    if (!bufftime.empty())
+    {
+        wchar_t durLine[128] = {};
+        mu_swprintf(durLine, I18N::Game::DurationPeriodS, bufftime.c_str());
+        UI::RmlBridge::Tooltip::Line line;
+        line.text = StringUtils::WideToNarrow(durLine);
+        line.color = LineColor::Purple;
+        lines.push_back(std::move(line));
+    }
+    return lines;
+}
+} // namespace
 
 CBuffStrip::CBuffStrip()
 {

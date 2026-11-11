@@ -4,12 +4,29 @@
 
 #include "stdafx.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/SyntheticInput.h"
 #include "Core/Utilities/UsefulDef.h"
 #include "Core/Time/Timer.h"
 
 #include "UI/Core/UIManager.h"
 
 extern CTimer* g_pTimer;
+
+namespace
+{
+void UpdateCursorPosition(HWND window, POINT& cursor)
+{
+    // Scripted events update the game pointer without moving the OS cursor.
+    if (Core::Input::Synthetic::IsInjectingPointer())
+    {
+        cursor.x = static_cast<LONG>(g_fWindowMouseX);
+        cursor.y = static_cast<LONG>(g_fWindowMouseY);
+        return;
+    }
+    ::GetCursorPos(&cursor);
+    ::ScreenToClient(window, &cursor);
+}
+} // namespace
 
 CInput& CInput::Instance()
 {
@@ -63,8 +80,7 @@ void CInput::Update()
     m_bLBtnDn = m_bRBtnDn = m_bMBtnDn = false;
     m_bLBtnDbl = m_bRBtnDbl = m_bMBtnDbl = false;
 
-    ::GetCursorPos(&m_ptCursor);
-    ::ScreenToClient(m_hWnd, &m_ptCursor);
+    UpdateCursorPosition(m_hWnd, m_ptCursor);
 
     m_ptCursor.x = LIMIT(m_ptCursor.x, 0, m_lScreenWidth - 1);
     m_ptCursor.y = LIMIT(m_ptCursor.y, 0, m_lScreenHeight - 1);
@@ -199,7 +215,7 @@ void CInput::Update()
         m_bMBtnUp = true;
     }
 
-    if (GetActiveWindow() == NULL)
+    if (!Core::Input::Synthetic::IsInjectingPointer() && GetActiveWindow() == NULL)
     {
         m_lDX = m_lDY = 0L;
         m_bLBtnUp = m_bRBtnUp = m_bMBtnUp = false;

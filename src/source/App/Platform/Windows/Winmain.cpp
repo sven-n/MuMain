@@ -19,8 +19,6 @@
 
 #ifdef _WIN32
 #include <dpapi.h>
-#elif defined(__APPLE__)
-#include <mach-o/dyld.h>
 #endif
 #include <clocale>
 #include <cstring>
@@ -32,6 +30,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "GameLogic/Monsters/MonsterNames.h"
+#include "World/GameMaps/MonsterSpawnWorld.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -48,6 +47,7 @@
 #include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Network/EndpointForLog.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
@@ -74,6 +74,8 @@
 
 #include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/Log/ReadingLanguageLog.h"
+#include "Core/Utilities/PlatformInfo.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -171,6 +173,18 @@ extern wchar_t LogInID[];
 extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
+extern bool LogOut;
+
+// Closing the window skips the menu exit, which is what sends the key configuration (skill and item hotkeys,
+// options, chat box); send it here while still connected. Once is enough: several close events can arrive, and the
+// menu exit has already saved before it logs out and closes the window.
+void SaveOptionsBeforeClose()
+{
+    if (!Destroy && !LogOut)
+    {
+        SaveOptionsIfInGame();
+    }
+}
 
 void CheckHack()
 {
@@ -738,6 +752,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // Just request shutdown; the main loop exits on Destroy and the teardown
         // (sound, GL, window) runs after it. SDL owns the window now, so the GL
         // context and window must not be torn down from inside a message.
+        SaveOptionsBeforeClose();
         Destroy = true;
         if (SocketClient != nullptr)
         {
@@ -1115,7 +1130,6 @@ void HandleMouseButton(const SDL_Event& e)
             if (!MouseLButton)
                 MouseLButtonPush = true;
             MouseLButton = true;
-            Core::Input::RecordLeftMouseButtonPressEdge();
             if (e.button.clicks >= 2)
                 MouseLButtonDBClick = true;
             SetCapture(g_hWnd);
@@ -1228,8 +1242,8 @@ void HandleFocusChange(bool active)
             MouseMButtonPop = false;
             MouseMButtonPush = false;
             MouseWheel = 0;
-            Core::Input::ClearLeftMouseButtonPressEdge();
         }
+        Core::Input::ClearPressEdges();
     }
     else
     {
@@ -1410,6 +1424,17 @@ SDL_WindowID ActionWindowId(const SDL_Event& event)
     }
 }
 
+// A right press consumed by the UI still reaches the game when it targets a party card (casting a
+// support skill on that member), and a right release does while the game holds the button, so it can't stick.
+bool PassesRightButtonToGame(const SDL_Event& event)
+{
+    if (event.button.button != SDL_BUTTON_RIGHT)
+        return false;
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+        return MouseRButton;
+    return g_pPartyListWindow && g_pPartyListWindow->IsCardHoveredForMemberSkill();
+}
+
 // Physical and scripted input share UI-first routing. Scripted input owns its
 // own legacy held state; it never acquires the OS pointer or replays SDL events.
 bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
@@ -1429,9 +1454,12 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
     case SDL_EVENT_MOUSE_BUTTON_UP:
         if (!synthetic && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
-        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow) || PassesRightButtonToGame(event);
         if (propagates && !synthetic)
+        {
+            Core::Input::RecordPressEdge(event);
             HandleMouseButton(event);
+        }
         return true;
     case SDL_EVENT_TEXT_INPUT:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
@@ -1442,6 +1470,9 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         return true;
     case SDL_EVENT_KEY_DOWN:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        // Scripted keys keep their own held state (Synthetic::IsKeyHeld).
+        if (propagates && !synthetic)
+            Core::Input::RecordPressEdge(event);
 #if !defined(_WIN32)
         // Physical Windows messages already handle these keys; SDL-only paths
         // (and Windows synthetic events below) must handle them here instead.
@@ -1512,11 +1543,13 @@ MSG MainLoop()
             switch (event.type)
             {
             case SDL_EVENT_QUIT:
+                SaveOptionsBeforeClose();
                 Destroy = true;
                 break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 // Titlebar X / Alt+F4: request shutdown directly on SDL's close
                 // event, without relying on a subsequent SDL_EVENT_QUIT (#535).
+                SaveOptionsBeforeClose();
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
@@ -1941,28 +1974,25 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng", fileVersion[0],
                         fileVersion[1], fileVersion[2], fileVersion[3]);
+    g_ErrorReport.WriteBuildInfo();
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
                           fileVersion[2], fileVersion[3]);
 
     g_ErrorReport.WriteCurrentTime();
-    ER_SystemInfo systemInfo;
-    ZeroMemory(&systemInfo, sizeof(systemInfo));
-    MuGetSystemInfo(&systemInfo);
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSystemInfo(&systemInfo);
+    g_ErrorReport.WriteSystemInfo();
     g_ErrorReport.AddSeparator();
 }
 
 static void SetWorkingDirectoryToBasePath()
 {
 #if defined(__APPLE__)
-    std::uint32_t pathSize = 0;
-    _NSGetExecutablePath(nullptr, &pathSize);
-    std::string executablePath(pathSize, '\0');
-    if (_NSGetExecutablePath(executablePath.data(), &pathSize) == 0)
+    // The working directory hasn't moved yet, so a relative start path still leads to the client here and is kept
+    // absolute for every later caller (WinApiShims.h).
+    if (const std::filesystem::path executable = Core::Platform::GetExecutablePath(); !executable.empty())
     {
         std::error_code error;
-        std::filesystem::current_path(std::filesystem::path(executablePath).parent_path(), error);
+        std::filesystem::current_path(executable.parent_path(), error);
     }
 #else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
@@ -1971,6 +2001,39 @@ static void SetWorkingDirectoryToBasePath()
         std::filesystem::current_path(basePath, error);
     }
 #endif
+}
+
+// The language the player reads: SetLocale falls back to en for a locale it doesn't know.
+static Core::Log::ReadingLanguage::State CurrentReadingLanguage()
+{
+    return {I18N::GetCurrentLocale(), GameConfig::GetInstance().GetTranslateItemNames()};
+}
+
+// A UI language switch after start-up (the options window, the editor), so a report shows the language it was in.
+static void LogUiLanguageChange(void* /*context*/) noexcept
+{
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
+}
+
+// The connect server: the command line's (a launcher passes one) or else config.ini's.
+static void SelectConnectServer(wchar_t* commandLine)
+{
+    WORD port;
+    const bool fromCommandLine = GetConnectServerInfo(commandLine, g_lpszCmdURL, &port) != FALSE;
+    if (fromCommandLine)
+    {
+        szServerIpAddress = g_lpszCmdURL;
+        g_ServerPort = port;
+    }
+    else
+    {
+        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
+        szServerIpAddress = serverIPFromConfig.c_str();
+        g_ServerPort = GameConfig::GetInstance().GetServerPort();
+    }
+    g_ErrorReport.Write(L"> Server = %hs, from %ls.\r\n",
+                        Network::DescribeEndpointForLog(mu_wchar_to_utf8(szServerIpAddress), g_ServerPort).c_str(),
+                        fromCommandLine ? L"the command line" : L"config.ini");
 }
 
 static void InitializeWorkingDirectoryAndLog()
@@ -2032,20 +2095,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_bDisableAnimationTaskPool = false;
     }
 
-    // Check for command line server override
-    WORD wPortNumber;
-    if (GetConnectServerInfo(lpszCommandLine, g_lpszCmdURL, &wPortNumber))
-    {
-        szServerIpAddress = g_lpszCmdURL;
-        g_ServerPort = wPortNumber;
-    }
-    else
-    {
-        // Use config.ini settings if no command line override
-        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
-        szServerIpAddress = serverIPFromConfig.c_str();
-        g_ServerPort = GameConfig::GetInstance().GetServerPort();
-    }
+    SelectConnectServer(lpszCommandLine);
 
     // #ifdef _DEBUG
 
@@ -2073,6 +2123,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
     wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
     g_strSelectedML = g_aszMLSelection;
+    // The legacy "Eng"/"Por"/"Spn" selection that picks the Data/Local files; the UI language comes later.
+    g_ErrorReport.Write(L"> Data language = %ls.\r\n", g_aszMLSelection);
 
     if (m_RememberMe)
     {
@@ -2220,7 +2272,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
+    g_ErrorReport.WriteGpuInfo();
     g_ErrorReport.AddSeparator();
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
@@ -2295,15 +2347,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
-    // The editor still restores its own MuEditorConfig language preference
-    // later in its init, which feeds through to I18N::SetLocale as well.
+    // The options window and the editor's language box switch it later.
     {
         std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
+    Core::Log::ReadingLanguage::Write(CurrentReadingLanguage());
+    I18N::RegisterLocaleObserver(&LogUiLanguageChange, nullptr);
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
+    g_MonsterDataHandler.SetMonstersChangedCallback(&World::Monsters::ApplyLiveSetup);
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.

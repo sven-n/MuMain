@@ -43,6 +43,7 @@ LookFeatures PresetFeatures(LookPreset preset)
     features.textureFiltering = enhanced;
     features.enhancedLighting = enhanced;
     features.dynamicLights = enhanced;
+    features.sunlight = enhanced;
     features.lightMood = enhanced;
     features.postProcessing = enhanced;
     features.lightMoodStrength = Lighting::LightMood::MaxStrength;
@@ -52,7 +53,8 @@ LookFeatures PresetFeatures(LookPreset preset)
 
 bool FeatureOverrides::Any() const
 {
-    return textureFiltering || enhancedLighting || dynamicLights || lightMood || postProcessing || lightMoodStrength;
+    return textureFiltering || enhancedLighting || dynamicLights || sunlight || lightMood || postProcessing ||
+           lightMoodStrength;
 }
 
 void FeatureOverrides::Merge(const FeatureOverrides& change)
@@ -67,6 +69,7 @@ void FeatureOverrides::Merge(const FeatureOverrides& change)
     merge(textureFiltering, change.textureFiltering);
     merge(enhancedLighting, change.enhancedLighting);
     merge(dynamicLights, change.dynamicLights);
+    merge(sunlight, change.sunlight);
     merge(lightMood, change.lightMood);
     merge(postProcessing, change.postProcessing);
     merge(lightMoodStrength, change.lightMoodStrength);
@@ -77,6 +80,7 @@ void FeatureOverrides::ApplyTo(LookFeatures& features) const
     features.textureFiltering = textureFiltering.value_or(features.textureFiltering);
     features.enhancedLighting = enhancedLighting.value_or(features.enhancedLighting);
     features.dynamicLights = dynamicLights.value_or(features.dynamicLights);
+    features.sunlight = sunlight.value_or(features.sunlight);
     features.lightMood = lightMood.value_or(features.lightMood);
     features.postProcessing = postProcessing.value_or(features.postProcessing);
     features.lightMoodStrength = lightMoodStrength.value_or(features.lightMoodStrength);
@@ -88,6 +92,7 @@ std::string FeatureOverrides::Describe() const
     AppendSwitch(text, "texfilter", textureFiltering);
     AppendSwitch(text, "lighting", enhancedLighting);
     AppendSwitch(text, "dynlights", dynamicLights);
+    AppendSwitch(text, "sun", sunlight);
     AppendSwitch(text, "lightmood", lightMood);
     AppendSwitch(text, "post", postProcessing);
     if (lightMoodStrength)
@@ -182,9 +187,8 @@ std::optional<FeatureOverrides> ParseFeatureOverrideCommand(std::wstring_view co
         std::optional<bool> FeatureOverrides::* feature;
     };
     static constexpr SwitchCommand Switches[] = {
-        {L"$texfilter ", &FeatureOverrides::textureFiltering},
-        {L"$lighting ", &FeatureOverrides::enhancedLighting},
-        {L"$dynlights ", &FeatureOverrides::dynamicLights},
+        {L"$texfilter ", &FeatureOverrides::textureFiltering}, {L"$lighting ", &FeatureOverrides::enhancedLighting},
+        {L"$dynlights ", &FeatureOverrides::dynamicLights},    {L"$sun ", &FeatureOverrides::sunlight},
         {L"$post ", &FeatureOverrides::postProcessing},
     };
     FeatureOverrides overrides;

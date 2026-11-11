@@ -1,12 +1,15 @@
 #pragma once
 
 #include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/EffectData/Shines.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
+#include "Data/GameData/ItemData/PartModel.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
 
 #include <span>
@@ -72,6 +75,18 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
 void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
                           const std::string& labelFile, std::vector<ItemDataIssue>& issues);
 
+// The forms of the items' names and name lines ("nameForms") against the name cases file (`casesFile` names it in
+// messages): a form in English, in a language or case the file does not give, or in a language the name has no text
+// of its own in, is never shown (a text shows the name itself instead): warnings. A name line's shared text is read
+// from `tooltips`.
+void ValidateNameForms(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
+                       const ItemNameCases& cases, const std::string& casesFile, std::vector<ItemDataIssue>& issues);
+
+// A language of the name cases file (`casesFile` names it in messages) the game has no texts in ("pl-PL" for "pl")
+// declines names no text shows: a warning for each. `uiLocales` are the game's languages (I18N::GetAvailableLocales).
+void ValidateNameCaseLocales(const ItemNameCases& cases, std::span<const char* const> uiLocales,
+                             const std::string& casesFile, std::vector<ItemDataIssue>& issues);
+
 // The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
 // lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description
 // names is a warning. So is a wing (an item with a wing tier) whose description lines are not those of most of the
@@ -94,6 +109,10 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
 void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
                                  std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues);
 
+// Checks that the shine below +3 each model names is in the shine list (Shines.h). Appends the problems to `issues`.
+void ValidateItemModelShines(std::span<const ItemModelDefinition> models, std::span<const Effects::Shine> shines,
+                             std::vector<ItemDataIssue>& issues);
+
 // Whether a look of this name exists; the looks are drawing code
 // (Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists).
 using LookNameExists = bool (*)(std::string_view name);
@@ -103,6 +122,12 @@ using LookNameExists = bool (*)(std::string_view name);
 // same when it opens the models).
 void ValidateItemModelLooks(std::span<const ItemModelDefinition> models, LookNameExists renderStyleExists,
                             LookNameExists itemEffectExists, std::vector<ItemDataIssue>& issues);
+
+// The part models (PartModels.json, design L28): a warning for an entry whose name is no part model slot (the game
+// draws nothing of it), for a render style no look has (the model is drawn plainly; not checked when
+// `renderStyleExists` is null) and, when there are entries, for a slot without one (the game draws nothing there).
+void ValidatePartModels(std::span<const PartModel> parts, LookNameExists renderStyleExists,
+                        std::vector<ItemDataIssue>& issues);
 
 // A .bmd file that several model entries name themselves instead of through
 // a shared model: a warning for each of them, since each opens the file again

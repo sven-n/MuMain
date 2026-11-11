@@ -11,6 +11,7 @@
 #include "../MuEditor/UI/Common/ToolWindowFrame.h"
 #include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
@@ -90,8 +91,10 @@ UndoTarget& GetUndoTarget()
 
 int GetDataVersion()
 {
-    return g_MonsterDatabase.GetVersion() + g_MonsterModelDatabase.GetVersion() +
-           g_MonsterSoundSetDatabase.GetVersion();
+    // A change of only the shared values (all numbers have their own) changes
+    // no entry, yet a whole monster's draft shows them.
+    return g_MonsterDatabase.GetVersion() + g_MonsterDataHandler.GetGroupsVersion() +
+           g_MonsterModelDatabase.GetVersion() + g_MonsterSoundSetDatabase.GetVersion();
 }
 } // namespace MuEditor::Monsters::ToolWindow
 

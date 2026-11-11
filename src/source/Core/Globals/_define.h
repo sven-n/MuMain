@@ -339,7 +339,7 @@ constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 
 #define	MAX_MASTER		   24
 
-#define MAX_ITEM_SPECIAL   8
+#define MAX_ITEM_SPECIAL 16
 #define ITEM_LEVEL_NORMAL  4
 #define MAX_QUEST_ITEM     64
 #define MAX_EVENT_ITEM     35
@@ -608,8 +608,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 /////////////////////////////////////_cdirection end_////////////////////////////////////////////////////
 /////////////////////////////////////_ccomgem start_////////////////////////////////////////////////////
 
-#define INDEX_COMPILED_CELE		ITEM_WING+30
-#define INDEX_COMPILED_SOUL		ITEM_WING+31
 #define MODEL_COMPILED_CELE		MODEL_WING+30
 #define MODEL_COMPILED_SOUL		MODEL_WING+31
 #define MAX_LINE_UNMIXLIST		8

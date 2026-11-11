@@ -634,27 +634,32 @@
     {
       "slot": "MONSTER_MODEL_LIZARD_WARRIOR",
       "file": "Data/Monster/Monster82.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster81_EyeRight": 29, "Monster81_EyeLeft": 30}
     },
     {
       "slot": "MONSTER_MODEL_FIRE_GOLEM",
       "file": "Data/Monster/Monster83.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster82_RHand": 45, "Monster82_LHand": 34, "Monster82_Eye": 48, "Monster82_Back": 46}
     },
     {
       "slot": "MONSTER_MODEL_QUEEN_BEE",
       "file": "Data/Monster/Monster84.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster83_Tail": 62}
     },
     {
       "slot": "MONSTER_MODEL_POISON_GOLEM",
       "file": "Data/Monster/Monster85.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster84_PoisonTop": 53, "Monster84_PoisonRight": 54, "Monster84_PoisonLeft": 55, "Monster84_LeftHand": 37, "Monster84_RightHand": 50}
     },
     {
       "slot": "MONSTER_MODEL_AXE_HERO",
       "file": "Data/Monster/Monster86.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster85_LeftEye": 18, "Monster85_RightEye": 19}
     },
     {
       "slot": "MONSTER_MODEL_LIFE_STONE",
@@ -665,7 +670,8 @@
     {
       "slot": "MONSTER_MODEL_EROHIM",
       "file": "Data/Monster/Monster88.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster87_LeftEye": 8, "Monster87_RightEye": 9, "Monster87_LeftHand": 16}
     },
     {
       "slot": "MONSTER_MODEL_BALGASS",
@@ -687,12 +693,14 @@
       "slot": "MONSTER_MODEL_DARK_ELF_1",
       "file": "Data/Monster/Monster93.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"appear": 0.33, "attack3": 0.33}
+      "animations": {"appear": 0.33, "attack3": 0.33},
+      "namedBones": {"Left_Hand": 17}
     },
     {
       "slot": "MONSTER_MODEL_DEATH_SPIRIT",
       "file": "Data/Monster/Monster94.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster94_zx": 27, "Monster94_zx01": 28}
     },
     {
       "slot": "MONSTER_MODEL_SORAM",
@@ -703,12 +711,14 @@
     {
       "slot": "MONSTER_MODEL_WEREWOLF_HERO",
       "file": "Data/Monster/Monster96.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster95_Head": 6}
     },
     {
       "slot": "MONSTER_MODEL_VALAM",
       "file": "Data/Monster/Monster97.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Monster96_Top": 27, "Monster96_Center": 28, "Monster96_Bottom": 29}
     },
     {
       "slot": "MONSTER_MODEL_SOLAM",
@@ -744,19 +754,22 @@
       "slot": "MONSTER_MODEL_WITCH_QUEEN",
       "file": "Data/Monster/monster101.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.2}
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster100_Footstepst": 0, "Monster100_L_Hand": 76, "Monster100_R_Hand": 94, "Monster100_Pelvis": 2, "Monster100_Head": 57, "Monster100_z02": 107, "Monster100_z03": 108, "Monster100_z04": 109, "Monster100_z05": 110}
     },
     {
       "slot": "MONSTER_MODEL_GOLDEN_STONE_GOLEM",
       "file": "Data/Monster/monster102.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.2}
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.2},
+      "namedBones": {"Monster101_L_Arm": 12, "Monster101_R_Arm": 20, "Monster101_Head": 6}
     },
     {
       "slot": "MONSTER_MODEL_DEATH_RIDER",
       "file": "Data/Monster/monster103.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15}
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15},
+      "namedBones": {"Monster102_Footstepst": 0, "Monster102_Head": 6}
     },
     {
       "slot": "MONSTER_MODEL_FOREST_ORC",
@@ -767,31 +780,36 @@
       "slot": "MONSTER_MODEL_DEATH_TREE",
       "file": "Data/Monster/monster105.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.2}
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster104_Horn0": 37, "Monster104_Horn1": 38, "Monster104_Horn2": 39, "Monster104_Horn3": 40, "Monster104_Horn4": 44, "Monster104_Horn5": 45, "Monster104_Footsteps": 1}
     },
     {
       "slot": "MONSTER_MODEL_HELL_MAINE",
       "file": "Data/Monster/monster106.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"walk": 0.15}
+      "animations": {"walk": 0.15},
+      "namedBones": {"Monster105_R_Eye": 9, "Monster105_L_Eye": 10, "Monster105_L_Arm00": 33, "Monster105_L_Arm01": 34, "Monster105_L_Arm02": 35, "Monster105_L_Hand": 20, "Monster105_R_Hand": 39}
     },
     {
       "slot": "MONSTER_MODEL_BERSERK",
       "file": "Data/Monster/Monster107.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19}
+      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19},
+      "namedBones": {"BERSERK_MOUTH": 9}
     },
     {
       "slot": "MONSTER_MODEL_SPLINTER_WOLF",
       "file": "Data/Monster/monster108.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.3, "attack2": 0.3, "die": 0.3}
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"SPL_WOLF_EYE_26": 16, "SPL_WOLF_EYE_25": 17}
     },
     {
       "slot": "MONSTER_MODEL_IRON_RIDER",
       "file": "Data/Monster/monster109.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.25, "attack2": 0.25, "die": 0.25}
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.25, "attack2": 0.25, "die": 0.25},
+      "namedBones": {"IRON_RIDER_BIP01": 2, "IRON_RIDER_BOW_6": 42, "IRON_RIDER_BOW_15": 52, "IRON_RIDER_BOW_16": 47}
     },
     {
       "slot": "MONSTER_MODEL_SATYROS",
@@ -803,13 +821,15 @@
       "slot": "MONSTER_MODEL_BLADE_HUNTER",
       "file": "Data/Monster/monster111.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"attack1": 0.23, "attack2": 0.23, "die": 0.2}
+      "animations": {"attack1": 0.23, "attack2": 0.23, "die": 0.2},
+      "namedBones": {"BLADE_L_HAND": 12, "BOX1": 54, "BOX2": 55}
     },
     {
       "slot": "MONSTER_MODEL_KENTAUROS",
       "file": "Data/Monster/monster112.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25}
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25},
+      "namedBones": {"KENTAUROS_BIP_23": 27, "KENTAUROS_BIP_24": 28, "KENTAUROS_BIP_25": 29, "KENTAUROS_BIP_26": 30, "KENTAUROS_BIP_18": 34, "KENTAUROS_BIP_19": 35, "KENTAUROS_BIP_20": 36, "KENTAUROS_BIP_21": 37, "KENTAUROS_BIP_TAIL": 81, "KENTAUROS_BIP_TAIL_1": 82, "KENTAUROS_BIP_TAIL_2": 83, "KENTAUROS_BIP_SPAIN_1": 4, "KENTAUROS_BIP_SPAIN_2": 5, "KENTAUROS_BIP_SPAIN_3": 6}
     },
     {
       "slot": "MONSTER_MODEL_GIGANTIS",
@@ -821,13 +841,15 @@
       "slot": "MONSTER_MODEL_GENOCIDER",
       "file": "Data/Monster/Monster114.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3}
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"GENO_WP": 47}
     },
     {
       "slot": "MONSTER_MODEL_PERSONA",
       "file": "Data/Monster/Monster115.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "die": 0.23}
+      "animations": {"stop2": 0.25, "die": 0.23},
+      "namedBones": {"PRSona_A1": 73, "PRSona_Tail": 76, "PRSona_Tail1": 77}
     },
     {
       "slot": "MONSTER_MODEL_TWIN_TAIL",
@@ -836,7 +858,8 @@
       "animations": {"stop2": 0.25, "attack1": 0.23, "attack2": 0.23, "die": 0.23},
       "timers": [
         {"name": "hair swing", "animation": "walk", "everyMs": 500}
-      ]
+      ],
+      "namedBones": {"Twintail_Hair24": 16, "Twintail_Hair32": 24}
     },
     {
       "slot": "MONSTER_MODEL_DREADFEAR",
@@ -845,7 +868,8 @@
       "animations": {"stop2": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.25},
       "cues": [
         {"name": "attack2 sound", "animation": "attack2", "frames": [0, 2.001]}
-      ]
+      ],
+      "namedBones": {"Dreadfear_Wing32": 71, "Dreadfear_Wing34": 68, "Dreadfear_Wing51": 50, "Dreadfear_Wing53": 47, "Dreadfear_Eye52": 9, "Dreadfear_Eye54": 10}
     },
     {
       "slot": "MONSTER_MODEL_RED_SKELETON_KNIGHT_4",
@@ -856,19 +880,22 @@
       "slot": "MONSTER_MODEL_MAYA_HAND_LEFT",
       "file": "Data/Monster/monster119.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.12, "appear": 0.12}
+      "animations": {"die": 0.12, "appear": 0.12},
+      "namedBones": {"L_Hand01": 7, "L_Hand02": 13, "L_Hand03": 19, "L_Hand04": 25, "L_Hand05": 31, "L_Hand11": 11, "L_Hand12": 17, "L_Hand13": 23, "L_Hand14": 29, "L_Hand15": 5, "L_Hand21": 12, "L_Hand22": 18, "L_Hand23": 24, "L_Hand24": 30, "L_Hand25": 6}
     },
     {
       "slot": "MONSTER_MODEL_MAYA_HAND_RIGHT",
       "file": "Data/Monster/monster120.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.12, "appear": 0.12}
+      "animations": {"die": 0.12, "appear": 0.12},
+      "namedBones": {"R_Hand01": 59, "R_Hand02": 48, "R_Hand03": 11, "R_Hand04": 37, "R_Hand05": 26, "R_Hand11": 54, "R_Hand12": 43, "R_Hand13": 32, "R_Hand14": 6, "R_Hand15": 21, "R_Hand21": 5, "R_Hand22": 53, "R_Hand23": 42, "R_Hand24": 20, "R_Hand25": 31}
     },
     {
       "slot": "MONSTER_MODEL_DARK_SKULL_SOLDIER_5",
       "file": "Data/Monster/monster122.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.22, "stop2": 0.22, "walk": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.12, "appear": 0.22, "attack3": 0.25, "attack4": 0.25}
+      "animations": {"stop1": 0.22, "stop2": 0.22, "walk": 0.25, "attack1": 0.25, "attack2": 0.25, "die": 0.12, "appear": 0.22, "attack3": 0.25, "attack4": 0.25},
+      "namedBones": {"Body_Bone1": 61, "Body_Bone2": 62, "Body_Bone3": 54, "Body_Bone4": 55, "Body_Bone5": 21, "Body_Bone6": 22, "Body_Bone7": 25, "Body_Bone8": 26, "Body_Bone9": 71, "Body_Bone10": 70, "Body_Bone11": 43, "Body_Bone12": 44, "LHand_Bone": 14, "Body_Bone13": 63, "Sword_Bone1": 39, "Sword_Bone2": 40, "Eye_Bone1": 9, "Eye_Bone2": 10, "Windmill_Bone1": 47}
     },
     {
       "slot": "MONSTER_MODEL_POUCH_OF_BLESSING",
@@ -894,13 +921,15 @@
     {
       "slot": "MONSTER_MODEL_DARK_ELF",
       "file": "Data/Monster/Monster127.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"Left_Hand": 17}
     },
     {
       "slot": "MONSTER_MODEL_LUNAR_RABBIT",
       "file": "Data/Monster/Monster128.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.4, "shock": 0.4, "die": 0.5}
+      "animations": {"stop1": 0.4, "stop2": 0.4, "walk": 0.4, "shock": 0.4, "die": 0.5},
+      "namedBones": {"Rabbit_1": 3, "Rabbit_2": 16, "Rabbit_3": 15, "Rabbit_4": 2}
     },
     {
       "slot": "MONSTER_MODEL_RABBIT",
@@ -1219,7 +1248,8 @@
     {
       "slot": "MONSTER_MODEL_GIANT_MAMMOTH",
       "file": "Data/Monster/Monster147.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"GIANT_MAMUD_BIP_TAIL": 45, "GIANT_MAMUD_BIP_TAIL_1": 6, "GIANT_MAMUD_BIP_TAIL_2": 7, "GIANT_MAMUD_BIP_SPAIN_1": 3, "GIANT_MAMUD_BIP_SPAIN_2": 4, "GIANT_MAMUD_BIP_SPAIN_3": 5}
     },
     {
       "slot": "MONSTER_MODEL_ICE_GIANT",
@@ -1392,7 +1422,34 @@
       "slot": "MONSTER_MODEL_GAYION",
       "file": "Data/Monster/Monster165.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.38, "attack2": 0.4, "die": 0.2, "appear": 0.4, "attack3": 0.38, "attack4": 0.38}
+      "animations": {"stop1": 0.3, "stop2": 0.3, "walk": 0.4, "attack1": 0.38, "attack2": 0.4, "die": 0.2, "appear": 0.4, "attack3": 0.38, "attack4": 0.38},
+      "parts": [
+        {
+          "effect": "swordLeft01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_left01.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordLeft02EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_left02.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordRight01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_right01.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordRight02EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_right02.bmd",
+          "textureFolders": ["Monster"]
+        },
+        {
+          "effect": "swordMain01EmpireGuardianBossGaion",
+          "file": "Data/Monster/Boss_Karane_sword_main01.bmd",
+          "textureFolders": ["Monster"]
+        }
+      ]
     },
     {
       "slot": "MONSTER_MODEL_JERRY",
@@ -1424,7 +1481,8 @@
       "cues": [
         {"name": "step 1", "animation": "walk", "frames": [1, 2]},
         {"name": "step 2", "animation": "walk", "frames": [7, 8]}
-      ]
+      ],
+      "namedBones": {"node_eyes01": 14, "node_eyes02": 15, "node_blade01": 71, "node_blade05": 72, "node_blade04": 73, "node_blade02": 74}
     },
     {
       "slot": "MONSTER_MODEL_HAMMERIZE",
@@ -1577,31 +1635,36 @@
       "slot": "MONSTER_MODEL_BLOODY_DEATH_RIDER",
       "file": "Data/Monster/monster195.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15}
+      "animations": {"stop1": 0.15, "stop2": 0.15, "walk": 0.3, "attack1": 0.23, "attack2": 0.23, "die": 0.15},
+      "namedBones": {"Monster102_Footstepst": 0, "Monster102_Head": 6}
     },
     {
       "slot": "MONSTER_MODEL_BLOODY_GOLEM",
       "file": "Data/Monster/Monster196.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.2}
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster101_L_Arm": 12, "Monster101_R_Arm": 20, "Monster101_Head": 6}
     },
     {
       "slot": "MONSTER_MODEL_BLOODY_WITCH_QUEEN",
       "file": "Data/Monster/monster197.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"die": 0.2}
+      "animations": {"die": 0.2},
+      "namedBones": {"Monster100_Footstepst": 0, "Monster100_L_Hand": 76, "Monster100_R_Hand": 94, "Monster100_Pelvis": 2, "Monster100_Head": 57, "Monster100_z02": 107, "Monster100_z03": 108, "Monster100_z04": 109, "Monster100_z05": 110}
     },
     {
       "slot": "MONSTER_MODEL_BERSERKER_WARRIOR",
       "file": "Data/Monster/Monster198.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19}
+      "animations": {"stop2": 0.25, "walk": 0.23, "attack1": 0.28, "attack2": 0.28, "die": 0.19},
+      "namedBones": {"BERSERK_MOUTH": 9}
     },
     {
       "slot": "MONSTER_MODEL_KENTAUROS_WARRIOR",
       "file": "Data/Monster/monster199.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25}
+      "animations": {"stop2": 0.25, "walk": 0.27, "attack1": 0.27, "attack2": 0.27, "die": 0.25},
+      "namedBones": {"KENTAUROS_BIP_23": 27, "KENTAUROS_BIP_24": 28, "KENTAUROS_BIP_25": 29, "KENTAUROS_BIP_26": 30, "KENTAUROS_BIP_18": 34, "KENTAUROS_BIP_19": 35, "KENTAUROS_BIP_20": 36, "KENTAUROS_BIP_21": 37, "KENTAUROS_BIP_TAIL": 81, "KENTAUROS_BIP_TAIL_1": 82, "KENTAUROS_BIP_TAIL_2": 83, "KENTAUROS_BIP_SPAIN_1": 4, "KENTAUROS_BIP_SPAIN_2": 5, "KENTAUROS_BIP_SPAIN_3": 6}
     },
     {
       "slot": "MONSTER_MODEL_GIGANTIS_WARRIOR",
@@ -1613,7 +1676,8 @@
       "slot": "MONSTER_MODEL_SOCCERBALL",
       "file": "Data/Monster/Monster201.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3}
+      "animations": {"stop2": 0.25, "walk": 0.25, "attack1": 0.3, "attack2": 0.3, "die": 0.3},
+      "namedBones": {"GENO_WP": 47}
     },
     {
       "slot": "MONSTER_MODEL_SAPI_QUEEN",
@@ -1692,7 +1756,8 @@
     {
       "slot": "MONSTER_MODEL_DARK_MAMMOTH",
       "file": "Data/Monster/Monster206.bmd",
-      "textureFolders": ["Monster"]
+      "textureFolders": ["Monster"],
+      "namedBones": {"GIANT_MAMUD_BIP_TAIL": 45, "GIANT_MAMUD_BIP_TAIL_1": 6, "GIANT_MAMUD_BIP_TAIL_2": 7, "GIANT_MAMUD_BIP_SPAIN_1": 3, "GIANT_MAMUD_BIP_SPAIN_2": 4, "GIANT_MAMUD_BIP_SPAIN_3": 5}
     },
     {
       "slot": "MONSTER_MODEL_DARK_GIANT",
@@ -2250,7 +2315,8 @@
     {
       "slot": "MODEL_KANTURU2ND_ENTER_NPC",
       "file": "Data/NPC/to3gate.bmd",
-      "textureFolders": ["NPC"]
+      "textureFolders": ["NPC"],
+      "namedBones": {"KANTURU2ND_ENTER_NPC_1": 37, "KANTURU2ND_ENTER_NPC_2": 38, "KANTURU2ND_ENTER_NPC_3": 39, "KANTURU2ND_ENTER_NPC_4": 40, "KANTURU2ND_ENTER_NPC_5": 41, "KANTURU2ND_ENTER_NPC_6": 42, "KANTURU2ND_ENTER_NPC_7": 43, "KANTURU2ND_ENTER_NPC_8": 6, "KANTURU2ND_ENTER_NPC_9": 7, "KANTURU2ND_ENTER_NPC_10": 8, "KANTURU2ND_ENTER_NPC_11": 15, "KANTURU2ND_ENTER_NPC_12": 16, "KANTURU2ND_ENTER_NPC_13": 17, "KANTURU2ND_ENTER_NPC_14": 10}
     },
     {
       "slot": "MODEL_SMELTING_NPC",

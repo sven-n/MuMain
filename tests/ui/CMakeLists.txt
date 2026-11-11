@@ -1,12 +1,19 @@
+# RmlLayoutFixture.cpp loads the themes and fonts for the tests that lay out RmlUi documents, here and in
+# tests/data: compiled once for all of them.
+mu_add_test_objects(NAME mu_test_rml_layout_fixture SOURCES RmlLayoutFixture.cpp LINK_LIBS mu_test_main MuClient)
+target_compile_definitions(mu_test_rml_layout_fixture PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
 mu_add_test(
     NAME map_name_tests
     SOURCES
         test_map_name.cpp
         test_map_name_ornament.cpp
         test_text_fit.cpp
-        RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient Freetype::Freetype
+    LINK_LIBS MuClient Freetype::Freetype mu_test_rml_layout_fixture
 )
 
 target_compile_definitions(map_name_tests PRIVATE
@@ -14,19 +21,26 @@ target_compile_definitions(map_name_tests PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
     MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
 )
+# GCC 13 reports a -Wstringop-overflow false positive in it with the precompiled header.
+mu_allow_gcc13_stringop_overflow(map_name_tests test_map_name.cpp)
 
 mu_add_test(
     NAME cursed_temple_skill_tests
     SOURCES
         test_cursed_temple_skill.cpp
-        RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
 )
 target_compile_definitions(cursed_temple_skill_tests PRIVATE
     MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
+mu_add_test(
+    NAME rml_render_target_lifetime_tests
+    SOURCES
+        test_rml_render_target_lifetime.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )
 
 mu_add_test(
@@ -182,6 +196,7 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
+        ${CMAKE_SOURCE_DIR}/tests/data/ExecutableConfigFile.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
     # Saves the config.ini beside the executable, as theme_file_interface_tests does.
@@ -204,9 +219,7 @@ mu_add_test(
 
 mu_add_test(
     NAME window_geometry_tests
-    SOURCES
-        test_window_geometry.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/Core/WindowGeometry.cpp
+    SOURCES test_window_geometry.cpp
     LINK_LIBS MuClient
 )
 
@@ -214,7 +227,8 @@ mu_add_test(
     NAME master_skill_tree_layout_tests
     SOURCES
         test_master_skill_tree_layout.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
 )
 
 mu_add_test(
@@ -222,7 +236,8 @@ mu_add_test(
     SOURCES
         test_skill_icon_atlas.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/SkillIconAtlas.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/UI/HUD/Skills/MasterSkillTreeLayout.cpp
+    LINK_LIBS
+        mu_test_master_skill_tree_layout
 )
 
 mu_add_test(
@@ -281,13 +296,10 @@ mu_add_test(
     NAME rml_party_trade_layout_tests
     SOURCES
         test_rml_party_trade_layout.cpp
-        RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
 )
 target_compile_definitions(rml_party_trade_layout_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
     MU_LOCALIZATION_DIR="${CMAKE_SOURCE_DIR}/src/Localization"
 )
 
@@ -355,13 +367,13 @@ mu_add_test(
 add_executable(rml_text_layout_tests
     test_rml_text_layout.cpp
     RmlTextLayoutAudit.cpp
-    RmlLayoutFixture.cpp
 )
-target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main mu_test_winmain)
+target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main mu_test_winmain mu_test_rml_layout_fixture)
 target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
 if(MSVC)
     target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
 endif()
+mu_test_use_pch(rml_text_layout_tests)
 add_test(
     NAME rml_text_layout_baseline
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/prepare_rml_text_layout.py"
@@ -370,18 +382,13 @@ add_test(
         --executable "$<TARGET_FILE:rml_text_layout_tests>"
         --output "${CMAKE_BINARY_DIR}/text-layout-baseline"
 )
-target_compile_definitions(rml_text_layout_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
-)
 
 mu_add_test(
     NAME rml_styling_regression_tests
     SOURCES
         test_rml_styling_regressions.cpp
-        RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
 )
 target_compile_definitions(rml_styling_regression_tests PRIVATE
     MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
@@ -392,11 +399,6 @@ mu_add_test(
     NAME rml_click_sound_tests
     SOURCES
         test_rml_click_sounds.cpp
-        RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient
-)
-target_compile_definitions(rml_click_sound_tests PRIVATE
-    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
-    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    LINK_LIBS MuClient mu_test_rml_layout_fixture
 )

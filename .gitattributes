@@ -22,6 +22,8 @@ src/bin/Data/Local/ServerList.json text eol=lf
 src/bin/Data/Monsters/**/*.json text eol=lf
 # The creation baseline of the effect recorder is compared line by line on every platform.
 tests/effects/baseline/*.txt text eol=lf
+# So is the draw baseline of the render styles in data.
+tests/data/baseline/*.txt text eol=lf
 
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`
@@ -53,6 +55,6 @@ tests/effects/baseline/*.txt text eol=lf
 # Shell scripts and git hooks run under bash on every platform; CRLF breaks them.
 *.sh text eol=lf
 .githooks/* text eol=lf
-# The miniaudio patch must keep LF: it applies to a downloaded archive, which is LF on every
-# platform. The SDL_ttf patches stay native, like the SDL_ttf clone they apply to.
-cmake/patches/miniaudio-*.patch text eol=lf
+# The patches must keep LF: they apply to downloaded archives (miniaudio, SDL_ttf and the
+# libraries it vendors), which are LF on every platform.
+cmake/patches/*.patch text eol=lf

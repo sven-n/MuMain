@@ -11,13 +11,22 @@
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/EffectData/Shines.h"
+#include "Data/GameData/ItemData/PartModelSlots.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemEnumNames.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemOptionValidation.h"
+#include "Data/GameData/ItemData/OptionRule.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
 #include "Data/GameData/ItemData/ItemNames.h"
+#include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/LookData/LookStore.h"
+#include "Data/GameData/ItemData/ItemReferenceNames.h"
+#include "Data/Translation/ItemTextExpansion.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -49,6 +58,32 @@ double MillisecondsSince(std::chrono::steady_clock::time_point start)
 {
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
     return elapsed.count();
+}
+
+// The option files, the rules in the editor only (the game reads the items' lists), checked with the items' links,
+// whose names it puts in the order the item files write them in.
+ItemOptionDatabase LoadItemOptions(std::vector<ItemDefinition>& items, std::vector<ItemDataIssue>& issues)
+{
+#ifdef _EDITOR
+    constexpr bool WithRules = true;
+#else
+    constexpr bool WithRules = false;
+#endif
+    std::vector<ItemDataIssue> optionIssues;
+    ItemOptionDatabase options = LoadItemOptionFiles(WithRules, I18N::GetAvailableLocales(), optionIssues);
+    issues.insert(issues.end(), optionIssues.begin(), optionIssues.end());
+    // Without the definitions every link would be an error of its own; the files' fatal problems stop the start.
+    if (HasFatal(optionIssues))
+    {
+        return options;
+    }
+    ValidateItemOptionLinks(items, options, issues);
+    ValidateOptionDefinitionUse(items, options, issues);
+    for (ItemDefinition& item : items)
+    {
+        options.OrderLinks(item.options);
+    }
+    return options;
 }
 
 // ITEM_ATTRIBUTE records with the item names of `locale`.
@@ -241,12 +276,19 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
+    ItemNameCasesLoadResult nameCases = LoadItemNameCasesFile(GetItemNameCasesFile());
+    result.issues.insert(result.issues.end(), nameCases.issues.begin(), nameCases.issues.end());
+    ValidateNameForms(result.items, tooltips.file, nameCases.cases, GetItemNameCasesFile().generic_string(),
+                      result.issues);
+    ValidateNameCaseLocales(nameCases.cases, I18N::GetAvailableLocales(), GetItemNameCasesFile().generic_string(),
+                            result.issues);
     GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
     result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
     if (!HasFatal(groundLabels.issues))
     {
         ValidateGroundLabels(result.items, groundLabels.file, GetGroundLabelsFile().generic_string(), result.issues);
     }
+    ItemOptionDatabase options = LoadItemOptions(result.items, result.issues);
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
     {
@@ -258,6 +300,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     m_statFile = InWriterOrder(std::move(stats.file));
     m_statFileChanged = false;
     m_groundLabelsChanged = false;
+    m_nameCasesChanged = false;
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
@@ -265,10 +308,13 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
     g_ItemDatabase.SetGroundLabels(std::move(groundLabels.file));
+    g_ItemDatabase.SetOptions(std::move(options));
+    g_ItemDatabase.SetNameCases(std::move(nameCases.cases));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
     RegisterLocaleObserver();
+    ConnectItemTexts();
 
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} items from {} in {:.1f} ms (item database build {:.2f} ms)",
                 g_ItemDatabase.GetExistingItemCount(), GetItemDataDirectory().string(), loadMilliseconds,
@@ -280,11 +326,17 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     GlowColorsLoadResult colors = LoadGlowColorsFile(GetGlowColorsFile());
+    ShinesLoadResult shines = LoadShinesFile(GetShinesFile());
     ItemModelDataLoadResult result = LoadItemModelDataDirectory(GetItemModelDataDirectory());
+    result.issues.insert(result.issues.begin(), shines.issues.begin(), shines.issues.end());
     result.issues.insert(result.issues.begin(), colors.issues.begin(), colors.issues.end());
     if (!HasFatal(colors.issues))
     {
         ValidateItemModelGlowColors(result.models, colors.colors, result.issues);
+    }
+    if (!HasFatal(shines.issues))
+    {
+        ValidateItemModelShines(result.models, shines.shines, result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
@@ -294,18 +346,22 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     }
 
     g_GlowColors.Build(colors.colors);
+    g_Shines.Build(shines.shines);
 #ifdef _EDITOR
     g_GlowColors.SetFolders(std::move(colors.folders));
 #endif
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
     g_ItemModelDatabase.SetSharedModels(result.sharedModels);
+    g_ItemModelDatabase.SetPartModels(result.partModels);
 #ifdef _EDITOR
     // The models are where their files have them again.
     m_modelMoves.clear();
     m_changedModelGroups.reset();
     m_sharedModelsChanged = false;
+    m_partModelsChanged = false;
     m_glowColorsChanged = false;
     m_modelsToReopen.clear();
+    m_partModelsToReopen.clear();
 #endif
     MU_LOG_INFO(mu::log::Get("data"), "Loaded {} item models from {} in {:.1f} ms", g_ItemModelDatabase.GetModelCount(),
                 GetItemModelDataDirectory().string(), MillisecondsSince(loadStart));
@@ -350,6 +406,36 @@ void CItemDataHandler::SetTranslateItemNames(bool translate)
     if (m_loaded)
     {
         RefreshItemNames();
+        RefreshItemTexts();
+    }
+}
+
+void CItemDataHandler::ConnectItemTexts()
+{
+    // The name of a text's item in the text's language, computed from the item data rather than from the shown names:
+    // a locale switch expands the texts before this handler's observer shows the names in the new language.
+    Data::Translation::ItemTexts::SetNameResolver(
+        [this](const Data::Translation::ItemReference& reference,
+               std::string_view textLocale) -> std::optional<std::string>
+        {
+            const Data::Items::ReferencedName name = Data::Items::ResolveUiTextName(
+                g_ItemDatabase, reference, Data::Items::GetItemNameLocale(textLocale, m_translateItemNames));
+            return name.text.empty() ? std::nullopt : std::optional<std::string>(name.text);
+        });
+    RefreshItemTexts();
+}
+
+void CItemDataHandler::RefreshItemTexts()
+{
+    m_itemTextsNameVersion = g_ItemDatabase.GetNameVersion();
+    Data::Translation::ItemTexts::Refresh();
+}
+
+void CItemDataHandler::RefreshItemTextsIfNamesChanged()
+{
+    if (m_loaded && g_ItemDatabase.GetNameVersion() != m_itemTextsNameVersion)
+    {
+        RefreshItemTexts();
     }
 }
 
@@ -383,6 +469,8 @@ ItemDefinition CItemDataHandler::WithDerivedFields(const ItemDefinition& definit
     {
         result.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), previous, result);
     }
+    result.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), previous, result);
+    g_ItemDatabase.GetOptions().OrderLinks(result.options);
     return result;
 }
 
@@ -498,6 +586,7 @@ void CItemDataHandler::SetItemModel(const ItemModelDefinition& model)
         stored.file = shared->file;
         stored.textureFolders = shared->textureFolders;
         stored.noneBlendMeshes = shared->noneBlendMeshes;
+        stored.meshNames = shared->meshNames;
     }
     const ItemModelDefinition* before = g_ItemModelDatabase.Find(itemType);
     const bool opensDifferently = before == nullptr || !stored.Exists() || stored.model != before->model ||
@@ -599,8 +688,134 @@ void CItemDataHandler::SetGlowColorFolders(std::vector<Data::Colors::ColorFolder
     m_glowColorsChanged = true;
 }
 
+namespace
+{
+std::filesystem::path LookFilePath(Data::Looks::LookKind kind)
+{
+    return Data::Effects::GetEffectDataDirectory() / Data::Looks::GetLookFileName(kind);
+}
+
+void SortLooks(std::vector<Data::Looks::LookDefinition>& looks)
+{
+    std::ranges::sort(looks, {}, &Data::Looks::LookDefinition::name);
+}
+} // namespace
+
+CItemDataHandler::LookFileState& CItemDataHandler::ReadLookFileOnce(Data::Looks::LookKind kind)
+{
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+    if (state.read)
+    {
+        return state;
+    }
+    state.read = true;
+    const std::filesystem::path file = LookFilePath(kind);
+    const std::string source = file.generic_string();
+    Data::Looks::LookFile read;
+    if (const std::optional<std::string> text = Data::ReadTextFile(file))
+    {
+        Data::Looks::ReadLookFile(*text, source, kind, read, state.issues);
+    }
+    else
+    {
+        state.issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "",
+                                "could not be read"});
+    }
+    state.complete = !HasFatal(state.issues);
+    if (state.complete)
+    {
+        SortLooks(read.looks);
+        state.file = std::move(read);
+        // The file may have changed since the game read it at start: the game draws what the editor shows.
+        if (!std::ranges::equal(state.file.looks, Data::Looks::g_LookStore.GetLooks(kind)))
+        {
+            Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
+        }
+    }
+    else
+    {
+        // The game keeps the looks it read at start.
+        const auto looks = Data::Looks::g_LookStore.GetLooks(kind);
+        state.file = {{looks.begin(), looks.end()}, {}};
+    }
+    ++state.version;
+    return state;
+}
+
+const Data::Looks::LookFile& CItemDataHandler::GetLookFile(Data::Looks::LookKind kind)
+{
+    return ReadLookFileOnce(kind).file;
+}
+
+void CItemDataHandler::SetLookFile(Data::Looks::LookKind kind, Data::Looks::LookFile file)
+{
+    LookFileState& state = ReadLookFileOnce(kind);
+    SortLooks(file.looks);
+    state.file = std::move(file);
+    Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
+    state.changed = true;
+    ++state.version;
+}
+
+const std::vector<ItemDataIssue>& CItemDataHandler::GetLookReadIssues(Data::Looks::LookKind kind)
+{
+    return ReadLookFileOnce(kind).issues;
+}
+
+bool CItemDataHandler::CanSaveLooks(Data::Looks::LookKind kind)
+{
+    return ReadLookFileOnce(kind).complete;
+}
+
+void CItemDataHandler::ResetLooksForTest(Data::Looks::LookKind kind, Data::Looks::LookFile file)
+{
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+    SortLooks(file.looks);
+    state.file = std::move(file);
+    Data::Looks::g_LookStore.SetLooks(kind, state.file.looks);
+    state.read = true;
+    state.complete = true;
+    state.issues.clear();
+    state.changed = false;
+    ++state.version;
+}
+
+void CItemDataHandler::ForgetLooksForTest(Data::Looks::LookKind kind)
+{
+    LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+    const int version = state.version;
+    state = {};
+    state.version = version + 1;
+}
+
+void CItemDataHandler::SetPartModels(std::vector<Data::Items::PartModel> parts)
+{
+    for (const Data::Items::PartModel& part : parts)
+    {
+        const Data::Items::PartModel* before = g_ItemModelDatabase.FindPartModel(part.model.name);
+        const auto slot = std::ranges::find(Data::Items::PartModelSlots, std::string_view(part.model.name),
+                                            &Data::Items::PartModelSlot::name);
+        const bool opensDifferently = before == nullptr || before->model.file != part.model.file ||
+                                      before->model.textureFolders != part.model.textureFolders ||
+                                      before->model.noneBlendMeshes != part.model.noneBlendMeshes;
+        if (opensDifferently && slot != std::end(Data::Items::PartModelSlots) &&
+            std::ranges::find(m_partModelsToReopen, slot->modelType) == m_partModelsToReopen.end())
+        {
+            m_partModelsToReopen.push_back(slot->modelType);
+        }
+    }
+    g_ItemModelDatabase.SetPartModels(parts);
+    m_partModelsChanged = true;
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
+    std::vector<int> partSlots;
+    partSlots.swap(m_partModelsToReopen);
+    for (const int slot : partSlots)
+    {
+        ModelLoader::OpenPartModel(slot, lookNames);
+    }
     std::vector<int> itemTypes;
     itemTypes.swap(m_modelsToReopen);
     std::ranges::sort(itemTypes);
@@ -701,7 +916,10 @@ void CItemDataHandler::FollowDerivedFieldsAfterMove(const ItemDefinition& before
     ItemDefinition changed = *moved;
     changed.weaponKind = FollowGroupWeaponKind(&before, changed);
     changed.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), &before, changed);
-    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile)
+    changed.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), &before, changed);
+    g_ItemDatabase.GetOptions().OrderLinks(changed.options);
+    if (changed.weaponKind != moved->weaponKind || changed.statProfile != moved->statProfile ||
+        changed.options != moved->options)
     {
         g_ItemDatabase.Set(changed);
     }
@@ -725,6 +943,11 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                       GetItemStatsFile().generic_string(), issues);
     ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
                          GetGroundLabelsFile().generic_string(), issues);
+    ValidateItemOptionLinks(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetOptions(), issues);
+    ValidateNameForms(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetTooltipFile(), g_ItemDatabase.GetNameCases(),
+                      GetItemNameCasesFile().generic_string(), issues);
+    ValidateNameCaseLocales(g_ItemDatabase.GetNameCases(), I18N::GetAvailableLocales(),
+                            GetItemNameCasesFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
@@ -750,6 +973,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     {
         ValidateItemModelGlowColors(models, g_GlowColors.GetColors(), issues);
         ValidateGlowColorsAsWritten(g_GlowColors.GetColors(), issues);
+        ValidateItemModelShines(models, g_Shines.GetShines(), issues);
     }
     if (m_lookNames)
     {
@@ -759,9 +983,12 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     ValidateItemModelsAsWritten(g_ItemModelDatabase.GetAllSlots(), issues);
     ValidateSharedItemModelsAsWritten(g_ItemModelDatabase.GetSharedModels(), issues);
     ValidateItemModelFilesExist(models, issues);
+    ValidatePartModels(g_ItemModelDatabase.GetPartModels(), m_lookNames ? m_lookNames->renderStyle : nullptr, issues);
+    ValidatePartModelFilesExist(g_ItemModelDatabase.GetPartModels(), issues);
 }
 
-ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
+ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues,
+                                          std::span<const Data::TextFileToWrite> alsoWrite)
 {
     // Everything is checked before anything is written, so all problems are
     // reported at once.
@@ -779,6 +1006,8 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groups = m_changedModelGroups;
     models.sharedModels = g_ItemModelDatabase.GetSharedModels();
     models.sharedModelsChanged = m_sharedModelsChanged;
+    models.partModels = g_ItemModelDatabase.GetPartModels();
+    models.partModelsChanged = m_partModelsChanged;
     models.glowColorsFile = GetGlowColorsFile();
     models.glowColors = g_GlowColors.GetColors();
     models.glowColorFolders = g_GlowColors.GetFolders();
@@ -789,6 +1018,32 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.groundLabelsFile = GetGroundLabelsFile();
     models.groundLabels = &g_ItemDatabase.GetGroundLabels();
     models.groundLabelsChanged = m_groundLabelsChanged;
+    // The look files as the Style Editor changed them (design L39), when the read could use the whole file.
+    for (const Data::Looks::LookKind kind : {Data::Looks::LookKind::RenderStyle, Data::Looks::LookKind::ItemEffect})
+    {
+        const LookFileState& state = m_lookFiles[static_cast<std::size_t>(kind)];
+        if (!state.changed || !state.complete)
+        {
+            continue;
+        }
+        LookFileToSave& save = models.lookFiles.emplace_back();
+        save.file = LookFilePath(kind);
+        save.text = Data::Looks::WriteLookFileJson(kind, state.file.looks, state.file.folders);
+        // What the game would refuse is not written.
+        Data::Looks::LookFile readBack;
+        std::vector<ItemDataIssue> lookIssues;
+        Data::Looks::ReadLookFile(save.text, save.file.generic_string(), kind, readBack, lookIssues);
+        const bool fatal = HasFatal(lookIssues);
+        issues.insert(issues.end(), lookIssues.begin(), lookIssues.end());
+        if (fatal)
+        {
+            return ItemDataSaveResult::InvalidData;
+        }
+    }
+    models.alsoWrite = alsoWrite;
+    models.nameCasesFile = GetItemNameCasesFile();
+    models.nameCases = &g_ItemDatabase.GetNameCases();
+    models.nameCasesChanged = m_nameCasesChanged;
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 
@@ -797,6 +1052,12 @@ void CItemDataHandler::SetStatFile(const ItemStatFile& file)
     m_statFile = InWriterOrder(file);
     m_statFileChanged = true;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
+}
+
+void CItemDataHandler::SetNameCases(const ItemNameCases& cases)
+{
+    g_ItemDatabase.SetNameCases(cases);
+    m_nameCasesChanged = true;
 }
 
 void CItemDataHandler::SetGroundLabelStyle(const GroundLabelStyle& style)
@@ -882,6 +1143,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                       GetItemStatsFile().generic_string(), result.validationIssues);
     ValidateGroundLabels(result.items, g_ItemDatabase.GetGroundLabels(), GetGroundLabelsFile().generic_string(),
                          result.validationIssues);
+    ValidateItemOptionLinks(result.items, g_ItemDatabase.GetOptions(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     // The entries without a name stay as they are: they are not from the bmd files, so they
@@ -955,6 +1217,8 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
         }
         item.weaponKind = FollowGroupWeaponKind(current, item);
         item.statProfile = FollowStatProfile(g_ItemDatabase.GetStatProfiles(), current, item);
+        item.options = FollowItemOptions(g_ItemDatabase.GetOptions().GetRules(), current, item);
+        g_ItemDatabase.GetOptions().OrderLinks(item.options);
     }
 }
 

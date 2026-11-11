@@ -7,6 +7,8 @@
 #include "Render/Models/DrawLook.h"
 #include "World/MapInfra/w_BaseMap.h"
 
+#include <string_view>
+
 SmartPointer(GMEmpireGuardian1);
 
 class GMEmpireGuardian1 : public BaseMap
@@ -27,7 +29,6 @@ public: // Object
     void UpdateProjectileLauncher(OBJECT* o, BMD* b);
 
 public: // Character
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
@@ -66,6 +67,11 @@ public: // Weather
 
 private:
     int m_iWeather;
+
+public:
+    // The boss's rage ends: a new boss of the kind appears (the spawn hook
+    // EmpireGuardianRageReset). False for a boss of another map.
+    bool ResetRage(std::string_view boss);
 
 private:
     bool m_bCurrentIsRage_Raymond;

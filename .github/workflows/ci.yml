@@ -11,9 +11,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Coalesce releases: finish the running revision and keep only the newest pending trigger.
+  # A PR's newer push cancels its older run. Main pushes and releases finish the running revision and keep only the
+  # newest pending trigger: a main push saves the caches PRs start from, and its Windows and macOS builds take long
+  # enough that a day of merges would otherwise cancel most of them before they save anything.
   group: ci-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'release' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -34,11 +36,20 @@ jobs:
     # The image by name, not ubuntu-latest: GitHub moves repositories to a new latest image one by one, and its
     # cppcheck and GCC report different findings and warnings.
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # Select native builds looks up the commit main's last successful run built (scripts/ci_build_plan.py).
+      actions: read
     outputs:
       linux: ${{ steps.plan.outputs.linux }}
       macos: ${{ steps.plan.outputs.macos }}
       windows: ${{ steps.plan.outputs.windows }}
       release: ${{ steps.plan.outputs.release }}
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
+    env:
+      # The image has no cppcheck; it comes from an apt cache, as the Linux build's packages do.
+      APT_PACKAGES: cppcheck
+      APT_ARCHIVES: ${{ github.workspace }}/.apt-archives
 
     steps:
       # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
@@ -66,6 +77,8 @@ jobs:
 
       - name: Select native builds
         id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 scripts/ci_build_plan.py
 
       # Architecture guards and contracts that only read the source; native jobs skip the `static` label.
@@ -79,19 +92,7 @@ jobs:
           test -f src/bin/Data/Dec2.dat
           test -f src/bin/fonts/DejaVuSans.ttf
 
-      - name: Cache quality tools
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cache/pip
-          key: quality-tools-pip-${{ runner.os }}-v1
-          restore-keys: quality-tools-pip-${{ runner.os }}-
-
-      - name: Install quality tools
-        run: |
-          which cppcheck || { sudo apt-get update && sudo apt-get install -y cppcheck; }
-          pip install clang-format==21.1.8
-
+      # Before the tools: only Check formatting and Static analysis use them, and they skip a run without C++ changes.
       - name: Detect changed C++ files
         id: changed
         env:
@@ -108,6 +109,68 @@ jobs:
             echo "$CHANGED" > /tmp/changed-cpp-files.txt
             echo "$COUNT C++ files changed"
           fi
+
+      - name: Cache quality tools
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/pip
+          key: quality-tools-pip-${{ runner.os }}-v1
+          restore-keys: quality-tools-pip-${{ runner.os }}-
+
+      # cppcheck, cached as the Linux build caches its packages (see there).
+      - name: Find apt packages
+        id: apt_packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get update
+          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
+          python3 scripts/ci_apt_cache.py name apt-cppcheck-linux-x64- "$RUNNER_TEMP/apt-files.txt"
+
+      - name: Restore apt packages
+        id: apt
+        if: steps.changed.outputs.count != '0'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt_packages.outputs.key }}
+          restore-keys: |
+            apt-cppcheck-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-cppcheck-linux-x64-
+
+      - name: Note when the caches were read
+        id: caches_read
+        # As in the build jobs, for the prune job; skipped with the restore. To the microsecond, as GitHub notes the
+        # read: the one small restore before it can end within the second it began.
+        if: steps.changed.outputs.count != '0'
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%S.%6NZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch apt packages
+        if: steps.changed.outputs.count != '0'
+        run: |
+          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
+            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
+          fi
+          sudo apt-get install -y --download-only $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.changed.outputs.count != '0'
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
+
+      - name: Save apt packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt.outputs.cache-primary-key }}
+
+      - name: Install quality tools
+        if: steps.changed.outputs.count != '0'
+        run: |
+          sudo apt-get install -y $APT_PACKAGES
+          pip install clang-format==21.1.8
 
       - name: Check formatting
         if: steps.changed.outputs.count != '0'
@@ -145,7 +208,16 @@ jobs:
     # By name, as Quality Gates: another image brings another MSVC, and GitHub warns in every job while it moves
     # windows-latest to a new one.
     runs-on: windows-2025-vs2026
-    timeout-minutes: 90
+    # A cold build, e.g. after a runner image brings a new cl.exe, took 64 minutes: vcpkg 18, the build 41.
+    timeout-minutes: 120
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
+      # MSVC's objects carry their debug info (/Z7, see src/CMakeLists.txt): one build's take about 0.5 GB.
+      CCACHE_MAXSIZE: 1500M
 
     steps:
       - name: Checkout repository
@@ -204,14 +276,45 @@ jobs:
           }
           exit 0
 
+      - name: Install compiler cache
+        # The runner image has no ccache. Its release for Windows, checked against the SHA-256 the release lists; a
+        # download that fails is sent again, as a brief GitHub error would otherwise fail every Windows job meanwhile.
+        shell: pwsh
+        run: |
+          $version = '4.14.2'
+          $sha256 = '6993ce645e53192cec592ee23186200b574ac4c59097ecde8d9cfd681b47ae84'
+          $name = "ccache-$version-windows-x86_64"
+          $archive = Join-Path $env:RUNNER_TEMP "$name.zip"
+          Invoke-WebRequest -Uri "https://github.com/ccache/ccache/releases/download/v$version/$name.zip" -OutFile $archive `
+            -MaximumRetryCount 3 -RetryIntervalSec 10
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $sha256) {
+            throw "$name.zip does not match its SHA-256."
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP
+          Join-Path $env:RUNNER_TEMP $name | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        # Its compiler output, the start of cl.exe's SHA-256, also names the compiler cache.
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
+
+      - name: Cache Windows compilation
+        id: ccache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-windows-x64-${{ steps.vcpkg.outputs.compiler }}-${{ github.sha }}
+          restore-keys: ccache-windows-x64-${{ steps.vcpkg.outputs.compiler }}-
+
       - name: Restore dependencies
         id: deps
         # The key names what picks these files: the root CMakeLists.txt declares the libraries, cmake/patches changes
         # their sources, and the ClientLibrary projects and the .NET SDK pick the NuGet packages (the SDK's version
         # picks those of its NativeAOT compiler). src/CMakeLists.txt is not part of it: it changes with every new
-        # source file of the game. Only the release runs, the runs on main that build Windows, save it (Save
-        # dependencies): a PR's own copy would serve that PR alone and push main's entries out of the 10 GB cache. One
-        # kind of run saves each cache, so its newest entry, the one the prune job keeps, is always the newest commit's.
+        # source file of the game. Only main pushes save it (Save dependencies): a PR's own copy would serve that PR
+        # alone and push main's entries out of the 10 GB cache. One kind of run saves each cache, so its newest entry,
+        # the one the prune job keeps, is always the newest commit's.
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -219,17 +322,12 @@ jobs:
             out/build/windows-ci-x64-release/_deps/*-src
             out/build/windows-ci-x64-release/_deps/*-subbuild
             .nuget
-          key: windows-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: windows-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: windows-x64-release-dep-sources-
-
-      - name: Identify vcpkg toolchain
-        id: vcpkg
-        shell: pwsh
-        run: ./scripts/ci_vcpkg_cache_key.ps1
 
       - name: Restore vcpkg packages
         id: vcpkg_cache
-        # Saved after the configure step, which builds what the archives lack, by the release runs only.
+        # Saved after the configure step, which builds what the archives lack, by main pushes only.
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -239,13 +337,26 @@ jobs:
           key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake', 'cmake/triplets/**') }}
           restore-keys: vcpkg-windows-x64-v2-
 
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        shell: pwsh
+        run: |
+          $at = [DateTime]::UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+          "at=$at" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
       # No warning may come back: the game's own code builds with warnings as errors, and ci_warnings.py fails the
       # step for any other warning, note or deprecation in the configure or build output (docs/build/README.md).
+      # SDL and RmlUi build without their precompiled headers, which ccache does not cache: only the game's own
+      # code would hit, and the two libraries' files, over a quarter of the build, compiled again on every run. The
+      # nightly and manual release builds, which save no cache, keep them: local builds use them, and what ships
+      # should be built the way they are, so a change that breaks only with them still fails a nightly.
       - name: Configure CMake
         run: >
           python scripts/ci_warnings.py run
           cmake --preset windows-x64
           -B out/build/windows-ci-x64-release
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows
@@ -260,6 +371,8 @@ jobs:
           -DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Assert configured MSVC compiler
         shell: pwsh
@@ -302,7 +415,7 @@ jobs:
           }
 
       - name: Save vcpkg packages
-        if: needs.quality.outputs.release == 'true' && steps.vcpkg_cache.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.vcpkg_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -312,10 +425,26 @@ jobs:
           key: ${{ steps.vcpkg_cache.outputs.cache-primary-key }}
 
       - name: Build
-        run: python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+        # Trim compiler cache keeps the objects used from here on.
+        run: |
+          $started = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+          "BUILD_STARTED=$started" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          ccache --zero-stats
+          python scripts/ci_warnings.py run cmake --build out/build/windows-ci-x64-release --config Release
+
+      - name: Report compiler cache
+        if: always()
+        shell: pwsh
+        run: |
+          if (Get-Command ccache -ErrorAction SilentlyContinue) {
+            $stats = ccache --show-stats | Out-String
+            Write-Host $stats
+            "### Windows compiler cache", '```text', $stats.TrimEnd(), '```' |
+              Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
 
       - name: Save dependencies
-        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -331,6 +460,7 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
+          --parallel 4
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -559,10 +689,31 @@ jobs:
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $age = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - [long]$env:BUILD_STARTED + 60
+          ccache --evict-older-than "${age}s"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ccache --show-stats
+
+      - name: Save Windows compilation cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
+
+      # Only the release runs hand their builds on, as on Linux and macOS.
       - name: Archive runtime
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
 
       - name: Upload runtime artifact
+        if: needs.quality.outputs.release == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
@@ -576,11 +727,25 @@ jobs:
     # By name, as Quality Gates: another image's GCC warns differently.
     runs-on: ubuntu-26.04
     timeout-minutes: 90
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
       CCACHE_MAXSIZE: 1G
+      # What Install build tools installs. Find apt packages lists the files apt fetches for them.
+      APT_PACKAGES: >-
+        cmake ninja-build gcc g++ ccache
+        libgl1-mesa-dev libglu1-mesa-dev
+        libx11-dev libxext-dev libxrandr-dev
+        libxcursor-dev libxi-dev libxss-dev libxtst-dev
+        libwayland-dev libxkbcommon-dev wayland-protocols
+        libasound2-dev libpulse-dev
+        libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev
+        glslang-tools spirv-cross
+        pkg-config
+      APT_ARCHIVES: ${{ github.workspace }}/.apt-archives
 
     steps:
       - name: Checkout repository
@@ -592,19 +757,54 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install build tools
+      - name: Find apt packages
+        id: apt_packages
+        # The index picks the packages' versions, so the cache is named after the runner image and the files apt would
+        # fetch for them (their names, sizes and hashes): a new version gives a new key.
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            cmake ninja-build gcc g++ ccache \
-            libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
-            libwayland-dev libxkbcommon-dev wayland-protocols \
-            libasound2-dev libpulse-dev \
-            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
-            glslang-tools spirv-cross \
-            pkg-config
+          apt-get install --print-uris -qq $APT_PACKAGES > "$RUNNER_TEMP/apt-files.txt"
+          python3 scripts/ci_apt_cache.py name apt-linux-x64- "$RUNNER_TEMP/apt-files.txt"
+
+      - name: Restore apt packages
+        id: apt
+        # Saved by main pushes, like the compiler cache (Save apt packages). An older entry still holds the files whose
+        # versions stayed: this image's newest first, else another image's.
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt_packages.outputs.key }}
+          restore-keys: |
+            apt-linux-x64-${{ steps.apt_packages.outputs.image }}-
+            apt-linux-x64-
+
+      - name: Fetch apt packages
+        # apt uses a file it finds in its archive folder when the file matches the index, and fetches only the others:
+        # the image's Ubuntu mirror sometimes sends at 35-160 kB/s, and the 45 MB then take 5-24 minutes.
+        run: |
+          if compgen -G "$APT_ARCHIVES/*.deb" > /dev/null; then
+            sudo cp "$APT_ARCHIVES"/*.deb /var/cache/apt/archives/
+          fi
+          sudo apt-get install -y --download-only $APT_PACKAGES
+
+      - name: Gather apt packages
+        id: gather
+        # The files Find apt packages listed, for Save apt packages, and only in the runs that save them. Before the
+        # install, so that no clean-up after dpkg can remove them; a missing file gets a notice.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true'
+        run: python3 scripts/ci_apt_cache.py gather "$RUNNER_TEMP/apt-files.txt" /var/cache/apt/archives "$APT_ARCHIVES"
+
+      - name: Save apt packages
+        # Not without every file: an entry under this key would leave the missing ones to be fetched in every run.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.apt.outputs.cache-hit != 'true' && steps.gather.outputs.complete == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.APT_ARCHIVES }}
+          key: ${{ steps.apt.outputs.cache-primary-key }}
+
+      - name: Install build tools
+        # From the files Fetch apt packages put in apt's archive folder.
+        run: sudo apt-get install -y $APT_PACKAGES
 
       - name: Identify compiler cache
         id: compiler
@@ -628,15 +828,22 @@ jobs:
             out/build/linux-ci/_deps/*-src
             out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: linux-x64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
-      # As on Windows: no warning may come back (docs/build/README.md).
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers except in the
+      # release builds (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset linux-x64
           -B out/build/linux-ci
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
@@ -645,7 +852,9 @@ jobs:
           -DBUILD_TESTING=ON
 
       - name: Build
+        # Trim compiler cache keeps the objects used from here on.
         run: |
+          echo "BUILD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/linux-ci --config Release
 
@@ -704,6 +913,14 @@ jobs:
             fi
           done
 
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        run: |
+          ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"
+          ccache --show-stats
+
       - name: Save Linux compilation cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
@@ -731,6 +948,8 @@ jobs:
     # with this line, not when GitHub moves macos-latest to a newer macOS.
     runs-on: macos-26
     timeout-minutes: 90
+    outputs:
+      caches-read-at: ${{ steps.caches_read.outputs.at }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
@@ -782,15 +1001,22 @@ jobs:
             out/build/macos-ci/_deps/*-src
             out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: macos-arm64-release-dep-sources-${{ steps.dotnet.outputs.dotnet-version }}-${{ hashFiles('CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'cmake/UnpackArchive.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
-      # As on Windows: no warning may come back (docs/build/README.md).
+      - name: Note when the caches were read
+        id: caches_read
+        # The prune job deletes an older entry whose last read was this job's; one read later stays for a later run.
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # As on Windows: no warning may come back, and SDL and RmlUi build without precompiled headers except in the
+      # release builds (docs/build/README.md).
       - name: Configure CMake
         run: >
           python3 scripts/ci_warnings.py run
           cmake --preset macos-arm64
           -B out/build/macos-ci
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=${{ needs.quality.outputs.release == 'true' && 'OFF' || 'ON' }}
           -DENABLE_EDITOR=OFF
           -DMU_WARNINGS_AS_ERRORS=ON
           -DMU_COPY_RUNTIME_ASSETS=OFF
@@ -800,12 +1026,14 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
+        # Trim compiler cache keeps the objects used from here on.
         run: |
+          echo "BUILD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
           ccache --zero-stats
           python3 scripts/ci_warnings.py run cmake --build out/build/macos-ci --config Release
 
       - name: Save dependencies
-        if: needs.quality.outputs.release == 'true' && steps.deps.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -857,9 +1085,16 @@ jobs:
             fi
           done
 
-      # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
+      - name: Trim compiler cache
+        # ccache marks each object it finds or stores, so the objects from before this build are ones it no longer
+        # uses. Without them a save holds this build's objects, not every build's since the cache began.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        run: |
+          ccache --evict-older-than "$(( $(date +%s) - BUILD_STARTED + 60 ))s"
+          ccache --show-stats
+
       - name: Save macOS compilation cache
-        if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -881,7 +1116,8 @@ jobs:
   # They are deleted here, in a job of their own, so that the build jobs keep a read-only token.
   caches:
     name: Prune caches
-    needs: [build-windows, build-linux, build-macos]
+    # Quality Gates only for when it read its cppcheck cache: the builds wait for it anyway.
+    needs: [quality, build-windows, build-linux, build-macos]
     # PR runs save no cache.
     if: ${{ !cancelled() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
@@ -901,6 +1137,11 @@ jobs:
       - name: Delete older cache entries
         env:
           GH_TOKEN: ${{ github.token }}
+          # When each job's restores ended, empty for a job that did not run or restore.
+          CACHES_READ_AT_LINUX: ${{ needs.build-linux.outputs.caches-read-at }}
+          CACHES_READ_AT_MACOS: ${{ needs.build-macos.outputs.caches-read-at }}
+          CACHES_READ_AT_QUALITY: ${{ needs.quality.outputs.caches-read-at }}
+          CACHES_READ_AT_WINDOWS: ${{ needs.build-windows.outputs.caches-read-at }}
         run: python3 scripts/ci_cache_prune.py
 
   required:
@@ -991,6 +1232,7 @@ jobs:
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@8.0.0
+            @semantic-release/exec@7.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

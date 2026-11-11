@@ -6,6 +6,7 @@
 #include "Network/Server/ServerListManager.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "Render/Textures/OztFile.h"
 #include "UI/HUD/MapNameOrnament.h"
 #include "UI/HUD/UIMapName.h"
 #include "UI/RmlBridge/RmlElementBox.h"
@@ -37,6 +38,12 @@
 
 namespace
 {
+namespace Ozt = Render::Textures::Ozt;
+// The TGA header starts after the four-byte OZT prefix.
+constexpr std::size_t OztImageTypeOffset = 4 + 2;
+constexpr std::size_t OztDescriptorOffset = 4 + 17;
+constexpr unsigned char UncompressedTrueColor = 2;
+constexpr unsigned char AlphaBits = 8;
 constexpr float PixelTolerance = 1.f;
 constexpr GLuint GensWarningBitmap = BITMAP_INTERFACE_EX + 47;
 
@@ -346,13 +353,15 @@ TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]")
     REQUIRE(banner.Model().strifeSource.empty());
     REQUIRE(std::filesystem::create_directory(texture.directory));
     // A one-pixel OZT exercises the production cache without requiring localized game artwork.
-    std::array<unsigned char, 26> pixels{};
-    pixels[16] = pixels[18] = 1;
-    pixels[20] = 32;
-    std::fill(pixels.begin() + 22, pixels.end(), 255);
+    std::array<unsigned char, Ozt::HeaderSize + Ozt::BytesPerPixel> file{};
+    file[OztImageTypeOffset] = UncompressedTrueColor;
+    file[16] = file[18] = 1;
+    file[20] = 32;
+    file[OztDescriptorOffset] = AlphaBits;
+    std::fill(file.begin() + Ozt::HeaderSize, file.end(), 255);
     {
         std::ofstream image(texture.directory / "warning.ozt", std::ios::binary);
-        image.write(reinterpret_cast<const char*>(pixels.data()), pixels.size());
+        image.write(reinterpret_cast<const char*>(file.data()), file.size());
         REQUIRE(image.good());
     }
     const auto warningPath = texture.directory / "warning.tga";

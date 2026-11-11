@@ -5,6 +5,7 @@
 #include "ItemCodeReferences.h"
 
 #include "Data/GameData/ItemData/ItemTagSet.h"
+#include "Data/GameData/MonsterData/MonsterItemReferences.h"
 
 #include <span>
 #include <string>
@@ -14,8 +15,8 @@
 namespace MuEditor::Items
 {
 // What uses an item, shown before it is removed or moved to another number
-// (section 7): its tags and its model entry go with the item; the game data
-// and the code that read it by its number stay there.
+// (section 7): its tags and its model entry go with the item; the game data,
+// the texts and the code that read it by its number stay there.
 struct ItemUsage
 {
     std::vector<Data::Items::ItemTag> tags;
@@ -32,6 +33,12 @@ struct ItemUsage
     bool hasAddOption = false;
     bool givesBuff = false;
     bool isPet = false;
+    // The monsters that wear it, by number and place (D60): they name it by
+    // its number.
+    std::vector<Data::Monsters::MonsterItemWearer> monsters;
+    // The texts that name the item by its number ({item:14,13}), as Data::Translation::FindTextsNamingItem lists
+    // them: they then name whatever takes the number.
+    std::vector<std::string> texts;
 
     bool IsUsed() const
     {
@@ -45,7 +52,8 @@ struct ItemUsage
     // What reads the item by its number and stays there.
     bool IsUsedAtNumber() const
     {
-        return !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet;
+        return !code.empty() || inAncientSet || hasAddOption || givesBuff || isPet || !monsters.empty() ||
+               !texts.empty();
     }
 };
 

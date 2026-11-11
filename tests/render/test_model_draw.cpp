@@ -3,11 +3,15 @@
 #include <doctest.h>
 
 #include "Engine/Physics/PhysicsManager.h"
+#include "Render/Drawing/DrawCallLog.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/TextureScript.h"
 
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace
@@ -169,6 +173,41 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     CHECK(draw.bodyOrigin[2] == doctest::Approx(300.f));
     CHECK(draw.bodyScale == doctest::Approx(1.25f));
     CHECK(draw.lod == 2);
+}
+
+TEST_CASE("A shadow draws the casts it carries, whatever the frame's light is by then [render][model_draw]")
+{
+    auto model = std::make_unique<BMD>();
+    GridCloth cloth(0.f);
+    RecordingDrawer drawer;
+    {
+        DrawerScope scope(drawer);
+        model->RenderBodyShadow(-1, -1, -1, -1, &cloth, 1, 1.f);
+    }
+    REQUIRE(drawer.shadows.size() == 1);
+    Render::ModelDrawing::ShadowDraw draw = drawer.shadows.front();
+
+    const auto countsOf = [&](const char* state)
+    {
+        Render::Drawing::DrawCallLog log;
+        mu::SetRendererOverride(&log);
+        model->DrawShadow(draw);
+        mu::SetRendererOverride(nullptr);
+        return std::count_if(log.calls.begin(), log.calls.end(), [&](const std::string& call)
+                             { return call.starts_with("Triangles") && call.find(state) != std::string::npos; });
+    };
+
+    draw.flatStrength = 1.f;
+    draw.lightCastCount = 0;
+    CHECK(countsOf("groundShadow 10") == 1);
+    CHECK(countsOf("groundShadow 01") == 0);
+
+    draw.flatStrength = 0.f;
+    draw.lightCastCount = 2;
+    draw.lightCasts[0] = {0.f, 0.5f};
+    draw.lightCasts[1] = {1.f, 0.25f};
+    CHECK(countsOf("groundShadow 10") == 0);
+    CHECK(countsOf("groundShadow 01") == 2);
 }
 
 TEST_CASE("Both draws carry the skinning the model's last Transform set up [render][model_draw]")

@@ -13,8 +13,13 @@
 #include "ItemTextInput.h"
 #include "ItemUsers.h"
 
+#include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
+#include "Data/GameData/EffectData/Shines.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
+#include "Data/GameData/LookData/LookJson.h"
+#include "Data/GameData/LookData/LookStore.h"
 #include "I18N/All.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
@@ -22,6 +27,7 @@
 
 #include <cstdio>
 #include <iterator>
+#include <map>
 #include <optional>
 #include <span>
 #include <string>
@@ -145,10 +151,11 @@ void RenderUsers(const char* label, int count, std::vector<int> (*findUsers)(std
     ImGui::TreePop();
 }
 
-// A look picked from its names, each with how many models use it; "" is none.
-template <typename TCount>
+// A look picked from its names, each with how many models use it and "(code)" when `isCode` says it is still code;
+// "" is none.
+template <typename TCount, typename TIsCode>
 void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::span<const std::string_view> names,
-               TCount&& count)
+               TCount&& count, TIsCode&& isCode)
 {
     ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
     const std::string shown = value.empty() ? I18N::Editor::None : value;
@@ -163,7 +170,11 @@ void LookCombo(ModelDraft& draft, const char* label, std::string& value, std::sp
     }
     for (const std::string_view name : names)
     {
-        const std::string entry = std::string(name) + " (" + std::to_string(count(name)) + ")";
+        std::string entry = std::string(name) + " (" + std::to_string(count(name)) + ")";
+        if (isCode(name))
+        {
+            entry += std::string(" ") + I18N::Editor::CodeMark;
+        }
         if (ImGui::Selectable(entry.c_str(), name == value) && name != value)
         {
             value = std::string(name);
@@ -312,6 +323,30 @@ void RenderGround(ModelDraft& draft, ItemModelDefinition& model)
     Fields::Double(draft, I18N::Editor::Specular, model.material.specular, "%.2f");
 }
 
+// The shine below +3 the glow names: one of the shine list (design L30), or none.
+void ShineCombo(ModelDraft& draft, std::string& value)
+{
+    ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
+    if (ImGui::BeginCombo(I18N::Editor::ShineBelow3, value.empty() ? I18N::Editor::None : value.c_str()))
+    {
+        if (ImGui::Selectable(I18N::Editor::None, value.empty()))
+        {
+            value.clear();
+            draft.AfterChange(true, I18N::Editor::ShineBelow3);
+        }
+        for (const Data::Effects::Shine& shine : g_Shines.GetShines())
+        {
+            if (ImGui::Selectable(shine.name.c_str(), shine.name == value))
+            {
+                value = shine.name;
+                draft.AfterChange(true, I18N::Editor::ShineBelow3);
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::SetItemTooltip("%s", I18N::Editor::ShineBelow3Tooltip);
+}
+
 void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts, CGlowColorDialog& newColor)
 {
     if (!ImGui::CollapsingHeader(I18N::Editor::Glow))
@@ -333,11 +368,14 @@ void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts
     GlowLevels(draft, glow);
     colorField(0);
     GlowMeshes(draft, I18N::Editor::GlowMeshes, I18N::Editor::AllMeshesButThisOne, glow.meshes);
+    OptionalInt(draft, I18N::Editor::GlowAgainInWhiteOnMesh, glow.glowAgainInWhite);
+    ImGui::SetItemTooltip("%s", I18N::Editor::GlowAgainInWhiteTooltip);
     colorField(1);
     Fields::Check(draft, I18N::Editor::ShineWhite, glow.shineWhite);
     ImGui::PushID("Shine");
     GlowMeshes(draft, I18N::Editor::ShineMeshes, I18N::Editor::AllMeshesButThisOne, glow.shineMeshes);
     ImGui::PopID();
+    ShineCombo(draft, glow.shineBelowPlus3);
     colorField(2);
     Fields::Check(draft, I18N::Editor::ExcellentGlow, glow.excellent);
     OptionalInt(draft, I18N::Editor::ExcellentMesh, glow.excellentMesh);
@@ -355,21 +393,94 @@ void RenderGlow(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts
     ImGui::PopID();
 }
 
+// The values the item sets for its look (design L12): one field for each value the look lets each item set, written as
+// in the model file ("[0.9, 0.1, 0.2]"; null leaves the look's field out); empty: the look's default. Text that is no
+// value is not taken.
+static void LookValues(ModelDraft& draft, const char* id, const Data::Looks::LookDefinition* look,
+                       std::map<std::string, std::string>& values)
+{
+    if (look == nullptr || !Data::Looks::SetsEachItem(*look))
+    {
+        return;
+    }
+    ImGui::PushID(id);
+    ImGui::Indent();
+    ImGui::TextDisabled("%s", I18N::Editor::ValuesForThisItem);
+    ImGui::SetItemTooltip("%s", I18N::Editor::ValuesForThisItemTooltip);
+    for (const std::string& name : Data::Looks::EachItemNames(*look))
+    {
+        ImGui::PushID(name.c_str());
+        const auto set = values.find(name);
+        const std::string current = set != values.end() ? set->second : "";
+        std::string typed;
+        ImGui::SetNextItemWidth(Fields::ScaledWidth(ComboWidth));
+        if (InputStringOnLeave(name.c_str(), I18N::Editor::TheLookDefault, current, typed))
+        {
+            if (typed.empty())
+            {
+                values.erase(name);
+                draft.AfterChange(true, I18N::Editor::ValuesForThisItem);
+            }
+            else if (!Data::Items::Json::OrderedJson::parse(typed, nullptr, false).is_discarded())
+            {
+                values[name] = typed;
+                draft.AfterChange(true, I18N::Editor::ValuesForThisItem);
+            }
+        }
+        if (set != values.end())
+        {
+            ImGui::SameLine();
+            if (ImGui::SmallButton(I18N::Editor::Reset))
+            {
+                values.erase(name);
+                draft.AfterChange(true, I18N::Editor::ValuesForThisItem);
+            }
+        }
+        ImGui::PopID();
+    }
+    ImGui::Unindent();
+    ImGui::PopID();
+}
+
 void RenderLooks(ModelDraft& draft, ItemModelDefinition& model, ItemLookUseCounts& counts)
 {
-    LookCombo(draft, I18N::Editor::RenderStyle, model.renderStyle, Render::Items::Styles::GetNames(),
-              [&](std::string_view name) { return counts.RenderStyle(name); });
+    LookCombo(
+        draft, I18N::Editor::RenderStyle, model.renderStyle, Render::Items::Styles::GetNames(),
+        [&](std::string_view name) { return counts.RenderStyle(name); }, &Render::Items::Styles::ExistsInCode);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(model.renderStyle.empty() || !Render::Items::Styles::Exists(model.renderStyle));
+    if (ImGui::SmallButton(I18N::Editor::OpenInStyleEditor))
+    {
+        g_MuStyleEditorUI.ShowRenderStyle(model.renderStyle);
+    }
+    ImGui::EndDisabled();
     if (!model.renderStyle.empty())
     {
         RenderUsers("##StyleUsers", counts.RenderStyle(model.renderStyle), &FindRenderStyleUsers, model.renderStyle);
+        LookValues(draft, "StyleValues", Data::Looks::g_LookStore.FindRenderStyle(model.renderStyle),
+                   model.renderStyleValues);
     }
-    LookCombo(draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
-              [&](std::string_view name) { return counts.ItemEffect(name); });
+    LookCombo(
+        draft, I18N::Editor::ItemEffect, model.itemEffect, Render::Items::ItemEffects::GetNames(),
+        [&](std::string_view name) { return counts.ItemEffect(name); }, &Render::Items::ItemEffects::ExistsInCode);
+    ImGui::SameLine();
+    ImGui::PushID("ItemEffect");
+    ImGui::BeginDisabled(model.itemEffect.empty() || !Render::Items::ItemEffects::Exists(model.itemEffect));
+    if (ImGui::SmallButton(I18N::Editor::OpenInStyleEditor))
+    {
+        g_MuStyleEditorUI.ShowItemEffect(model.itemEffect);
+    }
+    ImGui::EndDisabled();
+    ImGui::PopID();
     if (!model.itemEffect.empty())
     {
         RenderUsers("##EffectUsers", counts.ItemEffect(model.itemEffect), &FindItemEffectUsers, model.itemEffect);
+        LookValues(draft, "EffectValues", Data::Looks::g_LookStore.FindItemEffect(model.itemEffect),
+                   model.itemEffectValues);
     }
-    ImGui::TextDisabled("%s", I18N::Editor::TheLooksAreDrawingCodeThisPicksWhichOneTheItemUses);
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::ItemLooksNote);
+    ImGui::PopTextWrapPos();
 }
 } // namespace MuEditor::Items::ModelForms
 

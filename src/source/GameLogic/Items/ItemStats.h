@@ -39,6 +39,8 @@ struct ItemStatInput
     int level = 0;
     BYTE excellentFlags = 0;
     BYTE ancientDiscriminator = 0;
+    // The level the additional option counts at (GameLogic::Items::GetAdditionalOptionLevel): the strength
+    // requirement grows by strengthPerOptionLevel per level.
     BYTE optionLevel = 0;
 };
 
@@ -46,7 +48,7 @@ struct ItemStatInput
 // entry, so the item editor's changes count; the stat profile, the fixed excellent
 // bonus, the requirements by level, excellentRaisesLevel and the slot come from the
 // item database. A stat or requirement with a base value of 0 stays 0, except a requirement
-// given by level and the strength the option level adds. For the stats,
+// given by level and the strength the additional option's counted level adds. For the stats,
 // excellent options count on items that are not wings (a wing's are wing options), and
 // ancient items get the excellent part too. For the requirements any excellent option
 // counts (the excellent drop level bonus before the ancient one), and the level

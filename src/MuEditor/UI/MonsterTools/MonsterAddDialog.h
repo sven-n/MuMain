@@ -9,9 +9,9 @@
 namespace MuEditor::Monsters
 {
 // The dialog that adds a monster: a free number (0-1023, no entry), the
-// English name and the kind. Copy starts from the selected monster: its kind
-// and English name, the next free number after it; the translations stay with
-// it.
+// English name and the kind. Copy starts from the selected monster: the
+// values its numbers share with its kind and English name, the next free
+// number after it; the translations and maps stay with it (Q-MN99).
 class MonsterAddDialog
 {
 public:

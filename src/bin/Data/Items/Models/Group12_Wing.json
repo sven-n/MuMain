@@ -15,7 +15,9 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 1,
@@ -61,7 +63,9 @@
       "glow": {
         "level": 0,
         "excellent": false
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 4,
@@ -141,7 +145,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 9,
@@ -153,7 +159,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 10,
@@ -165,7 +173,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 11,
@@ -180,7 +190,9 @@
       },
       "glow": {
         "level": 0
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 12,
@@ -309,7 +321,9 @@
       },
       "ground": {
         "rotation": [270, 0, 45]
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 21,
@@ -320,7 +334,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 22,
@@ -331,7 +345,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 23,
@@ -342,7 +356,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 24,
@@ -353,7 +367,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 30,
@@ -431,7 +445,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 36,
@@ -640,7 +654,7 @@
       "ground": {
         "rotation": [270, 0, 45]
       },
-      "itemEffect": "darkLordScroll"
+      "renderStyle": "darkLordScroll"
     },
     {
       "number": 49,
@@ -692,7 +706,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 61,
@@ -707,7 +722,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 62,
@@ -722,7 +738,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 63,
@@ -737,7 +754,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 64,
@@ -752,7 +770,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 65,
@@ -767,7 +786,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeed"
+      "renderStyle": "socketSeed",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 70,
@@ -849,7 +869,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 101,
@@ -864,7 +885,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 102,
@@ -879,7 +901,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 103,
@@ -894,7 +917,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 104,
@@ -909,7 +933,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 105,
@@ -924,7 +949,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 106,
@@ -939,7 +965,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 107,
@@ -954,7 +981,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 108,
@@ -969,7 +997,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 109,
@@ -984,7 +1013,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 110,
@@ -999,7 +1029,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 111,
@@ -1014,7 +1045,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 112,
@@ -1029,7 +1061,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 113,
@@ -1044,7 +1077,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 114,
@@ -1059,7 +1093,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 115,
@@ -1074,7 +1109,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 116,
@@ -1089,7 +1125,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 117,
@@ -1104,7 +1141,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 118,
@@ -1119,7 +1157,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 119,
@@ -1134,7 +1173,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 120,
@@ -1149,7 +1189,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 121,
@@ -1164,7 +1205,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 122,
@@ -1179,7 +1221,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 123,
@@ -1194,7 +1237,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 124,
@@ -1209,7 +1253,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.9, 0.1, 0.2]}
     },
     {
       "number": 125,
@@ -1224,7 +1269,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 0.5, 1]}
     },
     {
       "number": 126,
@@ -1239,7 +1285,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 1, 1]}
     },
     {
       "number": 127,
@@ -1254,7 +1301,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [0.4, 1, 0.6]}
     },
     {
       "number": 128,
@@ -1269,7 +1317,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.8, 0.4]}
     },
     {
       "number": 129,
@@ -1284,7 +1333,8 @@
       "glow": {
         "level": 0
       },
-      "renderStyle": "socketSeedSphere"
+      "renderStyle": "socketSeedSphere",
+      "renderStyleValues": {"color": [1, 0.4, 1]}
     },
     {
       "number": 130,
@@ -1327,7 +1377,9 @@
       },
       "glow": {
         "excellent": false
-      }
+      },
+      "itemEffect": "glowingMesh",
+      "itemEffectValues": {"glowMesh": 0}
     },
     {
       "number": 133,

@@ -32,6 +32,12 @@ and removes the file when it exits normally.
 An option would not do: the client's command line is split on spaces, so a
 path containing one could not be passed.
 
+The same builds take `MU_CONFIG_PATH` too: the client then reads and writes
+that file instead of the `config.ini` next to it, so a scripted client can run
+with settings of its own and leave the player's alone. The in-game tests use
+it for scenarios that need fixed settings, such as `look-references`. Player
+builds ignore it.
+
 ## Talking to it
 
 Newline-delimited JSON, one request object per line, exactly one response per
@@ -184,8 +190,13 @@ pointer or change window focus. A click rests on its pixel for two frames
 before the press, as a real mouse does: an item grid only picks up an item it
 saw hovered. Use screenshot pixels as `click-ui` coordinates: for
 example, click the Menu button, then take another screenshot to inspect the
-panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
-clicked remotely; use their keyboard navigation instead. Keys are
+panel. The login and character scenes' `CInput` readers follow the injected
+pointer only while a `click-ui`, `hover-ui` or `drag-ui` is in flight, including
+when the game window is in the background. A single character-selection click
+works; a scripted double-click is not supported. After a pointer command ends,
+these scene readers return to the OS cursor, so their hover does not persist
+after the reply, even though the rest of the game keeps the injected point.
+Keys are
 case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
 `home`, `end`, `insert`, `delete`, `pageup`, `pagedown`, arrows,
 `printscreen`, `f1`–`f12` and `alt`.

@@ -20,10 +20,25 @@ internal sealed class ScenarioContext(
 {
     private readonly List<StepResult> steps = [];
 
+    // Pictures the running step took itself, shown before the ones taken after it.
+    private readonly List<StepScreenshot> pictures = [];
+
     /// <summary>The steps so far, the last one possibly failed.</summary>
     public IReadOnlyList<StepResult> Steps => this.steps;
 
     public GameClient Client(string role) => clients[role];
+
+    /// <summary>
+    /// Inside a step: <paramref name="role"/>'s client takes a screenshot now, shown with the step under
+    /// <paramref name="caption"/>, e.g. two pictures of one scene a few seconds apart.
+    /// </summary>
+    public async Task PictureAsync(string role, string caption)
+    {
+        var number = this.steps.Count + 1;
+        var path = Path.GetFullPath(Path.Combine(folder, $"step-{number:00}-{role}-{this.pictures.Count + 1}.jpg"));
+        await clients[role].ScreenshotAsync(path, screenshotQuality);
+        this.pictures.Add(new StepScreenshot(caption, path));
+    }
 
     /// <summary>A line in the log that is no step, e.g. what else went wrong.</summary>
     public void Note(string text) => log.WriteLine($"        {text}");
@@ -54,21 +69,25 @@ internal sealed class ScenarioContext(
         var number = this.steps.Count + 1;
         log.WriteLine($"    {number,2}. {title}");
         stepStarted?.Invoke(number, title);
+        this.pictures.Clear();
         var stopwatch = Stopwatch.StartNew();
         try
         {
             var result = await action();
             var duration = stopwatch.Elapsed;
-            this.Finish(new StepResult(number, title, expectation, true, duration, null, await this.CaptureAsync(number, pictured)));
+            this.Finish(new StepResult(number, title, expectation, true, duration, null, await this.ScreenshotsAsync(number, pictured)));
             return result;
         }
         catch (Exception exception)
         {
             var duration = stopwatch.Elapsed;
-            this.Finish(new StepResult(number, title, expectation, false, duration, exception.Message, await this.CaptureAsync(number, null)));
+            this.Finish(new StepResult(number, title, expectation, false, duration, exception.Message, await this.ScreenshotsAsync(number, null)));
             throw;
         }
     }
+
+    private async Task<IReadOnlyList<StepScreenshot>> ScreenshotsAsync(int number, IReadOnlyCollection<string>? pictured)
+        => [.. this.pictures, .. await this.CaptureAsync(number, pictured)];
 
     private void Finish(StepResult step)
     {

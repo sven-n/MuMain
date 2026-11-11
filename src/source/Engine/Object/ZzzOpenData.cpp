@@ -8,6 +8,10 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "GameLogic/Skills/SkillHotkeyConfiguration.h"
+#include "Scenes/SceneCore.h"
+#include "Engine/Object/PlayerBodyModels.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Audio/DSPlaySound.h"
@@ -35,8 +39,10 @@
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/DataHandler/LookData/LookDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/BuffData/BuffStorage.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
@@ -45,6 +51,7 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Items/ItemEffects.h"
+#include "Render/Items/LookDrawing.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Core/Platform/ErrorDialog.h"
 #include "Core/Text/Utf8.h"
@@ -129,28 +136,10 @@ void OpenPlayers()
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 
+    const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
     for (int i = 0; i < MAX_CLASS; ++i)
     {
-        gLoadData.AccessModel(MODEL_BODY_HELM + i, L"Data\\Player\\", L"HelmClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + i, L"Data\\Player\\", L"ArmorClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + i, L"Data\\Player\\", L"PantClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + i, L"Data\\Player\\", L"GloveClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + i, L"Data\\Player\\", L"BootClass", i + 1);
-
-        if (CLASS_DARK != i && CLASS_DARK_LORD != i && CLASS_RAGEFIGHTER != i)
-        {
-            gLoadData.AccessModel(MODEL_BODY_HELM + MAX_CLASS + i, L"Data\\Player\\", L"HelmClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_ARMOR + MAX_CLASS + i, L"Data\\Player\\", L"ArmorClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_PANTS + MAX_CLASS + i, L"Data\\Player\\", L"PantClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_GLOVES + MAX_CLASS + i, L"Data\\Player\\", L"GloveClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_BOOTS + MAX_CLASS + i, L"Data\\Player\\", L"BootClass2", i + 1);
-        }
-
-        gLoadData.AccessModel(MODEL_BODY_HELM + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"HelmClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"ArmorClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"PantClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"GloveClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"BootClass3", i + 1);
+        Engine::Object::OpenPlayerClassBodyParts(i, useS6);
     }
 
     gLoadData.AccessModel(MODEL_MASK_HELM + 0, L"Data\\Player\\", L"MaskHelmMale", 1);
@@ -316,21 +305,12 @@ void OpenPlayerTextures()
     LoadBitmap(L"Item\\dl_redwings02.tga", BITMAP_ROBE + 9);
     LoadBitmap(L"Item\\dl_redwings03.tga", BITMAP_ROBE + 10);
 
-    int nIndex;
-
     for (int j = 0; j < MAX_CLASS_STAGES; ++j)
     {
         for (int i = 0; i < MAX_CLASS; ++i)
         {
-            nIndex = MAX_CLASS * j + i;
-            if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i || CLASS_RAGEFIGHTER == i))
-                continue;
-
-            gLoadData.OpenTexture(MODEL_BODY_HELM + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_ARMOR + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_PANTS + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_GLOVES + nIndex, L"Player\\");
-            gLoadData.OpenTexture(MODEL_BODY_BOOTS + nIndex, L"Player\\");
+            if (Engine::Object::HasPlayerBodyForm(j, i))
+                Engine::Object::OpenPlayerBodyTextures(j, i);
         }
     }
 
@@ -443,6 +423,17 @@ static void OpenMapData()
     }
 }
 
+// Loads the buffs (Data/Buffs/Buffs.json): their names, texts and the buff
+// strip's rules; errors stop the game.
+static void OpenBuffData()
+{
+    std::string errorMessage;
+    if (!Data::Buffs::LoadBuffs(errorMessage))
+    {
+        StopOnDataError("Buff data error", errorMessage);
+    }
+}
+
 // Loads the effect types (Data/Effects) and builds the effect registry from
 // their creation values; errors stop the game.
 // Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
@@ -481,6 +472,14 @@ static bool OpenItemModelData()
     return true;
 }
 
+// Opens a part model from its entry in Data/Items/Models/PartModels.json (design L28) into its slot, with its
+// textures; the code decides where it is drawn.
+static void OpenPartModel(int modelType)
+{
+    Data::Items::ModelLoader::OpenPartModel(modelType,
+                                            {Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists});
+}
+
 // Models that are drawn for items, but are no item models themselves:
 // event models, the level 14/15 armor decorations and the parts of the
 // Rage Fighter weapons.
@@ -510,17 +509,18 @@ static void OpenItemEffectModels()
     gLoadData.AccessModel(MODEL_EVENT + 22, L"Data\\Item\\", L"obox02");
     gLoadData.AccessModel(MODEL_EVENT + 23, L"Data\\Item\\", L"blue01");
 
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Data\\Item\\", L"class15_armleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Data\\Item\\", L"class15_armright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Data\\Item\\", L"class15_bodyleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Data\\Item\\", L"class15_bodyright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Data\\Item\\", L"class15_bootleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Data\\Item\\", L"class15_bootright");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Data\\Item\\", L"class15_head");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Data\\Item\\", L"class15_pantleft");
-    gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Data\\Item\\", L"class15_pantright");
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_HEAD);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT);
+    OpenPartModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT);
 
     g_CMonkSystem.LoadModelItem();
+    OpenPartModel(MODEL_ARMORINVEN_74);
 
     Models[MODEL_EVENT + 9].Meshs[1].NoneBlendMesh = true;
 }
@@ -550,8 +550,24 @@ void PrepareGrandSoulPantsClothMesh()
                   BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
 }
 
+// Loads the looks that are data (Data/Effects/RenderStyles.json and ItemEffects.json), before the item models are
+// opened, which check the names of their looks.
+static void OpenRenderStyleData()
+{
+    std::string errorMessage;
+    if (!Data::Looks::LoadRenderStyles(errorMessage))
+    {
+        StopOnDataError("Render style data error", errorMessage);
+    }
+    if (!Data::Looks::LoadItemEffects(errorMessage))
+    {
+        StopOnDataError("Item effect data error", errorMessage);
+    }
+}
+
 void OpenItems()
 {
+    OpenRenderStyleData();
     // Without model data the game stops; the item models are not opened.
     if (OpenItemModelData())
     {
@@ -590,21 +606,11 @@ static void OpenItemEffectModelTextures()
     gLoadData.OpenTexture(MODEL_EVENT + 22, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 23, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_HEAD, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Item\\");
-    gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Item\\");
-
     g_CMonkSystem.LoadModelItemTexture();
 }
 
 // Textures that the effect code of items draws with.
-static void OpenItemEffectTextures()
+void OpenItemEffectTextures()
 {
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
@@ -673,6 +679,9 @@ void DeleteMonsters()
 
     // The model sounds without a SOUND_* id; their models load them again.
     Audio::SoundNumbers::ReleaseAll();
+
+    // A missing model file is tried once a map (Q-MN45c).
+    Data::Monsters::ModelLoader::ForgetMissingFiles();
 }
 
 // Opens a monster model from its entry in the model list
@@ -1188,8 +1197,7 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_WINDSPIN03, L"Data\\Effect\\", L"wind_spin03");
     gLoadData.OpenTexture(MODEL_WINDSPIN03, L"Effect\\");
 
-    gLoadData.AccessModel(MODEL_SWORD_35_WING, L"Data\\Item\\", L"sword36wing");
-    gLoadData.OpenTexture(MODEL_SWORD_35_WING, L"Item\\");
+    OpenPartModel(MODEL_SWORD_35_WING);
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // 콘드라 돌조각
@@ -1517,27 +1525,21 @@ void OpenMacro(const wchar_t* FileName)
     fclose(fp);
 }
 
+extern BOOL g_bGameServerConnected;
+
 void SaveOptions()
 {
+    namespace Hotkeys = GameLogic::Skills::HotkeyConfiguration;
     // 0 ~ 19 skill hotkey
-    BYTE options[30]{};
+    BYTE options[Hotkeys::KeyConfigurationSize]{};
 
-    int iSkillType = -1;
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < Hotkeys::HotkeyCount; ++i)
     {
-        iSkillType = g_pMainFrame->GetSkillHotKey(i);
-
-        int iIndex = i * 2;
-        if (iSkillType != -1)
-        {
-            options[iIndex] = HIBYTE(CharacterAttribute->Skill[iSkillType]);
-            options[iIndex + 1] = LOBYTE(CharacterAttribute->Skill[iSkillType]);
-        }
-        else
-        {
-            options[iIndex] = 0xff;
-            options[iIndex + 1] = 0xff;
-        }
+        const int iSkillType = g_pMainFrame->GetSkillHotKey(i);
+        const auto skillNumber =
+            iSkillType != -1 ? static_cast<std::uint16_t>(CharacterAttribute->Skill[iSkillType]) : Hotkeys::FreeHotkey;
+        const auto bytes = Hotkeys::Encode(skillNumber);
+        std::copy(bytes.begin(), bytes.end(), options + i * Hotkeys::BytesPerHotkey);
     }
 
     if (g_pOption->IsAutoAttack())
@@ -1580,6 +1582,24 @@ void SaveOptions()
     options[29] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_R);
 
     SocketClient->ToGameServer()->SendSaveKeyConfiguration(options, sizeof options);
+}
+
+namespace
+{
+bool s_keyConfigurationReceived = false;
+}
+
+void SetKeyConfigurationReceived(bool received)
+{
+    s_keyConfigurationReceived = received;
+}
+
+void SaveOptionsIfInGame()
+{
+    if (SocketClient != nullptr && g_bGameServerConnected && SceneFlag == MAIN_SCENE && s_keyConfigurationReceived)
+    {
+        SaveOptions();
+    }
 }
 
 void OpenLogoSceneData()
@@ -2139,6 +2159,7 @@ void OpenBasicData(HDC hDC)
     TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();
+    Render::Items::Looks::PrepareTextures();
     TitleSceneUI::RenderSceneUI(hDC, 5, 11);
 
     OpenSkills();
@@ -2168,6 +2189,7 @@ void OpenBasicData(HDC hDC)
 
     OpenMonsterData();
     OpenMapData();
+    OpenBuffData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);

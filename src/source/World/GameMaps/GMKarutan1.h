@@ -43,8 +43,6 @@ public:
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // Character
-    // 몬스터 생성
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     // 몬스터(NPC) 프로세서
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     // 몬스터 스킬 블러 이펙트

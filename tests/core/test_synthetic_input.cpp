@@ -3,13 +3,17 @@
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "synthetic"
 
+#include "App/stdafx.h"
+
 #include "doctest.h"
 
 #include "App/Control/ControlCommands.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/Input.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
 #include "Core/Platform/WinCompat.h"
+#include "UI/Core/WindowCommon.h"
 
 #include <cstdint>
 #include <SDL3/SDL.h>
@@ -232,6 +236,91 @@ TEST_CASE("A second injection is refused while one is in flight [core][synthetic
     BeginFrame();
     CHECK(IsIdle());
     CHECK(Click(1.0f, 1.0f, MouseButton::Left));
+}
+
+TEST_CASE(
+    "The legacy scene input follows injected pointer and buttons without an active window [core][synthetic-input]")
+{
+    ResetInjector guard;
+    struct SceneInput : CInput
+    {
+        mu::ui::window::CNewKeyInput savedKeys = *g_pNewKeyInput;
+        ~SceneInput()
+        {
+            *g_pNewKeyInput = savedKeys;
+        }
+    };
+    SceneInput input{};
+    input.SetScreenSize(1280, 960);
+    WindowWidth = 1280;
+    WindowHeight = 960;
+    const auto frame = [&]
+    {
+        Core::Input::ClearPressEdges();
+        BeginFrame();
+        g_pNewKeyInput->ScanAsyncKeyState();
+        input.Update();
+    };
+
+    REQUIRE(Move(1000.75f, 725.25f));
+    frame();
+    CHECK(input.GetCursorX() == 1000);
+    CHECK(input.GetCursorY() == 725);
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(Move(-10.0f, 5000.0f));
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 959);
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(Click(1000.0f, 725.0f, MouseButton::Left));
+    frame();
+    frame();
+    frame();
+    CHECK(input.IsLBtnDn());
+    CHECK(input.IsLBtnHeldDn());
+    CHECK(input.GetCursorX() == 1000);
+    CHECK(input.GetCursorY() == 725);
+    frame();
+    CHECK_FALSE(input.IsLBtnDn());
+    CHECK(input.IsLBtnHeldDn());
+    frame();
+    frame();
+    CHECK(IsIdle());
+    CHECK_FALSE(input.IsLBtnHeldDn());
+    CHECK_FALSE(IsInjectingPointer());
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
+
+    consume = true;
+    REQUIRE(Click(500.0f, 600.0f, MouseButton::Left));
+    frame();
+    frame();
+    frame();
+    CHECK_FALSE(input.IsLBtnDn());
+    CHECK_FALSE(input.IsLBtnHeldDn());
+    frame();
+    frame();
+    frame();
+    CHECK(IsIdle());
+
+    REQUIRE(PressKey(VK_HOME));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
+    frame();
+    frame();
+    REQUIRE(IsIdle());
+
+    REQUIRE(TypeText("input", false));
+    CHECK_FALSE(IsInjectingPointer());
+    frame();
+    CHECK(input.GetCursorX() == 0);
+    CHECK(input.GetCursorY() == 0);
 }
 
 TEST_CASE("A click walks hover, press, hold, release through the mouse globals [core][synthetic-input]")
@@ -682,4 +771,66 @@ TEST_CASE("Type handler rejects invalid arguments before scheduling and refuses 
         App::Control::Request::Parse(R"({"cmd":"type","text":"x"})"), act);
     CHECK(response.find(R"("error":"busy")") != std::string::npos);
     CHECK(act == nullptr);
+}
+
+namespace
+{
+SDL_Event KeyEvent(SDL_EventType type, SDL_Scancode scancode, bool repeat = false)
+{
+    SDL_Event event{};
+    event.type = type;
+    event.key.scancode = scancode;
+    event.key.down = type == SDL_EVENT_KEY_DOWN;
+    event.key.repeat = repeat;
+    return event;
+}
+
+SDL_Event ButtonEvent(SDL_EventType type, Uint8 button)
+{
+    SDL_Event event{};
+    event.type = type;
+    event.button.button = button;
+    event.button.down = type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+    return event;
+}
+} // namespace
+
+TEST_CASE("A key pressed and released between two frames is pressed for one frame [core][input]")
+{
+    // Two scans settle whatever an earlier case left in the tracker.
+    Core::Input::ClearPressEdges();
+    g_pNewKeyInput->ScanAsyncKeyState();
+    g_pNewKeyInput->ScanAsyncKeyState();
+
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_DOWN, SDL_SCANCODE_I));
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_UP, SDL_SCANCODE_I));
+    g_pNewKeyInput->ScanAsyncKeyState();
+    CHECK(g_pNewKeyInput->IsPress('I'));
+    CHECK_FALSE(g_pNewKeyInput->IsPress('O'));
+    Core::Input::ClearPressEdges();
+
+    g_pNewKeyInput->ScanAsyncKeyState();
+    CHECK_FALSE(g_pNewKeyInput->IsPress('I'));
+    CHECK_FALSE(g_pNewKeyInput->IsRepeat('I'));
+    CHECK(g_pNewKeyInput->IsRelease('I'));
+    CHECK_FALSE(Core::Input::IsKeyDown('I'));
+}
+
+TEST_CASE("A key repeat is not a new press [core][input]")
+{
+    Core::Input::ClearPressEdges();
+    Core::Input::RecordPressEdge(KeyEvent(SDL_EVENT_KEY_DOWN, SDL_SCANCODE_RETURN, true));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_RETURN));
+}
+
+TEST_CASE("A mouse button clicked between two frames is down for one frame [core][input]")
+{
+    Core::Input::ClearPressEdges();
+    Core::Input::RecordPressEdge(ButtonEvent(SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_BUTTON_RIGHT));
+    Core::Input::RecordPressEdge(ButtonEvent(SDL_EVENT_MOUSE_BUTTON_UP, SDL_BUTTON_RIGHT));
+    CHECK(Core::Input::IsKeyDown(VK_RBUTTON));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_LBUTTON));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_MBUTTON));
+    Core::Input::ClearPressEdges();
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_RBUTTON));
 }

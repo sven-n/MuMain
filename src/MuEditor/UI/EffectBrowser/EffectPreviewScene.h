@@ -56,6 +56,8 @@ struct EffectPreviewRequest
     PreviewShowOn showOn = PreviewShowOn::Nothing;
     // With PreviewShowOn::Item.
     int itemType = -1;
+    // Instead of the item's model, this model slot (a part model, design L50), drawn at +0.
+    int modelSlot = -1;
     int itemLevel = 0;
     bool itemExcellent = false;
     bool itemAncient = false;
@@ -63,6 +65,8 @@ struct EffectPreviewRequest
     // With PreviewItemPose::Ground: the ground under the item, as far below
     // it as the game lays a dropped item above the terrain.
     bool itemGroundPlane = false;
+    // The item drawn as a doppelganger's (RENDER_DOPPELGANGER), see-through.
+    bool itemAsDoppelganger = false;
     PreviewSpriteBlend spriteBlend = PreviewSpriteBlend::Glow;
     bool turn = true;
 };

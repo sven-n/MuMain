@@ -299,8 +299,6 @@ void CreateLogInScene()
 
     g_fMULogoAlpha = 0;
 
-    ::PlayMp3(MUSIC_LOGIN_THEME);
-
     g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
@@ -326,7 +324,21 @@ static void UpdateLogInSceneView()
     ResetFrustrumBoundsFullTerrain();
     // Behind the credits the world is not drawn.
     if (!g_CreditWin.IsVisible())
+    {
         CullWorld();
+        Scenes::Lighting::PinWorldDynamicLights();
+    }
+}
+
+void PlayLogInSceneMusic()
+{
+    // The credits have their own theme. A login that went through leaves for the character select this frame,
+    // and that screen asks for no music of its own: it keeps the login theme, also when the credits were opened
+    // while the login was on its way. Tracks loop; asking every frame also starts the track once the music is
+    // switched on. A no-op while it plays.
+    const bool leavingForCharacterSelect = CurrentProtocolState == RECEIVE_LOG_IN_SUCCESS;
+    const bool creditsPlay = g_CreditWin.IsVisible() && !leavingForCharacterSelect;
+    ::PlayMp3(creditsPlay ? MUSIC_MUTHEME : MUSIC_LOGIN_THEME);
 }
 
 void NewMoveLogInScene()
@@ -337,8 +349,7 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
-    // Starts the theme again when it ends; a no-op while it plays.
-    ::PlayMp3(MUSIC_LOGIN_THEME);
+    PlayLogInSceneMusic();
 
     if (!g_CreditWin.IsVisible())
     {
@@ -431,7 +442,10 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!g_CreditWin.IsVisible())
     {
-        { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+        {
+            FRAME_PROFILE(Terrain);
+            RenderTerrain(false);
+        }
         { FRAME_PROFILE(Characters); RenderCharactersClient(); }
         { FRAME_PROFILE(Objects); RenderMount(); }
         {

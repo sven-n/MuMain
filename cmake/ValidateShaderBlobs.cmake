@@ -19,11 +19,17 @@ set(MU_SHADER_STAGE_NAMES
     skinned_shadow.vert
     skinned_weighted_shadow.vert
     skinned_lit.frag
+    world_lit.vert
+    world_lit.frag
+    shadow_mask.frag
     shadow_volume.vert
     post_fullscreen.vert
     post_bloom_down.frag
     post_bloom_up.frag
     post_composite.frag
+    post_ao.frag
+    post_ao_blur.frag
+    sun_depth.frag
 )
 set(MU_SHADER_BLOB_FORMATS spv msl dxil)
 set(MU_SHADER_BLOB_NAMES)

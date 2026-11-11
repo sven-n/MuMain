@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "MonsterShownValues.h"
 #include "MonsterSoundEventsEditor.h"
 
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
@@ -42,6 +43,12 @@ public:
     // slot in this frame or the one before (Monster Preview draws first).
     const Data::Monsters::MonsterModelDefinition* GetShownModelDraft(int slot) const;
 
+    // The name of the set the tool shows; empty for none.
+    const std::string& GetShownSet() const
+    {
+        return m_shown;
+    }
+
 private:
     MuMonsterSoundsUI();
 
@@ -51,8 +58,12 @@ private:
     // Shows the set of the selected monster's look once the selection or the
     // look changed, or the set shown is gone.
     void FollowSelection(const Data::Monsters::MonsterDefinition* monster);
-    void RenderMonster(const Data::Monsters::MonsterDefinition& monster);
-    void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
+    // The values the selection shows (ShownValues::Load), read again only
+    // when the selection or the data changes; nullptr for none.
+    const ShownValues::ShownMonster* ReadSelectedMonster();
+    // The shown values' sound set and their random variants' (D61).
+    void RenderMonster(const ShownValues::ShownMonster& shown);
+    void RenderVariants(const ShownValues::ShownMonster& shown);
     void RenderSetList();
     void RenderSet(Data::Monsters::MonsterSoundSet& set, const SoundEventsEditor::Context& context);
     void RenderName(const Data::Monsters::MonsterSoundSet& set);
@@ -73,6 +84,11 @@ private:
     // The set shown, and the event to mark once.
     std::string m_shown;
     std::optional<size_t> m_focusEvent;
+    // ReadSelectedMonster's values, with the selection key and data version
+    // they were read at.
+    std::optional<ShownValues::ShownMonster> m_selected;
+    int m_selectedKey = -1;
+    int m_selectedVersion = -1;
     // The selection the tool showed last: a new one shows the monster's set.
     int m_shownSerial = -1;
     int m_shownVariant = -2;

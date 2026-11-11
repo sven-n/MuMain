@@ -1,6 +1,7 @@
+#include "stdafx.h"
+
 #include <doctest.h>
 
-#include "stdafx.h"
 #include "UI/Inventory/InventoryCtrl.h"
 
 #include <RmlUi/Core.h>

@@ -13,11 +13,13 @@
 #include <SDL3/SDL_video.h>
 #include "MuInputBlockerCore.h"
 #include "MuEditorCursor.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "MuEditorPlatformWindows.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Colors/MuColorsUI.h"
+#include "../MuEditor/UI/StyleEditor/MuStyleEditorUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
@@ -37,6 +39,8 @@
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterSetupUI.h"
+#include "../MuEditor/UI/MonsterTools/MuMonsterEquipmentUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
@@ -536,6 +540,9 @@ void CMuEditorCore::Update()
     // Once per frame: the game's mouse-button reads ask it many times.
     m_bMouseInEditorWindow = FindMouseInEditorWindow();
 
+    // The texts that name items follow the editor's name edits, undo and revert.
+    g_ItemDataHandler.RefreshItemTextsIfNamesChanged();
+
     // Apply a pending UI scale change between frames (never mid-frame).
     if (m_bScaleDirty)
     {
@@ -557,6 +564,7 @@ void CMuEditorCore::Update()
         // only before the renderer's frame starts.
         g_MuEffectBrowserUI.BeforeFrame();
         g_MuItemModelUI.BeforeFrame();
+        g_MuStyleEditorUI.BeforeFrame();
         g_MuMonsterPreviewUI.BeforeFrame();
         // Between frames too: item models the item tools changed are opened
         // again, and so are the monster models the monster tools changed.
@@ -621,6 +629,11 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuColorsUI.Render(&m_windows.colors);
     }
+    // After the Item Model window, as its preview.
+    if (m_windows.styleEditor)
+    {
+        g_MuStyleEditorUI.Render(&m_windows.styleEditor);
+    }
     if (m_windows.itemTooltip)
     {
         g_MuItemTooltipUI.Render(&m_windows.itemTooltip);
@@ -654,6 +667,14 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterAttacks)
     {
         g_MuMonsterAttacksUI.Render(&m_windows.monsterAttacks);
+    }
+    if (m_windows.monsterSetup)
+    {
+        g_MuMonsterSetupUI.Render(&m_windows.monsterSetup);
+    }
+    if (m_windows.monsterEquipment)
+    {
+        g_MuMonsterEquipmentUI.Render(&m_windows.monsterEquipment);
     }
     if (m_windows.monsterSounds)
     {

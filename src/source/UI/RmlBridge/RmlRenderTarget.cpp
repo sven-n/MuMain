@@ -92,6 +92,10 @@ void ReleaseRetired()
 
 RenderTarget::RenderTarget(Drawer drawer) : m_drawer(std::move(drawer))
 {
+    // Global owners may outlive registries first used during rendering. Construct all
+    // support storage before this owner completes, so it is destroyed after the owner.
+    PublishedSources();
+    RetiredTextures();
     Targets().push_back(this);
 }
 
@@ -99,9 +103,9 @@ RenderTarget::~RenderTarget()
 {
     auto& targets = Targets();
     targets.erase(std::remove(targets.begin(), targets.end(), this), targets.end());
-    // Never shown, so nothing can be sampling it.
-    if (m_pending.id != 0)
-        mu::GetRenderer().ReleaseRenderTarget(m_pending.id);
+    // Retired, not released: a global owner can be destroyed after the renderer and its storage at
+    // exit, so the destructor touches only this file's storage, which outlives every owner.
+    Retire(m_pending.id, {});
     Retire(m_current.id, m_source);
 }
 

@@ -211,6 +211,7 @@ namespace mu::ui::window
         void RmlUIScaleChanged(int index);
         // Saves the choice only: the texture loader reads the pack at startup.
         void RmlTexturePackChanged(int index);
+        void RmlToggleS6PlayerModels();
         void RmlClickClose();
 
         // One tuning slider (UI::Options::TuningRow) as the RmlUi model binds it.
@@ -229,7 +230,7 @@ namespace mu::ui::window
 
             bool operator==(const TuningRowModel&) const = default;
         };
-        static constexpr std::size_t TuningGroupCount = 4;
+        static constexpr std::size_t TuningGroupCount = 5;
 
         struct OptionRmlModel
         {
@@ -343,12 +344,15 @@ namespace mu::ui::window
             // also without Enhanced lighting.
             bool lookLighting = true;
             bool lookDynamicLights = true;
+            bool lookSunlight = true;
             bool lookLightMood = true;
             bool lookPostProcessing = true;
             bool lookFeaturesLocked = false;
             bool lookDynamicLightsLocked = false;
+            bool lookSunlightLocked = false;
             Rml::String lookLightingLabel;
             Rml::String lookDynamicLightsLabel;
+            Rml::String lookSunlightLabel;
             Rml::String lookLightMoodLabel;
             Rml::String lookPostProcessingLabel;
             // The player's tuning, per group (Render::Look::TuningGroup): its common and its "More
@@ -402,6 +406,9 @@ namespace mu::ui::window
             Rml::String texturePackValueLabel;
             // The row's hint: where packs come from and that a change needs a restart.
             Rml::String texturePackTooltip;
+            bool useS6PlayerModels = true;
+            Rml::String s6PlayerModelsLabel;
+            Rml::String s6PlayerModelsTooltip;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);

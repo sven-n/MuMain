@@ -45,6 +45,7 @@
 #include <RmlUi/Core/Event.h>
 #include "GameLogic/Quests/QuestMng.h"
 #include "UI/Social/FriendWindow.h"
+#include "Engine/Object/ZzzOpenData.h"
 
 mu::ui::window::CSkillList::CSkillList()
 {
@@ -166,7 +167,9 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
             {
                 if (mu::ui::window::IsPress('1' + i))
                 {
-                    SetHotKey(i + 1, m_iHoveredGridSkillIndex);
+                    // Saved as it changes, so a crash or a disconnect doesn't lose it.
+                    if (SetHotKey(i + 1, m_iHoveredGridSkillIndex))
+                        SaveOptionsIfInGame();
 
                     return false;
                 }
@@ -174,7 +177,8 @@ bool mu::ui::window::CSkillList::UpdateKeyEvent()
 
             if (mu::ui::window::IsPress('0'))
             {
-                SetHotKey(0, m_iHoveredGridSkillIndex);
+                if (SetHotKey(0, m_iHoveredGridSkillIndex))
+                    SaveOptionsIfInGame();
 
                 return false;
             }
@@ -229,8 +233,13 @@ bool mu::ui::window::CSkillList::IsArrayIn(BYTE bySkill)
     return false;
 }
 
-void mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
+bool mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
 {
+    if (m_iHotKeySkillType[iHotKey] == iSkillType)
+    {
+        return false;
+    }
+
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
         if (m_iHotKeySkillType[i] == iSkillType)
@@ -241,6 +250,7 @@ void mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
     }
 
     m_iHotKeySkillType[iHotKey] = iSkillType;
+    return true;
 }
 
 int mu::ui::window::CSkillList::GetHotKey(int iHotKey)

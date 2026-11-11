@@ -82,6 +82,9 @@ TEST_CASE("The item checks send each field of an item to the tool that edits it 
         {"name", ItemTool::Basics},
         {"name.en", ItemTool::Basics},
         {"name.de", ItemTool::Translations},
+        // The name forms, of the item's name and of a name line's, are edited in Item Translations.
+        {"nameForms.pl.acc", ItemTool::Translations},
+        {"nameLines[2].nameForms.de", ItemTool::Translations},
         {"number", ItemTool::Browser},
         {"", ItemTool::Browser},
     };

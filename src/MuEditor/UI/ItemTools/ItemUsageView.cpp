@@ -6,6 +6,7 @@
 
 #include "../MuEditor/UI/Common/CodeReferenceList.h"
 #include "Data/GameData/ItemData/ItemEnumNames.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -46,8 +47,62 @@ void RenderModel(const ItemUsage& usage)
                                 .c_str());
 }
 
+std::string DescribePlace(const Data::Monsters::MonsterItemPlace& place)
+{
+    using Variant = Data::Monsters::MonsterItemPlace::Variant;
+    switch (place.variant)
+    {
+    case Variant::None:
+        break;
+    case Variant::Map:
+        return I18N::Format(I18N::Editor::_0MapVariant1, {place.slot, std::to_string(place.index + 1)});
+    case Variant::State:
+        return I18N::Format(I18N::Editor::_0While1, {place.slot, place.state});
+    case Variant::Random:
+        return I18N::Format(I18N::Editor::_0RandomLook1, {place.slot, std::to_string(place.index + 1)});
+    case Variant::MapState:
+        return I18N::Format(
+            I18N::Editor::_0While1,
+            {I18N::Format(I18N::Editor::_0MapVariant1, {place.slot, std::to_string(place.mapIndex + 1)}), place.state});
+    }
+    return place.slot;
+}
+
+// "163 Chaos Castle Elf"; the number alone when the monster list has no name.
+std::string MonsterLabel(int number)
+{
+    std::string label = std::to_string(number);
+    if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+    {
+        const std::string name = monster->names.GetNeutral();
+        if (!name.empty())
+        {
+            label += " " + name;
+        }
+    }
+    return label;
+}
+
+// A line for each monster, with the places it wears the item.
+void RenderMonsters(const ItemUsage& usage)
+{
+    for (size_t first = 0; first < usage.monsters.size();)
+    {
+        const int number = usage.monsters[first].number;
+        std::string places;
+        size_t next = first;
+        for (; next < usage.monsters.size() && usage.monsters[next].number == number; ++next)
+        {
+            places += (next == first ? "" : ", ") + DescribePlace(usage.monsters[next].place);
+        }
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::Monster0WearsIt1, {MonsterLabel(number), places}).c_str());
+        first = next;
+    }
+}
+
 void RenderGameData(const ItemUsage& usage)
 {
+    RenderMonsters(usage);
     const std::pair<bool, const char*> uses[] = {{usage.inAncientSet, I18N::Editor::AnAncientSet},
                                                  {usage.hasAddOption, I18N::Editor::AnAddOption},
                                                  {usage.givesBuff, I18N::Editor::ABuff},
@@ -59,6 +114,23 @@ void RenderGameData(const ItemUsage& usage)
             ImGui::BulletText("%s", label);
         }
     }
+}
+
+// The texts that name the item by its number, each below their count.
+void RenderTexts(const ItemUsage& usage)
+{
+    if (usage.texts.empty())
+    {
+        return;
+    }
+    ImGui::BulletText("%s",
+                      I18N::Format(I18N::Editor::TextsNamingTheItem0, {std::to_string(usage.texts.size())}).c_str());
+    ImGui::Indent();
+    for (const std::string& text : usage.texts)
+    {
+        ImGui::BulletText("%s", text.c_str());
+    }
+    ImGui::Unindent();
 }
 } // namespace
 
@@ -77,6 +149,7 @@ void RenderUsesAtNumber(const ItemUsage& usage)
         return;
     }
     RenderGameData(usage);
+    RenderTexts(usage);
     CodeReferenceList::Render(usage.codeKnown, usage.code,
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
@@ -111,6 +184,7 @@ void RenderNumberHolder(const ItemNumberHolder& holder, const ItemUsage& usage)
     ImGui::BulletText("%s", holder.entryWithoutName ? I18N::Editor::TheItemBrowserListsItAsEntryWithoutAName
                                                     : I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
     RenderGameData(usage);
+    RenderTexts(usage);
     // The move dialog lists the code of the moved item too.
     ImGui::PushID("NumberHolder");
     CodeReferenceList::Render(usage.codeKnown, usage.code,

@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "../MuEditor/UI/Common/NamedTreeRoot.h"
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 
 #include <cstddef>
@@ -50,25 +51,27 @@ struct NamedColorUser
     bool selected = false;
 };
 
-// What a root of the Colors window lists (D69): its named entries and the folders they are sorted in, who uses each
-// entry, and what a change of one does. The window draws the tree, NamedColorList the picked entry. Each root keeps
-// its own entries and values, because they differ: a glow tints a model, a label style is a text look, a server list
-// color has a shade per theme.
-class NamedColorSource
+// What a root of the Colors window lists (D69): its named entries and the folders they are sorted in (NamedTreeRoot),
+// who uses each entry, and what a change of one does. The window draws the tree (NamedTree), NamedColorList the picked
+// entry. Each root keeps its own entries and values, because they differ: a glow tints a model, a label style is a
+// text look, a server list color has a shade per theme.
+class NamedColorSource : public NamedTreeRoot
 {
 public:
-    virtual ~NamedColorSource() = default;
-
     virtual NamedColorTexts GetTexts() const = 0;
 
-    // Counts the changes of the entries and the folders, for what the window keeps between frames.
-    virtual int GetVersion() const = 0;
-    // The entries, in the file's order.
-    virtual std::size_t GetCount() const = 0;
-    virtual const std::string& GetName(std::size_t index) const = 0;
-    virtual bool Has(const std::string& name) const = 0;
+    const char* GetRootName() const final
+    {
+        return GetTexts().root;
+    }
     // The look of the entry, in front of its name in the tree.
-    virtual void RenderSwatch(const std::string& name) const = 0;
+    bool HasSwatches() const final
+    {
+        return true;
+    }
+    void RenderSwatch(const std::string& name) const override = 0;
+    // "gold (3)": the name and how many use it.
+    std::string GetRowLabel(const std::string& name) final;
 
     virtual int CountUsers(const std::string& name) = 0;
     virtual std::vector<NamedColorUser> FindUsers(const std::string& name) const = 0;
@@ -76,12 +79,6 @@ public:
     virtual bool IsKept(const std::string& name) const = 0;
     // Removes the entries as one undo step named `step`.
     virtual void Remove(const char* step, std::span<const std::string> names) = 0;
-
-    // The folders the entries are sorted in (ColorFolders.h), and new ones as one undo step named `step`.
-    virtual const std::vector<Data::Colors::ColorFolder>& GetFolders() const = 0;
-    virtual void SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders) = 0;
-    // The entries in this order (the same names, another order), as one undo step named `step`.
-    virtual void SetOrder(const char* step, std::span<const std::string> names) = 0;
 
     // The dialog for a new entry, opened with the value of `from` ("" while none is picked). RenderNew gives the new
     // entry's name in the frame it is added; it goes into the folder at `folder` (the empty path: under the root) in
@@ -104,9 +101,6 @@ public:
     // The undo history the root's changes go to, for the window's Undo and Redo.
     virtual MuEditor::UndoTarget& GetUndoTarget() = 0;
 };
-
-// The entries' names in the file's order.
-std::vector<std::string> GetNames(const NamedColorSource& source);
 } // namespace MuEditor::Colors
 
 #endif // _EDITOR

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -49,6 +50,7 @@ constexpr const char* Animation = "animation";
 constexpr const char* Frames = "frames";
 constexpr const char* Timers = "timers";
 constexpr const char* EveryMs = "everyMs";
+constexpr const char* NamedBones = "namedBones";
 constexpr const char* Bitmaps = "bitmaps";
 constexpr const char* Filter = "filter";
 constexpr const char* Wrap = "wrap";
@@ -89,6 +91,7 @@ const KeySet ModelKeys{Keys::Slot,
                        Keys::NoneBlendMeshes,
                        Keys::Cues,
                        Keys::Timers,
+                       Keys::NamedBones,
                        Keys::Bitmaps,
                        Keys::Parts,
                        Keys::BoundingBox,
@@ -592,6 +595,32 @@ void ReadTimers(const OrderedJson& json, std::vector<MonsterModelTimer>& timers,
     }
 }
 
+// The names the code finds bones by, in the order they are registered.
+void ReadNamedBones(const OrderedJson& json, std::vector<std::pair<std::string, int>>& bones, ModelIssues& issues)
+{
+    if (!json.is_object())
+    {
+        issues.Fatal(Keys::NamedBones, "must be an object of bones by name");
+        return;
+    }
+    for (const auto& [name, value] : json.items())
+    {
+        const std::string key = std::string(Keys::NamedBones) + "." + name;
+        if (name.empty())
+        {
+            issues.Fatal(Keys::NamedBones, "a name must not be empty");
+            return;
+        }
+        const std::optional<int> bone = ReadWholeIn(value, 0, std::numeric_limits<int>::max());
+        if (!bone)
+        {
+            issues.Fatal(key, RangeText(0, std::numeric_limits<int>::max()));
+            return;
+        }
+        bones.emplace_back(name, *bone);
+    }
+}
+
 void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, ModelIssues& issues)
 {
     ReadLoad(json, model.load, issues);
@@ -619,6 +648,10 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     if (const auto timers = json.find(Keys::Timers); timers != json.end())
     {
         ReadTimers(*timers, model.timers, issues);
+    }
+    if (const auto bones = json.find(Keys::NamedBones); bones != json.end())
+    {
+        ReadNamedBones(*bones, model.namedBones, issues);
     }
     if (const auto bitmaps = json.find(Keys::Bitmaps); bitmaps != json.end())
     {
@@ -835,6 +868,15 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
     {
         json[Keys::Timers] = WriteTimers(model.timers);
     }
+    if (!model.namedBones.empty())
+    {
+        OrderedJson bones = OrderedJson::object();
+        for (const auto& [name, bone] : model.namedBones)
+        {
+            bones[name] = bone;
+        }
+        json[Keys::NamedBones] = std::move(bones);
+    }
     if (!model.bitmaps.empty())
     {
         OrderedJson bitmaps = OrderedJson::array();
@@ -866,7 +908,7 @@ std::string FormatText(std::string text)
     {
         text = PutListsOnOneLine(text, key);
     }
-    for (const char* key : {Keys::Animations, Keys::TextureNames, Keys::BoundingBox})
+    for (const char* key : {Keys::Animations, Keys::TextureNames, Keys::NamedBones, Keys::BoundingBox})
     {
         text = PutObjectsOnOneLine(text, key);
     }

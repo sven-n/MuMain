@@ -33,6 +33,7 @@ internal static class Program
         new QuestHeroStatusScenario(museElf: true),
         new QuestComboScenario(),
         new QuestEvidenceOfStrengthScenario(),
+        new LookReferencesScenario(),
     ];
 
     // The window's file dialogs need a single-threaded apartment on Windows.
@@ -68,7 +69,28 @@ internal static class Program
             return ExitPassed;
         }
 
+        if (options.Compare is { } reports)
+        {
+            return CompareLooks(reports.Before, reports.After, options.OutputFolder);
+        }
+
         return options.Gui ? GuiApp.Run(options, args) : RunAsync(options).GetAwaiter().GetResult();
+    }
+
+    private static int CompareLooks(string before, string after, string outputFolder)
+    {
+        try
+        {
+            var path = LookComparison.Write(before, after, outputFolder, Console.Out);
+            Console.WriteLine($"comparison: {path}");
+            return ExitPassed;
+        }
+        catch (Exception exception) when (exception is InvalidDataException or IOException or UnauthorizedAccessException
+                                              or System.Text.Json.JsonException or FormatException)
+        {
+            Console.Error.WriteLine(exception.Message);
+            return ExitFailed;
+        }
     }
 
     // On Windows the tester is a window program (WinExe), so starting it, e.g. by a

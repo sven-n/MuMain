@@ -11,6 +11,7 @@
 #include "ItemTextInput.h"
 #include "ItemToolWindow.h"
 #include "ItemUsageView.h"
+#include "WrongSideButtons.h"
 
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -46,7 +47,6 @@ namespace
 // Pixel widths before the editor UI scale.
 constexpr float FieldsColumnWidth = 80.0f;
 constexpr float FieldColumnWidth = 220.0f;
-constexpr float KnownColumnWidth = 60.0f;
 constexpr float ItemListHeight = 260.0f;
 // What a short item list adds to its rows' height (the table's borders).
 constexpr float ItemListBorders = 4.0f;
@@ -58,6 +58,13 @@ constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
 // it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
 constexpr const char* CheckColumn = "##CheckColumn";
+// The tables' columns besides the check box (of an import) and the wrong side buttons: an item
+// list's change, item and field count; a changed item's field, both values and note (a new or
+// removed item's field and value); a formula entry and both values.
+constexpr int ItemListColumns = 3;
+constexpr int ChangedFieldColumns = 4;
+constexpr int WholeItemFieldColumns = 2;
+constexpr int FormulaColumns = 3;
 // The titles and change columns of Copy as Markdown: English whatever the editor's language, as
 // the copied table is meant for issues and chats.
 constexpr const char* MarkdownDifferFromServer = "Items that differ between the client and the server";
@@ -133,6 +140,24 @@ bool IsRowChecked(const SyncItem& row)
         return row.checked;
     }
     return std::ranges::any_of(row.fields, [](const SyncField& field) { return field.checked; });
+}
+
+// What is marked wrong in the server and left unchecked is grey: the client keeps its value. A
+// box checked by hand (or Check all) applies it after all, so it is not grey then.
+bool IsKeptByClient(WrongSide side, bool checked)
+{
+    return side == WrongSide::Server && !checked;
+}
+
+// A field's or a formula entry's name, grey while the client keeps its value.
+void RenderEntryName(const std::string& name, bool keptByClient)
+{
+    if (keptByClient)
+    {
+        ImGui::TextDisabled("%s", name.c_str());
+        return;
+    }
+    ImGui::TextUnformatted(name.c_str());
 }
 
 // Whether the row changes something when it is applied: the whole New or Removed item, or a
@@ -345,6 +370,13 @@ void CMuItemSyncUI::Render(bool* open)
     {
         title += " *";
     }
+    // The window was closed in between (it is not rendered then).
+    const int frame = ImGui::GetFrameCount();
+    if (m_lastShownFrame != frame - 1)
+    {
+        m_knownLoaded = false;
+    }
+    m_lastShownFrame = frame;
     if (ToolWindow::Begin(title.c_str(), MuEditor::WindowIds::ItemSync, open))
     {
         if (!m_knownLoaded)
@@ -355,7 +387,17 @@ void CMuItemSyncUI::Render(bool* open)
             {
                 g_MuEditorConsoleUI.LogEditor(issue.ToString());
             }
+            // A save would replace what could not be read (e.g. a file of a newer format version).
+            m_knownSavable =
+                std::ranges::none_of(issues, [](const ItemDataIssue& issue)
+                                     { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
+            m_marksNotSaved.clear();
             m_knownLoaded = true;
+            // A comparison shown still has the marks from before.
+            if (m_diff && !m_comparingFiles)
+            {
+                ApplyMarks(*m_diff, m_known);
+            }
         }
         TakeChosenFile();
         TakeServerDownload();
@@ -788,7 +830,6 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
         return;
     }
     SyncOptions options;
-    options.known = &m_known;
     options.comparingFiles = true;
     m_diff = BuildItemSyncDiff(m_fileA, m_file, options);
 }
@@ -885,6 +926,10 @@ bool CMuItemSyncUI::Apply()
         {std::to_string(changes.added + changes.changed + changes.removed), std::to_string(changes.formulaEntries)});
     const std::string path = m_comparedPath;
     g_MuEditorConsoleUI.LogEditor(path + ": " + done);
+    if (ForgetAppliedMarks(*m_diff, m_known))
+    {
+        SaveKnownDifferences();
+    }
     // The differences that are left; what was not checked stays unchecked, so a second click
     // does not take it after all.
     const UncheckedRows unchecked = FindUnchecked(*m_diff);
@@ -1210,8 +1255,8 @@ void CMuItemSyncUI::CopyItemList(ItemList list, const std::vector<int>& rows)
                                  : (m_fromServer ? MarkdownDifferFromServer : MarkdownDifferFromFile);
         changeColumn = m_comparingFiles ? MarkdownFromAToB : MarkdownInTheClient;
     }
-    const std::string text =
-        WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")", changeColumn);
+    const std::string text = WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")",
+                                                   changeColumn, !m_comparingFiles);
     ImGui::SetClipboardText(text.c_str());
     m_copiedList = list;
     m_copiedRows = static_cast<int>(rows.size());
@@ -1227,7 +1272,10 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
     const float rowHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2.0f;
     const float height =
         std::min(Scaled(ItemListHeight), rowHeight * static_cast<float>(rows.size() + 1) + Scaled(ItemListBorders));
-    if (ImGui::BeginTable(id, checkable ? 4 : 3, Flags, ImVec2(0.0f, height)))
+    // An import has the check box and the wrong side buttons: the marks are about the client and a
+    // server, not two files.
+    const int columns = (checkable ? 1 + WrongSideButtons::ColumnCount : 0) + ItemListColumns;
+    if (ImGui::BeginTable(id, columns, Flags, ImVec2(0.0f, height)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
         if (checkable)
@@ -1238,6 +1286,10 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                                 ImGuiTableColumnFlags_WidthFixed, ChangeColumnWidth());
         ImGui::TableSetupColumn(I18N::Editor::Item);
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldsColumnWidth));
+        if (checkable)
+        {
+            WrongSideButtons::SetupColumns();
+        }
         ImGui::TableHeadersRow();
         ImGuiListClipper clipper;
         clipper.Begin(static_cast<int>(rows.size()));
@@ -1263,7 +1315,9 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted(ChangeName(row.change));
                 ImGui::TableNextColumn();
-                if (row.known)
+                const WrongSide side = GetRowWrongSide(row);
+                const bool keptByClient = IsKeptByClient(side, IsRowChecked(row));
+                if (keptByClient)
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
                 }
@@ -1281,12 +1335,25 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                     const bool removedFromClient = checkable && row.change == SyncChange::Removed;
                     m_shownUsage = removedFromClient ? FindItemUsage(itemType) : ItemUsage{};
                 }
-                if (row.known)
+                if (keptByClient)
                 {
                     ImGui::PopStyleColor();
                 }
                 ImGui::TableNextColumn();
                 ImGui::Text("%d", static_cast<int>(row.fields.size()));
+                if (checkable)
+                {
+                    // A changed item marked as a whole whose fields name different sides: its mark,
+                    // faint.
+                    const bool mixed = side == WrongSide::None && row.wrongSide != WrongSide::None;
+                    const std::optional<WrongSide> picked =
+                        mixed ? WrongSideButtons::Render(row.wrongSide, WrongSideButtons::Shown::OfItemWithMarkedFields)
+                              : WrongSideButtons::Render(side);
+                    if (picked)
+                    {
+                        SetWrongSide(row, "", *picked);
+                    }
+                }
                 ImGui::PopID();
             }
         }
@@ -1330,18 +1397,6 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
             }
         }
     }
-    if (IsWhole(row))
-    {
-        bool known = row.known;
-        if (ImGui::Checkbox(I18N::Editor::Known, &known))
-        {
-            SetKnown(row.group, row.number, "", known);
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
-        }
-    }
     if (row.fields.empty())
     {
         return;
@@ -1353,7 +1408,9 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     // file A has lists file A's values.
     const bool checkable = !m_comparingFiles;
     const bool removed = row.change == SyncChange::Removed;
-    const int columns = (changed ? 5 : 2) + (checkable ? 1 : 0);
+    const bool markable = checkable && changed;
+    const int columns = (checkable ? 1 : 0) + (changed ? ChangedFieldColumns : WholeItemFieldColumns) +
+                        (markable ? WrongSideButtons::ColumnCount : 0);
     if (!ImGui::BeginTable("##SyncFields", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
@@ -1372,7 +1429,10 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
-        ImGui::TableSetupColumn(I18N::Editor::Known, ImGuiTableColumnFlags_WidthFixed, Scaled(KnownColumnWidth));
+    }
+    if (markable)
+    {
+        WrongSideButtons::SetupColumns();
     }
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < row.fields.size(); ++index)
@@ -1391,7 +1451,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
             }
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(field.field.c_str());
+        RenderEntryName(field.field, markable && IsKeptByClient(field.wrongSide, field.checked));
         if (changed)
         {
             ImGui::TableNextColumn();
@@ -1409,15 +1469,13 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
                 ImGui::TextColored(WarningColor, "%s", note.c_str());
                 ImGui::PopTextWrapPos();
             }
-            ImGui::TableNextColumn();
-            bool known = field.known;
-            if (ImGui::Checkbox("##Known", &known))
+        }
+        if (markable)
+        {
+            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(
+                    field.wrongSide, field.markOfItem ? WrongSideButtons::Shown::OfItem : WrongSideButtons::Shown::Own))
             {
-                SetKnown(row.group, row.number, field.field, known);
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
+                SetWrongSide(row, field.field, *picked);
             }
         }
         ImGui::PopID();
@@ -1458,7 +1516,8 @@ void CMuItemSyncUI::RenderFormulas()
     }
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
-    if (!ImGui::BeginTable("##SyncFormulas", checkable ? 5 : 4, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
+    const int columns = (checkable ? 1 + WrongSideButtons::ColumnCount : 0) + FormulaColumns;
+    if (!ImGui::BeginTable("##SyncFormulas", columns, Flags, ImVec2(0.0f, Scaled(FieldListHeight))))
     {
         return;
     }
@@ -1470,7 +1529,10 @@ void CMuItemSyncUI::RenderFormulas()
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
     ImGui::TableSetupColumn(checkable ? FromTheSource() : I18N::Editor::FileB);
-    ImGui::TableSetupColumn(I18N::Editor::Known, ImGuiTableColumnFlags_WidthFixed, Scaled(KnownColumnWidth));
+    if (checkable)
+    {
+        WrongSideButtons::SetupColumns();
+    }
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < m_diff->formulas.size(); ++index)
     {
@@ -1483,20 +1545,17 @@ void CMuItemSyncUI::RenderFormulas()
             ImGui::Checkbox("##Checked", &row.checked);
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(row.entry.c_str());
+        RenderEntryName(row.entry, checkable && IsKeptByClient(row.wrongSide, row.checked));
         ImGui::TableNextColumn();
         RenderValue(row.current);
         ImGui::TableNextColumn();
         RenderValue(row.incoming);
-        ImGui::TableNextColumn();
-        bool known = row.known;
-        if (ImGui::Checkbox("##Known", &known))
+        if (checkable)
         {
-            SetKnownFormula(row.entry, known);
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::WhatAKnownDifferenceIs);
+            if (const std::optional<WrongSide> picked = WrongSideButtons::Render(row.wrongSide))
+            {
+                SetFormulaWrongSide(row, *picked);
+            }
         }
         ImGui::PopID();
     }
@@ -1634,6 +1693,12 @@ void CMuItemSyncUI::RenderExportPopup()
 
 void CMuItemSyncUI::RenderMessages()
 {
+    if (!m_marksNotSaved.empty())
+    {
+        ImGui::PushTextWrapPos(0.0f);
+        ImGui::TextColored(ErrorColor, "%s", m_marksNotSaved.c_str());
+        ImGui::PopTextWrapPos();
+    }
     for (const std::string& message : m_messages)
     {
         ImGui::PushTextWrapPos(0.0f);
@@ -1649,62 +1714,28 @@ void CMuItemSyncUI::RenderMessages()
     }
 }
 
-void CMuItemSyncUI::SetKnown(int group, int number, const std::string& field, bool known)
+void CMuItemSyncUI::SetWrongSide(SyncItem& row, const std::string& field, WrongSide side)
 {
-    if (known)
-    {
-        m_known.fields.insert({group, number, field});
-    }
-    else
-    {
-        m_known.fields.erase({group, number, field});
-    }
-    for (SyncItem& row : m_diff->items)
-    {
-        if (row.group != group || row.number != number)
-        {
-            continue;
-        }
-        if (field.empty())
-        {
-            row.known = known;
-            row.checked = !known && row.locked.empty() && row.change == SyncChange::New;
-        }
-        for (SyncField& entry : row.fields)
-        {
-            if (entry.field == field)
-            {
-                entry.known = known;
-                entry.checked = !known && entry.locked.empty() && entry.inexact.empty();
-            }
-        }
-    }
+    MarkWrongSide(m_known, row, field, side);
     SaveKnownDifferences();
 }
 
-void CMuItemSyncUI::SetKnownFormula(const std::string& entry, bool known)
+void CMuItemSyncUI::SetFormulaWrongSide(SyncFormula& row, WrongSide side)
 {
-    if (known)
-    {
-        m_known.formulas.insert(entry);
-    }
-    else
-    {
-        m_known.formulas.erase(entry);
-    }
-    for (SyncFormula& row : m_diff->formulas)
-    {
-        if (row.entry == entry)
-        {
-            row.known = known;
-            row.checked = !known;
-        }
-    }
+    MarkWrongSide(m_known, row, side);
     SaveKnownDifferences();
 }
 
 void CMuItemSyncUI::SaveKnownDifferences()
 {
+    if (!m_knownSavable)
+    {
+        // The import's messages stay.
+        m_marksNotSaved = I18N::Format(I18N::Editor::TheMarksAreNotSavedWhile0CannotBeRead,
+                                       {GetKnownDifferencesFile().generic_string()});
+        g_MuEditorConsoleUI.LogEditor(m_marksNotSaved);
+        return;
+    }
     std::vector<ItemDataIssue> issues;
     Data::Items::WriteItemTextFile(GetKnownDifferencesFile(), WriteKnownDifferencesJson(m_known), issues);
     for (const ItemDataIssue& issue : issues)

@@ -6,16 +6,18 @@
 
 namespace MuEditor::Items
 {
-// Which mesh of the Item Model window's item the preview shows on its own, the others see-through: the one the mouse
-// points at (a row of the mesh list, a number in a mesh field), else the one a click keeps (a row, a part of the
-// preview). The preview is drawn before the list and the fields, so a mesh pointed at shows from the next frame.
+// Which mesh of the picked item the previews show on its own, the others see-through: the one the mouse points at (a
+// row of the Item Model window's mesh list, a number in a mesh field, a part of the Style Editor), else the one a click
+// keeps (a row, a part of a preview). The previews are drawn before the lists and the fields, so a mesh pointed at
+// shows from the next frame.
 class CItemMeshFocus
 {
 public:
     static CItemMeshFocus& GetInstance();
 
-    // At the start of the window's frame, for the item it shows; another item forgets the meshes.
-    void BeginFrame(int itemType);
+    // At the start of a window's frame, for the item it shows; another item forgets the meshes. With `frame` (the
+    // ImGui frame), a second call in that frame changes nothing, so the windows that show the item can each make it.
+    void BeginFrame(int itemType, std::optional<int> frame = std::nullopt);
     void Point(int mesh);
     // A click on a row: keeps its mesh, or lets it go when it was kept.
     void ToggleKept(int mesh);
@@ -37,6 +39,7 @@ public:
 
 private:
     int m_itemType = -1;
+    std::optional<int> m_frame;
     std::optional<int> m_pointedNow;
     std::optional<int> m_pointedBefore;
     std::optional<int> m_kept;

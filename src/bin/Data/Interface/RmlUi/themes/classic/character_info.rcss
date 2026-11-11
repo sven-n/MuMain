@@ -126,6 +126,8 @@
 .attr-lines span { display: block; white-space: nowrap; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
 .attr-lines span.buffed { color: rgb(255, 0, 240); }
+/* A line with a hint (the damage, the critical damage rate) shows it while the pointer is over it. */
+.attr-lines span.hinted { pointer-events: auto; }
 .attr-lines-str { top: 140px; }
 .attr-lines-agi { top: 200px; }
 .attr-lines-vit { top: 260px; }

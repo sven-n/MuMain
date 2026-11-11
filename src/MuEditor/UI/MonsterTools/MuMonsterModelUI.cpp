@@ -120,7 +120,7 @@ void MuMonsterModelUI::Render(bool* open)
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
         const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
         MonsterModelDefinition* model = m_draft.Begin(slot.value_or(-1), ToolWindow::GetDataVersion());
-        ShownModel::RenderSelectedMonster(number, monster);
+        ShownModel::RenderSelectedMonster(number, monster, false);
         if (monster != nullptr && (!slot || model == nullptr))
         {
             ShownModel::RenderWhyNoModel(*monster);

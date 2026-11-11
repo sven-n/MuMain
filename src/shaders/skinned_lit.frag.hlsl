@@ -12,42 +12,18 @@
 //              of the skinned tangent T, bitangent cross(N, T) x handedness and N, for the diffuse,
 //              rim, specular and point-light terms; without one (scale 0) the interpolated normal
 //              as before, and the flat default map bound at t1 is not read
-// FogUniforms mirrors FogUniform, SceneLighting mirrors mu::SceneLightingUniform and DynamicLights
-// mirrors mu::DynamicLightsUniform (std140).
+// The shared uniforms and lighting functions: scene_lighting.hlsli, dynamic_lighting.hlsli.
 Texture2D tex : register(t0, space2);
 SamplerState s : register(s0, space2);
 Texture2D normalMap : register(t1, space2);
 SamplerState normalSampler : register(s1, space2);
-cbuffer FogUniforms : register(b0, space3)
-{
-    uint fogEnabled;
-    uint alphaDiscardEnabled;
-    float alphaThreshold;
-    uint alphaToCoverage; // 1: the pipeline turns alpha into multisample coverage
-    float fogStart;
-    float fogEnd;
-    float4 fogColor;
-};
-cbuffer SceneLighting : register(b1, space3)
-{
-    float4 sceneLightDirection;
-    float4 sceneLightColor;
-    float4 diffuseCurve; // scale, ambient, floor, highlight knee
-    float4 rimParameters;
-    float4 specularParameters;
-    float4 sceneFogColor;
-    float4 sceneFogParameters;
-    float4 cameraPosition;
-};
-static const uint MaxDynamicLights = 32; // mu::kMaxDynamicLights
-cbuffer DynamicLights : register(b2, space3)
-{
-    uint dynamicLightCount;   // lights used
-    float dynamicLightWrap;   // 0: Lambert, 0.5: half-Lambert (mu::WrappedDiffuse)
-    uint2 dynamicLightPadding;
-    float4 dynamicLightPositionAndRadius[MaxDynamicLights];
-    float4 dynamicLightColor[MaxDynamicLights];
-};
+// The sun shadow map's depth (Enhanced sun shadows; a far 1x1 map without them).
+Texture2D sunShadowMap : register(t2, space2);
+SamplerComparisonState sunShadowSampler : register(s2, space2);
+
+#include "scene_lighting.hlsli"
+#include "dynamic_lighting.hlsli"
+#include "clouds.hlsli"
 
 // The light mood's highlight shoulder (Render::Lighting::LightMood::RollOffHighlight): a lit
 // colour channel above the knee approaches 1 smoothly instead of being cut off there. Only a knee
@@ -86,13 +62,6 @@ struct FSInput
     float4 worldTangentAndNormalMapScale : TEXCOORD10; // w: the map's scale, 0 without one
 };
 
-// Same curve as basic_textured_fog.frag.hlsl and mu::EnhancedFogAmount() (SceneLighting.cpp).
-float EnhancedFogAmount(float eyeDepth)
-{
-    const float scaledDistance = max(eyeDepth - sceneFogParameters.x, 0.0) * sceneFogParameters.z;
-    return saturate(1.0 - exp(-scaledDistance * scaledDistance));
-}
-
 float3 SafeNormalize(float3 value)
 {
     const float lengthSquared = dot(value, value);
@@ -110,11 +79,9 @@ float3 DynamicLighting(float3 worldPosition, float3 worldNormal)
     {
         const float4 positionAndRadius = dynamicLightPositionAndRadius[i];
         const float3 toLight = positionAndRadius.xyz - worldPosition;
-        const float radius = positionAndRadius.w;
-        const float horizontalDistance = length(toLight.xy);
-        if (horizontalDistance >= radius)
+        const float falloff = PointLightFalloff(toLight, positionAndRadius.w);
+        if (falloff <= 0.0)
             continue;
-        const float falloff = (radius - horizontalDistance) / radius;
         const float wrapped =
             saturate(dot(worldNormal, SafeNormalize(toLight)) * (1.0 - dynamicLightWrap) + dynamicLightWrap);
         light += dynamicLightColor[i].rgb * (falloff * wrapped);
@@ -161,18 +128,38 @@ float4 main(FSInput input) : SV_Target
     const float3 light = input.lightDirectionAndSpecular.xyz;
     const float lightDot = dot(shadingNormal, light);
 
-    const float luminosity = max(lightDot * diffuseCurve.x + diffuseCurve.y, diffuseCurve.z);
-    const float3 dynamicLight = input.worldPositionAndDynamicLights.w > 0.5
-                                    ? DynamicLighting(input.worldPositionAndDynamicLights.xyz,
-                                                      SafeNormalize(worldNormal))
-                                    : float3(0.0, 0.0, 0.0);
-    float3 diffuse = saturate(objectLight * luminosity + dynamicLight);
+    // In the scene's world (not a model drawn for the UI), the point lights and the sun's shadows apply.
+    const bool inWorld = input.worldPositionAndDynamicLights.w > 0.5;
+    const float3 litNormal = SafeNormalize(worldNormal);
+    // The sun's shadow takes away the direct sunlight only: the ambient part and the point lights stay.
+    // Clouds dim the sunlight as shadows do.
+    const float sunVisible =
+        inWorld && sunShadowParameters.x > 0.0
+            ? SunVisibility(input.worldPositionAndDynamicLights.xyz, litNormal) *
+                  CloudLight(input.worldPositionAndDynamicLights.xy, cloudParameters, cloudOffset.xy)
+            : 1.0;
+    const float sunLight = 1.0 - sunShadowParameters.x * (1.0 - sunVisible);
+    // Shade turns towards the sky's blue.
+    const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible));
+    // Shadow dims the light a face receives, never the darkening of faces turned away.
+    const float luminosity =
+        max(lightDot * diffuseCurve.x * (lightDot > 0.0 ? sunLight : 1.0) + diffuseCurve.y, diffuseCurve.z);
+    const float3 dynamicLight =
+        inWorld ? DynamicLighting(input.worldPositionAndDynamicLights.xyz, litNormal) : float3(0.0, 0.0, 0.0);
+    const float3 lit = objectLight * skyShade * luminosity + dynamicLight;
+    float3 diffuse = saturate(lit);
     if (RollsOffHighlight(diffuseCurve.w))
-        diffuse = RollOffHighlight(objectLight * luminosity + dynamicLight, diffuseCurve.w);
+        diffuse = RollOffHighlight(lit, diffuseCurve.w);
 
     // Two-sided meshes show back faces; |dot| keeps their interiors from rim-lighting.
     const float facing = saturate(abs(dot(normal, view)));
-    const float3 rim = rimParameters.x * pow(1.0 - facing, rimParameters.y) * objectLight;
+    float3 rim = rimParameters.x * pow(1.0 - facing, rimParameters.y) * objectLight;
+    if (inWorld && sunTowards.w > 0.0)
+    {
+        // The rim follows the sun: brighter and sun-coloured on the side facing it, gone in its shadow.
+        const float towardsSun = saturate(dot(litNormal, normalize(sunTowards.xyz)) * 0.75 + 0.25) * sunVisible;
+        rim = lerp(rim, rim * sunColor.rgb * (2.0 * towardsSun), sunTowards.w);
+    }
 
     const float specularStrength = input.lightDirectionAndSpecular.w * specularParameters.x;
     float3 specular = float3(0.0, 0.0, 0.0);
@@ -180,7 +167,7 @@ float4 main(FSInput input) : SV_Target
     {
         const float3 halfVector = SafeNormalize(SafeNormalize(light) + view);
         const float highlight = pow(saturate(dot(normal, halfVector)), specularParameters.y);
-        specular = specularStrength * highlight * sceneLightColor.rgb * objectLight;
+        specular = specularStrength * highlight * sunLight * sceneLightColor.rgb * objectLight;
     }
 
     // Rim and specular are light added on top of the surface, so dark textures still get an

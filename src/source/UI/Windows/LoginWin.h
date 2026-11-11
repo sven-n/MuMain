@@ -82,10 +82,8 @@ public:
     }
 
 protected:
-    // UpdateWhileShown() always runs while shown: ticks text-input state and the Remember-Password
-    // sub-dialog even when something else has taken over input, and computes IsActive() via
-    // SetActive() -- false while a higher-depth modal covers this dialog or the Remember-Password
-    // prompt is pending.
+    // Runs each enabled frame, including while hidden. Keeps the Remember-Password prompt ticking;
+    // login input is active only while this window is visible and no higher-depth modal owns it.
     bool UpdateWhileShown() override;
     // Runs only while also active -- OK/Cancel/Enter/Esc submit handling.
     bool UpdateWhileActive() override;

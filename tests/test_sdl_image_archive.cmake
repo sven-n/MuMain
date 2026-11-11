@@ -8,18 +8,11 @@ if(NOT DEFINED MU_ROOT_CMAKE)
     message(FATAL_ERROR "MU_ROOT_CMAKE is required")
 endif()
 
-file(READ "${MU_ROOT_CMAKE}" cmake_source)
-string(REGEX REPLACE "#[^\r\n]*" "" cmake_code "${cmake_source}")
-
-string(REGEX MATCHALL "FetchContent_Declare\\([ \t\r\n]*SDL3_image[^)]*\\)" declares "${cmake_code}")
-list(LENGTH declares declare_count)
-if(NOT declare_count EQUAL 1)
-    message(FATAL_ERROR "Expected one FetchContent_Declare(SDL3_image ...) in ${MU_ROOT_CMAKE}, found ${declare_count}")
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/FetchContentDeclare.cmake")
+mu_read_fetchcontent_declare("${MU_ROOT_CMAKE}" SDL3_image cmake_code declares declare_at)
 if(NOT declares MATCHES "URL[ \t]+https://[^ \t\r\n]+\\.tar\\.gz" OR NOT declares MATCHES "URL_HASH[ \t]+SHA256=[0-9a-f]+")
     message(FATAL_ERROR "SDL3_image must come as a release archive checked by its SHA-256: ${declares}")
 endif()
-string(FIND "${cmake_code}" "FetchContent_Declare(SDL3_image" declare_at)
 
 # Setting, value, and the vendored libraries SDL_image would build without it.
 set(settings

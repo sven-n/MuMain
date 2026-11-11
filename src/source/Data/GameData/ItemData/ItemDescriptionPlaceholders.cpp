@@ -4,10 +4,12 @@
 
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/Translation/ItemReference.h"
 
 #include <algorithm>
 #include <functional>
 #include <array>
+#include <set>
 
 namespace Data::Items
 {
@@ -47,6 +49,18 @@ Placeholder ReadPlaceholder(std::string_view text, size_t open)
     if (name.empty())
     {
         return {{}, std::string_view::npos, "has an empty placeholder \"{}\""};
+    }
+    if (name.starts_with(Data::Translation::ItemReferencePrefix))
+    {
+        if (IsItemReferencePlaceholder(name))
+        {
+            return {name, close + 1, {}};
+        }
+        return {{},
+                std::string_view::npos,
+                "has \"{" + std::string(name) +
+                    "}\": an item is named {item:group,number}, with \"+level\" for a level and \":case\" (gen, dat, "
+                    "acc, ins or loc) for a form of its name"};
     }
     const std::string_view table = GetPlaceholderTable(name);
     if (!Json::IsName(table.empty() ? name : table))
@@ -202,6 +216,29 @@ std::optional<GameDataValue> ReadGameDataValue(std::string_view name)
     return std::nullopt;
 }
 
+bool IsItemReferencePlaceholder(std::string_view name)
+{
+    return Data::Translation::ParseItemReferenceName(name).has_value();
+}
+
+std::set<std::string> ToParityPlaceholders(std::span<const std::string> names)
+{
+    std::set<std::string> parity;
+    for (const std::string& name : names)
+    {
+        std::optional<Data::Translation::ItemReference> reference = Data::Translation::ParseItemReferenceName(name);
+        if (!reference)
+        {
+            parity.insert(name);
+            continue;
+        }
+        reference->form.clear();
+        const std::string written = Data::Translation::FormatItemReference(*reference);
+        parity.insert(written.substr(1, written.size() - 2));
+    }
+    return parity;
+}
+
 bool IsBuiltInPlaceholder(std::string_view name)
 {
     return FindBuiltInPlaceholder(name).has_value();
@@ -258,6 +295,51 @@ std::string FillPlaceholders(std::string_view text, const PlaceholderValueOf& va
     }
     filled.append(text.substr(std::min(position, text.size())));
     return filled;
+}
+
+namespace
+{
+std::string ListPlaceholderNames(const std::set<std::string>& names)
+{
+    if (names.empty())
+    {
+        return "none";
+    }
+    std::string list;
+    for (const std::string& name : names)
+    {
+        list += (list.empty() ? "{" : ", {") + name + "}";
+    }
+    return list;
+}
+} // namespace
+
+std::vector<std::pair<std::string, std::string>> CheckTextPlaceholders(const LocalizedString& text,
+                                                                       const std::string& field)
+{
+    const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
+    if (!english.error.empty())
+    {
+        return {{field, english.error}};
+    }
+    std::vector<std::pair<std::string, std::string>> problems;
+    const std::set<std::string> englishNames = ToParityPlaceholders(english.names);
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        const PlaceholderScan scan = ScanPlaceholders(translation);
+        if (!scan.error.empty())
+        {
+            problems.emplace_back(field + "." + locale, scan.error);
+            continue;
+        }
+        const std::set<std::string> names = ToParityPlaceholders(scan.names);
+        if (names != englishNames)
+        {
+            problems.emplace_back(field + "." + locale, "has the placeholders " + ListPlaceholderNames(names) +
+                                                            ", the English text " + ListPlaceholderNames(englishNames));
+        }
+    }
+    return problems;
 }
 
 std::string SuggestPlaceholder(std::string_view name, std::span<const std::string> known)

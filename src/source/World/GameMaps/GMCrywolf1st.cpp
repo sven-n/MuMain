@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Combat/AttackTarget.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -670,155 +671,6 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, 
     return RenderCryWolf1stMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
-CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
-{
-    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
-        return NULL;
-
-    CHARACTER* c = NULL;
-
-    switch (iType)
-    {
-    case MONSTER_HAMMER_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SCOUT);
-        c = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_LANCE_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SOLAM);
-        c = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_BOW_SCOUT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_VALAM);
-        c = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
-        c->Object.Scale = 1.2f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster96_Top", 27);
-        BoneManager::RegisterBone(c, L"Monster96_Center", 28);
-        BoneManager::RegisterBone(c, L"Monster96_Bottom", 29);
-    }
-    break;
-    case MONSTER_WEREWOLF:
-    {
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
-        c = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Object.SubType = 0;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
-    }
-    break;
-    case MONSTER_SCOUTHERO:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SCOUT);
-        c = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
-        c->Object.Scale = 1.6f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_WEREWOLFHERO:
-    {
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
-        c = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
-        c->Object.Scale = 1.65f;
-        c->Object.SubType = 1;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
-    }
-    break;
-    case MONSTER_VALAM:
-    case MONSTER_BALRAM:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALRAM);
-        c = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_SOLAM:
-    case MONSTER_SORAM:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SORAM);
-        c = CreateCharacter(Key, MODEL_SORAM, PosX, PosY);
-        c->Object.Scale = 1.3f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-    }
-    break;
-    case MONSTER_BALGASS:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALGASS);
-        c = CreateCharacter(Key, MODEL_BALGASS, PosX, PosY);
-        c->Object.Scale = 2.f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 2, &c->Object, 30.f);
-        CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 3, &c->Object, 30.f);
-    }
-    break;
-    case MONSTER_DEATH_SPIRIT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT);
-        c = CreateCharacter(Key, MODEL_DEATH_SPIRIT, PosX, PosY);
-        c->Object.Scale = 1.25f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        BoneManager::RegisterBone(c, L"Monster94_zx", 27);
-        BoneManager::RegisterBone(c, L"Monster94_zx01", 28);
-    }
-    break;
-    case MONSTER_DARK_ELF:
-    case MONSTER_DARKELF:
-    {
-        OpenMonsterModel(MONSTER_MODEL_DARK_ELF_1);
-        c = CreateCharacter(Key, MODEL_DARK_ELF_1, PosX, PosY);
-        c->Object.Scale = 1.5f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, L"Left_Hand", 17);
-    }
-    break;
-    case MONSTER_BALLISTA:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BALLISTA);
-        c = CreateCharacter(Key, MODEL_BALLISTA, PosX, PosY, 180);
-        c->Object.Scale = 1.0f;
-        c->Weapon[0].Type = -1;
-        c->Weapon[1].Type = -1;
-
-        if (PosY == 90)
-        {
-        }
-        if (PosX == 62)
-            c->Object.Angle[2] = 90.0f;
-        if (PosX == 183)
-            c->Object.Angle[2] = 90.0f;
-    }
-    break;
-    }
-
-    return c;
-}
-
 bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
@@ -1422,20 +1274,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (o->AnimationFrame > 4.5f && o->AnimationFrame < 5.0f)
             {
-                CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                OBJECT* to = &tc->Object;
-                vec3_t Angle = { 0.f, 0.f, o->Angle[2] };
-                vec3_t Pos = { 0.f, 0.f, (to->BoundingBoxMax[2] / 1.f) };
+                if (OBJECT* to = GameLogic::Combat::AttackTargetObject(*c))
+                {
+                    vec3_t Angle = {0.f, 0.f, o->Angle[2]};
+                    vec3_t Pos = {0.f, 0.f, (to->BoundingBoxMax[2] / 1.f)};
 
-                Vector(80.f, 0.f, 20.f, p);
-                b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                Position[2] += 50.0f;
-                Angle[2] = o->Angle[2] + 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
-                Angle[2] = o->Angle[2] - 90;
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
-                CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Vector(80.f, 0.f, 20.f, p);
+                    b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                    Position[2] += 50.0f;
+                    Angle[2] = o->Angle[2] + 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                    Angle[2] = o->Angle[2] - 90;
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 0, to);
+                    CreateEffect(MODEL_DEATH_SPI_SKILL, Position, Angle, Pos, 1, to);
+                }
             }
         }
     }

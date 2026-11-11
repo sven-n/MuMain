@@ -16,6 +16,7 @@ struct ToolWindows
     bool itemCategories = false;
     bool itemModel = false;
     bool colors = false;
+    bool styleEditor = false;
     bool itemTooltip = false;
     bool itemFormulas = false;
     bool itemSync = false;
@@ -25,6 +26,8 @@ struct ToolWindows
     bool monsterModel = false;
     bool monsterPreview = false;
     bool monsterAttacks = false;
+    bool monsterSetup = false;
+    bool monsterEquipment = false;
     bool monsterSounds = false;
     bool dataChecks = false;
     bool soundMixer = false;

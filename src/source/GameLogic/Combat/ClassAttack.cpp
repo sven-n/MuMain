@@ -504,10 +504,17 @@ bool NeedsNoMeleeWeapon(ActionSkillType skill)
         return false;
     }
 }
+
+void CompleteKnightCast(CHARACTER* c)
+{
+    c->Movement = false;
+    c->SkillSuccess = true;
+}
 } // namespace
 
 void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
+    c->SkillSuccess = false;
     OBJECT* o = &c->Object;
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
 
@@ -618,6 +625,17 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_TWISTING_SLASH_MASTERY:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
+                    if (CheckAttack() && !CheckTile(c, o, Distance))
+                    {
+                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        {
+                            c->Movement = true;
+                            c->MovementType = MOVEMENT_SKILL;
+                            SendMove(c, o);
+                            break;
+                        }
+                    }
+
                     BYTE PathX[1];
                     BYTE PathY[1];
                     PathX[0] = (c->PositionX);
@@ -635,7 +653,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     SetAttackSpeed();
                     SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
 
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 break;
             case AT_SKILL_FIRE_SLASH:
@@ -664,7 +682,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         SetAttackSpeed();
 
                         SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
                     }
                 }
                 break;
@@ -702,7 +720,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         {
                             SetAction(o, PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
                         }
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
                     }
                 }
                 break;
@@ -736,7 +754,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     //									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
 
                     //									SetPlayerMagic(c);
 
@@ -819,7 +837,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                     //c->AttackTime = 15;
                 }
             }
@@ -849,7 +867,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
             }
             break;
@@ -860,7 +878,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     return;
                 }
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
 
             case AT_SKILL_ADD_CRITICAL:
@@ -868,11 +886,11 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_ADD_CRITICAL_STR2:
             case AT_SKILL_ADD_CRITICAL_STR3:
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_BRAND_OF_SKILL:
                 SendRequestMagic(Skill, HeroKey);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_FIRE_SCREAM:
             case AT_SKILL_FIRE_SCREAM_STR:
@@ -908,7 +926,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                             SetAction(o, PLAYER_ATTACK_STRIKE);
                         }
                     }
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -961,7 +979,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         SetAction(o, PLAYER_ATTACK_DARKHORSE);
                         PlayBuffer(SOUND_EARTH_QUAKE);
                     }
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -973,7 +991,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_SWELL_LIFE_PROFICIENCY:
                 SendRequestMagic(Skill, HeroKey);
                 SetAction(o, PLAYER_SKILL_VITALITY);
-                c->Movement = 0;
+                CompleteKnightCast(c);
                 break;
             case AT_SKILL_RAGEFUL_BLOW:
             case AT_SKILL_RAGEFUL_BLOW_STR:
@@ -995,7 +1013,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     SendRequestMagicContinue(Skill, (c->PositionX),
                         (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
                     SetAction(o, PLAYER_ATTACK_SKILL_FURY_STRIKE);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -1020,7 +1038,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     }
                     SendRequestMagicContinue(Skill, TargetX, TargetY, (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
                     SetAction(o, PLAYER_SKILL_BLOW_OF_DESTRUCTION);
-                    c->Movement = 0;
+                    CompleteKnightCast(c);
                 }
                 else
                 {
@@ -1046,7 +1064,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
                         SendRequestMagicContinue(Skill, (c->PositionX),
                             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
-                        c->Movement = 0;
+                        CompleteKnightCast(c);
 
                         if (o->Type == MODEL_PLAYER)
                         {
@@ -1079,8 +1097,6 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             }
         }
     }
-
-    c->SkillSuccess = true;
 }
 
 void AttackWizard(CHARACTER* c, int Skill, float Distance)
@@ -1217,6 +1233,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_HELL);
         c->Movement = 0;
@@ -1228,6 +1245,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        c->SkillSuccess = true;
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_INFERNO);
         c->Movement = 0;
@@ -1372,6 +1390,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_EVIL_SPIRIT_STR_MG:
             {
                 SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
             }
             return;
@@ -1379,6 +1398,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             {
                 SendRequestMagicContinue(Skill, (c->PositionX),
                     (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetAttackSpeed();
 
                 if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
@@ -1394,6 +1414,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_FLAME_STR:
             case AT_SKILL_FLAME_STR_MG:
                 SendRequestMagicContinue(Skill, (BYTE)(c->TargetPosition[0] / TERRAIN_SCALE), (BYTE)(c->TargetPosition[1] / TERRAIN_SCALE), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                c->SkillSuccess = true;
                 SetPlayerMagic(c);
                 return;
             case AT_SKILL_DECAY:

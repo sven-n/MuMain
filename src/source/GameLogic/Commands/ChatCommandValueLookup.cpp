@@ -7,10 +7,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Guild/GuildCache.h"
 #include "World/MapInfra/MapManager.h"
-
-#include <cerrno>
-#include <climits>
-#include <cwchar>
+#include "Core/Text/NumberParse.h"
 
 namespace GameLogic::Commands::ValueLookup
 {
@@ -18,20 +15,6 @@ namespace
 {
 // What getMonsterName answers for a monster it doesn't know.
 constexpr const wchar_t* UnknownMonsterName = L"()";
-
-bool TryParseNumber(const std::wstring& text, int& number)
-{
-    wchar_t* end = nullptr;
-    errno = 0;
-    const auto parsed = std::wcstol(text.c_str(), &end, 10);
-    if (errno == ERANGE || end == text.c_str() || *end != L'\0' || parsed < INT_MIN || parsed > INT_MAX)
-    {
-        return false;
-    }
-
-    number = static_cast<int>(parsed);
-    return true;
-}
 
 std::wstring GetMapName(int map)
 {
@@ -92,13 +75,13 @@ std::wstring GetItemNameOfNumber(const ChatCommandParameter& parameter, int numb
         return {};
     }
 
-    int group = 0;
-    if (!TryParseNumber(values[groupIndex], group))
+    const std::optional<int> group = Core::Text::TryParseInt(values[groupIndex]);
+    if (!group)
     {
         return {};
     }
 
-    return GetItemName(group, number);
+    return GetItemName(*group, number);
 }
 
 std::wstring GetOwnGuildName()
@@ -176,11 +159,12 @@ std::wstring DescribeValue(const ChatCommand& command, size_t parameterIndex, co
     }
 
     const auto& parameter = command.Parameters[parameterIndex];
-    int number = 0;
-    if (!TryParseNumber(values[parameterIndex], number))
+    const std::optional<int> parsed = Core::Text::TryParseInt(values[parameterIndex]);
+    if (!parsed)
     {
         return {};
     }
+    const int number = *parsed;
 
     switch (parameter.ValueReference)
     {

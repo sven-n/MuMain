@@ -50,7 +50,7 @@ The window has five tabs:
 | Graphics | Quality: Enhanced graphics, anti-aliasing, anisotropic filtering, render level. Effects: the effect toggles. Shadows: the shadow toggles |
 | Audio | Sound and music volume, whisper sound |
 | Gameplay | Auto attack, slide help |
-| Interface | Language, translate item names, font, UI theme, FPS counter, debug info |
+| Interface | Language, translate item names, font, UI theme, S6 player models, FPS counter, debug info |
 
 Each setting is a row with its name on the left and its control on the
 right, aligned in two columns. A tab's settings scroll when they don't fit,
@@ -99,6 +99,10 @@ window writes to these sections:
   Set from the Interface tab, applied at the next start:
   - `TexturePack` (default empty, the original textures): the Texture Pack
     row, the [texture pack](texture-packs.md) to read textures from first.
+  - `UseS6PlayerModels` (default `1`): the S6 player models row. Checked uses
+    the original Season 6 body models; unchecked uses the improved models.
+    Both sets ship together; [player models](player-base-models.md) lists the
+    affected classes. Restart the game to apply a change.
 
   Set by hand only, never written by the game:
   - `Backend` (`default`/`vulkan`/`direct3d12`/`metal`, case-insensitive,

@@ -1385,6 +1385,8 @@ server with original clients (after phases 6 and B).
 11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
     `pet` and drop settings, one phase each. Order decided when we get
     there. Each one gets OpenMU work where the server has matching data.
+    The buff values and durations of `ItemAddOption` (potions, scrolls,
+    seals, charms) move with the buffs instead (buffs design B13).
 12. **New item groups** (D21) — *to discuss again when we get here.*
     Groups 12–15 mix unrelated items. The new client may get new groups
     (e.g. 16 = jewels, 17 = orbs, 18 = scrolls) so the group means
@@ -1672,8 +1674,8 @@ types and model slots (4d2). 239 identify an item by its model slot
 - `Data/Local/<lang>/JewelOfHarmonySmelt_<lang>.bmd` lists the 85 items
   that cannot be smelted below +4. The client never loads it; `MixMgr.cpp`
   has the same list in code.
-- `BuffEffect_<lang>.bmd` links buffs to items and is loaded; the elixir
-  code lists the same link again.
+- `Data/Buffs/Buffs.json` (`BuffEffect_<lang>.bmd` before the buffs design)
+  links buffs to items; the elixir code lists the same link again.
 - The item field `skill` is empty for all scrolls and parchments;
   `GetSkillByBook` maps them in code (SK1).
 

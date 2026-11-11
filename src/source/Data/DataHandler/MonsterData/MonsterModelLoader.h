@@ -25,6 +25,12 @@ bool Open(int slot);
 // Whether the slot holds an opened model (meshes or animations).
 bool IsOpen(int slot);
 
+// A slot whose file was missing when it opened on this map: Open tries such
+// a file once a map, with one log line (Molt, Q-MN45c), not at each spawn.
+// DeleteMonsters forgets them with the map's models.
+bool IsFileMissing(int slot);
+void ForgetMissingFiles();
+
 // The sound sets that the monsters use with the model in the slot (their own,
 // or a random variant's with that model; Q-MN78, Q-MN83), by monster number,
 // each once. A model loads their sounds when it opens.

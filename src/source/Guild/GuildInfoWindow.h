@@ -21,17 +21,6 @@ class ElementDocument;
 
 namespace mu::ui::window
 {
-    struct ServerMessageInfo
-    {
-        GuildRelationshipType s_byRelationShipType;
-        GuildRequestType s_byRelationShipRequestType;
-        BYTE s_byTargetUserIndexH;
-        BYTE s_byTargetUserIndexL;
-
-        ServerMessageInfo() : s_byRelationShipType(GuildRelationshipType::Undefined), s_byRelationShipRequestType(GuildRequestType::Undefined),
-            s_byTargetUserIndexH(0), s_byTargetUserIndexL(0) {}
-    };
-
     // RmlUi owns the guild window presentation and list input; C++ validates requests.
     class CGuildInfoWindow : public CObject
     {
@@ -95,7 +84,6 @@ namespace mu::ui::window
         bool m_ListsDirty = true;
         SIZE m_ListWindowSize{};
         float m_ListTextPx = -1.f;
-        ServerMessageInfo		    m_MessageInfo;
 
         bool m_bRequestUnionList;
 
@@ -141,11 +129,9 @@ namespace mu::ui::window
         int GetUnionCount();
 
     public:
-        const ServerMessageInfo& GetServerMessage();
-
-    public:
-        void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
-            BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
+        // Asks the guild master to approve another guild master's request; the server waits for the answer.
+        void ReceiveGuildRelationShip(GuildRelationshipType relationshipType, GuildRequestType requestType,
+                                      WORD requesterKey);
 
     private:
         void SelectTab(int tab);
@@ -160,12 +146,6 @@ namespace mu::ui::window
         std::vector<GuildMemberRow> BuildMemberRows() const;
         std::vector<GuildUnionRow> BuildUnionRows() const;
     };
-
-    inline
-        const ServerMessageInfo& CGuildInfoWindow::GetServerMessage()
-    {
-        return m_MessageInfo;
-    }
 }
 
 #endif // !defined(AFX_NEWUIGUILDINFOWINDOW_H__AD267ADA_D799_4033_85B8_6B03E42EFB13__INCLUDED_)

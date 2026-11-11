@@ -2,6 +2,8 @@
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemGroundLabels.h"
+#include "Data/GameData/ItemData/ItemNameCases.h"
+#include "Data/GameData/ItemData/ItemOptionDatabase.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -128,6 +130,23 @@ public:
         return m_tooltipFile;
     }
 
+    // The option definitions, their texts and (in the editor) the option rules (Data/Items/Options), and resolves
+    // every item's links again. A link to a definition they don't have is left out (the loader reports it).
+    void SetOptions(ItemOptionDatabase options);
+
+    const ItemOptionDatabase& GetOptions() const
+    {
+        return m_options;
+    }
+
+    // The definitions the item links, as indices of GetOptions(), in the order the game takes them; none for empty
+    // slots and invalid ids. Resolved when the item or the options are stored, so the game looks no name up.
+    std::span<const ItemOptionIndex> GetOptionLinks(int itemType) const
+    {
+        return IsValidItemType(itemType) ? std::span<const ItemOptionIndex>(m_optionLinks[itemType])
+                                         : std::span<const ItemOptionIndex>();
+    }
+
     // The ground label styles and standard rules (Data/Items/Tooltips/GroundLabels.json).
     void SetGroundLabels(GroundLabelFile file)
     {
@@ -138,6 +157,21 @@ public:
     const GroundLabelFile& GetGroundLabels() const
     {
         return m_groundLabels;
+    }
+
+    // The cases each language declines item names in (Data/Items/Tooltips/NameCases.json). A version change, as the
+    // ground labels' (what checks the data checks again), and a name version change: the texts that name items look
+    // at which forms a language has.
+    void SetNameCases(ItemNameCases cases)
+    {
+        ++m_version;
+        ++m_nameVersion;
+        m_nameCases = std::move(cases);
+    }
+
+    const ItemNameCases& GetNameCases() const
+    {
+        return m_nameCases;
     }
 
     // The item's stat profile laid over the default; the default for empty
@@ -178,9 +212,10 @@ public:
 
     int GetExistingItemCount() const { return m_existingItemCount; }
 
-    // Counts the changes of the items, the stat file and the tooltip file;
-    // views taken from them (e.g. the item names the editor lists, the
-    // tooltips' compiled texts) take them again when it changes.
+    // Counts the changes of the items, the stat file, the tooltip file, the
+    // ground labels and the name cases; views taken from them (e.g. the item
+    // names the editor lists, the tooltips' compiled texts) take them again
+    // when it changes.
     int GetVersion() const
     {
         return m_version;
@@ -239,8 +274,12 @@ private:
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
     ItemStatProfiles m_statProfiles;
+    ItemOptionDatabase m_options;
+    // GetOptionLinks' lists, one per item type.
+    std::vector<std::vector<ItemOptionIndex>> m_optionLinks;
     ItemTooltipFile m_tooltipFile;
     GroundLabelFile m_groundLabels;
+    ItemNameCases m_nameCases;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.

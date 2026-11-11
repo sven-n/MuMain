@@ -5,6 +5,7 @@
 #include "ClientDataScope.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/UnknownMonsterLook.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Monsters/MonsterNames.h"
 #include "I18N/All.h"
@@ -106,6 +107,21 @@ TEST_CASE("Monster names: a refresh renames living monsters and NPCs, not names 
         CHECK(std::wstring(transformed.ID) == L"Maxi");
         CHECK(std::wstring(player.ID) == L"Maxi");
         CHECK(std::wstring(gone.ID) == L"Budge Dragon");
+        // A number without an entry has the unknown monsters' name (D64).
+        std::wstring unknownName = I18N::Game::UnknownMonsterName;
+        REQUIRE(unknownName.find(L"%d") != std::wstring::npos);
+        unknownName.replace(unknownName.find(L"%d"), 2, L"76");
+        CHECK(std::wstring(unknown.ID) == unknownName);
+    }
+    SUBCASE("a number without an entry, without the unknown monsters' look")
+    {
+        const Data::Monsters::UnknownMonsterLook kept = g_MonsterDatabase.GetUnknownLook();
+        Data::Monsters::UnknownMonsterLook off;
+        off.forNoEntry = false;
+        g_MonsterDatabase.SetUnknownLook(off);
+        GameLogic::Monsters::Names::RefreshShownNames();
+        g_MonsterDatabase.SetUnknownLook(kept);
+
         CHECK(std::wstring(unknown.ID).empty());
     }
 }

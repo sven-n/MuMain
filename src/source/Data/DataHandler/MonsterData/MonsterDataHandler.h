@@ -5,10 +5,13 @@
 #ifdef _EDITOR
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
+#include "Data/GameData/MonsterData/MonsterGroup.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
+#include <array>
 #include <functional>
+#include <map>
 #include <optional>
 #include <span>
 #include <vector>
@@ -46,6 +49,27 @@ struct MonsterSoundSetSnapshot
 
     bool operator==(const MonsterSoundSetSnapshot&) const = default;
 };
+
+// A monster of the monster list with two or more numbers as the monster editor
+// keeps it (D61): the values its numbers share (MakeSharedValues) and its
+// numbers, sorted. The entries are the table's.
+struct MonsterGroupLayout
+{
+    MonsterDefinition shared;
+    std::vector<int> numbers;
+
+    bool operator==(const MonsterGroupLayout&) const = default;
+};
+
+// A monster as the monster editor's undo keeps it, by its id
+// (MonsterDataHandler::FindGroupOf): its layout, or nullopt for none.
+struct MonsterGroupSnapshot
+{
+    int id = 0;
+    std::optional<MonsterGroupLayout> group;
+
+    bool operator==(const MonsterGroupSnapshot&) const = default;
+};
 #endif
 
 // Loads the monster list (Data/Monsters/Monsters.json) into the monster table
@@ -56,6 +80,14 @@ public:
     // Told when the shown names changed: the number of the monster, or -1 for
     // all. The game sets it to write the names into the living monsters.
     using NamesChangedCallback = void (*)(int number);
+    // Told when entries changed (the editor's changes, a load or a revert,
+    // not a language switch): the number, or AllNumbers. The game sets it to
+    // give the living monsters what they take at once (D55).
+    using MonstersChangedCallback = void (*)(int number);
+    void SetMonstersChangedCallback(MonstersChangedCallback callback)
+    {
+        m_monstersChanged = callback;
+    }
     static constexpr int AllNumbers = -1;
 
     static MonsterDataHandler& GetInstance();
@@ -98,6 +130,33 @@ public:
     // the snapshot's number), or no entry for nullopt. Numbers outside 0-1023
     // are skipped.
     void RestoreMonsters(std::span<const MonsterSnapshot> snapshots);
+
+    // The monsters with several numbers (D61) as the monster editor changes
+    // them. Each has an id for the session; Load and the reverts give new
+    // ones. A number with an entry that no monster lists is a monster of its
+    // own without an id: one with a single number in the file, one left alone
+    // by the editor's changes (MonsterEdits stores no monster with fewer than
+    // two numbers), each number of a table built without the handler (the
+    // tools' tests).
+
+    // The id of the monster that lists the number; nullopt when none does.
+    std::optional<int> FindGroupOf(int number) const;
+    // The monster of the id as it is now; nullopt when there is none.
+    std::optional<MonsterGroupLayout> ReadGroup(int id) const;
+    // The same without a copy, for the tools' reads each frame; valid until
+    // the next RestoreGroups, Load or revert.
+    const MonsterGroupLayout* FindGroup(int id) const;
+    // Makes each id what its snapshot says, exactly: the monster, or none for
+    // nullopt. The entries of its numbers are not changed.
+    void RestoreGroups(std::span<const MonsterGroupSnapshot> snapshots);
+    // An id no monster has had.
+    int MakeGroupId();
+    // Counts the changes of the monsters (RestoreGroups, Load and the
+    // reverts), so a list of them can tell it is out of date.
+    int GetGroupsVersion() const
+    {
+        return m_groupsVersion;
+    }
 
     // The checks of Load and Save on the table as it is: the names (the
     // separator, language codes, an empty English name, the length the game
@@ -164,6 +223,15 @@ public:
     // read back; the problems are added to `issues`.
     bool SaveSoundSets(const std::function<bool(std::vector<MonsterSoundSet>& sets)>& change,
                        std::vector<Items::ItemDataIssue>& issues);
+    // The monster list file as it is, its monsters changed by `change`, as the
+    // text to write together with other files: the item tools' Save writes
+    // the item references a move changed with the items (D60), and the
+    // monster tools' unsaved changes stay theirs. nullopt when the file
+    // cannot be read, `change` returns false (nothing to write) or the
+    // monsters would not read back; the problems are added to `issues`.
+    std::optional<std::string>
+    MakeMonstersFileWith(const std::function<bool(std::vector<MonsterGroup>& groups)>& change,
+                         std::vector<Items::ItemDataIssue>& issues) const;
     // The three files read again together: no table changes when one file
     // has fatal problems.
     bool RevertAll(std::vector<Items::ItemDataIssue>& issues);
@@ -203,12 +271,23 @@ private:
     void NotifyNamesChanged(int number) const;
     // The tables become what the files read: the monsters with their names
     // in the language shown, the models with the changed slots to reopen.
-    void UseMonsters(std::span<const MonsterDefinition> monsters);
+    void UseMonsters(std::span<const MonsterGroup> monsters);
+    // The monsters as the monster list file writes them: each monster with
+    // the entries of its numbers in the table as it is now. A number no
+    // monster lists is a monster of its own; one without an entry is gone.
+    std::vector<MonsterGroup> CollectGroups() const;
+    // The monsters become those read, with new ids.
+    void SetGroups(std::span<const MonsterGroup> monsters);
+    // Whether m_groups belongs to the table as it was last built: it does
+    // not after a Build without the handler.
+    bool HasCurrentGroups() const;
+    void IndexGroups();
     void UseModels(std::span<const MonsterModelDefinition> models);
     void UseSoundSets(std::span<const MonsterSoundSet> sets);
 #endif
 
     NamesChangedCallback m_namesChanged = nullptr;
+    MonstersChangedCallback m_monstersChanged = nullptr;
     bool m_localeObserverRegistered = false;
 #ifdef _EDITOR
     ModelsReopenedCallback m_modelsReopened = nullptr;
@@ -218,6 +297,13 @@ private:
     // sounds again.
     bool m_soundsToLoad = false;
     int m_filesVersion = 0;
+    // The monsters by id, and the id of each number's monster (-1: none).
+    std::map<int, MonsterGroupLayout> m_groups;
+    std::array<int, MonsterNumberCount> m_groupOfNumber{};
+    int m_nextGroupId = 0;
+    // MonsterDatabase::GetBuildCount when m_groups was set.
+    int m_groupsBuild = -1;
+    int m_groupsVersion = 0;
 #endif
 };
 } // namespace Data::Monsters

@@ -3,9 +3,9 @@
 #include "doctest.h"
 
 #include "ClientDataScope.h"
+#include "LogCapture.h"
 #include "TemporaryMonsterFolder.h"
 
-#include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/TextFile.h"
@@ -14,14 +14,9 @@
 #include "Data/GameData/MonsterData/MonsterKind.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 
-#include <spdlog/sinks/ostream_sink.h>
-
 #include <algorithm>
 #include <filesystem>
-#include <memory>
-#include <sstream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 using Data::Items::HasFatal;
@@ -49,45 +44,6 @@ const MonsterDefinition* FindMonster(const std::vector<MonsterDefinition>& monst
                                     [&](const MonsterDefinition& monster) { return monster.number == number; });
     return found == monsters.end() ? nullptr : &*found;
 }
-
-// What the "data" log gets while it lives.
-class DataLogCapture
-{
-public:
-    DataLogCapture() : m_logger(mu::log::Get("data")), m_sink(std::make_shared<spdlog::sinks::ostream_sink_st>(m_text))
-    {
-        m_logger->sinks().push_back(m_sink);
-    }
-
-    ~DataLogCapture()
-    {
-        std::vector<spdlog::sink_ptr>& sinks = m_logger->sinks();
-        sinks.erase(std::remove(sinks.begin(), sinks.end(), m_sink), sinks.end());
-    }
-
-    DataLogCapture(const DataLogCapture&) = delete;
-    DataLogCapture& operator=(const DataLogCapture&) = delete;
-
-    // The logged line that holds `part`; empty when none does.
-    std::string LineWith(std::string_view part) const
-    {
-        std::istringstream lines(m_text.str());
-        std::string line;
-        while (std::getline(lines, line))
-        {
-            if (line.find(part) != std::string::npos)
-            {
-                return line;
-            }
-        }
-        return {};
-    }
-
-private:
-    std::ostringstream m_text;
-    std::shared_ptr<spdlog::logger> m_logger;
-    spdlog::sink_ptr m_sink;
-};
 } // namespace
 
 TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty name [data][monsters]")
@@ -99,6 +55,7 @@ TEST_CASE("Shipped monster list: loads, with only the warning about 252's empty 
     CHECK(loaded.issues[0].severity == ItemDataIssueSeverity::Warning);
     CHECK(loaded.issues[0].number == 252);
     CHECK(loaded.monsters.size() == 547);
+    CHECK(loaded.groups.size() == 423);
 }
 
 TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]")
@@ -108,7 +65,7 @@ TEST_CASE("Shipped monster list: written in the writer's format [data][monsters]
     const auto text = Data::ReadTextFile(file);
 
     REQUIRE(text.has_value());
-    CHECK(Data::Monsters::WriteMonstersJson(loaded.monsters) == *text);
+    CHECK(Data::Monsters::WriteMonstersJson(loaded.groups, loaded.unknown) == *text);
 }
 
 TEST_CASE("Shipped monster list: the names the old name file test asked for [data][monsters]")
@@ -152,7 +109,10 @@ TEST_CASE("Shipped monster list: names are plain text, the Kalima gates too [dat
     CHECK(FindMonster(loaded.monsters, 158)->names.GetNeutral() == "Gate to Kalima 7");
 }
 
-TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names and their old kind [data][monsters]")
+// The renewed Illusion Temple's statues (P2, Q-MN42b): the Cursed Statue 658
+// is attacked, the ten Stone Statues are NPCs.
+TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names, 658 the monster kind "
+          "[data][monsters]")
 {
     const Data::Monsters::MonsterDataLoadResult loaded =
         Data::Monsters::LoadMonstersFile(ClientData / "Monsters" / "Monsters.json");
@@ -165,7 +125,8 @@ TEST_CASE("Shipped monster list: OpenMU's statues 658-668 have its English names
         CAPTURE(number);
         const MonsterDefinition* monster = FindMonster(loaded.monsters, number);
         REQUIRE(monster != nullptr);
-        CHECK(Data::Monsters::ToObjectKind(monster->kind) == Data::Monsters::GetLegacyObjectKind(number));
+        CHECK(monster->kind ==
+              (number == 658 ? Data::Monsters::MonsterKind::Monster : Data::Monsters::MonsterKind::Npc));
     }
 }
 
@@ -217,7 +178,7 @@ TEST_CASE("Monster data: the game's load names the file in the problems it logs 
     folder.WriteMonsters(R"({ "formatVersion": 1, "monsters": [
         { "number": 2, "name": {"en": "Budge Dragon", "zz": "Dragon"}, "kind": "monster" } ] })");
     ClientDataScope scope(folder.Path());
-    DataLogCapture log;
+    LogCapture log("data");
     std::string error;
 
     REQUIRE(g_MonsterDataHandler.Load(error));
@@ -238,12 +199,12 @@ TEST_CASE("Monster data: saving writes what loads back, and refuses errors [data
     std::vector<MonsterDefinition> monsters = {monster};
     std::vector<ItemDataIssue> issues;
 
-    CHECK(Data::Monsters::SaveMonstersFile(file, monsters, issues));
+    CHECK(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), {}, issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters == monsters);
 
     monsters[0].names.Set("en", "Budge||Dragon");
     issues.clear();
-    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, monsters, issues));
+    CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, Data::Monsters::MakeOneNumberGroups(monsters), {}, issues));
     CHECK(HasFatal(issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters[0].names.GetNeutral() == "Budge Dragon");
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));

@@ -345,6 +345,7 @@ void NewMoveCharacterScene()
     MoveCharacterSceneState();
     PlaceCharactersForDraw();
     CullWorld();
+    Scenes::Lighting::PinWorldDynamicLights();
 }
 
 /**

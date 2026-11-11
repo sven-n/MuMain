@@ -654,6 +654,8 @@ bool CInventoryActionController::TryStackItems(CInventoryCtrl* targetControl, IT
     return false;
 }
 
+// Returns true for every item this function knows, also when it refuses the item or waits for a
+// dialog. Only false sends the right-click on to equipping and then dropping the item.
 bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const
 {
     if (pItem == nullptr)
@@ -710,7 +712,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         }
 
         CreateOkMessageBox(I18N::Game::YouCannotUseThisItemWhileThePotionEffectsRemainActive, RGBA(255, 30, 0, 255));
-        return false;
+        return true;
     }
 
     if ((pItem->Type >= ITEM_RESET_FRUIT_STRENGTH && pItem->Type <= ITEM_RESET_FRUIT_ENERGY) ||
@@ -764,7 +766,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
                 SendRequestUse(srcIndex, 0);
             };
             g_pGenericConfirmDialog->Show(std::move(cfg));
-            return false;
+            return true;
         }
 
         SendRequestUse(iIndex, 0);
@@ -790,7 +792,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         if (Hero->SafeZone == false)
         {
             CreateOkMessageBox(I18N::Game::YouCanOnlyUseThisInASafeZone);
-            return false;
+            return true;
         }
 
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::ChaosCastle, pItem->Level);
@@ -802,14 +804,14 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::DevilSquare, byPossibleLevel);
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_BLOOD_CASTLE_TICKET)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::BloodCastle, byPossibleLevel);
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_KALIMA_TICKET)
@@ -817,7 +819,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         if (Hero->SafeZone || gMapManager.InHellas())
         {
             g_pSystemLogBox->AddText(I18N::Game::CanTBeUsedInTheSafeZone, TYPE_ERROR_MESSAGE);
-            return false;
+            return true;
         }
 
         SendRequestUse(iIndex, 0);
@@ -836,7 +838,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         if (Hero->SafeZone == false)
         {
             CreateOkMessageBox(I18N::Game::YouCanOnlyUseThisInASafeZone);
-            return false;
+            return true;
         }
 
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::ChaosCastle, pItem->Level);
@@ -910,11 +912,9 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             {
                 SendRequestUse(iIndex, 0);
             }
-
-            return true;
         }
 
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_FRUITS)
@@ -1022,10 +1022,9 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         if (bUse)
         {
             SendRequestUse(iIndex, 0);
-            return true;
         }
 
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_TALISMAN_OF_RESURRECTION)
@@ -1051,7 +1050,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             }
         }
 
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_TALISMAN_OF_MOBILITY)
@@ -1098,7 +1097,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             CreateOkMessageBox(I18N::Game::YouCannotUseTheItemAtCertainApplicableLocations);
         }
 
-        return false;
+        return true;
     }
 
     if (pItem->Type == ITEM_INVITATION_TO_SANTA_VILLAGE)
@@ -1116,6 +1115,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             }
         };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        return true;
     }
 
     return false;

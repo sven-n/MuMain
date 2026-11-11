@@ -112,6 +112,9 @@ void CreateMagicShiny(CHARACTER* c, int Hand = 0);
 
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1,
                           WORD SkillSerialNum = 0);
+// The hero's Twister or Evil Spirit: the monsters it touches spin for a moment. Visual only, the server calculates
+// the hits.
+void SpinMonstersInTornado(const vec3_t position, float range);
 
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey);
 void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex = 0, WORD Skill = 1, WORD SKKey = 0);
@@ -135,7 +138,8 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType = -1);
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur = false);
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
 
-void MoveJoint(JOINT* o, int iIndex);
+// The most moves a spear flare (Impale, Death Stab) makes in one frame of MoveJoints.
+constexpr int MAX_SPEAR_FLARE_MOVES = 256;
 void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
 // Hands the state changes, trail quads and ground mark a live joint draws with to `out`.

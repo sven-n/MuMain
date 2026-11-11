@@ -47,6 +47,10 @@ private:
     bool m_built = false;
 };
 
+// Whether the monster passes the filter: its search, missing language and
+// kind.
+bool MatchesMonsterFilter(const Data::Monsters::MonsterDefinition& monster, const MonsterListModel::Filter& filter);
+
 // Whether the monster matches the search text (see MonsterListModel::Filter):
 // the whole text is its number, or a name of it contains the text.
 bool MatchesMonsterSearch(const Data::Monsters::MonsterDefinition& monster, std::string_view search);

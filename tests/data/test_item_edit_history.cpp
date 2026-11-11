@@ -83,7 +83,18 @@ public:
                 { m_styles.assign(styles.begin(), styles.end()); },
                 [this](std::string_view root) { return m_folders[std::string(root)]; },
                 [this](std::string_view root, std::span<const Data::Colors::ColorFolder> folders)
-                { m_folders[std::string(root)].assign(folders.begin(), folders.end()); }};
+                { m_folders[std::string(root)].assign(folders.begin(), folders.end()); },
+                // No render style file.
+                {},
+                {},
+                // No monster table.
+                {},
+                {},
+                {},
+                {},
+                {},
+                [this] { return m_nameCases; },
+                [this](const Data::Items::ItemNameCases& cases) { m_nameCases = cases; }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
@@ -92,6 +103,7 @@ public:
     int m_statFileRestores = 0;
     std::vector<Data::Items::GroundLabelStyle> m_styles;
     std::map<std::string, std::vector<Data::Colors::ColorFolder>> m_folders;
+    Data::Items::ItemNameCases m_nameCases;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -277,6 +289,28 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
 
         // Styles changed past the history are not overwritten.
         items.m_styles[0].color = {0, 0, 0};
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("the cases the languages decline item names in")
+    {
+        Data::Items::ItemNameCases before;
+        before.SetCases("pl", {"gen", "acc"});
+        Data::Items::ItemNameCases after = before;
+        after.SetCases("de", {"gen"});
+        items.m_nameCases = after;
+        ItemEditStep step{ItemEditStep::Kind::NameCases};
+        step.casesBefore = before;
+        step.casesAfter = after;
+        history.Record({"Name cases", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_nameCases == before);
+        REQUIRE(history.Redo());
+        CHECK(items.m_nameCases == after);
+
+        // Cases changed past the history are not overwritten.
+        items.m_nameCases.SetCases("de", {});
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
     }

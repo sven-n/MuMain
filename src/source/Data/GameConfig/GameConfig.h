@@ -140,6 +140,14 @@ public:
     void SetEnhancedLighting(bool enabled) { m_enhancedLighting = enabled; }
     bool GetDynamicLights() const { return m_dynamicLights; }
     void SetDynamicLights(bool enabled) { m_dynamicLights = enabled; }
+    bool GetSunlight() const
+    {
+        return m_sunlight;
+    }
+    void SetSunlight(bool enabled)
+    {
+        m_sunlight = enabled;
+    }
     bool GetLightMood() const { return m_lightMood; }
     void SetLightMood(bool enabled) { m_lightMood = enabled; }
     bool GetPostProcessing() const { return m_postProcessing; }
@@ -174,6 +182,13 @@ public:
         return m_texturePack;
     }
     void SetTexturePack(const std::wstring& pack);
+
+    // Checked means original S6 bodies; unchecked means updated bodies. Read at startup.
+    bool GetUseS6PlayerModels() const
+    {
+        return m_useS6PlayerModels;
+    }
+    void SetUseS6PlayerModels(bool useOriginal);
 
     // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
@@ -230,6 +245,7 @@ private:
     int m_antialiasing;
     bool m_enhancedLighting;
     bool m_dynamicLights;
+    bool m_sunlight;
     bool m_lightMood;
     bool m_postProcessing;
     std::wstring m_renderBackend;
@@ -241,6 +257,7 @@ private:
     bool m_disableBodyShadows;
     int m_fpsCap;
     std::wstring m_texturePack;
+    bool m_useS6PlayerModels;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

@@ -7,6 +7,7 @@
 #include "ItemTooltipConditionsJson.h"
 #include "ItemTooltipLayouts.h"
 #include "ItemType.h"
+#include "Data/Translation/ItemReference.h"
 
 #include <algorithm>
 #include <array>
@@ -28,6 +29,7 @@ using namespace Json::Keys;
 constexpr const char* Items = "items";
 constexpr const char* Name = "name";
 constexpr const char* Tags = "tags";
+constexpr const char* Options = "options";
 constexpr const char* Description = "description";
 constexpr const char* Text = "text";
 constexpr const char* Color = "color";
@@ -36,6 +38,7 @@ constexpr const char* When = "when";
 constexpr const char* Values = "values";
 constexpr const char* LevelValues = "levelValues";
 constexpr const char* NameLines = "nameLines";
+constexpr const char* NameForms = "nameForms";
 constexpr const char* GroundLabels = "groundLabels";
 constexpr const char* TooltipLayout = "tooltipLayout";
 constexpr const char* TooltipLayoutChanges = "tooltipLayoutChanges";
@@ -244,13 +247,57 @@ OrderedJson WriteDescription(const std::vector<ItemDescriptionLine>& description
     return json;
 }
 
+// {"pl": {"gen": "<genitive>", "acc": "<accusative>"}}: the languages sorted by code, each one's forms in the order of
+// the case keys.
+OrderedJson WriteNameForms(const ItemNameForms& forms)
+{
+    OrderedJson json = OrderedJson::object();
+    for (const auto& [locale, caseForms] : forms.GetAll())
+    {
+        OrderedJson entry = OrderedJson::object();
+        for (const std::string_view caseKey : Data::Translation::ItemCaseKeys)
+        {
+            if (const auto form = caseForms.find(caseKey); form != caseForms.end())
+            {
+                entry[std::string(caseKey)] = form->second;
+            }
+        }
+        json[locale] = std::move(entry);
+    }
+    return json;
+}
+
+// A name line's fields with its forms right after its text.
+OrderedJson WriteNameLine(const ItemNameLine& line)
+{
+    OrderedJson entry = WriteLine(line, line.hasText, line.hasColor);
+    if (line.nameForms.IsEmpty())
+    {
+        return entry;
+    }
+    OrderedJson ordered = OrderedJson::object();
+    if (const auto text = entry.find(Keys::Text); text != entry.end())
+    {
+        ordered[Keys::Text] = *text;
+    }
+    ordered[Keys::NameForms] = WriteNameForms(line.nameForms);
+    for (const auto& [key, value] : entry.items())
+    {
+        if (key != Keys::Text)
+        {
+            ordered[key] = value;
+        }
+    }
+    return ordered;
+}
+
 // The name lines: a description line's fields, the text and the color only when the line has them.
 OrderedJson WriteNameLines(const std::vector<ItemNameLine>& nameLines)
 {
     OrderedJson json = OrderedJson::array();
     for (const ItemNameLine& line : nameLines)
     {
-        json.push_back(WriteLine(line, line.hasText, line.hasColor));
+        json.push_back(WriteNameLine(line));
     }
     return json;
 }
@@ -320,9 +367,17 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
     {
         item[Keys::Name] = Json::WriteLocalizedString(definition.names);
     }
+    if (!definition.nameForms.IsEmpty())
+    {
+        item[Keys::NameForms] = WriteNameForms(definition.nameForms);
+    }
     if (!definition.tags.IsEmpty())
     {
         item[Keys::Tags] = WriteTags(definition.tags);
+    }
+    if (!definition.options.empty())
+    {
+        item[Keys::Options] = definition.options;
     }
     if (!definition.description.empty())
     {
@@ -407,7 +462,11 @@ private:
     void AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message);
     bool ReadIdentity(const OrderedJson& json, ItemDefinition& definition);
     bool ReadNames(const OrderedJson& json, LocalizedString& names);
+    void ReadNameForms(const OrderedJson& json, const std::string& field, ItemNameForms& forms);
+    bool ReadCaseForms(const OrderedJson& json, const std::string& locale, const std::string& field,
+                       ItemNameForms& forms);
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
+    void ReadOptionLinks(const OrderedJson& json, std::vector<std::string>& options);
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines);
     void ReadGroundLabels(const OrderedJson& json, std::vector<ItemGroundLabel>& groundLabels);
@@ -548,6 +607,60 @@ bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
                                      { AddIssue(ItemDataIssueSeverity::Fatal, field, message); });
 }
 
+// {"pl": {"gen": "<genitive>", "acc": "<accusative>"}}: by language code, each language's forms by case key. Whether a
+// language declines names and has a name to decline is checked with the item data (ValidateNameForms).
+void ItemReader::ReadNameForms(const OrderedJson& json, const std::string& field, ItemNameForms& forms)
+{
+    if (!json.is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, field,
+                 R"(must be an object of languages, each with its forms by case: {"pl": {"gen": "..."}})");
+        return;
+    }
+    for (const auto& [locale, caseForms] : json.items())
+    {
+        const std::string localeField = field + "." + locale;
+        if (!LocalizedString::IsValidLocaleCode(locale))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, localeField,
+                     "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
+            continue;
+        }
+        if (!ReadCaseForms(caseForms, locale, localeField, forms))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, localeField,
+                     R"(must be an object of forms by case: {"gen": "..."})");
+        }
+    }
+}
+
+// One language's forms; false when it is not an object.
+bool ItemReader::ReadCaseForms(const OrderedJson& json, const std::string& locale, const std::string& field,
+                               ItemNameForms& forms)
+{
+    if (!json.is_object())
+    {
+        return false;
+    }
+    for (const auto& [caseKey, form] : json.items())
+    {
+        const std::string caseField = field + "." + caseKey;
+        if (!Data::Translation::IsItemCaseKey(caseKey))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, caseField, "is not a case: gen, dat, acc, ins or loc");
+        }
+        else if (!form.is_string() || form.get<std::string>().empty())
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, caseField, "must be the name's form, a text");
+        }
+        else
+        {
+            forms.Set(locale, caseKey, form.get<std::string>());
+        }
+    }
+    return true;
+}
+
 // The presets and line ids of the shipped Tooltip.json that replace the tags (a test checks that the file has them).
 constexpr std::string_view LevelRequirementLineIds[] = {"requiredLevel", "lackingLevel"};
 constexpr std::string_view BlankAfterOptionsLineIds[] = {"blankAfterOptions"};
@@ -596,6 +709,35 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
             continue;
         }
         tags.Set(tag);
+    }
+}
+
+// The option definitions the item links, by name; whether they exist is checked with them (ValidateItemOptionLinks).
+void ItemReader::ReadOptionLinks(const OrderedJson& json, std::vector<std::string>& options)
+{
+    const auto list = json.find(Keys::Options);
+    if (list == json.end())
+    {
+        return;
+    }
+    const bool names =
+        list->is_array() && std::all_of(list->begin(), list->end(), [](const OrderedJson& entry)
+                                        { return entry.is_string() && Json::IsName(entry.get<std::string>()); });
+    if (!names)
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, Keys::Options, "must be a list of option definition names");
+        return;
+    }
+    for (const OrderedJson& entry : *list)
+    {
+        std::string name = entry.get<std::string>();
+        if (std::find(options.begin(), options.end(), name) != options.end())
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, Keys::Options,
+                     "\"" + name + "\" is in the list more than once; it is read once");
+            continue;
+        }
+        options.push_back(std::move(name));
     }
 }
 
@@ -697,7 +839,17 @@ void ItemReader::ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine
         ItemNameLine line;
         line.hasText = entry.contains(Keys::Text);
         line.hasColor = entry.contains(Keys::Color);
-        if (ReadLine(entry, field, MaxNameLineLength, line))
+        // The line's fields without its forms, which ReadLine doesn't know; copied only for a line that has them.
+        const OrderedJson* lineFields = &entry;
+        OrderedJson withoutForms;
+        if (const auto forms = entry.find(Keys::NameForms); forms != entry.end())
+        {
+            ReadNameForms(*forms, field + "." + Keys::NameForms, line.nameForms);
+            withoutForms = entry;
+            withoutForms.erase(Keys::NameForms);
+            lineFields = &withoutForms;
+        }
+        if (ReadLine(*lineFields, field, MaxNameLineLength, line))
         {
             nameLines.push_back(std::move(line));
         }
@@ -1195,19 +1347,11 @@ void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition
 
 std::set<std::string, std::less<>> GetKnownItemKeys()
 {
-    std::set<std::string, std::less<>> keys{Keys::Number,
-                                            Keys::Name,
-                                            Keys::Tags,
-                                            Keys::Description,
-                                            Keys::LevelValues,
-                                            Keys::NameLines,
-                                            Keys::GroundLabels,
-                                            Keys::Requirements,
-                                            Keys::RequirementsByLevel,
-                                            Keys::ClassRequirements,
-                                            Keys::Resistances,
-                                            Keys::TooltipLayout,
-                                            Keys::TooltipLayoutChanges};
+    std::set<std::string, std::less<>> keys{
+        Keys::Number,       Keys::Name,          Keys::NameForms,           Keys::Tags,
+        Keys::Options,      Keys::Description,   Keys::LevelValues,         Keys::NameLines,
+        Keys::GroundLabels, Keys::Requirements,  Keys::RequirementsByLevel, Keys::ClassRequirements,
+        Keys::Resistances,  Keys::TooltipLayout, Keys::TooltipLayoutChanges};
     ItemDefinition unused;
     VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
     return keys;
@@ -1225,7 +1369,12 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
         return false;
     }
 
+    if (const auto forms = json.find(Keys::NameForms); forms != json.end())
+    {
+        ReadNameForms(*forms, Keys::NameForms, definition.nameForms);
+    }
     ReadTags(json, definition.tags);
+    ReadOptionLinks(json, definition.options);
     ReadDescription(json, definition.description);
     ReadLevelValues(json, definition.levelValues);
     ReadNameLines(json, definition.nameLines);
@@ -1365,6 +1514,7 @@ bool ReadItemJson(const OrderedJson& json, const std::string& source, int group,
 std::string LayOutItemJsonText(const std::string& text)
 {
     std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::Options);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::GroundLabels);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Hide);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);

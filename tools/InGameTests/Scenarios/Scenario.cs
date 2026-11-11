@@ -17,6 +17,9 @@ internal enum ScenarioCategory
 
     /// <summary>The quests: class changes and their rewards.</summary>
     Quests,
+
+    /// <summary>Fixed scenes pictured in each look, to compare the rendering of two builds.</summary>
+    LookReferences,
 }
 
 /// <summary>The names the window and the report show for the categories.</summary>
@@ -28,6 +31,7 @@ internal static class ScenarioCategories
         ScenarioCategory.NpcInteractions => "NPC Interactions",
         ScenarioCategory.GameBehaviour => "Game Behaviour",
         ScenarioCategory.Quests => "Quests",
+        ScenarioCategory.LookReferences => "Look References",
         _ => category.ToString(),
     };
 }
@@ -56,6 +60,12 @@ internal abstract class Scenario
     /// notes a passing run that took a different number.
     /// </summary>
     public abstract int StepCount { get; }
+
+    /// <summary>
+    /// The config.ini the scenario's clients start with instead of the one next to the client, so
+    /// what they show does not depend on the settings of whoever runs it; null keeps that one.
+    /// </summary>
+    public virtual string? ClientConfig => null;
 
     public abstract Task RunAsync(ScenarioContext context);
 }
