@@ -163,6 +163,12 @@ add_test(
         -P "${MU_TESTS}/render/test_world_clear_color.cmake"
 )
 add_test(
+    NAME scene_setup_before_frame_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_SCENE_MANAGER_SOURCE=${MU_SOURCE}/Scenes/SceneManager.cpp"
+        -P "${MU_TESTS}/render/test_scene_setup_before_frame.cmake"
+)
+add_test(
     NAME render_diagnostics_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SCENE_MANAGER_SOURCE=${MU_SOURCE}/Scenes/SceneManager.cpp"

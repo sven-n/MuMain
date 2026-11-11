@@ -1262,6 +1262,26 @@ void MainScene(HDC hDC)
     }
 }
 
+void PrepareSceneBeforeFrame()
+{
+    PumpWebzenScene();
+    // Deleting textures inside a frame drops that frame's game draws, so the title goes before it begins.
+    if (SceneFlag != WEBZEN_SCENE)
+    {
+        EndWebzenScene();
+    }
+    if (SceneFlag == LOG_IN_SCENE && !InitLogIn)
+    {
+        InitLogIn = true;
+        CreateLogInScene();
+    }
+    else if (SceneFlag == CHARACTER_SCENE && !InitCharacterScene && CurrentProtocolState >= RECEIVE_CHARACTERS_LIST)
+    {
+        InitCharacterScene = true;
+        CreateCharacterScene();
+    }
+}
+
 void RenderScene(HDC hDC)
 {
     CalcFPS();
@@ -1278,8 +1298,6 @@ void RenderScene(HDC hDC)
     try
     {
         g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
-        if (SceneFlag != WEBZEN_SCENE)
-            EndWebzenScene();
         switch (SceneFlag)
         {
         case WEBZEN_SCENE:

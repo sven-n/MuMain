@@ -114,6 +114,9 @@ extern FrameTimingState g_frameTiming;
 //=============================================================================
 
 void UpdateSceneState();
+// Loads and scene setup for the coming frame, before it begins: a load inside a frame loses what the frame drew
+// before it.
+void PrepareSceneBeforeFrame();
 void RenderScene(HDC Hdc);
 void MainScene(HDC hDC);
 

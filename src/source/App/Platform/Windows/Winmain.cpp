@@ -1640,7 +1640,7 @@ bool IterateClient()
             // it moved (options open or closed).
             Render::Look::ApplyPendingTuning();
             // Load work runs here, between frames: a load inside a frame loses what the frame drew before it.
-            PumpWebzenScene();
+            PrepareSceneBeforeFrame();
             // The first frame has something to draw now.
             if ((SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_HIDDEN) != 0)
                 SDL_ShowWindow(g_sdlWindow);

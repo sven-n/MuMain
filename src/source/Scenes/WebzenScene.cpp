@@ -128,7 +128,7 @@ struct StartupLoad
 };
 
 std::optional<StartupLoad> s_load;
-// The title screen is up; it goes once login has taken over and the frame that last drew it was submitted.
+// The title screen is up; it goes before the first frame that no longer draws it.
 bool s_titleShown = false;
 } // namespace
 
@@ -182,7 +182,7 @@ void PumpWebzenScene()
         "Startup data loaded {} ms after start; the longest frame of loading spent {} ms on it", SDL_GetTicks(),
         longestPassMs);
     g_ErrorReport.Write(L"> Loading ok.\r\n");
-    // Login draws from this frame on, with no empty frame between; EndWebzenScene releases the title as it does.
+    // Login draws from this frame on, with no empty frame between; the title is released before it begins.
     SceneFlag = LOG_IN_SCENE;
 }
 
