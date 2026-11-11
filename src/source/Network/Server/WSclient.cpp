@@ -7908,8 +7908,10 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
     const wchar_t* text = UI::Guild::RelationshipResultText(*change);
     if (text == nullptr)
     {
-        assert(!"Packet (0xE6)");
-        text = L"Invalid GuildRelationShipResult";
+        mu::log::Get("network")->warn("NET: E6 guild relationship result with unknown codes ignored (type {}, request "
+                                      "{}, result 0x{:02X})",
+                                      change->relationshipType, change->requestType, change->result);
+        return;
     }
     UI::Chat::PostSystem(text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
