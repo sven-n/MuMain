@@ -57,6 +57,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME trade_worse_offers_tests
+    SOURCES
+        test_trade_worse_offers.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/TradeWorseOffers.cpp
+)
+
+mu_add_test(
     NAME jewel_unmix_selection_tests
     SOURCES
         test_jewel_unmix_selection.cpp

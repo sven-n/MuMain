@@ -4,6 +4,7 @@
 
 #include "UI/Inventory/Trade.h"
 #include "UI/Inventory/HeldItemPlacement.h"
+#include "UI/Inventory/TradeWorseOffers.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -26,6 +27,10 @@
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <algorithm>
+#include <array>
+#include <span>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -42,6 +47,26 @@ const wchar_t* const* const kTradeAlertLines[] = {
     &I18N::Game::PleaseCheckWhetherTheItemIs,
     &I18N::Game::TheSameItemThatYouWantToTrade,
 };
+
+// CompareItem's results for (remembered, offered) of one type.
+constexpr int RememberedIsBetter = 1;
+constexpr int RememberedIsSame = 0;
+
+// Holds an offered item against the copy of its type the trade window remembers. The window remembers at most one
+// copy per type (CTrade::BackUpYourInven).
+UI::Trade::OfferedItemCheck CheckAgainstRemembered(std::span<const ITEM> remembered, const ITEM& offered)
+{
+    UI::Trade::OfferedItemCheck check{.itemType = offered.Type};
+    const auto copy =
+        std::ranges::find_if(remembered, [&offered](const ITEM& item) { return item.Type == offered.Type; });
+    if (copy == remembered.end())
+        return check;
+
+    const int compareValue = ::CompareItem(*copy, offered);
+    check.worseThanRemembered = (compareValue == RememberedIsBetter);
+    check.sameAsRemembered = (compareValue == RememberedIsSame);
+    return check;
+}
 } // namespace
 
 CTrade::CTrade()
@@ -813,53 +838,19 @@ void CTrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const 
 
 void CTrade::AlertYourTradeInven()
 {
-    int nCount = 0;
-    int nCompareItemType[10];
+    const size_t nYourItems = std::min(m_pYourInvenCtrl->GetNumberOfItems(), static_cast<size_t>(MAX_TRADE_INVEN));
 
-    m_bTradeAlert = false;
+    std::array<UI::Trade::OfferedItemCheck, MAX_TRADE_INVEN> offers{};
+    for (size_t i = 0; i < nYourItems; ++i)
+        offers[i] = CheckAgainstRemembered(m_aYourInvenBackUp, *m_pYourInvenCtrl->GetItem(static_cast<int>(i)));
 
-    int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-    ITEM* pYourItemObj;
-    int nCompareValue;
+    std::array<bool, MAX_TRADE_INVEN> marked{};
+    m_bTradeAlert =
+        UI::Trade::MarkWorseOffers(std::span(offers.data(), nYourItems), std::span(marked.data(), nYourItems));
 
-    for (int i = 0; i < nYourItems; ++i)
-    {
-        pYourItemObj = m_pYourInvenCtrl->GetItem(i);
-        for (int j = 0; j < MAX_TRADE_INVEN; ++j)
-        {
-            if (m_aYourInvenBackUp[j].Type == pYourItemObj->Type)
-            {
-                nCompareValue = ::CompareItem(m_aYourInvenBackUp[j], *pYourItemObj);
-                if (1 == nCompareValue)
-                {
-                    m_bTradeAlert = true;
-                    pYourItemObj->byColorState = ITEM_COLOR_TRADE_WARNING;
-                }
-                else
-                {
-                    if (0 == nCompareValue)
-                        nCompareItemType[nCount++] = m_aYourInvenBackUp[j].Type;
-
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (nCount > 0)
-    {
-        m_bTradeAlert = false;
-        for (int i = 0; i < nCount; ++i)
-        {
-            for (int j = 0; j < nYourItems; ++j)
-            {
-                pYourItemObj = m_pYourInvenCtrl->GetItem(j);
-                if (nCompareItemType[i] == pYourItemObj->Type)
-                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
-            }
-        }
-    }
+    for (size_t i = 0; i < nYourItems; ++i)
+        m_pYourInvenCtrl->GetItem(static_cast<int>(i))->byColorState =
+            marked[i] ? ITEM_COLOR_TRADE_WARNING : ITEM_COLOR_NORMAL;
 }
 
 void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
