@@ -29,9 +29,14 @@ bool TileCentreInRange(const float origin[2], const float point[2], float rangeT
     CHARACTER caster{};
     caster.Object.Position[0] = origin[0];
     caster.Object.Position[1] = origin[1];
+    const int previousTargetX = TargetX;
+    const int previousTargetY = TargetY;
     TargetX = static_cast<int>(point[0] / Tile);
     TargetY = static_cast<int>(point[1] / Tile);
-    return CheckTile(&caster, &caster.Object, rangeTiles);
+    const bool inRange = CheckTile(&caster, &caster.Object, rangeTiles);
+    TargetX = previousTargetX;
+    TargetY = previousTargetY;
+    return inRange;
 }
 
 // The hero and a character under the cursor, restoring the globals afterwards.
