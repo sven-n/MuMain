@@ -9,7 +9,7 @@
 
 using Network::Packets::ParseGuildRelationshipResult;
 
-TEST_CASE("an E6 result reads one byte per field and a big-endian guild master key [network][guild]")
+TEST_CASE("an E6 result reads one byte per field and a big-endian character key [network][guild]")
 {
     constexpr std::array<std::uint8_t, 8> packet{0xC1, 0x08, 0xE6, 0x01, 0x02, 0x01, 0x12, 0x34};
 
@@ -19,7 +19,7 @@ TEST_CASE("an E6 result reads one byte per field and a big-endian guild master k
     CHECK(result->relationshipType == 1); // Alliance
     CHECK(result->requestType == 2);      // Leave
     CHECK(result->result == 1);           // Success
-    CHECK(result->guildMasterKey == 0x1234);
+    CHECK(result->characterKey == 0x1234);
 }
 
 TEST_CASE("a short E6 packet is rejected [network][guild]")

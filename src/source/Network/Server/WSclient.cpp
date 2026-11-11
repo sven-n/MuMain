@@ -7994,7 +7994,7 @@ void ReceiveGuildRelationShipResult(std::span<const BYTE> ReceiveBuffer)
     }
     UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    if (pData->guildMasterKey == HeroKey && pData->result == 0x01 && pData->relationshipType == 0x01 &&
+    if (pData->characterKey == HeroKey && pData->result == 0x01 && pData->relationshipType == 0x01 &&
         pData->requestType == 0x02)
         GuildMark[Hero->GuildMarkIndex].UnionName[0] = 0;
 }
