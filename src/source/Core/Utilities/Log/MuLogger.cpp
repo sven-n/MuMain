@@ -26,10 +26,11 @@ struct LoggerState
     bool explicitlyInitialized = false;
 };
 
+// Never destroyed: other statics log from their destructors, whatever order they were built in.
 LoggerState& State()
 {
-    static LoggerState state;
-    return state;
+    static auto* const state = new LoggerState();
+    return *state;
 }
 
 std::shared_ptr<spdlog::logger> CreateLogger(LoggerState& state, const std::string& name)
