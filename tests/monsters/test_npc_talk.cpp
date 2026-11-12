@@ -20,6 +20,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "World/GameMaps/MonsterSpawnWorld.h"
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <optional>
@@ -47,13 +48,18 @@ std::wstring Shown(std::wstring text)
 }
 
 // The shipped monster list, as the game loads it.
-void LoadShippedMonsters()
+const Data::Monsters::MonsterDataLoadResult& ShippedMonsters()
 {
     static const Data::Monsters::MonsterDataLoadResult loaded =
         Data::Monsters::LoadMonstersFile(MonsterRecorder::ClientFolder() / "Data" / "Monsters" / "Monsters.json");
-    REQUIRE(loaded.monsters.size() > 500);
-    g_MonsterDatabase.Build(loaded.monsters, "en");
-    g_MonsterDatabase.SetTalkTexts(loaded.talkTexts);
+    return loaded;
+}
+
+void LoadShippedMonsters()
+{
+    REQUIRE(ShippedMonsters().monsters.size() > 500);
+    g_MonsterDatabase.Build(ShippedMonsters().monsters, "en");
+    g_MonsterDatabase.SetTalkTexts(ShippedMonsters().talkTexts);
 }
 
 // The game's state a talk reads, and what it did, in order.
@@ -353,21 +359,23 @@ TEST_CASE("NPC talk: an altar contract step on an NPC that is no altar talks [mo
 {
     TalkRecorder recorder;
     const TalkWorld world = recorder.World();
-    // The plain NPC's entry with the step, put back however the test ends.
-    struct EntryBack
+    // The shipped list with the step on the plain NPC, the shipped one built
+    // back however the test ends (Build: editor-OFF builds have no Set).
+    struct ShippedBack
     {
-        Data::Monsters::MonsterDefinition entry;
-        ~EntryBack()
+        ~ShippedBack()
         {
-            g_MonsterDatabase.Set(entry);
+            g_MonsterDatabase.Build(ShippedMonsters().monsters, "en");
         }
-    } const kept{*g_MonsterDatabase.Find(PlainNpc)};
-    Data::Monsters::MonsterDefinition plain = kept.entry;
+    } const back;
+    std::vector<Data::Monsters::MonsterDefinition> monsters = ShippedMonsters().monsters;
+    const auto plain = std::ranges::find(monsters, PlainNpc, &Data::Monsters::MonsterDefinition::number);
+    REQUIRE(plain != monsters.end());
     Data::Monsters::MonsterTalkBlock contract;
     contract.kind = Data::Monsters::MonsterTalkBlock::Kind::CrywolfAltarContract;
     contract.altarTexts = "crywolfAltar";
-    plain.setup.onTalk = {contract};
-    g_MonsterDatabase.Set(plain);
+    plain->setup.onTalk = {contract};
+    g_MonsterDatabase.Build(monsters, "en");
     const auto npc = MakeNpc(PlainNpc);
 
     recorder.crywolfMap = true;
