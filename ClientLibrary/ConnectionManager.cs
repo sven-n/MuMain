@@ -7,7 +7,6 @@ namespace MUnique.Client.Library;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.SimpleModulus;
 using MUnique.OpenMU.Network.Xor;
-using Pipelines.Sockets.Unofficial;
 
 /// <summary>
 /// Class which manages the connections which are created through the game client.
@@ -24,19 +22,9 @@ using Pipelines.Sockets.Unofficial;
 public unsafe partial class ConnectionManager
 {
     /// <summary>
-    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
+    /// How long a connect may take before it counts as failed: two handshake retries on Windows, three on Linux.
     /// </summary>
-    private const int KeepAliveIdleSeconds = 4;
-
-    /// <summary>
-    /// Interval, in seconds, between TCP keep-alive probes.
-    /// </summary>
-    private const int KeepAliveIntervalSeconds = 2;
-
-    /// <summary>
-    /// Number of unanswered keep-alive probes before the connection is dropped.
-    /// </summary>
-    private const int KeepAliveRetryCount = 3;
+    private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(10);
 
     /// <summary>
     /// The currently active connections, with their handle as key.
@@ -59,7 +47,8 @@ public unsafe partial class ConnectionManager
     }
 
     /// <summary>
-    /// Connects the specified host and port.
+    /// Starts connecting to the specified host and port and returns the handle at once. Packets sent with the handle
+    /// before the connection opens go out once it does.
     /// </summary>
     /// <param name="hostPtr">The pointer to a string which contains the host (ip or hostname).</param>
     /// <param name="port">The port.</param>
@@ -69,18 +58,20 @@ public unsafe partial class ConnectionManager
     /// </param>
     /// <param name="onPacketReceived">The pointer to an unmanaged method which is called when a new packet got received.
     /// Parameters: handle, size, pointer to the data.</param>
-    /// <param name="onDisconnected">The pointer to an unmanaged method which is called when the connection got disconnected.
+    /// <param name="onDisconnected">The pointer to an unmanaged method which is called when the connection got disconnected,
+    /// or could not be opened. Parameter: handle.</param>
+    /// <param name="onOpened">The pointer to an unmanaged method which is called when the connection opened.
     /// Parameter: handle.</param>
     /// <returns>
-    /// The handle of the created connection. If negative, the connection couldn't be established.
+    /// The handle of the created connection. If negative, no connect could be started.
     /// </returns>
-    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_Connect")]
-    public static int Connect(IntPtr hostPtr, int port, byte isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_BeginConnect")]
+    public static int BeginConnect(IntPtr hostPtr, int port, byte isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected, delegate* unmanaged<int, void> onOpened)
     {
         try
         {
             var host = NativeInterop.PtrToWideString(hostPtr) ?? throw new ArgumentNullException(nameof(hostPtr));
-            return ConnectInner(host, port, isEncrypted == 1, onPacketReceived, onDisconnected);
+            return BeginConnectInner(host, port, isEncrypted == 1, onPacketReceived, onDisconnected, onOpened);
         }
         catch (Exception ex)
         {
@@ -151,95 +142,30 @@ public unsafe partial class ConnectionManager
         }
     }
 
-    private static int ConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
+    /// <summary>
+    /// Forgets a connection that is shutting down, so sends for its handle stop reaching it.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    internal static void Forget(int handle)
     {
-        var tcpClient = new TcpClient(host, port);
+        Connections.TryRemove(handle, out _);
+    }
 
-        ConfigureKeepAlive(tcpClient.Client);
-
-        var socketConnection = SocketConnection.Create(tcpClient.Client);
-
-        var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
-        var decryptor = isEncrypted ? new PipelinedSimpleModulusDecryptor(socketConnection.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey) : null;
-        var connection = new Connection(socketConnection, decryptor, encryptor, new NullLogger<Connection>());
-
+    private static int BeginConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected, delegate* unmanaged<int, void> onOpened)
+    {
+        var pipe = new DeferredTcpPipe();
+        var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(pipe.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
+        var decryptor = isEncrypted ? new PipelinedSimpleModulusDecryptor(pipe.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey) : null;
+        var connection = new Connection(pipe, decryptor, encryptor, new NullLogger<Connection>());
         var handle = Interlocked.Increment(ref _maxHandle);
-        var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
+        var wrapper = new ConnectionWrapper(handle, connection, pipe, onPacketReceived, onDisconnected, onOpened);
         if (!Connections.TryAdd(handle, wrapper))
         {
             wrapper.Dispose();
             throw new InvalidOperationException($"Connection handle {handle} already exists.");
         }
 
-        connection.Disconnected += () =>
-        {
-            Connections.TryRemove(handle, out _);
-            return ValueTask.CompletedTask;
-        };
-
+        wrapper.Connect(host, port, ConnectTimeout);
         return handle;
-    }
-
-    /// <summary>
-    /// Enables aggressive TCP keep-alive so the OS detects dead or half-open
-    /// connections (server crash, network drop) within ~10 seconds and tears the
-    /// socket down. That makes the receive loop fault and raise
-    /// <see cref="Connection.Disconnected"/>, which the game client polls to
-    /// trigger auto-reconnect. Without this, a peer that vanishes without sending
-    /// FIN/RST keeps the connection alive for minutes. Probes are answered by the
-    /// healthy peer's OS automatically, so this never drops a live connection.
-    /// </summary>
-    /// <param name="socket">The connected socket to configure.</param>
-    private static void ConfigureKeepAlive(Socket socket)
-    {
-        try
-        {
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to enable SO_KEEPALIVE: {ex}");
-            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to enable SO_KEEPALIVE: {ex}");
-        }
-
-        // Modern cross-platform options (.NET 5+). Set each independently so an
-        // unsupported one doesn't skip the others (notably the retry count, which
-        // older Windows ignores).
-        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveTime, KeepAliveIdleSeconds);
-        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveInterval, KeepAliveIntervalSeconds);
-        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveRetryCount, KeepAliveRetryCount);
-
-        // Windows fallback/override: SIO_KEEPALIVE_VALS reliably sets the idle
-        // time and probe interval (in milliseconds) where the socket options
-        // above are sometimes ignored.
-        try
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                var values = new byte[12];
-                BitConverter.GetBytes(1u).CopyTo(values, 0);                                        // on
-                BitConverter.GetBytes((uint)(KeepAliveIdleSeconds * 1000)).CopyTo(values, 4);       // idle (ms)
-                BitConverter.GetBytes((uint)(KeepAliveIntervalSeconds * 1000)).CopyTo(values, 8);   // interval (ms)
-                socket.IOControl(IOControlCode.KeepAliveValues, values, null);
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to configure keep-alive via IOControl: {ex}");
-            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to configure keep-alive via IOControl: {ex}");
-        }
-    }
-
-    private static void TrySetSocketOption(Socket socket, SocketOptionName option, int value)
-    {
-        try
-        {
-            socket.SetSocketOption(SocketOptionLevel.Tcp, option, value);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to set socket option {option}: {ex}");
-            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Failed to set socket option {option}: {ex}");
-        }
     }
 }

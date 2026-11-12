@@ -1,7 +1,6 @@
 // Portable Winsock shim (issue #462, Phase 3).
 //
-// The reconnect reachability probe is the only Winsock user. Most of what it
-// needs (socket/connect/getsockopt/select/sockaddr_in/AF_INET/...) is standard
+// Most of what its users need (socket/connect/getsockopt/select/sockaddr_in/AF_INET/...) is standard
 // on POSIX, so on Windows this includes <ws2tcpip.h> and elsewhere it provides
 // just the Winsock-specific names mapped onto BSD sockets.
 #pragma once

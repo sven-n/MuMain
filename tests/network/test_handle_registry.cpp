@@ -106,3 +106,34 @@ TEST_CASE("HandleRegistry lets a callback remove and add handles [network][dotne
     CHECK_FALSE(registry.Dispatch(1, [](FakeConnection&) {}));
     CHECK(CallsAfterDispatch(registry, 2, opened) == 1);
 }
+
+TEST_CASE("HandleRegistry delivers a callback that arrives while the handle is created [network][dotnet]")
+{
+    // The managed connect can report "opened" on another thread before it has returned the handle.
+    Registry registry;
+    FakeConnection connection;
+    std::thread early;
+    std::atomic<bool> delivered = false;
+    const int32_t handle = registry.AddCreated(
+        [&]
+        {
+            early =
+                std::thread([&] { delivered = registry.Dispatch(5, [](FakeConnection& target) { ++target.calls; }); });
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            return 5;
+        },
+        &connection);
+    early.join();
+
+    CHECK(handle == 5);
+    CHECK(delivered);
+    CHECK(connection.calls == 1);
+}
+
+TEST_CASE("HandleRegistry registers nothing for a failed create [network][dotnet]")
+{
+    Registry registry;
+    FakeConnection connection;
+    CHECK(registry.AddCreated([] { return -1; }, &connection) == -1);
+    CHECK_FALSE(registry.Dispatch(-1, [](FakeConnection&) {}));
+}

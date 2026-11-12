@@ -7,6 +7,7 @@
 #include "Dotnet/PacketFunctions_ChatServer.h"
 #include "Dotnet/PacketFunctions_ClientToServer.h"
 #include "Dotnet/PacketFunctions_ConnectServer.h"
+#include "Network/IncomingPacketQueue.h"
 #include "Network/Server/CSMapServer.h"
 #include "UI/Combat/CastleSiegePhase.h"
 #include <span>
@@ -3555,7 +3556,13 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
+// Starts connecting SocketClient and returns at once; FALSE only when no connect could even start. A server that
+// can't be reached closes the connection later, and the frame that sees it calls FinishFailedConnect.
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// For a SocketClient that closed before it opened: says the server can't be reached, as CreateSocket did when it
+// waited for the answer, and deletes the connection. True when that was all to do (a server pick on the login
+// screen, which LoginSceneReconnect then reports); otherwise the loss is handled as a lost connection.
+bool FinishFailedConnect();
 // The connect server listens on 44288-44543 (0xAD00-0xADFF) and talks unencrypted; every other
 // port is a game server's, whose connection is encrypted. CreateSocket connects accordingly.
 bool IsGameServerPort(unsigned short Port);
@@ -3565,7 +3572,12 @@ void DeleteSocket();
 // server greets the new connection as a new client
 // (the connect server with its list, a game server with its join answer), not as a
 // map server change. Which of the two it is follows from the port (IsGameServerPort).
-BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port);
+// With `opened`, a connection to that address opened beforehand (OpenConnectionForLater),
+// the login goes over it instead of a new one.
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, std::unique_ptr<Connection> opened = nullptr);
+// Connects in the background without receiving yet: what the server sends waits until
+// ConnectForLogin takes the connection over.
+std::unique_ptr<Connection> OpenConnectionForLater(const wchar_t* IpAddr, unsigned short Port);
 
 // Tears the live game session down to a clean login-scene state (matching the
 // in-game logout path). Used by the auto-reconnect flow before it replays login.
@@ -3574,15 +3586,6 @@ void ResetClientToLoginScene();
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer);
 
-struct PacketInfo
-{
-    std::unique_ptr<BYTE[]> ReceiveBuffer;
-    int32_t ConnectionHandle = 0;
-    int32_t Size;
-    std::chrono::steady_clock::time_point EnqueuedAt;
-    bool Superseded = false;
-    bool SuppressOptionalPresentation = false;
-};
 void ProcessPacketCallback(const PacketInfo* Packet);
 
 void InitGame();
