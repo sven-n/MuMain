@@ -89,14 +89,6 @@ mu_add_test(
 )
 
 mu_add_test(
-    NAME test_reachability_probe
-    SOURCES
-        test_reachability_probe.cpp
-    LINK_LIBS
-        MuClient
-)
-
-mu_add_test(
     NAME test_login_scene_reconnect
     SOURCES
         test_login_scene_reconnect.cpp

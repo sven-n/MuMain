@@ -450,6 +450,12 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
     return TRUE;
 }
 
+std::unique_ptr<Connection> OpenConnectionForLater(const wchar_t* IpAddr, unsigned short Port)
+{
+    return std::make_unique<Connection>(MU_C16(IpAddr), Port, IsGameServerPort(Port), &HandleIncomingPacket,
+                                        /*startReceiving=*/false);
+}
+
 bool FinishFailedConnect()
 {
     ReportConnectFailure(s_connectAttempt);
@@ -477,7 +483,7 @@ wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
     0,
 };
 
-BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, std::unique_ptr<Connection> opened)
 {
     DeleteSocket();
     LogIn = 0;
@@ -486,7 +492,13 @@ BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
     // Game server packets (CheckHack's ping, the logout on quit) go out only while a
     // game server is connected; the connect server doesn't know them.
     g_bGameServerConnected = FALSE;
-    if (!CreateSocket(IpAddr, Port))
+    if (opened)
+    {
+        s_connectAttempt = ConnectAttempt{IpAddr, Port};
+        SocketClient = opened.release();
+        SocketClient->StartReceiving();
+    }
+    else if (!CreateSocket(IpAddr, Port))
     {
         return FALSE;
     }
