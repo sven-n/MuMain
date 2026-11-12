@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
 #include "ItemOptionValidation.h"
+#include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
+#include "ItemOptionEffects.h"
+#include "OptionTextsJson.h"
 
 #include <algorithm>
 #include <map>
@@ -65,14 +68,41 @@ void ValidateOptions(std::span<const ItemOptionDefinition> definitions, const It
                                   "the client computes no " + option.attribute + " for a definition of type " +
                                       FindEnumName(definition.type) + " this way: its line is shown, it adds nothing"});
             }
+            for (size_t term = 0; term < option.value.per.size(); ++term)
+            {
+                const std::string& attribute = option.value.per[term].attribute;
+                if (FindItemOptionTermAttribute(attribute) == ItemOptionTermAttribute::Unread)
+                {
+                    issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition),
+                                      ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                                      field + ".per[" + std::to_string(term) + "].attribute",
+                                      "the client reads no hero attribute " + attribute + ": the term adds nothing"});
+                }
+            }
+            const auto divisorTerms = std::count_if(option.value.per.begin(), option.value.per.end(),
+                                                    [](const ItemOptionTerm& term) { return term.divisor > 0; });
             for (const std::string& text : option.texts)
             {
                 namedTexts.insert(text);
-                if (texts.Find(text) == nullptr)
+                const LocalizedString* found = texts.Find(text);
+                if (found == nullptr)
                 {
                     issues.push_back({ItemDataIssueSeverity::Error, DefinitionSource(definition), ItemDataIssue::NoItem,
                                       ItemDataIssue::NoItem, field + ".text",
                                       "\"" + text + "\" is no text of OptionTexts.json: its line is left out"});
+                    continue;
+                }
+                const std::vector<std::string> names = ScanPlaceholders(found->GetNeutral()).names;
+                if (divisorTerms != 1 && std::find(names.begin(), names.end(), OptionDivisorPlaceholder) != names.end())
+                {
+                    const std::string problem =
+                        divisorTerms == 0 ? std::string("no term with a divisor: the line shows 0 there")
+                                          : std::to_string(divisorTerms) + " terms with a divisor: the line shows the "
+                                                                           "first one's";
+                    issues.push_back({ItemDataIssueSeverity::Warning, DefinitionSource(definition),
+                                      ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + ".text",
+                                      "\"" + text + "\" shows {" + std::string(OptionDivisorPlaceholder) +
+                                          "}, but the option has " + problem});
                 }
             }
         }
@@ -138,11 +168,23 @@ void ValidateItemOptionLinks(std::span<const ItemDefinition> items, const ItemOp
             }
             ++known;
         }
-        if (options.ResolveLinks(item.options).size() < known)
+        const std::vector<ItemOptionIndex> links = options.ResolveLinks(item.options);
+        if (links.size() < known)
         {
             issues.push_back({ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
                               "links two definitions whose options the same part of the server's item data turns on "
                               "(of one type): the later one is left out"});
+        }
+        // The excellent byte of wings holds their wing options, the Horn of Fenrir's its kind; no horn is excellent.
+        const bool byteMeansOther = item.slot == ItemSlot::Wings || item.tags.Has(ItemTag::HornMount);
+        const bool linksExcellent = std::any_of(links.begin(), links.end(), [&options](ItemOptionIndex link)
+                                                { return options.Get(link).type == ItemOptionType::Excellent; });
+        if (byteMeansOther && linksExcellent)
+        {
+            issues.push_back(
+                {ItemDataIssueSeverity::Error, "", item.group, item.number, OptionsField,
+                 "links excellent options, but its excellent byte holds its wing options or a horn's kind, "
+                 "or nothing: no horn is excellent"});
         }
     }
 }

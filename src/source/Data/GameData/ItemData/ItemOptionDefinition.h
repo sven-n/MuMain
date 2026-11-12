@@ -24,7 +24,14 @@ enum class ItemOptionType : BYTE
     // The additional option's level (ITEM::OptionLevel, the option byte's low four bits: 1 to 15, Season 6 sends 1 to
     // 4); its options numbered by the option type the server sends (ITEM::OptionType), their value by that level.
     Option,
+    // The excellent byte (ITEM::ExcellentFlags); its options numbered 1 to 6, each on with the byte's bit number - 1.
+    Excellent,
 };
+
+// An excellent option's number - 1 is its bit of the excellent byte, whose bits 0 to 5 hold them.
+constexpr int MaxExcellentOptionNumber = 6;
+// The excellent byte with every excellent option on.
+constexpr BYTE AllExcellentOptionFlags = (1 << MaxExcellentOptionNumber) - 1;
 
 // How an option's value adds to its attribute: as it is, after the other additions (OpenMU's AddFinal), or in per
 // cent.
@@ -35,15 +42,48 @@ enum class ItemOptionAdd : BYTE
     Percent,
 };
 
+// The hero attributes a term can read, named in ItemOptionTermAttributes (ItemOptionEffects.h); Unread for a name the
+// client doesn't read, which adds nothing.
+enum class ItemOptionTermAttribute : BYTE
+{
+    Unread,
+    // The hero's level.
+    Level,
+    // The level plus the master level.
+    TotalLevel,
+    MasterLevel,
+};
+
+// A term an option's value adds on an attribute of the hero ("level" / 20): the attribute times `times`, or divided by
+// `divisor`, rounded down on its own. Exactly one of the two is above 0. The attributes the client reads are
+// ItemOptionTermAttributes (ItemOptionEffects.h).
+struct ItemOptionTerm
+{
+    std::string attribute;
+    int times = 0;
+    int divisor = 0;
+    // The attribute of that name, which the option database resolves when it loads (ResolveTermAttributes), so the
+    // value computed every frame never compares a name.
+    ItemOptionTermAttribute heroAttribute = ItemOptionTermAttribute::Unread;
+
+    // The data only: heroAttribute follows from the name, so a loaded term equals an edited one with the same data.
+    bool operator==(const ItemOptionTerm& other) const
+    {
+        return attribute == other.attribute && times == other.times && divisor == other.divisor;
+    }
+};
+
 // An option's value: a constant, or a list with one value per level from level 1, whose last entry also counts above
-// it.
+// it; plus its terms on hero attributes, computed when the value is asked (GameLogic::Items::ComputeOptionValue).
 struct ItemOptionValue
 {
     std::vector<int> values;
     // Written as a list, also with one entry; else values holds the constant.
     bool isList = false;
+    std::vector<ItemOptionTerm> per;
 
-    // The value at `level`: the constant, or the list's entry (0 below level 1, the last entry above the list).
+    // The value at `level` without its terms: the constant, or the list's entry (0 below level 1, the last entry above
+    // the list).
     int At(int level) const
     {
         if (values.empty() || (isList && level < 1))

@@ -8,6 +8,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Network/Server/WSclient.h"
 
 #include <algorithm>
 #include <array>
@@ -202,6 +203,20 @@ bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
 bool CCharacterManager::IsMasterLevel(const CLASS_TYPE byClass)
 {
     return this->IsThirdClass(byClass);
+}
+
+int CCharacterManager::GetHeroMasterLevel()
+{
+    if (CharacterAttribute == nullptr || !this->IsMasterLevel(CharacterAttribute->Class))
+    {
+        return 0;
+    }
+    return Master_Level_Data.nMLevel;
+}
+
+void CCharacterManager::ForgetHeroMasterLevel()
+{
+    Master_Level_Data = {};
 }
 
 bool CCharacterManager::IsMasterExperienceActive(const CLASS_TYPE byClass, const int level)

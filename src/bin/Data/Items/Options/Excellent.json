@@ -1,0 +1,86 @@
+{
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "excellentDefense",
+      "type": "excellent",
+      "displayName": {
+        "en": "Excellent defense",
+        "de": "Exzellente Verteidigung",
+        "es": "Defensa excelente",
+        "id": "Pertahanan unggul",
+        "ja": "エクセレント防御",
+        "pl": "Doskonała obrona",
+        "pt": "Defesa excelente",
+        "ru": "Превосходная защита",
+        "tl": "Napakahusay na depensa",
+        "uk": "Чудовий захист",
+        "zh-TW": "卓越防禦"
+      },
+      "openMu": {"id": "00000083-0012-0000-0000-000000000000", "name": "Excellent Defense Options"},
+      "server": {"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2},
+      "options": [
+        {"number": 1, "attribute": "moneyAmountRate", "percent": {"values": 30}, "text": "zenAfterKill"},
+        {"number": 2, "attribute": "defenseRatePvm", "percent": {"values": 10}, "text": "defenseSuccessRate"},
+        {"number": 3, "attribute": "damageReflection", "percent": {"values": 5}, "text": "reflectDamage"},
+        {"number": 4, "attribute": "armorDamageDecrease", "percent": {"values": 4}, "text": "damageDecrease"},
+        {"number": 5, "attribute": "maximumMana", "percent": {"values": 4}, "text": "increaseMaxMana"},
+        {"number": 6, "attribute": "maximumHealth", "percent": {"values": 4}, "text": "increaseMaxHp"}
+      ]
+    },
+    {
+      "name": "excellentPhysicalAttack",
+      "type": "excellent",
+      "displayName": {
+        "en": "Excellent physical attack",
+        "de": "Exzellenter physischer Angriff",
+        "es": "Ataque físico excelente",
+        "id": "Serangan fisik unggul",
+        "ja": "エクセレント物理攻撃",
+        "pl": "Doskonały atak fizyczny",
+        "pt": "Ataque físico excelente",
+        "ru": "Превосходная физическая атака",
+        "tl": "Napakahusay na pisikal na atake",
+        "uk": "Чудова фізична атака",
+        "zh-TW": "卓越物理攻擊"
+      },
+      "openMu": {"id": "00000083-0013-0000-0000-000000000000", "name": "Excellent Physical Attack Options"},
+      "server": {"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2},
+      "options": [
+        {"number": 1, "attribute": "manaAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "manaAfterKill"},
+        {"number": 2, "attribute": "healthAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "lifeAfterKill"},
+        {"number": 3, "attribute": "attackSpeedAny", "add": {"values": 7}, "text": "increaseAttackSpeed"},
+        {"number": 4, "attribute": "physicalBaseDmgIncrease", "percent": {"values": 2}, "text": "increaseDamagePercent"},
+        {"number": 5, "attribute": "physicalBaseDmg", "add": {"values": 0, "per": [{"attribute": "level", "divisor": 20}]}, "text": "increaseDamageLevel20"},
+        {"number": 6, "attribute": "excellentDamageChance", "percent": {"values": 10}, "text": "excellentDamageRate"}
+      ]
+    },
+    {
+      "name": "excellentWizardryAttack",
+      "type": "excellent",
+      "displayName": {
+        "en": "Excellent wizardry attack",
+        "de": "Exzellenter Zaubereiangriff",
+        "es": "Ataque de hechicería excelente",
+        "id": "Serangan sihir unggul",
+        "ja": "エクセレント魔法攻撃",
+        "pl": "Doskonały atak magiczny",
+        "pt": "Ataque de magia excelente",
+        "ru": "Превосходная магическая атака",
+        "tl": "Napakahusay na wizardry na atake",
+        "uk": "Чудова магічна атака",
+        "zh-TW": "卓越魔法攻擊"
+      },
+      "openMu": {"id": "00000083-0014-0000-0000-000000000000", "name": "Excellent Wizardry Attack Options"},
+      "server": {"addsRandomly": true, "addChance": 0.001, "maximumOptionsPerItem": 2},
+      "options": [
+        {"number": 1, "attribute": "manaAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "manaAfterKill"},
+        {"number": 2, "attribute": "healthAfterMonsterKillMultiplier", "add": {"values": 8}, "text": "lifeAfterKill"},
+        {"number": 3, "attribute": "attackSpeedAny", "add": {"values": 7}, "text": "increaseAttackSpeed"},
+        {"number": 4, "attribute": "wizardryBaseDmgIncrease", "percent": {"values": 2}, "text": "increaseWizardryPercent"},
+        {"number": 5, "attribute": "wizardryBaseDmg", "add": {"values": 0, "per": [{"attribute": "level", "divisor": 20}]}, "text": "increaseWizardryLevel20"},
+        {"number": 6, "attribute": "excellentDamageChance", "percent": {"values": 10}, "text": "excellentDamageRate"}
+      ]
+    }
+  ]
+}

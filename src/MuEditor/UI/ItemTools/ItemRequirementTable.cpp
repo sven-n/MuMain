@@ -31,26 +31,40 @@ std::string OrDefault(std::string name)
     return name.empty() ? std::string(Data::Items::StatProfileNames::Default) : name;
 }
 
+// What a variant's option level and excellent options give, the same at every level.
+struct VariantOptions
+{
+    std::vector<Data::Items::ItemOptionIndex> links;
+    int optionLevel = 0;
+};
+
+// The option level and the excellent options count as the game counts them (option type 0), from the draft's own
+// option links and slot: the value list's last level above the list. Resolved only for a level or excellent: the
+// table and the weight searches ask mostly without them.
+VariantOptions ResolveVariantOptions(const ItemDefinition& item, const RequirementVariant& variant)
+{
+    VariantOptions options;
+    if (variant.optionLevel > 0 || variant.excellent)
+    {
+        options.links = g_ItemDatabase.GetOptions().ResolveLinks(item.options);
+        options.optionLevel = GameLogic::Items::CountAdditionalOptionLevel(
+            options.links, item.slot == Data::Items::ItemSlot::Wings, variant.optionLevel, 0);
+    }
+    return options;
+}
+
 GameLogic::Items::ItemStatValues ComputeValuesAt(const ItemDefinition& item, const ITEM_ATTRIBUTE& attribute,
                                                  const Data::Items::ItemStatProfile& profile,
-                                                 const RequirementVariant& variant, int level)
+                                                 const RequirementVariant& variant, const VariantOptions& options,
+                                                 int level)
 {
-    const GameLogic::Items::ItemStatSources sources{attribute, &item, profile,
-                                                    item.slot == Data::Items::ItemSlot::Wings};
     const int itemType = Data::Items::MakeItemType(item.group, item.number);
-    // The option level counts as the game counts it (option type 0), from the draft's own option links and slot: the
-    // value list's last level above the list. Resolved only for a level: the table and the weight searches ask
-    // mostly without one.
-    int optionLevel = 0;
-    if (variant.optionLevel > 0)
-    {
-        const std::vector<Data::Items::ItemOptionIndex> links = g_ItemDatabase.GetOptions().ResolveLinks(item.options);
-        optionLevel = GameLogic::Items::CountAdditionalOptionLevel(links, item.slot == Data::Items::ItemSlot::Wings,
-                                                                   variant.optionLevel, 0);
-    }
-    const GameLogic::Items::ItemStatInput input{itemType, level, static_cast<BYTE>(variant.excellent ? 1 : 0),
+    // Excellent: every excellent option on, so a draft whose excellent definition lacks one of them is excellent too.
+    const BYTE excellentFlags = variant.excellent ? Data::Items::AllExcellentOptionFlags : 0;
+    const GameLogic::Items::ItemStatSources sources{attribute, &item, profile, options.links};
+    const GameLogic::Items::ItemStatInput input{itemType, level, excellentFlags,
                                                 static_cast<BYTE>(variant.ancient ? 1 : 0),
-                                                static_cast<BYTE>(std::clamp(optionLevel, 0, 255))};
+                                                static_cast<BYTE>(std::clamp(options.optionLevel, 0, 255))};
     return GameLogic::Items::ComputeItemStats(sources, input);
 }
 
@@ -194,10 +208,11 @@ ItemLevelValues ComputeItemLevelValues(const ItemDefinition& item, const Require
     ITEM_ATTRIBUTE attribute{};
     Data::Items::ToItemAttribute(item, attribute);
     const Data::Items::ItemStatProfile& profile = FindStatProfile(item);
+    const VariantOptions options = ResolveVariantOptions(item, variant);
     ItemLevelValues values{};
     for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
     {
-        values[static_cast<size_t>(level)] = ComputeValuesAt(item, attribute, profile, variant, level);
+        values[static_cast<size_t>(level)] = ComputeValuesAt(item, attribute, profile, variant, options, level);
     }
     return values;
 }
@@ -207,7 +222,7 @@ GameLogic::Items::ItemStatValues ComputeItemValuesAt(const ItemDefinition& item,
 {
     ITEM_ATTRIBUTE attribute{};
     Data::Items::ToItemAttribute(item, attribute);
-    return ComputeValuesAt(item, attribute, FindStatProfile(item), variant, level);
+    return ComputeValuesAt(item, attribute, FindStatProfile(item), variant, ResolveVariantOptions(item, variant), level);
 }
 
 RequirementTable ComputeRequirementTable(const ItemDefinition& item, const RequirementVariant& variant)

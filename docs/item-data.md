@@ -20,7 +20,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
 | `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
 | `Tooltips/NameCases.json` | The cases each language declines item names in, for texts that name items with a case; see [Name forms](#name-forms) |
-| `Options/*.json` | The option definitions, one file per option group (luck and the additional option so far); see [Item options](#item-options) |
+| `Options/*.json` | The option definitions, one file per option group (luck, the additional option and the excellent options so far); see [Item options](#item-options) |
 | `Options/OptionRules.json` | Not read by the game: which option definitions an item's data gives it, for the editor; see [Option rules](#option-rules) |
 | `Tooltips/OptionTexts.json` | The texts of the options' tooltip lines; see [Item options](#item-options) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync marks as wrong in the client or wrong in the server; see [Item Sync](#item-sync) |
@@ -579,8 +579,9 @@ background (opaque black when left out) and bold.
   of its own: the first rule whose `when` holds, with the
   [conditions](#tooltip-layouts) of the tooltip lines. They are the level ladder
   of the original client: the set items, the divine archangel weapons, the
-  socket items, the excellent items (not the second- and third-tier wings and
-  capes), from +7, with a skill, luck or option, then by level. A tag is read
+  socket items, the excellent items (the `excellent` condition: active
+  excellent options, as for the name) and the Horn of Fenrir with a kind,
+  from +7, with a skill, luck or option, then by level. A tag is read
   from the item the drop is drawn as: the Weapon of Archangel at +0 to +2 is
   drawn as a divine archangel weapon. Without a rule that holds the label is
   white on black.
@@ -926,10 +927,11 @@ definitions: the files of `Data/Items/Options` hold the definitions, one
 file per option group, and each item names the ones it can have in its
 `options` list. Which of them an item has comes from the server: its item
 data turns them on (luck by the luck flag, the additional option by its
-level). Luck and the additional option of the items that are no wings are in
-data so far; the wings' and the Horn of Dinorant's options, the excellent,
-harmony, guardian, socket and pet options and the ancient bonus are still
-code and move into data one group at a time.
+level, the excellent options by the excellent byte). Luck, the additional
+option of the items that are no wings and the excellent options are in data
+so far; the wings' and the Horn of Dinorant's options, the Wizard's rings',
+the harmony, guardian, socket and pet options and the ancient bonus are
+still code and move into data one group at a time.
 
 ```json
 {
@@ -956,7 +958,8 @@ code and move into data one group at a time.
   a number; `option` is the additional option's level (the option byte's
   low four bits, 1 to 15; Season 6 sends 1 to 4), its options numbered
   (`"number": 0`) by the option type the server sends in the byte's high
-  four bits, their value by that level.
+  four bits, their value by that level; `excellent` is the excellent byte,
+  its options numbered 1 to 6, each turned on by the byte's bit number - 1.
   Each option group brings its type when it moves into data. An item links
   at most one definition of a type.
 - `displayName`: the definition's name by language, English first.
@@ -968,7 +971,16 @@ code and move into data one group at a time.
   and adds its value as it is (`add`), after the other additions
   (`addFinal`) or in per cent (`percent`). The value is an object:
   `{"values": 5}` is 5 at every level, `{"values": [4, 8, 12, 16]}` one
-  value per level from level 1, the last one also above the list. `text`
+  value per level from level 1, the last one also above the list. `per`
+  adds terms on the hero's attributes, each rounded down on its own:
+  `{"values": 0, "per": [{"attribute": "level", "divisor": 20}]}` is the
+  hero's level / 20 (`times` multiplies instead). The client reads `level`,
+  `totalLevel` (level plus master level) and `masterLevel`, the master
+  level only for a hero whose class has one (0 after a character is picked
+  until the server sends the new hero's); a term on another attribute
+  adds nothing. Such a value is computed again whenever
+  the tooltip or the stats ask, so it grows with the hero, and stops at 0
+  and 65535, what an option slot holds. `text`
   names its tooltip lines in `Tooltips/OptionTexts.json`, one name or a
   list in their order.
 
@@ -1001,6 +1013,50 @@ Feather and the others) have no additional option, as on OpenMU. The
 wings, the capes and the Horn of Dinorant keep their additional options in
 code until they move into data.
 
+`Options/Excellent.json` holds the excellent options, as OpenMU's (OpenMU's
+server values: a 0.1 % chance, two per item). Each option is the byte's bit
+number - 1; the tooltip lists them from number 6 down, as before.
+
+| Number | `excellentDefense` | `excellentPhysicalAttack` / `excellentWizardryAttack` |
+|---|---|---|
+| 1 | `moneyAmountRate` 30 %: Zen after hunting | `manaAfterMonsterKillMultiplier` 8: Mana after hunting (mana / 8) |
+| 2 | `defenseRatePvm` 10 %: Defense success rate | `healthAfterMonsterKillMultiplier` 8: Life after hunting (life / 8) |
+| 3 | `damageReflection` 5 % | `attackSpeedAny` +7 |
+| 4 | `armorDamageDecrease` 4 % | `physicalBaseDmgIncrease` / `wizardryBaseDmgIncrease` 2 % |
+| 5 | `maximumMana` 4 % | `physicalBaseDmg` / `wizardryBaseDmg` + level / 20 |
+| 6 | `maximumHealth` 4 % | `excellentDamageChance` 10 % |
+
+The client's stats add the damage and wizardry per cent, the defense rate
+per cent and level / 20 with the definitions' values; the server computes
+the other options (the attack speed among them), whose lines the tooltip
+shows.
+
+The defensive options go to groups 6 to 11 and the rings 13/8, 13/9 and
+13/21 to 13/24; the physical attack options to groups 0 to 4 and the
+pendants 13/13, 13/26 and 13/28; the wizardry attack options to group 5
+(the summoner's books too, whose stats add them to the curse damage, a
+known difference from OpenMU) and the pendants 13/12, 13/25 and 13/27.
+Arrows and bolts have none, as on Season 6 and OpenMU.
+
+The Zen option is +30 %, Season 6's value; OpenMU has +40 %. "Level / 20"
+divides the hero's level, as the client did; OpenMU divides level plus
+master level (`totalLevel`).
+
+"Excellent" (the name's prefix and green colour, the excellent +15
+durability, the tooltip state `excellent`, the ground label's excellent
+style, the excellent stat bonus and level requirement) means an active excellent option: the item links an
+excellent definition with an option its byte turns on. Wings with wing
+options use the byte for those, and the Horn of Fenrir for its kind
+(Destroy, Protect, Illusion), so they are not excellent by it; the Horn of
+Fenrir with a kind keeps the ground label's excellent style, as in the
+original client (a rule of the [ground labels](#ground-labels) only it
+meets: the other horns' byte is never set). The mixes, the MU
+Helper's excellent pick-up, the excellent glow, the durability per cent and
+the drop level's excellent bonus still read the byte. The durability per
+cent (what wear takes off the stats) reads it only for weapons, shields
+and armour, whose byte holds excellent options; wings pass no excellent
+flags to it.
+
 `Tooltips/OptionTexts.json` holds the lines' texts:
 
 ```json
@@ -1015,8 +1071,11 @@ code until they move into data.
 }
 ```
 
-`{value}` is the option's value at the item's level (luck's is 5). The
-lines are in the UI's language, English where a text has no translation.
+`{value}` is the option's value at the item's level (luck's is 5), and
+`{divisor}` the divisor of its first term that has one: the excellent
+"+level/{divisor}" shows the 20 of its `{"attribute": "level", "divisor":
+20}`, and "+Mana/{value}" the 8 of the mana option. The lines are in the
+UI's language, English where a text has no translation.
 
 ### Critical damage rate
 
@@ -1090,18 +1149,20 @@ The game does not read it: the editor writes the items' lists from it.
   "formatVersion": 1,
   "rules": [
     {"options": [], "tags": ["ammunition"]},
-    {"options": ["luck", "physicalAndWizardryDamageOption"], "tags": ["magicSword"]},
-    {"options": ["luck", "physicalDamageOption"], "group": [0, 1, 2, 3, 4]},
-    {"options": ["luck", "curseDamageOption"], "group": [5], "tags": ["summonerBook"]},
-    {"options": ["luck", "wizardryDamageOption"], "group": [5]},
-    {"options": ["luck", "defenseRateOption"], "group": [6]},
-    {"options": ["luck", "defenseOption"], "group": [7, 8, 9, 10, 11]},
+    {"options": ["luck", "physicalAndWizardryDamageOption", "excellentPhysicalAttack"], "tags": ["magicSword"]},
+    {"options": ["luck", "physicalDamageOption", "excellentPhysicalAttack"], "group": [0, 1, 2, 3, 4]},
+    {"options": ["luck", "curseDamageOption", "excellentWizardryAttack"], "group": [5], "tags": ["summonerBook"]},
+    {"options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"], "group": [5]},
+    {"options": ["luck", "defenseRateOption", "excellentDefense"], "group": [6]},
+    {"options": ["luck", "defenseOption", "excellentDefense"], "group": [7, 8, 9, 10, 11]},
     {"options": ["luck"], "group": [12], "numbers": [0, 1, 2, 3, 4, 5, 6, 41, 42, 49]},
     {"options": ["luck"], "slot": ["wings"], "wingTier": ["third"]},
     {"options": ["luck"], "group": [13], "numbers": [30]},
-    {"options": ["jewelryHealthRecovery"], "group": [13], "numbers": [8, 9, 12, 13, 21, 22, 23, 25, 26, 27]},
-    {"options": ["ringOfMagicMana"], "group": [13], "numbers": [24]},
-    {"options": ["pendantOfAbilityAg"], "group": [13], "numbers": [28]}
+    {"options": ["jewelryHealthRecovery", "excellentDefense"], "group": [13], "numbers": [8, 9, 21, 22, 23]},
+    {"options": ["ringOfMagicMana", "excellentDefense"], "group": [13], "numbers": [24]},
+    {"options": ["jewelryHealthRecovery", "excellentWizardryAttack"], "group": [13], "numbers": [12, 25, 27]},
+    {"options": ["jewelryHealthRecovery", "excellentPhysicalAttack"], "group": [13], "numbers": [13, 26]},
+    {"options": ["pendantOfAbilityAg", "excellentPhysicalAttack"], "group": [13], "numbers": [28]}
   ]
 }
 ```
@@ -1114,7 +1175,7 @@ more: `numbers`, item numbers (with `group`), and a tag with `!` before it
 shipped rules give luck to the items the client gave it before: groups 0
 to 11 but arrows and bolts, the wings 12/0 to 12/6, 12/41 and 12/42, the
 Cape of Fighter (12/49), the Cape of Lord (13/30) and the third tier
-wings; and the additional options of the table above. Since the first
+wings; and the additional and excellent options above. Since the first
 rule counts, a rule lists all of its items' definitions. A test checks
 that every shipped item's list is the one its rules give.
 
@@ -1124,15 +1185,24 @@ file that cannot be read or is no JSON, a missing or newer
 English) or `options`, a type the game does not know, a name used twice,
 an option without `attribute` or with none or more than one of `add`,
 `addFinal` and `percent`, a value that is no object of whole numbers from
-0 to 65535 or that has `perLevel`, a number used twice in a definition, a
-luck definition with more than one option or a numbered one, OpenMU
+0 to 65535 or that has `perLevel`, a term (`per`) without `attribute` or
+without exactly one of `times` and `divisor` (whole numbers from 1), a
+number used twice in a definition, an additional option's number above 15,
+an excellent option's number outside 1 to 6, a luck definition with more
+than one option or a numbered one, OpenMU
 labels or server values of the wrong kind, and a rule naming a
 definition that does not exist or a condition it does not have. Errors:
 an item linking a definition that does not exist (the link is left out)
-or two of one type (the later one is left out), an option naming a text
+or two of one type (the later one is left out), wings or a horn
+mount linking excellent options (the excellent byte of wings holds their
+wing options, the Horn of Fenrir's its kind; no horn is excellent), an option naming a text
 the texts do not have, and a text without English or with a placeholder
-other than `{value}` (the lines that name it are left out). Warnings:
-unknown fields, an attribute the client does not compute, a definition no
+other than `{value}` and `{divisor}` (the lines that name it are left
+out). Warnings:
+unknown fields, an attribute the client does not compute, a term on a hero
+attribute the client does not read, a text with `{divisor}` on an option
+without a term that has a divisor (the line shows 0 there) or with several
+(it shows the first one's), a definition no
 item and no rule links, a text no option names and a text in a language
 the game has no texts in.
 

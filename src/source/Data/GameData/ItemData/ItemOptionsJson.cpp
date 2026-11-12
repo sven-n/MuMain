@@ -33,6 +33,9 @@ constexpr const char* Attribute = "attribute";
 constexpr const char* Text = "text";
 constexpr const char* Values = "values";
 constexpr const char* PerLevel = "perLevel";
+constexpr const char* Per = "per";
+constexpr const char* Times = "times";
+constexpr const char* Divisor = "divisor";
 } // namespace Keys
 
 // The keys of the ways a value adds, in the order of ItemOptionAdd.
@@ -52,7 +55,8 @@ const KeySet OpenMuKeys = {Keys::Id, Keys::Name};
 const KeySet ServerKeys = {Keys::AddsRandomly, Keys::AddChance, Keys::MaximumOptionsPerItem};
 const KeySet OptionKeys = {Keys::Number, Keys::Attribute, AddKeys[0], AddKeys[1], AddKeys[2], Keys::Text};
 // perLevel has an error of its own, so it is no unknown field.
-const KeySet ValueKeys = {Keys::Values, Keys::PerLevel};
+const KeySet ValueKeys = {Keys::Values, Keys::PerLevel, Keys::Per};
+const KeySet TermKeys = {Keys::Attribute, Keys::Times, Keys::Divisor};
 
 // Whether the options of a type have a number (OpenMU's ItemOption.Number), and whether a definition of it has one
 // option only.
@@ -123,6 +127,7 @@ private:
     void ReadNumber(const OrderedJson& json, const std::string& field, ItemOptionType type, ItemOption& option);
     void ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option);
     void ReadValue(const OrderedJson& json, const std::string& field, ItemOptionValue& value);
+    void ReadTerms(const OrderedJson& json, const std::string& field, std::vector<ItemOptionTerm>& terms);
     bool ReadWholeNumber(const OrderedJson& json, const std::string& field, int minimum, int maximum, int& value);
     void ReadTexts(const OrderedJson& json, const std::string& field, std::vector<std::string>& texts);
 
@@ -308,7 +313,51 @@ void ItemOptionsReader::ReadValue(const OrderedJson& json, const std::string& fi
             value.values.push_back(entry);
         }
     }
+    if (const auto per = json.find(Keys::Per); per != json.end())
+    {
+        ReadTerms(*per, field + "." + Keys::Per, value.per);
+    }
     WarnAboutUnknownKeys(json, ValueKeys, field);
+}
+
+void ItemOptionsReader::ReadTerms(const OrderedJson& json, const std::string& field, std::vector<ItemOptionTerm>& terms)
+{
+    if (!json.is_array() || json.empty())
+    {
+        AddFatal(field, R"(must be a list of terms: [{"attribute": "level", "divisor": 20}])");
+        return;
+    }
+    for (size_t index = 0; index < json.size(); ++index)
+    {
+        const std::string termField = field + "[" + std::to_string(index) + "]";
+        const OrderedJson& entry = json[index];
+        if (!entry.is_object())
+        {
+            AddFatal(termField, R"(must be an object: {"attribute": "level", "divisor": 20})");
+            continue;
+        }
+        ItemOptionTerm term;
+        if (!ReadName(entry, Keys::Attribute, termField, term.attribute))
+        {
+            continue;
+        }
+        const auto times = entry.find(Keys::Times);
+        const auto divisor = entry.find(Keys::Divisor);
+        if ((times == entry.end()) == (divisor == entry.end()))
+        {
+            AddFatal(termField, "needs exactly one of times and divisor");
+        }
+        else if (times != entry.end())
+        {
+            ReadWholeNumber(*times, termField + "." + Keys::Times, 1, MaxValue, term.times);
+        }
+        else
+        {
+            ReadWholeNumber(*divisor, termField + "." + Keys::Divisor, 1, MaxValue, term.divisor);
+        }
+        WarnAboutUnknownKeys(entry, TermKeys, termField);
+        terms.push_back(std::move(term));
+    }
 }
 
 void ItemOptionsReader::ReadTexts(const OrderedJson& json, const std::string& field, std::vector<std::string>& texts)
@@ -353,8 +402,11 @@ void ItemOptionsReader::ReadNumber(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Number, "missing");
         return;
     }
-    ReadWholeNumber(*number, field + "." + Keys::Number, 0,
-                    type == ItemOptionType::Option ? MaxOptionTypeNumber : MaxNumber, option.number);
+    const int minimum = type == ItemOptionType::Excellent ? 1 : 0;
+    const int maximum = type == ItemOptionType::Option      ? MaxOptionTypeNumber
+                        : type == ItemOptionType::Excellent ? MaxExcellentOptionNumber
+                                                            : MaxNumber;
+    ReadWholeNumber(*number, field + "." + Keys::Number, minimum, maximum, option.number);
 }
 
 void ItemOptionsReader::ReadAdd(const OrderedJson& json, const std::string& field, ItemOption& option)
@@ -465,6 +517,25 @@ OrderedJson WriteValue(const ItemOptionValue& value)
     else
     {
         json[Keys::Values] = value.values.empty() ? 0 : value.values.front();
+    }
+    if (!value.per.empty())
+    {
+        OrderedJson terms = OrderedJson::array();
+        for (const ItemOptionTerm& term : value.per)
+        {
+            OrderedJson entry;
+            entry[Keys::Attribute] = term.attribute;
+            if (term.divisor > 0)
+            {
+                entry[Keys::Divisor] = term.divisor;
+            }
+            else
+            {
+                entry[Keys::Times] = term.times;
+            }
+            terms.push_back(std::move(entry));
+        }
+        json[Keys::Per] = std::move(terms);
     }
     return json;
 }

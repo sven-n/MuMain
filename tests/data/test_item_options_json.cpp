@@ -132,7 +132,7 @@ TEST_CASE("Option definition file errors stop the start [data][items]")
     };
 
     fatal(R"({"type": "luck", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}", "definitions[0].name");
-    fatal(R"({"name": "luck", "type": "excellent", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
+    fatal(R"({"name": "luck", "type": "wing", "displayName": {"en": "Luck"}, )" + std::string(LuckOption) + "}",
           "definitions[0].type");
     fatal(R"({"name": "luck", "type": "luck", )" + std::string(LuckOption) + "}", "definitions[0].displayName");
     fatal(R"({"name": "luck", "type": "luck", "displayName": {"de": "Glück"}, )" + std::string(LuckOption) + "}",
@@ -373,4 +373,68 @@ TEST_CASE("Option definitions of type option read their numbered options and wri
         HasFatal(ReadDefinition(option(R"({"number": 15, "attribute": "a", "add": {"values": [1]}, "text": "t"})"))));
     CHECK(HasIssue(ReadDefinition(option(R"({"number": 16, "attribute": "a", "add": {"values": [1]}, "text": "t"})")),
                    ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+}
+
+// An excellent definition: its options numbered 1 to 6 (the excellent byte's bit number - 1), a value with a term on a
+// hero attribute ("level" / 20).
+TEST_CASE("Option definitions of type excellent read their numbered options and terms and write them back [data][items]")
+{
+    constexpr const char* ExcellentFile = R"({
+  "formatVersion": 1,
+  "definitions": [
+    {
+      "name": "excellentAttack",
+      "type": "excellent",
+      "displayName": {
+        "en": "Excellent attack"
+      },
+      "options": [
+        {"number": 5, "attribute": "physicalBaseDmg", "add": {"values": 0, "per": [{"attribute": "level", "divisor": 20}]}, "text": "increaseDamageLevel20"},
+        {"number": 6, "attribute": "excellentDamageChance", "percent": {"values": 10, "per": [{"attribute": "masterLevel", "times": 2}]}, "text": "excellentDamageRate"}
+      ]
+    }
+  ]
+}
+)";
+    std::vector<ItemOptionDefinition> definitions;
+    std::vector<ItemDataIssue> issues;
+    ReadItemOptionsJson(ExcellentFile, "Options/Excellent.json", "Excellent.json", definitions, issues);
+    CHECK(issues.empty());
+    REQUIRE(definitions.size() == 1);
+    const ItemOptionDefinition& excellent = definitions[0];
+    CHECK(excellent.type == ItemOptionType::Excellent);
+    REQUIRE(excellent.options.size() == 2);
+    CHECK(excellent.options[0].number == 5);
+    REQUIRE(excellent.options[0].value.per.size() == 1);
+    CHECK(excellent.options[0].value.per[0] == ItemOptionTerm{"level", 0, 20});
+    CHECK(excellent.options[1].value.per[0] == ItemOptionTerm{"masterLevel", 2, 0});
+    CHECK(excellent.options[1].value.At(1) == 10);
+    CHECK(WriteItemOptionsJson(definitions) == ExcellentFile);
+
+    const auto option = [](const std::string& options)
+    {
+        return R"({"name": "e", "type": "excellent", "displayName": {"en": "E"}, "options": [)" + options + "]}";
+    };
+    // The numbers are the byte's bits 1 to 6.
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 0, "attribute": "a", "add": {"values": 1}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    CHECK(HasIssue(ReadDefinition(option(R"({"number": 7, "attribute": "a", "add": {"values": 1}, "text": "t"})")),
+                   ItemDataIssueSeverity::Fatal, "definitions[0].options[0].number"));
+    // A term has an attribute and exactly one of times and divisor, each a whole number from 1.
+    const auto term = [&option](const std::string& per)
+    {
+        return ReadDefinition(
+            option(R"({"number": 1, "attribute": "a", "add": {"values": 0, "per": )" + per + R"(}, "text": "t"})"));
+    };
+    CHECK(HasIssue(term(R"([])"), ItemDataIssueSeverity::Fatal, "definitions[0].options[0].add.per"));
+    CHECK(HasIssue(term(R"([{"divisor": 20}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0].attribute"));
+    CHECK(HasIssue(term(R"([{"attribute": "level"}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0]"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "times": 2, "divisor": 20}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0]"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "divisor": 0}])"), ItemDataIssueSeverity::Fatal,
+                   "definitions[0].options[0].add.per[0].divisor"));
+    CHECK(HasIssue(term(R"([{"attribute": "level", "divisor": 20, "round": "up"}])"), ItemDataIssueSeverity::Warning,
+                   "definitions[0].options[0].add.per[0].round"));
 }

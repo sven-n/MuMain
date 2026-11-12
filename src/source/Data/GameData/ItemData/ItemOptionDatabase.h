@@ -25,7 +25,7 @@ public:
     static constexpr int NoDefinition = -1;
 
     ItemOptionDatabase() = default;
-    // Each option's effect (FindItemOptionEffect) is looked up here once.
+    // Each option's effect (FindItemOptionEffect) and its terms' hero attributes are looked up here once.
     ItemOptionDatabase(std::vector<ItemOptionDefinition> definitions, ItemOptionTexts texts,
                        std::vector<OptionRule> rules = {});
 
@@ -46,6 +46,14 @@ public:
     const ItemOptionEffect& GetEffect(ItemOptionIndex definition, size_t option) const
     {
         return m_effects[definition][option];
+    }
+
+    // The order an item takes the definition's options in, as indexes of its options: as the code before the
+    // definitions tested their bits, the excellent options from the highest number down (the tooltip shows them so),
+    // the others as written. Worked out when the options load.
+    const std::vector<size_t>& GetOptionOrder(ItemOptionIndex definition) const
+    {
+        return m_optionOrders[definition];
     }
 
     const ItemOptionTexts& GetTexts() const
@@ -71,6 +79,7 @@ public:
 private:
     std::vector<ItemOptionDefinition> m_definitions;
     std::vector<std::vector<ItemOptionEffect>> m_effects;
+    std::vector<std::vector<size_t>> m_optionOrders;
     ItemOptionTexts m_texts;
     std::vector<OptionRule> m_rules;
 };

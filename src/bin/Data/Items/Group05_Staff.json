@@ -11,7 +11,7 @@
         "pl": "Kostur czaszki",
         "pt": "Bastão da caveira"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 3,
       "slot": "mainHand",
@@ -42,7 +42,7 @@
         "pl": "Anielski kostur",
         "pt": "Bastão angelical"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -73,7 +73,7 @@
         "pl": "Wężowy kostur",
         "pt": "Bastão da serpente"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -104,7 +104,7 @@
         "pl": "Kostur gromu",
         "pt": "Bastão do trovão"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -136,7 +136,7 @@
         "pl": "Kostur Gorgony",
         "pt": "Bastão da górgone"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -167,7 +167,7 @@
         "pl": "Legendarny kostur",
         "pt": "Bastão lendário"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -197,7 +197,7 @@
         "pl": "Kostur Wskrzeszenia",
         "pt": "Bastão da ressurreição"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -228,7 +228,7 @@
         "pl": "Kostur Błyskawic Chaosu",
         "pt": "Bastão do relâmpago do caos"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -260,7 +260,7 @@
         "pl": "Kostur Zniszczenia",
         "pt": "Bastão da destruição"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 2,
       "height": 4,
       "slot": "mainHand",
@@ -292,7 +292,7 @@
         "pl": "Kostur Smoczej Duszy",
         "pt": "Bastão da alma do dragão"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -323,7 +323,7 @@
         "pt": "Bastão divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "nameLines": [
         {
           "text": {
@@ -368,7 +368,7 @@
         "pl": "Kostur Kunduna",
         "pt": "Bastão de Kundun"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -398,7 +398,7 @@
         "pl": "Kostur Wielkiej Żmii",
         "pt": "Grande bastão da víbora"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -429,7 +429,7 @@
         "pl": "Platynowy kostur",
         "pt": "Bastão de platina"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -458,7 +458,7 @@
         "pl": "Różdżka tajemnic",
         "pt": "Cajado misterioso"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -487,7 +487,7 @@
         "pl": "Różdżka Gwałtownego Wiatru",
         "pt": "Cajado do vento violento"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -516,7 +516,7 @@
         "pl": "Różdżka Czerwonego Skrzydła",
         "pt": "Cajado da asa vermelha"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -545,7 +545,7 @@
         "pl": "Pradawna różdżka",
         "pt": "Cajado ancestral"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -574,7 +574,7 @@
         "pl": "Demoniczna różdżka",
         "pt": "Cajado demoníaco"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -603,7 +603,7 @@
         "pl": "Różdżka Burzowego Błysku",
         "pt": "Caj. Relâmpago de Tempestade"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -634,7 +634,7 @@
         "pl": "Różdżka Wiecznego Skrzydła",
         "pt": "Cajado da asa eterna"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -665,7 +665,7 @@
         "pt": "Livro de Samut"
       },
       "tags": ["summonerBook"],
-      "options": ["luck", "curseDamageOption"],
+      "options": ["luck", "curseDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -694,7 +694,7 @@
         "pt": "Livro de Neil"
       },
       "tags": ["summonerBook"],
-      "options": ["luck", "curseDamageOption"],
+      "options": ["luck", "curseDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -723,7 +723,7 @@
         "pt": "Livro de Lagle"
       },
       "tags": ["summonerBook"],
-      "options": ["luck", "curseDamageOption"],
+      "options": ["luck", "curseDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 2,
       "slot": "offHand",
@@ -751,7 +751,7 @@
         "pl": "Śmiercionośny kostur",
         "pt": "Bastão letal"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -782,7 +782,7 @@
         "pl": "Imperialny kostur",
         "pt": "Bastão inberial"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -815,7 +815,7 @@
         "pl": "Chromatyczny kostur",
         "pt": "Bastão cromático"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -845,7 +845,7 @@
         "pl": "Różdżka Kruka",
         "pt": "Cajado do corvo"
       },
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "width": 1,
       "height": 4,
       "slot": "mainHand",
@@ -875,7 +875,7 @@
         "pt": "Bastão Divino do Arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
-      "options": ["luck", "wizardryDamageOption"],
+      "options": ["luck", "wizardryDamageOption", "excellentWizardryAttack"],
       "nameLines": [
         {
           "text": {
